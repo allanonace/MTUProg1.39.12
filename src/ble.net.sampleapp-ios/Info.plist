@@ -48,5 +48,7 @@
 	<string>LaunchScreen</string>
 	<key>CFBundleShortVersionString</key>
 	<string></string>
+	<key>CFBundleName</key>
+	<string>BLE.net Sample App</string>
 </dict>
 </plist>
