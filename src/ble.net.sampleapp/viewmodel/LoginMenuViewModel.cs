@@ -37,6 +37,9 @@ namespace ble.net.sampleapp.viewmodel
         {
             m_rootPage_login = m_rootPage;
             LoginCommand = new Command(Login);
+
+
+
         }
         public async void Login()
         {

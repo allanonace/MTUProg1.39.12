@@ -13,6 +13,7 @@ using nexus.core.logging;
 using Xamarin.Forms;
 using Device = Xamarin.Forms.Device;
 using nexus.protocols.ble;
+using ble.net.sampleapp.Helpers;
 #if RELEASE
 using Microsoft.Azure.Mobile;
 using Microsoft.Azure.Mobile.Analytics;
@@ -66,7 +67,16 @@ namespace ble.net.sampleapp
 
           m_rootPage = new NavigationPage(new BleDeviceScannerPage(bleScanViewModel));
 
-          MainPage = new LoginMenuPage(m_rootPage);
+         
+          if (Settings.IsLoggedIn)
+          {
+                MainPage = m_rootPage;
+
+          }else{
+                MainPage = new LoginMenuPage(m_rootPage);
+          }
+
+
       }
 
       protected override void OnStart()
