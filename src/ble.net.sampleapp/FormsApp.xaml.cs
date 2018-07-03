@@ -10,9 +10,9 @@ using Acr.UserDialogs;
 using ble.net.sampleapp.view;
 using ble.net.sampleapp.viewmodel;
 using nexus.core.logging;
-using nexus.protocols.ble;
 using Xamarin.Forms;
 using Device = Xamarin.Forms.Device;
+using nexus.protocols.ble;
 #if RELEASE
 using Microsoft.Azure.Mobile;
 using Microsoft.Azure.Mobile.Analytics;
@@ -23,61 +23,56 @@ namespace ble.net.sampleapp
 {
    public partial class FormsApp
    {
-      private readonly IUserDialogs m_dialogs;
       private readonly NavigationPage m_rootPage;
+
+      private readonly IBluetoothLowEnergyAdapter adapterAclara;
+      private readonly IUserDialogs dialogsAclara;
+
+      public FormsApp()
+      {
+         InitializeComponent();
+      }
 
       public FormsApp( IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs )
       {
          InitializeComponent();
 
-         m_dialogs = dialogs;
+     
+         dialogsAclara = dialogs;
+         adapterAclara = adapter;
+
          var logsVm = new LogsViewModel();
          SystemLog.Instance.AddSink( logsVm );
 
          var bleAssembly = adapter.GetType().GetTypeInfo().Assembly.GetName();
          Log.Info( bleAssembly.Name + "@" + bleAssembly.Version );
 
-         var bleGattServerViewModel = new BleGattServerViewModel( dialogs, adapter );
+         var bleGattServerViewModel = new BleGattServerViewModel( dialogsAclara, adapterAclara );
+
          var bleScanViewModel = new BleDeviceScannerViewModel(
-            bleAdapter: adapter,
-            dialogs: dialogs,
+            bleAdapter: adapterAclara,
+            dialogs: dialogsAclara,
             onSelectDevice: async p =>
             {
                await bleGattServerViewModel.Update( p );
+
                await m_rootPage.PushAsync(
                   new BleGattServerPage(
                      model: bleGattServerViewModel,
                      bleServiceSelected: async s => { await m_rootPage.PushAsync( new BleGattServicePage( s ) ); } ) );
+                
                await bleGattServerViewModel.OpenConnection();
             } );
 
-         m_rootPage = new NavigationPage(
-            new TabbedPage
-            {
-               Title = "BLE.net Sample App",
-               Children = {new BleDeviceScannerPage( bleScanViewModel ), new LogsPage( logsVm )}
-            } );
+          m_rootPage = new NavigationPage(new BleDeviceScannerPage(bleScanViewModel));
 
-         MainPage = m_rootPage;
+          MainPage = new LoginMenuPage(m_rootPage);
       }
 
-      /// <inheritdoc />
       protected override void OnStart()
       {
          base.OnStart();
-         if(Device.RuntimePlatform == Device.Windows)
-         {
-            Device.StartTimer(
-               TimeSpan.FromSeconds( 3 ),
-               () =>
-               {
-                  m_dialogs.Alert(
-                     "The UWP API can listen for advertisements but is not yet able to connect to devices.",
-                     "Quick Note",
-                     "Aww, ok" );
-                  return false;
-               } );
-         }
       }
+
    }
 }

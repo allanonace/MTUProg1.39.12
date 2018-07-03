@@ -94,6 +94,7 @@
     <ITunesArtwork Include="iTunesArtwork" />
     <ITunesArtwork Include="iTunesArtwork%402x" />
     <None Include="packages.config" />
+    <Compile Include="Helpers\Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
@@ -164,6 +165,12 @@
     <Reference Include="ble.net-ios, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\..\lib\packages\ble.net-ios.1.1.0\lib\Xamarin.iOS10\ble.net-ios.dll</HintPath>
     </Reference>
+    <Reference Include="Plugin.Settings.Abstractions">
+      <HintPath>..\..\lib\packages\Xam.Plugins.Settings.3.1.1\lib\Xamarin.iOS10\Plugin.Settings.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Plugin.Settings">
+      <HintPath>..\..\lib\packages\Xam.Plugins.Settings.3.1.1\lib\Xamarin.iOS10\Plugin.Settings.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ble.net.sampleapp\ble.net.sampleapp.csproj">
@@ -173,6 +180,9 @@
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\Icon.png" />
+    <BundleResource Include="Resources\aclara_logo_login.png" />
+    <BundleResource Include="Resources\aclara_user_black.png" />
+    <BundleResource Include="Resources\aclara_key_black.png" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\Icon%402x.png" />

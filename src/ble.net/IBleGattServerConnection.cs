@@ -52,12 +52,14 @@ namespace nexus.protocols.ble
       /// necessary. To ensure  disconnection, await <see cref="Disconnect" /> instead of calling
       /// <see cref="Dispose" />.
       /// </summary>
-      [ObsoleteEx(
+        /// 
+     /* [ObsoleteEx(
          Message = "This functionality is now async",
          TreatAsErrorFromVersion = "2.0.0",
          RemoveInVersion = "2.1.0",
          ReplacementTypeOrMember = nameof(Disconnect) )]
       new void Dispose();
+        */
 
       /// <summary>
       /// Enumerate all services on this device
