@@ -10,6 +10,13 @@ namespace ble.net.sampleapp.view
 
         private viewmodel.LoginMenuViewModel viewModel;
 
+
+        public LoginMenuPage()
+        {
+            InitializeComponent();
+        }
+
+
         public LoginMenuPage(NavigationPage m_rootPage)
         {
             InitializeComponent();

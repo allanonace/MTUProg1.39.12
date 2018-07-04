@@ -13,6 +13,13 @@ namespace ble.net.sampleapp.view
 {
    public partial class LogsPage
    {
+
+      public LogsPage()
+      {
+          InitializeComponent();
+      }
+
+
       public LogsPage( LogsViewModel vm )
       {
          BindingContext = vm;

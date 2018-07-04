@@ -24,14 +24,24 @@ namespace ble.net.sampleapp.viewmodel
       private readonly Func<BlePeripheralViewModel, Task> m_onSelectDevice;
       private DateTime m_scanStopTime;
 
+
+
+
       public BleDeviceScannerViewModel( IBluetoothLowEnergyAdapter bleAdapter, IUserDialogs dialogs,
                                         Func<BlePeripheralViewModel, Task> onSelectDevice )
-         : base( bleAdapter, dialogs )
+: base( bleAdapter, dialogs )
       {
          m_onSelectDevice = onSelectDevice;
          FoundDevices = new ObservableCollection<BlePeripheralViewModel>();
          ScanForDevicesCommand =
             new Command( x => { StartScan( x as Double? ?? BleSampleAppUtils.SCAN_SECONDS_DEFAULT ); } );
+
+
+            
+   
+
+
+
       }
 
       public ObservableCollection<BlePeripheralViewModel> FoundDevices { get; }

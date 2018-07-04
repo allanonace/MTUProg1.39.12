@@ -194,6 +194,22 @@
     <AndroidResource Include="Resources\layout\Tabbar.axml" />
     <AndroidResource Include="Resources\layout\Toolbar.axml" />
     <AndroidResource Include="Resources\values\styles.xml" />
+    <AndroidResource Include="Resources\drawable\Icon.png" />
+    <AndroidResource Include="Resources\drawable\rssi_toolbar_high_white.png" />
+    <AndroidResource Include="Resources\drawable\rssi_toolbar_mid_white.png" />
+    <AndroidResource Include="Resources\drawable\rssi_toolbar_low_white.png" />
+    <AndroidResource Include="Resources\drawable\rssi_toolbar_empty_white.png" />
+    <AndroidResource Include="Resources\drawable\battery_toolbar_high_white.png" />
+    <AndroidResource Include="Resources\drawable\battery_toolbar_mid_white.png" />
+    <AndroidResource Include="Resources\drawable\battery_toolbar_low_white.png" />
+    <AndroidResource Include="Resources\drawable\battery_toolbar_empty_white.png" />
+    <AndroidResource Include="Resources\drawable\aclara_logo_menu.png" />
+    <AndroidResource Include="Resources\drawable\aclara_logo_login.png" />
+    <AndroidResource Include="Resources\drawable\user_menu_icon.png" />
+    <AndroidResource Include="Resources\drawable\aclara_user_black.png" />
+    <AndroidResource Include="Resources\drawable\close_menu_icon.png" />
+    <AndroidResource Include="Resources\drawable\hamburger_icon.png" />
+    <AndroidResource Include="Resources\drawable\aclara_key_black.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\" />

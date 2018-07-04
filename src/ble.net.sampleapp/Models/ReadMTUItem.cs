@@ -12,7 +12,7 @@ namespace ble.net.sampleapp.Models
 
         public string Title { get; set; }
         public string Icon { get; set; }
-        public Type TargetType { get; set; }
+        public string TargetType { get; set; }
     }
 }
 

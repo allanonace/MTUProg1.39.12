@@ -12,6 +12,13 @@ namespace ble.net.sampleapp.view
 {
    public partial class BleGattServicePage
    {
+        
+      public BleGattServicePage()
+      {
+          InitializeComponent();
+      }
+
+
       public BleGattServicePage( BleGattServiceViewModel model )
       {
          InitializeComponent();

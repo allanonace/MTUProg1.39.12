@@ -15,6 +15,11 @@ namespace ble.net.sampleapp.view
    {
       private readonly Func<BleGattServiceViewModel, Task> m_bleServiceSelected;
 
+      public BleGattServerPage()
+      {
+         InitializeComponent();
+      }
+
       public BleGattServerPage( BleGattServerViewModel model, Func<BleGattServiceViewModel, Task> bleServiceSelected )
       {
          m_bleServiceSelected = bleServiceSelected;
