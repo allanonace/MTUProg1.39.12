@@ -101,14 +101,29 @@ namespace ble.net.sampleapp.viewmodel
                Device.BeginInvokeOnMainThread(
                   () =>
                   {
+
+
                      var existing = FoundDevices.FirstOrDefault( d => d.Equals( peripheral ) );
+
                      if(existing != null)
                      {
                         existing.Update( peripheral );
                      }
                      else
                      {
-                        FoundDevices.Add( new BlePeripheralViewModel( peripheral, m_onSelectDevice ) );
+
+
+                        try{
+                            String value = peripheral.Advertisement.DeviceName;
+
+                            if(value.Contains("Aclara")){
+                                FoundDevices.Add(new BlePeripheralViewModel(peripheral, m_onSelectDevice));
+                            }
+
+                        }catch (Exception e){
+                              Log.Error(e);
+                        }
+
                      }
                   } );
             },

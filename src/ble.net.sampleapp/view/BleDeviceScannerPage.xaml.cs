@@ -12,6 +12,7 @@ using Acr.UserDialogs;
 using ble.net.sampleapp.Helpers;
 using ble.net.sampleapp.Models;
 using ble.net.sampleapp.viewmodel;
+//using Newtonsoft.Json;
 using nexus.core.logging;
 using nexus.protocols.ble;
 using Xamarin.Forms;
@@ -20,15 +21,31 @@ namespace ble.net.sampleapp.view
 {
    public partial class BleDeviceScannerPage
    {
-        
-  
+       // Desconectar device
+       // ((BleGattServerViewModel) BindingContext).DisconnectFromDeviceCommand.Execute( null );
 
       public BleDeviceScannerPage()
       {
          InitializeComponent();
       }
 
-          
+        private BleGattServiceViewModel m_bleServiceSelected;
+
+        private void OnServiceSelected(Object sender, SelectedItemChangedEventArgs e)
+        {
+            if (e.SelectedItem != null)
+            {
+                m_bleServiceSelected = ((BleGattServiceViewModel)e.SelectedItem);
+                ((ListView)sender).SelectedItem = null;
+
+              //  string json = JsonConvert.SerializeObject(m_bleServiceSelected, Formatting.Indented);
+
+              //  BleGattServiceViewModel account = JsonConvert.DeserializeObject<BleGattServiceViewModel>(json);
+
+                Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(m_bleServiceSelected));
+                   
+            }
+        }
 
 
         
@@ -54,21 +71,54 @@ namespace ble.net.sampleapp.view
                 {
                     await bleGattServerViewModel.Update(p);
 
+                    background_scan_page_detail.IsEnabled = true;
+                    background_scan_page_detail.IsVisible = true;
 
-                    await Application.Current.MainPage.Navigation.PushAsync(
-                           new BleGattServerPage(
-                              model: bleGattServerViewModel,
-                                bleServiceSelected: async s =>
-                                {
 
-                                    await Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(s));
-                                    // LOGICA DE LA VISTA DETALLADA
+                    background_scan_page.IsEnabled = false;
+                    background_scan_page.IsVisible = false;
 
-                                }
-                            )
-                        );
 
-                    await bleGattServerViewModel.OpenConnection();
+                    BindingContext = bleGattServerViewModel;
+
+
+
+
+                    // m_bleServiceSelected;
+
+                    /*
+                        await Application.Current.MainPage.Navigation.PushAsync(
+                               new BleGattServerPage(
+                                  model: bleGattServerViewModel,
+                                    bleServiceSelected: async s =>
+                                    {
+
+                                        await Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(s));
+                                        // LOGICA DE LA VISTA DETALLADA
+
+                                    }
+                                )
+                            );
+
+                    */
+
+
+                    await Task.Run(async () =>
+                     {
+
+                         await Task.Delay(1000); Device.BeginInvokeOnMainThread(async () =>
+                         {
+                             await bleGattServerViewModel.OpenConnection();
+
+                             navigationDrawerList.IsEnabled = true;
+                       
+                             navigationDrawerList.Opacity = 1;
+
+
+
+                         });
+                     });
+                  
                 }
 
 
@@ -76,6 +126,7 @@ namespace ble.net.sampleapp.view
 
             BindingContext = bleScanViewModel;
 
+        
 
 
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
@@ -83,10 +134,10 @@ namespace ble.net.sampleapp.view
             Task.Run(async () =>
             {
 
-                await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
+                await Task.Delay(1500); Device.BeginInvokeOnMainThread(() =>
                 {
                     bleScanViewModel.ScanForDevicesCommand.Execute(true);
-
+                   
                 });
             });
         }
@@ -115,10 +166,17 @@ namespace ble.net.sampleapp.view
             logout_button.Tapped += logout;
 
 
+            back_button_detail.Tapped += hamburgerOpen;
+
+
+            navigationDrawerList.Opacity = 0.65;
+
+            navigationDrawerList.IsEnabled = false;
+
             ContentNav.IsVisible = false;
             ContentNav.IsEnabled = true;
             background_scan_page.Opacity = 1;
-
+            background_scan_page_detail.Opacity = 1;
 
 
             //MENU
@@ -226,7 +284,7 @@ namespace ble.net.sampleapp.view
             ContentNav.IsVisible = true;
             ContentNav.IsEnabled = true;
             background_scan_page.Opacity = 0.5;
-
+            background_scan_page_detail.Opacity = 0.5;
             ContentNav.Opacity = 1;
 
            
@@ -240,7 +298,7 @@ namespace ble.net.sampleapp.view
     
 
             background_scan_page.Opacity = 1;
-              
+            background_scan_page_detail.Opacity = 1;
             ContentNav.Opacity = 0;
               
 
