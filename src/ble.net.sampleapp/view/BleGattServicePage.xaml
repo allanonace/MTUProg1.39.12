@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"
+<?xml version="1.0"
       encoding="utf-8"?>
 
 <util:BasePage xmlns="http://xamarin.com/schemas/2014/forms"
@@ -79,6 +79,21 @@
                                       IsEnabled="{Binding CanNotify}" />
                            </StackLayout>
 
+
+                             <StackLayout Orientation="Horizontal"
+                                        VerticalOptions="Center"
+                                        HorizontalOptions="Center"
+                                        Grid.Column="1">
+                              <Label IsEnabled="{Binding CanIndicate}"
+                                     VerticalTextAlignment="Center"
+                                     VerticalOptions="CenterAndExpand"
+                                     Text="Indicate:" />
+                              <Switch IsToggled="{Binding Path=NotifyEnabled, Mode=TwoWay}"
+                                      VerticalOptions="Center"
+                                      IsEnabled="{Binding CanIndicate}" />
+                           </StackLayout>
+
+                                    
                            <StackLayout Orientation="Horizontal"
                                         VerticalOptions="Center"
                                         HorizontalOptions="EndAndExpand"

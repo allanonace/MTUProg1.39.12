@@ -12,7 +12,7 @@ using Acr.UserDialogs;
 using ble.net.sampleapp.Helpers;
 using ble.net.sampleapp.Models;
 using ble.net.sampleapp.viewmodel;
-//using Newtonsoft.Json;
+using Newtonsoft.Json;
 using nexus.core.logging;
 using nexus.protocols.ble;
 using Xamarin.Forms;
@@ -38,17 +38,24 @@ namespace ble.net.sampleapp.view
                 m_bleServiceSelected = ((BleGattServiceViewModel)e.SelectedItem);
                 ((ListView)sender).SelectedItem = null;
 
-              //  string json = JsonConvert.SerializeObject(m_bleServiceSelected, Formatting.Indented);
+                bleScanViewModel.StopScan();
+                   
 
-              //  BleGattServiceViewModel account = JsonConvert.DeserializeObject<BleGattServiceViewModel>(json);
+                string json = JsonConvert.SerializeObject(m_bleServiceSelected, Formatting.None);
+
+                //BleGattServiceViewModel account = JsonConvert.DeserializeObject<BleGattServiceViewModel>(json);
 
                 Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(m_bleServiceSelected));
                    
+           
+              
+
+
             }
         }
 
 
-        
+
         private void connection()
         {
 

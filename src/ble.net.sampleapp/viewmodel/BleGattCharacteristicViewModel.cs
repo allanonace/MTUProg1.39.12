@@ -67,6 +67,7 @@ namespace ble.net.sampleapp.viewmodel
                         RaisePropertyChanged( nameof(CanNotify) );
                         RaisePropertyChanged( nameof(CanRead) );
                         RaisePropertyChanged( nameof(CanWrite) );
+                        RaisePropertyChanged( nameof(CanIndicate));
                      }
                   } );
             } );
@@ -77,6 +78,9 @@ namespace ble.net.sampleapp.viewmodel
       public Boolean CanRead => m_props.CanRead() && !IsBusy;
 
       public Boolean CanWrite => m_props.CanWrite() && !IsBusy;
+
+      public Boolean CanIndicate => m_props.CanIndicate() && !IsBusy;
+
 
       public String DescriptorValues
       {
@@ -102,6 +106,7 @@ namespace ble.net.sampleapp.viewmodel
                RaisePropertyChanged( nameof(CanRead) );
                RaisePropertyChanged( nameof(CanNotify) );
                RaisePropertyChanged( nameof(CanWrite) );
+               RaisePropertyChanged( nameof(CanIndicate));
             }
          }
       }
@@ -193,6 +198,7 @@ namespace ble.net.sampleapp.viewmodel
          {
             try
             {
+                    
                m_notificationSubscription = m_gattServer.NotifyCharacteristicValue(
                   m_serviceGuid,
                   m_characteristicGuid,

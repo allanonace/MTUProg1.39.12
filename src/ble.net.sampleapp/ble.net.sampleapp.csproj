@@ -136,6 +136,9 @@
     <Reference Include="ble.net">
       <HintPath>..\..\lib\packages\ble.net.1.1.1\lib\portable45-net45+win8\ble.net.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\lib\packages\Newtonsoft.Json.11.0.2\lib\portable-net45+win8+wp8+wpa81\Newtonsoft.Json.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
