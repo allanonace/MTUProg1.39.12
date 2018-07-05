@@ -74,6 +74,9 @@
     <Compile Include="Models\ReadMTUItem.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Helpers\Settings.cs" />
+    <Compile Include="view\MyPage.xaml.cs">
+      <DependentUpon>MyPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="FormsApp.xaml">
@@ -83,6 +86,10 @@
     <EmbeddedResource Include="view\LoginMenuPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="view\MyPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

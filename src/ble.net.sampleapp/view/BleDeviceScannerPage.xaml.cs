@@ -39,18 +39,24 @@ namespace ble.net.sampleapp.view
                 ((ListView)sender).SelectedItem = null;
 
                 bleScanViewModel.StopScan();
+
+             
+
+               // String json = JsonConvert.SerializeObject(m_bleServiceSelected);
+
+              //  String value = "\\";
+
+              //  String tempjson = json.Replace(value, "");
+
+
+              //  BleGattServiceViewModel account = JsonConvert.DeserializeObject<BleGattServiceViewModel>(tempjson);
+
+               // BleGattServiceViewModel account = new BleGattServiceViewModel("2cf42000-7992-4d24-b05d-1effd0381208");
+
+
+              //  Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(m_bleServiceSelected));
                    
-
-                string json = JsonConvert.SerializeObject(m_bleServiceSelected, Formatting.None);
-
-                //BleGattServiceViewModel account = JsonConvert.DeserializeObject<BleGattServiceViewModel>(json);
-
-                Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(m_bleServiceSelected));
-                   
-           
-              
-
-
+          
             }
         }
 
@@ -88,7 +94,7 @@ namespace ble.net.sampleapp.view
 
                     BindingContext = bleGattServerViewModel;
 
-
+                    bleScanViewModel.StopScan();
 
 
                     // m_bleServiceSelected;
@@ -115,11 +121,35 @@ namespace ble.net.sampleapp.view
 
                          await Task.Delay(1000); Device.BeginInvokeOnMainThread(async () =>
                          {
+                        
+                             
                              await bleGattServerViewModel.OpenConnection();
 
                              navigationDrawerList.IsEnabled = true;
-                       
+
                              navigationDrawerList.Opacity = 1;
+
+
+                                 await Task.Run(async () =>
+                                       {
+                                           await Task.Delay(1500); Device.BeginInvokeOnMainThread(() =>
+                                           {
+                                    
+                                               Guid value = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
+                                               BleGattServiceViewModel account = new BleGattServiceViewModel(value, bleGattServerViewModel.returnConnect(), dialogsSaved);
+                                                 Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account));
+                                           });
+                                       });
+
+
+                         
+                        // public BleGattServiceViewModel( Guid service, IBleGattServerConnection gattServer, IUserDialogs dialogManager )
+     
+
+              //  
+                   
+
+
 
 
 

@@ -19,15 +19,33 @@ namespace ble.net.sampleapp.view
       }
 
 
+
+        BleGattServiceViewModel model_saved;
+
+
+
       public BleGattServicePage( BleGattServiceViewModel model )
       {
          InitializeComponent();
          BindingContext = model;
+
+         model_saved = model;
+
+   
       }
 
       private void OnItemSelected( Object sender, SelectedItemChangedEventArgs e )
       {
          ((ListView)sender).SelectedItem = null;
+
+            BleGattCharacteristicViewModel[] array = new BleGattCharacteristicViewModel[10];
+
+
+
+            model_saved.Characteristic.CopyTo(array, 0);
+
+            String value1 = array[0].ValueAsHex;
+            String value2 = array[1].ValueAsHex;
       }
    }
 }

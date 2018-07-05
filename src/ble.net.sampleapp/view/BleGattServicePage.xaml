@@ -36,7 +36,8 @@
                   <Frame Padding="{StaticResource GridPadding}"
                          Margin="{StaticResource GridPadding}"
                          VerticalOptions="FillAndExpand"
-                         HorizontalOptions="FillAndExpand">
+                  
+                         HorizontalOptions="CenterAndExpand">
 
                      <StackLayout Orientation="Vertical"
                                   HorizontalOptions="StartAndExpand"
@@ -80,7 +81,7 @@
                            </StackLayout>
 
 
-                             <StackLayout Orientation="Horizontal"
+                             <StackLayout Orientation="Horizontal" Margin="0,12,0,0"
                                         VerticalOptions="Center"
                                         HorizontalOptions="Center"
                                         Grid.Column="1">
@@ -101,7 +102,7 @@
                               <Entry HorizontalOptions="StartAndExpand"
                                      Placeholder="Write Value"
                                      Text="{Binding WriteValue}" />
-                              <Button Command="{Binding WriteBytesCommand}"
+                              <Button Command="{Binding WriteBytesCommand}" Margin="-24,10,0,0"
                                       IsEnabled="{Binding CanWrite}"
                                       Text="Write" />
                            </StackLayout>

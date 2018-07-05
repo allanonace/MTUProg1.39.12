@@ -31,6 +31,12 @@ namespace ble.net.sampleapp.viewmodel
       private Boolean m_isBusy;
       private BlePeripheralViewModel m_peripheral;
 
+
+        public IBleGattServerConnection returnConnect(){
+            return m_gattServer;
+        }
+
+
       public BleGattServerViewModel( IUserDialogs dialogsManager, IBluetoothLowEnergyAdapter bleAdapter )
       {
          m_bleAdapter = bleAdapter;

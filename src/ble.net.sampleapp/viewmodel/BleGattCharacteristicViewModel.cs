@@ -226,16 +226,26 @@ namespace ble.net.sampleapp.viewmodel
          IsBusy = false;
       }
 
+
+        public string getValuehex(){
+
+            return ValueAsHex;
+        } 
+
       private void UpdateDisplayedValue( Byte[] bytes )
       {
-         ValueAsHex = bytes.EncodeToBase16String();
+
+
+         ValueAsHex = ValueAsHex + bytes.EncodeToBase16String();
+
+
          try
          {
-            ValueAsString = bytes.AsUtf8String();
+                ValueAsString = ValueAsString + bytes.AsUtf8String();
          }
          catch
          {
-            ValueAsString = String.Empty;
+                ValueAsString = ValueAsString + String.Empty;
          }
       }
 
