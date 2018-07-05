@@ -6,53 +6,64 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Threading.Tasks;
+using Acr.UserDialogs;
 using ble.net.sampleapp.Helpers;
 using ble.net.sampleapp.Models;
 using ble.net.sampleapp.viewmodel;
+using nexus.core.logging;
+using nexus.protocols.ble;
 using Xamarin.Forms;
 
 namespace ble.net.sampleapp.view
 {
    public partial class BleDeviceScannerPage
    {
+        
+  
+       public BleDeviceScannerPage()
+       {
+          InitializeComponent();
+       }
 
+        BleDeviceScannerViewModel bleScanViewModel_login;
+        public List<PageItem> menuList { get; set; }
 
-      public BleDeviceScannerPage()
-      {
-         InitializeComponent();
-      }
-
-
-      public List<PageItem> menuList { get; set; }
-
-
-      public BleDeviceScannerPage( BleDeviceScannerViewModel vm )
-      {
+        public BleDeviceScannerPage(BleDeviceScannerViewModel bleScanViewModel )
+        {
+            
              InitializeComponent();
-             BindingContext = vm;
+
+
+
+             bleScanViewModel_login = bleScanViewModel;
+
+             BindingContext = bleScanViewModel_login;
+
 
              NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
 
              Task.Run(async () =>
              {
-
-                 await Task.Delay(50); Device.BeginInvokeOnMainThread(() =>
+                 await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
                  {
-                     vm.ScanForDevicesCommand.Execute(true);
+                     bleScanViewModel.ScanForDevicesCommand.Execute(true);
 
                  });
              });
 
+
              back_button.Tapped += hamburgerOpen;
              back_button_menu.Tapped += hamburgerClose;
+             logout_button.Tapped += logout;
+
 
              ContentNav.IsVisible = false;
              ContentNav.IsEnabled = true;
              background_scan_page.Opacity = 1;
 
-
-
+           
              //MENU
 
 
@@ -91,8 +102,19 @@ namespace ble.net.sampleapp.view
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
             navigationDrawerList.ItemsSource = menuList;
+           
 
        }
+
+        private void logout(object sender, EventArgs e)
+        {
+            Settings.IsLoggedIn = false;
+            Application.Current.MainPage = new LoginMenuPage(bleScanViewModel_login);
+
+         
+
+
+        }
 
 
 

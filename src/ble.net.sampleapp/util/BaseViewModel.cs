@@ -41,7 +41,7 @@ namespace ble.net.sampleapp.util
       protected void RaisePropertyChanged( String propertyName )
       {
          //VerifyPropertyName( propertyName );
-         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
       }
 
       /// <summary>

@@ -22,8 +22,10 @@ namespace ble.net.sampleapp.viewmodel
    public class BleGattServerViewModel : BaseViewModel
    {
       private const Int32 CONNECTION_TIMEOUT_SECONDS = 15;
+
       private readonly IBluetoothLowEnergyAdapter m_bleAdapter;
       private readonly IUserDialogs m_dialogManager;
+
       private String m_connectionState;
       private IBleGattServerConnection m_gattServer;
       private Boolean m_isBusy;

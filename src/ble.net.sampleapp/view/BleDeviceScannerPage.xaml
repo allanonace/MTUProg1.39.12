@@ -109,10 +109,10 @@
                         
                   </StackLayout>
                 
-                  <ListView ItemsSource="{Binding FoundDevices}"
+                  <ListView ItemsSource="{Binding FoundDevices}" x:Name="listBLEs"
                             ItemTapped="ListView_OnItemTapped"
                             ItemSelected="ListView_OnItemSelected"
-                            HasUnevenRows="false"
+                            HasUnevenRows="true"
                             RowHeight="200"
                             SeparatorColor="#aaaaaa"
                             VerticalOptions="FillAndExpand"
@@ -275,7 +275,7 @@
         
         <!-- Menu desplegable -->
         
-    <ContentView x:Name="ContentNav" BackgroundColor="#6ba2b7" WidthRequest="280" IsVisible="true"
+    <ContentView x:Name="ContentNav" BackgroundColor="#6ba2b7" WidthRequest="310" IsVisible="true"
 
         RelativeLayout.YConstraint=
           "{ConstraintExpression Type=RelativeToParent,
@@ -291,58 +291,12 @@
             <RelativeLayout IsVisible="true">
 
 
-                <StackLayout x:Name="Block_upper" IsVisible="true" Margin="-4,0,0,0" Orientation="Vertical"  WidthRequest="280" HorizontalOptions="Center" >
-                             <StackLayout Margin="4,0,0,0" Orientation="Horizontal">
-                                
-                            <Image  
-                                x:Name="close_menu_icon"
-                                Margin="0,24,0,0" 
-                                Scale="0.6" 
-                                Source="close_menu_icon.png"  
-                                HorizontalOptions="Start">
-
-                                <Image.GestureRecognizers>
-                                    <TapGestureRecognizer  x:Name="back_button_menu"  NumberOfTapsRequired="1" />
-                                </Image.GestureRecognizers>       
-                                
-                           
-                            </Image>
-
-                             <Image  
-                                    WidthRequest="150" 
-                                    HeightRequest="64"
-                                    IsEnabled="false"
-                                    Margin="0,12,0,0" 
-                                    Scale="1" 
-                                    Source="aclara_logo_menu.png">
-                            </Image>
-
-                        
-                      </StackLayout>
-
-                          <StackLayout Margin="0,4,0,0" HorizontalOptions="Center">
-                          <Image  
-                        Margin="0,0,0,0"
-                        IsEnabled="false"
-                        WidthRequest="72" 
-                        HeightRequest="72"
-                        Scale="1" 
-                        Source="user_menu_icon.png">
-                      </Image>
-                    
-                      <Label x:Name="userName" TextColor="White" HorizontalTextAlignment="Center" Text="test@email.com" FontSize="16"></Label>
-                      <Label x:Name="Company" TextColor="White" HorizontalTextAlignment="Center"  Text="Company" FontSize="16"> </Label>
-
-  
-                </StackLayout>
-                    
-                </StackLayout>
                     <!-- Custom Shadow Effect -->
                   
                 
                     <Image  
                         x:Name="efecto4"
-                        Margin="277,0,0,0"
+                        Margin="307,0,0,0"
                         Opacity="0.45"
                         WidthRequest="1"
                         HeightRequest="2048"
@@ -352,7 +306,7 @@
                 
                     <Image  
                         x:Name="efecto3"
-                        Margin="278,0,0,0"
+                        Margin="308,0,0,0"
                         Opacity="0.35"
                         WidthRequest="1"
                         HeightRequest="2048"
@@ -362,7 +316,7 @@
 
                     <Image  
                         x:Name="efecto2"
-                        Margin="279,0,0,0"
+                        Margin="309,0,0,0"
                         Opacity="0.25"
                         WidthRequest="1"
                         HeightRequest="2048"
@@ -372,7 +326,7 @@
                 
                      <Image  
                         x:Name="efecto1"
-                        Margin="280,0,0,0"
+                        Margin="310,0,0,0"
                         Opacity="0.15"
                         WidthRequest="1"
                         HeightRequest="2048"
@@ -477,7 +431,9 @@
                      </ContentView>
 
 
-                    
+                
+
+
                              <Image Margin="0,12,0,0" BackgroundColor="White" HeightRequest="2"></Image>
 
 
@@ -518,12 +474,58 @@
 
 
                     </StackLayout>
-
-
              
 
-                
-       
+
+                <StackLayout x:Name="Block_upper" IsVisible="true" Margin="-4,0,0,0" Orientation="Vertical"  WidthRequest="310" HorizontalOptions="Center" >
+                             <StackLayout Margin="4,0,0,0" Orientation="Horizontal">
+                                
+                            <Image IsVisible="true"  
+                                x:Name="close_menu_icon"
+                                Margin="0,24,0,0" 
+                                Scale="0.6" 
+                                Source="close_menu_icon.png"  
+                                HorizontalOptions="Start">
+
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer  x:Name="back_button_menu"  NumberOfTapsRequired="1" />
+                                </Image.GestureRecognizers>       
+                                
+                           
+                            </Image>
+
+                             <Image  
+                                    WidthRequest="150" 
+                                    HeightRequest="64"
+                                    IsEnabled="false"
+                                    Margin="0,12,0,0" 
+                                    Scale="1" 
+                                    Source="aclara_logo_menu.png">
+                            </Image>
+
+                        
+                      </StackLayout>
+
+                          <StackLayout Margin="0,4,0,0" HorizontalOptions="Center">
+                          <Image  
+                        Margin="0,0,0,0"
+                        IsEnabled="false"
+                        WidthRequest="72" 
+                        HeightRequest="72"
+                        Scale="1" 
+                        Source="user_menu_icon.png">
+                      </Image>
+                    
+                      <Label x:Name="userName" TextColor="White" HorizontalTextAlignment="Center" Text="test@email.com" FontSize="16"></Label>
+                      <Label x:Name="Company" TextColor="White" HorizontalTextAlignment="Center"  Text="Company" FontSize="16"> </Label>
+
+  
+                </StackLayout>
+                    
+                </StackLayout>
+
+
+                    
             </RelativeLayout>
         
 

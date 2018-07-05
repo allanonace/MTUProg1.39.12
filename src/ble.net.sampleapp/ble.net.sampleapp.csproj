@@ -73,7 +73,7 @@
     <Compile Include="Models\PickerItems.cs" />
     <Compile Include="Models\ReadMTUItem.cs" />
     <Compile Include="Models\User.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="Helpers\Settings.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="FormsApp.xaml">

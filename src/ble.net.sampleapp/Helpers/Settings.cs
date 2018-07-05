@@ -1,5 +1,6 @@
 using Plugin.Settings;
 using Plugin.Settings.Abstractions;
+using Xamarin.Forms;
 
 namespace ble.net.sampleapp.Helpers
 {
@@ -40,6 +41,7 @@ namespace ble.net.sampleapp.Helpers
         private static readonly bool ChangesDoneAddMTUDefault = false;
 
         #endregion
+
 
         public static string SavedUserName
         {

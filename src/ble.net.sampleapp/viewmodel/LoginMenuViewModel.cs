@@ -3,6 +3,9 @@ using System.Windows.Input;
 using Xamarin.Forms;
 using ble.net.sampleapp.Models;
 using ble.net.sampleapp.Helpers;
+using ble.net.sampleapp.view;
+using nexus.protocols.ble;
+using Acr.UserDialogs;
 
 namespace ble.net.sampleapp.viewmodel
 {
@@ -31,16 +34,20 @@ namespace ble.net.sampleapp.viewmodel
         }
         #endregion
 
-        NavigationPage m_rootPage_login;
+        BleDeviceScannerViewModel bleScanViewModel;
 
-        public LoginMenuViewModel(NavigationPage m_rootPage)
+        public LoginMenuViewModel(BleDeviceScannerViewModel bleScanViewModel_login)
         {
-            m_rootPage_login = m_rootPage;
+            bleScanViewModel = bleScanViewModel_login;
+
+
             LoginCommand = new Command(Login);
 
 
 
         }
+
+
         public async void Login()
         {
             IsBusy = true;
@@ -58,7 +65,9 @@ namespace ble.net.sampleapp.viewmodel
 
                             Settings.SavedUserName = User.Email;
 
-                            Application.Current.MainPage = m_rootPage_login;
+                            Application.Current.MainPage = new NavigationPage(new BleDeviceScannerPage(bleScanViewModel));
+
+
 
                         }
                         else
@@ -87,6 +96,7 @@ namespace ble.net.sampleapp.viewmodel
                 await Application.Current.MainPage.DisplayAlert("Connection error", e.Message, "Ok");
             }
         }
+
 
     }
 }

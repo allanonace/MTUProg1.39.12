@@ -24,60 +24,48 @@ namespace ble.net.sampleapp
 {
    public partial class FormsApp
    {
-      private readonly NavigationPage m_rootPage;
-
-      private readonly IBluetoothLowEnergyAdapter adapterAclara;
-      private readonly IUserDialogs dialogsAclara;
 
       public FormsApp()
       {
          InitializeComponent();
       }
 
+ 
       public FormsApp( IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs )
       {
-         InitializeComponent();
+            InitializeComponent();
 
-     
-         dialogsAclara = dialogs;
-         adapterAclara = adapter;
+            var bleAssembly = adapter.GetType().GetTypeInfo().Assembly.GetName();
+            Log.Info(bleAssembly.Name + "@" + bleAssembly.Version);
 
-         var logsVm = new LogsViewModel();
-         SystemLog.Instance.AddSink( logsVm );
+            var bleGattServerViewModel = new BleGattServerViewModel(dialogs, adapter);
+            var bleScanViewModel = new BleDeviceScannerViewModel(
+               bleAdapter: adapter,
+               dialogs: dialogs,
+               onSelectDevice: async p =>
+               {
+                   await bleGattServerViewModel.Update(p);
+                   await Application.Current.MainPage.Navigation.PushAsync(
+                   new BleGattServerPage(
+                      model: bleGattServerViewModel,
+                        bleServiceSelected: async s => { await Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(s)); }));
+                   await bleGattServerViewModel.OpenConnection();
+               });
 
-         var bleAssembly = adapter.GetType().GetTypeInfo().Assembly.GetName();
-         Log.Info( bleAssembly.Name + "@" + bleAssembly.Version );
+           // NavigationPage  m_rootPage = new NavigationPage(new BleDeviceScannerPage(bleScanViewModel));
 
-         var bleGattServerViewModel = new BleGattServerViewModel( dialogsAclara, adapterAclara );
 
-         var bleScanViewModel = new BleDeviceScannerViewModel(
-            bleAdapter: adapterAclara,
-            dialogs: dialogsAclara,
-            onSelectDevice: async p =>
+
+            if (Settings.IsLoggedIn)
             {
-               await bleGattServerViewModel.Update( p );
+                MainPage = new NavigationPage(new BleDeviceScannerPage(bleScanViewModel));
 
-               await m_rootPage.PushAsync(
-                  new BleGattServerPage(
-                     model: bleGattServerViewModel,
-                     bleServiceSelected: async s => { await m_rootPage.PushAsync( new BleGattServicePage( s ) ); } ) );
-                
-               await bleGattServerViewModel.OpenConnection();
-            } );
-
-          m_rootPage = new NavigationPage(new BleDeviceScannerPage(bleScanViewModel));
-
-         
-          if (Settings.IsLoggedIn)
-          {
-                MainPage = m_rootPage;
-
-          }else{
-                MainPage = new LoginMenuPage(m_rootPage);
-          }
-
+            }else{
+                MainPage = new LoginMenuPage(bleScanViewModel);
+            }
 
       }
+
 
       protected override void OnStart()
       {
