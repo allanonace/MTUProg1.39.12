@@ -34,12 +34,13 @@ namespace ble.net.sampleapp.viewmodel
         }
         #endregion
 
-        BleDeviceScannerViewModel bleScanViewModel;
+        IBluetoothLowEnergyAdapter bleAdapter_save;
+        IUserDialogs dialogs_save;
 
-        public LoginMenuViewModel(BleDeviceScannerViewModel bleScanViewModel_login)
+        public LoginMenuViewModel(IBluetoothLowEnergyAdapter bleAdapter, IUserDialogs dialogs)
         {
-            bleScanViewModel = bleScanViewModel_login;
-
+            bleAdapter_save = bleAdapter;
+            dialogs_save = dialogs;
 
             LoginCommand = new Command(Login);
 
@@ -65,7 +66,7 @@ namespace ble.net.sampleapp.viewmodel
 
                             Settings.SavedUserName = User.Email;
 
-                            Application.Current.MainPage = new NavigationPage(new BleDeviceScannerPage(bleScanViewModel));
+                            Application.Current.MainPage = new NavigationPage(new BleDeviceScannerPage(bleAdapter_save,dialogs_save));
 
 
 

@@ -35,33 +35,13 @@ namespace ble.net.sampleapp
       {
             InitializeComponent();
 
-            var bleAssembly = adapter.GetType().GetTypeInfo().Assembly.GetName();
-            Log.Info(bleAssembly.Name + "@" + bleAssembly.Version);
-
-            var bleGattServerViewModel = new BleGattServerViewModel(dialogs, adapter);
-            var bleScanViewModel = new BleDeviceScannerViewModel(
-               bleAdapter: adapter,
-               dialogs: dialogs,
-               onSelectDevice: async p =>
-               {
-                   await bleGattServerViewModel.Update(p);
-                   await Application.Current.MainPage.Navigation.PushAsync(
-                   new BleGattServerPage(
-                      model: bleGattServerViewModel,
-                        bleServiceSelected: async s => { await Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(s)); }));
-                   await bleGattServerViewModel.OpenConnection();
-               });
-
-           // NavigationPage  m_rootPage = new NavigationPage(new BleDeviceScannerPage(bleScanViewModel));
-
-
 
             if (Settings.IsLoggedIn)
             {
-                MainPage = new NavigationPage(new BleDeviceScannerPage(bleScanViewModel));
+                MainPage = new NavigationPage(new BleDeviceScannerPage(adapter, dialogs));
 
             }else{
-                MainPage = new LoginMenuPage(bleScanViewModel);
+                MainPage = new LoginMenuPage(adapter, dialogs);
             }
 
       }

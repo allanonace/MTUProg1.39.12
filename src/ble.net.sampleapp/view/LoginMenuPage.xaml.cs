@@ -20,11 +20,11 @@ namespace ble.net.sampleapp.view
         }
 
 
-        public LoginMenuPage(BleDeviceScannerViewModel bleScanViewModel_login)
+        public LoginMenuPage(IBluetoothLowEnergyAdapter bleAdapter, IUserDialogs dialogs)
         {
             InitializeComponent();
 
-            BindingContext = viewModel = new viewmodel.LoginMenuViewModel(bleScanViewModel_login);
+            BindingContext = viewModel = new viewmodel.LoginMenuViewModel(bleAdapter, dialogs);
             viewModel.Navigation = this.Navigation;
         }
 

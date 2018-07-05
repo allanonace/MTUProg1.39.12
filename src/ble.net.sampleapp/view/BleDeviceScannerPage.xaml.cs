@@ -22,59 +22,116 @@ namespace ble.net.sampleapp.view
    {
         
   
-       public BleDeviceScannerPage()
-       {
-          InitializeComponent();
-       }
 
-        BleDeviceScannerViewModel bleScanViewModel_login;
-        public List<PageItem> menuList { get; set; }
+      public BleDeviceScannerPage()
+      {
+         InitializeComponent();
+      }
 
-        public BleDeviceScannerPage(BleDeviceScannerViewModel bleScanViewModel )
+          
+
+
+        
+        private void connection()
         {
-            
-             InitializeComponent();
+
+            //var logsVm = new LogsViewModel();
+            //SystemLog.Instance.AddSink(logsVm);
+
+            var bleAssembly = bleAdapterSaved.GetType().GetTypeInfo().Assembly.GetName();
+            Log.Info(bleAssembly.Name + "@" + bleAssembly.Version);
+
+            var bleGattServerViewModel = new BleGattServerViewModel(dialogsSaved, bleAdapterSaved);
+
+            bleScanViewModel = new BleDeviceScannerViewModel(
+                bleAdapter: bleAdapterSaved,
+                dialogs: dialogsSaved,
+               onSelectDevice:
 
 
 
-             bleScanViewModel_login = bleScanViewModel;
-
-             BindingContext = bleScanViewModel_login;
-
-
-             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-
-             Task.Run(async () =>
-             {
-                 await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
-                 {
-                     bleScanViewModel.ScanForDevicesCommand.Execute(true);
-
-                 });
-             });
+                async p =>
+                {
+                    await bleGattServerViewModel.Update(p);
 
 
-             back_button.Tapped += hamburgerOpen;
-             back_button_menu.Tapped += hamburgerClose;
-             logout_button.Tapped += logout;
+                    await Application.Current.MainPage.Navigation.PushAsync(
+                           new BleGattServerPage(
+                              model: bleGattServerViewModel,
+                                bleServiceSelected: async s =>
+                                {
+
+                                    await Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(s));
+                                    // LOGICA DE LA VISTA DETALLADA
+
+                                }
+                            )
+                        );
+
+                    await bleGattServerViewModel.OpenConnection();
+                }
 
 
-             ContentNav.IsVisible = false;
-             ContentNav.IsEnabled = true;
-             background_scan_page.Opacity = 1;
+            );
 
-           
-             //MENU
+            BindingContext = bleScanViewModel;
 
 
-             //Change username textview to Prefs. String
-             if (Settings.SavedUserName != null)
-             {
+
+            NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
+
+            Task.Run(async () =>
+            {
+
+                await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
+                {
+                    bleScanViewModel.ScanForDevicesCommand.Execute(true);
+
+                });
+            });
+        }
+
+
+      public List<PageItem> menuList { get; set; }
+
+
+        IBluetoothLowEnergyAdapter bleAdapterSaved;
+        IUserDialogs dialogsSaved;
+        BleDeviceScannerViewModel bleScanViewModel;
+
+        public BleDeviceScannerPage(IBluetoothLowEnergyAdapter bleAdapter, IUserDialogs dialogs )
+        {
+
+            InitializeComponent();
+
+
+            bleAdapterSaved = bleAdapter;
+            dialogsSaved = dialogs;
+
+            connection();
+
+            back_button.Tapped += hamburgerOpen;
+            back_button_menu.Tapped += hamburgerClose;
+            logout_button.Tapped += logout;
+
+
+            ContentNav.IsVisible = false;
+            ContentNav.IsEnabled = true;
+            background_scan_page.Opacity = 1;
+
+
+
+            //MENU
+
+
+            //Change username textview to Prefs. String
+            if (Settings.SavedUserName != null)
+            {
                 userName.Text = Settings.SavedUserName;
-             }
+            }
 
-             menuList = new List<PageItem>();
-             
+            menuList = new List<PageItem>();
+
             // Creating our pages for menu navigation
             // Here you can define title for item, 
             // icon on the left side, and page that you want to open after selection
@@ -102,14 +159,19 @@ namespace ble.net.sampleapp.view
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
             navigationDrawerList.ItemsSource = menuList;
-           
 
-       }
+
+
+
+
+
+        }
+
 
         private void logout(object sender, EventArgs e)
         {
             Settings.IsLoggedIn = false;
-            Application.Current.MainPage = new LoginMenuPage(bleScanViewModel_login);
+            Application.Current.MainPage = new LoginMenuPage(bleAdapterSaved,dialogsSaved );
 
          
 
