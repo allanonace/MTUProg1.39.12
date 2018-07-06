@@ -33,6 +33,9 @@ namespace ble.net.sampleapp.viewmodel
       private String m_valueAsString;
       private String m_writeValue;
 
+      private Byte[] m_bytearray;
+
+
       public BleGattCharacteristicViewModel( Guid serviceGuid, Guid characteristicGuid,
                                              IBleGattServerConnection gattServer, IUserDialogs dialogManager )
       {
@@ -51,7 +54,9 @@ namespace ble.net.sampleapp.viewmodel
 
 
          ValueAsHex = String.Empty;
+
          ValueAsString = String.Empty;
+         ValueAsHexBytes = new Byte[]{};
 
          m_gattServer.ReadCharacteristicProperties( m_serviceGuid, m_characteristicGuid ).ContinueWith(
             x =>
@@ -145,6 +150,18 @@ namespace ble.net.sampleapp.viewmodel
          get { return m_valueAsHex; }
          private set { Set( ref m_valueAsHex, value ); }
       }
+
+
+        ////////// 
+ 
+        public Byte[] ValueAsHexBytes
+        {
+            get { return m_bytearray; }
+            private set { Set(ref m_bytearray, value); }
+        }
+
+
+
 
       public String ValueAsString
       {
@@ -249,7 +266,16 @@ namespace ble.net.sampleapp.viewmodel
       {
 
 
-         ValueAsHex = ValueAsHex + bytes.EncodeToBase16String();
+            ValueAsHex = ValueAsHex + bytes.EncodeToBase16String();
+
+            byte[] ret = new byte[ValueAsHexBytes.Length + bytes.Length]; 
+            Array.Copy(ValueAsHexBytes, 0, ret, 0, ValueAsHexBytes.Length);
+            Array.Copy(bytes, 0, ret, ValueAsHexBytes.Length, bytes.Length);
+        
+
+
+            ValueAsHexBytes = ret;
+
 
 
          try

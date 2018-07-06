@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Acr.UserDialogs;
 using ble.net.sampleapp.viewmodel;
+using nexus.core.text;
 using nexus.protocols.ble;
 using Xamarin.Forms;
 
@@ -109,40 +110,76 @@ namespace ble.net.sampleapp.view
                                  BleGattCharacteristicViewModel[] array = new BleGattCharacteristicViewModel[10];
                                  model_saved.Characteristic.CopyTo(array, 0);
 
-                                 /*
-                                 for (int i = 0; i < array.Length; i++){
-                                     if(array[i].Id.Equals("00000003-0000-1000-8000-00805f9b34fb")){
-                                         String valueReaded = array[i].ValueAsHex;
+                              
 
-
-                                     }
-                                 }
-                                 */
-
-
-
-                                 String value1 = array[0].ValueAsHex;
+                                 Byte [] value1 = array[0].ValueAsHexBytes;
 
                                  int longitud = value1.Length ;
 
                                  int contador = 0;
 
-                                 String valortemp = "";
 
-                                 List<String> listofstrings = new List<string>();
+                                 //List<Byte[]> listofbytes = new List<Byte[]>();
+                                    byte[] listTotal = new byte[1024];
+                                 int listTotalLength = 0;
+                                 int cuantoDato = 0;
 
-                              
-                                 while(contador<longitud){
+                                 while (contador < longitud)
+                                 {
+                                        
+                                     byte[] array2= new byte[20];
 
-                                      valortemp = value1.Substring(contador, 40 );
+                                     Array.Copy(value1, contador, array2, 0, 20);
 
-                                      listofstrings.Add(valortemp);
+                                     //listofbytes.Add(array2);
+                                        cuantoDato = array2[2];
+                                     if (cuantoDato > 0)
+                                     {
+                                            Array.Copy(array2, 3, listTotal, listTotalLength, cuantoDato);
+                                         listTotalLength += cuantoDato;
+                                     }
 
-                                      contador = contador+40;
+                                     contador = contador + 20;
 
                                  }
 
-                               // String listado =  listofstrings.ToString();
+                                 
+                                 
+
+
+                                 //for (int i = 0; i < listofbytes.Count; i++)
+                                 //{
+                                     //byte[] array2 = new byte[18];
+
+                                     //Array.Copy(listofbytes[i], 2, array2, 0, 18);
+
+                                     //int cuantoDato = 0;
+
+                                     //cuantoDato = Convert.ToInt32(array2[0].ToString(), 16);
+
+                                     //byte[] arrayfinal = new byte[cuantoDato];
+
+                                     //Array.Copy(array2, 1, arrayfinal, 0, cuantoDato);
+
+                                     
+                                    //byte[] ret = new byte[listTotal.Length + arrayfinal.Length]; 
+
+                                    //Array.Copy(arrayfinal, 0, ret, 0, arrayfinal.Length);
+
+                                     //Array.Copy(arrayfinal, 0, listTotal, listTotalLength, arrayfinal.Length);
+                                     //listTotalLength += arrayfinal.Length;
+        
+
+                                 //}
+
+
+
+
+
+
+                                 String listatotla = listTotal.EncodeToBase16String();
+                                 valorHEX.Text = listatotla.Substring(0,listTotalLength*2);
+       /*
 
 
                                 String listadoDatos = "";
@@ -156,7 +193,9 @@ namespace ble.net.sampleapp.view
 
                                      int cuantoDato = 0;
 
-                                     cuantoDato = Int32.Parse(valorPosicion.Substring(0, 2));
+                                     cuantoDato =  Convert.ToInt32(valorPosicion.Substring(0, 2), 16);
+
+                                     //cuantoDato = Int32.Parse(valorPosicion.Substring(0, 2));
 
                                      cuantoDato = cuantoDato * 2;
 
@@ -169,38 +208,14 @@ namespace ble.net.sampleapp.view
                                 }
 
 
-                                String pruebavalor = listadoDatos.ToString();
-
-                                    /*
-                                 for (int i = 0; i < longitud; i++){
-                                        
-                                        if(contador<21){
-                                            contador++;
-
-                                            valortemp = value1.Substring(0, contador);
-
-                                        }else{
-                                            
-                                            contador = 0;
-                                        }
-
-                                       
-
-
-                                 }
-*/
+                                 String pruebavalor = listadoDatos.ToString();
 
                                
 
 
-
-                                 //value1
-
-                                 //String value2 = array[1].ValueAsHex; //El que me interesa
-
-                                    valorHEX.Text = pruebavalor;
-
-                                 //valorHEX.Text = value2;
+                                   valorHEX.Text = pruebavalor;
+                                   
+                            */
 
                              });
                          });
