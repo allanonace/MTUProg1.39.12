@@ -137,7 +137,7 @@ namespace ble.net.sampleapp.view
                                     
                                                Guid value = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
                                                BleGattServiceViewModel account = new BleGattServiceViewModel(value, bleGattServerViewModel.returnConnect(), dialogsSaved);
-                                                 Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account));
+                                Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account, bleGattServerViewModel.returnConnect(), dialogsSaved));
                                            });
                                        });
 

@@ -203,105 +203,7 @@
 
                                  </Grid>
                               </Frame>  
-
-                                    
-                               <!--     
-                              <Frame Margin="{StaticResource GridPadding}"
-                                     Padding="{StaticResource GridPadding}">
-
-                                 <Grid RowSpacing="5">
-                                    <Grid.ColumnDefinitions>
-                                       <ColumnDefinition Width="Auto" />
-                                       <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                       <RowDefinition Height="Auto" />
-                                       <RowDefinition Height="Auto" />
-                                       <RowDefinition Height="Auto" />
-                                       <RowDefinition Height="Auto" />
-                                       <RowDefinition Height="Auto" />
-                                       <RowDefinition Height="Auto" />
-                                       <RowDefinition Height="Auto" />
-                                    </Grid.RowDefinitions>
-
-                                    <Label Grid.Column="0"
-                                           Grid.Row="0"
-                                           Text="Address / Name"
-                                           FontAttributes="Bold" />
-                                    <Label Grid.Column="0"
-                                           Grid.Row="1"
-                                           Text="RSSI / Tx"
-                                           FontAttributes="Bold" />
-                                    <Label Grid.Column="0"
-                                           Grid.Row="2"
-                                           Text="Flags"
-                                           FontAttributes="Bold" />
-                                    <Label Grid.Column="0"
-                                           Grid.Row="3"
-                                           Text="Mfg. Data"
-                                           FontAttributes="Bold" />
-                                    <Label Grid.Column="0"
-                                           Grid.Row="4"
-                                           Text="Services"
-                                           FontAttributes="Bold" />
-                                    <Label Grid.Column="0"
-                                           Grid.Row="5"
-                                           Text="Service Data"
-                                           FontAttributes="Bold" />
-
-                                    <Label Grid.Column="1"
-                                           Grid.Row="0"
-                                           Text="{Binding AddressAndName}" />
-                                    <Label Grid.Column="1"
-                                           Grid.Row="1"
-                                           Text="{Binding Signal}" />
-                                    <Label Grid.Column="1"
-                                           Grid.Row="2"
-                                           Text="{Binding Flags}" />
-                                    <Label Grid.Column="1"
-                                           Grid.Row="3"
-                                           Text="{Binding ManufacturerData}" />
-                                    <Label Grid.Column="1"
-                                           Grid.Row="4"
-                                           Text="{Binding AdvertisedServices}" />
-                                    <Label Grid.Column="1"
-                                           Grid.Row="5"
-                                           Text="{Binding ServiceData}" />
-
-                                            
-                                    <StackLayout Grid.Row="6"
-                                                 Grid.Column="0"
-                                                 Grid.ColumnSpan="2"
-                                                 Orientation="Horizontal"
-                                                 HorizontalOptions="FillAndExpand">
-                                      
-                                       <Label IsVisible="false"
-                                              Text="Remember Device"
-                                              HorizontalOptions="Start"
-                                              VerticalOptions="Center" />
-                                       <Switch IsVisible="false"
-                                               IsToggled="{Binding IsRemembered, Mode=OneWay}"
-                                               HorizontalOptions="Start"
-                                               IsEnabled="false"
-                                               VerticalOptions="Center" />
-                                       <Button Text="Connect"
-                                               Command="{Binding ConnectToDeviceCommand}"
-                                               HorizontalOptions="EndAndExpand">
-                                          <Button.TextColor>
-                                             <OnPlatform x:TypeArguments="Color"
-                                                         WinPhone="DarkOrange" />
-                                          </Button.TextColor>
-                                       </Button>
-                                    </StackLayout>
-
-                                 </Grid>
-                              </Frame>
-
-
-                                    -->
-
-
-
+                            
                                     
                            </ViewCell>
                         </DataTemplate>
@@ -364,6 +266,161 @@
 
 
 
+
+
+
+        
+     <!--   DETAIL -->
+
+      
+      <ContentView  IsVisible="false" x:Name="background_scan_page_detail_ble"  
+            RelativeLayout.XConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Width,
+                                     Factor=0}"
+            RelativeLayout.WidthConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Width,
+                                     Factor=1}"
+            RelativeLayout.YConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Height,
+                                     Factor=0}"
+            RelativeLayout.HeightConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Height,
+                                     Factor=1}">
+
+
+             <Grid >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>      
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="menu_controller_width_detail_ble" Width="0"/>
+                </Grid.ColumnDefinitions>
+
+
+          
+                <StackLayout Opacity="1" BackgroundColor="White" Grid.Row="0" Grid.Column="1"  Margin="-6,0,0,0" Orientation="Vertical">
+                    <StackLayout   BackgroundColor="White"   Margin="1"> 
+                        <StackLayout Margin="0,0,0,0">
+                            <StackLayout  Margin="0,0,0,0" HeightRequest="92" BackgroundColor="#6ba2b7">
+                                <StackLayout Orientation="Horizontal">
+
+                                    <Image  x:Name="hamburger_icon_detail_ble"
+                                            Margin="0,24,0,0" 
+                                            Scale="0.6" 
+                                            Source="hamburger_icon.png"  
+                                            HorizontalOptions="Start">
+
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer  x:Name="back_button_detail_ble"  NumberOfTapsRequired="1" />
+                                        </Image.GestureRecognizers>       
+                                        
+                                    </Image>
+
+
+
+
+                                    <Image  WidthRequest="150" 
+                                            HeightRequest="64"
+                                            Margin="0,12,0,0" 
+                                            Scale="1" 
+                                            Source="aclara_logo_menu.png">
+                                    </Image>
+
+
+                                    
+                                    <StackLayout  Margin="0,24,10,0"  Orientation="Horizontal" HorizontalOptions="EndAndExpand" >
+                               
+                                    <Image  x:Name="battery_level_detail_ble" 
+                                            Margin="0,4,0,0" 
+                                            HeightRequest="32"
+                                            WidthRequest="32"
+                                            Scale="1" 
+                                            Source="battery_toolbar_high_white.png"  
+                                           >
+                                    </Image>
+
+                                    <Image  x:Name="rssi_level_detail_ble" 
+                                            Margin="4,0,0,0" 
+                                            HeightRequest="32"
+                                            WidthRequest="32"
+                                            Scale="1" 
+                                            Source="rssi_toolbar_high_white.png"  
+                                            >
+                                    </Image>
+                                </StackLayout>
+
+
+                                    
+                                </StackLayout>
+                                
+               
+                            </StackLayout>
+                    
+                        </StackLayout>
+
+                        
+                  </StackLayout>
+
+                   <!--  Aqui va la listview -->
+
+                <StackLayout   BackgroundColor="White"   Margin="1"> 
+        
+
+      
+        
+                <StackLayout Margin="-10,0,0,0" Orientation="Horizontal"  Scale="0.95" VerticalOptions="Center" HorizontalOptions="Center">
+                    <RelativeLayout  Scale="1" HorizontalOptions="Center">
+                       
+                        <StackLayout Padding="54">
+                            <StackLayout  Orientation="Vertical" 
+                                     VerticalOptions="Center" 
+                                     HorizontalOptions="Center">
+                                <Image Source="icon_detail_ble.png" />
+                                <Label HorizontalOptions="Center" FontSize="32" Text="{Binding deviceID}" x:Name="deviceID_ble"  ></Label>
+                                <Label HorizontalOptions="Center" Margin="4,-4,0,0" Text="{Binding macAddress}" x:Name="macAddress_ble" ></Label>
+                                <StackLayout Margin="0,-4,0,0" Orientation="Horizontal" HorizontalOptions="Center">
+                                     <Image   Source="{Binding imageBattery}" HeightRequest="40" x:Name="imageBattery_ble" VerticalOptions="Center" />
+                                     <Label Margin="-4,2,0,0" Text="{Binding batteryLevel}"   x:Name="batteryLevel_ble" FontSize="14" VerticalOptions="Center"></Label> 
+                                </StackLayout>
+                                <StackLayout Margin="0,-4,0,0" Orientation="Horizontal" HorizontalOptions="Center">
+                                     <Image Source="{Binding imageRssi}" HeightRequest="40"   x:Name="imageRssi_ble" VerticalOptions="Center" />
+                                     <Label Margin="-4,2,0,0" Text="{Binding rssiLevel}" x:Name="rssiLevel_ble" FontSize="14" VerticalOptions="Center"></Label>
+                                </StackLayout>
+                            </StackLayout>
+                        </StackLayout>  
+                        <Button Margin="16,0,0,0" x:Name="disconnectDevice_ble" Image="icon_button_ble_detail.png"  
+                            RelativeLayout.HeightConstraint="64"
+                            RelativeLayout.XConstraint="250"
+                            RelativeLayout.YConstraint="18">
+                        </Button>
+                        
+                    </RelativeLayout>
+               </StackLayout>
+
+           
+          </StackLayout>
+
+                            
+                    
+              </StackLayout>
+            
+         </Grid>
+            
+     </ContentView>
+
+
+        
+
+
+
+        <!--  DETAIL  -->
+
+
+        
       <ContentView  IsVisible="false" x:Name="background_scan_page_detail"  
             RelativeLayout.XConstraint=
               "{ConstraintExpression Type=RelativeToParent,
@@ -478,29 +535,13 @@
                                   HorizontalOptions="StartAndExpand"
                                   Padding="{StaticResource GridPadding}">
                         <Label Text="{Binding AddressAndName, StringFormat='Address / Name: {0}'}"
-                               HorizontalOptions="Start"
+                               HorizontalOptions="Start" IsVisible="false"
                                VerticalOptions="Center" />
-                        <Label Text="{Binding Manufacturer, StringFormat='Manufacturer: {0}'}"
+                        <Label Text="{Binding Manufacturer, StringFormat='Manufacturer: {0}'}"  IsVisible="false"
                                HorizontalOptions="Start"
                                VerticalOptions="Center" />
                      </StackLayout>
-                     <!-- TODO: implement the remember switch
-                     <StackLayout Orientation="Horizontal"
-                                  VerticalOptions="Center"
-                                  HorizontalOptions="StartAndExpand"
-                                  Padding="{StaticResource GridPadding}">
-                        
-                        <Label IsVisible="false"
-                               Text="Remember Device"
-                               HorizontalOptions="Start"
-                               VerticalOptions="Center" />
-                        <Switch IsVisible="false"
-                                IsToggled="{Binding IsRemembered, Mode=OneWay}"
-                                HorizontalOptions="Start"
-                                IsEnabled="false"
-                                VerticalOptions="Center" />
-                     </StackLayout>
-                     -->
+
                      <StackLayout Orientation="Horizontal"
                                   VerticalOptions="Center"
                                   HorizontalOptions="EndAndExpand"
@@ -532,11 +573,11 @@
 
                   <StackLayout Orientation="Horizontal"
                                Padding="{StaticResource GridPadding}">
-                     <Label Text="Services"
+                     <Label Text="Services" IsVisible="false"
                             FontSize="20" />
                   </StackLayout>
 
-                  <ListView ItemsSource="{Binding Services}"
+                  <ListView ItemsSource="{Binding Services}" IsVisible="false"
                             ItemSelected="OnServiceSelected"
                             HasUnevenRows="True"
                             VerticalOptions="FillAndExpand"
@@ -621,7 +662,7 @@
         
         <!-- Menu desplegable -->
         
-    <ContentView x:Name="ContentNav" BackgroundColor="#6ba2b7" WidthRequest="310" IsVisible="true"
+    <ContentView x:Name="ContentNav" BackgroundColor="#6ba2b7" WidthRequest="310" IsVisible="false"
 
         RelativeLayout.YConstraint=
           "{ConstraintExpression Type=RelativeToParent,

@@ -11,14 +11,18 @@
                 VerticalOptions="FillAndExpand"
                 HorizontalOptions="FillAndExpand">
 
-      <StackLayout Orientation="Horizontal"
+      <StackLayout Orientation="Horizontal" IsVisible="false"
                    Padding="{StaticResource GridPadding}">
          <Label Text="Characteristics"
                 FontSize="22" />
       </StackLayout>
 
-
-      <ListView ItemsSource="{Binding Characteristic}"
+       <Label Margin="12,12,0,0" Text="VALOR HEX:"
+                FontSize="20" />
+                 <Label x:Name="valorHEX" Text="-------------" Margin="12,12,0,0" 
+                FontSize="18" />
+        
+      <ListView ItemsSource="{Binding Characteristic}" x:Name="lista" IsVisible="false"
                 ItemSelected="OnItemSelected"
                 SeparatorVisibility="None"
                 HasUnevenRows="True"

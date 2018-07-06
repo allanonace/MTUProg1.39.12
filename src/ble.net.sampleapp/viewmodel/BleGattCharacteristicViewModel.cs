@@ -47,6 +47,9 @@ namespace ble.net.sampleapp.viewmodel
          ToggleNotificationsCommand = new Command( () => { NotifyEnabled = !NotifyEnabled; } );
          WriteBytesCommand = new Command( async () => { await WriteCurrentBytes(); } );
 
+            WriteCurrentBytesGUIDCommand = new Command(async () => { await WriteCurrentBytesGUID(); });
+
+
          ValueAsHex = String.Empty;
          ValueAsString = String.Empty;
 
@@ -150,6 +153,16 @@ namespace ble.net.sampleapp.viewmodel
       }
 
       public ICommand WriteBytesCommand { get; }
+
+
+
+
+
+      public ICommand WriteCurrentBytesGUIDCommand { get; }
+
+
+
+
 
       public String WriteValue
       {
@@ -275,5 +288,38 @@ namespace ble.net.sampleapp.viewmodel
             }
          }
       }
+
+
+
+        private async Task WriteCurrentBytesGUID()
+        {
+            var w = "000005258000ff5c";
+            if (!w.IsNullOrEmpty())
+            {
+                var val = w.DecodeAsBase16();
+                try
+                {
+                    IsBusy = true;
+
+                    var writeTask = m_gattServer.WriteCharacteristicValue( m_serviceGuid , m_characteristicGuid, val);
+                    // notify UI to clear written value from input field
+                    WriteValue = "";
+                    // update the characteristic value with the awaited results of the write
+                    UpdateDisplayedValue(await writeTask);
+                }
+                catch (GattException ex)
+                {
+                    Log.Warn(ex.ToString());
+                    m_dialogManager.Toast(ex.Message);
+                }
+                finally
+                {
+                    IsBusy = false;
+                }
+            }
+        }
+
+
+
    }
 }
