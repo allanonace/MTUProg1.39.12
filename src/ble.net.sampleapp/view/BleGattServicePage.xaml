@@ -5,187 +5,347 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:util="clr-namespace:ble.net.sampleapp.util;assembly=ble.net.sampleapp"
                Title="{Binding PageTitle}"
+                    NavigationPage.HasBackButton="false"
                x:Class="ble.net.sampleapp.view.BleGattServicePage">
 
-   <StackLayout Orientation="Vertical"
-                VerticalOptions="FillAndExpand"
-                HorizontalOptions="FillAndExpand">
+
+              
+
+        <ContentView  IsVisible="true" x:Name="background_scan_page"
+            RelativeLayout.XConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Width,
+                                     Factor=0}"
+            RelativeLayout.WidthConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Width,
+                                     Factor=1}"
+            RelativeLayout.YConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Height,
+                                     Factor=0}"
+            RelativeLayout.HeightConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Height,
+                                     Factor=1}">
+
+
+             <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>      
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="menu_controller_width" Width="0"/>
+                </Grid.ColumnDefinitions>
+
+
+          
+                <StackLayout Opacity="1" BackgroundColor="White" Grid.Row="0" Grid.Column="1"  Margin="-6,0,0,0" Orientation="Vertical">
+                    <StackLayout   BackgroundColor="White"   Margin="1"> 
+                        <StackLayout Margin="0,0,0,0">
+                            <StackLayout  Margin="0,0,0,0" HeightRequest="92" BackgroundColor="#6ba2b7">
+                                <StackLayout Orientation="Horizontal">
+
+                                    <Image  x:Name="hamburger_icon"
+                                            Margin="0,24,0,0" 
+                                            Scale="0.6" 
+                                            Source="close_menu_icon.png"  
+                                            HorizontalOptions="Start">
+
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer  x:Name="back_button"  NumberOfTapsRequired="1" />
+                                        </Image.GestureRecognizers>       
+                                        
+                                    </Image>
 
 
 
-        
-      <StackLayout Orientation="Horizontal" IsVisible="false"
-                   Padding="{StaticResource GridPadding}">
-         <Label Text="Characteristics"
-                FontSize="22" />
-      </StackLayout>
 
+                                    <Image  WidthRequest="150" 
+                                            HeightRequest="64"
+                                            Margin="0,12,0,0" 
+                                            Scale="1" 
+                                            Source="aclara_logo_menu.png">
+                                    </Image>
 
-        
-       <Label Margin="12,12,0,0" Text="VALOR HEX:"
-                FontSize="20" />
-                 <Label x:Name="valorHEX" Text="-------------" Margin="12,12,0,0" 
-                FontSize="18" />
-
-
-          <ListView   x:Name="listaMTUread" RowHeight="60" SeparatorVisibility="None" SeparatorColor="#6ba2b7"  > 
-              <ListView.ItemTemplate>
-                <DataTemplate>
-                  <ViewCell>
-                     <StackLayout Orientation="Vertical" >
-                        <Label Text="{Binding Title}" Margin="14,0,0,0" VerticalOptions="Center" Font="Bold,20" TextColor="Black"/>
-                        <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" VerticalOptions="Center" TextColor="Black"/>
-                     </StackLayout>
-                  </ViewCell>
-                </DataTemplate>
-              </ListView.ItemTemplate>
-            </ListView>
-        
-      <ListView ItemsSource="{Binding Characteristic}" x:Name="lista" IsVisible="false"
-                ItemSelected="OnItemSelected"
-                SeparatorVisibility="None"
-                HasUnevenRows="True"
-                SeparatorColor="#aaaaaa">
-         <x:Arguments>
-            <ListViewCachingStrategy>RecycleElement</ListViewCachingStrategy>
-         </x:Arguments>
-         <ListView.RowHeight>
-            <OnPlatform x:TypeArguments="x:Int32"
-                        iOS="200" />
-         </ListView.RowHeight>
-         <ListView.ItemTemplate>
-            <DataTemplate>
-               <ViewCell>
-                  <Frame Padding="{StaticResource GridPadding}"
-                         Margin="{StaticResource GridPadding}"
-                         VerticalOptions="FillAndExpand"
-                  
-                         HorizontalOptions="CenterAndExpand">
-
-                     <StackLayout Orientation="Vertical"
-                                  HorizontalOptions="StartAndExpand"
-                                  VerticalOptions="CenterAndExpand"
-                                  Padding="{StaticResource GridPadding}">
-                        <Label Text="{Binding Name}"
-                               HorizontalOptions="StartAndExpand"
-                               VerticalOptions="Start" />
-                        <Label Text="{Binding Id}"
-                               HorizontalOptions="StartAndExpand"
-                               VerticalOptions="Start" />
-
-                        <Grid HorizontalOptions="FillAndExpand"
-                              VerticalOptions="CenterAndExpand">
-                           <Grid.ColumnDefinitions>
-                              <ColumnDefinition />
-                              <ColumnDefinition />
-                              <ColumnDefinition />
-                           </Grid.ColumnDefinitions>
-
-                           <StackLayout Grid.Column="0"
-                                        Orientation="Horizontal"
-                                        VerticalOptions="Center"
-                                        HorizontalOptions="Start">
-                              <Button Command="{Binding RefreshValueCommand}"
-                                      IsEnabled="{Binding CanRead}"
-                                      Text="Read" />
-                           </StackLayout>
-
-                           <StackLayout Orientation="Horizontal"
-                                        VerticalOptions="Center"
-                                        HorizontalOptions="Center"
-                                        Grid.Column="1">
-                              <Label IsEnabled="{Binding CanNotify}"
-                                     VerticalTextAlignment="Center"
-                                     VerticalOptions="CenterAndExpand"
-                                     Text="Notify:" />
-                              <Switch IsToggled="{Binding Path=NotifyEnabled, Mode=TwoWay}"
-                                      VerticalOptions="Center"
-                                      IsEnabled="{Binding CanNotify}" />
-                           </StackLayout>
-
-
-                             <StackLayout Orientation="Horizontal" Margin="0,12,0,0"
-                                        VerticalOptions="Center"
-                                        HorizontalOptions="Center"
-                                        Grid.Column="1">
-                              <Label IsEnabled="{Binding CanIndicate}"
-                                     VerticalTextAlignment="Center"
-                                     VerticalOptions="CenterAndExpand"
-                                     Text="Indicate:" />
-                              <Switch IsToggled="{Binding Path=NotifyEnabled, Mode=TwoWay}"
-                                      VerticalOptions="Center"
-                                      IsEnabled="{Binding CanIndicate}" />
-                           </StackLayout>
 
                                     
-                           <StackLayout Orientation="Horizontal"
-                                        VerticalOptions="Center"
-                                        HorizontalOptions="EndAndExpand"
-                                        Grid.Column="2">
-                              <Entry HorizontalOptions="StartAndExpand"
-                                     Placeholder="Write Value"
-                                     Text="{Binding WriteValue}" />
-                              <Button Command="{Binding WriteBytesCommand}" Margin="-24,10,0,0"
-                                      IsEnabled="{Binding CanWrite}"
-                                      Text="Write" />
-                           </StackLayout>
+                                    <StackLayout  Margin="0,24,10,0"  Orientation="Horizontal" HorizontalOptions="EndAndExpand" >
+                               
+                                    <Image  x:Name="battery_level" 
+                                            Margin="0,4,0,0" 
+                                            HeightRequest="32"
+                                            WidthRequest="32"
+                                            Scale="1" 
+                                            Source="battery_toolbar_high_white.png"  
+                                           >
+                                    </Image>
 
-                        </Grid>
+                                    <Image  x:Name="rssi_level" 
+                                            Margin="4,0,0,0" 
+                                            HeightRequest="32"
+                                            WidthRequest="32"
+                                            Scale="1" 
+                                            Source="rssi_toolbar_high_white.png"  
+                                            >
+                                    </Image>
+                                </StackLayout>
 
-                        <Grid>
-                           <Grid.ColumnDefinitions>
-                              <ColumnDefinition Width="Auto" />
-                              <ColumnDefinition Width="*" />
-                           </Grid.ColumnDefinitions>
-                           <Grid.RowDefinitions>
-                              <RowDefinition Height="Auto" />
-                              <RowDefinition Height="Auto" />
-                              <!--<RowDefinition Height="Auto" />
-                              <RowDefinition Height="Auto" />-->
-                           </Grid.RowDefinitions>
 
-                           <Label Grid.Column="0"
-                                  Grid.Row="0"
-                                  Text="Hex:"
-                                  FontAttributes="Bold" />
-                           <Label Grid.Column="1"
-                                  Grid.Row="0"
-                                  Text="{Binding ValueAsHex}"
-                                  HorizontalOptions="StartAndExpand" />
+                                    
+                                </StackLayout>
+                                
+                  
 
-                           <Label Grid.Column="0"
-                                  Grid.Row="1"
-                                  Text="UTF8:"
-                                  FontAttributes="Bold" />
 
-                           <Label Grid.Column="1"
-                                  Grid.Row="1"
-                                  Text="{Binding ValueAsString}"
-                                  HorizontalOptions="StartAndExpand" />
-
-                           <!--
-                           <Label Grid.Column="0"
-                                  Grid.Row="2"
-                                  Grid.ColumnSpan="2"
-                                  Text="Descriptors:"
-                                  FontAttributes="Bold" />
-                           <Label Grid.Column="0"
-                                  Grid.Row="3"
-                                  Grid.ColumnSpan="2"
-                                  Text="{Binding DescriptorValues}"
-                                  HorizontalOptions="StartAndExpand" />
-                           -->
                            
-                        </Grid>
+                            
+                              
+                            </StackLayout>
+                    
+                        </StackLayout>
 
+                    <!--  Aqui va la listview -->
+
+                        
+                  </StackLayout>
+                
+
+
+
+
+              
+               <StackLayout Orientation="Vertical"
+                            VerticalOptions="FillAndExpand"
+                            HorizontalOptions="FillAndExpand">
+
+
+                        
+
+                    
+                  <StackLayout Orientation="Horizontal" IsVisible="false"
+                               Padding="{StaticResource GridPadding}">
+                     <Label Text="Characteristics"
+                            FontSize="22" />
+                  </StackLayout>
+
+
+                        
+                
+
+                      <ListView  Margin="0,24,0,0" x:Name="listaMTUread" RowHeight="60" SeparatorVisibility="None" SeparatorColor="#6ba2b7"  > 
+                          <ListView.ItemTemplate>
+                            <DataTemplate>
+                              <ViewCell>
+                                 <StackLayout Orientation="Vertical" >
+                                    <Label Text="{Binding Title}" Margin="14,0,0,0" VerticalOptions="Center" Font="Bold,20" TextColor="Black"/>
+                                    <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" VerticalOptions="Center" TextColor="Black"/>
+                                 </StackLayout>
+                              </ViewCell>
+                            </DataTemplate>
+                          </ListView.ItemTemplate>
+                        </ListView>
+
+                         <Label HeightRequest="20" Margin="12,0,0,0" FontAttributes="Bold" Text="HEX Value:"
+                            FontSize="20" />
+                             <Label x:Name="valorHEX" HeightRequest="200" Text="-------------" Margin="12,12,0,0" 
+                            FontSize="18" />
+                         
+                    
+                    
+                  <ListView ItemsSource="{Binding Characteristic}" x:Name="lista" IsVisible="false"
+                            ItemSelected="OnItemSelected"
+                            SeparatorVisibility="None"
+                            HasUnevenRows="True"
+                            SeparatorColor="#aaaaaa">
+                     <x:Arguments>
+                        <ListViewCachingStrategy>RecycleElement</ListViewCachingStrategy>
+                     </x:Arguments>
+                     <ListView.RowHeight>
+                        <OnPlatform x:TypeArguments="x:Int32"
+                                    iOS="200" />
+                     </ListView.RowHeight>
+                     <ListView.ItemTemplate>
+                        <DataTemplate>
+                           <ViewCell>
+                              <Frame Padding="{StaticResource GridPadding}"
+                                     Margin="{StaticResource GridPadding}"
+                                     VerticalOptions="FillAndExpand"
+                              
+                                     HorizontalOptions="CenterAndExpand">
+
+                                 <StackLayout Orientation="Vertical"
+                                              HorizontalOptions="StartAndExpand"
+                                              VerticalOptions="CenterAndExpand"
+                                              Padding="{StaticResource GridPadding}">
+                                    <Label Text="{Binding Name}"
+                                           HorizontalOptions="StartAndExpand"
+                                           VerticalOptions="Start" />
+                                    <Label Text="{Binding Id}"
+                                           HorizontalOptions="StartAndExpand"
+                                           VerticalOptions="Start" />
+
+                                    <Grid HorizontalOptions="FillAndExpand"
+                                          VerticalOptions="CenterAndExpand">
+                                       <Grid.ColumnDefinitions>
+                                          <ColumnDefinition />
+                                          <ColumnDefinition />
+                                          <ColumnDefinition />
+                                       </Grid.ColumnDefinitions>
+
+                                       <StackLayout Grid.Column="0"
+                                                    Orientation="Horizontal"
+                                                    VerticalOptions="Center"
+                                                    HorizontalOptions="Start">
+                                          <Button Command="{Binding RefreshValueCommand}"
+                                                  IsEnabled="{Binding CanRead}"
+                                                  Text="Read" />
+                                       </StackLayout>
+
+                                       <StackLayout Orientation="Horizontal"
+                                                    VerticalOptions="Center"
+                                                    HorizontalOptions="Center"
+                                                    Grid.Column="1">
+                                          <Label IsEnabled="{Binding CanNotify}"
+                                                 VerticalTextAlignment="Center"
+                                                 VerticalOptions="CenterAndExpand"
+                                                 Text="Notify:" />
+                                          <Switch IsToggled="{Binding Path=NotifyEnabled, Mode=TwoWay}"
+                                                  VerticalOptions="Center"
+                                                  IsEnabled="{Binding CanNotify}" />
+                                       </StackLayout>
+
+
+                                         <StackLayout Orientation="Horizontal" Margin="0,12,0,0"
+                                                    VerticalOptions="Center"
+                                                    HorizontalOptions="Center"
+                                                    Grid.Column="1">
+                                          <Label IsEnabled="{Binding CanIndicate}"
+                                                 VerticalTextAlignment="Center"
+                                                 VerticalOptions="CenterAndExpand"
+                                                 Text="Indicate:" />
+                                          <Switch IsToggled="{Binding Path=NotifyEnabled, Mode=TwoWay}"
+                                                  VerticalOptions="Center"
+                                                  IsEnabled="{Binding CanIndicate}" />
+                                       </StackLayout>
+
+                                                
+                                       <StackLayout Orientation="Horizontal"
+                                                    VerticalOptions="Center"
+                                                    HorizontalOptions="EndAndExpand"
+                                                    Grid.Column="2">
+                                          <Entry HorizontalOptions="StartAndExpand"
+                                                 Placeholder="Write Value"
+                                                 Text="{Binding WriteValue}" />
+                                          <Button Command="{Binding WriteBytesCommand}" Margin="-24,10,0,0"
+                                                  IsEnabled="{Binding CanWrite}"
+                                                  Text="Write" />
+                                       </StackLayout>
+
+                                    </Grid>
+
+                                    <Grid>
+                                       <Grid.ColumnDefinitions>
+                                          <ColumnDefinition Width="Auto" />
+                                          <ColumnDefinition Width="*" />
+                                       </Grid.ColumnDefinitions>
+                                       <Grid.RowDefinitions>
+                                          <RowDefinition Height="Auto" />
+                                          <RowDefinition Height="Auto" />
+                                    
+                                       </Grid.RowDefinitions>
+
+                                       <Label Grid.Column="0"
+                                              Grid.Row="0"
+                                              Text="Hex:"
+                                              FontAttributes="Bold" />
+                                       <Label Grid.Column="1"
+                                              Grid.Row="0"
+                                              Text="{Binding ValueAsHex}"
+                                              HorizontalOptions="StartAndExpand" />
+
+                                       <Label Grid.Column="0"
+                                              Grid.Row="1"
+                                              Text="UTF8:"
+                                              FontAttributes="Bold" />
+
+                                       <Label Grid.Column="1"
+                                              Grid.Row="1"
+                                              Text="{Binding ValueAsString}"
+                                              HorizontalOptions="StartAndExpand" />
+
+                           
+                                       
+                                    </Grid>
+
+                                 </StackLayout>
+                              </Frame>
+                           </ViewCell>
+                        </DataTemplate>
+                     </ListView.ItemTemplate>
+                  </ListView>
+
+                    
+
+               </StackLayout>
+                                
+
+
+                     <!-- NOT IMPORTANT  -->
+                     <!-- NOT IMPORTANT  -->
+                     <!-- NOT IMPORTANT  -->
+
+
+
+                    
+                            <StackLayout IsVisible="false">
+                          <Button Text="Start Scan" IsVisible="false" Command="{Binding ScanForDevicesCommand}" HorizontalOptions="Start" />
+                          <StackLayout Orientation="Horizontal"
+                               Padding="{StaticResource GridPadding}">
+                          <StackLayout HorizontalOptions="Start"
+                                  Orientation="Horizontal">
+                                <Label Text="Scanning"
+                                       IsVisible="{Binding IsScanning}"
+                                       VerticalOptions="Center" />
+                        <AbsoluteLayout IsVisible="{Binding IsScanning}">
+                           <ActivityIndicator IsRunning="{Binding IsScanning}">
+                              <ActivityIndicator.WidthRequest>
+                                 <OnPlatform x:TypeArguments="x:Double"
+                                             Android="40"
+                                             iOS="40"
+                                             WinPhone="100" />
+                              </ActivityIndicator.WidthRequest>
+                           </ActivityIndicator>
+                           <Label AbsoluteLayout.LayoutBounds=".5,.5,-1,-1"
+                                  AbsoluteLayout.LayoutFlags="PositionProportional"
+                                  Text="{Binding ScanTimeRemaining}" />
+                        </AbsoluteLayout>
+                        <Button Text="Start Scan"
+                                IsVisible="{Binding IsScanning, Converter={StaticResource InvertBoolean}}"
+                                Command="{Binding ScanForDevicesCommand}"
+                                HorizontalOptions="Start" />
                      </StackLayout>
-                  </Frame>
-               </ViewCell>
-            </DataTemplate>
-         </ListView.ItemTemplate>
-      </ListView>
+                    
+                     </StackLayout>
+                    </StackLayout>
+
+                     <!-- NOT IMPORTANT  -->
+                     <!-- NOT IMPORTANT  -->
+                     <!-- NOT IMPORTANT  -->
+
+                
+              </StackLayout>
+            
+         </Grid>
+            
+     </ContentView>
 
 
-   </StackLayout>
+
+
+
+
+
+        
 
 </util:BasePage>

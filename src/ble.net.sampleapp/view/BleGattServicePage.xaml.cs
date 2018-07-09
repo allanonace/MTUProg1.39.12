@@ -69,6 +69,12 @@ namespace ble.net.sampleapp.view
             cargarMTU();
            
 
+            NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
+
+            back_button.Tapped += returntomain;
+
+         
+
             Task.Run(async () =>
             {
 
@@ -105,7 +111,7 @@ namespace ble.net.sampleapp.view
                     Task.Run(async () =>
                     {
 
-                        await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
+                        await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
                         {
 
                             model_saved.Characteristic.RemoveAt(0);
@@ -134,7 +140,7 @@ namespace ble.net.sampleapp.view
                             Task.Run(async () =>
                             {
 
-                             await Task.Delay(1500); Device.BeginInvokeOnMainThread(() =>
+                             await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
                              {
 
                                  BleGattCharacteristicViewModel[] array = new BleGattCharacteristicViewModel[10];
@@ -223,6 +229,14 @@ namespace ble.net.sampleapp.view
 
                 });
             });
+        }
+
+        private void returntomain(object sender, EventArgs e)
+        {
+
+            Application.Current.MainPage.Navigation.PopAsync(); 
+
+
         }
 
         private void cargarValoresMTU(string identificador_int, string oneWayTx_int, string twoWayTx_int, string twoWayRx_int)
