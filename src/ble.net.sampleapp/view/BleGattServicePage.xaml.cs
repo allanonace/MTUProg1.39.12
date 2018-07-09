@@ -140,101 +140,102 @@ namespace ble.net.sampleapp.view
                                  BleGattCharacteristicViewModel[] array = new BleGattCharacteristicViewModel[10];
                                  model_saved.Characteristic.CopyTo(array, 0);
 
-                              
 
-                                 Byte [] value1 = array[0].ValueAsHexBytes;
 
-                                 int longitud = value1.Length ;
+                                 Byte[] value1 = array[0].ValueAsHexBytes;
+
+                                 int longitud = value1.Length;
 
                                  int contador = 0;
 
 
-                                 //List<Byte[]> listofbytes = new List<Byte[]>();
-                                    byte[] listTotal = new byte[1024];
+                                 byte[] listTotal = new byte[1024];
                                  int listTotalLength = 0;
                                  int cuantoDato = 0;
 
                                  while (contador < longitud)
                                  {
-                                        
-                                     byte[] array2= new byte[20];
+                                     byte[] array2 = new byte[20];
 
                                      Array.Copy(value1, contador, array2, 0, 20);
-
-                                     //listofbytes.Add(array2);
-                                        cuantoDato = array2[2];
+                       
+                                     cuantoDato = array2[2];
                                      if (cuantoDato > 0)
                                      {
-                                            Array.Copy(array2, 3, listTotal, listTotalLength, cuantoDato);
+                                         Array.Copy(array2, 3, listTotal, listTotalLength, cuantoDato);
                                          listTotalLength += cuantoDato;
                                      }
 
                                      contador = contador + 20;
-
                                  }
 
-                             
+
                                  //Identificador
                                  byte[] identificador = new byte[4];
                                  Array.Copy(listTotal, 6, identificador, 0, 4);
-                                 Array.Reverse(identificador, 0, identificador.Length);
-                                 string identificador_strhex = "0x" + identificador[0] + identificador[1] + identificador[2] + identificador[3];
-                                 long identificador_int = Convert.ToInt64(identificador_strhex, 16);
-      
-                                  
+                                
+                                 long identificador_valor = (long)(identificador[3] * Math.Pow(2, 24)
+                                                                    + identificador[2] * Math.Pow(2, 16)
+                                                                    + identificador[1] * Math.Pow(2, 8)
+                                                                    + identificador[0] * Math.Pow(2, 0));
+                                     
+                         
                                  //oneWayTx
                                  byte[] oneWayTx = new byte[4];
                                  Array.Copy(listTotal, 10, oneWayTx, 0, 4);
-                                 Array.Reverse(oneWayTx, 0, oneWayTx.Length);
-                                 string oneWayTx_strhex = "0x" + oneWayTx[0] + oneWayTx[1] + oneWayTx[2] + oneWayTx[3];
-                                 long oneWayTx_int = Convert.ToInt64(oneWayTx_strhex, 16);
-                                
+                          
 
+                                    long oneWayTx_valor = (long)(oneWayTx[3] * Math.Pow(2, 24)
+                                                               + oneWayTx[2] * Math.Pow(2, 16)
+                                                               + oneWayTx[1] * Math.Pow(2, 8)
+                                                               + oneWayTx[0] * Math.Pow(2, 0));
+                                    
+                                 
                                  //TwoWayTx
                                  byte[] TwoWayTx = new byte[4];
                                  Array.Copy(listTotal, 14, TwoWayTx, 0, 4);
-                                 Array.Reverse(TwoWayTx, 0, TwoWayTx.Length);
-                                 string TwoWayTx_strhex = "0x" + TwoWayTx[0] + TwoWayTx[1] + TwoWayTx[2] + TwoWayTx[3];
-                                 long TwoWayTx_int = Convert.ToInt64(TwoWayTx_strhex, 16);
-                                   
+                  
+                                 
+                                  long TwoWayTx_valor = (long)(TwoWayTx[3] * Math.Pow(2, 24)
+                                                               + TwoWayTx[2] * Math.Pow(2, 16)
+                                                               + TwoWayTx[1] * Math.Pow(2, 8)
+                                                               + TwoWayTx[0] * Math.Pow(2, 0));
+                               
                                  //TwoWayRx
                                  byte[] TwoWayRx = new byte[4];
                                  Array.Copy(listTotal, 18, TwoWayRx, 0, 4);
-                                 Array.Reverse(TwoWayRx, 0, TwoWayRx.Length);
-                                 string TwoWayRx_strhex = "0x" + TwoWayRx[0] + TwoWayRx[1] + TwoWayRx[2] + TwoWayRx[3];
-                                 long TwoWayRx_int = Convert.ToInt64(TwoWayRx_strhex, 16);
-
                                 
-                                   
+                               
+                                 long TwoWayRx_valor = (long)(TwoWayRx[3] * Math.Pow(2, 24)
+                                                               + TwoWayRx[2] * Math.Pow(2, 16)
+                                                               + TwoWayRx[1] * Math.Pow(2, 8)
+                                                               + TwoWayRx[0] * Math.Pow(2, 0));
+                               
                                  String listatotla = listTotal.EncodeToBase16String();
                                  valorHEX.Text = listatotla.Substring(0,listTotalLength*2);
 
-
-                                 cargarValoresMTU(identificador_int, oneWayTx_int, TwoWayTx_int, TwoWayRx_int);
+                                 cargarValoresMTU(identificador_valor.ToString(), oneWayTx_valor.ToString(), TwoWayTx_valor.ToString(), TwoWayRx_valor.ToString());
 
                              });
                          });
-                             
-
                         });
                     });
 
                 });
             });
-
         }
 
-        private void cargarValoresMTU(long identificador_int, long oneWayTx_int, long twoWayTx_int, long twoWayRx_int)
+        private void cargarValoresMTU(string identificador_int, string oneWayTx_int, string twoWayTx_int, string twoWayRx_int)
         {
             menuList = new List<ReadMTUItem>();
 
             // Creating our pages for menu navigation
             // Here you can define title for item, 
             // icon on the left side, and page that you want to open after selection
-            var page1 = new ReadMTUItem() { Title = "MTU Ser No.", Description = identificador_int.ToString() };
-            var page2 = new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = oneWayTx_int.ToString() };
-            var page3 = new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = twoWayTx_int.ToString() };
-            var page4 = new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = twoWayRx_int.ToString() };
+            var page1 = new ReadMTUItem() { Title = "MTU Ser No.", Description = Convert.ToString(identificador_int) };
+            var page2 = new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = Convert.ToString(oneWayTx_int) };
+            var page3 = new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = Convert.ToString(twoWayTx_int) };
+            var page4 = new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = Convert.ToString(twoWayRx_int) };
 
 
             // Adding menu items to menuList
