@@ -173,9 +173,24 @@ namespace ble.net.sampleapp.view
                                  //}
 
 
+                                 byte[] identificador = new byte[0];
 
+                                 Array.Copy(listTotal, 6, identificador, 0, 4);
+                                 Array.Reverse(identificador, 0, identificador.Length);
 
+                                 byte[] oneWayTx = new byte[0];
+                                 Array.Copy(listTotal, 10, oneWayTx, 0, 3);
+                                 Array.Reverse(oneWayTx, 0, oneWayTx.Length);
 
+                                 byte[] TwoWayTx = new byte[0];
+
+                                 Array.Copy(listTotal, 14, TwoWayTx, 0, 3);
+                                 Array.Reverse(TwoWayTx, 0, TwoWayTx.Length);
+
+                                 byte[] TwoWayRx = new byte[0];
+
+                                 Array.Copy(listTotal, 18, TwoWayRx, 0, 21);
+                                 Array.Reverse(TwoWayRx, 0, TwoWayRx.Length);
 
                                  String listatotla = listTotal.EncodeToBase16String();
                                  valorHEX.Text = listatotla.Substring(0,listTotalLength*2);

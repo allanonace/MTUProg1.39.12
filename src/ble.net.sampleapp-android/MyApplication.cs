@@ -77,7 +77,7 @@ namespace ble.net.sampleapp.android
       MainLauncher = false,
       Icon = "@drawable/icon",
       ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation )]
-   public class MainActivity : FormsAppCompatActivity
+    public class MainActivity : FormsApplicationActivity
    {
       /// <remarks>
       /// This must be implemented if you want to Subscribe() to IBluetoothLowEnergyAdapter.State to be notified when the
@@ -92,8 +92,8 @@ namespace ble.net.sampleapp.android
 
       protected override void OnCreate( Bundle bundle )
       {
-         TabLayoutResource = Resource.Layout.Tabbar;
-         ToolbarResource = Resource.Layout.Toolbar;
+         //TabLayoutResource = Resource.Layout.Tabbar;
+        // ToolbarResource = Resource.Layout.Toolbar;
 
          base.OnCreate( bundle );
 
