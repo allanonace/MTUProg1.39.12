@@ -172,7 +172,7 @@ namespace ble.net.sampleapp.view
 
                                  //Identificador
                                  byte[] identificador = new byte[4];
-                                 Array.Copy(listTotal, 6, identificador, 0, 4);
+                                 Array.Copy(listTotal, 6+5, identificador, 0, 4);
                                 
                                  long identificador_valor = (long)(identificador[3] * Math.Pow(2, 24)
                                                                     + identificador[2] * Math.Pow(2, 16)
@@ -182,7 +182,7 @@ namespace ble.net.sampleapp.view
                          
                                  //oneWayTx
                                  byte[] oneWayTx = new byte[4];
-                                 Array.Copy(listTotal, 10, oneWayTx, 0, 4);
+                                 Array.Copy(listTotal, 10+5, oneWayTx, 0, 4);
                           
 
                                     long oneWayTx_valor = (long)(oneWayTx[3] * Math.Pow(2, 24)
@@ -193,7 +193,7 @@ namespace ble.net.sampleapp.view
                                  
                                  //TwoWayTx
                                  byte[] TwoWayTx = new byte[4];
-                                 Array.Copy(listTotal, 14, TwoWayTx, 0, 4);
+                                 Array.Copy(listTotal, 14+5, TwoWayTx, 0, 4);
                   
                                  
                                   long TwoWayTx_valor = (long)(TwoWayTx[3] * Math.Pow(2, 24)
@@ -203,7 +203,7 @@ namespace ble.net.sampleapp.view
                                
                                  //TwoWayRx
                                  byte[] TwoWayRx = new byte[4];
-                                 Array.Copy(listTotal, 18, TwoWayRx, 0, 4);
+                                 Array.Copy(listTotal, 18+5, TwoWayRx, 0, 4);
                                 
                                
                                  long TwoWayRx_valor = (long)(TwoWayRx[3] * Math.Pow(2, 24)
