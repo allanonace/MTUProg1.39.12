@@ -6,6 +6,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
 using System.Threading.Tasks;
 using Acr.UserDialogs;
 using ble.net.sampleapp.viewmodel;
@@ -144,9 +146,7 @@ namespace ble.net.sampleapp.view
                                  }
 
                                  
-                                 
-
-
+                                
                                  //for (int i = 0; i < listofbytes.Count; i++)
                                  //{
                                      //byte[] array2 = new byte[18];
@@ -173,24 +173,38 @@ namespace ble.net.sampleapp.view
                                  //}
 
 
-                                 byte[] identificador = new byte[0];
-
+                                 //Identificador
+                                 byte[] identificador = new byte[4];
                                  Array.Copy(listTotal, 6, identificador, 0, 4);
                                  Array.Reverse(identificador, 0, identificador.Length);
+                                 string identificador_strhex = "0x" + identificador[0] + identificador[1] + identificador[2] + identificador[3];
+                                 int identificador_int = Convert.ToInt32(identificador_strhex, 16);
+      
 
-                                 byte[] oneWayTx = new byte[0];
-                                 Array.Copy(listTotal, 10, oneWayTx, 0, 3);
+                                 //oneWayTx
+                                 byte[] oneWayTx = new byte[4];
+                                 Array.Copy(listTotal, 10, oneWayTx, 0, 4);
                                  Array.Reverse(oneWayTx, 0, oneWayTx.Length);
+                                 string oneWayTx_strhex = "0x" + oneWayTx[0] + oneWayTx[1] + oneWayTx[2] + oneWayTx[3];
+                                 int oneWayTx_int = Convert.ToInt32(oneWayTx_strhex, 16);
+                                
 
-                                 byte[] TwoWayTx = new byte[0];
-
-                                 Array.Copy(listTotal, 14, TwoWayTx, 0, 3);
+                                 //TwoWayTx
+                                 byte[] TwoWayTx = new byte[4];
+                                 Array.Copy(listTotal, 14, TwoWayTx, 0, 4);
                                  Array.Reverse(TwoWayTx, 0, TwoWayTx.Length);
+                                 string TwoWayTx_strhex = "0x" + TwoWayTx[0] + TwoWayTx[1] + TwoWayTx[2] + TwoWayTx[3];
+                                 int TwoWayTx_int = Convert.ToInt32(TwoWayTx_strhex, 16);
 
-                                 byte[] TwoWayRx = new byte[0];
-
-                                 Array.Copy(listTotal, 18, TwoWayRx, 0, 21);
+                                 //TwoWayRx
+                                 byte[] TwoWayRx = new byte[4];
+                                 Array.Copy(listTotal, 18, TwoWayRx, 0, 4);
                                  Array.Reverse(TwoWayRx, 0, TwoWayRx.Length);
+                                 string TwoWayRx_strhex = "0x" + TwoWayRx[0] + TwoWayRx[1] + TwoWayRx[2] + TwoWayRx[3];
+                                 int TwoWayRx_int = Convert.ToInt32(TwoWayRx_strhex, 16);
+
+
+
 
                                  String listatotla = listTotal.EncodeToBase16String();
                                  valorHEX.Text = listatotla.Substring(0,listTotalLength*2);
