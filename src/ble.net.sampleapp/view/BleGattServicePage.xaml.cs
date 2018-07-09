@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Acr.UserDialogs;
+using ble.net.sampleapp.Models;
 using ble.net.sampleapp.viewmodel;
 using nexus.core.text;
 using nexus.protocols.ble;
@@ -29,7 +30,34 @@ namespace ble.net.sampleapp.view
 
         BleGattServiceViewModel model_saved;
 
+        public List<ReadMTUItem> menuList { get; set; }
 
+
+        private void cargarMTU(){
+
+
+            menuList = new List<ReadMTUItem>();
+
+            // Creating our pages for menu navigation
+            // Here you can define title for item, 
+            // icon on the left side, and page that you want to open after selection
+          
+            var page1 = new ReadMTUItem() { Title = "MTU Ser No.", Description = "-" };
+            var page2 = new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = "-" };
+            var page3 = new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = "-" };
+            var page4 = new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = "-" };
+
+
+            // Adding menu items to menuList
+            menuList.Add(page1);
+            menuList.Add(page2);
+            menuList.Add(page3);
+            menuList.Add(page4);
+
+            // Setting our list to be ItemSource for ListView in MainPage.xaml
+            listaMTUread.ItemsSource = menuList;
+
+        }
 
         public BleGattServicePage(BleGattServiceViewModel model, IBleGattServerConnection gattServer, IUserDialogs dialogs)
         {
@@ -38,7 +66,7 @@ namespace ble.net.sampleapp.view
 
             model_saved = model;
 
-           
+            cargarMTU();
            
 
             Task.Run(async () =>
@@ -145,48 +173,21 @@ namespace ble.net.sampleapp.view
 
                                  }
 
-                                 
-                                
-                                 //for (int i = 0; i < listofbytes.Count; i++)
-                                 //{
-                                     //byte[] array2 = new byte[18];
-
-                                     //Array.Copy(listofbytes[i], 2, array2, 0, 18);
-
-                                     //int cuantoDato = 0;
-
-                                     //cuantoDato = Convert.ToInt32(array2[0].ToString(), 16);
-
-                                     //byte[] arrayfinal = new byte[cuantoDato];
-
-                                     //Array.Copy(array2, 1, arrayfinal, 0, cuantoDato);
-
-                                     
-                                    //byte[] ret = new byte[listTotal.Length + arrayfinal.Length]; 
-
-                                    //Array.Copy(arrayfinal, 0, ret, 0, arrayfinal.Length);
-
-                                     //Array.Copy(arrayfinal, 0, listTotal, listTotalLength, arrayfinal.Length);
-                                     //listTotalLength += arrayfinal.Length;
-        
-
-                                 //}
-
-
+                             
                                  //Identificador
                                  byte[] identificador = new byte[4];
                                  Array.Copy(listTotal, 6, identificador, 0, 4);
                                  Array.Reverse(identificador, 0, identificador.Length);
                                  string identificador_strhex = "0x" + identificador[0] + identificador[1] + identificador[2] + identificador[3];
-                                 int identificador_int = Convert.ToInt32(identificador_strhex, 16);
+                                 long identificador_int = Convert.ToInt64(identificador_strhex, 16);
       
-
+                                  
                                  //oneWayTx
                                  byte[] oneWayTx = new byte[4];
                                  Array.Copy(listTotal, 10, oneWayTx, 0, 4);
                                  Array.Reverse(oneWayTx, 0, oneWayTx.Length);
                                  string oneWayTx_strhex = "0x" + oneWayTx[0] + oneWayTx[1] + oneWayTx[2] + oneWayTx[3];
-                                 int oneWayTx_int = Convert.ToInt32(oneWayTx_strhex, 16);
+                                 long oneWayTx_int = Convert.ToInt64(oneWayTx_strhex, 16);
                                 
 
                                  //TwoWayTx
@@ -194,180 +195,62 @@ namespace ble.net.sampleapp.view
                                  Array.Copy(listTotal, 14, TwoWayTx, 0, 4);
                                  Array.Reverse(TwoWayTx, 0, TwoWayTx.Length);
                                  string TwoWayTx_strhex = "0x" + TwoWayTx[0] + TwoWayTx[1] + TwoWayTx[2] + TwoWayTx[3];
-                                 int TwoWayTx_int = Convert.ToInt32(TwoWayTx_strhex, 16);
-
+                                 long TwoWayTx_int = Convert.ToInt64(TwoWayTx_strhex, 16);
+                                   
                                  //TwoWayRx
                                  byte[] TwoWayRx = new byte[4];
                                  Array.Copy(listTotal, 18, TwoWayRx, 0, 4);
                                  Array.Reverse(TwoWayRx, 0, TwoWayRx.Length);
                                  string TwoWayRx_strhex = "0x" + TwoWayRx[0] + TwoWayRx[1] + TwoWayRx[2] + TwoWayRx[3];
-                                 int TwoWayRx_int = Convert.ToInt32(TwoWayRx_strhex, 16);
+                                 long TwoWayRx_int = Convert.ToInt64(TwoWayRx_strhex, 16);
 
-
-
-
+                                
+                                   
                                  String listatotla = listTotal.EncodeToBase16String();
                                  valorHEX.Text = listatotla.Substring(0,listTotalLength*2);
-       /*
 
 
-                                String listadoDatos = "";
-
-
-                                    for (int i = 0; i < listofstrings.Count; i++)
-                                {
-                                     String valorPosicion = listofstrings[i].ToString();
-
-                                     valorPosicion = valorPosicion.Substring(4, 36);
-
-                                     int cuantoDato = 0;
-
-                                     cuantoDato =  Convert.ToInt32(valorPosicion.Substring(0, 2), 16);
-
-                                     //cuantoDato = Int32.Parse(valorPosicion.Substring(0, 2));
-
-                                     cuantoDato = cuantoDato * 2;
-
-                                     valorPosicion = valorPosicion.Substring(2, 34);
-
-                                     valorPosicion = valorPosicion.Substring(0, cuantoDato);
-
-                                     listadoDatos = listadoDatos + valorPosicion;
-
-                                }
-
-
-                                 String pruebavalor = listadoDatos.ToString();
-
-                               
-
-
-                                   valorHEX.Text = pruebavalor;
-                                   
-                            */
+                                 cargarValoresMTU(identificador_int, oneWayTx_int, TwoWayTx_int, TwoWayRx_int);
 
                              });
                          });
-
-
-
-                           
-                           
+                             
 
                         });
                     });
 
-
                 });
             });
-
 
         }
-                   
+
+        private void cargarValoresMTU(long identificador_int, long oneWayTx_int, long twoWayTx_int, long twoWayRx_int)
+        {
+            menuList = new List<ReadMTUItem>();
+
+            // Creating our pages for menu navigation
+            // Here you can define title for item, 
+            // icon on the left side, and page that you want to open after selection
+            var page1 = new ReadMTUItem() { Title = "MTU Ser No.", Description = identificador_int.ToString() };
+            var page2 = new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = oneWayTx_int.ToString() };
+            var page3 = new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = twoWayTx_int.ToString() };
+            var page4 = new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = twoWayRx_int.ToString() };
 
 
+            // Adding menu items to menuList
+            menuList.Add(page1);
+            menuList.Add(page2);
+            menuList.Add(page3);
+            menuList.Add(page4);
 
 
-            /*
-            Guid ServicioRead = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
-            Guid CaracterisicoRead = new Guid("00000003-0000-1000-8000-00805f9b34fb");
+            // Setting our list to be ItemSource for ListView in MainPage.xaml
+            listaMTUread.ItemsSource = menuList;
+        }
 
+     
 
-
-
-            // String valorDato = "000005258000015a";
-
-            BleGattCharacteristicViewModel gattCharacteristicViewModelRead = new BleGattCharacteristicViewModel(ServicioRead, CaracterisicoRead, gattServer, dialogs);
-
-            var viewModelRead = (BleGattCharacteristicViewModel)gattCharacteristicViewModelRead;
-
-            if (viewModelRead.ToggleNotificationsCommand.CanExecute(null))
-                viewModelRead.ToggleNotificationsCommand.Execute(null);
-
-
-            gattServer.NotifyCharacteristicValue(ServicioRead, CaracterisicoRead, bytes => {
-                String value = bytes.ToString();
-            });
-
-
-
-
-            Task.Run(async () =>
-            {
-
-                await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
-                {
-
-
-                    Guid Servicio = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
-                    Guid Caracterisico = new Guid("00000002-0000-1000-8000-00805f9b34fb");
-                    // String valorDato = "000005258000015a";
-
-                    BleGattCharacteristicViewModel gattCharacteristicViewModel = new BleGattCharacteristicViewModel(Servicio, Caracterisico, gattServer, dialogs);
-
-                    var viewModel = (BleGattCharacteristicViewModel)gattCharacteristicViewModel;
-                    if (viewModel.WriteCurrentBytesGUIDCommand.CanExecute(null))
-                        viewModel.WriteCurrentBytesGUIDCommand.Execute(null);
-
-
-                    Task.Run(async () =>
-                    {
-
-                        await Task.Delay(1500); Device.BeginInvokeOnMainThread(() =>
-                        {
-                            Guid ServicioRead2 = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
-                            Guid CaracterisicoRead2 = new Guid("00000003-0000-1000-8000-00805f9b34fb");
-
-                            // String valorDato = "000005258000015a";
-
-                            BleGattCharacteristicViewModel gattCharacteristicViewModelRead2 = new BleGattCharacteristicViewModel(ServicioRead2, CaracterisicoRead2, gattServer, dialogs);
-
-                            var viewModelRead2 = (BleGattCharacteristicViewModel)gattCharacteristicViewModelRead2;
-
-                     
-
-                            String valueRead2 = viewModelRead2.getValuehex();
-
-                        });
-                    });
-
-                   
-
-
-
-
-                });
-            });
-
-
-
-            /*
-            Task.Run(async () =>
-            {
-
-                await Task.Delay(2500); Device.BeginInvokeOnMainThread(() =>
-                {
-                    BleGattCharacteristicViewModel[] array = new BleGattCharacteristicViewModel[10];
-
-                    //model_saved.Characteristic.Add.SetValue("000005258000015a");
-
-                    model_saved.Characteristic.CopyTo(array, 0);
-
-                    String value1 = array[0].ValueAsHex;
-                    String value2 = array[1].ValueAsHex;
-
-                });
-            });
-
-     */
-      
-
-       // WriteCurrentBytesGUID(Guid Servicio, Guid Caracterisico, String valorDato)
-
-
-    
-
-      private void OnItemSelected( Object sender, SelectedItemChangedEventArgs e )
+        private void OnItemSelected( Object sender, SelectedItemChangedEventArgs e )
       {
          ((ListView)sender).SelectedItem = null;
 
