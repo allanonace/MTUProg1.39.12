@@ -618,11 +618,18 @@
                               SeparatorColor="#6ba2b7"
                                                   
                               BackgroundColor="White"
-                              ItemSelected="OnMenuItemSelectedAsync"
 
 
-                        
-                           > 
+
+
+                               ItemSelected="OnMenuItemSelectedAsync"
+
+
+                           >
+
+                      
+
+                            
                       <ListView.ItemTemplate >
                         <DataTemplate>
                           <ViewCell  >

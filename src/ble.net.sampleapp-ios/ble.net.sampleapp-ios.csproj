@@ -52,6 +52,8 @@
     <IOSDebuggerPort>10000</IOSDebuggerPort>
     <MtouchLink>SdkOnly</MtouchLink>
     <MtouchFastDev>true</MtouchFastDev>
+    <BuildIpa>true</BuildIpa>
+    <CodesignProvision>iOS Team Provisioning Profile: *</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <DebugType>none</DebugType>

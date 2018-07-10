@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14113" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="X5k-f2-b5h">
-    <device id="retina4_7" orientation="portrait">
+    <device id="ipad9_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
@@ -19,21 +19,36 @@
                         <viewControllerLayoutGuide type="bottom" id="9ZL-r4-8FZ"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="yd7-JS-zBw">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" image="aclara_logo_login.png" translatesAutoresizingMaskIntoConstraints="NO" id="23">
-                                <rect key="frame" x="28" y="-4" width="331" height="671"/>
-                                <rect key="contentStretch" x="0.0" y="0.0" width="0.0" height="0.0"/>
-                            </imageView>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="WnE-99-1Xt">
+                                <rect key="frame" x="20" y="20" width="728" height="1004"/>
+                                <subviews>
+                                    <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" image="aclara_logo_login.png" translatesAutoresizingMaskIntoConstraints="NO" id="23">
+                                        <rect key="frame" x="222.5" y="314.5" width="283" height="375"/>
+                                        <rect key="contentStretch" x="0.0" y="0.0" width="0.0" height="0.0"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="283" id="Q9d-ew-2Nr"/>
+                                            <constraint firstAttribute="height" constant="375" id="clW-iU-G3P"/>
+                                        </constraints>
+                                        <edgeInsets key="layoutMargins" top="12" left="12" bottom="12" right="12"/>
+                                    </imageView>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="23" firstAttribute="centerY" secondItem="WnE-99-1Xt" secondAttribute="centerY" id="8Mc-DO-90U"/>
+                                    <constraint firstItem="23" firstAttribute="centerX" secondItem="WnE-99-1Xt" secondAttribute="centerX" id="9bz-lp-NOn"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="23" firstAttribute="leading" secondItem="yd7-JS-zBw" secondAttribute="leadingMargin" constant="12" id="0jT-Cc-2HA"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="23" secondAttribute="trailing" id="b2W-5B-WW5"/>
-                            <constraint firstItem="9ZL-r4-8FZ" firstAttribute="top" secondItem="23" secondAttribute="bottom" id="y7n-LH-rWq"/>
-                            <constraint firstItem="23" firstAttribute="top" secondItem="Y8P-hJ-Z43" secondAttribute="bottom" constant="-24" id="zbk-IH-cS9"/>
+                            <constraint firstItem="WnE-99-1Xt" firstAttribute="leading" secondItem="yd7-JS-zBw" secondAttribute="leadingMargin" id="6JD-8f-puU"/>
+                            <constraint firstItem="9ZL-r4-8FZ" firstAttribute="top" secondItem="WnE-99-1Xt" secondAttribute="bottom" id="MKe-th-Xjc"/>
+                            <constraint firstItem="WnE-99-1Xt" firstAttribute="top" secondItem="Y8P-hJ-Z43" secondAttribute="bottom" id="YfS-hh-7Rs"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="WnE-99-1Xt" secondAttribute="trailing" id="pt4-ff-37i"/>
                         </constraints>
                     </view>
                 </viewController>

@@ -6,6 +6,7 @@ using ble.net.sampleapp.Helpers;
 using ble.net.sampleapp.view;
 using nexus.protocols.ble;
 using Acr.UserDialogs;
+using System.Threading.Tasks;
 
 namespace ble.net.sampleapp.viewmodel
 {
@@ -14,6 +15,7 @@ namespace ble.net.sampleapp.viewmodel
         #region Commands
         public INavigation Navigation { get; set; }
         public ICommand LoginCommand { get; set; }
+        public ICommand LoadCommand { get; set; }
         #endregion
 
         #region Properties
@@ -43,14 +45,34 @@ namespace ble.net.sampleapp.viewmodel
             dialogs_save = dialogs;
 
             LoginCommand = new Command(Login);
+            LoadCommand = new Command(load);
 
+            Task.Run(async () =>
+            {
 
+                await Task.Delay(500); Device.BeginInvokeOnMainThread(() =>
+                {
+                    LoadCommand.Execute(null);
+                });
+            });
+
+         
 
         }
 
+        public void load()
+        {
 
+            if (Settings.IsLoggedIn == true)
+            {
+                Application.Current.MainPage = new NavigationPage(new BleDeviceScannerPage(bleAdapter_save, dialogs_save));
+            }
+
+
+        }
         public async void Login()
         {
+            
             IsBusy = true;
             Title = string.Empty;
             try

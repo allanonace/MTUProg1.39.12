@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ServiceModel.Channels;
+using System.Threading.Tasks;
 using Acr.UserDialogs;
+using ble.net.sampleapp.Helpers;
 using ble.net.sampleapp.viewmodel;
 using nexus.protocols.ble;
 using Xamarin.Forms;
@@ -24,8 +26,23 @@ namespace ble.net.sampleapp.view
         {
             InitializeComponent();
 
+           
             BindingContext = viewModel = new viewmodel.LoginMenuViewModel(bleAdapter, dialogs);
             viewModel.Navigation = this.Navigation;
+
+
+            loginpage.IsVisible = false;
+
+            Task.Run(async () =>
+            {
+
+                await Task.Delay(505); Device.BeginInvokeOnMainThread(() =>
+                {
+                    loginpage.IsVisible = true;
+                });
+            });
+          
+
         }
 
 

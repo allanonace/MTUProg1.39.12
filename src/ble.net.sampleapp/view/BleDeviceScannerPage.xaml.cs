@@ -20,6 +20,7 @@ using Xamarin.Forms;
 
 namespace ble.net.sampleapp.view
 {
+    
    public partial class BleDeviceScannerPage
    {
        // Desconectar device
@@ -155,6 +156,8 @@ namespace ble.net.sampleapp.view
         }
 
 
+
+
       public List<PageItem> menuList { get; set; }
 
 
@@ -245,8 +248,56 @@ namespace ble.net.sampleapp.view
 
 
 
-
+           
         }
+
+
+  
+        protected override void OnSizeAllocated(double width, double height)
+        {
+            base.OnSizeAllocated(width, height); //must be called
+
+            if (width > height) {
+                // landscape
+
+                Task.Run(async () =>
+                {
+
+                    await Task.Delay(500); Device.BeginInvokeOnMainThread(() =>
+                    {
+                        ContentNav.IsVisible = true;
+                        background_scan_page.Opacity = 1;
+                        background_scan_page_detail.Opacity = 1;
+                        close_menu_icon.IsVisible = false;
+                        hamburger_icon.IsVisible = false;
+                        hamburger_icon_detail.IsVisible = false;
+
+                        //back_button_menu.
+                    });
+                });
+
+               
+
+            } else {
+              // portrait
+                Task.Run(async () =>
+                {
+
+                    await Task.Delay(500); Device.BeginInvokeOnMainThread(() =>
+                    {
+                        //ContentNav.IsVisible = false;
+                        close_menu_icon.IsVisible = true;
+                        hamburger_icon.IsVisible = true;
+                        hamburger_icon_detail.IsVisible = true;
+
+                    });
+                });
+
+               
+            }
+        } 
+
+
 
         private void bleDisconnect(object sender, EventArgs e)
         {
