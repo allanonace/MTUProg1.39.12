@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Acr.UserDialogs;
@@ -87,11 +88,10 @@ namespace ble.net.sampleapp.view
                 {
                     await bleGattServerViewModel.Update(p);
 
-                    background_scan_page_detail.IsEnabled = true;
                     background_scan_page_detail.IsVisible = true;
 
 
-                    background_scan_page.IsEnabled = false;
+                  
                     background_scan_page.IsVisible = false;
 
 
@@ -104,25 +104,7 @@ namespace ble.net.sampleapp.view
                     deviceID.Text = p.Name;
                     rssiLevel.Text = p.Rssi.ToString() + " db";
 
-
-                    // m_bleServiceSelected;
-
-                    /*
-                        await Application.Current.MainPage.Navigation.PushAsync(
-                               new BleGattServerPage(
-                                  model: bleGattServerViewModel,
-                                    bleServiceSelected: async s =>
-                                    {
-
-                                        await Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(s));
-                                        // LOGICA DE LA VISTA DETALLADA
-
-                                    }
-                                )
-                            );
-
-                    */
-
+                  
               
 
                     
@@ -141,27 +123,9 @@ namespace ble.net.sampleapp.view
                              navigationDrawerList.Opacity = 1;
 
                              bleGattServerViewModel.returnConnect();
-                        /*
-                        await Task.Run(async () =>
-                        {
-                            await Task.Delay(1500); Device.BeginInvokeOnMainThread(() =>
-                            {
-
-                                Guid value = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
-                                BleGattServiceViewModel account = new BleGattServiceViewModel(value, bleGattServerViewModel.returnConnect(), dialogsSaved);
-                                Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account, bleGattServerViewModel.returnConnect(), dialogsSaved));
-                            });
-                        });*/
+                      
                              savedServer = bleGattServerViewModel;
                          
-                        // public BleGattServiceViewModel( Guid service, IBleGattServerConnection gattServer, IUserDialogs dialogManager )
-     
-
-              //  
-                   
-
-
-
 
 
                          });
@@ -199,6 +163,10 @@ namespace ble.net.sampleapp.view
         BleDeviceScannerViewModel bleScanViewModel;
 
         public List<ReadMTUItem> menuListReadMTU { get; set; }
+
+
+
+
         public BleDeviceScannerPage(IBluetoothLowEnergyAdapter bleAdapter, IUserDialogs dialogs )
         {
 
@@ -207,6 +175,10 @@ namespace ble.net.sampleapp.view
 
             bleAdapterSaved = bleAdapter;
             dialogsSaved = dialogs;
+
+            disconnectDevice.Clicked += bleDisconnect;
+
+
 
             connection();
 
@@ -218,12 +190,16 @@ namespace ble.net.sampleapp.view
             back_button_detail.Tapped += hamburgerOpen;
 
 
-            navigationDrawerList.Opacity = 0.65;
+           
 
             navigationDrawerList.IsEnabled = false;
 
+            navigationDrawerList.Opacity = 0.65;
+
+           
+
             ContentNav.IsVisible = false;
-            ContentNav.IsEnabled = true;
+
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
 
@@ -270,43 +246,42 @@ namespace ble.net.sampleapp.view
 
 
 
-
-
-
-            menuListReadMTU = new List<ReadMTUItem>();
-
-            // Creating our pages for menu navigation
-            // Here you can define title for item, 
-            // icon on the left side, and page that you want to open after selection
-
-            var page1read = new ReadMTUItem() { Title = "MTU Ser No.", Description = "-" };
-            var page2read = new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = "-" };
-            var page3read = new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = "-" };
-            var page4read = new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = "-" };
-
-
-            // Adding menu items to menuList
-            menuListReadMTU.Add(page1read);
-            menuListReadMTU.Add(page2read);
-            menuListReadMTU.Add(page3read);
-            menuListReadMTU.Add(page4read);
-
-            // Setting our list to be ItemSource for ListView in MainPage.xaml
-            listREADMTU.ItemsSource = menuListReadMTU;
-
-
-
-
         }
 
+        private void bleDisconnect(object sender, EventArgs e)
+        {
+           
+            ((BleGattServerViewModel)BindingContext).DisconnectFromDeviceCommand.Execute(null);
 
+         
+            background_scan_page_detail.IsVisible = false;
+
+            navigationDrawerList.Opacity = 0.65;
+            navigationDrawerList.IsEnabled = false;
+         
+            background_scan_page.IsVisible = true;
+
+            connection();
+           
+
+
+
+        
+        }
 
         private void logout(object sender, EventArgs e)
         {
             Settings.IsLoggedIn = false;
-            Application.Current.MainPage = new LoginMenuPage(bleAdapterSaved,dialogsSaved );
-
-         
+            try
+            {
+                ((BleGattServerViewModel)BindingContext).DisconnectFromDeviceCommand.Execute(null);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Exception Message: " + ex.Message);
+            }
+           
+            Application.Current.MainPage = new LoginMenuPage(bleAdapterSaved, dialogsSaved);
 
 
         }
@@ -347,7 +322,7 @@ namespace ble.net.sampleapp.view
               
 
                                  ContentNav.IsVisible = false;
-                                 ContentNav.IsEnabled = true;
+                                
 
                                  navigationDrawerList.SelectedItem = null;
                                  navigationDrawerList.BeginRefresh();
@@ -370,7 +345,7 @@ namespace ble.net.sampleapp.view
 
                 ContentNav.Opacity = 0;
 
-                ContentNav.IsEnabled = true;
+          
                 ContentNav.IsVisible = false;
                 
 
@@ -388,197 +363,12 @@ namespace ble.net.sampleapp.view
 
         }
 
-        private void ReadMtuMethod(BleGattServiceViewModel model, BleGattServerViewModel gattServer, IUserDialogs dialogs)
-        {
-            BindingContext = model;
-
-            model_saved = model;
-
-
-
-            Task.Run(async () =>
-            {
-
-                await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
-                {
-
-                    model_saved.Characteristic.RemoveAt(0);
-
-
-
-
-                    Guid ServicioIndicate = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
-                    Guid CaracterisicoIndicate = new Guid("00000003-0000-1000-8000-00805f9b34fb");
-
-                    BleGattCharacteristicViewModel gattCharacteristicViewModelIndicate = new BleGattCharacteristicViewModel(ServicioIndicate, CaracterisicoIndicate, gattServer.returnConnect(), dialogs);
-
-                    var viewModelIndicate = (BleGattCharacteristicViewModel)gattCharacteristicViewModelIndicate;
-
-                    if (viewModelIndicate.EnableNotificationsCommand.CanExecute(null))
-                        viewModelIndicate.EnableNotificationsCommand.Execute(null);
-
-
-
-                    model_saved.Characteristic.Add(gattCharacteristicViewModelIndicate);
-
-                    BindingContext = model_saved;
-
-                    listREADMTU.BeginRefresh();
-
-                    listREADMTU.EndRefresh();
-
-
-
-                    Task.Run(async () =>
-                    {
-
-                        await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
-                        {
-
-                            model_saved.Characteristic.RemoveAt(0);
-
-                            Guid ServicioWrite = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
-                            Guid CaracterisicoWrite = new Guid("00000002-0000-1000-8000-00805f9b34fb");
-                            // String valorDato = "000005258000015a";
-
-                            BleGattCharacteristicViewModel gattCharacteristicViewModelWrite = new BleGattCharacteristicViewModel(ServicioWrite, CaracterisicoWrite, gattServer.returnConnect(), dialogs);
-
-                            var viewModelWrite = (BleGattCharacteristicViewModel)gattCharacteristicViewModelWrite;
-                            if (viewModelWrite.WriteCurrentBytesGUIDCommand.CanExecute(null))
-                                viewModelWrite.WriteCurrentBytesGUIDCommand.Execute(null);
-
-
-
-                            model_saved.Characteristic.Add(gattCharacteristicViewModelWrite);
-
-                            BindingContext = model_saved;
-
-                            listREADMTU.BeginRefresh();
-
-                            listREADMTU.EndRefresh();
-
-
-                            Task.Run(async () =>
-                            {
-
-                                await Task.Delay(1500); Device.BeginInvokeOnMainThread(() =>
-                                {
-
-                                    BleGattCharacteristicViewModel[] array = new BleGattCharacteristicViewModel[10];
-                                    model_saved.Characteristic.CopyTo(array, 0);
-
-
-
-                                    Byte[] value1 = array[0].ValueAsHexBytes;
-
-                                    int longitud = value1.Length;
-
-                                    int contador = 0;
-
-
-                                    byte[] listTotal = new byte[1024];
-                                    int listTotalLength = 0;
-                                    int cuantoDato = 0;
-
-                                    while (contador < longitud)
-                                    {
-                                        byte[] array2 = new byte[20];
-
-                                        Array.Copy(value1, contador, array2, 0, 20);
-
-                                        cuantoDato = array2[2];
-                                        if (cuantoDato > 0)
-                                        {
-                                            Array.Copy(array2, 3, listTotal, listTotalLength, cuantoDato);
-                                            listTotalLength += cuantoDato;
-                                        }
-
-                                        contador = contador + 20;
-                                    }
-
-
-                                    //Identificador
-                                    byte[] identificador = new byte[4];
-                                    Array.Copy(listTotal, 6 + 5, identificador, 0, 4);
-
-                                    long identificador_valor = (long)(identificador[3] * Math.Pow(2, 24)
-                                                                       + identificador[2] * Math.Pow(2, 16)
-                                                                       + identificador[1] * Math.Pow(2, 8)
-                                                                       + identificador[0] * Math.Pow(2, 0));
-
-
-                                    //oneWayTx
-                                    byte[] oneWayTx = new byte[4];
-                                    Array.Copy(listTotal, 10 + 5, oneWayTx, 0, 4);
-
-
-                                    long oneWayTx_valor = (long)(oneWayTx[3] * Math.Pow(2, 24)
-                                                               + oneWayTx[2] * Math.Pow(2, 16)
-                                                               + oneWayTx[1] * Math.Pow(2, 8)
-                                                               + oneWayTx[0] * Math.Pow(2, 0));
-
-
-                                    //TwoWayTx
-                                    byte[] TwoWayTx = new byte[4];
-                                    Array.Copy(listTotal, 14 + 5, TwoWayTx, 0, 4);
-
-
-                                    long TwoWayTx_valor = (long)(TwoWayTx[3] * Math.Pow(2, 24)
-                                                                 + TwoWayTx[2] * Math.Pow(2, 16)
-                                                                 + TwoWayTx[1] * Math.Pow(2, 8)
-                                                                 + TwoWayTx[0] * Math.Pow(2, 0));
-
-                                    //TwoWayRx
-                                    byte[] TwoWayRx = new byte[4];
-                                    Array.Copy(listTotal, 18 + 5, TwoWayRx, 0, 4);
-
-
-                                    long TwoWayRx_valor = (long)(TwoWayRx[3] * Math.Pow(2, 24)
-                                                                  + TwoWayRx[2] * Math.Pow(2, 16)
-                                                                  + TwoWayRx[1] * Math.Pow(2, 8)
-                                                                  + TwoWayRx[0] * Math.Pow(2, 0));
-                                    
-                                    cargarValoresMTU(identificador_valor.ToString(), oneWayTx_valor.ToString(), TwoWayTx_valor.ToString(), TwoWayRx_valor.ToString());
-
-                                });
-                            });
-                        });
-                    });
-
-                });
-            });
-        }
-
-
-        private void cargarValoresMTU(string identificador_int, string oneWayTx_int, string twoWayTx_int, string twoWayRx_int)
-        {
-            menuListReadMTU = new List<ReadMTUItem>();
-
-            // Creating our pages for menu navigation
-            // Here you can define title for item, 
-            // icon on the left side, and page that you want to open after selection
-            var page1read = new ReadMTUItem() { Title = "MTU Ser No.", Description = Convert.ToString(identificador_int) };
-            var page2read = new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = Convert.ToString(oneWayTx_int) };
-            var page3read = new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = Convert.ToString(twoWayTx_int) };
-            var page4read = new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = Convert.ToString(twoWayRx_int) };
-
-
-            // Adding menu items to menuList
-            menuListReadMTU.Add(page1read);
-            menuListReadMTU.Add(page2read);
-            menuListReadMTU.Add(page3read);
-            menuListReadMTU.Add(page4read);
-
-
-            // Setting our list to be ItemSource for ListView in MainPage.xaml
-            listREADMTU.ItemsSource = menuListReadMTU;
-        }
 
 
         private void hamburgerOpen(object sender, EventArgs e)
         {
             ContentNav.IsVisible = true;
-            ContentNav.IsEnabled = true;
+         
             background_scan_page.Opacity = 0.5;
             background_scan_page_detail.Opacity = 0.5;
             ContentNav.Opacity = 1;
@@ -599,7 +389,7 @@ namespace ble.net.sampleapp.view
               
 
             ContentNav.IsVisible = false;
-            ContentNav.IsEnabled = true;
+          
             
 
 
