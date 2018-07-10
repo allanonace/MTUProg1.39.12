@@ -243,13 +243,18 @@ namespace ble.net.sampleapp.view
         {
             menuList = new List<ReadMTUItem>();
 
+
+ 
+
+
+
             // Creating our pages for menu navigation
             // Here you can define title for item, 
             // icon on the left side, and page that you want to open after selection
             var page1 = new ReadMTUItem() { Title = "MTU Ser No.", Description = Convert.ToString(identificador_int) };
-            var page2 = new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = Convert.ToString(oneWayTx_int) };
-            var page3 = new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = Convert.ToString(twoWayTx_int) };
-            var page4 = new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = Convert.ToString(twoWayRx_int) };
+            var page2 = new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = Convert.ToString(double.Parse(oneWayTx_int) / 1000000) };
+            var page3 = new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = Convert.ToString(double.Parse(twoWayTx_int) / 1000000) };
+            var page4 = new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = Convert.ToString(double.Parse(twoWayRx_int) / 1000000) };
 
 
             // Adding menu items to menuList
