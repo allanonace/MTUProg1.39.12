@@ -82,9 +82,9 @@ namespace ble.net.sampleapp.view
 
                              background_scan_page.IsVisible = false;
                           
-                             await background_scan_page_detail.FadeTo(0, 10);
+                             //await background_scan_page_detail.FadeTo(0, 10);
 
-                             await background_scan_page_detail.FadeTo(1, 1500);
+                             //await background_scan_page_detail.FadeTo(1, 1500);
 
                              await bleGattServerViewModel.OpenConnection();
 
@@ -323,7 +323,7 @@ namespace ble.net.sampleapp.view
 
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
-        private async Task OnMenuItemSelectedAsync(object sender, SelectedItemChangedEventArgs e)
+        private async void OnMenuItemSelectedAsync(object sender, SelectedItemChangedEventArgs e)
         {
 
            // if (Settings.IsConnectedBLE)
