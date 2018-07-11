@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="ble.net.sampleapp.view.MyPage">
     <ContentPage.Content>
 
-      <ContentView  IsVisible="true" x:Name="background_scan_page_detail"   
+      <ContentView Margin="0,0,0,0"  IsVisible="true" x:Name="background_scan_page_detail"   
             RelativeLayout.XConstraint=
               "{ConstraintExpression Type=RelativeToParent,
                                      Property=Width,
@@ -52,7 +52,7 @@
 
 
 
-                                    <Image  WidthRequest="150" 
+                                    <Image  WidthRequest="150"  
                                             HeightRequest="64"
                                             Margin="0,12,0,0" 
                                             Scale="1" 

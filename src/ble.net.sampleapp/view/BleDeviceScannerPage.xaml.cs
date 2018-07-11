@@ -89,11 +89,7 @@ namespace ble.net.sampleapp.view
                 {
                     await bleGattServerViewModel.Update(p);
 
-                    background_scan_page_detail.IsVisible = true;
 
-
-                  
-                    background_scan_page.IsVisible = false;
 
 
                     BindingContext = bleGattServerViewModel;
@@ -116,7 +112,12 @@ namespace ble.net.sampleapp.view
                          await Task.Delay(500); Device.BeginInvokeOnMainThread(async () =>
                          {
                         
-                             
+                             background_scan_page_detail.IsVisible = true;
+
+
+
+                             background_scan_page.IsVisible = false;
+
                              await bleGattServerViewModel.OpenConnection();
 
                              navigationDrawerList.IsEnabled = true;
@@ -181,6 +182,8 @@ namespace ble.net.sampleapp.view
 
             disconnectDevice.Clicked += bleDisconnect;
 
+            background_scan_page_detail.IsVisible = false;
+            background_scan_page.IsVisible = true;
 
 
             connection();
@@ -268,9 +271,14 @@ namespace ble.net.sampleapp.view
                         ContentNav.IsVisible = true;
                         background_scan_page.Opacity = 1;
                         background_scan_page_detail.Opacity = 1;
-                        close_menu_icon.IsVisible = false;
+                        close_menu_icon.Opacity = 0;
                         hamburger_icon.IsVisible = false;
                         hamburger_icon_detail.IsVisible = false;
+
+                        background_scan_page.Margin = new Thickness(310, 0, 0, 0);
+                        background_scan_page_detail.Margin = new Thickness(310, 0, 0, 0);
+                        aclara_detail_logo.IsVisible = false;
+                        aclara_logo.IsVisible = false;
 
                         //back_button_menu.
                     });
@@ -286,9 +294,17 @@ namespace ble.net.sampleapp.view
                     await Task.Delay(500); Device.BeginInvokeOnMainThread(() =>
                     {
                         //ContentNav.IsVisible = false;
-                        close_menu_icon.IsVisible = true;
+                        background_scan_page.Margin = new Thickness(0, 0, 0, 0);
+                        background_scan_page_detail.Margin = new Thickness(0, 0, 0, 0);
+
+                        close_menu_icon.Opacity = 1;
                         hamburger_icon.IsVisible = true;
                         hamburger_icon_detail.IsVisible = true;
+
+                        aclara_detail_logo.IsVisible = true;
+                        aclara_logo.IsVisible = true;
+
+
 
                     });
                 });
