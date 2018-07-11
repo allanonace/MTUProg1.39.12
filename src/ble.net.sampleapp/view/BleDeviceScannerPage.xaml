@@ -110,8 +110,17 @@
                   </StackLayout>
 
 
-                  <Button   Margin="260,12,10,-48" x:Name="disconnectDevice"  HeightRequest="64" Image="icon_button_ble_detail.png"    ></Button>
+               
 
+               <Image   HeightRequest="64"    Margin="260,12,10,-48"      Source="icon_button_ble_detail.png"      >
+
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer x:Name="disconnectDevice"  NumberOfTapsRequired="1" />
+                    </Image.GestureRecognizers>       
+                    
+                </Image>
+
+                    
                   <StackLayout  Margin="0,36,0,0" Orientation="Horizontal" HorizontalOptions="CenterAndExpand" Scale="0.95" >
                         <RelativeLayout  Scale="1" HorizontalOptions="Center">
                            
@@ -354,8 +363,7 @@
                   </StackLayout>
                 
                   <ListView ItemsSource="{Binding FoundDevices}" x:Name="listBLEs"
-                            ItemTapped="ListView_OnItemTapped"
-                            ItemSelected="ListView_OnItemSelected"
+                            ItemTapped="ListView_OnItemTapped" ItemSelected="ListView_OnItemSelected"
                             HasUnevenRows="true"
                             RowHeight="170"
                             SeparatorColor="#aaaaaa"
@@ -434,14 +442,24 @@
                                                HorizontalOptions="Start"
                                                IsEnabled="false"
                                                VerticalOptions="Center" />
-                                       <Button Text="" WidthRequest="1000" Margin="-16,-16,0,0" 
-                                               Command="{Binding ConnectToDeviceCommand}"
-                                               HorizontalOptions="EndAndExpand">
-                                          <Button.TextColor>
-                                             <OnPlatform x:TypeArguments="Color"
-                                                         WinPhone="DarkOrange" />
-                                          </Button.TextColor>
-                                       </Button>
+
+                                  
+
+
+                                    <Image  WidthRequest="1000"
+                                             Margin="-16,-16,0,0" 
+                                            HorizontalOptions="EndAndExpand"
+                                            Source="hamburger_icon.png"  
+                                           >
+
+                                        <Image.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding ConnectToDeviceCommand}"  NumberOfTapsRequired="1" />
+                                        </Image.GestureRecognizers>       
+                                        
+                                    </Image>
+
+                                                
+                                                
                                     </StackLayout>
 
                                  </Grid>

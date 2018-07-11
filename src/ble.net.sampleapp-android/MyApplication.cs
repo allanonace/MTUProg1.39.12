@@ -19,6 +19,7 @@ using Xamarin.Forms.Platform.Android;
 using Application = Android.App.Application;
 using Log = Android.Util.Log;
 
+       
 namespace ble.net.sampleapp.android
 {
    [Application( Debuggable = IS_DEBUG, AllowBackup = true, AllowClearUserData = true )]
@@ -76,7 +77,10 @@ namespace ble.net.sampleapp.android
       Theme = "@style/MainTheme",
       MainLauncher = false,
       Icon = "@drawable/icon",
-      ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation )]
+        ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation,
+        ScreenOrientation = ScreenOrientation.Unspecified
+    )]
+
     public class MainActivity : FormsApplicationActivity
    {
       /// <remarks>
@@ -95,7 +99,10 @@ namespace ble.net.sampleapp.android
          //TabLayoutResource = Resource.Layout.Tabbar;
         // ToolbarResource = Resource.Layout.Toolbar;
 
+
+
          base.OnCreate( bundle );
+    
 
          UserDialogs.Init( this );
          Forms.Init( this, bundle );
@@ -107,6 +114,17 @@ namespace ble.net.sampleapp.android
          // need to support devices with multiple Bluetooth adapters)
          var bluetooth = BluetoothLowEnergyAdapter.ObtainDefaultAdapter( ApplicationContext );
 
+       
+        if (Device.Idiom == TargetIdiom.Phone)
+        {
+            RequestedOrientation = ScreenOrientation.Portrait;
+        }
+        else
+        {
+            RequestedOrientation = ScreenOrientation.Landscape;
+        }
+
+                
          LoadApplication( new FormsApp( bluetooth, UserDialogs.Instance ) );
       }
    }

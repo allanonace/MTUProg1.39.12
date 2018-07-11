@@ -4,34 +4,47 @@
              x:Class="ble.net.sampleapp.view.LoginMenuPage">
     <ContentPage.Content>
 
-       <StackLayout x:Name="loginpage" Scale="0.85" VerticalOptions="Center" HorizontalOptions="Center" >
-        <Image Margin="20,10,20,10" Source="aclara_logo_login.png" Aspect="AspectFit"  />
-        <RelativeLayout Margin="0,20,0,0" BackgroundColor="Gray"  >
-              <RelativeLayout Margin="2" BackgroundColor="White">
+       <StackLayout x:Name="loginpage"  Scale="0.85" VerticalOptions="Center" HorizontalOptions="Center" >
+        <Image  Margin="20,10,20,10" Source="aclara_logo_login.png" Aspect="AspectFit"  />
+      
 
 
-                
-                  <Entry Margin="54,0,0,0"  HeightRequest="45" WidthRequest="317"  Text="{Binding User.Email, Mode=TwoWay}" x:Name="EmailEntry" TextColor="Gray" Placeholder="Email" PlaceholderColor="Gray" Keyboard="Email" FontSize="18" HorizontalTextAlignment="Start"/>
+             <StackLayout BackgroundColor="Gray" Orientation="Horizontal" >
+                  <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+              
                     <Image  Margin="10,4,0,0" Source="aclara_user_black.png"
                                                  WidthRequest="38"
                                                  HeightRequest="38"
                                                  Scale="0.75"
                                                  VerticalOptions="Center" />
-                </RelativeLayout>
-        </RelativeLayout>
+              <Entry  Margin="0,0,0,0" BackgroundColor="White"  HeightRequest="45"  Text="{Binding User.Email, Mode=TwoWay}" 
+                         x:Name="EmailEntry" TextColor="Gray" Placeholder="Email" PlaceholderColor="Gray" 
+                         Keyboard="Email" HorizontalOptions="FillAndExpand" FontSize="18"  HorizontalTextAlignment="Start"/>
 
-        <RelativeLayout Margin="0,16,0,0" BackgroundColor="Gray"  >
-              <RelativeLayout Margin="2" BackgroundColor="White">
-              
-         <Entry Margin="54,0,0,0" Text="{Binding User.Password, Mode=TwoWay}" HeightRequest="45" WidthRequest="317"  x:Name="PasswordEntry" TextColor="Gray" Placeholder="Password" PlaceholderColor="Gray" IsPassword="True" FontSize="18" HorizontalTextAlignment="Start"/>
-             <Image Margin="10,4,0,0" Source="aclara_key_black.png"
-                                         WidthRequest="38"
-                                         HeightRequest="38"
-                                         Scale="0.75"
-                                         VerticalOptions="Center" />
-               </RelativeLayout>
-        </RelativeLayout>
-        
+                    
+                </StackLayout>
+            </StackLayout>
+
+
+            
+             <StackLayout Margin="0,16,0,0" BackgroundColor="Gray" Orientation="Horizontal" >
+                
+                <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                     <Image Margin="10,4,0,0" Source="aclara_key_black.png"
+                                             WidthRequest="38"
+                                             HeightRequest="38"
+                                             Scale="0.75"
+                                             VerticalOptions="Center" />
+                     <Entry Margin="0,0,0,0" Text="{Binding User.Password, Mode=TwoWay}" 
+                            HeightRequest="45"   x:Name="PasswordEntry" TextColor="Gray" HorizontalOptions="FillAndExpand"
+                            Placeholder="Password" PlaceholderColor="Gray" IsPassword="True" 
+                            FontSize="18" HorizontalTextAlignment="Start"/>
+
+                    
+                </StackLayout>
+            </StackLayout>
+
+            
                  <Button BorderRadius="0" BorderColor="Gray" BorderWidth="2" HeightRequest="54" Margin="0,20,0,0" 
                          Text="Login" BackgroundColor="#65a3b0" TextColor="White" FontSize="26" Command="{Binding LoginCommand}"/>
             <Label Text="{Binding Message, Mode=OneWay}" TextColor="#0072BD"/>

@@ -235,6 +235,7 @@ namespace ble.net.sampleapp.view
         {
 
             Application.Current.MainPage.Navigation.PopAsync(); 
+           
 
 
         }

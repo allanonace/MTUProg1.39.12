@@ -23,12 +23,9 @@ namespace ble.net.sampleapp.view
     
    public partial class BleDeviceScannerPage
    {
-       // Desconectar device
-       // ((BleGattServerViewModel) BindingContext).DisconnectFromDeviceCommand.Execute( null );
-        public  BleGattServiceViewModel accountSaved;
-        //public  IBleGattServerConnection bleGattServerViewModelSaved;
-
-
+        
+      public  BleGattServiceViewModel accountSaved;
+   
       public BleDeviceScannerPage()
       {
          InitializeComponent();
@@ -44,24 +41,6 @@ namespace ble.net.sampleapp.view
                 ((ListView)sender).SelectedItem = null;
 
                 bleScanViewModel.StopScan();
-
-             
-
-               // String json = JsonConvert.SerializeObject(m_bleServiceSelected);
-
-              //  String value = "\\";
-
-              //  String tempjson = json.Replace(value, "");
-
-
-              //  BleGattServiceViewModel account = JsonConvert.DeserializeObject<BleGattServiceViewModel>(tempjson);
-
-               // BleGattServiceViewModel account = new BleGattServiceViewModel("2cf42000-7992-4d24-b05d-1effd0381208");
-
-
-              //  Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(m_bleServiceSelected));
-                   
-          
             }
         }
 
@@ -70,9 +49,7 @@ namespace ble.net.sampleapp.view
         private void connection()
         {
 
-            //var logsVm = new LogsViewModel();
-            //SystemLog.Instance.AddSink(logsVm);
-
+          
             var bleAssembly = bleAdapterSaved.GetType().GetTypeInfo().Assembly.GetName();
             Log.Info(bleAssembly.Name + "@" + bleAssembly.Version);
 
@@ -83,40 +60,31 @@ namespace ble.net.sampleapp.view
                 dialogs: dialogsSaved,
                onSelectDevice:
 
-
-
                 async p =>
                 {
                     await bleGattServerViewModel.Update(p);
-
-
-
 
                     BindingContext = bleGattServerViewModel;
 
                     bleScanViewModel.StopScan();
 
-
                     macAddress.Text = p.Address;
                     deviceID.Text = p.Name;
                     rssiLevel.Text = p.Rssi.ToString() + " db";
 
-                  
-              
-
-                    
-
+                   
                     await Task.Run(async () =>
-                     {
-
+                    {
                          await Task.Delay(500); Device.BeginInvokeOnMainThread(async () =>
                          {
                         
                              background_scan_page_detail.IsVisible = true;
 
-
-
                              background_scan_page.IsVisible = false;
+                          
+                             await background_scan_page_detail.FadeTo(0, 10);
+
+                             await background_scan_page_detail.FadeTo(1, 1500);
 
                              await bleGattServerViewModel.OpenConnection();
 
@@ -128,8 +96,6 @@ namespace ble.net.sampleapp.view
                       
                              savedServer = bleGattServerViewModel;
                          
-
-
                          });
                      });
                   
@@ -180,7 +146,7 @@ namespace ble.net.sampleapp.view
             bleAdapterSaved = bleAdapter;
             dialogsSaved = dialogs;
 
-            disconnectDevice.Clicked += bleDisconnect;
+            disconnectDevice.Tapped += bleDisconnect;
 
             background_scan_page_detail.IsVisible = false;
             background_scan_page.IsVisible = true;
@@ -362,9 +328,10 @@ namespace ble.net.sampleapp.view
 
            // if (Settings.IsConnectedBLE)
           //  {
+
                 var item = (PageItem)e.SelectedItem;
                 String page = item.TargetType;
-
+              
                 switch (page)
                 {
                     case "ReadMTU":
@@ -374,9 +341,10 @@ namespace ble.net.sampleapp.view
                         await Task.Run(async () =>
                         {
 
-                             await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
+                             await Task.Delay(100); Device.BeginInvokeOnMainThread(() =>
                              {
                                  
+
                             Guid value = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
                                  BleGattServiceViewModel account = new BleGattServiceViewModel(value, savedServer.returnConnect(), dialogsSaved);
                             Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account, savedServer.returnConnect(), dialogsSaved));
@@ -385,10 +353,15 @@ namespace ble.net.sampleapp.view
 
                                 background_scan_page.Opacity = 1;
                                 background_scan_page_detail.Opacity = 1;
-                                ContentNav.Opacity = 0;
-              
 
-                                 ContentNav.IsVisible = false;
+                                if(Device.Idiom == TargetIdiom.Phone){
+                                    ContentNav.Opacity = 0;
+                                    ContentNav.IsVisible = false;
+                                }else{
+                                    ContentNav.Opacity = 1;
+                                    ContentNav.IsVisible = true;
+                                }
+                                
                                 
 
                                  navigationDrawerList.SelectedItem = null;
@@ -408,12 +381,7 @@ namespace ble.net.sampleapp.view
                 }
 
 
-                background_scan_page.Opacity = 1;
-
-                ContentNav.Opacity = 0;
-
-          
-                ContentNav.IsVisible = false;
+               
                 
 
 
