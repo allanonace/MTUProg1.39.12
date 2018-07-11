@@ -313,8 +313,9 @@ namespace ble.net.sampleapp.view
             {
                 Debug.WriteLine("Exception Message: " + ex.Message);
             }
-           
-            Application.Current.MainPage = new LoginMenuPage(bleAdapterSaved, dialogsSaved);
+
+            Navigation.PopAsync();
+
 
 
         }
@@ -329,58 +330,69 @@ namespace ble.net.sampleapp.view
            // if (Settings.IsConnectedBLE)
           //  {
 
+            try{
                 var item = (PageItem)e.SelectedItem;
                 String page = item.TargetType;
-              
+
                 switch (page)
                 {
                     case "ReadMTU":
-     
-                       
+
+
 
                         await Task.Run(async () =>
                         {
 
-                             await Task.Delay(100); Device.BeginInvokeOnMainThread(() =>
-                             {
-                                 
+                            await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
+                            {
 
-                            Guid value = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
-                                 BleGattServiceViewModel account = new BleGattServiceViewModel(value, savedServer.returnConnect(), dialogsSaved);
-                            Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account, savedServer.returnConnect(), dialogsSaved));
-                            //    ReadMtuMethod(account, savedServer, dialogsSaved);
+
+                                Guid value = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
+                                BleGattServiceViewModel account = new BleGattServiceViewModel(value, savedServer.returnConnect(), dialogsSaved);
+
+                                navigationDrawerList.SelectedItem = null;
+                                navigationDrawerList.BeginRefresh();
+                                navigationDrawerList.SelectedItem = null;
+                                navigationDrawerList.EndRefresh();
+
+                                Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account, savedServer.returnConnect(), dialogsSaved),false);
+                                //    ReadMtuMethod(account, savedServer, dialogsSaved);
 
 
                                 background_scan_page.Opacity = 1;
                                 background_scan_page_detail.Opacity = 1;
 
-                                if(Device.Idiom == TargetIdiom.Phone){
+                                if (Device.Idiom == TargetIdiom.Phone)
+                                {
                                     ContentNav.Opacity = 0;
                                     ContentNav.IsVisible = false;
-                                }else{
+                                }
+                                else
+                                {
                                     ContentNav.Opacity = 1;
                                     ContentNav.IsVisible = true;
                                 }
-                                
-                                
 
-                                 navigationDrawerList.SelectedItem = null;
-                                 navigationDrawerList.BeginRefresh();
-                                 navigationDrawerList.SelectedItem = null;
-                                 navigationDrawerList.EndRefresh();
-                             });
 
-                         });
 
-                    //  Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account, bleGattServerViewModel.returnConnect(), dialogsSaved));
 
-                    break;
-                    
+                            });
+
+                        });
+
+                        //  Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account, bleGattServerViewModel.returnConnect(), dialogsSaved));
+
+                        break;
+
 
 
                 }
 
 
+            }catch(Exception w){
+                
+            }
+               
                
                 
 
@@ -431,6 +443,30 @@ namespace ble.net.sampleapp.view
 
 
         }
+
+
+
+
+
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            // todo: this is a hack - hopefully Xamarin adds the ability to name a Pushed Page.
+            //MainMenu.IsSegmentShowing = false;
+
+            if(Navigation.NavigationStack.Count < 3){
+                try{
+                    ((BleGattServerViewModel)BindingContext).DisconnectFromDeviceCommand.Execute(null);
+                }catch(Exception q){
+                    
+                }
+                Settings.IsLoggedIn = false;
+            }
+
+        }
+
+
+
 
 
       private void ListView_OnItemSelected( Object sender, SelectedItemChangedEventArgs e )

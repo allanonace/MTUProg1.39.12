@@ -30,6 +30,7 @@ namespace ble.net.sampleapp.view
             BindingContext = viewModel = new viewmodel.LoginMenuViewModel(bleAdapter, dialogs);
             viewModel.Navigation = this.Navigation;
 
+            NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
 
             loginpage.IsVisible = false;
 

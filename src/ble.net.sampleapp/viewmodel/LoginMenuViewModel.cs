@@ -65,7 +65,12 @@ namespace ble.net.sampleapp.viewmodel
 
             if (Settings.IsLoggedIn == true)
             {
-                Application.Current.MainPage = new NavigationPage(new BleDeviceScannerPage(bleAdapter_save, dialogs_save));
+                //Application.Current.MainPage = new NavigationPage(new BleDeviceScannerPage(bleAdapter_save, dialogs_save));
+
+                Application.Current.MainPage.Navigation.PushAsync(new BleDeviceScannerPage(bleAdapter_save, dialogs_save),false);
+                               
+
+
             }
 
 
@@ -88,9 +93,10 @@ namespace ble.net.sampleapp.viewmodel
 
                             Settings.SavedUserName = User.Email;
 
-                            Application.Current.MainPage = new NavigationPage(new BleDeviceScannerPage(bleAdapter_save,dialogs_save));
+                            //Application.Current.MainPage = new NavigationPage(new BleDeviceScannerPage(bleAdapter_save,dialogs_save));
 
-
+                            Application.Current.MainPage.Navigation.PushAsync(new BleDeviceScannerPage(bleAdapter_save, dialogs_save), false);
+                   
 
                         }
                         else

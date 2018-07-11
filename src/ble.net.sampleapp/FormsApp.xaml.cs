@@ -35,7 +35,7 @@ namespace ble.net.sampleapp
       {
             InitializeComponent();
 
-            MainPage = new LoginMenuPage(adapter, dialogs);
+            MainPage =   new NavigationPage (new LoginMenuPage(adapter, dialogs));
            // if (Settings.IsLoggedIn)
             //{
                // MainPage = new NavigationPage(new BleDeviceScannerPage(adapter, dialogs));

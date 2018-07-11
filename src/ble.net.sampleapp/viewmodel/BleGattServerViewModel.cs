@@ -127,6 +127,8 @@ namespace ble.net.sampleapp.viewmodel
                   {
                      m_dialogManager.Toast( "Device disconnected" );
                      await CloseConnection();
+
+                     //await OpenConnection();
                   }
 
                   Connection = c.ToString();
