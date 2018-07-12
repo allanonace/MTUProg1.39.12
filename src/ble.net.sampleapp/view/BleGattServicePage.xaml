@@ -6,17 +6,18 @@
                xmlns:util="clr-namespace:ble.net.sampleapp.util;assembly=ble.net.sampleapp"
                Title="{Binding PageTitle}"
                     NavigationPage.HasBackButton="false"
+            
                x:Class="ble.net.sampleapp.view.BleGattServicePage">
 
 
-   <RelativeLayout IsVisible="true">
+   <RelativeLayout  IsVisible="true">
 
 
    
 
 
 
-        <ContentView  IsVisible="true" x:Name="background_scan_page"
+        <ContentView   IsVisible="true" x:Name="background_scan_page"
             RelativeLayout.XConstraint=
               "{ConstraintExpression Type=RelativeToParent,
                                      Property=Width,
@@ -45,7 +46,7 @@
 
 
           
-                <StackLayout Opacity="1" BackgroundColor="White" Grid.Row="0" Grid.Column="1"  Margin="-6,0,0,0" Orientation="Vertical">
+                <StackLayout  Opacity="1" BackgroundColor="White" Grid.Row="0" Grid.Column="1"  Margin="-6,0,0,0" Orientation="Vertical">
                     <StackLayout   BackgroundColor="White"   Margin="1"> 
                         <StackLayout Margin="0,0,0,0">
                             <StackLayout  Margin="0,0,0,0" HeightRequest="92" BackgroundColor="#6ba2b7">
@@ -120,20 +121,29 @@
 
 
               
-               <StackLayout Orientation="Vertical"
+               <StackLayout Orientation="Vertical" 
                             VerticalOptions="FillAndExpand"
                             HorizontalOptions="FillAndExpand">
 
 
                         
 
-                    
+
+
+
+
+
+
+                        
                   <StackLayout Orientation="Horizontal" IsVisible="false"
                                Padding="{StaticResource GridPadding}">
                      <Label Text="Characteristics"
                             FontSize="22" />
                   </StackLayout>
 
+
+
+                        
 
                     <StackLayout >
                         <Label Margin="16,16,0,0" FontSize="22" TextColor="#6ba2b7" Text="Read MTU"  />
@@ -159,9 +169,114 @@
                              <Label x:Name="valorHEX" IsVisible="false" HeightRequest="200" Text="-------------" Margin="12,12,0,0" 
                             FontSize="18" />
                          
+
+
+
+
+
+
+
+                         <!-- LOWER BAR -->
+                        
+                <StackLayout  IsVisible="true"  BackgroundColor="#6ba2b7"  HeightRequest="135" >
+
+
+
+                               <Label   x:Name="label_read" Margin="16,38,0,0" FontSize="22" TextColor="White" 
+                                        Text="Push Button to START" > </Label>
+    
+                              
+                               <StackLayout  Margin="0,-134,0,0" HorizontalOptions="End">
+                                 <Image IsVisible="true" IsEnabled="true"  
+                                x:Name="bg_read_mtu_button_img"
+                                Margin="0,0,0,0" 
+                                Scale="0.7" 
+                                Source="read_mtu_btn.png"  
+                                HorizontalOptions="End">
+
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer  x:Name="bg_read_mtu_button"  NumberOfTapsRequired="1" />
+                                </Image.GestureRecognizers>       
+                                </Image>
+
+                                   
+                            
+                            </StackLayout>
+
+                      <Grid  IsVisible="true"   BackgroundColor="White"  HeightRequest="28" Margin="12,-4,12,0" Scale="0.99" >  
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                         
+                        </Grid.ColumnDefinitions>
+
+                     </Grid> 
+
+                      <Grid  Margin="-4,-21,-4,0"  HorizontalOptions="FillAndExpand">  
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                             
+                                
+                            </Grid.ColumnDefinitions>
+                            
+                            <Grid  HorizontalOptions="FillAndExpand">  
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>       
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>  
+                                      
+                                    
+                                            </Grid.ColumnDefinitions>
+                                
+                           
+                                             <ProgressBar Opacity="0.8"    Margin="0,0,0,0"   x:Name="pb_ProgressBar"    Scale="9.1" 
+                                                     Progress="0" Grid.Column="4">
+                                    
+                                            
+                                                   
+                                        </ProgressBar>  
+                                      
+                        
+                                     <Image Opacity="0.25"  Margin="0,0,0,0" BackgroundColor="White"  Scale="9.1" Grid.Column="4"  HeightRequest="2">
+                                   
+                                        
+                                    </Image>  
+                                     <Image Opacity="0.25"  Margin="0,0,0,0" BackgroundColor="#6ba2b7"  Scale="9.1" Grid.Column="4"  HeightRequest="2"> </Image>  
+                                     <Image Opacity="0.25"  Margin="0,0,0,0" BackgroundColor="#6ba2b7"  Scale="9.1" Grid.Column="4"  HeightRequest="2"> </Image>  
+                                     <Image Opacity="0.25"  Margin="0,0,0,0" BackgroundColor="#6ba2b7"  Scale="9.1" Grid.Column="4"  HeightRequest="2"> </Image>  
+                                     <Image Opacity="0.25"  Margin="0,0,0,0" BackgroundColor="#6ba2b7"  Scale="9.1" Grid.Column="4"  HeightRequest="2"> </Image>  
+                                    
+                               
+                                    
+                                
+
+                                    </Grid>
+
+                
+                        </Grid>  
+
+                     
+                       
+                            
+                </StackLayout>
+
+
+
+
+
+
+
+
+
+
+                        
                     
-                    
-                  <ListView ItemsSource="{Binding Characteristic}" x:Name="lista" IsVisible="false"
+                  <ListView ItemsSource="{Binding Characteristic}" x:Name="lista" IsVisible="false" 
                             ItemSelected="OnItemSelected"
                             SeparatorVisibility="None"
                             HasUnevenRows="True"
@@ -342,79 +457,15 @@
                      <!-- NOT IMPORTANT  -->
 
        
-                    
-                <StackLayout BackgroundColor="#6ba2b7"  HeightRequest="135" >
-
-
-
-                               <Label   x:Name="label_read" Margin="16,38,0,0" FontSize="22" TextColor="White" 
-                                        Text="Push Button to START" > </Label>
-    
-                              
-                               <StackLayout HorizontalOptions="End">
-                                 <Image IsVisible="true"  
-                              
-                                Margin="0,-134,0,0" 
-                                Scale="0.7" 
-                                Source="read_mtu_btn.png"  
-                                HorizontalOptions="End">
-
-                                <Image.GestureRecognizers>
-                                    <TapGestureRecognizer  x:Name="bg_read_mtu_button"  NumberOfTapsRequired="1" />
-                                </Image.GestureRecognizers>       
-                                </Image>
-
-                                   
-                            
-                            </StackLayout>
-
-
-
-                      <Grid   HorizontalOptions="FillAndExpand">  
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"></ColumnDefinition>
-                             
-                                
-                            </Grid.ColumnDefinitions>
-                            
-                            <Grid  HorizontalOptions="FillAndExpand">  
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="10*"></ColumnDefinition>
-                                                <ColumnDefinition Width="10*"></ColumnDefinition>
-                                                <ColumnDefinition Width="10*"></ColumnDefinition>
-                                                <ColumnDefinition Width="10*"></ColumnDefinition>
-                                                <ColumnDefinition Width="10*"></ColumnDefinition>
-                                                <ColumnDefinition Width="10*"></ColumnDefinition>
-                                                <ColumnDefinition Width="10*"></ColumnDefinition>
-                                                <ColumnDefinition Width="10*"></ColumnDefinition>       
-                                                <ColumnDefinition Width="10*"></ColumnDefinition>  
-                                            </Grid.ColumnDefinitions>
-                            
-
-                                             <ProgressBar Margin="0,0,0,0"   x:Name="pb_ProgressBar"   Scale="9" 
-                                                     Progress="0.25" Grid.Column="4">
-
-                                                   
-                                        </ProgressBar>  
-                                            
-                                
-                                    </Grid>
-                                
-                                   
-                      
-                            
-                
-                    </Grid>  
-
-                     
-                       
-                            
-                </StackLayout>
-
-
+           
                     
               </StackLayout>
-            
+
+
+
+               
+
+                
          </Grid>
             
      </ContentView>

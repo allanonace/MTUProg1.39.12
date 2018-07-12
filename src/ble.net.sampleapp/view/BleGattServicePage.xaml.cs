@@ -99,9 +99,100 @@ namespace ble.net.sampleapp.view
 
         }
 
+
+        private void changeImageColor(bool v)
+        {
+            if (v)
+            {
+                bg_read_mtu_button_img.Source = "read_mtu_btn_bw.png";
+            
+            }
+            else
+            {
+                bg_read_mtu_button_img.Source = "read_mtu_btn.png";
+
+            }
+        }
+
+        private bool _userTapped;
+
+        private void ReadMTU(object sender, EventArgs e)
+        {
+            if(!_userTapped){
+                pb_ProgressBar.Progress = 0;
+                _userTapped = true;
+            
+                load_read_mtu();
+
+                Task.Run(async () =>
+                {
+                    await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
+                    {
+
+                        label_read.Text = "Reading from MTU ... 3sec";
+                        pb_ProgressBar.ProgressTo(0.2, 350, Easing.Linear);
+                        changeImageColor(true);
+
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
+                            {
+                                label_read.Text = "Reading from MTU ... 2sec";
+                                pb_ProgressBar.ProgressTo(0.5, 650, Easing.Linear);
+
+                                Task.Run(async () =>
+                                {
+                                    await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
+                                    {
+                                        label_read.Text = "Reading from MTU ... 1 sec";
+                                        pb_ProgressBar.ProgressTo(0.7, 850, Easing.Linear);
+
+                                        Task.Run(async () =>
+                                        {
+                                            await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
+                                            {
+
+                                                _userTapped = false;
+                                                label_read.Text = "Successful MTU read";
+                                                pb_ProgressBar.ProgressTo(1, 450, Easing.Linear);
+                                                bg_read_mtu_button.NumberOfTapsRequired = 1;
+                                                changeImageColor(false);
+                                            });
+                                        });
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            }
+           
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
        
         IBleGattServerConnection savedServer;
         IUserDialogs dialogsSaved;
+
+
+        BleGattServiceViewModel model_read_saved;
+
+
 
         public BleGattServicePage(BleGattServiceViewModel model, IBleGattServerConnection gattServer, IUserDialogs dialogs)
         {
@@ -122,24 +213,48 @@ namespace ble.net.sampleapp.view
 
             back_button.Tapped += returntomain;
 
-         
+            //Button READ
+            bg_read_mtu_button.Tapped += ReadMTU;
+
+            label_read.Text = "Push Button to START";
+
+
+           
+            _userTapped = false;
+
+
+
+            //Change username textview to Prefs. String
+            if (Settings.SavedUserName != null)
+            {
+                userName.Text = Settings.SavedUserName;
+            }
+
+           
+
+        }
+
+        private void load_read_mtu()
+        {
+            BindingContext = model_saved;
 
             Task.Run(async () =>
             {
 
                 await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
                 {
-                    try{
+                    try
+                    {
                         model_saved.Characteristic.RemoveAt(0);
- 
 
 
 
 
-                    Guid ServicioIndicate = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
+
+                        Guid ServicioIndicate = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
                         Guid CaracterisicoIndicate = new Guid("00000003-0000-1000-8000-00805f9b34fb");
 
-                        BleGattCharacteristicViewModel gattCharacteristicViewModelIndicate = new BleGattCharacteristicViewModel(ServicioIndicate, CaracterisicoIndicate, gattServer, dialogs);
+                        BleGattCharacteristicViewModel gattCharacteristicViewModelIndicate = new BleGattCharacteristicViewModel(ServicioIndicate, CaracterisicoIndicate, savedServer, dialogsSaved);
 
                         var viewModelIndicate = (BleGattCharacteristicViewModel)gattCharacteristicViewModelIndicate;
 
@@ -170,7 +285,7 @@ namespace ble.net.sampleapp.view
                                 Guid CaracterisicoWrite = new Guid("00000002-0000-1000-8000-00805f9b34fb");
                                 // String valorDato = "000005258000015a";
 
-                                BleGattCharacteristicViewModel gattCharacteristicViewModelWrite = new BleGattCharacteristicViewModel(ServicioWrite, CaracterisicoWrite, gattServer, dialogs);
+                                BleGattCharacteristicViewModel gattCharacteristicViewModelWrite = new BleGattCharacteristicViewModel(ServicioWrite, CaracterisicoWrite, savedServer, dialogsSaved);
 
                                 var viewModelWrite = (BleGattCharacteristicViewModel)gattCharacteristicViewModelWrite;
                                 if (viewModelWrite.WriteCurrentBytesGUIDCommand.CanExecute(null))
@@ -279,27 +394,17 @@ namespace ble.net.sampleapp.view
 
 
 
-                    }catch(Exception e){
-                        
+                    }
+                    catch (Exception e)
+                    {
+
                     }
 
 
 
                 });
             });
-
-
-
-            //Change username textview to Prefs. String
-            if (Settings.SavedUserName != null)
-            {
-                userName.Text = Settings.SavedUserName;
-            }
-
-           
-
         }
-
 
         private async void logoutAsync(object sender, EventArgs e)
         {
