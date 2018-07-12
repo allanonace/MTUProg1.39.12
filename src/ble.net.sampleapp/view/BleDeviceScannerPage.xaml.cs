@@ -355,7 +355,7 @@ namespace ble.net.sampleapp.view
                                 navigationDrawerList.SelectedItem = null;
                                 navigationDrawerList.EndRefresh();
 
-                                Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account, savedServer.returnConnect(), dialogsSaved),false);
+                                Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(account, savedServer.returnConnect(), dialogsSaved),false);
                                 //    ReadMtuMethod(account, savedServer, dialogsSaved);
 
 

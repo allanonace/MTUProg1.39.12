@@ -20,13 +20,13 @@ using Xamarin.Forms;
 
 namespace ble.net.sampleapp.view
 {
-    public partial class BleGattServicePage
-   {
-        
-        public BleGattServicePage()
-      {
-          InitializeComponent();
-      }
+    public partial class BleSettingsPage
+    {
+
+        public BleSettingsPage()
+        {
+            InitializeComponent();
+        }
 
 
 
@@ -35,8 +35,9 @@ namespace ble.net.sampleapp.view
         public List<ReadMTUItem> menuList { get; set; }
 
         public List<PageItem> menuList2 { get; set; }
-         
-        private void cargarMTU(){
+
+        private void cargarMTU()
+        {
 
 
             menuList = new List<ReadMTUItem>();
@@ -44,7 +45,7 @@ namespace ble.net.sampleapp.view
             // Creating our pages for menu navigation
             // Here you can define title for item, 
             // icon on the left side, and page that you want to open after selection
-          
+
             var page1 = new ReadMTUItem() { Title = "MTU Ser No.", Description = "-" };
             var page2 = new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = "-" };
             var page3 = new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = "-" };
@@ -105,7 +106,7 @@ namespace ble.net.sampleapp.view
             if (v)
             {
                 bg_read_mtu_button_img.Source = "read_mtu_btn_bw.png";
-            
+
             }
             else
             {
@@ -118,10 +119,11 @@ namespace ble.net.sampleapp.view
 
         private void ReadMTU(object sender, EventArgs e)
         {
-            if(!_userTapped){
+            if (!_userTapped)
+            {
                 pb_ProgressBar.Progress = 0;
                 _userTapped = true;
-            
+
                 load_read_mtu();
 
                 Task.Run(async () =>
@@ -166,7 +168,7 @@ namespace ble.net.sampleapp.view
                     });
                 });
             }
-           
+
         }
 
 
@@ -185,7 +187,7 @@ namespace ble.net.sampleapp.view
 
 
 
-       
+
         IBleGattServerConnection savedServer;
         IUserDialogs dialogsSaved;
 
@@ -194,7 +196,7 @@ namespace ble.net.sampleapp.view
 
 
 
-        public BleGattServicePage(BleGattServiceViewModel model, IBleGattServerConnection gattServer, IUserDialogs dialogs)
+        public BleSettingsPage(BleGattServiceViewModel model, IBleGattServerConnection gattServer, IUserDialogs dialogs)
         {
             InitializeComponent();
             BindingContext = model;
@@ -207,7 +209,7 @@ namespace ble.net.sampleapp.view
 
 
             cargarMTU();
-           
+
 
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
 
@@ -219,7 +221,7 @@ namespace ble.net.sampleapp.view
             label_read.Text = "Push Button to START";
 
 
-           
+
             _userTapped = false;
 
 
@@ -230,7 +232,7 @@ namespace ble.net.sampleapp.view
                 userName.Text = Settings.SavedUserName;
             }
 
-           
+
 
         }
 
@@ -422,16 +424,20 @@ namespace ble.net.sampleapp.view
             int contador = Navigation.NavigationStack.Count;
 
             //Navigation.RemovePage(Navigation.NavigationStack[Navigation.NavigationStack.Count - 1]);
-            while(contador>0){
+            while (contador > 0)
+            {
                 //Navigation.RemovePage(Navigation.NavigationStack[Navigation.NavigationStack.Count - 1]);
-               
-                try{
+
+                try
+                {
                     Navigation.PopAsync(false);
 
-                }catch(Exception v){
-                    
                 }
-              
+                catch (Exception v)
+                {
+
+                }
+
                 contador--;
             }
 
@@ -444,7 +450,7 @@ namespace ble.net.sampleapp.view
             {
 
             }
-                       
+
 
         }
 
@@ -452,8 +458,8 @@ namespace ble.net.sampleapp.view
         private void returntomain(object sender, EventArgs e)
         {
 
-            Application.Current.MainPage.Navigation.PopAsync(false); 
-           
+            Application.Current.MainPage.Navigation.PopAsync(false);
+
 
 
         }
@@ -463,7 +469,7 @@ namespace ble.net.sampleapp.view
             menuList = new List<ReadMTUItem>();
 
 
- 
+
 
 
 
@@ -487,14 +493,14 @@ namespace ble.net.sampleapp.view
             listaMTUread.ItemsSource = menuList;
         }
 
-     
-
-      private void OnItemSelected( Object sender, SelectedItemChangedEventArgs e )
-      {
-         ((ListView)sender).SelectedItem = null;
 
 
-      }
+        private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
+        {
+            ((ListView)sender).SelectedItem = null;
+
+
+        }
 
 
 
@@ -528,9 +534,9 @@ namespace ble.net.sampleapp.view
 
                                 Guid value = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
                                 BleGattServiceViewModel account = new BleGattServiceViewModel(value, savedServer, dialogsSaved);
-                                Application.Current.MainPage.Navigation.PopAsync(false); 
-           
-                                Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(account, savedServer, dialogsSaved),false);
+                                Application.Current.MainPage.Navigation.PopAsync(false);
+
+                                Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(account, savedServer, dialogsSaved), false);
                                 //    ReadMtuMethod(account, savedServer, dialogsSaved);
 
 
@@ -563,10 +569,12 @@ namespace ble.net.sampleapp.view
 
                 }
 
-            } catch(Exception w){
-                
             }
-               
+            catch (Exception w)
+            {
+
+            }
+
 
 
 
@@ -581,7 +589,8 @@ namespace ble.net.sampleapp.view
         {
             base.OnSizeAllocated(width, height); //must be called
 
-            if (width > height) {
+            if (width > height)
+            {
                 // landscape
 
                 Task.Run(async () =>
@@ -591,10 +600,10 @@ namespace ble.net.sampleapp.view
                     {
                         ContentNav.IsVisible = true;
                         background_scan_page.Opacity = 1;
-                      
+
                         close_menu_icon.Opacity = 0;
                         hamburger_icon.IsVisible = false;
-                 
+
 
                         background_scan_page.Margin = new Thickness(310, 0, 0, 0);
 
@@ -605,10 +614,12 @@ namespace ble.net.sampleapp.view
                     });
                 });
 
-               
 
-            } else {
-              // portrait
+
+            }
+            else
+            {
+                // portrait
                 Task.Run(async () =>
                 {
 
@@ -616,7 +627,7 @@ namespace ble.net.sampleapp.view
                     {
                         //ContentNav.IsVisible = false;
                         background_scan_page.Margin = new Thickness(0, 0, 0, 0);
-                      
+
 
                         close_menu_icon.Opacity = 1;
                         hamburger_icon.IsVisible = true;
@@ -627,9 +638,9 @@ namespace ble.net.sampleapp.view
                     });
                 });
 
-               
-            }
-        } 
 
-   }
+            }
+        }
+
+    }
 }

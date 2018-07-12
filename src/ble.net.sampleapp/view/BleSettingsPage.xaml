@@ -7,7 +7,7 @@
                Title="{Binding PageTitle}"
                     NavigationPage.HasBackButton="false"
             
-               x:Class="ble.net.sampleapp.view.BleGattServicePage">
+               x:Class="ble.net.sampleapp.view.BleSettingsPage">
 
 
    <RelativeLayout  IsVisible="true">
