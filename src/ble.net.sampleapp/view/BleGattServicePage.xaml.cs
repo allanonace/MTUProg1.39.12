@@ -94,7 +94,7 @@ namespace ble.net.sampleapp.view
             navigationDrawerListRead.ItemsSource = menuList2;
 
 
-            logout_button.Tapped += logout;
+            logout_button.Tapped += logoutAsync;
 
 
         }
@@ -301,7 +301,7 @@ namespace ble.net.sampleapp.view
         }
 
 
-        private void logout(object sender, EventArgs e)
+        private async void logoutAsync(object sender, EventArgs e)
         {
             Settings.IsLoggedIn = false;
             try
@@ -319,11 +319,26 @@ namespace ble.net.sampleapp.view
             //Navigation.RemovePage(Navigation.NavigationStack[Navigation.NavigationStack.Count - 1]);
             while(contador>0){
                 //Navigation.RemovePage(Navigation.NavigationStack[Navigation.NavigationStack.Count - 1]);
-                Navigation.PopAsync(false);
+               
+                try{
+                    Navigation.PopAsync(false);
+
+                }catch(Exception v){
+                    
+                }
+              
                 contador--;
             }
 
-          
+            try
+            {
+                await Navigation.PopToRootAsync(false);
+
+            }
+            catch (Exception v)
+            {
+
+            }
                        
 
         }
@@ -332,7 +347,7 @@ namespace ble.net.sampleapp.view
         private void returntomain(object sender, EventArgs e)
         {
 
-            Application.Current.MainPage.Navigation.PopAsync(); 
+            Application.Current.MainPage.Navigation.PopAsync(false); 
            
 
 
@@ -408,6 +423,8 @@ namespace ble.net.sampleapp.view
 
                                 Guid value = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
                                 BleGattServiceViewModel account = new BleGattServiceViewModel(value, savedServer, dialogsSaved);
+                                Application.Current.MainPage.Navigation.PopAsync(false); 
+           
                                 Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(account, savedServer, dialogsSaved),false);
                                 //    ReadMtuMethod(account, savedServer, dialogsSaved);
 

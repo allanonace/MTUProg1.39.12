@@ -449,7 +449,7 @@
                                     <Image  WidthRequest="1000"
                                              Margin="-16,-16,0,0" 
                                             HorizontalOptions="EndAndExpand"
-                                            Source="hamburger_icon.png"  
+                                           
                                            >
 
                                         <Image.GestureRecognizers>

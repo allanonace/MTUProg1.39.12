@@ -135,10 +135,13 @@
                   </StackLayout>
 
 
-                        
-                
+                    <StackLayout >
+                        <Label Margin="16,16,0,0" FontSize="22" TextColor="#6ba2b7" Text="Read MTU"  />
+                        <Image Margin="-16,4,-16,0" WidthRequest="380" HeightRequest="2" BackgroundColor="#6ba2b7"/>
+                    </StackLayout>
+            
 
-                      <ListView  Margin="0,24,0,0" x:Name="listaMTUread" RowHeight="60" SeparatorVisibility="None" SeparatorColor="#6ba2b7"  > 
+                      <ListView  Margin="0,0,0,-4" x:Name="listaMTUread" RowHeight="60" SeparatorVisibility="None" SeparatorColor="#6ba2b7"  > 
                           <ListView.ItemTemplate>
                             <DataTemplate>
                               <ViewCell>
@@ -338,7 +341,78 @@
                      <!-- NOT IMPORTANT  -->
                      <!-- NOT IMPORTANT  -->
 
+       
+                    
+                <StackLayout BackgroundColor="#6ba2b7"  HeightRequest="135" >
+
+
+
+                               <Label   x:Name="label_read" Margin="16,38,0,0" FontSize="22" TextColor="White" 
+                                        Text="Push Button to START" > </Label>
+    
+                              
+                               <StackLayout HorizontalOptions="End">
+                                 <Image IsVisible="true"  
+                              
+                                Margin="0,-134,0,0" 
+                                Scale="0.7" 
+                                Source="read_mtu_btn.png"  
+                                HorizontalOptions="End">
+
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer  x:Name="bg_read_mtu_button"  NumberOfTapsRequired="1" />
+                                </Image.GestureRecognizers>       
+                                </Image>
+
+                                   
+                            
+                            </StackLayout>
+
+
+
+                      <Grid   HorizontalOptions="FillAndExpand">  
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                             
+                                
+                            </Grid.ColumnDefinitions>
+                            
+                            <Grid  HorizontalOptions="FillAndExpand">  
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>       
+                                                <ColumnDefinition Width="10*"></ColumnDefinition>  
+                                            </Grid.ColumnDefinitions>
+                            
+
+                                             <ProgressBar Margin="0,0,0,0"   x:Name="pb_ProgressBar"   Scale="9" 
+                                                     Progress="0.25" Grid.Column="4">
+
+                                                   
+                                        </ProgressBar>  
+                                            
+                                
+                                    </Grid>
+                                
+                                   
+                      
+                            
                 
+                    </Grid>  
+
+                     
+                       
+                            
+                </StackLayout>
+
+
+                    
               </StackLayout>
             
          </Grid>
@@ -352,7 +426,7 @@
 
         <!-- Menu desplegable -->
         
-    <ContentView x:Name="ContentNav" BackgroundColor="#6ba2b7" WidthRequest="310" IsVisible="true"
+    <ContentView x:Name="ContentNav" BackgroundColor="#6ba2b7" WidthRequest="310" IsVisible="false"
 
         RelativeLayout.YConstraint=
           "{ConstraintExpression Type=RelativeToParent,
