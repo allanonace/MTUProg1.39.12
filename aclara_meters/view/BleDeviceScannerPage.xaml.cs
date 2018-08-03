@@ -87,8 +87,9 @@ namespace aclara_meters.view
 
                         aclara_logo.Scale = 1.2;
 
-
-
+                        aclara_detail_logo.Scale = 1.2;
+                        aclara_detail_logo.TranslationX = 42;
+                        aclara_logo.TranslationX = 42;
                     });
                 });
             }
@@ -206,6 +207,7 @@ namespace aclara_meters.view
             if (Device.RuntimePlatform == Device.Android)
             {
                 backmenu.Scale = 1.42;
+
             }
 
         }

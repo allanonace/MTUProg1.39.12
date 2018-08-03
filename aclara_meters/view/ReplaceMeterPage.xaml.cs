@@ -419,6 +419,10 @@ namespace aclara_meters.view
 
                         shadoweffect.IsVisible = true;
 
+                        aclara_logo.Scale = 1.2;
+                        aclara_logo.TranslationX = 42;
+                        aclara_logo.TranslationX = 42;
+
                     });
                 });
             }

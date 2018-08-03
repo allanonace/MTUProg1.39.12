@@ -39,18 +39,20 @@ namespace aclara_meters.view
             
             menuList2 = new List<PageItem>();
 
+
             // Creating our pages for menu navigation
             // Here you can define title for item, 
             // icon on the left side, and page that you want to open after selection
             var page1menu = new PageItem() { Title = "Read MTU", Icon = "readmtu_icon.png", TargetType = "ReadMTU" };
-            var page2menu = new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", TargetType = "" };
+            var page2menu = new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", TargetType = "turnOff" };
             var page3menu = new PageItem() { Title = "Add MTU", Icon = "addMTU.png", TargetType = "AddMTU" };
-            var page4menu = new PageItem() { Title = "Rep. MTU", Icon = "replaceMTU2.png", TargetType = "" };
-            var page5menu = new PageItem() { Title = "Rep. Meter", Icon = "replaceMeter.png", TargetType = "" };
+            var page4menu = new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", TargetType = "replaceMTU" };
+            var page5menu = new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", TargetType = "replaceMeter" };
             var page6menu = new PageItem() { Title = "Add MTU / Add meter", Icon = "addMTUaddmeter.png", TargetType = "" };
             var page7menu = new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", TargetType = "" };
             var page8menu = new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = "" };
             var page9menu = new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = "" };
+
 
 
             // Adding menu items to menuList
@@ -105,6 +107,10 @@ namespace aclara_meters.view
 
                         logo_tablet_aclara.Opacity = 0;
 
+
+                        aclara_logo.Scale = 1.2;
+                        aclara_logo.TranslationX = 42;
+                        aclara_logo.TranslationX = 42;
 
                     });
                 });
@@ -191,7 +197,13 @@ namespace aclara_meters.view
                 });
             });
 
-
+            turnoffmtu_ok.Tapped += TurnOffMTU_OK;
+            turnoffmtu_no.Tapped += Turnoffmtu_No_Tapped;
+            turnoffmtu_ok_close.Tapped += TurnOffMtu_Close;
+            replacemeter_ok.Tapped += Replacemeter_Ok_Tapped;
+            replacemeter_cancel.Tapped += Replacemeter_Cancel_Tapped;
+            meter_ok.Tapped += Meter_Ok_Tapped;
+            meter_cancel.Tapped += Meter_Cancel_Tapped;
         }
 
         public BleSettingsPage(IUserDialogs dialogs)
@@ -230,7 +242,11 @@ namespace aclara_meters.view
                         lowerbar.Margin = new Thickness(0, 0, 310, 0);
 
                         shadoweffect.IsVisible = true;
-                       
+
+                        aclara_logo.Scale = 1.2;
+                        aclara_logo.TranslationX = 42;
+                        aclara_logo.TranslationX = 42;
+
                     });
                 });
             }
@@ -309,7 +325,94 @@ namespace aclara_meters.view
             });
 
        
+
+            turnoffmtu_ok.Tapped += TurnOffMTU_OK;
+            turnoffmtu_no.Tapped += Turnoffmtu_No_Tapped;
+            turnoffmtu_ok_close.Tapped += TurnOffMtu_Close;
+            replacemeter_ok.Tapped += Replacemeter_Ok_Tapped;
+            replacemeter_cancel.Tapped += Replacemeter_Cancel_Tapped;
+            meter_ok.Tapped += Meter_Ok_Tapped;
+            meter_cancel.Tapped += Meter_Cancel_Tapped;
+
+
         }
+
+
+        private void Replacemeter_Cancel_Tapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+        private void Replacemeter_Ok_Tapped(object sender, EventArgs e)
+        {
+
+            //APP OPEN VIEW
+            dialog_replacemeter_one.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+
+            Application.Current.MainPage.Navigation.PushAsync(new ReplaceMTUPage(dialogsSaved), false);
+
+        }
+
+        private void TurnOffMtu_Close(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+        private void Turnoffmtu_No_Tapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+        private void TurnOffMTU_OK(object sender, EventArgs e)
+        {
+
+            dialog_turnoff_one.IsVisible = false;
+            dialog_turnoff_two.IsVisible = true;
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
+                {
+                    dialog_turnoff_two.IsVisible = false;
+                    dialog_turnoff_three.IsVisible = true;
+                });
+            });
+
+
+        }
+
+
+
+        void Meter_Cancel_Tapped(object sender, EventArgs e)
+        {
+
+            dialog_open_bg.IsVisible = false;
+            dialog_meter_replace_one.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+        }
+
+
+        void Meter_Ok_Tapped(object sender, EventArgs e)
+        {
+            dialog_meter_replace_one.IsVisible = false;
+
+            //APP OPEN VIEW
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Application.Current.MainPage.Navigation.PushAsync(new ReplaceMeterPage(dialogsSaved), false);
+
+
+        }
+
+
 
         private async void logoutAsync(object sender, EventArgs e)
         {
