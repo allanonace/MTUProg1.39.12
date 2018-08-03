@@ -205,7 +205,7 @@ namespace aclara_meters.view
 
             if (Device.RuntimePlatform == Device.Android)
             {
-                backmenu.Scale = 1.5;
+                backmenu.Scale = 1.42;
             }
 
         }
