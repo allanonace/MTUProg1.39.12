@@ -28,7 +28,7 @@ namespace aclara_meters.iOS
         {
             Forms.Init();
             Distribute.DontCheckForUpdatesInDebug();
-            LoadApplication( new FormsApp( UserDialogs.Instance ) );
+            LoadApplication( new FormsApp( BluetoothLowEnergyAdapter.ObtainDefaultAdapter(), UserDialogs.Instance ) );
           
             return base.FinishedLaunching(app, options);
         }

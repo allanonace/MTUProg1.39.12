@@ -8,6 +8,8 @@ using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.AppCenter.Distribute;
+using ble_library;
+
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -24,12 +26,32 @@ namespace aclara_meters
             CredentialsService = new CredentialsService();
         }
 
-        public FormsApp( IUserDialogs dialogs)
+        public FormsApp(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs)
         {
             InitializeComponent();
+
+            //Inicializar libreria personalizada
+            InicializarLibreriaBLE(adapter,dialogs);
+
+            //Gestor de cuentas
             CredentialsService = new CredentialsService();
+
+            //Cargar la pantalla principal
             MainPage = new NavigationPage(new LoginMenuPage(dialogs));
+
         }
+
+
+        private void InicializarLibreriaBLE(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs)
+        {
+
+            BleMainClass.init(adapter,dialogs);
+
+
+                  
+
+        }
+
 
         protected override void OnStart()
         {

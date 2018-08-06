@@ -96,7 +96,7 @@ namespace aclara_meters.Droid
 
             CrossCurrentActivity.Current.Init(this, bundle);
 
-            LoadApplication(new FormsApp(UserDialogs.Instance));
+            LoadApplication(new FormsApp(bluetooth, UserDialogs.Instance));
 
         }
 

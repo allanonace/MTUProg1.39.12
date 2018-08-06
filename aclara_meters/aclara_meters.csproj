@@ -62,4 +62,7 @@
   <ItemGroup>
     <None Remove="XML\XmlElementList.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ble_library\ble_library.csproj" />
+  </ItemGroup>
 </Project>

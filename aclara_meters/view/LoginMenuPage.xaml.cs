@@ -13,6 +13,7 @@ using Plugin.Geolocator.Abstractions;
 using Renci.SshNet;
 using System.IO;
 
+
 namespace aclara_meters.view
 {
     public partial class LoginMenuPage : ContentPage
@@ -56,9 +57,11 @@ namespace aclara_meters.view
                 });
             });
 
-           
+       
 
         }
+
+
 
         private void listFiles()
         {
