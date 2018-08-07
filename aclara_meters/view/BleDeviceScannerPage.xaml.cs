@@ -16,6 +16,7 @@ using aclara_meters.viewmodel;
 using nexus.core.logging;
 using nexus.protocols.ble;
 using Xamarin.Forms;
+using System.Threading;
 
 namespace aclara_meters.view
 {
@@ -210,7 +211,53 @@ namespace aclara_meters.view
 
             }
 
+            Thread printer = new Thread(new ThreadStart(InvokeMethod));
+ 
+            printer.Start();
+
         }
+
+        public Boolean changedStatus;
+
+        private void InvokeMethod()
+        {
+            while (true)
+            {
+                if(ble_library.BleMainClass.Connection_app!=changedStatus){
+                    changedStatus = ble_library.BleMainClass.Connection_app;
+                    if(ble_library.BleMainClass.Connection_app){
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            background_scan_page_detail.IsVisible = true;
+                            block_ble_disconnect.Opacity = 0;
+                            block_ble_disconnect.FadeTo(1, 250);
+                            block_ble.Opacity = 0;
+                            block_ble.FadeTo(1, 250);
+                            background_scan_page.IsVisible = false;
+                            navigationDrawerList.IsEnabled = true;
+                            navigationDrawerList.Opacity = 1;
+                        });
+
+                    }
+
+                    if (!ble_library.BleMainClass.Connection_app)
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            background_scan_page_detail.IsVisible = false;
+                            navigationDrawerList.Opacity = 0.65;
+                            navigationDrawerList.IsEnabled = true;
+                            background_scan_page.IsVisible = true;
+                        });
+                    }
+
+                }
+                Thread.Sleep(500); // 1.5 Second
+            }
+        }
+
+    
 
         private void Replacemeter_Cancel_Tapped(object sender, EventArgs e)
         {
@@ -293,18 +340,9 @@ namespace aclara_meters.view
 
         private void bleDisconnect(object sender, EventArgs e)
         {
-           
-           // ((BleGattServerViewModel)BindingContext).DisconnectFromDeviceCommand.Execute(null);
 
-         
-            background_scan_page_detail.IsVisible = false;
 
-            navigationDrawerList.Opacity = 0.65;
-            navigationDrawerList.IsEnabled = true;
-         
-            background_scan_page.IsVisible = true;
-
-            Settings.IsConnectedBLE = false;
+            ble_library.BleMainClass.DisconnectFromDevice();
 
         }
 
@@ -806,24 +844,11 @@ namespace aclara_meters.view
 
         void ConnectElementMockUp_Tapped(object sender, EventArgs e)
         {
-            background_scan_page_detail.IsVisible = true;
-
-            block_ble_disconnect.Opacity = 0;
-            block_ble_disconnect.FadeTo(1, 250);
-
-            block_ble.Opacity = 0;
-            block_ble.FadeTo(1, 250);
+            
+            ble_library.BleMainClass.ConnectoToDevice();
 
 
-         
-       
 
-            Settings.IsConnectedBLE = true;
-
-            background_scan_page.IsVisible = false;
-
-            navigationDrawerList.IsEnabled = true;
-            navigationDrawerList.Opacity = 1;
         }
 
 

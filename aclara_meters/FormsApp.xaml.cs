@@ -16,7 +16,6 @@ namespace aclara_meters
 {
     public partial class FormsApp : Application
     {
-
         public static string AppName { get { return "StoreAccountInfoApp"; } }
         public static ICredentialsService CredentialsService { get; private set; }
 
@@ -31,7 +30,7 @@ namespace aclara_meters
             InitializeComponent();
 
             //Inicializar libreria personalizada
-            InicializarLibreriaBLE(adapter,dialogs);
+            BleMainClass.init(adapter, dialogs);
 
             //Gestor de cuentas
             CredentialsService = new CredentialsService();
@@ -40,18 +39,6 @@ namespace aclara_meters
             MainPage = new NavigationPage(new LoginMenuPage(dialogs));
 
         }
-
-
-        private void InicializarLibreriaBLE(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs)
-        {
-
-            BleMainClass.init(adapter,dialogs);
-
-
-                  
-
-        }
-
 
         protected override void OnStart()
         {

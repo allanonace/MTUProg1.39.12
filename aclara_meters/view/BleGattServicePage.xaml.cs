@@ -139,6 +139,7 @@ namespace aclara_meters.view
 
         private void ReadMTU(object sender, EventArgs e)
         {
+
             if(!_userTapped){
                 
                 Task.Run(async () =>
@@ -224,6 +225,10 @@ namespace aclara_meters.view
         public BleGattServicePage(IUserDialogs dialogs)
         {
             InitializeComponent();
+
+
+            ble_library.BleMainClass.MostrarBuffer();
+
 
             Task.Run(async () =>
             {

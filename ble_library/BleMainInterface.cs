@@ -1,4 +1,6 @@
 ﻿using System;
+using nexus.protocols.ble;
+
 namespace ble_library
 {
     public interface InterfazPadre {  
@@ -22,8 +24,13 @@ namespace ble_library
         void FOUR();
     }
 
+    public interface IBluetoothEnable {
+        void Enable();
+        void Disable();
+    }
 
-    public class BleMainInterface: InterfazFamilia, InterfazInvitado
+
+    public class BleMainInterface: InterfazFamilia, InterfazInvitado,IBluetoothEnable
     {  
         public void ONE() 
         {  
@@ -40,6 +47,14 @@ namespace ble_library
             Console.WriteLine("This is FOUR");
         }
 
+
+        public void Enable(){
+    
+        }
+
+        public void Disable(){
+            
+        }
     }  
 
 

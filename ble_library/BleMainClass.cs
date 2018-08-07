@@ -1,47 +1,190 @@
 ﻿using System;
+using System.Collections;
 using System.Linq;
 using Acr.UserDialogs;
 using nexus.protocols.ble;
 using nexus.protocols.ble.scan;
 using nexus.protocols.ble.scan.advertisement;
+using Xamarin.Forms;
 
 namespace ble_library
 {
     public class BleMainClass
-    {     
-        public static void init(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs)
+    {
+        public static String buffer;
+        public static IBluetoothLowEnergyAdapter adapter;
+        public static IUserDialogs dialogs;
+
+        public static IBlePeripheral ble_device;
+        public static IBleGattServerConnection gattServer_connection;
+
+        public static String m_connectionState;
+        public static String Connection
         {
-
-            InterfacesPorConsola();
-            dialogs.Toast("La libreria ha cargado correctamente");
-            dialogs.Alert("Inicialización de la librería");
-
-            BluetoothEnable(adapter);
-           
-            if(adapter.CurrentState.IsEnabledOrEnabling()){
-                ScanForBroadcasts(adapter,dialogs);
+            get { return m_connectionState; }
+            private set
+            {
+                if (value != ConnectionState.Disconnected.ToString())
+                {
+                    m_connectionState = value;
+                }
             }
-
         }
 
+        public static Boolean Connection_app;
 
-        private async static void BluetoothEnable(IBluetoothLowEnergyAdapter adapter){
+        public class ObserverReporter : IObserver<ConnectionState>
+        {
+            private IDisposable unsubscriber;
+
+            public virtual void Subscribe(IObservable<ConnectionState> provider)
+            {
+                unsubscriber = provider.Subscribe(this);
+                dialogs.Toast("Subscribed to Device");
+            }
+
+            public virtual void Unsubscribe()
+            {
+                unsubscriber.Dispose();
+
+            }
+
+            public virtual void OnCompleted()
+            {
+                Console.WriteLine("Status Report Completed");
+            }
+
+            public virtual void OnError(Exception error)
+            {
+                // Do nothing.
+            }
+
+            public void OnNext(ConnectionState value)
+            {
+                Console.WriteLine("Status: " + value.ToString());
+                dialogs.Toast("Status: " + value.ToString());
+
+                if (value == ConnectionState.Disconnected)
+                {
+                    dialogs.Toast("Device disconnected");
+                    try{
+                        DisconnectFromDevice();
+                    }catch(Exception e){
+                        
+                    }
+                    Connection_app = false;
+                }
+            }
+        }
+
+        public static void init(IBluetoothLowEnergyAdapter adapter_app, IUserDialogs dialogs_app)
+        {
+			adapter = adapter_app;
+            dialogs = dialogs_app;
+
+            Connection_app = false;
+
+            Device.StartTimer(
+              TimeSpan.FromSeconds(3),
+              () =>
+              {
+                  InterfacesPorConsola();
+                  dialogs.Toast("La libreria ha cargado correctamente");
+
+                  BluetoothEnable();
+
+                  if (adapter.CurrentState.IsEnabledOrEnabling())
+                  {
+                      ScanForBroadcasts();
+                  }
+                  return false;
+              });
+        }
+
+        private async static void BluetoothEnable()
+        {
             if (adapter.AdapterCanBeEnabled && adapter.CurrentState.IsDisabledOrDisabling())
             {
                 await adapter.EnableAdapter();
             }
         }
 
+        public async static void ConnectoToDevice(){
 
-        private async static void ScanForBroadcasts(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs)
+            var connection = await adapter.ConnectToDevice(
+                // The IBlePeripheral to connect to
+                ble_device,
+                // TimeSpan or CancellationToken to stop the
+                // connection attempt.
+                // If you omit this argument, it will use
+                // BluetoothLowEnergyUtils.DefaultConnectionTimeout
+                TimeSpan.FromSeconds(15),
+                // Optional IProgress<ConnectionProgress>
+                progress => {
+                    Console.WriteLine(progress);
+                    dialogs.Toast("Progreso: " + progress.ToString());
+                }
+            );
+
+            if (connection.IsSuccessful())
+            {
+                gattServer_connection = connection.GattServer;
+                // ... do things with gattServer here...
+
+                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
+                                                                // the server implements IObservable<ConnectionState> so you can subscribe to its state
+
+                gattServer_connection.Subscribe(new ObserverReporter());
+ 
+                Connection = "Reading Services";
+
+                Connection_app = true;
+
+                try{
+                    ListAllServices = new ArrayList();
+
+                    foreach (var guid in await gattServer_connection.ListAllServices())
+                    {
+                        //Debug.WriteLine($"service: {known.GetDescriptionOrGuid(guid)}");
+                        ListAllServices.Add(guid);
+                        dialogs.Alert("Service: " + guid);
+
+                    }
+                }catch(Exception j){
+                    
+                }
+               
+
+
+            }
+            else
+            {
+                // Do something to inform user or otherwise handle unsuccessful connection.
+                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
+                dialogs.Alert("Error connecting to device. result={0:g}", connection.ConnectionResult.ToString());
+                // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
+                Connection_app = false;
+            }
+
+        }
+
+        public static ArrayList ListAllServices;
+
+        public async static void DisconnectFromDevice(){
+            await gattServer_connection.Disconnect();
+            dialogs.Toast("Disconnected from device");
+            Connection_app = false;
+        }
+
+        private async static void ScanForBroadcasts()
         {
-
             await adapter.ScanForBroadcasts(
             // Optional scan filter to ensure that the
             // observer will only receive peripherals
             // that pass the filter. If you want to scan
             // for everything around, omit this argument.
             new ScanFilter()
+
                .SetIgnoreRepeatBroadcasts(true),
                 // IObserver<IBlePeripheral> or Action<IBlePeripheral>
                 // will be triggered for each discovered peripheral
@@ -51,7 +194,6 @@ namespace ble_library
                 // read the advertising data...
                 var adv = peripheral.Advertisement;
                 Console.WriteLine(adv.DeviceName);
-                dialogs.Alert("Nombre Dispositivo: " + adv.DeviceName);
 
                 String serv = adv.Services
                                 .Select
@@ -64,19 +206,27 @@ namespace ble_library
                                  ).ToString();
 
                 serv = serv + ", ";
-                 
 
+                Console.WriteLine(serv);
 
-                 Console.WriteLine(serv);
-
-                // dialogs.Alert("Servicios: "+serv);
+                //dialogs.Alert("Servicios: "+serv);
                 //dialogs.Alert("Compañia: " + adv.ManufacturerSpecificData.FirstOrDefault().CompanyName());
                 //dialogs.Alert("Datos Servicio: " + adv.ServiceData);
-                 Console.WriteLine(adv.ManufacturerSpecificData.FirstOrDefault().CompanyName());
-                 Console.WriteLine(adv.ServiceData);
 
-                 //  connect to the device
+                Console.WriteLine(adv.ManufacturerSpecificData.FirstOrDefault().CompanyName());
+                Console.WriteLine(adv.ServiceData);
 
+                //Show dialog with name
+                if(adv.DeviceName!=null){
+                    if (adv.DeviceName.Contains("Aclara"))
+                    {
+                        dialogs.Alert("Nombre Dispositivo: " + adv.DeviceName);
+                        buffer += adv.DeviceName;
+                        ble_device = peripheral;
+                    } 
+                }
+
+                //  connect to the device
                },
                 // TimeSpan or CancellationToken to stop the scan
                 TimeSpan.FromSeconds(30)
@@ -85,11 +235,25 @@ namespace ble_library
             );
 
             // scanning has been stopped when code reached this point
-
         }
 
 
+		public static void MostrarBuffer(){
+          
+            Device.StartTimer(
+             TimeSpan.FromSeconds(3),
+             () =>
+             {  
+                 dialogs.Alert(buffer);
+                 return false;
+             });
 
+        }
+
+		public static void DoSomething(InterfazHija familia)
+        {
+            // Do awesome stuff here.
+        }
 
         private static void InterfacesPorConsola()
         {
