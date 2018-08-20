@@ -18,6 +18,7 @@ using nexus.core.text;
 using nexus.protocols.ble;
 using Xamarin.Forms;
 using System.Threading;
+using ble_library;
 
 namespace aclara_meters.view
 {
@@ -139,6 +140,9 @@ namespace aclara_meters.view
 
         private void ReadMTU(object sender, EventArgs e)
         {
+  
+
+
 
             if(!_userTapped){
                 
@@ -149,6 +153,11 @@ namespace aclara_meters.view
 
                         backdark_bg.IsVisible = true;
                         indicator.IsVisible = true;
+
+                        ble_library.BleSerial.buffer_interface = new byte[] { };
+                       
+                        ble_library.BleMainClass.Write_Characteristic_ReadMTU();
+                  
 
                     });
                 });
@@ -200,6 +209,9 @@ namespace aclara_meters.view
                                                         backdark_bg.IsVisible = false;
                                                         indicator.IsVisible = false;
                                                         background_scan_page.IsEnabled = true;
+
+                                                   
+
                                                     });
                                                 });
 
@@ -227,7 +239,7 @@ namespace aclara_meters.view
             InitializeComponent();
 
 
-            ble_library.BleMainClass.MostrarBuffer();
+
 
 
             Task.Run(async () =>
@@ -318,13 +330,10 @@ namespace aclara_meters.view
 
 
             //Change username textview to Prefs. String
-            if (Settings.SavedUserName != null)
+            if (FormsApp.CredentialsService.UserName != null)
             {
-                userName.Text = Settings.SavedUserName;
+                userName.Text = FormsApp.CredentialsService.UserName;
             }
-
-           
-
 
             turnoffmtu_ok.Tapped += TurnOffMTU_OK;
             turnoffmtu_no.Tapped += Turnoffmtu_No_Tapped;
@@ -333,6 +342,27 @@ namespace aclara_meters.view
             replacemeter_cancel.Tapped += Replacemeter_Cancel_Tapped;
             meter_ok.Tapped += Meter_Ok_Tapped;
             meter_cancel.Tapped += Meter_Cancel_Tapped;
+
+
+            //Libreria BLE
+
+            //ble_library.BleMainClass.MostrarBuffer();
+
+          
+
+
+
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                ble_library.BleMainClass.Listen_Characteristic_Notification_ReadMTU();
+         
+            });
+
+
+           
+
+
 
 
         }
@@ -418,6 +448,11 @@ namespace aclara_meters.view
         {
            
 
+    
+
+
+       
+
             Task.Run(async () =>
             {
 
@@ -443,9 +478,229 @@ namespace aclara_meters.view
                                 {
                                     await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
                                     {
+                                        ////////
+                                        try{
+                                            BleSerial interfaceBle = BleMainClass.interfaceBle;
+                                            Lexi.Lexi lexi = interfaceBle.getInterface_lexi();
+                                            Byte[] value1 = interfaceBle.getBufferInterface();
+                                            int longi = interfaceBle.getBufferInterface().Length - 8;
 
-                                        cargarValoresMTU("21189225", "456,3375", "456,3375", "468,8375");
+                                            Byte[] value2 = new Byte[longi];
+                                            Array.Copy(value1, 8, value2, 0, longi);
 
+                                            value1 = value2;
+
+                                            ble_library.BleSerial.buffer_interface = value2;
+
+                                          
+                                                    
+                                            try{
+                                                //int identificador = lexi.Read(value1, 11, 4);
+                                                // int oneWayTx = lexi.Read(value1, 15, 4);
+                                                // int TwoWayTx = lexi.Read(value1, 19, 4);
+                                                // int TwoWayRx = lexi.Read(value1, 23, 4);
+
+                                                //lexi.Write(0, value1);
+
+                                                /*
+                                                Console.WriteLine(BitConverter.ToString(lexi.Read(0, 1)));
+                                                Console.WriteLine("");
+                                                Console.WriteLine(BitConverter.ToString(lexi.Read(1, 9)));
+                                                Console.WriteLine("");
+                                                Console.WriteLine(BitConverter.ToString(lexi.Read(600, 9)));
+                                                Console.WriteLine("");
+                                                lexi.Write(64, new byte[] { 0x01 });
+                                                */
+
+
+                                                /*
+                                                Console.WriteLine(BitConverter.ToString(interfaceBle.Read(0, 1)));
+                                                Console.WriteLine("");
+                                                Console.WriteLine(BitConverter.ToString(interfaceBle.Read(1, 9)));
+                                                Console.WriteLine("");
+                                                Console.WriteLine(BitConverter.ToString(lx.Read(600, 9)));
+                                                Console.WriteLine("");
+                                                interfaceBle.Write(64, new byte[] { 0x01 });
+
+*/
+
+                                                Console.WriteLine("Valores LEXI:");
+                                                Console.WriteLine("");
+
+                                                try
+                                                {
+                                                    byte [] a1 = lexi.Read(11, 4);
+                                                }
+                                                catch(Exception w1){
+                                                    
+                                                }
+                                               
+
+                                                Console.WriteLine("Buffer Write MTU Ser: " + ble_library.BleSerial.buffer_interface_write);
+                                                Console.WriteLine("");
+
+                                                try
+                                                {
+                                                    byte[] a2 = lexi.Read(15, 4);
+                                                }
+                                                catch (Exception w2)
+                                                {
+
+                                                }
+
+                                            
+                                                Console.WriteLine("Buffer Write 1 Way Tx: " + ble_library.BleSerial.buffer_interface_write);
+                                                Console.WriteLine("");
+
+                                           
+                                                try
+                                                {
+                                                    byte[] a3 = lexi.Read(19, 4);
+                                                }
+                                                catch (Exception w3)
+                                                {
+
+                                                }
+
+                                                Console.WriteLine("Buffer Write 2 Way Tx: " + ble_library.BleSerial.buffer_interface_write);
+                                                Console.WriteLine("");
+
+                                               
+                                                try
+                                                {
+                                                    byte[] a4 = lexi.Read(23, 4);
+                                                }
+                                                catch (Exception w4)
+                                                {
+
+                                                }
+
+                                                Console.WriteLine("Buffer Write 2 Way Rx: " + ble_library.BleSerial.buffer_interface_write);
+
+
+
+                                                Console.WriteLine("");
+                                               
+                                
+                                                //lexi.Write(64, new byte[] { 0x01 });
+                                                
+
+                                               
+                                            }catch(Exception e){
+                                                
+                                            }
+
+                                         
+                                         
+
+
+                                                       
+                                            int longitud = value1.Length;
+
+                                            int contador = 0;
+
+
+                                            byte[] listTotal = new byte[1024];
+                                            int listTotalLength = 0;
+                                            int cuantoDato = 0;
+
+                                            while (contador < longitud)
+                                            {
+                                                byte[] array2 = new byte[20];
+
+                                                try
+                                                {
+                                                     Array.Copy(value1, contador, array2, 0, 20);
+                                                }
+                                                catch (Exception s)
+                                                {
+
+                                                }
+
+                                                cuantoDato = array2[2];
+                                               
+                                                    
+                                        
+                                                if (cuantoDato > 0)
+                                                {
+                                                    try
+                                                    {
+                                                        Array.Copy(array2, 3, listTotal, listTotalLength, cuantoDato);
+                                                    }
+                                                    catch (Exception v)
+                                                    {
+
+                                                    }
+
+                                                    listTotalLength += cuantoDato;
+                                                
+                                                }
+                                               
+                                                contador = contador + 20;
+                                            }
+
+
+                                            //Identificador
+                                            byte[] identificador = new byte[4];
+                                            Array.Copy(listTotal, 6 + 5, identificador, 0, 4);
+
+                                            long identificador_valor = (long)(identificador[3] * Math.Pow(2, 24)
+                                                                               + identificador[2] * Math.Pow(2, 16)
+                                                                               + identificador[1] * Math.Pow(2, 8)
+                                                                               + identificador[0] * Math.Pow(2, 0));
+
+
+                                            //oneWayTx
+                                            byte[] oneWayTx = new byte[4];
+                                            Array.Copy(listTotal, 10 + 5, oneWayTx, 0, 4);
+
+
+                                            long oneWayTx_valor = (long)(oneWayTx[3] * Math.Pow(2, 24)
+                                                                       + oneWayTx[2] * Math.Pow(2, 16)
+                                                                       + oneWayTx[1] * Math.Pow(2, 8)
+                                                                       + oneWayTx[0] * Math.Pow(2, 0));
+
+
+                                            //TwoWayTx
+                                            byte[] TwoWayTx = new byte[4];
+                                            Array.Copy(listTotal, 14 + 5, TwoWayTx, 0, 4);
+
+
+                                            long TwoWayTx_valor = (long)(TwoWayTx[3] * Math.Pow(2, 24)
+                                                                         + TwoWayTx[2] * Math.Pow(2, 16)
+                                                                         + TwoWayTx[1] * Math.Pow(2, 8)
+                                                                         + TwoWayTx[0] * Math.Pow(2, 0));
+
+                                            //TwoWayRx
+                                            byte[] TwoWayRx = new byte[4];
+                                            Array.Copy(listTotal, 18 + 5, TwoWayRx, 0, 4);
+
+
+                                            long TwoWayRx_valor = (long)(TwoWayRx[3] * Math.Pow(2, 24)
+                                                                          + TwoWayRx[2] * Math.Pow(2, 16)
+                                                                          + TwoWayRx[1] * Math.Pow(2, 8)
+                                                                          + TwoWayRx[0] * Math.Pow(2, 0));
+
+                                            String listatotla = listTotal.EncodeToBase16String();
+
+
+                                            //cargarValoresMTU("21189225", "456,3375", "456,3375", "468,8375");
+                                            cargarValoresMTU(identificador_valor.ToString(),
+                                                             (Double.Parse(oneWayTx_valor.ToString()) / 1000000).ToString(),
+                                                             (Double.Parse(TwoWayTx_valor.ToString()) / 1000000).ToString(),
+                                                             (Double.Parse(TwoWayRx_valor.ToString()) / 1000000).ToString()
+                                                            );
+
+
+                                        }catch(Exception e){
+                                            //cargarValoresMTU("21189225", "456,3375", "456,3375", "468,8375");
+                                            cargarValoresMTU("0",
+                                                            "0",
+                                                            "0",
+                                                            "0"
+                                                            );
+                                        }
+                                       
                                     });
                                 });
                             });
@@ -556,14 +811,14 @@ namespace aclara_meters.view
         {
 
 
-            if (!Settings.IsConnectedBLE)
+            if (!ble_library.BleMainClass.Connection_app)
             {
                 // don't do anything if we just de-selected the row.
                 if (e.Item == null) return;
                 // Deselect the item.
                 if (sender is ListView lv) lv.SelectedItem = null;
             }
-            if (Settings.IsConnectedBLE)
+            if (ble_library.BleMainClass.Connection_app)
             {
                 navigationDrawerList.SelectedItem = null;
 

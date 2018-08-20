@@ -162,9 +162,9 @@ namespace aclara_meters.view
 
 
             //Change username textview to Prefs. String
-            if (Settings.SavedUserName != null)
+            if (FormsApp.CredentialsService.UserName != null)
             {
-                userName.Text = Settings.SavedUserName;
+                userName.Text = FormsApp.CredentialsService.UserName;
             }
 
             menuList = new List<PageItem>();
@@ -212,7 +212,7 @@ namespace aclara_meters.view
             }
 
             Thread printer = new Thread(new ThreadStart(InvokeMethod));
- 
+
             printer.Start();
 
         }
@@ -369,13 +369,14 @@ namespace aclara_meters.view
 
 
 
-            if(!Settings.IsConnectedBLE){
+            if (!ble_library.BleMainClass.Connection_app)
+            {
                 // don't do anything if we just de-selected the row.
                 if (e.Item == null) return;
                 // Deselect the item.
                 if (sender is ListView lv) lv.SelectedItem = null;
             }
-            if (Settings.IsConnectedBLE)
+            if (ble_library.BleMainClass.Connection_app)
             {
                 navigationDrawerList.SelectedItem = null;
 

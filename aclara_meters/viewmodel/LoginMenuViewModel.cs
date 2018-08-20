@@ -150,6 +150,7 @@ namespace aclara_meters.viewmodel
                             if (!doCredentialsExist)
                             {
                                 FormsApp.CredentialsService.SaveCredentials(userName, password);
+                        
                             }
 
                             Settings.IsLoggedIn = true;
