@@ -9,4 +9,7 @@
     <PackageReference Include="nexus.core" Version="0.32.0" />
     <PackageReference Include="System.IO.Ports" Version="4.5.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="BleMainInterface.cs" />
+  </ItemGroup>
 </Project>

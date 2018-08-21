@@ -154,10 +154,18 @@ namespace aclara_meters.view
                         backdark_bg.IsVisible = true;
                         indicator.IsVisible = true;
 
-                        ble_library.BleSerial.buffer_interface = new byte[] { };
+                        //ble_library.BleSerial.buffer_interface = new byte[] { };
                        
-                        ble_library.BleMainClass.Write_Characteristic_ReadMTU();
-                  
+                        //ble_library.BlePort.Write_Characteristic_ReadMTU();
+                       
+                        FormsApp.ble_interface.ble_port_serial.CaracterisicoIndicate = new Guid("00000003-0000-1000-8000-00805f9b34fb");
+                        FormsApp.ble_interface.ble_port_serial.ServicioIndicate =  new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
+
+                        FormsApp.ble_interface.ble_port_serial.ServicioWrite = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
+                        FormsApp.ble_interface.ble_port_serial.CaracterisicoWrite = new Guid("00000002-0000-1000-8000-00805f9b34fb");
+
+
+                        FormsApp.ble_interface.Write(new byte[] { (byte)0x00, (byte)0x00, (byte)0x05, (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C },0,8);
 
                     });
                 });
@@ -352,14 +360,14 @@ namespace aclara_meters.view
 
 
 
-
+            /*
             Device.BeginInvokeOnMainThread(() =>
             {
-                ble_library.BleMainClass.Listen_Characteristic_Notification_ReadMTU();
+                ble_library.BlePort.Listen_Characteristic_Notification_ReadMTU();
          
             });
 
-
+*/
            
 
 
@@ -456,7 +464,7 @@ namespace aclara_meters.view
             Task.Run(async () =>
             {
 
-                await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
+                await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
                 {
                     try
                     {
@@ -480,21 +488,50 @@ namespace aclara_meters.view
                                     {
                                         ////////
                                         try{
-                                            BleSerial interfaceBle = BleMainClass.interfaceBle;
-                                            Lexi.Lexi lexi = interfaceBle.getInterface_lexi();
-                                            Byte[] value1 = interfaceBle.getBufferInterface();
-                                            int longi = interfaceBle.getBufferInterface().Length - 8;
+                                            Queue<byte[]> numbers = new Queue<byte[]>();
+                                            numbers = FormsApp.ble_interface.ble_port_serial.getBuffer_ble_data();
 
-                                            Byte[] value2 = new Byte[longi];
-                                            Array.Copy(value1, 8, value2, 0, longi);
 
-                                            value1 = value2;
+                                            // Create an array twice the size of the queue and copy the
+                                            // elements of the queue, starting at the middle of the 
+                                            // array. 
+                                          //  byte[] array2 = new byte[]{};
+                                          
+                                         //   for (int i = 0; i < numbers.Count; i++){
+                                         //       numbers.Peek().CopyTo(array2, numbers.Count);
+                                         //   }
 
-                                            ble_library.BleSerial.buffer_interface = value2;
+                                        
+
+                                            cargarValoresMTU(FormsApp.ble_interface.Read(null, 11, 4).ToString(),
+                                                             (Double.Parse(FormsApp.ble_interface.Read(null, 15, 4).ToString()) / 1000000).ToString(),
+                                                             (Double.Parse(FormsApp.ble_interface.Read(null, 19, 4).ToString()) / 1000000).ToString(),
+                                                             (Double.Parse(FormsApp.ble_interface.Read(null, 23, 4).ToString()) / 1000000).ToString()
+                                                            );
+
+
+
+                                            //FormsApp.ble_interface.Read(FormsApp.ble_interface.GetBufferElement(), 11, 4);
+                                           // FormsApp.ble_interface.Read(FormsApp.ble_interface.GetBufferElement(), 15, 4);
+                                            //FormsApp.ble_interface.Read(FormsApp.ble_interface.GetBufferElement(), 19, 4);
+                                           // FormsApp.ble_interface.Read(FormsApp.ble_interface.GetBufferElement(), 23, 4);
+
+
+
+
+                                         //   Byte[] value1 = BlePort.buffer_ble_data
+                                         //   int longi = interfaceBle.getBufferInterface().Length - 8;
+
+                                          //  Byte[] value2 = new Byte[longi];
+                                          //  Array.Copy(value1, 8, value2, 0, longi);
+
+                                          //  value1 = value2;
+
+                                           // ble_library.BleSerial.buffer_interface = value2;
 
                                           
                                                     
-                                            try{
+                                            //try{
                                                 //int identificador = lexi.Read(value1, 11, 4);
                                                 // int oneWayTx = lexi.Read(value1, 15, 4);
                                                 // int TwoWayTx = lexi.Read(value1, 19, 4);
@@ -523,7 +560,7 @@ namespace aclara_meters.view
                                                 interfaceBle.Write(64, new byte[] { 0x01 });
 
 */
-
+                                                /*
                                                 Console.WriteLine("Valores LEXI:");
                                                 Console.WriteLine("");
 
@@ -592,7 +629,7 @@ namespace aclara_meters.view
 
                                          
                                          
-
+                                            /*
 
                                                        
                                             int longitud = value1.Length;
@@ -691,7 +728,7 @@ namespace aclara_meters.view
                                                              (Double.Parse(TwoWayRx_valor.ToString()) / 1000000).ToString()
                                                             );
 
-
+*/
                                         }catch(Exception e){
                                             //cargarValoresMTU("21189225", "456,3375", "456,3375", "468,8375");
                                             cargarValoresMTU("0",
@@ -700,8 +737,10 @@ namespace aclara_meters.view
                                                             "0"
                                                             );
                                         }
-                                       
+                                      
+
                                     });
+                                    
                                 });
                             });
                         });
@@ -811,14 +850,14 @@ namespace aclara_meters.view
         {
 
 
-            if (!ble_library.BleMainClass.Connection_app)
+            if (!ble_library.BlePort.Connection_app)
             {
                 // don't do anything if we just de-selected the row.
                 if (e.Item == null) return;
                 // Deselect the item.
                 if (sender is ListView lv) lv.SelectedItem = null;
             }
-            if (ble_library.BleMainClass.Connection_app)
+                    if (ble_library.BlePort.Connection_app)
             {
                 navigationDrawerList.SelectedItem = null;
 

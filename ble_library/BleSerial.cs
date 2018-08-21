@@ -2,115 +2,109 @@
 using Lexi.Interfaces;
 using System.IO.Ports;
 using System.Linq;
+using nexus.protocols.ble;
+using Acr.UserDialogs;
+using System.Numerics;
+using System.Threading;
 
 namespace ble_library
 {
     public class BleSerial : ISerial
     {
-        public static Byte[] buffer_interface;
-        public static ISerial base_serial;
-        public static Lexi.Lexi interface_lexi;
-
-        public static int valueRead;
-
-        public static Byte[] buffer_interface_write;
-
-       // public static Byte[] write_buffer;
-       
-        public Byte[] getBufferInterface(){
-            return buffer_interface;
-        }
-
-        /*
-        public Byte[] getWriteBuffer()
-        {
-            return write_buffer;
-        }
-*/
-
-        public Lexi.Lexi getInterface_lexi()
-        {
-            return interface_lexi;
-        }
-
-
-
-
-
+        public ISerial base_serial;
+        public BlePort ble_port_serial;
 
         public BleSerial(string portName)
         {
-            
-            buffer_interface = new Byte[] { };
-
-            try{
-                base_serial = this;
-            }catch(Exception e){
-                
-            }
-            interface_lexi = new Lexi.Lexi(base_serial, 400);
-
-            //base_serial.Open();
-
-            //base_serial = new ISerial(portName, 1200, Parity.None, 8, StopBits.Two);
-          
+            ble_port_serial = new BlePort();
         }
 
+        public void initConfig(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs)
+        {
+            ble_port_serial.init(adapter, dialogs);
+        }
+
+        Byte[] array2;
 
 
         public int Read(byte[] buffer, int offset, int count)
         {
+            long identificador_valor = 0;
+            array2 = new Byte[] { };
+            if(buffer!=null){
+                
+            }else{
+                for (int i = 1; i < ble_port_serial.getBuffer_ble_data().Count -1; i++){
+                    
+                    byte[] tempArray = new byte[ ble_port_serial.getBuffer_ble_data().ElementAt(i)[2] ];
+                    Array.Copy(ble_port_serial.getBuffer_ble_data().ElementAt(i), 3, tempArray, 0, ble_port_serial.getBuffer_ble_data().ElementAt(i)[2] ); 
+                    byte[] ret = new byte[array2.Length + tempArray.Length];
+                    Buffer.BlockCopy(array2, 0, ret, 0, array2.Length);
+                    Buffer.BlockCopy(tempArray, 0, ret, array2.Length, tempArray.Length);
+                    array2 =  ret;
+                }
 
-            /*
-            Console.WriteLine(BitConverter.ToString(interface_lexi.Read(0, 1)));
-            Console.WriteLine("");
-            Console.WriteLine(BitConverter.ToString(interface_lexi.Read(1, 9)));
-            Console.WriteLine("");
-            Console.WriteLine(BitConverter.ToString(interface_lexi.Read(600, 9)));
-            Console.WriteLine("");
-            interface_lexi.Write(64, new byte[] { 0x01 });
-            */
+                byte[] identificador = new byte[count];
+                Array.Copy(array2, offset, identificador, 0, count);
 
-            valueRead = BitConverter.ToInt32(buffer.Skip(offset).Take(count).ToArray(), 0);
+                for (int i = 0; i < count; i++)
+                {
+                    identificador_valor= (long)((long) identificador_valor + (long)( (long) identificador[i] * Math.Pow(2, 8 * i)));
+                }
 
-            return BitConverter.ToInt32(buffer.Skip(offset).Take(count).ToArray(), 0);
-            //return BitConverter.ToInt16(interface_lexi.Read(offset count));
-            //return base_serial.Read(buffer, offset, count);
+                Thread.Sleep(20);
+                return (int)identificador_valor;
+
+            }
+            return 0;
         }
+
+
+        public byte[] GetBufferElement()
+        {
+            return ble_port_serial.getBuffer_ble_data().Dequeue();
+        }
+
 
 
         public void Write(byte[] buffer, int offset, int count)
         {
-
-            // write_buffer = write_buffer.Concat(buffer).ToArray();
-
-            //base_serial.Write(buffer, offset, count);
-            //base_serial.Write(buffer, offset, count);
-
-            buffer_interface_write = buffer;
+            ble_port_serial.clearBuffer_ble_data();
+            ble_port_serial.Listen_Characteristic_Notification();
+            ble_port_serial.Write_Characteristic(buffer);
         }
 
         public void Close()
         {
-           // base_serial.Close();
-            //interface_lexi.Write(64, new byte[] { 0x01 });
+            ble_port_serial.DisconnectDevice();
         }
 
         public Boolean IsOpen()
         {
-            return true;
-            //return base_serial.IsOpen();
+            if(ble_port_serial.getConnection_app())
+            {
+                return true;
+            }
+            return false;
+
+        }
+
+        public void Scan(){
+            ble_port_serial.startScan();
         }
 
         public void Open()
         {
-           // return true;
-           // base_serial.Open();
+            if(!IsOpen()){
+                ble_port_serial.ConnectoToDevice();
+            }else{
+                Close();
+            }
         }
 
         public int BytesToRead()
         {
-            return buffer_interface.Length;
+            return ble_port_serial.getBuffer_ble_data().Count;
         }
 
         public Boolean isEcho()

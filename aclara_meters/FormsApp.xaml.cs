@@ -18,6 +18,7 @@ namespace aclara_meters
     {
         public static string AppName { get { return "StoreAccountInfoApp"; } }
         public static ICredentialsService CredentialsService { get; private set; }
+        public static BleSerial ble_interface;
 
         public FormsApp()
         {
@@ -30,7 +31,9 @@ namespace aclara_meters
             InitializeComponent();
 
             //Inicializar libreria personalizada
-            BleMainClass.init(adapter, dialogs);
+            ble_interface = new BleSerial("Ble Port");
+            ble_interface.initConfig(adapter, dialogs);
+
 
             //Gestor de cuentas
             CredentialsService = new CredentialsService();

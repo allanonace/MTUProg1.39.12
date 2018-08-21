@@ -16,8 +16,12 @@ using Xamarin.Forms;
 
 namespace ble_library
 {
-    public class BleMainClass
+    public class BlePort
     {
+        
+        /* Buffer BLE */
+        public static Queue<byte[]> buffer_ble_data;
+
         public static IBluetoothLowEnergyAdapter adapter;
         public static IUserDialogs dialogs;
 
@@ -39,12 +43,33 @@ namespace ble_library
 
         public static Boolean Connection_app;
 
+
+
+
+        public Boolean getConnection_app(){
+            return Connection_app;
+        }
+
+        public Queue<byte[]> getBuffer_ble_data()
+        {
+            return buffer_ble_data;
+        }
+
+        public void clearBuffer_ble_data()
+        {
+            buffer_ble_data.Clear();
+            Stop_Listen_Characteristic_Notification_ReadMTU();
+        }
+
+
+
         public class ObserverReporter : IObserver<ConnectionState>
         {
             private IDisposable unsubscriber;
 
             public virtual void Subscribe(IObservable<ConnectionState> provider)
             {
+        
                 unsubscriber = provider.Subscribe(this);
                 dialogs.Toast("Subscribed to Device");
             }
@@ -83,34 +108,35 @@ namespace ble_library
             }
         }
 
-        public static void init(IBluetoothLowEnergyAdapter adapter_app, IUserDialogs dialogs_app)
+        public void init(IBluetoothLowEnergyAdapter adapter_app, IUserDialogs dialogs_app)
         {
 			adapter = adapter_app;
             dialogs = dialogs_app;
 
             Connection_app = false;
-
-           
-
-
-            Device.StartTimer(
-              TimeSpan.FromSeconds(3),
-              () =>
-              {
-                  InterfacesPorConsola();
-                  dialogs.Toast("La libreria ha cargado correctamente");
-
-                  BluetoothEnable();
-
-                  if (adapter.CurrentState.IsEnabledOrEnabling())
-                  {
-                      ScanForBroadcasts();
-                  }
-                  return false;
-              });
         }
 
-        private async static void BluetoothEnable()
+
+        public void startScan(){
+
+             Device.StartTimer(
+             TimeSpan.FromSeconds(3),
+             () =>
+             {
+                 dialogs.Toast("BLE Library loaded");
+
+                 BluetoothEnable();
+
+                 if (adapter.CurrentState.IsEnabledOrEnabling())
+                 {
+                     ScanForBroadcasts();
+                 }
+                 return false;
+             });
+
+        }
+
+        private async void BluetoothEnable()
         {
             if (adapter.AdapterCanBeEnabled && adapter.CurrentState.IsDisabledOrDisabling())
             {
@@ -118,12 +144,14 @@ namespace ble_library
             }
         }
 
+        public Guid ServicioIndicate;
+        public Guid CaracterisicoIndicate;
 
 
 
         public static IDisposable Listen_Characteristic_Notification_Handler;
         //public static Byte[] m_bytearray_notification_readmtu;
-        public async static void Listen_Characteristic_Notification_ReadMTU(){
+        public async void Listen_Characteristic_Notification(){
             
             try
             {
@@ -133,8 +161,7 @@ namespace ble_library
 
 
 
-                Guid ServicioIndicate = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
-                Guid CaracterisicoIndicate = new Guid("00000003-0000-1000-8000-00805f9b34fb");
+              
 
                 // Will also stop listening when gattServer
                 // is disconnected, so if that is acceptable,
@@ -158,7 +185,12 @@ namespace ble_library
 
         public async static void Stop_Listen_Characteristic_Notification_ReadMTU()
         {
-            Listen_Characteristic_Notification_Handler.Dispose();
+            try{
+                Listen_Characteristic_Notification_Handler.Dispose();
+            }catch(Exception e){
+                
+            }
+
             Stop_Notification = true;
 
         }
@@ -169,20 +201,20 @@ namespace ble_library
 
   
         public static Byte[] m_bytearray_write_characteristic_read;
-        public async static void Write_Characteristic_ReadMTU()
+        public async void Write_Characteristic(byte[] buffer)
         {
-            await WriteCharacteristicMethodAsync();
+            await WriteCharacteristicMethodAsync(buffer);
           
             Stop_Notification = false;
         }
 
-        private static async Task WriteCharacteristicMethodAsync()
+        private async Task WriteCharacteristicMethodAsync(byte[] buffer)
         {
             
         
             try
             {
-                await WriteCurrentBytesGUIDAsync();
+                await WriteCurrentBytesGUIDAsync(buffer);
             }
             catch (GattException ex)
             {
@@ -191,17 +223,23 @@ namespace ble_library
 
         }
 
-        private static async Task WriteCurrentBytesGUIDAsync()
+
+        public Guid ServicioWrite;
+        public Guid CaracterisicoWrite;
+
+
+        private async Task WriteCurrentBytesGUIDAsync(byte[] buffer)
         {
             try
             {
-                ValueAsHexBytes = new Byte[] { };
+                
+
                 m_bytearray_write_characteristic_read = new Byte[] { };
 
                 var bytes_temp_characteristic_read = gattServer_connection.WriteCharacteristicValue(
-                    new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
-                    new Guid("00000002-0000-1000-8000-00805f9b34fb"),
-                    new byte[] { (byte)0x00, (byte)0x00, (byte)0x05, (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C }
+                    ServicioWrite,
+                    CaracterisicoWrite,
+                    buffer
                 );
 
                 UpdateDisplayedValue(await bytes_temp_characteristic_read);
@@ -216,11 +254,7 @@ namespace ble_library
 
 
         //static byte[] bufferFull = new byte[]{};
-        //static List<byte> al_list = new List<byte>();
-
-        public static BleSerial interfaceBle;
-
-        public static Byte[] ValueAsHexBytes;
+        //static List<byte> al_list = new List<byte>()
 
         private static void UpdateDisplayedValue(byte[] bytes )
         {
@@ -242,15 +276,14 @@ namespace ble_library
 
 
 
-            byte[] ret = new byte[ValueAsHexBytes.Length + bytes.Length];
-            Array.Copy(ValueAsHexBytes, 0, ret, 0, ValueAsHexBytes.Length);
-            Array.Copy(bytes, 0, ret, ValueAsHexBytes.Length, bytes.Length);
+           // byte[] ret = new byte[ValueAsHexBytes.Length + bytes.Length];
+          //  Array.Copy(ValueAsHexBytes, 0, ret, 0, ValueAsHexBytes.Length);
+           // Array.Copy(bytes, 0, ret, ValueAsHexBytes.Length, bytes.Length);
+          //  ValueAsHexBytes = ret;
 
+            buffer_ble_data.Enqueue(bytes);
 
-
-            ValueAsHexBytes = ret;
-
-            ble_library.BleSerial.buffer_interface = ValueAsHexBytes;
+            //ble_library.BleSerial.buffer_interface = ValueAsHexBytes;
 
 
            
@@ -265,7 +298,7 @@ namespace ble_library
            
         }
 
-        public async static void ConnectoToDevice(){
+        public async void ConnectoToDevice(){
 
             var connection = await adapter.ConnectToDevice(
                 // The IBlePeripheral to connect to
@@ -324,8 +357,10 @@ namespace ble_library
                 dialogs.Alert("\n\r"  + string.Join("\n\r", ListAllCharacteristics.ToArray()) + "\n\r");
 
 
-                interfaceBle = new BleSerial("Read MTU");
-                ValueAsHexBytes = new Byte[] { };
+             
+               // ValueAsHexBytes = new Byte[] { };
+                buffer_ble_data = new Queue<byte[]>();
+
             }
             else
             {
@@ -350,7 +385,18 @@ namespace ble_library
 
         }
 
-        private async static void ScanForBroadcasts()
+
+        public async void DisconnectDevice()
+        {
+            await gattServer_connection.Disconnect();
+            dialogs.Toast("Disconnected from device");
+            Connection_app = false;
+            Stop_Notification = true;
+
+        }
+
+
+        private async void ScanForBroadcasts()
         {
             await adapter.ScanForBroadcasts(
             // Optional scan filter to ensure that the
@@ -409,42 +455,6 @@ namespace ble_library
             );
 
             // scanning has been stopped when code reached this point
-        }
-
-
-
-		public static void DoSomething(InterfazHija familia)
-        {
-            // Do awesome stuff here.
-        }
-
-        private static void InterfacesPorConsola()
-        {
-            Console.WriteLine("Este es el padre");  
-            InterfazPadre Padre = new BleMainInterface();
-            Padre.ONE();
-
-            Console.WriteLine("Este es el hijo");  
-            InterfazHijo Hijo = new BleMainInterface();
-            Hijo.ONE();
-            Hijo.TWO();
-
-            Console.WriteLine("Esta es la hija");  
-            InterfazHija Hija = new BleMainInterface();
-            Hija.ONE();
-            Hija.THREE();
-
-            Console.WriteLine("Esta es la familia"); 
-            InterfazFamilia Familia = new BleMainInterface();
-            Familia.ONE();
-            Familia.TWO();
-            Familia.THREE();
-
-            Console.WriteLine("Este es un invitado"); 
-            InterfazInvitado Invitado = new BleMainInterface();
-            Invitado.FOUR();
-
-            Console.ReadLine();  
         }
 
     }

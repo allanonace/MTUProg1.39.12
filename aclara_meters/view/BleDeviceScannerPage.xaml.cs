@@ -215,6 +215,10 @@ namespace aclara_meters.view
 
             printer.Start();
 
+
+            //SCAN BLE DEVICES
+            FormsApp.ble_interface.Scan();
+
         }
 
         public Boolean changedStatus;
@@ -223,9 +227,9 @@ namespace aclara_meters.view
         {
             while (true)
             {
-                if(ble_library.BleMainClass.Connection_app!=changedStatus){
-                    changedStatus = ble_library.BleMainClass.Connection_app;
-                    if(ble_library.BleMainClass.Connection_app){
+                if(ble_library.BlePort.Connection_app!=changedStatus){
+                    changedStatus = ble_library.BlePort.Connection_app;
+                    if(ble_library.BlePort.Connection_app){
                         Device.BeginInvokeOnMainThread(() =>
                         {
 
@@ -241,7 +245,7 @@ namespace aclara_meters.view
 
                     }
 
-                    if (!ble_library.BleMainClass.Connection_app)
+                    if (!ble_library.BlePort.Connection_app)
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
@@ -342,7 +346,7 @@ namespace aclara_meters.view
         {
 
 
-            ble_library.BleMainClass.DisconnectFromDevice();
+            ble_library.BlePort.DisconnectFromDevice();
 
         }
 
@@ -369,14 +373,14 @@ namespace aclara_meters.view
 
 
 
-            if (!ble_library.BleMainClass.Connection_app)
+            if (!ble_library.BlePort.Connection_app)
             {
                 // don't do anything if we just de-selected the row.
                 if (e.Item == null) return;
                 // Deselect the item.
                 if (sender is ListView lv) lv.SelectedItem = null;
             }
-            if (ble_library.BleMainClass.Connection_app)
+            if (ble_library.BlePort.Connection_app)
             {
                 navigationDrawerList.SelectedItem = null;
 
@@ -845,8 +849,10 @@ namespace aclara_meters.view
 
         void ConnectElementMockUp_Tapped(object sender, EventArgs e)
         {
-            
-            ble_library.BleMainClass.ConnectoToDevice();
+
+            FormsApp.ble_interface.Open();
+
+            //ble_library.BlePort.ConnectoToDevice();
 
 
 
