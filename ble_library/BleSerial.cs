@@ -11,7 +11,6 @@ namespace ble_library
 {
     public class BleSerial : ISerial
     {
-        public ISerial base_serial;
         public BlePort ble_port_serial;
 
         public BleSerial(string portName)
