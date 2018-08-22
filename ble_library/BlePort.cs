@@ -20,7 +20,7 @@ namespace ble_library
     {
         
         /* Buffer BLE */
-        public static Queue<byte[]> buffer_ble_data;
+        public static Queue<byte> buffer_ble_data;
 
         public static IBluetoothLowEnergyAdapter adapter;
         public static IUserDialogs dialogs;
@@ -50,7 +50,7 @@ namespace ble_library
             return Connection_app;
         }
 
-        public Queue<byte[]> getBuffer_ble_data()
+        public Queue<byte> getBuffer_ble_data()
         {
             return buffer_ble_data;
         }
@@ -281,7 +281,17 @@ namespace ble_library
            // Array.Copy(bytes, 0, ret, ValueAsHexBytes.Length, bytes.Length);
           //  ValueAsHexBytes = ret;
 
-            buffer_ble_data.Enqueue(bytes);
+            if(bytes.Length == 20){
+                byte[] tempArray = new byte[bytes[2]];
+                Array.Copy(bytes, 3, tempArray, 0, bytes[2]);
+
+                for (int i = 0; i < tempArray.Length; i++){
+
+                    buffer_ble_data.Enqueue(tempArray[i]);
+                }
+
+            }
+
 
             //ble_library.BleSerial.buffer_interface = ValueAsHexBytes;
 
@@ -359,7 +369,7 @@ namespace ble_library
 
              
                // ValueAsHexBytes = new Byte[] { };
-                buffer_ble_data = new Queue<byte[]>();
+                buffer_ble_data = new Queue<byte>();
 
             }
             else

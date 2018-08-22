@@ -488,7 +488,7 @@ namespace aclara_meters.view
                                     {
                                         ////////
                                         try{
-                                            Queue<byte[]> numbers = new Queue<byte[]>();
+                                            Queue<byte> numbers = new Queue<byte>();
                                             numbers = FormsApp.ble_interface.ble_port_serial.getBuffer_ble_data();
 
 
