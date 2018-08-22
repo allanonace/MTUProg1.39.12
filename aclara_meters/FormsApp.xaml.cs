@@ -32,7 +32,7 @@ namespace aclara_meters
 
             //Inicializar libreria personalizada
             ble_interface = new BleSerial("Ble Port");
-            ble_interface.initConfig(adapter, dialogs);
+            ble_interface.InitConfig(adapter, dialogs);
 
 
             //Gestor de cuentas
