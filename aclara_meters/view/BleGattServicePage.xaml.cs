@@ -145,7 +145,7 @@ namespace aclara_meters.view
 
 
             if(!_userTapped){
-                
+
                 Task.Run(async () =>
                 {
                     Device.BeginInvokeOnMainThread(() =>
@@ -155,14 +155,14 @@ namespace aclara_meters.view
                         indicator.IsVisible = true;
 
                         //ble_library.BleSerial.buffer_interface = new byte[] { };
-                       
-                        //ble_library.BlePort.Write_Characteristic_ReadMTU();
-                       
-                        FormsApp.ble_interface.ble_port_serial.CaracterisicoIndicate = new Guid("00000003-0000-1000-8000-00805f9b34fb");
-                        FormsApp.ble_interface.ble_port_serial.ServicioIndicate =  new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
 
-                        FormsApp.ble_interface.ble_port_serial.ServicioWrite = new Guid("2cf42000-7992-4d24-b05d-1effd0381208");
-                        FormsApp.ble_interface.ble_port_serial.CaracterisicoWrite = new Guid("00000002-0000-1000-8000-00805f9b34fb");
+                        //ble_library.BlePort.Write_Characteristic_ReadMTU();
+
+                        FormsApp.ble_interface.ble_port_serial.setCaracterisicoIndicate(new Guid("00000003-0000-1000-8000-00805f9b34fb"));
+                        FormsApp.ble_interface.ble_port_serial.setServicioIndicate(new Guid("2cf42000-7992-4d24-b05d-1effd0381208"));
+
+                        FormsApp.ble_interface.ble_port_serial.setServicioWrite(new Guid("2cf42000-7992-4d24-b05d-1effd0381208"));
+                        FormsApp.ble_interface.ble_port_serial.setCaracterisicoWrite(new Guid("00000002-0000-1000-8000-00805f9b34fb"));
 
 
                         FormsApp.ble_interface.Write(new byte[] { (byte)0x00, (byte)0x00, (byte)0x05, (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C },0,8);
@@ -511,8 +511,7 @@ namespace aclara_meters.view
                                                             );
 
 
-                                            FormsApp.ble_interface.ShowBuffer_Console();
-
+                                           
 
                                             //FormsApp.ble_interface.Read(FormsApp.ble_interface.GetBufferElement(), 11, 4);
                                            // FormsApp.ble_interface.Read(FormsApp.ble_interface.GetBufferElement(), 15, 4);

@@ -43,7 +43,6 @@ namespace ble_library
 
         public int Read(byte[] buffer, int offset, int count)
         {
-
             ExceptionCheck(buffer, offset, count);
 
             int readedElements = 0;
@@ -59,33 +58,8 @@ namespace ble_library
             {
                 throw e;
             }  
-          
-
-
+         
             return readedElements;
-
-         //   ble_port_serial.getBuffer_ble_data().Dequeue();
-
-
-            /*
-            long identificador_valor = 0;
-
-            for (int i = offset; i < offset + count; i++)
-            {
-                identificador_valor = (long)((long)identificador_valor + (long)((long)ble_port_serial.getBuffer_ble_data().ElementAt(i) * Math.Pow(2, 8 * (i-offset) ) ) );
-            }
-           
-            return (int)identificador_valor;
-            */
-        }
-
-        public void ShowBuffer_Console()
-        {
-            for (int i = 0; i < BytesToRead(); i++)
-            {
-                Console.Write(Convert.ToString(ble_port_serial.getBuffer_ble_data().ElementAt(i), 16)+" ");
-             
-            }
         }
 
         public void Write(byte[] buffer, int offset, int count)
@@ -94,9 +68,6 @@ namespace ble_library
             ble_port_serial.clearBuffer_ble_data();
             ble_port_serial.Listen_Characteristic_Notification();
             ble_port_serial.Write_Characteristic(buffer, offset, count);
-
-         
-
         }
 
         public void Close()
@@ -111,7 +82,6 @@ namespace ble_library
                 return true;
             }
             return false;
-
         }
 
         public void Scan(){
@@ -120,7 +90,8 @@ namespace ble_library
 
         public void Open()
         {
-            if(!IsOpen()){
+            if(!IsOpen())
+            {
                 ble_port_serial.ConnectoToDevice();
             }else{
                 Close();
@@ -136,6 +107,5 @@ namespace ble_library
         {
             return true;
         }
-
     }
 }

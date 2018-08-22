@@ -18,38 +18,52 @@ namespace ble_library
 {
     public class BlePort
     {
-        
-        /* Buffer BLE */
         private static Queue<byte> buffer_ble_data;
-
         private static IBluetoothLowEnergyAdapter adapter;
         private static IUserDialogs dialogs;
-
         private static IBlePeripheral ble_device;
         private static IBleGattServerConnection gattServer_connection;
+        private static IDisposable Listen_Characteristic_Notification_Handler;
+        private static bool Stop_Notification = false;
+        private static Boolean Connection_app;
+        private static string hex;
+        private static Byte[] val;
+        private static int offset_write;
+        private static int count_write;
+        private static ArrayList ListAllServices;
+        private static ArrayList ListAllCharacteristics;
+        private Guid ServicioWrite;
+        private Guid CaracterisicoWrite;
+        private Guid ServicioIndicate;
+        private Guid CaracterisicoIndicate;
 
-        public static String m_connectionState;
-        public static String Connection
+
+        public void setServicioWrite(Guid value)
         {
-            get { return m_connectionState; }
-            private set
-            {
-                if (value != ConnectionState.Disconnected.ToString())
-                {
-                    m_connectionState = value;
-                }
-            }
+            ServicioWrite = value;
         }
 
-        private static Boolean Connection_app;
+        public void setCaracterisicoWrite(Guid value)
+        {
+            CaracterisicoWrite = value;
+        }
 
 
+        public void setServicioIndicate(Guid value)
+        {
+            ServicioIndicate = value;
+        }
+
+        public void setCaracterisicoIndicate(Guid value)
+        {
+            CaracterisicoIndicate = value;
+        }
+
+     
         public byte GetBufferElement()
         {
-
             return buffer_ble_data.Dequeue();
         }
-
 
         public Boolean getConnection_app(){
             return Connection_app;
@@ -66,23 +80,18 @@ namespace ble_library
             Stop_Listen_Characteristic_Notification_ReadMTU();
         }
 
-
-
         public class ObserverReporter : IObserver<ConnectionState>
         {
             private IDisposable unsubscriber;
 
             public virtual void Subscribe(IObservable<ConnectionState> provider)
             {
-        
                 unsubscriber = provider.Subscribe(this);
-                dialogs.Toast("Subscribed to Device");
             }
 
             public virtual void Unsubscribe()
             {
                 unsubscriber.Dispose();
-
             }
 
             public virtual void OnCompleted()
@@ -92,21 +101,20 @@ namespace ble_library
 
             public virtual void OnError(Exception error)
             {
-                // Do nothing.
+              
             }
 
             public void OnNext(ConnectionState value)
             {
                 Console.WriteLine("Status: " + value.ToString());
-                dialogs.Toast("Status: " + value.ToString());
 
                 if (value == ConnectionState.Disconnected)
                 {
-                    dialogs.Toast("Device disconnected");
+                    //dialogs.Toast("Device disconnected");
                     try{
                         DisconnectFromDevice();
                     }catch(Exception e){
-                        
+                        throw e;
                     }
                     Connection_app = false;
                 }
@@ -128,7 +136,6 @@ namespace ble_library
              TimeSpan.FromSeconds(3),
              () =>
              {
-                 dialogs.Toast("BLE Library loaded");
 
                  BluetoothEnable();
 
@@ -149,15 +156,9 @@ namespace ble_library
             }
         }
 
-        public Guid ServicioIndicate;
-        public Guid CaracterisicoIndicate;
-
-
-
-        public static IDisposable Listen_Characteristic_Notification_Handler;
-        //public static Byte[] m_bytearray_notification_readmtu;
-        public async void Listen_Characteristic_Notification(){
-            
+       
+        public async void Listen_Characteristic_Notification()
+        {
             try
             {
          
@@ -179,7 +180,7 @@ namespace ble_library
             }
         }
 
-        public static bool Stop_Notification = false;
+
 
         public async static void Stop_Listen_Characteristic_Notification_ReadMTU()
         {
@@ -192,14 +193,7 @@ namespace ble_library
             Stop_Notification = true;
 
         }
-
-        public static string hex;
-        public static Byte[] val;
-
-
-        private static int offset_write;
-        private static int count_write;
-
+       
         public async void Write_Characteristic(byte[] buffer, int offset, int count)
         {
             try
@@ -226,10 +220,6 @@ namespace ble_library
   
 
 
-        public Guid ServicioWrite;
-        public Guid CaracterisicoWrite;
-
-
         private async Task WriteCurrentBytesGUIDAsync(byte[] buffer)
         {
             try
@@ -252,67 +242,20 @@ namespace ble_library
         }
 
 
-        //static byte[] bufferFull = new byte[]{};
-        //static List<byte> al_list = new List<byte>()
-
         private static void UpdateDisplayedValue(byte[] bytes )
         {
-         
-            //bufferFull = bufferFull.Concat(bytes).ToArray();
-
-
-
-           // byte[] ret = new byte[ValueAsHexBytes.Length + bytes.Length];
-           // Array.Copy(ValueAsHexBytes, 0, ret, 0, ValueAsHexBytes.Length);
-           // Array.Copy(bytes, 0, ret, ValueAsHexBytes.Length, bytes.Length);
-
-           // ValueAsHexBytes = ret;
-
-            //ble_library.BleSerial.buffer_interface = ValueAsHexBytes;
-
-            //ble_library.BleSerial.buffer_interface = ble_library.BleSerial.buffer_interface.Concat(bytes).ToArray();
-
-
-
-
-           // byte[] ret = new byte[ValueAsHexBytes.Length + bytes.Length];
-          //  Array.Copy(ValueAsHexBytes, 0, ret, 0, ValueAsHexBytes.Length);
-           // Array.Copy(bytes, 0, ret, ValueAsHexBytes.Length, bytes.Length);
-          //  ValueAsHexBytes = ret;
-
-       
-            if(bytes.Length == 20){
+            if(bytes.Length == 20)
+            {
                 byte[] tempArray = new byte[bytes[2]];
                 Array.Copy(bytes, 3, tempArray, 0, bytes[2]);
-
-                for (int i = 0; i < tempArray.Length; i++){
-
+                for (int i = 0; i < tempArray.Length; i++)
+                {
                     buffer_ble_data.Enqueue(tempArray[i]);
-
-
-
                 }
-
             }
-
-
-            //ble_library.BleSerial.buffer_interface = ValueAsHexBytes;
-
-
-           
-            //interfaceBle.Read(bytes, interfaceBle.BytesToRead(), interfaceBle.BytesToRead() + bytes.Length);
-            //interfaceBle.Write(bytes, 0, interfaceBle.BytesToRead() + bytes.Length);
-            //Console.WriteLine("Bytes interfaceBle: " + interfaceBle.BytesToRead().ToString());
-            //Console.WriteLine("Bytes interfaceBle buffer sent: " + bytes.EncodeToBase16String());
-
-
-
-            //Console.WriteLine("Bytes characteristic_read: " + bufferFull.EncodeToBase16String());
-           
         }
 
         public async void ConnectoToDevice(){
-
             var connection = await adapter.ConnectToDevice(
                 // The IBlePeripheral to connect to
                 ble_device,
@@ -324,25 +267,23 @@ namespace ble_library
                 // Optional IProgress<ConnectionProgress>
                 progress => {
                     Console.WriteLine(progress);
-                    dialogs.Toast("Progreso: " + progress.ToString());
+                    //dialogs.Toast("Progreso: " + progress.ToString());
                 }
             );
 
             if (connection.IsSuccessful())
             {
                 gattServer_connection = connection.GattServer;
-                // ... do things with gattServer here...
 
                 Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
                                                                 // the server implements IObservable<ConnectionState> so you can subscribe to its state
 
                 gattServer_connection.Subscribe(new ObserverReporter());
- 
-                Connection = "Reading Services";
 
                 Connection_app = true;
 
-                try{
+                try
+                {
                     ListAllServices = new ArrayList();
                     ListAllCharacteristics = new ArrayList();
 
@@ -357,23 +298,13 @@ namespace ble_library
                             ListAllCharacteristics.Add(DescriptionOrGuid);
                         }
 
-
-
                     }
 
                 }catch(Exception j){
                     
                 }
-               
-
-               // dialogs.Alert("\n\r" + string.Join("\n\r", ListAllServices.ToArray()) + "\n\r");
-                dialogs.Alert("\n\r"  + string.Join("\n\r", ListAllCharacteristics.ToArray()) + "\n\r");
-
-
-             
-               // ValueAsHexBytes = new Byte[] { };
+ 
                 buffer_ble_data = new Queue<byte>();
-
             }
             else
             {
@@ -386,13 +317,12 @@ namespace ble_library
 
         }
 
-        public static ArrayList ListAllServices;
-        public static ArrayList ListAllCharacteristics;
+       
 
 
         public async static void DisconnectFromDevice(){
             await gattServer_connection.Disconnect();
-            dialogs.Toast("Disconnected from device");
+            //dialogs.Toast("Disconnected from device");
             Connection_app = false;
             Stop_Notification = true;
 
@@ -402,7 +332,7 @@ namespace ble_library
         public async void DisconnectDevice()
         {
             await gattServer_connection.Disconnect();
-            dialogs.Toast("Disconnected from device");
+           // dialogs.Toast("Disconnected from device");
             Connection_app = false;
             Stop_Notification = true;
 
@@ -441,11 +371,6 @@ namespace ble_library
                 serv = serv + ", ";
 
                 Console.WriteLine(serv);
-
-                //dialogs.Alert("Servicios: "+serv);
-                //dialogs.Alert("Compañia: " + adv.ManufacturerSpecificData.FirstOrDefault().CompanyName());
-                //dialogs.Alert("Datos Servicio: " + adv.ServiceData);
-
                 Console.WriteLine(adv.ManufacturerSpecificData.FirstOrDefault().CompanyName());
                 Console.WriteLine(adv.ServiceData);
 
@@ -453,12 +378,11 @@ namespace ble_library
                 if(adv.DeviceName!=null){
                     if (adv.DeviceName.Contains("Aclara"))
                     {
-                        dialogs.Alert("Nombre Dispositivo: " + adv.DeviceName);
-               
+                        //dialogs.Alert("Nombre Dispositivo: " + adv.DeviceName);
+          
                         ble_device = peripheral;
                     } 
                 }
-
                 //  connect to the device
                },
                 // TimeSpan or CancellationToken to stop the scan
