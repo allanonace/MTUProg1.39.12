@@ -90,9 +90,13 @@ namespace ble_library
 
         public void Write(byte[] buffer, int offset, int count)
         {
+            ExceptionCheck(buffer, offset, count);
             ble_port_serial.clearBuffer_ble_data();
             ble_port_serial.Listen_Characteristic_Notification();
-            ble_port_serial.Write_Characteristic(buffer);
+            ble_port_serial.Write_Characteristic(buffer, offset, count);
+
+         
+
         }
 
         public void Close()

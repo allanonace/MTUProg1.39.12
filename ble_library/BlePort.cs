@@ -160,14 +160,7 @@ namespace ble_library
             
             try
             {
-          
-
-
-
-
-
-              
-
+         
                 // Will also stop listening when gattServer
                 // is disconnected, so if that is acceptable,
                 // you don't need to store this disposable.
@@ -204,29 +197,33 @@ namespace ble_library
         public static Byte[] val;
 
 
-  
-        public static Byte[] m_bytearray_write_characteristic_read;
-        public async void Write_Characteristic(byte[] buffer)
-        {
-            await WriteCharacteristicMethodAsync(buffer);
-          
-            Stop_Notification = false;
-        }
+        private static int offset_write;
+        private static int count_write;
 
-        private async Task WriteCharacteristicMethodAsync(byte[] buffer)
+        public async void Write_Characteristic(byte[] buffer, int offset, int count)
         {
-            
-        
             try
             {
-                await WriteCurrentBytesGUIDAsync(buffer);
+               
+                byte[] ret = new byte[count];
+              
+                for (int i = 0; i < count; i++){
+                    ret[i] = buffer[i + offset];
+                }
+
+
+               
+                await WriteCurrentBytesGUIDAsync(ret);
             }
             catch (GattException ex)
             {
                 Console.WriteLine(ex.ToString());
             }
 
+            Stop_Notification = false;
         }
+
+  
 
 
         public Guid ServicioWrite;
@@ -237,9 +234,6 @@ namespace ble_library
         {
             try
             {
-                
-
-                m_bytearray_write_characteristic_read = new Byte[] { };
 
                 var bytes_temp_characteristic_read = gattServer_connection.WriteCharacteristicValue(
                     ServicioWrite,
@@ -286,6 +280,7 @@ namespace ble_library
            // Array.Copy(bytes, 0, ret, ValueAsHexBytes.Length, bytes.Length);
           //  ValueAsHexBytes = ret;
 
+       
             if(bytes.Length == 20){
                 byte[] tempArray = new byte[bytes[2]];
                 Array.Copy(bytes, 3, tempArray, 0, bytes[2]);
