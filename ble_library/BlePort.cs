@@ -288,6 +288,9 @@ namespace ble_library
                 for (int i = 0; i < tempArray.Length; i++){
 
                     buffer_ble_data.Enqueue(tempArray[i]);
+
+
+
                 }
 
             }

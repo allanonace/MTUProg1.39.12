@@ -166,6 +166,7 @@ namespace aclara_meters.view
 
 
                         FormsApp.ble_interface.Write(new byte[] { (byte)0x00, (byte)0x00, (byte)0x05, (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C },0,8);
+                        //FormsApp.ble_interface.Write(new byte[] { (byte)0x00, (byte)0x00, (byte)0x05, (byte)0x25, (byte)0x80, (byte)0x00, (byte)0x01, (byte)0x5A }, 0, 8);
 
                     });
                 });
@@ -503,12 +504,14 @@ namespace aclara_meters.view
 
                                         
 
-                                            cargarValoresMTU(FormsApp.ble_interface.Read(null, 11, 4).ToString(),
-                                                             (Double.Parse(FormsApp.ble_interface.Read(null, 15, 4).ToString()) / 1000000).ToString(),
-                                                             (Double.Parse(FormsApp.ble_interface.Read(null, 19, 4).ToString()) / 1000000).ToString(),
-                                                             (Double.Parse(FormsApp.ble_interface.Read(null, 23, 4).ToString()) / 1000000).ToString()
+                                            cargarValoresMTU(FormsApp.ble_interface.Read(new byte[4], 11, 4).ToString(),
+                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[4], 15, 4).ToString()) / 1000000).ToString(),
+                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[4], 19, 4).ToString()) / 1000000).ToString(),
+                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[4], 23, 4).ToString()) / 1000000).ToString()
                                                             );
 
+
+                                            FormsApp.ble_interface.ShowBuffer_Console();
 
 
                                             //FormsApp.ble_interface.Read(FormsApp.ble_interface.GetBufferElement(), 11, 4);

@@ -25,16 +25,32 @@ namespace ble_library
 
         public int Read(byte[] buffer, int offset, int count)
         {
-            int cantidad = BytesToRead();
+            for (int i = 0; i < count; i++)
+            {
+                buffer[i] = ble_port_serial.getBuffer_ble_data().ElementAt(offset + i);
+            }
 
+            return buffer.Length;
+
+            /*
             long identificador_valor = 0;
 
             for (int i = offset; i < offset + count; i++)
             {
                 identificador_valor = (long)((long)identificador_valor + (long)((long)ble_port_serial.getBuffer_ble_data().ElementAt(i) * Math.Pow(2, 8 * (i-offset) ) ) );
             }
-
+           
             return (int)identificador_valor;
+            */
+        }
+
+        public void ShowBuffer_Console()
+        {
+            for (int i = 0; i < BytesToRead(); i++)
+            {
+                Console.Write(Convert.ToString(ble_port_serial.getBuffer_ble_data().ElementAt(i), 16)+" ");
+             
+            }
         }
 
         public byte GetBufferElement()
