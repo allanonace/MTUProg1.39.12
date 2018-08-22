@@ -19,19 +19,25 @@ namespace ble_library
     public class BlePort
     {
         private static Queue<byte> buffer_ble_data;
-        private static IBluetoothLowEnergyAdapter adapter;
-        private static IUserDialogs dialogs;
-        private static IBlePeripheral ble_device;
+        private IBluetoothLowEnergyAdapter adapter;
+        private IUserDialogs dialogs;
+        private IBlePeripheral ble_device;
         private static IBleGattServerConnection gattServer_connection;
         private static IDisposable Listen_Characteristic_Notification_Handler;
         private static Boolean Connection_app;
-        private static ArrayList ListAllServices;
-        private static ArrayList ListAllCharacteristics;
+        private ArrayList ListAllServices;
+        private ArrayList ListAllCharacteristics;
         private Guid ServicioWrite;
         private Guid CaracterisicoWrite;
         private Guid ServicioIndicate;
         private Guid CaracterisicoIndicate;
+       
 
+
+
+        public static void SetConnectionApp(Boolean status){
+            Connection_app = status;
+        }
 
         public void setServicioWrite(Guid value)
         {
@@ -110,7 +116,9 @@ namespace ble_library
                     }catch(Exception e){
                         throw e;
                     }
-                    Connection_app = false;
+
+                    SetConnectionApp(false);
+               
                 }
             }
         }
@@ -121,6 +129,9 @@ namespace ble_library
             dialogs = dialogs_app;
 
             Connection_app = false;
+
+
+           
         }
 
 
