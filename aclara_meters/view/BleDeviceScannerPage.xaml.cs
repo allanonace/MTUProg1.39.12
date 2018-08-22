@@ -227,9 +227,9 @@ namespace aclara_meters.view
         {
             while (true)
             {
-                if(ble_library.BlePort.Connection_app!=changedStatus){
-                    changedStatus = ble_library.BlePort.Connection_app;
-                    if(ble_library.BlePort.Connection_app){
+                if(FormsApp.ble_interface.IsOpen()!=changedStatus){
+                    changedStatus = FormsApp.ble_interface.IsOpen();
+                    if(FormsApp.ble_interface.IsOpen()){
                         Device.BeginInvokeOnMainThread(() =>
                         {
 
@@ -245,7 +245,7 @@ namespace aclara_meters.view
 
                     }
 
-                    if (!ble_library.BlePort.Connection_app)
+                    if (!FormsApp.ble_interface.IsOpen())
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
@@ -373,14 +373,14 @@ namespace aclara_meters.view
 
 
 
-            if (!ble_library.BlePort.Connection_app)
+            if (!FormsApp.ble_interface.IsOpen())
             {
                 // don't do anything if we just de-selected the row.
                 if (e.Item == null) return;
                 // Deselect the item.
                 if (sender is ListView lv) lv.SelectedItem = null;
             }
-            if (ble_library.BlePort.Connection_app)
+            if (FormsApp.ble_interface.IsOpen())
             {
                 navigationDrawerList.SelectedItem = null;
 

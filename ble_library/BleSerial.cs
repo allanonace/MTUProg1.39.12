@@ -23,14 +23,49 @@ namespace ble_library
             ble_port_serial.init(adapter, dialogs);
         }
 
-        public int Read(byte[] buffer, int offset, int count)
-        {
-            for (int i = 0; i < count; i++)
+        private void ExceptionCheck(byte[] buffer, int offset, int count){
+            if (buffer == null)
             {
-                buffer[i] = ble_port_serial.getBuffer_ble_data().ElementAt(offset + i);
+                throw new System.ArgumentException("Parameter cannot be null", "buffer");
             }
 
-            return buffer.Length;
+            if (offset < 0)
+            {
+                throw new System.ArgumentException("Parameter cannot be less than Zero", "offset");
+            }
+
+            if (count < 0)
+            {
+                throw new System.ArgumentException("Parameter cannot be less than Zero", "count");
+            }
+
+        }
+
+        public int Read(byte[] buffer, int offset, int count)
+        {
+
+            ExceptionCheck(buffer, offset, count);
+
+            int readedElements = 0;
+
+            try{
+                for (int i = 0; i < count; i++)
+                {
+                    buffer[i+offset] = ble_port_serial.GetBufferElement();
+                    readedElements++;
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }  
+          
+
+
+            return readedElements;
+
+         //   ble_port_serial.getBuffer_ble_data().Dequeue();
+
 
             /*
             long identificador_valor = 0;
@@ -51,11 +86,6 @@ namespace ble_library
                 Console.Write(Convert.ToString(ble_port_serial.getBuffer_ble_data().ElementAt(i), 16)+" ");
              
             }
-        }
-
-        public byte GetBufferElement()
-        {
-            return ble_port_serial.getBuffer_ble_data().Dequeue();
         }
 
         public void Write(byte[] buffer, int offset, int count)

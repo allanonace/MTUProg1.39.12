@@ -504,10 +504,10 @@ namespace aclara_meters.view
 
                                         
 
-                                            cargarValoresMTU(FormsApp.ble_interface.Read(new byte[4], 11, 4).ToString(),
-                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[4], 15, 4).ToString()) / 1000000).ToString(),
-                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[4], 19, 4).ToString()) / 1000000).ToString(),
-                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[4], 23, 4).ToString()) / 1000000).ToString()
+                                            cargarValoresMTU(FormsApp.ble_interface.Read(new byte[262], 11, 4).ToString(),
+                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[262], 15, 4).ToString()) / 1000000).ToString(),
+                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[262], 19, 4).ToString()) / 1000000).ToString(),
+                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[262], 23, 4).ToString()) / 1000000).ToString()
                                                             );
 
 
@@ -853,14 +853,14 @@ namespace aclara_meters.view
         {
 
 
-            if (!ble_library.BlePort.Connection_app)
+            if (!FormsApp.ble_interface.IsOpen())
             {
                 // don't do anything if we just de-selected the row.
                 if (e.Item == null) return;
                 // Deselect the item.
                 if (sender is ListView lv) lv.SelectedItem = null;
             }
-                    if (ble_library.BlePort.Connection_app)
+            if (FormsApp.ble_interface.IsOpen())
             {
                 navigationDrawerList.SelectedItem = null;
 
