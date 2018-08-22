@@ -20,13 +20,13 @@ namespace ble_library
     {
         
         /* Buffer BLE */
-        public static Queue<byte> buffer_ble_data;
+        private static Queue<byte> buffer_ble_data;
 
-        public static IBluetoothLowEnergyAdapter adapter;
-        public static IUserDialogs dialogs;
+        private static IBluetoothLowEnergyAdapter adapter;
+        private static IUserDialogs dialogs;
 
-        public static IBlePeripheral ble_device;
-        public static IBleGattServerConnection gattServer_connection;
+        private static IBlePeripheral ble_device;
+        private static IBleGattServerConnection gattServer_connection;
 
         public static String m_connectionState;
         public static String Connection
@@ -41,9 +41,14 @@ namespace ble_library
             }
         }
 
-        public static Boolean Connection_app;
+        private static Boolean Connection_app;
 
 
+        public byte GetBufferElement()
+        {
+
+            return buffer_ble_data.Dequeue();
+        }
 
 
         public Boolean getConnection_app(){
