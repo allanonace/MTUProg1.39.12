@@ -24,12 +24,7 @@ namespace ble_library
         private static IBlePeripheral ble_device;
         private static IBleGattServerConnection gattServer_connection;
         private static IDisposable Listen_Characteristic_Notification_Handler;
-        private static bool Stop_Notification = false;
         private static Boolean Connection_app;
-        private static string hex;
-        private static Byte[] val;
-        private static int offset_write;
-        private static int count_write;
         private static ArrayList ListAllServices;
         private static ArrayList ListAllCharacteristics;
         private Guid ServicioWrite;
@@ -69,15 +64,14 @@ namespace ble_library
             return Connection_app;
         }
 
-        public Queue<byte> getBuffer_ble_data()
+        public int BytesToRead()
         {
-            return buffer_ble_data;
+            return buffer_ble_data.Count;
         }
 
         public void clearBuffer_ble_data()
         {
             buffer_ble_data.Clear();
-            Stop_Listen_Characteristic_Notification_ReadMTU();
         }
 
         public class ObserverReporter : IObserver<ConnectionState>
@@ -157,7 +151,7 @@ namespace ble_library
         }
 
        
-        public async void Listen_Characteristic_Notification()
+        private void Listen_Characteristic_Notification()
         {
             try
             {
@@ -182,16 +176,13 @@ namespace ble_library
 
 
 
-        public async static void Stop_Listen_Characteristic_Notification_ReadMTU()
+        private  static void Stop_Listen_Characteristic_Notification()
         {
             try{
                 Listen_Characteristic_Notification_Handler.Dispose();
             }catch(Exception e){
                 
             }
-
-            Stop_Notification = true;
-
         }
        
         public async void Write_Characteristic(byte[] buffer, int offset, int count)
@@ -214,7 +205,6 @@ namespace ble_library
                 Console.WriteLine(ex.ToString());
             }
 
-            Stop_Notification = false;
         }
 
   
@@ -303,8 +293,15 @@ namespace ble_library
                 }catch(Exception j){
                     
                 }
- 
+
+                setCaracterisicoIndicate(new Guid("00000003-0000-1000-8000-00805f9b34fb"));
+                setServicioIndicate(new Guid("2cf42000-7992-4d24-b05d-1effd0381208"));
+
+                setServicioWrite(new Guid("2cf42000-7992-4d24-b05d-1effd0381208"));
+                setCaracterisicoWrite(new Guid("00000002-0000-1000-8000-00805f9b34fb"));
+
                 buffer_ble_data = new Queue<byte>();
+                Listen_Characteristic_Notification();
             }
             else
             {
@@ -321,21 +318,17 @@ namespace ble_library
 
 
         public async static void DisconnectFromDevice(){
+            Stop_Listen_Characteristic_Notification();
             await gattServer_connection.Disconnect();
-            //dialogs.Toast("Disconnected from device");
             Connection_app = false;
-            Stop_Notification = true;
-
         }
 
 
         public async void DisconnectDevice()
         {
+            Stop_Listen_Characteristic_Notification();
             await gattServer_connection.Disconnect();
-           // dialogs.Toast("Disconnected from device");
             Connection_app = false;
-            Stop_Notification = true;
-
         }
 
 
