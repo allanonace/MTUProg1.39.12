@@ -395,7 +395,7 @@
                  <ListView    Opacity="1"
                  IsPullToRefreshEnabled="true"
                               x:Name="DeviceList" 
-                              RowHeight="240"
+                              RowHeight="160"
                               SeparatorVisibility="None"
                               SeparatorColor="#6aa2b8"                
                               BackgroundColor="White"

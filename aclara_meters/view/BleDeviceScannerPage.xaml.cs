@@ -220,7 +220,7 @@ namespace aclara_meters.view
            
 
             //SCAN BLE DEVICES
-            FormsApp.ble_interface.Scan();
+            //FormsApp.ble_interface.Scan();
             employees = new ObservableCollection<DeviceItem>();
 
             DeviceList.RefreshCommand = new Command(() =>
@@ -259,6 +259,10 @@ namespace aclara_meters.view
                 }
                 DeviceList.IsRefreshing = false;
             });
+
+
+            DeviceList.RefreshCommand.Execute(true);
+
         }
 
         public Boolean changedStatus;
@@ -294,6 +298,9 @@ namespace aclara_meters.view
                             navigationDrawerList.IsEnabled = true;
                             background_scan_page.IsVisible = true;
                             //SCAN BLE DEVICES 
+
+
+                             DeviceList.RefreshCommand.Execute(true);
                         });
                     }
 
@@ -330,8 +337,8 @@ namespace aclara_meters.view
                     for (int i = 0; i < blePeripherals.Count; i++)
                     {
                         DeviceItem device = new DeviceItem();
-                        device.deviceMacAddress = blePeripherals[i].Address.ToString();
-                        device.deviceName = blePeripherals[i].DeviceId.ToString();
+                        device.deviceMacAddress = blePeripherals[i].DeviceId.ToString();
+                        device.deviceName = blePeripherals[i].Advertisement.DeviceName;
                         device.deviceBattery = "100%";
                         device.deviceRssi = blePeripherals[i].Rssi.ToString() + "dBm";
                         device.deviceBatteryIcon = "battery_toolbar_high";
@@ -466,6 +473,8 @@ namespace aclara_meters.view
 
 
             FormsApp.ble_interface.Close();
+
+            DeviceList.RefreshCommand.Execute(true);
 
         }
 
