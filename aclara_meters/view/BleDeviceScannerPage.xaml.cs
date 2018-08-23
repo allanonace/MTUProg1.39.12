@@ -17,6 +17,8 @@ using nexus.core.logging;
 using nexus.protocols.ble;
 using Xamarin.Forms;
 using System.Threading;
+using nexus.protocols.ble.scan;
+using System.Collections.ObjectModel;
 
 namespace aclara_meters.view
 {
@@ -54,7 +56,7 @@ namespace aclara_meters.view
             replacemeter_cancel.Tapped += Replacemeter_Cancel_Tapped;
             meter_ok.Tapped += Meter_Ok_Tapped;
             meter_cancel.Tapped += Meter_Cancel_Tapped;
-            connectElementMockUp.Tapped += ConnectElementMockUp_Tapped;
+            //connectElementMockUp.Tapped += ConnectElementMockUp_Tapped;
 
 
             shadoweffect.IsVisible = false;
@@ -215,10 +217,48 @@ namespace aclara_meters.view
 
             printer.Start();
 
+           
 
             //SCAN BLE DEVICES
             FormsApp.ble_interface.Scan();
+            employees = new ObservableCollection<DeviceItem>();
 
+            DeviceList.RefreshCommand = new Command(() =>
+            {
+                try{
+
+                    employees.Clear();
+
+                    FormsApp.ble_interface.Scan();
+
+                    DeviceList.IsRefreshing = true;
+
+                    tempblePeripherals = new List<IBlePeripheral> { };
+
+                    try
+                    {
+                        // DeviceList.ItemsSource = employees;
+                        ChangeListViewData();
+
+             
+              
+                    }
+                    catch (Exception c)
+                    {
+
+                    }
+
+
+
+                 
+                   
+
+                  
+                }catch (Exception c){
+                    
+                }
+                DeviceList.IsRefreshing = false;
+            });
         }
 
         public Boolean changedStatus;
@@ -253,15 +293,94 @@ namespace aclara_meters.view
                             navigationDrawerList.Opacity = 0.65;
                             navigationDrawerList.IsEnabled = true;
                             background_scan_page.IsVisible = true;
+                            //SCAN BLE DEVICES 
                         });
                     }
 
                 }
+
+              
+                ChangeListViewData();
+
                 Thread.Sleep(500); // 1.5 Second
             }
         }
 
-    
+        List<IBlePeripheral> blePeripherals;
+        List<IBlePeripheral> tempblePeripherals;
+        ObservableCollection<DeviceItem> employees;
+
+        private void ChangeListViewData()
+        {
+            try{
+                
+
+
+                blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
+
+
+              
+
+                    //List<DeviceItem> listViewItems = new List<DeviceItem> { };
+
+              
+                    
+               
+
+                    for (int i = 0; i < blePeripherals.Count; i++)
+                    {
+                        DeviceItem device = new DeviceItem();
+                        device.deviceMacAddress = blePeripherals[i].Address.ToString();
+                        device.deviceName = blePeripherals[i].DeviceId.ToString();
+                        device.deviceBattery = "100%";
+                        device.deviceRssi = blePeripherals[i].Rssi.ToString() + "dBm";
+                        device.deviceBatteryIcon = "battery_toolbar_high";
+                        device.deviceRssiIcon = "rssi_toolbar_high";
+                        device.Peripheral = blePeripherals[i];
+
+                        if(tempblePeripherals.Count<0){
+                            employees.Add(device);
+                        }else{
+
+                            bool enc = false;
+
+                            for (int j = 0; j < tempblePeripherals.Count; i++)
+                            {
+                                if (tempblePeripherals[j].DeviceId.Equals(blePeripherals[i].DeviceId))
+                                {
+                                    enc = true;
+                                }
+                            }
+                              
+                            if(!enc){
+                                employees.Add(device);
+                            }
+
+                            }
+
+                       
+                         }
+
+                    // var listView = new ListView();
+                    //BindingContext = new DeviceListNotify();
+                    //DeviceListNotify mainUIModel = (DeviceListNotify)this.BindingContext;
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        DeviceList.ItemsSource = employees;
+                        
+                    });
+                   
+                    tempblePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
+
+
+            }catch(Exception e){
+
+            } 
+        
+           
+
+        }
 
         private void Replacemeter_Cancel_Tapped(object sender, EventArgs e)
         {
@@ -363,6 +482,30 @@ namespace aclara_meters.view
 
 
         }
+
+
+
+
+        // Event for Menu Item selection, here we are going to handle navigation based
+        // on user selection in menu ListView
+        private async void OnMenuItemSelectedListDevices(object sender, ItemTappedEventArgs e)
+        {
+            var item = (DeviceItem)e.Item;
+            FormsApp.ble_interface.Open(item.Peripheral);
+
+            deviceID.Text = item.deviceName;
+            macAddress.Text = item.deviceMacAddress;
+
+            imageBattery.Source = item.deviceBatteryIcon;
+            imageRssi.Source = item.deviceRssiIcon;
+
+
+            batteryLevel.Text = item.deviceBattery;
+            rssiLevel.Text = item.deviceRssi;
+
+        }
+
+    
 
 
         // Event for Menu Item selection, here we are going to handle navigation based
@@ -842,28 +985,6 @@ namespace aclara_meters.view
             }
 
         }
-
-
-
-
-
-        void ConnectElementMockUp_Tapped(object sender, EventArgs e)
-        {
-
-            FormsApp.ble_interface.Open();
-
-            //ble_library.BlePort.ConnectoToDevice();
-
-
-
-        }
-
-
-
-
-
-
-
 
 
 

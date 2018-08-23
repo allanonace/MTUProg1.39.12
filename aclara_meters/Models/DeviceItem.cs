@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using nexus.protocols.ble.scan;
 
 namespace aclara_meters.Models
 {
@@ -10,12 +11,13 @@ namespace aclara_meters.Models
     public class DeviceItem
     {
 
-        public string DeviceID { get; set; }
-        public string MacAddress { get; set; }
-        public string BatteryLevel { get; set; }
-        public string RssiLevel { get; set; }
-        public string imageBattery { get; set; }
-        public string imageRssi { get; set; }
+        public string deviceName { get; set; }
+        public string deviceMacAddress { get; set; }
+        public string deviceBattery { get; set; }
+        public string deviceRssi { get; set; }
+        public string deviceBatteryIcon { get; set; }
+        public string deviceRssiIcon { get; set; }
+        public IBlePeripheral Peripheral { get; internal set; }
     }
     
    

@@ -389,111 +389,62 @@
 
                         
                   </StackLayout>
-                <ScrollView Margin="0,-6,0,0"  >
-                        
-                 <StackLayout  >
+               
 
-                  <StackLayout Margin="0,0,0,0"  Scale="1" Padding="16" Orientation="Horizontal">
-                                            <Image  HeightRequest="108" Margin="4,0,0,0" Source="ble_puck_icon.png" />
-                                            <StackLayout Margin="8,0,0,0" Orientation="Vertical" 
-                                                         VerticalOptions="Center" 
-                                                         HorizontalOptions="Center">
 
-                            <!-- {Binding Name} -->
-                                                <Label FontSize="32" Text="Device 1"></Label>
-                                                <Label Margin="4,-4,0,0" FontSize="14" Text="34:32:45:76:98"></Label>
-                                                <StackLayout Margin="0,-4,0,0" Orientation="Horizontal" VerticalOptions="Center">
-                                                     <Image Source="battery_toolbar_high" HeightRequest="34" VerticalOptions="Center" />
-                                                    <Label Margin="-2,2,0,-2" Text="100%" FontSize="14" VerticalOptions="Center"></Label>
-                                                     <Image Source="rssi_toolbar_high" HeightRequest="20"  VerticalOptions="Center" />
-                                                    <Label Margin="-2,2,0,0" Text="-66 dBm" FontSize="14" VerticalOptions="Center"></Label>
-                                                </StackLayout>
-                                            </StackLayout>
+                 <ListView    Opacity="1"
+                 IsPullToRefreshEnabled="true"
+                              x:Name="DeviceList" 
+                              RowHeight="240"
+                              SeparatorVisibility="None"
+                              SeparatorColor="#6aa2b8"                
+                              BackgroundColor="White"
 
-                                            <StackLayout.GestureRecognizers>
-                                                 <TapGestureRecognizer  x:Name="connectElementMockUp"  NumberOfTapsRequired="1" />
-                               
-                                            </StackLayout.GestureRecognizers>
-                                        </StackLayout>
-                    
-                                 
+                              ItemTapped="OnMenuItemSelectedListDevices"
 
-                  <StackLayout  Scale="1" Padding="16" Orientation="Horizontal">
-                                            <Image  HeightRequest="108" Margin="4,0,0,0" Source="ble_puck_icon.png" />
-                                            <StackLayout Margin="8,0,0,0" Orientation="Vertical" 
-                                                         VerticalOptions="Center" 
-                                                         HorizontalOptions="Center">
+                              
+                           >
 
-                            <!-- {Binding Name} -->
-                                                <Label FontSize="32" Text="Device 2"></Label>
-                                                <Label Margin="4,-4,0,0" FontSize="14" Text="34:32:45:76:98"></Label>
-                                                <StackLayout Margin="0,-4,0,0" Orientation="Horizontal" VerticalOptions="Center">
-                                                     <Image Source="battery_toolbar_mid" HeightRequest="34" VerticalOptions="Center" />
-                                                    <Label Margin="-2,2,0,-2" Text="60%" FontSize="14" VerticalOptions="Center"></Label>
-                                                     <Image Source="rssi_toolbar_mid" HeightRequest="20"  VerticalOptions="Center" />
-                                                    <Label Margin="-2,2,0,0" Text="-36 dBm" FontSize="14" VerticalOptions="Center"></Label>
-                                                </StackLayout>
-                                            </StackLayout>
+                      
 
-                                            <StackLayout.GestureRecognizers>
-                                                 <TapGestureRecognizer  x:Name="connectElementMockUp2"  NumberOfTapsRequired="1" />
-                               
-                                            </StackLayout.GestureRecognizers>
-                                        </StackLayout>
-
-                                    <StackLayout  Scale="1" Padding="16" Orientation="Horizontal">
+                            
+                      <ListView.ItemTemplate >
+                        <DataTemplate>
+                          <ViewCell  >
+                            
+     
+                             <StackLayout Margin="0,0,0,0"  Scale="1" Padding="16" Orientation="Horizontal">
                                     <Image  HeightRequest="108" Margin="4,0,0,0" Source="ble_puck_icon.png" />
                                     <StackLayout Margin="8,0,0,0" Orientation="Vertical" 
                                                  VerticalOptions="Center" 
                                                  HorizontalOptions="Center">
 
-                    <!-- {Binding Name} -->
-                                        <Label FontSize="32" Text="Device 3"></Label>
-                                        <Label Margin="4,-4,0,0" FontSize="14" Text="34:32:45:76:98"></Label>
+                                        <!-- {Binding Name} -->
+                                        <Label FontSize="32" Text="{Binding deviceName}"></Label>
+                                        <Label Margin="4,-4,0,0" FontSize="14" Text="{Binding deviceMacAddress}"></Label>
                                         <StackLayout Margin="0,-4,0,0" Orientation="Horizontal" VerticalOptions="Center">
-                                             <Image Source="battery_toolbar_low" HeightRequest="34" VerticalOptions="Center" />
-                                            <Label Margin="-2,2,0,-2" Text="35%" FontSize="14" VerticalOptions="Center"></Label>
-                                             <Image Source="rssi_toolbar_low" HeightRequest="20"  VerticalOptions="Center" />
-                                            <Label Margin="-2,2,0,0" Text="-24 dBm" FontSize="14" VerticalOptions="Center"></Label>
+                                             <Image Source="{Binding deviceBatteryIcon} " HeightRequest="34" VerticalOptions="Center" />
+                                            <Label Margin="-2,2,0,-2" Text="{Binding deviceBattery}" FontSize="14" VerticalOptions="Center"></Label>
+                                             <Image Source="{Binding deviceRssiIcon}" HeightRequest="20"  VerticalOptions="Center" />
+                                            <Label Margin="-2,2,0,0" Text="{Binding deviceRssi}" FontSize="14" VerticalOptions="Center"></Label>
                                         </StackLayout>
                                     </StackLayout>
 
-                                    <StackLayout.GestureRecognizers>
-                                         <TapGestureRecognizer  x:Name="connectElementMockUp3"  NumberOfTapsRequired="1" />
-                       
-                                    </StackLayout.GestureRecognizers>
+
                                 </StackLayout>
 
-
-
-                    <StackLayout  Scale="1" Padding="16" Orientation="Horizontal">
-                            <Image  HeightRequest="108" Margin="4,0,0,0" Source="ble_puck_icon.png" />
-                            <StackLayout Margin="8,0,0,0" Orientation="Vertical" 
-                                         VerticalOptions="Center" 
-                                         HorizontalOptions="Center">
-
-            <!-- {Binding Name} -->
-                                <Label FontSize="32" Text="Device 4"></Label>
-                                <Label Margin="4,-4,0,0" FontSize="14" Text="34:32:45:76:98"></Label>
-                                <StackLayout Margin="0,-4,0,0" Orientation="Horizontal" VerticalOptions="Center">
-                                     <Image Source="battery_toolbar_empty" HeightRequest="34" VerticalOptions="Center" />
-                                    <Label Margin="-2,2,0,-2" Text="10%" FontSize="14" VerticalOptions="Center"></Label>
-                                     <Image Source="rssi_toolbar_empty" HeightRequest="20"  VerticalOptions="Center" />
-                                    <Label Margin="-2,2,0,0" Text="-3 dBm" FontSize="14" VerticalOptions="Center"></Label>
-                                </StackLayout>
-                            </StackLayout>
-
-                            <StackLayout.GestureRecognizers>
-                                 <TapGestureRecognizer  x:Name="connectElementMockUp4"  NumberOfTapsRequired="1" />
-               
-                            </StackLayout.GestureRecognizers>
-                        </StackLayout>
+                                            
+                                        
+                          </ViewCell>
+                        </DataTemplate>
+                      </ListView.ItemTemplate>
+                    </ListView>
+                                     
                             
-                        </StackLayout>
+         
+                    
 
-
-
-                          </ScrollView>
+                     
 
 
                     

@@ -2,6 +2,8 @@
 using Lexi.Interfaces;
 using nexus.protocols.ble;
 using Acr.UserDialogs;
+using nexus.protocols.ble.scan;
+using System.Collections.Generic;
 
 namespace ble_library
 {
@@ -103,7 +105,23 @@ namespace ble_library
         }
 
         public void Scan(){
+            
             ble_port_serial.StartScan();
+        }
+
+        /// <summary>
+        /// Opens a new serial port connection.
+        /// </summary>
+        /// <param name="blePeripheral">The object that contains the device information.</param>
+        /// <remarks></remarks>
+        public void Open(IBlePeripheral blePeripheral)
+        {
+            if(!IsOpen())
+            {
+                ble_port_serial.ConnectoToDevice(blePeripheral);
+            }else{
+                // TO-DO: mantenemos la misma conexion o cerramos y volvemos a abrir otra
+            }
         }
 
         /// <summary>
@@ -112,12 +130,7 @@ namespace ble_library
         /// <remarks></remarks>
         public void Open()
         {
-            if(!IsOpen())
-            {
-                ble_port_serial.ConnectoToDevice();
-            }else{
-                // TO-DO: mantenemos la misma conexion o cerramos y volvemos a abrir otra
-            }
+         
         }
 
         /// <summary>
@@ -140,6 +153,15 @@ namespace ble_library
         public Boolean isEcho()
         {
             return true;
+        }
+
+        /// <summary>
+        /// Gets the BLE device list
+        /// </summary>
+        /// <returns>The BLE device list</returns>
+        /// <remarks></remarks>
+        public List <IBlePeripheral> GetBlePeripheralList() {
+            return ble_port_serial.GetBlePeripherals();
         }
     }
 }

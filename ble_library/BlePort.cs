@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Acr.UserDialogs;
 using nexus.protocols.ble;
@@ -65,18 +66,19 @@ namespace ble_library
     {
         private Queue<byte> buffer_ble_data;
         private IBluetoothLowEnergyAdapter adapter;
-        private IBlePeripheral ble_device;
         private IBleGattServerConnection gattServer_connection;
         private IDisposable Listen_Characteristic_Notification_Handler;
         private Boolean isConnected;
-//       private ArrayList ListAllServices;
-//        private ArrayList ListAllCharacteristics;
+        private List<IBlePeripheral> BlePeripheralList;
+//      private ArrayList ListAllServices;
+//      private ArrayList ListAllCharacteristics;
 
         public BlePort(IBluetoothLowEnergyAdapter adapter_app)
         {
             adapter = adapter_app;
             buffer_ble_data = new Queue<byte>();
             isConnected = false;
+            busy = false;
         }
 
         public Boolean GetConnectionStatus()
@@ -99,11 +101,15 @@ namespace ble_library
             buffer_ble_data.Clear();
         }     
 
+        public List<IBlePeripheral> GetBlePeripherals()
+        {
+            return BlePeripheralList;
+        }
 
         public void StartScan(){
 
              Device.StartTimer(
-             TimeSpan.FromSeconds(3),
+             TimeSpan.FromSeconds(1),
              () =>
              {
 
@@ -192,7 +198,7 @@ namespace ble_library
             }
         }
 
-        public async void ConnectoToDevice(){
+        public async void ConnectoToDevice(IBlePeripheral ble_device){
             var connection = await adapter.ConnectToDevice(
                 // The IBlePeripheral to connect to
                 ble_device,
@@ -264,59 +270,72 @@ namespace ble_library
             }
         }
 
+        private bool busy;
 
         private async void ScanForBroadcasts()
         {
-            await adapter.ScanForBroadcasts(
-            // Optional scan filter to ensure that the
-            // observer will only receive peripherals
-            // that pass the filter. If you want to scan
-            // for everything around, omit this argument.
-            new ScanFilter()
+            if(!busy){
+                
+                BlePeripheralList = new List<IBlePeripheral> { };
+                busy = true;
+                await adapter.ScanForBroadcasts(
+                // Optional scan filter to ensure that the
+                // observer will only receive peripherals
+                // that pass the filter. If you want to scan
+                // for everything around, omit this argument.
+                new ScanFilter()
 
-               .SetIgnoreRepeatBroadcasts(true),
-                // IObserver<IBlePeripheral> or Action<IBlePeripheral>
-                // will be triggered for each discovered peripheral
-                // that passes the above can filter (if provided).
-                (IBlePeripheral peripheral) =>
-                {
-                // read the advertising data...
-                var adv = peripheral.Advertisement;
-                Console.WriteLine(adv.DeviceName);
-
-                String serv = adv.Services
-                                .Select
-                                 (x => {
-                                     var name = adv.DeviceName;
-                                     return name != null || name.Equals("")
-                                                ? x.ToString()
-                                                : x.ToString() + " (" + name + ")";
-                                 }
-                                 ).ToString();
-
-                serv = serv + ", ";
-
-                Console.WriteLine(serv);
-                Console.WriteLine(adv.ManufacturerSpecificData.FirstOrDefault().CompanyName());
-                Console.WriteLine(adv.ServiceData);
-
-                //Show dialog with name
-                if(adv.DeviceName!=null){
-                    if (adv.DeviceName.Contains("Aclara"))
+                   .SetIgnoreRepeatBroadcasts(false),
+                    // IObserver<IBlePeripheral> or Action<IBlePeripheral>
+                    // will be triggered for each discovered peripheral
+                    // that passes the above can filter (if provided).
+                    (IBlePeripheral peripheral) =>
                     {
-                        //dialogs.Alert("Nombre Dispositivo: " + adv.DeviceName);
-          
-                        ble_device = peripheral;
-                    } 
-                }
-                //  connect to the device
-               },
-                // TimeSpan or CancellationToken to stop the scan
-                TimeSpan.FromSeconds(30)
-                // If you omit this argument, it will use
-                // BluetoothLowEnergyUtils.DefaultScanTimeout
-            );
+                    // read the advertising data...
+                    var adv = peripheral.Advertisement;
+                    Console.WriteLine(adv.DeviceName);
 
+                    String serv = adv.Services
+                                    .Select
+                                     (x => {
+                                         var name = adv.DeviceName;
+                                         return name != null || name.Equals("")
+                                                    ? x.ToString()
+                                                    : x.ToString() + " (" + name + ")";
+                                     }
+                                     ).ToString();
+
+                    serv = serv + ", ";
+
+                    Console.WriteLine(serv);
+                    Console.WriteLine(adv.ManufacturerSpecificData.FirstOrDefault().CompanyName());
+                    Console.WriteLine(adv.ServiceData);
+
+                    //Show dialog with name
+                    if(adv.DeviceName!=null){
+                        if (adv.DeviceName.Contains("Aclara"))
+                        {
+                            if(!BlePeripheralList.Contains(peripheral))
+                            {
+                                if(BlePeripheralList.Any(p => p.DeviceId.Equals(peripheral.DeviceId)))
+                                {
+                                    BlePeripheralList[BlePeripheralList.FindIndex(f => f.DeviceId.Equals(peripheral.DeviceId))] = peripheral;
+                                }else{
+                                    BlePeripheralList.Add(peripheral);
+                                  
+                                }
+                            } 
+                        } 
+                    }
+                    //  connect to the device
+                   },
+                    // TimeSpan or CancellationToken to stop the scan
+                    TimeSpan.FromSeconds(10)
+                    // If you omit this argument, it will use
+                    // BluetoothLowEnergyUtils.DefaultScanTimeout
+                );  
+            }
+            busy = false;
             // scanning has been stopped when code reached this point
         }
 
