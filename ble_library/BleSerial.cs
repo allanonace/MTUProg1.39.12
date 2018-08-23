@@ -1,11 +1,7 @@
 ﻿using System;
 using Lexi.Interfaces;
-using System.IO.Ports;
-using System.Linq;
 using nexus.protocols.ble;
 using Acr.UserDialogs;
-using System.Numerics;
-using System.Threading;
 
 namespace ble_library
 {
@@ -45,6 +41,13 @@ namespace ble_library
             }
         }
 
+        /// <summary>
+        /// Reads a number of characters from the ISerial input buffer and writes them into an array of characters at a given offset.
+        /// </summary>
+        /// <param name="buffer">The byte array to write the input to.</param>
+        /// <param name="offset">The offset in buffer at which to write the bytes.</param>
+        /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
+        /// <returns>The number of bytes read.</returns>
         public int Read(byte[] buffer, int offset, int count)
         {
             ExceptionCheck(buffer, offset, count);
@@ -70,6 +73,13 @@ namespace ble_library
             return readedElements;
         }
 
+        /// <summary>
+        /// Writes a specified number of characters to the serial port using data from a buffer.
+        /// </summary>
+        /// <param name="buffer">The byte array that contains the data to write to the port.</param>
+        /// <param name="offset">The zero-based byte offset in the buffer parameter at which to begin copying bytes to the port.</param>
+        /// <param name="count">The number of bytes to write.</param>
+        /// <remarks></remarks>
         public void Write(byte[] buffer, int offset, int count)
         {
             ExceptionCheck(buffer, offset, count);
@@ -77,11 +87,20 @@ namespace ble_library
             ble_port_serial.Write_Characteristic(buffer, offset, count);
         }
 
+        /// <summary>
+        /// Closes the port connection, sets the <c>IsOpen</c> property to false, and disposes of the internal Stream object.
+        /// </summary>
+        /// <remarks></remarks>
         public void Close()
         {
             ble_port_serial.DisconnectDevice();
         }
 
+        /// <summary>
+        /// Gets a value indicating the open or closed status of the ISerial object.
+        /// </summary>
+        /// <returns>Boolean value indicating the open or closed status of the ISerial object</returns>
+        /// <remarks>The IsOpen property tracks whether the port is open for use by the caller, not whether the port is open by any application on the machine.</remarks>
         public Boolean IsOpen()
         {
             return ble_port_serial.getConnection_app();
@@ -91,6 +110,10 @@ namespace ble_library
             ble_port_serial.startScan();
         }
 
+        /// <summary>
+        /// Opens a new serial port connection.
+        /// </summary>
+        /// <remarks></remarks>
         public void Open()
         {
             if(!IsOpen())
@@ -101,11 +124,23 @@ namespace ble_library
             }
         }
 
+        /// <summary>
+        /// Gets the number of bytes of data in the receive buffer.
+        /// </summary>
+        /// <returns>Number of bytes of data in the receive buffer</returns>
+        /// <remarks>
+        /// The receive buffer includes the serial driver's receive buffer as well as internal buffering in the <c>ISerial</c> object itself.
+        /// </remarks>
         public int BytesToRead()
         {
             return ble_port_serial.BytesToRead();
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks></remarks>
         public Boolean isEcho()
         {
             return true;
