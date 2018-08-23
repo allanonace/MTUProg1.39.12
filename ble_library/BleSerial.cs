@@ -9,14 +9,10 @@ namespace ble_library
     {
         private BlePort ble_port_serial;
 
-        public BleSerial(string portName)
+        public BleSerial(IBluetoothLowEnergyAdapter adapter)
         {
-            ble_port_serial = new BlePort();
-        }
-
-        public void InitConfig(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs)
-        {
-            ble_port_serial.init(adapter, dialogs);
+            ble_port_serial = new BlePort(adapter);
+            ble_port_serial.DisconnectDevice();
         }
 
         private void ExceptionCheck(byte[] buffer, int offset, int count){
@@ -83,7 +79,7 @@ namespace ble_library
         public void Write(byte[] buffer, int offset, int count)
         {
             ExceptionCheck(buffer, offset, count);
-            ble_port_serial.clearBuffer_ble_data();   // TO-DO
+            ble_port_serial.ClearBuffer();   // TO-DO
             ble_port_serial.Write_Characteristic(buffer, offset, count);
         }
 
@@ -103,11 +99,11 @@ namespace ble_library
         /// <remarks>The IsOpen property tracks whether the port is open for use by the caller, not whether the port is open by any application on the machine.</remarks>
         public Boolean IsOpen()
         {
-            return ble_port_serial.getConnection_app();
+            return ble_port_serial.GetConnectionStatus();
         }
 
         public void Scan(){
-            ble_port_serial.startScan();
+            ble_port_serial.StartScan();
         }
 
         /// <summary>
