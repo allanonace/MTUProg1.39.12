@@ -346,7 +346,7 @@ namespace aclara_meters.view
         {
 
 
-            ble_library.BlePort.DisconnectFromDevice();
+            FormsApp.ble_interface.Close();
 
         }
 

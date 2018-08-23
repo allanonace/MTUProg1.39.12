@@ -31,9 +31,7 @@ namespace aclara_meters
             InitializeComponent();
 
             //Inicializar libreria personalizada
-            ble_interface = new BleSerial("Ble Port");
-            ble_interface.InitConfig(adapter, dialogs);
-
+            ble_interface = new BleSerial(adapter);
 
             //Gestor de cuentas
             CredentialsService = new CredentialsService();

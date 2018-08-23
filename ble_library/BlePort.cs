@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Threading;
 using System.Threading.Tasks;
 using Acr.UserDialogs;
-using nexus.core.text;
 using nexus.protocols.ble;
 using nexus.protocols.ble.gatt;
 using nexus.protocols.ble.scan;
@@ -16,58 +12,81 @@ using Xamarin.Forms;
 
 namespace ble_library
 {
+    public class ObserverReporter : IObserver<ConnectionState>
+    {
+        private IDisposable unsubscriber;
+        private BlePort blePort;
+
+        public ObserverReporter(BlePort port)
+        {
+            blePort = port;
+        }
+
+        public virtual void Subscribe(IObservable<ConnectionState> provider)
+        {
+            unsubscriber = provider.Subscribe(this);
+        }
+
+        public virtual void Unsubscribe()
+        {
+            unsubscriber.Dispose();
+        }
+
+        public virtual void OnCompleted()
+        {
+            Console.WriteLine("Status Report Completed");
+        }
+
+        public virtual void OnError(Exception error)
+        {
+
+        }
+
+        public void OnNext(ConnectionState value)
+        {
+            Console.WriteLine("Status: " + value.ToString());
+
+            if (value == ConnectionState.Disconnected)
+            {
+                //dialogs.Toast("Device disconnected");
+                try
+                {
+                    blePort.DisconnectDevice();
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+            }
+        }
+    }
+
     public class BlePort
     {
-        private static Queue<byte> buffer_ble_data;
+        private Queue<byte> buffer_ble_data;
         private IBluetoothLowEnergyAdapter adapter;
-        private IUserDialogs dialogs;
         private IBlePeripheral ble_device;
-        private static IBleGattServerConnection gattServer_connection;
-        private static IDisposable Listen_Characteristic_Notification_Handler;
-        private static Boolean Connection_app;
-        private ArrayList ListAllServices;
-        private ArrayList ListAllCharacteristics;
-        private Guid ServicioWrite;
-        private Guid CaracterisicoWrite;
-        private Guid ServicioIndicate;
-        private Guid CaracterisicoIndicate;
-       
+        private IBleGattServerConnection gattServer_connection;
+        private IDisposable Listen_Characteristic_Notification_Handler;
+        private Boolean isConnected;
+//       private ArrayList ListAllServices;
+//        private ArrayList ListAllCharacteristics;
 
-
-
-        public static void SetConnectionApp(Boolean status){
-            Connection_app = status;
-        }
-
-        public void setServicioWrite(Guid value)
+        public BlePort(IBluetoothLowEnergyAdapter adapter_app)
         {
-            ServicioWrite = value;
+            adapter = adapter_app;
+            buffer_ble_data = new Queue<byte>();
+            isConnected = false;
         }
 
-        public void setCaracterisicoWrite(Guid value)
+        public Boolean GetConnectionStatus()
         {
-            CaracterisicoWrite = value;
+            return isConnected;
         }
-
-
-        public void setServicioIndicate(Guid value)
-        {
-            ServicioIndicate = value;
-        }
-
-        public void setCaracterisicoIndicate(Guid value)
-        {
-            CaracterisicoIndicate = value;
-        }
-
-     
+             
         public byte GetBufferElement()
         {
             return buffer_ble_data.Dequeue();
-        }
-
-        public Boolean getConnection_app(){
-            return Connection_app;
         }
 
         public int BytesToRead()
@@ -75,67 +94,13 @@ namespace ble_library
             return buffer_ble_data.Count;
         }
 
-        public void clearBuffer_ble_data()
+        public void ClearBuffer()
         {
             buffer_ble_data.Clear();
-        }
-
-        public class ObserverReporter : IObserver<ConnectionState>
-        {
-            private IDisposable unsubscriber;
-
-            public virtual void Subscribe(IObservable<ConnectionState> provider)
-            {
-                unsubscriber = provider.Subscribe(this);
-            }
-
-            public virtual void Unsubscribe()
-            {
-                unsubscriber.Dispose();
-            }
-
-            public virtual void OnCompleted()
-            {
-                Console.WriteLine("Status Report Completed");
-            }
-
-            public virtual void OnError(Exception error)
-            {
-              
-            }
-
-            public void OnNext(ConnectionState value)
-            {
-                Console.WriteLine("Status: " + value.ToString());
-
-                if (value == ConnectionState.Disconnected)
-                {
-                    //dialogs.Toast("Device disconnected");
-                    try{
-                        DisconnectFromDevice();
-                    }catch(Exception e){
-                        throw e;
-                    }
-
-                    SetConnectionApp(false);
-               
-                }
-            }
-        }
-
-        public void init(IBluetoothLowEnergyAdapter adapter_app, IUserDialogs dialogs_app)
-        {
-			adapter = adapter_app;
-            dialogs = dialogs_app;
-
-            Connection_app = false;
+        }     
 
 
-           
-        }
-
-
-        public void startScan(){
+        public void StartScan(){
 
              Device.StartTimer(
              TimeSpan.FromSeconds(3),
@@ -165,19 +130,16 @@ namespace ble_library
         private void Listen_Characteristic_Notification()
         {
             try
-            {
-         
+            {         
                 // Will also stop listening when gattServer
                 // is disconnected, so if that is acceptable,
                 // you don't need to store this disposable.
 
                 Listen_Characteristic_Notification_Handler = gattServer_connection.NotifyCharacteristicValue(
-                   ServicioIndicate,
-                   CaracterisicoIndicate,
-                   UpdateDisplayedValue
-                 
+                   new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
+                   new Guid("00000003-0000-1000-8000-00805f9b34fb"),
+                   UpdateBuffer                 
                 );
-
             }
             catch (GattException ex)
             {
@@ -185,9 +147,7 @@ namespace ble_library
             }
         }
 
-
-
-        private  static void Stop_Listen_Characteristic_Notification()
+        private  void Stop_Listen_Characteristic_Notification()
         {
             try{
                 Listen_Characteristic_Notification_Handler.Dispose();
@@ -199,41 +159,18 @@ namespace ble_library
         public async void Write_Characteristic(byte[] buffer, int offset, int count)
         {
             try
-            {
-               
+            {               
                 byte[] ret = new byte[count];
               
                 for (int i = 0; i < count; i++){
                     ret[i] = buffer[i + offset];
                 }
 
-
-               
-                await WriteCurrentBytesGUIDAsync(ret);
-            }
-            catch (GattException ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-
-        }
-
-  
-
-
-        private async Task WriteCurrentBytesGUIDAsync(byte[] buffer)
-        {
-            try
-            {
-
-                var bytes_temp_characteristic_read = gattServer_connection.WriteCharacteristicValue(
-                    ServicioWrite,
-                    CaracterisicoWrite,
-                    buffer
+                await gattServer_connection.WriteCharacteristicValue(
+                    new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
+                    new Guid("00000002-0000-1000-8000-00805f9b34fb"),
+                    ret
                 );
-
-                UpdateDisplayedValue(await bytes_temp_characteristic_read);
-
             }
             catch (GattException ex)
             {
@@ -242,8 +179,7 @@ namespace ble_library
 
         }
 
-
-        private static void UpdateDisplayedValue(byte[] bytes )
+        private void UpdateBuffer(byte[] bytes )
         {
             if(bytes.Length == 20)
             {
@@ -279,10 +215,12 @@ namespace ble_library
                 Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
                                                                 // the server implements IObservable<ConnectionState> so you can subscribe to its state
 
-                gattServer_connection.Subscribe(new ObserverReporter());
+                gattServer_connection.Subscribe(new ObserverReporter(this));                
+                Listen_Characteristic_Notification();
+                isConnected = true;
 
-                Connection_app = true;
-
+                // TO-DO: comprobar que tiene servicios y caracteristicas de un PUK? consultar Maria.
+                /*
                 try
                 {
                     ListAllServices = new ArrayList();
@@ -304,42 +242,26 @@ namespace ble_library
                 }catch(Exception j){
                     
                 }
-
-                setCaracterisicoIndicate(new Guid("00000003-0000-1000-8000-00805f9b34fb"));
-                setServicioIndicate(new Guid("2cf42000-7992-4d24-b05d-1effd0381208"));
-
-                setServicioWrite(new Guid("2cf42000-7992-4d24-b05d-1effd0381208"));
-                setCaracterisicoWrite(new Guid("00000002-0000-1000-8000-00805f9b34fb"));
-
-                buffer_ble_data = new Queue<byte>();
-                Listen_Characteristic_Notification();
+                */                
             }
             else
             {
                 // Do something to inform user or otherwise handle unsuccessful connection.
                 Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
-                dialogs.Alert("Error connecting to device. result={0:g}", connection.ConnectionResult.ToString());
                 // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
-                Connection_app = false;
+                isConnected = false;
             }
 
         }
 
-       
-
-
-        public async static void DisconnectFromDevice(){
-            Stop_Listen_Characteristic_Notification();
-            await gattServer_connection.Disconnect();
-            Connection_app = false;
-        }
-
-
         public async void DisconnectDevice()
         {
-            Stop_Listen_Characteristic_Notification();
-            await gattServer_connection.Disconnect();
-            Connection_app = false;
+            if (isConnected)
+            {
+                Stop_Listen_Characteristic_Notification();
+                await gattServer_connection.Disconnect();
+                isConnected = false;
+            }
         }
 
 
