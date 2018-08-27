@@ -15,12 +15,12 @@ using System.Collections.ObjectModel;
 
 namespace aclara_meters.view
 {
-    public partial class AddMTUPage
+    public partial class AclaraViewAddMTU
     {
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
 
-        public AddMTUPage()
+        public AclaraViewAddMTU()
         {
             InitializeComponent();
         }
@@ -299,7 +299,7 @@ namespace aclara_meters.view
             //TO-DO
         }
 
-        public AddMTUPage(IUserDialogs dialogs)
+        public AclaraViewAddMTU(IUserDialogs dialogs)
         {
             InitializeComponent();
 
@@ -549,7 +549,7 @@ namespace aclara_meters.view
             }
         }
 
-        #pragma warning disable RECS0165 // Los métodos asincrónicos deben devolver una tarea en lugar de un valor nulo
+		#pragma warning disable RECS0165 // Asynchronous methods must return a task instead of a null value
         private async void OnMenuCaseReplaceMeter()
         {
             background_scan_page.Opacity = 1;
@@ -557,8 +557,10 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                await ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
             await Task.Run(async () =>
             {
@@ -598,8 +600,10 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                await ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
             await Task.Run(async () =>
@@ -638,8 +642,10 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                await ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
             await Task.Run(async () =>
@@ -678,8 +684,10 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                await ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
             await Task.Run(async () =>
@@ -687,7 +695,7 @@ namespace aclara_meters.view
                 await Task.Delay(200); Device.BeginInvokeOnMainThread(() =>
                 {
                     navigationDrawerList.SelectedItem = null;
-                    Application.Current.MainPage.Navigation.PushAsync(new AddMTUPage(dialogsSaved), false);
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved),false);
                     background_scan_page.Opacity = 1;
 
                     if (Device.Idiom == TargetIdiom.Tablet)
@@ -714,8 +722,10 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                await ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
             await Task.Run(async () =>
@@ -741,6 +751,6 @@ namespace aclara_meters.view
                 }); 
             });
         }
-        #pragma warning restore RECS0165 // Los métodos asincrónicos deben devolver una tarea en lugar de un valor nulo
+		#pragma warning restore RECS0165 // Asynchronous methods must return a task instead of a null value
     }
 }

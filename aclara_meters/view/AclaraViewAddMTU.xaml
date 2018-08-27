@@ -8,7 +8,7 @@
                NavigationPage.HasBackButton="false"
                
                xmlns:Controls="clr-namespace:aclara_meters" 
-               x:Class="aclara_meters.view.AddMTUPage">
+               x:Class="aclara_meters.view.AclaraViewAddMTU">
 
 
    <RelativeLayout  IsVisible="true">

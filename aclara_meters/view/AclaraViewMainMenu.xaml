@@ -6,7 +6,7 @@
                NavigationPage.HasBackButton="false"
                BackgroundColor="Black"
                xmlns:Controls="clr-namespace:aclara_meters"  
-               x:Class="aclara_meters.view.BleDeviceScannerPage">
+               x:Class="aclara_meters.view.AclaraViewMainMenu">
 
   <RelativeLayout IsVisible="true">
 

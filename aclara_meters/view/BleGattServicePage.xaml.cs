@@ -946,7 +946,7 @@ namespace aclara_meters.view
                                     navigationDrawerList.SelectedItem = null;
 
 
-                                    Application.Current.MainPage.Navigation.PushAsync(new AddMTUPage(dialogsSaved), false);
+                                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
 
 
                                     background_scan_page.Opacity = 1;

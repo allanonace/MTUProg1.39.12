@@ -26,11 +26,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="MainPage.xaml.cs" />
+    <Compile Remove="viewmodel\BleDeviceScannerViewModel.cs" />
+    <Compile Remove="viewmodel\AbstractScanViewModel.cs" />
+    <Compile Remove="viewmodel\BleGattCharacteristicViewModel.cs" />
+    <Compile Remove="viewmodel\BleGattServerViewModel.cs" />
+    <Compile Remove="viewmodel\BleGattServiceViewModel.cs" />
+    <Compile Remove="viewmodel\BlePeripheralViewModel.cs" />
+    <Compile Remove="view\BleGattServerPage.xaml.cs" />
+    <Compile Remove="view\MyPage.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="view\BleGattServerPage.xaml.cs">
-      <DependentUpon>BleGattServerPage.xaml</DependentUpon>
-    </Compile>
     <Compile Update="view\BleGattServicePage.xaml.cs">
       <DependentUpon>BleGattServicePage.xaml</DependentUpon>
     </Compile>
@@ -43,17 +48,17 @@
     <Compile Update="view\LogsPage.xaml.cs">
       <DependentUpon>LogsPage.xaml</DependentUpon>
     </Compile>
-    <Compile Update="view\MyPage.xaml.cs">
-      <DependentUpon>MyPage.xaml</DependentUpon>
-    </Compile>
     <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="App.xaml.cs">
       <DependentUpon>FormsApp.xaml</DependentUpon>
     </Compile>
     <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="view\BleDeviceScannerPage.xaml.cs">
-      <DependentUpon>BleDeviceScannerPage.xaml</DependentUpon>
+      <DependentUpon>AclaraViewMainMenu.xaml</DependentUpon>
     </Compile>
     <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="FormsApp.xaml.cs">
       <DependentUpon>FormsApp.xaml</DependentUpon>
+    </Compile>
+    <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="view\AclaraViewAddMTU.xaml.cs">
+      <DependentUpon>AclaraViewAddMTU.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -64,5 +69,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ble_library\ble_library.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Remove="view\MyPage.xaml" />
   </ItemGroup>
 </Project>

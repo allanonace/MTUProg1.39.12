@@ -41,8 +41,6 @@ namespace aclara_meters.view
         //List of ADD MTU components
         string strFunctlLoctn = "";
 
-        BleGattServiceViewModel model_saved;
-
         public List<ReadMTUItem> menuList { get; set; }
 
         public List<PageItem> menuList2 { get; set; }
@@ -373,10 +371,6 @@ namespace aclara_meters.view
         IUserDialogs dialogsSaved;
 
 
-        BleGattServiceViewModel model_read_saved;
-
-
-
         public ReplaceMeterPage(IUserDialogs dialogs)
         {
             InitializeComponent();
@@ -576,34 +570,20 @@ namespace aclara_meters.view
         {
             Settings.IsLoggedIn = false;
             FormsApp.CredentialsService.DeleteCredentials();
-
-            try
-            {
-                ((BleGattServerViewModel)BindingContext).DisconnectFromDeviceCommand.Execute(null);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Exception Message: " + ex.Message);
-            }
-
-            // Application.Current.MainPage = new LoginMenuPage(bleAdapterSaved, dialogsSaved);
+            FormsApp.ble_interface.Close();
             int contador = Navigation.NavigationStack.Count;
 
-            //Navigation.RemovePage(Navigation.NavigationStack[Navigation.NavigationStack.Count - 1]);
             while (contador > 0)
             {
-                //Navigation.RemovePage(Navigation.NavigationStack[Navigation.NavigationStack.Count - 1]);
-
                 try
                 {
-                    Navigation.PopAsync(false);
+                    await Navigation.PopAsync(false);
 
                 }
-                catch (Exception v)
+                catch (Exception v1)
                 {
-
+                    Console.WriteLine(v1.StackTrace);
                 }
-
                 contador--;
             }
 
@@ -612,9 +592,9 @@ namespace aclara_meters.view
                 await Navigation.PopToRootAsync(false);
 
             }
-            catch (Exception v)
+            catch (Exception v2)
             {
-
+                Console.WriteLine(v2.StackTrace);
             }
 
 
@@ -625,9 +605,6 @@ namespace aclara_meters.view
         {
 
             Application.Current.MainPage.Navigation.PopAsync(false);
-
-
-
         }
 
 
@@ -650,14 +627,14 @@ namespace aclara_meters.view
         {
 
 
-            if (!Settings.IsConnectedBLE)
+            if (!FormsApp.ble_interface.IsOpen())
             {
                 // don't do anything if we just de-selected the row.
                 if (e.Item == null) return;
                 // Deselect the item.
                 if (sender is ListView lv) lv.SelectedItem = null;
             }
-            if (Settings.IsConnectedBLE)
+            if (FormsApp.ble_interface.IsOpen())
             {
                 navigationDrawerList.SelectedItem = null;
 
@@ -743,7 +720,7 @@ namespace aclara_meters.view
                                     navigationDrawerList.SelectedItem = null;
 
 
-                                    Application.Current.MainPage.Navigation.PushAsync(new AddMTUPage(dialogsSaved), false);
+                                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
 
 
                                     background_scan_page.Opacity = 1;
