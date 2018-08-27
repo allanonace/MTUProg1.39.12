@@ -3,7 +3,5 @@
     internal class PickerItems
     {
         public string Name { get; set; }
-
-
     }
 }

@@ -44,7 +44,6 @@ namespace aclara_meters.Models
             }
         }
 
-
         string _deviceBattery;
         public string deviceBattery
         {
@@ -56,7 +55,6 @@ namespace aclara_meters.Models
                 OnPropertyChanged("deviceBattery");
             }
         }
-
 
         string _deviceRssiIcon;
         public string deviceRssiIcon
@@ -70,7 +68,6 @@ namespace aclara_meters.Models
             }
         }
 
-
         string _deviceRssi;
         public string deviceRssi
         {
@@ -82,21 +79,6 @@ namespace aclara_meters.Models
                 OnPropertyChanged("deviceRssi");
             }
         }
-
-        /*
-        IBlePeripheral _Peripheral;
-        public IBlePeripheral Peripheral
-        {
-            get { return _Peripheral; }
-            set
-            {
-                if (_Peripheral != value)
-                    _Peripheral = value;
-                OnPropertyChanged("Peripheral");
-            }
-        }
-
-*/
 
         public event PropertyChangedEventHandler PropertyChanged;
         void OnPropertyChanged(string propertyName)

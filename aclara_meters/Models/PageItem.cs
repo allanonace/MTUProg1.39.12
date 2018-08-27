@@ -6,13 +6,10 @@ using System.Threading.Tasks;
 
 namespace aclara_meters.Models
 {
-
     public class ReadMTUItem
     {
-
         public string Title { get; set; }
         public string Description { get; set; }
- 
     }
 }
 

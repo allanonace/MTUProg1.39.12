@@ -98,9 +98,5 @@ namespace aclara_meters.Helpers
             set { AppSettings.AddOrUpdateValue(IsInSettings, value); }
         }
 
-
-
-
-
     }
 }

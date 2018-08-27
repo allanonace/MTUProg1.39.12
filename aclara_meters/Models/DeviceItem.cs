@@ -7,10 +7,8 @@ using nexus.protocols.ble.scan;
 
 namespace aclara_meters.Models
 {
-
     public class DeviceItem
     {
-
         public string deviceName { get; set; }
         public string deviceMacAddress { get; set; }
         public string deviceBattery { get; set; }
@@ -19,7 +17,5 @@ namespace aclara_meters.Models
         public string deviceRssiIcon { get; set; }
         public IBlePeripheral Peripheral { get; internal set; }
     }
-    
-   
 }
 
