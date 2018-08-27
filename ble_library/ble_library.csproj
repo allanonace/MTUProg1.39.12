@@ -11,5 +11,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="BleMainInterface.cs" />
+    <Compile Remove="ISerial.cs" />
+    <Compile Remove="Lexi.cs" />
+    <Compile Remove="LexiWriteException.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Lexi\Lexi.csproj" />
   </ItemGroup>
 </Project>

@@ -11,11 +11,17 @@ namespace ble_library
     {
         private BlePort ble_port_serial;
 
+        /// <summary>
+        /// Initialize Bluetooth LE Serial port
+        /// </summary>
+        /// <param name="adapter">The Bluetooth Low Energy Adapter from the OS</param>
         public BleSerial(IBluetoothLowEnergyAdapter adapter)
         {
             ble_port_serial = new BlePort(adapter);
             ble_port_serial.DisconnectDevice();
         }
+
+
 
         private void ExceptionCheck(byte[] buffer, int offset, int count){
             if (buffer == null)

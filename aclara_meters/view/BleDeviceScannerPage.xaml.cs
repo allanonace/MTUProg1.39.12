@@ -222,7 +222,7 @@ namespace aclara_meters.view
             //SCAN BLE DEVICES
             //FormsApp.ble_interface.Scan();
             employees = new ObservableCollection<DeviceItem>();
-
+            tempblePeripherals = new List<IBlePeripheral> { };
             DeviceList.RefreshCommand = new Command(() =>
             {
                 try{
@@ -233,7 +233,7 @@ namespace aclara_meters.view
 
                     DeviceList.IsRefreshing = true;
 
-                    tempblePeripherals = new List<IBlePeripheral> { };
+                    tempblePeripherals.Clear();
 
                     try
                     {

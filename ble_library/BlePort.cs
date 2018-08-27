@@ -13,6 +13,11 @@ using Xamarin.Forms;
 
 namespace ble_library
 {
+
+    /*
+    ObserverReporter Class.
+    Contains all methods that allow to know the connection status
+    */
     public class ObserverReporter : IObserver<ConnectionState>
     {
         private IDisposable unsubscriber;
@@ -73,6 +78,10 @@ namespace ble_library
 //      private ArrayList ListAllServices;
 //      private ArrayList ListAllCharacteristics;
 
+        /// <summary>
+        /// Initizalize Bluetooth LE Serial Port
+        /// </summary>
+        /// <param name="adapter_app">The Bluetooth Low Energy Adapter from the OS</param>
         public BlePort(IBluetoothLowEnergyAdapter adapter_app)
         {
             adapter = adapter_app;
@@ -81,33 +90,56 @@ namespace ble_library
             busy = false;
         }
 
+        /// <summary>
+        /// Returns the Connection status with the Bluetooth device
+        /// </summary>
+        /// <returns>The Bluetooth connection status.</returns>
         public Boolean GetConnectionStatus()
         {
             return isConnected;
         }
              
+        /// <summary>
+        /// Returns the byte array from buffer and drops the element out of the queue
+        /// </summary>
+        /// <returns>The byte array from the buffer that is dropped out the queue</returns>
         public byte GetBufferElement()
         {
             return buffer_ble_data.Dequeue();
         }
 
+        /// <summary>
+        /// Returns the number of bytes to read from the buffer
+        /// </summary>
+        /// <returns>The number of bytes to read from the buffer</returns>
         public int BytesToRead()
         {
             return buffer_ble_data.Count;
         }
 
+        /// <summary>
+        /// Clears the buffer queue
+        /// </summary>
         public void ClearBuffer()
         {
             buffer_ble_data.Clear();
         }     
 
+
+        /// <summary>
+        /// Returns the Bluetooth LE Peripherals detected by the scan
+        /// </summary>
+        /// <returns>The Bluetooth LE periphals around the scanning device</returns>
         public List<IBlePeripheral> GetBlePeripherals()
         {
             return BlePeripheralList;
         }
 
+        /// <summary>
+        /// If bluetooth antenna is enabled on device, starts scanning devices. If not, turns it on, and proceeds to scan.
+        /// </summary>
         public void StartScan(){
-
+            
              Device.StartTimer(
              TimeSpan.FromSeconds(1),
              () =>
@@ -124,6 +156,9 @@ namespace ble_library
 
         }
 
+        /// <summary>
+        /// Enables bluetooth antenna on device.
+        /// </summary>
         private async void BluetoothEnable()
         {
             if (adapter.AdapterCanBeEnabled && adapter.CurrentState.IsDisabledOrDisabling())
@@ -132,7 +167,9 @@ namespace ble_library
             }
         }
 
-       
+        /// <summary>
+        /// Listen to the characteristic notifications of a peripheral
+        /// </summary>
         private void Listen_Characteristic_Notification()
         {
             try
@@ -153,6 +190,9 @@ namespace ble_library
             }
         }
 
+        /// <summary>
+        /// Stops listening to the characteristic notifications of a peripheral
+        /// </summary>
         private  void Stop_Listen_Characteristic_Notification()
         {
             try{
@@ -162,6 +202,13 @@ namespace ble_library
             }
         }
        
+
+        /// <summary>
+        /// Writes a number of bytes via Bluetooth LE to the peripheral gatt connnection
+        /// </summary>
+        /// <param name="buffer">The byte array to write the input to.</param>
+        /// <param name="offset">The offset in buffer at which to write the bytes.</param>
+        /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
         public async void Write_Characteristic(byte[] buffer, int offset, int count)
         {
             try
@@ -185,6 +232,9 @@ namespace ble_library
 
         }
 
+        /// <summary>
+        /// Updates buffer with the notification data received 
+        /// </summary>
         private void UpdateBuffer(byte[] bytes )
         {
             if(bytes.Length == 20)
@@ -198,6 +248,10 @@ namespace ble_library
             }
         }
 
+        /// <summary>
+        /// Updates buffer with the notification data received 
+        /// </summary>
+        /// <param name="ble_device">The Bluetooth LE peripheral to connect.</param>
         public async void ConnectoToDevice(IBlePeripheral ble_device){
             var connection = await adapter.ConnectToDevice(
                 // The IBlePeripheral to connect to
@@ -260,6 +314,9 @@ namespace ble_library
 
         }
 
+        /// <summary>
+        /// Disconnects from Bluetooth LE peripheral 
+        /// </summary>
         public async void DisconnectDevice()
         {
             if (isConnected)
@@ -272,6 +329,9 @@ namespace ble_library
 
         private bool busy;
 
+        /// <summary>
+        /// Scans for Bluetooth LE peripheral broadcasts 
+        /// </summary>
         private async void ScanForBroadcasts()
         {
             if(!busy){
@@ -315,16 +375,13 @@ namespace ble_library
                     if(adv.DeviceName!=null){
                         if (adv.DeviceName.Contains("Aclara"))
                         {
-                            if(!BlePeripheralList.Contains(peripheral))
+                            if(BlePeripheralList.Any(p => p.DeviceId.Equals(peripheral.DeviceId)))
                             {
-                                if(BlePeripheralList.Any(p => p.DeviceId.Equals(peripheral.DeviceId)))
-                                {
-                                    BlePeripheralList[BlePeripheralList.FindIndex(f => f.DeviceId.Equals(peripheral.DeviceId))] = peripheral;
-                                }else{
-                                    BlePeripheralList.Add(peripheral);
-                                  
-                                }
-                            } 
+                                BlePeripheralList[BlePeripheralList.FindIndex(f => f.DeviceId.Equals(peripheral.DeviceId))] = peripheral;
+                            }else{
+                                BlePeripheralList.Add(peripheral);
+                              
+                            }
                         } 
                     }
                     //  connect to the device
