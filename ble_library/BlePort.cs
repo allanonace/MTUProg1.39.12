@@ -387,7 +387,7 @@ namespace ble_library
                     //  connect to the device
                    },
                     // TimeSpan or CancellationToken to stop the scan
-                    TimeSpan.FromSeconds(10)
+                    TimeSpan.FromSeconds(3)
                     // If you omit this argument, it will use
                     // BluetoothLowEnergyUtils.DefaultScanTimeout
                 );  

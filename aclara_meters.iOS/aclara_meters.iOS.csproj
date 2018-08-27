@@ -101,6 +101,7 @@
     <Compile Include="Helpers\Settings.cs" />
     <Compile Include="BorderlessEntryRenderer.cs" />
     <Compile Include="BorderlessPickerRenderer.cs" />
+    <Compile Include="ViewCellTransparent.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />

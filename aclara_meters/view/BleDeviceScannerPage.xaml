@@ -5,6 +5,7 @@
                xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters"
                NavigationPage.HasBackButton="false"
                BackgroundColor="Black"
+               xmlns:Controls="clr-namespace:aclara_meters"  
                x:Class="aclara_meters.view.BleDeviceScannerPage">
 
   <RelativeLayout IsVisible="true">
@@ -410,7 +411,7 @@
                             
                       <ListView.ItemTemplate >
                         <DataTemplate>
-                          <ViewCell  >
+                          <Controls:ViewCellTransparent  >
                             
      
                              <StackLayout Margin="0,0,0,0"  Scale="1" Padding="16" Orientation="Horizontal">
@@ -435,7 +436,7 @@
 
                                             
                                         
-                          </ViewCell>
+                          </Controls:ViewCellTransparent>
                         </DataTemplate>
                       </ListView.ItemTemplate>
                     </ListView>
