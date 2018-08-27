@@ -37,7 +37,7 @@ namespace aclara_meters
             CredentialsService = new CredentialsService();
 
             //Cargar la pantalla principal
-            MainPage = new NavigationPage(new LoginMenuPage(dialogs));
+            MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
 
         }
 

@@ -733,7 +733,7 @@ namespace aclara_meters.view
                 await Task.Delay(200); Device.BeginInvokeOnMainThread(() =>
                 {
                     navigationDrawerList.SelectedItem = null;
-                    Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(dialogsSaved), false);
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
                     background_scan_page.Opacity = 1;
 
                     if (Device.Idiom == TargetIdiom.Tablet)

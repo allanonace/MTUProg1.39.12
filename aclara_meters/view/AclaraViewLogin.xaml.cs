@@ -11,11 +11,11 @@ using System.IO;
 
 namespace aclara_meters.view
 {
-    public partial class LoginMenuPage : ContentPage
+    public partial class AclaraViewLogin : ContentPage
     {
         public viewmodel.LoginMenuViewModel viewModel;
 
-        public LoginMenuPage()
+        public AclaraViewLogin()
         {
             InitializeComponent();
         }
@@ -26,7 +26,7 @@ namespace aclara_meters.view
             return true;
         }
 
-        public LoginMenuPage(IUserDialogs dialogs)
+        public AclaraViewLogin(IUserDialogs dialogs)
         {
             InitializeComponent();
             Settings.IsNotConnectedInSettings = false;
@@ -44,13 +44,13 @@ namespace aclara_meters.view
                     loginpage.IsVisible = true;
                     if(IsLocationAvailable()){
                         Task.Run(async () => { await StartListening(); });
-                        //listFiles();
+                        //ListSFTPDataFiles();
                     }
                 });
             });
         }
 
-        private void listFiles()
+        private void ListSFTPDataFiles()
         {
             //string host = "192.168.1.39";
             string host = "169.254.130.57";

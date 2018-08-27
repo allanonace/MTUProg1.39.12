@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
              NavigationPage.HasBackButton="false"
              xmlns:Controls="clr-namespace:aclara_meters"  
-             x:Class="aclara_meters.view.LoginMenuPage">
+             x:Class="aclara_meters.view.AclaraViewLogin">
     <ContentPage.Content>
 
        <StackLayout x:Name="loginpage"  Scale="0.85" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" >

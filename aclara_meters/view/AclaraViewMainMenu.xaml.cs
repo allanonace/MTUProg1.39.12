@@ -451,7 +451,7 @@ namespace aclara_meters.view
 
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
-        #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        #pragma warning disable CS1998 
         private async void OnMenuItemSelectedAsync(object sender, ItemTappedEventArgs e)
         {
             if (!FormsApp.ble_interface.IsOpen())
@@ -502,7 +502,9 @@ namespace aclara_meters.view
             }
         }
 
+        #pragma warning disable RECS0165
         private async void OnCaseReplaceMeterAsync()
+        #pragma warning restore RECS0165
         {
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
@@ -510,10 +512,10 @@ namespace aclara_meters.view
             background_scan_page_detail.IsEnabled = true;
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                #pragma warning disable CS4014 
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                #pragma warning restore CS4014
             }
             await Task.Run(async () =>
             {
@@ -546,7 +548,9 @@ namespace aclara_meters.view
             });
         }
 
+        #pragma warning disable RECS0165
         private async void OnCaseReplaceMTUAsync()
+        #pragma warning restore RECS0165
         {
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
@@ -555,10 +559,10 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                #pragma warning disable CS4014 
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                #pragma warning restore CS4014
             }
             await Task.Run(async () =>
             {
@@ -591,7 +595,9 @@ namespace aclara_meters.view
             });
         }
 
+        #pragma warning disable RECS0165
         private async void OnCaseTurnOffAsync()
+        #pragma warning restore RECS0165
         {
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
@@ -600,10 +606,10 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                #pragma warning disable CS4014 
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                #pragma warning restore CS4014
             }
 
             await Task.Run(async () =>
@@ -637,7 +643,9 @@ namespace aclara_meters.view
             });
         }
 
+        #pragma warning disable RECS0165
         private async void OnCaseAddMTUAsync()
+        #pragma warning restore RECS0165
         {
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
@@ -678,7 +686,9 @@ namespace aclara_meters.view
             });
         }
 
+        #pragma warning disable RECS0165 
         private async void OnCaseReadMTUAsync()
+        #pragma warning restore RECS0165
         {
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
@@ -699,7 +709,7 @@ namespace aclara_meters.view
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     navigationDrawerList.SelectedItem = null;
-                    Application.Current.MainPage.Navigation.PushAsync(new BleGattServicePage(dialogsSaved), false);
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
                     background_scan_page.Opacity = 1;
                     background_scan_page_detail.Opacity = 1;
 
@@ -718,7 +728,7 @@ namespace aclara_meters.view
                 });
             });
         }
-
+       
         private void OpenSettingsTapped(object sender, EventArgs e)
         {
             background_scan_page.Opacity = 1;

@@ -7,7 +7,7 @@
                Title="{Binding PageTitle}"
                     NavigationPage.HasBackButton="false"
             
-               x:Class="aclara_meters.view.BleGattServicePage">
+               x:Class="aclara_meters.view.AclaraViewReadMTU">
 
 
   <RelativeLayout  IsVisible="true">
