@@ -394,22 +394,22 @@ namespace aclara_meters.view
             settings_button.Tapped += OpenSettingsCallAsync;
             back_button.Tapped += ReturnToMainView;
             bg_read_mtu_button.Tapped += ReadMTU;
-            turnoffmtu_ok.Tapped += TurnOffMTU_OK;
-            turnoffmtu_no.Tapped += Turnoffmtu_No_Tapped;
-            turnoffmtu_ok_close.Tapped += TurnOffMtu_Close;
-            replacemeter_ok.Tapped += Replacemeter_Ok_Tapped;
-            replacemeter_cancel.Tapped += Replacemeter_Cancel_Tapped;
-            meter_ok.Tapped += Meter_Ok_Tapped;
-            meter_cancel.Tapped += Meter_Cancel_Tapped;
+            turnoffmtu_ok.Tapped += TurnOffMTUOkTapped;
+            turnoffmtu_no.Tapped += TurnOffMTUNoTapped;
+            turnoffmtu_ok_close.Tapped += TurnOffMTUCloseTapped;
+            replacemeter_ok.Tapped += ReplaceMeterOkTapped;
+            replacemeter_cancel.Tapped += ReplaceMeterCancelTapped;
+            meter_ok.Tapped += MeterOkTapped;
+            meter_cancel.Tapped += MeterCancelTapped;
         }
 
-        private void Replacemeter_Cancel_Tapped(object sender, EventArgs e)
+        private void ReplaceMeterCancelTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
 
-        private void Replacemeter_Ok_Tapped(object sender, EventArgs e)
+        private void ReplaceMeterOkTapped(object sender, EventArgs e)
         {
             dialog_replacemeter_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
@@ -418,19 +418,19 @@ namespace aclara_meters.view
             Application.Current.MainPage.Navigation.PushAsync(new ReplaceMTUPage(dialogsSaved), false);
         }
 
-        private void TurnOffMtu_Close(object sender, EventArgs e)
+        private void TurnOffMTUCloseTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
 
-        private void Turnoffmtu_No_Tapped(object sender, EventArgs e)
+        private void TurnOffMTUNoTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
 
-        private void TurnOffMTU_OK(object sender, EventArgs e)
+        private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
 
             dialog_turnoff_one.IsVisible = false;
@@ -446,14 +446,14 @@ namespace aclara_meters.view
             });
         }
 
-        void Meter_Cancel_Tapped(object sender, EventArgs e)
+        void MeterCancelTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
             dialog_meter_replace_one.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
 
-        void Meter_Ok_Tapped(object sender, EventArgs e)
+        void MeterOkTapped(object sender, EventArgs e)
         {
             dialog_meter_replace_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
