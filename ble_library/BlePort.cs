@@ -10,6 +10,9 @@ using nexus.protocols.ble.gatt;
 using nexus.protocols.ble.scan;
 using nexus.protocols.ble.scan.advertisement;
 using Xamarin.Forms;
+using System.Security.Cryptography;
+using System.IO;
+using System.Text;
 
 namespace ble_library
 {
@@ -75,8 +78,8 @@ namespace ble_library
         private IDisposable Listen_Characteristic_Notification_Handler;
         private Boolean isConnected;
         private List<IBlePeripheral> BlePeripheralList;
-//      private ArrayList ListAllServices;
-//      private ArrayList ListAllCharacteristics;
+        private ArrayList ListAllServices;
+        private ArrayList ListAllCharacteristics;
 
         /// <summary>
         /// Initizalize Bluetooth LE Serial Port
@@ -276,11 +279,10 @@ namespace ble_library
                                                                 // the server implements IObservable<ConnectionState> so you can subscribe to its state
 
                 gattServer_connection.Subscribe(new ObserverReporter(this));                
-                Listen_Characteristic_Notification();
-                isConnected = true;
+               
 
                 // TO-DO: comprobar que tiene servicios y caracteristicas de un PUK? consultar Maria.
-                /*
+
                 try
                 {
                     ListAllServices = new ArrayList();
@@ -302,7 +304,9 @@ namespace ble_library
                 }catch(Exception j){
                     
                 }
-                */                
+
+
+                await AESConnectionVerifyAsync();
             }
             else
             {
@@ -313,6 +317,153 @@ namespace ble_library
             }
 
         }
+
+
+
+        /// <summary>
+        /// AES Verification to connect Bluetooth LE peripheral 
+        /// </summary>
+        private async Task AESConnectionVerifyAsync()
+        {
+            byte [] static_pass = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x2e };
+
+
+            try
+            {
+                // Will also stop listening when gattServer
+                // is disconnected, so if that is acceptable,
+                // you don't need to store this disposable.
+
+                Listen_Characteristic_Notification_Handler = gattServer_connection.NotifyCharacteristicValue(
+                   new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                   new Guid("00000041-0000-1000-8000-00805f9b34fb"),
+                   UpdateBuffer
+                );
+
+                Thread.Sleep(500);
+                //Read Pass H data from Characteristic
+                byte [] PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
+                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                    new Guid("00000040-0000-1000-8000-00805f9b34fb")
+                );
+
+                //Read Pass L data from Characteristic
+                byte[] PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
+                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                    new Guid("00000042-0000-1000-8000-00805f9b34fb")
+                );
+
+
+                byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
+                byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
+
+                //Generate dynamic password
+                byte[] Dynamic_Pass = new byte[PassH_decrypt.Length + PassL_decrypt.Length];
+
+                //Dynamic_Pass.Concat(PassH_decrypt).Concat(PassL_decrypt).ToArray();
+
+                Array.Copy(PassH_decrypt, 0, Dynamic_Pass, 0, PassH_decrypt.Length);
+                Array.Copy(PassL_decrypt, 0, Dynamic_Pass, PassH_decrypt.Length, PassL_decrypt.Length);
+
+                // Input string.
+                const string input = "Hi, I'm Aclara";
+                byte[] array = Encoding.ASCII.GetBytes(input); //  "Hi, I'm Aclara";  ----> 48692c2049276d2041636c617261 
+                byte[] hi_msg = AES_Encrypt(array, Dynamic_Pass);
+
+
+                await gattServer_connection.WriteCharacteristicValue(
+                  new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                  new Guid("00000041-0000-1000-8000-00805f9b34fb"),
+                  hi_msg
+               );
+
+
+               // Listen_Characteristic_Notification();
+
+                isConnected = true;
+
+
+            }
+            catch (GattException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+
+        public byte[] AES_Decrypt(byte[] bytesToBeDecrypted, byte[] passwordBytes)
+        {
+            byte[] decryptedBytes = null;
+
+            // Set your salt here, change it to meet your flavor:
+            // The salt bytes must be at least 8 bytes.
+            byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (RijndaelManaged AES = new RijndaelManaged())
+                {
+                    AES.KeySize = 256;
+                    AES.BlockSize = 128;
+                    AES.Padding = PaddingMode.None;
+
+                    var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
+                    AES.Key = key.GetBytes(AES.KeySize / 8);
+                    AES.IV = key.GetBytes(AES.BlockSize / 8);
+
+                    AES.Mode = CipherMode.ECB;
+
+                    using (var cs = new CryptoStream(ms, AES.CreateDecryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(bytesToBeDecrypted, 0, bytesToBeDecrypted.Length);
+                        cs.Close();
+                    }
+                    decryptedBytes = ms.ToArray();
+                }
+            }
+
+            return decryptedBytes;
+        }
+
+
+
+        public byte[] AES_Encrypt(byte[] bytesToBeEncrypted, byte[] passwordBytes)
+        {
+            byte[] encryptedBytes = null;
+
+            // Set your salt here, change it to meet your flavor:
+            // The salt bytes must be at least 8 bytes.
+            byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                using (RijndaelManaged AES = new RijndaelManaged())
+                {
+                    AES.KeySize = 256;
+                    AES.BlockSize = 128;
+                    AES.Padding = PaddingMode.None;
+
+                    var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
+                    AES.Key = key.GetBytes(AES.KeySize / 8);
+                    AES.IV = key.GetBytes(AES.BlockSize / 8);
+
+                    AES.Mode = CipherMode.ECB;
+
+                    using (var cs = new CryptoStream(ms, AES.CreateEncryptor(), CryptoStreamMode.Write))
+                    {
+                        cs.Write(bytesToBeEncrypted, 0, bytesToBeEncrypted.Length);
+                        cs.Close();
+                    }
+                    encryptedBytes = ms.ToArray();
+                }
+            }
+
+            return encryptedBytes;
+        }
+
+
+
+
 
         /// <summary>
         /// Disconnects from Bluetooth LE peripheral 
@@ -373,7 +524,7 @@ namespace ble_library
 
                     //Show dialog with name
                     if(adv.DeviceName!=null){
-                        if (adv.DeviceName.Contains("Aclara"))
+                        if ( adv.DeviceName.Contains("Aclara") || adv.DeviceName.Contains("Acl") )
                         {
                             if(BlePeripheralList.Any(p => p.DeviceId.Equals(peripheral.DeviceId)))
                             {
