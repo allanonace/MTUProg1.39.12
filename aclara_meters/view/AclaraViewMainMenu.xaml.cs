@@ -393,14 +393,13 @@ namespace aclara_meters.view
             dialog_turnoff_one.IsVisible = false;
             dialog_turnoff_two.IsVisible = true;
 
-            Task.Run(async () =>
+            Task.Delay(2000).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
-                {
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = true;
-                });
-            });
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = true;
+            }));
+
         }
 
         void MeterCancelTapped(object sender, EventArgs e)
@@ -451,8 +450,8 @@ namespace aclara_meters.view
 
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
-        #pragma warning disable CS1998 
-        private async void OnMenuItemSelectedAsync(object sender, ItemTappedEventArgs e)
+
+        private void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
         {
             if (!FormsApp.ble_interface.IsOpen())
             {
@@ -475,23 +474,23 @@ namespace aclara_meters.view
                     switch (page)
                     {
                         case "ReadMTU":
-                            OnCaseReadMTUAsync();
+                            OnCaseReadMTU();
                             break;
 
                         case "AddMTU":
-                            OnCaseAddMTUAsync();
+                            OnCaseAddMTU();
                             break;
 
                         case "turnOff":
-                            OnCaseTurnOffAsync();
+                            OnCaseTurnOff();
                             break;
 
                         case "replaceMTU":
-                            OnCaseReplaceMTUAsync();
+                            OnCaseReplaceMTU();
                             break;
 
                         case "replaceMeter":
-                            OnCaseReplaceMeterAsync();
+                            OnCaseReplaceMeter();
                             break;
                     }
                 }
@@ -502,55 +501,51 @@ namespace aclara_meters.view
             }
         }
 
-        #pragma warning disable RECS0165
-        private async void OnCaseReplaceMeterAsync()
-        #pragma warning restore RECS0165
+
+        private void OnCaseReplaceMeter()
         {
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
             background_scan_page.IsEnabled = true;
             background_scan_page_detail.IsEnabled = true;
+
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014
             }
-            await Task.Run(async () =>
+
+
+            Task.Delay(200).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Task.Delay(200); 
-                Device.BeginInvokeOnMainThread(() =>
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+                dialog_turnoff_one.IsVisible = false;
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = false;
+                dialog_replacemeter_one.IsVisible = false;
+                dialog_meter_replace_one.IsVisible = true;
+                background_scan_page.Opacity = 1;
+                background_scan_page_detail.Opacity = 1;
+
+                if (Device.Idiom == TargetIdiom.Tablet)
                 {
-                    dialog_open_bg.IsVisible = true;
-                    turnoff_mtu_background.IsVisible = true;
-                    dialog_turnoff_one.IsVisible = false;
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = false;
-                    dialog_replacemeter_one.IsVisible = false;
-                    dialog_meter_replace_one.IsVisible = true;
-                    background_scan_page.Opacity = 1;
-                    background_scan_page_detail.Opacity = 1;
+                    ContentNav.Opacity = 1;
+                    ContentNav.IsVisible = true;
+                }
+                else
+                {
+                    ContentNav.Opacity = 0;
+                    ContentNav.IsVisible = false;
+                }
 
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
-                    }
-                    else
-                    {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
-                    }
-
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                });
-            });
+                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+            }));
+         
         }
 
-        #pragma warning disable RECS0165
-        private async void OnCaseReplaceMTUAsync()
-        #pragma warning restore RECS0165
+        private void OnCaseReplaceMTU()
         {
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
@@ -559,45 +554,42 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014
             }
-            await Task.Run(async () =>
+
+            Task.Delay(200).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Task.Delay(200); 
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    dialog_open_bg.IsVisible = true;
-                    turnoff_mtu_background.IsVisible = true;
-                    dialog_meter_replace_one.IsVisible = false;
-                    dialog_turnoff_one.IsVisible = false;
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = false;
-                    dialog_replacemeter_one.IsVisible = true;
-                    background_scan_page.Opacity = 1;
-                    background_scan_page_detail.Opacity = 1;
+                dialog_open_bg.IsVisible = true;
+               turnoff_mtu_background.IsVisible = true;
+               dialog_meter_replace_one.IsVisible = false;
+               dialog_turnoff_one.IsVisible = false;
+               dialog_turnoff_two.IsVisible = false;
+               dialog_turnoff_three.IsVisible = false;
+               dialog_replacemeter_one.IsVisible = true;
+               background_scan_page.Opacity = 1;
+               background_scan_page_detail.Opacity = 1;
 
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
-                    }
-                    else
-                    {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
-                    }
+               if (Device.Idiom == TargetIdiom.Tablet)
+               {
+                   ContentNav.Opacity = 1;
+                   ContentNav.IsVisible = true;
+               }
+               else
+               {
+                   ContentNav.Opacity = 0;
+                   ContentNav.IsVisible = false;
+               }
 
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                });
-            });
+               shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+            }));
+
+
+         
         }
 
-        #pragma warning disable RECS0165
-        private async void OnCaseTurnOffAsync()
-        #pragma warning restore RECS0165
+        private void OnCaseTurnOff()
         {
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
@@ -606,46 +598,39 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014
             }
 
-            await Task.Run(async () =>
+            Task.Delay(200).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Task.Delay(200); 
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    dialog_open_bg.IsVisible = true;
-                    turnoff_mtu_background.IsVisible = true;
-                    dialog_meter_replace_one.IsVisible = false;
-                    dialog_turnoff_one.IsVisible = true;
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = false;
-                    dialog_replacemeter_one.IsVisible = false;
-                    background_scan_page.Opacity = 1;
-                    background_scan_page_detail.Opacity = 1;
+               dialog_open_bg.IsVisible = true;
+               turnoff_mtu_background.IsVisible = true;
+               dialog_meter_replace_one.IsVisible = false;
+               dialog_turnoff_one.IsVisible = true;
+               dialog_turnoff_two.IsVisible = false;
+               dialog_turnoff_three.IsVisible = false;
+               dialog_replacemeter_one.IsVisible = false;
+               background_scan_page.Opacity = 1;
+               background_scan_page_detail.Opacity = 1;
 
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
-                    }
-                    else
-                    {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
-                    }
+               if (Device.Idiom == TargetIdiom.Tablet)
+               {
+                   ContentNav.Opacity = 1;
+                   ContentNav.IsVisible = true;
+               }
+               else
+               {
+                   ContentNav.Opacity = 0;
+                   ContentNav.IsVisible = false;
+               }
 
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                });
-            });
+               shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+            }));
         }
 
-        #pragma warning disable RECS0165
-        private async void OnCaseAddMTUAsync()
-        #pragma warning restore RECS0165
+        private void OnCaseAddMTU()
         {
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
@@ -654,41 +639,34 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+              
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
-            await Task.Run(async () =>
+            Task.Delay(200).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Task.Delay(200); 
-                Device.BeginInvokeOnMainThread(() =>
+                navigationDrawerList.SelectedItem = null;
+                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
+                background_scan_page.Opacity = 1;
+                background_scan_page_detail.Opacity = 1;
+
+                if (Device.Idiom == TargetIdiom.Tablet)
                 {
-                    navigationDrawerList.SelectedItem = null;
-                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
-                    background_scan_page.Opacity = 1;
-                    background_scan_page_detail.Opacity = 1;
-
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
-                    }
-                    else
-                    {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
-                    }
-
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                });
-            });
+                    ContentNav.Opacity = 1;
+                    ContentNav.IsVisible = true;
+                }
+                else
+                {
+                    ContentNav.Opacity = 0;
+                    ContentNav.IsVisible = false;
+                }
+                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+            }));
         }
 
-        #pragma warning disable RECS0165 
-        private async void OnCaseReadMTUAsync()
-        #pragma warning restore RECS0165
+        private void OnCaseReadMTU()
         {
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
@@ -697,36 +675,29 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
-            await Task.Run(async () =>
+            Task.Delay(200).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Task.Delay(200); 
-                Device.BeginInvokeOnMainThread(() =>
+                navigationDrawerList.SelectedItem = null;
+                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
+                background_scan_page.Opacity = 1;
+                background_scan_page_detail.Opacity = 1;
+                if (Device.Idiom == TargetIdiom.Tablet)
                 {
-                    navigationDrawerList.SelectedItem = null;
-                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
-                    background_scan_page.Opacity = 1;
-                    background_scan_page_detail.Opacity = 1;
-
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
-                    }
-                    else
-                    {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
-                    }
-
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                });
-            });
+                    ContentNav.Opacity = 1;
+                    ContentNav.IsVisible = true;
+                }
+                else
+                {
+                    ContentNav.Opacity = 0;
+                    ContentNav.IsVisible = false;
+                }
+                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+            }));
         }
        
         private void OpenSettingsTapped(object sender, EventArgs e)
@@ -738,42 +709,16 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
-            Task.Run(async () =>
+            Task.Delay(200).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Task.Delay(200); 
-                Device.BeginInvokeOnMainThread(() =>
+                try
                 {
-                    try{
-                     
-                        Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(dialogsSaved), false);
-                        if (Device.Idiom == TargetIdiom.Tablet)
-                        {
-                            ContentNav.Opacity = 1;
-                            ContentNav.IsVisible = true;
-                        }
-                        else
-                        {
-                            ContentNav.Opacity = 0;
-                            ContentNav.IsVisible = false;
-                        }
-                        background_scan_page.Opacity = 1;
-                        background_scan_page_detail.Opacity = 1;
-
-                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //   if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                        return;
-                    }catch(Exception f)
-                    {
-                        Console.WriteLine(f.StackTrace);
-                    }
-
-                    Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(true),false);
-
+                    Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(dialogsSaved), false);
                     if (Device.Idiom == TargetIdiom.Tablet)
                     {
                         ContentNav.Opacity = 1;
@@ -784,16 +729,37 @@ namespace aclara_meters.view
                         ContentNav.Opacity = 0;
                         ContentNav.IsVisible = false;
                     }
-
                     background_scan_page.Opacity = 1;
                     background_scan_page_detail.Opacity = 1;
 
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                });
-            });
-        }
-        #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //   if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                    return;
+                }
+                catch (Exception f)
+                {
+                    Console.WriteLine(f.StackTrace);
+                }
 
+                Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(true), false);
+
+                if (Device.Idiom == TargetIdiom.Tablet)
+                {
+                    ContentNav.Opacity = 1;
+                    ContentNav.IsVisible = true;
+                }
+                else
+                {
+                    ContentNav.Opacity = 0;
+                    ContentNav.IsVisible = false;
+                }
+
+                background_scan_page.Opacity = 1;
+                background_scan_page_detail.Opacity = 1;
+
+                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+            }));
+        }
+   
         private void SideMenuOpen(object sender, EventArgs e)
         {
             fondo.Opacity = 0;
@@ -815,17 +781,16 @@ namespace aclara_meters.view
             shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
-            Task.Run(async () =>
+         
+            Task.Delay(200).ContinueWith(t => 
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Task.Delay(200); Device.BeginInvokeOnMainThread(() =>
-                {
-                    ContentNav.Opacity = 0;
-                    shadoweffect.IsVisible = false;
-                    ContentNav.IsVisible = false;
-                    background_scan_page.IsEnabled = true;
-                    background_scan_page_detail.IsEnabled = true;
-                });
-            });
+                ContentNav.Opacity = 0;
+                shadoweffect.IsVisible = false;
+                ContentNav.IsVisible = false;
+                background_scan_page.IsEnabled = true;
+                background_scan_page_detail.IsEnabled = true;
+            }));
         }
 
         protected override void OnDisappearing()

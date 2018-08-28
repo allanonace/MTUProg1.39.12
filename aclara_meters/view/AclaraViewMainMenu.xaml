@@ -632,7 +632,7 @@
 
                             
 
-                               ItemTapped="OnMenuItemSelectedAsync"
+                               ItemTapped="OnMenuItemSelected"
 
                               
                            >
