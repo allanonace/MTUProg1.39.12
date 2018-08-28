@@ -218,7 +218,7 @@ namespace aclara_meters.view
                 await Task.Delay(100); Device.BeginInvokeOnMainThread(() =>
                 {
 
-                    Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(dialogsSaved), false);
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
 
                 });
 

@@ -248,7 +248,7 @@ namespace aclara_meters.view
 
 
                     //Application.Current.MainPage.Navigation.PopAsync(false); 
-                    Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(dialogsSaved), false);
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
 
 
                 });

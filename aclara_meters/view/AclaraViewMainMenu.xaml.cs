@@ -718,45 +718,48 @@ namespace aclara_meters.view
             {
                 try
                 {
-                    Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(dialogsSaved), false);
-                    if (Device.Idiom == TargetIdiom.Tablet)
+                    if (FormsApp.ble_interface.IsOpen())
                     {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
+                        if (Device.Idiom == TargetIdiom.Tablet)
+                        {
+                            ContentNav.Opacity = 1;
+                            ContentNav.IsVisible = true;
+                        }
+                        else
+                        {
+                            ContentNav.Opacity = 0;
+                            ContentNav.IsVisible = false;
+                        }
+                        background_scan_page.Opacity = 1;
+                        background_scan_page_detail.Opacity = 1;
+
+                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //   if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                        return;
                     }
                     else
                     {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(true), false);
+
+                        if (Device.Idiom == TargetIdiom.Tablet)
+                        {
+                            ContentNav.Opacity = 1;
+                            ContentNav.IsVisible = true;
+                        }
+                        else
+                        {
+                            ContentNav.Opacity = 0;
+                            ContentNav.IsVisible = false;
+                        }
+
+                        background_scan_page.Opacity = 1;
+                        background_scan_page_detail.Opacity = 1;
+
+                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false; 
                     }
-                    background_scan_page.Opacity = 1;
-                    background_scan_page_detail.Opacity = 1;
-
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //   if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                    return;
+                }catch(Exception i2){
+                    Console.WriteLine(i2.StackTrace);
                 }
-                catch (Exception f)
-                {
-                    Console.WriteLine(f.StackTrace);
-                }
-
-                Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(true), false);
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-
-                background_scan_page.Opacity = 1;
-                background_scan_page_detail.Opacity = 1;
-
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
             }));
         }
    
@@ -798,7 +801,8 @@ namespace aclara_meters.view
             base.OnDisappearing();
             // todo: this is a hack - hopefully Xamarin adds the ability to name a Pushed Page.
             //MainMenu.IsSegmentShowing = false;
-            Settings.IsLoggedIn &= Navigation.NavigationStack.Count >= 3; //  if(Navigation.NavigationStack.Count < 3) Settings.IsLoggedIn = false;
+            bool value = FormsApp.ble_interface.IsOpen();
+            value &= Navigation.NavigationStack.Count >= 3; //  if(Navigation.NavigationStack.Count < 3) Settings.IsLoggedIn = false;
 		}
     }
 }

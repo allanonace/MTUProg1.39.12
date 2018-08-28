@@ -207,12 +207,29 @@ namespace aclara_meters.view
 
         private void OpenSettingsCallAsync(object sender, EventArgs e)
         {
-             Task.Delay(100).ContinueWith(t =>
-              Device.BeginInvokeOnMainThread(() =>
-              {
-                Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(dialogsSaved), false);
-              }));
+             Device.BeginInvokeOnMainThread(() =>
+             {
+                 try
+                 {
+                     if (FormsApp.ble_interface.IsOpen())
+                     {
+                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
+                         return;
+                     }
+                     else
+                     {
+                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(true), false);
+                     }
+                 }
+                 catch (Exception i2)
+                 {
+                     Console.WriteLine(i2.StackTrace);
+                 }
+             });
         }
+
+
+
 
         private void ChangeLowerButtonImage(bool v)
         {

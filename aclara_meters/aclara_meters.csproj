@@ -40,7 +40,7 @@
       <DependentUpon>AclaraViewReadMTU.xaml</DependentUpon>
     </Compile>
     <Compile Update="view\BleSettingsPage.xaml.cs">
-      <DependentUpon>BleSettingsPage.xaml</DependentUpon>
+      <DependentUpon>AclaraViewSettings.xaml</DependentUpon>
     </Compile>
     <Compile Update="view\LoginMenuPage.xaml.cs">
       <DependentUpon>AclaraViewLogin.xaml</DependentUpon>

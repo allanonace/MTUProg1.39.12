@@ -7,7 +7,7 @@
                Title="{Binding PageTitle}"
                     NavigationPage.HasBackButton="false"
              xmlns:accordion="clr-namespace:Xamarin.CustomControls;assembly=Xamarin.CustomControls.AccordionView"
-               x:Class="aclara_meters.view.BleSettingsPage">
+               x:Class="aclara_meters.view.AclaraViewSettings">
 
 
 
@@ -944,7 +944,7 @@
 
                             
 
-                               ItemTapped="OnMenuItemSelectedAsync"
+                               ItemTapped="OnMenuItemSelected"
 
                               
                            >

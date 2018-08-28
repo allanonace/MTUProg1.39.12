@@ -123,12 +123,24 @@ namespace aclara_meters.view
 
         private void OpenSettingsView(object sender, EventArgs e)
         {
-            Task.Run(async () =>
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Task.Delay(100); Device.BeginInvokeOnMainThread(() =>
+                try
                 {
-                    Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(dialogsSaved), false);
-                });
+                    if (FormsApp.ble_interface.IsOpen())
+                    {
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
+                        return;
+                    }
+                    else
+                    {
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(true), false);
+                    }
+                }
+                catch (Exception i2)
+                {
+                    Console.WriteLine(i2.StackTrace);
+                }
             });
         }
 
