@@ -207,15 +207,11 @@ namespace aclara_meters.view
 
         private void OpenSettingsCallAsync(object sender, EventArgs e)
         {
-            Task.Run(async () =>
-            {
-                await Task.Delay(100); 
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(dialogsSaved), false);
-                });
-
-            });
+             Task.Delay(100).ContinueWith(t =>
+              Device.BeginInvokeOnMainThread(() =>
+              {
+                Application.Current.MainPage.Navigation.PushAsync(new BleSettingsPage(dialogsSaved), false);
+              }));
         }
 
         private void ChangeLowerButtonImage(bool v)
@@ -436,14 +432,14 @@ namespace aclara_meters.view
             dialog_turnoff_one.IsVisible = false;
             dialog_turnoff_two.IsVisible = true;
 
-            Task.Run(async () =>
-            {
-                await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
-                {
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = true;
-                });
-            });
+            Task.Delay(2000).ContinueWith(t =>
+             Device.BeginInvokeOnMainThread(() =>
+             {
+                dialog_turnoff_two.IsVisible = false;
+                 dialog_turnoff_three.IsVisible = true;
+             }));
+
+
         }
 
         void MeterCancelTapped(object sender, EventArgs e)
@@ -549,208 +545,188 @@ namespace aclara_meters.view
             }
         }
 
-		#pragma warning disable RECS0165 // Asynchronous methods must return a task instead of a null value
-        private async void OnMenuCaseReplaceMeter()
+        private void OnMenuCaseReplaceMeter()
         {
             background_scan_page.Opacity = 1;
             background_scan_page.IsEnabled = true;
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
-            await Task.Run(async () =>
-            {
-                await Task.Delay(200); Device.BeginInvokeOnMainThread(() =>
-                {
-                    dialog_open_bg.IsVisible = true;
-                    turnoff_mtu_background.IsVisible = true;
-                    dialog_turnoff_one.IsVisible = false;
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = false;
-                    dialog_replacemeter_one.IsVisible = false;
-                    dialog_meter_replace_one.IsVisible = true;
-                    background_scan_page.Opacity = 1;
 
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
-                    }
-                    else
-                    {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
-                    }
+            Task.Delay(200).ContinueWith(t =>
+             Device.BeginInvokeOnMainThread(() =>
+             {
+                dialog_open_bg.IsVisible = true;
+                 turnoff_mtu_background.IsVisible = true;
+                 dialog_turnoff_one.IsVisible = false;
+                 dialog_turnoff_two.IsVisible = false;
+                 dialog_turnoff_three.IsVisible = false;
+                 dialog_replacemeter_one.IsVisible = false;
+                 dialog_meter_replace_one.IsVisible = true;
+                 background_scan_page.Opacity = 1;
 
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                });
-               
-            });
-            
+                 if (Device.Idiom == TargetIdiom.Tablet)
+                 {
+                     ContentNav.Opacity = 1;
+                     ContentNav.IsVisible = true;
+                 }
+                 else
+                 {
+                     ContentNav.Opacity = 0;
+                     ContentNav.IsVisible = false;
+                 }
+
+                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+             }));
         }
 
-        private async void OnMenuCaseReplaceMTU()
+        private void OnMenuCaseReplaceMTU()
         {
             background_scan_page.Opacity = 1;
             background_scan_page.IsEnabled = true;
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
-            await Task.Run(async () =>
-            {
-                await Task.Delay(200); Device.BeginInvokeOnMainThread(() =>
-                {
-                    dialog_open_bg.IsVisible = true;
-                    turnoff_mtu_background.IsVisible = true;
-                    dialog_meter_replace_one.IsVisible = false;
-                    dialog_turnoff_one.IsVisible = false;
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = false;
-                    dialog_replacemeter_one.IsVisible = true;
-                    background_scan_page.Opacity = 1;
+            Task.Delay(200).ContinueWith(t =>
+             Device.BeginInvokeOnMainThread(() =>
+             {
+                 dialog_open_bg.IsVisible = true;
+                 turnoff_mtu_background.IsVisible = true;
+                 dialog_meter_replace_one.IsVisible = false;
+                 dialog_turnoff_one.IsVisible = false;
+                 dialog_turnoff_two.IsVisible = false;
+                 dialog_turnoff_three.IsVisible = false;
+                 dialog_replacemeter_one.IsVisible = true;
+                 background_scan_page.Opacity = 1;
 
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
-                    }
-                    else
-                    {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
-                    }
+                 if (Device.Idiom == TargetIdiom.Tablet)
+                 {
+                     ContentNav.Opacity = 1;
+                     ContentNav.IsVisible = true;
+                 }
+                 else
+                 {
+                     ContentNav.Opacity = 0;
+                     ContentNav.IsVisible = false;
+                 }
 
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if(Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                });
-            });
+                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if(Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+             }));
+
         }
 
-        private async void OnMenuCaseTurnOFF()
+        private void OnMenuCaseTurnOFF()
         {
             background_scan_page.Opacity = 1;
             background_scan_page.IsEnabled = true;
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
-            await Task.Run(async () =>
-            {
-                await Task.Delay(200); Device.BeginInvokeOnMainThread(() =>
-                {
-                    dialog_open_bg.IsVisible = true;
-                    turnoff_mtu_background.IsVisible = true;
-                    dialog_meter_replace_one.IsVisible = false;
-                    dialog_turnoff_one.IsVisible = true;
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = false;
-                    dialog_replacemeter_one.IsVisible = false;
-                    background_scan_page.Opacity = 1;
+            Task.Delay(200).ContinueWith(t =>
+             Device.BeginInvokeOnMainThread(() =>
+             {
+                 dialog_open_bg.IsVisible = true;
+                 turnoff_mtu_background.IsVisible = true;
+                 dialog_meter_replace_one.IsVisible = false;
+                 dialog_turnoff_one.IsVisible = true;
+                 dialog_turnoff_two.IsVisible = false;
+                 dialog_turnoff_three.IsVisible = false;
+                 dialog_replacemeter_one.IsVisible = false;
+                 background_scan_page.Opacity = 1;
 
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
-                    }
-                    else
-                    {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
-                    }
-                   
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                });
-            });
+                 if (Device.Idiom == TargetIdiom.Tablet)
+                 {
+                     ContentNav.Opacity = 1;
+                     ContentNav.IsVisible = true;
+                 }
+                 else
+                 {
+                     ContentNav.Opacity = 0;
+                     ContentNav.IsVisible = false;
+                 }
+
+                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+             }));
+
         }
 
-        private async void OnMenuCaseAddMTU()
+        private void OnMenuCaseAddMTU()
         {
             background_scan_page.Opacity = 1;
             background_scan_page.IsEnabled = true;
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
-            await Task.Run(async () =>
-            {
-                await Task.Delay(200); Device.BeginInvokeOnMainThread(() =>
-                {
-                    navigationDrawerList.SelectedItem = null;
-                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved),false);
-                    background_scan_page.Opacity = 1;
+       
+            Task.Delay(200).ContinueWith(t =>
+             Device.BeginInvokeOnMainThread(() =>
+             {
+                 navigationDrawerList.SelectedItem = null;
+                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
+                 background_scan_page.Opacity = 1;
 
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
-                    }
-                    else
-                    {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
-                    }
+                 if (Device.Idiom == TargetIdiom.Tablet)
+                 {
+                     ContentNav.Opacity = 1;
+                     ContentNav.IsVisible = true;
+                 }
+                 else
+                 {
+                     ContentNav.Opacity = 0;
+                     ContentNav.IsVisible = false;
+                 }
 
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                });
-
-            });
+                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+             }));
         }
 
-        private async void OnMenuCaseReadMTU()
+        private void OnMenuCaseReadMTU()
         {
             background_scan_page.Opacity = 1;
             background_scan_page.IsEnabled = true;
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             }
 
-            await Task.Run(async () =>
-            {
-                await Task.Delay(200); Device.BeginInvokeOnMainThread(() =>
-                {
-                    navigationDrawerList.SelectedItem = null;
-                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
-                    background_scan_page.Opacity = 1;
 
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        ContentNav.Opacity = 1;
-                        ContentNav.IsVisible = true;
-                    }
-                    else
-                    {
-                        ContentNav.Opacity = 0;
-                        ContentNav.IsVisible = false;
-                    }
+            Task.Delay(200).ContinueWith(t =>
+             Device.BeginInvokeOnMainThread(() =>
+             {
+                navigationDrawerList.SelectedItem = null;
+                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
+                 background_scan_page.Opacity = 1;
 
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-                }); 
-            });
+                 if (Device.Idiom == TargetIdiom.Tablet)
+                 {
+                     ContentNav.Opacity = 1;
+                     ContentNav.IsVisible = true;
+                 }
+                 else
+                 {
+                     ContentNav.Opacity = 0;
+                     ContentNav.IsVisible = false;
+                 }
+
+                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+             }));
         }
-		#pragma warning restore RECS0165 // Asynchronous methods must return a task instead of a null value
     }
 }

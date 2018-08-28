@@ -572,7 +572,7 @@
 
                             
 
-                               ItemTapped="OnMenuItemSelectedAsync"
+                               ItemTapped="OnMenuItemSelected"
 
                               
                            >

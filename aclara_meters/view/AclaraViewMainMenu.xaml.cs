@@ -561,7 +561,7 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                dialog_open_bg.IsVisible = true;
+               dialog_open_bg.IsVisible = true;
                turnoff_mtu_background.IsVisible = true;
                dialog_meter_replace_one.IsVisible = false;
                dialog_turnoff_one.IsVisible = false;
