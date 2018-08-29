@@ -73,6 +73,8 @@ namespace ble_library
     public class BlePort
     {
         private Queue<byte> buffer_ble_data;
+        private Queue<byte> buffer_aes;
+
         private IBluetoothLowEnergyAdapter adapter;
         private IBleGattServerConnection gattServer_connection;
         private IDisposable Listen_Characteristic_Notification_Handler;
@@ -321,13 +323,25 @@ namespace ble_library
 
 
         /// <summary>
+        /// Updates AES buffer with the notification data received 
+        /// </summary>
+        private void UpdateAESBuffer(byte[] bytes)
+        {
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                buffer_aes.Enqueue(bytes[i]);
+            }
+        }
+
+        /// <summary>
         /// AES Verification to connect Bluetooth LE peripheral 
         /// </summary>
         private async Task AESConnectionVerifyAsync()
         {
             byte [] static_pass = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x2e };
 
-
+            buffer_aes = new Queue<byte>();
+          
             try
             {
                 // Will also stop listening when gattServer
@@ -337,15 +351,17 @@ namespace ble_library
                 Listen_Characteristic_Notification_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                    new Guid("00000041-0000-1000-8000-00805f9b34fb"),
-                   UpdateBuffer
+                   UpdateAESBuffer
                 );
 
-                Thread.Sleep(500);
+                //Thread.Sleep(10);
                 //Read Pass H data from Characteristic
                 byte [] PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
                     new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                     new Guid("00000040-0000-1000-8000-00805f9b34fb")
                 );
+
+                //Thread.Sleep(10);
 
                 //Read Pass L data from Characteristic
                 byte[] PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
@@ -353,6 +369,7 @@ namespace ble_library
                     new Guid("00000042-0000-1000-8000-00805f9b34fb")
                 );
 
+                //Thread.Sleep(10);
 
                 byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
                 byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
@@ -366,8 +383,12 @@ namespace ble_library
                 Array.Copy(PassL_decrypt, 0, Dynamic_Pass, PassH_decrypt.Length, PassL_decrypt.Length);
 
                 // Input string.
-                const string input = "Hi, I'm Aclara";
-                byte[] array = Encoding.ASCII.GetBytes(input); //  "Hi, I'm Aclara";  ----> 48692c2049276d2041636c617261 
+                //const string input = "Hi, I'm Aclara";
+                //byte[] array = Encoding.ASCII.GetBytes(input); //  "Hi, I'm Aclara";  ----> 48 69 2c 20 49 27 6d 20 41 63 6c 61 72 61   // 07a6271209736449361a31468bc89c98
+
+                byte [] array =  {0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00};
+
+
                 byte[] hi_msg = AES_Encrypt(array, Dynamic_Pass);
 
 
@@ -377,6 +398,7 @@ namespace ble_library
                   hi_msg
                );
 
+                Console.WriteLine(buffer_aes);
 
                // Listen_Characteristic_Notification();
 
@@ -397,7 +419,7 @@ namespace ble_library
 
             // Set your salt here, change it to meet your flavor:
             // The salt bytes must be at least 8 bytes.
-            byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            //byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -406,10 +428,10 @@ namespace ble_library
                     AES.KeySize = 256;
                     AES.BlockSize = 128;
                     AES.Padding = PaddingMode.None;
-
-                    var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
-                    AES.Key = key.GetBytes(AES.KeySize / 8);
-                    AES.IV = key.GetBytes(AES.BlockSize / 8);
+                    AES.Key = passwordBytes; 
+                    //var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
+                    //AES.Key = key.GetBytes(AES.KeySize / 8);
+                    //AES.IV = key.GetBytes(AES.BlockSize / 8);
 
                     AES.Mode = CipherMode.ECB;
 
@@ -433,7 +455,7 @@ namespace ble_library
 
             // Set your salt here, change it to meet your flavor:
             // The salt bytes must be at least 8 bytes.
-            byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            //byte[] saltBytes = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -442,10 +464,10 @@ namespace ble_library
                     AES.KeySize = 256;
                     AES.BlockSize = 128;
                     AES.Padding = PaddingMode.None;
-
-                    var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
-                    AES.Key = key.GetBytes(AES.KeySize / 8);
-                    AES.IV = key.GetBytes(AES.BlockSize / 8);
+                    AES.Key = passwordBytes; 
+                    //var key = new Rfc2898DeriveBytes(passwordBytes, saltBytes, 1000);
+                    //AES.Key = key.GetBytes(AES.KeySize / 8);
+                    //AES.IV = key.GetBytes(AES.BlockSize / 8);
 
                     AES.Mode = CipherMode.ECB;
 
