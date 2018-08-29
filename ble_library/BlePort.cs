@@ -77,7 +77,10 @@ namespace ble_library
 
         private IBluetoothLowEnergyAdapter adapter;
         private IBleGattServerConnection gattServer_connection;
+        private IDisposable Listen_aes_conection_Handler;
         private IDisposable Listen_Characteristic_Notification_Handler;
+
+
         private Boolean isConnected;
         private List<IBlePeripheral> BlePeripheralList;
         private ArrayList ListAllServices;
@@ -284,7 +287,7 @@ namespace ble_library
                
 
                 // TO-DO: comprobar que tiene servicios y caracteristicas de un PUK? consultar Maria.
-
+                /*
                 try
                 {
                     ListAllServices = new ArrayList();
@@ -306,7 +309,7 @@ namespace ble_library
                 }catch(Exception j){
                     
                 }
-
+*/
 
                 await AESConnectionVerifyAsync();
             }
@@ -348,20 +351,20 @@ namespace ble_library
                 // is disconnected, so if that is acceptable,
                 // you don't need to store this disposable.
 
-                Listen_Characteristic_Notification_Handler = gattServer_connection.NotifyCharacteristicValue(
+                Listen_aes_conection_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                    new Guid("00000041-0000-1000-8000-00805f9b34fb"),
                    UpdateAESBuffer
                 );
 
-                //Thread.Sleep(10);
+                Thread.Sleep(100);
                 //Read Pass H data from Characteristic
                 byte [] PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
                     new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                     new Guid("00000040-0000-1000-8000-00805f9b34fb")
                 );
 
-                //Thread.Sleep(10);
+                Thread.Sleep(100);
 
                 //Read Pass L data from Characteristic
                 byte[] PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
@@ -369,7 +372,7 @@ namespace ble_library
                     new Guid("00000042-0000-1000-8000-00805f9b34fb")
                 );
 
-                //Thread.Sleep(10);
+                Thread.Sleep(100);
 
                 byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
                 byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
@@ -398,13 +401,42 @@ namespace ble_library
                   hi_msg
                );
 
-                Console.WriteLine(buffer_aes);
+                Thread.Sleep(100);
+
+                Console.WriteLine(buffer_aes.ToString());
 
                // Listen_Characteristic_Notification();
 
                 isConnected = true;
 
+                //Pedir todos los datos
+                //02 01 05 39 68 0f 8d 1a a9 3e 16 60 a4 f5 69 73 0f ad 91 00
+                //02 02 05 39 68 0f 8d 1a a9 3e 16 60 a4 f5 69 73 0f ad 91 00
 
+
+                // byte[] aes_count = Encoding.ASCII.GetBytes("1");
+
+                Listen_Characteristic_Notification();
+
+                await gattServer_connection.WriteCharacteristicValue(
+                    new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
+                    new Guid("00000002-0000-1000-8000-00805f9b34fb"),
+                    new byte[] {0x02, 0x01, 0x05, 0x39, 0x68, 0x0f, 0x8d, 0x1a, 0xa9, 0x3e, 0x16, 0x60, 0xa4, 0xf5, 0x69, 0x73, 0x0f, 0xad, 0x91, 0x00 }
+                );
+
+                Thread.Sleep(100);
+             //   aes_count = Encoding.ASCII.GetBytes("2");
+
+
+                await gattServer_connection.WriteCharacteristicValue(
+                    new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
+                    new Guid("00000002-0000-1000-8000-00805f9b34fb"),
+                    new byte[] { 0x02, 0x02, 0x05, 0x39, 0x68, 0x0f, 0x8d, 0x1a, 0xa9, 0x3e, 0x16, 0x60, 0xa4, 0xf5, 0x69, 0x73, 0x0f, 0xad, 0x91, 0x00 }
+                );
+
+                Thread.Sleep(100);
+
+                Console.WriteLine(buffer_ble_data.ToString());
             }
             catch (GattException ex)
             {
