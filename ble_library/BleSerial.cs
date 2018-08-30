@@ -169,5 +169,6 @@ namespace ble_library
         public List <IBlePeripheral> GetBlePeripheralList() {
             return ble_port_serial.GetBlePeripherals();
         }
+
     }
 }
