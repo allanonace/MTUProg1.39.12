@@ -1,9 +1,9 @@
 ﻿using System;
 using Lexi.Interfaces;
 using nexus.protocols.ble;
-using Acr.UserDialogs;
 using nexus.protocols.ble.scan;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace ble_library
 {
@@ -18,30 +18,28 @@ namespace ble_library
         public BleSerial(IBluetoothLowEnergyAdapter adapter)
         {
             ble_port_serial = new BlePort(adapter);
-            ble_port_serial.DisconnectDevice();
+            Task.Factory.StartNew(ble_port_serial.DisconnectDevice);
         }
-
-
 
         private void ExceptionCheck(byte[] buffer, int offset, int count){
             if (buffer == null)
             {
-                throw new System.ArgumentException("Parameter cannot be null", "buffer");
+                throw new ArgumentException("Parameter cannot be null", nameof(buffer));
             }
 
             if (offset < 0)
             {
-                throw new System.ArgumentException("Parameter cannot be less than Zero", "offset");
+                throw new ArgumentException("Parameter cannot be less than Zero", nameof(offset));
             }
 
             if (count < 0)
             {
-                throw new System.ArgumentException("Parameter cannot be less than Zero", "count");
+                throw new ArgumentException("Parameter cannot be less than Zero", nameof(count));
             }
 
             if (buffer.Length < offset + count)
             {
-                throw new System.ArgumentException("Incorrect buffer size", "buffer");
+                throw new ArgumentException("Incorrect buffer size", nameof(buffer));
             }
         }
 
@@ -88,7 +86,7 @@ namespace ble_library
         {
             ExceptionCheck(buffer, offset, count);
             ble_port_serial.ClearBuffer();   // TO-DO
-            ble_port_serial.Write_Characteristic(buffer, offset, count);
+            Task.Factory.StartNew(() => ble_port_serial.Write_Characteristic(buffer,offset,count));
         }
 
         /// <summary>
@@ -97,7 +95,7 @@ namespace ble_library
         /// <remarks></remarks>
         public void Close()
         {
-            ble_port_serial.DisconnectDevice();
+            Task.Factory.StartNew(ble_port_serial.DisconnectDevice);
         }
 
         /// <summary>
@@ -110,6 +108,10 @@ namespace ble_library
             return ble_port_serial.GetConnectionStatus();
         }
 
+        /// <summary>
+        /// Starts the device scanning
+        /// </summary>
+        /// <remarks></remarks>
         public void Scan(){
             
             ble_port_serial.StartScan();
@@ -124,7 +126,8 @@ namespace ble_library
         {
             if(!IsOpen())
             {
-                ble_port_serial.ConnectoToDevice(blePeripheral);
+                Task.Factory.StartNew(() => ble_port_serial.ConnectoToDevice(blePeripheral));
+         
             }else{
                 // TO-DO: mantenemos la misma conexion o cerramos y volvemos a abrir otra
             }

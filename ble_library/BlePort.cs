@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
-using Acr.UserDialogs;
 using nexus.protocols.ble;
 using nexus.protocols.ble.gatt;
 using nexus.protocols.ble.scan;
@@ -12,11 +9,9 @@ using nexus.protocols.ble.scan.advertisement;
 using Xamarin.Forms;
 using System.Security.Cryptography;
 using System.IO;
-using System.Text;
 
 namespace ble_library
 {
-
     /*
     ObserverReporter Class.
     Contains all methods that allow to know the connection status
@@ -60,7 +55,7 @@ namespace ble_library
                 //dialogs.Toast("Device disconnected");
                 try
                 {
-                    blePort.DisconnectDevice();
+                    Task.Factory.StartNew(blePort.DisconnectDevice).Wait();
                 }
                 catch (Exception e)
                 {
@@ -83,6 +78,12 @@ namespace ble_library
 
         private Boolean isConnected;
         private List<IBlePeripheral> BlePeripheralList;
+
+        private byte[] dynamicPass;
+        private bool isCiphered = true;
+        private bool busy;
+        private int cipheredDataSentCounter;
+
         //private ArrayList ListAllServices;
         //private ArrayList ListAllCharacteristics;
 
@@ -96,7 +97,7 @@ namespace ble_library
             buffer_ble_data = new Queue<byte>();
             isConnected = false;
             busy = false;
-            CipheredDataSentCounter = 1;
+            cipheredDataSentCounter = 1;
         }
 
         /// <summary>
@@ -154,11 +155,11 @@ namespace ble_library
              () =>
              {
 
-                 BluetoothEnable();
+                 Task.Factory.StartNew(BluetoothEnable);
 
                  if (adapter.CurrentState.IsEnabledOrEnabling())
                  {
-                     ScanForBroadcasts();
+                    Task.Factory.StartNew(ScanForBroadcasts);
                  }
                  return false;
              });
@@ -168,7 +169,7 @@ namespace ble_library
         /// <summary>
         /// Enables bluetooth antenna on device.
         /// </summary>
-        private async void BluetoothEnable()
+        private async Task BluetoothEnable()
         {
             if (adapter.AdapterCanBeEnabled && adapter.CurrentState.IsDisabledOrDisabling())
             {
@@ -212,14 +213,14 @@ namespace ble_library
             }
         }
 
-        private int CipheredDataSentCounter;
+
         /// <summary>
         /// Writes a number of bytes via Bluetooth LE to the peripheral gatt connnection
         /// </summary>
         /// <param name="buffer">The byte array to write the input to.</param>
         /// <param name="offset">The offset in buffer at which to write the bytes.</param>
         /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
-        public async void Write_Characteristic(byte[] buffer, int offset, int count)
+        public async Task Write_Characteristic(byte[] buffer, int offset, int count)
         {
             try
             {               
@@ -240,7 +241,7 @@ namespace ble_library
                         fillzeros = temp;
                     }
 
-                    ret = new byte[] { 0x02, Convert.ToByte(CipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(AES_Encrypt(fillzeros, Dynamic_Pass)).Concat(new byte[] { 0x00 }).ToArray();
+                    ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(AES_Encrypt(fillzeros, dynamicPass)).Concat(new byte[] { 0x00 }).ToArray();
                                  
                 }
 
@@ -250,7 +251,7 @@ namespace ble_library
                     new Guid("00000002-0000-1000-8000-00805f9b34fb"),
                     ret
                 );
-                CipheredDataSentCounter++;
+                cipheredDataSentCounter++;
             }
             catch (GattException ex)
             {
@@ -267,7 +268,7 @@ namespace ble_library
             byte[] tempArray = new byte[bytes[2]];
 
             if(isCiphered){
-                Array.Copy(AES_Decrypt(bytes.Skip(3).Take(16).ToArray(), Dynamic_Pass), 0, tempArray, 0, bytes[2]);
+                Array.Copy(AES_Decrypt(bytes.Skip(3).Take(16).ToArray(), dynamicPass), 0, tempArray, 0, bytes[2]);
             }else{
                 Array.Copy(bytes, 3, tempArray, 0, bytes[2]);
             }
@@ -277,15 +278,12 @@ namespace ble_library
                 buffer_ble_data.Enqueue(tempArray[i]);
             }
          }
-
-
-
      
         /// <summary>
         /// Updates buffer with the notification data received 
         /// </summary>
         /// <param name="ble_device">The Bluetooth LE peripheral to connect.</param>
-        public async void ConnectoToDevice(IBlePeripheral ble_device){
+        public async Task ConnectoToDevice(IBlePeripheral ble_device){
             var connection = await adapter.ConnectToDevice(
                 // The IBlePeripheral to connect to
                 ble_device,
@@ -334,8 +332,7 @@ namespace ble_library
                 }catch(Exception j){
                     
                 }
-*/
-
+                */
                 await AESConnectionVerifyAsync();
             }
             else
@@ -348,8 +345,6 @@ namespace ble_library
 
         }
 
-
-
         /// <summary>
         /// Updates AES buffer with the notification data received 
         /// </summary>
@@ -361,10 +356,6 @@ namespace ble_library
             }
         }
 
-        private byte[] Dynamic_Pass;
-
-        private bool isCiphered = true;
-       
         /// <summary>
         /// AES Verification to connect Bluetooth LE peripheral 
         /// </summary>
@@ -404,14 +395,14 @@ namespace ble_library
                 byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
 
                 //Generate dynamic password
-                Dynamic_Pass = new byte[PassH_decrypt.Length + PassL_decrypt.Length];
+                dynamicPass = new byte[PassH_decrypt.Length + PassL_decrypt.Length];
 
-                Array.Copy(PassH_decrypt, 0, Dynamic_Pass, 0, PassH_decrypt.Length);
-                Array.Copy(PassL_decrypt, 0, Dynamic_Pass, PassH_decrypt.Length, PassL_decrypt.Length);
+                Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
+                Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
 
                 byte [] say_hi =  {0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00};
 
-                byte[] hi_msg = AES_Encrypt(say_hi, Dynamic_Pass);
+                byte[] hi_msg = AES_Encrypt(say_hi, dynamicPass);
 
                 await gattServer_connection.WriteCharacteristicValue(
                   new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
@@ -433,7 +424,7 @@ namespace ble_library
                 if(isPairing)
                 {
                     // TO-DO
-                    string encoded = System.Convert.ToBase64String(Dynamic_Pass);
+                    string encoded = System.Convert.ToBase64String(dynamicPass);
                     // HERE GOES THE - SAVE DYNAMIC PASS TO PREFERENCES STORAGE
 
                     // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
@@ -447,7 +438,9 @@ namespace ble_library
             }
         }
 
-
+        /// <summary>
+        /// AES Decryptation algorithm
+        /// </summary>
         private byte[] AES_Decrypt(byte[] bytesToBeDecrypted, byte[] passwordBytes)
         {
             byte[] decryptedBytes = null;
@@ -482,8 +475,9 @@ namespace ble_library
             return decryptedBytes;
         }
 
-
-
+        /// <summary>
+        /// AES Encryptation algorithm
+        /// </summary>
         private byte[] AES_Encrypt(byte[] bytesToBeEncrypted, byte[] passwordBytes)
         {
             byte[] encryptedBytes = null;
@@ -518,14 +512,10 @@ namespace ble_library
             return encryptedBytes;
         }
 
-
-
-
-
         /// <summary>
         /// Disconnects from Bluetooth LE peripheral 
         /// </summary>
-        public async void DisconnectDevice()
+        public async Task DisconnectDevice()
         {
             if (isConnected)
             {
@@ -535,12 +525,10 @@ namespace ble_library
             }
         }
 
-        private bool busy;
-
         /// <summary>
         /// Scans for Bluetooth LE peripheral broadcasts 
         /// </summary>
-        private async void ScanForBroadcasts()
+        private async Task ScanForBroadcasts()
         {
             if(!busy){
                 
@@ -603,7 +591,5 @@ namespace ble_library
             busy = false;
             // scanning has been stopped when code reached this point
         }
-
     }
-
 }
