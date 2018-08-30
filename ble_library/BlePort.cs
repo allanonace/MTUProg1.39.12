@@ -96,6 +96,7 @@ namespace ble_library
             buffer_ble_data = new Queue<byte>();
             isConnected = false;
             busy = false;
+            CipheredDataSentCounter = 1;
         }
 
         /// <summary>
@@ -210,8 +211,8 @@ namespace ble_library
                 Console.WriteLine(e.StackTrace);  
             }
         }
-       
 
+        private int CipheredDataSentCounter;
         /// <summary>
         /// Writes a number of bytes via Bluetooth LE to the peripheral gatt connnection
         /// </summary>
@@ -228,11 +229,28 @@ namespace ble_library
                     ret[i] = buffer[i + offset];
                 }
 
+                if(isCiphered){
+                    int header = 3; int bufferSize = 16;
+                    byte[] fillzeros = ret.Skip(header).Take(count - header).ToArray();
+                    int zerosPadding = bufferSize - buffer[2]; 
+
+                    for (int i = 0; i < zerosPadding; i++ )
+                    {
+                        byte [] temp = fillzeros.Concat(new byte[] { 0x00 }).ToArray();
+                        fillzeros = temp;
+                    }
+
+                    ret = new byte[] { 0x02, Convert.ToByte(CipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(AES_Encrypt(fillzeros, Dynamic_Pass)).Concat(new byte[] { 0x00 }).ToArray();
+                                 
+                }
+
+   
                 await gattServer_connection.WriteCharacteristicValue(
                     new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                     new Guid("00000002-0000-1000-8000-00805f9b34fb"),
                     ret
                 );
+                CipheredDataSentCounter++;
             }
             catch (GattException ex)
             {
@@ -247,8 +265,13 @@ namespace ble_library
         private void UpdateBuffer(byte[] bytes )
         {
             byte[] tempArray = new byte[bytes[2]];
-            Array.Copy(AES_Decrypt(bytes.Skip(3).Take(16).ToArray(), Dynamic_Pass), 0, tempArray, 0, bytes[2]);
 
+            if(isCiphered){
+                Array.Copy(AES_Decrypt(bytes.Skip(3).Take(16).ToArray(), Dynamic_Pass), 0, tempArray, 0, bytes[2]);
+            }else{
+                Array.Copy(bytes, 3, tempArray, 0, bytes[2]);
+            }
+           
             for (int i = 0; i < tempArray.Length; i++)
             {
                 buffer_ble_data.Enqueue(tempArray[i]);
@@ -340,6 +363,8 @@ namespace ble_library
 
         private byte[] Dynamic_Pass;
 
+        private bool isCiphered = true;
+       
         /// <summary>
         /// AES Verification to connect Bluetooth LE peripheral 
         /// </summary>
@@ -395,6 +420,25 @@ namespace ble_library
                 );
 
                 isConnected = true;
+
+
+                bool isPairing = true;
+
+
+                for (int i = 0; i < buffer_aes.Count; i++)
+                {
+                    isPairing &= buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11); // if (!buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11)) isCiphered = false;
+                }
+
+                if(isPairing)
+                {
+                    // TO-DO
+                    string encoded = System.Convert.ToBase64String(Dynamic_Pass);
+                    // HERE GOES THE - SAVE DYNAMIC PASS TO PREFERENCES STORAGE
+
+                    // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
+                    byte[] bytes = System.Convert.FromBase64String(encoded);
+                }
 
             }
             catch (GattException ex)
