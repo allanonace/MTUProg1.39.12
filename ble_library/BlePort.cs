@@ -405,33 +405,34 @@ namespace ble_library
                     {
                         isPairing &= buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11); // if (!buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11)) isCiphered = false;
 
-
                         if (buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0xCC))
                         {
                             isPairing = false;
-             
-                       
+          
                         }
 
-
-                      
                     }
 
                     buffer_aes.Clear();
 
                     saved_settings.AddOrUpdateValue("responsehi", isPairing.ToString() ); 
 
-
-
                     if (!isPairing)
                     {
-                        await DisconnectDevice();
+                        try
+                        {
+                            isConnected = false;
+                            await DisconnectDevice();
+
+                        }catch(Exception control)
+                        {
+                            Console.WriteLine(control.StackTrace);
+                        }
+                       
                         saved_settings.AddOrUpdateValue("session_dynamicpass", string.Empty);
                         saved_settings.AddOrUpdateValue("session_peripheral", string.Empty);
                     }
-
-
-                   
+                  
                 }else{
 
                     //Read Pass H data from Characteristic
@@ -464,19 +465,13 @@ namespace ble_library
                       hi_msg
                     );
 
-
-
-
                     bool isPairing = true;
-
-
                     for (int i = 0; i < buffer_aes.Count; i++)
                     {
                         isPairing &= buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11); // if (!buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11)) isCiphered = false;
                     }
 
                     buffer_aes.Clear();
-
 
                     saved_settings.AddOrUpdateValue("responsehi", isPairing.ToString() ); 
 
@@ -489,10 +484,20 @@ namespace ble_library
                         // HERE GOES THE - SAVE DYNAMIC PASS TO PREFERENCES STORAGE
                         saved_settings.AddOrUpdateValue("session_dynamicpass", encoded);
                         saved_settings.AddOrUpdateValue("session_peripheral", ble_device.Advertisement.DeviceName);
+                    }else{
+                        try
+                        {
+                            isConnected = false;
+                            await DisconnectDevice();
+
+                        }
+                        catch (Exception control)
+                        {
+                            Console.WriteLine(control.StackTrace);
+                        }
+
                     }
                 }
-
-
             }
             catch (GattException ex)
             {
