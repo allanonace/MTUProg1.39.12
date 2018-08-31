@@ -14,6 +14,7 @@ using Xamarin.Forms;
 using System.Threading;
 using nexus.protocols.ble.scan;
 using System.Collections.ObjectModel;
+using Plugin.Settings;
 
 namespace aclara_meters.view
 {
@@ -62,6 +63,7 @@ namespace aclara_meters.view
             if (FormsApp.CredentialsService.UserName != null)
             {
                 userName.Text = FormsApp.CredentialsService.UserName;
+                CrossSettings.Current.AddOrUpdateValue("session_username", FormsApp.CredentialsService.UserName);           
             }
 
             LoadSideMenuElements();
@@ -83,7 +85,7 @@ namespace aclara_meters.view
 
             employees = new ObservableCollection<DeviceItem>();
             temporal_ble_peripherals = new List<IBlePeripheral> { };
-
+                
             DeviceList.RefreshCommand = new Command(() =>
             {
                 try
@@ -106,6 +108,14 @@ namespace aclara_meters.view
                 DeviceList.IsRefreshing = false;
             });
             DeviceList.RefreshCommand.Execute(true);
+
+
+
+
+
+
+
+
         }
 
         private void LoadSideMenuElements()
@@ -322,6 +332,22 @@ namespace aclara_meters.view
                 blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
                 for (int i = 0; i < blePeripherals.Count; i++)
                 {
+
+                    //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
+                    if(CrossSettings.Current.GetValueOrDefault("session_dynamicpass",string.Empty)!=string.Empty)
+                    {
+                        if(blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)))
+                        {
+                            if (FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)))
+                            {
+                                if(!FormsApp.ble_interface.IsOpen()){
+                                    FormsApp.ble_interface.Open(blePeripherals[i], true);
+                                }
+                            }
+                        }
+                    }
+                   
+
                     DeviceItem device = new DeviceItem
                     {
                         deviceMacAddress = blePeripherals[i].DeviceId.ToString(),

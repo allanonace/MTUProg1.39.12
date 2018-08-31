@@ -4,6 +4,7 @@ using nexus.protocols.ble;
 using nexus.protocols.ble.scan;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Plugin.Settings.Abstractions;
 
 namespace ble_library
 {
@@ -16,7 +17,7 @@ namespace ble_library
         /// </summary>
         /// <param name="adapter">The Bluetooth Low Energy Adapter from the OS</param>
         public BleSerial(IBluetoothLowEnergyAdapter adapter)
-        {
+        {     
             ble_port_serial = new BlePort(adapter);
             Task.Factory.StartNew(ble_port_serial.DisconnectDevice);
         }
@@ -122,11 +123,11 @@ namespace ble_library
         /// </summary>
         /// <param name="blePeripheral">The object that contains the device information.</param>
         /// <remarks></remarks>
-        public void Open(IBlePeripheral blePeripheral)
+        public void Open(IBlePeripheral blePeripheral, bool isBounded = false)
         {
             if(!IsOpen())
             {
-                Task.Factory.StartNew(() => ble_port_serial.ConnectoToDevice(blePeripheral));
+                Task.Factory.StartNew(() => ble_port_serial.ConnectoToDevice(blePeripheral,isBounded));
          
             }else{
                 // TO-DO: mantenemos la misma conexion o cerramos y volvemos a abrir otra

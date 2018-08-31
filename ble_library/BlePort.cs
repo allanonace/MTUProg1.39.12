@@ -9,6 +9,8 @@ using nexus.protocols.ble.scan.advertisement;
 using Xamarin.Forms;
 using System.Security.Cryptography;
 using System.IO;
+using Plugin.Settings.Abstractions;
+using Plugin.Settings;
 
 namespace ble_library
 {
@@ -84,6 +86,8 @@ namespace ble_library
         private bool busy;
         private int cipheredDataSentCounter;
 
+        private ISettings saved_settings;
+
         //private ArrayList ListAllServices;
         //private ArrayList ListAllCharacteristics;
 
@@ -98,6 +102,7 @@ namespace ble_library
             isConnected = false;
             busy = false;
             cipheredDataSentCounter = 1;
+            saved_settings = CrossSettings.Current;               
         }
 
         /// <summary>
@@ -154,7 +159,7 @@ namespace ble_library
              TimeSpan.FromSeconds(1),
              () =>
              {
-
+                
                  Task.Factory.StartNew(BluetoothEnable);
 
                  if (adapter.CurrentState.IsEnabledOrEnabling())
@@ -283,7 +288,7 @@ namespace ble_library
         /// Updates buffer with the notification data received 
         /// </summary>
         /// <param name="ble_device">The Bluetooth LE peripheral to connect.</param>
-        public async Task ConnectoToDevice(IBlePeripheral ble_device){
+        public async Task ConnectoToDevice(IBlePeripheral ble_device, bool isBounded){
             var connection = await adapter.ConnectToDevice(
                 // The IBlePeripheral to connect to
                 ble_device,
@@ -308,7 +313,7 @@ namespace ble_library
 
                 gattServer_connection.Subscribe(new ObserverReporter(this));                
                
-
+                isConnected = true;
                 // TO-DO: comprobar que tiene servicios y caracteristicas de un PUK? consultar Maria.
                 /*
                 try
@@ -333,7 +338,8 @@ namespace ble_library
                     
                 }
                 */
-                await AESConnectionVerifyAsync();
+
+                await AESConnectionVerifyAsync(ble_device, isBounded);
             }
             else
             {
@@ -359,7 +365,7 @@ namespace ble_library
         /// <summary>
         /// AES Verification to connect Bluetooth LE peripheral 
         /// </summary>
-        private async Task AESConnectionVerifyAsync()
+        private async Task AESConnectionVerifyAsync(IBlePeripheral ble_device, bool isBounded)
         {
             byte [] static_pass = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x2e };
 
@@ -377,59 +383,115 @@ namespace ble_library
                    UpdateAESBuffer
                 );
 
+                byte[] say_hi = { 0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00 };
 
-                //Read Pass H data from Characteristic
-                byte [] PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
-                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                    new Guid("00000040-0000-1000-8000-00805f9b34fb")
-                );
-
-       
-                //Read Pass L data from Characteristic
-                byte[] PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
-                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                    new Guid("00000042-0000-1000-8000-00805f9b34fb")
-                );
-               
-                byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
-                byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
-
-                //Generate dynamic password
-                dynamicPass = new byte[PassH_decrypt.Length + PassL_decrypt.Length];
-
-                Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
-                Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
-
-                byte [] say_hi =  {0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00};
-
-                byte[] hi_msg = AES_Encrypt(say_hi, dynamicPass);
-
-                await gattServer_connection.WriteCharacteristicValue(
-                  new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                  new Guid("00000041-0000-1000-8000-00805f9b34fb"),
-                  hi_msg
-                );
-
-                isConnected = true;
-
-
-                bool isPairing = true;
-
-
-                for (int i = 0; i < buffer_aes.Count; i++)
-                {
-                    isPairing &= buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11); // if (!buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11)) isCiphered = false;
-                }
-
-                if(isPairing)
-                {
-                    // TO-DO
-                    string encoded = System.Convert.ToBase64String(dynamicPass);
-                    // HERE GOES THE - SAVE DYNAMIC PASS TO PREFERENCES STORAGE
-
+                if(isBounded){
+                  
                     // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
-                    byte[] bytes = System.Convert.FromBase64String(encoded);
+                    byte[] bytes = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
+                    byte[] hi_msg = AES_Encrypt(say_hi, bytes);
+
+
+                    await gattServer_connection.WriteCharacteristicValue(
+                      new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                      new Guid("00000041-0000-1000-8000-00805f9b34fb"),
+                      hi_msg
+                    );
+
+                   
+                    bool isPairing = true;
+
+                    for (int i = 0; i < buffer_aes.Count; i++)
+                    {
+                        isPairing &= buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11); // if (!buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11)) isCiphered = false;
+
+
+                        if (buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0xCC))
+                        {
+                            isPairing = false;
+             
+                       
+                        }
+
+
+                      
+                    }
+
+                    buffer_aes.Clear();
+
+                    saved_settings.AddOrUpdateValue("responsehi", isPairing.ToString() ); 
+
+
+
+                    if (!isPairing)
+                    {
+                        await DisconnectDevice();
+                        saved_settings.AddOrUpdateValue("session_dynamicpass", string.Empty);
+                        saved_settings.AddOrUpdateValue("session_peripheral", string.Empty);
+                    }
+
+
+                   
+                }else{
+
+                    //Read Pass H data from Characteristic
+                    byte[] PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
+                        new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                        new Guid("00000040-0000-1000-8000-00805f9b34fb")
+                    );
+
+
+                    //Read Pass L data from Characteristic
+                    byte[] PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
+                        new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                        new Guid("00000042-0000-1000-8000-00805f9b34fb")
+                    );
+
+                    byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
+                    byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
+
+                    //Generate dynamic password
+                    dynamicPass = new byte[PassH_decrypt.Length + PassL_decrypt.Length];
+
+                    Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
+                    Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
+
+                    byte[] hi_msg = AES_Encrypt(say_hi, dynamicPass);
+
+                    await gattServer_connection.WriteCharacteristicValue(
+                      new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                      new Guid("00000041-0000-1000-8000-00805f9b34fb"),
+                      hi_msg
+                    );
+
+
+
+
+                    bool isPairing = true;
+
+
+                    for (int i = 0; i < buffer_aes.Count; i++)
+                    {
+                        isPairing &= buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11); // if (!buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11)) isCiphered = false;
+                    }
+
+                    buffer_aes.Clear();
+
+
+                    saved_settings.AddOrUpdateValue("responsehi", isPairing.ToString() ); 
+
+
+                    if (isPairing)
+                    {
+                        // TO-DO
+                        string encoded = System.Convert.ToBase64String(dynamicPass);
+
+                        // HERE GOES THE - SAVE DYNAMIC PASS TO PREFERENCES STORAGE
+                        saved_settings.AddOrUpdateValue("session_dynamicpass", encoded);
+                        saved_settings.AddOrUpdateValue("session_peripheral", ble_device.Advertisement.DeviceName);
+                    }
                 }
+
 
             }
             catch (GattException ex)
@@ -521,7 +583,9 @@ namespace ble_library
             {
                 Stop_Listen_Characteristic_Notification();
                 await gattServer_connection.Disconnect();
+                CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
                 isConnected = false;
+
             }
         }
 
@@ -576,7 +640,6 @@ namespace ble_library
                                 BlePeripheralList[BlePeripheralList.FindIndex(f => f.DeviceId.Equals(peripheral.DeviceId))] = peripheral;
                             }else{
                                 BlePeripheralList.Add(peripheral);
-                              
                             }
                         } 
                     }

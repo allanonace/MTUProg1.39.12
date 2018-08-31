@@ -11,6 +11,7 @@ using Acr.UserDialogs;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
 using Xamarin.Forms;
+using Plugin.Settings;
 
 namespace aclara_meters.view
 {
@@ -390,7 +391,7 @@ namespace aclara_meters.view
                                 lista.EndRefresh();
                                 Task.Run(async () =>
                                 {
-                                    await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
+                                    await Task.Delay(3500); Device.BeginInvokeOnMainThread(() =>
                                     {
                                         try
                                         {
@@ -403,7 +404,7 @@ namespace aclara_meters.view
                                                             );
                                             */
 
-                                            FormsApp.ble_interface.BytesToRead();
+                                            label_read.Text = "Hi-Response: " + CrossSettings.Current.GetValueOrDefault("responsehi", string.Empty).ToString() + "  Data Count: " + FormsApp.ble_interface.BytesToRead().ToString();
 
 
 

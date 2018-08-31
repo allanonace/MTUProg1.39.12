@@ -1,3 +1,4 @@
+/*
 using Plugin.Settings;
 using Plugin.Settings.Abstractions;
 using Xamarin.Forms;
@@ -40,23 +41,7 @@ namespace aclara_meters.Helpers
         private const string ChangesDoneAddMTU = "ChangesDoneAddMTU";
         private static readonly bool ChangesDoneAddMTUDefault = false;
 
-
-        private const string IsInSettings = "IsInSettings";
-        private static readonly bool IsInSettingsDefault = false;
-
-
-        private const string StoredPairedDevices = "StoredPairedDevices";
-        private static readonly string StoredPairedDevicesDefault = string.Empty;
-
-
-
         #endregion
-
-        public static string SavedStoredPairedDevices
-        {
-            get { return AppSettings.GetValueOrDefault(StoredPairedDevices, StoredPairedDevicesDefault); }
-            set { AppSettings.AddOrUpdateValue(StoredPairedDevices, value); }
-        }
 
 
         public static string SavedUserName
@@ -102,12 +87,6 @@ namespace aclara_meters.Helpers
             set { AppSettings.AddOrUpdateValue(ChangesDoneAddMTU, value); }
         }
 
-
-        public static bool IsNotConnectedInSettings
-        {
-            get { return AppSettings.GetValueOrDefault(IsInSettings, IsInSettingsDefault); }
-            set { AppSettings.AddOrUpdateValue(IsInSettings, value); }
-        }
-
     }
 }
+*/

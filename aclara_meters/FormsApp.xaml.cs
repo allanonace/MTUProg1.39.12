@@ -9,7 +9,7 @@ using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.AppCenter.Distribute;
 using ble_library;
-
+using Plugin.Settings;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -30,15 +30,14 @@ namespace aclara_meters
         {
             InitializeComponent();
 
-            //Inicializar libreria personalizada
-            ble_interface = new BleSerial(adapter);
-
             //Gestor de cuentas
             CredentialsService = new CredentialsService();
 
+            //Inicializar libreria personalizada
+            ble_interface = new BleSerial(adapter);
+
             //Cargar la pantalla principal
             MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
-
         }
 
         protected override void OnStart()
