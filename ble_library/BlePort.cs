@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using System.IO;
 using Plugin.Settings.Abstractions;
 using Plugin.Settings;
+using System.Threading;
 
 namespace ble_library
 {
@@ -71,10 +72,12 @@ namespace ble_library
     {
         private Queue<byte> buffer_ble_data;
         private Queue<byte> buffer_aes;
+        private Queue<byte> buffer_ack;
 
         private IBluetoothLowEnergyAdapter adapter;
         private IBleGattServerConnection gattServer_connection;
         private IDisposable Listen_aes_conection_Handler;
+        private IDisposable Listen_ack_response_Handler;
         private IDisposable Listen_Characteristic_Notification_Handler;
 
 
@@ -82,7 +85,7 @@ namespace ble_library
         private List<IBlePeripheral> BlePeripheralList;
 
         private byte[] dynamicPass;
-        private bool isCiphered = true;
+        private bool isCiphered = false;
         private bool busy;
         private int cipheredDataSentCounter;
 
@@ -99,6 +102,8 @@ namespace ble_library
         {
             adapter = adapter_app;
             buffer_ble_data = new Queue<byte>();
+            buffer_ack = new Queue<byte>();
+            buffer_aes = new Queue<byte>();
             isConnected = false;
             busy = false;
             cipheredDataSentCounter = 1;
@@ -228,35 +233,67 @@ namespace ble_library
         public async Task Write_Characteristic(byte[] buffer, int offset, int count)
         {
             try
-            {               
+            {
+                //buffer_ack.Clear();
+
                 byte[] ret = new byte[count];
               
                 for (int i = 0; i < count; i++){
                     ret[i] = buffer[i + offset];
                 }
 
-                if(isCiphered){
-                    int header = 3; int bufferSize = 16;
-                    byte[] fillzeros = ret.Skip(header).Take(count - header).ToArray();
-                    int zerosPadding = bufferSize - buffer[2]; 
 
-                    for (int i = 0; i < zerosPadding; i++ )
-                    {
-                        byte [] temp = fillzeros.Concat(new byte[] { 0x00 }).ToArray();
-                        fillzeros = temp;
-                    }
+                int header = 3; int bufferSize = 16;
+                byte[] fillzeros = ret.Skip(header).Take(count - header).ToArray();
+                int zerosPadding = bufferSize - buffer[2]; 
 
-                    ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(AES_Encrypt(fillzeros, dynamicPass)).Concat(new byte[] { 0x00 }).ToArray();
-                                 
+                for (int i = 0; i < zerosPadding; i++ )
+                {
+                    byte [] temp = fillzeros.Concat(new byte[] { 0x00 }).ToArray();
+                    fillzeros = temp;
                 }
 
-   
+                if (isCiphered)
+                {
+                    ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(AES_Encrypt(fillzeros, dynamicPass)).Concat(new byte[] { 0x00 }).ToArray();  
+                }else{
+                    ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(fillzeros).Concat(new byte[] { 0x00 }).ToArray();
+                
+                } 
+
+  
                 await gattServer_connection.WriteCharacteristicValue(
                     new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                     new Guid("00000002-0000-1000-8000-00805f9b34fb"),
                     ret
                 );
-                cipheredDataSentCounter++;
+
+               
+              
+                await Task.Delay(300);
+
+
+                if (buffer_ack.Skip(3).Take(1) == new byte[] { 0x01 }){
+                    
+                    cipheredDataSentCounter = Int16.Parse(buffer_ack.Skip(3).Take(1).ToString()) + 1;
+
+                    if (isCiphered)
+                    {
+                        ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(AES_Encrypt(fillzeros, dynamicPass)).Concat(new byte[] { 0x00 }).ToArray();  
+                    }else{
+                        ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(fillzeros).Concat(new byte[] { 0x00 }).ToArray();
+                    
+                    } 
+                    await gattServer_connection.WriteCharacteristicValue(
+                        new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
+                        new Guid("00000002-0000-1000-8000-00805f9b34fb"),
+                        ret
+                    );
+
+                }else{
+                    cipheredDataSentCounter++; 
+                }
+                buffer_ack.Clear();
             }
             catch (GattException ex)
             {
@@ -362,6 +399,19 @@ namespace ble_library
             }
         }
 
+
+        /// <summary>
+        /// Updates Ack buffer with the notification data received 
+        /// </summary>
+        private void UpdateACKBuffer(byte[] bytes)
+        {
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                buffer_ack.Enqueue(bytes[i]);
+            }
+        }
+
+
         /// <summary>
         /// AES Verification to connect Bluetooth LE peripheral 
         /// </summary>
@@ -377,6 +427,27 @@ namespace ble_library
                 // you don't need to store this disposable.
                 Listen_Characteristic_Notification();
 
+
+                try
+                {
+                    // Will also stop listening when gattServer
+                    // is disconnected, so if that is acceptable,
+                    // you don't need to store this disposable.
+                    Listen_ack_response_Handler = gattServer_connection.NotifyCharacteristicValue(
+                       new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
+                       new Guid("00000002-0000-1000-8000-00805f9b34fb"),
+                        UpdateACKBuffer
+                    );
+
+                }
+                catch (GattException ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+
+
+
+
                 Listen_aes_conection_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                    new Guid("00000041-0000-1000-8000-00805f9b34fb"),
@@ -389,7 +460,15 @@ namespace ble_library
                   
                     // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
                     byte[] bytes = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
-                    byte[] hi_msg = AES_Encrypt(say_hi, bytes);
+                    byte[] hi_msg;
+
+                    if (isCiphered)
+                    {
+
+                        hi_msg = AES_Encrypt(say_hi, bytes);
+                    }else{
+                        hi_msg = say_hi;
+                    }
 
 
                     await gattServer_connection.WriteCharacteristicValue(
@@ -433,30 +512,40 @@ namespace ble_library
 
                    
                 }else{
+                    byte[] PassH_crypt;
+                    byte[] PassL_crypt;
 
-                    //Read Pass H data from Characteristic
-                    byte[] PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
-                        new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                        new Guid("00000040-0000-1000-8000-00805f9b34fb")
-                    );
+                    if(isCiphered){
+                        //Read Pass H data from Characteristic
+                        PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
+                            new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                            new Guid("00000040-0000-1000-8000-00805f9b34fb")
+                        );
 
+                        //Read Pass L data from Characteristic
+                        PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
+                            new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                            new Guid("00000042-0000-1000-8000-00805f9b34fb")
+                        );
 
-                    //Read Pass L data from Characteristic
-                    byte[] PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
-                        new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                        new Guid("00000042-0000-1000-8000-00805f9b34fb")
-                    );
+                        byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
+                        byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
 
-                    byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
-                    byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
+                        //Generate dynamic password
+                        dynamicPass = new byte[PassH_decrypt.Length + PassL_decrypt.Length];
 
-                    //Generate dynamic password
-                    dynamicPass = new byte[PassH_decrypt.Length + PassL_decrypt.Length];
+                        Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
+                        Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
 
-                    Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
-                    Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
+                    }
 
-                    byte[] hi_msg = AES_Encrypt(say_hi, dynamicPass);
+                    byte[] hi_msg;
+
+                    if(isCiphered){
+                        hi_msg = AES_Encrypt(say_hi, dynamicPass);
+                    }else{
+                        hi_msg = say_hi;
+                    }
 
                     await gattServer_connection.WriteCharacteristicValue(
                       new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
@@ -464,11 +553,7 @@ namespace ble_library
                       hi_msg
                     );
 
-
-
-
                     bool isPairing = true;
-
 
                     for (int i = 0; i < buffer_aes.Count; i++)
                     {
@@ -477,17 +562,20 @@ namespace ble_library
 
                     buffer_aes.Clear();
 
-
                     saved_settings.AddOrUpdateValue("responsehi", isPairing.ToString() ); 
-
 
                     if (isPairing)
                     {
-                        // TO-DO
-                        string encoded = System.Convert.ToBase64String(dynamicPass);
+                        if (isCiphered)
+                        {
+                            // TO-DO
+                            string encoded = System.Convert.ToBase64String(dynamicPass);
 
-                        // HERE GOES THE - SAVE DYNAMIC PASS TO PREFERENCES STORAGE
-                        saved_settings.AddOrUpdateValue("session_dynamicpass", encoded);
+                            // HERE GOES THE - SAVE DYNAMIC PASS TO PREFERENCES STORAGE
+                            saved_settings.AddOrUpdateValue("session_dynamicpass", encoded);
+                        }else{
+                            saved_settings.AddOrUpdateValue("session_dynamicpass", "No Cipher");
+                        }
                         saved_settings.AddOrUpdateValue("session_peripheral", ble_device.Advertisement.DeviceName);
                     }
                 }
@@ -633,7 +721,7 @@ namespace ble_library
 
                     //Show dialog with name
                     if(adv.DeviceName!=null){
-                        if ( adv.DeviceName.Contains("Aclara") || adv.DeviceName.Contains("Acl") )
+                        if ( adv.DeviceName.Contains("Aclara") || adv.DeviceName.Contains("Acl") || adv.DeviceName.Contains("Ac") )
                         {
                             if(BlePeripheralList.Any(p => p.DeviceId.Equals(peripheral.DeviceId)))
                             {
