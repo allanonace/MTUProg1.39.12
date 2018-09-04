@@ -254,8 +254,11 @@ namespace ble_library
                     fillzeros = temp;
                 }
 
+
+             
                 if (isCiphered)
                 {
+                    dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
                     ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(AES_Encrypt(fillzeros, dynamicPass)).Concat(new byte[] { 0x00 }).ToArray();  
                 }else{
                     ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(fillzeros).Concat(new byte[] { 0x00 }).ToArray();
@@ -334,7 +337,7 @@ namespace ble_library
                 // connection attempt.
                 // If you omit this argument, it will use
                 // BluetoothLowEnergyUtils.DefaultConnectionTimeout
-                TimeSpan.FromSeconds(15),
+                TimeSpan.FromSeconds(5),
                 // Optional IProgress<ConnectionProgress>
                 progress => {
                     Console.WriteLine(progress);
@@ -469,6 +472,8 @@ namespace ble_library
                    UpdateAESBuffer
                 );
 
+                await Task.Delay(200);
+
                 byte[] say_hi = { 0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00 };
 
                 if(isBounded){
@@ -491,31 +496,20 @@ namespace ble_library
                       new Guid("00000041-0000-1000-8000-00805f9b34fb"),
                       hi_msg
                     );
-
                    
                     bool isPairing = true;
 
                     for (int i = 0; i < buffer_aes.Count; i++)
                     {
                         isPairing &= buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11); // if (!buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11)) isCiphered = false;
-
-
+                       
                         if (buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0xCC))
                         {
                             isPairing = false;
-             
-                       
                         }
-
-
-                      
                     }
-
                     buffer_aes.Clear();
-
                     saved_settings.AddOrUpdateValue("responsehi", isPairing.ToString() ); 
-
-
 
                     if (!isPairing)
                     {
@@ -524,12 +518,10 @@ namespace ble_library
                         saved_settings.AddOrUpdateValue("session_peripheral", string.Empty);
                         saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", string.Empty);
                     }
-
-
                    
                 }else{
-                    byte[] PassH_crypt;
-                    byte[] PassL_crypt;
+                    byte[] PassH_crypt = new byte []{};
+                    byte[] PassL_crypt = new byte[] { };
 
                     if(isCiphered){
                         //Read Pass H data from Characteristic
@@ -747,9 +739,9 @@ namespace ble_library
                     if(adv.DeviceName!=null){
                         if ( adv.DeviceName.Contains("Aclara") || adv.DeviceName.Contains("Acl") || adv.DeviceName.Contains("Ac") )
                         {
-                            if(BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data)))
+                            if(BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
                             {
-                                BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data))] = peripheral;
+                                BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
                             }else{
                                 BlePeripheralList.Add(peripheral);
                             }

@@ -162,13 +162,13 @@
                         <RelativeLayout  Scale="1" HorizontalOptions="Center">
                            
                             <StackLayout Margin="0,-24,0,0" Padding="48">
-                                <StackLayout  Orientation="Vertical" 
+                                <StackLayout  Orientation="Vertical" WidthRequest="268"
                                          VerticalOptions="Center" 
                                          HorizontalOptions="Center">
                                     <Image Source="ble_puck_icon.png" />
                                     <Label HorizontalOptions="Center" FontSize="32" Text="Device 1" x:Name="deviceID"  ></Label>
                                     <Label HorizontalOptions="Center" IsVisible="true" Margin="4,-4,0,0" FontSize="16" 
-                                           Text="34:32:45:76:98"  HorizontalTextAlignment="Center" WidthRequest="220" x:Name="macAddress" ></Label>
+                                           Text="34:32:45:76:98"  HorizontalTextAlignment="Center"  x:Name="macAddress" ></Label>
                                     <StackLayout Margin="0,-4,0,0" Orientation="Horizontal" HorizontalOptions="Center">
                                          <Image   Source="battery_toolbar_high"  HeightRequest="34" x:Name="imageBattery" VerticalOptions="Center" />
                                          <Label Margin="-2,2,0,-2" Text="100 %"   x:Name="batteryLevel" FontSize="14" VerticalOptions="Center"></Label> 
