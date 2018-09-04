@@ -87,7 +87,7 @@ namespace ble_library
         {
             ExceptionCheck(buffer, offset, count);
             ble_port_serial.ClearBuffer();   // TO-DO
-            Task.Factory.StartNew(() => ble_port_serial.Write_Characteristic(buffer,offset,count));
+            ble_port_serial.Write_Characteristic(buffer, offset, count);
         }
 
         /// <summary>

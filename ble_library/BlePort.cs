@@ -232,7 +232,7 @@ namespace ble_library
         /// <param name="buffer">The byte array to write the input to.</param>
         /// <param name="offset">The offset in buffer at which to write the bytes.</param>
         /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
-        public async Task Write_Characteristic(byte[] buffer, int offset, int count)
+        public async void Write_Characteristic(byte[] buffer, int offset, int count)
         {
             byte[] ret = new byte[20];
             try
