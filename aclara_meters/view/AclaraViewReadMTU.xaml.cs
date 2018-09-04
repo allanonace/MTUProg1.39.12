@@ -167,7 +167,7 @@ namespace aclara_meters.view
                     {
                         backdark_bg.IsVisible = true;
                         indicator.IsVisible = true;
-                        FormsApp.ble_interface.Write(new byte[] { (byte)0x00, (byte)0x00, (byte)0x05, (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C }, 0, 8);
+                        FormsApp.ble_interface.Write(new byte[] { (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C }, 0, 5);
 
                         //byte[] send = { 0x02, 0x01, 0x05, 0x39, 0x68, 0x0f, 0x8d, 0x1a, 0xa9, 0x3e, 0x16, 0x60, 0xa4, 0xf5, 0x69, 0x73, 0x0f, 0xad, 0x91, 0x00 };
                         //FormsApp.ble_interface.Write(send, 0, 20);

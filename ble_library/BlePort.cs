@@ -13,6 +13,7 @@ using Plugin.Settings.Abstractions;
 using Plugin.Settings;
 using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
+using nexus.core;
 
 namespace ble_library
 {
@@ -233,67 +234,75 @@ namespace ble_library
         /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
         public async Task Write_Characteristic(byte[] buffer, int offset, int count)
         {
+            byte[] ret = new byte[20];
             try
             {
-                //buffer_ack.Clear();
-
-                byte[] ret = new byte[count];
-              
+                byte[] dataToCipher = new byte[16];
+               
                 for (int i = 0; i < count; i++){
-                    ret[i] = buffer[i + offset];
+                    dataToCipher[i] = buffer[i + offset];
                 }
 
-
-                int header = 3; int bufferSize = 16;
-                byte[] fillzeros = ret.Skip(header).Take(count - header).ToArray();
-                int zerosPadding = bufferSize - buffer[2]; 
-
-                for (int i = 0; i < zerosPadding; i++ )
-                {
-                    byte [] temp = fillzeros.Concat(new byte[] { 0x00 }).ToArray();
-                    fillzeros = temp;
-                }
-
-
-             
                 if (isCiphered)
                 {
                     dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
-                    ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(AES_Encrypt(fillzeros, dynamicPass)).Concat(new byte[] { 0x00 }).ToArray();  
+                    ret = new byte[] {   0x02, 
+                                         Convert.ToByte(cipheredDataSentCounter.ToString(), 16), 
+                                         Convert.ToByte(count.ToString(), 16)}.ToArray().
+                                         Concat(AES_Encrypt(dataToCipher, dynamicPass)).
+                                         Concat(new byte[] { 0x00 }).ToArray();  
                 }else{
-                    ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(fillzeros).Concat(new byte[] { 0x00 }).ToArray();
+                    ret = new byte[] {   0x02,
+                                         Convert.ToByte(cipheredDataSentCounter.ToString(), 16),
+                                         Convert.ToByte(count.ToString(), 16)}.ToArray().
+                                         Concat(dataToCipher).
+                                         Concat(new byte[] { 0x00 }).ToArray();
                 
                 } 
 
-  
                 await gattServer_connection.WriteCharacteristicValue(
                     new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                     new Guid("00000002-0000-1000-8000-00805f9b34fb"),
                     ret
                 );
 
-               
-              
-                await Task.Delay(300);
+      
+                await Task.Delay(350);
 
+                //¿Is notify counter incorrect? Give me the index count and re-write
+                if (buffer_ack.Skip(3).Take(1).SequenceEqual(new byte[] { 0x01 }))
+                {
+                    byte [] contbuffer = buffer_ack.Skip(1).Take(1).ToArray();
 
-                if (buffer_ack.Skip(3).Take(1) == new byte[] { 0x01 }){
-                    
-                    cipheredDataSentCounter = Int16.Parse(buffer_ack.Skip(3).Take(1).ToString()) + 1;
+                    int i = contbuffer.ToInt16();
+
+                    cipheredDataSentCounter = i + 1;
 
                     if (isCiphered)
                     {
-                        ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(AES_Encrypt(fillzeros, dynamicPass)).Concat(new byte[] { 0x00 }).ToArray();  
-                    }else{
-                        ret = new byte[] { 0x02, Convert.ToByte(cipheredDataSentCounter.ToString(), 16), buffer[2] }.ToArray().Concat(fillzeros).Concat(new byte[] { 0x00 }).ToArray();
-                    
-                    } 
+                        dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
+                        ret = new byte[] {   0x02,
+                                         Convert.ToByte(cipheredDataSentCounter.ToString(), 16),
+                                         Convert.ToByte(count.ToString(), 16)}.ToArray().
+                                         Concat(AES_Encrypt(dataToCipher, dynamicPass)).
+                                         Concat(new byte[] { 0x00 }).ToArray();
+                    }
+                    else
+                    {
+                        ret = new byte[] {   0x02,
+                                         Convert.ToByte(cipheredDataSentCounter.ToString(), 16),
+                                         Convert.ToByte(count.ToString(), 16)}.ToArray().
+                                         Concat(dataToCipher).
+                                         Concat(new byte[] { 0x00 }).ToArray();
+
+                    }
+
                     await gattServer_connection.WriteCharacteristicValue(
                         new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                         new Guid("00000002-0000-1000-8000-00805f9b34fb"),
                         ret
                     );
-
+                    buffer_ack.Clear();
                 }else{
                     cipheredDataSentCounter++; 
                 }
