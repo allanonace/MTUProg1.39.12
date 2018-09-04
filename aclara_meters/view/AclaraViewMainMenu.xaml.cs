@@ -31,6 +31,9 @@ namespace aclara_meters.view
         private List<IBlePeripheral> temporal_ble_peripherals;
         private ObservableCollection<DeviceItem> employees;
         private Boolean disconnectedButton = false;
+        private IBlePeripheral peripheral;
+        private byte[] btdata; 
+
         public AclaraViewMainMenu()
         {
            InitializeComponent();
@@ -314,6 +317,21 @@ namespace aclara_meters.view
         private void IsConnectedUIChange(bool v)
         {
             if(v){
+                
+                try
+                {
+                    deviceID.Text = peripheral.Advertisement.DeviceName;
+                    macAddress.Text = BitConverter.ToString(btdata);
+                    imageBattery.Source = "battery_toolbar_high";
+                    imageRssi.Source = "rssi_toolbar_high";
+                    batteryLevel.Text = "100%";
+                    rssiLevel.Text = peripheral.Rssi.ToString() + " dBm";
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                }
+
                 background_scan_page_detail.IsVisible = true;
                 block_ble_disconnect.Opacity = 0;
                 block_ble_disconnect.FadeTo(1, 250);
@@ -360,26 +378,21 @@ namespace aclara_meters.view
 
                                             Device.BeginInvokeOnMainThread(() =>
                                             {
-                                                byte[] btdata = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+                                                try{
+                                                    
+                                                    btdata = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
 
+                                                    FormsApp.ble_interface.Open(blePeripherals[i], true);
 
-                                                FormsApp.ble_interface.Open(blePeripherals[i], true);
+                                                    peripheral = blePeripherals[i];
 
-
-
-                                                try
-                                                {
-                                                    deviceID.Text = blePeripherals[i].Advertisement.DeviceName;
-                                                    macAddress.Text = BitConverter.ToString(btdata);
-                                                    imageBattery.Source = "battery_toolbar_high";
-                                                    imageRssi.Source = "rssi_toolbar_high";
-                                                    batteryLevel.Text = "100%";
-                                                    rssiLevel.Text = blePeripherals[i].Rssi.ToString() + " dBm";
+                                                    Thread.Sleep(100);
                                                 }
                                                 catch (Exception e)
                                                 {
-                                                    Console.WriteLine(e.StackTrace);
+
                                                 }
+                                               
 
                                             });
                                             
@@ -517,6 +530,7 @@ namespace aclara_meters.view
         {
             var item = (DeviceItem)e.Item;
             FormsApp.ble_interface.Open(item.Peripheral);
+
             deviceID.Text = item.deviceName;
             macAddress.Text = item.deviceMacAddress;
             imageBattery.Source = item.deviceBatteryIcon;

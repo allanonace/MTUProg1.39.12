@@ -574,8 +574,18 @@ namespace ble_library
 
                     for (int i = 0; i < buffer_aes.Count; i++)
                     {
-                        isPairing &= buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11); // if (!buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11)) isCiphered = false;
+                        //isPairing &= buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11); // 
+                        if (!buffer_aes.Take(buffer_aes.Count).ToArray()[i].Equals(0x11)) {
+                            isPairing = false;
+                        }else{
+                            
+                            await gattServer_connection.Disconnect();
+                        }
+                           
                     }
+                        
+                       
+
 
                     buffer_aes.Clear();
 
@@ -695,6 +705,24 @@ namespace ble_library
             if (isConnected)
             {
                 Stop_Listen_Characteristic_Notification();
+                try
+                {
+                    Listen_ack_response_Handler.Dispose();
+                }
+                catch (Exception e1)
+                {
+                    Console.WriteLine(e1.StackTrace);
+                }
+               
+                try
+                {
+                    Listen_aes_conection_Handler.Dispose();
+                }
+                catch (Exception e2)
+                {
+                    Console.WriteLine(e2.StackTrace);
+                }
+
                 await gattServer_connection.Disconnect();
                 //CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
                 //CrossSettings.Current.AddOrUpdateValue("session_peripheral", string.Empty);
