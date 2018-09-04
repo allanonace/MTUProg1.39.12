@@ -12,6 +12,7 @@ using System.IO;
 using Plugin.Settings.Abstractions;
 using Plugin.Settings;
 using System.Threading;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace ble_library
 {
@@ -85,7 +86,7 @@ namespace ble_library
         private List<IBlePeripheral> BlePeripheralList;
 
         private byte[] dynamicPass;
-        private bool isCiphered = false;
+        private bool isCiphered = true;
         private bool busy;
         private int cipheredDataSentCounter;
 
@@ -376,6 +377,21 @@ namespace ble_library
                 }
                 */
 
+                if (ble_device.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).SequenceEqual(new byte[] { 0x12, 0x34, 0x56, 0x78 }))
+                {
+                    isCiphered = true;
+                }
+               
+                if (ble_device.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).SequenceEqual(new byte[] { 0x9A, 0xBC, 0xD3, 0xF0 })) 
+                {
+                    isCiphered = false;
+                }
+
+                //}else{
+                //    //Other possible configs
+                // }
+
+
                 await AESConnectionVerifyAsync(ble_device, isBounded);
             }
             else
@@ -392,8 +408,7 @@ namespace ble_library
         /// Updates AES buffer with the notification data received 
         /// </summary>
         private void UpdateAESBuffer(byte[] bytes)
-        {
-            for (int i = 0; i < bytes.Length; i++)
+        {            for (int i = 0; i < bytes.Length; i++)
             {
                 buffer_aes.Enqueue(bytes[i]);
             }
@@ -507,6 +522,7 @@ namespace ble_library
                         await DisconnectDevice();
                         saved_settings.AddOrUpdateValue("session_dynamicpass", string.Empty);
                         saved_settings.AddOrUpdateValue("session_peripheral", string.Empty);
+                        saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", string.Empty);
                     }
 
 
@@ -562,7 +578,7 @@ namespace ble_library
 
                     buffer_aes.Clear();
 
-                    saved_settings.AddOrUpdateValue("responsehi", isPairing.ToString() ); 
+                    saved_settings.AddOrUpdateValue("responsehi", isPairing.ToString() );
 
                     if (isPairing)
                     {
@@ -573,10 +589,18 @@ namespace ble_library
 
                             // HERE GOES THE - SAVE DYNAMIC PASS TO PREFERENCES STORAGE
                             saved_settings.AddOrUpdateValue("session_dynamicpass", encoded);
-                        }else{
+                        }
+                        else
+                        {
                             saved_settings.AddOrUpdateValue("session_dynamicpass", "No Cipher");
                         }
                         saved_settings.AddOrUpdateValue("session_peripheral", ble_device.Advertisement.DeviceName);
+
+                        var data = ble_device.Advertisement.ManufacturerSpecificData.ElementAt(0).Data;
+
+
+                        saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", System.Convert.ToBase64String( data));
+
                     }
                 }
 
@@ -723,9 +747,9 @@ namespace ble_library
                     if(adv.DeviceName!=null){
                         if ( adv.DeviceName.Contains("Aclara") || adv.DeviceName.Contains("Acl") || adv.DeviceName.Contains("Ac") )
                         {
-                            if(BlePeripheralList.Any(p => p.DeviceId.Equals(peripheral.DeviceId)))
+                            if(BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data)))
                             {
-                                BlePeripheralList[BlePeripheralList.FindIndex(f => f.DeviceId.Equals(peripheral.DeviceId))] = peripheral;
+                                BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data))] = peripheral;
                             }else{
                                 BlePeripheralList.Add(peripheral);
                             }
@@ -743,4 +767,6 @@ namespace ble_library
             // scanning has been stopped when code reached this point
         }
     }
+
+
 }

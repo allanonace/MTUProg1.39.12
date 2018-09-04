@@ -15,6 +15,9 @@ using System.Threading;
 using nexus.protocols.ble.scan;
 using System.Collections.ObjectModel;
 using Plugin.Settings;
+using System.Linq;
+using System.Text;
+using System.ComponentModel;
 
 namespace aclara_meters.view
 {
@@ -336,21 +339,40 @@ namespace aclara_meters.view
                     //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
                     if(CrossSettings.Current.GetValueOrDefault("session_dynamicpass",string.Empty)!=string.Empty)
                     {
-                        if(blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)))
+                        //System.Convert.ToBase64String(data)
+                        // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
+                        byte[] bytes = System.Convert.FromBase64String(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty));
+
+
+                        // System.ComponentModel.TypeConverter obj2 = TypeDescriptor.GetConverter(blePeripherals[i].Advertisement.ManufacturerSpecificData.ToList().AsQueryable().GetType());
+                        // byte[] byte_now = (byte[])obj2.ConvertTo(blePeripherals[i].Advertisement.ManufacturerSpecificData, typeof(byte[]));
+
+                        byte[] byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data;
+
+                        if (bytes.SequenceEqual(byte_now))
                         {
-                            if (FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)))
+                            if(blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)))
                             {
-                                if(!FormsApp.ble_interface.IsOpen()){
-                                    FormsApp.ble_interface.Open(blePeripherals[i], true);
+                                if (FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)))
+                                {
+                                    if(!FormsApp.ble_interface.IsOpen()){
+                                        FormsApp.ble_interface.Open(blePeripherals[i], true);
+                                    }
                                 }
                             }
                         }
                     }
-                   
+
+
+                    //System.ComponentModel.TypeConverter obj = TypeDescriptor.GetConverter(blePeripherals[i].Advertisement.ManufacturerSpecificData.ToList().AsQueryable().GetType());
+                   // byte[] bt = (byte[])obj.ConvertTo(blePeripherals[i].Advertisement.ManufacturerSpecificData.ToList().AsQueryable(), typeof(byte[]));
+
+                    byte[] bt = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data;
+
 
                     DeviceItem device = new DeviceItem
                     {
-                        deviceMacAddress = blePeripherals[i].DeviceId.ToString(),
+                        deviceMacAddress = BitConverter.ToString(bt),
                         deviceName = blePeripherals[i].Advertisement.DeviceName,
                         deviceBattery = "100%",
                         deviceRssi = blePeripherals[i].Rssi.ToString() + " dBm",
@@ -362,12 +384,15 @@ namespace aclara_meters.view
                     if (temporal_ble_peripherals.Count<0){
                         employees.Add(device);
                     }else{
-
+                        
                         bool enc = false;
 
                         for (int j = 0; j < temporal_ble_peripherals.Count; j++)
                         {
-                            enc |= temporal_ble_peripherals[j].DeviceId.Equals(blePeripherals[i].DeviceId); //  if (temporal_ble_peripherals[j].DeviceId.Equals(blePeripherals[i].DeviceId)) enc = true;
+                            if (temporal_ble_peripherals[j].Advertisement.ManufacturerSpecificData.ElementAt(0).Data
+                                .SequenceEqual(blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data)) //  if (temporal_ble_peripherals[j].DeviceId.Equals(blePeripherals[i].DeviceId)) enc = true;
+                                  enc = true;
+  
                         }
                          
                         if(!enc){
