@@ -355,12 +355,18 @@ namespace aclara_meters.view
                                     if(!disconnectedButton)
                                     {
                                         if(!FormsApp.ble_interface.IsOpen()){
-                                            FormsApp.ble_interface.Open(blePeripherals[i], true);
+                                           
 
-                                            byte[] btdata = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
 
                                             Device.BeginInvokeOnMainThread(() =>
                                             {
+                                                byte[] btdata = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+
+
+                                                FormsApp.ble_interface.Open(blePeripherals[i], true);
+
+
+
                                                 try
                                                 {
                                                     deviceID.Text = blePeripherals[i].Advertisement.DeviceName;

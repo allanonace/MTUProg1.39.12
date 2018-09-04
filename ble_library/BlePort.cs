@@ -412,7 +412,8 @@ namespace ble_library
         /// Updates AES buffer with the notification data received 
         /// </summary>
         private void UpdateAESBuffer(byte[] bytes)
-        {            for (int i = 0; i < bytes.Length; i++)
+        {            
+            for (int i = 0; i < bytes.Length; i++)
             {
                 buffer_aes.Enqueue(bytes[i]);
             }
