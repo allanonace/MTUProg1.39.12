@@ -389,15 +389,7 @@ namespace ble_library
                 }
                 */
 
-                if (ble_device.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).SequenceEqual(new byte[] { 0x12, 0x34, 0x56, 0x78 }))
-                {
-                    isCiphered = true;
-                }
-               
-                if (ble_device.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).SequenceEqual(new byte[] { 0x9A, 0xBC, 0xD3, 0xF0 })) 
-                {
-                    isCiphered = false;
-                }
+                isCiphered = true;
 
                 //}else{
                 //    //Other possible configs
@@ -485,7 +477,8 @@ namespace ble_library
 
                 byte[] say_hi = { 0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00 };
 
-                if(isBounded){
+                if(isBounded)
+                {
                   
                     // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
                     byte[] bytes = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
@@ -517,6 +510,7 @@ namespace ble_library
                             isPairing = false;
                         }
                     }
+
                     buffer_aes.Clear();
                     saved_settings.AddOrUpdateValue("responsehi", isPairing.ToString() ); 
 
@@ -530,9 +524,10 @@ namespace ble_library
                    
                 }else{
                     byte[] PassH_crypt = new byte []{};
-                    byte[] PassL_crypt = new byte[] { };
+                    byte[] PassL_crypt = new byte []{};
 
-                    if(isCiphered){
+                    if(isCiphered)
+                    {
                         //Read Pass H data from Characteristic
                         PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
                             new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
@@ -554,11 +549,15 @@ namespace ble_library
                         Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
                         Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
 
+                        //if(dynamicPass == null){
+                        //    dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
+                        //}
                     }
 
                     byte[] hi_msg;
 
-                    if(isCiphered){
+                    if(isCiphered)
+                    {
                         hi_msg = AES_Encrypt(say_hi, dynamicPass);
                     }else{
                         hi_msg = say_hi;
@@ -696,7 +695,9 @@ namespace ble_library
             {
                 Stop_Listen_Characteristic_Notification();
                 await gattServer_connection.Disconnect();
-                CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
+                //CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
+                //CrossSettings.Current.AddOrUpdateValue("session_peripheral", string.Empty);
+
                 isConnected = false;
 
             }

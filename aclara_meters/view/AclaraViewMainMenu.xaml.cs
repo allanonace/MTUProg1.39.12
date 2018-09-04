@@ -30,7 +30,7 @@ namespace aclara_meters.view
         private List<IBlePeripheral> blePeripherals;
         private List<IBlePeripheral> temporal_ble_peripherals;
         private ObservableCollection<DeviceItem> employees;
-
+        private Boolean disconnectedButton = false;
         public AclaraViewMainMenu()
         {
            InitializeComponent();
@@ -292,6 +292,7 @@ namespace aclara_meters.view
                         Device.BeginInvokeOnMainThread(() =>
                         {
                             IsConnectedUIChange(true);
+                          
                         });
                     }
 
@@ -303,7 +304,9 @@ namespace aclara_meters.view
                         });
                     }
                 }
+                         
                 ChangeListViewData();
+
                 Thread.Sleep(500); // 0.5 Second
             }
         }
@@ -349,29 +352,32 @@ namespace aclara_meters.view
                             {
                                 if (FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)))
                                 {
-                                    if(!FormsApp.ble_interface.IsOpen()){
-                                        FormsApp.ble_interface.Open(blePeripherals[i], true);
+                                    if(!disconnectedButton)
+                                    {
+                                        if(!FormsApp.ble_interface.IsOpen()){
+                                            FormsApp.ble_interface.Open(blePeripherals[i], true);
 
-                                        byte[] btdata = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+                                            byte[] btdata = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
 
-                                        Device.BeginInvokeOnMainThread(() =>
-                                        {
-                                            try
+                                            Device.BeginInvokeOnMainThread(() =>
                                             {
-                                                deviceID.Text = blePeripherals[i].Advertisement.DeviceName;
-                                                macAddress.Text = BitConverter.ToString(btdata);
-                                                imageBattery.Source = "battery_toolbar_high";
-                                                imageRssi.Source = "rssi_toolbar_high";
-                                                batteryLevel.Text = "100%";
-                                                rssiLevel.Text = blePeripherals[i].Rssi.ToString() + " dBm";
-                                            }
-                                            catch (Exception e)
-                                            {
-                                                Console.WriteLine(e.StackTrace);
-                                            }
+                                                try
+                                                {
+                                                    deviceID.Text = blePeripherals[i].Advertisement.DeviceName;
+                                                    macAddress.Text = BitConverter.ToString(btdata);
+                                                    imageBattery.Source = "battery_toolbar_high";
+                                                    imageRssi.Source = "rssi_toolbar_high";
+                                                    batteryLevel.Text = "100%";
+                                                    rssiLevel.Text = blePeripherals[i].Rssi.ToString() + " dBm";
+                                                }
+                                                catch (Exception e)
+                                                {
+                                                    Console.WriteLine(e.StackTrace);
+                                                }
 
-                                        });
-                                
+                                            });
+                                            
+                                        }
                                     }
                                 }
                             }
@@ -486,6 +492,7 @@ namespace aclara_meters.view
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
         {
             FormsApp.ble_interface.Close();
+            disconnectedButton = true;
             DeviceList.RefreshCommand.Execute(true);
         }
 
