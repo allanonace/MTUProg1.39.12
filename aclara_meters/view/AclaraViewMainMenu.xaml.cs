@@ -354,48 +354,42 @@ namespace aclara_meters.view
             try
             {
                 blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
+              
+                // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
+                byte[] bytes = System.Convert.FromBase64String(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty));
+
+                byte[] byte_now = new byte[] { };
+
                 for (int i = 0; i < blePeripherals.Count; i++)
                 {
+                    byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+
                     //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
                     if(CrossSettings.Current.GetValueOrDefault("session_dynamicpass",string.Empty)!=string.Empty)
                     {
-                        // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
-                        byte[] bytes = System.Convert.FromBase64String(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty));
-
-                        byte[] byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
-
-                        if (bytes.Take(4).ToArray().SequenceEqual(byte_now))
+                        if (FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)))
                         {
-                            if(blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)))
+                            if (bytes.Take(4).ToArray().SequenceEqual(byte_now))
                             {
-                                if (FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)))
+                                if(blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)))
                                 {
                                     if(!disconnectedButton)
                                     {
-                                        if(!FormsApp.ble_interface.IsOpen()){
-                                           
-
-
+                                        if(!FormsApp.ble_interface.IsOpen())
+                                        {
                                             Device.BeginInvokeOnMainThread(() =>
                                             {
                                                 try{
-                                                    
-                                                    btdata = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
-
+                                                  
                                                     FormsApp.ble_interface.Open(blePeripherals[i], true);
-
                                                     peripheral = blePeripherals[i];
-
-                                                    Thread.Sleep(100);
+                                                    btdata = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
                                                 }
                                                 catch (Exception e)
                                                 {
-
+                                                    Console.WriteLine(e.StackTrace);
                                                 }
-                                               
-
                                             });
-                                            
                                         }
                                     }
                                 }
@@ -403,16 +397,9 @@ namespace aclara_meters.view
                         }
                     }
 
-
-                    //System.ComponentModel.TypeConverter obj = TypeDescriptor.GetConverter(blePeripherals[i].Advertisement.ManufacturerSpecificData.ToList().AsQueryable().GetType());
-                   // byte[] bt = (byte[])obj.ConvertTo(blePeripherals[i].Advertisement.ManufacturerSpecificData.ToList().AsQueryable(), typeof(byte[]));
-
-                    byte[] bt = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
-
-
                     DeviceItem device = new DeviceItem
                     {
-                        deviceMacAddress = BitConverter.ToString(bt),
+                        deviceMacAddress = BitConverter.ToString(byte_now),
                         deviceName = blePeripherals[i].Advertisement.DeviceName,
                         deviceBattery = "100%",
                         deviceRssi = blePeripherals[i].Rssi.ToString() + " dBm",
@@ -432,7 +419,6 @@ namespace aclara_meters.view
                             if (temporal_ble_peripherals[j].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
                                 .SequenceEqual(blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())) //  if (temporal_ble_peripherals[j].DeviceId.Equals(blePeripherals[i].DeviceId)) enc = true;
                                   enc = true;
-  
                         }
                          
                         if(!enc){
