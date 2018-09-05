@@ -394,7 +394,7 @@ namespace aclara_meters.view
                              
                                  if (temporal_ble_peripherals.Count<0){
                                      employees.Add(device);
-                                     temporal_ble_peripherals.add(blePeripherals[i]);
+                                     temporal_ble_peripherals.Add(blePeripherals[i]);
                                  }else{
                                     
                                      bool enc = false;
@@ -413,7 +413,7 @@ namespace aclara_meters.view
                                       
                                      if(!enc){
                                          employees.Add(device);
-                                         temporal_ble_peripherals.add(blePeripherals[i]);
+                                         temporal_ble_peripherals.Add(blePeripherals[i]);
                                      }
                                  }
                             

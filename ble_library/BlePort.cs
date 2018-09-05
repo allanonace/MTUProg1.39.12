@@ -324,7 +324,6 @@ namespace ble_library
                                                                 // the server implements IObservable<ConnectionState> so you can subscribe to its state
                 gattServer_connection.Subscribe(new ObserverReporter(this));                
               
-                isConnected = true;
                 ble_peripheral = ble_device;
 
                 await AESConnectionVerifyAsync(ble_peripheral, isBounded);
@@ -386,17 +385,21 @@ namespace ble_library
                   new Guid("00000041-0000-1000-8000-00805f9b34fb"),
                   hi_msg
                 );
-                isPaired = true;
+          
+                isConnected = false;
                 //DisconnectDevice();
             }
 
             if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0x11 }))
             {
+
                 isPaired = true;
                 saved_settings.AddOrUpdateValue("responsehi", isPaired.ToString() );        
                 saved_settings.AddOrUpdateValue("session_peripheral", ble_peripheral.Advertisement.DeviceName);
                 var data = ble_peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data;
                 saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", System.Convert.ToBase64String(data));
+
+                isConnected = true;
             }
         }
 
