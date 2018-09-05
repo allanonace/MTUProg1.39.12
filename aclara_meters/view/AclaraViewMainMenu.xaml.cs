@@ -605,12 +605,7 @@ namespace aclara_meters.view
 
                     ((ListView)sender).SelectedItem = null;
 
-                    try{
-                        printer.Suspend();
-                    }catch (Exception d23){
-                        Console.WriteLine(d23.StackTrace);
-                    }
-      
+
 
                     switch (page)
                     {
