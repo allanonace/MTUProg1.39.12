@@ -281,25 +281,14 @@ namespace aclara_meters.view
         {
             while (true)
             {
-                if(FormsApp.ble_interface.IsOpen()!=changedStatus)
+                bool isOpen = FormsApp.ble_interface.IsOpen();
+                if(isOpen!=changedStatus)
                 {
-                    changedStatus = FormsApp.ble_interface.IsOpen();
-                    if(FormsApp.ble_interface.IsOpen())
+                    changedStatus = isOpen;
+                    Device.BeginInvokeOnMainThread(() =>
                     {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            IsConnectedUIChange(true);
-                          
-                        });
-                    }
-
-                    if (!FormsApp.ble_interface.IsOpen())
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            IsConnectedUIChange(false);
-                        });
-                    }
+                       IsConnectedUIChange(isOpen);
+                    });
                 }
                          
                 ChangeListViewData();
