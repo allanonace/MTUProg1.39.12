@@ -92,14 +92,20 @@ namespace aclara_meters.view
 
             employees = new ObservableCollection<DeviceItem>();
             temporal_ble_peripherals = new List<IBlePeripheral> { };
-                
+
             DeviceList.RefreshCommand = new Command(() =>
             {
-                if(!printer.IsAlive){
-                    printer.Start();
-                }
-               
-
+                if (!printer.IsAlive)
+                {
+                    try
+                    {
+                        printer.Start();
+                    }
+                    catch (Exception e11)
+                    {
+                        Console.WriteLine(e11.StackTrace);
+                    }
+                } 
 
                 try
                 {
@@ -119,6 +125,7 @@ namespace aclara_meters.view
                     Console.WriteLine(c2.StackTrace);
                 }
                 DeviceList.IsRefreshing = false;
+
             });
             DeviceList.RefreshCommand.Execute(true);
         }
@@ -288,13 +295,25 @@ namespace aclara_meters.view
             {
                 if (!FormsApp.ble_interface.GetPairingStatusOk())
                 {
-                    Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+                        DeviceList.IsEnabled = true;
+                        fondo.Opacity = 1;
+                        background_scan_page.Opacity = 1;
+                        background_scan_page.IsEnabled = true;
 
+                    });
                 }
 
                 bool isOpen = FormsApp.ble_interface.IsOpen();
                 if(isOpen!=changedStatus)
                 {
+                    fondo.Opacity = 1;
+                    background_scan_page.Opacity = 1;
+                    background_scan_page.IsEnabled = true;
+
+                    DeviceList.IsEnabled = true;
                     changedStatus = isOpen;
                     Device.BeginInvokeOnMainThread(() =>
                     {
@@ -383,7 +402,9 @@ namespace aclara_meters.view
                                             {
                                                 peripheral = blePeripherals[i];
                                                 FormsApp.ble_interface.Open(peripheral, true);
-
+                                                fondo.Opacity = 0;
+                                                background_scan_page.Opacity = 0.5;
+                                                background_scan_page.IsEnabled = false;
                                                 btdata = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
                                             }
                                             catch (Exception e)
@@ -503,15 +524,28 @@ namespace aclara_meters.view
 
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
         {
-            printer.Abort();
             FormsApp.ble_interface.Close();
+        
             disconnectedButton = true;
+
+            try
+            {
+                printer.Start();
+            }
+            catch (Exception t12)
+            {
+                Console.WriteLine(t12.StackTrace);
+            }
+
+
             DeviceList.RefreshCommand.Execute(true);
+
+
         }
 
         private void LogoutTapped(object sender, EventArgs e)
         {
-            printer.Abort();
+            printer.Suspend();
             Settings.IsLoggedIn = false;
             FormsApp.CredentialsService.DeleteCredentials();
             background_scan_page.IsEnabled = true;
@@ -524,6 +558,9 @@ namespace aclara_meters.view
         private void OnMenuItemSelectedListDevices(object sender, ItemTappedEventArgs e)
         {
             var item = (DeviceItem)e.Item;
+            fondo.Opacity = 0;
+            background_scan_page.Opacity = 0.5;
+            background_scan_page.IsEnabled = false;
 
             FormsApp.ble_interface.Open(item.Peripheral);
 
@@ -568,7 +605,12 @@ namespace aclara_meters.view
 
                     ((ListView)sender).SelectedItem = null;
 
-                    printer.Abort();
+                    try{
+                        printer.Suspend();
+                    }catch (Exception d23){
+                        Console.WriteLine(d23.StackTrace);
+                    }
+      
 
                     switch (page)
                     {
@@ -801,7 +843,7 @@ namespace aclara_meters.view
        
         private void OpenSettingsTapped(object sender, EventArgs e)
         {
-            printer.Abort();
+            printer.Suspend();
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
             background_scan_page.IsEnabled = true;

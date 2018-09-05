@@ -144,7 +144,9 @@ namespace ble_library
             {
                 return true;
             }
-             
+            number_tries = 0;
+        
+ 
             return false;
         }
 
@@ -261,6 +263,7 @@ namespace ble_library
         /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
         public async void Write_Characteristic(byte[] buffer, int offset, int count)
         {
+            writeSavedBuffer = new byte[] { };
             writeSavedBuffer = buffer;
             writeSavedOffset = offset;
             writeSavedCount = count;
@@ -274,9 +277,9 @@ namespace ble_library
                 for (int i = 0; i < count; i++){
                     dataToCipher[i] = buffer[i + offset];
                 }
-
-              
+         
                 dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
+
                 ret = new byte[] {   0x02, 
                                      Convert.ToByte(cipheredDataSentCounter.ToString(), 16), 
                                      Convert.ToByte(count.ToString(), 16)}.ToArray().
@@ -290,13 +293,13 @@ namespace ble_library
                     ret
                 );
 
-               
+                cipheredDataSentCounter++; 
             }
             catch (GattException ex)
             {
                 Console.WriteLine(ex.ToString());
             }
-            cipheredDataSentCounter++; 
+           
         }
 
         /// <summary>
@@ -424,6 +427,11 @@ namespace ble_library
                     var data = ble_peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data;
                     saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", System.Convert.ToBase64String(data));
 
+                    if(dynamicPass!=null)
+                    {
+                        saved_settings.AddOrUpdateValue("session_dynamicpass", System.Convert.ToBase64String(dynamicPass));
+                    }
+                   
                     isConnected = true;
 
                     number_tries = 0;
@@ -656,8 +664,8 @@ namespace ble_library
                 await gattServer_connection.Disconnect();
                 //CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
                 //CrossSettings.Current.AddOrUpdateValue("session_peripheral", string.Empty);
-
                 isConnected = false;
+
 
             }
         }
