@@ -621,31 +621,19 @@ namespace aclara_meters.view
             backdark_bg.IsVisible = true;
             indicator.IsVisible = true;
 
-            Task.Run(async () =>
+            Task.Delay(3000).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
             {
-                await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
-                {
-                    Task.Run(async () =>
-                    {
-                        await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
-                        {
-                            Task.Run(async () =>
-                            {
-                                await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
-                                {
-                                    String myDate = DateTime.Now.ToString();
-                                    date_sync.Text = myDate;
-                                    updated_files.Text = "1456";
-                                    pending_files.Text = "23";
-                                    force_sync.IsEnabled = true;
-                                    backdark_bg.IsVisible = false;
-                                    indicator.IsVisible = false;
-                                });
-                            });
-                        });
-                    });
-                });
-            });                                
+                String myDate = DateTime.Now.ToString();
+                date_sync.Text = myDate;
+                updated_files.Text = "1456";
+                pending_files.Text = "23";
+                force_sync.IsEnabled = true;
+                backdark_bg.IsVisible = false;
+                indicator.IsVisible = false;
+            }));
+
+                                 
         }
 
         private void ButtonListeners()

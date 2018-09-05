@@ -248,69 +248,51 @@ namespace aclara_meters.view
         {
             if (!_userTapped)
             {
-                Task.Run(() =>
+                Device.BeginInvokeOnMainThread(() =>
                 {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        backdark_bg.IsVisible = true;
-                        indicator.IsVisible = true;
-                    });
+                    backdark_bg.IsVisible = true;
+                    indicator.IsVisible = true;
+                    label_read.Text = "Writing to MTU ... ";
+                    _userTapped = true;
+                    background_scan_page.IsEnabled = false;
+                    ChangeLowerButtonImage(true);
                 });
 
-                _userTapped = true;
-                background_scan_page.IsEnabled = false;
-                ChangeLowerButtonImage(true);
+                Task.Delay(1000).ContinueWith(t =>
+                 Device.BeginInvokeOnMainThread(() =>
+                 {
+                    label_read.Text = "Writing to MTU ... 3 sec";
+                 }));
 
-                AddDataFromMTU();
-                label_read.Text = "Writing to MTU ... ";
+                Task.Delay(2000).ContinueWith(t =>
+                 Device.BeginInvokeOnMainThread(() =>
+                 {
+                    label_read.Text = "Writing to MTU ... 2 sec";
+                 }));
 
-                Task.Run(async () =>
-                {
-                    await Task.Delay(1000); 
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        label_read.Text = "Writing to MTU ... 3 sec";
-                      
-                        Task.Run(async () =>
-                        {
-                            await Task.Delay(1000); 
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                label_read.Text = "Writing to MTU ... 2 sec";
-                                Task.Run(async () =>
-                                {
-                                    await Task.Delay(1000); 
-                                    Device.BeginInvokeOnMainThread(() =>
-                                    {
-                                        label_read.Text = "Writing to MTU ... 1 sec";
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
 
-                Task.Run(async () =>
-                {
-                    await Task.Delay(4000); 
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        _userTapped = false;
-                        bg_read_mtu_button.NumberOfTapsRequired = 1;
-                        ChangeLowerButtonImage(false);
-                        backdark_bg.IsVisible = false;
-                        indicator.IsVisible = false;
-                        label_read.Text = "Successful MTU write";
-                        background_scan_page.IsEnabled = true;
-                    });
-                });
+                Task.Delay(3000).ContinueWith(t =>
+                 Device.BeginInvokeOnMainThread(() =>
+                 {
+                    label_read.Text = "Writing to MTU ... 1 sec";
+                 }));
+
+
+                Task.Delay(4000).ContinueWith(t =>
+                 Device.BeginInvokeOnMainThread(() =>
+                 {
+                    _userTapped = false;
+                     bg_read_mtu_button.NumberOfTapsRequired = 1;
+                     ChangeLowerButtonImage(false);
+                     backdark_bg.IsVisible = false;
+                     indicator.IsVisible = false;
+                     label_read.Text = "Successful MTU write";
+                     background_scan_page.IsEnabled = true;
+                 }));
             }
         }
 
-        private void AddDataFromMTU()
-        {
-            //TO-DO
-        }
+    
 
         public AclaraViewAddMTU(IUserDialogs dialogs)
         {

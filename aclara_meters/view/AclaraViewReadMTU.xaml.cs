@@ -159,74 +159,66 @@ namespace aclara_meters.view
 
         private void ReadMTU(object sender, EventArgs e)
         {
-            if(!_userTapped){
-
-                Task.Run(() =>
+            if(!_userTapped)
+            {
+                Device.BeginInvokeOnMainThread(() =>
                 {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        backdark_bg.IsVisible = true;
-                        indicator.IsVisible = true;
-                        FormsApp.ble_interface.Write(new byte[] { (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C }, 0, 5);
-
-                        //byte[] send = { 0x02, 0x01, 0x05, 0x39, 0x68, 0x0f, 0x8d, 0x1a, 0xa9, 0x3e, 0x16, 0x60, 0xa4, 0xf5, 0x69, 0x73, 0x0f, 0xad, 0x91, 0x00 };
-                        //FormsApp.ble_interface.Write(send, 0, 20);
-
-                    });
+                    backdark_bg.IsVisible = true;
+                    indicator.IsVisible = true;
+                    background_scan_page.IsEnabled = false;
+                    ChangeLowerButtonImage(true);
+                    _userTapped = true;
+                    label_read.Text = "Reading from MTU ... ";
                 });
 
-                background_scan_page.IsEnabled = false;
-                _userTapped = true;
-                ChangeLowerButtonImage(true);
-                LoadReadMTUData();
-                label_read.Text = "Reading from MTU ... ";
-                Task.Run(async () =>
-                {
-                    await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
-                    {
-                        label_read.Text = "Reading from MTU ... 3 sec";
-                   
-                        Task.Run(async () =>
-                        {
-                            await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
-                            {
-                                label_read.Text = "Reading from MTU ... 2 sec";
+                FormsApp.ble_interface.Write(new byte[] { (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C }, 0, 5);
 
-                                Task.Run(async () =>
-                                {
-                                    await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
-                                    {
-                                        label_read.Text = "Reading from MTU ... 1 sec";
-                                      
-                                        Task.Run(async () =>
-                                        {
-                                            await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
-                                            {
-                                                _userTapped = false;
-                                                label_read.Text = "Successful MTU read";
-                                                bg_read_mtu_button.NumberOfTapsRequired = 1;
-                                                ChangeLowerButtonImage(false);
+                Task.Delay(1000).ContinueWith(t =>
+                 Device.BeginInvokeOnMainThread(() =>
+                 {
+                     label_read.Text = "Reading from MTU ... 3 sec";
+                 }));
+                        
+                Task.Delay(2000).ContinueWith(t =>
+                 Device.BeginInvokeOnMainThread(() =>
+                 {
+                     label_read.Text = "Reading from MTU ... 2 sec";
+                 }));
 
-                                                Task.Run(() =>
-                                                {
-                                                    Device.BeginInvokeOnMainThread(() =>
-                                                    {
-                                                        backdark_bg.IsVisible = false;
-                                                        indicator.IsVisible = false;
-                                                        background_scan_page.IsEnabled = true;
-                                                    });
-                                                });
-                                            });
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
+                Task.Delay(3000).ContinueWith(t =>
+                 Device.BeginInvokeOnMainThread(() =>
+                 {
+                     label_read.Text = "Reading from MTU ... 1 sec";
+                 }));
+
+                Task.Delay(4000).ContinueWith(t =>
+                 Device.BeginInvokeOnMainThread(() =>
+                 {
+                     label_read.Text = "Successful MTU read";
+                     lista.BeginRefresh();
+                     lista.EndRefresh();
+                     _userTapped = false;
+                     bg_read_mtu_button.NumberOfTapsRequired = 1;
+                     ChangeLowerButtonImage(false);
+                     backdark_bg.IsVisible = false;
+                     indicator.IsVisible = false;
+                     background_scan_page.IsEnabled = true;
+
+                     try
+                     {
+                         LoadMTUValuesToListView("21189225", "456,3375", "456,3375", "468,8375");
+                         label_read.Text = "Hi-Response: " + CrossSettings.Current.GetValueOrDefault("responsehi", string.Empty).ToString()
+                             + "  Data Count: " + FormsApp.ble_interface.BytesToRead().ToString();
+                     }
+                     catch (Exception e6)
+                     {
+                         Console.WriteLine(e6.StackTrace);
+                         LoadMTUValuesToListView("0", "0", "0", "0");
+                     }
+
+                } )); 
             }
         }
-
 
         public AclaraViewReadMTU(IUserDialogs dialogs)
         {
@@ -371,64 +363,6 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
             Application.Current.MainPage.Navigation.PushAsync(new ReplaceMeterPage(dialogsSaved), false);
-        }
-
-        private void LoadReadMTUData()
-        {
-            Task.Run(async () =>
-            {
-                await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
-                {
-                    try
-                    {
-                        lista.BeginRefresh();
-                        lista.EndRefresh();
-                        Task.Run(async () =>
-                        {
-                            await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
-                            {
-                                lista.BeginRefresh();
-                                lista.EndRefresh();
-                                Task.Run(async () =>
-                                {
-                                    await Task.Delay(3500); Device.BeginInvokeOnMainThread(() =>
-                                    {
-                                        try
-                                        {
-                                            LoadMTUValuesToListView("21189225", "456,3375", "456,3375", "468,8375");
-                                            /*
-                                            LoadMTUValuesToListView(FormsApp.ble_interface.Read(new byte[262], 11, 4).ToString(),
-                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[262], 15, 4).ToString()) / 1000000).ToString(),
-                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[262], 19, 4).ToString()) / 1000000).ToString(),
-                                                             (Double.Parse(FormsApp.ble_interface.Read(new byte[262], 23, 4).ToString()) / 1000000).ToString()
-                                                            );
-                                            */
-
-                                            label_read.Text = "Hi-Response: " + CrossSettings.Current.GetValueOrDefault("responsehi", string.Empty).ToString() + "  Data Count: " + FormsApp.ble_interface.BytesToRead().ToString();
-
-
-
-                                          }catch(Exception e){
-                                            
-                                              Console.WriteLine(e.StackTrace);
-
-                                              LoadMTUValuesToListView("0",
-                                                               "0",
-                                                               "0",
-                                                               "0");
-                                        }
-                                    });
-                                    
-                                });
-                            });
-                        });
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.StackTrace);
-                    }
-                });
-            });
         }
 
         private async void LogoutAsync(object sender, EventArgs e)

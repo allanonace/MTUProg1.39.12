@@ -32,7 +32,8 @@ namespace aclara_meters.view
         private ObservableCollection<DeviceItem> employees;
         private Boolean disconnectedButton = false;
         private IBlePeripheral peripheral;
-        private byte[] btdata; 
+        private byte[] btdata;
+        private Thread printer;
 
         public AclaraViewMainMenu()
         {
@@ -86,7 +87,7 @@ namespace aclara_meters.view
 
             }
 
-            Thread printer = new Thread(new ThreadStart(InvokeMethod));
+            printer = new Thread(new ThreadStart(InvokeMethod));
             printer.Start();
 
             employees = new ObservableCollection<DeviceItem>();
@@ -94,6 +95,7 @@ namespace aclara_meters.view
                 
             DeviceList.RefreshCommand = new Command(() =>
             {
+                printer.Start();
                 try
                 {
                     employees.Clear();
@@ -114,14 +116,6 @@ namespace aclara_meters.view
                 DeviceList.IsRefreshing = false;
             });
             DeviceList.RefreshCommand.Execute(true);
-
-
-
-
-
-
-
-
         }
 
         private void LoadSideMenuElements()
@@ -351,93 +345,104 @@ namespace aclara_meters.view
 
         private void ChangeListViewData()
         {
-            try
-            {
-                blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
-              
-                // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
-                byte[] bytes = System.Convert.FromBase64String(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty));
-
-                byte[] byte_now = new byte[] { };
-
-                for (int i = 0; i < blePeripherals.Count; i++)
+                try
                 {
-                    byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+                    blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
+                  
+                    // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
+                    byte[] bytes = System.Convert.FromBase64String(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty));
 
-                    //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
-                    if(CrossSettings.Current.GetValueOrDefault("session_dynamicpass",string.Empty)!=string.Empty)
+                    byte[] byte_now = new byte[] { };
+
+                    if(blePeripherals.Count>0)
                     {
-                        if (FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)))
+                        int sizeList = blePeripherals.Count;
+
+                        for (int i = 0; i < sizeList; i++)
                         {
-                            if (bytes.Take(4).ToArray().SequenceEqual(byte_now))
+                            if(i<sizeList)
                             {
-                                if(blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)))
-                                {
-                                    if(!disconnectedButton)
+                                byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+                                //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
+                                if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty && 
+                                    FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty))  && 
+                                    bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
+                                    blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
+                                    !disconnectedButton &&
+                                    peripheral == null) 
+                                 {
+                                    
+                                    if (!FormsApp.ble_interface.IsOpen())
                                     {
-                                        if(!FormsApp.ble_interface.IsOpen())
+                                        Device.BeginInvokeOnMainThread(() =>
                                         {
-                                            Device.BeginInvokeOnMainThread(() =>
+                                            try
                                             {
-                                                try{
-                                                  
-                                                    FormsApp.ble_interface.Open(blePeripherals[i], true);
-                                                    peripheral = blePeripherals[i];
-                                                    btdata = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
-                                                }
-                                                catch (Exception e)
-                                                {
-                                                    Console.WriteLine(e.StackTrace);
-                                                }
-                                            });
+                                                peripheral = blePeripherals[i];
+                                                FormsApp.ble_interface.Open(peripheral, true);
+
+                                                btdata = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+                                            }
+                                            catch (Exception e)
+                                            {
+                                                Console.WriteLine(e.StackTrace);
+                                            }
+                                        });
+                                    }    
+                                 } 
+
+
+                                 DeviceItem device = new DeviceItem
+                                 {
+                                     deviceMacAddress = BitConverter.ToString(byte_now),
+                                     deviceName = blePeripherals[i].Advertisement.DeviceName,
+                                     deviceBattery = "100%",
+                                     deviceRssi = blePeripherals[i].Rssi.ToString() + " dBm",
+                                     deviceBatteryIcon = "battery_toolbar_high",
+                                     deviceRssiIcon = "rssi_toolbar_high",
+                                     Peripheral = blePeripherals[i]
+                                 };
+                             
+                                 if (temporal_ble_peripherals.Count<0){
+                                     employees.Add(device);
+                                     temporal_ble_peripherals.add(blePeripherals[i]);
+                                 }else{
+                                    
+                                     bool enc = false;
+
+                                     int sizeListTemp = temporal_ble_peripherals.Count;
+
+                                     for (int j = 0; j < temporal_ble_peripherals.Count; j++)
+                                     {
+                                        if (j < sizeListTemp)
+                                        {
+                                            if (temporal_ble_peripherals[j].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
+                                                .SequenceEqual(blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())) //  if (temporal_ble_peripherals[j].DeviceId.Equals(blePeripherals[i].DeviceId)) enc = true;
+                                                enc = true;
                                         }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                                     }
+                                      
+                                     if(!enc){
+                                         employees.Add(device);
+                                         temporal_ble_peripherals.add(blePeripherals[i]);
+                                     }
+                                 }
+                            
 
-                    DeviceItem device = new DeviceItem
-                    {
-                        deviceMacAddress = BitConverter.ToString(byte_now),
-                        deviceName = blePeripherals[i].Advertisement.DeviceName,
-                        deviceBattery = "100%",
-                        deviceRssi = blePeripherals[i].Rssi.ToString() + " dBm",
-                        deviceBatteryIcon = "battery_toolbar_high",
-                        deviceRssiIcon = "rssi_toolbar_high",
-                        Peripheral = blePeripherals[i]
-                    };
+                                Device.BeginInvokeOnMainThread(() =>
+                                {
+                                    DeviceList.ItemsSource = employees;
+                                });
 
-                    if (temporal_ble_peripherals.Count<0){
-                        employees.Add(device);
-                    }else{
-                        
-                        bool enc = false;
-
-                        for (int j = 0; j < temporal_ble_peripherals.Count; j++)
-                        {
-                            if (temporal_ble_peripherals[j].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
-                                .SequenceEqual(blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())) //  if (temporal_ble_peripherals[j].DeviceId.Equals(blePeripherals[i].DeviceId)) enc = true;
-                                  enc = true;
-                        }
-                         
-                        if(!enc){
-                            employees.Add(device);
+                                
                         }
                     }
                 }
 
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    DeviceList.ItemsSource = employees;
-                });
-
-                temporal_ble_peripherals = FormsApp.ble_interface.GetBlePeripheralList();
-
-            }catch(Exception e){
-                Console.WriteLine(e.StackTrace);
+            }catch(Exception e5){
+            Console.WriteLine(e5.StackTrace);
             } 
-        }
+        } 
 
         private void ReplaceMeterCancelTapped(object sender, EventArgs e)
         {
@@ -496,6 +501,7 @@ namespace aclara_meters.view
 
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
         {
+            printer.Abort();
             FormsApp.ble_interface.Close();
             disconnectedButton = true;
             DeviceList.RefreshCommand.Execute(true);
@@ -503,6 +509,7 @@ namespace aclara_meters.view
 
         private void LogoutTapped(object sender, EventArgs e)
         {
+            printer.Abort();
             Settings.IsLoggedIn = false;
             FormsApp.CredentialsService.DeleteCredentials();
             background_scan_page.IsEnabled = true;
@@ -515,17 +522,26 @@ namespace aclara_meters.view
         private void OnMenuItemSelectedListDevices(object sender, ItemTappedEventArgs e)
         {
             var item = (DeviceItem)e.Item;
+
             FormsApp.ble_interface.Open(item.Peripheral);
 
-            deviceID.Text = item.deviceName;
-            macAddress.Text = item.deviceMacAddress;
-            imageBattery.Source = item.deviceBatteryIcon;
-            imageRssi.Source = item.deviceRssiIcon;
-            batteryLevel.Text = item.deviceBattery;
-            rssiLevel.Text = item.deviceRssi;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                try
+                {
+                    deviceID.Text = item.deviceName;
+                    macAddress.Text = item.deviceMacAddress;
+                    imageBattery.Source = item.deviceBatteryIcon;
+                    imageRssi.Source = item.deviceRssiIcon;
+                    batteryLevel.Text = item.deviceBattery;
+                    rssiLevel.Text = item.deviceRssi;
+                }
+                catch (Exception e4)
+                {
+                    Console.WriteLine(e4.StackTrace);
+                }
+            });
         }
-
-
 
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
@@ -549,6 +565,8 @@ namespace aclara_meters.view
                     String page = item.TargetType;
 
                     ((ListView)sender).SelectedItem = null;
+
+                    printer.Abort();
 
                     switch (page)
                     {
@@ -781,6 +799,7 @@ namespace aclara_meters.view
        
         private void OpenSettingsTapped(object sender, EventArgs e)
         {
+            printer.Abort();
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
             background_scan_page.IsEnabled = true;
