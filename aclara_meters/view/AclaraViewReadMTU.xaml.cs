@@ -173,25 +173,25 @@ namespace aclara_meters.view
 
                 FormsApp.ble_interface.Write(new byte[] { (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C }, 0, 5);
 
-                Task.Delay(1000).ContinueWith(t =>
+                Task.Delay(2000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
                      label_read.Text = "Reading from MTU ... 3 sec";
                  }));
                         
-                Task.Delay(2000).ContinueWith(t =>
+                Task.Delay(3000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
                      label_read.Text = "Reading from MTU ... 2 sec";
                  }));
 
-                Task.Delay(3000).ContinueWith(t =>
+                Task.Delay(4000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
                      label_read.Text = "Reading from MTU ... 1 sec";
                  }));
 
-                Task.Delay(4000).ContinueWith(t =>
+                Task.Delay(5000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
                      label_read.Text = "Successful MTU read";

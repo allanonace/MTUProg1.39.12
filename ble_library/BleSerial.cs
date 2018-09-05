@@ -110,6 +110,17 @@ namespace ble_library
         }
 
         /// <summary>
+        /// Returns the Pairing status with the Bluetooth device
+        /// </summary>
+        /// <returns>The Bluetooth pairing status.</returns>
+        public Boolean GetPairingStatusOk()
+        {
+            return ble_port_serial.GetPairingStatusOk();
+        }
+
+      
+
+        /// <summary>
         /// Starts the device scanning
         /// </summary>
         /// <remarks></remarks>

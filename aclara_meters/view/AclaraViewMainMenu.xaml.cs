@@ -23,9 +23,9 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewMainMenu
     {
-		private List<PageItem> MenuList { get; set; }
+        private List<PageItem> MenuList { get; set; }
         private IUserDialogs dialogsSaved;
-		private List<ReadMTUItem> MenuListReadMTU { get; set; }
+        private List<ReadMTUItem> MenuListReadMTU { get; set; }
         private Boolean changedStatus;
         private List<IBlePeripheral> blePeripherals;
         private List<IBlePeripheral> temporal_ble_peripherals;
@@ -45,7 +45,7 @@ namespace aclara_meters.view
             InitializeComponent();
             Settings.IsConnectedBLE = false;
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-			TappedListeners();
+            TappedListeners();
             LoadPreUIGFX();
 
             if (Device.Idiom == TargetIdiom.Tablet)
@@ -95,7 +95,12 @@ namespace aclara_meters.view
                 
             DeviceList.RefreshCommand = new Command(() =>
             {
-                printer.Start();
+                if(!printer.IsAlive){
+                    printer.Start();
+                }
+               
+
+
                 try
                 {
                     employees.Clear();
@@ -281,6 +286,12 @@ namespace aclara_meters.view
         {
             while (true)
             {
+                if (!FormsApp.ble_interface.GetPairingStatusOk())
+                {
+                    Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+
+                }
+
                 bool isOpen = FormsApp.ble_interface.IsOpen();
                 if(isOpen!=changedStatus)
                 {
@@ -299,6 +310,7 @@ namespace aclara_meters.view
 
         private void IsConnectedUIChange(bool v)
         {
+         
             if(v){
                 
                 try
@@ -329,6 +341,8 @@ namespace aclara_meters.view
                 navigationDrawerList.IsEnabled = true;
                 background_scan_page.IsVisible = true;
                 DeviceList.RefreshCommand.Execute(true);
+
+
             }
         }
 
@@ -401,14 +415,13 @@ namespace aclara_meters.view
 
                                      int sizeListTemp = temporal_ble_peripherals.Count;
 
-                                     for (int j = 0; j < temporal_ble_peripherals.Count; j++)
+                                     for (int j = 0; j < sizeListTemp; j++)
                                      {
-                                        if (j < sizeListTemp)
-                                        {
-                                            if (temporal_ble_peripherals[j].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
-                                                .SequenceEqual(blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())) //  if (temporal_ble_peripherals[j].DeviceId.Equals(blePeripherals[i].DeviceId)) enc = true;
-                                                enc = true;
-                                        }
+                                       
+                                        if (temporal_ble_peripherals[j].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
+                                            .SequenceEqual(blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())) //  if (temporal_ble_peripherals[j].DeviceId.Equals(blePeripherals[i].DeviceId)) enc = true;
+                                            enc = true;
+
                                      }
                                       
                                      if(!enc){
@@ -890,6 +903,6 @@ namespace aclara_meters.view
             //MainMenu.IsSegmentShowing = false;
             bool value = FormsApp.ble_interface.IsOpen();
             value &= Navigation.NavigationStack.Count >= 3; //  if(Navigation.NavigationStack.Count < 3) Settings.IsLoggedIn = false;
-		}
+        }
     }
 }

@@ -99,6 +99,8 @@ namespace ble_library
         private byte[] static_pass = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x2e };
         private byte[] say_hi = { 0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00 };
 
+        private int number_tries;
+
         //private ArrayList ListAllServices;
         //private ArrayList ListAllCharacteristics;
 
@@ -114,6 +116,7 @@ namespace ble_library
             writeSavedBuffer = new byte[] { };
             writeSavedOffset = 0;
             writeSavedCount = 0;
+            number_tries = 0;
 
             isConnected = false;
             busy = false;
@@ -129,7 +132,22 @@ namespace ble_library
         {
             return isConnected;
         }
+
+        /// <summary>
+        /// Returns the Pairing status with the Bluetooth device
+        /// </summary>
+        /// <returns>The Bluetooth pairing status.</returns>
+        /// 
+        public Boolean GetPairingStatusOk()
+        {
+            if (number_tries < 5)
+            {
+                return true;
+            }
              
+            return false;
+        }
+
         /// <summary>
         /// Returns the byte array from buffer and drops the element out of the queue
         /// </summary>
@@ -326,6 +344,8 @@ namespace ble_library
               
                 ble_peripheral = ble_device;
 
+                number_tries = 0;
+
                 await AESConnectionVerifyAsync(ble_peripheral, isBounded);
             }
             else
@@ -343,63 +363,71 @@ namespace ble_library
         /// </summary>
         private async void UpdateAESBuffer(byte[] bytes)
         {
-            if(bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0xCC }))
+            if (number_tries < 5)
             {
-                isPaired = false;
-                saved_settings.AddOrUpdateValue("responsehi", isPaired.ToString() ); 
-             
-                saved_settings.AddOrUpdateValue("session_peripheral", string.Empty);
-                saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", string.Empty);
+                if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0xCC }))
+                {
+                    number_tries++;
 
-                //dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
-                byte[] hi_msg;
+                    isPaired = false;
+                    saved_settings.AddOrUpdateValue("responsehi", isPaired.ToString());
 
-                byte[] PassH_crypt = new byte[] { };
-                byte[] PassL_crypt = new byte[] { };
+                    saved_settings.AddOrUpdateValue("session_peripheral", string.Empty);
+                    saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", string.Empty);
 
-                //Read Pass H data from Characteristic
-                PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
-                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                    new Guid("00000040-0000-1000-8000-00805f9b34fb")
-                );
+                    //dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
+                    byte[] hi_msg;
 
-                //Read Pass L data from Characteristic
-                PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
-                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                    new Guid("00000042-0000-1000-8000-00805f9b34fb")
-                );
+                    byte[] PassH_crypt = new byte[] { };
+                    byte[] PassL_crypt = new byte[] { };
 
-                byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
-                byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
+                    //Read Pass H data from Characteristic
+                    PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
+                        new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                        new Guid("00000040-0000-1000-8000-00805f9b34fb")
+                    );
 
-                //Generate dynamic password
-                dynamicPass = new byte[PassH_decrypt.Length + PassL_decrypt.Length];
+                    //Read Pass L data from Characteristic
+                    PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
+                        new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                        new Guid("00000042-0000-1000-8000-00805f9b34fb")
+                    );
 
-                Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
-                Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
+                    byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
+                    byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
 
-                hi_msg = AES_Encrypt(say_hi, dynamicPass);
-          
-                await gattServer_connection.WriteCharacteristicValue(
-                  new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                  new Guid("00000041-0000-1000-8000-00805f9b34fb"),
-                  hi_msg
-                );
-          
-                isConnected = false;
-                //DisconnectDevice();
-            }
+                    //Generate dynamic password
+                    dynamicPass = new byte[PassH_decrypt.Length + PassL_decrypt.Length];
 
-            if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0x11 }))
-            {
+                    Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
+                    Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
 
-                isPaired = true;
-                saved_settings.AddOrUpdateValue("responsehi", isPaired.ToString() );        
-                saved_settings.AddOrUpdateValue("session_peripheral", ble_peripheral.Advertisement.DeviceName);
-                var data = ble_peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data;
-                saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", System.Convert.ToBase64String(data));
+                    hi_msg = AES_Encrypt(say_hi, dynamicPass);
 
-                isConnected = true;
+                    await gattServer_connection.WriteCharacteristicValue(
+                      new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                      new Guid("00000041-0000-1000-8000-00805f9b34fb"),
+                      hi_msg
+                    );
+
+                    isConnected = false;
+                    //DisconnectDevice();
+
+                }
+
+                if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0x11 }))
+                {
+
+                    isPaired = true;
+                    saved_settings.AddOrUpdateValue("responsehi", isPaired.ToString());
+                    saved_settings.AddOrUpdateValue("session_peripheral", ble_peripheral.Advertisement.DeviceName);
+                    var data = ble_peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data;
+                    saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", System.Convert.ToBase64String(data));
+
+                    isConnected = true;
+
+                    number_tries = 0;
+                }
             }
         }
 
