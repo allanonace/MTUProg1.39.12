@@ -23,14 +23,13 @@ namespace aclara_meters.view
     {
         private List<PageItem> MenuList { get; set; }
         private IUserDialogs dialogsSaved;
-        private List<ReadMTUItem> MenuListReadMTU { get; set; }
-        private Boolean changedStatus;
-        private List<IBlePeripheral> blePeripherals;
-        private List<IBlePeripheral> temporal_ble_peripherals;
         private ObservableCollection<DeviceItem> employees;
-        private Boolean disconnectedButton = false;
-        private IBlePeripheral peripheral;
-        private byte[] btdata;
+        
+        private IBlePeripheral peripheral = null;
+        private Boolean peripheralConnected = false;
+        private byte[] peripheralID = null;
+        private Boolean peripheralManualDisconnection = false;
+
         private Thread printer;
 
         public AclaraViewMainMenu()
@@ -83,10 +82,11 @@ namespace aclara_meters.view
             printer.Start();
 
             employees = new ObservableCollection<DeviceItem>();
-            temporal_ble_peripherals = new List<IBlePeripheral> { };
 
             DeviceList.RefreshCommand = new Command(() =>
             {
+                // Esta parte no funcinaba; tras un suspend el hilo sigue alive
+                /*
                 if (!printer.IsAlive)
                 {
                     try
@@ -97,23 +97,31 @@ namespace aclara_meters.view
                     {
                         Console.WriteLine(e11.StackTrace);
                     }
+                }
+                */
+
+                // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
+                // Problema: solo se hace si se refresca DeviceList
+                // TO-DO: eliminar el hilo o eliminar el suspend
+                if (printer.ThreadState == ThreadState.Suspended)
+                {
+                    try
+                    {
+                        printer.Resume();
+                    }
+                    catch (Exception e11)
+                    {
+                        Console.WriteLine(e11.StackTrace);
+                    }
                 } 
 
+                DeviceList.IsRefreshing = true;
                 try
                 {
                     employees.Clear();
-                    FormsApp.ble_interface.Scan();
-                    DeviceList.IsRefreshing = true;
-                    temporal_ble_peripherals.Clear();
-                    try
-                    {
-                        ChangeListViewData();
-                    }
-                    catch (Exception c1)
-                    {
-                        Console.WriteLine(c1.StackTrace);
-                    }
-                }catch (Exception c2){
+                    FormsApp.ble_interface.Scan();                    
+                }
+                catch (Exception c2){
                     Console.WriteLine(c2.StackTrace);
                 }
                 DeviceList.IsRefreshing = false;
@@ -282,6 +290,9 @@ namespace aclara_meters.view
         }
 
         private void InvokeMethod()
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // printer = new Thread(new ThreadStart(InvokeMethod));
+        // printer.Start();
         {
             while (true)
             {
@@ -299,14 +310,14 @@ namespace aclara_meters.view
                 }
 
                 bool isOpen = FormsApp.ble_interface.IsOpen();
-                if(isOpen!=changedStatus)
+                if (isOpen != peripheralConnected)
                 {
                     fondo.Opacity = 1;
                     background_scan_page.Opacity = 1;
                     background_scan_page.IsEnabled = true;
 
                     DeviceList.IsEnabled = true;
-                    changedStatus = isOpen;
+                    peripheralConnected = isOpen;
                     Device.BeginInvokeOnMainThread(() =>
                     {
                        IsConnectedUIChange(isOpen);
@@ -323,11 +334,12 @@ namespace aclara_meters.view
         {
          
             if(v){
-                
+
                 try
                 {
+                    // TODO: la siguente linea siempre da error xq peripheral es null
                     deviceID.Text = peripheral.Advertisement.DeviceName;
-                    macAddress.Text = BitConverter.ToString(btdata);
+                    macAddress.Text = BitConverter.ToString(peripheralID);
                     imageBattery.Source = "battery_toolbar_high";
                     imageRssi.Source = "rssi_toolbar_high";
                     batteryLevel.Text = "100%";
@@ -361,6 +373,7 @@ namespace aclara_meters.view
         {
                 try
                 {
+                    List<IBlePeripheral> blePeripherals;
                     blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
                   
                     // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
@@ -382,28 +395,32 @@ namespace aclara_meters.view
                                     FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty))  && 
                                     bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
                                     blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
-                                    !disconnectedButton &&
+                                    !peripheralManualDisconnection &&
                                     peripheral == null) 
                                  {
                                     
                                     if (!FormsApp.ble_interface.IsOpen())
                                     {
-                                        Device.BeginInvokeOnMainThread(() =>
-                                        {
+                                        //Device.BeginInvokeOnMainThread(() =>
+                                        //{
                                             try
                                             {
                                                 peripheral = blePeripherals[i];
+                                                peripheralConnected = false;
+                                                peripheralManualDisconnection = false;
+                                                peripheralID = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
                                                 FormsApp.ble_interface.Open(peripheral, true);
+                                                
+
                                                 fondo.Opacity = 0;
                                                 background_scan_page.Opacity = 0.5;
-                                                background_scan_page.IsEnabled = false;
-                                                btdata = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+                                                background_scan_page.IsEnabled = false;                                                
                                             }
                                             catch (Exception e)
                                             {
                                                 Console.WriteLine(e.StackTrace);
                                             }
-                                        });
+                                        //});
                                     }    
                                  } 
 
@@ -419,27 +436,25 @@ namespace aclara_meters.view
                                      Peripheral = blePeripherals[i]
                                  };
                              
-                                 if (temporal_ble_peripherals.Count<0){
+                                 if (employees.Count<0){
                                      employees.Add(device);
-                                     temporal_ble_peripherals.Add(blePeripherals[i]);
                                  }else{
                                     
                                      bool enc = false;
 
-                                     int sizeListTemp = temporal_ble_peripherals.Count;
+                                     int sizeListTemp = employees.Count;
 
                                      for (int j = 0; j < sizeListTemp; j++)
                                      {
-                                       
-                                        if (temporal_ble_peripherals[j].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
-                                            .SequenceEqual(blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())) //  if (temporal_ble_peripherals[j].DeviceId.Equals(blePeripherals[i].DeviceId)) enc = true;
+                                        if (employees[j].Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
+                                            .SequenceEqual(blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))
+                                        {
                                             enc = true;
-
+                                        }
                                      }
                                       
                                      if(!enc){
                                          employees.Add(device);
-                                         temporal_ble_peripherals.Add(blePeripherals[i]);
                                      }
                                  }
                             
@@ -518,8 +533,8 @@ namespace aclara_meters.view
         {
             FormsApp.ble_interface.Close();
         
-            disconnectedButton = true;
-
+            peripheralManualDisconnection = true;
+            /*
             try
             {
                 printer.Start();
@@ -528,7 +543,7 @@ namespace aclara_meters.view
             {
                 Console.WriteLine(t12.StackTrace);
             }
-
+            */
 
             DeviceList.RefreshCommand.Execute(true);
 
