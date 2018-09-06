@@ -16,8 +16,6 @@ using nexus.protocols.ble.scan;
 using System.Collections.ObjectModel;
 using Plugin.Settings;
 using System.Linq;
-using System.Text;
-using System.ComponentModel;
 
 namespace aclara_meters.view
 {
