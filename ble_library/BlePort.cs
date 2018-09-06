@@ -280,12 +280,13 @@ namespace ble_library
          
                 dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
 
-                ret = new byte[] {   0x02, 
-                                     Convert.ToByte(cipheredDataSentCounter.ToString(), 16), 
-                                     Convert.ToByte(count.ToString(), 16)}.ToArray().
-                                     Concat(AES_Encrypt(dataToCipher, dynamicPass)).
-                                     Concat(new byte[] { 0x00 }).ToArray();  
-        
+                byte frameId = 0x02;
+                byte frameCount = (byte) cipheredDataSentCounter;
+                byte dataCount = (byte) count;
+
+                ret = new byte[] { frameId, frameCount, dataCount }.ToArray().
+                                        Concat(AES_Encrypt(dataToCipher, dynamicPass)).
+                                        Concat(new byte[] { 0x00 }).ToArray();
 
                 await gattServer_connection.WriteCharacteristicValue(
                     new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
@@ -294,6 +295,10 @@ namespace ble_library
                 );
 
                 cipheredDataSentCounter++; 
+                if (cipheredDataSentCounter > 255)
+                {
+                    cipheredDataSentCounter = 1;
+                }
             }
             catch (GattException ex)
             {
