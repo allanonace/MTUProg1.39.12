@@ -48,17 +48,11 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Tablet)
             {
-                Task.Run(() =>
-                {
-                    Device.BeginInvokeOnMainThread(LoadTabletUI);
-                });
+                LoadTabletUI();
             }
             else
             {
-                Task.Run(() =>
-                {
-                    Device.BeginInvokeOnMainThread(LoadPhoneUI);
-                });
+                LoadPhoneUI();
             }
           
             dialogsSaved = dialogs;
