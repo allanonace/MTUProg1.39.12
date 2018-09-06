@@ -121,7 +121,9 @@ namespace ble_library
             isConnected = false;
             busy = false;
             cipheredDataSentCounter = 1;
-            saved_settings = CrossSettings.Current;               
+            saved_settings = CrossSettings.Current;
+
+            BlePeripheralList = new List<IBlePeripheral>();
         }
 
         /// <summary>
@@ -681,8 +683,8 @@ namespace ble_library
         private async Task ScanForBroadcasts()
         {
             if(!busy){
-                
-                BlePeripheralList = new List<IBlePeripheral> { };
+
+                BlePeripheralList.Clear();
                 busy = true;
                 await adapter.ScanForBroadcasts(
                 // Optional scan filter to ensure that the
