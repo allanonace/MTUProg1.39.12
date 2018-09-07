@@ -684,7 +684,7 @@ namespace ble_library
         {
             if(!busy){
 
-                BlePeripheralList.Clear();
+                List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
                 busy = true;
                 await adapter.ScanForBroadcasts(
                 // Optional scan filter to ensure that the
@@ -715,19 +715,19 @@ namespace ble_library
 
                     serv = serv + ", ";
 
-                    Console.WriteLine(serv);
-                    Console.WriteLine(adv.ManufacturerSpecificData.FirstOrDefault().CompanyName());
-                    Console.WriteLine(adv.ServiceData);
+//                    Console.WriteLine(serv);
+//                    Console.WriteLine(adv.ManufacturerSpecificData.FirstOrDefault().CompanyName());
+//                    Console.WriteLine(adv.ServiceData);
 
                     //Show dialog with name
                     if(adv.DeviceName!=null){
                         if ( adv.DeviceName.Contains("Aclara") || adv.DeviceName.Contains("Acl") || adv.DeviceName.Contains("Ac") )
                         {
-                            if(BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
+                            if(BlePeripheralListAux.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
                             {
-                                BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
+                                BlePeripheralListAux[BlePeripheralListAux.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
                             }else{
-                                BlePeripheralList.Add(peripheral);
+                                BlePeripheralListAux.Add(peripheral);
                             }
                         } 
                     }
@@ -738,6 +738,7 @@ namespace ble_library
                     // If you omit this argument, it will use
                     // BluetoothLowEnergyUtils.DefaultScanTimeout
                 );  
+                BlePeripheralList = BlePeripheralListAux;
             }
             busy = false;
             // scanning has been stopped when code reached this point
