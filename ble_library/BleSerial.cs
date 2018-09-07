@@ -129,6 +129,11 @@ namespace ble_library
             ble_port_serial.StartScan();
         }
 
+        public Boolean IsScanning()
+        {
+            return ble_port_serial.IsScanning();
+        }
+
         /// <summary>
         /// Opens a new serial port connection.
         /// </summary>

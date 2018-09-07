@@ -207,6 +207,9 @@ namespace ble_library
                  return false;
              });
 
+        public Boolean IsScanning()
+        {
+            return busy;
         }
 
         /// <summary>
