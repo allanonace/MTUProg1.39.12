@@ -87,7 +87,7 @@ namespace ble_library
 
         private byte[] dynamicPass;
         private bool isPaired = true;
-        private bool busy;
+        private bool isScanning;
         private int cipheredDataSentCounter;
 
         private byte[] writeSavedBuffer;
@@ -119,7 +119,7 @@ namespace ble_library
             number_tries = 0;
 
             isConnected = false;
-            busy = false;
+            isScanning = false;
             cipheredDataSentCounter = 1;
             saved_settings = CrossSettings.Current;
 
@@ -201,7 +201,7 @@ namespace ble_library
 
         public Boolean IsScanning()
         {
-            return busy;
+            return isScanning;
         }
 
         /// <summary>
@@ -677,10 +677,10 @@ namespace ble_library
         /// </summary>
         private async Task ScanForBroadcasts()
         {
-            if(!busy){
+            if(!isScanning){
 
                 List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
-                busy = true;
+                isScanning = true;
                 await adapter.ScanForBroadcasts(
                 // Optional scan filter to ensure that the
                 // observer will only receive peripherals
@@ -735,7 +735,7 @@ namespace ble_library
                 );  
                 BlePeripheralList = BlePeripheralListAux;
             }
-            busy = false;
+            isScanning = false;
             // scanning has been stopped when code reached this point
         }
     }
