@@ -192,20 +192,12 @@ namespace ble_library
         /// If bluetooth antenna is enabled on device, starts scanning devices. If not, turns it on, and proceeds to scan.
         /// </summary>
         public void StartScan(){
-            
-             Device.StartTimer(
-             TimeSpan.FromSeconds(1),
-             () =>
-             {
-                
-                 Task.Factory.StartNew(BluetoothEnable);
-
-                 if (adapter.CurrentState.IsEnabledOrEnabling())
-                 {
-                    Task.Factory.StartNew(ScanForBroadcasts);
-                 }
-                 return false;
-             });
+            BluetoothEnable();
+            if (adapter.CurrentState.IsEnabledOrEnabling())
+            {
+                Task.Factory.StartNew(ScanForBroadcasts);
+            }
+        }
 
         public Boolean IsScanning()
         {
