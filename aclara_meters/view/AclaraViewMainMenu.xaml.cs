@@ -312,19 +312,17 @@ namespace aclara_meters.view
                 bool isOpen = FormsApp.ble_interface.IsOpen();
                 if (isOpen != peripheralConnected)
                 {
-                    fondo.Opacity = 1;
-                    background_scan_page.Opacity = 1;
-                    background_scan_page.IsEnabled = true;
-
                     DeviceList.IsEnabled = true;
                     peripheralConnected = isOpen;
                     Device.BeginInvokeOnMainThread(() =>
                     {
-                       IsConnectedUIChange(isOpen);
+                        fondo.Opacity = 1;
+                        background_scan_page.Opacity = 1;
+                        background_scan_page.IsEnabled = true;
+
+                        IsConnectedUIChange(isOpen);
                     });
                 }
-                         
-                ChangeListViewData();
 
                 Thread.Sleep(500); // 0.5 Second
             }
