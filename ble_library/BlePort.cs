@@ -191,11 +191,17 @@ namespace ble_library
         /// <summary>
         /// If bluetooth antenna is enabled on device, starts scanning devices. If not, turns it on, and proceeds to scan.
         /// </summary>
-        public void StartScan(){
-            BluetoothEnable();
+        public async Task StartScan(){
+            await BluetoothEnable();
             if (adapter.CurrentState.IsEnabledOrEnabling())
             {
                 Task.Factory.StartNew(ScanForBroadcasts);
+            }
+            else
+            {
+                // New empty BlePeripheralList
+                List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
+                BlePeripheralList = BlePeripheralListAux;
             }
         }
 

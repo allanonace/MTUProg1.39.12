@@ -124,9 +124,9 @@ namespace ble_library
         /// Starts the device scanning
         /// </summary>
         /// <remarks></remarks>
-        public void Scan(){
+        public async Task Scan(){
             
-            ble_port_serial.StartScan();
+            await ble_port_serial.StartScan();
         }
 
         public Boolean IsScanning()
