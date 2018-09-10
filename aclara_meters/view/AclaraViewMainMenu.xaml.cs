@@ -83,23 +83,8 @@ namespace aclara_meters.view
 
             employees = new ObservableCollection<DeviceItem>();
 
-            DeviceList.RefreshCommand = new Command(() =>
+            DeviceList.RefreshCommand = new Command(async () =>
             {
-                // Esta parte no funcinaba; tras un suspend el hilo sigue alive
-                /*
-                if (!printer.IsAlive)
-                {
-                    try
-                    {
-                        printer.Start();
-                    }
-                    catch (Exception e11)
-                    {
-                        Console.WriteLine(e11.StackTrace);
-                    }
-                }
-                */
-
                 // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
                 // Problema: solo se hace si se refresca DeviceList
                 // TO-DO: eliminar el hilo o eliminar el suspend
@@ -114,20 +99,15 @@ namespace aclara_meters.view
                         Console.WriteLine(e11.StackTrace);
                     }
                 } 
-
                 DeviceList.IsRefreshing = true;
-                try
-                {
-                    employees.Clear();
-                    FormsApp.ble_interface.Scan();                    
-                }
-                catch (Exception c2){
-                    Console.WriteLine(c2.StackTrace);
-                }
+                employees.Clear();
+                await FormsApp.ble_interface.Scan();
+                await ChangeListViewData();
                 DeviceList.IsRefreshing = false;
 
             });
             DeviceList.RefreshCommand.Execute(true);
+            DeviceList.ItemsSource = employees;
         }
 
         private void LoadSideMenuElements()
