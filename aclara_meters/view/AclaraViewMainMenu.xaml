@@ -517,6 +517,7 @@
     <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" 
                  IsVisible="false"
 
+                
         RelativeLayout.YConstraint=
           "{ConstraintExpression Type=RelativeToParent,
                                  Property=Height,
@@ -607,7 +608,7 @@
 
 
 
-                     <ContentView  Margin="0,240,0,-20"
+                     <ContentView  Margin="0,114,0,-20"
                                        RelativeLayout.YConstraint=
                       "{ConstraintExpression Type=RelativeToParent,
                                              Property=Height,
@@ -741,9 +742,9 @@
 
                     <StackLayout    Margin="4,-12,0,0" Orientation="Horizontal">
                            
-                            <Image IsVisible="true"  
+                            <Image IsVisible="true"   
                                 x:Name="close_menu_icon"
-                                Margin="0,0,0,0"  HeightRequest="56"
+                                Margin="0,8,0,0"  HeightRequest="56"
                                 Scale="1" 
                                 Source="back_arrow.png"  
                                 HorizontalOptions="Start">
@@ -755,11 +756,11 @@
                            
                             </Image>
 
-                            <Image  x:Name="logo_tablet_aclara" 
-                                    WidthRequest="256" 
+                            <Image  x:Name="logo_tablet_aclara"  TranslationX="18"
+                                    WidthRequest="216" 
                                     HeightRequest="128"
                                     IsEnabled="false"
-                                    Margin="-36,0,0,0" 
+                                    Margin="-32,-8,0,0" 
                                     Scale="1" 
                                     Opacity="1"
                                     Source="aclara_logo_menu.png">
@@ -768,33 +769,23 @@
                         
                       </StackLayout>
 
-                          <StackLayout Margin="0,-32,0,0" x:Name="tablet_user_view" HorizontalOptions="Center">
-                          <Image  
-                            Margin="0,0,0,0"
-                            IsEnabled="false"
-                            WidthRequest="72" 
-                            HeightRequest="72"
-                            Scale="1" 
-                                
-                            Source="user_menu_icon.png"
-                                     
-                            >
-                          </Image>
+                          <StackLayout Margin="0,-40,0,0"  x:Name="tablet_user_view" HorizontalOptions="Center">
+                       
                         
-                      <Label x:Name="userName" TextColor="White" HorizontalTextAlignment="Center" Text="test@email.com" FontSize="16"></Label>
-                      <Label x:Name="Company" TextColor="White" HorizontalTextAlignment="Center"  Text="Company" FontSize="16"> </Label>
-
-  
+                      <Label x:Name="userName" Margin="0,0,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" 
+                             FontSize="20"></Label>
+                     
+        
+                    
                 </StackLayout>
                     
                 </StackLayout>
 
-                      <Image Margin="0,0,0,0" x:Name="backmenu" Source="background_menu"  HeightRequest="240" Opacity="0.2"  InputTransparent="true">
+                  <Image Margin="0,-80,0,0" x:Name="backmenu" Source="background_menu"  HeightRequest="360" Opacity="0.1"  InputTransparent="true">
                     
                 </Image>
-                    
             </RelativeLayout>
-        
+      
 
                 
             

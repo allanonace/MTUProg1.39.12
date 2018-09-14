@@ -174,7 +174,7 @@
                                   <!--  FUNCTL LOCTN -->
                                         
                                   <StackLayout x:Name="Block_FunctlLoctn">  
-                                      <Label Text="Functl Loctn" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                      <Label Text="Functional Location" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
                                       
@@ -221,7 +221,7 @@
 
 
                                   <StackLayout x:Name="Block_Vendor">  
-                                      <Label Text="1. Vendor" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                      <Label Text="Vendor" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
                                       
