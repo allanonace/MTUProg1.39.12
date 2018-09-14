@@ -540,6 +540,12 @@ namespace aclara_meters.view
 
         private void LogoutTapped(object sender, EventArgs e)
         {
+
+            dialog_open_bg.IsVisible = true;
+            dialog_meter_replace_one.IsVisible = false;
+            dialog_turnoff_two.IsVisible = false;
+            dialog_turnoff_three.IsVisible = false;
+            dialog_replacemeter_one.IsVisible = false;
             dialog_logoff.IsVisible = true;
             dialog_open_bg.IsVisible = true;
             turnoff_mtu_background.IsVisible = true;
