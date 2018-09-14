@@ -36,10 +36,34 @@ namespace aclara_meters.view
                 // icon on the left side, and page that you want to open after selection
 
                 // Adding menu items to MTUDataListView
-                new ReadMTUItem() { Title = "MTU Ser No.", Description = "-" },
-                new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = "-" },
-                new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = "-" },
-                new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = "-" }
+                new ReadMTUItem() { Title = "MTU Status:", Description = "-" },
+                new ReadMTUItem() { Title = "MTU Ser No:", Description =  "-" },
+                new ReadMTUItem() { Title = "Interface Tamp:", Description  = "-" },
+                new ReadMTUItem() { Title = "Last Gasp:", Description =  "-" },
+                new ReadMTUItem() { Title = "Insf. Mem:", Description =  "-" },
+                new ReadMTUItem() { Title = "Daily Snap:", Description =  "-" },
+                new ReadMTUItem() { Title = "Encrypted:", Description =  "-" },
+
+                new ReadMTUItem() { Description = "Port 1: Unknown" , isMTU = "false", isMeter = "true",
+                        Title1 = "Meter Type ID:", Description1 = "-" ,
+                        Title2 = "Service Pt. ID:", Description2 =  "-" ,
+                        Title3 = "Meter Reading:", Description3 = "-" ,
+                    Title4 = "Digits #:", Description4 =  "-" , Height = "310"
+                },
+
+                new ReadMTUItem() { Title = "Xmit Interval:", Description = "-" },
+                new ReadMTUItem() { Title = "Read Interval:", Description = "-" },
+                new ReadMTUItem() { Title = "Battery:", Description = "-" },
+                new ReadMTUItem() { Title = "2-Way:", Description = "-" },
+                new ReadMTUItem() { Title = "On Demand Cnt:", Description = "-" },
+                new ReadMTUItem() { Title = "Data Req Cnt:", Description = "-" },
+                new ReadMTUItem() { Title = "FOTA Cnt:", Description = "-" },
+                new ReadMTUItem() { Title = "FOTC Cnt:", Description = "-" },
+                new ReadMTUItem() { Title = "MTU Type:", Description = "-" },
+                new ReadMTUItem() { Title = "MTU Software:", Description = "-" },
+                new ReadMTUItem() { Title = "PCB Number", Description = "-" },
+
+
             };
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
@@ -195,8 +219,6 @@ namespace aclara_meters.view
                  Device.BeginInvokeOnMainThread(() =>
                  {
                      label_read.Text = "Successful MTU read";
-                     lista.BeginRefresh();
-                     lista.EndRefresh();
                      _userTapped = false;
                      bg_read_mtu_button.NumberOfTapsRequired = 1;
                      ChangeLowerButtonImage(false);
@@ -207,8 +229,8 @@ namespace aclara_meters.view
                      try
                      {
                          LoadMTUValuesToListView("21189225", "456,3375", "456,3375", "468,8375");
-                         label_read.Text = "Hi-Response: " + CrossSettings.Current.GetValueOrDefault("responsehi", string.Empty).ToString()
-                             + "  Data Count: " + FormsApp.ble_interface.BytesToRead().ToString();
+                         //label_read.Text = "Hi-Response: " + CrossSettings.Current.GetValueOrDefault("responsehi", string.Empty).ToString()
+                         //    + "  Data Count: " + FormsApp.ble_interface.BytesToRead().ToString();
                      }
                      catch (Exception e6)
                      {
@@ -405,10 +427,39 @@ namespace aclara_meters.view
                 // Here you can define title for item, 
                 // icon on the left side, and page that you want to open after selection
                 // Adding menu items to MTUDataListView
-                new ReadMTUItem() { Title = "MTU Ser No.", Description = Convert.ToString(identificador_int) },
-                new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = oneWayTx_int },
-                new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = twoWayTx_int },
-                new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = twoWayRx_int }
+               // new ReadMTUItem() { Title = "MTU Ser No.", Description = Convert.ToString(identificador_int) },
+               // new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = oneWayTx_int },
+               // new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = twoWayTx_int },
+               // new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = twoWayRx_int }
+
+                new ReadMTUItem() { Title = "MTU Status:", Description = "On" },
+                new ReadMTUItem() { Title = "MTU Ser No:", Description = "63004810"},
+                new ReadMTUItem() { Title = "Interface Tamp:", Description = "Triggered" },
+                new ReadMTUItem() { Title = "Last Gasp:", Description = "Enabled" },
+                new ReadMTUItem() { Title = "Insf. Mem:", Description = "Enabled" },
+                new ReadMTUItem() { Title = "Daily Snap:", Description = "2 PM" },
+                new ReadMTUItem() { Title = "Encrypted:", Description = "Yes"},
+
+                new ReadMTUItem() { Description = "Port 1: MTU Water Single Port On-Demand Encoder ER" , Height = "310", isMTU = "false", isMeter = "true",
+                        
+                        Title1 = "Meter Type ID:", Description1 = "126" ,
+                        Title2 = "Service Pt. ID:", Description2 = "012345678" ,
+                        Title3 = "Meter Reading:", Description3 = "0188XX" ,
+                        Title4 = "Digits #:", Description4 = "4"
+                },
+
+                new ReadMTUItem() { Title = "Xmit Interval:", Description = "72 Hrs" },
+                new ReadMTUItem() { Title = "Read Interval:", Description = "12 Hrs" },
+                new ReadMTUItem() { Title = "Battery:", Description = "3,66 V" },
+                new ReadMTUItem() { Title = "2-Way:", Description = "Slow" },
+                new ReadMTUItem() { Title = "On Demand Cnt:", Description = "0" },
+                new ReadMTUItem() { Title = "Data Req Cnt:", Description = "0"  },
+                new ReadMTUItem() { Title = "FOTA Cnt:", Description = "0"  },
+                new ReadMTUItem() { Title = "FOTC Cnt:", Description = "0"  },
+                new ReadMTUItem() { Title = "MTU Type:", Description = "171"},
+                new ReadMTUItem() { Title = "MTU Software:", Description = "Version 01.04.0008"},
+                new ReadMTUItem() { Title = "PCB Number", Description = "0"},
+
             };
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
