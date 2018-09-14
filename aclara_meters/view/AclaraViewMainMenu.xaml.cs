@@ -21,6 +21,11 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewMainMenu
     {
+        void Logoff_No_Tapped(object sender, EventArgs e)
+        {
+        }
+
+
         private List<PageItem> MenuList { get; set; }
         private IUserDialogs dialogsSaved;
         private ObservableCollection<DeviceItem> employees;
@@ -267,6 +272,9 @@ namespace aclara_meters.view
             logout_button.Tapped += LogoutTapped;
             back_button_detail.Tapped += SideMenuOpen;
             settings_button.Tapped += OpenSettingsTapped;
+
+            logoff_no.Tapped += LogOffNoTapped;
+            logoff_ok.Tapped += LogOffOkTapped;
         }
 
         private void InvokeMethod()
@@ -430,6 +438,30 @@ namespace aclara_meters.view
             });
         } 
 
+
+
+        private void LogOffOkTapped(object sender, EventArgs e)
+        {
+            dialog_logoff.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            printer.Suspend();
+            Settings.IsLoggedIn = false;
+            FormsApp.CredentialsService.DeleteCredentials();
+            background_scan_page.IsEnabled = true;
+            background_scan_page_detail.IsEnabled = true;
+            Navigation.PopAsync();
+
+        }
+
+        private void LogOffNoTapped(object sender, EventArgs e)
+        {
+            dialog_logoff.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+
         private void ReplaceMeterCancelTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
@@ -508,12 +540,9 @@ namespace aclara_meters.view
 
         private void LogoutTapped(object sender, EventArgs e)
         {
-            printer.Suspend();
-            Settings.IsLoggedIn = false;
-            FormsApp.CredentialsService.DeleteCredentials();
-            background_scan_page.IsEnabled = true;
-            background_scan_page_detail.IsEnabled = true;
-            Navigation.PopAsync();
+            dialog_logoff.IsVisible = true;
+            dialog_open_bg.IsVisible = true;
+            turnoff_mtu_background.IsVisible = true;
         }
 
         // Event for Menu Item selection, here we are going to handle navigation based

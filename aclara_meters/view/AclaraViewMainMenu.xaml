@@ -829,6 +829,42 @@
    
                 <Frame  CornerRadius="6"  HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">
                  <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" > 
+
+                     <StackLayout  x:Name="dialog_logoff" IsVisible="false" 
+                                  Margin="0" Opacity="1">
+                 
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="20" Text="Are you sure you want to Log off?">    
+                        </Label>
+                            
+                        <StackLayout Margin="0,12,0,0" Orientation="Horizontal"  >
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                         TextColor="#6aa2b8"
+                                         FontSize="20"  Text="Yes">
+
+                                         <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="logoff_ok" />
+                                        </Label.GestureRecognizers>
+                                
+                            </Label>
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                        TextColor="#6aa2b8"
+                                        FontSize="20" Text="No"> 
+                                
+                                          <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="logoff_no" />
+                                        </Label.GestureRecognizers>
+
+                            </Label>
+
+                          </StackLayout>
+                      
+                     </StackLayout>
+                    
+
+
+                    
                     <StackLayout  x:Name="dialog_turnoff_one" IsVisible="false" 
                                   Margin="0" Opacity="1">
                  
