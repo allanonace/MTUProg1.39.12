@@ -589,6 +589,7 @@ namespace aclara_meters.view
             background_scan_page.IsEnabled = false;
 
             FormsApp.ble_interface.Open(item.Peripheral);
+            peripheral = item.Peripheral;
 
             Device.BeginInvokeOnMainThread(() =>
             {
