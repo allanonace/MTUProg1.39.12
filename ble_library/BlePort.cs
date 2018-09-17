@@ -79,8 +79,11 @@ namespace ble_library
         private IDisposable Listen_ack_response_Handler;
         private IDisposable Listen_Characteristic_Notification_Handler;
 
+        public static int NO_CONNECTED = 0;
+        public static int CONNECTING = 1;
+        public static int CONNECTED = 2;
 
-        private Boolean isConnected;
+        private int isConnected;
         private List<IBlePeripheral> BlePeripheralList;
 
         private IBlePeripheral ble_peripheral;
@@ -118,7 +121,7 @@ namespace ble_library
             writeSavedCount = 0;
             number_tries = 0;
 
-            isConnected = false;
+            isConnected = NO_CONNECTED;
             isScanning = false;
             cipheredDataSentCounter = 1;
             saved_settings = CrossSettings.Current;
@@ -130,26 +133,9 @@ namespace ble_library
         /// Returns the Connection status with the Bluetooth device
         /// </summary>
         /// <returns>The Bluetooth connection status.</returns>
-        public Boolean GetConnectionStatus()
+        public int GetConnectionStatus()
         {
             return isConnected;
-        }
-
-        /// <summary>
-        /// Returns the Pairing status with the Bluetooth device
-        /// </summary>
-        /// <returns>The Bluetooth pairing status.</returns>
-        /// 
-        public Boolean GetPairingStatusOk()
-        {
-            if (number_tries < 5)
-            {
-                return true;
-            }
-            number_tries = 0;
-        
- 
-            return false;
         }
 
         /// <summary>
@@ -331,6 +317,7 @@ namespace ble_library
         /// </summary>
         /// <param name="ble_device">The Bluetooth LE peripheral to connect.</param>
         public async Task ConnectoToDevice(IBlePeripheral ble_device, bool isBounded){
+            isConnected = CONNECTING;
             var connection = await adapter.ConnectToDevice(
                 // The IBlePeripheral to connect to
                 ble_device,
@@ -361,10 +348,11 @@ namespace ble_library
             }
             else
             {
+                number_tries = 0;
                 // Do something to inform user or otherwise handle unsuccessful connection.
                 Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
                 // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
-                isConnected = false;
+                isConnected = NO_CONNECTED;
             }
 
         }
@@ -374,7 +362,7 @@ namespace ble_library
         /// </summary>
         private async void UpdateAESBuffer(byte[] bytes)
         {
-            if (number_tries < 5)
+            if ((isConnected == CONNECTING) && (number_tries < 5))
             {
                 if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0xCC }))
                 {
@@ -421,8 +409,8 @@ namespace ble_library
                       hi_msg
                     );
 
-                    isConnected = false;
-                    //DisconnectDevice();
+                    isConnected = NO_CONNECTED;
+                    DisconnectDevice();
 
                 }
 
@@ -440,7 +428,7 @@ namespace ble_library
                         saved_settings.AddOrUpdateValue("session_dynamicpass", System.Convert.ToBase64String(dynamicPass));
                     }
                    
-                    isConnected = true;
+                    isConnected = CONNECTED;
 
                     number_tries = 0;
                 }
@@ -490,6 +478,7 @@ namespace ble_library
                     Console.WriteLine(ex.ToString());
                 }
 
+                number_tries = 0;
                 Listen_aes_conection_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                    new Guid("00000041-0000-1000-8000-00805f9b34fb"),
@@ -648,7 +637,7 @@ namespace ble_library
         /// </summary>
         public async Task DisconnectDevice()
         {
-            if (isConnected)
+            if (isConnected == CONNECTED)
             {
                 Stop_Listen_Characteristic_Notification();
                 try
@@ -672,9 +661,14 @@ namespace ble_library
                 await gattServer_connection.Disconnect();
                 //CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
                 //CrossSettings.Current.AddOrUpdateValue("session_peripheral", string.Empty);
-                isConnected = false;
+                isConnected = NO_CONNECTED;
 
 
+            }
+            else if (isConnected == CONNECTING)
+            {
+                await gattServer_connection.Disconnect();
+                isConnected = NO_CONNECTED;
             }
         }
 

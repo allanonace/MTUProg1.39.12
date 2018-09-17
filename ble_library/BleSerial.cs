@@ -106,19 +106,18 @@ namespace ble_library
         /// <remarks>The IsOpen property tracks whether the port is open for use by the caller, not whether the port is open by any application on the machine.</remarks>
         public Boolean IsOpen()
         {
-            return ble_port_serial.GetConnectionStatus();
+            return (ble_port_serial.GetConnectionStatus() == BlePort.CONNECTED);
         }
 
         /// <summary>
-        /// Returns the Pairing status with the Bluetooth device
+        /// Gets a value indicating the open or closed status of the ISerial object.
         /// </summary>
-        /// <returns>The Bluetooth pairing status.</returns>
-        public Boolean GetPairingStatusOk()
+        /// <returns>Boolean value indicating the open or closed status of the ISerial object</returns>
+        /// <remarks>The IsOpen property tracks whether the port is open for use by the caller, not whether the port is open by any application on the machine.</remarks>
+        public int GetConnectionStatus()
         {
-            return ble_port_serial.GetPairingStatusOk();
+            return ble_port_serial.GetConnectionStatus();
         }
-
-      
 
         /// <summary>
         /// Starts the device scanning

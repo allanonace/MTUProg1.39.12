@@ -31,7 +31,7 @@ namespace aclara_meters.view
         private ObservableCollection<DeviceItem> employees;
         
         private IBlePeripheral peripheral = null;
-        private Boolean peripheralConnected = false;
+        private int peripheralConnected = ble_library.BlePort.NO_CONNECTED;
         private byte[] peripheralID = null;
         private Boolean peripheralManualDisconnection = false;
 
@@ -284,34 +284,62 @@ namespace aclara_meters.view
         {
             while (true)
             {
-                if (!FormsApp.ble_interface.GetPairingStatusOk())
+                //if (!FormsApp.ble_interface.GetPairingStatusOk())
+                int status = FormsApp.ble_interface.GetConnectionStatus();
+                if (status != peripheralConnected)
                 {
-                    Device.BeginInvokeOnMainThread(() =>
+                    if (peripheralConnected == ble_library.BlePort.NO_CONNECTED)
                     {
-                        Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+                        // status DEBERIA SER SIEMPRE ble_library.BlePort.CONNECTING
+                        peripheralConnected = status;
+                    }
+                    else if (peripheralConnected == ble_library.BlePort.CONNECTING)
+                    {
+                        if (status == ble_library.BlePort.NO_CONNECTED)
+                        {
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+                                DeviceList.IsEnabled = true;
+                                fondo.Opacity = 1;
+                                background_scan_page.Opacity = 1;
+                                background_scan_page.IsEnabled = true;
+
+                            });
+                            peripheralConnected = status;
+                        }
+                        else // status == ble_library.BlePort.CONNECTED
+                        {
+                            DeviceList.IsEnabled = true;
+                            // status DEBERIA SER SIEMPRE ble_library.BlePort.CONNECTED
+                            peripheralConnected = status;
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                fondo.Opacity = 1;
+                                background_scan_page.Opacity = 1;
+                                background_scan_page.IsEnabled = true;
+
+                                IsConnectedUIChange(true);
+                            });
+                        }
+                    }
+                    else if (peripheralConnected == ble_library.BlePort.CONNECTED)
+                    {
                         DeviceList.IsEnabled = true;
-                        fondo.Opacity = 1;
-                        background_scan_page.Opacity = 1;
-                        background_scan_page.IsEnabled = true;
+                        // status DEBERIA SER SIEMPRE ble_library.BlePort.NO_CONNECTED
+                        peripheralConnected = status;
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            fondo.Opacity = 1;
+                            background_scan_page.Opacity = 1;
+                            background_scan_page.IsEnabled = true;
 
-                    });
+                            IsConnectedUIChange(false);
+                        });
+
+                    }
+
                 }
-
-                bool isOpen = FormsApp.ble_interface.IsOpen();
-                if (isOpen != peripheralConnected)
-                {
-                    DeviceList.IsEnabled = true;
-                    peripheralConnected = isOpen;
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        fondo.Opacity = 1;
-                        background_scan_page.Opacity = 1;
-                        background_scan_page.IsEnabled = true;
-
-                        IsConnectedUIChange(isOpen);
-                    });
-                }
-
                 Thread.Sleep(500); // 0.5 Second
             }
         }
@@ -391,7 +419,7 @@ namespace aclara_meters.view
                             try
                             {
                                 peripheral = blePeripherals[i];
-                                peripheralConnected = false;
+                                peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                                 peripheralManualDisconnection = false;
                                 peripheralID = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
                                 FormsApp.ble_interface.Open(peripheral, true);
