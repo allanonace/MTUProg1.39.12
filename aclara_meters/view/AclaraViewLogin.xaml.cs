@@ -42,12 +42,50 @@ namespace aclara_meters.view
                 await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
                 {
                     loginpage.IsVisible = true;
+                    /*
                     if(IsLocationAvailable()){
+
                         Task.Run(async () => { await StartListening(); });
                         //ListSFTPDataFiles();
                     }
+                    */
                 });
             });
+
+
+            this.EmailEntry.Focused += (s, e) => { SetLayoutPosition(true, (int) -20); };
+            this.EmailEntry.Unfocused += (s, e) => { SetLayoutPosition(false, (int)-20); };
+
+
+            this.PasswordEntry.Focused += (s, e) => { SetLayoutPosition(true, (int) -80); };
+            this.PasswordEntry.Unfocused += (s, e) => { SetLayoutPosition(false, (int) -80); };
+        }
+
+
+        void SetLayoutPosition(bool onFocus, int value)
+        {
+            if (onFocus)
+            {
+                if (Device.RuntimePlatform == Device.iOS)
+                {
+                    this.loginpage.TranslateTo(0, value, 50);
+                }
+                else if (Device.RuntimePlatform == Device.Android)
+                {
+                    this.loginpage.TranslateTo(0, value, 50);
+                }
+            }
+            else
+            {
+                if (Device.RuntimePlatform == Device.iOS)
+                {
+                    this.loginpage.TranslateTo(0, 0, 50);
+                }
+                else if (Device.RuntimePlatform == Device.Android)
+                {
+                    this.loginpage.TranslateTo(0, 0, 50);
+                }
+            }
         }
 
         private void ListSFTPDataFiles()
