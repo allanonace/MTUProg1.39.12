@@ -161,7 +161,7 @@ namespace aclara_meters.view
 
                 new PageItem()
                 {
-                    Title = "Add MTU / Add meter",
+                    Title = "Add MTU / Add Meter",
                     Icon = "addMTUaddmeter.png",
                     TargetType = ""
                 },
