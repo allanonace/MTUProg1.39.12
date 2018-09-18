@@ -65,7 +65,7 @@ namespace aclara_meters.view
             //Change username textview to Prefs. String
             if (FormsApp.CredentialsService.UserName != null)
             {
-                userName.Text = FormsApp.CredentialsService.UserName;
+                userName.Text = "Kartik"; //FormsApp.CredentialsService.UserName;
                 CrossSettings.Current.AddOrUpdateValue("session_username", FormsApp.CredentialsService.UserName);           
             }
 

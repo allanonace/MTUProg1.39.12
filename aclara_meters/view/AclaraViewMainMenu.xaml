@@ -608,7 +608,7 @@
 
 
 
-                     <ContentView  Margin="0,114,0,-20"
+                     <ContentView  Margin="0,92,0,-20"
                                        RelativeLayout.YConstraint=
                       "{ConstraintExpression Type=RelativeToParent,
                                              Property=Height,
@@ -762,7 +762,7 @@
                                     WidthRequest="216" 
                                     HeightRequest="128"
                                     IsEnabled="false"
-                                    Margin="-32,-8,0,0" 
+                                    Margin="-32,-12,0,4" 
                                     Scale="1" 
                                     Opacity="1"
                                     Source="aclara_logo_menu.png">
@@ -777,7 +777,7 @@
                           <StackLayout Margin="0,-40,0,0"  x:Name="tablet_user_view" HorizontalOptions="Center">
                        
                         
-                      <Label x:Name="userName" Margin="0,0,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" 
+                      <Label x:Name="userName" Margin="0,-12,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" 
                              FontSize="20"></Label>
                      
         
@@ -802,8 +802,8 @@
 
                     <Image.HeightRequest>
                       <OnPlatform x:TypeArguments="x:Double">
-                        <On Platform="iOS" Value="114" />
-                        <On Platform="Android" Value="96" />
+                        <On Platform="iOS" Value="94" />
+                        <On Platform="Android" Value="76" />
                      
                       </OnPlatform>
                             
