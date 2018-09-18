@@ -364,47 +364,7 @@ namespace ble_library
                     number_tries++;
 
                     isPaired = false;
-                    saved_settings.AddOrUpdateValue("responsehi", isPaired.ToString());
 
-                    saved_settings.AddOrUpdateValue("session_peripheral", string.Empty);
-                    saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", string.Empty);
-
-                    //dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
-                    byte[] hi_msg;
-
-                    byte[] PassH_crypt = new byte[] { };
-                    byte[] PassL_crypt = new byte[] { };
-
-                    //Read Pass H data from Characteristic
-                    PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
-                        new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                        new Guid("00000040-0000-1000-8000-00805f9b34fb")
-                    );
-
-                    //Read Pass L data from Characteristic
-                    PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
-                        new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                        new Guid("00000042-0000-1000-8000-00805f9b34fb")
-                    );
-
-                    byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
-                    byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
-
-                    //Generate dynamic password
-                    dynamicPass = new byte[PassH_decrypt.Length + PassL_decrypt.Length];
-
-                    Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
-                    Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
-
-                    hi_msg = AES_Encrypt(say_hi, dynamicPass);
-
-                    await gattServer_connection.WriteCharacteristicValue(
-                      new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                      new Guid("00000041-0000-1000-8000-00805f9b34fb"),
-                      hi_msg
-                    );
-
-                    isConnected = NO_CONNECTED;
                     DisconnectDevice();
 
                 }
