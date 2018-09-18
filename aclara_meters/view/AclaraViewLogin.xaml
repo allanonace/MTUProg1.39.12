@@ -5,7 +5,9 @@
              xmlns:Controls="clr-namespace:aclara_meters"  
              x:Class="aclara_meters.view.AclaraViewLogin">
     <ContentPage.Content>
-
+        
+    <ScrollView>
+            
        <StackLayout x:Name="loginpage"  Scale="0.85" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" >
         <Image  Margin="0,0,0,0" HeightRequest="300" Source="aclara_logo_login.png" WidthRequest="300"  />
       
@@ -42,17 +44,17 @@
                             </StackLayout>
                      </Frame> 
                 
-            </Frame>
+                </Frame>
 
-            
-                 <Button BorderRadius="6" BorderColor="Gray" BorderWidth="0" HeightRequest="54" Margin="0,20,0,0" 
-                         Text="Login" BackgroundColor="#6aa2b8"  TextColor="White" FontSize="26" Command="{Binding LoginCommand}"/>
-            <Label Text="{Binding Message, Mode=OneWay}" TextColor="#0072BD"/>
+                
+                     <Button BorderRadius="6" BorderColor="Gray" BorderWidth="0" HeightRequest="54" Margin="0,20,0,0" 
+                             Text="Login" BackgroundColor="#6aa2b8"  TextColor="White" FontSize="26" Command="{Binding LoginCommand}"/>
+                <Label Text="{Binding Message, Mode=OneWay}" TextColor="#0072BD"/>
 
 
-               <Label x:Name="accuracy" IsVisible="false" Text="Waiting Accuracy..." FontSize="12" TextColor="#0072BD"/>
-            
-        </StackLayout>
-
+                   <Label x:Name="accuracy" IsVisible="false" Text="Waiting Accuracy..." FontSize="12" TextColor="#0072BD"/>
+                
+            </StackLayout>
+        </ScrollView>
     </ContentPage.Content>
 </ContentPage>
