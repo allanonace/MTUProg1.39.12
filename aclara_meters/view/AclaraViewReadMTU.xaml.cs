@@ -196,7 +196,11 @@ namespace aclara_meters.view
                 });
 
                 FormsApp.ble_interface.Write(new byte[] { (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C }, 0, 5);
-
+                while (FormsApp.ble_interface.BytesToRead() <= 4)
+                {
+                }
+//                byte[] prub = new byte[270];
+//                int leidos = FormsApp.ble_interface.Read(prub, 0, 262);
                 Task.Delay(2000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {

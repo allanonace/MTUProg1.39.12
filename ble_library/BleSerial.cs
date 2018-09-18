@@ -19,7 +19,6 @@ namespace ble_library
         public BleSerial(IBluetoothLowEnergyAdapter adapter)
         {     
             ble_port_serial = new BlePort(adapter);
-            Task.Factory.StartNew(ble_port_serial.DisconnectDevice);
         }
 
         private void ExceptionCheck(byte[] buffer, int offset, int count){

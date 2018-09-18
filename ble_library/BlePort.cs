@@ -43,7 +43,7 @@ namespace ble_library
 
         public virtual void OnCompleted()
         {
-            Console.WriteLine("Status Report Completed");
+//            Console.WriteLine("Status Report Completed");
         }
 
         public virtual void OnError(Exception error)
@@ -53,7 +53,7 @@ namespace ble_library
 
         public void OnNext(ConnectionState value)
         {
-            Console.WriteLine("Status: " + value.ToString());
+//            Console.WriteLine("Status: " + value.ToString());
 
             if (value == ConnectionState.Disconnected)
             {
@@ -66,6 +66,11 @@ namespace ble_library
                 {
                     throw e;
                 }
+            }
+            else
+            {
+                // ver que valores mas nos da
+                value = value;
             }
         }
     }
@@ -328,7 +333,7 @@ namespace ble_library
                 TimeSpan.FromSeconds(5),
                 // Optional IProgress<ConnectionProgress>
                 progress => {
-                    Console.WriteLine(progress);
+//                    Console.WriteLine(progress);
                     //dialogs.Toast("Progreso: " + progress.ToString());
                 }
             );
@@ -336,7 +341,7 @@ namespace ble_library
             if (connection.IsSuccessful())
             {
                 gattServer_connection = connection.GattServer;
-                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
+//                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
                                                                 // the server implements IObservable<ConnectionState> so you can subscribe to its state
                 gattServer_connection.Subscribe(new ObserverReporter(this));                
               
@@ -350,7 +355,7 @@ namespace ble_library
             {
                 number_tries = 0;
                 // Do something to inform user or otherwise handle unsuccessful connection.
-                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
+//                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
                 // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
                 isConnected = NO_CONNECTED;
             }
@@ -696,7 +701,7 @@ namespace ble_library
                     {
                     // read the advertising data...
                     var adv = peripheral.Advertisement;
-                    Console.WriteLine(adv.DeviceName);
+//                    Console.WriteLine(adv.DeviceName);
 
                     String serv = adv.Services
                                     .Select
@@ -722,6 +727,7 @@ namespace ble_library
                             {
                                 BlePeripheralListAux[BlePeripheralListAux.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
                             }else{
+Console.WriteLine(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray());
                                 BlePeripheralListAux.Add(peripheral);
                             }
                         } 
