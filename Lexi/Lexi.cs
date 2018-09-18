@@ -14,7 +14,7 @@ namespace Lexi
     /// <see cref="Lexi.Lexi" /> Protocol Class.
     /// Contains all methods of Lexi Protocol V2: Read, Write and Operations.
     /// </summary>
-    public class Lexi
+    public class LexiComm
     {
         /// <summary>
         /// Serial port interface used to communicate through Lexi
@@ -64,7 +64,7 @@ namespace Lexi
         /// </summary>
         /// <param name="serial"></param>
         /// <param name="timeout"></param>
-        public Lexi(ISerial serial, int timeout)
+        public LexiComm(ISerial serial, int timeout)
         {
             m_serial = serial;
             m_timeout = timeout;
@@ -75,7 +75,7 @@ namespace Lexi
         /// Initializes a new instance of the <see cref="Lexi.Lexi" /> class. 
         /// </summary>
         /// <remarks></remarks>
-        public Lexi()
+        public LexiComm()
         {
             //set default read wait to response timeout to 400ms
             m_timeout = 400;
