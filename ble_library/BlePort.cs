@@ -53,19 +53,9 @@ namespace ble_library
 
         public void OnNext(ConnectionState value)
         {
-//            Console.WriteLine("Status: " + value.ToString());
-
             if (value == ConnectionState.Disconnected)
             {
-                //dialogs.Toast("Device disconnected");
-                try
-                {
-                    Task.Factory.StartNew(blePort.DisconnectDevice).Wait();
-                }
-                catch (Exception e)
-                {
-                    throw e;
-                }
+                Task.Factory.StartNew(blePort.DisconnectDevice).Wait();
             }
             else
             {
