@@ -515,7 +515,7 @@
         <!-- Menu desplegable -->
         
     <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" 
-                 IsVisible="false"
+                 IsVisible="true"
 
                 
         RelativeLayout.YConstraint=
@@ -734,15 +734,17 @@
                            
 
                     </StackLayout>
-             
-         
+      
 
                 <StackLayout x:Name="Block_upper" IsVisible="true" Margin="-4,0,0,0" Orientation="Vertical"  WidthRequest="310" HorizontalOptions="Center" >
                  
 
-                    <StackLayout    Margin="4,-12,0,0" Orientation="Horizontal">
+                   
+
+                       
                            
-                            <Image IsVisible="true"   
+                             <StackLayout    Margin="4,-12,0,0" Orientation="Horizontal">
+                                <Image IsVisible="true"   
                                 x:Name="close_menu_icon"
                                 Margin="0,8,0,0"  HeightRequest="56"
                                 Scale="1" 
@@ -765,9 +767,12 @@
                                     Opacity="1"
                                     Source="aclara_logo_menu.png">
                             </Image>
+                      
+                               </StackLayout>
+                      
 
                         
-                      </StackLayout>
+                   
 
                           <StackLayout Margin="0,-40,0,0"  x:Name="tablet_user_view" HorizontalOptions="Center">
                        
@@ -778,12 +783,37 @@
         
                     
                 </StackLayout>
+
+
+
+          
                     
                 </StackLayout>
-
-                  <Image Margin="0,-80,0,0" x:Name="backmenu" Source="background_menu"  HeightRequest="360" Opacity="0.1"  InputTransparent="true">
+                <StackLayout VerticalOptions="Start" InputTransparent="true">
+                    <StackLayout.HeightRequest>
+                      <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="iOS" Value="114" />
+                        <On Platform="Android" Value="96" />
+                     
+                      </OnPlatform>
+                    </StackLayout.HeightRequest>
                     
-                </Image>
+                    <Image Margin="0,0,0,0"  x:Name="backmenu" Source="background_menu"  Opacity="0.1"  InputTransparent="true">
+
+                    <Image.HeightRequest>
+                      <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="iOS" Value="114" />
+                        <On Platform="Android" Value="96" />
+                     
+                      </OnPlatform>
+                            
+                    </Image.HeightRequest>
+                        
+                    </Image>
+
+                </StackLayout>
+
+                  
             </RelativeLayout>
       
 
