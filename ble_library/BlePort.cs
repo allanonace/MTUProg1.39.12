@@ -316,8 +316,9 @@ namespace ble_library
             {
                 buffer_ble_data.Enqueue(tempArray[i]);
             }
-         }
-     
+            Console.WriteLine("Rx buffer updated");
+        }
+
         /// <summary>
         /// Updates buffer with the notification data received 
         /// </summary>

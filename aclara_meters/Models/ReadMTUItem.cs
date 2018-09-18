@@ -18,12 +18,10 @@ namespace aclara_meters.Models
             Title1 = "-";
             Title2 = "-";
             Title3 = "-";
-            Title4 = "-";
 
             Description1 = "-";
             Description2 = "-";
             Description3 = "-";
-            Description4 = "-";
 
             Height = "60";
         }
@@ -63,11 +61,6 @@ namespace aclara_meters.Models
         public string Description3
         { get; set; }
 
-        public string Title4
-        { get; set; }
-
-        public string Description4
-        { get; set; }
 
         /*
         public string Title 
