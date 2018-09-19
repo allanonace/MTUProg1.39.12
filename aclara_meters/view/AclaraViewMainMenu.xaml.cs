@@ -405,7 +405,7 @@ namespace aclara_meters.view
                 for (int i = 0; i < sizeList; i++)
                 {
                     byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
-                    /*
+                    
                     //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
                     if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
                         FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty))  &&
@@ -424,9 +424,26 @@ namespace aclara_meters.view
                                 peripheralID = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
                                 FormsApp.ble_interface.Open(peripheral, true);
 
-                                fondo.Opacity = 0;
-                                background_scan_page.Opacity = 0.5;
-                                background_scan_page.IsEnabled = false;
+                                //fondo.Opacity = 0;
+                                //background_scan_page.Opacity = 0.5;
+                                //background_scan_page.IsEnabled = false;                                        
+
+                                //Device.BeginInvokeOnMainThread(() =>
+                                //{
+                                //    try
+                                //    {
+                                //        deviceID.Text = item.deviceName;
+                                //        macAddress.Text = item.deviceMacAddress;
+                                //        imageBattery.Source = item.deviceBatteryIcon;
+                                //        imageRssi.Source = item.deviceRssiIcon;
+                                //        batteryLevel.Text = item.deviceBattery;
+                                //        rssiLevel.Text = item.deviceRssi;
+                                //    }
+                                //    catch (Exception e4)
+                                //    {
+                                //        Console.WriteLine(e4.StackTrace);
+                                //    }
+                                //});
                             }
                             catch (Exception e)
                             {
@@ -434,7 +451,7 @@ namespace aclara_meters.view
                             }
                         }
                     }
-                    */
+                  
 
                     bool enc = false;
                     int sizeListTemp = employees.Count;
@@ -587,8 +604,15 @@ namespace aclara_meters.view
             fondo.Opacity = 0;
             background_scan_page.Opacity = 0.5;
             background_scan_page.IsEnabled = false;
+            bool reassociate = false;
+            if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
+                FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
+                item.Peripheral.Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)))
+            {
+                reassociate = true;
+            }
 
-            FormsApp.ble_interface.Open(item.Peripheral);
+            FormsApp.ble_interface.Open(item.Peripheral, reassociate);
             peripheral = item.Peripheral;
 
             Device.BeginInvokeOnMainThread(() =>
