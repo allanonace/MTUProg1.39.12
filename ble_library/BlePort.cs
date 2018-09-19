@@ -14,6 +14,7 @@ using Plugin.Settings;
 using System.Threading;
 using System.Runtime.Serialization.Formatters.Binary;
 using nexus.core;
+using System.Collections;
 
 namespace ble_library
 {
@@ -43,12 +44,12 @@ namespace ble_library
 
         public virtual void OnCompleted()
         {
-//            Console.WriteLine("Status Report Completed");
+Console.WriteLine("Status Report Completed");
         }
 
         public virtual void OnError(Exception error)
         {
-
+ Console.WriteLine("Status Report Completed");
         }
 
         public void OnNext(ConnectionState value)
@@ -204,6 +205,7 @@ namespace ble_library
         /// </summary>
         private void Listen_Characteristic_Notification()
         {
+            // TODO: comprobar que existe servicio?
             try
             {         
                 // Will also stop listening when gattServer
@@ -334,6 +336,8 @@ namespace ble_library
         /// </summary>
         /// <param name="ble_device">The Bluetooth LE peripheral to connect.</param>
         public async Task ConnectoToDevice(IBlePeripheral ble_device, bool isBounded){
+try
+{
             isConnected = CONNECTING;
             var connection = await adapter.ConnectToDevice(
                 // The IBlePeripheral to connect to
@@ -359,18 +363,25 @@ namespace ble_library
               
                 ble_peripheral = ble_device;
 
-                number_tries = 0;
-
                 await AESConnectionVerifyAsync(ble_peripheral, isBounded);
             }
             else
             {
-                number_tries = 0;
                 // Do something to inform user or otherwise handle unsuccessful connection.
 //                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
                 // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
                 isConnected = NO_CONNECTED;
             }
+}
+catch (GattException ex)
+{
+    Console.WriteLine(ex.ToString());
+}
+catch (Exception e)
+{
+    Console.WriteLine(e);
+}
+
 
         }
 
@@ -440,6 +451,11 @@ namespace ble_library
                 cipheredDataSentCounter = i + 1;
                 Write_Characteristic(writeSavedBuffer, writeSavedOffset, writeSavedCount);
             }
+        }
+
+        private void CosasError(Exception e)
+        {
+            Console.Write(e);
         }
 
         /// <summary>
@@ -724,62 +740,38 @@ namespace ble_library
         {
             if(!isScanning){
 
-                List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
+                //List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
+                BlePeripheralList.Clear();
                 isScanning = true;
                 await adapter.ScanForBroadcasts(
-                // Optional scan filter to ensure that the
-                // observer will only receive peripherals
-                // that pass the filter. If you want to scan
-                // for everything around, omit this argument.
-                new ScanFilter()
-
-                   .SetIgnoreRepeatBroadcasts(false),
-                    // IObserver<IBlePeripheral> or Action<IBlePeripheral>
-                    // will be triggered for each discovered peripheral
+                    // Optional scan filter to ensure that the observer will only receive peripherals
+                    // that pass the filter. If you want to scan for everything around, omit this argument.
+                    new ScanFilter().SetIgnoreRepeatBroadcasts(false),
+                    // IObserver<IBlePeripheral> or Action<IBlePeripheral> will be triggered for each discovered peripheral
                     // that passes the above can filter (if provided).
                     (IBlePeripheral peripheral) =>
                     {
-                    // read the advertising data...
-                    var adv = peripheral.Advertisement;
-//                    Console.WriteLine(adv.DeviceName);
+                        // read the advertising data...
+                        var adv = peripheral.Advertisement;
 
-                    String serv = adv.Services
-                                    .Select
-                                     (x => {
-                                         var name = adv.DeviceName;
-                                         return name != null || name.Equals("")
-                                                    ? x.ToString()
-                                                    : x.ToString() + " (" + name + ")";
-                                     }
-                                     ).ToString();
-
-                    serv = serv + ", ";
-
-//                    Console.WriteLine(serv);
-//                    Console.WriteLine(adv.ManufacturerSpecificData.FirstOrDefault().CompanyName());
-//                    Console.WriteLine(adv.ServiceData);
-
-                    //Show dialog with name
-                    if(adv.DeviceName!=null){
-                        if ( adv.DeviceName.Contains("Aclara") || adv.DeviceName.Contains("Acl") || adv.DeviceName.Contains("Ac") )
-                        {
-                            if(BlePeripheralListAux.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
+                        if(adv.DeviceName!=null){
+                            if ( adv.DeviceName.Contains("Aclara") || adv.DeviceName.Contains("Acl") || adv.DeviceName.Contains("Ac") )
                             {
-                                BlePeripheralListAux[BlePeripheralListAux.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
-                            }else{
-Console.WriteLine(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray());
-                                BlePeripheralListAux.Add(peripheral);
-                            }
-                        } 
-                    }
-                    //  connect to the device
-                   },
+                                if(BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
+                                {
+                                    BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
+                                }else{
+                                    BlePeripheralList.Add(peripheral);
+                                }
+                            } 
+                        }
+                        //  connect to the device
+                    },
                     // TimeSpan or CancellationToken to stop the scan
-                    TimeSpan.FromSeconds(3)
-                    // If you omit this argument, it will use
-                    // BluetoothLowEnergyUtils.DefaultScanTimeout
+                    // If you omit this argument, it will use BluetoothLowEnergyUtils.DefaultScanTimeout
+                    TimeSpan.FromSeconds(10)                    
                 );  
-                BlePeripheralList = BlePeripheralListAux;
+                //BlePeripheralList = BlePeripheralListAux;
             }
             isScanning = false;
             // scanning has been stopped when code reached this point
