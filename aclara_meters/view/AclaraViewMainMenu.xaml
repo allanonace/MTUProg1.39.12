@@ -515,7 +515,7 @@
         <!-- Menu desplegable -->
         
     <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" 
-                 IsVisible="true"
+                 IsVisible="false"
 
                 
         RelativeLayout.YConstraint=
