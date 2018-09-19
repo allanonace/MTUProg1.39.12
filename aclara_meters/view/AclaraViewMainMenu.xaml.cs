@@ -282,6 +282,7 @@ namespace aclara_meters.view
         // printer = new Thread(new ThreadStart(InvokeMethod));
         // printer.Start();
         {
+            int timeout_connecting = 0;
             while (true)
             {
                 //if (!FormsApp.ble_interface.GetPairingStatusOk())
@@ -292,6 +293,7 @@ namespace aclara_meters.view
                     {
                         // status DEBERIA SER SIEMPRE ble_library.BlePort.CONNECTING
                         peripheralConnected = status;
+                        timeout_connecting = 0;
                     }
                     else if (peripheralConnected == ble_library.BlePort.CONNECTING)
                     {
@@ -339,6 +341,23 @@ namespace aclara_meters.view
 
                     }
 
+                }
+                if (peripheralConnected == ble_library.BlePort.CONNECTING)
+                {
+                    timeout_connecting++;
+                    if (timeout_connecting >= 2*60) // 1 minute
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            Application.Current.MainPage.DisplayAlert("ERROR", "Timeout of connection", "Ok");
+                            DeviceList.IsEnabled = true;
+                            fondo.Opacity = 1;
+                            background_scan_page.Opacity = 1;
+                            background_scan_page.IsEnabled = true;
+
+                        });
+                        peripheralConnected = ble_library.BlePort.NO_CONNECTED;
+                    }
                 }
                 Thread.Sleep(500); // 0.5 Second
             }
