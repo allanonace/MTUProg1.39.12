@@ -3,11 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>aclara_meters</string>
+	<string>Aclara Meters</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.bizintekinnova.aclara-meters</string>
+	<string>com.aclara.aclara_meters</string>
 	<key>CFBundleName</key>
-	<string>aclara_meters</string>
+	<string>Aclara Meters</string>
 	<key>CFBundleShortVersionString</key>
 	<string>6</string>
 	<key>CFBundleURLTypes</key>
