@@ -97,8 +97,6 @@ namespace ble_library
         private byte[] static_pass = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x2e };
         private byte[] say_hi = { 0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00 };
 
-        private int number_tries;
-
         //private ArrayList ListAllServices;
         //private ArrayList ListAllCharacteristics;
 
@@ -114,7 +112,6 @@ namespace ble_library
             writeSavedBuffer = new byte[] { };
             writeSavedOffset = 0;
             writeSavedCount = 0;
-            number_tries = 0;
 
             isConnected = NO_CONNECTED;
             isScanning = false;
@@ -357,12 +354,10 @@ namespace ble_library
         /// </summary>
         private async void UpdateAESBuffer(byte[] bytes)
         {
-            if ((isConnected == CONNECTING) && (number_tries < 5))
+            if (isConnected == CONNECTING)
             {
                 if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0xCC }))
                 {
-                    number_tries++;
-
                     isPaired = false;
 
                     DisconnectDevice();
@@ -382,10 +377,17 @@ namespace ble_library
                     {
                         saved_settings.AddOrUpdateValue("session_dynamicpass", System.Convert.ToBase64String(dynamicPass));
                     }
-                   
+                                       
+                    Listen_Characteristic_Notification();
+                    try
+                    {
+                        Listen_aes_conection_Handler.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.StackTrace);
+                    }
                     isConnected = CONNECTED;
-
-                    number_tries = 0;
                 }
             }
         }
