@@ -357,6 +357,8 @@ namespace aclara_meters.view
 
                         });
                         peripheralConnected = ble_library.BlePort.NO_CONNECTED;
+                        timeout_connecting = 0;
+                        FormsApp.ble_interface.Close();
                     }
                 }
                 Thread.Sleep(500); // 0.5 Second
