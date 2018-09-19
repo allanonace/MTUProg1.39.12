@@ -704,7 +704,7 @@ catch (Exception e)
                         var adv = peripheral.Advertisement;
 
                         if(adv.DeviceName!=null){
-                            if ( adv.DeviceName.Contains("Aclara") || adv.DeviceName.Contains("Acl") || adv.DeviceName.Contains("Ac") )
+                            if (adv.DeviceName.Equals("Aclara"))
                             {
                                 if(BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
                                 {
