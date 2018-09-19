@@ -486,9 +486,26 @@ namespace aclara_meters.view
 
                     if (!enc)
                     {
+                        String s = "ZZ";
+                        int a = 0;
+                        try
+                        {
+                            s = System.Text.Encoding.ASCII.GetString(byte_now.Take(2).ToArray());
+                            byte_now[0] = byte_now[3];
+                            byte_now[1] = byte_now[2];
+                            byte_now[2] = 0;
+                            byte_now[3] = 0;
+                            a = BitConverter.ToInt32(byte_now, 0);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
+
                         DeviceItem device = new DeviceItem
                         {
-                            deviceMacAddress = BitConverter.ToString(byte_now),
+                            //deviceMacAddress = BitConverter.ToString(byte_now),                            
+                            deviceMacAddress = s+a,
                             deviceName = blePeripherals[i].Advertisement.DeviceName,
                             deviceBattery = "100%",
                             deviceRssi = blePeripherals[i].Rssi.ToString() + " dBm",
