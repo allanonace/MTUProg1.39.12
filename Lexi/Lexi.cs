@@ -186,13 +186,15 @@ namespace Lexi
 
             // whait till the response buffer data is available or timeout limit is reached
             long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
-            while (serial.BytesToRead() < rawBuffer.Length)
+
+            while ( checkResponseOk(serial,rawBuffer) )
             {
                 if(DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                 {
                     throw new TimeoutException();
                 }
-                Thread.Sleep(10);
+                //Thread.Sleep(100);
+               // await Task.Delay(100);
             }
 
             //read the response buffer
@@ -215,6 +217,11 @@ namespace Lexi
 
             //Validare CRC ane get Response BUDY
             return validateReadResponse(response,data);
+
+        }
+
+        private bool checkResponseOk(ISerial serial, byte [] rawBuffer ){
+            return serial.BytesToRead() < rawBuffer.Length;
 
         }
 

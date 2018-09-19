@@ -347,8 +347,8 @@ try
                 gattServer_connection = connection.GattServer;
 //                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
                                                                 // the server implements IObservable<ConnectionState> so you can subscribe to its state
-                gattServer_connection.Subscribe(new ObserverReporter(this));                
-              
+                gattServer_connection.Subscribe(new ObserverReporter(this));
+
                 ble_peripheral = ble_device;
 
                 await AESConnectionVerifyAsync(ble_peripheral, isBounded);

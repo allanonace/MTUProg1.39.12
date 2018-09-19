@@ -208,7 +208,7 @@ namespace aclara_meters.view
                     label_read.Text = "Reading from MTU ... ";
                 });
 
-                string resultMsg = "Successful MTU read";
+
 
                 /*long timeout_ms = 20000; // 10s
                 bool timeout_error = false;
@@ -234,44 +234,70 @@ namespace aclara_meters.view
                     FormsApp.ble_interface.Read(rxbuffer, 0, 262);
                 }*/
 
-                byte[] readData;
-                try
+
+                Task.Factory.StartNew(ThreadProcedureReadLexi);
+
+
+
+            }
+        }
+
+        private void ThreadProcedureReadLexi()
+        {
+            string resultMsg = "Successful MTU read";
+            byte[] readData;
+
+
+
+            try
+            {
+                //FormsApp.lexi.Write(64, new byte[] { 1 });
+                //Thread.Sleep(500);
+
+                byte[] readData0 = FormsApp.lexi.Read(0, 255);
+                //byte[] readData1 = FormsApp.lexi.Read(255, 255);
+                readData = readData0; //  readData0.Concat(readData1).ToArray();
+                Mtu mtu = new Mtu(readData);
+
+
+                Task.Delay(100).ContinueWith(t =>
+                Device.BeginInvokeOnMainThread(() =>
                 {
-                    //FormsApp.lexi.Write(64, new byte[] { 1 });
-                    //Thread.Sleep(500);
+                    label_read.Text = resultMsg;
+                    _userTapped = false;
+                    bg_read_mtu_button.NumberOfTapsRequired = 1;
+                    ChangeLowerButtonImage(false);
+                    backdark_bg.IsVisible = false;
+                    indicator.IsVisible = false;
+                    background_scan_page.IsEnabled = true;
 
-                    byte[] readData0 = FormsApp.lexi.Read(0, 255);
-                    //byte[] readData1 = FormsApp.lexi.Read(255, 255);
-                    readData = readData0; //  readData0.Concat(readData1).ToArray();
-                    Mtu mtu = new Mtu(readData);
-
-
-                    Task.Delay(100).ContinueWith(t =>
-                    Device.BeginInvokeOnMainThread(() =>
+                    try
                     {
-                        label_read.Text = resultMsg;
-                        _userTapped = false;
-                        bg_read_mtu_button.NumberOfTapsRequired = 1;
-                        ChangeLowerButtonImage(false);
-                        backdark_bg.IsVisible = false;
-                        indicator.IsVisible = false;
-                        background_scan_page.IsEnabled = true;
-
-                        try
-                        {
-                            LoadDemoMtuValuesToListView(mtu);
+                        LoadDemoMtuValuesToListView(mtu);
                     }
-                        catch (Exception e6)
-                        {
-                            Console.WriteLine(e6.StackTrace);
-                            LoadMTUValuesToListView("0", "0", "0", "0");
-                        }
+                    catch (Exception e6)
+                    {
+                        Console.WriteLine(e6.StackTrace);
+                        LoadMTUValuesToListView("0", "0", "0", "0");
+                    }
 
-                    }));
-                } catch (TimeoutException ex)
-                {
-                    resultMsg = "Timeout";
-                }
+                }));
+            }
+            catch (TimeoutException ex)
+            {
+                resultMsg = "Timeout";
+                Task.Delay(100).ContinueWith(t =>
+                     Device.BeginInvokeOnMainThread(() =>
+                     {
+                         label_read.Text = resultMsg;
+                         _userTapped = false;
+                         bg_read_mtu_button.NumberOfTapsRequired = 1;
+                         ChangeLowerButtonImage(false);
+                         backdark_bg.IsVisible = false;
+                         indicator.IsVisible = false;
+                         background_scan_page.IsEnabled = true;
+
+                     }));
             }
         }
 
