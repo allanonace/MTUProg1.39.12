@@ -259,7 +259,7 @@ namespace ble_library
                     dataToCipher[i] = buffer[i + offset];
                 }
          
-                dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
+//                dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
 
                 byte frameId = 0x02;
                 byte frameCount = (byte) cipheredDataSentCounter;
@@ -295,7 +295,7 @@ namespace ble_library
         {
             byte[] tempArray = new byte[bytes[2]];
 
-            dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
+//            dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
             Array.Copy(AES_Decrypt(bytes.Skip(3).Take(16).ToArray(), dynamicPass), 0, tempArray, 0, bytes[2]);
            
             for (int i = 0; i < tempArray.Length; i++)
@@ -435,22 +435,22 @@ namespace ble_library
                     Console.WriteLine(ex.ToString());
                 }
 
-                number_tries = 0;
+                                
                 Listen_aes_conection_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                    new Guid("00000041-0000-1000-8000-00805f9b34fb"),
                    UpdateAESBuffer
                 );
 
-                Task.Delay(200);
+//                await Task.Delay(200);
 
                 if(isBounded)
                 {
                     // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
-                    byte[] bytes = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
+                    dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
                     byte[] hi_msg;
 
-                    hi_msg = AES_Encrypt(say_hi, bytes);
+                    hi_msg = AES_Encrypt(say_hi, dynamicPass);
                   
                     await gattServer_connection.WriteCharacteristicValue(
                       new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
@@ -460,13 +460,14 @@ namespace ble_library
 
                 }else
                 {
-                    //dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
                     byte[] hi_msg;
 
                     byte[] PassH_crypt = new byte[] { };
                     byte[] PassL_crypt = new byte[] { };
 
-                    if (saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty).Equals(string.Empty))
+                    // ESTO TIENE SENTIDO SI DESCONECTO Y ME VUELVO A CONECTAR AL MISMO DISPISTIVO
+                    // PARA QUE FUNCIONE BIEN TENDRÏA QUE BORRAR "session_dynamicpass" SI FALLA LA ASOCIACION ("0xCC")
+//                    if (saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty).Equals(string.Empty))
                     {
                         //Read Pass H data from Characteristic
                         PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
@@ -491,10 +492,10 @@ namespace ble_library
 
                         hi_msg = AES_Encrypt(say_hi, dynamicPass);
 
-                        saved_settings.AddOrUpdateValue("session_dynamicpass", System.Convert.ToBase64String(dynamicPass));
+                        //saved_settings.AddOrUpdateValue("session_dynamicpass", System.Convert.ToBase64String(dynamicPass));
 
-                    }else{
-                        hi_msg = AES_Encrypt(say_hi, System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty)));
+//                    }else{
+//                        hi_msg = AES_Encrypt(say_hi, System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty)));
                     }
 
                
