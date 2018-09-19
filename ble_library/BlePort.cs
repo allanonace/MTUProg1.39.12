@@ -221,6 +221,23 @@ namespace ble_library
             {
                 Console.WriteLine(ex.ToString());
             }
+
+            try
+            {
+                // Will also stop listening when gattServer
+                // is disconnected, so if that is acceptable,
+                // you don't need to store this disposable.
+                Listen_ack_response_Handler = gattServer_connection.NotifyCharacteristicValue(
+                   new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
+                   new Guid("00000002-0000-1000-8000-00805f9b34fb"),
+                    UpdateACKBuffer
+                );
+
+            }
+            catch (GattException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
         }
 
         /// <summary>
@@ -233,6 +250,14 @@ namespace ble_library
             }catch(Exception e){
                 Console.WriteLine(e.StackTrace);  
             }
+            try
+            {
+                Listen_ack_response_Handler.Dispose();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }            
         }
 
 
@@ -359,7 +384,19 @@ namespace ble_library
                 if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0xCC }))
                 {
                     isPaired = false;
-
+                    saved_settings.AddOrUpdateValue("session_dynamicpass", string.Empty);
+                    saved_settings.AddOrUpdateValue("session_peripheral", string.Empty);
+                    saved_settings.AddOrUpdateValue("responsehi", string.Empty);
+                    saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", string.Empty);
+                    
+                    try
+                    {
+                        Listen_aes_conection_Handler.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.StackTrace);
+                    }
                     DisconnectDevice();
 
                 }
@@ -416,30 +453,80 @@ namespace ble_library
                 // Will also stop listening when gattServer
                 // is disconnected, so if that is acceptable,
                 // you don't need to store this disposable.
-                Listen_Characteristic_Notification();
+                               
 
+                //try
+                //{
+                //    // Will also stop listening when gattServer
+                //    // is disconnected, so if that is acceptable,
+                //    // you don't need to store this disposable.
+                //    Listen_ack_response_Handler = gattServer_connection.NotifyCharacteristicValue(
+                //       new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
+                //       new Guid("00000002-0000-1000-8000-00805f9b34fb"),
+                //        UpdateACKBuffer
+                //    );
+
+                //}
+                //catch (GattException ex)
+                //{
+                //    Console.WriteLine(ex.ToString());
+                //}
+
+                //gattServer_connection.NotifyCharacteristicValue(
+                //   new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                //   new Guid("00000004-0000-1000-8000-00805f9b34fb"),
+                //   UpdateAESBuffer,
+                //   CosasError
+                //);
+                //await Task.Delay(1000);
+
+                //IEnumerable<Guid> ListAllServices = gattServer_connection.ListAllServices();
+                //gattServer_connection.ListServiceCharacteristics();
+                // TO-DO: comprobar que tiene servicios y caracteristicas de un PUK? consultar Maria.            
+                
+
+                /*
+                ArrayList ListAllServices = new ArrayList();
+                ArrayList ListAllCharacteristics = new ArrayList();
                 try
+                {                    
+                    foreach (var guid in await gattServer_connection.ListAllServices())
+                    {
+                        ListAllServices.Add(guid);
+                        ListAllCharacteristics.Add("_______________________________");
+                        Console.WriteLine("_______________________________");
+                        ListAllCharacteristics.Add("Service: " + "\n\r" + guid + "\n\r");
+                        Console.WriteLine("Service: " + "\n\r" + guid + "\n\r");
+                        ListAllCharacteristics.Add("________Caracteristics_________");
+                        Console.WriteLine("________Caracteristics_________");
+                        foreach (var DescriptionOrGuid in await gattServer_connection.ListServiceCharacteristics(guid))
+                        {
+                            ListAllCharacteristics.Add(DescriptionOrGuid);
+                            Console.WriteLine(DescriptionOrGuid);
+                        }
+                    }
+                }
+                catch (Exception j)
                 {
-                    // Will also stop listening when gattServer
-                    // is disconnected, so if that is acceptable,
-                    // you don't need to store this disposable.
-                    Listen_ack_response_Handler = gattServer_connection.NotifyCharacteristicValue(
-                       new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
-                       new Guid("00000002-0000-1000-8000-00805f9b34fb"),
-                        UpdateACKBuffer
-                    );
 
                 }
-                catch (GattException ex)
+                */
+
+                bool hayServicio = false;
+                int reintentos = 10;
+                do
                 {
-                    Console.WriteLine(ex.ToString());
+                    hayServicio = await gattServer_connection.ServiceExists(new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"));
+                    reintentos--;
                 }
+                while (!hayServicio && (reintentos>0));
 
                                 
                 Listen_aes_conection_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                    new Guid("00000041-0000-1000-8000-00805f9b34fb"),
                    UpdateAESBuffer
+//                   , CosasError
                 );
 
 //                await Task.Delay(200);
