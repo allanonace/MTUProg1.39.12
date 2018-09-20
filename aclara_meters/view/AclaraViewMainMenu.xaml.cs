@@ -346,7 +346,7 @@ namespace aclara_meters.view
                 {
                     
                     timeout_connecting++;
-                    if (timeout_connecting >= 2*30) // 10 seconds
+                    if (timeout_connecting >= 2*10) // 10 seconds
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
