@@ -37,6 +37,14 @@ namespace aclara_meters.view
 
         private Thread printer;
 
+
+
+        protected override bool OnBackButtonPressed()
+        {
+            return true;
+        }
+
+
         public AclaraViewMainMenu()
         {
            InitializeComponent();
