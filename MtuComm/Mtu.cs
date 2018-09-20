@@ -64,6 +64,10 @@ namespace MtuComm
                 {
                     return "Pos 4D PF2 CCF";
                 }
+                else if (this.MeterTypeId == 1092)
+                {
+                    return "NEPT T10 5/8 E-Coder 0.1Gals";
+                }
                 else
                 {
                     return "";
@@ -97,6 +101,10 @@ namespace MtuComm
                 if (this.MtuType == 138)
                 {
                     return "MTU PLS HRR ASO";
+                }
+                else if (this.MtuType == 171)
+                {
+                    return "MTU Water Single Port On-Demand Encoder ER";
                 }
                 else
                 {
@@ -373,7 +381,7 @@ namespace MtuComm
             {
                 if (this.MtuType == 171)
                 {
-                    return "";
+                    return "0";
                 }
                 else if (this.MtuType == 138)
                 {
@@ -474,6 +482,58 @@ namespace MtuComm
                         }
                     }
                     return interfaceTamp;
+                }
+                else if (this.MtuType == 171)
+                {
+                    string interfaceTamp = "Enabled";
+                    byte tampers = memory[109];
+                    if (((tampers >> 4) & 1) == 1)
+                    {
+                        interfaceTamp = "Triggered";
+                    }
+                    return interfaceTamp;
+                }
+                else
+                {
+                    return "";
+                }
+            }
+        }
+
+        public string InsfMem
+        {
+            get
+            {
+                if (this.MtuType == 171)
+                {
+                    string insfMem = "Disabled";
+                    byte tampers = memory[108];
+                    if (((tampers >> 0) & 1) == 1)
+                    {
+                        insfMem = "Triggered";
+                    }
+                    return insfMem;
+                }
+                else
+                {
+                    return "";
+                }
+            }
+        }
+
+        public string LastGasp
+        {
+            get
+            {
+                if (this.MtuType == 171)
+                {
+                    string lastGasp = "Disabled";
+                    byte tampers = memory[108];
+                    if (((tampers >> 4) & 1) == 1)
+                    {
+                        lastGasp = "Triggered";
+                    }
+                    return lastGasp;
                 }
                 else
                 {
