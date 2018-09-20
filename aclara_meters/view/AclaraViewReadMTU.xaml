@@ -415,7 +415,7 @@
 
 
 
-                     <ContentView  Margin="0,240,0,-20"
+                     <ContentView  Margin="0,92,0,-20"
                                        RelativeLayout.YConstraint=
                       "{ConstraintExpression Type=RelativeToParent,
                                              Property=Height,
@@ -564,10 +564,10 @@
                             </Image>
 
                             <Image  x:Name="logo_tablet_aclara" 
-                                    WidthRequest="256" 
+                                    WidthRequest="216" 
                                     HeightRequest="128"
                                     IsEnabled="false"
-                                    Margin="-36,0,0,0" 
+                                    Margin="-32,-12,0,4" 
                                     Scale="1" 
                                     Opacity="1"
                                     Source="aclara_logo_menu.png">
@@ -576,33 +576,48 @@
                         
                       </StackLayout>
 
-                          <StackLayout Margin="0,-32,0,0" x:Name="tablet_user_view" HorizontalOptions="Center">
-                          <Image  
-                            Margin="0,0,0,0"
-                            IsEnabled="false"
-                            WidthRequest="72" 
-                            HeightRequest="72"
-                            Scale="1" 
-                                
-                            Source="user_menu_icon.png"
-                                     
-                            >
-                          </Image>
+                          <StackLayout Margin="0,-40,0,0" x:Name="tablet_user_view" HorizontalOptions="Center">
+
                         
-                      <Label x:Name="userName" TextColor="White" HorizontalTextAlignment="Center" Text="test@email.com" FontSize="16"></Label>
-                      <Label x:Name="Company" TextColor="White" HorizontalTextAlignment="Center"  Text="Company" FontSize="16"> </Label>
-
-  
-                </StackLayout>
-                    
-                </StackLayout>
-
-                      <Image Margin="0,0,0,0" Source="background_menu"  HeightRequest="240" Opacity="0.2"  InputTransparent="true">
-                    
-                </Image>
-                    
-            </RelativeLayout>
+                <Label x:Name="userName" Margin="0,-12,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" 
+                             FontSize="20"></Label>
+                     
         
+                    
+                </StackLayout>
+
+
+
+          
+                    
+                </StackLayout>
+                <StackLayout VerticalOptions="Start" InputTransparent="true">
+                    <StackLayout.HeightRequest>
+                      <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="iOS" Value="114" />
+                        <On Platform="Android" Value="96" />
+                     
+                      </OnPlatform>
+                    </StackLayout.HeightRequest>
+                    
+                    <Image Margin="0,0,0,0"  x:Name="backmenu" Source="background_menu"  Opacity="0.1"  InputTransparent="true">
+
+                    <Image.HeightRequest>
+                      <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="iOS" Value="94" />
+                        <On Platform="Android" Value="76" />
+                     
+                      </OnPlatform>
+                            
+                    </Image.HeightRequest>
+                        
+                    </Image>
+
+                </StackLayout>
+
+                  
+            </RelativeLayout>
+      
 
                 
             
@@ -672,6 +687,42 @@
    
                 <Frame  CornerRadius="6"  HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">
                  <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" > 
+
+                     <StackLayout  x:Name="dialog_logoff" IsVisible="false" 
+                                  Margin="0" Opacity="1">
+                 
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="20" Text="Are you sure you want to Log off?">    
+                        </Label>
+                            
+                        <StackLayout Margin="0,12,0,0" Orientation="Horizontal"  >
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                         TextColor="#6aa2b8"
+                                         FontSize="20"  Text="Yes">
+
+                                         <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="logoff_ok" />
+                                        </Label.GestureRecognizers>
+                                
+                            </Label>
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                        TextColor="#6aa2b8"
+                                        FontSize="20" Text="No"> 
+                                
+                                          <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="logoff_no" />
+                                        </Label.GestureRecognizers>
+
+                            </Label>
+
+                          </StackLayout>
+                      
+                     </StackLayout>
+                    
+
+
+                    
                     <StackLayout  x:Name="dialog_turnoff_one" IsVisible="false" 
                                   Margin="0" Opacity="1">
                  
@@ -862,7 +913,6 @@
             </ContentView>
 
           <!--  END DIALOGS   -->
-
 
         
    

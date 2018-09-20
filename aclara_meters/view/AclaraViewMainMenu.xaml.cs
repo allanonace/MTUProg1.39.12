@@ -214,7 +214,20 @@ namespace aclara_meters.view
             background_scan_page.IsVisible = true;
             navigationDrawerList.IsEnabled = true;
             navigationDrawerList.Opacity = 0.65;
-            ContentNav.IsVisible = false;
+
+            if (Device.Idiom == TargetIdiom.Tablet)
+            {
+                ContentNav.Opacity = 1;
+                ContentNav.IsVisible = true;
+            }
+            else
+            {
+                ContentNav.Opacity = 0;
+                ContentNav.IsVisible = false;
+            }
+
+
+           
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
         }
@@ -549,6 +562,7 @@ namespace aclara_meters.view
             printer.Suspend();
             Settings.IsLoggedIn = false;
             FormsApp.CredentialsService.DeleteCredentials();
+            FormsApp.ble_interface.Close();
             background_scan_page.IsEnabled = true;
             background_scan_page_detail.IsEnabled = true;
             Navigation.PopAsync();

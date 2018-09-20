@@ -12,6 +12,7 @@ using aclara_meters.Helpers;
 using aclara_meters.Models;
 using Xamarin.Forms;
 using System.Collections.ObjectModel;
+using Plugin.Settings;
 
 namespace aclara_meters.view
 {
@@ -335,11 +336,6 @@ namespace aclara_meters.view
 
             InitializeLowerbarLabel();
 
-            //Change username textview to Prefs. String
-            if (FormsApp.CredentialsService.UserName != null)
-            {
-                userName.Text = FormsApp.CredentialsService.UserName;
-            }
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -350,6 +346,13 @@ namespace aclara_meters.view
 
             //Initialize Tap/Clickable element listeners
             TappedListeners();
+
+            //Change username textview to Prefs. String
+            if (FormsApp.CredentialsService.UserName != null)
+            {
+                userName.Text = FormsApp.CredentialsService.UserName; //"Kartik";
+            }
+
         }
 
         private void LoadPhoneUI()

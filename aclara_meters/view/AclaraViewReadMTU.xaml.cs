@@ -313,14 +313,16 @@ namespace aclara_meters.view
 
             _userTapped = false;
 
-            //Change username textview to Prefs. String
-            if (FormsApp.CredentialsService.UserName != null)
-            {
-                userName.Text = FormsApp.CredentialsService.UserName;
-            }
 
             TappedListeners();
       
+            //Change username textview to Prefs. String
+            if (FormsApp.CredentialsService.UserName != null)
+            {
+                userName.Text = FormsApp.CredentialsService.UserName; //"Kartik";
+              
+            }
+
         }
 
         private void TappedListeners()
