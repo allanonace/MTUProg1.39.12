@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Linq;
 using MtuComm;
 using System.Threading;
+using System.Globalization;
 
 namespace aclara_meters.view
 {
@@ -575,7 +576,7 @@ namespace aclara_meters.view
             string port1 = "Port 1: " + mtu.Port1Desc;
             string meterType = mtu.MeterType;
             string servicePtId = mtu.ServicePtId.ToString("d9");
-            string meterReading = mtu.MeterReading.ToString("d9");
+            string meterReading = string.Format(new CultureInfo("en-US"), "{0:0000000.0}X", ((double)mtu.MeterReading) / 10);
             string digits = mtu.Digits.ToString();
 
             string xmitInterval = string.Format("{0} Hrs", mtu.XmitInterval / 60);
