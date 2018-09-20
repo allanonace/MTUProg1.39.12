@@ -420,111 +420,117 @@ namespace aclara_meters.view
                 // wait until scan finish
                 while (FormsApp.ble_interface.IsScanning())
                 {
-                }
-
-                List<IBlePeripheral> blePeripherals;
-                blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
-
-                // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
-                byte[] bytes = System.Convert.FromBase64String(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty));
-
-                byte[] byte_now = new byte[] { };
-
-                int sizeList = blePeripherals.Count;
-
-                for (int i = 0; i < sizeList; i++)
-                {
-                    byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
-                    
-                    //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
-                    if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
-                        FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty))  &&
-                        bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
-                        blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
-                        !peripheralManualDisconnection &&
-                        peripheral == null)
+                    try
                     {
-                        if (!FormsApp.ble_interface.IsOpen())
+                        List<IBlePeripheral> blePeripherals;
+                        blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
+
+                        // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
+                        byte[] bytes = System.Convert.FromBase64String(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty));
+
+                        byte[] byte_now = new byte[] { };
+
+                        int sizeList = blePeripherals.Count;
+
+                        for (int i = 0; i < sizeList; i++)
                         {
-                            try
+                            byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+
+                            //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
+                            if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
+                                FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
+                                bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
+                                blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
+                                !peripheralManualDisconnection &&
+                                peripheral == null)
                             {
-                                peripheral = blePeripherals[i];
-                                peripheralConnected = ble_library.BlePort.NO_CONNECTED;
-                                peripheralManualDisconnection = false;
-                                peripheralID = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
-                                FormsApp.ble_interface.Open(peripheral, true);
+                                if (!FormsApp.ble_interface.IsOpen())
+                                {
+                                    try
+                                    {
+                                        peripheral = blePeripherals[i];
+                                        peripheralConnected = ble_library.BlePort.NO_CONNECTED;
+                                        peripheralManualDisconnection = false;
+                                        peripheralID = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+                                        FormsApp.ble_interface.Open(peripheral, true);
 
-                                //fondo.Opacity = 0;
-                                //background_scan_page.Opacity = 0.5;
-                                //background_scan_page.IsEnabled = false;                                        
+                                        //fondo.Opacity = 0;
+                                        //background_scan_page.Opacity = 0.5;
+                                        //background_scan_page.IsEnabled = false;                                        
 
-                                //Device.BeginInvokeOnMainThread(() =>
-                                //{
-                                //    try
-                                //    {
-                                //        deviceID.Text = item.deviceName;
-                                //        macAddress.Text = item.deviceMacAddress;
-                                //        imageBattery.Source = item.deviceBatteryIcon;
-                                //        imageRssi.Source = item.deviceRssiIcon;
-                                //        batteryLevel.Text = item.deviceBattery;
-                                //        rssiLevel.Text = item.deviceRssi;
-                                //    }
-                                //    catch (Exception e4)
-                                //    {
-                                //        Console.WriteLine(e4.StackTrace);
-                                //    }
-                                //});
+                                        //Device.BeginInvokeOnMainThread(() =>
+                                        //{
+                                        //    try
+                                        //    {
+                                        //        deviceID.Text = item.deviceName;
+                                        //        macAddress.Text = item.deviceMacAddress;
+                                        //        imageBattery.Source = item.deviceBatteryIcon;
+                                        //        imageRssi.Source = item.deviceRssiIcon;
+                                        //        batteryLevel.Text = item.deviceBattery;
+                                        //        rssiLevel.Text = item.deviceRssi;
+                                        //    }
+                                        //    catch (Exception e4)
+                                        //    {
+                                        //        Console.WriteLine(e4.StackTrace);
+                                        //    }
+                                        //});
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Console.WriteLine(e.StackTrace);
+                                    }
+                                }
                             }
-                            catch (Exception e)
+
+
+                            bool enc = false;
+                            int sizeListTemp = employees.Count;
+
+                            for (int j = 0; j < sizeListTemp; j++)
                             {
-                                Console.WriteLine(e.StackTrace);
+                                if (employees[j].Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
+                                    .SequenceEqual(blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))
+                                {
+                                    enc = true;
+                                }
+                            }
+
+                            if (!enc)
+                            {
+                                String s = "ZZ";
+                                int a = 0;
+                                try
+                                {
+                                    s = System.Text.Encoding.ASCII.GetString(byte_now.Take(2).ToArray());
+                                    byte_now[0] = byte_now[3];
+                                    byte_now[1] = byte_now[2];
+                                    byte_now[2] = 0;
+                                    byte_now[3] = 0;
+                                    a = BitConverter.ToInt32(byte_now, 0);
+                                }
+                                catch (Exception e)
+                                {
+                                    Console.WriteLine(e);
+                                }
+
+                                DeviceItem device = new DeviceItem
+                                {
+                                    //deviceMacAddress = BitConverter.ToString(byte_now),                            
+                                    deviceMacAddress = s + a,
+                                    deviceName = blePeripherals[i].Advertisement.DeviceName,
+                                    deviceBattery = "100%",
+                                    deviceRssi = blePeripherals[i].Rssi.ToString() + " dBm",
+                                    deviceBatteryIcon = "battery_toolbar_high",
+                                    deviceRssiIcon = "rssi_toolbar_high",
+                                    Peripheral = blePeripherals[i]
+                                };
+                                employees.Add(device);
                             }
                         }
                     }
-                  
-
-                    bool enc = false;
-                    int sizeListTemp = employees.Count;
-
-                    for (int j = 0; j < sizeListTemp; j++)
+                    catch (Exception e)
                     {
-                        if (employees[j].Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
-                            .SequenceEqual(blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))
-                        {
-                            enc = true;
-                        }
-                    }
-
-                    if (!enc)
-                    {
-                        String s = "ZZ";
-                        int a = 0;
-                        try
-                        {
-                            s = System.Text.Encoding.ASCII.GetString(byte_now.Take(2).ToArray());
-                            byte_now[0] = byte_now[3];
-                            byte_now[1] = byte_now[2];
-                            byte_now[2] = 0;
-                            byte_now[3] = 0;
-                            a = BitConverter.ToInt32(byte_now, 0);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                        }
-
-                        DeviceItem device = new DeviceItem
-                        {
-                            //deviceMacAddress = BitConverter.ToString(byte_now),                            
-                            deviceMacAddress = s+a,
-                            deviceName = blePeripherals[i].Advertisement.DeviceName,
-                            deviceBattery = "100%",
-                            deviceRssi = blePeripherals[i].Rssi.ToString() + " dBm",
-                            deviceBatteryIcon = "battery_toolbar_high",
-                            deviceRssiIcon = "rssi_toolbar_high",
-                            Peripheral = blePeripherals[i]
-                        };
-                        employees.Add(device);
+                        Console.WriteLine(e);
                     }
                 }
             });
