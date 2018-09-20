@@ -387,7 +387,8 @@ catch (Exception e)
                     saved_settings.AddOrUpdateValue("session_peripheral", string.Empty);
                     saved_settings.AddOrUpdateValue("responsehi", string.Empty);
                     saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", string.Empty);
-                    
+
+                    Listen_Characteristic_Notification();
                     try
                     {
                         Listen_aes_conection_Handler.Dispose();
@@ -397,6 +398,9 @@ catch (Exception e)
                         Console.WriteLine(e.StackTrace);
                     }
                     DisconnectDevice();
+                    this.adapter.DisableAdapter();
+
+                    this.adapter.EnableAdapter();
                 }
 
                 if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0x11 }))
@@ -514,10 +518,17 @@ catch (Exception e)
                 */
 
                 bool hayServicio = false;
-                int reintentos = 10;
+                int reintentos = 5;
+
                 do
                 {
-                    hayServicio = await gattServer_connection.ServiceExists(new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"));
+                  //  Task.Delay(500).Wait();
+                    try{
+                        hayServicio = await gattServer_connection.ServiceExists(new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"));
+                    }catch (Exception test){
+                        Console.WriteLine(test.StackTrace); reintentos = 1;
+                    }
+
                     reintentos--;
                 }
                 while (!hayServicio && (reintentos>0));
@@ -530,7 +541,40 @@ catch (Exception e)
 //                   , CosasError
                 );
 
-//                await Task.Delay(200);
+                byte[] PassH_crypt = new byte[] { };
+                byte[] PassL_crypt = new byte[] { };
+
+                //Read Pass H data from Characteristic
+                PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
+                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                    new Guid("00000040-0000-1000-8000-00805f9b34fb")
+                );
+
+                //Read Pass L data from Characteristic
+                PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
+                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                    new Guid("00000042-0000-1000-8000-00805f9b34fb")
+                );
+
+                bool isOnState = true;
+                for (int i = 0; i < PassH_crypt.Length;i++)
+                {
+                    if (PassH_crypt[i] != 0x00)
+                    {
+                        isOnState = false;
+                    }
+                }
+                for (int i = 0; i < PassL_crypt.Length; i++)
+                {
+                    if (PassL_crypt[i] != 0x00)
+                    {
+                        isOnState = false;
+                    }
+                }
+                if (isBounded && !isOnState)
+                {
+                    isBounded = false;
+                }
 
                 if(isBounded)
                 {
@@ -548,8 +592,22 @@ catch (Exception e)
 
                 }else
                 {
+                    if (isOnState)
+                    {
+                        Listen_Characteristic_Notification();
+                        try
+                        {
+                            Listen_aes_conection_Handler.Dispose();
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.StackTrace);
+                        }
+                        DisconnectDevice();
+                        return;
+                    }
                     byte[] hi_msg;
-
+                    /*
                     byte[] PassH_crypt = new byte[] { };
                     byte[] PassL_crypt = new byte[] { };
 
@@ -564,7 +622,7 @@ catch (Exception e)
                         new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                         new Guid("00000042-0000-1000-8000-00805f9b34fb")
                     );
-
+                    */
                     byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
                     byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
 

@@ -65,7 +65,7 @@ namespace aclara_meters.view
             //Change username textview to Prefs. String
             if (FormsApp.CredentialsService.UserName != null)
             {
-                userName.Text = "Kartik"; //FormsApp.CredentialsService.UserName;
+                userName.Text = FormsApp.CredentialsService.UserName; //"Kartik";
                 CrossSettings.Current.AddOrUpdateValue("session_username", FormsApp.CredentialsService.UserName);           
             }
 
@@ -344,8 +344,9 @@ namespace aclara_meters.view
                 }
                 if (peripheralConnected == ble_library.BlePort.CONNECTING)
                 {
+                    
                     timeout_connecting++;
-                    if (timeout_connecting >= 2*60) // 1 minute
+                    if (timeout_connecting >= 2*30) // 10 seconds
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
