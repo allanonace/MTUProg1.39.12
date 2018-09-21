@@ -301,8 +301,64 @@ namespace aclara_meters.view
             int timeout_connecting = 0;
             while (true)
             {
+              
                 //if (!FormsApp.ble_interface.GetPairingStatusOk())
                 int status = FormsApp.ble_interface.GetConnectionStatus();
+
+                //Nivel de bateria
+                if (status == ble_library.BlePort.CONNECTED)
+                {
+                    byte[] battery = new byte [] {}; 
+                    try{
+                        
+                        battery = FormsApp.ble_interface.GetBatteryLevel();
+
+                        if(battery != null)
+                        {
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+
+                                batteryLevel.Text = battery[0].ToString() + " %";
+
+
+                                if (battery[0] > 75)
+                                {
+
+                                    imageBattery.Source = "battery_toolbar_high";
+                                }
+
+                                if (battery[0] > 45 && battery[0] < 75)
+                                {
+
+                                    imageBattery.Source = "battery_toolbar_mid";
+                                }
+
+                                if (battery[0] > 15 && battery[0] < 45)
+                                {
+
+                                    imageBattery.Source = "battery_toolbar_low";
+                                }
+
+                                if (battery[0] < 15)
+                                {
+
+                                    imageBattery.Source = "battery_toolbar_empty";
+                                }
+
+
+                            });
+
+                        }
+                    }catch (Exception e5){
+                        
+                    }
+
+              
+                   // imageBattery.Source = "battery_toolbar_high";
+                   // imageRssi.Source = "rssi_toolbar_high";
+                   
+                }
+
                 if (status != peripheralConnected)
                 {
                     if (peripheralConnected == ble_library.BlePort.NO_CONNECTED)
@@ -378,6 +434,8 @@ namespace aclara_meters.view
                         FormsApp.ble_interface.Close();
                     }
                 }
+
+
                 Thread.Sleep(500); // 0.5 Second
             }
         }
@@ -523,15 +581,47 @@ namespace aclara_meters.view
                                 }
                             }
 
+                            string icono_bateria;
+                            byte[] bateria;
+
                             if (!enc)
                             {
+                                bateria = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
+
+                
+                                icono_bateria = "battery_toolbar_high";
+
+                                if( bateria[0] > 75 )
+                                {
+
+                                    icono_bateria = "battery_toolbar_high";
+                                }
+
+                                if (bateria[0] > 45  && bateria[0] < 75)
+                                {
+
+                                    icono_bateria = "battery_toolbar_mid";
+                                }
+
+                                if (bateria[0] > 15 && bateria[0] < 45)
+                                {
+
+                                    icono_bateria = "battery_toolbar_low";
+                                }
+
+                                if (bateria[0] < 15 )
+                                {
+
+                                    icono_bateria = "battery_toolbar_empty";
+                                }
+                          
                                 DeviceItem device = new DeviceItem
                                 {
                                     deviceMacAddress = DecodeId(byte_now),
                                     deviceName = blePeripherals[i].Advertisement.DeviceName,
-                                    deviceBattery = "100%",
+                                    deviceBattery = bateria[0].ToString() + "%",
                                     deviceRssi = blePeripherals[i].Rssi.ToString() + " dBm",
-                                    deviceBatteryIcon = "battery_toolbar_high",
+                                    deviceBatteryIcon = icono_bateria,
                                     deviceRssiIcon = "rssi_toolbar_high",
                                     Peripheral = blePeripherals[i]
                                 };

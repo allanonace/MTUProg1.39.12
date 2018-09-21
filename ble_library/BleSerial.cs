@@ -188,5 +188,13 @@ namespace ble_library
             return ble_port_serial.GetBlePeripherals();
         }
 
+        /// <summary>
+        /// Gets the BLE device Battery Level
+        /// </summary>
+        /// <returns>The BLE device Battery Level</returns>
+        /// <remarks></remarks>
+        public byte[] GetBatteryLevel(){
+            return ble_port_serial.GetBatteryLevel();
+        }
     }
 }

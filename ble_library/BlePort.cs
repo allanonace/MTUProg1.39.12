@@ -69,6 +69,7 @@ namespace ble_library
         private IDisposable Listen_aes_conection_Handler;
         private IDisposable Listen_ack_response_Handler;
         private IDisposable Listen_Characteristic_Notification_Handler;
+        private IDisposable Listen_Battery_level;
 
         public static int NO_CONNECTED = 0;
         public static int CONNECTING = 1;
@@ -91,6 +92,9 @@ namespace ble_library
         private byte[] static_pass = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x2e };
         private byte[] say_hi = { 0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00 };
 
+
+        private byte[] batteryLevel;
+
         /// <summary>
         /// Initizalize Bluetooth LE Serial Port
         /// </summary>
@@ -110,6 +114,8 @@ namespace ble_library
             saved_settings = CrossSettings.Current;
 
             BlePeripheralList = new List<IBlePeripheral>();
+
+            batteryLevel = new byte[] { 0x00 };
         }
 
         /// <summary>
@@ -250,6 +256,19 @@ namespace ble_library
             {
                 Console.WriteLine(e.StackTrace);
             }            
+
+
+
+            try
+            {
+                Listen_Battery_level.Dispose();
+            }
+            catch (Exception e3)
+            {
+                Console.WriteLine(e3.StackTrace);
+            }
+
+
         }
 
 
@@ -640,12 +659,41 @@ catch (Exception e)
                       hi_msg
                     );
                 }
+
+
+                Listen_Battery_level = gattServer_connection.NotifyCharacteristicValue(
+                    new Guid("1d632100-dc5a-41ab-bdbb-7cff9901210d"),
+                    new Guid("0000000c-0000-1000-8000-00805f9b34fb"),
+                    UpdateBatteryLevel
+                 );
+          
+                batteryLevel = await gattServer_connection.ReadCharacteristicValue(
+                    new Guid("1d632100-dc5a-41ab-bdbb-7cff9901210d"),
+                    new Guid("0000000c-0000-1000-8000-00805f9b34fb")
+                );
+
+
+
             }
             catch (GattException ex)
             {
                 Console.WriteLine(ex.ToString());
             }
         }
+
+
+
+        /// <summary>
+        /// Updates Ack buffer with the notification data received 
+        /// </summary>
+        private void UpdateBatteryLevel(byte[] bytes)
+        {
+            
+            batteryLevel = bytes;
+        }
+
+
+
 
         /// <summary>
         /// AES Decryptation algorithm
@@ -730,6 +778,20 @@ catch (Exception e)
                     Console.WriteLine(e2.StackTrace);
                 }
 
+
+                try
+                {
+                    Listen_Battery_level.Dispose();
+                }
+                catch (Exception e3)
+                {
+                    Console.WriteLine(e3.StackTrace);
+                }
+
+
+
+
+
                 await gattServer_connection.Disconnect();
                 isConnected = NO_CONNECTED;
 
@@ -783,7 +845,23 @@ catch (Exception e)
             isScanning = false;
             // scanning has been stopped when code reached this point
         }
+
+
+        public byte [] GetBatteryLevel()
+        {
+            //Task.Factory.StartNew(GetBatteryLevelAsync);
+            return batteryLevel;
+        }
+
+        /*
+        private async Task GetBatteryLevelAsync()
+        {
+            //Read Pass H data from Characteristic
+            batteryLevel = await gattServer_connection.ReadCharacteristicValue(
+                    new Guid("00002100-13d9-409b-8abb-48893a06dc7d"),
+                    new Guid("0000000c-0000-1000-8000-00805f9b34fb")
+                );
+        }
+        */
     }
-
-
 }
