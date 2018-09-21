@@ -52,7 +52,14 @@ namespace MtuComm
         {
             get
             {
-                return "Yes";
+                if (memory[256] == 1)
+                {
+                    return "Yes";
+                }
+                else
+                {
+                    return "No";
+                }
             }
         }
 
