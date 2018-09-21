@@ -373,7 +373,20 @@ namespace aclara_meters.view
                         {
                             Device.BeginInvokeOnMainThread(() =>
                             {
-                                Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+                                switch (FormsApp.ble_interface.GetConnectionError())
+                                {
+                                    case ble_library.BlePort.NO_ERROR:
+                                        break;
+                                    case ble_library.BlePort.CONECTION_ERRROR:
+                                        Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
+                                        break;
+                                    case ble_library.BlePort.DYNAMIC_KEY_ERROR:
+                                        Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+                                        break;
+                                    case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
+                                        Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+                                        break;
+                                }
                                 DeviceList.IsEnabled = true;
                                 fondo.Opacity = 1;
                                 background_scan_page.Opacity = 1;
@@ -422,7 +435,7 @@ namespace aclara_meters.view
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            Application.Current.MainPage.DisplayAlert("ERROR", "Timeout of connection", "Ok");
+                            Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
                             DeviceList.IsEnabled = true;
                             fondo.Opacity = 1;
                             background_scan_page.Opacity = 1;

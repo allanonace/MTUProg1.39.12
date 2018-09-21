@@ -111,11 +111,20 @@ namespace ble_library
         /// <summary>
         /// Gets a value indicating the open or closed status of the ISerial object.
         /// </summary>
-        /// <returns>Boolean value indicating the open or closed status of the ISerial object</returns>
+        /// <returns>Int value indicating the open or closed status of the ISerial object</returns>
         /// <remarks>The IsOpen property tracks whether the port is open for use by the caller, not whether the port is open by any application on the machine.</remarks>
         public int GetConnectionStatus()
         {
             return ble_port_serial.GetConnectionStatus();
+        }
+
+        /// <summary>
+        /// Gets a value indicating the error on the connectio
+        /// </summary>
+        /// <returns>int value indicating the error on the connectio</returns>
+        public int GetConnectionError()
+        {
+            return ble_port_serial.GetConnectionError();
         }
 
         /// <summary>

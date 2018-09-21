@@ -75,7 +75,13 @@ namespace ble_library
         public static int CONNECTING = 1;
         public static int CONNECTED = 2;
 
+        public const int NO_ERROR = 0;
+        public const int CONECTION_ERRROR = 1;
+        public const int DYNAMIC_KEY_ERROR = 2;
+        public const int NO_DYNAMIC_KEY_ERROR = 3;
+
         private int isConnected;
+        private int connectionError;
         private List<IBlePeripheral> BlePeripheralList;
         private IBlePeripheral ble_peripheral;
 
@@ -109,6 +115,7 @@ namespace ble_library
             writeSavedCount = 0;
 
             isConnected = NO_CONNECTED;
+            connectionError = NO_ERROR;
             isScanning = false;
             cipheredDataSentCounter = 1;
             saved_settings = CrossSettings.Current;
@@ -125,6 +132,15 @@ namespace ble_library
         public int GetConnectionStatus()
         {
             return isConnected;
+        }
+
+        /// <summary>
+        /// Returns the Connection error
+        /// </summary>
+        /// <returns> Connection error.</returns>
+        public int GetConnectionError()
+        {
+            return connectionError;
         }
 
         /// <summary>
@@ -346,6 +362,7 @@ namespace ble_library
 try
 {
             isConnected = CONNECTING;
+            connectionError = NO_ERROR;
             var connection = await adapter.ConnectToDevice(
                 // The IBlePeripheral to connect to
                 ble_device,
@@ -378,6 +395,7 @@ try
 //                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
                 // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
                 isConnected = NO_CONNECTED;
+                connectionError = CONECTION_ERRROR;
             }
 }
 catch (GattException ex)
@@ -416,6 +434,7 @@ catch (Exception e)
                     {
                         Console.WriteLine(e.StackTrace);
                     }
+                    connectionError = DYNAMIC_KEY_ERROR;
                     DisconnectDevice();
                     this.adapter.DisableAdapter();
 
@@ -445,6 +464,7 @@ catch (Exception e)
                         Console.WriteLine(e.StackTrace);
                     }
                     isConnected = CONNECTED;
+                    connectionError = NO_ERROR;
                 }
             }
         }
@@ -622,6 +642,7 @@ catch (Exception e)
                         {
                             Console.WriteLine(e.StackTrace);
                         }
+                        connectionError = NO_DYNAMIC_KEY_ERROR;
                         DisconnectDevice();
                         return;
                     }
