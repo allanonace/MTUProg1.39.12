@@ -537,53 +537,6 @@ namespace aclara_meters.view
                         {
                             byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
 
-                            //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
-                            if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
-                                FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
-                                bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
-                                blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
-                                !peripheralManualDisconnection &&
-                                peripheral == null)
-                            {
-                                if (!FormsApp.ble_interface.IsOpen())
-                                {
-                                    try
-                                    {
-                                        peripheral = blePeripherals[i];
-                                        peripheralConnected = ble_library.BlePort.NO_CONNECTED;
-                                        peripheralManualDisconnection = false;
-                                        peripheralID = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
-                                        FormsApp.ble_interface.Open(peripheral, true);
-
-                                        //fondo.Opacity = 0;
-                                        //background_scan_page.Opacity = 0.5;
-                                        //background_scan_page.IsEnabled = false;                                        
-
-                                        //Device.BeginInvokeOnMainThread(() =>
-                                        //{
-                                        //    try
-                                        //    {
-                                        //        deviceID.Text = item.deviceName;
-                                        //        macAddress.Text = item.deviceMacAddress;
-                                        //        imageBattery.Source = item.deviceBatteryIcon;
-                                        //        imageRssi.Source = item.deviceRssiIcon;
-                                        //        batteryLevel.Text = item.deviceBattery;
-                                        //        rssiLevel.Text = item.deviceRssi;
-                                        //    }
-                                        //    catch (Exception e4)
-                                        //    {
-                                        //        Console.WriteLine(e4.StackTrace);
-                                        //    }
-                                        //});
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        Console.WriteLine(e.StackTrace);
-                                    }
-                                }
-                            }
-
-
                             bool enc = false;
                             int sizeListTemp = employees.Count;
 
@@ -641,6 +594,31 @@ namespace aclara_meters.view
                                     Peripheral = blePeripherals[i]
                                 };
                                 employees.Add(device);
+
+                                //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
+                                if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
+                                    FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
+                                    bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
+                                    blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
+                                    !peripheralManualDisconnection &&
+                                    peripheral == null)
+                                {
+                                    if (!FormsApp.ble_interface.IsOpen())
+                                    {
+                                        try
+                                        {
+                                            peripheral = blePeripherals[i];
+                                            peripheralConnected = ble_library.BlePort.NO_CONNECTED;
+                                            peripheralManualDisconnection = false;
+                                            peripheralID = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+                                            FormsApp.ble_interface.Open(peripheral, true);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            Console.WriteLine(e.StackTrace);
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
