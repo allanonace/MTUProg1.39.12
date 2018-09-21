@@ -446,7 +446,7 @@ catch (Exception e)
                     isPaired = true;
                     saved_settings.AddOrUpdateValue("responsehi", isPaired.ToString());
                     saved_settings.AddOrUpdateValue("session_peripheral", ble_peripheral.Advertisement.DeviceName);
-                    var data = ble_peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data;
+                    var data = ble_peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
                     saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", System.Convert.ToBase64String(data));
 
                     if(dynamicPass!=null)
