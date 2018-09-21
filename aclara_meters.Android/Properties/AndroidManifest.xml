@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="2" android:versionName="1.01" package="com.aclara.aclara_meters" android:installLocation="auto">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="3" android:versionName="1.02" package="com.aclara.mtu.programmer" android:installLocation="auto">
 	<uses-sdk android:minSdkVersion="19" />
 	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 	<uses-permission android:name="android.permission.BLUETOOTH" />
@@ -7,5 +7,5 @@
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.ACCOUNT_MANAGER" />
-	<application android:label="Aclara Meters"></application>
+	<application android:label="Aclara MTU Programmer"></application>
 </manifest>

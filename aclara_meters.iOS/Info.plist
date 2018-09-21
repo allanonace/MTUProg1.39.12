@@ -5,11 +5,9 @@
 	<key>CFBundleDisplayName</key>
 	<string>Aclara Meters</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.aclara.aclara_meters</string>
+	<string>com.aclara.mtu.programmer</string>
 	<key>CFBundleName</key>
-	<string>Aclara Meters</string>
-	<key>CFBundleShortVersionString</key>
-	<string>6</string>
+	<string>Aclara MTU Programmer</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -21,7 +19,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.05</string>
+	<string>1.06</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>MainStoryboardFile</key>
@@ -75,5 +73,7 @@
 	<string>Assets.xcassets/AppIcon.appiconset</string>
 	<key>XSLaunchImageAssets</key>
 	<string>Assets.xcassets/LaunchImage.launchimage</string>
+	<key>CFBundleShortVersionString</key>
+	<string>7</string>
 </dict>
 </plist>
