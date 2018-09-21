@@ -27,7 +27,6 @@ namespace aclara_meters.view
         
         private IBlePeripheral peripheral = null;
         private int peripheralConnected = ble_library.BlePort.NO_CONNECTED;
-        private byte[] peripheralID = null;
         private Boolean peripheralManualDisconnection = false;
 
         private Thread printer;
@@ -464,7 +463,7 @@ namespace aclara_meters.view
                 {
                     // TODO: la siguente linea siempre da error xq peripheral es null
                     deviceID.Text = peripheral.Advertisement.DeviceName;
-                    macAddress.Text = DecodeId(peripheralID);
+                    macAddress.Text = DecodeId(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray());
                     imageBattery.Source = "battery_toolbar_high";
                     imageRssi.Source = "rssi_toolbar_high";
                     batteryLevel.Text = "100%";
@@ -509,7 +508,7 @@ namespace aclara_meters.view
             }
             catch (Exception e)
             {
-                s = BitConverter.ToString(peripheralID);
+                s = BitConverter.ToString(id);
             }
             return s;
         }
@@ -610,7 +609,6 @@ namespace aclara_meters.view
                                             peripheral = blePeripherals[i];
                                             peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                                             peripheralManualDisconnection = false;
-                                            peripheralID = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
                                             FormsApp.ble_interface.Open(peripheral, true);
                                         }
                                         catch (Exception e)
