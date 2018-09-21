@@ -723,10 +723,6 @@ namespace aclara_meters.view
                 Console.WriteLine(t12.StackTrace);
             }
             */
-
-            DeviceList.RefreshCommand.Execute(true);
-
-
         }
 
         private void LogoutTapped(object sender, EventArgs e)
