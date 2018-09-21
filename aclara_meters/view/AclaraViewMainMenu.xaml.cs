@@ -383,7 +383,7 @@ namespace aclara_meters.view
                 {
                     // TODO: la siguente linea siempre da error xq peripheral es null
                     deviceID.Text = peripheral.Advertisement.DeviceName;
-                    macAddress.Text = BitConverter.ToString(peripheralID);
+                    macAddress.Text = DecodeId(peripheralID);
                     imageBattery.Source = "battery_toolbar_high";
                     imageRssi.Source = "rssi_toolbar_high";
                     batteryLevel.Text = "100%";
@@ -411,6 +411,26 @@ namespace aclara_meters.view
 
 
             }
+        }
+
+        private string DecodeId(byte[] id)
+        {
+            string s;
+            try
+            {
+                s = System.Text.Encoding.ASCII.GetString(id.Take(2).ToArray());
+                byte[] byte_aux = new byte[4];
+                byte_aux[0] = id[3];
+                byte_aux[1] = id[2];
+                byte_aux[2] = 0;
+                byte_aux[3] = 0;
+                s += BitConverter.ToInt32(byte_aux, 0);
+            }
+            catch (Exception e)
+            {
+                s = BitConverter.ToString(peripheralID);
+            }
+            return s;
         }
 
         private async Task ChangeListViewData()
@@ -497,26 +517,9 @@ namespace aclara_meters.view
 
                             if (!enc)
                             {
-                                String s = "ZZ";
-                                int a = 0;
-                                try
-                                {
-                                    s = System.Text.Encoding.ASCII.GetString(byte_now.Take(2).ToArray());
-                                    byte_now[0] = byte_now[3];
-                                    byte_now[1] = byte_now[2];
-                                    byte_now[2] = 0;
-                                    byte_now[3] = 0;
-                                    a = BitConverter.ToInt32(byte_now, 0);
-                                }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine(e);
-                                }
-
                                 DeviceItem device = new DeviceItem
                                 {
-                                    //deviceMacAddress = BitConverter.ToString(byte_now),                            
-                                    deviceMacAddress = s + a,
+                                    deviceMacAddress = DecodeId(byte_now),
                                     deviceName = blePeripherals[i].Advertisement.DeviceName,
                                     deviceBattery = "100%",
                                     deviceRssi = blePeripherals[i].Rssi.ToString() + " dBm",
