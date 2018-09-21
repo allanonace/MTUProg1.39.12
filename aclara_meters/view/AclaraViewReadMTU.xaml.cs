@@ -34,55 +34,6 @@ namespace aclara_meters.view
         }
 
         private void LoadMTUData(){
-            string mtuStatus = "-";
-            string mtuSerNo = "-";
-            string tiltTamp = "-";
-            string magneticTamp = "-";
-            string interfaceTamp = "-";
-            string regCover = "-";
-            string revFlTamp = "-";
-            string dailySnap = "-";
-
-            string port1 = "Port 1: " + "-";
-            string meterType = "-";
-            string servicePtId = "-";
-            string meterReading = "-";
-            string xmitInterval = "-";
-            string readInterval = "-";
-            string battery = "-";
-            string mtuType = "-";
-            string mtuSoftware = "-";
-            string pcbNumber = "-";
-
-            MTUDataListView = new List<ReadMTUItem>
-            {
-                new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
-                new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
-                new ReadMTUItem() { Title = "Tilt Tamp:", Description = tiltTamp },
-                new ReadMTUItem() { Title = "Magnetic Tamp:", Description = magneticTamp },
-                new ReadMTUItem() { Title = "Interface Tamp:", Description = interfaceTamp },
-                new ReadMTUItem() { Title = "Reg. Cover:", Description = regCover },
-                new ReadMTUItem() { Title = "Rev. Fl Tamp:", Description = revFlTamp },
-                new ReadMTUItem() { Title = "Daily Snap:", Description = dailySnap },
-
-                new ReadMTUItem() { Description = port1 , Height = "240", isMTU = "false", isMeter = "true",
-
-                        Title1 = "Meter Type:", Description1 = meterType ,
-                        Title2 = "Service Pt. ID:", Description2 = servicePtId ,
-                        Title3 = "Meter Reading:", Description3 = meterReading ,
-                },
-
-                new ReadMTUItem() { Title = "Xmit Interval:", Description = xmitInterval },
-                new ReadMTUItem() { Title = "Read Interval:", Description = readInterval },
-                new ReadMTUItem() { Title = "Battery:", Description = battery },
-                new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
-                new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
-                new ReadMTUItem() { Title = "PCB Number", Description = pcbNumber },
-
-            };
-
-            // Setting our list to be ItemSource for ListView in MainPage.xaml
-            listaMTUread.ItemsSource = MTUDataListView;
 
             MenuList = new List<PageItem>
             {
@@ -299,6 +250,10 @@ namespace aclara_meters.view
                             LoadMTUValuesToListView("0", "0", "0", "0");
                         }
                     }
+                    else
+                    {
+                        LoadMtuTypeNotSupported(mtuType);
+                    }
 
                 }));
             }
@@ -507,6 +462,16 @@ namespace aclara_meters.view
             {
                 LoadDemoPulseMtuValuesToListView(mtu);
             }
+        }
+
+        private void LoadMtuTypeNotSupported(int mtuType)
+        {
+                MTUDataListView = new List<ReadMTUItem>
+                {
+                    new ReadMTUItem() { Title = "MTU type not supported:", Description = mtuType.ToString() },
+                    new ReadMTUItem() { Title = "Supported MTU types:", Description = "171, 138" },
+                };
+               listaMTUread.ItemsSource = MTUDataListView;
         }
 
         private void LoadDemoPulseMtuValuesToListView(Mtu mtu)
