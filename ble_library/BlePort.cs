@@ -813,14 +813,28 @@ catch (Exception e)
 
 
 
-                await gattServer_connection.Disconnect();
                 isConnected = NO_CONNECTED;
+                try
+                {
+                    await gattServer_connection.Disconnect();
+                }
+                catch (Exception e2)
+                {
+                    Console.WriteLine(e2.StackTrace);
+                }
 
             }
             else if (isConnected == CONNECTING)
             {
-                await gattServer_connection.Disconnect();
                 isConnected = NO_CONNECTED;
+                try
+                {
+                    await gattServer_connection.Disconnect();
+                }
+                catch (Exception e2)
+                {
+                    Console.WriteLine(e2.StackTrace);
+                }
             }
         }
 
