@@ -7,5 +7,5 @@
 	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 	<uses-permission android:name="android.permission.ACCOUNT_MANAGER" />
-	<application android:label="Aclara MTU Programmer"></application>
+	<application android:label="Aclara MTU Programmer" android:icon="@drawable/aclara_icon_app"></application>
 </manifest>
