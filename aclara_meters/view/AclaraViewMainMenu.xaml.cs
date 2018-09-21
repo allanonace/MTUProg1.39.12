@@ -394,6 +394,7 @@ namespace aclara_meters.view
 
                             });
                             peripheralConnected = status;
+                            peripheral = null;
                         }
                         else // status == ble_library.BlePort.CONNECTED
                         {
@@ -415,6 +416,7 @@ namespace aclara_meters.view
                         DeviceList.IsEnabled = true;
                         // status DEBERIA SER SIEMPRE ble_library.BlePort.NO_CONNECTED
                         peripheralConnected = status;
+                        peripheral = null;
                         Device.BeginInvokeOnMainThread(() =>
                         {
                             fondo.Opacity = 1;
