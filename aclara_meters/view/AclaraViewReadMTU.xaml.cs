@@ -531,33 +531,48 @@ namespace aclara_meters.view
             string mtuSoftware = mtu.Software;
             string pcbNumber = mtu.PcbNumber;
 
-            MTUDataListView = new List<ReadMTUItem>
+            if (mtuStatus == "On")
             {
+                MTUDataListView = new List<ReadMTUItem>
+                {
+                    new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
+                    new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
+                    new ReadMTUItem() { Title = "Tilt Tamp:", Description = tiltTamp },
+                    new ReadMTUItem() { Title = "Magnetic Tamp:", Description = magneticTamp },
+                    new ReadMTUItem() { Title = "Interface Tamp:", Description = interfaceTamp },
+                    new ReadMTUItem() { Title = "Reg. Cover:", Description = regCover },
+                    new ReadMTUItem() { Title = "Rev. Fl Tamp:", Description = revFlTamp },
+                    new ReadMTUItem() { Title = "Daily Snap:", Description = dailySnap },
 
-                new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
-                new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
-                new ReadMTUItem() { Title = "Tilt Tamp:", Description = tiltTamp },
-                new ReadMTUItem() { Title = "Magnetic Tamp:", Description = magneticTamp },
-                new ReadMTUItem() { Title = "Interface Tamp:", Description = interfaceTamp },
-                new ReadMTUItem() { Title = "Reg. Cover:", Description = regCover },
-                new ReadMTUItem() { Title = "Rev. Fl Tamp:", Description = revFlTamp },
-                new ReadMTUItem() { Title = "Daily Snap:", Description = dailySnap },
+                    new ReadMTUItem() { Description = port1 , Height = "240", isMTU = "false", isMeter = "true",
 
-                new ReadMTUItem() { Description = port1 , Height = "240", isMTU = "false", isMeter = "true",
+                            Title1 = "Meter Type:", Description1 = meterType ,
+                            Title2 = "Service Pt. ID:", Description2 = servicePtId ,
+                            Title3 = "Meter Reading:", Description3 = meterReading ,
+                    },
 
-                        Title1 = "Meter Type:", Description1 = meterType ,
-                        Title2 = "Service Pt. ID:", Description2 = servicePtId ,
-                        Title3 = "Meter Reading:", Description3 = meterReading ,
-                },
+                    new ReadMTUItem() { Title = "Xmit Interval:", Description = xmitInterval },
+                    new ReadMTUItem() { Title = "Read Interval:", Description = readInterval },
+                    new ReadMTUItem() { Title = "Battery:", Description = battery },
+                    new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
+                    new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
+                    new ReadMTUItem() { Title = "PCB Number:", Description = pcbNumber },
 
-                new ReadMTUItem() { Title = "Xmit Interval:", Description = xmitInterval },
-                new ReadMTUItem() { Title = "Read Interval:", Description = readInterval },
-                new ReadMTUItem() { Title = "Battery:", Description = battery },
-                new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
-                new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
-                new ReadMTUItem() { Title = "PCB Number:", Description = pcbNumber },
+                };
+            }
+            else
+            {
+                MTUDataListView = new List<ReadMTUItem>
+                {
+                    new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
+                    new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
+                    new ReadMTUItem() { Title = "Battery:", Description = battery },
+                    new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
+                    new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
+                    new ReadMTUItem() { Title = "PCB Number:", Description = pcbNumber },
+                };
 
-            };
+            }
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
             listaMTUread.ItemsSource = MTUDataListView;
@@ -591,38 +606,51 @@ namespace aclara_meters.view
             string mtuSoftware = mtu.Software;
             string pcbNumber = mtu.PcbNumber;
 
-            MTUDataListView = new List<ReadMTUItem>
+            if (mtuStatus == "On")
             {
+                MTUDataListView = new List<ReadMTUItem>
+                {
+                    new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
+                    new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
+                    new ReadMTUItem() { Title = "Interface Tamp:", Description = interfaceTamp },
+                    new ReadMTUItem() { Title = "Last Gasp:", Description = lastGasp },
+                    new ReadMTUItem() { Title = "Insf. Mem:", Description = insfMem },
+                    new ReadMTUItem() { Title = "Daily Snap:", Description = dailySnap },
+                    new ReadMTUItem() { Title = "Encrypted:", Description = encrypted },
 
-                new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
-                new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
-                new ReadMTUItem() { Title = "Interface Tamp:", Description = interfaceTamp },
-                new ReadMTUItem() { Title = "Last Gasp:", Description = lastGasp },
-                new ReadMTUItem() { Title = "Insf. Mem:", Description = insfMem },
-                new ReadMTUItem() { Title = "Daily Snap:", Description = dailySnap },
-                new ReadMTUItem() { Title = "Encrypted:", Description = encrypted },
+                    new ReadMTUItem() { Description = port1 , Height = "240", isMTU = "false", isMeter = "true",
 
-                new ReadMTUItem() { Description = port1 , Height = "240", isMTU = "false", isMeter = "true",
+                            Title1 = "Meter Type:", Description1 = meterType ,
+                            Title2 = "Service Pt. ID:", Description2 = servicePtId ,
+                            Title3 = "Meter Reading:", Description3 = meterReading ,
+                    },
+                    new ReadMTUItem() { Title = "Digits #:", Description = digits },
 
-                        Title1 = "Meter Type:", Description1 = meterType ,
-                        Title2 = "Service Pt. ID:", Description2 = servicePtId ,
-                        Title3 = "Meter Reading:", Description3 = meterReading ,
-                },
-                new ReadMTUItem() { Title = "Digits #:", Description = digits },
+                    new ReadMTUItem() { Title = "Xmit Interval:", Description = xmitInterval },
+                    new ReadMTUItem() { Title = "Read Interval:", Description = readInterval },
+                    new ReadMTUItem() { Title = "Battery:", Description = battery },
+                    new ReadMTUItem() { Title = "2-Way:", Description = twoWay },
+                    new ReadMTUItem() { Title = "On Demand Cnt:", Description = onDemandCnt },
+                    new ReadMTUItem() { Title = "Data Req Cnt:", Description = dataReqCnt },
+                    new ReadMTUItem() { Title = "FOTA Cnt:", Description = fotaCnt },
+                    new ReadMTUItem() { Title = "FOTC Cnt:", Description = fotcCnt },
+                    new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
+                    new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
+                    new ReadMTUItem() { Title = "PCB Number:", Description = pcbNumber },
 
-                new ReadMTUItem() { Title = "Xmit Interval:", Description = xmitInterval },
-                new ReadMTUItem() { Title = "Read Interval:", Description = readInterval },
-                new ReadMTUItem() { Title = "Battery:", Description = battery },
-                new ReadMTUItem() { Title = "2-Way:", Description = twoWay },
-                new ReadMTUItem() { Title = "On Demand Cnt:", Description = onDemandCnt },
-                new ReadMTUItem() { Title = "Data Req Cnt:", Description = dataReqCnt },
-                new ReadMTUItem() { Title = "FOTA Cnt:", Description = fotaCnt },
-                new ReadMTUItem() { Title = "FOTC Cnt:", Description = fotcCnt },
-                new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
-                new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
-                new ReadMTUItem() { Title = "PCB Number:", Description = pcbNumber },
-
-            };
+                };
+            }
+            else
+            {
+                MTUDataListView = new List<ReadMTUItem>
+                {
+                    new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
+                    new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
+                    new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
+                    new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
+                    new ReadMTUItem() { Title = "PCB Number:", Description = pcbNumber },
+                };
+            }
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
             listaMTUread.ItemsSource = MTUDataListView;
