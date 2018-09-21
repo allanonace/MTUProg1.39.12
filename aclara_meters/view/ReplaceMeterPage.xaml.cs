@@ -19,6 +19,7 @@ using nexus.protocols.ble;
 using Xamarin.Forms;
 using System.Threading;
 using System.Collections.ObjectModel;
+using Plugin.Settings;
 
 namespace aclara_meters.view
 {
@@ -482,6 +483,11 @@ namespace aclara_meters.view
             replacemeter_cancel.Tapped += Replacemeter_Cancel_Tapped;
             meter_ok.Tapped += Meter_Ok_Tapped;
             meter_cancel.Tapped += Meter_Cancel_Tapped;
+
+
+
+            battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
+            rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
 
 
         }

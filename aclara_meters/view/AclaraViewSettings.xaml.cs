@@ -13,7 +13,7 @@ using aclara_meters.Helpers;
 using aclara_meters.Models;
 using Xamarin.Forms;
 using aclara.ViewModels;
-
+using Plugin.Settings;
 
 namespace aclara_meters.view
 {
@@ -240,6 +240,11 @@ namespace aclara_meters.view
                     indicator.IsVisible = false;
                 });
             });
+
+
+            battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
+            rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
+
         }
 
         private void LoadPhoneUIConnected()

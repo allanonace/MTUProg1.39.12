@@ -353,6 +353,12 @@ namespace aclara_meters.view
                 userName.Text = FormsApp.CredentialsService.UserName; //"Kartik";
             }
 
+
+            battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
+            rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
+
+
+
         }
 
         private void LoadPhoneUI()

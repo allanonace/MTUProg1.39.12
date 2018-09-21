@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Remove="XML\XmlElementList.xml" />
+    <None Remove="view\.AclaraViewMainMenu.xaml.cs.swp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ble_library\ble_library.csproj" />
