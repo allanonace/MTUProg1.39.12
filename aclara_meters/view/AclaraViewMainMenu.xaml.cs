@@ -21,11 +21,6 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewMainMenu
     {
-        void Logoff_No_Tapped(object sender, EventArgs e)
-        {
-        }
-
-
         private List<PageItem> MenuList { get; set; }
         private IUserDialogs dialogsSaved;
         private ObservableCollection<DeviceItem> employees;
@@ -655,15 +650,19 @@ namespace aclara_meters.view
 
         private void LogoutTapped(object sender, EventArgs e)
         {
-
-            dialog_open_bg.IsVisible = true;
-            dialog_meter_replace_one.IsVisible = false;
-            dialog_turnoff_two.IsVisible = false;
-            dialog_turnoff_three.IsVisible = false;
-            dialog_replacemeter_one.IsVisible = false;
-            dialog_logoff.IsVisible = true;
-            dialog_open_bg.IsVisible = true;
-            turnoff_mtu_background.IsVisible = true;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                dialog_turnoff_one.IsVisible = false;
+                dialog_open_bg.IsVisible = true;
+                dialog_meter_replace_one.IsVisible = false;
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = false;
+                dialog_replacemeter_one.IsVisible = false;
+                dialog_logoff.IsVisible = true;
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+            });
+          
         }
 
         // Event for Menu Item selection, here we are going to handle navigation based
