@@ -935,6 +935,8 @@ namespace aclara_meters.view
                 {
                     Console.WriteLine(w1.StackTrace);
                 }
+            }else{
+                Application.Current.MainPage.DisplayAlert("Alert", "Connect to a device and retry", "Ok");
             }
         }
 

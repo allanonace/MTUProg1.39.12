@@ -19,7 +19,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.06</string>
+	<string>1.07</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>MainStoryboardFile</key>
@@ -74,6 +74,6 @@
 	<key>XSLaunchImageAssets</key>
 	<string>Assets.xcassets/LaunchImage.launchimage</string>
 	<key>CFBundleShortVersionString</key>
-	<string>7</string>
+	<string>8</string>
 </dict>
 </plist>
