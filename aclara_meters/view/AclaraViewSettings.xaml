@@ -347,7 +347,7 @@
                              <!--  Sync -->
                                 
                           <StackLayout IsVisible="false" Margin="-10,0,0,0"  HorizontalOptions="CenterAndExpand" 
-                                       VerticalOptions="Center"  HeightRequest="1024"
+                                       VerticalOptions="Center"  HeightRequest="1024" Scale="0.9"
                                        x:Name="sync_block">   
 
                                 <StackLayout Margin="0,72,0,0" VerticalOptions="Center" Orientation="Horizontal" >
