@@ -263,6 +263,10 @@ namespace aclara_meters.view
                 Task.Delay(100).ContinueWith(t =>
                      Device.BeginInvokeOnMainThread(() =>
                      {
+
+                         MTUDataListView = new List<ReadMTUItem>{};
+                         listaMTUread.ItemsSource = MTUDataListView;
+
                          label_read.Text = resultMsg;
                          _userTapped = false;
                          bg_read_mtu_button.NumberOfTapsRequired = 1;
