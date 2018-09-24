@@ -107,14 +107,24 @@ namespace aclara_meters.view
                     }
                 } 
                 DeviceList.IsRefreshing = true;
-                employees.Clear();
+
+                employees = new ObservableCollection<DeviceItem>();
+
                 await FormsApp.ble_interface.Scan();
                 await ChangeListViewData();
                 DeviceList.IsRefreshing = false;
 
+                if (employees.Count != 0)
+                {
+                    DeviceList.ItemsSource = employees;
+                }
             });
             DeviceList.RefreshCommand.Execute(true);
-            DeviceList.ItemsSource = employees;
+            if(employees.Count != 0)
+            {
+                DeviceList.ItemsSource = employees;
+            }
+           
         }
 
         private void LoadSideMenuElements()
@@ -361,7 +371,7 @@ namespace aclara_meters.view
             int timeout_connecting = 0;
             while (true)
             {
-              
+                      
                 //if (!FormsApp.ble_interface.GetPairingStatusOk())
                 int status = FormsApp.ble_interface.GetConnectionStatus();
 

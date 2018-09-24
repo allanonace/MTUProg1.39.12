@@ -10,6 +10,7 @@ using System.IO;
 using Plugin.Settings.Abstractions;
 using Plugin.Settings;
 using nexus.core;
+using Xamarin.Forms;
 
 namespace ble_library
 {
@@ -60,6 +61,59 @@ namespace ble_library
             }
         }
     }
+
+
+    /*
+    BluetoothStatusReporter Class.
+    Contains all methods that allow to know the bluetooth adapter status
+    */
+    public class BluetoothStatusReporter : IObserver<EnabledDisabledState>
+    {
+        private IDisposable unsubscriber;
+        private BlePort blePort;
+
+        public BluetoothStatusReporter(BlePort port)
+        {
+            blePort = port;
+
+        }
+
+        public virtual void Subscribe(IObservable<EnabledDisabledState> provider)
+        {
+            unsubscriber = provider.Subscribe(this);
+        }
+
+        public virtual void Unsubscribe()
+        {
+            unsubscriber.Dispose();
+        }
+
+
+        public void OnCompleted()
+        {
+          
+        }
+
+        public void OnError(Exception error)
+        {
+          
+        }
+
+        public void OnNext(EnabledDisabledState value)
+        {
+            if (value == EnabledDisabledState.Disabled)
+            {
+                Task.Factory.StartNew(blePort.DisconnectDevice).Wait();
+
+            }
+            else
+            {
+                // test
+                value = value;
+            }
+        }
+    }
+
 
     public class BlePort
     {
@@ -123,6 +177,7 @@ namespace ble_library
             BlePeripheralList = new List<IBlePeripheral>();
 
             batteryLevel = new byte[] { 0x00 };
+
         }
 
         /// <summary>
@@ -215,6 +270,7 @@ namespace ble_library
             }
         }
 
+
         /// <summary>
         /// Listen to the characteristic notifications of a peripheral
         /// </summary>
@@ -259,32 +315,37 @@ namespace ble_library
         /// </summary>
         private  void Stop_Listen_Characteristic_Notification()
         {
-            try{
-                Listen_Characteristic_Notification_Handler.Dispose();
-            }catch(Exception e){
-                Console.WriteLine(e.StackTrace);  
-            }
-            try
+            if(!Device.RuntimePlatform.Equals(Device.iOS))
             {
-                Listen_ack_response_Handler.Dispose();
+                try
+                {
+                    Listen_Characteristic_Notification_Handler.Dispose();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                }
+                try
+                {
+                    Listen_ack_response_Handler.Dispose();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                }
+
+
+
+                try
+                {
+                    Listen_Battery_level.Dispose();
+                }
+                catch (Exception e3)
+                {
+                    Console.WriteLine(e3.StackTrace);
+                }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.StackTrace);
-            }            
-
-
-
-            try
-            {
-                Listen_Battery_level.Dispose();
-            }
-            catch (Exception e3)
-            {
-                Console.WriteLine(e3.StackTrace);
-            }
-
-
+       
         }
 
 
@@ -384,6 +445,9 @@ try
 //                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
                                                                 // the server implements IObservable<ConnectionState> so you can subscribe to its state
                 gattServer_connection.Subscribe(new ObserverReporter(this));
+
+                adapter.CurrentState.Subscribe(new BluetoothStatusReporter(this));
+
 
                 ble_peripheral = ble_device;
 
@@ -780,36 +844,39 @@ catch (Exception e)
         {
             if (isConnected == CONNECTED)
             {
-                Stop_Listen_Characteristic_Notification();
-                try
+                if (!Device.RuntimePlatform.Equals(Device.iOS))
                 {
-                    Listen_ack_response_Handler.Dispose();
-                }
-                catch (Exception e1)
-                {
-                    Console.WriteLine(e1.StackTrace);
-                }
-               
-                try
-                {
-                    Listen_aes_conection_Handler.Dispose();
-                }
-                catch (Exception e2)
-                {
-                    Console.WriteLine(e2.StackTrace);
-                }
+
+                    Stop_Listen_Characteristic_Notification();
+                    try
+                    {
+                        Listen_ack_response_Handler.Dispose();
+                    }
+                    catch (Exception e1)
+                    {
+                        Console.WriteLine(e1.StackTrace);
+                    }
+
+                    try
+                    {
+                        Listen_aes_conection_Handler.Dispose();
+                    }
+                    catch (Exception e2)
+                    {
+                        Console.WriteLine(e2.StackTrace);
+                    }
 
 
-                try
-                {
-                    Listen_Battery_level.Dispose();
-                }
-                catch (Exception e3)
-                {
-                    Console.WriteLine(e3.StackTrace);
-                }
+                    try
+                    {
+                        Listen_Battery_level.Dispose();
+                    }
+                    catch (Exception e3)
+                    {
+                        Console.WriteLine(e3.StackTrace);
+                    }
 
-
+                }
 
 
 
@@ -899,4 +966,6 @@ catch (Exception e)
         }
         */
     }
+
+
 }
