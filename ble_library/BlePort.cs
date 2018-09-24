@@ -315,7 +315,7 @@ namespace ble_library
         /// </summary>
         private  void Stop_Listen_Characteristic_Notification()
         {
-            if(!Device.RuntimePlatform.Equals(Device.iOS))
+            if (!adapter.CurrentState.IsDisabledOrDisabling())
             {
                 try
                 {
@@ -844,9 +844,10 @@ catch (Exception e)
         {
             if (isConnected == CONNECTED)
             {
-                if (!Device.RuntimePlatform.Equals(Device.iOS))
+                
+                if(!adapter.CurrentState.IsDisabledOrDisabling())
                 {
-
+                  
                     Stop_Listen_Characteristic_Notification();
                     try
                     {
@@ -876,7 +877,10 @@ catch (Exception e)
                         Console.WriteLine(e3.StackTrace);
                     }
 
+
                 }
+
+               
 
 
 
