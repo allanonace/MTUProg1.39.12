@@ -21,6 +21,11 @@ namespace aclara_meters.view
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
 
+        private Command port1cmd;
+        private Command port2cmd;
+        private Command misccmd;
+
+
         public AclaraViewAddMTU()
         {
             InitializeComponent();
@@ -303,7 +308,7 @@ namespace aclara_meters.view
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    label_read.Opacity = 0;
+                    label_read.Opacity = 1;
                     backdark_bg.IsVisible = false;
                     indicator.IsVisible = false;
                 });
@@ -334,8 +339,7 @@ namespace aclara_meters.view
 
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
 
-            InitializeLowerbarLabel();
-
+         
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -357,6 +361,7 @@ namespace aclara_meters.view
             battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
             rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
 
+            InitializeLowerbarLabel();
 
 
         }
@@ -405,7 +410,52 @@ namespace aclara_meters.view
             replacemeter_cancel.Tapped += ReplaceMeterCancelTapped;
             meter_ok.Tapped += MeterOkTapped;
             meter_cancel.Tapped += MeterCancelTapped;
+
+
+
+            port1cmd = new Command(() => port1_command());
+            port2cmd = new Command(() => port2_command());
+            misccmd = new Command(() => misc_command());
+
         }
+
+        /**********************************/
+        /**      Command functions       **/
+        private void misc_command()
+        {
+            port1label.Opacity = 0.5;
+            misclabel.Opacity = 1;
+            port2label.Opacity = 0.5;
+
+            port1label.FontSize = 19;
+            misclabel.FontSize = 22;
+            port2label.FontSize = 19;
+        }
+
+        private void port2_command()
+        {
+            port1label.Opacity = 0.5;
+            misclabel.Opacity = 0.5;
+            port2label.Opacity = 1;
+
+            port1label.FontSize = 19;
+            misclabel.FontSize = 19;
+            port2label.FontSize = 22;
+
+        }
+
+        private void port1_command()
+        {
+            port1label.Opacity = 1;
+            misclabel.Opacity = 0.5;
+            port2label.Opacity = 0.5;
+
+            port1label.FontSize = 22;
+            misclabel.FontSize = 19;
+            port2label.FontSize = 19;
+        }
+
+
 
         private void ReplaceMeterCancelTapped(object sender, EventArgs e)
         {

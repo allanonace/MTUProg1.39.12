@@ -163,57 +163,18 @@
 
                         
 
-                    <StackLayout Margin="0,0,0,0" >
-                       
-                        <Grid Margin="0,0,0,0"   HeightRequest="48" >
-                  
-                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"></ColumnDefinition>
-                                <ColumnDefinition Width="*"></ColumnDefinition>
-                                <ColumnDefinition Width="*"></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
-
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="48"></RowDefinition>
-                            </Grid.RowDefinitions>
-
-                             <Label x:Name="port1label" Margin="0,0,0,0" Grid.Column="0" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="22" 
-                                    TextColor="#6aa2b8" Text="Port 1"  Opacity="1" > 
-                                  <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding port1Cmd}" NumberOfTapsRequired="1" />
-                                  </Label.GestureRecognizers>    
-                             </Label>
-                                
-                             <Label x:Name="port2label" Margin="0,0,0,0" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="19" 
-                                    TextColor="#6aa2b8" Text="Port 2" Opacity="0.5"  > 
-                                  <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding port2Cmd}" NumberOfTapsRequired="1" />
-                                  </Label.GestureRecognizers>    
-                             </Label>
-                             <Label x:Name="misclabel" Margin="0,0,0,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="19" 
-                                    TextColor="#6aa2b8" Text="Misc"  Opacity="0.5"   > 
-                                  <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding miscCmd}" NumberOfTapsRequired="1" />
-                                  </Label.GestureRecognizers>    
-                             </Label>
-                            
-                        </Grid>   
-                     <Image Margin="-16,-4,-16,0" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8"/>
-
-                            
+                    <StackLayout Margin="0,-6,0,0" >
+                        <Label Margin="16,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+                        <Image Margin="-16,4,-16,0" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8"/>
                     </StackLayout>
             
                     <ScrollView Margin="0,-6,0,-6"  >
                              <StackLayout Margin="12,0,12,0"> 
-
-                                  <Label Margin="0,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
-                                
-                                    <StackLayout Margin="0,0,0,0" >
-
-                                     <!--  FUNCTL LOCTN -->
+                               
+                                  <!--  FUNCTL LOCTN -->
                                         
                                   <StackLayout x:Name="Block_FunctlLoctn">  
-                                      <Label Text="Service Pt. ID" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                      <Label Text="Functional Location" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
                                       
@@ -236,7 +197,7 @@
                                   <!--  METER NUMBER -->
 
                                   <StackLayout x:Name="Block_MeterNumber">  
-                                      <Label Text="Field Order" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                      <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
                                       
@@ -380,12 +341,11 @@
                                     </Frame>
                                     
                                   </StackLayout>
-                                  </StackLayout>
 
                                 
-                             </StackLayout >  
+                             </StackLayout>  
 
-                          </ScrollView >
+                          </ScrollView>
 
                          <Label  HeightRequest="20" Margin="12,0,0,0" FontAttributes="Bold" Text="HEX Value:"
                             FontSize="20" IsVisible="false" />
@@ -393,8 +353,202 @@
                             FontSize="18" />
                          
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        
+                    
+                  <ListView ItemsSource="{Binding Characteristic}" x:Name="lista" IsVisible="false" 
+                            ItemSelected="OnItemSelected"
+                            SeparatorVisibility="None"
+                            HasUnevenRows="True"
+                            SeparatorColor="#aaaaaa">
+                     <x:Arguments>
+                        <ListViewCachingStrategy>RecycleElement</ListViewCachingStrategy>
+                     </x:Arguments>
+                     <ListView.RowHeight>
+                        <OnPlatform x:TypeArguments="x:Int32"
+                                    iOS="200" />
+                     </ListView.RowHeight>
+                     <ListView.ItemTemplate>
+                        <DataTemplate>
+                           <ViewCell>
+                              <Frame Padding="{StaticResource GridPadding}"
+                                     Margin="{StaticResource GridPadding}"
+                                     VerticalOptions="FillAndExpand"
+                              
+                                     HorizontalOptions="CenterAndExpand">
+
+                                 <StackLayout Orientation="Vertical"
+                                              HorizontalOptions="StartAndExpand"
+                                              VerticalOptions="CenterAndExpand"
+                                              Padding="{StaticResource GridPadding}">
+                                    <Label Text="{Binding Name}"
+                                           HorizontalOptions="StartAndExpand"
+                                           VerticalOptions="Start" />
+                                    <Label Text="{Binding Id}"
+                                           HorizontalOptions="StartAndExpand"
+                                           VerticalOptions="Start" />
+
+                                    <Grid HorizontalOptions="FillAndExpand"
+                                          VerticalOptions="CenterAndExpand">
+                                       <Grid.ColumnDefinitions>
+                                          <ColumnDefinition />
+                                          <ColumnDefinition />
+                                          <ColumnDefinition />
+                                       </Grid.ColumnDefinitions>
+
+                                       <StackLayout Grid.Column="0"
+                                                    Orientation="Horizontal"
+                                                    VerticalOptions="Center"
+                                                    HorizontalOptions="Start">
+                                          <Button Command="{Binding RefreshValueCommand}"
+                                                  IsEnabled="{Binding CanRead}"
+                                                  Text="Read" />
+                                       </StackLayout>
+
+                                       <StackLayout Orientation="Horizontal"
+                                                    VerticalOptions="Center"
+                                                    HorizontalOptions="Center"
+                                                    Grid.Column="1">
+                                          <Label IsEnabled="{Binding CanNotify}"
+                                                 VerticalTextAlignment="Center"
+                                                 VerticalOptions="CenterAndExpand"
+                                                 Text="Notify:" />
+                                          <Switch IsToggled="{Binding Path=NotifyEnabled, Mode=TwoWay}"
+                                                  VerticalOptions="Center"
+                                                  IsEnabled="{Binding CanNotify}" />
+                                       </StackLayout>
+
+
+                                         <StackLayout Orientation="Horizontal" Margin="0,12,0,0"
+                                                    VerticalOptions="Center"
+                                                    HorizontalOptions="Center"
+                                                    Grid.Column="1">
+                                          <Label IsEnabled="{Binding CanIndicate}"
+                                                 VerticalTextAlignment="Center"
+                                                 VerticalOptions="CenterAndExpand"
+                                                 Text="Indicate:" />
+                                          <Switch IsToggled="{Binding Path=NotifyEnabled, Mode=TwoWay}"
+                                                  VerticalOptions="Center"
+                                                  IsEnabled="{Binding CanIndicate}" />
+                                       </StackLayout>
+
+                                                
+                                       <StackLayout Orientation="Horizontal"
+                                                    VerticalOptions="Center"
+                                                    HorizontalOptions="EndAndExpand"
+                                                    Grid.Column="2">
+                                          <Entry HorizontalOptions="StartAndExpand"
+                                                 Placeholder="Write Value"
+                                                 Text="{Binding WriteValue}" />
+                                          <Button Command="{Binding WriteBytesCommand}" Margin="-24,10,0,0"
+                                                  IsEnabled="{Binding CanWrite}"
+                                                  Text="Write" />
+                                       </StackLayout>
+
+                                    </Grid>
+
+                                    <Grid>
+                                       <Grid.ColumnDefinitions>
+                                          <ColumnDefinition Width="Auto" />
+                                          <ColumnDefinition Width="*" />
+                                       </Grid.ColumnDefinitions>
+                                       <Grid.RowDefinitions>
+                                          <RowDefinition Height="Auto" />
+                                          <RowDefinition Height="Auto" />
+                                    
+                                       </Grid.RowDefinitions>
+
+                                       <Label Grid.Column="0"
+                                              Grid.Row="0"
+                                              Text="Hex:"
+                                              FontAttributes="Bold" />
+                                       <Label Grid.Column="1"
+                                              Grid.Row="0"
+                                              Text="{Binding ValueAsHex}"
+                                              HorizontalOptions="StartAndExpand" />
+
+                                       <Label Grid.Column="0"
+                                              Grid.Row="1"
+                                              Text="UTF8:"
+                                              FontAttributes="Bold" />
+
+                                       <Label Grid.Column="1"
+                                              Grid.Row="1"
+                                              Text="{Binding ValueAsString}"
+                                              HorizontalOptions="StartAndExpand" />
+
+                           
+                                       
+                                    </Grid>
+
+                                 </StackLayout>
+                              </Frame>
+                           </ViewCell>
+                        </DataTemplate>
+                     </ListView.ItemTemplate>
+                  </ListView>
+
+                    
+
                </StackLayout>
                                 
+
+
+                     <!-- NOT IMPORTANT  -->
+                     <!-- NOT IMPORTANT  -->
+                     <!-- NOT IMPORTANT  -->
+
+
+
+                    
+                            <StackLayout IsVisible="false">
+                          <Button Text="Start Scan" IsVisible="false" Command="{Binding ScanForDevicesCommand}" HorizontalOptions="Start" />
+                          <StackLayout Orientation="Horizontal"
+                               Padding="{StaticResource GridPadding}">
+                          <StackLayout HorizontalOptions="Start"
+                                  Orientation="Horizontal">
+                                <Label Text="Scanning"
+                                       IsVisible="{Binding IsScanning}"
+                                       VerticalOptions="Center" />
+                        <AbsoluteLayout IsVisible="{Binding IsScanning}">
+                           <ActivityIndicator IsRunning="{Binding IsScanning}">
+                              <ActivityIndicator.WidthRequest>
+                                 <OnPlatform x:TypeArguments="x:Double"
+                                             Android="40"
+                                             iOS="40"
+                                             WinPhone="100" />
+                              </ActivityIndicator.WidthRequest>
+                           </ActivityIndicator>
+                           <Label AbsoluteLayout.LayoutBounds=".5,.5,-1,-1" 
+                                  AbsoluteLayout.LayoutFlags="PositionProportional"
+                                  Text="{Binding ScanTimeRemaining}" />
+                        </AbsoluteLayout>
+                        <Button Text="Start Scan"
+                                IsVisible="{Binding IsScanning, Converter={StaticResource InvertBoolean}}"
+                                Command="{Binding ScanForDevicesCommand}"
+                                HorizontalOptions="Start" />
+                     </StackLayout>
+                    
+                     </StackLayout>
+                    </StackLayout>
+
+                     <!-- NOT IMPORTANT  -->
+                     <!-- NOT IMPORTANT  -->
+                     <!-- NOT IMPORTANT  -->
 
 
 
@@ -406,7 +560,7 @@
                              
 
 
-                               <Label   x:Name="label_read" Margin="17,22,0,44" FontSize="21" TextColor="White" 
+                               <Label   x:Name="label_read" Margin="17,22,0,0" FontSize="21" TextColor="White" 
                                         Text="Push Button to START" > </Label>
     
                               

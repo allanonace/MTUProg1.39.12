@@ -34,6 +34,7 @@
     <Compile Remove="viewmodel\BlePeripheralViewModel.cs" />
     <Compile Remove="view\BleGattServerPage.xaml.cs" />
     <Compile Remove="view\MyPage.xaml.cs" />
+    <Compile Remove="view\testingui.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="view\BleGattServicePage.xaml.cs">
@@ -74,5 +75,6 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="view\MyPage.xaml" />
+    <EmbeddedResource Remove="view\testingui.xaml" />
   </ItemGroup>
 </Project>
