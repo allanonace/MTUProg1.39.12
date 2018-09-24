@@ -180,20 +180,20 @@
                              <Label x:Name="port1label" Margin="0,0,0,0" Grid.Column="0" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="22" 
                                     TextColor="#6aa2b8" Text="Port 1"  Opacity="1" > 
                                   <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding port1Cmd}" NumberOfTapsRequired="1" />
+                                    <TapGestureRecognizer Command="{Binding port1cmd}" NumberOfTapsRequired="1" />
                                   </Label.GestureRecognizers>    
                              </Label>
                                 
                              <Label x:Name="port2label" Margin="0,0,0,0" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="19" 
                                     TextColor="#6aa2b8" Text="Port 2" Opacity="0.5"  > 
                                   <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding port2Cmd}" NumberOfTapsRequired="1" />
+                                    <TapGestureRecognizer Command="{Binding port2cmd}" NumberOfTapsRequired="1" />
                                   </Label.GestureRecognizers>    
                              </Label>
                              <Label x:Name="misclabel" Margin="0,0,0,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="19" 
                                     TextColor="#6aa2b8" Text="Misc"  Opacity="0.5"   > 
                                   <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding miscCmd}" NumberOfTapsRequired="1" />
+                                    <TapGestureRecognizer Command="{Binding misccmd}" NumberOfTapsRequired="1" />
                                   </Label.GestureRecognizers>    
                              </Label>
                             
