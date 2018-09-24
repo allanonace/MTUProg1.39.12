@@ -163,7 +163,7 @@
 
                         
 
-                    <StackLayout Margin="0,0,0,0" >
+                    <StackLayout  Margin="0,0,0,0"  >
                        
                         <Grid Margin="0,0,0,0"   HeightRequest="48" >
                   
@@ -177,24 +177,17 @@
                                 <RowDefinition Height="48"></RowDefinition>
                             </Grid.RowDefinitions>
 
-                             <Label x:Name="port1label" Margin="0,0,0,0" Grid.Column="0" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="22" 
+                             <Label  x:Name="port1label" Margin="0,0,0,0" Grid.Column="0" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="22" 
                                     TextColor="#6aa2b8" Text="Port 1"  Opacity="1" > 
-                                  <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding port1cmd}" NumberOfTapsRequired="1" />
-                                  </Label.GestureRecognizers>    
                              </Label>
                                 
                              <Label x:Name="port2label" Margin="0,0,0,0" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="19" 
                                     TextColor="#6aa2b8" Text="Port 2" Opacity="0.5"  > 
-                                  <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding port2cmd}" NumberOfTapsRequired="1" />
-                                  </Label.GestureRecognizers>    
+                                
                              </Label>
                              <Label x:Name="misclabel" Margin="0,0,0,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="19" 
                                     TextColor="#6aa2b8" Text="Misc"  Opacity="0.5"   > 
-                                  <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding misccmd}" NumberOfTapsRequired="1" />
-                                  </Label.GestureRecognizers>    
+                                  
                              </Label>
                             
                         </Grid>   
@@ -203,7 +196,7 @@
                             
                     </StackLayout>
             
-                    <ScrollView Margin="0,-6,0,-6"  >
+                    <ScrollView  Margin="0,-6,0,-6"  >
                              <StackLayout Margin="12,0,12,0"> 
 
                                   <Label Margin="0,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />

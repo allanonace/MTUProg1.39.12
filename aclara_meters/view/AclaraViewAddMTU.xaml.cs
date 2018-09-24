@@ -21,11 +21,6 @@ namespace aclara_meters.view
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
 
-        private Command port1cmd;
-        private Command port2cmd;
-        private Command misccmd;
-
-
         public AclaraViewAddMTU()
         {
             InitializeComponent();
@@ -412,10 +407,18 @@ namespace aclara_meters.view
             meter_cancel.Tapped += MeterCancelTapped;
 
 
-
-            port1cmd = new Command(() => port1_command());
-            port2cmd = new Command(() => port2_command());
-            misccmd = new Command(() => misc_command());
+            port1label.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(() => port1_command()),
+            });
+            misclabel.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(() => misc_command()),
+            });
+            port2label.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(() => port2_command()),
+            });
 
         }
 
