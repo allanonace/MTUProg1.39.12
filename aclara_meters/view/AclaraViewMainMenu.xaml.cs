@@ -462,21 +462,18 @@ namespace aclara_meters.view
 
         private void IsConnectedUIChange(bool v)
         {
-         
             if(v)
             {
-
-
-
                 try
                 {
                     // TODO: la siguente linea siempre da error xq peripheral es null
                     deviceID.Text = peripheral.Advertisement.DeviceName;
                     macAddress.Text = DecodeId(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray());
+                   
                     //imageBattery.Source = "battery_toolbar_high";
-                   // imageRssi.Source = "rssi_toolbar_high";
-                   // batteryLevel.Text = "100%";
-                   // rssiLevel.Text = peripheral.Rssi.ToString() + " dBm";
+                    // imageRssi.Source = "rssi_toolbar_high";
+                    // batteryLevel.Text = "100%";
+                    // rssiLevel.Text = peripheral.Rssi.ToString() + " dBm";
 
                     byte[] battery_ui = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
 
@@ -484,38 +481,30 @@ namespace aclara_meters.view
                     {
                         batteryLevel.Text = battery_ui[0].ToString() + " %";
 
-                        if (battery_ui[0] > 75)
+                        if (battery_ui[0] >= 75)
                         {
-
                             imageBattery.Source = "battery_toolbar_high";
                             battery_level.Source = "battery_toolbar_high_white";
                             battery_level_detail.Source = "battery_toolbar_high_white";
                         }
-
-                        if (battery_ui[0] > 45 && battery_ui[0] < 75)
+                        else if (battery_ui[0] >= 45 && battery_ui[0] < 75)
                         {
-
                             imageBattery.Source = "battery_toolbar_mid";
                             battery_level.Source = "battery_toolbar_mid_white";
                             battery_level_detail.Source = "battery_toolbar_mid_white";
                         }
-
-                        if (battery_ui[0] > 15 && battery_ui[0] < 45)
+                        else if (battery_ui[0] >= 15 && battery_ui[0] < 45)
                         {
-
                             imageBattery.Source = "battery_toolbar_low";
                             battery_level.Source = "battery_toolbar_low_white";
                             battery_level_detail.Source = "battery_toolbar_low_white";
                         }
-
-                        if (battery_ui[0] < 15)
+                        else // battery_ui[0] < 15
                         {
-
                             imageBattery.Source = "battery_toolbar_empty";
                             battery_level.Source = "battery_toolbar_empty_white";
                             battery_level_detail.Source = "battery_toolbar_empty_white";
                         }
-
                     }
 
                     /*** RSSI ICONS UPDATE ***/
@@ -544,7 +533,6 @@ namespace aclara_meters.view
                         rssi_level_detail.Source = "rssi_toolbar_high_white";
                     }
 
-
                     //Save Battery & Rssi info for the next windows
                     CrossSettings.Current.AddOrUpdateValue("battery_icon_topbar", battery_level.Source.ToString().Substring(6));
                     CrossSettings.Current.AddOrUpdateValue("rssi_icon_topbar", rssi_level.Source.ToString().Substring(6));
@@ -563,6 +551,7 @@ namespace aclara_meters.view
                 background_scan_page.IsVisible = false;
                 navigationDrawerList.IsEnabled = true;
                 navigationDrawerList.Opacity = 1;
+
             }else{
                 background_scan_page_detail.IsVisible = false;
                 navigationDrawerList.Opacity = 0.65;

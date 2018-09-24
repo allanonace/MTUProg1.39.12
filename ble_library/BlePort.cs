@@ -436,9 +436,9 @@ catch (Exception e)
                     }
                     connectionError = DYNAMIC_KEY_ERROR;
                     DisconnectDevice();
-                    this.adapter.DisableAdapter();
+                   // this.adapter.DisableAdapter();
 
-                    this.adapter.EnableAdapter();
+                  //  this.adapter.EnableAdapter();
                 }
 
                 if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0x11 }))
