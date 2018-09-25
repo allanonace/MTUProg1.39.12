@@ -648,6 +648,167 @@
 
 
 
+                           <!--                   -->
+
+                           <!--       Misc        -->
+
+                           <!--                   -->
+
+
+                             <StackLayout x:Name="miscview" IsVisible="false" Margin="12,0,12,0"> 
+
+                              
+                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+                             
+                                  
+
+
+
+                                   <!-- MTU Geolocation -->
+                                   <Label Text="MTU Geolocation" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+
+
+                                <StackLayout Orientation="Horizontal"  HorizontalOptions="FillAndExpand" Margin="4">
+                                      <Label Text="Lat." Margin="0,4,0,0" VerticalOptions="Center" FontSize="16" ></Label>
+                                        <Frame CornerRadius="6" HeightRequest="28" Margin="0,4,0,0"  HorizontalOptions="FillAndExpand" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="28"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+
+                              
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="28"   x:Name="mtuGeolocationLat" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+
+                                                               
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+
+                                     <Label Text="Lon." Margin="0,4,0,0" VerticalOptions="Center" FontSize="16" ></Label>
+                                    
+                                            <Frame CornerRadius="6"  HorizontalOptions="FillAndExpand"  HeightRequest="28" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="28"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+
+                                           
+
+
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="28"   x:Name="mtuGeolocationLong" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                            
+                                                    </StackLayout>
+                                             </Frame> 
+
+
+                                        
+
+                                            
+                                    </Frame>
+
+
+
+                                       <StackLayout  Margin="0,0,0,0"     VerticalOptions="Center"  HeightRequest="40" 
+                                             HorizontalOptions="End"> 
+                                             <Image IsVisible="true" IsEnabled="true"  InputTransparent="false" 
+                                            x:Name="gps_icon" HeightRequest="48"  WidthRequest="48" 
+                                            Margin="12,0,0,0"  
+                                            Scale="1" 
+                                            Source="gps_icon.png"  
+                                            HorizontalOptions="End">
+
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer  x:Name="gps_icon_button"  NumberOfTapsRequired="1" />
+                                            </Image.GestureRecognizers >       
+                                            </Image>
+
+                                   
+                                     </StackLayout>
+                                    
+                                    
+                                </StackLayout>
+
+                                
+                                  <!-- MTU Location -->
+
+
+                                  <StackLayout >  
+                                      <Label Text="MTU Location" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="mtuLocation" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
+                                  </StackLayout>
+
+
+                                
+                                   <!--  Meter Location -->
+
+
+                                  <StackLayout >  
+                                      <Label Text="Meter Location" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="meterLocation" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
+                                  </StackLayout>
+
+                              
+
+                                 <!--  Construction -->
+
+
+                                  <StackLayout >  
+                                      <Label Text="Construction" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,128" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="construction" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
+                                  </StackLayout>
+
+
+
+
 
 
                             </StackLayout>
@@ -655,6 +816,19 @@
                             
                                   
 
+
+
+                            </StackLayout>
+                          
+                            
+                                  
+
+
+
+
+
+
+                            
 
 
                             

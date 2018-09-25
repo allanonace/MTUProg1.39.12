@@ -311,6 +311,8 @@
     <AndroidResource Include="Resources\drawable-nodpi\turnoff_icon.png" />
     <AndroidResource Include="Resources\drawable-nodpi\user_menu_icon.png" />
     <AndroidResource Include="Resources\drawable-nodpi\aclara_icon_app.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\gps_icon.png" />
+    <AndroidResource Include="Resources\drawable\gps_icon.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable\" />
