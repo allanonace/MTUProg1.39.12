@@ -177,15 +177,15 @@
                                 <RowDefinition Height="48"></RowDefinition>
                             </Grid.RowDefinitions>
 
-                             <Label  x:Name="port1label" Margin="0,0,0,0" Grid.Column="0" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="22" 
+                             <Label  WidthRequest="100" HeightRequest="46" x:Name="port1label" Margin="0,0,0,0" Grid.Column="0" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="22" 
                                     TextColor="#6aa2b8" Text="Port 1"  Opacity="1" > 
                              </Label>
                                 
-                             <Label x:Name="port2label" Margin="0,0,0,0" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="19" 
+                             <Label x:Name="port2label" WidthRequest="100" HeightRequest="46" Margin="0,0,0,0" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19" 
                                     TextColor="#6aa2b8" Text="Port 2" Opacity="0.5"  > 
                                 
                              </Label>
-                             <Label x:Name="misclabel" Margin="0,0,0,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" FontSize="19" 
+                             <Label x:Name="misclabel" WidthRequest="100" HeightRequest="46" Margin="0,0,0,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19" 
                                     TextColor="#6aa2b8" Text="Misc"  Opacity="0.5"   > 
                                   
                              </Label>
@@ -196,8 +196,8 @@
                             
                     </StackLayout>
             
-                    <ScrollView  Margin="0,-6,0,-6"  >
-                             <StackLayout Margin="12,0,12,0"> 
+                    <ScrollView   Margin="0,-6,0,-6"  >
+                             <StackLayout  IsVisible="false" Margin="12,0,12,0"> 
 
                                   <Label Margin="0,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
                                 
@@ -274,78 +274,7 @@
 
                            
                                        
-                                  <!--  Read Inverval -->
-
-
-                                  <StackLayout >  
-                                      <Label Text="Read Inverval" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
-                                             />
-                                          
-                                      
-                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        
-                                                         <Controls:BorderlessPicker x:Name="pickerReadInterval" Title="" 
-                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
-                                                           />
-                                                    </StackLayout>
-                                             </Frame> 
-                                        
-                                    </Frame>
-                                    
-                                  </StackLayout>
-
-                                
-
-                                  <!--  Snap Reads -->
-
-                                 <StackLayout >  
-                                  <Label Text="Snap Reads" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
-                                         />
-                                      
-                                  
-                                 <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                      <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                                <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                    
-                                                     <Controls:BorderlessPicker x:Name="pickerSnapReads" Title="" 
-                                                          HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                          SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
-                                                       />
-                                                </StackLayout>
-                                         </Frame> 
-                                        
-                                    </Frame>
-                                    
-                                  </StackLayout>
-                                
-
-
-                                  <!--  2-Way -->
-
-
-
-                                 <StackLayout >  
-                                      <Label Text="2-Way" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
-                                             />
-                                          
-                                      
-                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        
-                                                         <Controls:BorderlessPicker x:Name="pickerTwoWay" Title="" 
-                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
-                                                           />
-                                                    </StackLayout>
-                                             </Frame> 
-                                            
-                                        </Frame>
-                                    
-                                  </StackLayout>
+                                 
 
                                 
 
@@ -378,6 +307,188 @@
                                 
                              </StackLayout >  
 
+
+
+
+                           <!--
+
+
+                           Port 1 
+
+
+
+                            --> 
+
+
+
+                            
+                            <StackLayout  IsVisible="true" Margin="12,0,12,0"> 
+
+                                  <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+
+
+                                   <!-- PORT ID -->
+                                   <Label Text="Service Port ID" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                        
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="servicePortId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+
+
+
+                               
+
+                                
+                                    <!-- Field Order -->
+                                     <Label Text="Field Order" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="fieldOrder" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+
+                              
+                                     <!-- Meter Number -->
+                                     <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="meterNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+
+                                
+                                    <StackLayout Margin="0,0,0,0" >
+
+                                        <StackLayout 
+                                            HorizontalOptions="FillAndExpand" 
+                                            Margin="0,4,0,0"
+                                            x:Name="EntriesStackLayout">
+                                        </StackLayout>
+
+                                  </StackLayout>
+
+                                   <!--  Read Inverval -->
+
+
+                                  <StackLayout >  
+                                      <Label Text="Read Inverval" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="pickerReadInterval" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
+                                  </StackLayout>
+
+                                
+
+                                   <!--  Snap Reads -->
+
+                                 <StackLayout >  
+                                  <Label Text="Snap Reads" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                         />
+                                      
+                                  
+                                 <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                      <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                      <!-- PORT ID -->
+                                   <Label Text="10" Margin="0,4,0,0" x:Name="sliderValue"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
+                                             />
+                                                     <StackLayout  
+                                                    HorizontalOptions="FillAndExpand" 
+                                                    Margin="0,4,0,4"
+                                                    HeightRequest="40" 
+                                                    x:Name="IntegerSlider">
+                                                </StackLayout>
+
+                                                </StackLayout>
+                                         </Frame> 
+                                        
+                                    </Frame>
+                                    
+                                  </StackLayout>
+                                
+
+
+
+                                
+                                  <!--  2-Way -->
+
+
+
+                                 <StackLayout >  
+                                      <Label Text="2-Way" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,24" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="pickerTwoWay" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                            
+                                        </Frame>
+                                    
+                                  </StackLayout>
+
+                                
+                             </StackLayout >  
+
+
+
+
+
+                                  
+
+
+
+                            
                           </ScrollView >
 
                          <Label  HeightRequest="20" Margin="12,0,0,0" FontAttributes="Bold" Text="HEX Value:"
@@ -399,7 +510,7 @@
                              
 
 
-                               <Label   x:Name="label_read" Margin="17,22,0,44" FontSize="21" TextColor="White" 
+                               <Label   x:Name="label_read" Margin="17,32,0,44" FontSize="21" TextColor="White" 
                                         Text="Push Button to START" > </Label>
     
                               
@@ -412,11 +523,11 @@
 
 
 
-                 <StackLayout  Margin="0,-174,0,20" 
+                 <StackLayout  Margin="0,-194,0,20" 
                                              HorizontalOptions="End"> 
                                  <Image IsVisible="true" IsEnabled="true"  InputTransparent="false"
                                 x:Name="bg_read_mtu_button_img" HeightRequest="96"
-                                Margin="0,0,20,20"  
+                                Margin="0,0,20,30"  
                                 Scale="1" 
                                 Source="add_mtu_btn.png"  
                                 HorizontalOptions="End">

@@ -21,6 +21,23 @@ namespace aclara_meters.view
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
 
+        private List<string> picker_List_Vendor;
+        private List<string> picker_List_Model;
+        private List<string> picker_List_Name;
+
+        private enum Colors
+        {
+            Blanco = 0,
+            Negro = 1,
+            Plata = 2,
+            Gris = 3,
+            Azul = 4,
+            Rojo = 5,
+            Beige = 6,
+            Amarillo = 7,
+            Verde = 8
+        };
+
         public AclaraViewAddMTU()
         {
             InitializeComponent();
@@ -98,7 +115,7 @@ namespace aclara_meters.view
             }
 
             //Now I am given ItemsSorce to the Pickers
-            pickerSnapReads.ItemsSource = objStringList;
+           // pickerSnapReads.ItemsSource = objStringList;
         }
 
         private void InitPickerTwoWay()
@@ -358,8 +375,547 @@ namespace aclara_meters.view
 
             InitializeLowerbarLabel();
 
+            InitializeBlocks();
+        }
+
+        private void InitializeBlocks()
+        {
+            ColectionElementsPort1();
+        }
+
+
+
+        private void ColectionElementsPort1()
+        {
+            /*******************************************//*******************************************//*******************************************/
+            /*******************************************/
+            /**                  MARCA [0]            **/
+
+            //Listado de los Selectores
+            picker_List_Vendor = new List<string>();
+
+            picker_List_Vendor.Add("Ferrari");
+            picker_List_Vendor.Add("Renault");
+            picker_List_Vendor.Add("Toyota");
+            picker_List_Vendor.Add("BMW");
+            picker_List_Vendor.Add("Honda");
+
+            Frame fm1_vendor = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(0, 4, 0, 0),
+                BackgroundColor = Color.FromHex("#7a868c")
+            };
+
+
+            Frame fm2_vendor = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(-7, -7, -7, -7),
+                BackgroundColor = Color.White
+            };
+
+            StackLayout st_vendor = new StackLayout()
+            {
+                Orientation = StackOrientation.Horizontal,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Margin = new Thickness(1, 1, 1, 1),
+                BackgroundColor = Color.White
+            };
+
+            // Generamos el Selector
+            BorderlessPicker picker = new BorderlessPicker()
+            {
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                HeightRequest = 40, 
+                FontSize=17,
+                ItemsSource = picker_List_Vendor
+            };
+
+            //Detectar el Selector clickado
+            picker.SelectedIndexChanged += PickerMarcas_SelectedIndexChanged;
+
+
+            //Creamos el Bloque con toda la informacion
+            StackLayout ElementoBloque = new StackLayout()
+            {
+                StyleId = "bloque" + 1
+            };
+
+            //Texto del titulo
+            Label textoTitulo = new Label()
+            {
+                Text = "Vendor",
+                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                Margin = new Thickness(0, 4, 0, 0)
+            };
+
+            //Añadimos el titulo y el selector al bloque
+
+            //Texto del titulo
+            Label textoTituloCamposGrandes = new Label()
+            {
+                Text = "Vistas de Colección",
+                Font = Font.SystemFontOfSize(NamedSize.Large).WithAttributes(FontAttributes.Bold),
+                IsVisible = false,
+                Margin = new Thickness(0, 8, 0, 0)
+                   
+            };
+
+
+            st_vendor.Children.Add(picker);
+            fm2_vendor.Content = st_vendor;
+            fm1_vendor.Content = fm2_vendor;
+
+            ElementoBloque.Children.Add(textoTituloCamposGrandes);
+            ElementoBloque.Children.Add(textoTitulo);
+
+            // Picker to    fm1_vendor --> fm2_vendor --> st_vendor --> picker
+            ElementoBloque.Children.Add(fm1_vendor);
+
+            //Introducimos el bloque en la vista
+            EntriesStackLayout.Children.Add(ElementoBloque);
+
+            /*******************************************//*******************************************//*******************************************/
+            /*******************************************/
+            /**                  MODELO  [1]          **/
+            //Listado de los Selectores
+            picker_List_Model = new List<string>();
+
+            picker_List_Model.Add("F100");
+            picker_List_Model.Add("F101");
+            picker_List_Model.Add("F102");
+            picker_List_Model.Add("F103");
+
+            picker_List_Model.Add("R100");
+            picker_List_Model.Add("R101");
+            picker_List_Model.Add("R102");
+            picker_List_Model.Add("R103");
+
+            picker_List_Model.Add("T100");
+            picker_List_Model.Add("T101");
+            picker_List_Model.Add("T102");
+            picker_List_Model.Add("T103");
+
+            picker_List_Model.Add("B100");
+            picker_List_Model.Add("B101");
+            picker_List_Model.Add("B102");
+            picker_List_Model.Add("B103");
+
+            picker_List_Model.Add("H100");
+            picker_List_Model.Add("H101");
+            picker_List_Model.Add("H102");
+            picker_List_Model.Add("H103");
+
+
+
+
+            Frame fm1_model = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(0, 4, 0, 0),
+                BackgroundColor = Color.FromHex("#7a868c")
+            };
+
+
+            Frame fm2_model = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(-7, -7, -7, -7),
+                BackgroundColor = Color.White
+            };
+
+            StackLayout st_model = new StackLayout()
+            {
+                Orientation = StackOrientation.Horizontal,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Margin = new Thickness(1, 1, 1, 1),
+                BackgroundColor = Color.White
+            };
+
+  
+
+            // Generamos el Selector
+            BorderlessPicker pickerModelos = new BorderlessPicker()
+            {
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                HeightRequest = 40,
+                FontSize = 17,
+                ItemsSource = picker_List_Model,
+                StyleId = "pickerModelos"
+            };
+
+            //Detectar el Selector clickado
+            pickerModelos.SelectedIndexChanged += PickerModelos_SelectedIndexChanged;
+
+            //Creamos el Bloque con toda la informacion
+            StackLayout ElementoBloqueModelo = new StackLayout()
+            {
+                StyleId = "bloque" + 2
+            };
+
+            //Texto del titulo
+            Label textoTituloModelo = new Label()
+            {
+                Text = "Model",
+                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                Margin = new Thickness(0, 4, 0, 0)
+            };
+
+
+            st_model.Children.Add(pickerModelos);
+            fm2_model.Content = st_model;
+            fm1_model.Content = fm2_model;
+
+
+            //Añadimos el titulo y el selector al bloque
+            ElementoBloqueModelo.Children.Add(textoTituloModelo);
+            ElementoBloqueModelo.Children.Add(fm1_model);
+
+            //Introducimos el bloque en la vista
+            EntriesStackLayout.Children.Add(ElementoBloqueModelo);
+
+            /*******************************************//*******************************************//*******************************************/
+            /*******************************************/
+            /**                  COLOR  [2]          **/
+            //Listado de los Selectores
+            picker_List_Name = new List<string>();
+
+            picker_List_Name.Add("Blanco");
+            picker_List_Name.Add("Negro");
+            picker_List_Name.Add("Plata");
+            picker_List_Name.Add("Gris");
+            picker_List_Name.Add("Azul");
+            picker_List_Name.Add("Rojo");
+            picker_List_Name.Add("Beige");
+            picker_List_Name.Add("Amarillo");
+            picker_List_Name.Add("Verde");
+
+
+
+            Frame fm1_name = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(0, 4, 0, 0),
+                BackgroundColor = Color.FromHex("#7a868c")
+            };
+
+
+            Frame fm2_name = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(-7, -7, -7, -7),
+                BackgroundColor = Color.White
+            };
+
+            StackLayout st_name = new StackLayout()
+            {
+                Orientation = StackOrientation.Horizontal,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Margin = new Thickness(1, 1, 1, 1),
+                BackgroundColor = Color.White
+            };
+
+
+
+            // Generamos el Selector
+            BorderlessPicker pickerColor = new BorderlessPicker()
+            {
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                HeightRequest = 40,
+                FontSize = 17,
+                ItemsSource = picker_List_Name,
+                StyleId = "pickerColor"
+            };
+
+            //Detectar el Selector clickado
+            pickerColor.SelectedIndexChanged += PickerColor_SelectedIndexChanged;
+
+            //Creamos el Bloque con toda la informacion
+            StackLayout ElementoBloqueColor = new StackLayout()
+            {
+                StyleId = "bloque" + 3
+            };
+
+            //Texto del titulo
+            Label textoTituloColor = new Label()
+            {
+                Text = "Name",
+                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                Margin = new Thickness(0, 4, 0, 0)
+            };
+
+
+
+
+            st_name.Children.Add(pickerColor);
+            fm2_name.Content = st_name;
+            fm1_name.Content = fm2_name;
+
+
+
+            //Añadimos el titulo y el selector al bloque
+            ElementoBloqueColor.Children.Add(textoTituloColor);
+            ElementoBloqueColor.Children.Add(fm1_name);
+
+            //Introducimos el bloque en la vista
+            EntriesStackLayout.Children.Add(ElementoBloqueColor);
+
+            ElementoBloqueColor.IsVisible = false;
+            ElementoBloqueModelo.IsVisible = false;
+
+
+
+            StepValue = 1.0;
+
+            SliderMain = new Slider
+            {
+                Minimum = 0.0f,
+                Maximum = 20.0f,
+                HeightRequest = 40,
+                Value = 10.0f,
+                Margin = new Thickness(0, -12, 0, 0),
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                VerticalOptions = LayoutOptions.CenterAndExpand
+            };
+
+            SliderMain.ValueChanged += OnSliderValueChanged;
+
+            IntegerSlider.Children.Add(new StackLayout
+            {
+                Children = { SliderMain },
+                Orientation = StackOrientation.Vertical,
+                HeightRequest = 40,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                VerticalOptions = LayoutOptions.CenterAndExpand
+            });
 
         }
+
+
+        void OnSliderValueChanged(object sender, ValueChangedEventArgs e)
+        {
+            var newStep = Math.Round(e.NewValue / StepValue);
+
+            SliderMain.Value = newStep * StepValue;
+
+            sliderValue.Text = SliderMain.Value.ToString();
+
+        }
+
+        private double StepValue;
+        private Slider SliderMain;
+
+
+        private void PickerMarcas_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int j = ((BorderlessPicker)sender).SelectedIndex;
+            Console.WriteLine("Elemento Picker : " + j);
+
+            List<string> filter_result = new List<string>();
+
+            StackLayout bloque2 = (StackLayout)EntriesStackLayout.Children[1];
+
+
+            Frame tempframeMarca = (Frame) bloque2.Children[1];
+            Frame tempFrame2Marca = (Frame) tempframeMarca.Content;
+            StackLayout tempStackMarca = (StackLayout) tempFrame2Marca.Content;
+
+
+            BorderlessPicker PickerToModify = (BorderlessPicker) tempStackMarca.Children[0];
+
+            if (j != -1)
+            {
+                int i = 0;
+
+                int cuantosProcesar = picker_List_Model.Count - 1;
+                switch (j)
+                {
+                    case 0:
+                        Console.WriteLine("Ferrari Selected");
+                        for (i = 0; i < cuantosProcesar; i++)
+                        {
+                            if (picker_List_Model[i].StartsWith("F"))
+                            {
+                                filter_result.Add(picker_List_Model[i]);
+                            }
+                        }
+
+                        break;
+
+                    case 1:
+                        Console.WriteLine("Renault Selected");
+                        for (i = 0; i < cuantosProcesar; i++)
+                        {
+                            if (picker_List_Model[i].StartsWith("R"))
+                            {
+                                filter_result.Add(picker_List_Model[i]);
+                            }
+                        }
+
+                        break;
+
+                    case 2:
+                        Console.WriteLine("Toyota Selected");
+                        for (i = 0; i < cuantosProcesar; i++)
+                        {
+                            if (picker_List_Model[i].StartsWith("T"))
+                            {
+                                filter_result.Add(picker_List_Model[i]);
+                            }
+                        }
+
+                        break;
+
+                    case 3:
+                        Console.WriteLine("BMW Selected");
+                        for (i = 0; i < cuantosProcesar; i++)
+                        {
+                            if (picker_List_Model[i].StartsWith("B"))
+                            {
+                                filter_result.Add(picker_List_Model[i]);
+                            }
+                        }
+
+                        break;
+
+
+                    case 4:
+                        Console.WriteLine("Honda Selected");
+                        for (i = 0; i < cuantosProcesar; i++)
+                        {
+                            if (picker_List_Model[i].StartsWith("H"))
+                            {
+                                filter_result.Add(picker_List_Model[i]);
+                            }
+                        }
+
+                        break;
+                }
+
+                try
+                {
+                    PickerToModify.ItemsSource = filter_result;
+                    EntriesStackLayout.Children[1].IsVisible = true;
+                    EntriesStackLayout.Children[2].IsVisible = false;
+                }
+                catch (Exception e3)
+                {
+                    EntriesStackLayout.Children[1].IsVisible = false;
+                    EntriesStackLayout.Children[2].IsVisible = false;
+                    Console.WriteLine(e3.StackTrace);
+                }
+            }
+        }
+
+        private void PickerColor_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int j = ((BorderlessPicker)sender).SelectedIndex;
+            Console.WriteLine("Elemento Picker : " + j);
+
+            List<string> itemsColores = (List<string>)((BorderlessPicker)sender).ItemsSource;
+
+
+
+            try
+            {
+                Console.WriteLine(itemsColores[j] + " Selected");
+            }
+            catch (Exception n2)
+            {
+                Console.WriteLine(n2.StackTrace);
+            }
+
+        }
+
+        private void PickerModelos_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int i = ((BorderlessPicker)sender).SelectedIndex;
+            Console.WriteLine("Elemento Picker : " + i);
+
+            List<string> filter_result = new List<string>();
+
+            StackLayout bloque2 = (StackLayout)EntriesStackLayout.Children[2];
+
+            Frame tempframeMarca = (Frame)bloque2.Children[1];
+            Frame tempFrame2Marca = (Frame)tempframeMarca.Content;
+            StackLayout tempStackMarca = (StackLayout)tempFrame2Marca.Content;
+
+
+            BorderlessPicker PickerToModify = (BorderlessPicker)tempStackMarca.Children[0];
+
+            List<string> valores = (List<string>)((BorderlessPicker)sender).ItemsSource;
+
+            if (i != -1)
+            {
+                if (valores[0].StartsWith("F"))
+                {
+                    filter_result.Add(picker_List_Name[(int)Colors.Beige]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Azul]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Amarillo]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Gris]);
+                }
+
+                if (valores[0].StartsWith("R"))
+                {
+                    filter_result.Add(picker_List_Name[(int)Colors.Rojo]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Verde]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Amarillo]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Negro]);
+                }
+
+                if (valores[0].StartsWith("T"))
+                {
+                    filter_result.Add(picker_List_Name[(int)Colors.Plata]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Negro]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Rojo]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Azul]);
+                }
+
+                if (valores[0].StartsWith("B"))
+                {
+                    filter_result.Add(picker_List_Name[(int)Colors.Plata]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Azul]);
+                }
+
+                if (valores[0].StartsWith("H"))
+                {
+                    filter_result.Add(picker_List_Name[(int)Colors.Rojo]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Verde]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Amarillo]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Negro]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Azul]);
+                    filter_result.Add(picker_List_Name[(int)Colors.Gris]);
+                }
+
+                try
+                {
+                    PickerToModify.ItemsSource = filter_result;
+                    EntriesStackLayout.Children[2].IsVisible = true;
+                    EntriesStackLayout.Children[1].IsVisible = true;
+                }
+                catch (Exception e3)
+                {
+                    PickerToModify.ItemsSource = filter_result;
+                    EntriesStackLayout.Children[1].IsVisible = false;
+                    EntriesStackLayout.Children[2].IsVisible = false;
+                    Console.WriteLine(e3.StackTrace);
+                }
+            }
+
+        }
+    
+
+
+
+
+
 
         private void LoadPhoneUI()
         {
@@ -405,7 +961,6 @@ namespace aclara_meters.view
             replacemeter_cancel.Tapped += ReplaceMeterCancelTapped;
             meter_ok.Tapped += MeterOkTapped;
             meter_cancel.Tapped += MeterCancelTapped;
-
 
             port1label.GestureRecognizers.Add(new TapGestureRecognizer
             {
