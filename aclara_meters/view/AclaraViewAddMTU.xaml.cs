@@ -25,17 +25,17 @@ namespace aclara_meters.view
         private List<string> picker_List_Model;
         private List<string> picker_List_Name;
 
-        private enum Colors
+        private enum Names
         {
-            Blanco = 0,
-            Negro = 1,
-            Plata = 2,
-            Gris = 3,
-            Azul = 4,
-            Rojo = 5,
-            Beige = 6,
-            Amarillo = 7,
-            Verde = 8
+            Name1 = 0,
+            Name2 = 1,
+            Name3 = 2,
+            Name4 = 3,
+            Name5 = 4,
+            Name6 = 5,
+            Name7 = 6,
+            Name8 = 7,
+            Name9 = 8
         };
 
         public AclaraViewAddMTU()
@@ -59,10 +59,18 @@ namespace aclara_meters.view
             int selectedIndex = picker.SelectedIndex;
         }
 
+
+
+        private void PickerSelection2(object sender, EventArgs e)
+        {
+            var picker = (Picker)sender;
+            int selectedIndex = picker.SelectedIndex;
+        }
+
+
         private void InitPickerList()
         {
             InitPickerReadInterval();
-            InitPickerSnapReads();
             InitPickerTwoWay();
         }
 
@@ -74,9 +82,9 @@ namespace aclara_meters.view
             //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
             ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
             {
-                new PickerItems { Name = "Read Interval 1" },
-                new PickerItems { Name = "Read Interval 2" },
-                new PickerItems { Name = "Read Interval 3" }
+                new PickerItems { Name = "6 Hours" },
+                new PickerItems { Name = "12 Hours" },
+                new PickerItems { Name = "24 Hours" }
             };
 
             /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
@@ -92,31 +100,6 @@ namespace aclara_meters.view
             pickerReadInterval.ItemsSource = objStringList;
         }
 
-        private void InitPickerSnapReads()
-        {
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList = new ObservableCollection<string>();
-
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
-            {
-                new PickerItems { Name = "Snap Reads 1" },
-                new PickerItems { Name = "Snap Reads 2" },
-                new PickerItems { Name = "Snap Reads 3" }
-            };
-
-            /* Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-
-            foreach (var item in objClassList)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList.Add(item.Name);
-            }
-
-            //Now I am given ItemsSorce to the Pickers
-           // pickerSnapReads.ItemsSource = objStringList;
-        }
 
         private void InitPickerTwoWay()
         {
@@ -126,9 +109,9 @@ namespace aclara_meters.view
             //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
             ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
             {
-                new PickerItems { Name = "2-Way 1" },
-                new PickerItems { Name = "2-Way 2" },
-                new PickerItems { Name = "2-Way 3" }
+                new PickerItems { Name = "Slow" },
+                new PickerItems { Name = "Moderate" },
+                new PickerItems { Name = "Fast" }
             };
 
             /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
@@ -394,11 +377,9 @@ namespace aclara_meters.view
             //Listado de los Selectores
             picker_List_Vendor = new List<string>();
 
-            picker_List_Vendor.Add("Ferrari");
-            picker_List_Vendor.Add("Renault");
-            picker_List_Vendor.Add("Toyota");
-            picker_List_Vendor.Add("BMW");
-            picker_List_Vendor.Add("Honda");
+            picker_List_Vendor.Add("Vendor 1");
+            picker_List_Vendor.Add("Vendor 2");
+            picker_List_Vendor.Add("Vendor 3");
 
             Frame fm1_vendor = new Frame()
             {
@@ -484,31 +465,20 @@ namespace aclara_meters.view
             //Listado de los Selectores
             picker_List_Model = new List<string>();
 
-            picker_List_Model.Add("F100");
-            picker_List_Model.Add("F101");
-            picker_List_Model.Add("F102");
-            picker_List_Model.Add("F103");
+            picker_List_Model.Add("Vendor 1 Model 1");
+            picker_List_Model.Add("Vendor 1 Model 2");
+            picker_List_Model.Add("Vendor 1 Model 3");
+            picker_List_Model.Add("Vendor 1 Model 4");
 
-            picker_List_Model.Add("R100");
-            picker_List_Model.Add("R101");
-            picker_List_Model.Add("R102");
-            picker_List_Model.Add("R103");
+            picker_List_Model.Add("Vendor 2 Model 1");
+            picker_List_Model.Add("Vendor 2 Model 2");
+            picker_List_Model.Add("Vendor 2 Model 3");
+            picker_List_Model.Add("Vendor 2 Model 4");
 
-            picker_List_Model.Add("T100");
-            picker_List_Model.Add("T101");
-            picker_List_Model.Add("T102");
-            picker_List_Model.Add("T103");
-
-            picker_List_Model.Add("B100");
-            picker_List_Model.Add("B101");
-            picker_List_Model.Add("B102");
-            picker_List_Model.Add("B103");
-
-            picker_List_Model.Add("H100");
-            picker_List_Model.Add("H101");
-            picker_List_Model.Add("H102");
-            picker_List_Model.Add("H103");
-
+            picker_List_Model.Add("Vendor 3 Model 1");
+            picker_List_Model.Add("Vendor 3 Model 2");
+            picker_List_Model.Add("Vendor 3 Model 3");
+            picker_List_Model.Add("Vendor 3 Model 4");
 
 
 
@@ -585,15 +555,15 @@ namespace aclara_meters.view
             //Listado de los Selectores
             picker_List_Name = new List<string>();
 
-            picker_List_Name.Add("Blanco");
-            picker_List_Name.Add("Negro");
-            picker_List_Name.Add("Plata");
-            picker_List_Name.Add("Gris");
-            picker_List_Name.Add("Azul");
-            picker_List_Name.Add("Rojo");
-            picker_List_Name.Add("Beige");
-            picker_List_Name.Add("Amarillo");
-            picker_List_Name.Add("Verde");
+            picker_List_Name.Add("Name 1");
+            picker_List_Name.Add("Name 2");
+            picker_List_Name.Add("Name 3");
+            picker_List_Name.Add("Name 4");
+            picker_List_Name.Add("Name 5");
+            picker_List_Name.Add("Name 6");
+            picker_List_Name.Add("Name 7");
+            picker_List_Name.Add("Name 8");
+            picker_List_Name.Add("Name 9");
 
 
 
@@ -680,7 +650,7 @@ namespace aclara_meters.view
                 Maximum = 20.0f,
                 HeightRequest = 40,
                 Value = 10.0f,
-                Margin = new Thickness(0, -12, 0, 0),
+                Margin = new Thickness(0, -20, 0, 0),
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 VerticalOptions = LayoutOptions.CenterAndExpand
             };
@@ -738,10 +708,10 @@ namespace aclara_meters.view
                 switch (j)
                 {
                     case 0:
-                        Console.WriteLine("Ferrari Selected");
+                        Console.WriteLine("Vendor 1 Selected");
                         for (i = 0; i < cuantosProcesar; i++)
                         {
-                            if (picker_List_Model[i].StartsWith("F"))
+                            if (picker_List_Model[i].Contains("Vendor 1"))
                             {
                                 filter_result.Add(picker_List_Model[i]);
                             }
@@ -750,10 +720,10 @@ namespace aclara_meters.view
                         break;
 
                     case 1:
-                        Console.WriteLine("Renault Selected");
+                        Console.WriteLine("Vendor 2 Selected");
                         for (i = 0; i < cuantosProcesar; i++)
                         {
-                            if (picker_List_Model[i].StartsWith("R"))
+                            if (picker_List_Model[i].Contains("Vendor 2"))
                             {
                                 filter_result.Add(picker_List_Model[i]);
                             }
@@ -762,41 +732,17 @@ namespace aclara_meters.view
                         break;
 
                     case 2:
-                        Console.WriteLine("Toyota Selected");
+                        Console.WriteLine("Vendor 3 Selected");
                         for (i = 0; i < cuantosProcesar; i++)
                         {
-                            if (picker_List_Model[i].StartsWith("T"))
+                            if (picker_List_Model[i].Contains("Vendor 3"))
                             {
                                 filter_result.Add(picker_List_Model[i]);
                             }
                         }
 
                         break;
-
-                    case 3:
-                        Console.WriteLine("BMW Selected");
-                        for (i = 0; i < cuantosProcesar; i++)
-                        {
-                            if (picker_List_Model[i].StartsWith("B"))
-                            {
-                                filter_result.Add(picker_List_Model[i]);
-                            }
-                        }
-
-                        break;
-
-
-                    case 4:
-                        Console.WriteLine("Honda Selected");
-                        for (i = 0; i < cuantosProcesar; i++)
-                        {
-                            if (picker_List_Model[i].StartsWith("H"))
-                            {
-                                filter_result.Add(picker_List_Model[i]);
-                            }
-                        }
-
-                        break;
+                       
                 }
 
                 try
@@ -854,44 +800,28 @@ namespace aclara_meters.view
 
             if (i != -1)
             {
-                if (valores[0].StartsWith("F"))
+                if (valores[0].Contains("Vendor 1"))
                 {
-                    filter_result.Add(picker_List_Name[(int)Colors.Beige]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Azul]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Amarillo]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Gris]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name1]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name2]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name3]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name4]);
                 }
 
-                if (valores[0].StartsWith("R"))
+                if (valores[0].Contains("Vendor 2"))
                 {
-                    filter_result.Add(picker_List_Name[(int)Colors.Rojo]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Verde]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Amarillo]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Negro]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name3]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name4]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name5]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name6]);
                 }
 
-                if (valores[0].StartsWith("T"))
+                if (valores[0].Contains("Vendor 3"))
                 {
-                    filter_result.Add(picker_List_Name[(int)Colors.Plata]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Negro]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Rojo]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Azul]);
-                }
-
-                if (valores[0].StartsWith("B"))
-                {
-                    filter_result.Add(picker_List_Name[(int)Colors.Plata]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Azul]);
-                }
-
-                if (valores[0].StartsWith("H"))
-                {
-                    filter_result.Add(picker_List_Name[(int)Colors.Rojo]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Verde]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Amarillo]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Negro]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Azul]);
-                    filter_result.Add(picker_List_Name[(int)Colors.Gris]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name6]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name7]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name8]);
+                    filter_result.Add(picker_List_Name[(int)Names.Name9]);
                 }
 
                 try
@@ -911,12 +841,6 @@ namespace aclara_meters.view
 
         }
     
-
-
-
-
-
-
         private void LoadPhoneUI()
         {
             background_scan_page.Margin = new Thickness(0, 0, 0, 0);
@@ -988,6 +912,10 @@ namespace aclara_meters.view
             port1label.FontSize = 19;
             misclabel.FontSize = 22;
             port2label.FontSize = 19;
+
+            port1view.IsVisible = false;
+            port2view.IsVisible = false;
+
         }
 
         private void port2_command()
@@ -1000,6 +928,11 @@ namespace aclara_meters.view
             misclabel.FontSize = 19;
             port2label.FontSize = 22;
 
+            port1view.IsVisible = false;
+            port2view.IsVisible = true;
+
+
+
         }
 
         private void port1_command()
@@ -1011,6 +944,10 @@ namespace aclara_meters.view
             port1label.FontSize = 22;
             misclabel.FontSize = 19;
             port2label.FontSize = 19;
+
+            port1view.IsVisible = true;
+            port2view.IsVisible = false;
+
         }
 
 
