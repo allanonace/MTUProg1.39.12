@@ -142,7 +142,7 @@ namespace ble_library
         private byte[] dynamicPass;
         private bool isPaired = true;
         private bool isScanning;
-        private int cipheredDataSentCounter;
+        private byte cipheredDataSentCounter;
 
         private byte[] writeSavedBuffer;
         private int writeSavedOffset;
@@ -373,24 +373,23 @@ namespace ble_library
                 }
          
                 byte frameId = 0x02;
-                byte frameCount = (byte) cipheredDataSentCounter;
                 byte dataCount = (byte) count;
 
-                ret = new byte[] { frameId, frameCount, dataCount }.ToArray().
+                ret = new byte[] { frameId, cipheredDataSentCounter, dataCount }.ToArray().
                                         Concat(AES_Encrypt(dataToCipher, dynamicPass)).
                                         Concat(new byte[] { 0x00 }).ToArray();
+
+                cipheredDataSentCounter++; 
+                if (cipheredDataSentCounter == 0)
+                {
+                    cipheredDataSentCounter = 1;
+                }
 
                 await gattServer_connection.WriteCharacteristicValue(
                     new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                     new Guid("00000002-0000-1000-8000-00805f9b34fb"),
                     ret
                 );
-
-                cipheredDataSentCounter++; 
-                if (cipheredDataSentCounter > 255)
-                {
-                    cipheredDataSentCounter = 1;
-                }
             }
             catch (GattException ex)
             {
@@ -529,6 +528,7 @@ catch (Exception e)
                     }
                     isConnected = CONNECTED;
                     connectionError = NO_ERROR;
+                    cipheredDataSentCounter = 1;
                 }
             }
         }
@@ -540,8 +540,12 @@ catch (Exception e)
         {
             if(bytes.Skip(3).Take(1).ToArray().SequenceEqual(new byte[] { 0x01 }))
             {
-                int i = bytes.Skip(1).Take(1).ToArray().ToInt16();
-                cipheredDataSentCounter = i + 1;
+                cipheredDataSentCounter = bytes.Skip(1).Take(1).ToArray()[0];
+                cipheredDataSentCounter++;
+                if (cipheredDataSentCounter == 0)
+                {
+                    cipheredDataSentCounter = 1;
+                }
                 Write_Characteristic(writeSavedBuffer, writeSavedOffset, writeSavedCount);
             }
         }
