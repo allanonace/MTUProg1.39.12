@@ -150,7 +150,7 @@ namespace ble_library
         
         private ISettings saved_settings;
         private byte[] static_pass = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x2e };
-        private byte[] say_hi = { 0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00 };
+        private byte[] say_hi = { 0x48, 0x69, 0x2c, 0x49, 0x27, 0x6d, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00, 0x00, 0x00 };
 
 
         private byte[] batteryLevel;
@@ -646,6 +646,7 @@ catch (Exception e)
 
                 byte[] PassH_crypt = new byte[] { };
                 byte[] PassL_crypt = new byte[] { };
+                byte[] ticks = new byte[] { };
 
                 //Read Pass H data from Characteristic
                 PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
@@ -657,6 +658,12 @@ catch (Exception e)
                 PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
                     new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                     new Guid("00000042-0000-1000-8000-00805f9b34fb")
+                );
+
+                //Read Pass L data from Characteristic
+                ticks = await gattServer_connection.ReadCharacteristicValue(
+                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                    new Guid("00000044-0000-1000-8000-00805f9b34fb")
                 );
 
                 bool isOnState = true;
@@ -685,6 +692,7 @@ catch (Exception e)
                     dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
                     byte[] hi_msg;
 
+                    Array.Copy(ticks, 0, say_hi, 12, 4);
                     hi_msg = AES_Encrypt(say_hi, dynamicPass);
                   
                     await gattServer_connection.WriteCharacteristicValue(
@@ -736,6 +744,7 @@ catch (Exception e)
                     Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
                     Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
 
+                    Array.Copy(ticks, 0, say_hi, 12, 4);
                     hi_msg = AES_Encrypt(say_hi, dynamicPass);
                
                     await gattServer_connection.WriteCharacteristicValue(
