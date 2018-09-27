@@ -474,10 +474,90 @@ namespace aclara_meters.view
         {
             ColectionElementsPort1();
             ColectionElementsPort2();
-
+            InitMTULocationPicker();
+            InitMeterLocationPicker();
+            InitConstructionPicker();
         }
 
+        private void InitConstructionPicker()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
 
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Vinyl" },
+                new PickerItems { Name = "Wood" },
+                new PickerItems { Name = "Brick" },
+                new PickerItems { Name = "Aluminium" },
+                new PickerItems { Name = "Other" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            construction.ItemsSource = objStringList;
+        }
+
+        private void InitMeterLocationPicker()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Outside" },
+                new PickerItems { Name = "Inside" },
+                new PickerItems { Name = "Basement" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            meterLocation.ItemsSource = objStringList;
+        }
+
+        private void InitMTULocationPicker()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Outside" },
+                new PickerItems { Name = "Inside" },
+                new PickerItems { Name = "Basement" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            mtuLocation.ItemsSource = objStringList;
+        }
 
         private void ColectionElementsPort1()
         {
@@ -1549,7 +1629,6 @@ namespace aclara_meters.view
 
             mtuGeolocationLat.Text = position.Latitude.ToString();
             mtuGeolocationLong.Text = position.Longitude.ToString();
-
 
         }
 
