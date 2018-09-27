@@ -121,9 +121,16 @@ namespace aclara_meters.view
             //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
             ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
             {
-                new PickerItems { Name = "6 Hours" },
+                new PickerItems { Name = "24 Hours" },
                 new PickerItems { Name = "12 Hours" },
-                new PickerItems { Name = "24 Hours" }
+                new PickerItems { Name = "6 Hours" },
+                new PickerItems { Name = "4 Hours" },
+                new PickerItems { Name = "3 Hours" },
+                new PickerItems { Name = "2 Hours" },
+                new PickerItems { Name = "1 Hour" },
+                new PickerItems { Name = "30 Min" },
+                new PickerItems { Name = "20 Min" },
+                new PickerItems { Name = "15 Min" }
             };
 
             /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
@@ -148,10 +155,16 @@ namespace aclara_meters.view
             //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
             ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
             {
-                new PickerItems { Name = "6 Hours" },
-                new PickerItems { Name = "12 Hours" },
                 new PickerItems { Name = "24 Hours" },
-                new PickerItems { Name = "48 Hours" },
+                new PickerItems { Name = "12 Hours" },
+                new PickerItems { Name = "6 Hours" },
+                new PickerItems { Name = "4 Hours" },
+                new PickerItems { Name = "3 Hours" },
+                new PickerItems { Name = "2 Hours" },
+                new PickerItems { Name = "1 Hour" },
+                new PickerItems { Name = "30 Min" },
+                new PickerItems { Name = "20 Min" },
+                new PickerItems { Name = "15 Min" }
             };
 
             /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
