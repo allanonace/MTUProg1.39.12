@@ -456,7 +456,7 @@
 
 
 
-                                 <StackLayout  Margin="0,4,0,128"  >  
+                                 <StackLayout  Margin="0,4,0,148"  >  
                                       <Label Text="2-Way" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
@@ -623,7 +623,7 @@
 
 
 
-                                   <StackLayout  Margin="0,4,0,128"  > 
+                                   <StackLayout  Margin="0,4,0,148"  > 
                                       <Label Text="2-Way" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
@@ -791,7 +791,7 @@
                                              />
                                           
                                       
-                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,128" BackgroundColor="#7a868c"  >
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,148" BackgroundColor="#7a868c"  >
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
@@ -852,7 +852,7 @@
               </StackLayout>
 
 
-              <Grid Grid.Column="1" InputTransparent="true"  Grid.Row="0" Margin="-12,0,0,0" VerticalOptions="End"   HeightRequest="148"  
+              <Grid Grid.Column="1" InputTransparent="false"   Grid.Row="0" Margin="-12,0,0,0" VerticalOptions="End"   HeightRequest="148"  
                     >
 
 
@@ -866,10 +866,10 @@
                                     
                             </Grid.RowDefinitions>
                     
-               <StackLayout  Margin="0,46,0,0"   VerticalOptions="End">
+               <StackLayout  Margin="0,46,0,0" InputTransparent="true"  VerticalOptions="End">
                     <!-- LOWER BAR -->
                         
-                <StackLayout  IsVisible="true"  Margin="0,28,0,0"   HeightRequest="128" BackgroundColor="#6aa2b8"
+                <StackLayout  IsVisible="true"  Margin="0,28,0,0"   HeightRequest="128" BackgroundColor="#6aa2b8" 
                               >
                              
                              

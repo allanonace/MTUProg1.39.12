@@ -807,7 +807,7 @@ namespace aclara_meters.view
             //Texto del titulo
             Label textoTituloColor = new Label()
             {
-                Text = "Name",
+                Text = "Meter Type",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
@@ -1108,7 +1108,7 @@ namespace aclara_meters.view
             //Texto del titulo
             Label textoTituloColor2 = new Label()
             {
-                Text = "Name",
+                Text = "Meter Type",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
