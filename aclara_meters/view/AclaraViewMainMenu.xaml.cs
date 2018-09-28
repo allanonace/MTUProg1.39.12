@@ -303,7 +303,8 @@ namespace aclara_meters.view
             dialog_ReplaceMTUReplaceMeter_cancel.Tapped += dialog_ReplaceMTUReplaceMeter_cancelTapped;
 
 
-
+            dialog_AddMTU_ok.Tapped += dialog_AddMTU_okTapped;
+            dialog_AddMTU_cancel.Tapped += dialog_AddMTU_cancelTapped;
 
 
 
@@ -880,6 +881,27 @@ namespace aclara_meters.view
         }
 
 
+        void dialog_AddMTU_cancelTapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_AddMTU.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+        void dialog_AddMTU_okTapped(object sender, EventArgs e)
+        {
+            dialog_AddMTU.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
+        }
+
+
+
+
+
+
+
 
 
 
@@ -1307,8 +1329,21 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                navigationDrawerList.SelectedItem = null;
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
+
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+                dialog_turnoff_one.IsVisible = false;
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = false;
+                dialog_replacemeter_one.IsVisible = false;
+                dialog_meter_replace_one.IsVisible = false;
+
+                dialog_AddMTUAddMeter.IsVisible = false;
+                dialog_AddMTUReplaceMeter.IsVisible = false;
+                dialog_ReplaceMTUReplaceMeter.IsVisible = false;
+
+                dialog_AddMTU.IsVisible = true;
+
                 background_scan_page.Opacity = 1;
                 background_scan_page_detail.Opacity = 1;
 
