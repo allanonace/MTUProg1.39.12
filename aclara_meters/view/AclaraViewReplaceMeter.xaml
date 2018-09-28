@@ -8,7 +8,7 @@
                NavigationPage.HasBackButton="false"
                
                xmlns:Controls="clr-namespace:aclara_meters" 
-               x:Class="aclara_meters.view.AclaraViewAddMTU">
+               x:Class="aclara_meters.view.AclaraViewReplaceMeter">
 
 
    <RelativeLayout  IsVisible="true">
@@ -200,7 +200,7 @@
                     <ScrollView   Margin="0,-6,0,-6"  >
                              <StackLayout  IsVisible="false" Margin="12,0,12,0"> 
 
-                                  <Label Margin="0,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+                                  <Label Margin="0,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Replace Meter"  />
                                 
                                     <StackLayout Margin="0,0,0,0" >
 
@@ -249,7 +249,9 @@
                                     
                                   </StackLayout>
 
-           
+                                   
+                     
+                                    
                                   <!--  1. Vendor -->
 
 
@@ -323,7 +325,7 @@
                                   <StackLayout x:Name="port1view" IsVisible="true" Margin="12,0,12,0"> 
 
                               
-                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Replace Meter"  />
                              
                                           
                                    <!-- PORT ID -->
@@ -366,9 +368,10 @@
                                         
                                     </Frame>
 
-                              
-                                     <!-- Meter Number -->
-                                     <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+
+
+                                           
+                                      <Label Text="Old Meter #"  Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
                                       
@@ -377,7 +380,27 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="meterNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="input_oldmeterid" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
+                                
+
+
+                                      <Label Text="Old Reading"  Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="input_oldreading" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
                                                                 FontSize="17" HorizontalTextAlignment="Start"/>
                                                     </StackLayout>
@@ -385,6 +408,67 @@
                                         
                                     </Frame>
 
+                                    
+                                    
+                                     <!-- Meter Number -->
+                                     <Label Text="Old Meter Working" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="pickerOldMeterWorking" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+
+
+
+                                     <!-- Meter Number -->
+                                     <Label Text="Replace Meter / Register" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                           <Controls:BorderlessPicker x:Name="pickerReplaceMeterRegister" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
+
+
+
+                                     <!-- Meter Number -->
+                                     <Label Text="New Meter #" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="newMeter" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
                                 
                                     <StackLayout Margin="0,0,0,0" >
 
@@ -490,7 +574,7 @@
                              <StackLayout x:Name="port2view" IsVisible="false" Margin="12,0,12,0"> 
 
                               
-                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Replace Meter"  />
                              
                                           
                                    <!-- PORT ID -->
@@ -533,9 +617,9 @@
                                         
                                     </Frame>
 
-                              
-                                     <!-- Meter Number -->
-                                     <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+
+                                           
+                                      <Label Text="Old Meter #"  Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
                                       
@@ -544,7 +628,27 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="meterNumber2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="input_oldmeterid2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
+                                
+
+
+                                      <Label Text="Old Reading"  Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="input_oldreading2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
                                                                 FontSize="17" HorizontalTextAlignment="Start"/>
                                                     </StackLayout>
@@ -552,6 +656,67 @@
                                         
                                     </Frame>
 
+                                    
+                                    
+                                     <!-- Meter Number -->
+                                     <Label Text="Old Meter Working" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="pickerOldMeterWorking2" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+
+
+
+                                     <!-- Meter Number -->
+                                     <Label Text="Replace Meter / Register" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                           <Controls:BorderlessPicker x:Name="pickerReplaceMeterRegister2" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
+
+
+
+                                     <!-- Meter Number -->
+                                     <Label Text="New Meter #" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="newMeter2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
                                 
                                     <StackLayout Margin="0,0,0,0" >
 
@@ -658,7 +823,7 @@
                              <StackLayout x:Name="miscview" IsVisible="false" Margin="12,0,12,0"> 
 
                               
-                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Replace Meter"  />
                              
                                   
 
@@ -857,7 +1022,7 @@
                                 x:Name="bg_read_mtu_button_img" HeightRequest="96" 
                                 Margin="0,-4,20,20"  
                                 Scale="1" 
-                                Source="add_mtu_btn.png"  
+                                Source="rep_meter_btn.png"  
                                 HorizontalOptions="End">
 
                                 <Image.GestureRecognizers>

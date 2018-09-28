@@ -8,7 +8,7 @@
                NavigationPage.HasBackButton="false"
                
                xmlns:Controls="clr-namespace:aclara_meters" 
-               x:Class="aclara_meters.view.AclaraViewAddMTU">
+               x:Class="aclara_meters.view.AclaraViewReplaceMTU">
 
 
    <RelativeLayout  IsVisible="true">
@@ -200,7 +200,7 @@
                     <ScrollView   Margin="0,-6,0,-6"  >
                              <StackLayout  IsVisible="false" Margin="12,0,12,0"> 
 
-                                  <Label Margin="0,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+                                  <Label Margin="0,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Replace MTU"  />
                                 
                                     <StackLayout Margin="0,0,0,0" >
 
@@ -249,7 +249,9 @@
                                     
                                   </StackLayout>
 
-           
+                                   
+                     
+                                    
                                   <!--  1. Vendor -->
 
 
@@ -323,7 +325,7 @@
                                   <StackLayout x:Name="port1view" IsVisible="true" Margin="12,0,12,0"> 
 
                               
-                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Replace MTU"  />
                              
                                           
                                    <!-- PORT ID -->
@@ -366,7 +368,29 @@
                                         
                                     </Frame>
 
-                              
+
+
+                                           
+                                      <Label Text="Old MTU ID"  Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="input_oldmtuid" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
+                                
+
+                                    
                                      <!-- Meter Number -->
                                      <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
@@ -490,7 +514,7 @@
                              <StackLayout x:Name="port2view" IsVisible="false" Margin="12,0,12,0"> 
 
                               
-                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Replace MTU"  />
                              
                                           
                                    <!-- PORT ID -->
@@ -533,7 +557,26 @@
                                         
                                     </Frame>
 
+
                               
+                                      <Label Text="Old MTU ID"  Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="input_oldmtuid2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
+                                 
                                      <!-- Meter Number -->
                                      <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
@@ -658,7 +701,7 @@
                              <StackLayout x:Name="miscview" IsVisible="false" Margin="12,0,12,0"> 
 
                               
-                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
+                                   <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Replace MTU"  />
                              
                                   
 
@@ -857,7 +900,7 @@
                                 x:Name="bg_read_mtu_button_img" HeightRequest="96" 
                                 Margin="0,-4,20,20"  
                                 Scale="1" 
-                                Source="add_mtu_btn.png"  
+                                Source="rep_mtu_btn.png"  
                                 HorizontalOptions="End">
 
                                 <Image.GestureRecognizers>

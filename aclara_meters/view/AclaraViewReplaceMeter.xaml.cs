@@ -18,7 +18,7 @@ using Plugin.Geolocator.Abstractions;
 
 namespace aclara_meters.view
 {
-    public partial class AclaraViewAddMTU
+    public partial class AclaraViewReplaceMeter
     {
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
@@ -54,7 +54,7 @@ namespace aclara_meters.view
             Name9 = 8
         };
 
-        public AclaraViewAddMTU()
+        public AclaraViewReplaceMeter()
         {
             InitializeComponent();
         }
@@ -101,6 +101,10 @@ namespace aclara_meters.view
                 port2label.IsVisible = true; //Las vistas en si no provocan fallos, con controlar el boton, bastaria.
                 InitPickerReadInterval2();
                 InitPickerTwoWay2();
+
+                InitPickerReplaceMeterRegister2();
+                InitPickerOldMeterWorking2();
+
             }
             else
             {
@@ -110,7 +114,123 @@ namespace aclara_meters.view
             //
 
 
+            InitPickerReplaceMeterRegister();
+            InitPickerOldMeterWorking();
 
+
+        }
+
+
+        private void InitPickerOldMeterWorking2()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Yes" },
+                new PickerItems { Name = "No" },
+                new PickerItems { Name = "Broken" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            pickerOldMeterWorking2.ItemsSource = objStringList;
+        }
+
+        private void InitPickerReplaceMeterRegister2()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Meter" },
+                new PickerItems { Name = "Register" },
+                new PickerItems { Name = "Both" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            pickerReplaceMeterRegister2.ItemsSource = objStringList;
+        }
+
+
+
+
+
+
+
+
+
+        private void InitPickerOldMeterWorking()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Yes" },
+                new PickerItems { Name = "No" },
+                new PickerItems { Name = "Broken" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            pickerOldMeterWorking.ItemsSource = objStringList;
+        }
+
+        private void InitPickerReplaceMeterRegister()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Meter" },
+                new PickerItems { Name = "Register" },
+                new PickerItems { Name = "Both" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            pickerReplaceMeterRegister.ItemsSource = objStringList;
         }
 
         private void InitPickerReadInterval()
@@ -317,25 +437,25 @@ namespace aclara_meters.view
 
         private void OpenSettingsCallAsync(object sender, EventArgs e)
         {
-             Device.BeginInvokeOnMainThread(() =>
-             {
-                 try
-                 {
-                     if (FormsApp.ble_interface.IsOpen())
-                     {
-                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
-                         return;
-                     }
-                     else
-                     {
-                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(true), false);
-                     }
-                 }
-                 catch (Exception i2)
-                 {
-                     Console.WriteLine(i2.StackTrace);
-                 }
-             });
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                try
+                {
+                    if (FormsApp.ble_interface.IsOpen())
+                    {
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
+                        return;
+                    }
+                    else
+                    {
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(true), false);
+                    }
+                }
+                catch (Exception i2)
+                {
+                    Console.WriteLine(i2.StackTrace);
+                }
+            });
         }
 
 
@@ -345,12 +465,12 @@ namespace aclara_meters.view
         {
             if (v)
             {
-                bg_read_mtu_button_img.Source = "add_mtu_btn_black.png";
+                bg_read_mtu_button_img.Source = "rep_meter_btn_black.png";
 
             }
             else
             {
-                bg_read_mtu_button_img.Source = "add_mtu_btn.png";
+                bg_read_mtu_button_img.Source = "rep_meter_btn.png";
             }
         }
 
@@ -362,7 +482,7 @@ namespace aclara_meters.view
                 {
                     backdark_bg.IsVisible = true;
                     indicator.IsVisible = true;
-                    label_read.Text = "Writing to MTU ... ";
+                    label_read.Text = "Replacing Meter ... ";
                     _userTapped = true;
                     background_scan_page.IsEnabled = false;
                     ChangeLowerButtonImage(true);
@@ -371,40 +491,40 @@ namespace aclara_meters.view
                 Task.Delay(1000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
-                    label_read.Text = "Writing to MTU ... 3 sec";
+                    label_read.Text = "Replacing Meter ... 3 sec";
                  }));
 
                 Task.Delay(2000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
-                    label_read.Text = "Writing to MTU ... 2 sec";
+                    label_read.Text = "Replacing Meter ... 2 sec";
                  }));
 
 
                 Task.Delay(3000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
-                    label_read.Text = "Writing to MTU ... 1 sec";
+                    label_read.Text = "Replacing Meter ... 1 sec";
                  }));
 
 
                 Task.Delay(4000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
-                    _userTapped = false;
+                     _userTapped = false;
                      bg_read_mtu_button.NumberOfTapsRequired = 1;
                      ChangeLowerButtonImage(false);
                      backdark_bg.IsVisible = false;
                      indicator.IsVisible = false;
-                     label_read.Text = "Successful MTU write";
+                    label_read.Text = "Successful Meter replace";
                      background_scan_page.IsEnabled = true;
                  }));
             }
         }
 
-    
 
-        public AclaraViewAddMTU(IUserDialogs dialogs)
+
+        public AclaraViewReplaceMeter(IUserDialogs dialogs)
         {
             InitializeComponent();
 
@@ -443,7 +563,7 @@ namespace aclara_meters.view
 
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
 
-         
+
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -601,8 +721,8 @@ namespace aclara_meters.view
             BorderlessPicker picker = new BorderlessPicker()
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
-                HeightRequest = 40, 
-                FontSize=17,
+                HeightRequest = 40,
+                FontSize = 17,
                 ItemsSource = picker_List_Vendor_port1
             };
 
@@ -633,7 +753,7 @@ namespace aclara_meters.view
                 Font = Font.SystemFontOfSize(NamedSize.Large).WithAttributes(FontAttributes.Bold),
                 IsVisible = false,
                 Margin = new Thickness(0, 8, 0, 0)
-                   
+
             };
 
 
@@ -698,7 +818,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-  
+
 
             // Generamos el Selector
             BorderlessPicker pickerModelos = new BorderlessPicker()
@@ -1172,7 +1292,7 @@ namespace aclara_meters.view
 
         }
 
- 
+
 
 
         void OnSliderValueChanged2(object sender, ValueChangedEventArgs e)
@@ -1198,12 +1318,12 @@ namespace aclara_meters.view
             StackLayout bloque2 = (StackLayout)EntriesStackLayout.Children[1];
 
 
-            Frame tempframeMarca = (Frame) bloque2.Children[1];
-            Frame tempFrame2Marca = (Frame) tempframeMarca.Content;
-            StackLayout tempStackMarca = (StackLayout) tempFrame2Marca.Content;
+            Frame tempframeMarca = (Frame)bloque2.Children[1];
+            Frame tempFrame2Marca = (Frame)tempframeMarca.Content;
+            StackLayout tempStackMarca = (StackLayout)tempFrame2Marca.Content;
 
 
-            BorderlessPicker PickerToModify = (BorderlessPicker) tempStackMarca.Children[0];
+            BorderlessPicker PickerToModify = (BorderlessPicker)tempStackMarca.Children[0];
 
             if (j != -1)
             {
@@ -1247,7 +1367,7 @@ namespace aclara_meters.view
                         }
 
                         break;
-                       
+
                 }
 
                 try
@@ -1451,7 +1571,7 @@ namespace aclara_meters.view
             }
 
         }
-    
+
 
 
 
@@ -1582,13 +1702,13 @@ namespace aclara_meters.view
 
         private void GPSUpdateButton(object sender, EventArgs e)
         {
-          
-            if(IsLocationAvailable())
+
+            if (IsLocationAvailable())
             {
 
                 Task.Run(async () => { await StartListening(); });
             }
-                    
+
         }
 
 
@@ -1596,7 +1716,7 @@ namespace aclara_meters.view
         {
             if (!CrossGeolocator.IsSupported)
                 return false;
-          
+
             CrossGeolocator.Current.DesiredAccuracy = 5;
 
 
@@ -1733,7 +1853,7 @@ namespace aclara_meters.view
             Task.Delay(2000).ContinueWith(t =>
              Device.BeginInvokeOnMainThread(() =>
              {
-                dialog_turnoff_two.IsVisible = false;
+                 dialog_turnoff_two.IsVisible = false;
                  dialog_turnoff_three.IsVisible = true;
              }));
 
@@ -1766,7 +1886,9 @@ namespace aclara_meters.view
                 try
                 {
                     await Navigation.PopAsync(false);
-                } catch (Exception v){
+                }
+                catch (Exception v)
+                {
                     Console.WriteLine(v.StackTrace);
                 }
                 contador--;
@@ -1775,7 +1897,9 @@ namespace aclara_meters.view
             try
             {
                 await Navigation.PopToRootAsync(false);
-            }catch (Exception v1){
+            }
+            catch (Exception v1)
+            {
                 Console.WriteLine(v1.StackTrace);
             }
 
@@ -1857,7 +1981,7 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
              Device.BeginInvokeOnMainThread(() =>
              {
-                dialog_open_bg.IsVisible = true;
+                 dialog_open_bg.IsVisible = true;
                  turnoff_mtu_background.IsVisible = true;
                  dialog_turnoff_one.IsVisible = false;
                  dialog_turnoff_two.IsVisible = false;
@@ -1970,7 +2094,7 @@ namespace aclara_meters.view
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
-       
+
             Task.Delay(200).ContinueWith(t =>
              Device.BeginInvokeOnMainThread(() =>
              {
@@ -2008,7 +2132,7 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
              Device.BeginInvokeOnMainThread(() =>
              {
-                navigationDrawerList.SelectedItem = null;
+                 navigationDrawerList.SelectedItem = null;
                  Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
                  background_scan_page.Opacity = 1;
 
