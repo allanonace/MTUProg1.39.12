@@ -284,6 +284,8 @@
     <BundleResource Include="Resources\rep_mtu_btn_bw.png" />
     <BundleResource Include="Resources\signal0_bw.png" />
     <BundleResource Include="Resources\gps_icon.png" />
+    <BundleResource Include="Resources\rep_mtu_rep_meter_btn_black.png" />
+    <BundleResource Include="Resources\rep_mtu_rep_meter_btn.png" />
   </ItemGroup>
   <ItemGroup>
     <ITunesArtwork Include="iTunesArtwork" />

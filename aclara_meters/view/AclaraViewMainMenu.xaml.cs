@@ -129,6 +129,7 @@ namespace aclara_meters.view
 
         private void LoadSideMenuElements()
         {
+
             MenuList = new List<PageItem>
             {
                 // Creating our pages for menu navigation
@@ -173,30 +174,30 @@ namespace aclara_meters.view
 
                 new PageItem()
                 {
-                    Title = "Add MTU / Add Meter",
+                    Title = "Add MTU / Add meter",
                     Icon = "addMTUaddmeter.png",
-                    TargetType = ""
+                    TargetType = "AddMTUAddMeter"
                 },
 
                 new PageItem()
                 {
                     Title = "Add MTU / Rep. Meter",
                     Icon = "addMTUrepmeter.png",
-                    TargetType = ""
+                    TargetType = "AddMTUReplaceMeter"
                 },
 
                 new PageItem()
                 {
                     Title = "Rep.MTU / Rep. Meter",
                     Icon = "repMTUrepmeter.png",
-                    TargetType = ""
+                    TargetType = "ReplaceMTUReplaceMeter"
                 },
 
                 new PageItem()
                 {
                     Title = "Install Confirmation",
                     Icon = "installConfirm.png",
-                    TargetType = ""
+                    TargetType = "InstallConfirm"
                 }
             };
 
@@ -291,6 +292,11 @@ namespace aclara_meters.view
             replacemeter_cancel.Tapped += ReplaceMeterCancelTapped;
             meter_ok.Tapped += MeterOkTapped;
             meter_cancel.Tapped += MeterCancelTapped;
+
+            dialog_AddMTUAddMeter_ok.Tapped += dialog_AddMTUAddMeter_okTapped;
+            dialog_AddMTUAddMeter_cancel.Tapped += dialog_AddMTUAddMeter_cancelTapped;
+
+
             disconnectDevice.Tapped += BluetoothPeripheralDisconnect;
             back_button.Tapped += SideMenuOpen;
             back_button_menu.Tapped += SideMenuClose;
@@ -811,6 +817,24 @@ namespace aclara_meters.view
             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
         }
 
+
+        void dialog_AddMTUAddMeter_cancelTapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_AddMTUAddMeter.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+        void dialog_AddMTUAddMeter_okTapped(object sender, EventArgs e)
+        {
+            dialog_AddMTUAddMeter.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTUAddMeter(dialogsSaved), false);
+        }
+
+
+
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
         {
             FormsApp.ble_interface.Close();
@@ -906,8 +930,6 @@ namespace aclara_meters.view
 
                     ((ListView)sender).SelectedItem = null;
 
-
-
                     switch (page)
                     {
                         case "ReadMTU":
@@ -929,6 +951,11 @@ namespace aclara_meters.view
                         case "replaceMeter":
                             OnCaseReplaceMeter();
                             break;
+
+                        case "AddMTUAddMeter":
+                            OnCaseAddMTUAddMeter();
+                            break;
+
                     }
                 }
                 catch (Exception w1)
@@ -940,6 +967,50 @@ namespace aclara_meters.view
             }
         }
 
+        private void OnCaseAddMTUAddMeter()
+        {
+            background_scan_page.Opacity = 1;
+            background_scan_page_detail.Opacity = 1;
+            background_scan_page.IsEnabled = true;
+            background_scan_page_detail.IsEnabled = true;
+
+            if (Device.Idiom == TargetIdiom.Phone)
+            {
+                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+            }
+
+
+            Task.Delay(200).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+                dialog_turnoff_one.IsVisible = false;
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = false;
+                dialog_replacemeter_one.IsVisible = false;
+                dialog_meter_replace_one.IsVisible = false;
+
+                dialog_AddMTUAddMeter.IsVisible = true;
+
+                background_scan_page.Opacity = 1;
+                background_scan_page_detail.Opacity = 1;
+
+                if (Device.Idiom == TargetIdiom.Tablet)
+                {
+                    ContentNav.Opacity = 1;
+                    ContentNav.IsVisible = true;
+                }
+                else
+                {
+                    ContentNav.Opacity = 0;
+                    ContentNav.IsVisible = false;
+                }
+
+                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+            }));
+        }
 
         private void OnCaseReplaceMeter()
         {

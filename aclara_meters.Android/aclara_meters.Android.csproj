@@ -313,6 +313,10 @@
     <AndroidResource Include="Resources\drawable-nodpi\aclara_icon_app.png" />
     <AndroidResource Include="Resources\drawable-nodpi\gps_icon.png" />
     <AndroidResource Include="Resources\drawable\gps_icon.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\rep_mtu_rep_meter_btn_black.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\rep_mtu_rep_meter_btn.png" />
+    <AndroidResource Include="Resources\drawable\rep_mtu_rep_meter_btn_black.png" />
+    <AndroidResource Include="Resources\drawable\rep_mtu_rep_meter_btn.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable\" />

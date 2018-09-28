@@ -18,7 +18,7 @@ using Plugin.Geolocator.Abstractions;
 
 namespace aclara_meters.view
 {
-    public partial class AclaraViewReplaceMTU
+    public partial class AclaraViewAddMTUAddMeter
     {
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
@@ -54,7 +54,7 @@ namespace aclara_meters.view
             Name9 = 8
         };
 
-        public AclaraViewReplaceMTU()
+        public AclaraViewAddMTUAddMeter()
         {
             InitializeComponent();
         }
@@ -101,6 +101,10 @@ namespace aclara_meters.view
                 port2label.IsVisible = true; //Las vistas en si no provocan fallos, con controlar el boton, bastaria.
                 InitPickerReadInterval2();
                 InitPickerTwoWay2();
+
+                InitPickerOldMeterWorking2();
+              
+                InitPickerReplaceMeterRegister2();
             }
             else
             {
@@ -108,10 +112,129 @@ namespace aclara_meters.view
             }
 
             //
-
-
+            InitPickerOldMeterWorking();
+            InitPickerReplaceMeterRegister();
 
         }
+
+
+
+
+
+        private void InitPickerOldMeterWorking2()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Yes" },
+                new PickerItems { Name = "No" },
+                new PickerItems { Name = "Broken" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            pickerOldMeterWorking2.ItemsSource = objStringList;
+        }
+
+        private void InitPickerReplaceMeterRegister2()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Meter" },
+                new PickerItems { Name = "Register" },
+                new PickerItems { Name = "Both" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            pickerReplaceMeterRegister2.ItemsSource = objStringList;
+        }
+
+
+
+
+
+
+
+
+
+        private void InitPickerOldMeterWorking()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Yes" },
+                new PickerItems { Name = "No" },
+                new PickerItems { Name = "Broken" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            pickerOldMeterWorking.ItemsSource = objStringList;
+        }
+
+        private void InitPickerReplaceMeterRegister()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+            {
+                new PickerItems { Name = "Meter" },
+                new PickerItems { Name = "Register" },
+                new PickerItems { Name = "Both" }
+            };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            pickerReplaceMeterRegister.ItemsSource = objStringList;
+        }
+
+
+
 
         private void InitPickerReadInterval()
         {
@@ -285,7 +408,7 @@ namespace aclara_meters.view
                 {
                     Title = "Add MTU / Add meter",
                     Icon = "addMTUaddmeter.png",
-                    TargetType = "AddMTUAddMeter"
+					TargetType = "AddMTUAddMeter"
                 },
 
                 new PageItem()
@@ -345,12 +468,12 @@ namespace aclara_meters.view
         {
             if (v)
             {
-                bg_read_mtu_button_img.Source = "rep_mtu_btn_black.png";
+                bg_read_mtu_button_img.Source = "add_mtu_meter_btn_black.png";
 
             }
             else
             {
-                bg_read_mtu_button_img.Source = "rep_mtu_btn.png";
+                bg_read_mtu_button_img.Source = "add_mtu_meter_btn.png";
             }
         }
 
@@ -362,7 +485,7 @@ namespace aclara_meters.view
                 {
                     backdark_bg.IsVisible = true;
                     indicator.IsVisible = true;
-                    label_read.Text = "Replacing MTU ... ";
+                    label_read.Text = "Writing to MTU ... ";
                     _userTapped = true;
                     background_scan_page.IsEnabled = false;
                     ChangeLowerButtonImage(true);
@@ -371,20 +494,20 @@ namespace aclara_meters.view
                 Task.Delay(1000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
-                    label_read.Text = "Replacing MTU ... 3 sec";
+                     label_read.Text = "Writing to MTU ... 3 sec";
                  }));
 
                 Task.Delay(2000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
-                    label_read.Text = "Replacing MTU ... 2 sec";
+                     label_read.Text = "Writing to MTU ... 2 sec";
                  }));
 
 
                 Task.Delay(3000).ContinueWith(t =>
                  Device.BeginInvokeOnMainThread(() =>
                  {
-                    label_read.Text = "Replacing MTU ... 1 sec";
+                     label_read.Text = "Writing to MTU ... 1 sec";
                  }));
 
 
@@ -396,7 +519,7 @@ namespace aclara_meters.view
                      ChangeLowerButtonImage(false);
                      backdark_bg.IsVisible = false;
                      indicator.IsVisible = false;
-                     label_read.Text = "Successful MTU replace";
+                     label_read.Text = "Successful MTU write";
                      background_scan_page.IsEnabled = true;
                  }));
             }
@@ -404,7 +527,7 @@ namespace aclara_meters.view
 
 
 
-        public AclaraViewReplaceMTU(IUserDialogs dialogs)
+        public AclaraViewAddMTUAddMeter(IUserDialogs dialogs)
         {
             InitializeComponent();
 

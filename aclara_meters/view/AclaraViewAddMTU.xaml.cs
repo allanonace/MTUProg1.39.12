@@ -285,28 +285,28 @@ namespace aclara_meters.view
                 {
                     Title = "Add MTU / Add meter",
                     Icon = "addMTUaddmeter.png",
-                    TargetType = ""
+                    TargetType = "AddMTUAddMeter"
                 },
 
                 new PageItem()
                 {
                     Title = "Add MTU / Rep. Meter",
                     Icon = "addMTUrepmeter.png",
-                    TargetType = ""
+                    TargetType = "AddMTUReplaceMeter"
                 },
 
                 new PageItem()
                 {
                     Title = "Rep.MTU / Rep. Meter",
                     Icon = "repMTUrepmeter.png",
-                    TargetType = ""
+                    TargetType = "ReplaceMTUReplaceMeter"
                 },
 
                 new PageItem()
                 {
                     Title = "Install Confirmation",
                     Icon = "installConfirm.png",
-                    TargetType = ""
+                    TargetType = "InstallConfirm"
                 }
             };
 
@@ -1834,6 +1834,8 @@ namespace aclara_meters.view
                         case "replaceMeter":
                             OnMenuCaseReplaceMeter();
                             break;
+
+
                     }
                 }
                 catch (Exception w1)
