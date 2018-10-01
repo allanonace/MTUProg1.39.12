@@ -893,7 +893,20 @@ namespace aclara_meters.view
             dialog_AddMTU.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
+
+
+            //Bug fix Android UI Animation
+            Task.Delay(200).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
+            })
+            );
+              
+            
+                                  
+                                 
+            
         }
 
 

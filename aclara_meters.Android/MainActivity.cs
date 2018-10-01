@@ -76,9 +76,14 @@ namespace aclara_meters.Droid
             global::Xamarin.Forms.Forms.Init(this, bundle);
 
            
-  
-            // If you want to enable/disable the Bluetooth adapter from code, you must call this.
-            BluetoothLowEnergyAdapter.Init(this);
+            try
+            {
+                // If you want to enable/disable the Bluetooth adapter from code, you must call this.
+                BluetoothLowEnergyAdapter.Init(this);
+            }catch(Exception e){
+                Console.WriteLine(e.StackTrace);
+            }
+
             // Obtain the bluetooth adapter so we can pass it into our (shared-code) Xamarin Forms app. There are
             // additional Obtain() methods on BluetoothLowEnergyAdapter if you have more specific needs (e.g. if you
             // need to support devices with multiple Bluetooth adapters)
