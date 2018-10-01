@@ -54,6 +54,35 @@ namespace aclara_meters.view
             Name9 = 8
         };
 
+        /*
+            Optional 1  WorkOrderRecording      Hides/shows Field Order
+            Optional 2  MeterWorkRecording      Shows option to specify if meter is broken when replacing it
+            Optional 3  ApptScreen              —— —— —— —— —— —— —— ——
+            Optional 4  AccountDualEntry        Enable popup to repeat Service Pt. ID
+            Optional 5  WorkOrderDualEntry      Enables popup to repeat Field Order
+            Optional 6  OldSerialNumDualEntry   Enables popup to repeat Old meter #
+            Optional 7  NewSerialNumDualEntry   Enable popup to repeat New meter #
+            Optional 8  ReadingDualEntry        —— —— —— —— —— —— —— ——
+            Optional 9  OldReadingDualEntry     Enable popup to repeat Old Reading
+            Optional 10 ReverseReading          All Reading Inputs reversed
+            Optional 11 IndividualReadInterval  If false, disables Read Interval field (it is visible but readonly)
+            Optional 12 RegisterRecording       Shows Replace Meter/Register field, with Meter/Register/Both list
+            Optional 13 UseMeterSerialNumber    Shows/hides different meter # fields (Old, New)
+            Optional 14 OldReadingRecording     Shows/hides Old Reading field
+            Optional 15 ShowAddMtu              Disables Add Mtu button (visible, but not clickable)
+            Optional 16 ShowAddMtuReplaceMeter  Disables Add MTU/Replace Meter button (visible, but not clickable)
+            Optional 17 ShowAddMtuMeter         Disables Add MTU/Add Meter button (visible, but not clickable)
+            Optional 18 ShowReplaceMtu          Disables Replace MTU button (visible, but not clickable)
+            Optional 19 ShowReplaceMtuMeter     Disables Replace MTU/Replace Meter button (visible, but not clickable)
+            Optional 20 ShowReplaceMeter        Disables Replace Meter button (visible, but not clickable)
+         */
+
+        private bool opt1, opt2, opt3, opt4, opt5, 
+                     opt6, opt7, opt8, opt9, opt10, 
+                     opt11, opt12, opt13, opt14, opt15, 
+                     opt16, opt17, opt18, opt19, opt20;
+
+
         public AclaraViewAddMTU()
         {
             InitializeComponent();
@@ -468,7 +497,176 @@ namespace aclara_meters.view
             InitializeLowerbarLabel();
 
             InitializeBlocks();
+
+
+            TestOptionalFields();
+
+            Validations();
         }
+
+        private void TestOptionalFields()
+        {
+            opt1 = true;
+
+            opt4 = true;
+            opt5 = true;
+
+            opt11 = true;
+
+            opt13 = true;
+
+
+        }
+
+        private void Validations()
+        {
+            if( opt1 )
+            {
+                fo_view.IsVisible = true;
+            }else{
+                fo_view.IsVisible = false;
+            }
+                
+
+            if( opt4 )
+            {
+                servicePortId.Unfocused += (s, e) => { ServicePortId_validate(1); };
+                servicePortId2.Unfocused += (s, e) => { ServicePortId_validate(2); };
+                servicePortId_ok.Tapped += ServicePortId_Ok_Tapped;
+                servicePortId_cancel.Tapped += ServicePortId_Cancel_Tapped;
+            }
+
+            if (opt5)
+            {
+                fieldOrder.Unfocused += (s, e) => { FieldOrder_validate(1); };
+                fieldOrder2.Unfocused += (s, e) => { FieldOrder_validate(2); };
+                fieldOrder_ok.Tapped += FieldOrder_Ok_Tapped;
+                fieldOrder_cancel.Tapped += FieldOrder_Cancel_Tapped;
+            }
+
+            if(opt11)
+            {
+                pickerReadInterval.IsEnabled = true;
+                read_view.Opacity = 1;
+
+            }else{
+                pickerReadInterval.IsEnabled = false;
+                read_view.Opacity = 0.8;
+            }
+
+            if (opt13)
+            {
+                mn_view.IsVisible = true;
+            }else{
+                mn_view.IsVisible = false;
+            }
+
+        }
+
+        /** Dialogs Tap Detection **/
+        private void ServicePortId_Ok_Tapped(object sender, EventArgs e)
+        {
+
+            if (servicePortId.Text.Equals(serviceCheckEntry.Text))
+            {
+                errorServicePort.IsVisible = false;
+                dialog_open_bg.IsVisible = false;
+                turnoff_mtu_background.IsVisible = false;
+                dialog_servicePortId.IsVisible = false;
+                serviceCheckEntry.Text = "";
+            }else{
+                errorServicePort.IsVisible = true;
+           }
+        }
+
+        private void ServicePortId_Cancel_Tapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            dialog_servicePortId.IsVisible = false;
+            errorServicePort.IsVisible = false;
+            servicePortId.Text = "";
+        }
+
+
+
+
+        private void FieldOrder_Ok_Tapped(object sender, EventArgs e)
+        {
+
+            if (fieldOrder.Text.Equals(fieldOrderCheckEntry.Text))
+            {
+                errorFieldOrder.IsVisible = false;
+                dialog_open_bg.IsVisible = false;
+                turnoff_mtu_background.IsVisible = false;
+                dialog_fieldOrder.IsVisible = false;
+                fieldOrderCheckEntry.Text = "";
+            }
+            else
+            {
+                errorFieldOrder.IsVisible = true;
+            }
+        }
+
+        private void FieldOrder_Cancel_Tapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            dialog_fieldOrder.IsVisible = false;
+            errorFieldOrder.IsVisible = false;
+            fieldOrder.Text = "";
+        }
+
+
+        /*********          ****        ************/
+
+        /** Dialogs Validation **/
+        private void ServicePortId_validate(int v)
+        {
+            if(!servicePortId.Text.Equals(""))
+            {
+                if (v == 1)
+                {
+                    dialog_open_bg.IsVisible = true;
+                    turnoff_mtu_background.IsVisible = true;
+                    dialog_servicePortId.IsVisible = true;
+
+                }
+                else if (v == 2)
+                {
+                    dialog_open_bg.IsVisible = true;
+                    turnoff_mtu_background.IsVisible = true;
+                    dialog_servicePortId.IsVisible = true;
+                }
+            }
+        }
+
+
+
+        private void FieldOrder_validate(int v)
+        {
+            if (!fieldOrder.Text.Equals(""))
+            {
+                   
+                if (v == 1)
+                {
+                    dialog_open_bg.IsVisible = true;
+                    turnoff_mtu_background.IsVisible = true;
+                    dialog_fieldOrder.IsVisible = true;
+
+                }
+                else if (v == 2)
+                {
+                    dialog_open_bg.IsVisible = true;
+                    turnoff_mtu_background.IsVisible = true;
+                    dialog_fieldOrder.IsVisible = true;
+                }
+            }
+
+        }
+
+        /*********          ****        ************/
+
 
         private void InitializeBlocks()
         {
