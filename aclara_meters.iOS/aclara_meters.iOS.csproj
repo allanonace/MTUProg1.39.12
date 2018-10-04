@@ -191,6 +191,11 @@
       <Project>{81D262C1-FBC5-40E5-941A-A4CD3727E932}</Project>
       <Name>aclara_meters</Name>
     </ProjectReference>
+    <ProjectReference Include="..\AclaraMetersShareExtension\AclaraMetersShareExtension.csproj">
+      <IsAppExtension>true</IsAppExtension>
+      <Project>{884ACC36-012A-4AFC-AAAC-1A85B0D17616}</Project>
+      <Name>AclaraMetersShareExtension</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\turnoff_icon.png" />

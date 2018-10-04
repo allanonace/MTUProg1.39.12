@@ -17,8 +17,5 @@ namespace aclara_meters.iOS
             UIApplication.Main(args, null, "AppDelegate");
         }
 
-
-
-
     }
 }
