@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>Aclara Meters Share Extension</string>
+	<string>Aclara MTU Programmer</string>
 	<key>CFBundleName</key>
-	<string>Aclara Meters Share Extension</string>
+	<string>Aclara MTU Programmer</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.aclara.mtu.programmer.AclaraMetersShareExtension</string>
 	<key>CFBundleDevelopmentRegion</key>

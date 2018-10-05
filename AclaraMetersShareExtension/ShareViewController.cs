@@ -5,10 +5,14 @@ using MobileCoreServices;
 using Social;
 using UIKit;
 
+
 namespace AclaraMetersShareExtension
 {
     public partial class ShareViewController : SLComposeServiceViewController
     {
+        NSExtensionContext extensionContext;
+        bool enviado;
+
         protected ShareViewController(IntPtr handle) : base(handle)
         {
             // Note: this .ctor should not contain any initialization logic.
@@ -26,9 +30,185 @@ namespace AclaraMetersShareExtension
         {
             base.ViewDidLoad();
 
+            extensionContext = this.ExtensionContext;
             // Do any additional setup after loading the view.
+            NSExtensionItem[] outputItem = extensionContext.InputItems;
+            NSExtensionItem item = extensionContext.InputItems[0];
+            NSItemProvider provider = item.Attachments[0];  //provider is null, no attachments
 
-            UIApplication.SharedApplication.BeginInvokeOnMainThread(() => { DidSelectPost(); });
+            enviado = false;
+
+            string[] type  = outputItem[0].Attachments[0].RegisteredTypeIdentifiers;
+
+
+           
+
+            foreach (string x in type)
+            {
+                if ("public.zip-archive".Contains(x))
+                {
+                    if (!enviado)
+                    {
+
+                        enviado = true;
+
+                       
+
+                        var item2 = extensionContext.InputItems[0];
+
+                        NSItemProvider prov = null;
+                        if (item2 != null) prov = item2.Attachments[0];
+                        if (prov != null)
+                        {
+                            prov.LoadItem(UTType.ZipArchive, null, (NSObject url, NSError error) =>
+                            {
+                                if (url == null) return;
+                                NSUrl newUrl = (NSUrl)url;
+
+                                InvokeOnMainThread(() =>
+                                {
+                                    //String encode1 = System.Web.HttpUtility.UrlEncode("thirdpartyappurlscheme://?param=" + rece);
+
+                                    NSUrl request = new NSUrl("aclara-mtu-programmer://?script_path=" + newUrl);
+
+                                    try
+                                    {
+                                        bool isOpened = UIApplication.SharedApplication.OpenUrl(request);
+
+                                        if (isOpened == false)
+                                            UIApplication.SharedApplication.OpenUrl(new NSUrl("aclara-mtu-programmer://?script_path=" + newUrl));
+                                        extensionContext.CompleteRequest(new NSExtensionItem[0], null);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine("Cannot open url: {0}, Error: {1}", request.AbsoluteString, ex.Message);
+                                        var alertView = new UIAlertView("Error", ex.Message, null, "OK", null);
+
+                                        alertView.Show();
+                                    }
+                                });
+                            });
+                        }
+                    }
+                }
+
+
+                if ("public.xml".Contains(x))
+                {
+                    if (!enviado)
+                    {
+
+                        enviado = true;
+
+
+
+                        var item2 = extensionContext.InputItems[0];
+
+                        NSItemProvider prov = null;
+                        if (item2 != null) prov = item2.Attachments[0];
+                        if (prov != null)
+                        {
+                            prov.LoadItem(UTType.XML, null, (NSObject url, NSError error) =>
+                            {
+                                if (url == null) return;
+                                NSUrl newUrl = (NSUrl)url;
+
+                                InvokeOnMainThread(() =>
+                                {
+                                    //String encode1 = System.Web.HttpUtility.UrlEncode("thirdpartyappurlscheme://?param=" + rece);
+
+                                    NSUrl request = new NSUrl("aclara-mtu-programmer://?script_path=" + newUrl);
+
+                                    try
+                                    {
+                                        bool isOpened = UIApplication.SharedApplication.OpenUrl(request);
+
+                                        if (isOpened == false)
+                                            UIApplication.SharedApplication.OpenUrl(new NSUrl("aclara-mtu-programmer://?script_path=" + newUrl));
+                                        extensionContext.CompleteRequest(new NSExtensionItem[0], null);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine("Cannot open url: {0}, Error: {1}", request.AbsoluteString, ex.Message);
+                                        var alertView = new UIAlertView("Error", ex.Message, null, "OK", null);
+
+                                        alertView.Show();
+                                    }
+                                });
+                            });
+                        }
+                    }
+                }
+
+
+
+
+                if ("public.data".Contains(x))
+                {
+                    if (!enviado)
+                    {
+
+                        enviado = true;
+
+                       
+                        var item2 = extensionContext.InputItems[0];
+
+                        NSItemProvider prov = null;
+                        if (item2 != null) prov = item2.Attachments[0];
+                        if (prov != null)
+                        {
+                            prov.LoadItem(UTType.Data, null, (NSObject url, NSError error) =>
+                            {
+                                if (url == null) return;
+                                NSUrl newUrl = (NSUrl)url;
+                                 
+                                InvokeOnMainThread(() =>
+                                {
+                                    //String encode1 = System.Web.HttpUtility.UrlEncode("thirdpartyappurlscheme://?param=" + rece);
+
+                                    NSUrl request = new NSUrl("aclara-mtu-programmer://?script_path=" + newUrl.ToString());
+
+                                    try
+                                    {
+                                        bool isOpened = UIApplication.SharedApplication.OpenUrl(request);
+
+                                        if (isOpened == false)
+                                            UIApplication.SharedApplication.OpenUrl(new NSUrl("aclara-mtu-programmer://?script_path=" + newUrl.ToString()));
+                                        extensionContext.CompleteRequest(new NSExtensionItem[0], null);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Debug.WriteLine("Cannot open url: {0}, Error: {1}", request.AbsoluteString, ex.Message);
+                                        var alertView = new UIAlertView("Error", ex.Message, null, "OK", null);
+
+                                        alertView.Show();
+                                    }
+                                });
+                            });
+                        }
+                    }
+                }
+
+
+
+                if ("public.file-url".Contains(x))
+                {
+                    if (!enviado)
+                    {
+                        enviado = true;
+
+                        string value = outputItem[0].AttributedContentText.Value.ToString();
+
+                        String encode1 = System.Net.WebUtility.UrlEncode(value);
+
+                        extensionContext.CompleteRequest(new NSExtensionItem[0], null);
+
+                        UIApplication.SharedApplication.OpenUrl(new NSUrl("aclara-mtu-programmer://?script_path=" + encode1));
+
+                    }
+                }
+            }
+
 
         }
 
@@ -38,48 +218,7 @@ namespace AclaraMetersShareExtension
         //      return true;
         //   }
 
-        public override void DidSelectPost()
-        {
-            // This is called after the user selects Post. Do the upload of contentText and/or NSExtensionContext attachments.
 
-            // Inform the host that we're done, so it un-blocks its UI. Note: Alternatively you could call super's -didSelectPost, which will similarly complete the extension context.
-            ExtensionContext.CompleteRequest(new NSExtensionItem[0], null);
-
-            var item = ExtensionContext.InputItems[0];
-
-            NSItemProvider prov = null;
-            if (item != null) prov = item.Attachments[0];
-            if (prov != null)
-            {
-                prov.LoadItem(UTType.URL, null, (NSObject url, NSError error) =>
-                {
-                    if (url == null) return;
-                    NSUrl newUrl = (NSUrl)url;
-
-                    InvokeOnMainThread(() =>
-                    {
-                        //String encode1 = System.Web.HttpUtility.UrlEncode("thirdpartyappurlscheme://?param=" + rece);
-
-                        NSUrl request = new NSUrl("aclara-mtu-programmer://?script_path=" + newUrl);
-
-                        try
-                        {
-                            bool isOpened = UIApplication.SharedApplication.OpenUrl(request);
-
-                            if (isOpened == false)
-                                UIApplication.SharedApplication.OpenUrl(new NSUrl("aclara-mtu-programmer://?script_path=" + newUrl));
-                        }
-                        catch (Exception ex)
-                        {
-                            Debug.WriteLine("Cannot open url: {0}, Error: {1}", request.AbsoluteString, ex.Message);
-                            var alertView = new UIAlertView("Error", ex.Message, null, "OK", null);
-
-                            alertView.Show();
-                        }
-                    });
-                });
-            }
-        }
 
         public override SLComposeSheetConfigurationItem[] GetConfigurationItems()
         {

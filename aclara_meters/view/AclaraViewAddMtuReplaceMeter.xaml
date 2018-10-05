@@ -886,8 +886,8 @@
                                              HorizontalOptions="End"> 
                                              <Image IsVisible="true" IsEnabled="true"  InputTransparent="false" 
                                             x:Name="gps_icon" HeightRequest="48"  WidthRequest="48" 
-                                            Margin="12,-4,0,0"  
-                                            Scale="0.8" 
+                                            Margin="12,-3,0,0"  
+                                            Scale="0.85" 
                                             Source="gps_icon.png"  
                                             HorizontalOptions="End">
 
