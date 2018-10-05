@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using System.Xml;
+using System.Linq;
 using Foundation;
 using MobileCoreServices;
 using Social;
 using UIKit;
-
+using System.Threading;
+using System.Net;
 
 namespace AclaraMetersShareExtension
 {
@@ -40,9 +44,8 @@ namespace AclaraMetersShareExtension
 
             string[] type  = outputItem[0].Attachments[0].RegisteredTypeIdentifiers;
 
-
-           
-
+      
+          
             foreach (string x in type)
             {
                 if ("public.zip-archive".Contains(x))
@@ -110,21 +113,35 @@ namespace AclaraMetersShareExtension
                         {
                             prov.LoadItem(UTType.XML, null, (NSObject url, NSError error) =>
                             {
+
+                               
+
+
                                 if (url == null) return;
                                 NSUrl newUrl = (NSUrl)url;
+
+
+                                byte[] uploadData = (NSData.FromUrl((NSUrl)newUrl).ToArray());
+
+
+                                // From byte array to string
+                                string s = System.Text.Encoding.UTF8.GetString(uploadData, 0, uploadData.Length);
+
+
+                                s = WebUtility.UrlEncode(s);
 
                                 InvokeOnMainThread(() =>
                                 {
                                     //String encode1 = System.Web.HttpUtility.UrlEncode("thirdpartyappurlscheme://?param=" + rece);
 
-                                    NSUrl request = new NSUrl("aclara-mtu-programmer://?script_path=" + newUrl);
+                                    NSUrl request = new NSUrl("aclara-mtu-programmer://?script_path=" + s.ToString());
 
                                     try
                                     {
                                         bool isOpened = UIApplication.SharedApplication.OpenUrl(request);
 
                                         if (isOpened == false)
-                                            UIApplication.SharedApplication.OpenUrl(new NSUrl("aclara-mtu-programmer://?script_path=" + newUrl));
+                                            UIApplication.SharedApplication.OpenUrl(new NSUrl("aclara-mtu-programmer://?script_path=" + s.ToString()));
                                         extensionContext.CompleteRequest(new NSExtensionItem[0], null);
                                     }
                                     catch (Exception ex)

@@ -13,6 +13,10 @@ using Plugin.Settings;
 using Lexi;
 using System.Threading.Tasks;
 using System.Web;
+using System.Net.Http;
+using System.Collections.Generic;
+using System.Xml.Linq;
+using System.IO;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -77,7 +81,25 @@ namespace aclara_meters
                         if (var1 != null)
                         {
                             Console.WriteLine("Var1:" + var1.ToString());
+
                             var response3 = await Application.Current.MainPage.DisplayAlert("Alert", "script_path: " + var1.ToString(), "ok", "cancel");
+
+
+                            List<string> listaObjetos = new List<string>();
+
+                            XDocument doc = XDocument.Parse(var1);
+
+                            foreach (var item in doc.Descendants("note"))  
+                            {  
+                                string to = item.Element("to").Value.ToString();  
+                                string from = item.Element("from").Value.ToString();  
+                                string heading = item.Element("heading").Value.ToString();  
+                                string body = item.Element("body").Value.ToString();  
+                                listaObjetos.Add("To: "+to+" From: "+from+" Heading: "+heading+" Body: "+body);  
+                            }  
+
+                            await Application.Current.MainPage.DisplayAlert("Objetos XML", listaObjetos[0], "ok", "cancel");
+
                         }
                         var var2 = query.Get("callback");
                         if (var2 != null)
