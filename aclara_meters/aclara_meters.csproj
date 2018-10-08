@@ -35,6 +35,7 @@
     <Compile Remove="view\BleGattServerPage.xaml.cs" />
     <Compile Remove="view\MyPage.xaml.cs" />
     <Compile Remove="view\testingui.xaml.cs" />
+    <Compile Remove="Xml_Files\XmlResources.Designer.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="view\BleGattServicePage.xaml.cs">
@@ -64,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="XML\" />
+    <Folder Include="Xml_Files\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="XML\XmlElementList.xml" />
@@ -74,22 +76,35 @@
     <None Remove="Resources\Memory.xml" />
     <None Remove="Resources\Meter.xml" />
     <None Remove="Resources\Mtu.xml" />
+    <None Remove="Xml_Files\Alarm.xml" />
+    <None Remove="Xml_Files\DemandConf.xml" />
+    <None Remove="Xml_Files\Global.xml" />
+    <None Remove="Xml_Files\Memory.xml" />
+    <None Remove="Xml_Files\Mtu.xml" />
+    <None Remove="Xml_Files\Meter.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ble_library\ble_library.csproj" />
-    <ProjectReference Include="..\MtuComm\MtuComm.csproj" />
-    <ProjectReference Include="..\..\xml\Xml\Xml.csproj" />
+    <ProjectReference Include="..\..\boilerplate\Lexi\Lexi.csproj" />
+    <ProjectReference Include="..\..\boilerplate\MTUComm\MTUComm.csproj" />
+    <ProjectReference Include="..\..\boilerplate\Xml\Xml.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="view\MyPage.xaml" />
     <EmbeddedResource Remove="view\testingui.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\Alarm.xml" />
-    <EmbeddedResource Include="Resources\DemandConf.xml" />
-    <EmbeddedResource Include="Resources\Global.xml" />
-    <EmbeddedResource Include="Resources\Memory.xml" />
-    <EmbeddedResource Include="Resources\Meter.xml" />
-    <EmbeddedResource Include="Resources\Mtu.xml" />
+    <EmbeddedResource Include="Xml_Files\Alarm.xml" />
+    <EmbeddedResource Include="Xml_Files\DemandConf.xml" />
+    <EmbeddedResource Include="Xml_Files\Global.xml" />
+    <EmbeddedResource Include="Xml_Files\Memory.xml" />
+    <EmbeddedResource Include="Xml_Files\Mtu.xml" />
+    <EmbeddedResource Include="Xml_Files\Meter.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Xml_Files\XmlResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>XmlResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

@@ -9,14 +9,9 @@ using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.AppCenter.Distribute;
 using ble_library;
-using Plugin.Settings;
-using Lexi;
-using System.Threading.Tasks;
 using System.Web;
-using System.Net.Http;
 using System.Collections.Generic;
 using System.Xml.Linq;
-using System.IO;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -26,7 +21,7 @@ namespace aclara_meters
         public static string AppName { get { return "StoreAccountInfoApp"; } }
         public static ICredentialsService CredentialsService { get; private set; }
         public static BleSerial ble_interface;
-        public static LexiComm lexi;
+        public static Lexi.Lexi lexi;
 
         public FormsApp()
         {
@@ -43,7 +38,7 @@ namespace aclara_meters
 
             //Inicializar libreria personalizada
             ble_interface = new BleSerial(adapter);
-            lexi = new LexiComm(ble_interface, 10000);
+            lexi = new Lexi.Lexi(ble_interface, 10000);
 
           
             //Cargar la pantalla principal

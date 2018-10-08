@@ -15,13 +15,13 @@ using System.Collections.ObjectModel;
 using Plugin.Settings;
 using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
-using Xml;
 using System.Xml.Serialization;
-using System.Xml;
 
 using System.IO;
 using System.Text;
-
+using MTUComm;
+using Xml;
+using System.Reflection;
 
 namespace aclara_meters.view
 {
@@ -509,7 +509,69 @@ namespace aclara_meters.view
             TestOptionalFields();
 
             Validations();
+
+            var assembly = typeof(AclaraViewAddMTU).GetTypeInfo().Assembly;
+
+            //First get the list of all resources available for debugging purpose
+            string [] resources = assembly.GetManifestResourceNames();
+
+
+            Stream stream_mtu = assembly.GetManifestResourceStream("aclara_meters.Xml_Files.Mtu.xml");
+            Stream stream_meter = assembly.GetManifestResourceStream("aclara_meters.Xml_Files.Meter.xml");
+
+
+
+            var data_mtu = "";
+            using (var reader = new StreamReader(stream_mtu))
+            {
+                data_mtu = reader.ReadToEnd();
+            }
+
+            var data_meter = "";
+            using (var reader = new StreamReader(stream_meter))
+            {
+                data_meter = reader.ReadToEnd();
+            }
+
+
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            var filename_meter = Path.Combine(xml_documents, "Meter.xml");
+            var filename_mtu = Path.Combine(xml_documents, "Mtu.xml");
+
+            File.WriteAllText(filename_meter, aclara_meters.Resources.XmlStrings.GetMeterString() );
+            File.WriteAllText(filename_mtu, aclara_meters.Resources.XmlStrings.GetMTUString() );
+
+            //Create Ation when opening Form
+            //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
+            MTUComm.Action add_mtu = new MTUComm.Action(config: new Configuration(xml_documents), serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: "iker");
+
+            // "/var/mobile/Containers/Data/Application/637D98AB-7487-449A-9DD8-5914E17B479F/Documents/Mtu.xml"
+
+            //Define finish and error event handler
+            add_mtu.OnFinish += Add_mtu_OnFinish;
+            add_mtu.OnError += Add_mtu_OnError;
+
+            //Run
+            add_mtu.Run();
+           // Console.ReadKey();
         }
+
+
+
+		private static void Add_mtu_OnError(object sender, MTUComm.Action.ActionErrorArgs e)
+        {
+            Console.WriteLine("Action Errror");
+            Console.WriteLine("Press Key to Exit");
+        }
+
+        private static void Add_mtu_OnFinish(object sender, MTUComm.Action.ActionFinishArgs e)
+        {
+            Console.WriteLine("Action Succefull");
+            Console.WriteLine("Press Key to Exit");
+        }
+
+
 
         private void TestOptionalFields()
         {
@@ -766,7 +828,7 @@ namespace aclara_meters.view
 
 
         MeterTypes meterTypes;
-        List<Meter> meters;
+        List<Xml.Meter> meters;
         List<string> vendors;
         List<string> models;
         List<string> names;
@@ -790,11 +852,11 @@ namespace aclara_meters.view
 
             using (TextReader reader = new StreamReader(stream))
             {
-                meterTypes = (MeterTypes)s.Deserialize(reader);
+                meterTypes = (s.Deserialize(reader) as MeterTypes);
             }
 
             //MeterTypesDeserializationFromFileTest()
-            Config config = new Config();
+            Xml.Config config = new Config();
             //MeterTypes meterTypes = config.GetMeters("aclara_meters.Resources.Meter.xml");
 
 
@@ -1458,11 +1520,14 @@ namespace aclara_meters.view
 
             vendor = vendors[j];
 
+            models = new List<string>();
+
             models = meterTypes.GetModelsByVendorFromMeters(meterTypes.Meters, vendor);
 
             try
             {
                 PickerToModify.ItemsSource = models;
+
                 EntriesStackLayout.Children[1].IsVisible = true;
                 EntriesStackLayout.Children[2].IsVisible = false;
             }
@@ -1566,6 +1631,8 @@ namespace aclara_meters.view
             int j = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + j);
 
+            name = "";
+
             name = names[j];
             try
             {
@@ -1606,8 +1673,7 @@ namespace aclara_meters.view
             int i = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + i);
 
-            List<string> filter_result = new List<string>();
-
+     
             StackLayout bloque2 = (StackLayout)EntriesStackLayout.Children[2];
 
             Frame tempframeMarca = (Frame)bloque2.Children[1];
@@ -1617,10 +1683,11 @@ namespace aclara_meters.view
 
             BorderlessPicker PickerToModify = (BorderlessPicker)tempStackMarca.Children[0];
 
-            List<string> valores = (List<string>)((BorderlessPicker)sender).ItemsSource;
-
+            model = "";
 
             model = models[i];
+
+            names = new List<string>();
 
             names = meterTypes.GetNamesByModelAndVendorFromMeters(meterTypes.Meters, vendor, model);
 

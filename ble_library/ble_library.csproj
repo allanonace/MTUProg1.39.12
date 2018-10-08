@@ -17,9 +17,9 @@
     <Compile Remove="LexiWriteException.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Lexi\Lexi.csproj" />
+    <Folder Include="Helpers\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Helpers\" />
+    <ProjectReference Include="..\..\boilerplate\Lexi\Lexi.csproj" />
   </ItemGroup>
 </Project>

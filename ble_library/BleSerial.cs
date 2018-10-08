@@ -1,10 +1,10 @@
 ﻿using System;
-using Lexi.Interfaces;
 using nexus.protocols.ble;
 using nexus.protocols.ble.scan;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Plugin.Settings.Abstractions;
+using Lexi.Interfaces;
 
 namespace ble_library
 {

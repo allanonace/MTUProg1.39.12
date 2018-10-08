@@ -14,9 +14,9 @@ using Xamarin.Forms;
 using Plugin.Settings;
 using System.Diagnostics;
 using System.Linq;
-using MtuComm;
 using System.Threading;
 using System.Globalization;
+using Xml;
 
 namespace aclara_meters.view
 {
@@ -186,9 +186,9 @@ namespace aclara_meters.view
                     FormsApp.ble_interface.Read(rxbuffer, 0, 262);
                 }*/
 
+                LoadMTUValuesToListView("","","","");
 
-                Task.Factory.StartNew(ThreadProcedureReadLexi);
-
+               
 
 
             }
@@ -198,7 +198,7 @@ namespace aclara_meters.view
         {
             string resultMsg = "Successful MTU read";
             byte[] readData;
-            Mtu mtu = null;
+
             
             try
             {
@@ -214,12 +214,11 @@ namespace aclara_meters.view
                     readData0 = FormsApp.lexi.Read(0, 255);
                     byte[] readData1 = FormsApp.lexi.Read(255, 255);
                     readData = readData0.Concat(readData1).ToArray();
-                    mtu = new Mtu(readData);
                 }
                 else if (mtuType == 138)
                 {
                     readData = readData0;
-                    mtu = new Mtu(readData);
+               
                 }
                 
                 //byte[] readData1 = FormsApp.lexi.Read(255, 255);
@@ -238,23 +237,7 @@ namespace aclara_meters.view
                     indicator.IsVisible = false;
                     background_scan_page.IsEnabled = true;
 
-                    if (mtu != null)
-                    {
-                        try
-                        {
-                            LoadDemoMtuValuesToListView(mtu);
-                        }
-                        catch (Exception e6)
-                        {
-                            Console.WriteLine(e6.StackTrace);
-                            LoadMTUValuesToListView("0", "0", "0", "0");
-                        }
-                    }
-                    else
-                    {
-                        LoadMtuTypeNotSupported(mtuType);
-                    }
-
+                  
                 }));
             }
             catch (TimeoutException ex)
@@ -461,174 +444,7 @@ namespace aclara_meters.view
             Application.Current.MainPage.Navigation.PopAsync(false); 
         }
 
-        private void LoadDemoMtuValuesToListView(Mtu mtu)
-        {
-            if (mtu.MtuType == 171)
-            {
-                LoadDemoEncoderMtuValuesToListView(mtu);
-            }
-            else if (mtu.MtuType == 138)
-            {
-                LoadDemoPulseMtuValuesToListView(mtu);
-            }
-        }
-
-        private void LoadMtuTypeNotSupported(int mtuType)
-        {
-                MTUDataListView = new List<ReadMTUItem>
-                {
-                    new ReadMTUItem() { Title = "MTU type not supported:", Description = mtuType.ToString() },
-                    new ReadMTUItem() { Title = "Supported MTU types:", Description = "171, 138" },
-                };
-               listaMTUread.ItemsSource = MTUDataListView;
-        }
-
-        private void LoadDemoPulseMtuValuesToListView(Mtu mtu)
-        {
-            string mtuStatus = mtu.Status;
-            string mtuSerNo = mtu.SerialNumber.ToString();
-            string tiltTamp = mtu.TilTamp;
-            string magneticTamp = mtu.MagneticTamp;
-            string interfaceTamp = mtu.InterfaceTamp;
-            string regCover = mtu.RegCover;
-            string revFlTamp = mtu.RevFlTamp;
-            string dailySnap = mtu.DailySnap;
-
-            string port1 = "Port 1: " + mtu.Port1Desc;
-            string meterType = mtu.MeterType;
-            string servicePtId = mtu.ServicePtId.ToString("d9");
-            string meterReading = mtu.MeterReading.ToString("d9");
-            string xmitInterval = string.Format("{0} Hrs", mtu.XmitInterval / 60);
-            string readInterval = string.Format("{0} Hrs", mtu.ReadInterval / 60);
-            string battery = mtu.BatteryVoltage;
-            string mtuType = mtu.MtuType.ToString();
-            string mtuSoftware = mtu.Software;
-            string pcbNumber = mtu.PcbNumber;
-
-            if (mtuStatus == "On")
-            {
-                MTUDataListView = new List<ReadMTUItem>
-                {
-                    new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
-                    new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
-                    new ReadMTUItem() { Title = "Tilt Tamp:", Description = tiltTamp },
-                    new ReadMTUItem() { Title = "Magnetic Tamp:", Description = magneticTamp },
-                    new ReadMTUItem() { Title = "Interface Tamp:", Description = interfaceTamp },
-                    new ReadMTUItem() { Title = "Reg. Cover:", Description = regCover },
-                    new ReadMTUItem() { Title = "Rev. Fl Tamp:", Description = revFlTamp },
-                    new ReadMTUItem() { Title = "Daily Snap:", Description = dailySnap },
-
-                    new ReadMTUItem() { Description = port1 , Height = "240", isMTU = "false", isMeter = "true",
-
-                            Title1 = "Meter Type:", Description1 = meterType ,
-                            Title2 = "Service Pt. ID:", Description2 = servicePtId ,
-                            Title3 = "Meter Reading:", Description3 = meterReading ,
-                    },
-
-                    new ReadMTUItem() { Title = "Xmit Interval:", Description = xmitInterval },
-                    new ReadMTUItem() { Title = "Read Interval:", Description = readInterval },
-                    new ReadMTUItem() { Title = "Battery:", Description = battery },
-                    new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
-                    new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
-                    new ReadMTUItem() { Title = "PCB Number:", Description = pcbNumber },
-
-                };
-            }
-            else
-            {
-                MTUDataListView = new List<ReadMTUItem>
-                {
-                    new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
-                    new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
-                    new ReadMTUItem() { Title = "Battery:", Description = battery },
-                    new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
-                    new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
-                    new ReadMTUItem() { Title = "PCB Number:", Description = pcbNumber },
-                };
-
-            }
-
-            // Setting our list to be ItemSource for ListView in MainPage.xaml
-            listaMTUread.ItemsSource = MTUDataListView;
-        }
-
-        private void LoadDemoEncoderMtuValuesToListView(Mtu mtu)
-        {
-            string mtuStatus = mtu.Status;
-            string mtuSerNo = mtu.SerialNumber.ToString();
-            string interfaceTamp = mtu.InterfaceTamp;
-            string lastGasp = mtu.LastGasp;
-            string insfMem = mtu.InsfMem;
-            string dailySnap = mtu.DailySnap;
-            string encrypted = "Yes";
-
-            string port1 = "Port 1: " + mtu.Port1Desc;
-            string meterType = mtu.MeterType;
-            string servicePtId = mtu.ServicePtId.ToString("d9");
-            string meterReading = string.Format(new CultureInfo("en-US"), "{0:0000000.0}X", ((double)mtu.MeterReading) / 10);
-            string digits = mtu.Digits.ToString();
-
-            string xmitInterval = string.Format("{0} Hrs", mtu.XmitInterval / 60);
-            string readInterval = string.Format("{0} Hrs", mtu.ReadInterval / 60);
-            string battery = mtu.BatteryVoltage;
-            string twoWay = mtu.TwoWay;
-            string onDemandCnt = mtu.OnDemandCount.ToString();
-            string dataReqCnt = mtu.DataReqCount.ToString();
-            string fotaCnt = mtu.FotaCount.ToString();
-            string fotcCnt = mtu.FotcCount.ToString();
-            string mtuType = mtu.MtuType.ToString();
-            string mtuSoftware = mtu.Software;
-            string pcbNumber = mtu.PcbNumber;
-
-            if (mtuStatus == "On")
-            {
-                MTUDataListView = new List<ReadMTUItem>
-                {
-                    new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
-                    new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
-                    new ReadMTUItem() { Title = "Interface Tamp:", Description = interfaceTamp },
-                    new ReadMTUItem() { Title = "Last Gasp:", Description = lastGasp },
-                    new ReadMTUItem() { Title = "Insf. Mem:", Description = insfMem },
-                    new ReadMTUItem() { Title = "Daily Snap:", Description = dailySnap },
-                    new ReadMTUItem() { Title = "Encrypted:", Description = encrypted },
-
-                    new ReadMTUItem() { Description = port1 , Height = "240", isMTU = "false", isMeter = "true",
-
-                            Title1 = "Meter Type:", Description1 = meterType ,
-                            Title2 = "Service Pt. ID:", Description2 = servicePtId ,
-                            Title3 = "Meter Reading:", Description3 = meterReading ,
-                    },
-                    new ReadMTUItem() { Title = "Digits #:", Description = digits },
-
-                    new ReadMTUItem() { Title = "Xmit Interval:", Description = xmitInterval },
-                    new ReadMTUItem() { Title = "Read Interval:", Description = readInterval },
-                    new ReadMTUItem() { Title = "Battery:", Description = battery },
-                    new ReadMTUItem() { Title = "2-Way:", Description = twoWay },
-                    new ReadMTUItem() { Title = "On Demand Cnt:", Description = onDemandCnt },
-                    new ReadMTUItem() { Title = "Data Req Cnt:", Description = dataReqCnt },
-                    new ReadMTUItem() { Title = "FOTA Cnt:", Description = fotaCnt },
-                    new ReadMTUItem() { Title = "FOTC Cnt:", Description = fotcCnt },
-                    new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
-                    new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
-                    new ReadMTUItem() { Title = "PCB Number:", Description = pcbNumber },
-
-                };
-            }
-            else
-            {
-                MTUDataListView = new List<ReadMTUItem>
-                {
-                    new ReadMTUItem() { Title = "MTU Status:", Description = mtuStatus },
-                    new ReadMTUItem() { Title = "MTU Ser No:", Description = mtuSerNo },
-                    new ReadMTUItem() { Title = "MTU Type:", Description = mtuType },
-                    new ReadMTUItem() { Title = "MTU Software:", Description = mtuSoftware },
-                    new ReadMTUItem() { Title = "PCB Number:", Description = pcbNumber },
-                };
-            }
-
-            // Setting our list to be ItemSource for ListView in MainPage.xaml
-            listaMTUread.ItemsSource = MTUDataListView;
-        }
+  
 
         private void LoadMTUValuesToListView(string identificador_int, string oneWayTx_int, string twoWayTx_int, string twoWayRx_int)
         {
@@ -671,6 +487,23 @@ namespace aclara_meters.view
                 new ReadMTUItem() { Title = "PCB Number", Description = "0"},
 
             };
+
+
+            string resultMsg = "Successful MTU read";
+            Task.Delay(100).ContinueWith(t =>
+           Device.BeginInvokeOnMainThread(() =>
+           {
+               label_read.Text = resultMsg;
+               _userTapped = false;
+               bg_read_mtu_button.NumberOfTapsRequired = 1;
+               ChangeLowerButtonImage(false);
+               backdark_bg.IsVisible = false;
+               indicator.IsVisible = false;
+               background_scan_page.IsEnabled = true;
+
+
+           }));
+
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
             listaMTUread.ItemsSource = MTUDataListView;
