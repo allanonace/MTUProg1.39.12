@@ -68,13 +68,28 @@
   <ItemGroup>
     <None Remove="XML\XmlElementList.xml" />
     <None Remove="view\.AclaraViewMainMenu.xaml.cs.swp" />
+    <None Remove="Resources\Alarm.xml" />
+    <None Remove="Resources\DemandConf.xml" />
+    <None Remove="Resources\Global.xml" />
+    <None Remove="Resources\Memory.xml" />
+    <None Remove="Resources\Meter.xml" />
+    <None Remove="Resources\Mtu.xml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ble_library\ble_library.csproj" />
     <ProjectReference Include="..\MtuComm\MtuComm.csproj" />
+    <ProjectReference Include="..\..\xml\Xml\Xml.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="view\MyPage.xaml" />
     <EmbeddedResource Remove="view\testingui.xaml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\Alarm.xml" />
+    <EmbeddedResource Include="Resources\DemandConf.xml" />
+    <EmbeddedResource Include="Resources\Global.xml" />
+    <EmbeddedResource Include="Resources\Memory.xml" />
+    <EmbeddedResource Include="Resources\Meter.xml" />
+    <EmbeddedResource Include="Resources\Mtu.xml" />
   </ItemGroup>
 </Project>

@@ -15,6 +15,13 @@ using System.Collections.ObjectModel;
 using Plugin.Settings;
 using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
+using Xml;
+using System.Xml.Serialization;
+using System.Xml;
+
+using System.IO;
+using System.Text;
+
 
 namespace aclara_meters.view
 {
@@ -757,18 +764,64 @@ namespace aclara_meters.view
             mtuLocation.ItemsSource = objStringList;
         }
 
+
+        MeterTypes meterTypes;
+        List<Meter> meters;
+        List<string> vendors;
+        List<string> models;
+        List<string> names;
+        string vendor;
+        string model;
+        string name;
+
         private void ColectionElementsPort1()
         {
             /*******************************************//*******************************************//*******************************************/
             /*******************************************/
             /**                  MARCA [0]            **/
 
+
+            XmlSerializer s = new XmlSerializer(typeof(MeterTypes));
+         
+            // convert string to stream
+            byte[] byteArray = Encoding.UTF8.GetBytes(aclara_meters.Resources.XmlStrings.GetMeterString());
+            //byte[] byteArray = Encoding.ASCII.GetBytes(contents);
+            MemoryStream stream = new MemoryStream(byteArray);
+
+            using (TextReader reader = new StreamReader(stream))
+            {
+                meterTypes = (MeterTypes)s.Deserialize(reader);
+            }
+
+            //MeterTypesDeserializationFromFileTest()
+            Config config = new Config();
+            //MeterTypes meterTypes = config.GetMeters("aclara_meters.Resources.Meter.xml");
+
+
+            //MeterTypesFindMetersByEncoderTypeAndLiveDigits()
+            int encoderType = 2;
+            int liveDigits = 6;
+
+            meters = meterTypes.FindByEncoderTypeAndLiveDigits(encoderType, liveDigits);
+
+                    //MeterTypesGetVendorsFromMeters()
+                    //List<string> vendors = meterTypes.GetVendorsFromMeters(meterTypes.Meters);
+
+                    //MeterTypesGetNamesByModelAndVendorFromMeters()
+
+            vendors = meterTypes.GetVendorsFromMeters(meterTypes.Meters);
+
             //Listado de los Selectores
             picker_List_Vendor_port1 = new List<string>();
 
-            picker_List_Vendor_port1.Add("Vendor 1");
-            picker_List_Vendor_port1.Add("Vendor 2");
-            picker_List_Vendor_port1.Add("Vendor 3");
+            for (int i1 = 0; i1 < vendors.Count; i1++)
+            {
+                picker_List_Vendor_port1.Add(vendors[i1]);
+            }
+
+            //picker_List_Vendor_port1.Add("Vendor 1");
+           // picker_List_Vendor_port1.Add("Vendor 2");
+            //picker_List_Vendor_port1.Add("Vendor 3");
 
             Frame fm1_vendor = new Frame()
             {
@@ -1391,8 +1444,7 @@ namespace aclara_meters.view
             int j = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + j);
 
-            List<string> filter_result = new List<string>();
-
+   
             StackLayout bloque2 = (StackLayout)EntriesStackLayout.Children[1];
 
 
@@ -1401,66 +1453,26 @@ namespace aclara_meters.view
             StackLayout tempStackMarca = (StackLayout) tempFrame2Marca.Content;
 
 
+            ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// MARCASSSSSS
             BorderlessPicker PickerToModify = (BorderlessPicker) tempStackMarca.Children[0];
 
-            if (j != -1)
+            vendor = vendors[j];
+
+            models = meterTypes.GetModelsByVendorFromMeters(meterTypes.Meters, vendor);
+
+            try
             {
-                int i = 0;
-
-                int cuantosProcesar = picker_List_Model_port1.Count - 1;
-                switch (j)
-                {
-                    case 0:
-                        Console.WriteLine("Vendor 1 Selected");
-                        for (i = 0; i < cuantosProcesar; i++)
-                        {
-                            if (picker_List_Model_port1[i].Contains("Vendor 1"))
-                            {
-                                filter_result.Add(picker_List_Model_port1[i]);
-                            }
-                        }
-
-                        break;
-
-                    case 1:
-                        Console.WriteLine("Vendor 2 Selected");
-                        for (i = 0; i < cuantosProcesar; i++)
-                        {
-                            if (picker_List_Model_port1[i].Contains("Vendor 2"))
-                            {
-                                filter_result.Add(picker_List_Model_port1[i]);
-                            }
-                        }
-
-                        break;
-
-                    case 2:
-                        Console.WriteLine("Vendor 3 Selected");
-                        for (i = 0; i < cuantosProcesar; i++)
-                        {
-                            if (picker_List_Model_port1[i].Contains("Vendor 3"))
-                            {
-                                filter_result.Add(picker_List_Model_port1[i]);
-                            }
-                        }
-
-                        break;
-                       
-                }
-
-                try
-                {
-                    PickerToModify.ItemsSource = filter_result;
-                    EntriesStackLayout.Children[1].IsVisible = true;
-                    EntriesStackLayout.Children[2].IsVisible = false;
-                }
-                catch (Exception e3)
-                {
-                    EntriesStackLayout.Children[1].IsVisible = false;
-                    EntriesStackLayout.Children[2].IsVisible = false;
-                    Console.WriteLine(e3.StackTrace);
-                }
+                PickerToModify.ItemsSource = models;
+                EntriesStackLayout.Children[1].IsVisible = true;
+                EntriesStackLayout.Children[2].IsVisible = false;
             }
+            catch (Exception e3)
+            {
+                EntriesStackLayout.Children[1].IsVisible = false;
+                EntriesStackLayout.Children[2].IsVisible = false;
+                Console.WriteLine(e3.StackTrace);
+            }
+
         }
 
 
@@ -1481,6 +1493,9 @@ namespace aclara_meters.view
 
 
             BorderlessPicker PickerToModify = (BorderlessPicker)tempStackMarca.Children[0];
+
+
+
 
             if (j != -1)
             {
@@ -1551,13 +1566,10 @@ namespace aclara_meters.view
             int j = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + j);
 
-            List<string> itemsColores = (List<string>)((BorderlessPicker)sender).ItemsSource;
-
-
-
+            name = names[j];
             try
             {
-                Console.WriteLine(itemsColores[j] + " Selected");
+                Console.WriteLine(name + " Selected");
             }
             catch (Exception n2)
             {
@@ -1607,52 +1619,26 @@ namespace aclara_meters.view
 
             List<string> valores = (List<string>)((BorderlessPicker)sender).ItemsSource;
 
-            if (i != -1)
+
+            model = models[i];
+
+            names = meterTypes.GetNamesByModelAndVendorFromMeters(meterTypes.Meters, vendor, model);
+
+            try
             {
-                if (valores[0].Contains("Vendor 1"))
-                {
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name1]);
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name2]);
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name3]);
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name4]);
-                }
-
-                if (valores[0].Contains("Vendor 2"))
-                {
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name3]);
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name4]);
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name5]);
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name6]);
-                }
-
-                if (valores[0].Contains("Vendor 3"))
-                {
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name6]);
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name7]);
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name8]);
-                    filter_result.Add(picker_List_Name_port1[(int)Names.Name9]);
-                }
-
-                try
-                {
-                    PickerToModify.ItemsSource = filter_result;
-                    EntriesStackLayout.Children[2].IsVisible = true;
-                    EntriesStackLayout.Children[1].IsVisible = true;
-                }
-                catch (Exception e3)
-                {
-                    PickerToModify.ItemsSource = filter_result;
-                    EntriesStackLayout.Children[1].IsVisible = false;
-                    EntriesStackLayout.Children[2].IsVisible = false;
-                    Console.WriteLine(e3.StackTrace);
-                }
+                PickerToModify.ItemsSource = names;
+                EntriesStackLayout.Children[2].IsVisible = true;
+                EntriesStackLayout.Children[1].IsVisible = true;
             }
-
+            catch (Exception e3)
+            {
+                PickerToModify.ItemsSource = names;
+                EntriesStackLayout.Children[1].IsVisible = false;
+                EntriesStackLayout.Children[2].IsVisible = false;
+                Console.WriteLine(e3.StackTrace);
+            }
         }
     
-
-
-
 
         private void PickerModelos_SelectedIndexChanged2(object sender, EventArgs e)
         {
