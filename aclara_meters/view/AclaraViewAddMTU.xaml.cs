@@ -416,18 +416,7 @@ namespace aclara_meters.view
                     ThreadProcedureMTUCOMMAction();
                 });
 
-                Task.Delay(4000).ContinueWith(t =>
-                 Device.BeginInvokeOnMainThread(() =>
-                 {
-                     _userTapped = false;
-                     bg_read_mtu_button.NumberOfTapsRequired = 1;
-                     ChangeLowerButtonImage(false);
-                     backdark_bg.IsVisible = false;
-                     indicator.IsVisible = false;
-                     label_read.Text = "Successful MTU write";
-                     background_scan_page.IsEnabled = true;
-                 }));
-
+               
 
 
             }
@@ -524,7 +513,7 @@ namespace aclara_meters.view
 
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action  add_mtu = new MTUComm.Action(config: new Configuration(xml_documents), serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: "iker");
+            MTUComm.Action  add_mtu = new MTUComm.Action(config: new Configuration(xml_documents), serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.AddMtu, user: "iker");
 
             //Define finish and error event handler
             //add_mtu.OnFinish += Add_mtu_OnFinish;
@@ -541,6 +530,20 @@ namespace aclara_meters.view
                 }
 
 
+                Task.Delay(100).ContinueWith(t =>
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    _userTapped = false;
+                    bg_read_mtu_button.NumberOfTapsRequired = 1;
+                    ChangeLowerButtonImage(false);
+                    backdark_bg.IsVisible = false;
+                    indicator.IsVisible = false;
+                    label_read.Text = "Successful MTU write";
+                    background_scan_page.IsEnabled = true;
+                }));
+
+
+
             });
 
 
@@ -550,6 +553,23 @@ namespace aclara_meters.view
                 // Console.WriteLine(s.ToString());
 
                  String result = e.Message;
+
+           
+                                              
+                Task.Delay(100).ContinueWith(t =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      _userTapped = false;
+                      bg_read_mtu_button.NumberOfTapsRequired = 1;
+                      ChangeLowerButtonImage(false);
+                      backdark_bg.IsVisible = false;
+                      indicator.IsVisible = false;
+                      label_read.Text = result;
+                      background_scan_page.IsEnabled = true;
+                  }));
+
+
+
                  Console.WriteLine(result.ToString());
 
              });

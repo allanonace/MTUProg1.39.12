@@ -17,6 +17,7 @@ using System.Linq;
 using System.Threading;
 using System.Globalization;
 using Xml;
+using MTUComm;
 
 namespace aclara_meters.view
 {
@@ -158,7 +159,15 @@ namespace aclara_meters.view
                     ChangeLowerButtonImage(true);
                     _userTapped = true;
                     label_read.Text = "Reading from MTU ... ";
+
+
+                    ThreadProcedureMTUCOMMAction();
+
+
                 });
+
+
+
 
 
 
@@ -186,49 +195,56 @@ namespace aclara_meters.view
                     FormsApp.ble_interface.Read(rxbuffer, 0, 262);
                 }*/
 
-                LoadMTUValuesToListView("","","","");
+                //LoadMTUValuesToListView("","","","");
 
                
-
-
             }
         }
 
-        private void ThreadProcedureReadLexi()
-        {
-            string resultMsg = "Successful MTU read";
-            byte[] readData;
 
-            
-            try
-            {
-                //FormsApp.lexi.Write(64, new byte[] { 1 });
-                //Thread.Sleep(500);
-                /*
-                byte[] readData0 = FormsApp.lexi.Read(0, 255);
-                int mtuType = readData0[0];
-                if (mtuType == 171)
+
+        private void ThreadProcedureMTUCOMMAction()
+        {
+
+
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            //Create Ation when opening Form
+            //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
+            MTUComm.Action add_mtu = new MTUComm.Action(config: new Configuration(xml_documents), serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: "iker");
+
+            //Define finish and error event handler
+            //add_mtu.OnFinish += Add_mtu_OnFinish;
+            //add_mtu.OnError += Add_mtu_OnError;
+
+
+            add_mtu.OnFinish += ((s, e) => {
+                Console.WriteLine("Action Succefull");
+                Console.WriteLine("Press Key to Exit");
+                //Console.WriteLine(s.ToString());
+
+                MTUDataListView = new List<ReadMTUItem>();
+
+                foreach (Parameter param in e.Result.getParameters())
                 {
-                    FormsApp.lexi.Write(64, new byte[] { 1 });
-                    Thread.Sleep(500);
-                    readData0 = FormsApp.lexi.Read(0, 255);
-                    byte[] readData1 = FormsApp.lexi.Read(255, 255);
-                    readData = readData0.Concat(readData1).ToArray();
+                    Console.WriteLine(param.getLogDisplay() + ":" + param.getValue());
+
+
+                    MTUDataListView.Add(new ReadMTUItem() { Title = param.getLogDisplay()+ ":", Description = param.getValue() });
+
+
+
                 }
-                else if (mtuType == 138)
-                {
-                    readData = readData0;
-               
-                }
-                */
-                //byte[] readData1 = FormsApp.lexi.Read(255, 255);
-                //readData = readData0; //  readData0.Concat(readData1).ToArray();
-                //Mtu mtu = new Mtu(readData);
+
+                string resultMsg = "Successful MTU read";
+                byte[] readData;
+
 
 
                 Task.Delay(100).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
+                    listaMTUread.ItemsSource = MTUDataListView;
                     label_read.Text = resultMsg;
                     _userTapped = false;
                     bg_read_mtu_button.NumberOfTapsRequired = 1;
@@ -237,17 +253,71 @@ namespace aclara_meters.view
                     indicator.IsVisible = false;
                     background_scan_page.IsEnabled = true;
 
-                  
+
                 }));
-            }
-            catch (TimeoutException ex)
+
+
+
+                /*
+                 * 
+                 *   
+                 MTUDataListView = new List<ReadMTUItem>
             {
-                resultMsg = "Timeout";
+            
+                   new ReadMTUItem() { Title = "MTU Status:", Description = "On" },
+                new ReadMTUItem() { Title = "MTU Ser No:", Description = "63004810"},
+                new ReadMTUItem() { Title = "Interface Tamp:", Description = "Triggered" },
+                new ReadMTUItem() { Title = "Last Gasp:", Description = "Enabled" },
+                new ReadMTUItem() { Title = "Insf. Mem:", Description = "Enabled" },
+                new ReadMTUItem() { Title = "Daily Snap:", Description = "2 PM" },
+                new ReadMTUItem() { Title = "Encrypted:", Description = "Yes"},
+
+                new ReadMTUItem() { Description = "Port 1: MTU Water Single Port On-Demand Encoder ER" , Height = "310", isMTU = "false", isMeter = "true",
+                        
+                        Title1 = "Meter Type ID:", Description1 = "126" ,
+                        Title2 = "Service Pt. ID:", Description2 = "012345678" ,
+                        Title3 = "Meter Reading:", Description3 = "0188XX"
+                },
+
+                new ReadMTUItem() { Title = "Xmit Interval:", Description = "72 Hrs" },
+                new ReadMTUItem() { Title = "Read Interval:", Description = "12 Hrs" },
+                new ReadMTUItem() { Title = "Battery:", Description = "3,66 V" },
+                new ReadMTUItem() { Title = "2-Way:", Description = "Slow" },
+                new ReadMTUItem() { Title = "On Demand Cnt:", Description = "0" },
+                new ReadMTUItem() { Title = "Data Req Cnt:", Description = "0"  },
+                new ReadMTUItem() { Title = "FOTA Cnt:", Description = "0"  },
+                new ReadMTUItem() { Title = "FOTC Cnt:", Description = "0"  },
+                new ReadMTUItem() { Title = "MTU Type:", Description = "171"},
+                new ReadMTUItem() { Title = "MTU Software:", Description = "Version 01.04.0008"},
+                new ReadMTUItem() { Title = "PCB Number", Description = "0"},
+ 
+                };
+                 */
+
+
+
+
+               
+           
+
+            });
+
+
+            add_mtu.OnError += ((s, e) => {
+                Console.WriteLine("Action Errror");
+                Console.WriteLine("Press Key to Exit");
+                // Console.WriteLine(s.ToString());
+
+               // String result = e.Message;
+                //Console.WriteLine(result.ToString());
+
+
+                string resultMsg = "Timeout";
                 Task.Delay(100).ContinueWith(t =>
                      Device.BeginInvokeOnMainThread(() =>
                      {
 
-                         MTUDataListView = new List<ReadMTUItem>{};
+                         MTUDataListView = new List<ReadMTUItem> { };
                          listaMTUread.ItemsSource = MTUDataListView;
 
                          label_read.Text = resultMsg;
@@ -259,9 +329,18 @@ namespace aclara_meters.view
                          background_scan_page.IsEnabled = true;
 
                      }));
-            }
+
+
+            });
+
+
+            add_mtu.Run();
+
+
+
         }
 
+  
         public AclaraViewReadMTU(IUserDialogs dialogs)
         {
             InitializeComponent();
@@ -445,70 +524,6 @@ namespace aclara_meters.view
         }
 
   
-
-        private void LoadMTUValuesToListView(string identificador_int, string oneWayTx_int, string twoWayTx_int, string twoWayRx_int)
-        {
-            MTUDataListView = new List<ReadMTUItem>
-            {
-                // Creating our pages for menu navigation
-                // Here you can define title for item, 
-                // icon on the left side, and page that you want to open after selection
-                // Adding menu items to MTUDataListView
-               // new ReadMTUItem() { Title = "MTU Ser No.", Description = Convert.ToString(identificador_int) },
-               // new ReadMTUItem() { Title = "1 Way Tx Freq.", Description = oneWayTx_int },
-               // new ReadMTUItem() { Title = "2 Way Tx Freq.", Description = twoWayTx_int },
-               // new ReadMTUItem() { Title = "2 Way Rx Freq.", Description = twoWayRx_int }
-
-                new ReadMTUItem() { Title = "MTU Status:", Description = "On" },
-                new ReadMTUItem() { Title = "MTU Ser No:", Description = "63004810"},
-                new ReadMTUItem() { Title = "Interface Tamp:", Description = "Triggered" },
-                new ReadMTUItem() { Title = "Last Gasp:", Description = "Enabled" },
-                new ReadMTUItem() { Title = "Insf. Mem:", Description = "Enabled" },
-                new ReadMTUItem() { Title = "Daily Snap:", Description = "2 PM" },
-                new ReadMTUItem() { Title = "Encrypted:", Description = "Yes"},
-
-                new ReadMTUItem() { Description = "Port 1: MTU Water Single Port On-Demand Encoder ER" , Height = "310", isMTU = "false", isMeter = "true",
-                        
-                        Title1 = "Meter Type ID:", Description1 = "126" ,
-                        Title2 = "Service Pt. ID:", Description2 = "012345678" ,
-                        Title3 = "Meter Reading:", Description3 = "0188XX"
-                },
-
-                new ReadMTUItem() { Title = "Xmit Interval:", Description = "72 Hrs" },
-                new ReadMTUItem() { Title = "Read Interval:", Description = "12 Hrs" },
-                new ReadMTUItem() { Title = "Battery:", Description = "3,66 V" },
-                new ReadMTUItem() { Title = "2-Way:", Description = "Slow" },
-                new ReadMTUItem() { Title = "On Demand Cnt:", Description = "0" },
-                new ReadMTUItem() { Title = "Data Req Cnt:", Description = "0"  },
-                new ReadMTUItem() { Title = "FOTA Cnt:", Description = "0"  },
-                new ReadMTUItem() { Title = "FOTC Cnt:", Description = "0"  },
-                new ReadMTUItem() { Title = "MTU Type:", Description = "171"},
-                new ReadMTUItem() { Title = "MTU Software:", Description = "Version 01.04.0008"},
-                new ReadMTUItem() { Title = "PCB Number", Description = "0"},
-
-            };
-
-
-            string resultMsg = "Successful MTU read";
-            Task.Delay(100).ContinueWith(t =>
-           Device.BeginInvokeOnMainThread(() =>
-           {
-               label_read.Text = resultMsg;
-               _userTapped = false;
-               bg_read_mtu_button.NumberOfTapsRequired = 1;
-               ChangeLowerButtonImage(false);
-               backdark_bg.IsVisible = false;
-               indicator.IsVisible = false;
-               background_scan_page.IsEnabled = true;
-
-
-           }));
-
-
-            // Setting our list to be ItemSource for ListView in MainPage.xaml
-            listaMTUread.ItemsSource = MTUDataListView;
-        }
-
         private void OnItemSelected( Object sender, SelectedItemChangedEventArgs e )
         {
             ((ListView)sender).SelectedItem = null;
