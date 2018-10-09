@@ -12,6 +12,7 @@ using ble_library;
 using System.Web;
 using System.Collections.Generic;
 using System.Xml.Linq;
+using System.IO;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -40,7 +41,16 @@ namespace aclara_meters
             ble_interface = new BleSerial(adapter);
             //lexi = new Lexi.Lexi(ble_interface, 10000);
 
-          
+            // XML FILE FTP CREATION
+            //var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            //var filename_meter = Path.Combine(xml_documents, "Meter.xml");
+           // var filename_mtu = Path.Combine(xml_documents, "Mtu.xml");
+
+           // File.WriteAllText(filename_meter, aclara_meters.Resources.XmlStrings.GetMeterString());
+          //  File.WriteAllText(filename_mtu, aclara_meters.Resources.XmlStrings.GetMTUString());
+
+
             //Cargar la pantalla principal
             MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
         }

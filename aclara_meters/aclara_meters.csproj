@@ -65,7 +65,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="XML\" />
-    <Folder Include="Xml_Files\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="XML\XmlElementList.xml" />
@@ -92,19 +91,6 @@
   <ItemGroup>
     <EmbeddedResource Remove="view\MyPage.xaml" />
     <EmbeddedResource Remove="view\testingui.xaml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Xml_Files\Alarm.xml" />
-    <EmbeddedResource Include="Xml_Files\DemandConf.xml" />
-    <EmbeddedResource Include="Xml_Files\Global.xml" />
-    <EmbeddedResource Include="Xml_Files\Memory.xml" />
-    <EmbeddedResource Include="Xml_Files\Mtu.xml" />
-    <EmbeddedResource Include="Xml_Files\Meter.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="Xml_Files\XmlResources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>XmlResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    <EmbeddedResource Remove="Xml_Files\XmlResources.resx" />
   </ItemGroup>
 </Project>

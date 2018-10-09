@@ -416,6 +416,17 @@ namespace aclara_meters.view
                     ThreadProcedureMTUCOMMAction();
                 });
 
+                Task.Delay(4000).ContinueWith(t =>
+                 Device.BeginInvokeOnMainThread(() =>
+                 {
+                     _userTapped = false;
+                     bg_read_mtu_button.NumberOfTapsRequired = 1;
+                     ChangeLowerButtonImage(false);
+                     backdark_bg.IsVisible = false;
+                     indicator.IsVisible = false;
+                     label_read.Text = "Successful MTU write";
+                     background_scan_page.IsEnabled = true;
+                 }));
 
 
 
@@ -511,12 +522,6 @@ namespace aclara_meters.view
 
             var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-            var filename_meter = Path.Combine(xml_documents, "Meter.xml");
-            var filename_mtu = Path.Combine(xml_documents, "Mtu.xml");
-
-            File.WriteAllText(filename_meter, aclara_meters.Resources.XmlStrings.GetMeterString());
-            File.WriteAllText(filename_mtu, aclara_meters.Resources.XmlStrings.GetMTUString());
-
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
             MTUComm.Action  add_mtu = new MTUComm.Action(config: new Configuration(xml_documents), serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: "iker");
@@ -529,10 +534,12 @@ namespace aclara_meters.view
             add_mtu.OnFinish += ((s, e) => {   
                 Console.WriteLine("Action Succefull");
                 Console.WriteLine("Press Key to Exit");
-                Console.WriteLine(s.ToString());
+                //Console.WriteLine(s.ToString());
 
-                ReadResult result = e.Result;
-                Console.WriteLine(result.ToString());
+                foreach(Parameter param in e.Result.getParameters()){
+                    Console.WriteLine(param.getLogDisplay() + ":" + param.getValue());
+                }
+
 
             });
 
@@ -540,7 +547,7 @@ namespace aclara_meters.view
             add_mtu.OnError  += ((s, e) => {
                  Console.WriteLine("Action Errror");
                  Console.WriteLine("Press Key to Exit");
-                 Console.WriteLine(s.ToString());
+                // Console.WriteLine(s.ToString());
 
                  String result = e.Message;
                  Console.WriteLine(result.ToString());
@@ -837,15 +844,9 @@ namespace aclara_meters.view
             /*******************************************/
             /**                  MARCA [0]            **/
 
-
             XmlSerializer s = new XmlSerializer(typeof(MeterTypes));
-         
-            // convert string to stream
-            byte[] byteArray = Encoding.UTF8.GetBytes(aclara_meters.Resources.XmlStrings.GetMeterString());
-            //byte[] byteArray = Encoding.ASCII.GetBytes(contents);
-            MemoryStream stream = new MemoryStream(byteArray);
 
-            using (TextReader reader = new StreamReader(stream))
+            using (TextReader reader = new StreamReader(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Meter.xml")))
             {
                 meterTypes = (s.Deserialize(reader) as MeterTypes);
             }
