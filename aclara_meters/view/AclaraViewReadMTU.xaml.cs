@@ -204,7 +204,7 @@ namespace aclara_meters.view
             {
                 //FormsApp.lexi.Write(64, new byte[] { 1 });
                 //Thread.Sleep(500);
-
+                /*
                 byte[] readData0 = FormsApp.lexi.Read(0, 255);
                 int mtuType = readData0[0];
                 if (mtuType == 171)
@@ -220,7 +220,7 @@ namespace aclara_meters.view
                     readData = readData0;
                
                 }
-                
+                */
                 //byte[] readData1 = FormsApp.lexi.Read(255, 255);
                 //readData = readData0; //  readData0.Concat(readData1).ToArray();
                 //Mtu mtu = new Mtu(readData);

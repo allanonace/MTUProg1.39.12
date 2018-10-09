@@ -394,6 +394,7 @@ namespace aclara_meters.view
         {
             if (!_userTapped)
             {
+
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     backdark_bg.IsVisible = true;
@@ -404,37 +405,20 @@ namespace aclara_meters.view
                     ChangeLowerButtonImage(true);
                 });
 
-                Task.Delay(1000).ContinueWith(t =>
-                 Device.BeginInvokeOnMainThread(() =>
-                 {
-                    label_read.Text = "Writing to MTU ... 3 sec";
-                 }));
-
-                Task.Delay(2000).ContinueWith(t =>
-                 Device.BeginInvokeOnMainThread(() =>
-                 {
-                    label_read.Text = "Writing to MTU ... 2 sec";
-                 }));
 
 
-                Task.Delay(3000).ContinueWith(t =>
-                 Device.BeginInvokeOnMainThread(() =>
-                 {
-                    label_read.Text = "Writing to MTU ... 1 sec";
-                 }));
 
 
-                Task.Delay(4000).ContinueWith(t =>
-                 Device.BeginInvokeOnMainThread(() =>
-                 {
-                    _userTapped = false;
-                     bg_read_mtu_button.NumberOfTapsRequired = 1;
-                     ChangeLowerButtonImage(false);
-                     backdark_bg.IsVisible = false;
-                     indicator.IsVisible = false;
-                     label_read.Text = "Successful MTU write";
-                     background_scan_page.IsEnabled = true;
-                 }));
+                //Task.Factory.StartNew(ThreadProcedureMTUCOMMAction);
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    ThreadProcedureMTUCOMMAction();
+                });
+
+
+
+
             }
         }
 
@@ -510,28 +494,19 @@ namespace aclara_meters.view
 
             Validations();
 
-            var assembly = typeof(AclaraViewAddMTU).GetTypeInfo().Assembly;
-
-            //First get the list of all resources available for debugging purpose
-            string [] resources = assembly.GetManifestResourceNames();
-
-
-            Stream stream_mtu = assembly.GetManifestResourceStream("aclara_meters.Xml_Files.Mtu.xml");
-            Stream stream_meter = assembly.GetManifestResourceStream("aclara_meters.Xml_Files.Meter.xml");
 
 
 
-            var data_mtu = "";
-            using (var reader = new StreamReader(stream_mtu))
-            {
-                data_mtu = reader.ReadToEnd();
-            }
 
-            var data_meter = "";
-            using (var reader = new StreamReader(stream_meter))
-            {
-                data_meter = reader.ReadToEnd();
-            }
+
+
+
+        }
+
+    
+
+        private void ThreadProcedureMTUCOMMAction()
+        {
 
 
             var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -539,27 +514,47 @@ namespace aclara_meters.view
             var filename_meter = Path.Combine(xml_documents, "Meter.xml");
             var filename_mtu = Path.Combine(xml_documents, "Mtu.xml");
 
-            File.WriteAllText(filename_meter, aclara_meters.Resources.XmlStrings.GetMeterString() );
-            File.WriteAllText(filename_mtu, aclara_meters.Resources.XmlStrings.GetMTUString() );
+            File.WriteAllText(filename_meter, aclara_meters.Resources.XmlStrings.GetMeterString());
+            File.WriteAllText(filename_mtu, aclara_meters.Resources.XmlStrings.GetMTUString());
 
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action add_mtu = new MTUComm.Action(config: new Configuration(xml_documents), serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: "iker");
-
-            // "/var/mobile/Containers/Data/Application/637D98AB-7487-449A-9DD8-5914E17B479F/Documents/Mtu.xml"
+            MTUComm.Action  add_mtu = new MTUComm.Action(config: new Configuration(xml_documents), serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: "iker");
 
             //Define finish and error event handler
-            add_mtu.OnFinish += Add_mtu_OnFinish;
-            add_mtu.OnError += Add_mtu_OnError;
+            //add_mtu.OnFinish += Add_mtu_OnFinish;
+            //add_mtu.OnError += Add_mtu_OnError;
 
-            //Run
+
+            add_mtu.OnFinish += ((s, e) => {   
+                Console.WriteLine("Action Succefull");
+                Console.WriteLine("Press Key to Exit");
+                Console.WriteLine(s.ToString());
+
+                ReadResult result = e.Result;
+                Console.WriteLine(result.ToString());
+
+            });
+
+
+            add_mtu.OnError  += ((s, e) => {
+                 Console.WriteLine("Action Errror");
+                 Console.WriteLine("Press Key to Exit");
+                 Console.WriteLine(s.ToString());
+
+                 String result = e.Message;
+                 Console.WriteLine(result.ToString());
+
+             });
+
+
             add_mtu.Run();
-           // Console.ReadKey();
+             
+
+                  
         }
 
-
-
-		private static void Add_mtu_OnError(object sender, MTUComm.Action.ActionErrorArgs e)
+        private static void Add_mtu_OnError(object sender, MTUComm.Action.ActionErrorArgs e)
         {
             Console.WriteLine("Action Errror");
             Console.WriteLine("Press Key to Exit");

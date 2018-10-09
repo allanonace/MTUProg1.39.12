@@ -7,8 +7,7 @@ namespace aclara_meters.Resources
 
         public static string GetMTUString(){
 
-            string mtuvalue = @"
-            <?xml version=""1.0"" encoding=""utf-8"" ?>
+            string mtuvalue = @"<?xml version=""1.0"" encoding=""utf-8"" ?>
 <MtuTypes>
     <FileVersion>2.0</FileVersion>
     <FileDate>10/11/2005</FileDate>
