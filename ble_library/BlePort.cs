@@ -142,7 +142,7 @@ namespace ble_library
         private byte[] dynamicPass;
         private bool isPaired = true;
         private bool isScanning;
-        private int cipheredDataSentCounter;
+        private byte cipheredDataSentCounter;
 
         private byte[] writeSavedBuffer;
         private int writeSavedOffset;
@@ -150,7 +150,7 @@ namespace ble_library
         
         private ISettings saved_settings;
         private byte[] static_pass = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x2e };
-        private byte[] say_hi = { 0x48, 0x69, 0x2c, 0x20, 0x49, 0x27, 0x6d, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00 };
+        private byte[] say_hi = { 0x48, 0x69, 0x2c, 0x49, 0x27, 0x6d, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00, 0x00, 0x00 };
 
 
         private byte[] batteryLevel;
@@ -373,24 +373,23 @@ namespace ble_library
                 }
          
                 byte frameId = 0x02;
-                byte frameCount = (byte) cipheredDataSentCounter;
                 byte dataCount = (byte) count;
 
-                ret = new byte[] { frameId, frameCount, dataCount }.ToArray().
+                ret = new byte[] { frameId, cipheredDataSentCounter, dataCount }.ToArray().
                                         Concat(AES_Encrypt(dataToCipher, dynamicPass)).
                                         Concat(new byte[] { 0x00 }).ToArray();
+
+                cipheredDataSentCounter++; 
+                if (cipheredDataSentCounter == 0)
+                {
+                    cipheredDataSentCounter = 1;
+                }
 
                 await gattServer_connection.WriteCharacteristicValue(
                     new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                     new Guid("00000002-0000-1000-8000-00805f9b34fb"),
                     ret
                 );
-
-                cipheredDataSentCounter++; 
-                if (cipheredDataSentCounter > 255)
-                {
-                    cipheredDataSentCounter = 1;
-                }
             }
             catch (GattException ex)
             {
@@ -529,6 +528,7 @@ catch (Exception e)
                     }
                     isConnected = CONNECTED;
                     connectionError = NO_ERROR;
+                    cipheredDataSentCounter = 1;
                 }
             }
         }
@@ -540,8 +540,12 @@ catch (Exception e)
         {
             if(bytes.Skip(3).Take(1).ToArray().SequenceEqual(new byte[] { 0x01 }))
             {
-                int i = bytes.Skip(1).Take(1).ToArray().ToInt16();
-                cipheredDataSentCounter = i + 1;
+                cipheredDataSentCounter = bytes.Skip(1).Take(1).ToArray()[0];
+                cipheredDataSentCounter++;
+                if (cipheredDataSentCounter == 0)
+                {
+                    cipheredDataSentCounter = 1;
+                }
                 Write_Characteristic(writeSavedBuffer, writeSavedOffset, writeSavedCount);
             }
         }
@@ -646,6 +650,7 @@ catch (Exception e)
 
                 byte[] PassH_crypt = new byte[] { };
                 byte[] PassL_crypt = new byte[] { };
+                byte[] ticks = new byte[] { };
 
                 //Read Pass H data from Characteristic
                 PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
@@ -657,6 +662,12 @@ catch (Exception e)
                 PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
                     new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                     new Guid("00000042-0000-1000-8000-00805f9b34fb")
+                );
+
+                //Read Pass L data from Characteristic
+                ticks = await gattServer_connection.ReadCharacteristicValue(
+                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
+                    new Guid("00000044-0000-1000-8000-00805f9b34fb")
                 );
 
                 bool isOnState = true;
@@ -685,6 +696,7 @@ catch (Exception e)
                     dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
                     byte[] hi_msg;
 
+                    Array.Copy(ticks, 0, say_hi, 12, 4);
                     hi_msg = AES_Encrypt(say_hi, dynamicPass);
                   
                     await gattServer_connection.WriteCharacteristicValue(
@@ -736,6 +748,7 @@ catch (Exception e)
                     Array.Copy(PassH_decrypt, 0, dynamicPass, 0, PassH_decrypt.Length);
                     Array.Copy(PassL_decrypt, 0, dynamicPass, PassH_decrypt.Length, PassL_decrypt.Length);
 
+                    Array.Copy(ticks, 0, say_hi, 12, 4);
                     hi_msg = AES_Encrypt(say_hi, dynamicPass);
                
                     await gattServer_connection.WriteCharacteristicValue(
