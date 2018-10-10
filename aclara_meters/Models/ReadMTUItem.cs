@@ -23,6 +23,7 @@ namespace aclara_meters.Models
             Description2 = "-";
             Description3 = "-";
 
+            isDisplayed = "true";
             Height = "60";
         }
 
@@ -38,6 +39,9 @@ namespace aclara_meters.Models
         { get; set; }
 
         public string isMeter
+        { get; set; }
+
+        public string isDisplayed
         { get; set; }
 
         public string isMTU

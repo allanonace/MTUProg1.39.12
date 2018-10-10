@@ -167,7 +167,7 @@
                         <Label Margin="16,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Read MTU"  />
 
                             
-                        <Image Margin="-16,4,-16,0" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8"/>
+                        <Image Margin="-16,4,-16,0" WidthRequest="380"  HeightRequest="2" BackgroundColor="#6aa2b8"/>
 
                          
                    
@@ -191,32 +191,12 @@
                               <ViewCell >
                                        
                                     
-                                 <StackLayout HeightRequest="{Binding Height}" Orientation="Vertical" >
+                                 <StackLayout HeightRequest="{Binding Height}" IsVisible="{Binding isDisplayed}" Orientation="Vertical" >
 
                                      <StackLayout  IsVisible="{Binding isMeter}">
                                            <Label Text="{Binding Description}" Margin="14,4,0,0" VerticalOptions="Center"  Font="Bold,20"/> 
                                             <BoxView BackgroundColor="#7a868c" HeightRequest="1" Margin="8,-4,24,0" />
-                                            <Label Text="{Binding Title1}" Margin="14,0,0,0" VerticalOptions="Center" 
-                                                   Font="Bold,20" />        
-                                            <Label Text="{Binding Description1}" Margin="14,-4,0,0" FontSize="18" 
-                                                   VerticalOptions="Center"/>
-                                         
-
-                                       
-                                            <Label Text="{Binding Title2}" Margin="14,0,0,0" VerticalOptions="Center" 
-                                                   Font="Bold,20" />        
-                                            <Label Text="{Binding Description2}" Margin="14,-4,0,0" FontSize="18" 
-                                                   VerticalOptions="Center"/>
-                                        
-
-
-                                            <Label Text="{Binding Title3}" Margin="14,0,0,0" VerticalOptions="Center" 
-                                                   Font="Bold,20" />
-                                                <Label Text="{Binding Description3}" Margin="14,-4,0,0" FontSize="18" 
-                                                   VerticalOptions="Center"/>
-
-
-
+                              
                                             </StackLayout>
                                    
                                       <StackLayout IsVisible="{Binding isMTU}">       

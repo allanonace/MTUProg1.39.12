@@ -25,6 +25,10 @@ namespace aclara_meters.view
     {
 
         private List<ReadMTUItem> MTUDataListView { get; set; }
+
+        private List<ReadMTUItem> FinalReadListView { get; set; }
+
+
         private List<PageItem> MenuList { get; set; }
         private bool _userTapped;
         private IUserDialogs dialogsSaved;
@@ -224,27 +228,228 @@ namespace aclara_meters.view
                 //Console.WriteLine(s.ToString());
 
                 MTUDataListView = new List<ReadMTUItem>();
+                FinalReadListView = new List<ReadMTUItem>();
+
+                for (int i = 0; i < 31; i++){
+                    FinalReadListView.Add(new ReadMTUItem()
+                    {
+                        isDisplayed = "false",
+                        Height = "0"
+                    });
+                }
 
                 foreach (Parameter param in e.Result.getParameters())
                 {
                     Console.WriteLine(param.getLogDisplay() + ":" + param.getValue());
 
 
-                    MTUDataListView.Add(new ReadMTUItem() { Title = param.getLogDisplay()+ ":", Description = param.getValue() });
-
-
-
+                    if(e.Result.getParameters()[0].getLogDisplay().Equals("MTU Status"))
+                    {
+                        if(e.Result.getParameters()[0].getValue().Equals("ON"))
+                        {
+                            if (!CheckIfParamIsVisible(param.getLogDisplay(), param.getValue()   ))
+                            {
+                                MTUDataListView.Add(new ReadMTUItem() 
+                                { 
+                                    Title = param.getLogDisplay() + ":", 
+                                    isDisplayed = "false", 
+                                    Height = "0", 
+                                    Description = param.getValue() 
+                                });
+                            }
+                            else
+                            {
+                                MTUDataListView.Add(new ReadMTUItem() 
+                                { 
+                                    Title = param.getLogDisplay() + ":", 
+                                    Description = param.getValue() 
+                                });
+                            }
+                        }else{
+                            if (!CheckIfParamIsVisible(param.getLogDisplay(), param.getValue() , "MTU Status Off"))
+                            {
+                                MTUDataListView.Add(new ReadMTUItem() 
+                                { 
+                                    Title = param.getLogDisplay() + ":", 
+                                    isDisplayed = "false", 
+                                    Height = "0", 
+                                    Description = param.getValue() 
+                                });
+                            }
+                            else
+                            {
+                                MTUDataListView.Add(new ReadMTUItem() 
+                                { 
+                                    Title = param.getLogDisplay() + ":", 
+                                    Description = param.getValue() 
+                                });
+                            }
+                        }
+                    }
                 }
+
+                ReadResult[] portResult = e.Result.getPorts();
+
+                int cont = 1;
+                foreach (MTUComm.ReadResult portval in portResult)
+                {
+                    
+
+                    int index = FinalReadListView.FindIndex(
+                        a => 
+                        a.Title.ToString().Contains("Xmit Interval") 
+                    );
+
+              
+                   
+
+                    FinalReadListView.Insert(index, new ReadMTUItem()
+                    {
+                        Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
+                        Height = "40",
+                        isMTU = "false",
+                        isMeter = "true"
+
+                    });
+
+                    /*
+                     
+                        // PORT FIELDS -->
+
+                        case "Meter Type":
+                            isVisible = true;
+
+                            break;
+                        case "Service Pt. ID":
+                            isVisible = true;
+                            break;
+                        case "Meter Reading":
+                            isVisible = true;
+                            break;
+                        // <-- END PORT FIELDS
+
+                     */
+
+                    MTUDataListView.Add(new ReadMTUItem()
+                    {
+                        Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
+                        Height = "40",
+                        isMTU = "false",
+                        isMeter = "true"
+
+                    });
+
+                    for (int i = 0; i < portval.getParameters().Length; i++)
+                    {
+                        MTUComm.Parameter paramval = portval.getParameters()[i];
+
+                        Console.WriteLine(paramval.getLogDisplay() + ":" + paramval.getValue());
+
+                        if(i == portval.getParameters().Length)
+                        {
+                            if (!CheckIfParamIsVisible(paramval.getLogDisplay(), paramval.getValue()))
+                            {
+
+                                FinalReadListView.Insert(index+1+i,new ReadMTUItem()
+                                {
+                                    Title = paramval.getLogDisplay() + ":",
+                                    Height = "0",
+                                    isDisplayed = "false",
+                                    Description = paramval.getValue()
+                                });
+
+
+                                MTUDataListView.Add(new ReadMTUItem()
+                                {
+                                    Title = paramval.getLogDisplay() + ":",
+                                    Height = "0",
+                                    isDisplayed = "false",
+                                    Description = paramval.getValue()
+                                });
+                            }else{
+
+                               FinalReadListView.Insert(index+1+i,new ReadMTUItem()
+                               {
+                                   Title = paramval.getLogDisplay() + ":",
+                                   Height = "80",
+                                   Description = paramval.getValue()
+                               });
+
+
+                                MTUDataListView.Add(new ReadMTUItem()
+                                {
+                                    Title = paramval.getLogDisplay() + ":",
+                                    Height = "80",
+                                    Description = paramval.getValue()
+                                });
+                            }
+                        }else{
+                            if (!CheckIfParamIsVisible(paramval.getLogDisplay(), paramval.getValue()))
+                            {
+
+
+
+
+                                FinalReadListView.Insert(index+1+i,new ReadMTUItem()
+                                {
+                                    Title = paramval.getLogDisplay() + ":",
+                                    isDisplayed = "false",
+                                    Height = "0",
+                                    Description = paramval.getValue()
+                                });
+
+
+                                MTUDataListView.Add(new ReadMTUItem()
+                                {
+                                    Title = paramval.getLogDisplay() + ":",
+                                    isDisplayed = "false",
+                                    Height = "0",
+                                    Description = paramval.getValue()
+                                });
+                            }
+                            else
+                            {
+
+                               
+                                FinalReadListView.Insert(index+1+i,new ReadMTUItem()
+                                  {
+                                      Title = paramval.getLogDisplay() + ":",
+                                      Description = paramval.getValue()
+                                  });
+
+                                MTUDataListView.Add(new ReadMTUItem()
+                                {
+                                    Title = paramval.getLogDisplay() + ":",
+                                    Description = paramval.getValue()
+                                });
+                            }
+                        }
+                    }
+                }
+
+                /*
+                FinalReadListView.ForEach(a =>
+                {
+                   
+                    if(a.Title.Contains("-"))
+                    {
+                        
+                        FinalReadListView.RemoveAt(FinalReadListView.IndexOf(a));
+                    }
+                 
+                });
+*/
+
+
+
 
                 string resultMsg = "Successful MTU read";
                 byte[] readData;
 
-
-
                 Task.Delay(100).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    listaMTUread.ItemsSource = MTUDataListView;
+                    listaMTUread.ItemsSource = FinalReadListView;
                     label_read.Text = resultMsg;
                     _userTapped = false;
                     bg_read_mtu_button.NumberOfTapsRequired = 1;
@@ -318,7 +523,10 @@ namespace aclara_meters.view
                      {
 
                          MTUDataListView = new List<ReadMTUItem> { };
-                         listaMTUread.ItemsSource = MTUDataListView;
+
+                         FinalReadListView = new List<ReadMTUItem> { };
+
+                         listaMTUread.ItemsSource = FinalReadListView;
 
                          label_read.Text = resultMsg;
                          _userTapped = false;
@@ -329,10 +537,7 @@ namespace aclara_meters.view
                          background_scan_page.IsEnabled = true;
 
                      }));
-
-
             });
-
 
             add_mtu.Run();
 
@@ -340,7 +545,159 @@ namespace aclara_meters.view
 
         }
 
-  
+        private void addToListview(string field, string value,int pos)
+        {
+
+            FinalReadListView.RemoveAt(pos);
+            FinalReadListView.Insert(pos,
+                    new ReadMTUItem()
+                    {
+                        Title = field + ":",
+                        Description = value
+                    });
+        }
+
+        private bool CheckIfParamIsVisible(string field, string value, string status = "")
+        {
+            bool isVisible = false;
+
+            switch (field)
+            {
+                case "MTU Status":
+                    isVisible = true;
+
+                    addToListview(field, value,0);
+           
+                    break;
+                case "MTU Ser No":
+                    isVisible = true;
+
+                    addToListview(field, value,1);
+
+                    break;
+                case "1 Way Tx Freq":
+                    isVisible = true;
+
+                    addToListview(field, value,2);
+
+                    break;
+                case "2 Way Tx Freq":
+                    isVisible = true;
+
+                    addToListview(field, value,3);
+
+                    break;
+                case "2 Way Rx Freq":
+                    isVisible = true;
+
+                    addToListview(field, value,4);
+
+                    break;
+                case "Tilt Tamp":
+                    isVisible = true;
+
+                    addToListview(field, value,5);
+
+                    break;
+                case "Magnetic Tamp":
+                    isVisible = true;
+
+                    addToListview(field, value,6);
+
+                    break;
+                case "Interface Tamp":
+                    isVisible = true;
+
+                    addToListview(field, value,7);
+
+                    break;
+                case "Reg. Cover":
+                    isVisible = true;
+
+                    addToListview(field, value,8);
+
+                    break;
+                case "Rev. Fl Tamp":
+                    isVisible = true;
+
+                    addToListview(field, value,9);
+
+                    break;
+                case "Daily Snap":
+                    isVisible = true;
+
+                    addToListview(field, value,10);
+
+                    break;
+                case "Installation":
+                    isVisible = true;
+
+                    addToListview(field, value,11);
+
+                    break;
+
+
+                // PORT FIELDS -->
+
+                case "Meter Type":
+                    isVisible = true;
+
+                    break;
+                case "Service Pt. ID":
+                    isVisible = true;
+                    break;
+                case "Meter Reading":
+                    isVisible = true;
+                    break;
+                // <-- END PORT FIELDS
+
+                case "Xmit Interval":
+                    isVisible = true;
+
+                    addToListview(field, value,12);
+
+                    break;
+                case "Read Interval":
+                    isVisible = true;
+
+                    addToListview(field, value,13);
+
+                    break;
+                case "Battery":
+                    isVisible = true;
+
+                    addToListview(field, value, 14);
+
+                    break;
+                case "MTU Type":
+                    isVisible = true;
+
+                    addToListview(field, value,15);
+
+
+                    break;
+                case "MTU Software":
+                    isVisible = true;
+
+                    addToListview(field, value,16);
+
+                    break;
+                case "PCB Number":
+                    isVisible = true;
+
+                    addToListview(field, value,17);
+
+                    break;
+            }
+
+            if (status.Equals("MTU Status Off"))
+            {
+                return false;
+            }
+
+            return isVisible;
+        }
+
         public AclaraViewReadMTU(IUserDialogs dialogs)
         {
             InitializeComponent();
