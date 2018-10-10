@@ -13,6 +13,8 @@ using System.Web;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.IO;
+using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -45,17 +47,43 @@ namespace aclara_meters
             //var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             //var filename_meter = Path.Combine(xml_documents, "Meter.xml");
-           // var filename_mtu = Path.Combine(xml_documents, "Mtu.xml");
+            // var filename_mtu = Path.Combine(xml_documents, "Mtu.xml");
 
-           // File.WriteAllText(filename_meter, aclara_meters.Resources.XmlStrings.GetMeterString());
-          //  File.WriteAllText(filename_mtu, aclara_meters.Resources.XmlStrings.GetMTUString());
+            // File.WriteAllText(filename_meter, aclara_meters.Resources.XmlStrings.GetMeterString());
+            //  File.WriteAllText(filename_mtu, aclara_meters.Resources.XmlStrings.GetMTUString());
 
+            /* */
+             
+            Console.WriteLine("\r\nExists Certs Name and Location");
+
+            Console.WriteLine("------ ----- -------------------------");
+            foreach (StoreLocation storeLocation in (StoreLocation[])
+                Enum.GetValues(typeof(StoreLocation)))
+            {
+                foreach (StoreName storeName in (StoreName[])
+                    Enum.GetValues(typeof(StoreName)))
+                {
+                    X509Store store = new X509Store(storeName, storeLocation);
+                    try
+                    {
+                        store.Open(OpenFlags.OpenExistingOnly);
+                        Console.WriteLine("Yes    {0,4}  {1}, {2}",
+                            store.Certificates.Count, store.Name, store.Location);
+                    }
+                    catch (CryptographicException)
+                    {
+                        Console.WriteLine("No           {0}, {1}",
+                            store.Name, store.Location);
+                    }
+                }
+                Console.WriteLine();
+            }
+
+            /* */
 
             //Cargar la pantalla principal
             MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
         }
-
-
 
         public async void HandleUrl(Uri url)
         {
