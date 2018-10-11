@@ -112,7 +112,7 @@ namespace aclara_meters.view
         {
             this.notConnected = notConnected;
             InitializeComponent();
-            Settings.IsNotConnectedInSettings = true;
+            //Settings.IsNotConnectedInSettings = true;
             if (Device.Idiom == TargetIdiom.Tablet)
             {
                 Task.Run(() =>
@@ -160,7 +160,8 @@ namespace aclara_meters.view
 
                     backdark_bg.IsVisible = false;
                     indicator.IsVisible = false;
-
+                    battery_level.Opacity = 0;
+                    rssi_level.Opacity = 0;
                 });
             });
         }

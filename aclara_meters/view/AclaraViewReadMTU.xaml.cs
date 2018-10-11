@@ -232,8 +232,8 @@ namespace aclara_meters.view
                 Console.WriteLine("Press Key to Exit");
                 //Console.WriteLine(s.ToString());
 
-                MTUDataListView = new List<ReadMTUItem>();
-                FinalReadListView = new List<ReadMTUItem>();
+                MTUDataListView = new List<ReadMTUItem>();  // Saves all the fields data from MTUComm - DEBUG
+                FinalReadListView = new List<ReadMTUItem>(); // Saves the data to view
 
                 for (int i = 0; i < 31; i++){
                     FinalReadListView.Add(new ReadMTUItem()
@@ -317,23 +317,6 @@ namespace aclara_meters.view
 
                     });
 
-                    /*
-                     
-                        // PORT FIELDS -->
-
-                        case "Meter Type":
-                            isVisible = true;
-
-                            break;
-                        case "Service Pt. ID":
-                            isVisible = true;
-                            break;
-                        case "Meter Reading":
-                            isVisible = true;
-                            break;
-                        // <-- END PORT FIELDS
-
-                     */
 
                     MTUDataListView.Add(new ReadMTUItem()
                     {
@@ -432,21 +415,8 @@ namespace aclara_meters.view
                     }
                 }
 
-                /*
-                FinalReadListView.ForEach(a =>
-                {
-                   
-                    if(a.Title.Contains("-"))
-                    {
-                        
-                        FinalReadListView.RemoveAt(FinalReadListView.IndexOf(a));
-                    }
-                 
-                });
-*/
 
-
-
+                FinalReadListView.RemoveAll(X => X.Title.Equals("-"));
 
                 string resultMsg = "Successful MTU read";
                 byte[] readData;
@@ -467,47 +437,6 @@ namespace aclara_meters.view
                 }));
 
 
-
-                /*
-                 * 
-                 *   
-                 MTUDataListView = new List<ReadMTUItem>
-            {
-            
-                   new ReadMTUItem() { Title = "MTU Status:", Description = "On" },
-                new ReadMTUItem() { Title = "MTU Ser No:", Description = "63004810"},
-                new ReadMTUItem() { Title = "Interface Tamp:", Description = "Triggered" },
-                new ReadMTUItem() { Title = "Last Gasp:", Description = "Enabled" },
-                new ReadMTUItem() { Title = "Insf. Mem:", Description = "Enabled" },
-                new ReadMTUItem() { Title = "Daily Snap:", Description = "2 PM" },
-                new ReadMTUItem() { Title = "Encrypted:", Description = "Yes"},
-
-                new ReadMTUItem() { Description = "Port 1: MTU Water Single Port On-Demand Encoder ER" , Height = "310", isMTU = "false", isMeter = "true",
-                        
-                        Title1 = "Meter Type ID:", Description1 = "126" ,
-                        Title2 = "Service Pt. ID:", Description2 = "012345678" ,
-                        Title3 = "Meter Reading:", Description3 = "0188XX"
-                },
-
-                new ReadMTUItem() { Title = "Xmit Interval:", Description = "72 Hrs" },
-                new ReadMTUItem() { Title = "Read Interval:", Description = "12 Hrs" },
-                new ReadMTUItem() { Title = "Battery:", Description = "3,66 V" },
-                new ReadMTUItem() { Title = "2-Way:", Description = "Slow" },
-                new ReadMTUItem() { Title = "On Demand Cnt:", Description = "0" },
-                new ReadMTUItem() { Title = "Data Req Cnt:", Description = "0"  },
-                new ReadMTUItem() { Title = "FOTA Cnt:", Description = "0"  },
-                new ReadMTUItem() { Title = "FOTC Cnt:", Description = "0"  },
-                new ReadMTUItem() { Title = "MTU Type:", Description = "171"},
-                new ReadMTUItem() { Title = "MTU Software:", Description = "Version 01.04.0008"},
-                new ReadMTUItem() { Title = "PCB Number", Description = "0"},
- 
-                };
-                 */
-
-
-
-
-               
            
 
             });
