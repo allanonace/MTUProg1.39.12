@@ -418,58 +418,72 @@ namespace ble_library
         /// Updates buffer with the notification data received 
         /// </summary>
         /// <param name="ble_device">The Bluetooth LE peripheral to connect.</param>
-        public async Task ConnectoToDevice(IBlePeripheral ble_device, bool isBounded){
-try
-{
-            isConnected = CONNECTING;
-            connectionError = NO_ERROR;
-            var connection = await adapter.ConnectToDevice(
-                // The IBlePeripheral to connect to
-                ble_device,
-                // TimeSpan or CancellationToken to stop the
-                // connection attempt.
-                // If you omit this argument, it will use
-                // BluetoothLowEnergyUtils.DefaultConnectionTimeout
-                TimeSpan.FromSeconds(5),
-                // Optional IProgress<ConnectionProgress>
-                progress => {
-//                    Console.WriteLine(progress);
-                    //dialogs.Toast("Progreso: " + progress.ToString());
+        public async Task ConnectoToDevice(IBlePeripheral ble_device, bool isBounded)
+        {
+            int retriesCounter = 0;
+
+            while(retriesCounter < 3)
+            {
+                try
+                {
+                    isConnected = CONNECTING;
+                    connectionError = NO_ERROR;
+                    var connection = await adapter.ConnectToDevice(
+                        // The IBlePeripheral to connect to
+                        ble_device,
+                        // TimeSpan or CancellationToken to stop the
+                        // connection attempt.
+                        // If you omit this argument, it will use
+                        // BluetoothLowEnergyUtils.DefaultConnectionTimeout
+                        TimeSpan.FromSeconds(5),
+                        // Optional IProgress<ConnectionProgress>
+                        progress => {
+        //                    Console.WriteLine(progress);
+                            //dialogs.Toast("Progreso: " + progress.ToString());
+                        }
+                    );
+
+                    if (connection.IsSuccessful())
+                    {
+                        retriesCounter = 3;
+
+                        gattServer_connection = connection.GattServer;
+        //                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
+                                                                        // the server implements IObservable<ConnectionState> so you can subscribe to its state
+                        gattServer_connection.Subscribe(new ObserverReporter(this));
+
+                        adapter.CurrentState.Subscribe(new BluetoothStatusReporter(this));
+
+
+                        ble_peripheral = ble_device;
+
+                        await AESConnectionVerifyAsync(ble_peripheral, isBounded);
+                    }
+                    else
+                    {
+                        retriesCounter++;
+
+                        if(retriesCounter==3)
+                        {
+                            isConnected = NO_CONNECTED;
+                            connectionError = CONECTION_ERRROR;
+                        }
+
+                        // Do something to inform user or otherwise handle unsuccessful connection.
+        //                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
+                        // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
+                       
+                    }
                 }
-            );
-
-            if (connection.IsSuccessful())
-            {
-                gattServer_connection = connection.GattServer;
-//                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
-                                                                // the server implements IObservable<ConnectionState> so you can subscribe to its state
-                gattServer_connection.Subscribe(new ObserverReporter(this));
-
-                adapter.CurrentState.Subscribe(new BluetoothStatusReporter(this));
-
-
-                ble_peripheral = ble_device;
-
-                await AESConnectionVerifyAsync(ble_peripheral, isBounded);
+                catch (GattException ex)
+                {
+                    Console.WriteLine(ex.ToString());
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
             }
-            else
-            {
-                // Do something to inform user or otherwise handle unsuccessful connection.
-//                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
-                // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
-                isConnected = NO_CONNECTED;
-                connectionError = CONECTION_ERRROR;
-            }
-}
-catch (GattException ex)
-{
-    Console.WriteLine(ex.ToString());
-}
-catch (Exception e)
-{
-    Console.WriteLine(e);
-}
-
 
         }
 
