@@ -84,9 +84,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ble_library\ble_library.csproj" />
-    <ProjectReference Include="..\..\boilerplate\Lexi\Lexi.csproj" />
-    <ProjectReference Include="..\..\boilerplate\MTUComm\MTUComm.csproj" />
-    <ProjectReference Include="..\..\boilerplate\Xml\Xml.csproj" />
+    <ProjectReference Include="..\MTUComm\MTUComm.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="view\MyPage.xaml" />

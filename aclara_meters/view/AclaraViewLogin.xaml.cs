@@ -8,6 +8,10 @@ using System.Diagnostics;
 using Plugin.Geolocator.Abstractions;
 using Renci.SshNet;
 using System.IO;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Collections.Generic;
 
 namespace aclara_meters.view
 {
@@ -53,14 +57,182 @@ namespace aclara_meters.view
             });
 
 
-            this.EmailEntry.Focused += (s, e) => { SetLayoutPosition(true, (int) -20); };
-            this.EmailEntry.Unfocused += (s, e) => { SetLayoutPosition(false, (int)-20); };
+            this.EmailEntry.Focused += (s, e) => 
+            { 
+                SetLayoutPosition(true, (int) -20); 
+            };
+
+            this.EmailEntry.Unfocused += (s, e) => 
+            { 
+                SetLayoutPosition(false, (int)-20); 
+                Task.Factory.StartNew(CertsTask);
 
 
-            this.PasswordEntry.Focused += (s, e) => { SetLayoutPosition(true, (int) -80); };
-            this.PasswordEntry.Unfocused += (s, e) => { SetLayoutPosition(false, (int) -80); };
+            };
+
+
+            this.PasswordEntry.Focused += (s, e) => 
+            { 
+                SetLayoutPosition(true, (int) -80);
+            };
+
+            this.PasswordEntry.Unfocused += (s, e) => 
+            { 
+                SetLayoutPosition(false, (int) -80); 
+            };
+
+
+
+
+
+
+           
+
+
         }
 
+        private void CertsTask()
+        {
+            /* */
+
+            Console.WriteLine("\r\nExists Certs Name and Location");
+
+            Console.WriteLine("------ ----- -------------------------");
+            foreach (StoreLocation storeLocation in (StoreLocation[])
+                Enum.GetValues(typeof(StoreLocation)))
+            {
+                foreach (StoreName storeName in (StoreName[])
+                    Enum.GetValues(typeof(StoreName)))
+                {
+                    X509Store store = new X509Store(storeName, storeLocation);
+
+                    X509Certificate2Collection collection = store.Certificates;
+
+                    Console.WriteLine("\r\n Collection: " + store.Name);
+
+                    foreach(var cert in store.Certificates){
+                        Console.WriteLine(cert.Subject);
+                    }
+                  
+
+
+                    try
+                    {
+                        store.Open(OpenFlags.OpenExistingOnly);
+
+
+
+                        Console.WriteLine("Yes    {0,4}  {1}, {2}",
+                            store.Certificates.Count, store.Name, store.Location);
+                    }
+                    catch (CryptographicException)
+                    {
+                        Console.WriteLine("No           {0}, {1}",
+                            store.Name, store.Location);
+                    }
+                }
+                Console.WriteLine();
+            }
+
+            /* */
+
+            /*  ---Install---
+             * string file; // Contains name of certificate file
+                X509Store store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+                store.Open(OpenFlags.ReadWrite);
+                store.Add(new X509Certificate2(X509Certificate2.CreateFromCertFile(file)));
+                store.Close();
+             * */
+
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+
+            if (Device.RuntimePlatform == Device.Android)
+            {
+                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
+            }
+
+
+            X509Certificate serverCertificate = null;
+            serverCertificate = X509Certificate.CreateFromCertFile(Path.Combine(xml_documents, "Aclara-Cert.cer"));
+
+            string mensaje = "Cifra este mensaje";
+
+            byte[] bytes_mensaje = Encoding.ASCII.GetBytes(mensaje);
+
+            X509Certificate2 certificate2 = new X509Certificate2(serverCertificate);
+
+            byte[] datos_cifrados = EncryptDataOaepSha1(certificate2, bytes_mensaje);
+
+            // byte [] datos_descifrados = DecryptDataOaepSha1(certificate2, datos_cifrados);
+
+
+
+
+            //X509Certificate2 value = GetSigningCertificate("New-Test-Dev-Aclara");
+
+
+
+
+
+        }
+
+
+
+        private static X509Certificate2 GetSigningCertificate(string subject)
+        {
+            X509Certificate2 theCert = null;
+            foreach (StoreName name in Enum.GetValues(typeof(StoreName)))
+            {
+                foreach (StoreLocation location in Enum.GetValues(typeof(StoreLocation)))
+                {
+                    var store = new X509Store(name, location);
+                    store.Open(OpenFlags.ReadOnly);
+                    foreach (X509Certificate2 cert in store.Certificates)
+                    {
+                        if (cert.Subject.ToLower().Contains(subject.ToLower()) && cert.HasPrivateKey)
+                        {
+                            theCert = cert;
+                            break;
+                        }
+                    }
+                    store.Close();
+                }
+            }
+            if (theCert == null)
+            {
+                throw new Exception(
+                    String.Format("No certificate found containing a subject '{0}'.",
+                                  subject));
+            }
+
+            return theCert;
+        }
+
+
+
+        public static byte[] EncryptDataOaepSha1(X509Certificate2 cert, byte[] data)
+        {
+            // GetRSAPublicKey returns an object with an independent lifetime, so it should be
+            // handled via a using statement.
+            using (RSA rsa = cert.GetRSAPublicKey())
+            {
+                // OAEP allows for multiple hashing algorithms, what was formermly just "OAEP" is
+                // now OAEP-SHA1.
+                return rsa.Encrypt(data, RSAEncryptionPadding.OaepSHA1);
+            }
+        }
+
+
+        public static byte[] DecryptDataOaepSha1(X509Certificate2 cert, byte[] data)
+        {
+            // GetRSAPrivateKey returns an object with an independent lifetime, so it should be
+            // handled via a using statement.
+            using (RSA rsa = cert.GetRSAPublicKey())
+            {
+                return rsa.Decrypt(data, RSAEncryptionPadding.OaepSHA1);
+            }
+        }
 
         void SetLayoutPosition(bool onFocus, int value)
         {

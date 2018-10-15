@@ -20,6 +20,6 @@
     <Folder Include="Helpers\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\boilerplate\Lexi\Lexi.csproj" />
+    <ProjectReference Include="..\Lexi\Lexi.csproj" />
   </ItemGroup>
 </Project>
