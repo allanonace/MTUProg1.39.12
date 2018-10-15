@@ -445,7 +445,7 @@
 
 
                                   <StackLayout >  
-                                      <Label Text="Read Inverval" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                      <Label Text="Read Interval" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
                                       
@@ -655,7 +655,7 @@
 
 
                                   <StackLayout >  
-                                      <Label Text="Read Inverval" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                      <Label Text="Read Interval" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
                                       
