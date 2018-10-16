@@ -8,6 +8,7 @@ using UIKit;
 using Xamarin.Forms;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Distribute;
+using Microsoft.Intune.MAM;
 
 namespace aclara_meters.iOS
 {
@@ -18,6 +19,8 @@ namespace aclara_meters.iOS
     public partial class AppDelegate : global::Xamarin.Forms.Platform.iOS.FormsApplicationDelegate
     {
         private FormsApp appSave;
+        private string identity = "";
+
         //
         // This method is invoked when the application has loaded and is ready to run. In this 
         // method you should instantiate the window, load the UI into it and then make the window
@@ -29,9 +32,14 @@ namespace aclara_meters.iOS
         {
             Forms.Init();
             Distribute.DontCheckForUpdatesInDebug();
+
+            identity = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
+            IntuneMAMEnrollmentManager.Instance.LoginAndEnrollAccount(identity);
+
             appSave = new FormsApp(BluetoothLowEnergyAdapter.ObtainDefaultAdapter(), UserDialogs.Instance);
             LoadApplication( appSave );
           
+
             return base.FinishedLaunching(app, options);
         }
 
