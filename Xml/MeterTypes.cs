@@ -66,5 +66,15 @@ namespace Xml
 
             return names.ToList();
         }
+
+
+        public List<Meter> GetMetersByModelAndVendorFromMeters(List<Meter> meters, string vendor, string model)
+        {
+            HashSet<string> names = new HashSet<string>();
+
+            List<Meter> filteredMeters = meters.FindAll(x => (x.Vendor == vendor && x.Model == model));
+            return filteredMeters;
+
+        }
     }
 }

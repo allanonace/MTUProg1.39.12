@@ -16,12 +16,9 @@ using Plugin.Settings;
 using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
 using System.Xml.Serialization;
-
 using System.IO;
-using System.Text;
 using MTUComm;
 using Xml;
-using System.Reflection;
 
 namespace aclara_meters.view
 {
@@ -38,7 +35,6 @@ namespace aclara_meters.view
         private List<string> picker_List_Model_port2;
         private List<string> picker_List_Name_port2;
 
-
         private double StepValue;
         private Slider SliderMain;
 
@@ -47,19 +43,21 @@ namespace aclara_meters.view
 
         private bool port2enabled;
 
-
         private enum Names
         {
             Name1 = 0,
-            Name2 = 1,
-            Name3 = 2,
-            Name4 = 3,
-            Name5 = 4,
-            Name6 = 5,
-            Name7 = 6,
-            Name8 = 7,
-            Name9 = 8
         };
+
+
+        private MeterTypes meterTypes;
+        private List<Xml.Meter> meters;
+        private List<string> vendors;
+        private List<string> models;
+        private List<Meter> names;
+        private string vendor;
+        private string model;
+        private string name;
+
 
         /*
             Optional 1  WorkOrderRecording      Hides/shows Field Order
@@ -84,11 +82,26 @@ namespace aclara_meters.view
             Optional 20 ShowReplaceMeter        Disables Replace Meter button (visible, but not clickable)
          */
 
-        private bool opt1, opt2, opt3, opt4, opt5, 
-                     opt6, opt7, opt8, opt9, opt10, 
-                     opt11, opt12, opt13, opt14, opt15, 
-                     opt16, opt17, opt18, opt19, opt20;
-
+      private bool  WorkOrderRecording, 
+                    MeterWorkRecording, 
+                    ApptScreen, 
+                    AccountDualEntry, 
+                    WorkOrderDualEntry, 
+                    OldSerialNumDualEntry, 
+                    NewSerialNumDualEntry, 
+                    ReadingDualEntry, 
+                    OldReadingDualEntry, 
+                    ReverseReading, 
+                    IndividualReadInterval, 
+                    RegisterRecording, 
+                    UseMeterSerialNumber, 
+                    OldReadingRecording, 
+                    ShowAddMtu, 
+                    ShowAddMtuReplaceMeter, 
+                    ShowAddMtuMeter, 
+                    ShowReplaceMtu, 
+                    ShowReplaceMtuMeter, 
+                    ShowReplaceMeter;
 
         public AclaraViewAddMTU()
         {
@@ -111,21 +124,16 @@ namespace aclara_meters.view
             int selectedIndex = picker.SelectedIndex;
         }
 
-
-
         private void PickerSelection2(object sender, EventArgs e)
         {
             var picker = (Picker)sender;
             int selectedIndex = picker.SelectedIndex;
         }
 
-
         private void InitPickerList()
         {
-
             /* Desconozco completamente cual es el caso de tener varios puertos, o el procedimiento para ello. Dejo la función de cara a su implementación */
             //
-
             //port2enabled = true;
             port2enabled = true;
 
@@ -142,11 +150,6 @@ namespace aclara_meters.view
             {
                 port2label.IsVisible = false;
             }
-
-            //
-
-
-
         }
 
         private void InitPickerReadInterval()
@@ -217,7 +220,6 @@ namespace aclara_meters.view
         }
 
 
-
         private void InitPickerTwoWay()
         {
             //This ObservableCollection later we will assign ItemsSource for Picker.
@@ -244,7 +246,6 @@ namespace aclara_meters.view
             pickerTwoWay.ItemsSource = objStringList;
         }
 
-
         private void InitPickerTwoWay2()
         {
             //This ObservableCollection later we will assign ItemsSource for Picker.
@@ -270,8 +271,6 @@ namespace aclara_meters.view
             //Now I am given ItemsSorce to the Pickers
             pickerTwoWay2.ItemsSource = objStringList;
         }
-
-
 
         private void LoadSideMenuElements()
         {
@@ -374,9 +373,6 @@ namespace aclara_meters.view
              });
         }
 
-
-
-
         private void ChangeLowerButtonImage(bool v)
         {
             if (v)
@@ -406,24 +402,16 @@ namespace aclara_meters.view
                 });
 
 
-
-
-
-                //Task.Factory.StartNew(ThreadProcedureMTUCOMMAction);
-
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     ThreadProcedureMTUCOMMAction();
                 });
 
-               
-
-
+          
             }
         }
 
-    
-
+   
         public AclaraViewAddMTU(IUserDialogs dialogs)
         {
             InitializeComponent();
@@ -463,8 +451,7 @@ namespace aclara_meters.view
 
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
 
-         
-
+        
             Device.BeginInvokeOnMainThread(() =>
             {
                 label_read.Opacity = 1;
@@ -494,24 +481,14 @@ namespace aclara_meters.view
 
             Validations();
 
-
-
-
-
-
-
-
         }
 
     
 
         private void ThreadProcedureMTUCOMMAction()
         {
-
-
-
+            
             var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
 
             if (Device.RuntimePlatform == Device.Android)
             {
@@ -562,7 +539,7 @@ namespace aclara_meters.view
                  String result = e.Message;
 
            
-                                              
+                                            
                 Task.Delay(100).ContinueWith(t =>
                   Device.BeginInvokeOnMainThread(() =>
                   {
@@ -580,53 +557,29 @@ namespace aclara_meters.view
                  Console.WriteLine(result.ToString());
 
              });
-
-
             add_mtu.Run();
              
-
-                  
         }
-
-        private static void Add_mtu_OnError(object sender, MTUComm.Action.ActionErrorArgs e)
-        {
-            Console.WriteLine("Action Errror");
-            Console.WriteLine("Press Key to Exit");
-        }
-
-        private static void Add_mtu_OnFinish(object sender, MTUComm.Action.ActionFinishArgs e)
-        {
-            Console.WriteLine("Action Succefull");
-            Console.WriteLine("Press Key to Exit");
-        }
-
-
 
         private void TestOptionalFields()
         {
-            opt1 = true;
-
-            opt4 = true;
-            opt5 = true;
-
-            opt11 = true;
-
-            opt13 = true;
-
-
+            WorkOrderRecording = true;
+            AccountDualEntry = true;
+            WorkOrderDualEntry = true;
+            IndividualReadInterval = true;
+            UseMeterSerialNumber = true;
         }
 
         private void Validations()
         {
-            if( opt1 )
+            if( WorkOrderRecording )
             {
                 fo_view.IsVisible = true;
             }else{
                 fo_view.IsVisible = false;
             }
-                
 
-            if( opt4 )
+            if( AccountDualEntry )
             {
                 servicePortId.Unfocused += (s, e) => { ServicePortId_validate(1); };
                 servicePortId2.Unfocused += (s, e) => { ServicePortId_validate(2); };
@@ -634,7 +587,7 @@ namespace aclara_meters.view
                 servicePortId_cancel.Tapped += ServicePortId_Cancel_Tapped;
             }
 
-            if (opt5)
+            if (WorkOrderDualEntry)
             {
                 fieldOrder.Unfocused += (s, e) => { FieldOrder_validate(1); };
                 fieldOrder2.Unfocused += (s, e) => { FieldOrder_validate(2); };
@@ -642,7 +595,7 @@ namespace aclara_meters.view
                 fieldOrder_cancel.Tapped += FieldOrder_Cancel_Tapped;
             }
 
-            if(opt11)
+            if(IndividualReadInterval)
             {
                 pickerReadInterval.IsEnabled = true;
                 read_view.Opacity = 1;
@@ -652,7 +605,7 @@ namespace aclara_meters.view
                 read_view.Opacity = 0.8;
             }
 
-            if (opt13)
+            if (UseMeterSerialNumber)
             {
                 mn_view.IsVisible = true;
             }else{
@@ -686,9 +639,6 @@ namespace aclara_meters.view
             servicePortId.Text = "";
         }
 
-
-
-
         private void FieldOrder_Ok_Tapped(object sender, EventArgs e)
         {
 
@@ -715,7 +665,6 @@ namespace aclara_meters.view
             fieldOrder.Text = "";
         }
 
-
         /*********          ****        ************/
 
         /** Dialogs Validation **/
@@ -738,8 +687,6 @@ namespace aclara_meters.view
                 }
             }
         }
-
-
 
         private void FieldOrder_validate(int v)
         {
@@ -764,7 +711,6 @@ namespace aclara_meters.view
         }
 
         /*********          ****        ************/
-
 
         private void InitializeBlocks()
         {
@@ -856,14 +802,6 @@ namespace aclara_meters.view
         }
 
 
-        MeterTypes meterTypes;
-        List<Xml.Meter> meters;
-        List<string> vendors;
-        List<string> models;
-        List<string> names;
-        string vendor;
-        string model;
-        string name;
 
         private void ColectionElementsPort1()
         {
@@ -888,21 +826,13 @@ namespace aclara_meters.view
                 meterTypes = (s.Deserialize(reader) as MeterTypes);
             }
 
-            //MeterTypesDeserializationFromFileTest()
+          
             Xml.Config config = new Config();
-            //MeterTypes meterTypes = config.GetMeters("aclara_meters.Resources.Meter.xml");
-
-
-            //MeterTypesFindMetersByEncoderTypeAndLiveDigits()
+          
             int encoderType = 2;
             int liveDigits = 6;
 
             meters = meterTypes.FindByEncoderTypeAndLiveDigits(encoderType, liveDigits);
-
-                    //MeterTypesGetVendorsFromMeters()
-                    //List<string> vendors = meterTypes.GetVendorsFromMeters(meterTypes.Meters);
-
-                    //MeterTypesGetNamesByModelAndVendorFromMeters()
 
             vendors = meterTypes.GetVendorsFromMeters(meterTypes.Meters);
 
@@ -914,10 +844,7 @@ namespace aclara_meters.view
                 picker_List_Vendor_port1.Add(vendors[i1]);
             }
 
-            //picker_List_Vendor_port1.Add("Vendor 1");
-           // picker_List_Vendor_port1.Add("Vendor 2");
-            //picker_List_Vendor_port1.Add("Vendor 3");
-
+          
             Frame fm1_vendor = new Frame()
             {
                 CornerRadius = 6,
@@ -1002,23 +929,6 @@ namespace aclara_meters.view
             //Listado de los Selectores
             picker_List_Model_port1 = new List<string>();
 
-            picker_List_Model_port1.Add("Vendor 1 Model 1");
-            picker_List_Model_port1.Add("Vendor 1 Model 2");
-            picker_List_Model_port1.Add("Vendor 1 Model 3");
-            picker_List_Model_port1.Add("Vendor 1 Model 4");
-
-            picker_List_Model_port1.Add("Vendor 2 Model 1");
-            picker_List_Model_port1.Add("Vendor 2 Model 2");
-            picker_List_Model_port1.Add("Vendor 2 Model 3");
-            picker_List_Model_port1.Add("Vendor 2 Model 4");
-
-            picker_List_Model_port1.Add("Vendor 3 Model 1");
-            picker_List_Model_port1.Add("Vendor 3 Model 2");
-            picker_List_Model_port1.Add("Vendor 3 Model 3");
-            picker_List_Model_port1.Add("Vendor 3 Model 4");
-
-
-
             Frame fm1_model = new Frame()
             {
                 CornerRadius = 6,
@@ -1092,18 +1002,6 @@ namespace aclara_meters.view
             //Listado de los Selectores
             picker_List_Name_port1 = new List<string>();
 
-            picker_List_Name_port1.Add("Name 1");
-            picker_List_Name_port1.Add("Name 2");
-            picker_List_Name_port1.Add("Name 3");
-            picker_List_Name_port1.Add("Name 4");
-            picker_List_Name_port1.Add("Name 5");
-            picker_List_Name_port1.Add("Name 6");
-            picker_List_Name_port1.Add("Name 7");
-            picker_List_Name_port1.Add("Name 8");
-            picker_List_Name_port1.Add("Name 9");
-
-
-
             Frame fm1_name = new Frame()
             {
                 CornerRadius = 6,
@@ -1132,52 +1030,45 @@ namespace aclara_meters.view
 
 
             // Generamos el Selector
-            BorderlessPicker pickerColor = new BorderlessPicker()
+            BorderlessPicker pickerName = new BorderlessPicker()
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 HeightRequest = 40,
                 FontSize = 17,
                 ItemsSource = picker_List_Name_port1,
-                StyleId = "pickerColor"
+                StyleId = "pickerName"
             };
 
             //Detectar el Selector clickado
-            pickerColor.SelectedIndexChanged += PickerColor_SelectedIndexChanged;
+            pickerName.SelectedIndexChanged += PickerName_SelectedIndexChanged;
 
             //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloqueColor = new StackLayout()
+            StackLayout ElementoBloqueName = new StackLayout()
             {
                 StyleId = "bloque" + 3
             };
 
             //Texto del titulo
-            Label textoTituloColor = new Label()
+            Label textoTituloName = new Label()
             {
                 Text = "Meter Type",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
-
-
-
-            st_name.Children.Add(pickerColor);
+            st_name.Children.Add(pickerName);
             fm2_name.Content = st_name;
             fm1_name.Content = fm2_name;
 
-
-
             //Añadimos el titulo y el selector al bloque
-            ElementoBloqueColor.Children.Add(textoTituloColor);
-            ElementoBloqueColor.Children.Add(fm1_name);
+            ElementoBloqueName.Children.Add(textoTituloName);
+            ElementoBloqueName.Children.Add(fm1_name);
 
             //Introducimos el bloque en la vista
-            EntriesStackLayout.Children.Add(ElementoBloqueColor);
+            EntriesStackLayout.Children.Add(ElementoBloqueName);
 
-            ElementoBloqueColor.IsVisible = false;
+            ElementoBloqueName.IsVisible = false;
             ElementoBloqueModelo.IsVisible = false;
-
-
 
             StepValue = 1.0;
 
@@ -1214,10 +1105,6 @@ namespace aclara_meters.view
 
             //Listado de los Selectores
             picker_List_Vendor_port2 = new List<string>();
-
-            picker_List_Vendor_port2.Add("Vendor 1");
-            picker_List_Vendor_port2.Add("Vendor 2");
-            picker_List_Vendor_port2.Add("Vendor 3");
 
             Frame fm1_vendor2 = new Frame()
             {
@@ -1303,23 +1190,6 @@ namespace aclara_meters.view
             //Listado de los Selectores
             picker_List_Model_port2 = new List<string>();
 
-            picker_List_Model_port2.Add("Vendor 1 Model 1");
-            picker_List_Model_port2.Add("Vendor 1 Model 2");
-            picker_List_Model_port2.Add("Vendor 1 Model 3");
-            picker_List_Model_port2.Add("Vendor 1 Model 4");
-
-            picker_List_Model_port2.Add("Vendor 2 Model 1");
-            picker_List_Model_port2.Add("Vendor 2 Model 2");
-            picker_List_Model_port2.Add("Vendor 2 Model 3");
-            picker_List_Model_port2.Add("Vendor 2 Model 4");
-
-            picker_List_Model_port2.Add("Vendor 3 Model 1");
-            picker_List_Model_port2.Add("Vendor 3 Model 2");
-            picker_List_Model_port2.Add("Vendor 3 Model 3");
-            picker_List_Model_port2.Add("Vendor 3 Model 4");
-
-
-
             Frame fm1_model2 = new Frame()
             {
                 CornerRadius = 6,
@@ -1393,18 +1263,6 @@ namespace aclara_meters.view
             //Listado de los Selectores
             picker_List_Name_port2 = new List<string>();
 
-            picker_List_Name_port2.Add("Name 1");
-            picker_List_Name_port2.Add("Name 2");
-            picker_List_Name_port2.Add("Name 3");
-            picker_List_Name_port2.Add("Name 4");
-            picker_List_Name_port2.Add("Name 5");
-            picker_List_Name_port2.Add("Name 6");
-            picker_List_Name_port2.Add("Name 7");
-            picker_List_Name_port2.Add("Name 8");
-            picker_List_Name_port2.Add("Name 9");
-
-
-
             Frame fm1_name2 = new Frame()
             {
                 CornerRadius = 6,
@@ -1433,26 +1291,26 @@ namespace aclara_meters.view
 
 
             // Generamos el Selector
-            BorderlessPicker pickerColor2 = new BorderlessPicker()
+            BorderlessPicker pickerName2 = new BorderlessPicker()
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 HeightRequest = 40,
                 FontSize = 17,
                 ItemsSource = picker_List_Name_port2,
-                StyleId = "pickerColor"
+                StyleId = "pickerName"
             };
 
             //Detectar el Selector clickado
-            pickerColor2.SelectedIndexChanged += PickerColor_SelectedIndexChanged2;
+            pickerName2.SelectedIndexChanged += PickerName_SelectedIndexChanged2;
 
             //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloqueColor2 = new StackLayout()
+            StackLayout ElementoBloqueName2 = new StackLayout()
             {
                 StyleId = "bloque" + 3
             };
 
             //Texto del titulo
-            Label textoTituloColor2 = new Label()
+            Label textoTituloName2 = new Label()
             {
                 Text = "Meter Type",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
@@ -1460,25 +1318,19 @@ namespace aclara_meters.view
             };
 
 
-
-
-            st_name2.Children.Add(pickerColor2);
+            st_name2.Children.Add(pickerName2);
             fm2_name2.Content = st_name2;
             fm1_name2.Content = fm2_name2;
 
-
-
             //Añadimos el titulo y el selector al bloque
-            ElementoBloqueColor2.Children.Add(textoTituloColor2);
-            ElementoBloqueColor2.Children.Add(fm1_name2);
+            ElementoBloqueName2.Children.Add(textoTituloName2);
+            ElementoBloqueName2.Children.Add(fm1_name2);
 
             //Introducimos el bloque en la vista
-            EntriesStackLayout2.Children.Add(ElementoBloqueColor2);
+            EntriesStackLayout2.Children.Add(ElementoBloqueName2);
 
-            ElementoBloqueColor2.IsVisible = false;
+            ElementoBloqueName2.IsVisible = false;
             ElementoBloqueModelo2.IsVisible = false;
-
-
 
             StepValue2 = 1.0;
 
@@ -1507,7 +1359,6 @@ namespace aclara_meters.view
         }
 
 
-
         void OnSliderValueChanged(object sender, ValueChangedEventArgs e)
         {
             var newStep = Math.Round(e.NewValue / StepValue);
@@ -1519,7 +1370,6 @@ namespace aclara_meters.view
         }
 
  
-
 
         void OnSliderValueChanged2(object sender, ValueChangedEventArgs e)
         {
@@ -1547,8 +1397,8 @@ namespace aclara_meters.view
             Frame tempFrame2Marca = (Frame) tempframeMarca.Content;
             StackLayout tempStackMarca = (StackLayout) tempFrame2Marca.Content;
 
-
             ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// MARCASSSSSS
+
             BorderlessPicker PickerToModify = (BorderlessPicker) tempStackMarca.Children[0];
 
             vendor = vendors[j];
@@ -1592,81 +1442,20 @@ namespace aclara_meters.view
 
             BorderlessPicker PickerToModify = (BorderlessPicker)tempStackMarca.Children[0];
 
-
-
-
-            if (j != -1)
-            {
-                int i = 0;
-
-                int cuantosProcesar = picker_List_Model_port2.Count - 1;
-                switch (j)
-                {
-                    case 0:
-                        Console.WriteLine("Vendor 1 Selected");
-                        for (i = 0; i < cuantosProcesar; i++)
-                        {
-                            if (picker_List_Model_port2[i].Contains("Vendor 1"))
-                            {
-                                filter_result.Add(picker_List_Model_port2[i]);
-                            }
-                        }
-
-                        break;
-
-                    case 1:
-                        Console.WriteLine("Vendor 2 Selected");
-                        for (i = 0; i < cuantosProcesar; i++)
-                        {
-                            if (picker_List_Model_port2[i].Contains("Vendor 2"))
-                            {
-                                filter_result.Add(picker_List_Model_port2[i]);
-                            }
-                        }
-
-                        break;
-
-                    case 2:
-                        Console.WriteLine("Vendor 3 Selected");
-                        for (i = 0; i < cuantosProcesar; i++)
-                        {
-                            if (picker_List_Model_port2[i].Contains("Vendor 3"))
-                            {
-                                filter_result.Add(picker_List_Model_port2[i]);
-                            }
-                        }
-
-                        break;
-
-                }
-
-                try
-                {
-                    PickerToModify.ItemsSource = filter_result;
-                    EntriesStackLayout2.Children[1].IsVisible = true;
-                    EntriesStackLayout2.Children[2].IsVisible = false;
-                }
-                catch (Exception e3)
-                {
-                    EntriesStackLayout2.Children[1].IsVisible = false;
-                    EntriesStackLayout2.Children[2].IsVisible = false;
-                    Console.WriteLine(e3.StackTrace);
-                }
-            }
         }
 
 
 
 
 
-        private void PickerColor_SelectedIndexChanged(object sender, EventArgs e)
+        private void PickerName_SelectedIndexChanged(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + j);
-
+            Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
             name = "";
 
-            name = names[j];
+            name = selectedMeter.Display;
             try
             {
                 Console.WriteLine(name + " Selected");
@@ -1679,7 +1468,7 @@ namespace aclara_meters.view
         }
 
 
-        private void PickerColor_SelectedIndexChanged2(object sender, EventArgs e)
+        private void PickerName_SelectedIndexChanged2(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + j);
@@ -1715,18 +1504,20 @@ namespace aclara_meters.view
 
 
             BorderlessPicker PickerToModify = (BorderlessPicker)tempStackMarca.Children[0];
+            PickerToModify.ItemDisplayBinding = new Binding("Display");
 
             model = "";
 
             model = models[i];
 
-            names = new List<string>();
 
-            names = meterTypes.GetNamesByModelAndVendorFromMeters(meterTypes.Meters, vendor, model);
+            names = meterTypes.GetMetersByModelAndVendorFromMeters(meterTypes.Meters, vendor, model);
+
 
             try
             {
                 PickerToModify.ItemsSource = names;
+
                 EntriesStackLayout.Children[2].IsVisible = true;
                 EntriesStackLayout.Children[1].IsVisible = true;
             }
@@ -1739,6 +1530,7 @@ namespace aclara_meters.view
             }
         }
     
+
 
         private void PickerModelos_SelectedIndexChanged2(object sender, EventArgs e)
         {
@@ -1757,47 +1549,6 @@ namespace aclara_meters.view
             BorderlessPicker PickerToModify = (BorderlessPicker)tempStackMarca.Children[0];
 
             List<string> valores = (List<string>)((BorderlessPicker)sender).ItemsSource;
-
-            if (i != -1)
-            {
-                if (valores[0].Contains("Vendor 1"))
-                {
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name1]);
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name2]);
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name3]);
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name4]);
-                }
-
-                if (valores[0].Contains("Vendor 2"))
-                {
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name3]);
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name4]);
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name5]);
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name6]);
-                }
-
-                if (valores[0].Contains("Vendor 3"))
-                {
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name6]);
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name7]);
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name8]);
-                    filter_result.Add(picker_List_Name_port2[(int)Names.Name9]);
-                }
-
-                try
-                {
-                    PickerToModify.ItemsSource = filter_result;
-                    EntriesStackLayout2.Children[2].IsVisible = true;
-                    EntriesStackLayout2.Children[1].IsVisible = true;
-                }
-                catch (Exception e3)
-                {
-                    PickerToModify.ItemsSource = filter_result;
-                    EntriesStackLayout2.Children[1].IsVisible = false;
-                    EntriesStackLayout2.Children[2].IsVisible = false;
-                    Console.WriteLine(e3.StackTrace);
-                }
-            }
 
         }
 
