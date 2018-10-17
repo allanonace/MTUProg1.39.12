@@ -66,7 +66,7 @@ namespace aclara_meters.view
         private string model;
         private string name;
 
-
+        private Global globalData;
         /*
             Optional 1  WorkOrderRecording      Hides/shows Field Order
             Optional 2  MeterWorkRecording      Shows option to specify if meter is broken when replacing it
@@ -136,6 +136,9 @@ namespace aclara_meters.view
 
 
         private List<string> alarmList;
+
+
+        private Xml.Config config;
 
 
 
@@ -598,6 +601,28 @@ namespace aclara_meters.view
 
         private void TestOptionalFields()
         {
+
+            config = new Config();
+
+            XmlSerializer s = new XmlSerializer(typeof(Global));
+
+
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+
+            if (Device.RuntimePlatform == Device.Android)
+            {
+                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
+            }
+
+
+            globalData =  config.GetGlobal(Path.Combine(xml_documents, "Global.xml"));
+
+
+
+
+
+
             WorkOrderRecording = true;
             AccountDualEntry = true;
             WorkOrderDualEntry = true;

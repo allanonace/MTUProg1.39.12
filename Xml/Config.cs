@@ -122,8 +122,9 @@ namespace Xml
                     global = (Global)s.Deserialize(reader);
                 }
             }
-            catch (Exception)
+            catch (Exception e )
             {
+                Console.WriteLine(e.StackTrace);
                 throw new GlobalLoadException("Error loading Global file");
             }
 
