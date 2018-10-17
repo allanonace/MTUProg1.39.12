@@ -52,11 +52,52 @@ namespace aclara_meters
             // File.WriteAllText(filename_meter, aclara_meters.Resources.XmlStrings.GetMeterString());
             //  File.WriteAllText(filename_mtu, aclara_meters.Resources.XmlStrings.GetMTUString());
 
-         
-
+            // XML FILE FTP CREATION
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var init_file = Path.Combine(xml_documents, "init");
+            File.WriteAllText(init_file, "Init app folder creation");
+   
             //Cargar la pantalla principal
             MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
         }
+
+
+
+        public FormsApp(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs, List<string> listaDatos)
+        {
+            InitializeComponent();
+
+            //Gestor de cuentas
+            CredentialsService = new CredentialsService();
+
+            //Inicializar libreria personalizada
+            ble_interface = new BleSerial(adapter);
+           
+            // XML FILE FTP CREATION
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            var init_file = Path.Combine(xml_documents, "init");
+            File.WriteAllText(init_file, "Init app folder creation");
+
+            string data = "";
+
+            if (listaDatos.Count != 0 || listaDatos != null)
+            {
+                
+ 
+                for (int i = 0; i < listaDatos.Count; i++)
+                {
+                    data = data + listaDatos[i] + "/n";
+                }
+
+              
+            }
+
+            //Cargar la pantalla principal
+            MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
+
+
+        }
+
 
         public async void HandleUrl(Uri url)
         {

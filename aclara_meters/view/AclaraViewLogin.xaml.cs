@@ -30,6 +30,53 @@ namespace aclara_meters.view
             return true;
         }
 
+       
+
+        public AclaraViewLogin(IUserDialogs dialogs, string data)
+        {
+            InitializeComponent();
+            Settings.IsNotConnectedInSettings = false;
+            BindingContext = viewModel = new viewmodel.LoginMenuViewModel(dialogs);
+            viewModel.Navigation = this.Navigation;
+
+            //Turn off the Navigation bar
+            NavigationPage.SetHasNavigationBar(this, false);
+
+            loginpage.IsVisible = false;
+            Task.Run(async () =>
+            {
+                await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
+                {
+                    loginpage.IsVisible = true;
+                    Application.Current.MainPage.DisplayAlert("Alert", "Show data: "+data, "ok");  
+
+                });
+            });
+
+
+            this.EmailEntry.Focused += (s, e) =>
+            {
+                SetLayoutPosition(true, (int)-20);
+            };
+
+            this.EmailEntry.Unfocused += (s, e) =>
+            {
+                SetLayoutPosition(false, (int)-20);
+            };
+
+            this.PasswordEntry.Focused += (s, e) =>
+            {
+                SetLayoutPosition(true, (int)-80);
+            };
+
+            this.PasswordEntry.Unfocused += (s, e) =>
+            {
+                SetLayoutPosition(false, (int)-80);
+            };
+
+
+        }
+
         public AclaraViewLogin(IUserDialogs dialogs)
         {
             InitializeComponent();

@@ -428,13 +428,13 @@
 
                                    <!--  Snap Reads -->
 
-                                 <StackLayout >  
+                                 <StackLayout x:Name="SnapReads_Port1" >  
                                   <Label Text="Snap Reads" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                          />
                                       
                                   
                                  <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                      <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                      <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" x:Name="SnapReadsViewPort1" BackgroundColor="White"  >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                       <!-- PORT ID -->
                                    <Label Text="10" Margin="0,4,0,0" x:Name="sliderValue"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
@@ -461,7 +461,7 @@
 
 
 
-                                 <StackLayout  Margin="0,4,0,148"  >  
+                                 <StackLayout  Margin="0,4,0,0" x:Name="TwoWay_Port1" >  
                                       <Label Text="2-Way" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
@@ -481,7 +481,35 @@
                                     
                                   </StackLayout>
 
-                                
+
+
+
+                                 <StackLayout  Margin="0,4,0,0" x:Name="Alarms_Port1" >  
+                                      <Label Text="Alarm Settings" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="pickerAlarms" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                            
+                                        </Frame>
+                                    
+                                  </StackLayout>
+
+
+                                    
+
+                                  <StackLayout  Margin="0,4,0,148"> </StackLayout>
+
+                                    
                              </StackLayout >  
 
                             

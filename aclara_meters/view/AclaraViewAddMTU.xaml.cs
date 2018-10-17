@@ -90,7 +90,7 @@ namespace aclara_meters.view
             Optional 20 ShowReplaceMeter        Disables Replace Meter button (visible, but not clickable)
          */
 
-      private bool  WorkOrderRecording, 
+       private bool WorkOrderRecording, 
                     MeterWorkRecording, 
                     ApptScreen, 
                     AccountDualEntry, 
@@ -111,9 +111,38 @@ namespace aclara_meters.view
                     ShowReplaceMtuMeter, 
                     ShowReplaceMeter;
 
+
+
+        private bool mtuDailyReads,
+                     globalsAllowDailyReads,
+                     setGlobalSnap,
+                     globalsChangeDailyReads;
+
+        private double globalsDailyReadsDefault;
+        private double memoryMapValue;
+
+        private Slider MeterSnapReadsPort1Slider;
+        private BorderlessPicker MeterTwoWayPort1Picker;
+        private BorderlessPicker MeterAlarmSettingsPort1Picker;
+
+
+
+        private bool mtuFastMessageConfig, globalsFastMessageConfig;
+
+
+
+
+        private bool mtuRequiresAlarmProfile;
+
+
+        private List<string> alarmList;
+
+
+
         public AclaraViewAddMTU()
         {
             InitializeComponent();
+
         }
 
         protected override void OnAppearing()
@@ -237,7 +266,6 @@ namespace aclara_meters.view
             ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
             {
                 new PickerItems { Name = "Slow" },
-                new PickerItems { Name = "Moderate" },
                 new PickerItems { Name = "Fast" }
             };
 
@@ -263,7 +291,6 @@ namespace aclara_meters.view
             ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
             {
                 new PickerItems { Name = "Slow" },
-                new PickerItems { Name = "Moderate" },
                 new PickerItems { Name = "Fast" }
             };
 
@@ -576,10 +603,123 @@ namespace aclara_meters.view
             WorkOrderDualEntry = true;
             IndividualReadInterval = true;
             UseMeterSerialNumber = true;
+
+            /******************/
+            /**  Snap Reads  **/
+            mtuDailyReads = true;
+            globalsAllowDailyReads = true;
+            setGlobalSnap = true;
+            memoryMapValue = 15.0;
+            globalsChangeDailyReads = true;
+            globalsDailyReadsDefault = 10.0;
+            /****    ****    ****/
+
+
+            /******************/
+            /**     2-way    **/
+
+            mtuFastMessageConfig = true;
+            globalsFastMessageConfig = true;
+
+            /****   ****   ****/
+
+
+            /***************************/
+            /**     Alarm Settings    **/
+
+            mtuRequiresAlarmProfile = true;
+            alarmList = new List<string>();
+
+            //ADD ALARMS TO LIST
+            for (int i = 1; i < 4; i++)
+            {
+                alarmList.Add("Alarm "+i);
+            }
+           
+
+            /****  ****  ****  **** ****/
+        }
+
+
+        private void FormsUILogic()
+        {
+            /******************/
+            /**  Snap Reads  **/
+
+            if( mtuDailyReads && globalsAllowDailyReads )
+            {
+                SnapReads_Port1.IsVisible = true;
+            }else{
+                SnapReads_Port1.IsVisible = false;
+            }
+
+            if( setGlobalSnap )
+            {
+                SliderMain.Value = globalsDailyReadsDefault;
+            }else{
+
+                SliderMain.Value = memoryMapValue;
+            }
+          
+            if( !globalsChangeDailyReads )
+            {
+                SnapReads_Port1.IsVisible = true;
+                SnapReadsViewPort1.Opacity = 0.8;
+            }else{
+                SnapReadsViewPort1.Opacity = 1;
+            }
+
+            /****    ****    ****/
+
+            /******************/
+            /**     2-way    **/
+
+            if ( mtuFastMessageConfig )
+            {
+                TwoWay_Port1.IsVisible = true;
+            }else{
+                TwoWay_Port1.IsVisible = false;
+            }
+
+            if (globalsFastMessageConfig)
+            {
+                pickerTwoWay.SelectedIndex = 1;
+                //Fast
+            }else{
+                pickerTwoWay.SelectedIndex = 0;
+                //slow
+            }
+
+        
+            /***************************/
+            /**     Alarm Settings    **/
+
+            if ( mtuRequiresAlarmProfile )
+            {
+                Alarms_Port1.IsVisible = true;
+            }else{
+                Alarms_Port1.IsVisible = false;
+            }
+
+            if( alarmList.Count > 0 )
+            {
+              
+                pickerAlarms.ItemsSource = alarmList;
+            } 
+           
+
+            /****  ****  ****  **** ****/
+
+
+
         }
 
         private void Validations()
         {
+
+            FormsUILogic();
+
+
             if( WorkOrderRecording )
             {
                 fo_view.IsVisible = true;
