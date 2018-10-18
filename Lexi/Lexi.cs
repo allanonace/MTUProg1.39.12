@@ -226,7 +226,7 @@ namespace Lexi
 
         }
 
-        public void Write(byte addres, byte[] data)
+        public void Write(UInt32 addres, byte[] data)
         {
             if (m_serial == null)
             {
