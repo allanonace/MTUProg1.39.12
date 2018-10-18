@@ -315,6 +315,10 @@ namespace MTUComm
         {
             XElement xml_parameter = new XElement(parameter.getLogTag(), parameter.getValue());
             addAtrribute(xml_parameter, "display", parameter.getLogDisplay());
+            if (parameter.Optional)
+            {
+                addAtrribute(xml_parameter, "option", "1");
+            }
             parent.Add(xml_parameter);
         }
 
