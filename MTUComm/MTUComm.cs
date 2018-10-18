@@ -150,6 +150,10 @@ namespace MTUComm
 
         public void TurnOffMtu()
         {
+            Task.Factory.StartNew(TurnOffMtuTask);
+        }
+        public void TurnOffMtuTask()
+        {
             Console.WriteLine("TurnOffMtu start");
             byte valueToWrite = 1;
             lexi.Write(22, new byte[] { valueToWrite });
@@ -170,6 +174,11 @@ namespace MTUComm
         }
 
         public void TurnOnMtu()
+        {
+            Task.Factory.StartNew(TurnOnMtuTask);
+        }
+
+        public void TurnOnMtuTask()
         {
             Console.WriteLine("TurnOnMtu start");
             byte valueToWrite = 0;
