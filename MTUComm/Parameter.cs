@@ -92,6 +92,8 @@ namespace MTUComm
 
         private String mValue;
 
+        private bool optional = false;
+
         public Parameter(ParameterType type, String value)
         {
             mParameterType = type;
@@ -111,6 +113,15 @@ namespace MTUComm
             mCustomParameter = custom_parameter;
             mCustomDisplay = custom_display;
             mValue = value;
+        }
+
+        public Parameter(String custom_parameter, String custom_display, String value, bool optional)
+        {
+            mParameterType = ParameterType.Custom;
+            mCustomParameter = custom_parameter;
+            mCustomDisplay = custom_display;
+            mValue = value;
+            this.optional = optional;
         }
 
         public ParameterType Tye
@@ -161,6 +172,14 @@ namespace MTUComm
         public Boolean doesGenerateLog()
         {
             return paremeter_defines[mParameterType].log_generation;
+        }
+
+        public bool Optional
+        {
+            get
+            {
+                return this.optional;
+            }
         }
 
 

@@ -172,6 +172,10 @@ namespace MTUComm
                 int messageOverlapCount = memory[25];
                 return messageOverlapCount;
             }
+            set
+            {
+                memory[25] = (byte)value;
+            }
         }
 
         // addr 26-27
@@ -182,6 +186,11 @@ namespace MTUComm
             {
                 int readInterval = (memory[26] + (memory[27] << 8));
                 return readInterval;
+            }
+            set
+            {
+                memory[26] = (byte)value;
+                memory[27] = (byte)(value >> 8);
             }
         }
 
@@ -251,9 +260,14 @@ namespace MTUComm
                 int p1MeterType = (memory[32] + (memory[33] << 8));
                 return p1MeterType;
             }
+            set
+            {
+                memory[32] = (byte)value;
+                memory[33] = (byte)(value >> 8);
+            }
         }
 
-        // addr 34-37
+        // addr 34-39
         // P1 meter ID
         public ulong P1MeterId // TODO: convert from BCD format to long
         {
@@ -262,10 +276,16 @@ namespace MTUComm
                 ulong p1MeterId = ((ulong)memory[34] + ((ulong)memory[35] << 8) + ((ulong)memory[36] << 16) + ((ulong)memory[37] << 24) + ((ulong)memory[38] << 32) + ((ulong)memory[39] << 40));
                 return BcdToLong(p1MeterId);
             }
+            set
+            {
+                memory[34] = (byte)value;
+                memory[35] = (byte)(value >> 8);
+                memory[36] = (byte)(value >> 16);
+                memory[37] = (byte)(value >> 24);
+                memory[38] = (byte)(value >> 32);
+                memory[39] = (byte)(value >> 40);
+            }
         }
-
-        // addr 38-39
-        // future expansion of P1 meter ID
 
         // addr 40-41
         // P1 pulse ratio
@@ -275,6 +295,26 @@ namespace MTUComm
             {
                 int p1PulseRatio = (memory[40] + (memory[41] << 8));
                 return p1PulseRatio;
+            }
+            set
+            {
+                memory[40] = (byte)value;
+                memory[41] = (byte)(value >> 8);
+            }
+        }
+
+        // addr 42
+        // P1 mode
+        public int P1Mode
+        {
+            get
+            {
+                int p1Mode = memory[42];
+                return p1Mode;
+            }
+            set
+            {
+                memory[42] = (byte)value;
             }
         }
 
@@ -435,25 +475,19 @@ namespace MTUComm
         // addr 46-47
         // Unused
 
-        // addr 48
-        // P2 info
-        public int P2Info
-        {
-            get
-            {
-                int p2Info = memory[48];
-                return p2Info;
-            }
-        }
-
-        // addr 49
+        // addr 48-49
         // P2 meter type
         public int P2MeterType
         {
             get
             {
-                int p2MeterType = memory[49];
-                return p2MeterType;
+                int p1MeterType = (memory[48] + (memory[49] << 8));
+                return p1MeterType;
+            }
+            set
+            {
+                memory[48] = (byte)value;
+                memory[49] = (byte)(value >> 8);
             }
         }
 
@@ -466,6 +500,15 @@ namespace MTUComm
                 ulong p2MeterId = ((ulong)memory[50] + ((ulong)memory[51] << 8) + ((ulong)memory[52] << 16) + ((ulong)memory[53] << 24) + ((ulong)memory[54] << 32) + ((ulong)memory[55] << 40));
                 return BcdToLong(p2MeterId);
             }
+            set
+            {
+                memory[50] = (byte)value;
+                memory[51] = (byte)(value >> 8);
+                memory[52] = (byte)(value >> 16);
+                memory[53] = (byte)(value >> 24);
+                memory[54] = (byte)(value >> 32);
+                memory[55] = (byte)(value >> 40);
+            }
         }
 
         // addr 56-57
@@ -476,6 +519,26 @@ namespace MTUComm
             {
                 int p2PulseRatio = (memory[56] + (memory[57] << 8));
                 return p2PulseRatio;
+            }
+            set
+            {
+                memory[56] = (byte)value;
+                memory[57] = (byte)(value >> 8);
+            }
+        }
+
+        // addr 58
+        // P2 mode
+        public int P2Mode
+        {
+            get
+            {
+                int p2Mode = memory[58];
+                return p2Mode;
+            }
+            set
+            {
+                memory[58] = (byte)value;
             }
         }
 
@@ -1061,7 +1124,7 @@ namespace MTUComm
             }
         }
 
-        // addr 96-103
+        // addr 96-101
         // p1 reading
         public uint P1Reading
         {
@@ -1072,10 +1135,17 @@ namespace MTUComm
                     ((uint)memory[98] << 16) +
                     ((uint)memory[99] << 24) +
                     ((uint)memory[100] << 32) +
-                    ((uint)memory[101] << 40) +
-                    ((uint)memory[102] << 48) +
-                    ((uint)memory[103] << 56);
+                    ((uint)memory[101] << 40);
                 return p1Reading;
+            }
+            set
+            {
+                memory[96] = (byte)value;
+                memory[97] = (byte)(value >> 8);
+                memory[98] = (byte)(value >> 16);
+                memory[99] = (byte)(value >> 24);
+                memory[100] = (byte)(value >> 32);
+                memory[101] = (byte)(value >> 40);
             }
         }
 
@@ -1090,7 +1160,7 @@ namespace MTUComm
             }
         }
 
-        // addr 104-111
+        // addr 104-109
         // p2 reading
         public int P2Reading
         {
@@ -1101,10 +1171,17 @@ namespace MTUComm
                     (memory[106] << 16) +
                     (memory[107] << 24) +
                     (memory[108] << 32) +
-                    (memory[109] << 40) +
-                    (memory[110] << 48) +
-                    (memory[111] << 56);
+                    (memory[109] << 40);
                 return p2Reading;
+            }
+            set
+            {
+                memory[104] = (byte)value;
+                memory[105] = (byte)(value >> 8);
+                memory[106] = (byte)(value >> 16);
+                memory[107] = (byte)(value >> 24);
+                memory[108] = (byte)(value >> 32);
+                memory[109] = (byte)(value >> 40);
             }
         }
 
@@ -1556,6 +1633,10 @@ namespace MTUComm
                 int dailyRead = memory[198];
                 return dailyRead;
             }
+            set
+            {
+                memory[198] = (byte)value;
+            }
         }
 
         public String DailySnap
@@ -1767,6 +1848,13 @@ namespace MTUComm
 
         // addr 256-271
         // AES encryption key
+        public byte[] AesEncryptionKey
+        {
+            set
+            {
+                value.CopyTo(memory, 256);
+            }
+        }
 
         // addr 272-317
         // Unused
