@@ -259,7 +259,9 @@ namespace MTUComm
         {
             get
             {
-                int p1MeterType = memory[33];
+                //int p1MeterType = memory[33];
+                //return p1MeterType;
+                int p1MeterType = (memory[32] + (memory[33] << 8));
                 return p1MeterType;
             }
         }
@@ -421,7 +423,7 @@ namespace MTUComm
 
         // addr 45
         // Number of tx between rx
-        public int NumberTxBetweenRx
+        public int RxInterval
         {
             get
             {
@@ -1047,6 +1049,128 @@ namespace MTUComm
             }
         }
 
+        public string BackFlowState
+        {
+            get {
+                string reply = string.Empty;
+                string param = Convert.ToString(memory[102], 2).PadLeft(8, '0').Substring(6);
+                switch (param)
+                {
+                    case "00":
+                        reply = "No reverse Flow Event in last 35 days";
+                        break;
+                    case "01":
+                        reply = "Small Reverse Flow Event in last 35 days";
+                        break;
+                    case "10":
+                        reply = "Large Reverse Flow Event in last 35 days";
+                        break;
+                }
+                return reply;
+            }
+
+
+        }
+
+        //addr 102 bits 2-4
+        //Leak Detection state
+        public string DaysOfNoFlow
+        {
+            get
+            {
+                string reply = string.Empty;
+                string param = Convert.ToString(memory[102], 2).PadLeft(8, '0').Substring(3, 3);
+                switch (param)
+                {
+                    case "000":
+                        reply = "0";
+                        break;
+                    case "001":
+                        reply = "1-2";
+                        break;
+                    case "010":
+                        reply = "3-7";
+                        break;
+                    case "011":
+                        reply = "8-14";
+                        break;
+                    case "100":
+                        reply = "15-21";
+                        break;
+                    case "101":
+                        reply = "22-34";
+                        break;
+                    case "110":
+                        reply = "35 (ALL)";
+                        break;
+                }
+
+                return reply + " days of no consumption";
+            }
+        }
+
+        //addr 103 bits 1-2
+        //Leak Detection state
+        public string LeakDetection
+        {
+            get
+            {
+                string reply = string.Empty;
+                string param = Convert.ToString(memory[103], 2).PadLeft(8, '0').Substring(5, 2);
+                switch (param)
+                {
+                    case "00":
+                        reply = "Less than 50 15-minute intervals";
+                        break;
+                    case "01":
+                        reply = "Between 50 and 95 15-minute intervals";
+                        break;
+                    case "10":
+                        reply = "Greater than 96 15-minute intervals";
+                        break;
+                }
+                return reply;
+            }
+        }
+
+
+        //addr 103 bits 3-5
+        //Days of Leak 
+        public string DaysOfLeak
+        {
+            get
+            {
+                string reply = string.Empty;
+                string param = Convert.ToString(memory[103], 2).PadLeft(8, '0').Substring(2, 3);
+                switch (param)
+                {
+                    case "000":
+                        reply = "0";
+                        break;
+                    case "001":
+                        reply = "1-2";
+                        break;
+                    case "010":
+                        reply = "3-7";
+                        break;
+                    case "011":
+                        reply = "8-14";
+                        break;
+                    case "100":
+                        reply = "15-21";
+                        break;
+                    case "101":
+                        reply = "22-34";
+                        break;
+                    case "110":
+                        reply = "35 (ALL)";
+                        break;
+                }
+
+                return reply + " days of leak detection";
+            }
+        }
+
         // addr 102-103
         // P1 scaler
         public int P1Scaler
@@ -1057,6 +1181,8 @@ namespace MTUComm
                 return p1Scaler;
             }
         }
+
+
 
         // addr 104-111
         // P2 reading
@@ -1105,7 +1231,7 @@ namespace MTUComm
             get
             {
                 int batteryVoltageAd = memory[113];
-                return batteryVoltageAd;
+                return (int)(memory[113] * 9.766 * 2) + 250;
             }
         }
 
@@ -1247,7 +1373,7 @@ namespace MTUComm
 
         // addr 132-135
         // 7021 reg1
-        public int Reg1
+        public int F12WAYRegister1
         {
             get
             {
@@ -1258,7 +1384,7 @@ namespace MTUComm
 
         // addr 136-139
         // 7021 reg2
-        public int Reg2
+        public int F12WAYRegister2
         {
             get
             {
@@ -1269,7 +1395,7 @@ namespace MTUComm
 
         // addr 140-143
         // 7021 reg3
-        public int Reg3
+        public int F12WAYRegister3
         {
             get
             {
@@ -1280,7 +1406,7 @@ namespace MTUComm
 
         // addr 144-147
         // 7021 reg4
-        public int Reg4
+        public int F12WAYRegister4
         {
             get
             {
@@ -1291,7 +1417,7 @@ namespace MTUComm
 
         // addr 148-151
         // 7021 reg5
-        public int Reg5
+        public int F12WAYRegister5
         {
             get
             {
@@ -1302,7 +1428,7 @@ namespace MTUComm
 
         // addr 152-155
         // 7021 reg6
-        public int Reg6
+        public int F12WAYRegister6
         {
             get
             {
@@ -1313,7 +1439,7 @@ namespace MTUComm
 
         // addr 156-159
         // 7021 reg7
-        public int Reg7
+        public int F12WAYRegister7
         {
             get
             {
@@ -1324,7 +1450,7 @@ namespace MTUComm
 
         // addr 160-163
         // 7021 reg8
-        public int Reg8
+        public int F12WAYRegister8
         {
             get
             {
@@ -1335,7 +1461,7 @@ namespace MTUComm
 
         // addr 164-167
         // 7021 reg9
-        public int Reg9
+        public int F12WAYRegister9
         {
             get
             {
@@ -1346,7 +1472,7 @@ namespace MTUComm
 
         // addr 168-171
         // 7021 reg10
-        public int Reg10
+        public int F12WAYRegister10
         {
             get
             {
@@ -1357,7 +1483,7 @@ namespace MTUComm
 
         // addr 172-175
         // 7021 reg11
-        public int Reg11
+        public int F12WAYRegister11
         {
             get
             {
@@ -1368,7 +1494,7 @@ namespace MTUComm
 
         // addr 176-179
         // 7021 reg12
-        public int Reg12
+        public int F12WAYRegister12
         {
             get
             {
@@ -1379,7 +1505,7 @@ namespace MTUComm
 
         // addr 180-183
         // 7021 reg0 rx
-        public int Reg0Rx
+        public int F12WAYRegister13
         {
             get
             {
@@ -1390,7 +1516,7 @@ namespace MTUComm
 
         // addr 184-187
         // 7021 reg1 rx
-        public int Reg1Rx
+        public int F12WAYRegister14
         {
             get
             {
@@ -1669,7 +1795,16 @@ namespace MTUComm
         {
             get
             {
-                return "0";
+                char supplierCode = Convert.ToChar(memory[232]);
+                char productRevision = Convert.ToChar(memory[237]);
+                int pcbNumber = memory[233] +
+                    (memory[234] << 8) +
+                    (memory[235] << 16) +
+                    (memory[236] << 24);
+                return string.Format("{0}-{1:000000000}-{2}",
+                    supplierCode,
+                    pcbNumber,
+                    productRevision);
             }
         }
 

@@ -64,5 +64,11 @@ namespace MTUComm
             return meterTypes.GetModelsByVendorFromMeters(meterTypes.Meters, vendor);
         }
 
+
+        public Boolean useDummyDigits()
+        {
+            return true; //should be taen from globals, hardcoded for dev
+        }
+
     }
 }

@@ -94,6 +94,7 @@ namespace MTUComm
                     args = new ReadMtuArgs(new MemoryMap31xx32xx(lexi.Read(0, 255)), mtuType);
                     break;
                 case "33":
+                    args = new ReadMtuArgs(new MemoryMap33xx(lexi.Read(0, 255)), mtuType);
                     break;
                 case "34":
                     break;

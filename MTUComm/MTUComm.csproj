@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Xml\Xml.csproj" />
     <ProjectReference Include="..\Lexi\Lexi.csproj" />
+    <ProjectReference Include="..\Xml\Xml.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />

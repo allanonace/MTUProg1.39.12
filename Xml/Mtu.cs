@@ -20,5 +20,9 @@ namespace Xml
  
         [XmlElement("DailyReads")]
         public bool DailyReads { get; set; }
+
+        [XmlElement("PulseCountOnly")]
+        public Boolean PulseCountOnly { get; set; }
+        
     }
 }

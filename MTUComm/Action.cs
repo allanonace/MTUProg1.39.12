@@ -179,57 +179,86 @@ namespace MTUComm
 
             int meterid = (int)memory.GetType().GetProperty("P" + (portnumber + 1) + "MeterType").GetValue(memory, null);
 
-            Meter metertype = configuration.getMeterTyoeById(meterid);
-            result.AddParameter(new Parameter("MeterType", "Meter Type", metertype.Display));
-            result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", meterid.ToString()));
+            if(meterid != 0) {
+                Meter metertype = configuration.getMeterTyoeById(meterid);
+                result.AddParameter(new Parameter("MeterType", "Meter Type", metertype.Display));
+                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", meterid.ToString()));
 
 
-            switch (mtutype.HexNum.Substring(0, 2))
-            {
-                case "31":
-                case "32":
-                    MemoryMap31xx32xx mmap31xx32xx = (MemoryMap31xx32xx)memory;
+                switch (mtutype.HexNum.Substring(0, 2))
+                {
+                    case "31":
+                    case "32":
+                        MemoryMap31xx32xx mmap31xx32xx = (MemoryMap31xx32xx)memory;
 
-                    Match match = Regex.Match(metertype.Display,
-                            @"(\w+) (\d+)D PF(\d+) (\w+)",
-                            RegexOptions.IgnoreCase | RegexOptions.Singleline |
-                            RegexOptions.CultureInvariant | RegexOptions.Compiled);
-                    if (match.Success)
-                    {
-                        String NumberOfDials = match.Groups[2].Value;
-                        String DriveDialSize = match.Groups[3].Value;
-                        String UnitOfMeasure = match.Groups[4].Value;
+                        Match match = Regex.Match(metertype.Display,
+                                @"(\w+) (\d+)D PF(\d+) (\w+)",
+                                RegexOptions.IgnoreCase | RegexOptions.Singleline |
+                                RegexOptions.CultureInvariant | RegexOptions.Compiled);
+                        if (match.Success)
+                        {
+                            String NumberOfDials = match.Groups[2].Value;
+                            String DriveDialSize = match.Groups[3].Value;
+                            String UnitOfMeasure = match.Groups[4].Value;
 
-                        result.AddParameter(new Parameter("NumberOfDials", "Number Of Dials", NumberOfDials));
-                        result.AddParameter(new Parameter("DriveDialSize", "Drive Dial Size", DriveDialSize));
-                        result.AddParameter(new Parameter("UnitOfMeasure", "Unit Of Measure", UnitOfMeasure));
-                    }
+                            result.AddParameter(new Parameter("NumberOfDials", "Number Of Dials", NumberOfDials));
+                            result.AddParameter(new Parameter("DriveDialSize", "Drive Dial Size", DriveDialSize));
+                            result.AddParameter(new Parameter("UnitOfMeasure", "Unit Of Measure", UnitOfMeasure));
+                        }
 
 
-                    break;
-                case "33":
-                    break;
-                case "34":
-                    break;
-            }
+                        break;
+                    case "33":
+                        result.AddParameter(new Parameter("NumberOfDigits", "Digits #", metertype.LiveDigits.ToString()));
+                        break;
+                    case "34":
+                        break;
+                }
 
-            ulong meter_id = (ulong) memory.GetType().GetProperty("P" + (portnumber + 1) + "MeterId").GetValue(memory, null);
-            result.AddParameter(new Parameter("AcctNumber", "Service Pt. ID", meter_id.ToString()));
+                ulong meter_id = (ulong) memory.GetType().GetProperty("P" + (portnumber + 1) + "MeterId").GetValue(memory, null);
+                result.AddParameter(new Parameter("AcctNumber", "Service Pt. ID", meter_id.ToString()));
 
-            uint meter_reading = (uint)memory.GetType().GetProperty("P" + (portnumber + 1) + "Reading").GetValue(memory, null);
+                uint meter_reading = (uint)memory.GetType().GetProperty("P" + (portnumber + 1) + "Reading").GetValue(memory, null);
 
-            uint tempReadingVal = meter_reading * (uint)metertype.HiResScaling;
+                uint tempReadingVal = 0;
+                if (mtutype.PulseCountOnly)
+                {
+                    tempReadingVal = meter_reading * (uint)metertype.HiResScaling;
+                }
+                else
+                {
+                    tempReadingVal = meter_reading;
+                }
+                
 
-            String tempReading = tempReadingVal.ToString();
-            if (metertype.LiveDigits < tempReading.Length)
-            {
-                tempReading = tempReading.Substring(tempReading.Length - metertype.LiveDigits - (tempReading.IndexOf('.') > -1 ? 1 : 0));
+                String tempReading = tempReadingVal.ToString();
+                if (metertype.LiveDigits < tempReading.Length)
+                {
+                    tempReading = tempReading.Substring(tempReading.Length - metertype.LiveDigits - (tempReading.IndexOf('.') > -1 ? 1 : 0));
+                }
+                else
+                {
+                    tempReading = tempReading.PadLeft(metertype.LiveDigits, '0');
+                }
+                if (metertype.LeadingDummy > 0) // KG 12/08/2008
+                    tempReading = tempReading.PadLeft(tempReading.Length + metertype.LeadingDummy, configuration.useDummyDigits()  ? 'X' : '0');
+                if (metertype.DummyDigits > 0)  // KG 12/08/2008
+                    tempReading = tempReading.PadRight(tempReading.Length + metertype.DummyDigits, configuration.useDummyDigits() ? 'X' : '0');
+                if (metertype.Scale > 0 && tempReading.IndexOf(".") == -1) // 8.12.2011 KG add for F1 Pulse
+                    tempReading = tempReading.Insert(tempReading.Length - metertype.Scale, ".");
+                if (metertype.PaintedDigits > 0 && configuration.useDummyDigits()) // KG 12/08/2008
+                    tempReading = tempReading.PadRight(tempReading.Length + metertype.PaintedDigits, '0').Insert(tempReading.Length, " - ");
+
+
+                result.AddParameter(new Parameter("MeterReading", "Meter Reading", tempReading));
             }
             else
             {
-                tempReading = tempReading.PadLeft(metertype.LiveDigits, '0');
+                result.AddParameter(new Parameter("MeterType", "Meter Type", "Not Installed"));
+                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", meterid.ToString()));
+                result.AddParameter(new Parameter("AcctNumber", "Service Pt. ID", "000000000"));
+                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
             }
-            result.AddParameter(new Parameter("MeterReading", "Meter Reading", tempReading));
 
             return result;
         }
@@ -308,6 +337,23 @@ namespace MTUComm
 
                     break;
                 case "33"://33xx MTU Family
+                    MemoryMap33xx mmap33xx = (MemoryMap33xx)memory;
+
+
+                    if (!memory.Shipbit)
+                    {
+                        result.AddParameter(new Parameter("BackFlowState", "Backflow State", mmap33xx.BackFlowState ));
+                        result.AddParameter(new Parameter("DaysOfNoFlow", "Days of No Flow", mmap33xx.DaysOfNoFlow));
+                        result.AddParameter(new Parameter("LeakDetection", "Leak Detection", mmap33xx.LeakDetection));
+                        result.AddParameter(new Parameter("DaysOfLeak", "Days of Leak", mmap33xx.DaysOfLeak));
+
+                    }
+
+                    result.AddParameter(new Parameter("RxInterval", "Rx Interval", mmap33xx.RxInterval.ToString()));
+                    result.AddParameter(new Parameter("F12WAYRegister1", "F12WAYRegister1", "0x" + mmap33xx.F12WAYRegister1.ToString("X8")));
+                    result.AddParameter(new Parameter("F12WAYRegister10", "F12WAYRegister10", "0x" + mmap33xx.F12WAYRegister10.ToString("X8")));
+                    result.AddParameter(new Parameter("F12WAYRegister14", "F12WAYRegister14", "0x" + mmap33xx.F12WAYRegister14.ToString("X8")));
+                    
                     break;
                 case "34"://34xx MTU Family
                     break;
