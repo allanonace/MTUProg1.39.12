@@ -62,11 +62,11 @@ namespace MTUComm
                     file.WriteLine("<?xml version=\"1.0\" encoding=\"ASCII\"?>");
                     file.WriteLine("<StarSystem>");
                     file.WriteLine("    <AppInfo>");
-                    file.WriteLine("        <AppName>AclaraStarSystemMobile</AppName>");
-                    file.WriteLine("        <Version>2.2.5.0</Version>");
+                    file.WriteLine("        <AppName>"+ config.getApplicationName() + "</AppName>");
+                    file.WriteLine("        <Version>" + config.GetApplicationVersion() + "</Version>");
                     file.WriteLine("        <Date>"+ DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>");
                     file.WriteLine("        <UTCOffset>"+ TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>");
-                    file.WriteLine("        <UnitId>ACLARATECH-CLE5478L-KGUILER</UnitId>");
+                    file.WriteLine("        <UnitId>" + config.GetDevideUUID() + "</UnitId>");
                     file.WriteLine("        <AppType>"+(isFixedName() ? "Scripting" : "Interactive") +"</AppType>");
                     file.WriteLine("    </AppInfo>");
                     file.WriteLine("    <Message />");
