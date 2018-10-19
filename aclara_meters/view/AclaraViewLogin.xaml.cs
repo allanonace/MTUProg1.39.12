@@ -50,6 +50,8 @@ namespace aclara_meters.view
                     loginpage.IsVisible = true;
                     Application.Current.MainPage.DisplayAlert("Alert", "Show data: "+data, "ok");  
 
+
+
                 });
             });
 
@@ -202,6 +204,7 @@ namespace aclara_meters.view
 
             X509Certificate serverCertificate = null;
             serverCertificate = X509Certificate.CreateFromCertFile(Path.Combine(xml_documents, "Aclara-Cert.cer"));
+
 
             string mensaje = "Cifra este mensaje";
 

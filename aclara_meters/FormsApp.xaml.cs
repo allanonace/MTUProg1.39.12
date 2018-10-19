@@ -86,6 +86,12 @@ namespace aclara_meters
               
             }
 
+           
+
+            string base64CertificateString = listaDatos[2].Replace("cert_file: ", "");
+   
+            byte[] bytes = Convert.FromBase64String(base64CertificateString);
+            X509Certificate2 x509certificate = new X509Certificate2(bytes);
 
 
 
