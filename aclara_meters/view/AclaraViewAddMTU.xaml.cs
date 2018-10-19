@@ -67,6 +67,8 @@ namespace aclara_meters.view
         private string name;
 
         private Global globalData;
+        private MtuTypes mtuData;
+
         /*
             Optional 1  WorkOrderRecording      Hides/shows Field Order
             Optional 2  MeterWorkRecording      Shows option to specify if meter is broken when replacing it
@@ -603,10 +605,7 @@ namespace aclara_meters.view
         {
 
             config = new Config();
-
-            XmlSerializer s = new XmlSerializer(typeof(Global));
-
-
+           
             var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
 
@@ -618,25 +617,25 @@ namespace aclara_meters.view
 
             globalData =  config.GetGlobal(Path.Combine(xml_documents, "Global.xml"));
 
+            mtuData = config.GetMtu(Path.Combine(xml_documents, "Mtu.xml"));
 
+            //mtuData
+            Mtu mtu = mtuData.FindByMtuId(138);
 
-
-
-
-            WorkOrderRecording = true;
-            AccountDualEntry = true;
-            WorkOrderDualEntry = true;
-            IndividualReadInterval = true;
-            UseMeterSerialNumber = true;
+            WorkOrderRecording = globalData.WorkOrderRecording;
+            AccountDualEntry = globalData.AccountDualEntry;
+            WorkOrderDualEntry = globalData.WorkOrderDualEntry;
+            IndividualReadInterval = globalData.IndividualReadInterval;
+            UseMeterSerialNumber = globalData.UseMeterSerialNumber;
 
             /******************/
             /**  Snap Reads  **/
-            mtuDailyReads = true;
-            globalsAllowDailyReads = true;
+            mtuDailyReads = mtu.DailyReads;
+            globalsAllowDailyReads = globalData.AllowDailyReads;
             setGlobalSnap = true;
             memoryMapValue = 15.0;
             globalsChangeDailyReads = true;
-            globalsDailyReadsDefault = 10.0;
+            globalsDailyReadsDefault =  Convert.ToDouble( globalData.DailyReadsDefault ); 
             /****    ****    ****/
 
 

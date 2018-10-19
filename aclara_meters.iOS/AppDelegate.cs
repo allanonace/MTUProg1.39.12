@@ -33,99 +33,59 @@ namespace aclara_meters.iOS
             Forms.Init();
             Distribute.DontCheckForUpdatesInDebug();
 
-            //identity = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
-            // IntuneMAMEnrollmentManager.Instance.LoginAndEnrollAccount("ma.jimenez@bizintekinnova.com");
+            IntuneMAMPolicyManager value = IntuneMAMPolicyManager.Instance;
+            NSDictionary dictionary =  value.DiagnosticInformation;
 
-            var keys = new[]
+            NSString[] keys = new NSString[]{new NSString("AppConfig")};
+
+            NSDictionary key= dictionary.GetDictionaryOfValuesFromKeys(keys);
+
+            var ftp_username = new NSObject();
+            var ftp_pathremotefile = new NSObject();
+            var cert_file = new NSObject();
+            var ftp_password = new NSObject();
+            var ftp_host = new NSObject();
+        
+            for (int i = 0, keyCount = (int)key.Count; i < keyCount; i++)
             {
-                new NSString("ftp_url"),
-                new NSString("ftp_username")
-            };
+                
+                NSObject fields_values = key.ElementAt(i).Value;
 
-            /// IntuneMAMPolicyManager value = IntuneMAMPolicyManager.Instance;
-            /*
-            NSDictionary dictionary = value.DiagnosticInformation;
+                ftp_username = fields_values.ValueForKey(new NSString("ftp_username"));
+                ftp_pathremotefile = fields_values.ValueForKey(new NSString("ftp_pathremotefile"));
+                cert_file = fields_values.ValueForKey(new NSString("cert_file"));
+                ftp_password = fields_values.ValueForKey(new NSString("ftp_password"));
+                ftp_host = fields_values.ValueForKey(new NSString("ftp_host"));
 
-            int count = (int) dictionary.Count;
-
-            Console.WriteLine("Elementos diccionario: ");
-            for (int i = 0; i < count; i++)
-            {
-                Console.WriteLine("Key: "+ dictionary.ElementAt(i).Key  + " Value: "+ dictionary.ElementAt(i).Value);
-
+                Console.WriteLine("ftp_username: {0}, ftp_pathremotefile: {1}, cert_file: {2}, ftp_password: {3}, ftp_host: {4}", 
+                                  ftp_username, ftp_pathremotefile, cert_file, ftp_password, ftp_host );
+              
             }
 
-            IntuneMAMPolicySource IntuneMAMPolicySource2 = value.MamPolicySource;
-
-       */
-            /*
-            try{
-
-                string object1 = NSBundle.MainBundle.ObjectForInfoDictionary("ftp_username").ToString();
-                string object2 = NSBundle.MainBundle.ObjectForInfoDictionary("ftp_url").ToString();
-                string object3 = NSBundle.MainBundle.ObjectForInfoDictionary("userprincipalname").ToString();
-
-
-                Console.WriteLine("ftp_username: " + object1 + " ftp_url: " + object2 + "userprincipalname: " + object3);
-
-            }catch (Exception c){
-                Console.WriteLine(c.StackTrace);
-            }
-*/
-
-            IntuneMAMAppConfigManager appConfigManager = IntuneMAMAppConfigManager.Instance;
-
-            IntuneMAMEnrollmentManager intuneMAMEnrollmentManager = IntuneMAMEnrollmentManager.Instance;
-
-
-
-
-            identity = "ma.jimenez@bizintekinnova.com";
-
-
-           
-
-            IntuneMAMAppConfig intuneMAMAppConfig = appConfigManager.AppConfigForIdentity(identity);
-
-          
-            string[] field1 = intuneMAMAppConfig.AllStringsForKey("ftp_username");
-
-            string[] field2 = intuneMAMAppConfig.AllStringsForKey("ftp_url");
-
-            string[] field3 = intuneMAMAppConfig.AllStringsForKey("userprincipalname");
-
-         
+     
             List <string> listaDatos = new List<string>();
 
+
             try{
-                if(field1.Length != 0 || field1 != null )
-                    listaDatos.Add("ftp_username: " + field1[0]);
-                
-            }catch (Exception c1){
+                listaDatos.Add("ftp_username: " + ftp_username );
+            }catch (Exception c1){}
 
-            }
+            try{
+                listaDatos.Add("ftp_pathremotefile: " + ftp_pathremotefile);
+            }catch (Exception c1){}
 
-            try
-            {
+            try{
+                listaDatos.Add("cert_file: " + cert_file);
+            }catch (Exception c1) { }
 
-                if (field2.Length !=  0 || field2 != null)
-                    listaDatos.Add("ftp_url: " + field2[0]);
-                
-             }catch (Exception c1){
+            try{
+                listaDatos.Add("ftp_password: " + ftp_password);
+            }catch (Exception c1) { }
 
-             }
+            try{
+                listaDatos.Add("ftp_host: " + ftp_host);
+            }catch (Exception c1) { }
 
-            try
-            {
-                
-            if (field3.Length != 0 || field3 != null)
-                listaDatos.Add("userprincipalname: " + field3[0]);
-                
-            }
-            catch (Exception c1)
-            {
-
-            }
 
             appSave = new FormsApp(BluetoothLowEnergyAdapter.ObtainDefaultAdapter(), UserDialogs.Instance, listaDatos);
             LoadApplication( appSave );

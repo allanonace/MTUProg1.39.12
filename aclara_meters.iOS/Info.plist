@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>aclara-mtu-programmer</string>
 	<key>CFBundleShortVersionString</key>
-	<string>12</string>
+	<string>19</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -27,7 +27,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.11</string>
+	<string>1.19</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>MainStoryboardFile</key>
@@ -84,9 +84,5 @@
 	</array>
 	<key>XSAppIconAssets</key>
 	<string>Assets.xcassets/AppIcon.appiconset</string>
-	<key>ftp_url</key>
-	<string>{{ftp_url}}</string>
-	<key>ftp_username</key>
-	<string>{{ftp_username}}</string>
 </dict>
 </plist>
