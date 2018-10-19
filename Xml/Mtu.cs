@@ -17,5 +17,8 @@ namespace Xml
 
         [XmlElement("Port")]
         public List<Port> Ports { get; set; }
+ 
+        [XmlElement("DailyReads")]
+        public bool DailyReads { get; set; }
     }
 }
