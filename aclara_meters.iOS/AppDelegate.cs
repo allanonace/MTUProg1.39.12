@@ -89,7 +89,7 @@ namespace aclara_meters.iOS
 
 
 
-            NSObject AppVersion = NSBundle.MainBundle.InfoDictionary["CFBundleShortVersionString"];
+            NSObject AppVersion = NSBundle.MainBundle.InfoDictionary["CFBundleVersion"];
 
 
             appSave = new FormsApp(BluetoothLowEnergyAdapter.ObtainDefaultAdapter(), UserDialogs.Instance, listaDatos, AppVersion.ToString());
