@@ -22,6 +22,7 @@ using Android.Content;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Distribute;
 using Plugin.CurrentActivity;
+using System.Collections.Generic;
 
 namespace aclara_meters.Droid
 {
@@ -101,7 +102,15 @@ namespace aclara_meters.Droid
 
             CrossCurrentActivity.Current.Init(this, bundle);
 
-            LoadApplication(new FormsApp(bluetooth, UserDialogs.Instance));
+
+            var context = Android.App.Application.Context;
+            var info = context.PackageManager.GetPackageInfo(context.PackageName, 0);
+
+            string value = $"{info.VersionName}.{info.VersionCode.ToString()}";
+
+
+
+            LoadApplication(new FormsApp(bluetooth, UserDialogs.Instance, new List<string>, value));
 
         }
 
