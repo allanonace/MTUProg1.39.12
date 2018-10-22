@@ -39,11 +39,23 @@ namespace Xml
             {
                 using (StreamReader reader = new StreamReader(path))
                 {
-                    meterTypes = (MeterTypes)s.Deserialize(reader);
+                    try{
+                        //System.Diagnostics.Debug.WriteLine((reader).ReadToEnd());
+
+                        meterTypes = (MeterTypes)s.Deserialize(reader);
+                    }catch (Exception errorLine){
+                        Console.WriteLine(errorLine.StackTrace);
+                     
+                        throw new MeterLoadException("Error loading Meter file");
+
+                    }
+                   
                 }
             }
             catch (Exception e)
             {
+                Console.WriteLine(e.StackTrace);
+      
                 throw new MeterLoadException("Error loading Meter file");
             }
 

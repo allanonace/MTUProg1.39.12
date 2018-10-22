@@ -25,6 +25,7 @@ namespace MTUComm
             mbase_path = base_path;
             device = "PC";
             Config config = new Config();
+
             mtuTypes = config.GetMtu(Path.Combine(mbase_path, "Mtu.xml"));
             meterTypes = config.GetMeters(Path.Combine(mbase_path, "Meter.xml"));
             global = config.GetGlobal(Path.Combine(mbase_path, "Global.xml"));

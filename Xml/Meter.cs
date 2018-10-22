@@ -76,7 +76,7 @@ namespace Xml
         public int PulseHiTime { get; set; }
 
         [XmlElement("HiResScaling")]
-        public int HiResScaling { get; set; }
+        public decimal HiResScaling { get; set; }
 
         [XmlElement("PHF")]
         public int PHF { get; set; }
