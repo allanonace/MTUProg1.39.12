@@ -360,10 +360,10 @@ namespace MTUComm
 
                     if (!memory.Shipbit)
                     {
-                        result.AddParameter(new Parameter("InterfaceTamperStatus", "Interface Tamp",getAlarmStatus(mmap342x.SerialComProblem, mmap342x.TampersSerialComProblem)));
+                        result.AddParameter(new Parameter("InterfaceTamperStatus", "Interface Tamp",getAlarmStatus(mmap342x.ProgrammingCoilInterfaceTamper, mmap342x.TampersProgrammingCoilInterfaceTamper)));
                         result.AddParameter(new Parameter("LastGasp", "Last Gasp", getAlarmStatus(mmap342x.MtuLastGasp, mmap342x.TampersMtuLastGasp)));
                         result.AddParameter(new Parameter("InsufficentMemory", "Insf. Mem", getAlarmStatus(mmap342x.InsufficientMemory, mmap342x.TampersInsufficientMemory)));
-                        result.AddParameter(new Parameter("Cut1WireTamperStatus", "Cut 1 Wire Tamp", getAlarmStatus(mmap342x.CutWirePort1, mmap342x.TampersCutAlarmCable)));
+                        result.AddParameter(new Parameter("Cut1WireTamperStatus", "Cut 1 Wire Tamp", getAlarmStatus(mmap342x.CutWirePort1, mmap342x.TampersCutWirePort1)));
                         result.AddParameter(new Parameter("CutWireDelaySetting", "Cut Wire Delay", mmap342x.CutWireDelaySetting.ToString()));
                     }
 
