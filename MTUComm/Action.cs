@@ -1,8 +1,7 @@
 ﻿using Lexi.Interfaces;
+using MTUComm.MemoryMap;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -264,7 +263,7 @@ namespace MTUComm
 
            if (!memory.Shipbit)
             {
-                result.AddParameter(new Parameter("DailySnap", "Daily Snap", memory.DailySnap));
+                result.AddParameter(new Parameter("DailySnap", "Daily Snap", memory.DailySnap ));
                 result.AddParameter(new Parameter("DailyGMTHourRead", "Daily GMT Hour Read", memory.DailyRead.ToString()));
             }
 
@@ -288,23 +287,21 @@ namespace MTUComm
             {
                 case "31": //31xx MTU Family
                 case "32"://32xx MTU Family
-                    MemoryMap31xx32xx mmap31xx32xx = (MemoryMap31xx32xx)memory;
+                    dynamic reg = ((MemoryMap31xx32xx)memory).registers;
 
-                    if (!memory.Shipbit) {
-                        result.AddParameter(new Parameter("InterfaceTamperStatus", "Interface Tamp", getAlarmStatus(mmap31xx32xx.P1PciAlarm, mmap31xx32xx.ProgrammingCoilInterfaceTamper)));
-                        result.AddParameter(new Parameter("TiltTamperStatus", "Tilt Tamp", getAlarmStatus(mmap31xx32xx.P1TiltAlarm, mmap31xx32xx.TiltTamper)));
-                        result.AddParameter(new Parameter("MagneticTamperStatus", "Magnetic Tamp", getAlarmStatus(mmap31xx32xx.P1MagneticAlarm, mmap31xx32xx.MagneticTamper)));
-                        result.AddParameter(new Parameter("RegisterCoverTamperStatus", "Reg. Cover", getAlarmStatus(mmap31xx32xx.P1RegisterCoverAlarm, mmap31xx32xx.RegisterCoverTamper)));
-                        result.AddParameter(new Parameter("ReverseFlowTamperStatus", "Rev. Fl Tamp", getAlarmStatus(mmap31xx32xx.P1ReverseFlowAlarm, mmap31xx32xx.ReverseFlowTamper)));
-
+                    if (!memory.Shipbit)
+                    {
+                        result.AddParameter(new Parameter("InterfaceTamperStatus", "Interface Tamp", getAlarmStatus(reg.P1PciAlarm, reg.ProgrammingCoilInterfaceTamper)));
+                        result.AddParameter(new Parameter("TiltTamperStatus", "Tilt Tamp", getAlarmStatus(reg.P1TiltAlarm, reg.TiltTamper)));
+                        result.AddParameter(new Parameter("MagneticTamperStatus", "Magnetic Tamp", getAlarmStatus(reg.P1MagneticAlarm, reg.MagneticTamper)));
+                        result.AddParameter(new Parameter("RegisterCoverTamperStatus", "Reg. Cover", getAlarmStatus(reg.P1RegisterCoverAlarm, reg.RegisterCoverTamper)));
+                        result.AddParameter(new Parameter("ReverseFlowTamperStatus", "Rev. Fl Tamp", getAlarmStatus(reg.P1ReverseFlowAlarm, reg.ReverseFlowTamper)));
                     }
 
-
-                    result.AddParameter(new Parameter("RxInterval", "Rx Interval", mmap31xx32xx.RxInterval.ToString()));
-                    result.AddParameter(new Parameter("F12WAYRegister1", "F12WAYRegister1", "0x"+mmap31xx32xx.F12WAYRegister1.ToString("X8")));
-                    result.AddParameter(new Parameter("F12WAYRegister10", "F12WAYRegister10", "0x" + mmap31xx32xx.F12WAYRegister10.ToString("X8")));
-                    result.AddParameter(new Parameter("F12WAYRegister14", "F12WAYRegister14", "0x" + mmap31xx32xx.F12WAYRegister14.ToString("X8")));
-
+                    result.AddParameter(new Parameter("RxInterval", "Rx Interval", reg.RxInterval.ToString()));
+                    result.AddParameter(new Parameter("F12WAYRegister1", "F12WAYRegister1", "0x"+reg.F12WAYRegister1.ToString("X8")));
+                    result.AddParameter(new Parameter("F12WAYRegister10", "F12WAYRegister10", "0x" + reg.F12WAYRegister10.ToString("X8")));
+                    result.AddParameter(new Parameter("F12WAYRegister14", "F12WAYRegister14", "0x" + reg.F12WAYRegister14.ToString("X8")));
 
                     break;
                 case "33"://33xx MTU Family
