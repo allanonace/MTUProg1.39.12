@@ -67,7 +67,7 @@ namespace aclara_meters
         {
             InitializeComponent();
 
-            AppVersion = Version;
+            Version = AppVersion;
 
             var deviceId = CrossDeviceInfo.Current.Id;
 
@@ -93,13 +93,19 @@ namespace aclara_meters
               
             }
 
+            string base64CertificateString = "";
+
+            try
+            {
+                base64CertificateString = listaDatos[2].Replace("cert_file: ", "");
+                byte[] bytes = Convert.FromBase64String(base64CertificateString);
+                X509Certificate2 x509certificate = new X509Certificate2(bytes);
+
+            }catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
            
-
-            string base64CertificateString = listaDatos[2].Replace("cert_file: ", "");
-   
-            byte[] bytes = Convert.FromBase64String(base64CertificateString);
-            X509Certificate2 x509certificate = new X509Certificate2(bytes);
-
 
 
             //Cargar la pantalla principal
