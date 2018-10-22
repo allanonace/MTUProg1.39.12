@@ -48,10 +48,7 @@ namespace aclara_meters.view
                 await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
                 {
                     loginpage.IsVisible = true;
-                    Application.Current.MainPage.DisplayAlert("Alert", "Show data: "+data, "ok");  
-
-
-
+                    Console.WriteLine("Data: " + data);
                 });
             });
 
