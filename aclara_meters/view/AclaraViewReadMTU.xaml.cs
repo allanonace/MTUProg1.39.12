@@ -212,7 +212,7 @@ namespace aclara_meters.view
 
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action add_mtu = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: "iker");
+            MTUComm.Action add_mtu = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: FormsApp.CredentialsService.UserName);
 
             //Define finish and error event handler
             //add_mtu.OnFinish += Add_mtu_OnFinish;
@@ -256,10 +256,11 @@ namespace aclara_meters.view
                             }
                             else
                             {
-                                MTUDataListView.Add(new ReadMTUItem() 
-                                { 
-                                    Title = param.getLogDisplay() + ":", 
-                                    Description = param.getValue() 
+                                MTUDataListView.Add(new ReadMTUItem()
+                                {
+                                    Title = param.getLogDisplay() + ":",
+                                    Description = param.getValue(),
+                             
                                 });
                             }
                         }else{
@@ -297,28 +298,51 @@ namespace aclara_meters.view
                         a.Title.ToString().Contains("Xmit Interval") 
                     );
 
-              
+
+                    if (portval.getParameters()[0].getValue().Length > 25)
+                    {
+                        FinalReadListView.Insert(index, new ReadMTUItem()
+                        {
+                            Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
+                            Height = "80",
+                            isMTU = "false",
+                            isMeter = "true"
+
+                        });
+
+
+                        MTUDataListView.Add(new ReadMTUItem()
+                        {
+                            Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
+                            Height = "80",
+                            isMTU = "false",
+                            isMeter = "true"
+
+                        });
+                    }else{
+                        FinalReadListView.Insert(index, new ReadMTUItem()
+                        {
+                            Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
+                            Height = "40",
+                            isMTU = "false",
+                            isMeter = "true"
+
+                        });
+
+
+                        MTUDataListView.Add(new ReadMTUItem()
+                        {
+                            Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
+                            Height = "40",
+                            isMTU = "false",
+                            isMeter = "true"
+
+                        });
+
+                    }
+
+
                    
-
-                    FinalReadListView.Insert(index, new ReadMTUItem()
-                    {
-                        Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
-                        Height = "40",
-                        isMTU = "false",
-                        isMeter = "true"
-
-                    });
-
-
-                    MTUDataListView.Add(new ReadMTUItem()
-                    {
-                        Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
-                        Height = "40",
-                        isMTU = "false",
-                        isMeter = "true"
-
-                    });
-
                     for (int i = 0; i < portval.getParameters().Length; i++)
                     {
                         MTUComm.Parameter paramval = portval.getParameters()[i];
@@ -389,26 +413,49 @@ namespace aclara_meters.view
                             }
                             else
                             {
-
-                               
-                                FinalReadListView.Insert(index+1+i,new ReadMTUItem()
-                                  {
-                                      Title = paramval.getLogDisplay() + ":",
-                                      Description = paramval.getValue()
-                                  });
-
-                                MTUDataListView.Add(new ReadMTUItem()
+                                if ( paramval.getValue().Length > 25 ) 
                                 {
-                                    Title = paramval.getLogDisplay() + ":",
-                                    Description = paramval.getValue()
-                                });
+
+                                    FinalReadListView.Insert(index + 1 + i, new ReadMTUItem()
+                                    {
+                                        Title = paramval.getLogDisplay() + ":",
+                                        Description = paramval.getValue(),
+                                        Height = "80"
+                                    });
+
+                                    MTUDataListView.Add(new ReadMTUItem()
+                                    {
+                                        Title = paramval.getLogDisplay() + ":",
+                                        Description = paramval.getValue(),
+                                        Height = "80"
+                                    });
+
+                                }else
+                                {
+                                    FinalReadListView.Insert(index + 1 + i, new ReadMTUItem()
+                                    {
+                                        Title = paramval.getLogDisplay() + ":",
+                                        Description = paramval.getValue(),
+                                    
+                                    });
+
+                                    MTUDataListView.Add(new ReadMTUItem()
+                                    {
+                                        Title = paramval.getLogDisplay() + ":",
+                                        Description = paramval.getValue(),
+                                     
+                                    });
+                                }
+                            
+
+
                             }
                         }
                     }
                 }
 
 
-                FinalReadListView.RemoveAll(X => X.Title.Equals("-"));
+                //FinalReadListView.RemoveAll(X => X.Title.Equals("-"));
 
                 string resultMsg = "Successful MTU read";
                 byte[] readData;
@@ -479,7 +526,8 @@ namespace aclara_meters.view
                     new ReadMTUItem()
                     {
                         Title = field + ":",
-                        Description = value
+                        Description = value,
+                   
                     });
         }
 
@@ -537,6 +585,7 @@ namespace aclara_meters.view
                     addToListview(field, value,7);
 
                     break;
+
                 case "Reg. Cover":
                     isVisible = true;
 
