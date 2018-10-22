@@ -43,7 +43,7 @@ namespace MTUComm.MemoryMap
     {
         #region Attributes
 
-        public dynamic registers;
+        protected dynamic registers;
         protected IDictionary<string, object> dictionary { private set; get; }
         private ReadOnlyDictionary<string, object> backupDictionary;
 
@@ -84,17 +84,18 @@ namespace MTUComm.MemoryMap
 
             Console.WriteLine ( "Handler: " + id );
 
-            // Recuperar valor asignado
+            // Recover assigned value
             object value = this.dictionary[ id ];
 
-            // Restaurar el miembro anterior (  )
+            // Restart previous member ( reference to MemoryMap.RegisterObj.Value property )
             dictionary[ id ] = this.backupDictionary[ id ];
             //dictionary[ e.PropertyName ] = value; // Crearia un bucle y no invocaria nunca set
 
-            this.SetValue ( id, value );
+            // Invokes method that uses Value property set block
+            this.SetValueAfterAvoidOverride( id, value );
         }
 
-        protected abstract void SetValue(string id, object value);
+        protected abstract void SetValueAfterAvoidOverride(string id, object value);
 
         #endregion
 

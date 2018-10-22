@@ -7,20 +7,41 @@ using Xamarin.Forms;
 using Xml;
 
 /// <summary>
-/// TODO:
-/// - Crear un diccionario<id,bool> en donde listar todas las entradas del XML
-/// - Crear un metodo que permita marcar como editado un registro concreto
-/// - Crear un metodo que permite recuperar el listado de registros modificados
-///   - Que quieres que devuelva... los identificadores de los campos modificados
-///     y tu usas un switch para guardar la informacion que corresponda en cada caso
+/// LOGIC:
+/// - 1. In constructor loads current MTU family XML file and iterate over all registers
+/// - 2. For each register creates an instance of the corresponding specialized RegisterObj type
+/// - 3. Creates Get and Set methods for each register, leaving all parameters setted but value to be setted
+///      CreateProperty_Get|Set_XXX methods create function/action delegates to simulate property, but logic
+///      of new properties is inside GetXXXFromMem and SetXXXToMem methods, working with memory bytes[]
+/// - 4. Pass Set and Get methods references to each object, that will be used on Value property inside objects ( registers.get|set_id )
+/// - 5. Creates new ExpandoObject member with register name, asociating Value property to them ( registers.id )
+/// - 6. Adds instances to registersObjs dictionary that will be filtered to recover only modified registers
+/// - 7. Registers ExpandoObject PropertyChanged event, inside AMemoryMap class in IMemoryMap.cs file, to avoid override
+///      member when using asignment operator ( "=" / set ). The main problem working with ExpandoObject type, is that use
+///      property get block or invoke a method works perfect, but assign ( set ) always overrides dynamic member. The trick
+///      is to create dictionary copy, after have created all registers methods and properties, and use PropertyChanged
+///      to get new value assigned and restore dynamic member, put it pointing again to corresponding Value property
+///      ----
+///      dynamicObject.member = reference to property;
+///      property = 2;
+///      Console.WriteLine ( dynamicObject.member ); // 2 and member continues being reference to property
+///      dynamicObject.member = 33;
+///      Console.WriteLine ( dynamicObject.member ); // 33 but member now is only an integer, not previously referenced property
+///      ----
+/// - 8. New register properties simulated using ExpandoObject have to be used as normal class members
+///      "memoryMap.registers.idProperty" to get value, and "memoryMap.registers.idProperty = value" to set
+///      Never need to to call directly to registers.get_idProperty nor registers.set_idProperty, because
+///      Value property do it for us, invoking funcGet and funcSet methods
+///      
+/// CURRENT:
+/// - Seems that get methods are created ok but when call CreateProperty_Set_XXX breaks
+///   Inside CreateProperty_Set_Int logic sentence is commented
+/// - Also breaks when try to set funcGet|Set references to the methods
 /// 
-/// - La interfaz IMemoryMap no tendra sentido cuando todas las propiedades sean
-///   generadas dinamicamente, porque la clase MemoryMap3xxx de turno nunca tendra
-///   las propiedades que la interfaz espera
-///   
+/// TODO: 
 /// - De momento se crearan set y get para todo registro pero luego se modificara
 ///   para que en el xml de la familia se indique si cada registro tendra set
-///   
+/// 
 /// - Cuando en el campo custom se indique "Logic" de forma automatica, usando
 ///   reflexion, se generara la propiedad getter asociada a un metodo llamado
 ///   igual que el registro ( identificador ) mas el sufijo "_Logic"
@@ -110,6 +131,8 @@ namespace MTUComm.MemoryMap
                 }
             }
         }
+
+        #region Specialized classes
 
         private class RegisterObj_Int : RegisterObj
         {
@@ -281,6 +304,8 @@ namespace MTUComm.MemoryMap
 
         #endregion
 
+        #endregion
+
         #region Attributes
 
         protected byte[] memory { private set; get; }
@@ -320,7 +345,12 @@ namespace MTUComm.MemoryMap
                 {
                     RegType type = ( RegType )Enum.Parse ( typeof( RegType ), reg.Type.ToUpper () );
 
-                    switch (type)
+                    Console.WriteLine ( "New register: " + reg.Id + " <" + type + ">" );
+
+                    // Can be created RegisterObj class as generic because could not define
+                    // registersObjs dictionary using object, and each register type need their
+                    // own RegisterObj specialized class, only overriding Value property
+                    switch ( type )
                     {
                         case RegType.INT:
                             regObj = new RegisterObj_Int (
@@ -396,25 +426,29 @@ namespace MTUComm.MemoryMap
                             break;
                     }
 
-                    // Add new object/register to collection where will be filtered
-                    this.registersObjs.Add(reg.Id, regObj);
+                    Console.WriteLine ( "Exist get method? " + this.dictionary.ContainsKey ( METHODS_GET_PREFIX + regObj.id ) );
+                    Console.WriteLine ( "Exist set method? " + this.dictionary.ContainsKey ( METHODS_SET_PREFIX + regObj.id ) );
 
-                    // Methods tu use in property
+                    // References to methods to use in property ( .Value )
                     regObj.funcGet = ( Func<object> )this.dictionary[ METHODS_GET_PREFIX + regObj.id ];
                     regObj.funcSet = ( Action<object> )this.dictionary[ METHODS_SET_PREFIX + regObj.id ];
 
-                    // Property
+                    // Reference to property itself
                     base.dictionary[ regObj.id ] = regObj.Value;
-                }
 
-                Console.WriteLine ("MemoryMap -> Test Get: " + this.registers.MtuType );
-                this.registers.MtuType = 123;
-                Console.WriteLine ("MemoryMap -> Test Get after SET: " + this.registers.MtuType );
+                    // Add new object to collection where will be
+                    // filtered to only recover modified registers
+                    this.registersObjs.Add(reg.Id, regObj);
+                }
             }
 
             // Register event that allow to overpass ExpandoObject limitation
             // using asignment operator that override class member with pass value
             base.AddModifyEvent ();
+
+            Console.WriteLine ( "Test lectura 1: " + this.registers.MtuType );
+            this.registers.MtuType = 33;
+            Console.WriteLine ( "Test lectura 2: " + this.registers.MtuType );
         }
 
         #endregion
@@ -432,19 +466,20 @@ namespace MTUComm.MemoryMap
             }));
         }
 
-        private void CreateProperty_Get_Int ( RegisterObj regObj ) //string id, int address, int size = 1)
+        private void CreateProperty_Get_Int ( RegisterObj regObj )
         {
-            Console.WriteLine("MemoryMap -> Create Property Int [ GET ]: " + regObj.id);
+            Console.WriteLine("MemoryMap -> Create Property Int [ GET ]: " + METHODS_GET_PREFIX + regObj.id );
             
-            this.dictionary.Add( METHODS_GET_PREFIX + regObj.id, new Func<int>(() => {
+            this.dictionary.Add( METHODS_GET_PREFIX + regObj.id,
+                new Func<int>(() =>
+                {
+                    Console.WriteLine("MemoryMap -> Property Int [ GET ]: " + regObj.id);
 
-                Console.WriteLine("MemoryMap -> Property Int [ GET ]: " + regObj.id);
-
-                return this.GetIntFromMem ( regObj.address, regObj.size );
-            }));
+                    return this.GetIntFromMem ( regObj.address, regObj.size );
+                }));
         }
 
-        private void CreateProperty_Get_UInt ( RegisterObj regObj ) //string id, int address, int size = 1)
+        private void CreateProperty_Get_UInt ( RegisterObj regObj )
         {
             Console.WriteLine("MemoryMap -> Create Property UInt [ GET ]: " + regObj.id);
 
@@ -453,7 +488,7 @@ namespace MTUComm.MemoryMap
             }));
         }
 
-        private void CreateProperty_Get_ULong ( RegisterObj regObj ) //string id, int address, int size = 1)
+        private void CreateProperty_Get_ULong ( RegisterObj regObj )
         {
             Console.WriteLine("MemoryMap -> Create Property ULong [ GET ]: " + regObj.id);
 
@@ -462,7 +497,7 @@ namespace MTUComm.MemoryMap
             }));
         }
 
-        private void CreateProperty_Get_Bool ( RegisterObj regObj ) //string id, int address, int bit = 0)
+        private void CreateProperty_Get_Bool ( RegisterObj regObj )
         {
             Console.WriteLine("MemoryMap -> Create Property Bool [ GET ]: " + regObj.id);
 
@@ -471,7 +506,7 @@ namespace MTUComm.MemoryMap
             }));
         }
 
-        private void CreateProperty_Get_Char ( RegisterObj regObj ) //string id, int address)
+        private void CreateProperty_Get_Char ( RegisterObj regObj )
         {
             Console.WriteLine("MemoryMap -> Create Property Char [ GET ]: " + regObj.id);
 
@@ -480,7 +515,7 @@ namespace MTUComm.MemoryMap
             }));
         }
 
-        private void CreateProperty_Get_String ( RegisterObj regObj ) //string id, int address, string format)
+        private void CreateProperty_Get_String ( RegisterObj regObj )
         {
             Console.WriteLine("MemoryMap -> Create Property String [ GET ]: " + regObj.id);
 
@@ -493,74 +528,68 @@ namespace MTUComm.MemoryMap
 
         #region Create Property Set
 
-        public void CreateProperty_Set_Int ( RegisterObj regObj ) //string id, int address, int size = 1)
+        public void CreateProperty_Set_Int ( RegisterObj regObj )
         {
-            Console.WriteLine("MemoryMap -> Create Property Int [ SET ]: " + regObj.id);
+            Console.WriteLine("MemoryMap -> Create Property Int [ SET ]: " + METHODS_SET_PREFIX + regObj.id );
 
             this.dictionary.Add( METHODS_SET_PREFIX + regObj.id,
-                //new Action<int, int, int> ( ( _value, _address, _size ) =>
                 new Action<int>((_value) =>
                 {
                     Console.WriteLine("MemoryMap -> Property Int [ SET ]: " + regObj.id + " Value: " + _value );
 
-                    this.SetIntToMem(_value, regObj.address, regObj.size );
+                    //this.SetIntToMem(_value, regObj.address, regObj.size );
                 }));
         }
 
-        public void CreateProperty_Set_UInt ( RegisterObj regObj ) //string id, int address, int size = 1)
+        public void CreateProperty_Set_UInt ( RegisterObj regObj )
         {
             Console.WriteLine("MemoryMap -> Create Property UInt [ SET ]: " + regObj.id);
 
             this.dictionary.Add( METHODS_SET_PREFIX + regObj.id,
-                //new Action<uint, int, int>((_value, _address, _size) =>
                 new Action<uint>((_value) =>
                 {
                     this.SetUIntToMem(_value, regObj.address, regObj.size);
                 }));
         }
 
-        public void CreateProperty_Set_ULong ( RegisterObj regObj ) //string id, int address, int size = 1)
+        public void CreateProperty_Set_ULong ( RegisterObj regObj )
         {
             Console.WriteLine("MemoryMap -> Create Property ULong [ SET ]: " + regObj.id);
 
             this.dictionary.Add( METHODS_SET_PREFIX + regObj.id,
-                //new Action<string, int, int>((_value, _address, _size) =>
-                new Action<string>((_value) =>
+                new Action<ulong>((_value) =>
                 {
                     this.SetULongToMem(_value, regObj.address, regObj.size);
                 }));
         }
 
-        public void CreateProperty_Set_Bool ( RegisterObj regObj ) //string id, int address, int bit = 0)
+        public void CreateProperty_Set_Bool ( RegisterObj regObj )
         {
             Console.WriteLine("MemoryMap -> Create Property Bool [ SET ]: " + regObj.id);
 
             this.dictionary.Add( METHODS_SET_PREFIX + regObj.id,
-                //new Action<bool, int, int>((_value, _address, _bit) =>
                 new Action<bool>((_value) =>
                 {
                     this.SetBoolToMem(_value, regObj.address, regObj.bit);
                 }));
         }
 
-        public void CreateProperty_Set_Char ( RegisterObj regObj ) //string id, int address)
+        public void CreateProperty_Set_Char ( RegisterObj regObj )
         {
             Console.WriteLine("MemoryMap -> Create Property Char [ SET ]: " + regObj.id);
 
             this.dictionary.Add( METHODS_SET_PREFIX + regObj.id,
-                //new Action<char, int>((_value, _address) =>
                 new Action<char>((_value) =>
                 {
                     this.SetCharToMem(_value, regObj.address);
                 }));
         }
 
-        public void CreateProperty_Set_String ( RegisterObj regObj ) //string id, int address)
+        public void CreateProperty_Set_String ( RegisterObj regObj )
         {
             Console.WriteLine("MemoryMap -> Create Property String [ SET ]: " + regObj.id);
 
             this.dictionary.Add( METHODS_SET_PREFIX + regObj.id,
-                //new Action<string, int>((_value, _address) =>
                 new Action<string>((_value) =>
                 {
                     this.SetStringToMem(_value, regObj.address);
@@ -617,28 +646,28 @@ namespace MTUComm.MemoryMap
 
         #region Set
 
-        protected override void SetValue ( string id, object value )
+        protected override void SetValueAfterAvoidOverride ( string id, object value )
         {
             RegisterObj obj = this.registersObjs[ id ];
             switch ( obj.type )
                 {
                     case RegType.INT:
-                        (( Action<int> )this.dictionary[ id ]) ( (int)value );
+                        (( Action<int> )this.dictionary[ METHODS_SET_PREFIX + id ]) ( (int)value );
                         break;
                     case RegType.UINT:
-                        (( Action<uint> )this.dictionary[ id ]) ( (uint)value );
+                        (( Action<uint> )this.dictionary[ METHODS_SET_PREFIX + id ]) ( (uint)value );
                         break;
                     case RegType.ULONG:
-                        (( Action<ulong> )this.dictionary[ id ]) ( (ulong)value );
+                        (( Action<ulong> )this.dictionary[ METHODS_SET_PREFIX + id ]) ( (ulong)value );
                         break;
                     case RegType.BOOL:
-                        (( Action<bool> )this.dictionary[ id ]) ( (bool)value );
+                        (( Action<bool> )this.dictionary[ METHODS_SET_PREFIX + id ]) ( (bool)value );
                         break;
                     case RegType.CHAR:
-                        (( Action<char> )this.dictionary[ id ]) ( (char)value );
+                        (( Action<char> )this.dictionary[ METHODS_SET_PREFIX + id ]) ( (char)value );
                         break;
                     case RegType.STRING:
-                        (( Action<string> )this.dictionary[ id ]) ( (string)value );
+                        (( Action<string> )this.dictionary[ METHODS_SET_PREFIX + id ]) ( (string)value );
                         break;
                 }
         }
