@@ -140,9 +140,7 @@ namespace aclara_meters.view
         private List<string> alarmList;
 
 
-        private Xml.Config config;
-
-
+    
 
         public AclaraViewAddMTU()
         {
@@ -528,16 +526,10 @@ namespace aclara_meters.view
         private void ThreadProcedureMTUCOMMAction()
         {
             
-            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            if (Device.RuntimePlatform == Device.Android)
-            {
-                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-            }
-
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action  add_mtu = new MTUComm.Action(config: new Configuration(xml_documents), serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.AddMtu, user: "iker");
+            MTUComm.Action add_mtu = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.AddMtu, user: FormsApp.CredentialsService.UserName);
+
 
             //Define finish and error event handler
             //add_mtu.OnFinish += Add_mtu_OnFinish;
@@ -604,23 +596,15 @@ namespace aclara_meters.view
         private void TestOptionalFields()
         {
 
-            config = new Config();
-           
-            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+   
+            globalData =  FormsApp.config.GetGlobal();
 
+            //mtuData = FormsApp.config.GetMtuTypeById(138);
 
-            if (Device.RuntimePlatform == Device.Android)
-            {
-                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-            }
-
-
-            globalData =  config.GetGlobal(Path.Combine(xml_documents, "Global.xml"));
-
-            mtuData = config.GetMtu(Path.Combine(xml_documents, "Mtu.xml"));
 
             //mtuData
-            Mtu mtu = mtuData.FindByMtuId(138);
+            Mtu mtu = FormsApp.config.GetMtuTypeById(138);
+
 
             WorkOrderRecording = globalData.WorkOrderRecording;
             AccountDualEntry = globalData.AccountDualEntry;
@@ -981,26 +965,11 @@ namespace aclara_meters.view
             /*******************************************/
             /**                  MARCA [0]            **/
 
-            XmlSerializer s = new XmlSerializer(typeof(MeterTypes));
+           
+
+            meterTypes = FormsApp.config.GetMeterTypes();
 
 
-            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-
-            if (Device.RuntimePlatform == Device.Android)
-            {
-                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-            }
-
-
-            using (TextReader reader = new StreamReader(Path.Combine(xml_documents, "Meter.xml")))
-            {
-                meterTypes = (s.Deserialize(reader) as MeterTypes);
-            }
-
-          
-            Xml.Config config = new Config();
-          
             int encoderType = 2;
             int liveDigits = 6;
 

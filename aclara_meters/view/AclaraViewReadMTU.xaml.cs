@@ -210,17 +210,9 @@ namespace aclara_meters.view
         private void ThreadProcedureMTUCOMMAction()
         {
 
-
-            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-
-            if(Device.RuntimePlatform == Device.Android)
-            {
-                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-            }
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action add_mtu = new MTUComm.Action(config: new Configuration(xml_documents), serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: "iker");
+            MTUComm.Action add_mtu = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: "iker");
 
             //Define finish and error event handler
             //add_mtu.OnFinish += Add_mtu_OnFinish;

@@ -16,18 +16,23 @@ using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using Plugin.DeviceInfo;
+using MTUComm;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
 {
     public partial class FormsApp : Application
     {
-        public static string AppName { get { return "StoreAccountInfoApp"; } }
+        public static string AppName { get { return "Aclara MTU Programmer"; } }
         public static ICredentialsService CredentialsService { get; private set; }
         public static BleSerial ble_interface;
         //public static Lexi.Lexi lexi;
 
         public string Version;
+        public string deviceId;
+
+
+        public static Configuration config;
 
         public FormsApp()
         {
@@ -55,13 +60,45 @@ namespace aclara_meters
             // File.WriteAllText(filename_meter, aclara_meters.Resources.XmlStrings.GetMeterString());
             //  File.WriteAllText(filename_mtu, aclara_meters.Resources.XmlStrings.GetMTUString());
 
-
+            LoadConfiguration();
 
             //Cargar la pantalla principal
             MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
         }
 
+        private void LoadConfiguration()
+        {
 
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
+            {
+                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
+            }
+
+
+            config = new Configuration(xml_documents);
+
+            if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
+            {
+                config.setPlatform("Android");
+                config.setAppName(AppName);
+                config.setVersion(Version);
+                config.setDeviceUUID(deviceId);
+
+            }else
+        
+            if(Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.iOS)
+            {
+                config.setPlatform("iOS"); 
+                config.setAppName(AppName);
+                config.setVersion(Version);
+                config.setDeviceUUID(deviceId);
+            }else{
+                config.setPlatform("Unknown"); 
+            }
+            
+        }
 
         public FormsApp(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs, List<string> listaDatos, string AppVersion)
         {
@@ -69,7 +106,7 @@ namespace aclara_meters
 
             Version = AppVersion;
 
-            var deviceId = CrossDeviceInfo.Current.Id;
+            deviceId = CrossDeviceInfo.Current.Id;
 
             //Gestor de cuentas
             CredentialsService = new CredentialsService();
@@ -106,7 +143,7 @@ namespace aclara_meters
                 Console.WriteLine(e.StackTrace);
             }
            
-
+            LoadConfiguration();
 
             //Cargar la pantalla principal
             MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));

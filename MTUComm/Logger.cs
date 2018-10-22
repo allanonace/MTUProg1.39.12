@@ -66,7 +66,7 @@ namespace MTUComm
                     file.WriteLine("        <Version>" + config.GetApplicationVersion() + "</Version>");
                     file.WriteLine("        <Date>"+ DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>");
                     file.WriteLine("        <UTCOffset>"+ TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>");
-                    file.WriteLine("        <UnitId>" + config.GetDevideUUID() + "</UnitId>");
+                    file.WriteLine("        <UnitId>" + config.GetDeviceUUID() + "</UnitId>");
                     file.WriteLine("        <AppType>"+(isFixedName() ? "Scripting" : "Interactive") +"</AppType>");
                     file.WriteLine("    </AppInfo>");
                     file.WriteLine("    <Message />");
