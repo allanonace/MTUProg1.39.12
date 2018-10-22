@@ -21,6 +21,7 @@ namespace aclara_meters.iOS
         private FormsApp appSave;
         private string identity = "";
 
+
         //
         // This method is invoked when the application has loaded and is ready to run. In this 
         // method you should instantiate the window, load the UI into it and then make the window
@@ -87,7 +88,12 @@ namespace aclara_meters.iOS
             }catch (Exception c1) { }
 
 
-            appSave = new FormsApp(BluetoothLowEnergyAdapter.ObtainDefaultAdapter(), UserDialogs.Instance, listaDatos);
+
+            var AppVersion = NSBundle.MainBundle.InfoDictionary["CFBundleVersion"];
+
+
+            appSave = new FormsApp(BluetoothLowEnergyAdapter.ObtainDefaultAdapter(), UserDialogs.Instance, listaDatos, AppVersion.Description);
+
             LoadApplication( appSave );
           
 

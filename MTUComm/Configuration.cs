@@ -70,5 +70,20 @@ namespace MTUComm
             return true; //should be taen from globals, hardcoded for dev
         }
 
+        public String GetDevideUUID()
+        {
+            return "ACLARATECH-CLE5478L-KGUILER"; //get UUID from Xamarin
+        }
+
+        public String GetApplicationVersion()
+        {
+            return "2.2.5.0"; //get build version from manifest/pkg manager
+        }
+
+        public String getApplicationName()
+        {
+            return "AclaraStarSystemMobile";
+        }
+
     }
 }

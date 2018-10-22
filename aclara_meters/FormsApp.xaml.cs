@@ -15,6 +15,7 @@ using System.Xml.Linq;
 using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
+using Plugin.DeviceInfo;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -25,6 +26,8 @@ namespace aclara_meters
         public static ICredentialsService CredentialsService { get; private set; }
         public static BleSerial ble_interface;
         //public static Lexi.Lexi lexi;
+
+        public string Version;
 
         public FormsApp()
         {
@@ -60,9 +63,13 @@ namespace aclara_meters
 
 
 
-        public FormsApp(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs, List<string> listaDatos)
+        public FormsApp(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs, List<string> listaDatos, string AppVersion)
         {
             InitializeComponent();
+
+            Version = AppVersion;
+
+            var deviceId = CrossDeviceInfo.Current.Id;
 
             //Gestor de cuentas
             CredentialsService = new CredentialsService();
@@ -86,13 +93,19 @@ namespace aclara_meters
               
             }
 
+            string base64CertificateString = "";
+
+            try
+            {
+                base64CertificateString = listaDatos[2].Replace("cert_file: ", "");
+                byte[] bytes = Convert.FromBase64String(base64CertificateString);
+                X509Certificate2 x509certificate = new X509Certificate2(bytes);
+
+            }catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
            
-
-            string base64CertificateString = listaDatos[2].Replace("cert_file: ", "");
-   
-            byte[] bytes = Convert.FromBase64String(base64CertificateString);
-            X509Certificate2 x509certificate = new X509Certificate2(bytes);
-
 
 
             //Cargar la pantalla principal

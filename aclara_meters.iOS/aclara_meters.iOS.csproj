@@ -187,6 +187,9 @@
     <PackageReference Include="Microsoft.Intune.MAM.Xamarin.iOS">
       <Version>8.1.1</Version>
     </PackageReference>
+    <PackageReference Include="Xam.Plugin.DeviceInfo">
+      <Version>4.0.0.13</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.iOS.CSharp.targets" />
   <ItemGroup>
