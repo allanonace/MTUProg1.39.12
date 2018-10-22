@@ -97,6 +97,12 @@ namespace MTUComm
                     args = new ReadMtuArgs(new MemoryMap33xx(lexi.Read(0, 255)), mtuType);
                     break;
                 case "34":
+                    byte[] buffer = new byte[512];
+
+                    System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
+                    System.Buffer.BlockCopy(lexi.Read(256, 65), 0, buffer, 256, 65);
+
+                    args = new ReadMtuArgs(new MemoryMap342x(buffer), mtuType);
                     break;
             }
             OnReadMtu(this, args);

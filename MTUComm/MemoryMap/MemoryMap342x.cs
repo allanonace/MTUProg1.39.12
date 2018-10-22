@@ -1212,7 +1212,7 @@ namespace MTUComm
             get
             {
                 int batteryVoltage = memory[110];
-                return batteryVoltage;
+                return (int)(1500 + (memory[110] * 10));
             }
         }
 
@@ -1430,7 +1430,7 @@ namespace MTUComm
 
         // addr 144-145
         // Number of On-Demand Requests
-        public int NumberOnDemandRequests
+        public int OnDemandCount
         {
             get
             {
@@ -1441,7 +1441,7 @@ namespace MTUComm
 
         // addr 146-147
         // Number of Data Requests
-        public int NumberDataRequests
+        public int DataRequestCount
         {
             get
             {
@@ -1452,7 +1452,7 @@ namespace MTUComm
 
         // addr 148
         // Number of OTA FW Updates
-        public int NumberOtaFwUpdates
+        public int FOTACount
         {
             get
             {
@@ -1463,7 +1463,7 @@ namespace MTUComm
 
         // addr 149
         // Number of FOTC FW Updates
-        public int NumberFotcFwUpdates
+        public int FOTCCount
         {
             get
             {
@@ -1474,7 +1474,7 @@ namespace MTUComm
 
         // addr 150
         // Number of Low Priority Data transmissions
-        public int NumberLowPriorityDataTransmissions
+        public int MtuNumLowPriorityMsg
         {
             get
             {
@@ -1609,9 +1609,20 @@ namespace MTUComm
             }
         }
 
+        // addr 163
+        // Mtu Msg Protocol Configuration
+        public int MtuMsgProtocolConfig
+        {
+            get
+            {
+                int msgProtocolConfig = memory[163];
+                return msgProtocolConfig;
+            }
+        }
+
         // addr 164-165
         // Primary Message Window Interval A
-        public int PrimaryMessageWindowIntervalA
+        public int MtuPrimaryWindowInterval
         {
             get
             {
@@ -1622,7 +1633,7 @@ namespace MTUComm
 
         // addr 166
         // Window A Start
-        public int WindowAStart
+        public int MtuWindowAStart
         {
             get
             {
@@ -1633,7 +1644,7 @@ namespace MTUComm
 
         // addr 167
         // Window B Start
-        public int WindowBStart
+        public int MtuWindowBStart
         {
             get
             {
@@ -1644,7 +1655,7 @@ namespace MTUComm
 
         // addr 168-169
         // Primary Message Window Interval B
-        public int PrimaryMessageWindowIntervalB
+        public int MtuPrimaryWindowIntervalB
         {
             get
             {
@@ -1655,7 +1666,7 @@ namespace MTUComm
 
         // addr 170
         // Primary Message Window Offset
-        public int PrimaryMessageWindowOffset
+        public int MtuPrimaryWindowOffset
         {
             get
             {
@@ -2057,7 +2068,7 @@ namespace MTUComm
 
         // addr 199
         // Cut wire alarm hysteresis setting
-        public int CutWireAlarmHysteresisSetting
+        public int CutWireDelaySetting
         {
             get
             {
@@ -2387,7 +2398,7 @@ namespace MTUComm
 
         // addr 319
         // Key index
-        public int KeyIndex
+        public int EncryptionIndex
         {
             get
             {

@@ -356,6 +356,34 @@ namespace MTUComm
                     
                     break;
                 case "34"://34xx MTU Family
+                    MemoryMap342x mmap342x = (MemoryMap342x)memory;
+
+                    if (!memory.Shipbit)
+                    {
+                        result.AddParameter(new Parameter("InterfaceTamperStatus", "Interface Tamp",getAlarmStatus(mmap342x.SerialComProblem, mmap342x.TampersSerialComProblem)));
+                        result.AddParameter(new Parameter("LastGasp", "Last Gasp", getAlarmStatus(mmap342x.MtuLastGasp, mmap342x.TampersMtuLastGasp)));
+                        result.AddParameter(new Parameter("InsufficentMemory", "Insf. Mem", getAlarmStatus(mmap342x.InsufficientMemory, mmap342x.TampersInsufficientMemory)));
+                        result.AddParameter(new Parameter("Cut1WireTamperStatus", "Cut 1 Wire Tamp", getAlarmStatus(mmap342x.CutWirePort1, mmap342x.TampersCutAlarmCable)));
+                        result.AddParameter(new Parameter("CutWireDelaySetting", "Cut Wire Delay", mmap342x.CutWireDelaySetting.ToString()));
+                    }
+
+
+
+                    result.AddParameter(new Parameter("Encryption", "Encrypted", mmap342x.EncryptionEnabled ? "Yes" : "No"));
+                    result.AddParameter(new Parameter("EncryptionIndex", "Encryption Index", mmap342x.EncryptionIndex.ToString()));
+                    result.AddParameter(new Parameter("Fast-2-Way", "2-Way", mmap342x.FastMessagingMode? "Fast" : "Slow"));
+                    result.AddParameter(new Parameter("MtuMsgProtocolConfig", "Mtu Msg Protocol Config", mmap342x.MtuMsgProtocolConfig.ToString()));
+                    result.AddParameter(new Parameter("MtuPrimaryWindowInterval", "Mtu Primary Window Interval", mmap342x.MtuPrimaryWindowInterval.ToString()));
+                    result.AddParameter(new Parameter("MtuWindowAStart", "Mtu Window A Start", mmap342x.MtuWindowAStart.ToString()));
+                    result.AddParameter(new Parameter("MtuWindowBStart", "Mtu Window B Start", mmap342x.MtuWindowBStart.ToString()));
+                    result.AddParameter(new Parameter("MtuPrimaryWindowIntervalB", "Mtu Primary Window Interval B", mmap342x.MtuPrimaryWindowIntervalB.ToString()));
+                    result.AddParameter(new Parameter("MtuPrimaryWindowOffset", "Mtu Primary Window Offset", mmap342x.MtuPrimaryWindowOffset.ToString()));
+                    result.AddParameter(new Parameter("MtuNumLowPriorityMsg", "Mtu Num Low Priority Msg", mmap342x.MtuNumLowPriorityMsg.ToString()));
+                    result.AddParameter(new Parameter("OnDemandCount", "On Demand Cnt", mmap342x.OnDemandCount.ToString()));
+                    result.AddParameter(new Parameter("DataRequestCount", "Data Req Cnt", mmap342x.DataRequestCount.ToString()));
+                    result.AddParameter(new Parameter("FOTACount", "FOTA Cnt", mmap342x.FOTACount.ToString()));
+                    result.AddParameter(new Parameter("FOTCCount", "FOTC Cnt", mmap342x.FOTCCount.ToString()));
+                    result.AddParameter(new Parameter("TxBetweenRx", "Tx Between Rx", mmap342x.NumberTxBetweenRx.ToString()));
                     break;
             }
 
