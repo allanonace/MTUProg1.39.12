@@ -84,9 +84,24 @@ namespace ble_library
         /// <remarks></remarks>
         public void Write(byte[] buffer, int offset, int count)
         {
+            int bytesToWrite = count;
+            int bytesWritten = 0;
             ExceptionCheck(buffer, offset, count);
-            ble_port_serial.ClearBuffer();   // TO-DO
-            ble_port_serial.Write_Characteristic(buffer, offset, count);
+            do
+            {
+                int currentWriteCount = 16;
+                if (bytesToWrite <= 16)
+                {
+                    currentWriteCount = bytesToWrite;
+                }
+                ble_port_serial.ClearBuffer();   // TO-DO
+                ble_port_serial.Write_Characteristic(buffer, bytesWritten + offset, currentWriteCount);
+                // TODO: check ack before next iteration
+
+                bytesToWrite = bytesToWrite - currentWriteCount;
+                bytesWritten = bytesWritten + currentWriteCount;
+            }
+            while (bytesToWrite > 0);
         }
 
         /// <summary>
