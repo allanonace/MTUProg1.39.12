@@ -672,6 +672,8 @@ namespace aclara_meters.view
             if( !globalsChangeDailyReads )
             {
                 SnapReads_Port1.IsVisible = true;
+                SnapReads_Port1.IsEnabled = false;
+                SnapReadsViewPort1.IsEnabled = false;
                 SnapReadsViewPort1.Opacity = 0.8;
             }else{
                 SnapReadsViewPort1.Opacity = 1;
