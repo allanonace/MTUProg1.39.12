@@ -182,6 +182,26 @@ namespace MTUComm
             }
         }
 
+        public string CustomParameter
+        {
+            get
+            {
+                return mCustomParameter;
+            }
+        }
+
+        public string Value
+        {
+            get
+            {
+                return mValue;
+            }
+        }
+
+        public override string ToString()
+        {
+            return CustomParameter + ": " + Value;
+        }
 
     }
 }
