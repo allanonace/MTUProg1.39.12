@@ -286,10 +286,10 @@ namespace aclara_meters.view
                     }
                 }
 
-                ReadResult[] portResult = e.Result.getPorts();
+                ActionResult[] portResult = e.Result.getPorts();
 
                 int cont = 1;
-                foreach (MTUComm.ReadResult portval in portResult)
+                foreach (MTUComm.ActionResult portval in portResult)
                 {
                     
 

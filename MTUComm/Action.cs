@@ -170,9 +170,9 @@ namespace MTUComm
 
         }
 
-        private ReadResult ReadPort(int portnumber, IMemoryMap memory, Mtu mtutype)
+        private ActionResult ReadPort(int portnumber, IMemoryMap memory, Mtu mtutype)
         {
-            ReadResult result = new ReadResult();
+            ActionResult result = new ActionResult();
 
             Port portType = mtutype.Ports[portnumber];
             result.AddParameter(new Parameter("Description", "Description", portType.Description));
@@ -283,9 +283,9 @@ namespace MTUComm
         }
 
 
-        private ReadResult ReadMTU(IMemoryMap memory, Mtu mtutype)
+        private ActionResult ReadMTU(IMemoryMap memory, Mtu mtutype)
         {
-            ReadResult result = new ReadResult();
+            ActionResult result = new ActionResult();
 
             result.AddParameter(new Parameter("MtuStatus", "MTU Status", memory.Shipbit ? "OFF" : "ON"));
             result.AddParameter(new Parameter("MtuSerialNumber", "MTU Ser No", memory.MtuId.ToString()));
@@ -433,7 +433,7 @@ namespace MTUComm
 
         private void Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
         {
-            ReadResult result = ReadMTU(e.MemoryMap, e.MtuType);
+            ActionResult result = ReadMTU(e.MemoryMap, e.MtuType);
             logger.logReadResult(this, result);
             ActionFinishArgs args = new ActionFinishArgs(result);
             OnFinish(this, args);
@@ -484,9 +484,9 @@ namespace MTUComm
         //
         public class ActionFinishArgs : EventArgs
         {
-            public ReadResult Result { get; private set; }
+            public ActionResult Result { get; private set; }
 
-            public ActionFinishArgs(ReadResult result)
+            public ActionFinishArgs(ActionResult result)
             {
                 Result = result;
             }
@@ -516,7 +516,7 @@ namespace MTUComm
         private void successAction()
         {
             logger.logAction(this);
-            ActionFinishArgs args = new ActionFinishArgs(new ReadResult());
+            ActionFinishArgs args = new ActionFinishArgs(new ActionResult());
             OnFinish(this, args);
         }
 

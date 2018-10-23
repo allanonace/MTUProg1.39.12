@@ -4,17 +4,17 @@ using System.Text;
 
 namespace MTUComm
 {
-    public class ReadResult
+    public class ActionResult
     {
         private List<Parameter> parameters;
 
-        private List<ReadResult> ports;
+        private List<ActionResult> ports;
 
 
-        public ReadResult()
+        public ActionResult()
         {
             parameters  = new List<Parameter>();
-            ports = new List<ReadResult>();
+            ports = new List<ActionResult>();
         }
 
         public void AddParameter(Parameter parameter)
@@ -28,12 +28,12 @@ namespace MTUComm
         }
 
 
-        public void addPort(ReadResult port)
+        public void addPort(ActionResult port)
         {
             ports.Add(port);
         }
 
-        public ReadResult[] getPorts()
+        public ActionResult[] getPorts()
         {
             return ports.ToArray();
         }

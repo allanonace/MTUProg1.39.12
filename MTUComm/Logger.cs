@@ -112,7 +112,7 @@ namespace MTUComm
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
 
-        public void logReadResult(Action ref_action, ReadResult result)
+        public void logReadResult(Action ref_action, ActionResult result)
         {
             CreateFileIfNotExist();
             XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
@@ -121,7 +121,7 @@ namespace MTUComm
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
 
-        public void logReadResult(XElement parent, Action ref_action, ReadResult result)
+        public void logReadResult(XElement parent, Action ref_action, ActionResult result)
         {
             XElement action = new XElement("Action");
 
@@ -142,7 +142,7 @@ namespace MTUComm
                 logParameter(action, parameter);
             }
 
-            ReadResult[] ports = result.getPorts();
+            ActionResult[] ports = result.getPorts();
             for (int i= 0; i < ports.Length; i++)
             {
                 logPort(i, action, ports[i]);
@@ -151,7 +151,7 @@ namespace MTUComm
             parent.Add(action);
         }
 
-        private void logPort(int portnumber, XElement parent, ReadResult result)
+        private void logPort(int portnumber, XElement parent, ActionResult result)
         {
 
 
