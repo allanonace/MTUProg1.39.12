@@ -61,7 +61,6 @@ namespace aclara_meters.view
             this.EmailEntry.Unfocused += (s, e) =>
             {
                 SetLayoutPosition(false, (int)-20);
-                Task.Factory.StartNew(CertsTask);
 
             };
 
@@ -112,10 +111,7 @@ namespace aclara_meters.view
 
             this.EmailEntry.Unfocused += (s, e) => 
             { 
-                SetLayoutPosition(false, (int)-20); 
-                Task.Factory.StartNew(CertsTask);
-
-
+                SetLayoutPosition(false, (int)-20);
             };
 
 
