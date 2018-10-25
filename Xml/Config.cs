@@ -17,9 +17,13 @@ namespace Xml
 
             try
             {
-                using (StreamReader reader = new StreamReader(path))
+                using (StreamReader streamReader = new StreamReader(path))
                 {
-                    demandConf = (DemandConf)s.Deserialize(reader);
+                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                    using (StringReader reader = new StringReader(fileContent))
+                    {
+                        demandConf = (DemandConf)s.Deserialize(reader);
+                    }
                 }
             }
             catch (Exception)
@@ -37,25 +41,17 @@ namespace Xml
 
             try
             {
-                using (StreamReader reader = new StreamReader(path))
+                using (StreamReader streamReader = new StreamReader(path))
                 {
-                    try{
-                        //System.Diagnostics.Debug.WriteLine((reader).ReadToEnd());
-
+                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                    using (StringReader reader = new StringReader(fileContent))
+                    {
                         meterTypes = (MeterTypes)s.Deserialize(reader);
-                    }catch (Exception errorLine){
-                        Console.WriteLine(errorLine.StackTrace);
-                     
-                        throw new MeterLoadException("Error loading Meter file");
-
                     }
-                   
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.StackTrace);
-      
                 throw new MeterLoadException("Error loading Meter file");
             }
 
@@ -70,15 +66,16 @@ namespace Xml
 
             try
             {
-               
-                using (StreamReader reader = new StreamReader(path))
+                using (StreamReader streamReader = new StreamReader(path))
                 {
-                    mtuTypes = (MtuTypes)s.Deserialize(reader);
+                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                    using (StringReader reader = new StringReader(fileContent))
+                    {
+                        mtuTypes = (MtuTypes)s.Deserialize(reader);
+                    }
                 }
-
             }
-
-              
+            
             catch (Exception e ) 
             {
                 throw new MtuLoadException("Error loading Mtu file");
@@ -109,9 +106,13 @@ namespace Xml
 
             try
             {
-                using (StreamReader reader = new StreamReader(path))
+                using (StreamReader streamReader = new StreamReader(path))
                 {
-                    alarms = (AlarmList)s.Deserialize(reader);
+                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                    using (StringReader reader = new StringReader(fileContent))
+                    {
+                        alarms = (AlarmList)s.Deserialize(reader);
+                    }
                 }
             }
             catch (Exception)
@@ -129,18 +130,30 @@ namespace Xml
 
             try
             {
-                using (StreamReader reader = new StreamReader(path))
+                using (StreamReader streamReader = new StreamReader(path))
                 {
-                    global = (Global)s.Deserialize(reader);
+                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                    using (StringReader reader = new StringReader(fileContent))
+                    {
+                        global = (Global)s.Deserialize(reader);
+                    }
                 }
             }
             catch (Exception e )
             {
-                Console.WriteLine(e.StackTrace);
                 throw new GlobalLoadException("Error loading Global file");
             }
 
             return global;
+        }
+
+        private string NormalizeBooleans(string input)
+        {
+            string output = input.Replace(">True<", ">true<");
+            output = output.Replace(">TRUE<", ">true<");
+            output = output.Replace(">False<", ">false<");
+            output = output.Replace(">FALSE<", ">false<");
+            return output;
         }
     }
 }
