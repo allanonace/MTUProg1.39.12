@@ -12,13 +12,13 @@ namespace Xml
         public string Name { get; set; }
 
         [XmlElement("AlarmMask1")]
-        public int AlarmMask1 { get; set; }
+        public byte AlarmMask1 { get; set; }
 
         [XmlElement("AlarmMask2")]
-        public int AlarmMask2 { get; set; }
+        public byte AlarmMask2 { get; set; }
 
         [XmlElement("AlarmMessages")]
-        public int AlarmMessages { get; set; }
+        public byte AlarmMessages { get; set; }
 
         [XmlElement("CutAlarmCable")]
         public bool CutAlarmCable { get; set; }
@@ -27,7 +27,7 @@ namespace Xml
         public bool CutWireAlarmImm { get; set; }
 
         [XmlElement("CutWireDelaySetting")]
-        public int CutWireDelaySetting { get; set; }
+        public byte CutWireDelaySetting { get; set; }
 
         [XmlElement("DailyData")]
         public bool DailyData { get; set; }
@@ -49,6 +49,9 @@ namespace Xml
 
         [XmlElement("HardErrorAlarm")]
         public bool HardErrorAlarm { get; set; }
+
+        [XmlElement("HighAlarmValue")]
+        public int HighAlarmValue { get; set; }
 
         [XmlElement("ImmediateAlarmTransmit")]
         public bool ImmediateAlarmTransmit { get; set; }
@@ -81,19 +84,19 @@ namespace Xml
         public bool Magnetic { get; set; }
 
         [XmlElement("MessageSendTime")]
-        public int MessageSendTime { get; set; }
+        public byte MessageSendTime { get; set; }
 
         [XmlElement("OutageMessageCount")]
-        public int OutageMessageCount { get; set; }
+        public byte OutageMessageCount { get; set; }
 
         [XmlElement("Overlap")]
         public string Overlap { get; set; }
 
         [XmlElement("PowerOutDelay")]
-        public int PowerOutDelay { get; set; }
+        public byte PowerOutDelay { get; set; }
 
         [XmlElement("PowerRestoreDelay")]
-        public int PowerRestoreDelay { get; set; }
+        public byte PowerRestoreDelay { get; set; }
 
         [XmlElement("RegisterCover")]
         public bool RegisterCover { get; set; }
@@ -102,7 +105,7 @@ namespace Xml
         public string Response { get; set; }
 
         [XmlElement("RestoreMessageCount")]
-        public int RestoreMessageCount { get; set; }
+        public byte RestoreMessageCount { get; set; }
 
         [XmlElement("ReverseFlow")]
         public bool ReverseFlow { get; set; }
@@ -123,10 +126,10 @@ namespace Xml
         public bool SerialCutWireImm { get; set; }
 
         [XmlElement("SyncDrift")]
-        public int SyncDrift { get; set; }
+        public byte SyncDrift { get; set; }
 
         [XmlElement("SyncTimeout")]
-        public int SyncTimeout { get; set; }
+        public byte SyncTimeout { get; set; }
 
         [XmlElement("Tilt")]
         public bool Tilt { get; set; }
