@@ -15,6 +15,28 @@ namespace Xml
         public string Type { get; set; }
 
         [XmlElement("Tamper")]
-        public string Tamper { get; set; }
+        public string TamperSerialize { get; set; }
+
+        [XmlIgnore]
+        public byte Tamper
+        {
+            get
+            {
+                byte tamper = 0;
+                if (TamperSerialize.StartsWith("int"))
+                {
+                    tamper = 4;
+                }
+                else if (TamperSerialize.StartsWith("ext"))
+                {
+                    tamper = 8;
+                }
+                else
+                {
+                    // do nothing
+                }
+                return tamper;
+            }
+        }
     }
 }
