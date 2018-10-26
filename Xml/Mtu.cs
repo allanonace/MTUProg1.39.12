@@ -28,7 +28,21 @@ namespace Xml
         public List<Port> Ports { get; set; }
 
         [XmlElement("IsTables")]
-        public int IsTables { get; set; }
+        public int IsTablesSerialize { get; set; }
+
+        [XmlIgnore]
+        public bool IsTables
+        {
+            get
+            {
+                bool isTables = false;
+                if (IsTablesSerialize.Equals("1"))
+                {
+                    isTables = true;
+                }
+                return isTables;
+            }
+        }
 
         [XmlElement("IsEcoder")]
         public bool IsEcoder { get; set; }
