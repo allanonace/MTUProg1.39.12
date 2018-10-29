@@ -852,9 +852,9 @@ namespace MTUComm
                     ((uint)memory[82] << 16) +
                     ((uint)memory[83] << 24) +
                     ((uint)memory[84] << 32) +
-                    ((uint)memory[85] << 40) +
-                    ((uint)memory[86] << 48) +
-                    ((uint)memory[87] << 56);
+                    ((uint)memory[85] << 40);// +
+                    //((uint)memory[86] << 48) +
+                    //((uint)memory[87] << 56);
                 return p1Reading;
             }
         }
@@ -881,9 +881,9 @@ namespace MTUComm
                     (memory[90] << 16) +
                     (memory[91] << 24) +
                     (memory[92] << 32) +
-                    (memory[93] << 40) +
-                    (memory[94] << 48) +
-                    (memory[95] << 56);
+                    (memory[93] << 40);// +
+                    ////(memory[94] << 48) +
+                    //(memory[95] << 56);
                 return p2Reading;
             }
         }

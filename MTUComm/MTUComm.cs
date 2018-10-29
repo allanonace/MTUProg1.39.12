@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Lexi.Interfaces;
 using Xml;
@@ -86,6 +87,18 @@ namespace MTUComm
             }
 
             ReadMtuArgs args = null;
+
+            switch (mtuType.HexNum.Substring(0, 2))
+            {
+                case "31":
+                case "32":
+                    break;
+                case "33":
+                case "34":
+                    lexi.Write(64, new byte[] { 1 });
+                    Thread.Sleep(1000);
+                    break;
+            }
 
             switch (mtuType.HexNum.Substring(0, 2))
             {
