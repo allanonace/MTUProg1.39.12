@@ -209,16 +209,20 @@ namespace MTUComm
 
                         break;
                     case "33":
-                        result.AddParameter(new Parameter("NumberOfDigits", "Digits #", metertype.LiveDigits.ToString()));
                         break;
                     case "34":
+                        result.AddParameter(new Parameter("NumberOfDigits", "Digits #", metertype.LiveDigits.ToString()));
                         break;
                 }
 
                 ulong meter_id = (ulong) memory.GetType().GetProperty("P" + (portnumber + 1) + "MeterId").GetValue(memory, null);
                 result.AddParameter(new Parameter("AcctNumber", "Service Pt. ID", meter_id.ToString()));
-
-                uint meter_reading = (uint)memory.GetType().GetProperty("P" + (portnumber + 1) + "Reading").GetValue(memory, null);
+                uint meter_reading = 0;
+                try
+                {
+                    meter_reading = (uint)memory.GetType().GetProperty("P" + (portnumber + 1) + "Reading").GetValue(memory, null);
+                }
+                catch (Exception e){}
 
                 uint tempReadingVal = 0;
                 if (mtutype.PulseCountOnly)
