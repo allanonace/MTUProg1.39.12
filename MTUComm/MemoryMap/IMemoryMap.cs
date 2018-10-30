@@ -34,6 +34,9 @@ namespace MTUComm
         uint P1Reading { get; }
         int P2Reading { get; }
 
+        string P1ReadingError { get; }
+        string P2ReadingError { get; }
+
         int P1Scaler { get; }
         int P2Scaler { get; }
 

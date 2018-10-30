@@ -1062,6 +1062,24 @@ namespace MTUComm
             }
         }
 
+        public string P1ReadingError
+        {
+            get
+            {
+                int encoderErrorcode = memory[106];
+                if (encoderErrorcode == 0xFF)
+                    return "ERROR - Check Meter";
+                if (encoderErrorcode == 0xFE)
+                    return "ERROR - Bad Digits";
+                if (encoderErrorcode == 0xFD)
+                    return "ERROR - Delta Overflow";
+                if (encoderErrorcode == 0xFC)
+                    return "ERROR - Readings Purged";
+                return "";
+
+            }
+        }
+
         // addr 107
         // P2 Encoder errorcode
         public int P2EncoderErrorcode
@@ -1073,6 +1091,23 @@ namespace MTUComm
             }
         }
 
+        public string P2ReadingError
+        {
+            get
+            {
+                int encoderErrorcode = memory[107];
+                if (encoderErrorcode == 0xFF)
+                    return "ERROR - Check Meter";
+                if (encoderErrorcode == 0xFE)
+                    return "ERROR - Bad Digits";
+                if (encoderErrorcode == 0xFD)
+                    return "ERROR - Delta Overflow";
+                if (encoderErrorcode == 0xFC)
+                    return "ERROR - Readings Purged";
+                return "";
+
+            }
+        }
         // addr 108 bit 0
         // tamper memory state - insufficient memory
         public bool TampersInsufficientMemory

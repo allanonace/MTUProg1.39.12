@@ -876,6 +876,24 @@ namespace MTUComm
             }
         }
 
+        public string P1ReadingError
+        {
+            get
+            {
+                int encoderErrorcode = memory[72];
+                if (encoderErrorcode == 0xFF)
+                    return "ERROR - Check Meter";
+                if (encoderErrorcode == 0xFE)
+                    return "ERROR - Bad Digits";
+                if (encoderErrorcode == 0xFD)
+                    return "ERROR - Delta Overflow";
+                if (encoderErrorcode == 0xFC)
+                    return "ERROR - Readings Purged";
+                return "";
+
+            }
+        }
+
         // addr 73 bit 4
         // wire break port2
         public bool WireBreakPort2
@@ -1221,6 +1239,24 @@ namespace MTUComm
             {
                 int p2EncoderErrorcode = memory[112];
                 return p2EncoderErrorcode;
+            }
+        }
+
+        public string P2ReadingError
+        {
+            get
+            {
+                int encoderErrorcode = memory[112];
+                if (encoderErrorcode == 0xFF)
+                    return "ERROR - Check Meter";
+                if (encoderErrorcode == 0xFE)
+                    return "ERROR - Bad Digits";
+                if (encoderErrorcode == 0xFD)
+                    return "ERROR - Delta Overflow";
+                if (encoderErrorcode == 0xFC)
+                    return "ERROR - Readings Purged";
+                return "";
+
             }
         }
 

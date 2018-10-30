@@ -217,44 +217,57 @@ namespace MTUComm
 
                 ulong meter_id = (ulong) memory.GetType().GetProperty("P" + (portnumber + 1) + "MeterId").GetValue(memory, null);
                 result.AddParameter(new Parameter("AcctNumber", "Service Pt. ID", meter_id.ToString()));
-                uint meter_reading = 0;
-                try
-                {
-                    meter_reading = (uint)memory.GetType().GetProperty("P" + (portnumber + 1) + "Reading").GetValue(memory, null);
-                }
-                catch (Exception e){}
 
-                uint tempReadingVal = 0;
-                if (mtutype.PulseCountOnly)
-                {
-                    tempReadingVal = meter_reading * (uint)metertype.HiResScaling;
-                }
-                else
-                {
-                    tempReadingVal = meter_reading;
-                }
                 
 
-                String tempReading = tempReadingVal.ToString();
-                if (metertype.LiveDigits < tempReading.Length)
+                string meter_reading_error = (string)memory.GetType().GetProperty("P" + (portnumber + 1) + "ReadingError").GetValue(memory, null);
+                if (meter_reading_error.Length < 1)
                 {
-                    tempReading = tempReading.Substring(tempReading.Length - metertype.LiveDigits - (tempReading.IndexOf('.') > -1 ? 1 : 0));
+                    uint meter_reading = 0;
+                    try
+                    {
+                        meter_reading = (uint)memory.GetType().GetProperty("P" + (portnumber + 1) + "Reading").GetValue(memory, null);
+                    }
+                    catch (Exception e) { }
+
+                    uint tempReadingVal = 0;
+                    if (mtutype.PulseCountOnly)
+                    {
+                        tempReadingVal = meter_reading * (uint)metertype.HiResScaling;
+                    }
+                    else
+                    {
+                        tempReadingVal = meter_reading;
+                    }
+
+
+                    String tempReading = tempReadingVal.ToString();
+                    if (metertype.LiveDigits < tempReading.Length)
+                    {
+                        tempReading = tempReading.Substring(tempReading.Length - metertype.LiveDigits - (tempReading.IndexOf('.') > -1 ? 1 : 0));
+                    }
+                    else
+                    {
+                        tempReading = tempReading.PadLeft(metertype.LiveDigits, '0');
+                    }
+                    if (metertype.LeadingDummy > 0) // KG 12/08/2008
+                        tempReading = tempReading.PadLeft(tempReading.Length + metertype.LeadingDummy, configuration.useDummyDigits() ? 'X' : '0');
+                    if (metertype.DummyDigits > 0)  // KG 12/08/2008
+                        tempReading = tempReading.PadRight(tempReading.Length + metertype.DummyDigits, configuration.useDummyDigits() ? 'X' : '0');
+                    if (metertype.Scale > 0 && tempReading.IndexOf(".") == -1) // 8.12.2011 KG add for F1 Pulse
+                        tempReading = tempReading.Insert(tempReading.Length - metertype.Scale, ".");
+                    if (metertype.PaintedDigits > 0 && configuration.useDummyDigits()) // KG 12/08/2008
+                        tempReading = tempReading.PadRight(tempReading.Length + metertype.PaintedDigits, '0').Insert(tempReading.Length, " - ");
+
+
+                    result.AddParameter(new Parameter("MeterReading", "Meter Reading", tempReading));
                 }
                 else
                 {
-                    tempReading = tempReading.PadLeft(metertype.LiveDigits, '0');
+                    result.AddParameter(new Parameter("MeterReading", "Meter Reading", meter_reading_error));
                 }
-                if (metertype.LeadingDummy > 0) // KG 12/08/2008
-                    tempReading = tempReading.PadLeft(tempReading.Length + metertype.LeadingDummy, configuration.useDummyDigits()  ? 'X' : '0');
-                if (metertype.DummyDigits > 0)  // KG 12/08/2008
-                    tempReading = tempReading.PadRight(tempReading.Length + metertype.DummyDigits, configuration.useDummyDigits() ? 'X' : '0');
-                if (metertype.Scale > 0 && tempReading.IndexOf(".") == -1) // 8.12.2011 KG add for F1 Pulse
-                    tempReading = tempReading.Insert(tempReading.Length - metertype.Scale, ".");
-                if (metertype.PaintedDigits > 0 && configuration.useDummyDigits()) // KG 12/08/2008
-                    tempReading = tempReading.PadRight(tempReading.Length + metertype.PaintedDigits, '0').Insert(tempReading.Length, " - ");
 
-
-                result.AddParameter(new Parameter("MeterReading", "Meter Reading", tempReading));
+                
             }
             else
             {

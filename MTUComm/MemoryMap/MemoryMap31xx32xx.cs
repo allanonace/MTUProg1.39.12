@@ -1149,6 +1149,15 @@ namespace MTUComm
             }
         }
 
+        public string P1ReadingError
+        {
+            get
+            {
+
+                return "";
+            }
+        }
+
         // addr 102-103
         // p1 scaler
         public int P1Scaler
@@ -1182,6 +1191,14 @@ namespace MTUComm
                 memory[107] = (byte)(value >> 24);
                 memory[108] = (byte)(value >> 32);
                 memory[109] = (byte)(value >> 40);
+            }
+        }
+
+        public string P2ReadingError
+        {
+            get
+            {
+                return "";
             }
         }
 
