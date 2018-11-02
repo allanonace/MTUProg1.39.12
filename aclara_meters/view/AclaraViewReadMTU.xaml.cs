@@ -18,6 +18,7 @@ using System.Threading;
 using System.Globalization;
 using Xml;
 using MTUComm;
+using Plugin.DeviceInfo;
 
 namespace aclara_meters.view
 {
@@ -209,15 +210,30 @@ namespace aclara_meters.view
 
         private void ThreadProcedureMTUCOMMAction()
         {
-
-
             var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
 
             if(Device.RuntimePlatform == Device.Android)
             {
-                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
+                //string manufacturer = Plugin.DeviceInfo.CrossDeviceInfo.Current.Manufacturer;
+                //string devicename = Plugin.DeviceInfo.CrossDeviceInfo.Current.DeviceName;
+                //string model = Plugin.DeviceInfo.CrossDeviceInfo.Current.Model;
+
+                // "data/data" is a symlink to "data/user/0" path and for example android phones
+                // looks like work with "data/data" but other phones use "data/user/0"
+                if ( xml_documents.Contains ( "/data/user/0/" ) )
+                    xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
+                else if ( xml_documents.Contains ( "/data/data/" ) )
+                    xml_documents = xml_documents.Replace("/data/data/", "/storage/emulated/0/Android/data/");
+                else
+                {  throw new Exception (); }
+
+                // Problema con SAMSUNG
+                //xml_documents = xml_documents.Replace("data/data", "data");
+                //xml_documents = "/storage/emulated/0/Android" + xml_documents;
             }
+
+            Console.WriteLine( "--------------> " + xml_documents);
+
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
             MTUComm.Action add_mtu = new MTUComm.Action(config: new Configuration(xml_documents), serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: "iker");
