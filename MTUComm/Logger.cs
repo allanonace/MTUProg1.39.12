@@ -53,9 +53,11 @@ namespace MTUComm
             }
         }
 
-        private void CreateFileIfNotExist()
+        public string CreateFileIfNotExist()
         {
-            if (!File.Exists(Path.Combine(abs_path, getFileName())))
+            string uri = Path.Combine(abs_path, getFileName());
+
+            if (!File.Exists(uri))
             { 
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(Path.Combine(abs_path, getFileName()), true))
                 {
@@ -77,6 +79,7 @@ namespace MTUComm
                 }
             }
 
+            return uri;
         }
 
         private XElement getRootElement()
