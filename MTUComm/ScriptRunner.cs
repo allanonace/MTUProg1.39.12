@@ -123,7 +123,7 @@ namespace MTUComm
 
                             String name = parameter.Name;
                             ActionParameter action_parameter = (ActionParameter)action.GetType().GetProperty(parameter.Name).GetValue(action, null);
-                            new_action.addParameter(new Parameter(parseParameterType(parameter.Name), action_parameter.Value));
+                            new_action.addParameter(new Parameter(parseParameterType(parameter.Name), action_parameter.Value, action_parameter.Port));
                         }
 
                     }

@@ -102,6 +102,10 @@ namespace MTUComm
 
         public Parameter(ParameterType type, String value, int port)
         {
+            if(port == 0)
+            {
+                port++;
+            }
             mParameterType = type;
             mValue = value;
             setPort(port);
