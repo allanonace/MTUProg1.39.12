@@ -143,10 +143,7 @@ namespace MTUComm
 
         public void Run()
         {
-            foreach (Action action in actions.ToArray())
-            {
-                action.Run();
-            }
+            actions.ToArray()[0].Run();
         }
 
 
@@ -161,6 +158,7 @@ namespace MTUComm
             if (act.Order < (actions.Count-1))
             {
                 onStepFinish(this, act.Order, e);
+                actions.ToArray()[act.Order+1].Run();
             }
             else
             {
