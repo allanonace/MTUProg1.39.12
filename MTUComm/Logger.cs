@@ -91,7 +91,7 @@ namespace MTUComm
             return root;
         }
 
-        private void addAtrribute(XElement node, String attname, String att_value)
+        public void addAtrribute(XElement node, String attname, String att_value)
         {
             if(att_value != null && att_value.Length > 0)
             {
