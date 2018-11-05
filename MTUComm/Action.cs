@@ -79,6 +79,8 @@ namespace MTUComm
 
         private List<Action> sub_actions = new List<Action>();
 
+        private int order = 0;
+
 
         private MTUComm comm;
 
@@ -168,6 +170,19 @@ namespace MTUComm
 
             }
 
+        }
+
+        public int Order
+        {
+            get
+            {
+                return this.order;
+            }
+
+            set
+            {
+                this.order = value;
+            }
         }
 
         private ActionResult ReadPort(int portnumber, IMemoryMap memory, Mtu mtutype)
@@ -343,6 +358,14 @@ namespace MTUComm
                         result.AddParameter(new Parameter("RegisterCoverTamperStatus", "Reg. Cover", getAlarmStatus(mmap31xx32xx.P1RegisterCoverAlarm, mmap31xx32xx.RegisterCoverTamper)));
                         result.AddParameter(new Parameter("ReverseFlowTamperStatus", "Rev. Fl Tamp", getAlarmStatus(mmap31xx32xx.P1ReverseFlowAlarm, mmap31xx32xx.ReverseFlowTamper)));
 
+                        /*
+                        addPair(ref index, ref topOffset, "Tilt Tamp:", mtuData.Port[0].GetTamper(1,true), "TiltTamperStatus");	
+                        addPair(ref index, ref topOffset, "Magnetic Tamp:", mtuData.Port[0].GetTamper(2,true), "MagneticTamperStatus");
+                        addPair(ref index, ref topOffset, "Interface Tamp:", mtuData.Port[0].GetTamper(16, FrmMain.prog_mode==inputType.READ_MTU? true:false), "InterfaceTamperStatus");	
+                        addPair(ref index, ref topOffset, "Reg. Cover:", mtuData.Port[0].GetTamper(32,true), "RegisterCoverTamperStatus");	
+                        addPair(ref index, ref topOffset, "Rev. Fl Tamp:", mtuData.Port[0].GetTamper(64,true), "ReverseFlowTamperStatus");	
+                        */
+
                     }
 
 
@@ -350,6 +373,7 @@ namespace MTUComm
                     result.AddParameter(new Parameter("F12WAYRegister1", "F12WAYRegister1", "0x"+mmap31xx32xx.F12WAYRegister1.ToString("X8")));
                     result.AddParameter(new Parameter("F12WAYRegister10", "F12WAYRegister10", "0x" + mmap31xx32xx.F12WAYRegister10.ToString("X8")));
                     result.AddParameter(new Parameter("F12WAYRegister14", "F12WAYRegister14", "0x" + mmap31xx32xx.F12WAYRegister14.ToString("X8")));
+
 
 
                     break;
