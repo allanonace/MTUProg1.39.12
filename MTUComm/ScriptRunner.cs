@@ -111,7 +111,7 @@ namespace MTUComm
 
             foreach (Xml.Action action in script.Actions)
             {
-                Action new_action = new Action(new Configuration(base_path), serial_device, parseType(action.Type), script.UserName, script.LogFile);
+                Action new_action = new Action(Configuration.GetInstance(), serial_device, parseType(action.Type), script.UserName, script.LogFile);
 
                 foreach (PropertyInfo parameter in action.GetType().GetProperties())
                 {

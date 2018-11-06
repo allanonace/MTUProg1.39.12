@@ -68,16 +68,7 @@ namespace aclara_meters
 
         private void LoadConfiguration()
         {
-
-            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
-            {
-                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-            }
-
-
-            config = new Configuration(xml_documents);
+            config = Configuration.GetInstance();
 
             if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
             {

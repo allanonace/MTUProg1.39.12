@@ -110,18 +110,9 @@ namespace MTUComm.MemoryMap
             this.registersObjs = new Dictionary<string,dynamic>();
 
             // Read MTU family XML and prepare setters and getters
-            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-            if (Device.RuntimePlatform == Device.Android)
-            {
-                if ( xml_documents.Contains ( "/data/user/0/" ) )
-                    xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-                else if ( xml_documents.Contains ( "/data/data/" ) )
-                    xml_documents = xml_documents.Replace("/data/data/", "/storage/emulated/0/Android/data/");
-            }
-
+            Configuration config = Configuration.GetInstance();
             XmlSerializer s = new XmlSerializer ( typeof ( MemRegisterList ) );
-            using (TextReader reader = new StreamReader(Path.Combine(xml_documents, XML_PREFIX + family + XML_EXTENSION)))
+            using (TextReader reader = new StreamReader(Path.Combine(config.GetBasePath(), XML_PREFIX + family + XML_EXTENSION)))
             {
                 MemRegisterList list = s.Deserialize(reader) as MemRegisterList;
                 foreach ( MemRegister xmlRegister in list.Registers )

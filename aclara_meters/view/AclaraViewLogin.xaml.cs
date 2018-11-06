@@ -188,18 +188,7 @@ namespace aclara_meters.view
                 store.Close();
              * */
 
-            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-
-            if (Device.RuntimePlatform == Device.Android)
-            {
-                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-            }
-
-            string text = File.ReadAllText((Path.Combine(xml_documents, "public.cert"))); // relative path
-
-
-
+            string text = File.ReadAllText((Path.Combine(FormsApp.config.GetBasePath(), "public.cert"))); // relative path
 
             byte[] certBuffer = GetBytesFromPEM(text, "Certificate");
             byte[] keyBuffer = GetBytesFromPEM(text, "RsaPrivateKey");
