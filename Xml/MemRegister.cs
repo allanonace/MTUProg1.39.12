@@ -1,5 +1,4 @@
 ﻿using System.Xml.Serialization;
-using System.ComponentModel;
 
 namespace Xml
 {
@@ -13,8 +12,11 @@ namespace Xml
     /// </summary>
     public class MemRegister
     {
-        private const int DEF_ADDRESS = 0;
-        private const int DEF_SIZE = 1;
+        public const int  DEF_ADDRESS = 0;
+        public const int  DEF_SIZE    = 1;
+        public const int  DEF_BIT     = 0;
+        public const bool DEF_WRITE   = false;
+        private const string STR_BOOL = "bool";
 
         [XmlElement("Id")]
         public string Id { get; set; }
@@ -58,10 +60,30 @@ namespace Xml
                 {
                     int v;
                     if (int.TryParse(value, out v))
-                        this.Size = v;
-                    else this.Size = DEF_SIZE;
+                         this.Size = v;
+                    else this.Size = ( string.Equals ( this.Type, STR_BOOL ) ) ? DEF_BIT : DEF_SIZE;
                 }
-                else this.Size = DEF_SIZE;
+                else this.Size = ( string.Equals ( this.Type, STR_BOOL ) ) ? DEF_BIT : DEF_SIZE;
+            }
+        }
+
+        [XmlIgnore]
+        public bool Write { get; set; }
+
+        [XmlElement("Write")]
+        public string WriteAllowEmptyField
+        {
+            get { return this.Write.ToString().ToLower (); }
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    bool v;
+                    if (bool.TryParse(value, out v))
+                         this.Write = v;
+                    else this.Write = DEF_WRITE;
+                }
+                else this.Write = DEF_WRITE;
             }
         }
 

@@ -287,21 +287,21 @@ namespace MTUComm
             {
                 case "31": //31xx MTU Family
                 case "32"://32xx MTU Family
-                    dynamic reg = ((MemoryMap31xx32xx)memory).registers;
+                    dynamic registers = ( MemoryMap31xx32xx )memory;
 
                     if (!memory.Shipbit)
                     {
-                        result.AddParameter(new Parameter("InterfaceTamperStatus", "Interface Tamp", getAlarmStatus(reg.P1PciAlarm, reg.ProgrammingCoilInterfaceTamper)));
-                        result.AddParameter(new Parameter("TiltTamperStatus", "Tilt Tamp", getAlarmStatus(reg.P1TiltAlarm, reg.TiltTamper)));
-                        result.AddParameter(new Parameter("MagneticTamperStatus", "Magnetic Tamp", getAlarmStatus(reg.P1MagneticAlarm, reg.MagneticTamper)));
-                        result.AddParameter(new Parameter("RegisterCoverTamperStatus", "Reg. Cover", getAlarmStatus(reg.P1RegisterCoverAlarm, reg.RegisterCoverTamper)));
-                        result.AddParameter(new Parameter("ReverseFlowTamperStatus", "Rev. Fl Tamp", getAlarmStatus(reg.P1ReverseFlowAlarm, reg.ReverseFlowTamper)));
+                        result.AddParameter(new Parameter("InterfaceTamperStatus", "Interface Tamp", getAlarmStatus(registers.P1PciAlarm, registers.ProgrammingCoilInterfaceTamper)));
+                        result.AddParameter(new Parameter("TiltTamperStatus", "Tilt Tamp", getAlarmStatus(registers.P1TiltAlarm, registers.TiltTamper)));
+                        result.AddParameter(new Parameter("MagneticTamperStatus", "Magnetic Tamp", getAlarmStatus(registers.P1MagneticAlarm, registers.MagneticTamper)));
+                        result.AddParameter(new Parameter("RegisterCoverTamperStatus", "Reg. Cover", getAlarmStatus(registers.P1RegisterCoverAlarm, registers.RegisterCoverTamper)));
+                        result.AddParameter(new Parameter("ReverseFlowTamperStatus", "Rev. Fl Tamp", getAlarmStatus(registers.P1ReverseFlowAlarm, registers.ReverseFlowTamper)));
                     }
 
-                    result.AddParameter(new Parameter("RxInterval", "Rx Interval", reg.RxInterval.ToString()));
-                    result.AddParameter(new Parameter("F12WAYRegister1", "F12WAYRegister1", "0x"+reg.F12WAYRegister1.ToString("X8")));
-                    result.AddParameter(new Parameter("F12WAYRegister10", "F12WAYRegister10", "0x" + reg.F12WAYRegister10.ToString("X8")));
-                    result.AddParameter(new Parameter("F12WAYRegister14", "F12WAYRegister14", "0x" + reg.F12WAYRegister14.ToString("X8")));
+                    result.AddParameter(new Parameter("RxInterval", "Rx Interval", registers.RxInterval.ToString()));
+                    result.AddParameter(new Parameter("F12WAYRegister1", "F12WAYRegister1", "0x"+registers.F12WAYRegister1.ToString("X8")));
+                    result.AddParameter(new Parameter("F12WAYRegister10", "F12WAYRegister10", "0x" + registers.F12WAYRegister10.ToString("X8")));
+                    result.AddParameter(new Parameter("F12WAYRegister14", "F12WAYRegister14", "0x" + registers.F12WAYRegister14.ToString("X8")));
 
                     break;
                 case "33"://33xx MTU Family

@@ -18,7 +18,6 @@ using System.Threading;
 using System.Globalization;
 using Xml;
 using MTUComm;
-using Plugin.DeviceInfo;
 
 namespace aclara_meters.view
 {

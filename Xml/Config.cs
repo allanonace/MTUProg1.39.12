@@ -69,7 +69,7 @@ namespace Xml
               
             catch (Exception e ) 
             {
-                throw new MtuLoadException("Error loading Mtu file");
+                throw new MtuLoadException("Error loading Mtu file: " + e.Message );
             }
 
             return mtuTypes;

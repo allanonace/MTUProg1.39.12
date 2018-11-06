@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Dynamic;
 
 namespace MTUComm.MemoryMap
@@ -39,13 +37,14 @@ namespace MTUComm.MemoryMap
         int P2Scaler { get; }
     }
 
-    public abstract class AMemoryMap : IMemoryMap
+    public abstract class AMemoryMap : DynamicObject, IMemoryMap
     {
         #region Attributes
 
+        // Can't put directly <string,MemoryRegister>
+        protected Dictionary<string, dynamic> dictionary;
+
         protected dynamic registers;
-        protected IDictionary<string, object> dictionary { private set; get; }
-        private ReadOnlyDictionary<string, object> backupDictionary;
 
         #endregion
 
@@ -53,147 +52,362 @@ namespace MTUComm.MemoryMap
 
         public AMemoryMap ()
         {
-            this.registers = new ExpandoObject();
-            this.dictionary = (IDictionary<string, object>)this.registers;
+            this.dictionary = new Dictionary<string, dynamic> ();
+
+            // En la clase MemoryMap no se puede usar directamente "this|base.idPropiedad", habiendo
+            // de declarar esta variable dinamica mediante la cual acceder a los miembros dinamicos
+            this.registers = this;
         }
 
-        #endregion
-
-        #region Events
-
-        protected void AddModifyEvent()
+        protected void AddProperty ( dynamic memoryRegister )
         {
-            // Dictionary backup after have been added all family registers, for avoid
-            // that ExpandoObject type overrides members when using asignment operator
-            this.backupDictionary = new ReadOnlyDictionary<string, object>(this.dictionary);
+            if ( ! this.dictionary.ContainsKey ( memoryRegister.id ) )
+            {
+                this.dictionary[memoryRegister.id] = memoryRegister;
 
-            ((INotifyPropertyChanged)this.registers).PropertyChanged +=
-                new PropertyChangedEventHandler(HandlePropertyChanges);
+                Console.WriteLine ( "AddProperty: " + memoryRegister.id );
+            }
         }
 
-        protected void RemoveModifyEvent()
+        public override bool TrySetMember ( SetMemberBinder binder, object value )
         {
-            ((INotifyPropertyChanged)this.registers).PropertyChanged -=
-                new PropertyChangedEventHandler(this.HandlePropertyChanges);
+            Console.WriteLine ( "Set " + binder.Name + ": " + value );
+
+            return this.Set ( binder.Name, value );
         }
 
-        private void HandlePropertyChanges(
-            object sender, PropertyChangedEventArgs e)
+        private bool Set ( string id, object value )
         {
-            string id = e.PropertyName;
+            // Selected dynamic member exists
+            if ( this.dictionary.ContainsKey ( id ) )
+            {
+                // Register with read and write
+                if ( ( bool )this.dictionary[id].Write )
+                {
+                    // En el get se puede no castear y devolver object que automaticamente se
+                    // transformara en el tipo esperado, pero si aqui se hace this.dictionary[id].Value = value
+                    // el programa se queda bloqueado no pudiendo completar la accion
+                    switch (Type.GetTypeCode( value.GetType () ))
+                    {
+                        case TypeCode.Int32  : (this.dictionary[id] as MemoryRegister<int>   ).Value = (int   )value; break;
+                        case TypeCode.UInt32 : (this.dictionary[id] as MemoryRegister<uint>  ).Value = (uint  )value; break;
+                        case TypeCode.Int64  : (this.dictionary[id] as MemoryRegister<ulong> ).Value = (ulong )value; break;
+                        case TypeCode.Boolean: (this.dictionary[id] as MemoryRegister<bool>  ).Value = (bool  )value; break;
+                        case TypeCode.Char   : (this.dictionary[id] as MemoryRegister<char>  ).Value = (char  )value; break;
+                        case TypeCode.String : (this.dictionary[id] as MemoryRegister<string>).Value = (string)value; break;
+                    }
 
-            Console.WriteLine ( "Handler: " + id );
+                    this.dictionary[id].used = true;
 
-            // Recover assigned value
-            object value = this.dictionary[ id ];
+                    return true;
+                }
 
-            // Restart previous member ( reference to MemoryMap.RegisterObj.Value property )
-            dictionary[ id ] = this.backupDictionary[ id ];
-            //dictionary[ e.PropertyName ] = value; // Crearia un bucle y no invocaria nunca set
+                // Register readonly
+                Console.WriteLine ( "Set " + id + ": Error - Can't write to this register" );
+                throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
+            }
 
-            // Invokes method that uses Value property set block
-            this.SetValueAfterAvoidOverride( id, value );
+            // Selected dynamic member not exists
+            Console.WriteLine ( "Set " + id + ": Error - Selected register is not loaded" );
+            throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + ": " + id );
         }
 
-        protected abstract void SetValueAfterAvoidOverride(string id, object value);
+        public override bool TryGetMember ( GetMemberBinder binder, out object result )
+        {
+            Console.WriteLine ( "Get " + binder.Name );
+
+            return this.Get ( binder.Name, out result );
+        }
+
+        private bool Get ( string id, out object result )
+        {
+            if ( this.dictionary.ContainsKey ( id ) )
+            {
+                result = ( object )this.dictionary[ id ].Value;
+
+                return true;
+            }
+
+            // Selected dynamic member not exists
+            Console.WriteLine ( "Get " + id + ": Error - Selected register is not loaded" );
+            throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + ": " + id );
+        }
 
         #endregion
 
         #region Shared properties
 
+        // Los miembros fijos/estaticos de la clase se gestionan por separado de los miembros dinamicos
+        // Si la clase cuenta con una propiedad o atributo con identificador A y se añade un miembro dinamico A
+        // del mismo tipo a la clase, al trabajar con A se estara usando el miembro estatico, que no el dinamico,
+        // no realizandose sobreescritura alguna o sustitucion de un miembro por el otro
+        // La unica forma que parece viable de asociar ambos miembros es trabajar con
+        // el dinamico desde la propiedad estatica, a modo de wrapper
+
         public int MtuType
         {
-            get { return registers.MtuType; }
+            get
+            {
+                object result;
+                this.Get ( "MtuType", out result );
+                return ( int )result;
+            }
+            set
+            {
+                this.Set ( "MtuType", value );
+            }
         }
 
         public int MtuId
         {
-            get { return registers.MtuId; }
+            get
+            {
+                object result;
+                this.Get("MtuId", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("MtuId", value);
+            }
         }
 
         public bool Shipbit
         {
-            get { return this.registers.Shipbit; }
+            get
+            {
+                object result;
+                this.Get("Shipbit", out result);
+                return (bool)result;
+            }
+            set
+            {
+                this.Set("Shipbit", value);
+            }
         }
 
         public int DailyRead
         {
-            get { return this.registers.DailyRead; }
+            get
+            {
+                object result;
+                this.Get("DailyRead", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("DailyRead", value);
+            }
         }
 
         public String DailySnap
         {
-            get { return this.registers.DailySnap; }
+            get
+            {
+                object result;
+                this.Get("DailySnap", out result);
+                return (String)result;
+            }
+            set
+            {
+                this.Set("DailySnap", value);
+            }
         }
 
         public int MessageOverlapCount
         {
-            get { return this.registers.MessageOverlapCount; }
+            get
+            {
+                object result;
+                this.Get("MessageOverlapCount", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("MessageOverlapCount", value);
+            }
         }
 
         public int ReadInterval
         {
-            get { return this.registers.ReadInterval; }
+            get
+            {
+                object result;
+                this.Get("ReadInterval", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("ReadInterval", value);
+            }
         }
 
         public int BatteryVoltage
         {
-            get { return this.registers.BatteryVoltage; }
+            get
+            {
+                object result;
+                this.Get("BatteryVoltage", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("BatteryVoltage", value);
+            }
         }
 
         public int MtuFirmwareVersionFormatFlag
         {
-            get { return this.registers.MtuFirmwareVersionFormatFlag; }
+            get
+            {
+                object result;
+                this.Get("MtuFirmwareVersionFormatFlag", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("MtuFirmwareVersionFormatFlag", value);
+            }
         }
 
         public string MtuFirmwareVersion
         {
-            get { return this.registers.MtuFirmwareVersion; }
+            get
+            {
+                object result;
+                this.Get("MtuFirmwareVersion", out result);
+                return (string)result;
+            }
+            set
+            {
+                this.Set("MtuFirmwareVersion", value);
+            }
         }
 
         public string PcbNumber
         {
-            get { return this.registers.PcbNumber; }
+            get
+            {
+                object result;
+                this.Get("PcbNumber", out result);
+                return (string)result;
+            }
+            set
+            {
+                this.Set("PcbNumber", value);
+            }
         }
 
         public int P1MeterType
         {
-            get { return this.registers.P1MeterType; }
+            get
+            {
+                object result;
+                this.Get("P1MeterType", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("P1MeterType", value);
+            }
         }
 
         public int P2MeterType
         {
-            get { return this.registers.P2MeterType; }
+            get
+            {
+                object result;
+                this.Get("P2MeterType", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("P2MeterType", value);
+            }
         }
 
         public ulong P1MeterId
         {
-            get { return this.registers.P1MeterId; }
+            get
+            {
+                object result;
+                this.Get("P1MeterId", out result);
+                return (ulong)result;
+            }
+            set
+            {
+                this.Set("P1MeterId", value);
+            }
         }
 
         public ulong P2MeterId
         {
-            get { return this.registers.P2MeterId; }
+            get
+            {
+                object result;
+                this.Get("P2MeterId", out result);
+                return (ulong)result;
+            }
+            set
+            {
+                this.Set("P2MeterId", value);
+            }
         }
 
         public uint P1Reading
         {
-            get { return this.registers.P1Reading; }
+            get
+            {
+                object result;
+                this.Get("P1Reading", out result);
+                return (uint)result;
+            }
+            set
+            {
+                this.Set("P1Reading", value);
+            }
         }
 
         public int P2Reading
         {
-            get { return this.registers.P2Reading; }
+            get
+            {
+                object result;
+                this.Get("P2Reading", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("P2Reading", value);
+            }
         }
 
         public int P1Scaler
         {
-            get { return this.registers.P1Scaler; }
+            get
+            {
+                object result;
+                this.Get("P1Scaler", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("P1Scaler", value);
+            }
         }
 
         public int P2Scaler
         {
-            get { return this.registers.P2Scaler; }
+            get
+            {
+                object result;
+                this.Get("P2Scaler", out result);
+                return (int)result;
+            }
+            set
+            {
+                this.Set("P2Scaler", value);
+            }
         }
 
         #endregion
