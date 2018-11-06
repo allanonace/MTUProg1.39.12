@@ -413,6 +413,34 @@ namespace MTUComm.MemoryMap
             }
         }
 
+        public string P1ReadingError
+        {
+            get
+            {
+                object result;
+                this.Get("P1ReadingError", out result);
+                return (string)result;
+            }
+            set
+            {
+                this.Set("P1ReadingError", value);
+            }
+        }
+
+        public string P2ReadingError
+        {
+            get
+            {
+                object result;
+                this.Get("P2ReadingError", out result);
+                return (string)result;
+            }
+            set
+            {
+                this.Set("P2ReadingError", value);
+            }
+        }
+
         #endregion
     }
 }
