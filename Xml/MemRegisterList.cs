@@ -8,5 +8,8 @@ namespace Xml
     {
         [XmlElement("Register")]
         public MemRegister[] Registers { get; set; }
+
+        [XmlElement("Overload")]
+        public MemOverload[] Overloads { get; set; }
     }
 }
