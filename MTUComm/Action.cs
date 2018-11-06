@@ -1,8 +1,7 @@
 ﻿using Lexi.Interfaces;
+using MTUComm.MemoryMap;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -325,7 +324,7 @@ namespace MTUComm
 
            if (!memory.Shipbit)
             {
-                result.AddParameter(new Parameter("DailySnap", "Daily Snap", memory.DailySnap));
+                result.AddParameter(new Parameter("DailySnap", "Daily Snap", memory.DailySnap ));
                 result.AddParameter(new Parameter("DailyGMTHourRead", "Daily GMT Hour Read", memory.DailyRead.ToString()));
             }
 
@@ -349,31 +348,21 @@ namespace MTUComm
             {
                 case "31": //31xx MTU Family
                 case "32"://32xx MTU Family
-                    MemoryMap31xx32xx mmap31xx32xx = (MemoryMap31xx32xx)memory;
+                    dynamic registers = ( MemoryMap31xx32xx )memory;
 
-                    if (!memory.Shipbit) {
-                        result.AddParameter(new Parameter("InterfaceTamperStatus", "Interface Tamp", getAlarmStatus(mmap31xx32xx.P1PciAlarm, mmap31xx32xx.ProgrammingCoilInterfaceTamper)));
-                        result.AddParameter(new Parameter("TiltTamperStatus", "Tilt Tamp", getAlarmStatus(mmap31xx32xx.P1TiltAlarm, mmap31xx32xx.TiltTamper)));
-                        result.AddParameter(new Parameter("MagneticTamperStatus", "Magnetic Tamp", getAlarmStatus(mmap31xx32xx.P1MagneticAlarm, mmap31xx32xx.MagneticTamper)));
-                        result.AddParameter(new Parameter("RegisterCoverTamperStatus", "Reg. Cover", getAlarmStatus(mmap31xx32xx.P1RegisterCoverAlarm, mmap31xx32xx.RegisterCoverTamper)));
-                        result.AddParameter(new Parameter("ReverseFlowTamperStatus", "Rev. Fl Tamp", getAlarmStatus(mmap31xx32xx.P1ReverseFlowAlarm, mmap31xx32xx.ReverseFlowTamper)));
-
-                        /*
-                        addPair(ref index, ref topOffset, "Tilt Tamp:", mtuData.Port[0].GetTamper(1,true), "TiltTamperStatus");	
-                        addPair(ref index, ref topOffset, "Magnetic Tamp:", mtuData.Port[0].GetTamper(2,true), "MagneticTamperStatus");
-                        addPair(ref index, ref topOffset, "Interface Tamp:", mtuData.Port[0].GetTamper(16, FrmMain.prog_mode==inputType.READ_MTU? true:false), "InterfaceTamperStatus");	
-                        addPair(ref index, ref topOffset, "Reg. Cover:", mtuData.Port[0].GetTamper(32,true), "RegisterCoverTamperStatus");	
-                        addPair(ref index, ref topOffset, "Rev. Fl Tamp:", mtuData.Port[0].GetTamper(64,true), "ReverseFlowTamperStatus");	
-                        */
-
+                    if (!memory.Shipbit)
+                    {
+                        result.AddParameter(new Parameter("InterfaceTamperStatus", "Interface Tamp", getAlarmStatus(registers.P1PciAlarm, registers.ProgrammingCoilInterfaceTamper)));
+                        result.AddParameter(new Parameter("TiltTamperStatus", "Tilt Tamp", getAlarmStatus(registers.P1TiltAlarm, registers.TiltTamper)));
+                        result.AddParameter(new Parameter("MagneticTamperStatus", "Magnetic Tamp", getAlarmStatus(registers.P1MagneticAlarm, registers.MagneticTamper)));
+                        result.AddParameter(new Parameter("RegisterCoverTamperStatus", "Reg. Cover", getAlarmStatus(registers.P1RegisterCoverAlarm, registers.RegisterCoverTamper)));
+                        result.AddParameter(new Parameter("ReverseFlowTamperStatus", "Rev. Fl Tamp", getAlarmStatus(registers.P1ReverseFlowAlarm, registers.ReverseFlowTamper)));
                     }
 
-
-                    result.AddParameter(new Parameter("RxInterval", "Rx Interval", mmap31xx32xx.RxInterval.ToString()));
-                    result.AddParameter(new Parameter("F12WAYRegister1", "F12WAYRegister1", "0x"+mmap31xx32xx.F12WAYRegister1.ToString("X8")));
-                    result.AddParameter(new Parameter("F12WAYRegister10", "F12WAYRegister10", "0x" + mmap31xx32xx.F12WAYRegister10.ToString("X8")));
-                    result.AddParameter(new Parameter("F12WAYRegister14", "F12WAYRegister14", "0x" + mmap31xx32xx.F12WAYRegister14.ToString("X8")));
-
+                    result.AddParameter(new Parameter("RxInterval", "Rx Interval", registers.RxInterval.ToString()));
+                    result.AddParameter(new Parameter("F12WAYRegister1", "F12WAYRegister1", "0x"+registers.F12WAYRegister1.ToString("X8")));
+                    result.AddParameter(new Parameter("F12WAYRegister10", "F12WAYRegister10", "0x" + registers.F12WAYRegister10.ToString("X8")));
+                    result.AddParameter(new Parameter("F12WAYRegister14", "F12WAYRegister14", "0x" + registers.F12WAYRegister14.ToString("X8")));
 
 
                     break;

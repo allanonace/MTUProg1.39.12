@@ -4,17 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MTUComm
+namespace MTUComm.MemoryMap
 {
-    public class MemoryMap33xx: IMemoryMap
+    public class MemoryMap33xx: MemoryMap
     {
-        private byte[] memory;
+        private const string FAMILY = "33xx";
 
-        public MemoryMap33xx(byte[] memory)
+        public MemoryMap33xx(byte[] memory) : base ( memory, FAMILY )
         {
-            this.memory = memory;
+
         }
 
+        /*
         // addr 0
         // MTU type
         public int MtuType
@@ -1940,6 +1941,6 @@ namespace MTUComm
 
             return outNum;
         }
-
+        */
     }
 }

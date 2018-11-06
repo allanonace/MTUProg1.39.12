@@ -1,176 +1,73 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace MTUComm
+namespace MTUComm.MemoryMap
 {
-    public class MemoryMap31xx32xx: IMemoryMap
+    public sealed class MemoryMap31xx32xx: MemoryMap
     {
-        private byte[] memory;
+        private const string FAMILY = "31xx32xx";
 
-        public MemoryMap31xx32xx(byte[] memory)
+        #region Initialization
+
+        public MemoryMap31xx32xx(byte[] memory) : base ( memory, FAMILY )
         {
-            this.memory = memory;
+            // Special cases
+            base.CreateProperty_Get_Custom<string>( this.DailySnap_Logic );
+            base.CreateProperty_Get_Custom<string> ( this.PcbNumber_Logic );
+            //base.CreateSpecialProperty<uint>(this.P1Reading);
+            //base.CreateSpecialProperty<int>(this.P2Reading);
         }
 
-        // addr 0
-        // MTU type
-        public int MtuType
-        {
-            get
-            {
-                int mtuType = memory[0];
-                return mtuType;
-            }
-        }
+        #endregion
 
-        // addr 1
-        // MTU version (OBSOLETE)
+        /*
 
-        // addr 2
-        // revision year (OBSOLETE)
+        // addr 0 - MTU type
+        public int MtuType { get { return base.GetIntFromMem ( 0 ); } }
 
-        // addr 3
-        // revision month (OBSOLETE)
+        // addr 1 - MTU version (OBSOLETE)
+        // addr 2 - Revision year (OBSOLETE)
+        // addr 3 - Revision month (OBSOLETE)
+        // addr 4 - Revision day (OBSOLETE)
 
-        // addr 4
-        // revision day (OBSOLETE)
+        // addr 5 - Temperature correction
+        public int TemperatureCorrection { get { return base.GetIntFromMem(5); } }
 
-        // addr 5
-        // temperature correction
-        public int TemperatureCorrection
-        {
-            get
-            {
-                int temperatureCorrection = memory[5];
-                return temperatureCorrection;
-            }
-        }
+        // addr 6-9 - MTU ID
+        public int MtuId { get { return base.GetIntFromMem(6,4); } }
 
-        // addr 6-9
-        // MTU ID
-        public int MtuId
-        {
-            get
-            {
-                int mtuId = (memory[6] + (memory[7] << 8) + (memory[8] << 16) + (memory[9] << 24));
-                return mtuId;
-            }
-        }
+        // addr 10-13 - One way tx frequency
+        public int OneWayTxFrequency { get { return base.GetIntFromMem(10, 4); } }
 
-        // addr 10-13
-        // one way tx frequency
-        public int OneWayTxFrequency
-        {
-            get
-            {
-                int oneWayTxFrequency = (memory[10] + (memory[11] << 8) + (memory[12] << 16) + (memory[13] << 24));
-                return oneWayTxFrequency;
-            }
-        }
+        // addr 14-17 - Two way tx frequency
+        public int TwoWayTxFrequency { get { return base.GetIntFromMem(14, 4); } }
 
-        // addr 14-17
-        // two way tx frequency
-        public int TwoWayTxFrequency
-        {
-            get
-            {
-                int twoWayTxFrequency = (memory[14] + (memory[15] << 8) + (memory[16] << 16) + (memory[17] << 24));
-                return twoWayTxFrequency;
-            }
-        }
+        // addr 18-21 - Two way rx frequency
+        public int TwoWayRxFrequency { get { return base.GetIntFromMem(18, 4); } }
 
-        // addr 18-21
-        // two way rx frequency
-        public int TwoWayRxFrequency
-        {
-            get
-            {
-                int twoWayRxFrequency = (memory[18] + (memory[19] << 8) + (memory[20] << 16) + (memory[21] << 24));
-                return twoWayRxFrequency;
-            }
-        }
+        // addr 22 bit 0 - System flags - shipbit
+        public bool Shipbit { get { return this.GetBoolFromMem(22); } }
 
-        // addr 22 bit 0
-        // system flags - shipbit
-        public bool Shipbit
-        {
-            get
-            {
-                byte systemFlags = memory[22];
-                bool shipbit = (((systemFlags >> 0) & 1) == 1);
-                return shipbit;
-            }
-        }
+        // addr 22 bit 1 - System flags - 2 way off / no afc
+        public bool TwoWayOffNoAfc { get { return this.GetBoolFromMem(22,1); } }
 
-        // addr 22 bit 1
-        // system flags - 2 way off / no afc
-        public bool TwoWayOffNoAfc
-        {
-            get
-            {
-                byte systemFlags = memory[22];
-                bool twoWayOffNoAfc = (((systemFlags >> 1) & 1) == 1);
-                return twoWayOffNoAfc;
-            }
-        }
+        // addr 22 bit 2 - System flags - rf test mode
+        public bool RfTestMode { get { return this.GetBoolFromMem(22, 2); } }
 
-        // addr 22 bit 2
-        // system flags - rf test mode
-        public bool RfTestMode
-        {
-            get
-            {
-                byte systemFlags = memory[22];
-                bool rfTestMode = (((systemFlags >> 2) & 1) == 1);
-                return rfTestMode;
-            }
-        }
+        // addr 22 bit 3 - System flags - precharge switch
+        public bool PrechargeSwitch { get { return this.GetBoolFromMem(22, 3); } }
 
-        // addr 22 bit 3
-        // system flags - precharge switch
-        public bool PrechargeSwitch
-        {
-            get
-            {
-                byte systemFlags = memory[22];
-                bool prechargeSwitch = (((systemFlags >> 3) & 1) == 1);
-                return prechargeSwitch;
-            }
-        }
+        // addr 23 - Wakeup message constant
+        public int WakeupMessageConstant { get { return base.GetIntFromMem(23); } }
 
-        // addr 23
-        // wakeup message constant
-        public int WakeupMessageConstant
-        {
-            get
-            {
-                int wakeupMessageConstant = memory[23];
-                return wakeupMessageConstant;
-            }
-        }
+        // addr 24 - Frequency correction
+        public int FrequencyCorrection { get { return base.GetIntFromMem(24); } }
 
-        // addr 24
-        // frequency correction
-        public int FrequencyCorrection
-        {
-            get
-            {
-                int frequencyCorrection = memory[24];
-                return frequencyCorrection;
-            }
-        }
-
-        // addr 25
-        // message overlap count
+        // addr 25 - Message overlap count
         public int MessageOverlapCount
         {
             get
             {
-                int messageOverlapCount = memory[25];
-                return messageOverlapCount;
+		return base.GetIntFromMem(25);
             }
             set
             {
@@ -184,8 +81,7 @@ namespace MTUComm
         {
             get
             {
-                int readInterval = (memory[26] + (memory[27] << 8));
-                return readInterval;
+                return base.GetIntFromMem(26,2);
             }
             set
             {
@@ -194,71 +90,27 @@ namespace MTUComm
             }
         }
 
-        // addr 28 bit 0
-        // port 1 enable
-        public bool Port1Enable
-        {
-            get
-            {
-                byte portsEnable = memory[28];
-                bool port1Enable = (((portsEnable >> 0) & 1) == 1);
-                return port1Enable;
-            }
-        }
+        // addr 28 bit 0 - Port 1 enable
+        public bool Port1Enable { get { return this.GetBoolFromMem(28); } }
 
-        // addr 28 bit 1
-        // port 2 enable
-        public bool Port2Enable
-        {
-            get
-            {
-                byte portsEnable = memory[28];
-                bool port2Enable = (((portsEnable >> 1) & 1) == 1);
-                return port2Enable;
-            }
-        }
+        // addr 28 bit 1 - Port 2 enable
+        public bool Port2Enable { get { return this.GetBoolFromMem(28,1); } }
 
-        // addr 29
-        // time sync hour
-        public int TimeSyncHour
-        {
-            get
-            {
-                int timeSyncHour = memory[29];
-                return timeSyncHour;
-            }
-        }
+        // addr 29 - Time sync hour
+        public int TimeSyncHour { get { return base.GetIntFromMem(29); } }
 
-        // addr 30
-        // time sync minute
-        public int TimeSyncMinute
-        {
-            get
-            {
-                int timeSyncMinute = memory[30];
-                return timeSyncMinute;
-            }
-        }
+        // addr 30 - Time sync minute
+        public int TimeSyncMinute { get { return base.GetIntFromMem(30); } }
 
-        // addr 31
-        // time sync second
-        public int TimeSyncSecond
-        {
-            get
-            {
-                int timeSyncSecond = memory[31];
-                return timeSyncSecond;
-            }
-        }
+        // addr 31 - Time sync second
+        public int TimeSyncSecond { get { return base.GetIntFromMem(31); } }
 
-        // addr 32-33
-        // P1 meter type
+        // addr 32-33 - P1 meter type
         public int P1MeterType
         {
             get
             {
-                int p1MeterType = (memory[32] + (memory[33] << 8));
-                return p1MeterType;
+                return base.GetIntFromMem(32,2); 
             }
             set
             {
@@ -267,14 +119,12 @@ namespace MTUComm
             }
         }
 
-        // addr 34-39
-        // P1 meter ID
-        public ulong P1MeterId // TODO: convert from BCD format to long
+        // addr 34-39 - P1 meter ID
+        public ulong P1MeterId
         {
             get
-            {
-                ulong p1MeterId = ((ulong)memory[34] + ((ulong)memory[35] << 8) + ((ulong)memory[36] << 16) + ((ulong)memory[37] << 24) + ((ulong)memory[38] << 32) + ((ulong)memory[39] << 40));
-                return BcdToLong(p1MeterId);
+            {   
+          	return this.GetULongFromMem(34,6); 
             }
             set
             {
@@ -287,14 +137,12 @@ namespace MTUComm
             }
         }
 
-        // addr 40-41
-        // P1 pulse ratio
+        // addr 40-41 - P1 pulse ratio
         public int P1PulseRatio
         {
             get
             {
-                int p1PulseRatio = (memory[40] + (memory[41] << 8));
-                return p1PulseRatio;
+                return base.GetIntFromMem(40,2);
             }
             set
             {
@@ -309,8 +157,7 @@ namespace MTUComm
         {
             get
             {
-                int p1Mode = memory[42];
-                return p1Mode;
+                return base.GetIntFromMem(42);
             }
             set
             {
@@ -318,162 +165,49 @@ namespace MTUComm
             }
         }
 
-        // addr 42 bit 0
-        // P1 mode - tilt alarm
-        public bool P1TiltAlarm
-        {
-            get
-            {
-                byte p1Mode = memory[42];
-                bool p1TiltAlarm = (((p1Mode >> 0) & 1) == 1);
-                return p1TiltAlarm;
-            }
-        }
+        // addr 42 bit 0 - P1 mode - tilt alarm
+        public bool P1TiltAlarm { get { return this.GetBoolFromMem(42); } }
 
-        // addr 42 bit 1
-        // P1 mode - magnetic alarm
-        public bool P1MagneticAlarm
-        {
-            get
-            {
-                byte p1Mode = memory[42];
-                bool p1MagneticAlarm = (((p1Mode >> 1) & 1) == 1);
-                return p1MagneticAlarm;
-            }
-        }
+        // addr 42 bit 1 - P1 mode - magnetic alarm
+        public bool P1MagneticAlarm { get { return this.GetBoolFromMem(42,1); } }
 
-        // addr 42 bit 2
-        // P1 mode - immediate alarm
-        public bool P1ImmediateAlarm
-        {
-            get
-            {
-                byte p1Mode = memory[42];
-                bool p1ImmediateAlarm = (((p1Mode >> 2) & 1) == 1);
-                return p1ImmediateAlarm;
-            }
-        }
+        // addr 42 bit 2 - P1 mode - immediate alarm
+        public bool P1ImmediateAlarm { get { return this.GetBoolFromMem(42,2); } }
 
-        // addr 42 bit 3
-        // P1 mode - urgent alarm
-        public bool P1UrgentAlarm
-        {
-            get
-            {
-                byte p1Mode = memory[42];
-                bool p1UrgentAlarm = (((p1Mode >> 3) & 1) == 1);
-                return p1UrgentAlarm;
-            }
-        }
+        // addr 42 bit 3 - P1 mode - urgent alarm
+        public bool P1UrgentAlarm { get { return this.GetBoolFromMem(42,3); } }
 
-        // addr 42 bit 4
-        // P1 mode - PCI alarm
-        public bool P1PciAlarm
-        {
-            get
-            {
-                byte p1Mode = memory[42];
-                bool p1PciAlarm = (((p1Mode >> 4) & 1) == 1);
-                return p1PciAlarm;
-            }
-        }
+        // addr 42 bit 4 - P1 mode - PCI alarm
+        public bool P1PciAlarm { get { return this.GetBoolFromMem(42,4); } }
 
-        // addr 42 bit 5
-        // P1 mode - register cover alarm
-        public bool P1RegisterCoverAlarm
-        {
-            get
-            {
-                byte p1Mode = memory[42];
-                bool p1RegisterCoverAlarm = (((p1Mode >> 5) & 1) == 1);
-                return p1RegisterCoverAlarm;
-            }
-        }
+        // addr 42 bit 5 - P1 mode - register cover alarm
+        public bool P1RegisterCoverAlarm { get { return this.GetBoolFromMem(42,5); } }
 
-        // addr 42 bit 6
-        // P1 mode - reverse flow alarm
-        public bool P1ReverseFlowAlarm
-        {
-            get
-            {
-                byte p1Mode = memory[42];
-                bool p1ReverseFlowAlarm = (((p1Mode >> 6) & 1) == 1);
-                return p1ReverseFlowAlarm;
-            }
-        }
+        // addr 42 bit 6 - P1 mode - reverse flow alarm
+        public bool P1ReverseFlowAlarm { get { return this.GetBoolFromMem(42,6); } }
 
-        // addr 42 bit 7
-        // P1 mode - flow rotation
-        public bool P1FlowRotation
-        {
-            get
-            {
-                byte p1Mode = memory[42];
-                bool p1FlowRotation = (((p1Mode >> 7) & 1) == 1);
-                return p1FlowRotation;
-            }
-        }
+        // addr 42 bit 7 - P1 mode - flow rotation
+        public bool P1FlowRotation { get { return this.GetBoolFromMem(42, 7); } }
 
-        // addr 43
-        // P1 pulse high time
-        public int P1PulseHighTime
-        {
-            get
-            {
-                int p1PulseHighTime = memory[43];
-                return p1PulseHighTime;
-            }
-        }
+        // addr 43 - P1 pulse high time
+        public int P1PulseHighTime { get { return base.GetIntFromMem(43); } }
 
-        // addr 44
-        // P1 pulse low time
-        public int P1PulseLowtime
-        {
-            get
-            {
-                int p1PulseLowTime = memory[44];
-                return p1PulseLowTime;
-            }
-        }
+        // addr 44 - P1 pulse low time
+        public int P1PulseLowtime { get { return base.GetIntFromMem(44); } }
 
-        // addr 45 bit 0
-        // P1 mode2 - cut wire alarm
-        public bool P1CutWireAlarm
-        {
-            get
-            {
-                byte p1Mode2 = memory[45];
-                bool p1CutWireAlarm = (((p1Mode2 >> 0) & 1) == 1);
-                return p1CutWireAlarm;
-            }
-        }
+        // addr 45 bit 0 - P1 mode2 - cut wire alarm
+        public bool P1CutWireAlarm { get { return this.GetBoolFromMem(45); } }
 
-        // addr 45 bit 1
-        // P1 mode2 - FormC (remote reed switch)
-        public bool P1FormC
-        {
-            get
-            {
-                byte p1Mode2 = memory[45];
-                bool p1FormC = (((p1Mode2 >> 1) & 1) == 1);
-                return p1FormC;
-            }
-        }
+        // addr 45 bit 1 - P1 mode2 - FormC (remote reed switch)
+        public bool P1FormC { get { return this.GetBoolFromMem(45,1); } }
 
-        // addr 45 bit 2
-        // P1 mode2 - Port 2 alarm
-        public bool P1Port2Alarm
-        {
-            get
-            {
-                byte p1Mode2 = memory[45];
-                bool p1Port2Alarm = (((p1Mode2 >> 2) & 1) == 1);
-                return p1Port2Alarm;
-            }
-        }
+        // addr 45 bit 2 - P1 mode2 - Port 2 alarm
+        public bool P1Port2Alarm { get { return this.GetBoolFromMem(45,2); } }
 
-        // addr 46-47
-        // Unused
+        // addr 46-47 - Unused
+
+        // addr 48 - P2 info
+        public int P2Info { get { return base.GetIntFromMem(48); } }
 
         // addr 48-49
         // P2 meter type
@@ -498,7 +232,7 @@ namespace MTUComm
             get
             {
                 ulong p2MeterId = ((ulong)memory[50] + ((ulong)memory[51] << 8) + ((ulong)memory[52] << 16) + ((ulong)memory[53] << 24) + ((ulong)memory[54] << 32) + ((ulong)memory[55] << 40));
-                return BcdToLong(p2MeterId);
+                return BcdToULong(p2MeterId);
             }
             set
             {
@@ -542,337 +276,90 @@ namespace MTUComm
             }
         }
 
-        // addr 58 bit 0
-        // P2 mode - tilt alarm
-        public bool P2TiltAlarm
-        {
-            get
-            {
-                byte p2Mode = memory[58];
-                bool p2TiltAlarm = (((p2Mode >> 0) & 1) == 1);
-                return p2TiltAlarm;
-            }
-        }
+        // addr 58 bit 0 - P2 mode - tilt alarm
+        public bool P2TiltAlarm { get { return this.GetBoolFromMem(58); } }
 
-        // addr 58 bit 1
-        // P2 mode - magnetic alarm
-        public bool P2MagneticAlarm
-        {
-            get
-            {
-                byte p2Mode = memory[58];
-                bool p2MagneticAlarm = (((p2Mode >> 1) & 1) == 1);
-                return p2MagneticAlarm;
-            }
-        }
+        // addr 58 bit 1 - P2 mode - magnetic alarm
+        public bool P2MagneticAlarm { get { return this.GetBoolFromMem(58,1); } }
 
-        // addr 58 bit 2
-        // P2 mode - immediate alarm
-        public bool P2ImmediateAlarm
-        {
-            get
-            {
-                byte p2Mode = memory[58];
-                bool p2ImmediateAlarm = (((p2Mode >> 2) & 1) == 1);
-                return p2ImmediateAlarm;
-            }
-        }
+        // addr 58 bit 2 - P2 mode - immediate alarm
+        public bool P2ImmediateAlarm { get { return this.GetBoolFromMem(58,2); } }
 
-        // addr 58 bit 3
-        // P2 mode - urgent alarm
-        public bool P2UrgentAlarm
-        {
-            get
-            {
-                byte p2Mode = memory[58];
-                bool p2UrgentAlarm = (((p2Mode >> 3) & 1) == 1);
-                return p2UrgentAlarm;
-            }
-        }
+        // addr 58 bit 3 - P2 mode - urgent alarm
+        public bool P2UrgentAlarm { get { return this.GetBoolFromMem(58,3); } }
 
-        // addr 58 bit 4
-        // P2 mode - PCI alarm
-        public bool P2PciAlarm
-        {
-            get
-            {
-                byte p2Mode = memory[58];
-                bool p2PciAlarm = (((p2Mode >> 4) & 1) == 1);
-                return p2PciAlarm;
-            }
-        }
+        // addr 58 bit 4 - P2 mode - PCI alarm
+        public bool P2PciAlarm { get { return this.GetBoolFromMem(58,4); } }
 
-        // addr 58 bit 5
-        // P2 mode - register cover alarm
-        public bool P2RegisterCoverAlarm
-        {
-            get
-            {
-                byte p2Mode = memory[58];
-                bool p2RegisterCoverAlarm = (((p2Mode >> 5) & 1) == 1);
-                return p2RegisterCoverAlarm;
-            }
-        }
+        // addr 58 bit 5 - P2 mode - register cover alarm
+        public bool P2RegisterCoverAlarm { get { return this.GetBoolFromMem(58,5); } }
 
-        // addr 58 bit 6
-        // P2 mode - reverse flow alarm
-        public bool P2ReverseFlowAlarm
-        {
-            get
-            {
-                byte p2Mode = memory[58];
-                bool p2ReverseFlowAlarm = (((p2Mode >> 6) & 1) == 1);
-                return p2ReverseFlowAlarm;
-            }
-        }
+        // addr 58 bit 6 - P2 mode - reverse flow alarm
+        public bool P2ReverseFlowAlarm { get { return this.GetBoolFromMem(58,6); } }
 
-        // addr 58 bit 7
-        // P2 mode - flow rotation
-        public bool P2FlowRotation
-        {
-            get
-            {
-                byte p2Mode = memory[58];
-                bool p2FlowRotation = (((p2Mode >> 7) & 1) == 1);
-                return p2FlowRotation;
-            }
-        }
+        // addr 58 bit 7 - P2 mode - flow rotation
+        public bool P2FlowRotation { get { return this.GetBoolFromMem(58,7); } }
 
-        // addr 59
-        // P2 pulse high time
-        public int P2PulseHighTime
-        {
-            get
-            {
-                int p2PulseHighTime = memory[59];
-                return p2PulseHighTime;
-            }
-        }
+        // addr 59 - P2 pulse high time
+        public int P2PulseHighTime { get { return base.GetIntFromMem(59); } }
 
-        // addr 60
-        // P2 pulse low time
-        public int P2PulseLowtime
-        {
-            get
-            {
-                int p2PulseLowtime = memory[60];
-                return p2PulseLowtime;
-            }
-        }
+        // addr 60 - P2 pulse low time
+        public int P2PulseLowtime { get { return base.GetIntFromMem(60); } }
 
-        // addr 61
-        // P2 message overlap count
-        public int P2MessageOverlapCount
-        {
-            get
-            {
-                int p2MessageOverlapCount = memory[61];
-                return p2MessageOverlapCount;
-            }
-        }
+        // addr 61 - P2 message overlap count
+        public int P2MessageOverlapCount { get { return base.GetIntFromMem(61); } }
 
-        // addr 62-63
-        // P2 read interval
-        public int P2ReadInterval
-        {
-            get
-            {
-                int p2ReadInterval = (memory[62] + (memory[63] << 8));
-                return p2ReadInterval;
-            }
-        }
+        // addr 62-63 - P2 read interval
+        public int P2ReadInterval { get { return base.GetIntFromMem(62,2); } }
 
-        // addr 64 bit 0
-        // Task flags - read meter
-        public bool TaskFlagsReadMeter
-        {
-            get
-            {
-                byte taskFlags = memory[64];
-                bool readMeter = (((taskFlags >> 0) & 1) == 1);
-                return readMeter;
-            }
-        }
+        // addr 64 bit 0 - Task flags - read meter
+        public bool TaskFlagsReadMeter { get { return this.GetBoolFromMem(64); } }
 
-        // addr 64 bit 1
-        // Task flags - tx
-        public bool TaskFlagsTx
-        {
-            get
-            {
-                byte taskFlags = memory[64];
-                bool tx = (((taskFlags >> 1) & 1) == 1);
-                return tx;
-            }
-        }
+        // addr 64 bit 1 - Task flags - tx
+        public bool TaskFlagsTx { get { return this.GetBoolFromMem(64,1); } }
 
-        // addr 64 bit 2
-        // Task flags - rtc correction
-        public bool TaskFlagsRtcCorrection
-        {
-            get
-            {
-                byte taskFlags = memory[64];
-                bool rtcCorrection = (((taskFlags >> 2) & 1) == 1);
-                return rtcCorrection;
-            }
-        }
+        // addr 64 bit 2 - Task flags - rtc correction
+        public bool TaskFlagsRtcCorrection { get { return this.GetBoolFromMem(64,2); } }
 
-        // addr 64 bit 3
-        // Task flags - afc
-        public bool TaskFlagsAfc
-        {
-            get
-            {
-                byte taskFlags = memory[64];
-                bool afc = (((taskFlags >> 3) & 1) == 1);
-                return afc;
-            }
-        }
+        // addr 64 bit 3 - Task flags - afc
+        public bool TaskFlagsAfc { get { return this.GetBoolFromMem(64,3); } }
 
-        // addr 64 bit 4
-        // Task flags - coil msg
-        public bool TaskFlagsCoilMsg
-        {
-            get
-            {
-                byte taskFlags = memory[64];
-                bool coilMsg = (((taskFlags >> 4) & 1) == 1);
-                return coilMsg;
-            }
-        }
+        // addr 64 bit 4 - Task flags - coil msg
+        public bool TaskFlagsCoilMsg { get { return this.GetBoolFromMem(64,4); } }
 
-        // addr 64 bit 5
-        // Task flags - rx msg
-        public bool TaskFlagsRxMsg
-        {
-            get
-            {
-                byte taskFlags = memory[64];
-                bool rxMsg = (((taskFlags >> 5) & 1) == 1);
-                return rxMsg;
-            }
-        }
+        // addr 64 bit 5 - Task flags - rx msg
+        public bool TaskFlagsRxMsg { get { return this.GetBoolFromMem(64,5); } }
 
-        // addr 64 bit 6
-        // Task flags - rx byte
-        public bool TaskFlagsRxByte
-        {
-            get
-            {
-                byte taskFlags = memory[64];
-                bool rxByte = (((taskFlags >> 6) & 1) == 1);
-                return rxByte;
-            }
-        }
+        // addr 64 bit 6 - Task flags - rx byte
+        public bool TaskFlagsRxByte { get { return this.GetBoolFromMem(64,6); } }
 
-        // addr 64 bit 7
-        // Task flags - rx mode
-        public bool TaskFlagsRxMode
-        {
-            get
-            {
-                byte taskFlags = memory[64];
-                bool rxMode = (((taskFlags >> 7) & 1) == 1);
-                return rxMode;
-            }
-        }
+        // addr 64 bit 7 - Task flags - rx mode
+        public bool TaskFlagsRxMode { get { return this.GetBoolFromMem(64,7); } }
 
-        // addr 65 bit 0
-        // Task flags - install_f
-        public bool TaskFlagsInstallF
-        {
-            get
-            {
-                byte taskFlags = memory[65];
-                bool installF = (((taskFlags >> 0) & 1) == 1);
-                return installF;
-            }
-        }
+        // addr 65 bit 0 - Task flags - install_f
+        public bool TaskFlagsInstallF { get { return this.GetBoolFromMem(65); } }
 
-        // addr 65 bit 1
-        // Task flags - tamper_f
-        public bool TaskFlagsTamperF
-        {
-            get
-            {
-                byte taskFlags = memory[65];
-                bool tamperF = (((taskFlags >> 1) & 1) == 1);
-                return tamperF;
-            }
-        }
+        // addr 65 bit 1 - Task flags - tamper_f
+        public bool TaskFlagsTamperF { get { return this.GetBoolFromMem(65,1); } }
 
-        // addr 65 bit 2
-        // Task flags - time sync f
-        public bool TaskFlagsTimeSyncF
-        {
-            get
-            {
-                byte taskFlags = memory[65];
-                bool timeSyncF = (((taskFlags >> 2) & 1) == 1);
-                return timeSyncF;
-            }
-        }
+        // addr 65 bit 2 - Task flags - time sync f
+        public bool TaskFlagsTimeSyncF { get { return this.GetBoolFromMem(65,2); } }
 
-        // addr 65 bit 3
-        // Task flags - update reg0 flag
-        public bool TaskFlagsUpdateReg0
-        {
-            get
-            {
-                byte taskFlags = memory[65];
-                bool updateReg0 = (((taskFlags >> 3) & 1) == 1);
-                return updateReg0;
-            }
-        }
+        // addr 65 bit 3 - Task flags - update reg0 flag
+        public bool TaskFlagsUpdateReg0 { get { return this.GetBoolFromMem(65,3); } }
 
-        // addr 65 bit 4
-        // Task flags - cal temperature flag
-        public bool TaskFlagsCalTemperature
-        {
-            get
-            {
-                byte taskFlags = memory[65];
-                bool calTemperature = (((taskFlags >> 4) & 1) == 1);
-                return calTemperature;
-            }
-        }
+        // addr 65 bit 4 - Task flags - cal temperature flag
+        public bool TaskFlagsCalTemperature { get { return this.GetBoolFromMem(65,4); } }
 
-        // addr 65 bit 5
-        // Task flags - test tx flag
-        public bool TaskFlagsTestTx
-        {
-            get
-            {
-                byte taskFlags = memory[65];
-                bool testTx = (((taskFlags >> 5) & 1) == 1);
-                return testTx;
-            }
-        }
+        // addr 65 bit 5 - Task flags - test tx flag
+        public bool TaskFlagsTestTx { get { return this.GetBoolFromMem(65,5); } }
 
-        // addr 65 bit 6
-        // Task flags - encoder autodetect flag
-        public bool TaskFlagsEncoderAutodetect
-        {
-            get
-            {
-                byte taskFlags = memory[65];
-                bool encoderAutodetect = (((taskFlags >> 6) & 1) == 1);
-                return encoderAutodetect;
-            }
-        }
+        // addr 65 bit 6 - Task flags - encoder autodetect flag
+        public bool TaskFlagsEncoderAutodetect { get { return this.GetBoolFromMem(65,6); } }
 
-        // addr 65 bit 7
-        // Task flags - encoder port2 autodetect flag
-        public bool TaskFlagsEncoderPort2Autodetect
-        {
-            get
-            {
-                byte taskFlags = memory[65];
-                bool encoderPort2Autodetect = (((taskFlags >> 7) & 1) == 1);
-                return encoderPort2Autodetect;
-            }
-        }
+        // addr 65 bit 7 - Task flags - encoder port2 autodetect flag
+        public bool TaskFlagsEncoderPort2Autodetect { get { return this.GetBoolFromMem(65,7); } }
+
 
         // addr 66-67
         // tx count down
@@ -901,118 +388,45 @@ namespace MTUComm
 
         // addr 71 bit 0
         // tamper memory - tilt tamper
-        public bool TiltTamper
-        {
-            get
-            {
-                byte tamperMemory = memory[71];
-                bool tiltTamper = (((tamperMemory >> 0) & 1) == 1);
-                return tiltTamper;
-            }
-        }
+        public bool TiltTamper { get { return this.GetBoolFromMem(71); } }
 
         // addr 71 bit 1
         // tamper memory - magnetic tamper
-        public bool MagneticTamper
-        {
-            get
-            {
-                byte tamperMemory = memory[71];
-                bool magneticTamper = (((tamperMemory >> 1) & 1) == 1);
-                return magneticTamper;
-            }
-        }
+        public bool MagneticTamper { get { return this.GetBoolFromMem(71,1); } }
 
         // addr 71 bit 2
         // tamper memory - not used
 
         // addr 71 bit 3
         // tamper memory - port 2 alarm
-        public bool Port2Alarm
-        {
-            get
-            {
-                byte tamperMemory = memory[71];
-                bool port2Alarm = (((tamperMemory >> 3) & 1) == 1);
-                return port2Alarm;
-            }
-        }
+        public bool Port2Alarm { get { return this.GetBoolFromMem(71,3); } }
 
         // addr 71 bit 4
         // tamper memory - programming coil interface tamper
-        public bool ProgrammingCoilInterfaceTamper
-        {
-            get
-            {
-                byte tamperMemory = memory[71];
-                bool programmingCoilInterfaceTamper = (((tamperMemory >> 4) & 1) == 1);
-                return programmingCoilInterfaceTamper;
-            }
-        }
+        public bool ProgrammingCoilInterfaceTamper { get { return this.GetBoolFromMem(71,4); } }
 
         // addr 71 bit 5
         // tamper memory - register cover tamper
-        public bool RegisterCoverTamper
-        {
-            get
-            {
-                byte tamperMemory = memory[71];
-                bool registerCoverTamper = (((tamperMemory >> 5) & 1) == 1);
-                return registerCoverTamper;
-            }
-        }
+        public bool RegisterCoverTamper { get { return this.GetBoolFromMem(71,5); } }
 
         // addr 71 bit 6
         // tamper memory - reverse flow tamper
-        public bool ReverseFlowTamper
-        {
-            get
-            {
-                byte tamperMemory = memory[71];
-                bool reverseFlowTamper = (((tamperMemory >> 6) & 1) == 1);
-                return reverseFlowTamper;
-            }
-        }
+        public bool ReverseFlowTamper { get { return this.GetBoolFromMem(71,6); } }
 
         // addr 71 bit 7
         // tamper memory - cut wire tamper
-        public bool CutWireTamper
-        {
-            get
-            {
-                byte tamperMemory = memory[71];
-                bool cutWireTamper = (((tamperMemory >> 7) & 1) == 1);
-                return cutWireTamper;
-            }
-        }
-
+        public bool CutWireTamper { get { return this.GetBoolFromMem(71,7); } }
 
         // addr 72
         // Unused
 
         // addr 73 bit 6
         // mtu errorcode - dco uncalibrated
-        public bool MtuErrorCodeDcoUncalibrated
-        {
-            get
-            {
-                byte mtuErrorcode = memory[73];
-                bool dcoUncalibrated = (((mtuErrorcode >> 6) & 1) == 1);
-                return dcoUncalibrated;
-            }
-        }
+        public bool MtuErrorCodeDcoUncalibrated { get { return this.GetBoolFromMem(73,6); } }
 
         // addr 73 bit 7
         // mtu errorcode - crystal fault
-        public bool MtuErrorCodeCrystalFault
-        {
-            get
-            {
-                byte mtuErrorcode = memory[73];
-                bool crystalFault = (((mtuErrorcode >> 7) & 1) == 1);
-                return crystalFault;
-            }
-        }
+        public bool MtuErrorCodeCrystalFault { get { return this.GetBoolFromMem(73,7); } }
 
         // addr 74
         // rtc second
@@ -1253,123 +667,43 @@ namespace MTUComm
 
         // addr 116 bit 0
         // Status flags - tx_count_down_f
-        public bool StatusTxCountDownF
-        {
-            get
-            {
-                byte statusFlags = memory[116];
-                bool txCountDownF = (((statusFlags >> 0) & 1) == 1);
-                return txCountDownF;
-            }
-        }
+        public bool StatusTxCountDownF { get { return this.GetBoolFromMem(116); } }
 
         // addr 116 bit 1
         // Status flags - rtc_not_synced_with_DCU_f
-        public bool StatusRtcNotSyncedWithDcuF
-        {
-            get
-            {
-                byte statusFlags = memory[116];
-                bool rtcNotSyncedWithDcuF = (((statusFlags >> 1) & 1) == 1);
-                return rtcNotSyncedWithDcuF;
-            }
-        }
+        public bool StatusRtcNotSyncedWithDcuF { get { return this.GetBoolFromMem(116,1); } }
 
         // addr 116 bit 2
         // Status flags - p1_tx_f
-        public bool StatusP1TxF
-        {
-            get
-            {
-                byte statusFlags = memory[116];
-                bool p1TxF = (((statusFlags >> 2) & 1) == 1);
-                return p1TxF;
-            }
-        }
+        public bool StatusP1TxF { get { return this.GetBoolFromMem(116,2); } }
 
         // addr 116 bit 3
         // Status flags - p2_tx_f
-        public bool StatusP2TxF
-        {
-            get
-            {
-                byte statusFlags = memory[116];
-                bool p2TxF = (((statusFlags >> 3) & 1) == 1);
-                return p2TxF;
-            }
-        }
+        public bool StatusP2TxF { get { return this.GetBoolFromMem(116,3); } }
 
         // addr 116 bit 4
         // Status flags - alarm_time_range_f
-        public bool StatusAlarmTimeRangeF
-        {
-            get
-            {
-                byte statusFlags = memory[116];
-                bool alarmTimeRangeF = (((statusFlags >> 4) & 1) == 1);
-                return alarmTimeRangeF;
-            }
-        }
+        public bool StatusAlarmTimeRangeF { get { return this.GetBoolFromMem(116,4); } }
 
         // addr 116 bit 5
         // Status flags - purge_data_f
-        public bool StatusPurgeDataF
-        {
-            get
-            {
-                byte statusFlags = memory[116];
-                bool purgeDataF = (((statusFlags >> 5) & 1) == 1);
-                return purgeDataF;
-            }
-        }
+        public bool StatusPurgeDataF { get { return this.GetBoolFromMem(116,5); } }
 
         // addr 116 bit 6
         // Status flags - rf_afc_change_f
-        public bool StatusRfAfcChangeF
-        {
-            get
-            {
-                byte statusFlags = memory[116];
-                bool rfAfcChangeF = (((statusFlags >> 6) & 1) == 1);
-                return rfAfcChangeF;
-            }
-        }
+        public bool StatusRfAfcChangeF { get { return this.GetBoolFromMem(116,6); } }
 
         // addr 117 bit 0
         // Status flags - time sync request trigger when tx cnt down
-        public bool StatusTimeSyncRequestTrigger
-        {
-            get
-            {
-                byte statusFlags = memory[117];
-                bool timeSyncRequest = (((statusFlags >> 0) & 1) == 1);
-                return timeSyncRequest;
-            }
-        }
+        public bool StatusTimeSyncRequestTrigger { get { return this.GetBoolFromMem(117); } }
 
         // addr 117 bit 1
         // Status flags - AFC report trigger when tx cnt down
-        public bool StatusAfcReportTrigger
-        {
-            get
-            {
-                byte statusFlags = memory[117];
-                bool afcReport = (((statusFlags >> 1) & 1) == 1);
-                return afcReport;
-            }
-        }
+        public bool StatusAfcReportTrigger { get { return this.GetBoolFromMem(117,1); } }
 
         // addr 117 bit 2
         // Status flags - schedule a tamper alarm tx
-        public bool StatusScheduleTamperAlarmTx
-        {
-            get
-            {
-                byte statusFlags = memory[117];
-                bool scheduleTamperAlarmTx = (((statusFlags >> 2) & 1) == 1);
-                return scheduleTamperAlarmTx;
-            }
-        }
+        public bool StatusScheduleTamperAlarmTx { get { return this.GetBoolFromMem(117,2); } }
 
         // addr 118-119
         // crc program flash
@@ -1656,27 +990,28 @@ namespace MTUComm
             }
         }
 
-        public String DailySnap
-        {
-            get
-            {
-                int timeDiff = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).Hours;
-                int curTime = memory[198] + timeDiff;
+        */
 
-                if (curTime < 0)
-                    curTime = 24 + curTime;
-                if (curTime == 0)
-                    return "MidNight";
-                if (curTime <= 11)
-                    return curTime.ToString() + " AM";
-                if (curTime == 12)
-                    return "Noon";
-                if (curTime > 12 && curTime < 24)
-                    return (curTime - 12).ToString() + " PM";
-                else
-                    return "Off";
-            }
+        public String DailySnap_Logic ()
+        {
+            int timeDiff = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).Hours;
+            int curTime = memory[198] + timeDiff;
+
+            if (curTime < 0)
+                curTime = 24 + curTime;
+            if (curTime == 0)
+                return "MidNight";
+            if (curTime <= 11)
+                return curTime.ToString() + " AM";
+            if (curTime == 12)
+                return "Noon";
+            if (curTime > 12 && curTime < 24)
+                return (curTime - 12).ToString() + " PM";
+            else
+                return "Off";
         }
+
+        /*
 
         // addr 199
         // AFC no change count
@@ -1756,23 +1091,23 @@ namespace MTUComm
             }
         }
 
-        public string PcbNumber
+        */
+
+        public string PcbNumber_Logic ()
         {
-            get
-            {
-                char supplierCode = Convert.ToChar(memory[232]);
-                char productRevision = Convert.ToChar(memory[237]);
-                int pcbNumber = memory[233] +
-                    (memory[234] << 8) +
-                    (memory[235] << 16) +
-                    (memory[236] << 24);
-                return string.Format("{0}-{1:000000000}-{2}",
-                    supplierCode,
-                    pcbNumber,
-                    productRevision);
-            }
+            char supplierCode = Convert.ToChar(memory[232]);
+            char productRevision = Convert.ToChar(memory[237]);
+            int pcbNumber = memory[233] +
+                (memory[234] << 8) +
+                (memory[235] << 16) +
+                (memory[236] << 24);
+            return string.Format("{0}-{1:000000000}-{2}",
+                supplierCode,
+                pcbNumber,
+                productRevision);
         }
 
+        /*
 
         // addr 238
         // test fail count (not implemented)
@@ -1878,15 +1213,7 @@ namespace MTUComm
 
         // addr 318 bit 0
         // Encryption enabled
-        public bool EncryptionEnabled
-        {
-            get
-            {
-                byte encryptionFlags = memory[318];
-                bool encryptionEnabled = (((encryptionFlags >> 0) & 1) == 1);
-                return encryptionEnabled;
-            }
-        }
+        public bool EncryptionEnabled { get { return this.GetBoolFromMem(318); } }
 
         // addr 319
         // Key index
@@ -1899,33 +1226,6 @@ namespace MTUComm
             }
         }
 
-
-        public static ulong BcdToLong(ulong inNum)
-        {
-            // Define powers of 10 for the BCD conversion routines.
-            ulong powers = 1;
-            ulong outNum = 0;
-            byte tempNum;
-
-            for (int offset = 0; offset < 7; offset++)
-            {
-                tempNum = (byte)((inNum >> offset * 8) & 0xff);
-                if ((tempNum & 0x0f) > 9)
-                {
-                    break;
-                }
-                outNum += (ulong)(tempNum & 0x0f) * powers;
-                powers *= 10;
-                if ((tempNum >> 4) > 9)
-                {
-                    break;
-                }
-                outNum += (ulong)(tempNum >> 4) * powers;
-                powers *= 10;
-            }
-
-            return  outNum;
-        }
-
+        */
     }
 }

@@ -1,16 +1,17 @@
 ﻿using System;
 
-namespace MTUComm
+namespace MTUComm.MemoryMap
 {
-    public class MemoryMap342x: IMemoryMap
+    public class MemoryMap342x: MemoryMap
     {
-        private byte[] memory;
+        private const string FAMILY = "342xx";
 
-        public MemoryMap342x(byte[] memory)
+        public MemoryMap342x(byte[] memory) : base ( memory, FAMILY )
         {
-            this.memory = memory;
+
         }
 
+        /*
         // addr 0
         // MTU type
         public int MtuType
@@ -2469,5 +2470,6 @@ namespace MTUComm
 
             return outNum;
         }
+        */
     }
 }
