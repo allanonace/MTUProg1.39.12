@@ -367,7 +367,7 @@ namespace MTUComm
 
                     break;
                 case "33"://33xx MTU Family
-                    MemoryMap33xx mmap33xx = (MemoryMap33xx)memory;
+                    dynamic mmap33xx = (MemoryMap33xx)memory;
 
 
                     if (!memory.Shipbit)
@@ -386,7 +386,7 @@ namespace MTUComm
                     
                     break;
                 case "34"://34xx MTU Family
-                    MemoryMap342x mmap342x = (MemoryMap342x)memory;
+                    dynamic mmap342x = (MemoryMap342x)memory;
 
                     if (!memory.Shipbit)
                     {
