@@ -18,5 +18,15 @@ namespace Xml
 
         [XmlElement("Alarm")]
         public List<Alarm> Alarms { get; set; }
+
+        public List<Alarm> FindByMtuType(int mtuType)
+        {
+            List<Alarm> alarms = Alarms.FindAll(x => (x.MTUType == mtuType));
+            if (alarms == null)
+            {
+                throw new AlarmNotFoundException("Alarms not found");
+            }
+            return alarms;
+        }
     }
 }
