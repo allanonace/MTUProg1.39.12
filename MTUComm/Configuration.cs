@@ -14,11 +14,15 @@ namespace MTUComm
         private const string XML_MTUS     = "Mtu.xml";
         private const string XML_METERS   = "Meter.xml";
         private const string XML_GLOBAL   = "Global.xml";
+        private const string XML_ALARMS = "Alarm.xml";
+        private const string XML_DEMANDS = "DemandConf.xml";
 
         private String mbase_path;
         private MtuTypes mtuTypes;
         private MeterTypes meterTypes;
         private Global global;
+        private AlarmList alarms;
+        private DemandConf demands;
 
         private string device;
         private string deviceUUID;
@@ -79,6 +83,8 @@ namespace MTUComm
             mtuTypes = config.GetMtu(Path.Combine(mbase_path, XML_MTUS ));
             meterTypes = config.GetMeters(Path.Combine(mbase_path, XML_METERS ));
             global = config.GetGlobal(Path.Combine(mbase_path, XML_GLOBAL ));
+            alarms = config.GetAlarms(Path.Combine(mbase_path, XML_ALARMS));
+            demands = config.GetDemandConf(Path.Combine(mbase_path, XML_DEMANDS));
         }
 
         public static Configuration GetInstance()
