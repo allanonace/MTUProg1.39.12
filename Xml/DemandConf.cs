@@ -9,5 +9,15 @@ namespace Xml
     {
         [XmlElement("Demand")]
         public List<Demand> Demands { get; set; }
+
+        public List<Demand> FindByMtuType(int mtuType)
+        {
+            List<Demand> demands = Demands.FindAll(x => (x.MTUType == mtuType));
+            if (demands == null)
+            {
+                throw new DemandNotFoundException("Demands not found");
+            }
+            return demands;
+        }
     }
 }
