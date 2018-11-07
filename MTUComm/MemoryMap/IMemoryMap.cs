@@ -74,8 +74,6 @@ namespace MTUComm.MemoryMap
 
         public override bool TrySetMember ( SetMemberBinder binder, object value )
         {
-            Console.WriteLine ( "Set " + binder.Name + ": " + value );
-
             return this.Set ( binder.Name, value );
         }
 
@@ -109,8 +107,6 @@ namespace MTUComm.MemoryMap
 
         public override bool TryGetMember ( GetMemberBinder binder, out object result )
         {
-            Console.WriteLine ( "Get " + binder.Name );
-
             return this.Get ( binder.Name, out result );
         }
 
@@ -118,7 +114,12 @@ namespace MTUComm.MemoryMap
         {
             if ( this.dictionary.ContainsKey ( id ) )
             {
-                result = ( object )this.dictionary[ id ].Value;
+                dynamic memoryRegister = this.dictionary[id];
+
+                // Some registers have customized get method
+                if ( ! memoryRegister.HasCustomMethod )
+                     result = ( object )this.dictionary[ id ].Value;
+                else result = ( object )this.dictionary[ id ].funcGetCustom ();
 
                 return true;
             }
