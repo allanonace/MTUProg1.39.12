@@ -11,7 +11,7 @@ namespace Xml
         public string Description { get; set; }
 
         [XmlArray("Registers")]
-        [XmlArrayItem("Register", typeof(MemOverloadRegister))]
+        [XmlArrayItem("Register")]
         public MemOverloadRegister[] Registers { get; set; }
 
         [XmlElement("Operation")]

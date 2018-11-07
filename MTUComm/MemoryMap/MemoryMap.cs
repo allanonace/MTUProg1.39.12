@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Serialization;
 using Xamarin.Forms;
 using Xml;
@@ -78,6 +80,7 @@ namespace MTUComm.MemoryMap
 
         private const string XML_PREFIX         = "family_";
         private const string XML_EXTENSION      = ".xml";
+        private const string METHODS_CUSTOM_SUFIX = "_Logic";
         private const string METHODS_GET_PREFIX = "get_";
         private const string METHODS_SET_PREFIX = "set_";
         private const string EXCEP_SET_INT      = "String argument can't be casted to int";
@@ -129,11 +132,6 @@ namespace MTUComm.MemoryMap
                     RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlRegister.Type.ToUpper () );
                     Type SysType = typeof(System.Object);
 
-                    Console.WriteLine ( "New register: " + xmlRegister.Id + " <" + type + ">" );
-
-                    // Can be created RegisterObj class as generic because could not define
-                    // registersObjs dictionary using object, and each register type need their
-                    // own RegisterObj specialized class, only overriding Value property
                     switch ( type )
                     {
                         case RegType.INT   : SysType = typeof ( int    ); break;
@@ -162,50 +160,47 @@ namespace MTUComm.MemoryMap
                     if ( xmlRegister.Write )
                         this.CreateProperty_Set ( memoryRegister );
 
-                    //Console.WriteLine ( "Exist get method? " + base.dictionary.ContainsKey ( METHODS_GET_PREFIX + memoryRegister.id ) );
-                    //Console.WriteLine ( "Exist set method? " + base.dictionary.ContainsKey ( METHODS_SET_PREFIX + memoryRegister.id ) );
-
-                    TypeCode tc = Type.GetTypeCode(SysType.GetType());
-
                     // References to methods to use in property ( .Value )
+                    dynamic get = base.dictionary[ METHODS_GET_PREFIX + memoryRegister.id ];
+                    dynamic set = ( xmlRegister.Write ) ? base.dictionary[ METHODS_SET_PREFIX + memoryRegister.id ] : null;
+                    TypeCode tc = Type.GetTypeCode(SysType.GetType());
                     switch (type)
                     {
                         case RegType.INT:
-                            memoryRegister.funcGet = (Func<int>)base.dictionary[METHODS_GET_PREFIX + memoryRegister.id];
+                            memoryRegister.funcGet = (Func<int>)get;
                             if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<int>)base.dictionary[METHODS_SET_PREFIX + memoryRegister.id];
+                                memoryRegister.funcSet = (Action<int>)set;
                             break;
                         case RegType.UINT:
-                            memoryRegister.funcGet = (Func<uint>)base.dictionary[METHODS_GET_PREFIX + memoryRegister.id];
+                            memoryRegister.funcGet = (Func<uint>)get;
                             if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<uint>)base.dictionary[METHODS_SET_PREFIX + memoryRegister.id];
+                                memoryRegister.funcSet = (Action<uint>)set;
                             break;
                         case RegType.ULONG:
-                            memoryRegister.funcGet = (Func<ulong>)base.dictionary[METHODS_GET_PREFIX + memoryRegister.id];
+                            memoryRegister.funcGet = (Func<ulong>)get;
                             if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<ulong>)base.dictionary[METHODS_SET_PREFIX + memoryRegister.id];
+                                memoryRegister.funcSet = (Action<ulong>)set;
                             break;
                         case RegType.BOOL:
-                            memoryRegister.funcGet = (Func<bool>)base.dictionary[METHODS_GET_PREFIX + memoryRegister.id];
+                            memoryRegister.funcGet = (Func<bool>)get;
                             if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<bool>)base.dictionary[METHODS_SET_PREFIX + memoryRegister.id];
+                                memoryRegister.funcSet = (Action<bool>)set;
                             break;
                         case RegType.CHAR:
-                            memoryRegister.funcGet = (Func<char>)base.dictionary[METHODS_GET_PREFIX + memoryRegister.id];
+                            memoryRegister.funcGet = (Func<char>)get;
                             if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<char>)base.dictionary[METHODS_SET_PREFIX + memoryRegister.id];
+                                memoryRegister.funcSet = (Action<char>)set;
                             break;
                         case RegType.STRING:
-                            memoryRegister.funcGet = (Func<string>)base.dictionary[METHODS_GET_PREFIX + memoryRegister.id];
+                            memoryRegister.funcGet = (Func<string>)get;
                             if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<string>)base.dictionary[METHODS_SET_PREFIX + memoryRegister.id];
+                                memoryRegister.funcSet = (Action<string>)set;
                             break;
                     }
 
                     // BAD: Reference to property itself
                     // OK : Reference to register object and use TrySet|GetMember methods
                     //      to override set and get logic, avoiding ExpandoObject problems
-                    //base.dictionary[regObj.id] = regObj; //.Value;
                     // NOTA: No se puede usar "base." porque parece ser invalidaria el comportamiento dinamico
                     AddProperty ( memoryRegister );
 
@@ -215,47 +210,76 @@ namespace MTUComm.MemoryMap
                 }
             }
 
-            //Console.WriteLine ( "--------------------" );
-            //Console.WriteLine ( "Test lectura 1: " + base.registers.MtuType);
-            //this.registers.MtuType = 12321; // Not allow
-            //Console.WriteLine ( "Test lectura 2: " + this.registers.MtuType);
+            /*
+            Console.WriteLine ( "--------------------" );
+
+            Console.WriteLine ( "Test custom methods: " + base.registers.DailyRead );
+            Console.WriteLine ( "Test custom operation: " + base.registers.BatteryVoltage );
+            Console.WriteLine ( "Test custom format: " + base.registers.MtuFirmwareVersion );
+
+            Console.WriteLine ( "Test lectura 1: " + base.registers.MtuType);
+            this.registers.MtuType = 12321; // Not allow
+            Console.WriteLine ( "Test lectura 2: " + this.registers.MtuType);
+            */
         }
 
         #endregion
 
         #region Create Property Get
 
-        protected void CreateProperty_Get_Custom<T> ( Func<T> function )
+        /*
+        private void CreateProperty_Get_Custom<T> ( Func<T> function )
         {
             string id = function.Method.Name;
-
-            Console.WriteLine( "MemoryMap -> Create Property Custom [ GET ]: " + id);
 
             base.dictionary.Add( METHODS_GET_PREFIX + id, new Func<T>(() => {
                 return function.Invoke ();
             }));
         }
+        */
 
-        private void CreateProperty_Get<T> ( MemoryRegister<T> regObj )
+        private void CreateProperty_Get<T> ( MemoryRegister<T> memoryRegister )
         {
-            Console.WriteLine("MemoryMap -> Create Property [ GET ]: " + METHODS_GET_PREFIX + regObj.id );
-            
-            base.dictionary.Add( METHODS_GET_PREFIX + regObj.id,
-                new Func<T>(() =>
-                {
-                    Console.WriteLine("MemoryMap -> Property [ GET ]: " + regObj.id);
-
-                    switch (Type.GetTypeCode(typeof(T)))
+            // Register uses normal get block
+            if ( ! memoryRegister.HasCustomMethod )
+            {
+                base.dictionary.Add( METHODS_GET_PREFIX + memoryRegister.id,
+                    new Func<T>(() =>
                     {
-                        case TypeCode.Int32  : return ( T )( object )this.GetIntFromMem   (regObj.address, regObj.size);
-                        case TypeCode.UInt32 : return ( T )( object )this.GetUIntFromMem  (regObj.address, regObj.size);
-                        case TypeCode.UInt64 : return ( T )( object )this.GetULongFromMem (regObj.address, regObj.size);
-                        case TypeCode.Boolean: return ( T )( object )this.GetBoolFromMem  (regObj.address, regObj.bit);
-                        case TypeCode.Char   : return ( T )( object )this.GetCharFromMem  (regObj.address);
-                        case TypeCode.String : return ( T )( object )this.GetStringFromMem(regObj.address, regObj.custom);
-                    }
-                    return default ( T );
-                }));
+                        object result = default ( T );
+                        switch (Type.GetTypeCode(typeof(T)))
+                        {
+                            case TypeCode.Int32  : result = ( object )this.GetIntFromMem   (memoryRegister.address, memoryRegister.size);   break;
+                            case TypeCode.UInt32 : result = ( object )this.GetUIntFromMem  (memoryRegister.address, memoryRegister.size);   break;
+                            case TypeCode.UInt64 : result = ( object )this.GetULongFromMem (memoryRegister.address, memoryRegister.size);   break;
+                            case TypeCode.Boolean: result = ( object )this.GetBoolFromMem  (memoryRegister.address, memoryRegister.bit);    break;
+                            case TypeCode.Char   : result = ( object )this.GetCharFromMem  (memoryRegister.address);                        break;
+                            case TypeCode.String : result = ( object )this.GetStringFromMem(memoryRegister.address, memoryRegister.custom); break;
+                        }
+
+                        // Numeric field with operation to evaluate
+                        if ( memoryRegister.HasCustomOperation )
+                            return this.GetOperation<T> ( result, memoryRegister.custom );
+
+                        // String field with format to apply
+                        else if ( memoryRegister.HasCustomFormat )
+                            return ( T )( object )this.GetStringFormatted ( ( string )result, memoryRegister.custom );
+
+                        // Only return readed value
+                        return ( T )result;
+                    }));
+            }
+            // Register uses special get block/method defined on MTU family classes
+            else
+            {
+                MethodInfo custoMethod = this.GetType().GetMethod ( memoryRegister.id + METHODS_CUSTOM_SUFIX );
+
+                base.dictionary.Add( METHODS_GET_PREFIX + memoryRegister.id,
+                    new Func<T>(() =>
+                    {
+                        return ( T )custoMethod.Invoke ( this, null );
+                    }));
+            }
         }
 
         #endregion
@@ -264,13 +288,9 @@ namespace MTUComm.MemoryMap
 
         public void CreateProperty_Set<T>( MemoryRegister<T> regObj )
         {
-            Console.WriteLine("MemoryMap -> Create Property [ SET ]: " + METHODS_SET_PREFIX + regObj.id );
-
             base.dictionary.Add( METHODS_SET_PREFIX + regObj.id,
                 new Action<T>((_value) =>
                 {
-                    Console.WriteLine("MemoryMap -> Property [ SET ]: " + regObj.id + " Value: " + _value );
-
                     switch (Type.GetTypeCode(typeof(T)))
                     {
                         case TypeCode.Int32  : this.SetIntToMem   ((int   )(object)_value, regObj.address, regObj.size); break;
@@ -286,6 +306,29 @@ namespace MTUComm.MemoryMap
         #endregion
 
         #region Get
+
+        private T GetOperation<T> ( object value, string operation )
+        {
+            // The following arithmetic operators are supported in expressions: +, -, *, / y %
+            // NOTA: No se puede hacer la conversion directa de un double a un entero generico
+            //return ( T )( new DataTable ().Compute ( operation.Replace ( "_val_", value.ToString () ), null ) );
+
+            object result = new DataTable().Compute(operation.Replace("_val_", value.ToString()), null );
+
+            switch ( Type.GetTypeCode( typeof( T )) )
+            {
+                case TypeCode.Int32  : result = Convert.ToInt32  ( result ); break;
+                case TypeCode.UInt32 : result = Convert.ToUInt32 ( result ); break;
+                case TypeCode.UInt64 : result = Convert.ToInt64  ( result ); break;
+            }
+
+            return ( T )result;
+        }
+
+        private string GetStringFormatted ( string value, string mask )
+        {
+            return value; // string.Format ( mask, value );
+        }
 
         protected int GetIntFromMem(int address, int size = MemRegister.DEF_SIZE)
         {
