@@ -146,7 +146,6 @@ namespace MTUComm
             return meterTypes.GetModelsByVendorFromMeters(meterTypes.Meters, vendor);
         }
 
-
         public Boolean useDummyDigits()
         {
             return true; //should be taen from globals, hardcoded for dev
@@ -187,6 +186,14 @@ namespace MTUComm
 
             return return_str; //get UUID from Xamarin
 
+        }
+
+        public AlarmList Alarms
+        {
+            get
+            {
+                return this.alarms;
+            }
         }
 
         public String getApplicationName()
