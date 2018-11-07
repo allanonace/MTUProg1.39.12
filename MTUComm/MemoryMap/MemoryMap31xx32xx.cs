@@ -11,8 +11,8 @@ namespace MTUComm.MemoryMap
         public MemoryMap31xx32xx(byte[] memory) : base ( memory, FAMILY )
         {
             // Special cases
-            base.CreateProperty_Get_Custom<string>( this.DailySnap_Logic );
-            base.CreateProperty_Get_Custom<string> ( this.PcbNumber_Logic );
+            //base.CreateProperty_Get_Custom<string>( this.DailySnap_Logic );
+            //base.CreateProperty_Get_Custom<string> ( this.PcbNumber_Logic );
             //base.CreateSpecialProperty<uint>(this.P1Reading);
             //base.CreateSpecialProperty<int>(this.P2Reading);
         }

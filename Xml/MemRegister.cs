@@ -12,11 +12,11 @@ namespace Xml
     /// </summary>
     public class MemRegister
     {
-        public const int  DEF_ADDRESS = 0;
-        public const int  DEF_SIZE    = 1;
-        public const int  DEF_BIT     = 0;
-        public const bool DEF_WRITE   = false;
-        private const string STR_BOOL = "bool";
+        public  const int    DEF_ADDRESS = 0;
+        public  const int    DEF_SIZE    = 1;
+        public  const int    DEF_BIT     = 0;
+        public  const bool   DEF_WRITE   = false;
+        private const string STR_BOOL    = "bool";
 
         [XmlElement("Id")]
         public string Id { get; set; }
