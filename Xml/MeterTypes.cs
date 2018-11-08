@@ -37,6 +37,55 @@ namespace Xml
             return meters;
         }
 
+        public List<Meter> FindByPortTypeAndFlow(string portType, int flow)
+        {
+            List<string> portTypes = new List<string>();
+            bool findInMeterId = false;
+            switch (portType)
+            {
+                case "E":
+                case "RW":
+                case "M":
+                case "S4K":
+                case "4KL":
+                case "GUT":
+                case "R":
+                case "G":
+                case "P":
+                case "T":
+                case "W":
+                case "I":
+                case "K":
+                case "L":
+                case "B":
+                case "CH4":
+                    portTypes.Add(portType);
+                    break;
+                default:
+                    findInMeterId = true; // numeric port type
+                    try
+                    {
+                        UInt32.Parse(portType);
+                        portTypes.Add(portType); // only one meter type (i.e. "3101")
+                    }
+                    catch (Exception e)
+                    {
+                        portTypes.AddRange(portType.Split('|')); // multiple meter types (i.e. "3101|3102|3103")
+                    }
+                    break;
+            }
+            List<Meter> meters;
+            if (findInMeterId)
+            {
+                meters = Meters.FindAll(m => portTypes.Contains(m.Id.ToString()) && m.Flow.Equals(flow));
+            }
+            else
+            {
+                meters = Meters.FindAll(m => portTypes.Contains(m.Type) && m.Flow.Equals(flow));
+            }
+            return meters;
+        }
+
         public List<string> GetVendorsFromMeters(List<Meter> meters)
         {
             HashSet<string> vendors = new HashSet<string>();
