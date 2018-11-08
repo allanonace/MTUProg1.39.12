@@ -2,6 +2,7 @@
 using MTUComm.MemoryMap;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -313,8 +314,82 @@ namespace MTUComm
             }
         }
 
+        private bool validateCondiction(string condition, IMemoryMap memory)
+        {
+            if(condition == null)
+            {
+                return true;
+            }
+
+            MatchCollection matches = Regex.Matches(condition, @"[&]?(([^&=]+)=([^&=#]*))", RegexOptions.Compiled);
+            Dictionary<string, string> conditions = matches.Cast<Match>().ToDictionary(
+                    m => Uri.UnescapeDataString(m.Groups[2].Value),
+                    m => Uri.UnescapeDataString(m.Groups[3].Value)
+            );
+
+            foreach (KeyValuePair<string, string> item in conditions)
+            {
+                /*
+                 * 
+                 * if(!memory.getValue(item.Key).toString().Equlas(item.Value)){
+                 *      return false;
+                 * }
+                 * */
+            }
+
+
+            return true;
+        }
+
 
         private ActionResult ReadMTU(IMemoryMap memory, Mtu mtutype)
+        {
+            InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtutype.Id, "ReadMTU");
+            String memory_map_type = configuration.GetMemoryMapTyeByMtuId(mtutype.Id);
+
+            dynamic registers;
+            switch (memory_map_type)
+            {
+                case "31xx32xx":
+                    registers = (MemoryMap31xx32xx)memory;
+                    break;
+                case "33xx":
+                    registers = (MemoryMap33xx)memory;
+                    break;
+                case "342x":
+                    registers = (MemoryMap342x)memory;
+                    break;
+                default:
+                    throw new InterfaceNotFoundException("Meter not found");
+            }
+
+            ActionResult result = new ActionResult();
+            foreach (InterfaceParameters parameter in parameters)
+            {
+                if (parameter.Name.Equals("Port"))
+                {
+
+                }
+                else
+                {
+                    try
+                    {
+                        if (validateCondiction(parameter.Conditional, memory))
+                        {
+                            result.AddParameter(new Parameter(parameter.Name, parameter.Display,  registers.GetType().GetProperty(parameter.Name).GetValue(registers, null).ToString()));
+                        }
+                
+                    }
+                    catch (Exception e) {
+                        Console.WriteLine(e.Message+"\r\n"+e.StackTrace);
+                    }
+                }
+
+            }
+            return result;
+        }
+
+        private ActionResult ReadMTUOld(IMemoryMap memory, Mtu mtutype)
         {
             ActionResult result = new ActionResult();
 

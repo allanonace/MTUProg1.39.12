@@ -123,6 +123,32 @@ namespace Xml
             return alarms;
         }
 
+
+        public InterfaceConfig GetInterfaces(string path)
+        {
+            InterfaceConfig interfaces;
+            XmlSerializer s = new XmlSerializer(typeof(InterfaceConfig));
+
+            try
+            {
+                using (StreamReader streamReader = new StreamReader(path))
+                {
+                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                    using (StringReader reader = new StringReader(fileContent))
+                    {
+                        interfaces = (InterfaceConfig)s.Deserialize(reader);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+                throw new InterfaceLoadException("Error loading Interfaces file");
+            }
+
+            return interfaces;
+        }
+
         public Global GetGlobal(string path)
         {
             Global global;

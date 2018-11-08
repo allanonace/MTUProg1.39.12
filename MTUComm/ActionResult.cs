@@ -38,6 +38,11 @@ namespace MTUComm
             return ports.ToArray();
         }
 
+        public Parameter getParameterByTag(string tag)
+        {
+            return parameters.Find(x => x.getLogTag().Equals(tag));
+        }
+
 
     }
 }

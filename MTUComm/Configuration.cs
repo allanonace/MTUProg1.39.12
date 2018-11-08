@@ -14,6 +14,7 @@ namespace MTUComm
         private MtuTypes mtuTypes;
         private MeterTypes meterTypes;
         private Global global;
+        private InterfaceConfig interfaces;
 
         private string device;
         private string deviceUUID;
@@ -40,13 +41,25 @@ namespace MTUComm
             mtuTypes = config.GetMtu(Path.Combine(mbase_path, "Mtu.xml"));
             meterTypes = config.GetMeters(Path.Combine(mbase_path, "Meter.xml"));
             global = config.GetGlobal(Path.Combine(mbase_path, "Global.xml"));
+            interfaces = config.GetInterfaces(Path.Combine(mbase_path, "Interface.xml"));
+        }
+
+        public Configuration(String base_path)
+        {
+            mbase_path = base_path;
+            device = "PC";
+            Config config = new Config();
+            mtuTypes = config.GetMtu(Path.Combine(mbase_path, "Mtu.xml"));
+            meterTypes = config.GetMeters(Path.Combine(mbase_path, "Meter.xml"));
+            global = config.GetGlobal(Path.Combine(mbase_path, "Global.xml"));
+            interfaces = config.GetInterfaces(Path.Combine(mbase_path, "Interface.xml"));
         }
 
         public static Configuration GetInstance()
         {
             if (instance == null)
             {
-                instance = new Configuration();
+                instance = new Configuration(@"C: \Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog");
             }
             return instance;
         }
@@ -89,6 +102,29 @@ namespace MTUComm
             return meterTypes.FindByMterId(meterId);
         }
 
+
+        public InterfaceParameters[] getAllInterfaceFields(int mtuid, string Action)
+        {
+            return interfaces.GetInterfaceByMtuIdAndAction(mtuid, Action).getAllInterfaces();
+        }
+
+        public InterfaceParameters[] getLogInterfaceFields(int mtuid, string Action)
+        {
+            return interfaces.GetInterfaceByMtuIdAndAction(mtuid, Action).getLogInterfaces();
+        }
+
+        public InterfaceParameters[] getUserInterfaceFields(int mtuid, string Action)
+        {
+            return interfaces.GetInterfaceByMtuIdAndAction(mtuid, Action).getUserInterfaces();
+        }
+
+        public string GetMemoryMapTyeByMtuId(int mtuid)
+        {
+            return interfaces.GetmemoryMapTyeByMtuId(mtuid);
+        }
+
+
+        
 
         public List<string>  GetVendorsFromMeters()
         {

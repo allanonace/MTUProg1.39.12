@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
 namespace Xml
@@ -86,6 +87,52 @@ namespace Xml
 
         [XmlElement("Flow")]
         public int Flow { get; set; }
+
+        public string NumberOfDials {
+            get {
+                Match match = Regex.Match(this.Display,
+                               @"(\w+) (\d+)D PF(\d+) (\w+)",
+                               RegexOptions.IgnoreCase | RegexOptions.Singleline |
+                               RegexOptions.CultureInvariant | RegexOptions.Compiled);
+                if (match.Success)
+                {
+                    return match.Groups[2].Value;
+                }
+                return null;
+            }
+        }
+
+        public string DriveDialSize
+        {
+            get
+            {
+                Match match = Regex.Match(this.Display,
+                               @"(\w+) (\d+)D PF(\d+) (\w+)",
+                               RegexOptions.IgnoreCase | RegexOptions.Singleline |
+                               RegexOptions.CultureInvariant | RegexOptions.Compiled);
+                if (match.Success)
+                {
+                    return match.Groups[3].Value;
+                }
+                return null;
+            }
+        }
+
+        public string UnitOfMeasure
+        {
+            get
+            {
+                Match match = Regex.Match(this.Display,
+                               @"(\w+) (\d+)D PF(\d+) (\w+)",
+                               RegexOptions.IgnoreCase | RegexOptions.Singleline |
+                               RegexOptions.CultureInvariant | RegexOptions.Compiled);
+                if (match.Success)
+                {
+                    return match.Groups[4].Value;
+                }
+                return null;
+            }
+        }
 
     }
 }
