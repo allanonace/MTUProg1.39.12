@@ -96,7 +96,7 @@ namespace Xml
         public bool GasCutWireAlarm { get; set; }
 
         [XmlElement("Flow")]
-        public string Flow { get; set; }
+        public int Flow { get; set; }
 
         [XmlElement("MeterId")]
         public string MeterId { get; set; }
