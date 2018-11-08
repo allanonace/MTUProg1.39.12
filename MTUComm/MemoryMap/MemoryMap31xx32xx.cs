@@ -8,14 +8,7 @@ namespace MTUComm.MemoryMap
 
         #region Initialization
 
-        public MemoryMap31xx32xx(byte[] memory) : base ( memory, FAMILY )
-        {
-            // Special cases
-            //base.CreateProperty_Get_Custom<string>( this.DailySnap_Logic );
-            //base.CreateProperty_Get_Custom<string> ( this.PcbNumber_Logic );
-            //base.CreateSpecialProperty<uint>(this.P1Reading);
-            //base.CreateSpecialProperty<int>(this.P2Reading);
-        }
+        public MemoryMap31xx32xx(byte[] memory) : base ( memory, FAMILY ) {}
 
         #endregion
 
@@ -992,7 +985,14 @@ namespace MTUComm.MemoryMap
 
         */
 
-        public String DailySnap_Logic ()
+        public int DailyRead_Logic ( dynamic MemoryRegister )
+        {
+            Console.WriteLine ( "Metodo personalizado de DailyRead: " + MemoryRegister.id );
+
+            return MemoryRegister.Value;
+        }
+
+        public String DailySnap_Logic ( dynamic MemoryRegister )
         {
             int timeDiff = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).Hours;
             int curTime = memory[198] + timeDiff;
@@ -1009,6 +1009,13 @@ namespace MTUComm.MemoryMap
                 return (curTime - 12).ToString() + " PM";
             else
                 return "Off";
+        }
+
+        public bool Shipbit_Logic ( dynamic MemoryRegister )
+        {
+            Console.WriteLine ( "MemoryMap3132 -> Logic Shipbit" );
+
+            return false; // base.registers.Shipbit.Value; // CREA UN BUCLE
         }
 
         /*
@@ -1093,7 +1100,7 @@ namespace MTUComm.MemoryMap
 
         */
 
-        public string PcbNumber_Logic ()
+        public string PcbNumber_Logic ( dynamic MemoryRegister )
         {
             char supplierCode = Convert.ToChar(memory[232]);
             char productRevision = Convert.ToChar(memory[237]);

@@ -82,6 +82,7 @@ namespace MTUComm.MemoryMap
         private const string XML_EXTENSION      = ".xml";
         private const string METHODS_CUSTOM_SUFIX = "_Logic";
         private const string METHODS_GET_PREFIX = "get_";
+        private const string METHODS_GET_CUSTOM_PREFIX = "getCustom_";
         private const string METHODS_SET_PREFIX = "set_";
         private const string EXCEP_SET_INT      = "String argument can't be casted to int";
         private const string EXCEP_SET_UINT     = "String argument can't be casted to uint";
@@ -152,40 +153,41 @@ namespace MTUComm.MemoryMap
                         this.CreateProperty_Set ( memoryRegister );
 
                     // References to methods to use in property ( .Value )
-                    dynamic get = base.dictionary[ METHODS_GET_PREFIX + memoryRegister.id ];
-                    dynamic set = ( xmlRegister.Write ) ? base.dictionary[ METHODS_SET_PREFIX + memoryRegister.id ] : null;
-                    TypeCode tc = Type.GetTypeCode(SysType.GetType());
+                    dynamic get  = base.dictionary[ METHODS_GET_PREFIX + memoryRegister.id ];
+                    dynamic getC = ( memoryRegister.HasCustomMethod ) ? base.dictionary[ METHODS_GET_CUSTOM_PREFIX + memoryRegister.id ] : null;
+                    dynamic set  = ( memoryRegister.write ) ? base.dictionary[ METHODS_SET_PREFIX + memoryRegister.id ] : null;
+                    TypeCode tc  = Type.GetTypeCode(SysType.GetType());
                     switch (type)
                     {
                         case RegType.INT:
-                            memoryRegister.funcGet = (Func<int>)get;
-                            if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<int>)set;
+                            memoryRegister.funcGet       = (Func<int>)get;
+                            memoryRegister.funcGetCustom = (Func<int>)getC;
+                            memoryRegister.funcSet       = (Action<int>)set;
                             break;
                         case RegType.UINT:
-                            memoryRegister.funcGet = (Func<uint>)get;
-                            if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<uint>)set;
+                            memoryRegister.funcGet       = (Func<uint>)get;
+                            memoryRegister.funcGetCustom = (Func<uint>)getC;
+                            memoryRegister.funcSet       = (Action<uint>)set;
                             break;
                         case RegType.ULONG:
-                            memoryRegister.funcGet = (Func<ulong>)get;
-                            if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<ulong>)set;
+                            memoryRegister.funcGet       = (Func<ulong>)get;
+                            memoryRegister.funcGetCustom = (Func<ulong>)getC;
+                            memoryRegister.funcSet       = (Action<ulong>)set;
                             break;
                         case RegType.BOOL:
-                            memoryRegister.funcGet = (Func<bool>)get;
-                            if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<bool>)set;
+                            memoryRegister.funcGet       = (Func<bool>)get;
+                            memoryRegister.funcGetCustom = (Func<bool>)getC;
+                            memoryRegister.funcSet       = (Action<bool>)set;
                             break;
                         case RegType.CHAR:
-                            memoryRegister.funcGet = (Func<char>)get;
-                            if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<char>)set;
+                            memoryRegister.funcGet       = (Func<char>)get;
+                            memoryRegister.funcGetCustom = (Func<char>)getC;
+                            memoryRegister.funcSet       = (Action<char>)set;
                             break;
                         case RegType.STRING:
-                            memoryRegister.funcGet = (Func<string>)get;
-                            if ( xmlRegister.Write )
-                                memoryRegister.funcSet = (Action<string>)set;
+                            memoryRegister.funcGet       = (Func<string>)get;
+                            memoryRegister.funcGetCustom = (Func<string>)getC;
+                            memoryRegister.funcSet       = (Action<string>)set;
                             break;
                     }
 
@@ -201,17 +203,25 @@ namespace MTUComm.MemoryMap
                 }
             }
 
-            /*
-            Console.WriteLine ( "--------------------" );
+            // TEST: Diferentes opciones campo custom
+            //Console.WriteLine ( "Test custom operation: " + base.registers.BatteryVoltage );
+            //Console.WriteLine ( "Test custom format: " + base.registers.MtuFirmwareVersion );
 
-            Console.WriteLine ( "Test custom methods: " + base.registers.DailyRead );
-            Console.WriteLine ( "Test custom operation: " + base.registers.BatteryVoltage );
-            Console.WriteLine ( "Test custom format: " + base.registers.MtuFirmwareVersion );
+            // TEST: Separacion entre Value.get y funGetCustom
+            //dynamic mInt = this.GetProperty_Int ( "DailyRead" );
+            //Console.WriteLine ( base.registers.DailyRead + " == " + mInt.Value );
+            //mInt.Value = 123;
+            //Console.WriteLine ( base.registers.DailyRead + " == " + mInt.Value );
 
-            Console.WriteLine ( "Test lectura 1: " + base.registers.MtuType);
-            this.registers.MtuType = 12321; // Not allow
-            Console.WriteLine ( "Test lectura 2: " + this.registers.MtuType);
-            */
+            // TEST: Registros de solo lectura
+            //Console.WriteLine ( "Test lectura 1: " + base.registers.MtuType);
+            //this.registers.MtuType = 12321; // Not allow. Error!
+
+            this.SetRegisterModified ( "MtuType"   );
+            this.SetRegisterModified ( "Shipbit"   );
+            this.SetRegisterModified ( "DailyRead" );
+
+            MemoryRegisterDictionary regs = this.GetModifiedRegisters ();
         }
 
         #endregion
@@ -231,44 +241,42 @@ namespace MTUComm.MemoryMap
 
         private void CreateProperty_Get<T> ( MemoryRegister<T> memoryRegister )
         {
-            // Register uses normal get block
-            if ( ! memoryRegister.HasCustomMethod )
-            {
-                base.dictionary.Add( METHODS_GET_PREFIX + memoryRegister.id,
-                    new Func<T>(() =>
+            // All register have normal get block
+            base.dictionary.Add( METHODS_GET_PREFIX + memoryRegister.id,
+                new Func<T>(() =>
+                {
+                    object result = default ( T );
+                    switch (Type.GetTypeCode(typeof(T)))
                     {
-                        object result = default ( T );
-                        switch (Type.GetTypeCode(typeof(T)))
-                        {
-                            case TypeCode.Int32  : result = ( object )this.GetIntFromMem   (memoryRegister.address, memoryRegister.size);   break;
-                            case TypeCode.UInt32 : result = ( object )this.GetUIntFromMem  (memoryRegister.address, memoryRegister.size);   break;
-                            case TypeCode.UInt64 : result = ( object )this.GetULongFromMem (memoryRegister.address, memoryRegister.size);   break;
-                            case TypeCode.Boolean: result = ( object )this.GetBoolFromMem  (memoryRegister.address, memoryRegister.bit);    break;
-                            case TypeCode.Char   : result = ( object )this.GetCharFromMem  (memoryRegister.address);                        break;
-                            case TypeCode.String : result = ( object )this.GetStringFromMem(memoryRegister.address, memoryRegister.custom); break;
-                        }
+                        case TypeCode.Int32  : result = ( object )this.GetIntFromMem   (memoryRegister.address, memoryRegister.size);   break;
+                        case TypeCode.UInt32 : result = ( object )this.GetUIntFromMem  (memoryRegister.address, memoryRegister.size);   break;
+                        case TypeCode.UInt64 : result = ( object )this.GetULongFromMem (memoryRegister.address, memoryRegister.size);   break;
+                        case TypeCode.Boolean: result = ( object )this.GetBoolFromMem  (memoryRegister.address, memoryRegister.bit);    break;
+                        case TypeCode.Char   : result = ( object )this.GetCharFromMem  (memoryRegister.address);                        break;
+                        case TypeCode.String : result = ( object )this.GetStringFromMem(memoryRegister.address, memoryRegister.custom); break;
+                    }
 
-                        // Numeric field with operation to evaluate
-                        if ( memoryRegister.HasCustomOperation )
-                            return this.GetOperation<T> ( result, memoryRegister.custom );
+                    // Numeric field with operation to evaluate
+                    if ( memoryRegister.HasCustomOperation )
+                        return this.GetOperation<T> ( result, memoryRegister.custom );
 
-                        // String field with format to apply
-                        else if ( memoryRegister.HasCustomFormat )
-                            return ( T )( object )this.GetStringFormatted ( ( string )result, memoryRegister.custom );
+                    // String field with format to apply
+                    else if ( memoryRegister.HasCustomFormat )
+                        return ( T )( object )this.GetStringFormatted ( ( string )result, memoryRegister.custom );
 
-                        // Only return readed value
-                        return ( T )result;
-                    }));
-            }
-            // Register uses special get block/method defined on MTU family classes
-            else
+                    // Only return readed value
+                    return ( T )result;
+                }));
+
+            // But only someone have special get block/method defined on MTU family classes
+            if ( memoryRegister.HasCustomMethod )
             {
                 MethodInfo custoMethod = this.GetType().GetMethod ( memoryRegister.id + METHODS_CUSTOM_SUFIX );
 
-                base.dictionary.Add( METHODS_GET_PREFIX + memoryRegister.id,
+                base.dictionary.Add( METHODS_GET_CUSTOM_PREFIX + memoryRegister.id,
                     new Func<T>(() =>
                     {
-                        return ( T )custoMethod.Invoke ( this, null );
+                        return ( T )custoMethod.Invoke ( this, new object[] { memoryRegister } );
                     }));
             }
         }
@@ -361,6 +369,46 @@ namespace MTUComm.MemoryMap
         protected string GetStringFromMem(int address, string format)
         {
             return string.Format(format, memory[address]);
+        }
+
+        public MemoryRegister<T> GetProperty<T> ( string id )
+        {
+            if ( base.dictionary.ContainsKey ( id ) )
+                return ( MemoryRegister<T> )base.dictionary[ id ];
+
+            // Selected dynamic member not exists
+            Console.WriteLine ( "Set " + id + ": Error - Selected register is not loaded" );
+            throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + ": " + id );
+        }
+
+        public MemoryRegister<int> GetProperty_Int ( string id )
+        {
+            return this.GetProperty<int> ( id );
+        }
+
+        public MemoryRegister<uint> GetProperty_UInt ( string id )
+        {
+            return this.GetProperty<uint> ( id );
+        }
+
+        public MemoryRegister<ulong> GetProperty_ULong ( string id )
+        {
+            return this.GetProperty<ulong> ( id );
+        }
+
+        public MemoryRegister<bool> GetProperty_Bool ( string id )
+        {
+            return this.GetProperty<bool> ( id );
+        }
+
+        public MemoryRegister<char> GetProperty_Char ( string id )
+        {
+            return this.GetProperty<char> ( id );
+        }
+
+        public MemoryRegister<string> GetProperty_String ( string id )
+        {
+            return this.GetProperty<string> ( id );
         }
 
         #endregion
@@ -470,7 +518,6 @@ namespace MTUComm.MemoryMap
 
         #region Used
 
-        /*
         public void SetRegisterModified ( string id )
         {
             if ( this.registersObjs.ContainsKey ( id ) )
@@ -486,7 +533,6 @@ namespace MTUComm.MemoryMap
             else
                 throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + ": "  + id );
         }
-        */
 
         public MemoryRegisterDictionary GetModifiedRegisters ()
         {
@@ -510,10 +556,10 @@ namespace MTUComm.MemoryMap
             MemoryRegisterDictionary changes,
             Dictionary<string,dynamic> mixedRegisters )
         {
-            List<MemoryRegister<T>> list = new List<MemoryRegister<T>> ();
-
-            foreach ( dynamic register in mixedRegisters )
+            foreach ( KeyValuePair<string,dynamic> entry in mixedRegisters )
             {
+                dynamic register = entry.Value;
+
                 switch ( Type.GetTypeCode ( typeof ( T ) ) )
                 {
                     case TypeCode.Int32:

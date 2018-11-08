@@ -12,6 +12,7 @@ namespace MTUComm.MemoryMap
         private const string STR_CUSTOM = "method";
 
         public Func<T> funcGet;
+        public Func<T> funcGetCustom;
         public Action<T> funcSet;
         public string id { get; }
         public string description { get; }

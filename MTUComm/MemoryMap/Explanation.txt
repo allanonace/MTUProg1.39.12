@@ -19,7 +19,7 @@
     <Address>_integer_</Address>
     <Size>_integer_</Size>
     <Write>false|_vacio_</Write>
-    <Custom>_val_1_operacion_|_val_1_mascara_string_|_vacio_</Custom>
+    <Custom>_val_1_operacion_|_val_1_mascara_string_|method|_vacio_</Custom>
   </Register>
 </Registers>
 
