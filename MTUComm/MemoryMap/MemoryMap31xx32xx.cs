@@ -983,43 +983,6 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        */
-
-        public int DailyRead_Logic ( dynamic MemoryRegister )
-        {
-            Console.WriteLine ( "Metodo personalizado de DailyRead: " + MemoryRegister.id );
-
-            return MemoryRegister.Value;
-        }
-
-        public String DailySnap_Logic ( dynamic MemoryRegister )
-        {
-            int timeDiff = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).Hours;
-            int curTime = memory[198] + timeDiff;
-
-            if (curTime < 0)
-                curTime = 24 + curTime;
-            if (curTime == 0)
-                return "MidNight";
-            if (curTime <= 11)
-                return curTime.ToString() + " AM";
-            if (curTime == 12)
-                return "Noon";
-            if (curTime > 12 && curTime < 24)
-                return (curTime - 12).ToString() + " PM";
-            else
-                return "Off";
-        }
-
-        public bool Shipbit_Logic ( dynamic MemoryRegister )
-        {
-            Console.WriteLine ( "MemoryMap3132 -> Logic Shipbit" );
-
-            return false; // base.registers.Shipbit.Value; // CREA UN BUCLE
-        }
-
-        /*
-
         // addr 199
         // AFC no change count
         public int AfcNoChangeCount
@@ -1099,20 +1062,6 @@ namespace MTUComm.MemoryMap
         }
 
         */
-
-        public string PcbNumber_Logic ( dynamic MemoryRegister )
-        {
-            char supplierCode = Convert.ToChar(memory[232]);
-            char productRevision = Convert.ToChar(memory[237]);
-            int pcbNumber = memory[233] +
-                (memory[234] << 8) +
-                (memory[235] << 16) +
-                (memory[236] << 24);
-            return string.Format("{0}-{1:000000000}-{2}",
-                supplierCode,
-                pcbNumber,
-                productRevision);
-        }
 
         /*
 
@@ -1234,5 +1183,35 @@ namespace MTUComm.MemoryMap
         }
 
         */
+
+        public string InterfaceTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1PciAlarm.Value, MemoryRegisters.ProgrammingCoilInterfaceTamper.Value);
+        }
+
+        public string TiltTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1TiltAlarm.Value, MemoryRegisters.TiltTamper.Value);
+        }
+
+        public string MagneticTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1MagneticAlarm.Value, MemoryRegisters.MagneticTamper.Value);
+        }
+
+        public string RegisterCoverTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1RegisterCoverAlarm.Value, MemoryRegisters.RegisterCoverTamper.Value);
+        }
+
+        public string ReverseFlowTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
+        }
     }
 }

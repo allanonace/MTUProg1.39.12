@@ -27,8 +27,8 @@ namespace Xml
         [XmlAttribute("conditional")]
         public string Conditional { get; set; }
 
-        [XmlAttribute("xml")]
-        public string Xml { get; set; }
+        [XmlAttribute("source")]
+        public string Source { get; set; }
 
         [XmlText]
         public string Value { get; set; }

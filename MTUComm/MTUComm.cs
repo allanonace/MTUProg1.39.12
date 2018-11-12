@@ -101,21 +101,23 @@ namespace MTUComm
                     break;
             }
 
+            byte[] buffer = new byte[512];
+
+            System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
+            System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
+            System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
+
+
             switch (mtuType.HexNum.Substring(0, 2))
             {
                 case "31":
                 case "32":
-                    args = new ReadMtuArgs(new MemoryMap31xx32xx(lexi.Read(0, 255)), mtuType);
+                    args = new ReadMtuArgs(new MemoryMap31xx32xx(buffer), mtuType);
                     break;
                 case "33":
-                    args = new ReadMtuArgs(new MemoryMap33xx(lexi.Read(0, 255)), mtuType);
+                    args = new ReadMtuArgs(new MemoryMap33xx(buffer), mtuType);
                     break;
                 case "34":
-                    byte[] buffer = new byte[512];
-
-                    System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
-                    System.Buffer.BlockCopy(lexi.Read(256, 65), 0, buffer, 256, 65);
-
                     args = new ReadMtuArgs(new MemoryMap342x(buffer), mtuType);
                     break;
             }

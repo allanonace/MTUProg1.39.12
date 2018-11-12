@@ -160,5 +160,10 @@ namespace Xml
 
         [XmlElement("ECoderReverseFlow")]
         public bool ECoderReverseFlow { get; set; }
-    }
+
+        public String GetProperty(String Name)
+        {
+            return this.GetType().GetProperty(Name).GetValue(this, null).ToString();
+        }
+}
 }

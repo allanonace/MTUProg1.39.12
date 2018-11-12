@@ -314,28 +314,65 @@ namespace MTUComm
             }
         }
 
-        private bool validateCondiction(string condition, IMemoryMap memory)
+        private bool validateCondition(string condition, dynamic registers, Mtu mtutype)
         {
             if(condition == null)
             {
                 return true;
             }
 
-            MatchCollection matches = Regex.Matches(condition, @"[&]?(([^&=]+)=([^&=#]*))", RegexOptions.Compiled);
-            Dictionary<string, string> conditions = matches.Cast<Match>().ToDictionary(
-                    m => Uri.UnescapeDataString(m.Groups[2].Value),
-                    m => Uri.UnescapeDataString(m.Groups[3].Value)
-            );
-
-            foreach (KeyValuePair<string, string> item in conditions)
+            try
             {
-                /*
-                 * 
-                 * if(!memory.getValue(item.Key).toString().Equlas(item.Value)){
-                 *      return false;
-                 * }
-                 * */
+                MatchCollection matches = Regex.Matches(condition, @"[&]?(([^&=]+)=([^&=#]*))", RegexOptions.Compiled);
+                Dictionary<string, string> conditions = matches.Cast<Match>().ToDictionary(
+                        m => Uri.UnescapeDataString(m.Groups[2].Value),
+                        m => Uri.UnescapeDataString(m.Groups[3].Value)
+                );
+
+                foreach (KeyValuePair<string, string> item in conditions)
+                {
+                    string condition_value = "";
+
+                    switch (item.Key.Split(new char[] { '.' })[0])
+                    {
+                        case "Action":
+                            try
+                            {
+                                string action_property_name = item.Key.Split(new char[] { '.' })[1];
+                                condition_value = GetProperty(action_property_name);
+                            }
+                            catch (Exception e) { }
+                            break;
+                        case "MeterType":
+                            break;
+                        case "MtuType":
+                            try
+                            {
+                                string mtu_property_name = item.Key.Split(new char[] { '.' })[1];
+                                condition_value = mtutype.GetProperty(mtu_property_name);
+                            }
+                            catch (Exception e) { }
+                            break;
+                        default:
+                            try
+                            {
+                                string memory_property_name = item.Key.Split(new char[] { '.' })[1];
+                                condition_value = registers.GetProperty(memory_property_name).Value.ToString();
+                            }
+                            catch (Exception e) { }
+                            break;
+
+                    }
+
+                    if (condition_value.Length > 0 && !condition_value.ToLower().Equals(item.Value.ToLower()))
+                    {
+                        return false;
+                    }
+                }
             }
+            catch (Exception e) {
+                Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
+            };
 
 
             return true;
@@ -374,9 +411,31 @@ namespace MTUComm
                 {
                     try
                     {
-                        if (validateCondiction(parameter.Conditional, memory))
+                        if (validateCondition(parameter.Conditional, registers, mtutype))
                         {
-                            result.AddParameter(new Parameter(parameter.Name, parameter.Display,  registers.GetType().GetProperty(parameter.Name).GetValue(registers, null).ToString()));
+                            if (parameter.Source == null)
+                            {
+                                parameter.Source = "";
+                            }
+
+                            switch (parameter.Source.Split(new char[] { '.' })[0])
+                            {
+                                case "Action":
+                                    string action_property_name = parameter.Source.Split(new char[] { '.' })[1];
+                                    result.AddParameter(new Parameter(parameter.Name, parameter.Display, GetProperty(action_property_name)));
+                                    break;
+                                case "MeterType":
+                                    break;
+                                case "MtuType":
+                                    string mtu_property_name = parameter.Source.Split(new char[] { '.' })[1];
+                                    result.AddParameter(new Parameter(parameter.Name, parameter.Display, mtutype.GetProperty(mtu_property_name)));
+                                    break;
+                                    default:
+                                    result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty(parameter.Name).Value.ToString()));
+                                break;
+
+                            }
+
                         }
                 
                     }
@@ -415,7 +474,7 @@ namespace MTUComm
             result.AddParameter(new Parameter("XmitInterval", "Xmit Interval", timeFormatter(memory.MessageOverlapCount * memory.ReadInterval) ));
             result.AddParameter(new Parameter("ReadInterval", "Read Interval", timeFormatter(memory.ReadInterval)));
             result.AddParameter(new Parameter("ReadIntervalMinutes", "ReadIntervalMinutes", memory.ReadInterval.ToString()));
-            result.AddParameter(new Parameter("MtuVoltageBattery", "Battery", ((memory.BatteryVoltage*1.0)/1000).ToString("0.00 V")));
+            result.AddParameter(new Parameter("MtuVoltageBattery", "Battery", ((memory.MtuMiliVoltageBattery * 1.0)/1000).ToString("0.00 V")));
 
             result.AddParameter(new Parameter("MtuType", "MTU Type", memory.MtuType.ToString()));
             result.AddParameter(new Parameter("MtuSoftware", "MTU Software", memory.MtuFirmwareVersion));
@@ -558,6 +617,20 @@ namespace MTUComm
             logger.logTurnOnResult(this, e.MtuId);
             ActionFinishArgs args = new ActionFinishArgs(null); // TODO: add turn on result
             OnFinish(this, args);
+        }
+
+        public String GetProperty(string name)
+        {
+            switch (name)
+            {
+                case "User":
+                    return mUser;
+                case "Date":
+                    return DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss");
+                default:
+                    return "";
+            }
+            return "";
         }
 
         public String getUser()

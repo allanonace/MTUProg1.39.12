@@ -17,7 +17,7 @@ namespace MTUComm.MemoryMap
         int MessageOverlapCount { get; }
         int ReadInterval { get; }
 
-        int BatteryVoltage { get; }
+        int MtuMiliVoltageBattery { get; }
 
         int MtuFirmwareVersionFormatFlag { get; }
         string MtuFirmwareVersion { get; }
@@ -42,12 +42,35 @@ namespace MTUComm.MemoryMap
 
     public abstract class AMemoryMap : DynamicObject, IMemoryMap
     {
+        #region Constants
+
+        public enum REGISTER_TYPE { REGISTER, OVERLOAD }
+
+        #endregion
+
         #region Attributes
 
         // Can't put directly <string,MemoryRegister>
-        protected Dictionary<string, dynamic> dictionary;
+        private Dictionary<string, dynamic> dictionary;
+        protected dynamic registers { get; }
 
-        protected dynamic registers;
+        #endregion
+
+        #region Indexer
+
+        // Return generated objects ( registers, overloads and methods ), without call TryGetMember
+        public dynamic this[ string id ]
+        {
+            get
+            {
+                if ( this.dictionary.ContainsKey ( id ) )
+                    return this.dictionary[ id ];
+
+                // Selected dynamic member not exists
+                Console.WriteLine ( "Get " + id + ": Error - Selected register is not loaded" );
+                throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + ": " + id );
+            }
+        }
 
         #endregion
 
@@ -55,6 +78,9 @@ namespace MTUComm.MemoryMap
 
         public AMemoryMap ()
         {
+            // Will contain MemoryRegister objects but thanks to TryGetMember
+            // the returned values always will be property get block returned value
+            // TryGetMember is only called using dot operator ( registers.id_register )
             this.dictionary = new Dictionary<string, dynamic> ();
 
             // En la clase MemoryMap no se puede usar directamente "this|base.idPropiedad", habiendo
@@ -62,15 +88,31 @@ namespace MTUComm.MemoryMap
             this.registers = this;
         }
 
-        protected void AddProperty ( dynamic memoryRegister )
-        {
-            if ( ! this.dictionary.ContainsKey ( memoryRegister.id ) )
-            {
-                this.dictionary[memoryRegister.id] = memoryRegister;
+        #endregion
 
-                Console.WriteLine ( "AddProperty: " + memoryRegister.id );
-            }
+        #region Methods
+
+        // Add dynamic member of type MemoryRegister or MemoryOverload
+        protected void AddProperty ( dynamic register )
+        {
+            if ( ! this.dictionary.ContainsKey ( register.id ) )
+                this.dictionary[ register.id ] = register;
         }
+
+        // Add dynamic member of type Func<> or Action<>
+        protected void AddMethod ( string id, dynamic method )
+        {
+            if ( ! this.dictionary.ContainsKey ( id ) )
+                this.dictionary[id] = method;
+        }
+
+        // Ask if a dynamic member exists in the object
+        protected bool ContainsMember ( string id )
+        {
+            return this.dictionary.ContainsKey ( id );
+        }
+
+        #region Using dot operator
 
         public override bool TrySetMember ( SetMemberBinder binder, object value )
         {
@@ -114,12 +156,17 @@ namespace MTUComm.MemoryMap
         {
             if ( this.dictionary.ContainsKey ( id ) )
             {
-                dynamic memoryRegister = this.dictionary[id];
+                dynamic register = this.dictionary[id];
 
-                // Some registers have customized get method
-                if ( ! memoryRegister.HasCustomMethod )
-                     result = ( object )this.dictionary[ id ].Value;
-                else result = ( object )this.dictionary[ id ].funcGetCustom ();
+                if ( register.registerType == REGISTER_TYPE.REGISTER )
+                {
+                    // Some registers have customized get method
+                    if ( ! register.HasCustomMethod )
+                         result = ( object )this.dictionary[ id ].Value;
+                    else result = ( object )this.dictionary[ id ].funcGetCustom ();
+                }
+                else // Overload
+                    result = ( object )this.dictionary[ id ].Value;
 
                 return true;
             }
@@ -128,6 +175,8 @@ namespace MTUComm.MemoryMap
             Console.WriteLine ( "Get " + id + ": Error - Selected register is not loaded" );
             throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + ": " + id );
         }
+
+        #endregion
 
         #endregion
 
@@ -238,17 +287,17 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        public int BatteryVoltage
+        public int MtuMiliVoltageBattery
         {
             get
             {
                 object result;
-                this.Get("BatteryVoltage", out result);
+                this.Get("MtuMiliVoltageBattery", out result);
                 return (int)result;
             }
             set
             {
-                this.Set("BatteryVoltage", value);
+                this.Set("MtuMiliVoltageBattery", value);
             }
         }
 

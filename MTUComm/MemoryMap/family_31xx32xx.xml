@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Registers>
   <Register>
     <Id>MtuType</Id>
@@ -10,7 +10,7 @@
     <Custom/>
   </Register>
   <Register>
-    <Id>MtuId</Id>
+    <Id>MtuSerialNumber</Id>
     <Description>MTU Id</Description>
     <Type>int</Type>
     <Address>6</Address>
@@ -28,7 +28,7 @@
     <Custom/>
   </Register>
   <Register>
-    <Id>DailyRead</Id>
+    <Id>DailyGMTHourRead</Id>
     <Description>Daily read</Description>
     <Type>int</Type>
     <Address>198</Address>
@@ -46,7 +46,7 @@
     <Custom/>
   </Register>
   <Register>
-    <Id>ReadInterval</Id>
+    <Id>ReadIntervalMinutes</Id>
     <Description>Read interval</Description>
     <Type>int</Type>
     <Address>26</Address>
@@ -55,7 +55,7 @@
     <Custom/>
   </Register>
   <Register>
-    <Id>BatteryVoltage</Id>
+    <Id>MtuMiliVoltageBattery</Id>
     <Description>battery voltage (AD value) | battery volt = ADvalue * 9.766mV*2 + 250</Description>
     <Type>int</Type>
     <Address>113</Address>
@@ -64,22 +64,13 @@
     <Custom>(_val_ * 9.766 * 2) + 250</Custom>
   </Register>
   <Register>
-    <Id>MtuFirmwareVersionFormatFlag</Id>
+    <Id>MTUFirmwareVersionFormatFlag</Id>
     <Description>MTU software version</Description>
     <Type>int</Type>
     <Address>244</Address>
     <Size>1</Size>
     <Write>false</Write>
     <Custom/>
-  </Register>
-  <Register>
-    <Id>MtuFirmwareVersion</Id>
-    <Description>MTU software version</Description>
-    <Type>string</Type>
-    <Address>244</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <Custom>Version {0:00}</Custom>
   </Register>
   <Register>
     <Id>P1TiltAlarm</Id>
@@ -232,7 +223,7 @@
     <Address>132</Address>
     <Size>4</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <Custom>method</Custom>
   </Register>
   <Register>
     <Id>F12WAYRegister10</Id>
@@ -241,7 +232,7 @@
     <Address>168</Address>
     <Size>4</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <Custom>method</Custom>
   </Register>
   <Register>
     <Id>F12WAYRegister14</Id>
@@ -250,7 +241,7 @@
     <Address>184</Address>
     <Size>4</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <Custom>method</Custom>
   </Register>
   <Register>
     <Id>RxInterval</Id>
@@ -261,4 +252,175 @@
     <Write>false</Write> <!-- NO SE -->
     <Custom/>
   </Register>
+  <Register>
+    <Id>PCBSupplierCode</Id>
+    <Description>PCB Number Supplier Code</Description>
+    <Type>int</Type>
+    <Address>232</Address>
+    <Size>1</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <Custom/>
+  </Register>
+  <Register>
+    <Id>PCBCoreNumber</Id>
+    <Description>PCB Core Number</Description>
+    <Type>int</Type>
+    <Address>233</Address>
+    <Size>4</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <Custom/>
+  </Register>
+  <Register>
+    <Id>PCBProductRevision</Id>
+    <Description>PCB Product Revision Number</Description>
+    <Type>int</Type>
+    <Address>237</Address>
+    <Size>1</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <Custom/>
+  </Register>
+  <Register>
+    <Id>Encrypted</Id>
+    <Description>Encrypted Flag</Description>
+    <Type>bool</Type>
+    <Address>318</Address>
+    <Size>0</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <Custom/>
+  </Register>
+  <Register>
+    <Id>EncryptionIndex</Id>
+    <Description>Encryption Index</Description>
+    <Type>int</Type>
+    <Address>319</Address>
+    <Size>1</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <Custom/>
+  </Register>
+  <Overload>
+    <Id>MtuStatus</Id>
+    <Description>Mtu Status</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>Shipbit</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>DailySnap</Id>
+    <Description>Mtu Daily Snap</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>DailyGMTHourRead</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>  
+  <Overload>
+    <Id>ReadInterval</Id>
+    <Description>Read Interval</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>ReadIntervalMinutes</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>  
+  <Overload>
+    <Id>XmitInterval</Id>
+    <Description>Transmit Interval</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>MessageOverlapCount</Register>
+      <Register>ReadIntervalMinutes</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>  
+  <Overload>
+    <Id>PCBNumber</Id>
+    <Description>PCBNumber</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>PCBSupplierCode</Register>
+      <Register>PCBCoreNumber</Register>
+      <Register>PCBProductRevision</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>    
+   <Overload>
+    <Id>MtuSoftware</Id>
+    <Description>Mtu Firmware version</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>MTUFirmwareVersionFormatFlag</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>   
+     <Overload>
+    <Id>Encryption</Id>
+    <Description>Encryption</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>Encrypted</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  
+  <Overload>
+    <Id>InterfaceTamperStatus</Id>
+    <Description>Interface TamperS tatus</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>P1PciAlarm</Register>
+	  <Register>ProgrammingCoilInterfaceTamper</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>TiltTamperStatus</Id>
+    <Description>Tilt Tamper Status</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>P1TiltAlarm</Register>
+	  <Register>TiltTamper</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>MagneticTamperStatus</Id>
+    <Description>Magnetic Tamper Status</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>P1MagneticAlarm</Register>
+	  <Register>MagneticTamper</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>RegisterCoverTamperStatus</Id>
+    <Description>Register Cover Tamper Status</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>P1RegisterCoverAlarm</Register>
+	  <Register>RegisterCoverTamper</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>ReverseFlowTamperStatus</Id>
+    <Description>Reverse Flow TamperStatus</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>P1ReverseFlowAlarm</Register>
+	  <Register>ReverseFlowTamper</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>MtuVoltageBattery</Id>
+    <Description>Mtu Voltage Battery</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>MtuMiliVoltageBattery</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
 </Registers>

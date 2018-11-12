@@ -10,14 +10,14 @@ namespace Xml
         [XmlElement("Description")]
         public string Description { get; set; }
 
+        [XmlElement("Type")]
+        public string Type { get; set; }
+
         [XmlArray("Registers")]
         [XmlArrayItem("Register")]
         public MemOverloadRegister[] Registers { get; set; }
 
-        [XmlElement("Operation")]
-        public string Operation { get; set; }
-
-        [XmlElement("Method")]
-        public string Method { get; set; }
+        [XmlElement("Custom")]
+        public string Custom { get; set; }
     }
 }
