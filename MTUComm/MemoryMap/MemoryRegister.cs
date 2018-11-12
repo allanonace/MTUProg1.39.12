@@ -2,6 +2,7 @@
 using Xml;
 
 using RegType = MTUComm.MemoryMap.MemoryMap.RegType;
+using REGISTER_TYPE = MTUComm.MemoryMap.AMemoryMap.REGISTER_TYPE;
 
 namespace MTUComm.MemoryMap
 {
@@ -16,13 +17,14 @@ namespace MTUComm.MemoryMap
         public Action<T> funcSet;
         public string id { get; }
         public string description { get; }
-        public RegType type { get; }
+        public RegType valueType { get; }
         public int address { get; }
         public int size { get; }
         public bool write { get; }
         public string custom { get; }
         private CUSTOM_TYPE customType;
         public bool used;
+        public REGISTER_TYPE registerType { get; }
 
         // Value size ( number of consecutive bytes ) is also used for bit with bool type
         public int bit { get { return this.size; } }
@@ -35,14 +37,14 @@ namespace MTUComm.MemoryMap
         private bool _HasCustomOperation
         {
             get { return ! this._HasCustomMethod      &&
-                           this.type < RegType.CHAR &&
+                           this.valueType < RegType.CHAR &&
                          ! string.IsNullOrEmpty ( this.custom ); }
         }
 
         private bool _HasCustomFormat
         {
             get { return ! this._HasCustomMethod         &&
-                           this.type == RegType.STRING &&
+                           this.valueType == RegType.STRING &&
                          ! string.IsNullOrEmpty ( this.custom ); }
         }
 
@@ -70,13 +72,14 @@ namespace MTUComm.MemoryMap
             bool write = MemRegister.DEF_WRITE,
             string custom = "" )
         {
-            this.id          = id;
-            this.type        = type;
-            this.description = description;
-            this.address     = address;
-            this.size        = size;
-            this.write       = write;
-            this.custom      = custom;
+            this.id           = id;
+            this.valueType    = type;
+            this.description  = description;
+            this.address      = address;
+            this.size         = size;
+            this.write        = write;
+            this.custom       = custom;
+            this.registerType = REGISTER_TYPE.REGISTER;
 
             if      ( this._HasCustomMethod    ) this.customType = CUSTOM_TYPE.METHOD;
             else if ( this._HasCustomOperation ) this.customType = CUSTOM_TYPE.OPERATION;

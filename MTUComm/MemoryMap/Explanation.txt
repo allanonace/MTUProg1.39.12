@@ -2,16 +2,6 @@
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Registers>
-  <Overload>
-    <Id>_string_</Id>
-    <Description>_string_</Description>
-    <Registers>
-      <Register>_id_register_param_1_</Register>
-      <Register>_id_register_param_2_</Register>
-    </Registers>
-    <Operation>_val1_valn_operacion_</Operation>
-    <Method>_id_method_to_use_</Method>
-  </Overload>
   <Register>
     <Id>_string_</Id>
     <Description>_string_</Description>
@@ -21,10 +11,20 @@
     <Write>false|_vacio_</Write>
     <Custom>_val_1_operacion_|_val_1_mascara_string_|method|_vacio_</Custom>
   </Register>
+  <Overload>
+    <Id>_string_</Id>
+    <Description>_string_</Description>
+    <Registers>
+      <Register>_id_register_param_1_</Register>
+      <Register>_id_register_param_2_</Register>
+    </Registers>
+    <Custom>_val1_valn_operacion_|method</Custom>
+  </Overload>
 </Registers>
 
 Register
 ----
+Registros presentes en los dispositivos, pudiendo ocupar una o mas posiciones ( bytes ) de memoria
 - Address: Posición en memoria ( byte inicial ) del registro
 - Size   : Cantidad de bytes consecutivos que ocupa el registro
            pej. Address 3 y Size 4 = Bytes { 3, 4, 5, 6 }
@@ -39,3 +39,71 @@ Register
 		     sufijo "_Logic", siendo útil en casos complejos en los que las dos opciones anteriores no sean una opción
 			 Para utilizar esta última funcionalidad habra que indicar <Custom>method</Custom> ( no es case sensitive )
              pej. Registro 'MtuType' -> Método 'MtuType_Logic'
+			 
+			 Cabecera del metodo:
+			 public T DailyRead_Logic ( MemoryRegister<T> MemoryRegister )
+			 En vez de T se tendra que indicar el tipo de valor del registro ( <Type> )
+			 El registro pasado como parametro es una instancia MemoryRegister, para poder acceder/leer los diferentes
+			 campos de cada registro, habiendo de usar la propiedad Value para recuperar el valor del registro
+
+			 pej. Metodo personalizado del registro Daily
+
+			 // family_31xx32xx.xml
+			 <Register>
+			   <Id>DailyRead</Id>
+			   <Description>Daily read</Description>
+			   <Type>int</Type>
+			   <Address>198</Address>
+			   <Size>1</Size>
+			   <Write>true</Write>
+			   <Custom>method</Custom>
+			 </Register>
+
+			 // MemoryMap31xx32xx.cs
+			 public int DailyRead_Logic ( MemoryRegister<int> MemoryRegister )
+			 {
+				 return MemoryRegister.Value;
+			 }
+
+Overload
+----
+Son registros que como tal no existen en los dispositivos, al requerir de varios registros para calcular su valor
+- Registers: Identificadores de los registros que se usaran para calcular el valor del registro/overload
+             Han de ser exactamente iguales a los identificadores de los registros ( Register.Id )
+- Custom   : Similar al campo de los registros, pero solo admite dos modos, pudiendo indicar directamente la
+             operacion matematica a realizar o la cadena 'method' para que se invoque el metodo id_Logic
+			 
+			 Cabecera del metodo:
+			 public T Overload_Method_Logic ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters )
+			 En vez de T se tendra que indicar el tipo de valor del registro/overload ( <Type> )
+			 Se accede a los registros pasados como parametro con el operador punto ( MemoryRegisters.id_registro )
+			 Son instancias MemoryRegister, que no enlaces directos a la propiedad Value, para permitir poder acceder/leer
+			 los diferentes campos de cada registro, habiendo de usar la propiedad Value para recuperar el valor del registro
+
+			 pej. Overload ficticio que referencia registros de diferente tipo
+
+			 // family_31xx32xx.xml
+			 <Overload>
+			   <Id>Overload_Method</Id>
+			   <Type>int</Type>
+			   <Description>Overload field test description</Description>
+			   <Registers>
+			     <Register>MtuType</Register>
+				 <Register>Shipbit</Register>
+				 <Register>DailyRead</Register>
+			   </Registers>
+			   <Custom>method</Custom>
+			 </Overload>
+
+			 // MemoryMap31xx32xx.cs
+			 public int Overload_Method_Logic ( MemoryOverload<int> MemoryOverload, dynamic MemoryRegisters )
+			 {
+				 Console.WriteLine ( MemoryRegisters.Shipbit  .id + " -> " + MemoryRegisters.Shipbit  .Value );
+				 Console.WriteLine ( MemoryRegisters.MtuType  .id + " -> " + MemoryRegisters.MtuType  .Value );
+				 Console.WriteLine ( MemoryRegisters.DailyRead.id + " -> " + MemoryRegisters.DailyRead.Value );
+
+				 if ( MemoryRegisters.Shipbit.Value )
+					 return MemoryRegisters.MtuType.Value + MemoryRegisters.DailyRead.Value;
+			
+				 return -1;
+			 }

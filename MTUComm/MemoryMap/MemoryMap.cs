@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
-using Xamarin.Forms;
 using Xml;
 
 /// <summary>
@@ -94,15 +94,8 @@ namespace MTUComm.MemoryMap
 
         #region Attributes
 
-        protected byte[] memory { private set; get; }
+        public byte[] memory { private set; get; }
         private Dictionary<string,dynamic> registersObjs;
-
-        #endregion
-
-        #region Properties
-
-        // Hides parent inherited member
-        //public new dynamic registers { get { return base.registers; } }
 
         #endregion
 
@@ -119,6 +112,9 @@ namespace MTUComm.MemoryMap
             using (TextReader reader = new StreamReader(Path.Combine(config.GetBasePath(), XML_PREFIX + family + XML_EXTENSION)))
             {
                 MemRegisterList list = s.Deserialize(reader) as MemRegisterList;
+
+                #region Registers
+
                 foreach ( MemRegister xmlRegister in list.Registers )
                 {
                     RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlRegister.Type.ToUpper () );
@@ -134,7 +130,7 @@ namespace MTUComm.MemoryMap
                         case RegType.STRING: SysType = typeof ( string ); break;
                     }
 
-                    // Creates an instance of the generic class RegisterObj of type selected
+                    // Creates an instance of the generic class
                     dynamic memoryRegister = Activator.CreateInstance(typeof(MemoryRegister<>).MakeGenericType(SysType),
                         xmlRegister.Id,
                         type,
@@ -153,9 +149,9 @@ namespace MTUComm.MemoryMap
                         this.CreateProperty_Set ( memoryRegister );
 
                     // References to methods to use in property ( .Value )
-                    dynamic get  = base.dictionary[ METHODS_GET_PREFIX + memoryRegister.id ];
-                    dynamic getC = ( memoryRegister.HasCustomMethod ) ? base.dictionary[ METHODS_GET_CUSTOM_PREFIX + memoryRegister.id ] : null;
-                    dynamic set  = ( memoryRegister.write ) ? base.dictionary[ METHODS_SET_PREFIX + memoryRegister.id ] : null;
+                    dynamic get  = base.registers[ METHODS_GET_PREFIX + memoryRegister.id ];
+                    dynamic getC = ( memoryRegister.HasCustomMethod ) ? base.registers[ METHODS_GET_CUSTOM_PREFIX + memoryRegister.id ] : null;
+                    dynamic set  = ( memoryRegister.write ) ? base.registers[ METHODS_SET_PREFIX + memoryRegister.id ] : null;
                     TypeCode tc  = Type.GetTypeCode(SysType.GetType());
                     switch (type)
                     {
@@ -201,11 +197,59 @@ namespace MTUComm.MemoryMap
                     // filtered to only recover modified registers
                     this.registersObjs.Add(xmlRegister.Id, memoryRegister);
                 }
+
+                #endregion
+                #region Overloads
+
+                // Overloads
+                foreach ( MemOverload xmlOverload in list.Overloads )
+                {
+                    RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlOverload.Type.ToUpper () );
+                    Type SysType = typeof(System.Object);
+
+                    switch ( type )
+                    {
+                        case RegType.INT   : SysType = typeof ( int    ); break;
+                        case RegType.UINT  : SysType = typeof ( uint   ); break;
+                        case RegType.ULONG : SysType = typeof ( ulong  ); break;
+                        case RegType.BOOL  : SysType = typeof ( bool   ); break;
+                        case RegType.CHAR  : SysType = typeof ( char   ); break;
+                        case RegType.STRING: SysType = typeof ( string ); break;
+                    }
+
+                    // Creates an instance of the generic class
+                    dynamic memoryOverload = Activator.CreateInstance(typeof(MemoryOverload<>).MakeGenericType(SysType),
+                        xmlOverload.Id,
+                        type,
+                        xmlOverload.Description,
+                        xmlOverload.Registers.Select ( o => o.Id ).ToArray (),
+                        xmlOverload.Custom );
+
+                    this.CreateOverload_Get ( memoryOverload );
+
+                    dynamic get = base.registers[ METHODS_GET_PREFIX + memoryOverload.id ];
+                    TypeCode tc = Type.GetTypeCode ( SysType.GetType() );
+                    switch (type)
+                    {
+                        case RegType.INT   : memoryOverload.funcGet = (Func<int>   )get; break;
+                        case RegType.UINT  : memoryOverload.funcGet = (Func<uint>  )get; break;
+                        case RegType.ULONG : memoryOverload.funcGet = (Func<ulong> )get; break;
+                        case RegType.BOOL  : memoryOverload.funcGet = (Func<bool>  )get; break;
+                        case RegType.CHAR  : memoryOverload.funcGet = (Func<char>  )get; break;
+                        case RegType.STRING: memoryOverload.funcGet = (Func<string>)get; break;
+                    }
+
+                    AddProperty ( memoryOverload );
+                }
+
+                #endregion
             }
 
-            // TEST: Diferentes opciones campo custom
+            #region Tests
+
+            // TEST: Diferentes opciones campo custom ( metodo y operacion matematica )
             //Console.WriteLine ( "Test custom operation: " + base.registers.BatteryVoltage );
-            //Console.WriteLine ( "Test custom format: " + base.registers.MtuFirmwareVersion );
+            //Console.WriteLine ( "Test custom format: " + base.registers.DailyRead );
 
             // TEST: Separacion entre Value.get y funGetCustom
             //dynamic mInt = this.GetProperty_Int ( "DailyRead" );
@@ -217,11 +261,24 @@ namespace MTUComm.MemoryMap
             //Console.WriteLine ( "Test lectura 1: " + base.registers.MtuType);
             //this.registers.MtuType = 12321; // Not allow. Error!
 
-            this.SetRegisterModified ( "MtuType"   );
-            this.SetRegisterModified ( "Shipbit"   );
-            this.SetRegisterModified ( "DailyRead" );
+            // TEST: Recuperar registros modificados
+            //this.SetRegisterModified ( "MtuType"   );
+            //this.SetRegisterModified ( "Shipbit"   );
+            //this.SetRegisterModified ( "DailyRead" );
+            //MemoryRegisterDictionary regs = this.GetModifiedRegisters ();
 
-            MemoryRegisterDictionary regs = this.GetModifiedRegisters ();
+            // TEST: Recuperar objetos registro
+            //dynamic             reg1 = this.GetProperty      ( "MtuType" );
+            //MemoryRegister<int> reg2 = this.GetProperty<int> ( "MtuType" );
+            //MemoryRegister<int> reg3 = this.GetProperty_Int  ( "MtuType" );
+            //Console.WriteLine ( "Registro MtuType: " +
+            //    reg1.Value + " " + reg2.Value + " " + reg3.Value );
+
+            // TEST: Trabajar con overloads
+            //Console.WriteLine ( base.registers.Overload_Method + "" );
+            //Console.WriteLine ( base.registers.Overload_Operation + "" );
+
+            #endregion
         }
 
         #endregion
@@ -242,7 +299,7 @@ namespace MTUComm.MemoryMap
         private void CreateProperty_Get<T> ( MemoryRegister<T> memoryRegister )
         {
             // All register have normal get block
-            base.dictionary.Add( METHODS_GET_PREFIX + memoryRegister.id,
+            base.AddMethod ( METHODS_GET_PREFIX + memoryRegister.id,
                 new Func<T>(() =>
                 {
                     object result = default ( T );
@@ -271,14 +328,44 @@ namespace MTUComm.MemoryMap
             // But only someone have special get block/method defined on MTU family classes
             if ( memoryRegister.HasCustomMethod )
             {
-                MethodInfo custoMethod = this.GetType().GetMethod ( memoryRegister.id + METHODS_CUSTOM_SUFIX );
+                MethodInfo custoMethod = this.GetType().GetMethod (
+                    memoryRegister.id + METHODS_CUSTOM_SUFIX,
+                    new Type[] { typeof( MemoryRegister<T> ) } );
 
-                base.dictionary.Add( METHODS_GET_CUSTOM_PREFIX + memoryRegister.id,
+                base.AddMethod ( METHODS_GET_CUSTOM_PREFIX + memoryRegister.id,
                     new Func<T>(() =>
                     {
                         return ( T )custoMethod.Invoke ( this, new object[] { memoryRegister } );
                     }));
             }
+        }
+
+        private void CreateOverload_Get<T> ( MemoryOverload<T> memoryOverload )
+        {
+            MethodInfo custoMethod = ( ! memoryOverload.HasCustomMethod ) ?
+                null : this.GetType().GetMethod (
+                    memoryOverload.id + METHODS_CUSTOM_SUFIX,
+                    new Type[] { typeof ( MemoryOverload<T> ), typeof( ExpandoObject ) } );
+
+            dynamic registersToUse = new ExpandoObject ();
+            IDictionary<string,dynamic> dictionary = registersToUse;
+            foreach ( string id in memoryOverload.registerIds )
+                dictionary[ id ] = base.registers[ id ];
+
+            // Overloads only have get block ( are readonly )
+            base.AddMethod ( METHODS_GET_PREFIX + memoryOverload.id,
+                new Func<T>(() =>
+                {
+                    // Use custom method
+                    if ( memoryOverload.HasCustomMethod )
+                        return ( T )custoMethod.Invoke ( this, new object[] { memoryOverload, registersToUse } );
+
+                    return default( T );
+
+                    // Operation to evaluate
+                    //else
+                    //    return this.GetOperation<T> ( result, memoryRegister.custom );
+                }));
         }
 
         #endregion
@@ -287,7 +374,7 @@ namespace MTUComm.MemoryMap
 
         public void CreateProperty_Set<T>( MemoryRegister<T> regObj )
         {
-            base.dictionary.Add( METHODS_SET_PREFIX + regObj.id,
+            base.AddMethod ( METHODS_SET_PREFIX + regObj.id,
                 new Action<T>((_value) =>
                 {
                     switch (Type.GetTypeCode(typeof(T)))
@@ -304,7 +391,7 @@ namespace MTUComm.MemoryMap
 
         #endregion
 
-        #region Get
+        #region Get value
 
         private T GetOperation<T> ( object value, string operation )
         {
@@ -320,6 +407,8 @@ namespace MTUComm.MemoryMap
                 case TypeCode.UInt32 : result = Convert.ToUInt32 ( result ); break;
                 case TypeCode.UInt64 : result = Convert.ToInt64  ( result ); break;
             }
+
+            Console.WriteLine ( "GetOperation: " + operation + " | " + value );
 
             return ( T )result;
         }
@@ -371,49 +460,9 @@ namespace MTUComm.MemoryMap
             return string.Format(format, memory[address]);
         }
 
-        public MemoryRegister<T> GetProperty<T> ( string id )
-        {
-            if ( base.dictionary.ContainsKey ( id ) )
-                return ( MemoryRegister<T> )base.dictionary[ id ];
-
-            // Selected dynamic member not exists
-            Console.WriteLine ( "Set " + id + ": Error - Selected register is not loaded" );
-            throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + ": " + id );
-        }
-
-        public MemoryRegister<int> GetProperty_Int ( string id )
-        {
-            return this.GetProperty<int> ( id );
-        }
-
-        public MemoryRegister<uint> GetProperty_UInt ( string id )
-        {
-            return this.GetProperty<uint> ( id );
-        }
-
-        public MemoryRegister<ulong> GetProperty_ULong ( string id )
-        {
-            return this.GetProperty<ulong> ( id );
-        }
-
-        public MemoryRegister<bool> GetProperty_Bool ( string id )
-        {
-            return this.GetProperty<bool> ( id );
-        }
-
-        public MemoryRegister<char> GetProperty_Char ( string id )
-        {
-            return this.GetProperty<char> ( id );
-        }
-
-        public MemoryRegister<string> GetProperty_String ( string id )
-        {
-            return this.GetProperty<string> ( id );
-        }
-
         #endregion
 
-        #region Set
+        #region Set value
 
         protected void SetIntToMem (int value, int address, int size = MemRegister.DEF_SIZE)
         {
@@ -476,6 +525,60 @@ namespace MTUComm.MemoryMap
         protected void SetStringToMem (string value, int address)
         {
             this.memory[address] = (byte)Int32.Parse(value);
+        }
+
+        #endregion
+
+        #region Get register
+
+        public dynamic GetProperty ( string id )
+        {
+            if ( base.ContainsMember ( id ) )
+                return base.registers[ id ];
+
+            // Selected dynamic member not exists
+            Console.WriteLine("Set " + id + ": Error - Selected register is not loaded");
+            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
+        }
+
+        public MemoryRegister<T> GetProperty<T>(string id)
+        {
+            if ( base.ContainsMember ( id ) )
+                return (MemoryRegister<T>)base.registers[ id ];
+
+            // Selected dynamic member not exists
+            Console.WriteLine("Set " + id + ": Error - Selected register is not loaded");
+            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
+        }
+
+        public MemoryRegister<int> GetProperty_Int(string id)
+        {
+            return this.GetProperty<int>(id);
+        }
+
+        public MemoryRegister<uint> GetProperty_UInt(string id)
+        {
+            return this.GetProperty<uint>(id);
+        }
+
+        public MemoryRegister<ulong> GetProperty_ULong(string id)
+        {
+            return this.GetProperty<ulong>(id);
+        }
+
+        public MemoryRegister<bool> GetProperty_Bool(string id)
+        {
+            return this.GetProperty<bool>(id);
+        }
+
+        public MemoryRegister<char> GetProperty_Char(string id)
+        {
+            return this.GetProperty<char>(id);
+        }
+
+        public MemoryRegister<string> GetProperty_String(string id)
+        {
+            return this.GetProperty<string>(id);
         }
 
         #endregion
