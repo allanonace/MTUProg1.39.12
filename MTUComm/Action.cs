@@ -397,7 +397,9 @@ namespace MTUComm
             result.AddParameter(new Parameter("MtuSerialNumber", "MTU Ser No", memory.MtuId.ToString()));
 
 
-           if (!memory.Shipbit)
+           
+
+           if (mtutype.DailyReads && !memory.Shipbit)
             {
                 result.AddParameter(new Parameter("DailySnap", "Daily Snap", memory.DailySnap ));
                 result.AddParameter(new Parameter("DailyGMTHourRead", "Daily GMT Hour Read", memory.DailyRead.ToString()));

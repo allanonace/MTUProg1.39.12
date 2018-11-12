@@ -303,6 +303,7 @@ namespace Lexi
             {
                 if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                 {
+                    //if even no data response no puck error..
                     throw new TimeoutException();
                 }
                 Thread.Sleep(10);
