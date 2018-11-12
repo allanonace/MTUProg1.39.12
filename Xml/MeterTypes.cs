@@ -37,51 +37,56 @@ namespace Xml
             return meters;
         }
 
-        public List<Meter> FindByPortTypeAndFlow(string portType, int flow)
+        public List<Meter> FindByPortTypeAndFlow(string portType, int flow = -1)
         {
             List<string> portTypes = new List<string>();
             bool findInMeterId = false;
-            switch (portType)
+
+            var isNumeric = int.TryParse(portType, out int portTypeNumber);
+
+            if (isNumeric)
             {
-                case "E":
-                case "RW":
-                case "M":
-                case "S4K":
-                case "4KL":
-                case "GUT":
-                case "R":
-                case "G":
-                case "P":
-                case "T":
-                case "W":
-                case "I":
-                case "K":
-                case "L":
-                case "B":
-                case "CH4":
-                    portTypes.Add(portType);
-                    break;
-                default:
-                    findInMeterId = true; // numeric port type
-                    try
-                    {
-                        UInt32.Parse(portType);
-                        portTypes.Add(portType); // only one meter type (i.e. "3101")
-                    }
-                    catch (Exception e)
-                    {
-                        portTypes.AddRange(portType.Split('|')); // multiple meter types (i.e. "3101|3102|3103")
-                    }
-                    break;
+                portTypes.Add(portType); // "3101"
+                findInMeterId = true;
+            }
+            else if(portType.Equals("S4K") || portType.Equals("4KL") || portType.Equals("GUT") || portType.Equals("CH4"))
+            {
+                portTypes.Add(portType); // "S4K", "4KL", "GUT", "CH4"
+            }
+            else if (portType.Contains("|"))
+            {
+                portTypes.AddRange(portType.Split('|')); // multiple meter types (i.e. "3101|3102|3103")
+                findInMeterId = true;
+            }
+            else
+            {
+                foreach (char c in portType)
+                {
+                    portTypes.Add(c.ToString());
+                }
             }
             List<Meter> meters;
             if (findInMeterId)
             {
-                meters = Meters.FindAll(m => portTypes.Contains(m.Id.ToString()) && m.Flow.Equals(flow));
+                if (flow > -1)
+                {
+                    meters = Meters.FindAll(m => portTypes.Contains(m.Id.ToString()) && m.Flow.Equals(flow));
+                }
+                else
+                {
+                    meters = Meters.FindAll(m => portTypes.Contains(m.Id.ToString()));
+                }
             }
             else
             {
-                meters = Meters.FindAll(m => portTypes.Contains(m.Type) && m.Flow.Equals(flow));
+                if (flow > -1)
+                {
+                    meters = Meters.FindAll(m => portTypes.Contains(m.Type) && m.Flow.Equals(flow));
+                }
+                else
+                {
+                    meters = Meters.FindAll(m => portTypes.Contains(m.Type));
+                }
             }
             return meters;
         }
