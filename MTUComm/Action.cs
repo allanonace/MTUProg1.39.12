@@ -195,7 +195,8 @@ namespace MTUComm
             int meterid = (int)memory.GetType().GetProperty("P" + (portnumber + 1) + "MeterType").GetValue(memory, null);
 
             if(meterid != 0) {
-                Meter metertype = configuration.getMeterTyoeById(meterid);
+                Meter metertype = configuration.getMeterTypeById(meterid);
+
                 result.AddParameter(new Parameter("MeterType", "Meter Type", metertype.Display));
                 result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", meterid.ToString()));
 
@@ -390,8 +391,11 @@ namespace MTUComm
 
             if (meterid != 0)
             {
-                Meter Metertype = configuration.getMeterTyoeById(meterid);
-
+                Meter Metertype = configuration.getMeterTypeById(meterid);
+                if (Metertype.Type == "NOTFOUND")
+                {
+                    //logger.LogError("No valid meter types were found for MTU type " + Metertype.Id);
+                }
 
                 foreach (InterfaceParameters parameter in parameters)
                 {
@@ -400,17 +404,17 @@ namespace MTUComm
                         string meter_reading_error = registers.GetProperty("P" + (portnumber + 1) + "ReadingError").Value.ToString();
                         if (meter_reading_error.Length < 1)
                         {
-                            uint meter_reading = 0;
+                            int meter_reading = 0;
                             try
                             {
                                 meter_reading = registers.GetProperty("P" + (portnumber + 1) + "Reading").Value;
                             }
                             catch (Exception e) { }
 
-                            uint tempReadingVal = 0;
+                            int tempReadingVal = 0;
                             if (mtutype.PulseCountOnly)
                             {
-                                tempReadingVal = meter_reading * (uint)Metertype.HiResScaling;
+                                tempReadingVal = meter_reading * (int)Metertype.HiResScaling;
                             }
                             else
                             {
@@ -436,7 +440,10 @@ namespace MTUComm
                             if (Metertype.PaintedDigits > 0 && configuration.useDummyDigits()) // KG 12/08/2008
                                 tempReading = tempReading.PadRight(tempReading.Length + Metertype.PaintedDigits, '0').Insert(tempReading.Length, " - ");
 
-
+                            if(tempReading == "")
+                            {
+                                tempReading = "INVALID";
+                            }
                             result.AddParameter(new Parameter(parameter.Name, parameter.Display, tempReading));
                         }
                         else

@@ -1942,5 +1942,154 @@ namespace MTUComm.MemoryMap
             return outNum;
         }
         */
+
+        public string InterfaceTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1PciAlarm.Value, MemoryRegisters.ProgrammingCoilInterfaceTamper.Value);
+        }
+
+        public string TiltTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1TiltAlarm.Value, MemoryRegisters.TiltTamper.Value);
+        }
+
+        public string MagneticTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1MagneticAlarm.Value, MemoryRegisters.MagneticTamper.Value);
+        }
+
+        public string RegisterCoverTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1RegisterCoverAlarm.Value, MemoryRegisters.RegisterCoverTamper.Value);
+        }
+
+        public string ReverseFlowTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
+        }
+
+        public string F12WAYRegister1_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return "0x" + MemoryRegisters.F12WAYRegister1Int.Value.ToString("X8");
+        }
+
+        public string F12WAYRegister10_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return "0x" + MemoryRegisters.F12WAYRegister10Int.Value.ToString("X8");
+        }
+
+        public string F12WAYRegister14_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return "0x" + MemoryRegisters.F12WAYRegister14Int.Value.ToString("X8");
+        }
+
+
+        public string BackFlowState_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+                string reply = string.Empty;
+                string param = Convert.ToString(MemoryRegisters.FlowState.Value, 2).PadLeft(8, '0').Substring(6);
+                switch (param)
+                {
+                    case "00":
+                        reply = "No reverse Flow Event in last 35 days";
+                        break;
+                    case "01":
+                        reply = "Small Reverse Flow Event in last 35 days";
+                        break;
+                    case "10":
+                        reply = "Large Reverse Flow Event in last 35 days";
+                        break;
+                }
+                return reply;
+        }
+
+
+        public string DaysOfNoFlow_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+                string reply = string.Empty;
+                string param = Convert.ToString(MemoryRegisters.FlowState.Value, 2).PadLeft(8, '0').Substring(3, 3);
+                switch (param)
+                {
+                    case "000":
+                        reply = "0";
+                        break;
+                    case "001":
+                        reply = "1-2";
+                        break;
+                    case "010":
+                        reply = "3-7";
+                        break;
+                    case "011":
+                        reply = "8-14";
+                        break;
+                    case "100":
+                        reply = "15-21";
+                        break;
+                    case "101":
+                        reply = "22-34";
+                        break;
+                    case "110":
+                        reply = "35 (ALL)";
+                        break;
+                }
+
+                return reply + " days of no consumption";
+        }
+
+        public string LeakDetection_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+                string reply = string.Empty;
+                string param = Convert.ToString(MemoryRegisters.LeakState.Value, 2).PadLeft(8, '0').Substring(5, 2);
+                switch (param)
+                {
+                    case "00":
+                        reply = "Less than 50 15-minute intervals";
+                        break;
+                    case "01":
+                        reply = "Between 50 and 95 15-minute intervals";
+                        break;
+                    case "10":
+                        reply = "Greater than 96 15-minute intervals";
+                        break;
+                }
+                return reply;
+        }
+
+        public string DaysOfLeak_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+                string reply = string.Empty;
+                string param = Convert.ToString(MemoryRegisters.LeakState.Value, 2).PadLeft(8, '0').Substring(2, 3);
+                switch (param)
+                {
+                    case "000":
+                        reply = "0";
+                        break;
+                    case "001":
+                        reply = "1-2";
+                        break;
+                    case "010":
+                        reply = "3-7";
+                        break;
+                    case "011":
+                        reply = "8-14";
+                        break;
+                    case "100":
+                        reply = "15-21";
+                        break;
+                    case "101":
+                        reply = "22-34";
+                        break;
+                    case "110":
+                        reply = "35 (ALL)";
+                        break;
+                }
+
+                return reply + " days of leak detection";
+        }
     }
 }

@@ -22,7 +22,12 @@ namespace Xml
             Meter meter = Meters.Find(x => x.Id == meterId);
             if (meter == null)
             {
-                throw new MeterNotFoundException("Meter not found");
+                meter = new Meter();
+                meter.Id = meterId;
+                meter.Display = "Not Installed";
+                meter.Type = "NOTFOUND";
+                return meter;
+
             }
             return meter;
         }

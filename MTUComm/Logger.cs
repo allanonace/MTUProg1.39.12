@@ -276,7 +276,12 @@ namespace MTUComm
 
         }
 
-        public void LogError(int id, String e_message)
+        public void LogError(String e_message)
+        {
+            LogError(-1, e_message);
+        }
+
+       public void LogError(int id, String e_message)
         {
             CreateFileIfNotExist();
             XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
@@ -286,7 +291,10 @@ namespace MTUComm
             logParameter(error, new Parameter("Date", null, DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
             XElement message = new XElement("Message", e_message);
-            addAtrribute(message, "ErrorId", id.ToString());
+            if(id >= 0)
+            {
+                addAtrribute(message, "ErrorId", id.ToString());
+            }
             error.Add(message);
 
             doc.Root.Element("Error").Add(error);

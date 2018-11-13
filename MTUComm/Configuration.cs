@@ -59,7 +59,7 @@ namespace MTUComm
         {
             if (instance == null)
             {
-                instance = new Configuration();
+                instance = new Configuration(@"C: \Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog");
             }
             return instance;
         }
@@ -97,7 +97,7 @@ namespace MTUComm
             return meterTypes;
         }
 
-        public Meter getMeterTyoeById(int meterId)
+        public Meter getMeterTypeById(int meterId)
         {
             return meterTypes.FindByMterId(meterId);
         }

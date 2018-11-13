@@ -30,7 +30,7 @@ namespace MTUComm.MemoryMap
         ulong P1MeterId { get; }
         ulong P2MeterId { get; }
 
-        uint P1Reading { get; } // Hard...
+        int P1Reading { get; } // Hard...
         int P2Reading { get; } // Hard...
 
         string P1ReadingError { get; }
@@ -399,13 +399,13 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        public uint P1Reading
+        public int P1Reading
         {
             get
             {
                 object result;
                 this.Get("P1Reading", out result);
-                return (uint)result;
+                return (int)result;
             }
             set
             {
