@@ -111,7 +111,16 @@ namespace MTUComm.MemoryMap
             XmlSerializer s = new XmlSerializer ( typeof ( MemRegisterList ) );
             using (TextReader reader = new StreamReader(Path.Combine(config.GetBasePath(), XML_PREFIX + family + XML_EXTENSION)))
             {
-                MemRegisterList list = s.Deserialize(reader) as MemRegisterList;
+                MemRegisterList list;
+                try {
+                    list = s.Deserialize(reader) as MemRegisterList;
+                }
+                catch (Exception e)
+                {
+                    return;
+                }
+
+                
 
                 #region Registers
                 if (list.Registers != null)
@@ -770,11 +779,33 @@ namespace MTUComm.MemoryMap
             return ((MemoryRegisters.MtuMiliVoltageBattery.Value * 1.0) / 1000).ToString("0.00 V");
         }
 
-        
+        public string P1ReadingError_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return translateErrorCodes(MemoryRegisters.P1ReadingErrorCode.Value);
+        }
 
+        public string P2ReadingError_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return translateErrorCodes(MemoryRegisters.P2ReadingErrorCode.Value);
+        }
         #endregion
 
         #region AuxiliaryFunctions
+
+
+        private string translateErrorCodes(int encoderErrorcode)
+        {
+            if (encoderErrorcode == 0xFF)
+                return "ERROR - Check Meter";
+            if (encoderErrorcode == 0xFE)
+                return "ERROR - Bad Digits";
+            if (encoderErrorcode == 0xFD)
+                return "ERROR - Delta Overflow";
+            if (encoderErrorcode == 0xFC)
+                return "ERROR - Readings Purged";
+            return "";
+        }
 
         private string timeFormatter(int time)
         {

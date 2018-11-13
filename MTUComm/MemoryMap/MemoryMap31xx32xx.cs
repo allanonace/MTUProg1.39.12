@@ -1213,5 +1213,21 @@ namespace MTUComm.MemoryMap
 
             return GetTemperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
         }
+
+        public string F12WAYRegister1_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return "0x"+ MemoryRegisters.F12WAYRegister1Int.Value.ToString("X8");
+        }
+
+        public string F12WAYRegister10_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return "0x" + MemoryRegisters.F12WAYRegister10Int.Value.ToString("X8");
+        }
+
+        public string F12WAYRegister14_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return "0x" + MemoryRegisters.F12WAYRegister14Int.Value.ToString("X8");
+        }
+
     }
 }

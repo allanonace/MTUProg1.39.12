@@ -134,5 +134,10 @@ namespace Xml
             }
         }
 
+        public String GetProperty(String Name)
+        {
+            return this.GetType().GetProperty(Name).GetValue(this, null).ToString();
+        }
+
     }
 }

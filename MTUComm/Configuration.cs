@@ -140,7 +140,7 @@ namespace MTUComm
 
         public Boolean useDummyDigits()
         {
-            return true; //should be taen from globals, hardcoded for dev
+            return !global.LiveDigitsOnly;
         }
 
         public String GetDeviceUUID()

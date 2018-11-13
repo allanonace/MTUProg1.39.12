@@ -379,6 +379,131 @@ namespace MTUComm
         }
 
 
+        private ActionResult ReadPort(int portnumber, InterfaceParameters[] parameters, dynamic registers, Mtu mtutype)
+        {
+            ActionResult result = new ActionResult();
+
+            Port PortType = mtutype.Ports[portnumber];
+           
+
+            int meterid = registers.GetProperty("P" + (portnumber + 1) + "MeterType").Value;
+
+            if (meterid != 0)
+            {
+                Meter Metertype = configuration.getMeterTyoeById(meterid);
+
+
+                foreach (InterfaceParameters parameter in parameters)
+                {
+                    if (parameter.Name.Equals("MeterReading"))
+                    {
+                        string meter_reading_error = registers.GetProperty("P" + (portnumber + 1) + "ReadingError").Value.ToString();
+                        if (meter_reading_error.Length < 1)
+                        {
+                            uint meter_reading = 0;
+                            try
+                            {
+                                meter_reading = registers.GetProperty("P" + (portnumber + 1) + "Reading").Value;
+                            }
+                            catch (Exception e) { }
+
+                            uint tempReadingVal = 0;
+                            if (mtutype.PulseCountOnly)
+                            {
+                                tempReadingVal = meter_reading * (uint)Metertype.HiResScaling;
+                            }
+                            else
+                            {
+                                tempReadingVal = meter_reading;
+                            }
+
+
+                            String tempReading = tempReadingVal.ToString();
+                            if (Metertype.LiveDigits < tempReading.Length)
+                            {
+                                tempReading = tempReading.Substring(tempReading.Length - Metertype.LiveDigits - (tempReading.IndexOf('.') > -1 ? 1 : 0));
+                            }
+                            else
+                            {
+                                tempReading = tempReading.PadLeft(Metertype.LiveDigits, '0');
+                            }
+                            if (Metertype.LeadingDummy > 0) // KG 12/08/2008
+                                tempReading = tempReading.PadLeft(tempReading.Length + Metertype.LeadingDummy, configuration.useDummyDigits() ? 'X' : '0');
+                            if (Metertype.DummyDigits > 0)  // KG 12/08/2008
+                                tempReading = tempReading.PadRight(tempReading.Length + Metertype.DummyDigits, configuration.useDummyDigits() ? 'X' : '0');
+                            if (Metertype.Scale > 0 && tempReading.IndexOf(".") == -1) // 8.12.2011 KG add for F1 Pulse
+                                tempReading = tempReading.Insert(tempReading.Length - Metertype.Scale, ".");
+                            if (Metertype.PaintedDigits > 0 && configuration.useDummyDigits()) // KG 12/08/2008
+                                tempReading = tempReading.PadRight(tempReading.Length + Metertype.PaintedDigits, '0').Insert(tempReading.Length, " - ");
+
+
+                            result.AddParameter(new Parameter(parameter.Name, parameter.Display, tempReading));
+                        }
+                        else
+                        {
+                            result.AddParameter(new Parameter(parameter.Name, parameter.Display, meter_reading_error));
+                        }
+
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (validateCondition(parameter.Conditional, registers, mtutype))
+                            {
+                                if (parameter.Source == null)
+                                {
+                                    parameter.Source = "";
+                                }
+
+                                switch (parameter.Source.Split(new char[] { '.' })[0])
+                                {
+                                    case "PortType":
+                                        string port_property_name = parameter.Source.Split(new char[] { '.' })[1];
+                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, PortType.GetProperty(port_property_name)));
+                                        break;
+                                    case "MeterType":
+                                        string meter_property_name = parameter.Source.Split(new char[] { '.' })[1];
+                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, Metertype.GetProperty(meter_property_name)));
+                                        break;
+                                    case "MtuType":
+                                        string mtu_property_name = parameter.Source.Split(new char[] { '.' })[1];
+                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, mtutype.GetProperty(mtu_property_name)));
+                                        break;
+                                    case "MemoryMap":
+                                        string memory_alt_property_name = parameter.Source.Split(new char[] { '.' })[1];
+                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty("P" + (portnumber + 1) + memory_alt_property_name).Value.ToString()));
+                                        break;
+                                    default:
+                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty("P"+ (portnumber + 1) + parameter.Name).Value.ToString()));
+                                        break;
+
+                                }
+
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
+                        }
+                    }
+
+                }
+
+            }
+            else
+            {
+                result.AddParameter(new Parameter("MeterType", "Meter Type", "Not Installed"));
+                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", meterid.ToString()));
+                result.AddParameter(new Parameter("AcctNumber", "Service Pt. ID", "000000000"));
+                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
+            }
+
+            return result;
+        }
+
+
         private ActionResult ReadMTU(IMemoryMap memory, Mtu mtutype)
         {
             InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtutype.Id, "ReadMTU");
@@ -405,7 +530,11 @@ namespace MTUComm
             {
                 if (parameter.Name.Equals("Port"))
                 {
+                    for (int i = 0; i < mtutype.Ports.Count; i++)
+                    {
 
+                        result.addPort(ReadPort(i, parameter.Parameters.ToArray(), registers, mtutype));
+                    }
                 }
                 else
                 {
@@ -422,7 +551,11 @@ namespace MTUComm
                             {
                                 case "Action":
                                     string action_property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                    result.AddParameter(new Parameter(parameter.Name, parameter.Display, GetProperty(action_property_name)));
+                                    string action_property_value = GetProperty(action_property_name);
+                                    if (action_property_value != null)
+                                    {
+                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, action_property_value));
+                                    }
                                     break;
                                 case "MeterType":
                                     break;
@@ -430,7 +563,11 @@ namespace MTUComm
                                     string mtu_property_name = parameter.Source.Split(new char[] { '.' })[1];
                                     result.AddParameter(new Parameter(parameter.Name, parameter.Display, mtutype.GetProperty(mtu_property_name)));
                                     break;
-                                    default:
+                                case "MemoryMap":
+                                    string memory_alt_property_name = parameter.Source.Split(new char[] { '.' })[1];
+                                    result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty(memory_alt_property_name)));
+                                    break;
+                                default:
                                     result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty(parameter.Name).Value.ToString()));
                                 break;
 
@@ -600,7 +737,7 @@ namespace MTUComm
         private void Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
         {
             ActionResult result = ReadMTU(e.MemoryMap, e.MtuType);
-            logger.logReadResult(this, result);
+            logger.logReadResult(this, result, e.MtuType);
             ActionFinishArgs args = new ActionFinishArgs(result);
             OnFinish(this, args);
         }

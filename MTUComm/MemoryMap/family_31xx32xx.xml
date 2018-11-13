@@ -153,6 +153,43 @@
     <Write>true</Write>
     <Custom/>
   </Register>
+  
+  <Register>
+    <Id>P1Reading</Id>
+    <Description>P1 Reading</Description>
+    <Type>int</Type>
+    <Address>96</Address>
+    <Size>6</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <Custom/>
+  </Register>
+  <Register>
+    <Id>P2Reading</Id>
+    <Description>P2 Reading</Description>
+    <Type>int</Type>
+    <Address>104</Address>
+    <Size>6</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <Custom/>
+  </Register>
+    <Register>
+    <Id>P1ReadingErrorCode</Id>
+    <Description>P1 Reading Error Code</Description>
+    <Type>int</Type>
+    <Address>72</Address>
+    <Size>1</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <Custom/>
+  </Register>
+  <Register>
+    <Id>P2ReadingErrorCode</Id>
+    <Description>P2 Reading Error Code</Description>
+    <Type>int</Type>
+    <Address>112</Address>
+    <Size>1</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <Custom/>
+  </Register>
   <Register>
     <Id>P1Scaler</Id>
     <Description>P1 scaler</Description>
@@ -217,31 +254,31 @@
     <Custom/>
   </Register>
   <Register>
-    <Id>F12WAYRegister1</Id>
-    <Description>7021 reg1</Description>
+    <Id>F12WAYRegister1Int</Id>
+    <Description>7021 reg1 Integer</Description>
     <Type>int</Type>
     <Address>132</Address>
     <Size>4</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom>method</Custom>
+    <Custom/>
   </Register>
   <Register>
-    <Id>F12WAYRegister10</Id>
-    <Description>7021 reg10</Description>
+    <Id>F12WAYRegister10Int</Id>
+    <Description>7021 reg10 Integer</Description>
     <Type>int</Type>
     <Address>168</Address>
     <Size>4</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom>method</Custom>
+    <Custom/>
   </Register>
   <Register>
-    <Id>F12WAYRegister14</Id>
-    <Description>7021 reg14</Description>
+    <Id>F12WAYRegister14Int</Id>
+    <Description>7021 reg14 Integer</Description>
     <Type>int</Type>
     <Address>184</Address>
     <Size>4</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom>method</Custom>
+    <Custom/>
   </Register>
   <Register>
     <Id>RxInterval</Id>
@@ -363,7 +400,6 @@
     </Registers>
     <Custom>method</Custom>
   </Overload>
-  
   <Overload>
     <Id>InterfaceTamperStatus</Id>
     <Description>Interface TamperS tatus</Description>
@@ -420,6 +456,51 @@
 	<Type>string</Type>
     <Registers>
       <Register>MtuMiliVoltageBattery</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>F12WAYRegister1</Id>
+    <Description>7021 reg1</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>F12WAYRegister1Int</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>F12WAYRegister10</Id>
+    <Description>7021 reg10</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>F12WAYRegister10Int</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>F12WAYRegister14</Id>
+    <Description>7021 reg14</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>F12WAYRegister14Int</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>P1ReadingError</Id>
+    <Description>P1 Reading Error Message</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>P1ReadingErrorCode</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>P2ReadingError</Id>
+    <Description>P1 Reading Error Message</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>P2ReadingErrorCode</Register>
     </Registers>
     <Custom>method</Custom>
   </Overload>

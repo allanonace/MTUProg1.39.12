@@ -115,16 +115,16 @@ namespace MTUComm
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
 
-        public void logReadResult(Action ref_action, ActionResult result)
+        public void logReadResult(Action ref_action, ActionResult result, Mtu mtuType)
         {
             CreateFileIfNotExist();
             XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
 
-            logReadResult(doc.Root.Element("Mtus"), ref_action, result);
+            logReadResult(doc.Root.Element("Mtus"), ref_action, result, mtuType);
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
 
-        public void logReadResult(XElement parent, Action ref_action, ActionResult result)
+        public void logReadResult(XElement parent, Action ref_action, ActionResult result, Mtu mtuType)
         {
             XElement action = new XElement("Action");
 
@@ -132,40 +132,65 @@ namespace MTUComm
             addAtrribute(action, "type", ref_action.getLogType());
             addAtrribute(action, "reason", ref_action.getReason());
 
-            logParameter(action, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
-
-            if (ref_action.getUser() != null)
+            InterfaceParameters[] parameters = config.getLogInterfaceFields(mtuType.Id, "ReadMTU");
+            foreach (InterfaceParameters parameter in parameters)
             {
+                if(parameter.Name == "Port") {
+
+                    ActionResult[] ports = result.getPorts();
+                    for (int i = 0; i < ports.Length; i++)
+                    {
+                        logPort(i, action, ports[i], parameter.Parameters.ToArray());
+                    }
+                }
+                else
+                {
+                    Parameter param = result.getParameterByTag(parameter.Name);
+                    if (param != null)
+                    {
+                        logParameter(action, param);
+                    }
+                }
                 
-                logParameter(action, new Parameter("User", "User", ref_action.getUser()));
             }
 
-            foreach(Parameter parameter in result.getParameters())
-            {
-                logParameter(action, parameter);
-            }
+                /*logParameter(action, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
-            ActionResult[] ports = result.getPorts();
-            for (int i= 0; i < ports.Length; i++)
-            {
-                logPort(i, action, ports[i]);
-            }
+                if (ref_action.getUser() != null)
+                {
 
-            parent.Add(action);
+                    logParameter(action, new Parameter("User", "User", ref_action.getUser()));
+                }
+
+                foreach(Parameter parameter in result.getParameters())
+                {
+                    logParameter(action, parameter);
+                }
+
+                ActionResult[] ports = result.getPorts();
+                for (int i= 0; i < ports.Length; i++)
+                {
+                    logPort(i, action, ports[i]);
+                }
+                */
+
+                parent.Add(action);
         }
 
-        private void logPort(int portnumber, XElement parent, ActionResult result)
+        private void logPort(int portnumber, XElement parent, ActionResult result, InterfaceParameters[] parameters)
         {
-
-
             XElement port = new XElement("Port");
 
             addAtrribute(port, "display", "Port "+ (portnumber+1).ToString());
             addAtrribute(port, "number", (portnumber + 1).ToString());
 
-            foreach (Parameter parameter in result.getParameters())
+            foreach (InterfaceParameters parameter in parameters)
             {
-                logParameter(port, parameter);
+                Parameter param = result.getParameterByTag(parameter.Name);
+                if (param != null)
+                {
+                    logParameter(port, param);
+                }
             }
 
             parent.Add(port);
