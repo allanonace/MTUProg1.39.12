@@ -179,13 +179,16 @@ namespace MTUComm
         public void TurnOffMtuTask()
         {
             Console.WriteLine("TurnOffMtu start");
-            byte valueToWrite = 1;
-            lexi.Write(22, new byte[] { valueToWrite });
+
+            byte mask = 1;
+            byte systemFlags = (lexi.Read(22, 1))[0];
+            systemFlags |= mask; // set bit 0
+            lexi.Write(22, new byte[] { systemFlags });
             byte valueWritten = (lexi.Read(22, 1))[0];
-            Console.WriteLine("Value to write: " + valueToWrite.ToString() + " Value written: " + valueWritten.ToString());
+            Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
             Console.WriteLine("TurnOffMtu end");
 
-            if (valueToWrite != valueWritten)
+            if (systemFlags != valueWritten)
             {
                 // TODO: handle error condition
             }
@@ -205,13 +208,16 @@ namespace MTUComm
         public void TurnOnMtuTask()
         {
             Console.WriteLine("TurnOnMtu start");
-            byte valueToWrite = 0;
-            lexi.Write(22, new byte[] { valueToWrite });
-            byte valueWritten = (lexi.Read(22, 1))[0];
-            Console.WriteLine("Value to write: " + valueToWrite.ToString() + " Value written: " + valueWritten.ToString());
-            Console.WriteLine("TurnOnMtu end");
 
-            if (valueToWrite != valueWritten)
+            byte mask = 1;
+            byte systemFlags = (lexi.Read(22, 1))[0];
+            systemFlags &= (byte)~mask; // clear bit 0
+            lexi.Write(22, new byte[] { systemFlags });
+            byte valueWritten = (lexi.Read(22, 1))[0];
+            Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
+            Console.WriteLine("TurnOffMtu end");
+
+            if (systemFlags != valueWritten)
             {
                 // TODO: handle error condition
             }

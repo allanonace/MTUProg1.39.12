@@ -120,8 +120,6 @@ namespace MTUComm.MemoryMap
                     return;
                 }
 
-                
-
                 #region Registers
                 if (list.Registers != null)
                 {
@@ -257,6 +255,53 @@ namespace MTUComm.MemoryMap
                 }
 
                 #endregion
+<<<<<<< HEAD
+=======
+                #region Overloads
+
+                // Overloads
+                foreach ( MemOverload xmlOverload in list.Overloads )
+                {
+                    RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlOverload.Type.ToUpper () );
+                    Type SysType = typeof(System.Object);
+
+                    switch ( type )
+                    {
+                        case RegType.INT   : SysType = typeof ( int    ); break;
+                        case RegType.UINT  : SysType = typeof ( uint   ); break;
+                        case RegType.ULONG : SysType = typeof ( ulong  ); break;
+                        case RegType.BOOL  : SysType = typeof ( bool   ); break;
+                        case RegType.CHAR  : SysType = typeof ( char   ); break;
+                        case RegType.STRING: SysType = typeof ( string ); break;
+                    }
+
+                    // Creates an instance of the generic class
+                    dynamic memoryOverload = Activator.CreateInstance(typeof(MemoryOverload<>).MakeGenericType(SysType),
+                        xmlOverload.Id,
+                        type,
+                        xmlOverload.Description,
+                        xmlOverload.Registers.Select ( o => o.Id ).ToArray (),
+                        xmlOverload.Custom );
+
+                    this.CreateOverload_Get ( memoryOverload );
+
+                    dynamic get = base.registers[ METHODS_GET_PREFIX + memoryOverload.id ];
+                    TypeCode tc = Type.GetTypeCode ( SysType.GetType() );
+                    switch (type)
+                    {
+                        case RegType.INT   : memoryOverload.funcGet = (Func<int>   )get; break;
+                        case RegType.UINT  : memoryOverload.funcGet = (Func<uint>  )get; break;
+                        case RegType.ULONG : memoryOverload.funcGet = (Func<ulong> )get; break;
+                        case RegType.BOOL  : memoryOverload.funcGet = (Func<bool>  )get; break;
+                        case RegType.CHAR  : memoryOverload.funcGet = (Func<char>  )get; break;
+                        case RegType.STRING: memoryOverload.funcGet = (Func<string>)get; break;
+                    }
+
+                    AddProperty ( memoryOverload );
+                }
+
+                #endregion
+>>>>>>> feature/custom_views
             }
 
             #region Tests
@@ -422,7 +467,11 @@ namespace MTUComm.MemoryMap
                 case TypeCode.UInt64 : result = Convert.ToInt64  ( result ); break;
             }
 
+<<<<<<< HEAD
             //Console.WriteLine ( "GetOperation: " + operation + " | " + value );
+=======
+            Console.WriteLine ( "GetOperation: " + operation + " | " + value );
+>>>>>>> feature/custom_views
 
             return ( T )result;
         }

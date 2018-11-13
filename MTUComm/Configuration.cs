@@ -10,6 +10,12 @@ namespace MTUComm
 {
     public class Configuration
     {
+        private const string SUBPATHFILES = "Android/data/com.aclara.mtu.programmer/files/";
+        private const string XML_MTUS     = "Mtu.xml";
+        private const string XML_METERS   = "Meter.xml";
+        private const string XML_GLOBAL   = "Global.xml";
+        private const string XML_INTERFACE   = "Interface.xml";
+
         private String mbase_path;
         private MtuTypes mtuTypes;
         private MeterTypes meterTypes;
@@ -22,26 +28,60 @@ namespace MTUComm
         private string appName;
         private static Configuration instance;
 
-        private Configuration()
+        private enum PATHS
         {
-            string base_path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            STORAGE_EMULATED_ZERO,
+            STORAGE_EMULATED_LEGACY,
+            STORAGE_SDCARD_ZERO,
+            SDCARD_MNT,
+            SDCARD
+        }
 
-            if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
+        private string[] paths =
+        {
+            "/storage/emulated/0/",      // Espacio de trabajo del usuario cero/0
+            "/storage/emulated/legacy/", // Enlace simbolico a "/storage/emulated/0/"
+            "/storage/sdcard0/",         // Android >= 4.0
+            "/mnt/sdcard/",              // Android < 4.0
+            "/sdcard/"                   // Enlace simbolico a "/storage/sdcard0/" y "/mnt/sdcard/"
+        };
+
+        private string GetPath ( PATHS ePath )
+        {
+            return paths[ (int)ePath ];
+        }
+
+        private Configuration ()
+        {
+            mbase_path = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
+
+            if ( Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android )
             {
-                if (base_path.Contains("/data/user/0/"))
-                    base_path = base_path.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-                else if (base_path.Contains("/data/data/"))
-                    base_path = base_path.Replace("/data/data/", "/storage/emulated/0/Android/data/");
+                // Search the first valid path to recover XML files
+                PATHS  ePath;
+                string path;
+                string[] names = Enum.GetNames(typeof(PATHS));
+                for (int i = 0; i < names.Length; i++)
+                {
+                    Enum.TryParse<PATHS> ( names[i], out ePath );
+                    path = this.GetPath ( ePath );
+
+                    if ( Directory.Exists ( this.GetPath ( ePath ) ) &&
+                         File.Exists ( path + SUBPATHFILES + XML_MTUS ) )
+                    {
+                        mbase_path = path + SUBPATHFILES;
+                        break;
+                    }
+                }
             }
 
-            mbase_path = base_path;
             device = "PC";
             Config config = new Config();
 
-            mtuTypes = config.GetMtu(Path.Combine(mbase_path, "Mtu.xml"));
-            meterTypes = config.GetMeters(Path.Combine(mbase_path, "Meter.xml"));
-            global = config.GetGlobal(Path.Combine(mbase_path, "Global.xml"));
-            interfaces = config.GetInterfaces(Path.Combine(mbase_path, "Interface.xml"));
+            mtuTypes = config.GetMtu(Path.Combine(mbase_path, XML_MTUS ));
+            meterTypes = config.GetMeters(Path.Combine(mbase_path, XML_METERS ));
+            global = config.GetGlobal(Path.Combine(mbase_path, XML_GLOBAL ));
+            interfaces = config.GetInterfaces(Path.Combine(mbase_path, XML_INTERFACE));
         }
 
         public Configuration(String base_path)
