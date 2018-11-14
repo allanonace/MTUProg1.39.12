@@ -103,10 +103,14 @@ namespace aclara_meters.iOS
 
         public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
         {
-            appSave.HandleUrl( (Uri) url);
-        
+            appSave.HandleUrl((Uri)url);
+
             return true;
         }
+
+
+ 
+
 
     }
 

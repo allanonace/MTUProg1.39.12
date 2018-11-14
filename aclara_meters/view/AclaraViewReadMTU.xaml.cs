@@ -384,7 +384,9 @@ namespace aclara_meters.view
                             {
                                 param = e.Result.getParameterByTag(parameter.Source.Split(new char[] { '.' })[1]);
                             }
-                            catch (Exception e3) { Console.WriteLine(e3.StackTrace); }
+                            catch (Exception e3) { 
+                                Console.WriteLine(e3.StackTrace); //{System.IndexOutOfRangeException: Index was outside the bounds of the array.t aclara_meters.view.AclaraViewReadMTU.< ThreadProcedureMTUCOMMAction > b__19_0(System.Object s, MTUComm.Action + ActionFinishArgs e)[0x0031d] in / Users / ma.jimenez / Desktop / Proyectos / proyecto_aclara / aclara_meters / view / AclaraViewReadMTU.xaml.cs:385 }
+                            }
 
                         }
                         if (param == null)

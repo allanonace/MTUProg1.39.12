@@ -17,6 +17,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography;
 using Plugin.DeviceInfo;
 using MTUComm;
+using aclara_meters.Helpers;
+using System.Threading.Tasks;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -68,27 +70,50 @@ namespace aclara_meters
 
         private void LoadConfiguration()
         {
-            config = Configuration.GetInstance();
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
             if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
             {
-                config.setPlatform("Android");
-                config.setAppName(AppName);
-                config.setVersion(Version);
-                config.setDeviceUUID(deviceId);
-
-            }else
-        
-            if(Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.iOS)
-            {
-                config.setPlatform("iOS"); 
-                config.setAppName(AppName);
-                config.setVersion(Version);
-                config.setDeviceUUID(deviceId);
-            }else{
-                config.setPlatform("Unknown"); 
+                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
             }
-            
+
+            config = new Configuration(xml_documents);
+
+            if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
+            {
+                config.setPlatform("Android"); config.setAppName(AppName); config.setVersion(Version); config.setDeviceUUID(deviceId);
+
+            }
+            else if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.iOS)
+            {
+                config.setPlatform("iOS"); config.setAppName(AppName); config.setVersion(Version); config.setDeviceUUID(deviceId);
+            }
+            else
+            {
+                config.setPlatform("Unknown");
+            }
+        }
+
+
+        /*--------------------------------------------------*/
+        /*      Extensions Requests are handled here        */
+
+        public async void HandleUrl(string url, string path)
+        {
+            Uri newUri = null;
+
+            try{
+                newUri = new Uri(url);
+
+                HandleUrl(newUri);
+            }catch (Exception j){
+                Console.WriteLine(j.StackTrace);
+            }
+
+           
+
+
+          
         }
 
         public FormsApp(IBluetoothLowEnergyAdapter adapter, IUserDialogs dialogs, List<string> listaDatos, string AppVersion)
@@ -142,85 +167,69 @@ namespace aclara_meters
 
         }
 
+        public static string Base64Decode(string base64EncodedData)
+        {
+            var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
+            return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+        }
+
+        public static string Base64Encode(string plainText)
+        {
+            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+            return System.Convert.ToBase64String(plainTextBytes);
+        }
 
         public async void HandleUrl(Uri url)
         {
             if (url == null)
             {
-                
+
             }
             else
             {
-                string url_str = url.LocalPath;
-                string url_str2 = url.AbsolutePath;
-                string url_str3 = url.Scheme;
+                var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var filename = "";
 
-            
-                var response = await Application.Current.MainPage.DisplayAlert("Alert", "Work in Progress deep linking", "ok","cancel");  
-  
-                if (response)  
+                if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
                 {
+                    xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
+                }
 
-					String decode1 = System.Web.HttpUtility.UrlDecode(url.ToString());
-                    var uri = new Uri(decode1);
-                    var query = HttpUtility.ParseQueryString(uri.Query);
+                //string decode1 = System.Web.HttpUtility.UrlDecode(url.ToString());
+                //var uri = new Uri(decode1);
+                var query = HttpUtility.ParseQueryString(url.Query);
 
+                var script_name = query.Get("script_name");
+                var script_data = query.Get("script_data");
+                var callback = query.Get("callback");
+
+
+                if(script_name!=null)
+                {
+                    filename = Path.Combine(xml_documents, script_name.ToString());
+                }
+
+                if (script_data != null)
+                {
+                    File.WriteAllText(filename, Base64Decode(script_data));
+                }
+
+                if (callback != null)
+                {
                   
-                    try
+                }
+            
+                Task.Run(async () =>
+                {
+                    await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
                     {
-                        var var1 = query.Get("script_path");
-                        if (var1 != null)
-                        {
-                            Console.WriteLine("Var1:" + var1.ToString());
-
-                            var response3 = await Application.Current.MainPage.DisplayAlert("Alert", "script_path: " + var1.ToString(), "ok", "cancel");
-
-
-                            List<string> listaObjetos = new List<string>();
-
-                            XDocument doc = XDocument.Parse(var1);
-
-                            foreach (var item in doc.Descendants("note"))  
-                            {  
-                                string to = item.Element("to").Value.ToString();  
-                                string from = item.Element("from").Value.ToString();  
-                                string heading = item.Element("heading").Value.ToString();  
-                                string body = item.Element("body").Value.ToString();  
-                                listaObjetos.Add("To: "+to+" From: "+from+" Heading: "+heading+" Body: "+body);  
-                            }  
-
-                            await Application.Current.MainPage.DisplayAlert("Objetos XML", listaObjetos[0], "ok", "cancel");
-
-                        }
-                        var var2 = query.Get("callback");
-                        if (var2 != null)
-                        {
-                            Console.WriteLine("Var2:" + var2.ToString());
-                            var response2 = await Application.Current.MainPage.DisplayAlert("Alert", "callback: " + var2.ToString(), "ok", "cancel");
-                            /**/
-                            var uri2 = new Uri(var2);
-                            var query2 = HttpUtility.ParseQueryString(uri2.Query);
-                            var var12 = query2.Get("param");
-                            String cabecera = var2.Replace(var12, "");
-                            String datos = System.Web.HttpUtility.UrlEncode(var12);
-                            Xamarin.Forms.Device.OpenUri(new Uri(cabecera + datos));
-
-                        }
-                       
-
-
-                    }catch(Exception e)
-                    {
-                        Console.WriteLine(e.StackTrace);
-                    }
-
-                }  
-      
-                else  
-                {  
-                   //user click cancel  
-                
-                }  
+                        Settings.IsLoggedIn = false;
+                        CredentialsService.DeleteCredentials();
+                        NavigationPage page = new NavigationPage(new AclaraViewScripting(filename, callback, script_name));
+                        MainPage = page;
+                        await MainPage.Navigation.PopToRootAsync(true);
+                    });
+                });
 
             }
         }
