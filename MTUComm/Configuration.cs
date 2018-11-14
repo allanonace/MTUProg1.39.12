@@ -99,7 +99,7 @@ namespace MTUComm
         {
             if (instance == null)
             {
-                instance = new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\run_basepath");// @"C: \Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog");
+                instance = new Configuration();// @"C: \Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog");
             }
             return instance;
         }
