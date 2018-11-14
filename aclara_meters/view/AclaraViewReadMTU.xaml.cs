@@ -262,13 +262,80 @@ namespace aclara_meters.view
 
                     if (parameter.Name.Equals("Port"))
                     {
+
+
+
                         ActionResult[] ports = e.Result.getPorts(); //parameter.Parameters.ToArray()
 
-                        Parameter[] paramPort = null;
 
                         for (int i = 0; i < ports.Length; i++)
                         {
+
+                            foreach (InterfaceParameters  port_parameter in parameter.Parameters)
+                            {
+
+                                Parameter param = null;
+
+                                if (port_parameter.Name.Equals("Description"))
+                                {
+                                    param = ports[i].getParameterByTag(port_parameter.Name);
+
+                                    FinalReadListView.Add(new ReadMTUItem()
+                                    {
+                                        Title = "Here lies the Port title...",
+                                        isDisplayed = "true",
+                                        Height = "40",
+                                        isMTU = "false",
+                                        isMeter = "true",
+                                        Description = "Port " + i + ": " + param.getValue() //parameter.Value
+                                    });
+
+                                }else{
+                                    
+                                    if (port_parameter.Source != null)
+                                    {
+                                        try
+                                        {
+                                            param = ports[i].getParameterByTag(port_parameter.Source.Split(new char[] { '.' })[1]);
+                                        }
+                                        catch (Exception e2)
+                                        {
+                                            Console.WriteLine(e2.StackTrace);
+                                         }
+
+                                    }
+                                    if (param == null)
+                                    {
+                                        param = ports[i].getParameterByTag(port_parameter.Name);
+                                    }
+
+                                    if (param != null)
+                                    {
+
+
+                                        FinalReadListView.Add(new ReadMTUItem()
+                                        {
+                                            Title = "\t\t\t\t\t" + param.getLogDisplay() + ":",
+                                            isDisplayed = "true",
+                                            Height = "64",
+                                            isMTU = "true",
+                                            isMeter = "false",
+                                            Description = "\t\t\t\t\t" + param.getValue() //parameter.Value
+                                        });
+                                    }
+
+
+                                }
+
+
+
+                            }
+
+
+
+                            /*
                             paramPort = ports[i].getParameters();
+
 
                             if (paramPort != null)
                             {
@@ -283,8 +350,11 @@ namespace aclara_meters.view
                                     Description = "Port " + i + ": " + paramPort[i].getValue() //parameter.Value
                                 });
 
+
                                 for (int i2 = 1; i2 < paramPort.Length; i2++)
                                 {
+
+
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
                                         Title = "\t\t\t\t\t" + paramPort[i2].getLogDisplay() + ":",
@@ -295,26 +365,47 @@ namespace aclara_meters.view
                                         Description = "\t\t\t\t\t" + paramPort[i2].getValue() //parameter.Value
                                     });
                                 }
-                            }
+
+
+                            }*/
+
                         }
 
 
                     }
                     else
                     {
-                        Parameter param = e.Result.getParameterByTag(parameter.Name);
 
-                    if(param!=null){
-                        FinalReadListView.Add(new ReadMTUItem()
+                        Parameter param = null;
+
+                        if (parameter.Source != null)
                         {
-                            Title = param.getLogDisplay() + ":",
-                            isDisplayed = "true",
-                            Height = "64",
-                            isMTU = "true",
-                            isMeter = "false",
-                            Description = param.Value //parameter.Value
-                        });
-                    }
+                            try
+                            {
+                                param = e.Result.getParameterByTag(parameter.Source.Split(new char[] { '.' })[1]);
+                            }
+                            catch (Exception e3) { Console.WriteLine(e3.StackTrace); }
+
+                        }
+                        if (param == null)
+                        {
+                            param = e.Result.getParameterByTag(parameter.Name);
+                        }
+
+                        if (param != null)
+                        {
+   
+                            FinalReadListView.Add(new ReadMTUItem()
+                            {
+                                Title = param.getLogDisplay() + ":",
+                                isDisplayed = "true",
+                                Height = "64",
+                                isMTU = "true",
+                                isMeter = "false",
+                                Description = param.Value //parameter.Value
+                            });
+                        }
+
                 }
             }
 
