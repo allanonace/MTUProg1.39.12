@@ -149,7 +149,7 @@ namespace MTUComm
 
         private void Action_OnError(object sender, Action.ActionErrorArgs e)
         {
-            OnError(this, e);
+            OnError(sender, e);
         }
 
         private void Action_OnFinish(object sender, Action.ActionFinishArgs e)
@@ -157,12 +157,12 @@ namespace MTUComm
             Action act = (Action)sender;
             if (act.Order < (actions.Count-1))
             {
-                onStepFinish(this, act.Order, e);
+                onStepFinish(act, act.Order, e);
                 actions.ToArray()[act.Order+1].Run();
             }
             else
             {
-                OnFinish(this, e);
+                OnFinish(act, e);
             }
             
         }

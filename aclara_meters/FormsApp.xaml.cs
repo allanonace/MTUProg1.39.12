@@ -179,7 +179,7 @@ namespace aclara_meters
             return System.Convert.ToBase64String(plainTextBytes);
         }
 
-        public async void HandleUrl(Uri url)
+        public void HandleUrl(Uri url)
         {
             if (url == null)
             {
@@ -204,7 +204,7 @@ namespace aclara_meters
                 var callback = query.Get("callback");
 
 
-                if(script_name!=null)
+                if (script_name != null)
                 {
                     filename = Path.Combine(xml_documents, script_name.ToString());
                 }
@@ -216,9 +216,9 @@ namespace aclara_meters
 
                 if (callback != null)
                 {
-                  
+
                 }
-            
+
                 Task.Run(async () =>
                 {
                     await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>

@@ -34,6 +34,9 @@ namespace aclara_meters.view
         private string resultCallback;
         private string resultScriptName;
 
+        private string resultDataXml;
+
+
         public AclaraViewScripting()
         {
             InitializeComponent();
@@ -92,7 +95,7 @@ namespace aclara_meters.view
             });
 
 
-            String dec = File.ReadAllText(url);
+            resultDataXml = File.ReadAllText(url);
 
             //ContentView_Scripting_textScript.Text = dec;
 
@@ -284,20 +287,10 @@ namespace aclara_meters.view
                                             });
 
 
-                                            var xml_documents2 = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
-                                            if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
-                                            {
-                                                xml_documents2 = xml_documents2.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-                                            }
-
-
-                                            var filename2 = Path.Combine(xml_documents2, "script_to_load.xml");
-                                            String dataStream = File.ReadAllText(filename2);
 
                                             //ScriptRunner runner = new ScriptRunner(FormsApp.config.GetBasePath(), FormsApp.ble_interface, FormsApp.config.GetBasePath() + "/data_share.xml");
 
-                                            ScriptRunner runner = new ScriptRunner(FormsApp.config.GetBasePath(), FormsApp.ble_interface, dataStream, dataStream.Length);
+                                            ScriptRunner runner = new ScriptRunner(FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length);
 
                                             //Define finish and error event handler
                                             runner.OnFinish += Add_mtu_OnFinish;
@@ -611,7 +604,7 @@ namespace aclara_meters.view
                         Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
                                                              "status=success" +
                                                              "&output_filename="+resultScriptName +
-                                                             "&output_data=" + Base64Encode(xmlResultTocallback) ));
+                                                             "&output_data=" + System.Web.HttpUtility.UrlEncode(Base64Encode(xmlResultTocallback)) ));
                     });
 
                 });
