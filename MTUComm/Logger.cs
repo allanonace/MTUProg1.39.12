@@ -145,11 +145,7 @@ namespace MTUComm
                 }
                 else
                 {
-                    Parameter param = result.getParameterByTag(parameter.Name);
-                    if (param != null)
-                    {
-                        logParameter(action, param);
-                    }
+                    logComplexParameter(action, result, parameter);
                 }
                 
             }
@@ -186,11 +182,7 @@ namespace MTUComm
 
             foreach (InterfaceParameters parameter in parameters)
             {
-                Parameter param = result.getParameterByTag(parameter.Name);
-                if (param != null)
-                {
-                    logParameter(port, param);
-                }
+                logComplexParameter(port, result, parameter);
             }
 
             parent.Add(port);
@@ -347,9 +339,38 @@ namespace MTUComm
 
         }
 
+        private void logComplexParameter(XElement parent, ActionResult result, InterfaceParameters parameter)
+        {
+            Parameter param = null;
+
+            if (parameter.Source != null)
+            {
+                try
+                {
+                    param = result.getParameterByTag(parameter.Source.Split(new char[] { '.' })[1]);
+                }
+                catch (Exception e) { }
+
+            }
+            if (param == null)
+            {
+                param = result.getParameterByTag(parameter.Name);
+            }
+
+            if (param != null)
+            {
+                logParameter(parent, param, parameter.Name);
+            }
+        }
+
         public void logParameter(XElement parent, Parameter parameter)
         {
-            XElement xml_parameter = new XElement(parameter.getLogTag(), parameter.getValue());
+            logParameter(parent, parameter, parameter.getLogTag());
+        }
+
+        public void logParameter(XElement parent, Parameter parameter, string TagName)
+        {
+            XElement xml_parameter = new XElement(TagName, parameter.getValue());
             addAtrribute(xml_parameter, "display", parameter.getLogDisplay());
             if (parameter.Optional)
             {

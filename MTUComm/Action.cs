@@ -479,7 +479,7 @@ namespace MTUComm
                                         break;
                                     case "MemoryMap":
                                         string memory_alt_property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty("P" + (portnumber + 1) + memory_alt_property_name).Value.ToString()));
+                                        result.AddParameter(new Parameter(memory_alt_property_name, parameter.Display, registers.GetProperty("P" + (portnumber + 1) + memory_alt_property_name).Value.ToString()));
                                         break;
                                     default:
                                         result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty("P"+ (portnumber + 1) + parameter.Name).Value.ToString()));
@@ -572,7 +572,7 @@ namespace MTUComm
                                     break;
                                 case "MemoryMap":
                                     string memory_alt_property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                    result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty(memory_alt_property_name)));
+                                    result.AddParameter(new Parameter(memory_alt_property_name, parameter.Display, registers.GetProperty(memory_alt_property_name).Value.ToString()));
                                     break;
                                 default:
                                     result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty(parameter.Name).Value.ToString()));
