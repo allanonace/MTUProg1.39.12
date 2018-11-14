@@ -1,5 +1,49 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Registers>
+  <Overload>
+    <Id>Overload_Operation</Id>
+    <Type>int</Type>
+    <Description>Overload field test description</Description>
+    <Registers>
+      <Register>MtuType</Register>
+      <Register>DailyRead</Register>
+    </Registers>
+    <Custom>_1_ + _2_</Custom>
+  </Overload>
+  <Overload>
+    <Id>Overload_Method</Id>
+    <Type>int</Type>
+    <Description>Overload field test description</Description>
+    <Registers>
+      <Register>MtuType</Register>
+      <Register>Shipbit</Register>
+      <Register>DailyRead</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+  <Overload>
+    <Id>Overload_Method_Reuse</Id>
+    <Type>int</Type>
+    <Description>Overload field test description</Description>
+    <Registers>
+      <Register>MtuType</Register>
+      <Register>Shipbit</Register>
+      <Register>DailyRead</Register>
+    </Registers>
+    <Custom>method:Method_reuse</Custom>
+  </Overload>
+  <Overload>
+    <Id>Overload_Method_Array</Id>
+    <Type>int</Type>
+    <Description>Overload field test description</Description>
+    <Registers>
+      <Register>MtuType</Register>
+      <Register>Shipbit</Register>
+      <Register>DailyRead</Register>
+    </Registers>
+    <Custom>method</Custom>
+  </Overload>
+
   <Register>
     <Id>MtuType</Id>
     <Description>MTU Type</Description>
@@ -25,7 +69,7 @@
     <Address>22</Address>
     <Size>0</Size>
     <Write>true</Write>
-    <Custom/>
+    <Custom>method</Custom>
   </Register>
   <Register>
     <Id>DailyRead</Id>
@@ -34,7 +78,7 @@
     <Address>198</Address>
     <Size>1</Size>
     <Write>true</Write>
-    <Custom/>
+    <Custom>method</Custom>
   </Register>
   <Register>
     <Id>MessageOverlapCount</Id>
@@ -97,7 +141,7 @@
     <Address>244</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <Custom>Version {0:00}</Custom>
+    <Custom/>
   </Register>
   <Register>
     <Id>P1TiltAlarm</Id>

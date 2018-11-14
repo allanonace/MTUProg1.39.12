@@ -45,21 +45,6 @@ using Xml;
 ///     haya usado 'new' para ocultar los miembros de la clase padre. La solucion vuelve a ser usar un tipo dinamico,
 ///     en este caso para la coleccion de registros, convirtiendo ademas la clase padre en generica ( RegisterObj<T> ),
 ///     ademas de los metodos CreatePropertySet|Get y los delegados Func|Action<T>
-/// 
-/// TODO: 
-/// - De momento se crearan set y get para todo registro pero luego se modificara
-///   para que en el xml de la familia se indique si cada registro tendra set
-/// 
-/// - Cuando en el campo custom se indique "Logic" de forma automatica, usando
-///   reflexion, se generara la propiedad getter asociada a un metodo llamado
-///   igual que el registro ( identificador ) mas el sufijo "_Logic"
-///   
-/// - Cambiar el planteamiento para que todos los campos que requieran algun calculo especial,
-///   como ocurre ahora con los numericos y el elemento "custom", invoquen un metodo con el mismo
-///   nombre que el identificador del registro con el sufijo "_Logic", para homogeneizar todo
-///
-/// - Añadir nuevos tipos de registro ( overload ) a los xml de las familias de los MTUs,
-///   que representaran combinaciones de varios registros ( register )
 /// </summary>
 
 namespace MTUComm.MemoryMap
@@ -80,15 +65,18 @@ namespace MTUComm.MemoryMap
 
         private const string XML_PREFIX         = "family_";
         private const string XML_EXTENSION      = ".xml";
-        private const string METHODS_CUSTOM_SUFIX = "_Logic";
         private const string METHODS_GET_PREFIX = "get_";
         private const string METHODS_GET_CUSTOM_PREFIX = "getCustom_";
         private const string METHODS_SET_PREFIX = "set_";
+        private const string REGISTER_OP        = "_val_";
+        private const string OVERLOAD_OP_SIGN   = "#";
+        private const string OVERLOAD_OP        = "_" + OVERLOAD_OP_SIGN + "_";
         private const string EXCEP_SET_INT      = "String argument can't be casted to int";
         private const string EXCEP_SET_UINT     = "String argument can't be casted to uint";
         private const string EXCEP_SET_ULONG    = "String argument can't be casted to ulong";
         public  const string EXCEP_SET_USED     = "The specified record has not been mapped";
         public  const string EXCEP_SET_READONLY = "The specified record is readonly";
+        private const string EXCEP_CUST_METHOD  = "Method '#' is not present in MTU family class";
 
         #endregion
 
@@ -115,132 +103,134 @@ namespace MTUComm.MemoryMap
 
                 #region Registers
 
-                foreach ( MemRegister xmlRegister in list.Registers )
-                {
-                    RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlRegister.Type.ToUpper () );
-                    Type SysType = typeof(System.Object);
-
-                    switch ( type )
+                if ( list.Registers != null )
+                    foreach ( MemRegister xmlRegister in list.Registers )
                     {
-                        case RegType.INT   : SysType = typeof ( int    ); break;
-                        case RegType.UINT  : SysType = typeof ( uint   ); break;
-                        case RegType.ULONG : SysType = typeof ( ulong  ); break;
-                        case RegType.BOOL  : SysType = typeof ( bool   ); break;
-                        case RegType.CHAR  : SysType = typeof ( char   ); break;
-                        case RegType.STRING: SysType = typeof ( string ); break;
+                        RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlRegister.Type.ToUpper () );
+                        Type SysType = typeof(System.Object);
+
+                        switch ( type )
+                        {
+                            case RegType.INT   : SysType = typeof ( int    ); break;
+                            case RegType.UINT  : SysType = typeof ( uint   ); break;
+                            case RegType.ULONG : SysType = typeof ( ulong  ); break;
+                            case RegType.BOOL  : SysType = typeof ( bool   ); break;
+                            case RegType.CHAR  : SysType = typeof ( char   ); break;
+                            case RegType.STRING: SysType = typeof ( string ); break;
+                        }
+
+                        // Creates an instance of the generic class
+                        dynamic memoryRegister = Activator.CreateInstance(typeof(MemoryRegister<>)
+                            .MakeGenericType(SysType),
+                                xmlRegister.Id,
+                                type,
+                                xmlRegister.Description,
+                                xmlRegister.Address,
+                                xmlRegister.Size,
+                                xmlRegister.Write,
+                                xmlRegister.Custom);
+
+                        // Is not possible to use SysType as Type to invoke generic
+                        // method like CreateProperty_Get<T> and is necesary to use Reflection
+                        //typeof( MemoryMap ).GetMethod("CreateProperty_Get").MakeGenericMethod(SysType).Invoke(null, new object[] { regObj });
+                        //typeof( MemoryMap ).GetMethod("CreateProperty_Set").MakeGenericMethod(SysType).Invoke(null, new object[] { regObj });
+                        this.CreateProperty_Get ( memoryRegister );
+                        if ( xmlRegister.Write )
+                            this.CreateProperty_Set ( memoryRegister );
+
+                        // References to methods to use in property ( .Value )
+                        dynamic get  = base.registers[ METHODS_GET_PREFIX + memoryRegister.id ];
+                        dynamic getC = ( memoryRegister.HasCustomMethod ) ? base.registers[ METHODS_GET_CUSTOM_PREFIX + memoryRegister.id ] : null;
+                        dynamic set  = ( memoryRegister.write ) ? base.registers[ METHODS_SET_PREFIX + memoryRegister.id ] : null;
+                        TypeCode tc  = Type.GetTypeCode(SysType.GetType());
+                        switch (type)
+                        {
+                            case RegType.INT:
+                                memoryRegister.funcGet       = (Func<int>)get;
+                                memoryRegister.funcGetCustom = (Func<int>)getC;
+                                memoryRegister.funcSet       = (Action<int>)set;
+                                break;
+                            case RegType.UINT:
+                                memoryRegister.funcGet       = (Func<uint>)get;
+                                memoryRegister.funcGetCustom = (Func<uint>)getC;
+                                memoryRegister.funcSet       = (Action<uint>)set;
+                                break;
+                            case RegType.ULONG:
+                                memoryRegister.funcGet       = (Func<ulong>)get;
+                                memoryRegister.funcGetCustom = (Func<ulong>)getC;
+                                memoryRegister.funcSet       = (Action<ulong>)set;
+                                break;
+                            case RegType.BOOL:
+                                memoryRegister.funcGet       = (Func<bool>)get;
+                                memoryRegister.funcGetCustom = (Func<bool>)getC;
+                                memoryRegister.funcSet       = (Action<bool>)set;
+                                break;
+                            case RegType.CHAR:
+                                memoryRegister.funcGet       = (Func<char>)get;
+                                memoryRegister.funcGetCustom = (Func<char>)getC;
+                                memoryRegister.funcSet       = (Action<char>)set;
+                                break;
+                            case RegType.STRING:
+                                memoryRegister.funcGet       = (Func<string>)get;
+                                memoryRegister.funcGetCustom = (Func<string>)getC;
+                                memoryRegister.funcSet       = (Action<string>)set;
+                                break;
+                        }
+
+                        // BAD: Reference to property itself
+                        // OK : Reference to register object and use TrySet|GetMember methods
+                        //      to override set and get logic, avoiding ExpandoObject problems
+                        // NOTA: No se puede usar "base." porque parece ser invalidaria el comportamiento dinamico
+                        AddProperty ( memoryRegister );
+
+                        // Add new object to collection where will be
+                        // filtered to only recover modified registers
+                        this.registersObjs.Add(xmlRegister.Id, memoryRegister);
                     }
-
-                    // Creates an instance of the generic class
-                    dynamic memoryRegister = Activator.CreateInstance(typeof(MemoryRegister<>).MakeGenericType(SysType),
-                        xmlRegister.Id,
-                        type,
-                        xmlRegister.Description,
-                        xmlRegister.Address,
-                        xmlRegister.Size,
-                        xmlRegister.Write,
-                        xmlRegister.Custom);
-
-                    // Is not possible to use SysType as Type to invoke generic
-                    // method like CreateProperty_Get<T> and is necesary to use Reflection
-                    //typeof( MemoryMap ).GetMethod("CreateProperty_Get").MakeGenericMethod(SysType).Invoke(null, new object[] { regObj });
-                    //typeof( MemoryMap ).GetMethod("CreateProperty_Set").MakeGenericMethod(SysType).Invoke(null, new object[] { regObj });
-                    this.CreateProperty_Get ( memoryRegister );
-                    if ( xmlRegister.Write )
-                        this.CreateProperty_Set ( memoryRegister );
-
-                    // References to methods to use in property ( .Value )
-                    dynamic get  = base.registers[ METHODS_GET_PREFIX + memoryRegister.id ];
-                    dynamic getC = ( memoryRegister.HasCustomMethod ) ? base.registers[ METHODS_GET_CUSTOM_PREFIX + memoryRegister.id ] : null;
-                    dynamic set  = ( memoryRegister.write ) ? base.registers[ METHODS_SET_PREFIX + memoryRegister.id ] : null;
-                    TypeCode tc  = Type.GetTypeCode(SysType.GetType());
-                    switch (type)
-                    {
-                        case RegType.INT:
-                            memoryRegister.funcGet       = (Func<int>)get;
-                            memoryRegister.funcGetCustom = (Func<int>)getC;
-                            memoryRegister.funcSet       = (Action<int>)set;
-                            break;
-                        case RegType.UINT:
-                            memoryRegister.funcGet       = (Func<uint>)get;
-                            memoryRegister.funcGetCustom = (Func<uint>)getC;
-                            memoryRegister.funcSet       = (Action<uint>)set;
-                            break;
-                        case RegType.ULONG:
-                            memoryRegister.funcGet       = (Func<ulong>)get;
-                            memoryRegister.funcGetCustom = (Func<ulong>)getC;
-                            memoryRegister.funcSet       = (Action<ulong>)set;
-                            break;
-                        case RegType.BOOL:
-                            memoryRegister.funcGet       = (Func<bool>)get;
-                            memoryRegister.funcGetCustom = (Func<bool>)getC;
-                            memoryRegister.funcSet       = (Action<bool>)set;
-                            break;
-                        case RegType.CHAR:
-                            memoryRegister.funcGet       = (Func<char>)get;
-                            memoryRegister.funcGetCustom = (Func<char>)getC;
-                            memoryRegister.funcSet       = (Action<char>)set;
-                            break;
-                        case RegType.STRING:
-                            memoryRegister.funcGet       = (Func<string>)get;
-                            memoryRegister.funcGetCustom = (Func<string>)getC;
-                            memoryRegister.funcSet       = (Action<string>)set;
-                            break;
-                    }
-
-                    // BAD: Reference to property itself
-                    // OK : Reference to register object and use TrySet|GetMember methods
-                    //      to override set and get logic, avoiding ExpandoObject problems
-                    // NOTA: No se puede usar "base." porque parece ser invalidaria el comportamiento dinamico
-                    AddProperty ( memoryRegister );
-
-                    // Add new object to collection where will be
-                    // filtered to only recover modified registers
-                    this.registersObjs.Add(xmlRegister.Id, memoryRegister);
-                }
 
                 #endregion
                 #region Overloads
 
-                // Overloads
-                foreach ( MemOverload xmlOverload in list.Overloads )
-                {
-                    RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlOverload.Type.ToUpper () );
-                    Type SysType = typeof(System.Object);
-
-                    switch ( type )
+                if ( list.Overloads != null )
+                    foreach ( MemOverload xmlOverload in list.Overloads )
                     {
-                        case RegType.INT   : SysType = typeof ( int    ); break;
-                        case RegType.UINT  : SysType = typeof ( uint   ); break;
-                        case RegType.ULONG : SysType = typeof ( ulong  ); break;
-                        case RegType.BOOL  : SysType = typeof ( bool   ); break;
-                        case RegType.CHAR  : SysType = typeof ( char   ); break;
-                        case RegType.STRING: SysType = typeof ( string ); break;
+                        RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlOverload.Type.ToUpper () );
+                        Type SysType = typeof(System.Object);
+
+                        switch ( type )
+                        {
+                            case RegType.INT   : SysType = typeof ( int    ); break;
+                            case RegType.UINT  : SysType = typeof ( uint   ); break;
+                            case RegType.ULONG : SysType = typeof ( ulong  ); break;
+                            case RegType.BOOL  : SysType = typeof ( bool   ); break;
+                            case RegType.CHAR  : SysType = typeof ( char   ); break;
+                            case RegType.STRING: SysType = typeof ( string ); break;
+                        }
+
+                        // Creates an instance of the generic class
+                        dynamic memoryOverload = Activator.CreateInstance(typeof(MemoryOverload<>).MakeGenericType(SysType),
+                            xmlOverload.Id,
+                            type,
+                            xmlOverload.Description,
+                            xmlOverload.Registers.Select ( o => o.Id ).ToArray (),
+                            xmlOverload.Custom );
+
+                        this.CreateOverload_Get ( memoryOverload );
+
+                        dynamic get = base.registers[ METHODS_GET_PREFIX + memoryOverload.id ];
+                        TypeCode tc = Type.GetTypeCode ( SysType.GetType() );
+                        switch (type)
+                        {
+                            case RegType.INT   : memoryOverload.funcGet = (Func<int>   )get; break;
+                            case RegType.UINT  : memoryOverload.funcGet = (Func<uint>  )get; break;
+                            case RegType.ULONG : memoryOverload.funcGet = (Func<ulong> )get; break;
+                            case RegType.BOOL  : memoryOverload.funcGet = (Func<bool>  )get; break;
+                            case RegType.CHAR  : memoryOverload.funcGet = (Func<char>  )get; break;
+                            case RegType.STRING: memoryOverload.funcGet = (Func<string>)get; break;
+                        }
+
+                        AddProperty ( memoryOverload );
                     }
-
-                    // Creates an instance of the generic class
-                    dynamic memoryOverload = Activator.CreateInstance(typeof(MemoryOverload<>).MakeGenericType(SysType),
-                        xmlOverload.Id,
-                        type,
-                        xmlOverload.Description,
-                        xmlOverload.Registers.Select ( o => o.Id ).ToArray (),
-                        xmlOverload.Custom );
-
-                    this.CreateOverload_Get ( memoryOverload );
-
-                    dynamic get = base.registers[ METHODS_GET_PREFIX + memoryOverload.id ];
-                    TypeCode tc = Type.GetTypeCode ( SysType.GetType() );
-                    switch (type)
-                    {
-                        case RegType.INT   : memoryOverload.funcGet = (Func<int>   )get; break;
-                        case RegType.UINT  : memoryOverload.funcGet = (Func<uint>  )get; break;
-                        case RegType.ULONG : memoryOverload.funcGet = (Func<ulong> )get; break;
-                        case RegType.BOOL  : memoryOverload.funcGet = (Func<bool>  )get; break;
-                        case RegType.CHAR  : memoryOverload.funcGet = (Func<char>  )get; break;
-                        case RegType.STRING: memoryOverload.funcGet = (Func<string>)get; break;
-                    }
-
-                    AddProperty ( memoryOverload );
-                }
 
                 #endregion
             }
@@ -248,7 +238,7 @@ namespace MTUComm.MemoryMap
             #region Tests
 
             // TEST: Diferentes opciones campo custom ( metodo y operacion matematica )
-            //Console.WriteLine ( "Test custom operation: " + base.registers.BatteryVoltage );
+            //Console.WriteLine ( "Test operation register: " + base.registers.BatteryVoltage );
             //Console.WriteLine ( "Test custom format: " + base.registers.DailyRead );
 
             // TEST: Separacion entre Value.get y funGetCustom
@@ -275,8 +265,10 @@ namespace MTUComm.MemoryMap
             //    reg1.Value + " " + reg2.Value + " " + reg3.Value );
 
             // TEST: Trabajar con overloads
-            //Console.WriteLine ( base.registers.Overload_Method + "" );
-            //Console.WriteLine ( base.registers.Overload_Operation + "" );
+            //Console.WriteLine ( "Test metodo overload: "       + base.registers.Overload_Method );
+            //Console.WriteLine ( "Test metodo reuse overload: " + base.registers.Overload_Method_Reuse );
+            //Console.WriteLine ( "Test metodo array overload: " + base.registers.Overload_Method_Array );
+            //Console.WriteLine ( "Test operation overload: "    + base.registers.Overload_Operation );
 
             #endregion
         }
@@ -284,17 +276,6 @@ namespace MTUComm.MemoryMap
         #endregion
 
         #region Create Property Get
-
-        /*
-        private void CreateProperty_Get_Custom<T> ( Func<T> function )
-        {
-            string id = function.Method.Name;
-
-            base.dictionary.Add( METHODS_GET_PREFIX + id, new Func<T>(() => {
-                return function.Invoke ();
-            }));
-        }
-        */
 
         private void CreateProperty_Get<T> ( MemoryRegister<T> memoryRegister )
         {
@@ -315,7 +296,7 @@ namespace MTUComm.MemoryMap
 
                     // Numeric field with operation to evaluate
                     if ( memoryRegister.HasCustomOperation )
-                        return this.GetOperation<T> ( result, memoryRegister.custom );
+                        return this.GetOperation<T> ( memoryRegister.custom, result );
 
                     // String field with format to apply
                     else if ( memoryRegister.HasCustomFormat )
@@ -328,43 +309,89 @@ namespace MTUComm.MemoryMap
             // But only someone have special get block/method defined on MTU family classes
             if ( memoryRegister.HasCustomMethod )
             {
-                MethodInfo custoMethod = this.GetType().GetMethod (
-                    memoryRegister.id + METHODS_CUSTOM_SUFIX,
+                MethodInfo customMethod = this.GetType().GetMethod (
+                    memoryRegister.methodId,
                     new Type[] { typeof( MemoryRegister<T> ) } );
+
+                // Method is not present in MTU family class
+                if ( customMethod == null )
+                {
+                    string strError = EXCEP_CUST_METHOD.Replace ( "#", memoryRegister.methodId );
+                    Console.WriteLine ( "Create Custom Get " + memoryRegister.id + ": Error - " + strError );
+                    throw new CustomMethodNotExistException ( strError + ": " + memoryRegister.id );
+                }
 
                 base.AddMethod ( METHODS_GET_CUSTOM_PREFIX + memoryRegister.id,
                     new Func<T>(() =>
                     {
-                        return ( T )custoMethod.Invoke ( this, new object[] { memoryRegister } );
+                        return ( T )customMethod.Invoke ( this, new object[] { memoryRegister } );
                     }));
             }
         }
 
         private void CreateOverload_Get<T> ( MemoryOverload<T> memoryOverload )
         {
-            MethodInfo custoMethod = ( ! memoryOverload.HasCustomMethod ) ?
-                null : this.GetType().GetMethod (
-                    memoryOverload.id + METHODS_CUSTOM_SUFIX,
-                    new Type[] { typeof ( MemoryOverload<T> ), typeof( ExpandoObject ) } );
+            bool useParamArray = false;
+            MethodInfo customMethod = null;
+
+            if ( memoryOverload.HasCustomMethod )
+            {
+                // First try to retrieve method with header ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters )
+                customMethod = this.GetType().GetMethod (
+                                    memoryOverload.methodId,
+                                    new Type[] { typeof ( MemoryOverload<T> ), typeof( ExpandoObject ) } );
+
+                // If method not, try to retrieve method with header ( MemoryOverload<T> MemoryOverload, dynamic[] MemoryRegisters )
+                if ( customMethod == null )
+                {
+                    useParamArray = true;
+                    customMethod  = this.GetType().GetMethod (
+                                        memoryOverload.methodId,
+                                        new Type[] { typeof ( MemoryOverload<T> ), typeof( dynamic[] ) } );
+
+                    // If both options are not present, thow an exception
+                    if ( customMethod == null )
+                    {
+                        string strError = EXCEP_CUST_METHOD.Replace ( "#", memoryOverload.methodId );
+                        Console.WriteLine ( "Create Custom Get " + memoryOverload.id + ": Error - " + strError );
+                        throw new CustomMethodNotExistException ( strError + ": " + memoryOverload.id );
+                    }
+                }
+            }
 
             dynamic registersToUse = new ExpandoObject ();
             IDictionary<string,dynamic> dictionary = registersToUse;
-            foreach ( string id in memoryOverload.registerIds )
-                dictionary[ id ] = base.registers[ id ];
+            dynamic[] registersToUseArray = new dynamic[ memoryOverload.registerIds.Length ];
 
+            int i = 0;
+            foreach ( string id in memoryOverload.registerIds )
+            {
+                dictionary[ id ] = base.registers[ id ];
+                registersToUseArray[ i++ ] = dictionary[ id ];
+            }
+            
             // Overloads only have get block ( are readonly )
             base.AddMethod ( METHODS_GET_PREFIX + memoryOverload.id,
                 new Func<T>(() =>
                 {
                     // Use custom method
                     if ( memoryOverload.HasCustomMethod )
-                        return ( T )custoMethod.Invoke ( this, new object[] { memoryOverload, registersToUse } );
-
-                    return default( T );
+                    {
+                        if ( ! useParamArray )
+                             return ( T )customMethod.Invoke ( this, new object[] { memoryOverload, registersToUse } );
+                        else return ( T )customMethod.Invoke ( this, new object[] { memoryOverload, registersToUseArray } );
+                    }
 
                     // Operation to evaluate
-                    //else
-                    //    return this.GetOperation<T> ( result, memoryRegister.custom );
+                    else
+                    {
+                        i = 0;
+                        object[] values = new object[ dictionary.Count ];
+                        foreach ( string id in dictionary.Keys )
+                            values[ i++ ] = base[ id ].Value;
+
+                        return this.GetOperation<T> ( memoryOverload.custom, values );
+                    }
                 }));
         }
 
@@ -393,13 +420,13 @@ namespace MTUComm.MemoryMap
 
         #region Get value
 
-        private T GetOperation<T> ( object value, string operation )
+        private T GetOperation<T> ( string operation, object value )
         {
             // The following arithmetic operators are supported in expressions: +, -, *, / y %
             // NOTA: No se puede hacer la conversion directa de un double a un entero generico
             //return ( T )( new DataTable ().Compute ( operation.Replace ( "_val_", value.ToString () ), null ) );
 
-            object result = new DataTable().Compute(operation.Replace("_val_", value.ToString()), null );
+            object result = new DataTable().Compute(operation.Replace ( REGISTER_OP, value.ToString()), null );
 
             switch ( Type.GetTypeCode( typeof( T )) )
             {
@@ -409,6 +436,26 @@ namespace MTUComm.MemoryMap
             }
 
             Console.WriteLine ( "GetOperation: " + operation + " | " + value );
+
+            return ( T )result;
+        }
+
+        private T GetOperation<T> ( string operation, params object[] values )
+        {
+            int i = 1;
+            foreach ( object value in values )
+                operation = operation.Replace ( OVERLOAD_OP.Replace ( OVERLOAD_OP_SIGN, ( i++ ).ToString () ), value.ToString () );
+
+            object result = new DataTable().Compute ( operation, null );
+
+            switch ( Type.GetTypeCode( typeof( T )) )
+            {
+                case TypeCode.Int32  : result = Convert.ToInt32  ( result ); break;
+                case TypeCode.UInt32 : result = Convert.ToUInt32 ( result ); break;
+                case TypeCode.UInt64 : result = Convert.ToInt64  ( result ); break;
+            }
+
+            Console.WriteLine ( "GetOperation: " + operation );
 
             return ( T )result;
         }

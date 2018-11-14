@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Dynamic;
 
 namespace MTUComm.MemoryMap
 {
@@ -985,14 +987,50 @@ namespace MTUComm.MemoryMap
 
         */
 
-        public int DailyRead_Logic ( dynamic MemoryRegister )
+        public int Overload_Method_Logic ( MemoryOverload<int> MemoryOverload, dynamic MemoryRegisters )
         {
-            Console.WriteLine ( "Metodo personalizado de DailyRead: " + MemoryRegister.id );
+            Console.WriteLine ( MemoryRegisters.Shipbit.id + " -> " + MemoryRegisters.Shipbit.Value );
+            Console.WriteLine ( MemoryRegisters.MtuType.id + " -> " + MemoryRegisters.MtuType.Value );
+            Console.WriteLine ( MemoryRegisters.DailyRead.id + " -> " + MemoryRegisters.DailyRead.Value );
+
+            if ( MemoryRegisters.Shipbit.Value )
+                return MemoryRegisters.MtuType.Value + MemoryRegisters.DailyRead.Value;
+
+            return -1;
+        }
+
+        public int Method_reuse ( MemoryOverload<int> MemoryOverload, dynamic[] MemoryRegisters )
+        {
+            Console.WriteLine ( MemoryRegisters[ 1 ].id + " -> " + MemoryRegisters[ 1 ].Value );
+            Console.WriteLine ( MemoryRegisters[ 0 ].id + " -> " + MemoryRegisters[ 0 ].Value );
+            Console.WriteLine ( MemoryRegisters[ 2 ].id + " -> " + MemoryRegisters[ 2 ].Value );
+
+            if ( MemoryRegisters[ 1 ].Value )
+                return MemoryRegisters[ 0 ].Value + MemoryRegisters[ 2 ].Value;
+
+            return -1;
+        }
+
+        public int Overload_Method_Array_Logic ( MemoryOverload<int> MemoryOverload, dynamic[] MemoryRegisters )
+        {
+            Console.WriteLine ( MemoryRegisters[ 0 ].id + " -> " + MemoryRegisters[ 0 ].Value );
+            Console.WriteLine ( MemoryRegisters[ 1 ].id + " -> " + MemoryRegisters[ 1 ].Value );
+            Console.WriteLine ( MemoryRegisters[ 2 ].id + " -> " + MemoryRegisters[ 2 ].Value );
+
+            if ( MemoryRegisters[ 1 ].Value )
+                return MemoryRegisters[ 0 ].Value + MemoryRegisters[ 2 ].Value;
+
+            return -1;
+        }
+
+        public int DailyRead_Logic ( MemoryRegister<int> MemoryRegister )
+        {
+            Console.WriteLine ( "Custom method: DailyRead_Logic" );
 
             return MemoryRegister.Value;
         }
 
-        public String DailySnap_Logic ( dynamic MemoryRegister )
+        public String DailySnap_Logic ( MemoryRegister<string> MemoryRegister )
         {
             int timeDiff = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).Hours;
             int curTime = memory[198] + timeDiff;
@@ -1011,11 +1049,9 @@ namespace MTUComm.MemoryMap
                 return "Off";
         }
 
-        public bool Shipbit_Logic ( dynamic MemoryRegister )
+        public bool Shipbit_Logic ( MemoryRegister<bool> MemoryRegister )
         {
-            Console.WriteLine ( "MemoryMap3132 -> Logic Shipbit" );
-
-            return false; // base.registers.Shipbit.Value; // CREA UN BUCLE
+            return MemoryRegister.Value;
         }
 
         /*
@@ -1100,7 +1136,7 @@ namespace MTUComm.MemoryMap
 
         */
 
-        public string PcbNumber_Logic ( dynamic MemoryRegister )
+        public string PcbNumber_Logic ( MemoryRegister<string> MemoryRegister )
         {
             char supplierCode = Convert.ToChar(memory[232]);
             char productRevision = Convert.ToChar(memory[237]);
