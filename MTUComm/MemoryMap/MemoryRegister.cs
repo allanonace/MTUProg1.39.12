@@ -8,9 +8,17 @@ namespace MTUComm.MemoryMap
 {
     public class MemoryRegister<T>
     {
+        #region Constants
+
         private enum CUSTOM_TYPE { EMPTY, METHOD, OPERATION, FORMAT }
 
-        private const string STR_CUSTOM = "method";
+        private const string METHOD       = "method";
+        private const string METHOD_KEY   = METHOD + ":";
+        private const string METHOD_SUFIX = "_Logic";
+
+        #endregion
+
+        #region Attributes
 
         public Func<T> funcGet;
         public Func<T> funcGetCustom;
@@ -22,16 +30,26 @@ namespace MTUComm.MemoryMap
         public int size { get; }
         public bool write { get; }
         public string custom { get; }
+        public string methodId { get; }
         private CUSTOM_TYPE customType;
         public bool used;
         public REGISTER_TYPE registerType { get; }
+
+        #endregion
+
+        #region Properties
 
         // Value size ( number of consecutive bytes ) is also used for bit with bool type
         public int bit { get { return this.size; } }
 
         private bool _HasCustomMethod
         {
-            get { return string.Equals ( this.custom.ToLower (), STR_CUSTOM ); }
+            get { return this.custom.ToLower ().StartsWith ( METHOD ); }
+        }
+
+        private bool _HasCustomMethodId
+        {
+            get { return this.custom.ToLower ().StartsWith ( METHOD_KEY ); }
         }
 
         private bool _HasCustomOperation
@@ -63,6 +81,28 @@ namespace MTUComm.MemoryMap
             get { return this.customType == CUSTOM_TYPE.FORMAT; }
         }
 
+        public T Value
+        {
+            get { return (T)this.funcGet(); }
+            set
+            {
+                // Register with read and write
+                if ( this.write )
+                    this.funcSet((T)value);
+
+                // Register is readonly
+                else
+                {
+                    Console.WriteLine ( "Set " + id + ": Error - Can't write to this register" );
+                    throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
+                }
+            }
+        }
+
+        #endregion
+
+        #region Initialization
+
         public MemoryRegister (
             string id,
             RegType type,
@@ -85,25 +125,15 @@ namespace MTUComm.MemoryMap
             else if ( this._HasCustomOperation ) this.customType = CUSTOM_TYPE.OPERATION;
             else if ( this._HasCustomFormat    ) this.customType = CUSTOM_TYPE.FORMAT;
             else                                 this.customType = CUSTOM_TYPE.EMPTY;
-        }
 
-        public T Value
-        {
-            get { return (T)this.funcGet(); }
-            set
+            if ( this.HasCustomMethod )
             {
-                // Register with read and write
-                if ( this.write )
-                    this.funcSet((T)value);
-
-                // Register is readonly
-                else
-                {
-                    // Register readonly
-                    Console.WriteLine ( "Set " + id + ": Error - Can't write to this register" );
-                    throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
-                }
-            }
+                if ( this._HasCustomMethodId )
+                     this.methodId = this.custom.Substring ( METHOD_KEY.Length + 1 );
+                else this.methodId = this.id + METHOD_SUFIX;
+            }   
         }
+
+        #endregion
     }
 }

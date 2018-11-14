@@ -67,7 +67,7 @@ namespace MTUComm.MemoryMap
                     return this.dictionary[ id ];
 
                 // Selected dynamic member not exists
-                Console.WriteLine ( "Get " + id + ": Error - Selected register is not loaded" );
+                Console.WriteLine ( "Get " + id + ": Error - " + MemoryMap.EXCEP_SET_USED );
                 throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + ": " + id );
             }
         }
