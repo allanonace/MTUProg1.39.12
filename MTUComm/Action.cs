@@ -805,6 +805,12 @@ namespace MTUComm
         }
 
 
+        public String getResultXML(ActionResult result)
+        {
+            return logger.logReadResultString(this, result);
+
+        }
+
         //
         public class ActionFinishArgs : EventArgs
         {

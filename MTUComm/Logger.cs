@@ -53,6 +53,26 @@ namespace MTUComm
             }
         }
 
+        private string getBaseFileHandler()
+        {
+            string base_stream = "<?xml version=\"1.0\" encoding=\"ASCII\"?>";
+            base_stream += "<StarSystem>";
+            base_stream += "    <AppInfo>";
+            base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
+            base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
+            base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
+            base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+            base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
+            base_stream += "        <AppType>" + (isFixedName() ? "Scripting" : "Interactive") + "</AppType>";
+            base_stream += "    </AppInfo>";
+            base_stream += "    <Message />";
+            base_stream += "    <Mtus />";
+            base_stream += "    <Warning />";
+            base_stream += "    <Error />";
+            base_stream += "</StarSystem>";
+            return base_stream;
+        }
+
         public string CreateFileIfNotExist()
         {
             string uri = Path.Combine(abs_path, getFileName());
@@ -61,21 +81,7 @@ namespace MTUComm
             { 
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(Path.Combine(abs_path, getFileName()), true))
                 {
-                    file.WriteLine("<?xml version=\"1.0\" encoding=\"ASCII\"?>");
-                    file.WriteLine("<StarSystem>");
-                    file.WriteLine("    <AppInfo>");
-                    file.WriteLine("        <AppName>"+ config.getApplicationName() + "</AppName>");
-                    file.WriteLine("        <Version>" + config.GetApplicationVersion() + "</Version>");
-                    file.WriteLine("        <Date>"+ DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>");
-                    file.WriteLine("        <UTCOffset>"+ TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>");
-                    file.WriteLine("        <UnitId>" + config.GetDeviceUUID() + "</UnitId>");
-                    file.WriteLine("        <AppType>"+(isFixedName() ? "Scripting" : "Interactive") +"</AppType>");
-                    file.WriteLine("    </AppInfo>");
-                    file.WriteLine("    <Message />");
-                    file.WriteLine("    <Mtus />");
-                    file.WriteLine("    <Warning />");
-                    file.WriteLine("    <Error />");
-                    file.WriteLine("</StarSystem>");
+                    file.WriteLine(getBaseFileHandler());
                 }
             }
 
@@ -115,16 +121,23 @@ namespace MTUComm
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
 
+        public string logReadResultString(Action ref_action, ActionResult result)
+        {
+            XDocument doc = XDocument.Parse(getBaseFileHandler());
+            logReadResult(doc.Root.Element("Mtus"), ref_action, result, Int32.Parse(result.getParameterByTag("MtuType").Value));
+            return doc.ToString();
+        }
+
         public void logReadResult(Action ref_action, ActionResult result, Mtu mtuType)
         {
             CreateFileIfNotExist();
             XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
 
-            logReadResult(doc.Root.Element("Mtus"), ref_action, result, mtuType);
+            logReadResult(doc.Root.Element("Mtus"), ref_action, result, mtuType.Id);
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
 
-        public void logReadResult(XElement parent, Action ref_action, ActionResult result, Mtu mtuType)
+        public void logReadResult(XElement parent, Action ref_action, ActionResult result, int mtu_type_id)
         {
             XElement action = new XElement("Action");
 
@@ -132,7 +145,7 @@ namespace MTUComm
             addAtrribute(action, "type", ref_action.getLogType());
             addAtrribute(action, "reason", ref_action.getReason());
 
-            InterfaceParameters[] parameters = config.getLogInterfaceFields(mtuType.Id, "ReadMTU");
+            InterfaceParameters[] parameters = config.getLogInterfaceFields(mtu_type_id, "ReadMTU");
             foreach (InterfaceParameters parameter in parameters)
             {
                 if(parameter.Name == "Port") {
