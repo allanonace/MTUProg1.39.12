@@ -205,8 +205,6 @@ namespace aclara_meters.view
             }
         }
 
-
-
         private void ThreadProcedureMTUCOMMAction()
         {
 
@@ -218,15 +216,16 @@ namespace aclara_meters.view
             //add_mtu.OnFinish += Add_mtu_OnFinish;
             //add_mtu.OnError += Add_mtu_OnError;
 
-
             add_mtu.OnFinish += ((s, e) => {
+
+
                 Console.WriteLine("Action Succefull");
                 Console.WriteLine("Press Key to Exit");
                 //Console.WriteLine(s.ToString());
 
-                MTUDataListView = new List<ReadMTUItem>();  // Saves all the fields data from MTUComm - DEBUG
+               // MTUDataListView = new List<ReadMTUItem>();  // Saves all the fields data from MTUComm - DEBUG
                 FinalReadListView = new List<ReadMTUItem>(); // Saves the data to view
-
+                /*
                 for (int i = 0; i < 31; i++){
                     FinalReadListView.Add(new ReadMTUItem()
                     {
@@ -234,228 +233,91 @@ namespace aclara_meters.view
                         Height = "0"
                     });
                 }
+                */
 
-                foreach (Parameter param in e.Result.getParameters())
-                {
-                    Console.WriteLine(param.getLogDisplay() + ":" + param.getValue());
+                Parameter []  paramResult = e.Result.getParameters();
 
+                int mtu_type = 0;
 
-                    if(e.Result.getParameters()[0].getLogDisplay().Equals("MTU Status"))
-                    {
-                        if(e.Result.getParameters()[0].getValue().Equals("ON"))
+                foreach (Parameter p in paramResult) {
+                    try{
+                        if (p.CustomParameter.Equals("MtuType"))
                         {
-                            if (!CheckIfParamIsVisible(param.getLogDisplay(), param.getValue()   ))
-                            {
-                                MTUDataListView.Add(new ReadMTUItem() 
-                                { 
-                                    Title = param.getLogDisplay() + ":", 
-                                    isDisplayed = "false", 
-                                    Height = "0", 
-                                    Description = param.getValue() 
-                                });
-                            }
-                            else
-                            {
-                                MTUDataListView.Add(new ReadMTUItem()
-                                {
-                                    Title = param.getLogDisplay() + ":",
-                                    Description = param.getValue(),
-                             
-                                });
-                            }
-                        }else{
-                            if (!CheckIfParamIsVisible(param.getLogDisplay(), param.getValue() , "MTU Status Off"))
-                            {
-                                MTUDataListView.Add(new ReadMTUItem() 
-                                { 
-                                    Title = param.getLogDisplay() + ":", 
-                                    isDisplayed = "false", 
-                                    Height = "0", 
-                                    Description = param.getValue() 
-                                });
-                            }
-                            else
-                            {
-                                MTUDataListView.Add(new ReadMTUItem() 
-                                { 
-                                    Title = param.getLogDisplay() + ":", 
-                                    Description = param.getValue() 
-                                });
-                            }
+                            mtu_type = Int32.Parse(p.Value.ToString());
                         }
+
+                    }catch(Exception e5){
+                        Console.WriteLine(e5.StackTrace);
                     }
+                  
                 }
 
-                ActionResult[] portResult = e.Result.getPorts();
+        
+                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, "ReadMTU");
 
-                int cont = 1;
-                foreach (MTUComm.ActionResult portval in portResult)
+                foreach (InterfaceParameters parameter in interfacesParams)
                 {
-                    
-
-                    int index = FinalReadListView.FindIndex(
-                        a => 
-                        a.Title.ToString().Contains("Xmit Interval") 
-                    );
-
-
-                    if (portval.getParameters()[0].getValue().Length > 25)
-                    {
-                        FinalReadListView.Insert(index, new ReadMTUItem()
-                        {
-                            Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
-                            Height = "80",
-                            isMTU = "false",
-                            isMeter = "true"
-
-                        });
-
-
-                        MTUDataListView.Add(new ReadMTUItem()
-                        {
-                            Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
-                            Height = "80",
-                            isMTU = "false",
-                            isMeter = "true"
-
-                        });
-                    }else{
-                        FinalReadListView.Insert(index, new ReadMTUItem()
-                        {
-                            Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
-                            Height = "40",
-                            isMTU = "false",
-                            isMeter = "true"
-
-                        });
-
-
-                        MTUDataListView.Add(new ReadMTUItem()
-                        {
-                            Description = "Port " + cont + ": " + portval.getParameters()[0].getValue(),
-                            Height = "40",
-                            isMTU = "false",
-                            isMeter = "true"
-
-                        });
-
-                    }
-
-
                    
-                    for (int i = 0; i < portval.getParameters().Length; i++)
+
+
+                    if (parameter.Name.Equals("Port"))
                     {
-                        MTUComm.Parameter paramval = portval.getParameters()[i];
+                        ActionResult[] ports = e.Result.getPorts(); //parameter.Parameters.ToArray()
 
-                        Console.WriteLine(paramval.getLogDisplay() + ":" + paramval.getValue());
+                        Parameter[] paramPort = null;
 
-                        if(i == portval.getParameters().Length)
+                        for (int i = 0; i < ports.Length; i++)
                         {
-                            if (!CheckIfParamIsVisible(paramval.getLogDisplay(), paramval.getValue()))
+                            paramPort = ports[i].getParameters();
+
+                            if (paramPort != null)
                             {
 
-                                FinalReadListView.Insert(index+1+i,new ReadMTUItem()
+                                FinalReadListView.Add(new ReadMTUItem()
                                 {
-                                    Title = paramval.getLogDisplay() + ":",
-                                    Height = "0",
-                                    isDisplayed = "false",
-                                    Description = paramval.getValue()
+                                    Title = "Here lies the Port title...",
+                                    isDisplayed = "true",
+                                    Height = "40",
+                                    isMTU = "false",
+                                    isMeter = "true",
+                                    Description = "Port " + i + ": " + paramPort[i].getValue() //parameter.Value
                                 });
 
-
-                                MTUDataListView.Add(new ReadMTUItem()
+                                for (int i2 = 1; i2 < paramPort.Length; i2++)
                                 {
-                                    Title = paramval.getLogDisplay() + ":",
-                                    Height = "0",
-                                    isDisplayed = "false",
-                                    Description = paramval.getValue()
-                                });
-                            }else{
-
-                               FinalReadListView.Insert(index+1+i,new ReadMTUItem()
-                               {
-                                   Title = paramval.getLogDisplay() + ":",
-                                   Height = "80",
-                                   Description = paramval.getValue()
-                               });
-
-
-                                MTUDataListView.Add(new ReadMTUItem()
-                                {
-                                    Title = paramval.getLogDisplay() + ":",
-                                    Height = "80",
-                                    Description = paramval.getValue()
-                                });
-                            }
-                        }else{
-                            if (!CheckIfParamIsVisible(paramval.getLogDisplay(), paramval.getValue()))
-                            {
-
-
-
-
-                                FinalReadListView.Insert(index+1+i,new ReadMTUItem()
-                                {
-                                    Title = paramval.getLogDisplay() + ":",
-                                    isDisplayed = "false",
-                                    Height = "0",
-                                    Description = paramval.getValue()
-                                });
-
-
-                                MTUDataListView.Add(new ReadMTUItem()
-                                {
-                                    Title = paramval.getLogDisplay() + ":",
-                                    isDisplayed = "false",
-                                    Height = "0",
-                                    Description = paramval.getValue()
-                                });
-                            }
-                            else
-                            {
-                                if ( paramval.getValue().Length > 25 ) 
-                                {
-
-                                    FinalReadListView.Insert(index + 1 + i, new ReadMTUItem()
+                                    FinalReadListView.Add(new ReadMTUItem()
                                     {
-                                        Title = paramval.getLogDisplay() + ":",
-                                        Description = paramval.getValue(),
-                                        Height = "80"
-                                    });
-
-                                    MTUDataListView.Add(new ReadMTUItem()
-                                    {
-                                        Title = paramval.getLogDisplay() + ":",
-                                        Description = paramval.getValue(),
-                                        Height = "80"
-                                    });
-
-                                }else
-                                {
-                                    FinalReadListView.Insert(index + 1 + i, new ReadMTUItem()
-                                    {
-                                        Title = paramval.getLogDisplay() + ":",
-                                        Description = paramval.getValue(),
-                                    
-                                    });
-
-                                    MTUDataListView.Add(new ReadMTUItem()
-                                    {
-                                        Title = paramval.getLogDisplay() + ":",
-                                        Description = paramval.getValue(),
-                                     
+                                        Title = "\t\t\t\t\t" + paramPort[i2].getLogDisplay() + ":",
+                                        isDisplayed = "true",
+                                        Height = "64",
+                                        isMTU = "true",
+                                        isMeter = "false",
+                                        Description = "\t\t\t\t\t" + paramPort[i2].getValue() //parameter.Value
                                     });
                                 }
-                            
-
-
                             }
                         }
+
+
+                    }
+                    else
+                    {
+                        Parameter param = e.Result.getParameterByTag(parameter.Name);
+
+                    if(param!=null){
+                        FinalReadListView.Add(new ReadMTUItem()
+                        {
+                            Title = param.getLogDisplay() + ":",
+                            isDisplayed = "true",
+                            Height = "64",
+                            isMTU = "true",
+                            isMeter = "false",
+                            Description = param.Value //parameter.Value
+                        });
                     }
                 }
+            }
 
-
-                //FinalReadListView.RemoveAll(X => X.Title.Equals("-"));
 
                 string resultMsg = "Successful MTU read";
                 byte[] readData;
