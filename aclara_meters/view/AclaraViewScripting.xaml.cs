@@ -46,6 +46,8 @@ namespace aclara_meters.view
         {
             InitializeComponent();
 
+            CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
+
             resultCallback = callback;
             resultScriptName = script_name;
 
@@ -104,15 +106,18 @@ namespace aclara_meters.view
 
             Task.Run(() =>
             {
+                Task.Delay(500); 
+
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     backdark_bg.IsVisible = false;
                     indicator.IsVisible = false;
+                    Interface_ContentView_DeviceList();
 
                 });
             });
 
-            Interface_ContentView_DeviceList();
+          
 
         }
 
@@ -463,7 +468,7 @@ namespace aclara_meters.view
 
                                         employees.Add(device);
 
-
+                                        /*
                                         if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
                                             FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
                                             bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
@@ -489,6 +494,8 @@ namespace aclara_meters.view
 
                                             }
                                         }
+
+                                        */
                                     }
                                 }
                             }

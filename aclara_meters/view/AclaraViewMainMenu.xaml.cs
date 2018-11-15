@@ -971,6 +971,8 @@ namespace aclara_meters.view
             FormsApp.ble_interface.Close();
         
             peripheralManualDisconnection = true;
+
+            CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
             /*
             try
             {
