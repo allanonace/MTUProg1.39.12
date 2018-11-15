@@ -62,7 +62,7 @@ namespace MTUComm.MemoryMap
             this.valueType    = type;
             this.description  = description;
             this.registerIds  = registerIds;
-            this.custom       = custom;
+            this.custom       = custom.Replace ( " ", string.Empty );
             this.registerType = REGISTER_TYPE.OVERLOAD;
 
             if      ( this._HasCustomMethod    ) this.customType = CUSTOM_TYPE.METHOD;

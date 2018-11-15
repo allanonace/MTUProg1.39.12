@@ -132,7 +132,7 @@ namespace MTUComm.MemoryMap
             this.address      = address;
             this.size         = size;
             this.write        = write;
-            this.custom       = custom;
+            this.custom       = custom.Replace ( " ", string.Empty );
             this.registerType = REGISTER_TYPE.REGISTER;
 
             if      ( this._HasCustomMethod    ) this.customType = CUSTOM_TYPE.METHOD;
