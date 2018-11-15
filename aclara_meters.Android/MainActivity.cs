@@ -28,7 +28,7 @@ namespace aclara_meters.Droid
 {
      
     // [Activity(Theme = "@style/MainTheme", MainLauncher = true, NoHistory = true)]
-    [Activity(Theme = "@style/AppTheme.Splash",  MainLauncher = true, NoHistory = true, Name = "com.aclara.mtu.programmer.urlentryclass")]
+    [Activity(Theme = "@style/MainTheme",  MainLauncher = true, NoHistory = true, Name = "com.aclara.mtu.programmer.urlentryclass")]
     public class urlentryclass : FormsApplicationActivity
     {
         /// <remarks>
@@ -89,11 +89,8 @@ namespace aclara_meters.Droid
 
             string value = info.VersionName.ToString();
 
-
-
             Intent outsideIntent = Intent;
            
-
             var data = Intent.Data;
 
             // check if this intent is started via custom scheme link
@@ -106,11 +103,12 @@ namespace aclara_meters.Droid
                 }
             }
 
+            // Set our view from the "main" layout resource
 
-
-
+            //SetContentView(Resource.Layout.SplashScreen);
 
             FormsApp app = new FormsApp(bluetooth, UserDialogs.Instance, new List<string>(), value);
+
 
             LoadApplication(app);
 
@@ -124,10 +122,6 @@ namespace aclara_meters.Droid
             Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-
-
-
-
 
     }
 
