@@ -5,6 +5,7 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Xml.Serialization;
 using Xml;
 
@@ -68,6 +69,7 @@ namespace MTUComm.MemoryMap
         private const string METHODS_GET_PREFIX = "get_";
         private const string METHODS_GET_CUSTOM_PREFIX = "getCustom_";
         private const string METHODS_SET_PREFIX = "set_";
+        private const string METHODS_SET_STRING_PREFIX = METHODS_SET_PREFIX + "string_";
         private const string REGISTER_OP        = "_val_";
         private const string OVERLOAD_OP_SIGN   = "#";
         private const string OVERLOAD_OP        = "_" + OVERLOAD_OP_SIGN + "_";
@@ -136,12 +138,16 @@ namespace MTUComm.MemoryMap
                         //typeof( MemoryMap ).GetMethod("CreateProperty_Set").MakeGenericMethod(SysType).Invoke(null, new object[] { regObj });
                         this.CreateProperty_Get ( memoryRegister );
                         if ( xmlRegister.Write )
+                        {
                             this.CreateProperty_Set ( memoryRegister );
+                            this.CreateProperty_Set_String ( memoryRegister );
+                        }
 
                         // References to methods to use in property ( .Value )
                         dynamic get  = base.registers[ METHODS_GET_PREFIX + memoryRegister.id ];
                         dynamic getC = ( memoryRegister.HasCustomMethod ) ? base.registers[ METHODS_GET_CUSTOM_PREFIX + memoryRegister.id ] : null;
                         dynamic set  = ( memoryRegister.write ) ? base.registers[ METHODS_SET_PREFIX + memoryRegister.id ] : null;
+                        dynamic setS = ( memoryRegister.write ) ? base.registers[ METHODS_SET_STRING_PREFIX + memoryRegister.id ] : null;
                         TypeCode tc  = Type.GetTypeCode(SysType.GetType());
                         switch (type)
                         {
@@ -176,6 +182,8 @@ namespace MTUComm.MemoryMap
                                 memoryRegister.funcSet       = (Action<string>)set;
                                 break;
                         }
+
+                        memoryRegister.funcSetString = (Action<string>)setS;
 
                         // BAD: Reference to property itself
                         // OK : Reference to register object and use TrySet|GetMember methods
@@ -291,7 +299,7 @@ namespace MTUComm.MemoryMap
                         case TypeCode.UInt64 : result = ( object )this.GetULongFromMem (memoryRegister.address, memoryRegister.size);   break;
                         case TypeCode.Boolean: result = ( object )this.GetBoolFromMem  (memoryRegister.address, memoryRegister.bit);    break;
                         case TypeCode.Char   : result = ( object )this.GetCharFromMem  (memoryRegister.address);                        break;
-                        case TypeCode.String : result = ( object )this.GetStringFromMem(memoryRegister.address, memoryRegister.custom); break;
+                        case TypeCode.String : result = ( object )this.GetStringFromMem(memoryRegister.address, memoryRegister.size); break;
                     }
 
                     // Numeric field with operation to evaluate
@@ -404,15 +412,24 @@ namespace MTUComm.MemoryMap
             base.AddMethod ( METHODS_SET_PREFIX + regObj.id,
                 new Action<T>((_value) =>
                 {
-                    switch (Type.GetTypeCode(typeof(T)))
+                    switch ( Type.GetTypeCode(typeof(T)) )
                     {
                         case TypeCode.Int32  : this.SetIntToMem   ((int   )(object)_value, regObj.address, regObj.size); break;
                         case TypeCode.UInt32 : this.SetUIntToMem  ((uint  )(object)_value, regObj.address, regObj.size); break;
                         case TypeCode.UInt64 : this.SetULongToMem ((ulong )(object)_value, regObj.address, regObj.size); break;
                         case TypeCode.Boolean: this.SetBoolToMem  ((bool  )(object)_value, regObj.address, regObj.size); break;
                         case TypeCode.Char   : this.SetCharToMem  ((char  )(object)_value, regObj.address); break;
-                        case TypeCode.String : this.SetStringToMem((string)(object)_value, regObj.address); break;
+                        //case TypeCode.String : this.SetStringToMem(TypeCode.String, (string)(object)_value, regObj.address); break;
                     }
+                }));
+        }
+
+        public void CreateProperty_Set_String<T> ( MemoryRegister<T> regObj )
+        {
+            base.AddMethod ( METHODS_SET_STRING_PREFIX + regObj.id,
+                new Action<string>((_value) =>
+                {
+                    this.SetStringToMem(Type.GetTypeCode(typeof(T)), (string)(object)_value, regObj.address,regObj.size);
                 }));
         }
 
@@ -502,61 +519,63 @@ namespace MTUComm.MemoryMap
             return Convert.ToChar(memory[address]);
         }
 
-        protected string GetStringFromMem(int address, string format)
+        protected string GetStringFromMem(int address, int size = MemRegister.DEF_SIZE)
         {
-            return string.Format(format, memory[address]);
+            byte[] dataRead = new byte[size];
+            Array.Copy(memory, address, dataRead, 0, size);
+            return Encoding.Default.GetString(dataRead);
         }
 
         #endregion
 
         #region Set value
 
-        protected void SetIntToMem (int value, int address, int size = MemRegister.DEF_SIZE)
-        {
-            for ( int b = 0; b < size; b++ )
-                this.memory[address + b] = ( byte )( value >> (b * 8) );
-        }
-
-        protected void SetIntToMem (string value, int address, int size = MemRegister.DEF_SIZE)
-        {
-            int vCasted;
-            if ( int.TryParse(value, out vCasted) )
-                throw new SetMemoryFormatException ( EXCEP_SET_INT + ": " + value);
-            else
-                for (int b = 0; b < size; b++)
-                    this.memory[address + b] = (byte)(vCasted >> (b * 8));
-        }
-
-        protected void SetUIntToMem (uint value, int address, int size = MemRegister.DEF_SIZE)
+        protected void SetIntToMem(int value, int address, int size = MemRegister.DEF_SIZE)
         {
             for (int b = 0; b < size; b++)
                 this.memory[address + b] = (byte)(value >> (b * 8));
         }
 
-        protected void SetUIntToMem (string value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetIntToMem(string value, int address, int size = MemRegister.DEF_SIZE)
         {
-            uint vCasted;
-            if (uint.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException ( EXCEP_SET_UINT + ": " + value);
+            int vCasted;
+            if (!int.TryParse(value, out vCasted))
+                throw new SetMemoryFormatException(EXCEP_SET_INT + ": " + value);
             else
                 for (int b = 0; b < size; b++)
                     this.memory[address + b] = (byte)(vCasted >> (b * 8));
         }
 
-        protected void SetULongToMem (ulong value, int address, int size = MemRegister.DEF_SIZE)
+        protected void SetUIntToMem(uint value, int address, int size = MemRegister.DEF_SIZE)
         {
             for (int b = 0; b < size; b++)
-                this.memory[address + b] = (byte)(this.ULongToBcd(value.ToString ()) >> (b * 8));
+                this.memory[address + b] = (byte)(value >> (b * 8));
         }
 
-        protected void SetULongToMem (string value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetUIntToMem(string value, int address, int size = MemRegister.DEF_SIZE)
         {
-            ulong vCasted;
-            if (ulong.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException ( EXCEP_SET_ULONG + ": " + value);
+            uint vCasted;
+            if (!uint.TryParse(value, out vCasted))
+                throw new SetMemoryFormatException(EXCEP_SET_UINT + ": " + value);
             else
                 for (int b = 0; b < size; b++)
-                    this.memory[address + b] = (byte)( this.ULongToBcd(value) >> (b * 8));
+                    this.memory[address + b] = (byte)(vCasted >> (b * 8));
+        }
+
+        protected void SetULongToMem(ulong value, int address, int size = MemRegister.DEF_SIZE)
+        {
+            for (int b = 0; b < size; b++)
+                this.memory[address + b] = (byte)(this.ULongToBcd(value.ToString()) >> (b * 8));
+        }
+
+        private void SetULongToMem(string value, int address, int size = MemRegister.DEF_SIZE)
+        {
+            ulong vCasted;
+            if (!ulong.TryParse(value, out vCasted))
+                throw new SetMemoryFormatException(EXCEP_SET_ULONG + ": " + value);
+            else
+                for (int b = 0; b < size; b++)
+                    this.memory[address + b] = (byte)(this.ULongToBcd(value) >> (b * 8));
         }
 
         protected void SetBoolToMem (bool value, int address, int bit_index = MemRegister.DEF_BIT)
@@ -569,9 +588,25 @@ namespace MTUComm.MemoryMap
             this.memory[address] = (byte)value;
         }
 
-        protected void SetStringToMem (string value, int address)
+        protected void SetStringToMem ( TypeCode registerType, string value, int address, int size = MemRegister.DEF_SIZE)
         {
-            this.memory[address] = (byte)Int32.Parse(value);
+            // If value to set is "real" string
+            if ( registerType is TypeCode.String )
+            {
+                foreach(char c in value)
+                    this.memory[address++] = (byte)c;
+            }
+            else
+            {
+                // If value to set is NOT to register of type string
+                switch ( registerType )
+                {
+                    case TypeCode.Int32  : this.SetIntToMem   (value, address, size); break;
+                    case TypeCode.UInt32 : this.SetUIntToMem  (value, address, size); break;
+                    case TypeCode.UInt64 : this.SetULongToMem (value, address, size); break;
+                    case TypeCode.Char   : this.SetCharToMem  (value[ 0 ], address); break;
+                }
+            }
         }
 
         #endregion

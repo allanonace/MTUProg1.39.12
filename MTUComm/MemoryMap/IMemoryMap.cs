@@ -124,19 +124,8 @@ namespace MTUComm.MemoryMap
             // Selected dynamic member exists
             if ( this.dictionary.ContainsKey ( id ) )
             {
-                // En el get se puede no castear y devolver object que automaticamente se
-                // transformara en el tipo esperado, pero si aqui se hace this.dictionary[id].Value = value
-                // el programa se queda bloqueado no pudiendo completar la accion
-                switch (Type.GetTypeCode( value.GetType () ))
-                {
-                    case TypeCode.Int32  : (this.dictionary[id] as MemoryRegister<int>   ).Value = (int   )value; break;
-                    case TypeCode.UInt32 : (this.dictionary[id] as MemoryRegister<uint>  ).Value = (uint  )value; break;
-                    case TypeCode.Int64  : (this.dictionary[id] as MemoryRegister<ulong> ).Value = (ulong )value; break;
-                    case TypeCode.Boolean: (this.dictionary[id] as MemoryRegister<bool>  ).Value = (bool  )value; break;
-                    case TypeCode.Char   : (this.dictionary[id] as MemoryRegister<char>  ).Value = (char  )value; break;
-                    case TypeCode.String : (this.dictionary[id] as MemoryRegister<string>).Value = (string)value; break;
-                }
-
+                // If value is type string ( form control content ) would always try to cast into MemoryString<string>
+                this.dictionary[id].Value = value;
                 this.dictionary[id].used = true;
 
                 return true;
