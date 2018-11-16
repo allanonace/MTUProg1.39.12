@@ -70,6 +70,7 @@ namespace MTUComm.MemoryMap
         private const string METHODS_GET_CUSTOM_PREFIX = "getCustom_";
         private const string METHODS_SET_PREFIX = "set_";
         private const string METHODS_SET_STRING_PREFIX = METHODS_SET_PREFIX + "string_";
+        private const string METHODS_SET_BYTE_PREFIX = METHODS_SET_PREFIX + "byte_";
         private const string REGISTER_OP        = "_val_";
         private const string OVERLOAD_OP_SIGN   = "#";
         private const string OVERLOAD_OP        = "_" + OVERLOAD_OP_SIGN + "_";
@@ -141,6 +142,7 @@ namespace MTUComm.MemoryMap
                         {
                             this.CreateProperty_Set ( memoryRegister );
                             this.CreateProperty_Set_String ( memoryRegister );
+                            this.CreateProperty_Set_ByteArray ( memoryRegister );
                         }
 
                         // References to methods to use in property ( .Value )
@@ -148,6 +150,7 @@ namespace MTUComm.MemoryMap
                         dynamic getC = ( memoryRegister.HasCustomMethod ) ? base.registers[ METHODS_GET_CUSTOM_PREFIX + memoryRegister.id ] : null;
                         dynamic set  = ( memoryRegister.write ) ? base.registers[ METHODS_SET_PREFIX + memoryRegister.id ] : null;
                         dynamic setS = ( memoryRegister.write ) ? base.registers[ METHODS_SET_STRING_PREFIX + memoryRegister.id ] : null;
+                        dynamic setB = ( memoryRegister.write ) ? base.registers[METHODS_SET_BYTE_PREFIX + memoryRegister.id ] : null;
                         TypeCode tc  = Type.GetTypeCode(SysType.GetType());
                         switch (type)
                         {
@@ -183,7 +186,8 @@ namespace MTUComm.MemoryMap
                                 break;
                         }
 
-                        memoryRegister.funcSetString = (Action<string>)setS;
+                        memoryRegister.funcSetString    = (Action<string>)setS;
+                        memoryRegister.funcSetByteArray = (Action<string>)setB;
 
                         // BAD: Reference to property itself
                         // OK : Reference to register object and use TrySet|GetMember methods
@@ -433,6 +437,15 @@ namespace MTUComm.MemoryMap
                 }));
         }
 
+        public void CreateProperty_Set_ByteArray<T> ( MemoryRegister<T> regObj )
+        {
+            base.AddMethod ( METHODS_SET_STRING_PREFIX + regObj.id,
+                new Action<byte[]>((_value) =>
+                {
+                    this.SetByteArrayToMem ( (byte[])(object)_value, regObj.address, regObj.size );
+                }));
+        }
+
         #endregion
 
         #region Get value
@@ -523,7 +536,7 @@ namespace MTUComm.MemoryMap
         {
             byte[] dataRead = new byte[size];
             Array.Copy(memory, address, dataRead, 0, size);
-            return Encoding.Default.GetString(dataRead);
+            return Encoding.UTF8.GetString(dataRead);
         }
 
         #endregion
@@ -607,6 +620,12 @@ namespace MTUComm.MemoryMap
                     case TypeCode.Char   : this.SetCharToMem  (value[ 0 ], address); break;
                 }
             }
+        }
+
+        protected void SetByteArrayToMem ( byte[] value, int address, int size = MemRegister.DEF_SIZE )
+        {
+            for ( int i = 0; i < size; i++ )
+                this.memory[ address + i ] = value[ i ];
         }
 
         #endregion

@@ -16,6 +16,7 @@ using nexus.protocols.ble.scan;
 using System.Collections.ObjectModel;
 using Plugin.Settings;
 using System.Linq;
+using MTUComm;
 
 namespace aclara_meters.view
 {
@@ -941,13 +942,27 @@ namespace aclara_meters.view
             dialog_AddMTU.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            uint DetectedMtuType = 0;
 
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                // TODO: cambiar usuario
+                // TODO: BasicRead no loguea
+                MTUComm.Action basicRead = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.BasicRead, user: "martxel");
+                basicRead.OnFinish += ((s, args) =>
+                {
+                    Parameter[] p = args.Result.getParameters();
+                    Parameter mtuTypeParam = p[0];
+                    DetectedMtuType = UInt32.Parse(mtuTypeParam.getValue());
+                });
+                basicRead.Run();
+            });
 
             //Bug fix Android UI Animation
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
+                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, DetectedMtuType), false);
             })
             );
               

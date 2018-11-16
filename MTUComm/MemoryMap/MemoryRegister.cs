@@ -25,6 +25,7 @@ namespace MTUComm.MemoryMap
         public Func<T> funcGetCustom;
         public Action<T> funcSet;
         public Action<string> funcSetString;
+        public Action<string> funcSetByteArray;
         public string id { get; }
         public string description { get; }
         public RegType valueType { get; }
@@ -93,11 +94,12 @@ namespace MTUComm.MemoryMap
                 {
                     // Try to set string value after read form control
                     if ( value is string )
-                        this.funcSetString(value);
+                        this.funcSetString(value); // >>> MAYBE REMOVE? <<<
                     
                     // Try to set string but using byte array ( AES )
                     else if ( value is byte[] )
-                        this.funcSetString(Encoding.Default.GetString(value));
+                        this.funcSet(value); // MAL: PORQUE EL TIPO QUE ESPERA Action es T
+                    //    this.funcSetString(Encoding.UTF8.GetString(value));
 
                     // Try to set value of waited type
                     else

@@ -1,4 +1,5 @@
 ﻿using Lexi.Interfaces;
+using MTUComm.actions;
 using MTUComm.MemoryMap;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,8 @@ namespace MTUComm
             ReplaceMeter,
             TurnOffMtu,
             TurnOnMtu,
-            Diagnosis
+            Diagnosis,
+            BasicRead
         }
 
         private Dictionary<ActionType, String> displays = new Dictionary<ActionType, String>()
@@ -139,9 +141,8 @@ namespace MTUComm
             return sub_actions.ToArray();
         } 
 
-        public void Run()
+        public void Run ( MtuForm mtuForm = null )
         {
-
             if (canceled)
             {
                 throw new Exception("Canceled Action can not be Executed");
@@ -154,6 +155,10 @@ namespace MTUComm
                         comm.OnReadMtu += Comm_OnReadMtu;
                         comm.ReadMTU();
                         break;
+                    case ActionType.AddMtu:
+                        comm.OnAddMtu += Comm_OnAddMtu;
+                        comm.AddMtu(( AddMtuForm )mtuForm); // this.getParameters());
+                        break;
                     case ActionType.TurnOffMtu:
                         comm.OnTurnOffMtu += Comm_OnTurnOffMtu;
                         comm.TurnOffMtu();
@@ -161,6 +166,10 @@ namespace MTUComm
                     case ActionType.TurnOnMtu:
                         comm.OnTurnOnMtu += Comm_OnTurnOnMtu;
                         comm.TurnOnMtu();
+                        break;
+                    case ActionType.BasicRead:
+                        comm.OnBasicRead += Comm_OnBasicRead;
+                        comm.BasicRead();
                         break;
                     default:
                         ActionRunSimulator();
@@ -483,6 +492,22 @@ namespace MTUComm
             OnFinish(this, args);
         }
 
+        private void Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)
+        {
+            logger.logAddMtuResult(this);
+            ActionFinishArgs args = new ActionFinishArgs(null); // TODO: add add mtu result
+            OnFinish(this, args);
+        }
+
+        private void Comm_OnBasicRead(object sender, MTUComm.BasicReadArgs e)
+        {
+            uint MtuId = e.MtuType;
+            ActionResult result = new ActionResult();
+            result.AddParameter(new Parameter("MtuId", "MTU ID", MtuId.ToString()));
+            ActionFinishArgs args = new ActionFinishArgs(result);
+            OnFinish(this, args);
+        }
+
         public String getUser()
         {
             return mUser;
@@ -510,6 +535,13 @@ namespace MTUComm
             return tag_reasons[mActionType];
         }
 
+        public ActionType GetActionType
+        {
+            get
+            {
+                return mActionType;
+            }
+        }
 
         //
         public class ActionFinishArgs : EventArgs

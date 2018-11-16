@@ -537,5 +537,11 @@ namespace Xml
 
         [XmlElement("Options")]
         public List<Option> Options { get; set; }
+
+        [XmlElement("FastMessageConfig")]
+        public bool FastMessageConfig { get; set; }
+
+        [XmlElement("Fast-2-Way")]
+        public bool Fast2Way { get; set; }
     }
 }
