@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<util:BasePage xmlns="http://xamarin.com/schemas/2014/forms"
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+               xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters"
+               NavigationPage.HasBackButton="false"
+               BackgroundColor="Black"
+               xmlns:Controls="clr-namespace:aclara_meters"  
+               x:Class="aclara_meters.view.AclaraViewGlobalUIController">
+
+    <RelativeLayout IsVisible="true">
+    <ContentPage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" x:Class="aclara_meters.view.AclaraViewGlobalUIController">
+        <ContentPage.Content>
+            
+        </ContentPage.Content>
+    </ContentPage>
+    </RelativeLayout>
+</util:BasePage> 

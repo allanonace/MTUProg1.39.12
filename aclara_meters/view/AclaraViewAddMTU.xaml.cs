@@ -24,6 +24,86 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewAddMTU
     {
+        /**         **          **       **         **          **          **          **/
+
+        public enum MTUStatus
+        {
+            ReadingMtuShortTime,
+            ReadingMtuData,
+            Autodetect,
+            CheckingEnconderLongTime,
+
+            ProgramingMtuShortTime,
+            PreparingToProgram,
+            TurningOffMtu,
+            ReadingMtuAgain,
+            ProgramingMtu,
+            VerifyingMtuData,
+            CheckingEnconderShortTime,
+            TurningOnMtu,
+            ReadingMtu,
+        };
+
+
+        public void SetUserInterfaceMTUStatus(string statusMsg)
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                label_read.Text = statusMsg;
+            });
+        }
+
+        public string GetStringFromMTUStatus(MTUStatus mtuStatus, int time)
+        {
+            switch(mtuStatus)
+            {
+                case MTUStatus.ReadingMtuShortTime:
+                    return "Reading MTU in " + time + " seconds...";
+                   
+                case MTUStatus.ReadingMtuData:
+                    return "Reading MTU data...";
+                   
+                case MTUStatus.Autodetect:
+                    return "Autodetect...";
+
+                case MTUStatus.CheckingEnconderLongTime:
+                    return "Checking Encoder... " + time;
+               
+                case MTUStatus.ProgramingMtuShortTime:
+                    return "Programming MTU in " + time + " seconds...";
+               
+                case MTUStatus.PreparingToProgram:
+                    return "Preparing to program...";
+              
+                case MTUStatus.TurningOffMtu:
+                    return "Turning off MTU...";
+               
+                case MTUStatus.ReadingMtuAgain:
+                    return "Reading MTU again...";
+              
+                case MTUStatus.ProgramingMtu:
+                    return "Programming MTU...";
+             
+                case MTUStatus.VerifyingMtuData:
+                    return "Verifying Mtu Data...";
+              
+                case MTUStatus.CheckingEnconderShortTime:
+                    return "Checking Encoder... "+ time;
+              
+                case MTUStatus.TurningOnMtu:
+                    return "Autodetect...";
+                
+                case MTUStatus.ReadingMtu:
+                    return "Reading MTU...";
+                
+            }
+
+            return "Error Detected";
+        }
+
+        /**         **          **       **         **          **          **          **/
+
+
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
 
@@ -56,6 +136,7 @@ namespace aclara_meters.view
             Name1 = 0,
         };
 
+        private bool isCancellable;
 
         private MeterTypes meterTypes;
         private List<Xml.Meter> meters;
@@ -137,10 +218,13 @@ namespace aclara_meters.view
         private bool mtuRequiresAlarmProfile;
 
 
-        private List<string> alarmList;
-
+        private List<string> alarmListPort1;
+        private List<string> alarmListPort2;
 
     
+        private List<string> demandListPort1;
+        private List<string> demandListPort2;
+
 
         public AclaraViewAddMTU()
         {
@@ -170,6 +254,28 @@ namespace aclara_meters.view
             int selectedIndex = picker.SelectedIndex;
         }
 
+
+        private void InitPickerReason()
+        {
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>();
+            objClassList.Add(new PickerItems { Name = "Reason 1" });
+            objClassList.Add(new PickerItems { Name = "Reason 2" });
+            objClassList.Add(new PickerItems { Name = "Reason 3" });
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+            //Now I am given ItemsSorce to the Pickers
+            pickerReason.ItemsSource = objStringList;
+        }
+
+
         private void InitPickerList()
         {
             /* Desconozco completamente cual es el caso de tener varios puertos, o el procedimiento para ello. Dejo la función de cara a su implementación */
@@ -190,6 +296,9 @@ namespace aclara_meters.view
             {
                 port2label.IsVisible = false;
             }
+
+            InitPickerReason();
+
         }
 
         private void InitPickerReadInterval()
@@ -426,6 +535,8 @@ namespace aclara_meters.view
 
         private void ReadMTU(object sender, EventArgs e)
         {
+            isCancellable = true;
+
             if (!_userTapped)
             {
 
@@ -453,6 +564,8 @@ namespace aclara_meters.view
         public AclaraViewAddMTU(IUserDialogs dialogs)
         {
             InitializeComponent();
+
+            isCancellable = false;
 
             Task.Run(() =>
             {
@@ -519,9 +632,26 @@ namespace aclara_meters.view
 
             Validations();
 
+            Popup_start.IsVisible = false;
+            Popup_start.IsEnabled = false;
+            submit_dialog.Clicked += submit_send;
         }
 
-    
+        private void submit_send(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            Popup_start.IsVisible = false;
+            Popup_start.IsEnabled = false;
+            Task.Run(async () =>
+            {
+                await Task.Delay(500); Device.BeginInvokeOnMainThread(() =>
+                {
+                    Application.Current.MainPage.Navigation.PopAsync(false);
+                });
+            });
+
+        }
+
 
         private void ThreadProcedureMTUCOMMAction()
         {
@@ -636,14 +766,34 @@ namespace aclara_meters.view
             /**     Alarm Settings    **/
 
             mtuRequiresAlarmProfile = true;
-            alarmList = new List<string>();
+            alarmListPort1 = new List<string>();
+            alarmListPort2 = new List<string>();
 
             //ADD ALARMS TO LIST
             for (int i = 1; i < 4; i++)
             {
-                alarmList.Add("Alarm "+i);
+                alarmListPort1.Add("Alarm "+i);
+                alarmListPort2.Add("Alarm "+ i);
             }
            
+
+            /***************************/
+            /**     Demand Settings    **/
+
+            demandListPort1 = new List<string>();
+            demandListPort2= new List<string>();
+
+            //ADD ALARMS TO LIST
+            for (int i = 1; i < 4; i++)
+            {
+                demandListPort1.Add("Demand " + i);
+                demandListPort2.Add("Demand " + i);
+            }
+
+
+
+
+
 
             /****  ****  ****  **** ****/
         }
@@ -711,16 +861,33 @@ namespace aclara_meters.view
                 Alarms_Port1.IsVisible = false;
             }
 
-            if( alarmList.Count > 0 )
+            if( alarmListPort1.Count > 0 )
             {
-              
-                pickerAlarms.ItemsSource = alarmList;
+             
+                pickerAlarms.ItemsSource = alarmListPort1;
             } 
            
+            if(alarmListPort2.Count > 0)
+            {
+                pickerAlarms2.ItemsSource = alarmListPort2;
+            }
 
             /****  ****  ****  **** ****/
 
 
+
+            /***************************/
+            /**     Demand Settings    **/
+
+            if(demandListPort1.Count > 0){
+                pickerDemands.ItemsSource = demandListPort1;
+            }
+
+            if(demandListPort2.Count > 0){
+                pickerDemands2.ItemsSource = demandListPort2;
+            }
+
+            /****  ****  ****  **** ****/
 
         }
 
@@ -1899,7 +2066,17 @@ namespace aclara_meters.view
 
         private void ReturnToMainView(object sender, EventArgs e)
         {
-            Application.Current.MainPage.Navigation.PopAsync(false);
+            if(isCancellable){
+                Application.Current.MainPage.Navigation.PopAsync(false);
+            }else{
+                //REASON
+                dialog_open_bg.IsVisible = true;
+
+                Popup_start.IsVisible = true;
+                Popup_start.IsEnabled = true;
+            }
+            
+           
         }
 
         private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)

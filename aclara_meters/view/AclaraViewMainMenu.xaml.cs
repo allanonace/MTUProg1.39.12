@@ -24,20 +24,15 @@ namespace aclara_meters.view
         private List<PageItem> MenuList { get; set; }
         private IUserDialogs dialogsSaved;
         private ObservableCollection<DeviceItem> employees;
-        
         private IBlePeripheral peripheral = null;
         private int peripheralConnected = ble_library.BlePort.NO_CONNECTED;
         private Boolean peripheralManualDisconnection = false;
-
         private Thread printer;
-
-
 
         protected override bool OnBackButtonPressed()
         {
             return true;
         }
-
 
         public AclaraViewMainMenu()
         {

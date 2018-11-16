@@ -6,12 +6,12 @@
                xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters"
                Title="{Binding PageTitle}"
                NavigationPage.HasBackButton="false"
-               
+               xmlns:local="clr-namespace:aclara_meters;assembly=aclara_meters"
                xmlns:Controls="clr-namespace:aclara_meters" 
                x:Class="aclara_meters.view.AclaraViewAddMTU">
 
 
-
+               
     
    <RelativeLayout  IsVisible="true">
 
@@ -326,7 +326,25 @@
 
                               
                                    <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
-                             
+
+
+                                    <Label Text="Initial read" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                        
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="initialRead" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+
+                                    
                                           
                                    <!-- PORT ID -->
                                    <Label Text="Service Port ID" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
@@ -505,6 +523,28 @@
                                   </StackLayout>
 
 
+                                    <StackLayout  Margin="0,4,0,0" x:Name="Demands_Port1" >  
+                                      <Label Text="Demand Settings" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="pickerDemands" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                            
+                                        </Frame>
+                                    
+                                  </StackLayout>
+
+
+
                                     
 
                                   <StackLayout  Margin="0,4,0,148"> </StackLayout>
@@ -524,7 +564,26 @@
 
                               
                                    <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
-                             
+
+
+                                     <Label Text="Initial read" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                        
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="initialRead2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+
+
+                                    
                                           
                                    <!-- PORT ID -->
                                    <Label Text="Service Port ID" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
@@ -656,12 +715,12 @@
 
 
 
-                                   <StackLayout  Margin="0,4,0,148"  > 
+                                   <StackLayout  Margin="0,4,0,0"  > 
                                       <Label Text="2-Way" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
                                       
-                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,24" BackgroundColor="#7a868c"  >
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c"  >
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
@@ -676,7 +735,55 @@
                                     
                                   </StackLayout>
 
-                                
+
+
+
+
+                                 <StackLayout  Margin="0,4,0,0" x:Name="Alarms_Port2" >  
+                                      <Label Text="Alarm Settings" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="pickerAlarms2" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                            
+                                        </Frame>
+                                    
+                                  </StackLayout>
+
+
+                                    <StackLayout  Margin="0,4,0,0" x:Name="Demands_Port2" >  
+                                      <Label Text="Demand Settings" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                          
+                                      
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessPicker x:Name="pickerDemands2" Title="" 
+                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                           />
+                                                    </StackLayout>
+                                             </Frame> 
+                                            
+                                        </Frame>
+                                    
+                                  </StackLayout>
+
+
+                                    <StackLayout  Margin="0,4,0,148"> </StackLayout>
+
+                                    
                              </StackLayout >  
 
 
@@ -869,7 +976,7 @@
                     <!-- LOWER BAR -->
                         
                 <StackLayout  IsVisible="true"  Margin="0,28,0,0"   HeightRequest="128" BackgroundColor="#6aa2b8" >
-      
+     
                        <Label   InputTransparent="true"   x:Name="label_read" Margin="17,22,0,44" FontSize="20" TextColor="White" 
                                 Text="Push Button to START" > </Label>
 
@@ -1261,11 +1368,116 @@
         </StackLayout>
 
 
+
+
+
+
        <!--   DIALOGS   -->
            <Image BackgroundColor="Black"  x:Name="dialog_open_bg" WidthRequest="1024"  IsVisible="false"
                   HeightRequest="1024" Opacity="0.5">
                 
             </Image>
+
+
+        <!-- POP UP START -->
+
+
+         <ContentView   Scale="1.1" IsVisible="true" Margin="-21"
+                        HeightRequest="396" 
+                        x:Name="Popup_start" 
+                        
+            RelativeLayout.XConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Width,
+                                     Factor=0.19}"
+            RelativeLayout.WidthConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Width,
+                                     Factor=0.620}"
+            RelativeLayout.YConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Height,
+                                     Factor=0.24}"
+
+                          
+            >
+                
+           
+   
+                <Frame   CornerRadius="6"  HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">
+                 <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" > 
+
+                     <StackLayout  IsVisible="true" 
+                                  Margin="0" Opacity="1">
+                 
+                  <Label IsVisible="true" 
+                            Margin="16,16,0,4" FontSize="20" TextColor="#6aa2b8" Text="PORT 1:"  />
+                           
+                    
+
+                     <Image Margin="0,0,0,0" HeightRequest="1" WidthRequest="1024" BackgroundColor="#6ba2b7"/>
+
+                          <!--  Reason -->
+                            
+                      <Label Text="Reason" Margin="16,4,0,0" VerticalOptions="Center" Font="Bold, 16" TextColor="Black"/>
+
+                        <Frame CornerRadius="6" HeightRequest="30" Margin="12" BackgroundColor="#7a868c"  >
+                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                        
+                                       <Controls:BorderlessPicker Margin="0,0,0,0" x:Name="pickerReason" Title="" 
+                                      HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" FontSize="16"
+                                      SelectedIndexChanged="PickerSelection" HeightRequest="30"  TextColor="Black"/>
+
+                                    </StackLayout>
+                             </Frame> 
+                         </Frame> 
+
+                      
+                      <Label Text="Other" Margin="16,4,0,0" VerticalOptions="Center" Font="Bold, 16"
+                             TextColor="Black"/>
+                            
+
+                          <Frame CornerRadius="6" HeightRequest="96" Margin="12" BackgroundColor="#7a868c"  >
+                               <Frame CornerRadius="6"  HeightRequest="96"  Margin="-7" BackgroundColor="White"  >
+                                    <StackLayout Margin="1"  Orientation="Vertical" HorizontalOptions="FillAndExpand" >
+                                        
+                                     <local:EditorMultiline  Margin="-7"  HorizontalOptions="FillAndExpand"  x:Name="input_Other" TextColor="Black" 
+                                         WidthRequest="200"  HeightRequest="96" 
+                                     FontSize="18" 
+                                                              
+                                    ></local:EditorMultiline>
+
+                                    </StackLayout>
+                             </Frame> 
+                            
+                         </Frame> 
+                        
+                     <Button IsVisible="true"  
+                             x:Name="submit_dialog" Margin="-2,0,-2,0" Text="SUBMIT" WidthRequest="320"  BorderWidth="1"  
+                             CornerRadius="0" FontSize="18" BorderColor="Gray" TextColor="White" BackgroundColor="#6aa2b8">  </Button>    
+
+                     </StackLayout>
+                    
+               </StackLayout>
+                
+            </Frame>
+            
+            </ContentView>
+
+        
+       <!-- POP UP END -->
+
+
+
+
+
+
+
+
+        
+
+
 
 
 

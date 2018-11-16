@@ -12,10 +12,6 @@ using aclara_meters.Helpers;
 using aclara_meters.Models;
 using Xamarin.Forms;
 using Plugin.Settings;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Globalization;
 using Xml;
 using MTUComm;
 
