@@ -4,43 +4,8 @@ using System.Dynamic;
 
 namespace MTUComm.MemoryMap
 {
-    public interface IMemoryMap
-    {
-        int MtuType { get; }
-        int MtuId { get; }
 
-        bool Shipbit { get; }
-
-        int DailyRead { get; }
-        string DailySnap { get; } // Hard...
-
-        int MessageOverlapCount { get; }
-        int ReadInterval { get; }
-
-        int MtuMiliVoltageBattery { get; }
-
-        int MtuFirmwareVersionFormatFlag { get; }
-        string MtuFirmwareVersion { get; }
-
-        string PcbNumber { get; } // Hard...
-
-        int P1MeterType { get; }
-        int P2MeterType { get; }
-
-        ulong P1MeterId { get; }
-        ulong P2MeterId { get; }
-
-        int P1Reading { get; } // Hard...
-        int P2Reading { get; } // Hard...
-
-        string P1ReadingError { get; }
-        string P2ReadingError { get; }
-
-        int P1Scaler { get; }
-        int P2Scaler { get; }
-    }
-
-    public abstract class AMemoryMap : DynamicObject, IMemoryMap
+    public abstract class AMemoryMap : DynamicObject
     {
         #region Constants
 

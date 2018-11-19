@@ -3,6 +3,8 @@ using System.IO;
 using System.Threading;
 using Lexi.Interfaces;
 using Lexi.Exceptions;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Lexi
 {
@@ -320,6 +322,224 @@ namespace Lexi
             }
         }
 
+        public void TriggerReadEventLogs(DateTime start, DateTime end)
+        {
+            if (m_serial == null)
+            {
+                throw new ArgumentNullException("No Serial interface defined");
+            }
+
+            TriggerReadEventLogs(m_serial, start, end, m_timeout);
+        }
+
+        public void TriggerReadEventLogs(ISerial serial, DateTime start, DateTime end, int timeout)
+        {
+            List<byte> list = new List<byte>(17);
+            list.Add(37);
+            list.Add(254);
+            list.Add(19);
+            list.Add(10);
+            list.Add(GetChecksum(list));
+            list.Add(1);
+            list.Add(1);
+            if (start.CompareTo(new DateTime(1970, 1, 1, 0, 0, 0)) < 0)
+            {
+                start = new DateTime(1970, 1, 1, 0, 0, 0);
+            }
+            byte[] timeSinceEventEpoch = GetTimeSinceEventEpoch(start);
+            list.AddRange(timeSinceEventEpoch.Take(4));
+            byte[] timeSinceEventEpoch2 = GetTimeSinceEventEpoch(end);
+            list.AddRange(timeSinceEventEpoch2.Take(4));
+            list.AddRange(CalcCrcNew(list.Skip(5).Take(10).ToArray()));
+
+            byte[] stream = list.ToArray();
+
+            serial.Write(stream, 0, stream.Length);
+
+
+            byte[] rawBuffer = new byte[2];
+            int response_offest = 0;
+            if (serial.isEcho()) { response_offest = stream.Length; }
+            Array.Resize(ref rawBuffer, (int)(response_offest + 2));
+
+            long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
+            while (serial.BytesToRead() < rawBuffer.Length - 1)
+            {
+                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
+                {
+                    //if even no data response no puck error..
+                    throw new TimeoutException();
+                }
+                Thread.Sleep(10);
+            }
+
+            serial.Read(rawBuffer, 0, (int)(rawBuffer.Length));
+
+            byte[] response = new byte[2];
+            Array.Copy(rawBuffer, response_offest, response, 0, response.Length);
+
+            if (response[0] != 0x06)
+            {
+                throw new LexiWriteException(response);
+            }
+
+        }
+
+        public byte[] GetNextLogQueryResult()
+        {
+            return GetNextLogQueryResult(m_serial, m_timeout);
+        }
+
+        public byte[] GetNextLogQueryResult(ISerial serial, int timeout)
+        {
+            List<byte> list = new List<byte>(5);
+            list.Add(37);
+            list.Add(254);
+            list.Add(20);
+            list.Add(0);
+            list.Add(GetChecksum(list));
+
+            byte[] stream = list.ToArray();
+
+            serial.Write(stream, 0, stream.Length);
+
+            byte[] rawBuffer = new byte[10];
+            int response_offest = 0;
+            if (serial.isEcho()) { response_offest = stream.Length; }
+            Array.Resize(ref rawBuffer, (int)(response_offest + 5));
+
+            long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
+            while (serial.BytesToRead() < rawBuffer.Length )
+            {
+                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
+                {
+                    //if even no data response no puck error..
+                    throw new TimeoutException();
+                }
+                Thread.Sleep(10);
+            }
+
+            serial.Read(rawBuffer, 0, rawBuffer.Length);
+            byte[] response = new byte[5];
+            if(rawBuffer[0] != 37)
+            {
+                response_offest++;
+            }
+            Array.Copy(rawBuffer, response_offest, response, 0, rawBuffer.Length - response_offest);
+
+            if (response[0] != 0x06)
+            {
+                throw new LexiWriteException(response);
+            }
+
+            if(response[1] == 1)
+            {
+                return response;
+            }
+            else
+            {
+                byte[] full_response = new byte[25];
+                Array.Copy(rawBuffer, response_offest, full_response, 0, rawBuffer.Length - response_offest);
+                int moredata_to_read = 25 - (rawBuffer.Length - response_offest);
+                Array.Resize(ref rawBuffer, moredata_to_read);
+                while (serial.BytesToRead() < moredata_to_read)
+                {
+                    if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
+                    {
+                        //if even no data response no puck error..
+                        throw new TimeoutException();
+                    }
+                    Thread.Sleep(10);
+                }
+                serial.Read(rawBuffer, 0, rawBuffer.Length);
+                Array.Copy(rawBuffer, 0 , full_response, 25 - moredata_to_read, moredata_to_read);
+
+                return full_response; 
+            }
+
+        }
+
+        public void GetLastLogQueryResult()
+        {
+            GetLastLogQueryResult(m_serial, m_timeout);
+        }
+
+        public void GetLastLogQueryResult(ISerial serial, int timeout)
+        {
+            List<byte> list = new List<byte>(5);
+            list.Add(37);
+            list.Add(254);
+            list.Add(21);
+            list.Add(0);
+            list.Add(GetChecksum(list));
+
+            byte[] stream = list.ToArray();
+
+            serial.Write(stream, 0, stream.Length);
+
+            byte[] rawBuffer = new byte[10];
+            int response_offest = 0;
+            if (serial.isEcho()) { response_offest = stream.Length; }
+            Array.Resize(ref rawBuffer, (int)(response_offest + 5));
+
+            long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
+            while (serial.BytesToRead() < rawBuffer.Length)
+            {
+                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
+                {
+                    //if even no data response no puck error..
+                    throw new TimeoutException();
+                }
+                Thread.Sleep(10);
+            }
+
+            serial.Read(rawBuffer, 0, rawBuffer.Length);
+
+            byte[] response = new byte[5];
+            Array.Copy(rawBuffer, response.Length, response, 0, response.Length);
+
+            if (response[0] != 0x06)
+            {
+                throw new LexiWriteException(response);
+            }
+
+
+        }
+
+        private byte GetChecksum(IEnumerable<byte> values)
+        {
+            return (byte)(255 - (byte)values.Sum((byte x) => x) + 1);
+        }
+
+        public byte[] CalcCrcNew(byte[] data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException("data");
+            }
+            ushort num = ushort.MaxValue;
+            for (int i = 0; i < data.Length; i++)
+            {
+                byte b = data[i];
+                for (int j = 0; j < 8; j++)
+                {
+                    bool flag = ((b ^ num) & 1) != 0;
+                    b = (byte)(b >> 1);
+                    num = (ushort)(num >> 1);
+                    if (flag)
+                    {
+                        num = (ushort)(num ^ 0x8408);
+                    }
+                }
+            }
+            if (BitConverter.IsLittleEndian)
+            {
+                return BitConverter.GetBytes(num);
+            }
+            return BitConverter.GetBytes(num).Reverse().ToArray();
+        }
+
+
         static byte[] checkSum(byte[] data)
         {
             int chksum = 0;
@@ -343,6 +563,16 @@ namespace Lexi
             for (int i = 0; i < len; i++)
                 accum = (accum >> 8) ^ CRCTable[(accum ^ data[i]) & 0x00ff];
             return accum;
+        }
+
+        private byte[] GetTimeSinceEventEpoch(DateTime time)
+        {
+            long value = (long)time.Subtract(new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            if (BitConverter.IsLittleEndian)
+            {
+                return BitConverter.GetBytes(value);
+            }
+            return BitConverter.GetBytes(value).Reverse().ToArray();
         }
 
         private byte[] validateReadResponse(byte[] response, uint response_length)

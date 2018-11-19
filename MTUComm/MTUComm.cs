@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using System.Threading;
 using System;
 using Xml;
+using static MTUComm.LogQueryResult;
+using System.Collections.Generic;
 
 namespace MTUComm
 {
@@ -34,6 +36,8 @@ namespace MTUComm
         public delegate void TurnOnMtuHandler(object sender, TurnOnMtuArgs e);
         public event TurnOnMtuHandler OnTurnOnMtu;
 
+        public delegate void ReadMtuDataHandler(object sender, ReadMtuDataArgs e);
+        public event ReadMtuDataHandler OnReadMtuData;
 
         public MTUComm(ISerial serial, Configuration configuration)
         {
@@ -70,6 +74,44 @@ namespace MTUComm
             }
         }
 
+        public void ReadMTUdata(int NumOfDays)
+        {
+
+            Task.Factory.StartNew(() => ReadMTUDataTask(NumOfDays));
+        }
+
+        public void ReadMTUDataTask(int NumOfDays)
+        {
+            DateTime start = DateTime.UtcNow.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
+            DateTime end = DateTime.UtcNow.Date.AddSeconds(86399);
+
+            lexi.TriggerReadEventLogs(start, end);
+
+            List<LogDataEntry> entries = new List<LogDataEntry>();
+
+           bool last_packet = false;
+            while (!last_packet)
+            {
+                LogQueryResult response = new LogQueryResult(lexi.GetNextLogQueryResult());
+                switch (response.Status)
+                {
+                    case LogDataType.LastPacket:
+                        last_packet = true;
+                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, entries));
+                        break;
+                    case LogDataType.Bussy:
+                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status));
+                        Thread.Sleep(100);
+                        break;
+                    case LogDataType.NewPacket:
+                        entries.Add(response.Entry);
+                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, response.TotalEntries, response.CurrentEntry));
+                        break;
+
+                }
+            }
+        }
+
 
         public void ReadMTU(){
 
@@ -87,41 +129,26 @@ namespace MTUComm
                 DetectMeters();
             }
 
-            ReadMtuArgs args = null;
 
-            switch (mtuType.HexNum.Substring(0, 2))
-            {
-                case "31":
-                case "32":
-                    break;
-                case "33":
-                case "34":
-                    lexi.Write(64, new byte[] { 1 });
-                    Thread.Sleep(1000);
-                    break;
-            }
+            String memory_map_type = configuration.GetMemoryMapTyeByMtuId(mtuType.Id);
+
+            lexi.Write(64, new byte[] { 1 });
+            Thread.Sleep(1000);
 
             byte[] buffer = new byte[512];
 
             System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
 
-            switch (mtuType.HexNum.Substring(0, 2))
+
+            try
             {
-                case "31":
-                case "32":
-                    System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
-                    System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
-                    args = new ReadMtuArgs(new MemoryMap31xx32xx(buffer), mtuType);
-                    break;
-                case "33":
-                    args = new ReadMtuArgs(new MemoryMap33xx(buffer), mtuType);
-                    break;
-                case "34":
-                    System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
-                    System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
-                    args = new ReadMtuArgs(new MemoryMap342x(buffer), mtuType);
-                    break;
+                System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
+                System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
             }
+            catch (Exception e) { }
+
+            ReadMtuArgs args = new ReadMtuArgs(new MemoryMap.MemoryMap(buffer, memory_map_type), mtuType);
+
             OnReadMtu(this, args);
         }
 
@@ -143,16 +170,52 @@ namespace MTUComm
 
         public class ReadMtuArgs : EventArgs
         {
-            public IMemoryMap MemoryMap { get; private set; }
+            public AMemoryMap MemoryMap { get; private set; }
 
             public Mtu MtuType { get; private set; }
 
-            public ReadMtuArgs(IMemoryMap memorymap, Mtu mtype)
+            public ReadMtuArgs(AMemoryMap memorymap, Mtu mtype)
             {
                 MemoryMap = memorymap;
                 MtuType = mtype;
             }
         }
+
+        public class ReadMtuDataArgs : EventArgs
+        {
+           
+            public LogDataType Status { get; private set; }
+
+            public int TotalEntries { get; private set; }
+            public int CurrentEntry { get; private set; }
+
+            public List<LogDataEntry> Entries { get; private set; }
+
+            public ReadMtuDataArgs(LogDataType status)
+            {
+                Status = status;
+                TotalEntries = 0;
+                CurrentEntry = 0;
+            }
+
+            public ReadMtuDataArgs(LogDataType status, List<LogDataEntry> entries)
+            {
+                Status = status;
+                TotalEntries = entries.Count;
+                CurrentEntry = entries.Count;
+                Entries = entries;
+            }
+
+            public ReadMtuDataArgs(LogDataType status, int totalEntries, int currentEntry)
+            {
+                Status = status;
+                TotalEntries = totalEntries;
+                CurrentEntry = currentEntry;
+            }
+
+        }
+
+        
 
         public class TurnOffMtuArgs : EventArgs
         {
