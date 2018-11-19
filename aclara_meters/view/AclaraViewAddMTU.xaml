@@ -8,6 +8,7 @@
                NavigationPage.HasBackButton="false"
                xmlns:local="clr-namespace:aclara_meters;assembly=aclara_meters"
                xmlns:Controls="clr-namespace:aclara_meters" 
+               xmlns:behaviors="clr-namespace:aclara_meters.Behaviors"
                x:Class="aclara_meters.view.AclaraViewAddMTU">
 
 
@@ -375,7 +376,14 @@
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                 HeightRequest="40"   x:Name="servicePortId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
-                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                                FontSize="17" HorizontalTextAlignment="Start">
+
+                                                                <Controls:BorderlessEntry.Behaviors>
+                                                                    <behaviors:EntryLengthValidatorBehavior MaxLength="10"/>
+                                                                </Controls:BorderlessEntry.Behaviors>
+
+                                                         </Controls:BorderlessEntry>
+
                                                     </StackLayout>
                                              </Frame> 
                                         
@@ -394,11 +402,17 @@
                                          <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
                                               <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                         <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                            
                                                              <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                     HeightRequest="40"   x:Name="fieldOrder" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                     Placeholder="" PlaceholderColor="#7a868c" 
-                                                                    FontSize="17" HorizontalTextAlignment="Start"/>
+                                                                    FontSize="17" HorizontalTextAlignment="Start">
+
+                                                                <Controls:BorderlessEntry.Behaviors>
+                                                                    <behaviors:EntryLengthValidatorBehavior MaxLength="20"/>
+                                                                </Controls:BorderlessEntry.Behaviors>
+
+                                                         </Controls:BorderlessEntry>
+                                                    
                                                         </StackLayout>
                                                  </Frame> 
                                             
@@ -419,7 +433,15 @@
                                                              <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                     HeightRequest="40"   x:Name="meterNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                     Placeholder="" PlaceholderColor="#7a868c" 
-                                                                    FontSize="17" HorizontalTextAlignment="Start"/>
+                                                                    FontSize="17" HorizontalTextAlignment="Start">
+
+                                                                <Controls:BorderlessEntry.Behaviors>
+                                                                    <behaviors:EntryLengthValidatorBehavior MaxLength="12"/>
+                                                                </Controls:BorderlessEntry.Behaviors>
+
+
+                                                    
+                                                         </Controls:BorderlessEntry>
                                                         </StackLayout>
                                                  </Frame> 
                                             
@@ -451,7 +473,15 @@
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                 HeightRequest="40"   x:Name="initialRead" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
-                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                                FontSize="17" HorizontalTextAlignment="Start">
+
+                                                                <Controls:BorderlessEntry.Behaviors>
+                                                                    <behaviors:EntryLengthValidatorBehavior MaxLength="12"/>
+                                                                </Controls:BorderlessEntry.Behaviors>
+
+
+                                                    
+                                                         </Controls:BorderlessEntry>
                                                     </StackLayout>
                                              </Frame> 
                                         
@@ -621,7 +651,15 @@
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                 HeightRequest="40"   x:Name="servicePortId2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
-                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                                FontSize="17" HorizontalTextAlignment="Start">
+
+                                                                <Controls:BorderlessEntry.Behaviors>
+                                                                    <behaviors:EntryLengthValidatorBehavior MaxLength="10"/>
+                                                                </Controls:BorderlessEntry.Behaviors>
+
+
+                                                    
+                                                         </Controls:BorderlessEntry>
                                                     </StackLayout>
                                              </Frame> 
                                         
@@ -644,7 +682,15 @@
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                 HeightRequest="40"   x:Name="fieldOrder2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
-                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                                FontSize="17" HorizontalTextAlignment="Start">
+
+                                                                <Controls:BorderlessEntry.Behaviors>
+                                                                    <behaviors:EntryLengthValidatorBehavior MaxLength="20"/>
+                                                                </Controls:BorderlessEntry.Behaviors>
+
+
+                                                    
+                                                         </Controls:BorderlessEntry>
                                                     </StackLayout>
                                              </Frame> 
                                         
@@ -663,7 +709,15 @@
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                 HeightRequest="40"   x:Name="meterNumber2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
-                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                                FontSize="17" HorizontalTextAlignment="Start">
+
+                                                                <Controls:BorderlessEntry.Behaviors>
+                                                                    <behaviors:EntryLengthValidatorBehavior MaxLength="12"/>
+                                                                </Controls:BorderlessEntry.Behaviors>
+
+
+                                                    
+                                                         </Controls:BorderlessEntry>
                                                     </StackLayout>
                                              </Frame> 
                                         
@@ -692,7 +746,15 @@
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                 HeightRequest="40"   x:Name="initialRead2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
-                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                                FontSize="17" HorizontalTextAlignment="Start">
+
+                                                                <Controls:BorderlessEntry.Behaviors>
+                                                                    <behaviors:EntryLengthValidatorBehavior MaxLength="12"/>
+                                                                </Controls:BorderlessEntry.Behaviors>
+
+
+                                                    
+                                                         </Controls:BorderlessEntry>
                                                     </StackLayout>
                                              </Frame> 
                                         

@@ -265,9 +265,12 @@ namespace aclara_meters.view
             ObservableCollection<string> objStringList = new ObservableCollection<string>();
             //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
             ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>();
-            objClassList.Add(new PickerItems { Name = "Reason 1" });
-            objClassList.Add(new PickerItems { Name = "Reason 2" });
-            objClassList.Add(new PickerItems { Name = "Reason 3" });
+            objClassList.Add(new PickerItems { Name = "Complete" });
+            objClassList.Add(new PickerItems { Name = "Cancel" });
+            objClassList.Add(new PickerItems { Name = "Skip" });
+            objClassList.Add(new PickerItems { Name = "Not Home" });
+            objClassList.Add(new PickerItems { Name = "Other" });
+
             /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
             I am using foreach and we can add each item to the ObservableCollection<string>(). */
             foreach (var item in objClassList)
@@ -701,12 +704,12 @@ namespace aclara_meters.view
 
                         FinalReadListView.Add(new ReadMTUItem()
                         {
-                            Title = "\t\t\t\t\t" + "Param Field" + ":",
+                            Title = "\t\t" + "Param Field" + ":",
                             isDisplayed = "true",
                             Height = "64",
                             isMTU = "true",
                             isMeter = "false",
-                            Description = "\t\t\t\t\t" + "99"//parameter.Value
+                            Description = "\t\t" + "99"//parameter.Value
                         });
 
 
