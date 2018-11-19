@@ -27,6 +27,7 @@ namespace MTUComm
         public int ReadInterval { get; private set; }
         public long MeterRead { get; private set; }
         private int Flags;
+        public int ErrorStatus { get; private set; }
 
         public LogDataEntry(byte[] response)
         {
@@ -37,6 +38,7 @@ namespace MTUComm
             Flags = response[13] + (response[14] << 8);
             ReadInterval = response[15] + (response[16] << 8);
             MeterRead = response[17] + (response[18] << 8) + (response[19] << 16) + (response[20] << 24) + (response[21] << 32);
+            ErrorStatus = response[22];
         }
 
         public int PortNumber

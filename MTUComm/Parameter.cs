@@ -33,7 +33,8 @@ namespace MTUComm
             NewMeterSerialNumber = 20,
             OldMeterReading = 21,
             NewMeterReading = 22,
-            Custom = 23
+            DaysOfRead = 23,
+            Custom = 24
 
         };
 
@@ -78,6 +79,7 @@ namespace MTUComm
             {ParameterType.NewMeterSerialNumber, new ParameterDefine(true, true, "Port{0}NewMeterSerialNumber", "New Meter Serial Number")},
             {ParameterType.OldMeterReading, new ParameterDefine(true, true, "Port{0}OldMeterReading", "Old Meter Reading")},
             {ParameterType.NewMeterReading, new ParameterDefine(true, true, "Port{0}NewMeterReading", "")},
+            {ParameterType.DaysOfRead, new ParameterDefine(true, true, "DaysOfRead", "DaysOfRead")},
             {ParameterType.Custom, new ParameterDefine(true, true, "{1}", "{1}")}
         };
 
@@ -128,7 +130,7 @@ namespace MTUComm
             this.optional = optional;
         }
 
-        public ParameterType Tye
+        public ParameterType Type
         {
             get
             {

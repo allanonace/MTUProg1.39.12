@@ -24,6 +24,7 @@ namespace MTUComm
             ReplaceMeter,
             TurnOffMtu,
             TurnOnMtu,
+            ReadData,
             Diagnosis
         }
 
@@ -38,6 +39,7 @@ namespace MTUComm
             {ActionType.ReplaceMeter,"Replace Meter" },
             {ActionType.TurnOffMtu,"Turn Off MTU" },
             {ActionType.TurnOnMtu,"Turn On MTU" },
+            {ActionType.ReadData,"Read Data Log" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -52,6 +54,7 @@ namespace MTUComm
             {ActionType.ReplaceMeter,"Program MTU" },
             {ActionType.TurnOffMtu,"TurnOffMtu" },
             {ActionType.TurnOnMtu,"TurnOnMTU" },
+            {ActionType.ReadData, "Program MTU" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -66,6 +69,7 @@ namespace MTUComm
             {ActionType.ReplaceMeter,"ReplaceMeter" },
             {ActionType.TurnOffMtu, null },
             {ActionType.TurnOnMtu, null },
+            {ActionType.ReadData, "DataRead" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -84,6 +88,9 @@ namespace MTUComm
 
         private MTUComm comm;
 
+
+        public delegate void ActionProgresshHandler(object sender, ActionProgressArgs e);
+        public event ActionProgresshHandler OnProgress;
 
         public delegate void ActionFinishHandler(object sender, ActionFinishArgs e);
         public event ActionFinishHandler OnFinish;
@@ -163,6 +170,26 @@ namespace MTUComm
                         comm.OnTurnOnMtu += Comm_OnTurnOnMtu;
                         comm.TurnOnMtu();
                         break;
+                    case ActionType.ReadData:
+                        Parameter param = mparameters.Find(x => (x.Type == Parameter.ParameterType.DaysOfRead));
+                        int DaysOfRead = 0;
+                        if(param == null)
+                        {
+                            ActionErrorArgs e_args = new ActionErrorArgs("Days Of Read parameter Not Defined or Invalid");
+                            OnError(this, e_args);
+                            break;
+                        }
+
+                        if(!Int32.TryParse(param.Value, out DaysOfRead) || DaysOfRead <= 0)
+                        {
+                            ActionErrorArgs e_args = new ActionErrorArgs("Days Of Read parameter Invalid");
+                            OnError(this, e_args);
+                            break;
+                        }
+
+                        comm.ReadMTUdata(DaysOfRead);
+                        comm.OnReadMtuData += Comm_OnReadMtuData;
+                        break;
                     default:
                         ActionRunSimulator();
                         break;
@@ -171,6 +198,8 @@ namespace MTUComm
             }
 
         }
+
+       
 
         public int Order
         {
@@ -382,6 +411,18 @@ namespace MTUComm
             return result;
         }
 
+        private ActionResult ReadMTUData(DateTime start, DateTime end, List<LogDataEntry> Entries, MTUBasicInfo mtuType)
+        {
+            ActionResult result = new ActionResult();
+
+            string log_path = logger.logReadDataResultEntries(mtuType.Id.ToString("d15"), start, end , Entries);
+
+            result.AddParameter(new Parameter("ReadRequest", "Number Read Request Days", ""));
+            result.AddParameter(new Parameter("ReadResult", "Read Result", "Number of Reads "+ Entries.Count.ToString()+ " for Selected Period From "+start.ToString("dd/MM/yyyy") + " 0:00:00 Till "+ end.ToString("dd/MM/yyyy") + " 23:59:59"));
+            result.AddParameter(new Parameter("ReadResultFile", "Read Result File", log_path));
+
+            return result;
+        }
 
         private ActionResult ReadMTU(dynamic registers, Mtu mtutype)
         {
@@ -445,6 +486,30 @@ namespace MTUComm
 
             }
             return result;
+        }
+
+        private void Comm_OnReadMtuData(object sender, MTUComm.ReadMtuDataArgs e)
+        {
+            ActionProgressArgs args;
+            switch (e.Status)
+            {
+                case LogQueryResult.LogDataType.Bussy:
+                    args = new ActionProgressArgs(0,0);
+                    OnProgress(this, args);
+                    break;
+                case LogQueryResult.LogDataType.NewPacket:
+                    args = new ActionProgressArgs(e.CurrentEntry, e.TotalEntries);
+                    OnProgress(this, args);
+                    break;
+                case LogQueryResult.LogDataType.LastPacket:
+                    ActionResult result = ReadMTUData(e.Start, e.End, e.Entries, e.MtuType);
+                    Mtu mtu_type = configuration.GetMtuTypeById((int)e.MtuType.Type);
+
+                    logger.logReadResult(this, result, mtu_type);
+                    ActionFinishArgs f_args = new ActionFinishArgs(null);
+                    OnFinish(this, f_args);
+                    break;
+            }
         }
 
 
@@ -517,8 +582,30 @@ namespace MTUComm
             return logger.logReadResultString(this, result);
 
         }
-
+        
         //
+
+        public class ActionProgressArgs : EventArgs
+        {
+            public int Step { get; private set; }
+            public int TotalSteps { get; private set; }
+            public string Message { get; private set; }
+
+            public ActionProgressArgs(int step, int totalsteps)
+            {
+                Step = step;
+                TotalSteps = totalsteps;
+                Message = "";
+            }
+
+            public ActionProgressArgs(int step, int totalsteps, string message)
+            {
+                Step = step;
+                TotalSteps = totalsteps;
+                Message = message;
+            }
+        }
+
         public class ActionFinishArgs : EventArgs
         {
             public ActionResult Result { get; private set; }

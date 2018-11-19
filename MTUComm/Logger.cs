@@ -88,6 +88,32 @@ namespace MTUComm
             return uri;
         }
 
+
+        private string getEventBaseFileHandler()
+        {
+            string base_stream = "<?xml version=\"1.0\" encoding=\"ASCII\"?>";
+            base_stream += "<Log>";
+            base_stream += "    <Transfer/>";
+            base_stream += "</Log>";
+            return base_stream;
+        }
+
+        public string CreateEventFileIfNotExist(string mtu_id)
+        {
+            string file_name = "MTUID"+ mtu_id+ "-" + System.DateTime.Now.ToString("MMddyyyyHH") + "-" + DateTime.Now.Ticks.ToString() + "DataLog.xml"; 
+            string uri = Path.Combine(abs_path, file_name);
+
+            if (!File.Exists(uri))
+            {
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, true))
+                {
+                    file.WriteLine(getEventBaseFileHandler());
+                }
+            }
+
+            return uri;
+        }
+
         private XElement getRootElement()
         {
             CreateFileIfNotExist();
@@ -350,6 +376,53 @@ namespace MTUComm
 
             parent.Add(action);
 
+        }
+
+        private void logDataResultEntry(XElement events, LogDataEntry entry)
+        {
+            XElement read_event = new XElement("MeterReadEvent");
+
+            addAtrribute(read_event, "FormatVersion", entry.FormatVersion.ToString());
+
+            read_event.Add(new XElement("TimeStamp", entry.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss")));
+            read_event.Add(new XElement("MeterRead", entry.MeterRead.ToString()));
+            read_event.Add(new XElement("ErrorStatus", entry.ErrorStatus.ToString()));
+            read_event.Add(new XElement("ReadInterval", "PT"+entry.ReadInterval.ToString()+"M"));
+            read_event.Add(new XElement("PortNumber", "PORT"+entry.PortNumber.ToString()));
+            read_event.Add(new XElement("IsDailyRead", entry.IsDailyRead.ToString()));
+            read_event.Add(new XElement("IsTopOfHourRead", entry.IsTopOfHourRead.ToString()));
+            read_event.Add(new XElement("ReadReason", entry.ReasonForRead.ToString()));
+            read_event.Add(new XElement("IsSynchronized", entry.IsSynchronized.ToString()));
+
+
+            events.Add(read_event);
+        }
+
+        public string logReadDataResultEntries(string mtu_id, DateTime start, DateTime end, List<LogDataEntry> Entries)
+        {
+            String path = CreateEventFileIfNotExist(mtu_id);
+            XDocument doc = XDocument.Load(path);
+
+            XElement transfer  = doc.Root.Element("Transfer");
+
+
+            XElement events = new XElement("Events");
+
+            addAtrribute(events, "FilterMode", "Match");
+            addAtrribute(events, "FilterValue", "MeterRead");
+            addAtrribute(events, "RangeStart", start.ToString("yyyy-MM-dd HH:mm:ss"));
+            addAtrribute(events, "RangeStop", end.ToString("yyyy-MM-dd HH:mm:ss"));
+
+            foreach (LogDataEntry entry in Entries)
+            {
+                logDataResultEntry(events, entry);
+            }
+
+            transfer.Add(events);
+
+            doc.Save(path);
+
+            return path;
         }
 
         private void logComplexParameter(XElement parent, ActionResult result, InterfaceParameters parameter)

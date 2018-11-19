@@ -82,6 +82,14 @@ namespace MTUComm
 
         public void ReadMTUDataTask(int NumOfDays)
         {
+            getMTUBasicInfo();
+
+            //If MTU has changed or critical settings/configuration force detection rutine
+            if (this.changedMTUSettings)
+            {
+                DetectMeters();
+            }
+
             DateTime start = DateTime.UtcNow.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
             DateTime end = DateTime.UtcNow.Date.AddSeconds(86399);
 
@@ -97,15 +105,15 @@ namespace MTUComm
                 {
                     case LogDataType.LastPacket:
                         last_packet = true;
-                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, entries));
+                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu, entries));
                         break;
                     case LogDataType.Bussy:
-                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status));
+                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu));
                         Thread.Sleep(100);
                         break;
                     case LogDataType.NewPacket:
                         entries.Add(response.Entry);
-                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, response.TotalEntries, response.CurrentEntry));
+                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu, response.TotalEntries, response.CurrentEntry));
                         break;
 
                 }
@@ -189,28 +197,39 @@ namespace MTUComm
             public int TotalEntries { get; private set; }
             public int CurrentEntry { get; private set; }
 
+            public DateTime Start { get; private set; }
+            public DateTime End { get; private set; }
+
+            public MTUBasicInfo MtuType { get; private set; }
+
+
             public List<LogDataEntry> Entries { get; private set; }
 
-            public ReadMtuDataArgs(LogDataType status)
+            public ReadMtuDataArgs(LogDataType status, DateTime start, DateTime end, MTUBasicInfo mtype)
             {
                 Status = status;
                 TotalEntries = 0;
                 CurrentEntry = 0;
+                MtuType = mtype;
             }
 
-            public ReadMtuDataArgs(LogDataType status, List<LogDataEntry> entries)
+            public ReadMtuDataArgs(LogDataType status, DateTime start, DateTime end, MTUBasicInfo mtype, List<LogDataEntry> entries)
             {
                 Status = status;
                 TotalEntries = entries.Count;
                 CurrentEntry = entries.Count;
                 Entries = entries;
+                MtuType = mtype;
             }
 
-            public ReadMtuDataArgs(LogDataType status, int totalEntries, int currentEntry)
+            public ReadMtuDataArgs(LogDataType status, DateTime start, DateTime end, MTUBasicInfo mtype, int totalEntries, int currentEntry)
             {
                 Status = status;
                 TotalEntries = totalEntries;
                 CurrentEntry = currentEntry;
+                MtuType = mtype;
+                Start = start;
+                End = end;
             }
 
         }
