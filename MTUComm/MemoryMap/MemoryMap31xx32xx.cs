@@ -1054,6 +1054,19 @@ namespace MTUComm.MemoryMap
             return MemoryRegister.Value;
         }
 
+        public dynamic ReadInterval_Logic(MemoryRegister<int> MemoryRegister, dynamic inputValue)
+        {
+            string[] readIntervalArray = ((string)inputValue).Split(' ');
+            string readIntervalStr = readIntervalArray[0];
+            string timeUnit = readIntervalArray[1];
+            int timeIntervalMins = Int32.Parse(readIntervalStr);
+
+            if (timeUnit is "Hours")
+                timeIntervalMins = timeIntervalMins * 60;
+
+            return timeIntervalMins;
+        }
+
         /*
 
         // addr 199

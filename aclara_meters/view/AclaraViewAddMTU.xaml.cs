@@ -448,13 +448,30 @@ namespace aclara_meters.view
         }
 
    
-        public AclaraViewAddMTU(IUserDialogs dialogs, uint DetectedMtuType)
+        public AclaraViewAddMTU(IUserDialogs dialogs)
         {
+            /*// TEST
+            byte[] memory = new byte[400];
+            dynamic map = new MTUComm.MemoryMap.MemoryMap31xx32xx(memory); // TODO: identify map by mtu type
+            map.ReadInterval = "24 Hours";
+            map.MessageOverlapCount = 5;
+            map.P1Reading = 0;
+            map.P1MeterId = "1";
+            map.P1MeterType = "1";
+            map.EncryptionKey = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            List<dynamic> modifiedRegisters = map.GetModifiedRegisters().GetAllElements();
+            // END TEST */
+
+
             /* Get detected mtu */
-            currentMtu = FormsApp.config.GetMtuTypeById((int)DetectedMtuType);
+            MTUBasicInfo mtuBasicInfo = MtuForm.mtuBasicInfo;
+            int DetectedMtuType = (int)mtuBasicInfo.Type;
+            currentMtu = FormsApp.config.GetMtuTypeById(DetectedMtuType);
 
             /* Instantiate form */
             addMtuForm = new AddMtuForm(currentMtu);
+            addMtuForm.SetCondition(AddMtuForm.FIELD_CONDITIONS.MTU_REQUIRES_ALARM_PROFILE, currentMtu.RequiresAlarmProfile);
+            addMtuForm.SetCondition(AddMtuForm.FIELD_CONDITIONS.MTU_TWO_PORTS, currentMtu.TwoPorts);
 
             /* Get meters for detected mtu */
             MeterTypes m = FormsApp.config.GetMeterTypes();
@@ -462,7 +479,7 @@ namespace aclara_meters.view
             this.meters = m.FindByPortTypeAndFlow(currentMtu.Ports[0].Type, currentMtu.Flow);
 
             /* Get alarms for detected mtu */
-            alarmList = FormsApp.config.Alarms.FindByMtuType((int)DetectedMtuType);
+            alarmList = FormsApp.config.Alarms.FindByMtuType(DetectedMtuType);
  
             InitializeComponent();
 
@@ -2078,7 +2095,6 @@ namespace aclara_meters.view
 
         private void OnMenuCaseAddMTU()
         {
-            uint DetectedMtuType = 0; // TODO: real mtu type
             background_scan_page.Opacity = 1;
             background_scan_page.IsEnabled = true;
 
@@ -2093,7 +2109,7 @@ namespace aclara_meters.view
              Device.BeginInvokeOnMainThread(() =>
              {
                  navigationDrawerList.SelectedItem = null;
-                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, DetectedMtuType), false);
+                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
                  background_scan_page.Opacity = 1;
 
                  if (Device.Idiom == TargetIdiom.Tablet)

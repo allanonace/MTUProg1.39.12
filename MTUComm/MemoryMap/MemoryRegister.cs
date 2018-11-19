@@ -24,7 +24,7 @@ namespace MTUComm.MemoryMap
         public Func<T> funcGet;                 // MemoryRegister.Value{get}
         public Func<T> funcGetCustom;           // Only use working dynamically ( IMemoryRegister.Get )
         public Action<T> funcSet;               // MemoryRegister.Value{set}
-        public Action<T> funcSetCustom;         // MemoryRegister.Value{set}
+        public Func<dynamic,dynamic> funcSetCustom;         // MemoryRegister.Value{set}
         public Action<string> funcSetString;    // MemoryRegister.Value{set}
         public Action<byte[]> funcSetByteArray; // MemoryRegister.Value{set}
         public string id { get; }

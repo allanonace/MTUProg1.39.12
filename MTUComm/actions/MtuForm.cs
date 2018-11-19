@@ -7,6 +7,13 @@ namespace MTUComm.actions
 {
     public class MtuForm : DynamicObject
     {
+        public static MTUBasicInfo mtuBasicInfo { get; private set; }
+
+        public static void SetBasicInfo ( MTUBasicInfo mtuBasicInfo )
+        {
+            MtuForm.mtuBasicInfo = mtuBasicInfo;
+        }
+
         private Dictionary<string, Parameter> dictionary;
 
         public MtuForm()

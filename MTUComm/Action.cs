@@ -501,16 +501,15 @@ namespace MTUComm
 
         private void Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)
         {
-            logger.logAddMtuResult(this);
+            AddMtuForm form = e.form;
+            logger.logAddMtuResult(this, form);
             ActionFinishArgs args = new ActionFinishArgs(null); // TODO: add add mtu result
             OnFinish(this, args);
         }
 
         private void Comm_OnBasicRead(object sender, MTUComm.BasicReadArgs e)
         {
-            uint MtuId = e.MtuType;
             ActionResult result = new ActionResult();
-            result.AddParameter(new Parameter("MtuId", "MTU ID", MtuId.ToString()));
             ActionFinishArgs args = new ActionFinishArgs(result);
             OnFinish(this, args);
         }

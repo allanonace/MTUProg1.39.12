@@ -51,7 +51,8 @@
     <Address>0</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>MtuId</Id>
@@ -60,7 +61,8 @@
     <Address>6</Address>
     <Size>4</Size>
     <Write>false</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>Shipbit</Id>
@@ -69,7 +71,8 @@
     <Address>22</Address>
     <Size>0</Size>
     <Write>true</Write>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>DailyRead</Id>
@@ -78,7 +81,8 @@
     <Address>198</Address>
     <Size>1</Size>
     <Write>true</Write>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>MessageOverlapCount</Id>
@@ -87,7 +91,8 @@
     <Address>25</Address>
     <Size>1</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2MessageOverlapCount</Id>
@@ -96,7 +101,8 @@
     <Address>61</Address>
     <Size>1</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>ReadInterval</Id>
@@ -105,7 +111,8 @@
     <Address>26</Address>
     <Size>2</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet>method</CustomSet>
   </Register>
   <Register>
     <Id>P2ReadInterval</Id>
@@ -114,7 +121,8 @@
     <Address>62</Address>
     <Size>2</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>BatteryVoltage</Id>
@@ -123,7 +131,8 @@
     <Address>113</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <Custom>(_val_ * 9.766 * 2) + 250</Custom>
+    <CustomGet>(_val_ * 9.766 * 2) + 250</CustomGet>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>MtuFirmwareVersionFormatFlag</Id>
@@ -132,7 +141,8 @@
     <Address>244</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>MtuFirmwareVersion</Id>
@@ -141,7 +151,8 @@
     <Address>244</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1TiltAlarm</Id>
@@ -150,7 +161,8 @@
     <Address>42</Address>
     <Size>0</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1MagneticAlarm</Id>
@@ -159,7 +171,8 @@
     <Address>42</Address>
     <Size>1</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1ImmediateAlarm</Id>
@@ -168,7 +181,8 @@
     <Address>42</Address>
     <Size>2</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1UrgentAlarm</Id>
@@ -177,7 +191,8 @@
     <Address>42</Address>
     <Size>3</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1InterfaceAlarm</Id>
@@ -186,7 +201,8 @@
     <Address>42</Address>
     <Size>4</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1RegisterCoverAlarm</Id>
@@ -195,7 +211,8 @@
     <Address>42</Address>
     <Size>5</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1ReverseFlowAlarm</Id>
@@ -204,7 +221,8 @@
     <Address>42</Address>
     <Size>6</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2TiltAlarm</Id>
@@ -213,7 +231,8 @@
     <Address>58</Address>
     <Size>0</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2MagneticAlarm</Id>
@@ -222,7 +241,8 @@
     <Address>58</Address>
     <Size>1</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2ImmediateAlarm</Id>
@@ -231,7 +251,8 @@
     <Address>58</Address>
     <Size>2</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2UrgentAlarm</Id>
@@ -240,7 +261,8 @@
     <Address>58</Address>
     <Size>3</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2InterfaceAlarm</Id>
@@ -249,7 +271,8 @@
     <Address>58</Address>
     <Size>4</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2RegisterCoverAlarm</Id>
@@ -258,7 +281,8 @@
     <Address>58</Address>
     <Size>5</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2ReverseFlowAlarm</Id>
@@ -267,7 +291,8 @@
     <Address>58</Address>
     <Size>6</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1MeterType</Id>
@@ -276,7 +301,8 @@
     <Address>32</Address>
     <Size>2</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2MeterType</Id>
@@ -285,7 +311,8 @@
     <Address>49</Address>
     <Size>1</Size>
     <Write>true</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1MeterId</Id>
@@ -294,7 +321,8 @@
     <Address>34</Address>
     <Size>6</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2MeterId</Id>
@@ -303,7 +331,8 @@
     <Address>50</Address>
     <Size>6</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1Scaler</Id>
@@ -312,7 +341,8 @@
     <Address>102</Address>
     <Size>2</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2Scaler</Id>
@@ -321,7 +351,8 @@
     <Address>110</Address>
     <Size>2</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>TiltTamper</Id>
@@ -330,7 +361,8 @@
     <Address>71</Address>
     <Size>0</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>MagneticTamper</Id>
@@ -339,7 +371,8 @@
     <Address>71</Address>
     <Size>1</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>ProgrammingCoilInterfaceTamper</Id>
@@ -348,7 +381,8 @@
     <Address>71</Address>
     <Size>4</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>RegisterCoverTamper</Id>
@@ -357,7 +391,8 @@
     <Address>71</Address>
     <Size>5</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>ReverseFlowTamper</Id>
@@ -366,7 +401,8 @@
     <Address>71</Address>
     <Size>6</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>F12WAYRegister1</Id>
@@ -375,7 +411,8 @@
     <Address>132</Address>
     <Size>4</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>F12WAYRegister10</Id>
@@ -384,7 +421,8 @@
     <Address>168</Address>
     <Size>4</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>F12WAYRegister14</Id>
@@ -393,7 +431,8 @@
     <Address>184</Address>
     <Size>4</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>RxInterval</Id>
@@ -402,7 +441,8 @@
     <Address>202</Address>
     <Size>1</Size>
     <Write>false</Write> <!-- NO SE -->
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>DailySnap</Id>
@@ -411,7 +451,8 @@
     <Address>198</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P1Reading</Id>
@@ -420,7 +461,8 @@
     <Address>96</Address>
     <Size>8</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>P2Reading</Id>
@@ -429,7 +471,8 @@
     <Address>104</Address>
     <Size>8</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>EncryptionKey</Id>
@@ -438,7 +481,8 @@
     <Address>256</Address>
     <Size>16</Size>
     <Write>true</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>Encrypted</Id>
@@ -447,7 +491,8 @@
     <Address>318</Address>
     <Size>0</Size>
     <Write>false</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register>
     <Id>EncryptionIndex</Id>
@@ -456,6 +501,7 @@
     <Address>319</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <Custom/>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
 </Registers>

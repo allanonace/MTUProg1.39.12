@@ -66,6 +66,7 @@ namespace MTUComm
             MTUBasicInfo mtu_info = new MTUBasicInfo(lexi.Read(0, 10));
             mtu_changed = !((mtu_info.Id == latest_mtu.Id) && (mtu_info.Type == latest_mtu.Type));
             latest_mtu = mtu_info;
+            MtuForm.SetBasicInfo(latest_mtu);
         }
 
         /// <summary>
@@ -183,17 +184,18 @@ namespace MTUComm
 
         public class AddMtuArgs : EventArgs
         {
-            public AddMtuArgs()
+            public AddMtuForm form;
+
+            public AddMtuArgs(AddMtuForm form)
             {
+                this.form = form;
             }
         }
 
         public class BasicReadArgs : EventArgs
         {
-            public uint MtuType { get; }
-            public BasicReadArgs(uint MtuType)
+            public BasicReadArgs()
             {
-                this.MtuType = MtuType;
             }
         }
 
@@ -255,26 +257,14 @@ namespace MTUComm
             OnTurnOnMtu(this, args);
         }
 
-        public void AddMtu(AddMtuForm addMtuForm) // Parameter[] addMtuParams)
+        public void AddMtu(AddMtuForm addMtuForm)
         {
             Task.Factory.StartNew(() => AddMtuTask(addMtuForm));
         }
 
-        private void AddMtuTask(dynamic form) // Parameter[] addMtuParams)
+        private void AddMtuTask(dynamic form)
         {
-            /*
-            List<Parameter> p = new List<Parameter>(addMtuParams);
-            Dictionary<FIELD, string[]> Texts = AddMtuForm.Texts;
-            Parameter servicePortIdParam = p.FindByParamId(FIELD.SERVICE_PORT_ID, Texts);
-            Parameter fieldOrderParam = p.FindByParamId(FIELD.FIELD_ORDER, Texts);
-            Parameter meterNumberParam = p.FindByParamId(FIELD.METER_NUMBER, Texts);
-            Parameter selectedMeterIdParam = p.FindByParamId(FIELD.SELECTED_METER_ID, Texts);
-            Parameter readIntervalParam = p.FindByParamId(FIELD.READ_INTERVAL, Texts);
-            Parameter snapReadsParam = p.FindByParamId(FIELD.SNAP_READS, Texts);
-            Parameter twoWayParam = p.FindByParamId(FIELD.TWO_WAY, Texts);
-            Parameter alarmsParam = p.FindByParamId(FIELD.ALARM, Texts);
-            */
-
+            Mtu mtu = form.mtu;
             // Prepare memory map
             byte[] memory = new byte[400];
             dynamic map = new MemoryMap31xx32xx ( memory ); // TODO: identify map by mtu type
@@ -288,18 +278,21 @@ namespace MTUComm
             // P2MeterId
 
             // reading interval
-            string[] readIntervalArray = form.ReadInterval.getValue().Split(' ');
+            /*string[] readIntervalArray = form.ReadInterval.getValue().Split(' ');
             string readIntervalStr = readIntervalArray[0];
             string timeUnit = readIntervalArray[1];
             int timeIntervalMins = Int32.Parse(readIntervalStr);
             if (timeUnit is "Hours")
                 timeIntervalMins = timeIntervalMins * 60;
 
-            map.ReadInterval = timeIntervalMins; // In minutes
+            map.ReadInterval = timeIntervalMins; // In minutes*/
+
+            map.ReadInterval = form.ReadInterval.getValue();
+
             // P2ReadInterval
 
             // overlap
-            map.MessageOverlapCount = 5;// DEFAULT_OVERLAP; // TODO: parse Alarm object and get Overlap
+            map.MessageOverlapCount = DEFAULT_OVERLAP;
             // P2MessageOverlapCount
 
             // initial reading
@@ -307,27 +300,75 @@ namespace MTUComm
             // P2Reading
 
             // alarms
-            Alarm alarms = (Alarm)form.Alarm.getValue();
-            // P1ImmediateAlarm
-            // P1UrgentAlarm
-            // P1MagneticAlarm
-            // P1RegisterCoverAlarm
-            // P1ReverseFlowAlarm
-            // P1TiltAlarm
-            // P1InterfaceAlarm
-            // P2ImmediateAlarm
-            // P2UrgentAlarm
-            // P2MagneticAlarm
-            // P2RegisterCoverAlarm
-            // P2ReverseFlowAlarm
-            // P2TiltAlarm
-            // P2InterfaceAlarm
+            if (form.GetCondition(AddMtuForm.FIELD_CONDITIONS.MTU_REQUIRES_ALARM_PROFILE))
+            {
+                Alarm alarms = (Alarm)form.Alarm.getValue();
+
+                // Overlap
+                map.MessageOverlapCount = alarms.Overlap;
+
+                // P1ImmediateAlarm
+                if (alarms.ImmediateAlarmTransmit)
+                {
+                    map.P1ImmediateAlarm = true;
+                }
+
+                // P1UrgentAlarm
+                if (alarms.DcuUrgentAlarm)
+                {
+                    map.P1UrgentAlarm = true;
+                }
+
+                // P1MagneticAlarm
+                if (mtu.MagneticTamper)
+                {
+                    map.P1MagneticAlarm = alarms.Magnetic;
+                }
+
+                // P1RegisterCoverAlarm
+                if (mtu.RegisterCoverTamper)
+                {
+                    map.P1RegisterCoverAlarm = alarms.RegisterCover;
+                }
+
+                // P1ReverseFlowAlarm
+                if (mtu.ReverseFlowTamper)
+                {
+                    map.P1ReverseFlowAlarm = alarms.ReverseFlow;
+                }
+
+                // P1TiltAlarm
+                if (mtu.TiltTamper)
+                {
+                    map.P1TiltAlarm = alarms.Tilt;
+                }
+
+                // P1InterfaceAlarm
+                if (mtu.InterfaceTamper)
+                {
+                    map.P1InterfaceAlarm = alarms.InterfaceTamper;
+                }
+                // P2ImmediateAlarm
+                // P2UrgentAlarm
+                // P2MagneticAlarm
+                // P2RegisterCoverAlarm
+                // P2ReverseFlowAlarm
+                // P2TiltAlarm
+                // P2InterfaceAlarm
+            }
 
             // Encryption key
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
             byte[] aesKey = new byte[ DEFAULT_LENGTH_AES ];
             rng.GetBytes ( aesKey );
             map.EncryptionKey = aesKey;
+            for (int i = 0; i < 15; i++)
+            {
+                if (aesKey[i] != memory[256+i])
+                {
+                    throw new Exception("AES key does not match");
+                }
+            }
             // Encrypted
             // EncryptionIndex
 
@@ -336,100 +377,10 @@ namespace MTUComm
             // fast message (not in pulse)
             // encoder digits to drop (not in pulse)
 
-            /*
-            //Console.WriteLine("AddMtu start");
-            //byte[] data = lexi.Read(0, 255);
-            //int mtuType = data[0];
-            //int meterTypeId = (int)(data[32] + (data[33] << 8));
-            //Console.WriteLine("MTU Type: " + mtuType);
-            //Console.WriteLine("Meter Type ID: " + meterTypeId);
-
-            //byte[] bytesToWrite = BitConverter.GetBytes(3101);
-            //int meterTypeId2 = (int)(bytesToWrite[0] + (bytesToWrite[1] << 8));
-            //Console.WriteLine("Meter Type ID 2: " + meterTypeId2);
-            //lexi.Write(32, bytesToWrite);
-            //Console.WriteLine("AddMtu end");
-
-            byte[] memory2 = new byte[300]; // TODO: read real memory map?
-            dynamic map2 = new MemoryMap31xx32xx(memory2); // TODO: identify mm by mtu type
-            // 22 system flags
-
-            // 25 message overlap count - alarm.xml
-            map2.MessageOverlapCount = 6; // TODO: take value from alarm.xml
-            //writeParam(25, memory, 1);
-
-            // 26-27 read interval
-            map2.ReadInterval = 11; // TODO: get real value
-            //writeParam(26, memory, 2);
-
-            // 28 ports enable
-
-            // 32-33 p1 meter type
-            map2.P1MeterType = 3101; // TODO: real value
-            //writeParam(32, memory, 2);
-
-            // 34-39 p1 meter id - Global.xml
-            string p1MeterId = "9876543210";
-            string p1MeterIdToWrite = "";
-            if (p1MeterId.Trim().Length > 12)
-            {
-                p1MeterIdToWrite = p1MeterId.Substring(0, 12);
-            }
-            else
-            {
-                p1MeterIdToWrite = p1MeterId.PadLeft(12, 'F');
-            }
-            map2.P1MeterId = ulong.Parse(p1MeterIdToWrite, System.Globalization.NumberStyles.HexNumber);
-            // 40-41 p1 pulse ratio
-            //mm.P1PulseRatio = 10;
-            // 42 p1 mode - alarm.xml
-            //mm.P1Mode = 255; // TODO: get AlarmMask1 value from alarm.xml
-            // 48-49 p2 info, p2 meter type
-            //mm.P2MeterType = 2222; // TODO: real value
-            // 50-55 p2 meter id - Global.xml
-            string p2MeterId = "9876543210";
-            string p2MeterIdToWrite = "";
-            if (p2MeterId.Trim().Length > 12)
-            {
-                p2MeterIdToWrite = p2MeterId.Substring(0, 12);
-            }
-            else
-            {
-                p2MeterIdToWrite = p2MeterId.PadLeft(12, 'F');
-            }
-            //mm.P2MeterId = ulong.Parse(p2MeterIdToWrite, System.Globalization.NumberStyles.HexNumber);
-            // 56-57 p2 pulse ratio
-            //mm.P2PulseRatio = 20;
-            // 58 p2 mode - alarm.xml
-            //mm.P2Mode = 255; // TODO: get AlarmMask2 value from alarm.xml
-            // 64 task flags - when reading meter
-            // 65 task flags - when time sync request
-            // 92-95 MTU/DCU ID of last packet received
-            // 96-101 p1 reading
-            //mm.P1Reading = 305;
-            //byte[] newP1Reading = new byte[6];
-            //Array.Copy(memory, 96, newP1Reading, 0, 6);
-            //lexi.Write(96, newP1Reading);
-            //writeParam(96, memory, 6);
-            // 104-109 p2 reading
-            //mm.P2Reading = 2002; 
-            // 198 daily read global.xml
-            map2.DailyRead = 17;
-            // 256-271 AES encryption key
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-            byte[] aesKey = new byte[16];
-            rng.GetBytes(aesKey);
-            //mm.AesEncryptionKey = aesKey;
-            //writeParam(256, memory, 16); // ble layer does not support 16 byte writes
-            //writeParam(256, memory, 6); // ble layer does not support 16 byte writes
-            //writeParam(262, memory, 6); // ble layer does not support 16 byte writes
-            //writeParam(268, memory, 4);
-            */
-
             // Write changes into MTU
             WriteModifiedRegisters(map);
 
-            AddMtuArgs args = new AddMtuArgs ();
+            AddMtuArgs args = new AddMtuArgs (form);
             OnAddMtu ( this, args );
         }
 
@@ -478,7 +429,7 @@ namespace MTUComm
         public void BasicRead()
         {
             getMTUBasicInfo();
-            BasicReadArgs args = new BasicReadArgs(latest_mtu.Type);
+            BasicReadArgs args = new BasicReadArgs();
             OnBasicRead(this, args);
         }
     }

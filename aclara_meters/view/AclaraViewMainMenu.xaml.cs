@@ -942,7 +942,6 @@ namespace aclara_meters.view
             dialog_AddMTU.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            uint DetectedMtuType = 0;
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -951,9 +950,6 @@ namespace aclara_meters.view
                 MTUComm.Action basicRead = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.BasicRead, user: "martxel");
                 basicRead.OnFinish += ((s, args) =>
                 {
-                    Parameter[] p = args.Result.getParameters();
-                    Parameter mtuTypeParam = p[0];
-                    DetectedMtuType = UInt32.Parse(mtuTypeParam.getValue());
                 });
                 basicRead.Run();
             });
@@ -962,7 +958,7 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, DetectedMtuType), false);
+                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
             })
             );
               

@@ -160,5 +160,14 @@ namespace Xml
 
         [XmlElement("ECoderReverseFlow")]
         public bool ECoderReverseFlow { get; set; }
+
+        [XmlIgnore]
+        public bool TwoPorts
+        {
+            get
+            {
+                return (this.Ports.Count > 1);
+            }
+        }
     }
 }

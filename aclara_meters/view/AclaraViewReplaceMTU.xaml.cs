@@ -1965,7 +1965,6 @@ namespace aclara_meters.view
 
         private void OnMenuCaseAddMTU()
         {
-            uint DetectedMtuType = 0; // TODO: real mtu type
             background_scan_page.Opacity = 1;
             background_scan_page.IsEnabled = true;
 
@@ -1980,7 +1979,7 @@ namespace aclara_meters.view
              Device.BeginInvokeOnMainThread(() =>
              {
                  navigationDrawerList.SelectedItem = null;
-                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, DetectedMtuType), false);
+                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
                  background_scan_page.Opacity = 1;
 
                  if (Device.Idiom == TargetIdiom.Tablet)

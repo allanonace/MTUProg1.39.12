@@ -110,6 +110,8 @@ namespace MTUComm.MemoryMap
                 if ( list.Registers != null )
                     foreach ( MemRegister xmlRegister in list.Registers )
                     {
+                        try {
+
                         RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlRegister.Type.ToUpper () );
                         Type SysType = typeof(System.Object);
 
@@ -162,39 +164,35 @@ namespace MTUComm.MemoryMap
                                 memoryRegister.funcGet       = (Func<int>)get;
                                 memoryRegister.funcSet       = (Action<int>)set;
                                 memoryRegister.funcGetCustom = (Func<int>)getC;
-                                memoryRegister.funcSetCustom = (Func<int>)setC;
                                 break;
                             case RegType.UINT:
                                 memoryRegister.funcGet       = (Func<uint>)get;
                                 memoryRegister.funcSet       = (Action<uint>)set;
                                 memoryRegister.funcGetCustom = (Func<uint>)getC;
-                                memoryRegister.funcSetCustom = (Func<uint>)setC;
                                 break;
                             case RegType.ULONG:
                                 memoryRegister.funcGet       = (Func<ulong>)get;
                                 memoryRegister.funcSet       = (Action<ulong>)set;
                                 memoryRegister.funcGetCustom = (Func<ulong>)getC;
-                                memoryRegister.funcSetCustom = (Func<ulong>)setC;
                                 break;
                             case RegType.BOOL:
                                 memoryRegister.funcGet       = (Func<bool>)get;
                                 memoryRegister.funcSet       = (Action<bool>)set;
                                 memoryRegister.funcGetCustom = (Func<bool>)getC;
-                                memoryRegister.funcSetCustom = (Func<bool>)setC;
                                 break;
                             case RegType.CHAR:
                                 memoryRegister.funcGet       = (Func<char>)get;
                                 memoryRegister.funcSet       = (Action<char>)set;
                                 memoryRegister.funcGetCustom = (Func<char>)getC;
-                                memoryRegister.funcSetCustom = (Func<char>)setC;
                                 break;
                             case RegType.STRING:
                                 memoryRegister.funcGet       = (Func<string>)get;
                                 memoryRegister.funcSet       = (Action<string>)set;
                                 memoryRegister.funcGetCustom = (Func<string>)getC;
-                                memoryRegister.funcSetCustom = (Func<string>)setC;
                                 break;
                         }
+                        
+                        memoryRegister.funcSetCustom = (Func<dynamic,dynamic>)setC;
 
                         // All register have this two functions
                         memoryRegister.funcSetString    = (Action<string>)setS;
@@ -209,6 +207,12 @@ namespace MTUComm.MemoryMap
                         // Add new object to collection where will be
                         // filtered to only recover modified registers
                         this.registersObjs.Add(xmlRegister.Id, memoryRegister);
+
+                        }
+                        catch ( Exception e )
+                        {
+                            Console.WriteLine ( "ERROR! " + e.Message + " " + e.InnerException );
+                        }
                     }
 
                 #endregion
@@ -446,8 +450,8 @@ namespace MTUComm.MemoryMap
             if ( memoryRegister.HasCustomMethod_Set )
             {
                 MethodInfo customMethod = this.GetType().GetMethod (
-                    memoryRegister.methodId_Set,
-                    new Type[] { typeof( MemoryRegister<T> ) } );
+                    memoryRegister.methodId_Set ); //,
+                    //new Type[] { typeof( MemoryRegister<T> ), typeof ( dynamic } );
 
                 // Method is not present in MTU family class
                 if ( customMethod == null )
@@ -458,9 +462,9 @@ namespace MTUComm.MemoryMap
                 }
 
                 base.AddMethod ( METHODS_SET_CUSTOM_PREFIX + memoryRegister.id,
-                    new Func<T>(() =>
+                    new Func<dynamic,dynamic>((_value) =>
                     {
-                        return ( T )customMethod.Invoke ( this, new object[] { memoryRegister } );
+                        return customMethod.Invoke ( this, new object[] { memoryRegister, _value } );
                     }));
             }
         }
@@ -816,27 +820,27 @@ namespace MTUComm.MemoryMap
                 switch ( Type.GetTypeCode ( typeof ( T ) ) )
                 {
                     case TypeCode.Int32:
-                        if ( ( RegType )register.type == RegType.INT )
+                        if ( ( RegType )register.valueType == RegType.INT )
                             changes.AddElement<int> ( register );
                         break;
                     case TypeCode.UInt32:
-                        if ( ( RegType )register.type == RegType.UINT )
+                        if ( ( RegType )register.valueType == RegType.UINT )
                             changes.AddElement<uint> ( register );
                         break;
                     case TypeCode.Int64:
-                        if ( ( RegType )register.type == RegType.ULONG )
+                        if ( ( RegType )register.valueType == RegType.ULONG )
                             changes.AddElement<ulong> ( register );
                         break;
                     case TypeCode.Boolean:
-                        if ( ( RegType )register.type == RegType.BOOL )
+                        if ( ( RegType )register.valueType == RegType.BOOL )
                             changes.AddElement<bool> ( register );
                         break;
                     case TypeCode.Char:
-                        if ( ( RegType )register.type == RegType.CHAR )
+                        if ( ( RegType )register.valueType == RegType.CHAR )
                             changes.AddElement<char> ( register );
                         break;
                     case TypeCode.String:
-                        if ( ( RegType )register.type == RegType.STRING )
+                        if ( ( RegType )register.valueType == RegType.STRING )
                             changes.AddElement<string> ( register );
                         break;
                 }
