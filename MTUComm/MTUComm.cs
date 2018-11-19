@@ -1,18 +1,20 @@
-using Xml;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Security.Cryptography;
-using System.Collections.Generic;
-using MTUComm.MemoryMap;
 using Lexi.Interfaces;
 using MTUComm.actions;
-using FIELD = MTUComm.actions.AddMtuForm.FIELD;
+using MTUComm.MemoryMap;
+using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
+using Xml;
 
 namespace MTUComm
 {
     public class MTUComm
     {
+        private const int DEFAULT_OVERLAP = 6;
+        private const int DEFAULT_LENGTH_AES = 16;
+
         /// <summary>
         ///
         /// </summary>
@@ -44,7 +46,7 @@ namespace MTUComm
         public delegate void BasicReadHandler(object sender, BasicReadArgs e);
         public event BasicReadHandler OnBasicRead;
 
-        private const int DEFAULT_OVERLAP = 6;
+        
 
 
         public MTUComm(ISerial serial, Configuration configuration)
@@ -260,8 +262,8 @@ namespace MTUComm
 
         private void AddMtuTask(dynamic form) // Parameter[] addMtuParams)
         {
-            /*List<Parameter> p = new List<Parameter>(addMtuParams);
-
+            /*
+            List<Parameter> p = new List<Parameter>(addMtuParams);
             Dictionary<FIELD, string[]> Texts = AddMtuForm.Texts;
             Parameter servicePortIdParam = p.FindByParamId(FIELD.SERVICE_PORT_ID, Texts);
             Parameter fieldOrderParam = p.FindByParamId(FIELD.FIELD_ORDER, Texts);
@@ -270,13 +272,16 @@ namespace MTUComm
             Parameter readIntervalParam = p.FindByParamId(FIELD.READ_INTERVAL, Texts);
             Parameter snapReadsParam = p.FindByParamId(FIELD.SNAP_READS, Texts);
             Parameter twoWayParam = p.FindByParamId(FIELD.TWO_WAY, Texts);
-            Parameter alarmsParam = p.FindByParamId(FIELD.ALARM, Texts);*/
+            Parameter alarmsParam = p.FindByParamId(FIELD.ALARM, Texts);
+            */
 
+            // Prepare memory map
             byte[] memory = new byte[400];
-            dynamic map = new MemoryMap31xx32xx(memory); // TODO: identify map by mtu type
+            dynamic map = new MemoryMap31xx32xx ( memory ); // TODO: identify map by mtu type
+
             // meter type
             map.P1MeterType = form.MeterNumber.getValue();
-            // P2MeterType;
+            // P2MeterType
 
             // service port id, account number
             map.P1MeterId = form.ServicePortId.getValue();
@@ -288,24 +293,20 @@ namespace MTUComm
             string timeUnit = readIntervalArray[1];
             int timeIntervalMins = Int32.Parse(readIntervalStr);
             if (timeUnit is "Hours")
-            {
                 timeIntervalMins = timeIntervalMins * 60;
-            }
 
-            map.ReadInterval = timeIntervalMins; // minutes
+            map.ReadInterval = timeIntervalMins; // In minutes
             // P2ReadInterval
 
             // overlap
-            // MessageOverlapCount
             map.MessageOverlapCount = 5;// DEFAULT_OVERLAP; // TODO: parse Alarm object and get Overlap
             // P2MessageOverlapCount
 
             // initial reading
-            // P1Reading
             map.P1Reading = 0;
             // P2Reading
 
-            // alarms // TODO: get alarms from Alarm object
+            // alarms
             Alarm alarms = (Alarm)form.Alarm.getValue();
             // P1ImmediateAlarm
             // P1UrgentAlarm
@@ -322,11 +323,10 @@ namespace MTUComm
             // P2TiltAlarm
             // P2InterfaceAlarm
 
-            // encryption key
-            // EncryptionKey
+            // Encryption key
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-            byte[] aesKey = new byte[16];
-            rng.GetBytes(aesKey);
+            byte[] aesKey = new byte[ DEFAULT_LENGTH_AES ];
+            rng.GetBytes ( aesKey );
             map.EncryptionKey = aesKey;
             // Encrypted
             // EncryptionIndex
@@ -426,9 +426,11 @@ namespace MTUComm
             //writeParam(268, memory, 4);
             */
 
+            // Write changes into MTU
             WriteModifiedRegisters(map);
-            AddMtuArgs args = new AddMtuArgs();
-            OnAddMtu(this, args);
+
+            AddMtuArgs args = new AddMtuArgs ();
+            OnAddMtu ( this, args );
         }
 
         public void NewAddMtu(Parameter[] p)
@@ -438,37 +440,9 @@ namespace MTUComm
 
         public void WriteModifiedRegisters(MemoryMap.MemoryMap map)
         {
-            var modifiedRegisters = map.GetModifiedRegisters();
-            List<MemoryRegister<int>> modifiedIntRegisters = modifiedRegisters.GetElements_Int();
-            foreach (var r in modifiedIntRegisters)
-            {
-                writeParam((uint)r.address, map.memory, (uint)r.size);
-            }
-            List<MemoryRegister<uint>> modifiedUIntRegisters = modifiedRegisters.GetElements_UInt();
-            foreach (var r in modifiedUIntRegisters)
-            {
-                writeParam((uint)r.address, map.memory, (uint)r.size);
-            }
-            List<MemoryRegister<ulong>> modifiedULongRegisters = modifiedRegisters.GetElements_ULong();
-            foreach (var r in modifiedULongRegisters)
-            {
-                writeParam((uint)r.address, map.memory, (uint)r.size);
-            }
-            List<MemoryRegister<bool>> modifiedBoolRegisters = modifiedRegisters.GetElements_Bool();
-            foreach (var r in modifiedBoolRegisters)
-            {
-                writeParam((uint)r.address, map.memory, (uint)r.size);
-            }
-            List<MemoryRegister<char>> modifiedCharRegisters = modifiedRegisters.GetElements_Char();
-            foreach (var r in modifiedCharRegisters)
-            {
-                writeParam((uint)r.address, map.memory, (uint)r.size);
-            }
-            List<MemoryRegister<string>> modifiedStringRegisters = modifiedRegisters.GetElements_String();
-            foreach (var r in modifiedStringRegisters)
-            {
-                writeParam((uint)r.address, map.memory, (uint)r.size);
-            }
+            List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
+            foreach ( dynamic r in modifiedRegisters )
+                this.writeParam((uint)r.address, map.memory, (uint)r.size);
         }
 
         public void writeParam(uint addr, byte[] memory, uint length)

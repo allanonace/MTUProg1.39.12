@@ -537,6 +537,7 @@ namespace aclara_meters.view
 
         private void ThreadProcedureMTUCOMMAction()
         {
+            // Create parameters with form fields content
             addMtuForm.AddParameter(FIELD.SERVICE_PORT_ID, servicePortId.Text);
             addMtuForm.AddParameter(FIELD.FIELD_ORDER, fieldOrder.Text);
             addMtuForm.AddParameter(FIELD.METER_NUMBER, meterNumber.Text);
@@ -545,19 +546,17 @@ namespace aclara_meters.view
             addMtuForm.AddParameter(FIELD.SNAP_READS, SliderMain.Value.ToString());
             addMtuForm.AddParameter(FIELD.TWO_WAY, pickerTwoWay.SelectedItem.ToString());
             addMtuForm.AddParameter(FIELD.ALARM, (Alarm)pickerAlarms.SelectedItem);
-      
-
-            Console.WriteLine(addMtuForm);
 
             //Create Ation when opening Form
             // TODO: usuario real
-            MTUComm.Action  add_mtu = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.AddMtu, user: "iker");
-            Parameter[] addMtuParams = addMtuForm.GetParameters();
-            foreach (var p in addMtuParams)
-            {
-                add_mtu.addParameter(p);
-            }
+            MTUComm.Action add_mtu = new MTUComm.Action ( 
+                config    : FormsApp.config,
+                serial    : FormsApp.ble_interface,
+                actiontype: MTUComm.Action.ActionType.AddMtu,
+                user      : "iker");
 
+            // Add parameters to the action
+            add_mtu.AddParameter ( addMtuForm );
 
             add_mtu.OnFinish += ((s, e) => {   
                 Console.WriteLine("Action Succefull");
@@ -612,7 +611,9 @@ namespace aclara_meters.view
                  Console.WriteLine(result.ToString());
 
              });
-            add_mtu.Run(addMtuForm);
+
+            // Launch the action!
+            add_mtu.Run ( addMtuForm );
              
         }
 

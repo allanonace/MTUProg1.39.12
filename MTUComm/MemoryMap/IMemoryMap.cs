@@ -124,9 +124,8 @@ namespace MTUComm.MemoryMap
             // Selected dynamic member exists
             if ( this.dictionary.ContainsKey ( id ) )
             {
-                // If value is type string ( form control content ) would always try to cast into MemoryString<string>
                 this.dictionary[id].Value = value;
-                this.dictionary[id].used = true;
+                this.dictionary[id].used  = true;
 
                 return true;
             }
@@ -150,8 +149,8 @@ namespace MTUComm.MemoryMap
                 if ( register.registerType == REGISTER_TYPE.REGISTER )
                 {
                     // Some registers have customized get method
-                    if ( ! register.HasCustomMethod )
-                         result = ( object )this.dictionary[ id ].Value;
+                    if ( ! register.HasCustomMethod_Get )
+                         result = ( object )this.dictionary[ id ].Value; // Invokes funGet method internally
                     else result = ( object )this.dictionary[ id ].funcGetCustom ();
                 }
                 else // Overload

@@ -126,6 +126,13 @@ namespace MTUComm
             mparameters.Add(parameter);
         }
 
+        public void AddParameter ( MtuForm form )
+        {
+            Parameter[] addMtuParams = form.GetParameters ();
+            foreach ( Parameter parameter in addMtuParams )
+                mparameters.Add (parameter);
+        }
+
         public void addActions(Action action)
         {
             sub_actions.Add(action);

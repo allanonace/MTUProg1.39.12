@@ -62,5 +62,18 @@ namespace MTUComm.MemoryMap
         {
             return this.dictionary[ RegType.STRING ];
         }
+
+        public List<dynamic> GetAllElements ()
+        {
+            List<dynamic> list = new List<dynamic> ();
+            list.AddRange ( this.dictionary[ RegType.INT    ] );
+            list.AddRange ( this.dictionary[ RegType.UINT   ] );
+            list.AddRange ( this.dictionary[ RegType.ULONG  ] );
+            list.AddRange ( this.dictionary[ RegType.BOOL   ] );
+            list.AddRange ( this.dictionary[ RegType.CHAR   ] );
+            list.AddRange ( this.dictionary[ RegType.STRING ] );
+
+            return list;
+        }
     }
 }
