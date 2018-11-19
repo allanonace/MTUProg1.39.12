@@ -138,10 +138,43 @@
                 
 
 
+                 <ListView Margin="0,0,0,-12" x:Name="listaMTUread" IsVisible="false" HasUnevenRows="true" SeparatorVisibility="None" SeparatorColor="#6aa2b8"  > 
+                  <ListView.ItemTemplate>
+                    <DataTemplate>
+                      <ViewCell >
+                               
+                            
+                         <StackLayout HeightRequest="{Binding Height}" IsVisible="{Binding isDisplayed}" Orientation="Vertical" >
 
+                             <StackLayout  IsVisible="{Binding isMeter}" >
+                                   <Label Text="{Binding Description}" Margin="14,4,0,0" VerticalOptions="Center"  
+
+                                          Font="Bold,20"/> 
+                                    <BoxView BackgroundColor="#7a868c" HeightRequest="1" Margin="8,-4,24,0" />
+                      
+                                    </StackLayout>
+                           
+                              <StackLayout IsVisible="{Binding isMTU}">       
+                                    <Label Text="{Binding Title}" Margin="14,0,0,0" VerticalOptions="Center" 
+                                           Font="Bold,20" />
+                                    <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" 
+                                           VerticalOptions="Center"/>
+
+                               </StackLayout>   
+
+                                            
+                         </StackLayout>
+
+
+
+                                
+                      </ViewCell>
+                    </DataTemplate>
+                  </ListView.ItemTemplate>
+                </ListView>
 
               
-               <StackLayout Orientation="Vertical" 
+               <StackLayout Orientation="Vertical"  x:Name="ReadMTUChangeView" IsVisible="true"
                             VerticalOptions="FillAndExpand"
                             HorizontalOptions="FillAndExpand">
 
@@ -165,7 +198,7 @@
 
                         
 
-                    <StackLayout  Margin="0,0,0,0"  >
+                    <StackLayout Margin="0,0,0,0"  >
                        
                         <Grid Margin="0,0,0,0"   HeightRequest="48" >
                   
@@ -319,7 +352,7 @@
 
 
 
-                            <StackLayout Margin="0,0,0,0">
+                            <StackLayout IsVisible="true" Margin="0,0,0,0">
 
 
                                   <StackLayout x:Name="port1view" IsVisible="true" Margin="12,0,12,0"> 
@@ -328,21 +361,6 @@
                                    <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
 
 
-                                    <Label Text="Initial read" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
-                                             />
-                                        
-                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        
-                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="initialRead" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                Placeholder="" PlaceholderColor="#7a868c" 
-                                                                FontSize="17" HorizontalTextAlignment="Start"/>
-                                                    </StackLayout>
-                                             </Frame> 
-                                        
-                                    </Frame>
 
                                     
                                           
@@ -419,6 +437,27 @@
 
                                   </StackLayout>
 
+
+
+
+
+                                    <Label Text="Initial read" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                        
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="initialRead" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+
+                                    
                                    <!--  Read Inverval -->
 
 
@@ -566,21 +605,7 @@
                                    <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
 
 
-                                     <Label Text="Initial read" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
-                                             />
-                                        
-                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        
-                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="initialRead2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                Placeholder="" PlaceholderColor="#7a868c" 
-                                                                FontSize="17" HorizontalTextAlignment="Start"/>
-                                                    </StackLayout>
-                                             </Frame> 
-                                        
-                                    </Frame>
+                                    
 
 
                                     
@@ -655,6 +680,24 @@
 
                                   </StackLayout>
 
+
+
+                                     <Label Text="Initial read" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                             />
+                                        
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="initialRead2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                        
+                                    </Frame>
+                                    
                                    <!--  Read Inverval -->
 
 
@@ -1411,7 +1454,7 @@
                                   Margin="0" Opacity="1">
                  
                   <Label IsVisible="true" 
-                            Margin="16,16,0,4" FontSize="20" TextColor="#6aa2b8" Text="PORT 1:"  />
+                            Margin="16,16,0,4" FontSize="20" TextColor="#6aa2b8" Text="PORT *:"  />
                            
                     
 
@@ -1454,7 +1497,7 @@
                          </Frame> 
                         
                      <Button IsVisible="true"  
-                             x:Name="submit_dialog" Margin="-2,0,-2,0" Text="SUBMIT" WidthRequest="320"  BorderWidth="1"  
+                             x:Name="submit_dialog" Margin="-2,0,-2,-2" Text="SUBMIT" WidthRequest="320"  BorderWidth="1"  
                              CornerRadius="0" FontSize="18" BorderColor="Gray" TextColor="White" BackgroundColor="#6aa2b8">  </Button>    
 
                      </StackLayout>

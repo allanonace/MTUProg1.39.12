@@ -19,6 +19,7 @@ using System.Xml.Serialization;
 using System.IO;
 using MTUComm;
 using Xml;
+using System.Threading;
 
 namespace aclara_meters.view
 {
@@ -224,6 +225,9 @@ namespace aclara_meters.view
     
         private List<string> demandListPort1;
         private List<string> demandListPort2;
+
+
+        private List<ReadMTUItem> FinalReadListView { get; set; }
 
 
         public AclaraViewAddMTU()
@@ -540,23 +544,201 @@ namespace aclara_meters.view
             if (!_userTapped)
             {
 
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    backdark_bg.IsVisible = true;
-                    indicator.IsVisible = true;
-                    label_read.Text = "Writing to MTU ... ";
-                    _userTapped = true;
-                    background_scan_page.IsEnabled = false;
-                    ChangeLowerButtonImage(true);
-                });
+               Task.Delay(100).ContinueWith(t =>
+
+               Device.BeginInvokeOnMainThread(() =>
+               {
+                   backdark_bg.IsVisible = true;
+                   indicator.IsVisible = true;
+                   _userTapped = true;
+                   background_scan_page.IsEnabled = false;
+                   ChangeLowerButtonImage(true);
+
+       
+                   Task.Delay(1000).ContinueWith(t0 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtuShortTime, 5);
+                   }));
+
+                   Task.Delay(2000).ContinueWith(t1 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtuShortTime, 4);
+                   }));
+
+                   Task.Delay(3000).ContinueWith(t2 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtuShortTime, 3);
+                   }));
+
+                   Task.Delay(4000).ContinueWith(t3 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtuShortTime, 2);
+                   }));
+
+                   Task.Delay(5000).ContinueWith(t4 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtuShortTime, 1);
+                   }));
+
+                   Task.Delay(6000).ContinueWith(t5 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.PreparingToProgram, 0);
+                   }));
+
+                   Task.Delay(7000).ContinueWith(t6 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.TurningOffMtu, 0);
+                   }));
+
+                   Task.Delay(8000).ContinueWith(t7 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.ReadingMtuAgain, 0);
+                   }));
+
+                   Task.Delay(9000).ContinueWith(t8 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 20);
+                   }));
+
+                   Task.Delay(10000).ContinueWith(t9 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                       label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 19);
+                   }));
+
+                   Task.Delay(11000).ContinueWith(t10 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                       label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 18);
+                   }));
+
+                   Task.Delay(12000).ContinueWith(t11 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                       label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 17);
+                   }));
+
+                   Task.Delay(13000).ContinueWith(t12 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtu, 0);
+                   }));
+
+                   Task.Delay(14000).ContinueWith(t13 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.VerifyingMtuData, 0);
+                   }));
 
 
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    ThreadProcedureMTUCOMMAction();
-                });
+                   Task.Delay(15000).ContinueWith(t14 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                       label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 20);
+                   }));
 
-          
+                   Task.Delay(16000).ContinueWith(t15 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                       label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 19);
+                   }));
+
+                   Task.Delay(17000).ContinueWith(t16 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                       label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 18);
+                   }));
+
+                   Task.Delay(18000).ContinueWith(t17 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                       label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 17);
+                   }));
+
+                   Task.Delay(19000).ContinueWith(t18 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.TurningOnMtu, 0);
+                   }));
+
+                   Task.Delay(20000).ContinueWith(t17 =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                        label_read.Text = GetStringFromMTUStatus(MTUStatus.ReadingMtu, 0);
+
+                        //ThreadProcedureMTUCOMMAction();
+                        FinalReadListView = new List<ReadMTUItem>();
+
+
+                        FinalReadListView.Add(new ReadMTUItem()
+                        {
+                            Title = "Param Field" + ":",
+                            isDisplayed = "true",
+                            Height = "64",
+                            isMTU = "true",
+                            isMeter = "false",
+                            Description = "99" //parameter.Value
+                        });
+
+                        FinalReadListView.Add(new ReadMTUItem()
+                        {
+                            Title = "Here lies the Port title...",
+                            isDisplayed = "true",
+                            Height = "40",
+                            isMTU = "false",
+                            isMeter = "true",
+                            Description = "Port " + "99" + ": " + " PlaceHolder"
+                        });
+
+                        FinalReadListView.Add(new ReadMTUItem()
+                        {
+                            Title = "\t\t\t\t\t" + "Param Field" + ":",
+                            isDisplayed = "true",
+                            Height = "64",
+                            isMTU = "true",
+                            isMeter = "false",
+                            Description = "\t\t\t\t\t" + "99"//parameter.Value
+                        });
+
+
+                        FinalReadListView.Add(new ReadMTUItem()
+                        {
+                            Title = "Another Param Field" + ":",
+                            isDisplayed = "true",
+                            Height = "64",
+                            isMTU = "true",
+                            isMeter = "false",
+                            Description = "99" //parameter.Value
+                        });
+
+
+                        ReadMTUChangeView.IsVisible = false;
+                        listaMTUread.IsVisible = true;
+                        listaMTUread.ItemsSource = FinalReadListView;
+
+                        Task.Run(() =>
+                        {
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                label_read.Opacity = 1;
+                                backdark_bg.IsVisible = false;
+                                indicator.IsVisible = false;
+                                _userTapped = false;
+                                ChangeLowerButtonImage(false);
+                                background_scan_page.IsEnabled = true;
+                            });
+                        });
+                   }));
+               }));
             }
         }
 
@@ -635,6 +817,111 @@ namespace aclara_meters.view
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
             submit_dialog.Clicked += submit_send;
+
+            listaMTUread.IsVisible = false;
+
+
+
+            Task.Delay(100).ContinueWith(t =>
+
+              Device.BeginInvokeOnMainThread(() =>
+              {
+                  backdark_bg.IsVisible = true;
+                  indicator.IsVisible = true;
+                  background_scan_page.IsEnabled = false;
+
+                  Task.Delay(1000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.ReadingMtuShortTime, 5);
+                  }));
+
+                  Task.Delay(2000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.ReadingMtuShortTime, 4);
+                  }));
+
+                  Task.Delay(3000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.ReadingMtuShortTime, 3);
+                  }));
+
+
+                  Task.Delay(4000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.ReadingMtuShortTime, 2);
+                  }));
+
+                  Task.Delay(5000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.ReadingMtuShortTime, 1);
+                  }));
+
+                  Task.Delay(6000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.ReadingMtuData, 1);
+                  }));
+
+                  Task.Delay(7000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.Autodetect, 1);
+                  }));
+
+
+                  Task.Delay(8000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderLongTime, 50);
+                  }));
+
+                  Task.Delay(9000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderLongTime, 49);
+                  }));
+
+                  Task.Delay(10000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderLongTime, 48);
+                  }));
+
+                  Task.Delay(11000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderLongTime, 47);
+                  }));
+
+
+                  Task.Delay(12000).ContinueWith(t0 =>
+                  Device.BeginInvokeOnMainThread(() =>
+                  {
+                      label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderLongTime, 46);
+                      Task.Run(() =>
+                      {
+                          Device.BeginInvokeOnMainThread(() =>
+                          {
+                              label_read.Opacity = 1;
+                              backdark_bg.IsVisible = false;
+                              indicator.IsVisible = false;
+                              background_scan_page.IsEnabled = true;
+                              label_read.Text = "Press Button to Start";
+                          });
+                      });
+
+                  }));
+
+              }
+                                             
+            ));
+
+
         }
 
         private void submit_send(object sender, EventArgs e)
@@ -671,14 +958,159 @@ namespace aclara_meters.view
                 Console.WriteLine("Press Key to Exit");
                 //Console.WriteLine(s.ToString());
 
+                /*
                 foreach(Parameter param in e.Result.getParameters()){
                     Console.WriteLine(param.getLogDisplay() + ":" + param.getValue());
                 }
+
+                */
+
+                FinalReadListView = new List<ReadMTUItem>(); // Saves the data to view
+    
+                Parameter[] paramResult = e.Result.getParameters();
+
+                int mtu_type = 0;
+
+                foreach (Parameter p in paramResult)
+                {
+                    try
+                    {
+                        if (p.CustomParameter.Equals("MtuType"))
+                        {
+                            mtu_type = Int32.Parse(p.Value.ToString());
+                        }
+
+                    }
+                    catch (Exception e5)
+                    {
+                        Console.WriteLine(e5.StackTrace);
+                    }
+
+                }
+
+
+                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, "ReadMTU");
+
+                foreach (InterfaceParameters parameter in interfacesParams)
+                {
+                   
+                    if (parameter.Name.Equals("Port"))
+                    {
+
+
+
+                        ActionResult[] ports = e.Result.getPorts(); //parameter.Parameters.ToArray()
+
+
+                        for (int i = 0; i < ports.Length; i++)
+                        {
+
+                            foreach (InterfaceParameters port_parameter in parameter.Parameters)
+                            {
+
+                                Parameter param = null;
+
+                                if (port_parameter.Name.Equals("Description"))
+                                {
+                                    param = ports[i].getParameterByTag(port_parameter.Name);
+
+                                    FinalReadListView.Add(new ReadMTUItem()
+                                    {
+                                        Title = "Here lies the Port title...",
+                                        isDisplayed = "true",
+                                        Height = "40",
+                                        isMTU = "false",
+                                        isMeter = "true",
+                                        Description = "Port " + i + ": " + param.getValue() //parameter.Value
+                                    });
+
+                                }
+                                else
+                                {
+
+                                    if (port_parameter.Source != null)
+                                    {
+                                        try
+                                        {
+                                            param = ports[i].getParameterByTag(port_parameter.Source.Split(new char[] { '.' })[1]);
+                                        }
+                                        catch (Exception e2)
+                                        {
+                                            Console.WriteLine(e2.StackTrace);
+                                        }
+
+                                    }
+                                    if (param == null)
+                                    {
+                                        param = ports[i].getParameterByTag(port_parameter.Name);
+                                    }
+
+                                    if (param != null)
+                                    {
+
+
+                                        FinalReadListView.Add(new ReadMTUItem()
+                                        {
+                                            Title = "\t\t\t\t\t" + param.getLogDisplay() + ":",
+                                            isDisplayed = "true",
+                                            Height = "64",
+                                            isMTU = "true",
+                                            isMeter = "false",
+                                            Description = "\t\t\t\t\t" + param.getValue() //parameter.Value
+                                        });
+                                    }
+                                }
+                            }
+                        }
+
+
+                    }
+                    else
+                    {
+
+                        Parameter param = null;
+
+                        if (parameter.Source != null)
+                        {
+                            try
+                            {
+                                param = e.Result.getParameterByTag(parameter.Source.Split(new char[] { '.' })[1]);
+                            }
+                            catch (Exception e3)
+                            {
+                                Console.WriteLine(e3.StackTrace); //{System.IndexOutOfRangeException: Index was outside the bounds of the array.t aclara_meters.view.AclaraViewReadMTU.< ThreadProcedureMTUCOMMAction > b__19_0(System.Object s, MTUComm.Action + ActionFinishArgs e)[0x0031d] in / Users / ma.jimenez / Desktop / Proyectos / proyecto_aclara / aclara_meters / view / AclaraViewReadMTU.xaml.cs:385 }
+                            }
+
+                        }
+                        if (param == null)
+                        {
+                            param = e.Result.getParameterByTag(parameter.Name);
+                        }
+
+                        if (param != null)
+                        {
+
+                            FinalReadListView.Add(new ReadMTUItem()
+                            {
+                                Title = param.getLogDisplay() + ":",
+                                isDisplayed = "true",
+                                Height = "64",
+                                isMTU = "true",
+                                isMeter = "false",
+                                Description = param.Value //parameter.Value
+                            });
+                        }
+
+                    }
+                }
+
+
 
 
                 Task.Delay(100).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
+                    
                     _userTapped = false;
                     bg_read_mtu_button.NumberOfTapsRequired = 1;
                     ChangeLowerButtonImage(false);
@@ -686,7 +1118,14 @@ namespace aclara_meters.view
                     indicator.IsVisible = false;
                     label_read.Text = "Successful MTU write";
                     background_scan_page.IsEnabled = true;
-                }));
+
+                    /*
+                    ReadMTUChangeView.IsVisible = false;
+                    listaMTUread.IsVisible = true;
+                    listaMTUread.ItemsSource = FinalReadListView;
+                    */
+
+                    }));
 
 
 
