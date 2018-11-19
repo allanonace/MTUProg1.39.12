@@ -180,8 +180,8 @@
            
                                <Label HorizontalTextAlignment="Center" FontSize="16" WidthRequest="358" HeightRequest="22" Text="Copyright © 2018 Aclara Technologies LLC."></Label>
                                <Label HorizontalTextAlignment="Center" FontSize="16" WidthRequest="358"  HeightRequest="22" Text="System tech Support: 1-866-205-5058"></Label>
-                               <Label HorizontalTextAlignment="Center" FontSize="16" WidthRequest="358" HeightRequest="22"  Text="Application Version: 2.2.7.0"></Label>
-                               <Label HorizontalTextAlignment="Center" FontSize="16" WidthRequest="358"  HeightRequest="22" Text="Licensed to: MOAW Panasonic Toughbook"></Label>
+                               <Label HorizontalTextAlignment="Center" FontSize="16" WidthRequest="358" HeightRequest="22"  Text="Application Version: 1.20.0.0"></Label>
+                               <Label HorizontalTextAlignment="Center" FontSize="16" WidthRequest="358"  HeightRequest="22" Text="Licensed to: ************************"></Label>
                                         
                           </StackLayout>
 

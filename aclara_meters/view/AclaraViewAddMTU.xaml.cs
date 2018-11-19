@@ -1177,7 +1177,6 @@ namespace aclara_meters.view
             //mtuData
             Mtu mtu = FormsApp.config.GetMtuTypeById(138);
 
-
             WorkOrderRecording = globalData.WorkOrderRecording;
             AccountDualEntry = globalData.AccountDualEntry;
             WorkOrderDualEntry = globalData.WorkOrderDualEntry;
@@ -2142,17 +2141,25 @@ namespace aclara_meters.view
             Console.WriteLine("Elemento Picker : " + j);
 
             vendor = vendors[j];
+
+            models = null;
+
             models = meterTypes.GetModelsByVendorFromMeters(meterTypes.Meters, vendor);
+            name = "";
 
             try
             {
+                MeterModelPicker.ItemsSource = null;
                 MeterModelPicker.ItemsSource = models;
+
+
 
                 EntriesStackLayout.Children[1].IsVisible = true;
                 EntriesStackLayout.Children[2].IsVisible = false;
             }
             catch (Exception e3)
             {
+                MeterModelPicker.ItemsSource = null;
                 EntriesStackLayout.Children[1].IsVisible = false;
                 EntriesStackLayout.Children[2].IsVisible = false;
                 Console.WriteLine(e3.StackTrace);
@@ -2165,6 +2172,8 @@ namespace aclara_meters.view
         private void PickerMarcas_SelectedIndexChanged2(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
+            if (j == -1)
+                return;
             Console.WriteLine("Elemento Picker : " + j);
             // TODO: change MeterModelPicker2
         }
@@ -2173,6 +2182,10 @@ namespace aclara_meters.view
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + j);
+
+            if (j == -1)
+                return;
+            
             Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
             name = selectedMeter.Display;
             try
@@ -2192,6 +2205,11 @@ namespace aclara_meters.view
             int j = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + j);
 
+
+            if (j == -1)
+                return;
+
+
             List<string> itemsColores = (List<string>)((BorderlessPicker)sender).ItemsSource;
 
 
@@ -2210,15 +2228,26 @@ namespace aclara_meters.view
 
         private void PickerModelos_SelectedIndexChanged(object sender, EventArgs e)
         {
+          
             int i = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + i);
+            if (i == -1)
+                return;
             
+                
             MeterNamePicker.ItemDisplayBinding = new Binding("Display");
+
+          
             model = models[i];
+            
+          
             List<Meter> meterlist = meterTypes.GetMetersByModelAndVendorFromMeters(meterTypes.Meters, vendor, model);
 
             try
             {
+
+                MeterNamePicker.ItemsSource = null;
+
                 MeterNamePicker.ItemsSource = meterlist;
 
                 EntriesStackLayout.Children[2].IsVisible = true;
@@ -2226,6 +2255,7 @@ namespace aclara_meters.view
             }
             catch (Exception e3)
             {
+                MeterNamePicker.ItemsSource = null;
                 MeterNamePicker.ItemsSource = meterlist;
                 EntriesStackLayout.Children[1].IsVisible = false;
                 EntriesStackLayout.Children[2].IsVisible = false;
@@ -2239,6 +2269,8 @@ namespace aclara_meters.view
         {
             int i = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + i);
+            if (i == -1)
+                return;
             List<string> valores = (List<string>)((BorderlessPicker)sender).ItemsSource;
         }
 

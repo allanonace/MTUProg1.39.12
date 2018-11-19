@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using Xamarin.Forms;
 
 namespace aclara_meters.Behaviors
@@ -23,13 +23,25 @@ namespace aclara_meters.Behaviors
         {
             var entry = (BorderlessEntry)sender;
 
-            if (entry.Text != null && entry.Text.Length > this.MaxLength)
+
+            if (!string.IsNullOrWhiteSpace(e.NewTextValue))
             {
-                string entryText = entry.Text;
-                entry.TextChanged -= OnEntryTextChanged;
-                entry.Text = e.OldTextValue;
-                entry.TextChanged += OnEntryTextChanged;
+                bool isValid = e.NewTextValue.ToCharArray().All(x => char.IsDigit(x)); //Make sure all characters are numbers
+
+                ((BorderlessEntry)sender).Text = isValid ? e.NewTextValue : e.NewTextValue.Remove(e.NewTextValue.Length - 1);
+
+                if(isValid)
+                {
+                    if (entry.Text != null && entry.Text.Length > this.MaxLength)
+                    {
+                        string entryText = entry.Text;
+                        entry.TextChanged -= OnEntryTextChanged;
+                        entry.Text = e.OldTextValue;
+                        entry.TextChanged += OnEntryTextChanged;
+                    }
+                }
             }
+
         }
     }
 }
