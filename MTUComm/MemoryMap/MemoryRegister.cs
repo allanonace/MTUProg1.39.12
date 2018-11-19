@@ -128,8 +128,9 @@ namespace MTUComm.MemoryMap
                          ! string.IsNullOrEmpty ( this.custom_Set ); }
         }
 
-        // - MemoryRegister.Value{set}
+        // - MemoryMap.CreateProperty_Set<T>
         // - MemoryRegister{Constructor}
+        // - MemoryRegister.Value{set}
         public bool HasCustomMethod_Set
         {
             get { return this.customType_Set == CUSTOM_TYPE.METHOD; }

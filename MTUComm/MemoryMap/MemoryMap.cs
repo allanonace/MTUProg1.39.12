@@ -480,7 +480,7 @@ namespace MTUComm.MemoryMap
 
         public void CreateProperty_Set_ByteArray<T> ( MemoryRegister<T> regObj )
         {
-            base.AddMethod ( METHODS_SET_STRING_PREFIX + regObj.id,
+            base.AddMethod ( METHODS_SET_BYTE_PREFIX + regObj.id,
                 new Action<byte[]>((_value) =>
                 {
                     this.SetByteArrayToMem ( _value, regObj.address, regObj.size );
