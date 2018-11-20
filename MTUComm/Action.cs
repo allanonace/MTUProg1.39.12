@@ -379,29 +379,34 @@ namespace MTUComm
                                 {
                                     parameter.Source = "";
                                 }
+                                string val = null;
+                                string property_type = parameter.Source.Split(new char[] { '.' })[0];
+                                string property_name = parameter.Source.Split(new char[] { '.' })[1];
+                                string name = parameter.Name;
 
-                                switch (parameter.Source.Split(new char[] { '.' })[0])
+                                switch (property_type)
                                 {
                                     case "PortType":
-                                        string port_property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, PortType.GetProperty(port_property_name)));
+                                        val = PortType.GetProperty(property_name);
                                         break;
                                     case "MeterType":
-                                        string meter_property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, Metertype.GetProperty(meter_property_name)));
+                                        val = Metertype.GetProperty(property_name);
                                         break;
                                     case "MtuType":
-                                        string mtu_property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, mtutype.GetProperty(mtu_property_name)));
+                                        val = mtutype.GetProperty(property_name);
                                         break;
                                     case "MemoryMap":
-                                        string memory_alt_property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                        result.AddParameter(new Parameter(memory_alt_property_name, parameter.Display, registers.GetProperty("P" + (portnumber + 1) + memory_alt_property_name).Value.ToString()));
+                                        val = registers.GetProperty("P" + (portnumber + 1) + property_name).Value.ToString();
+                                        name = property_name;
                                         break;
                                     default:
-                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty("P"+ (portnumber + 1) + parameter.Name).Value.ToString()));
+                                        val = registers.GetProperty("P" + (portnumber + 1) + parameter.Name).Value.ToString();
                                         break;
 
+                                }
+                                if (!string.IsNullOrEmpty(val))
+                                {
+                                    result.AddParameter(new Parameter(name, parameter.Display, val));
                                 }
 
                             }
