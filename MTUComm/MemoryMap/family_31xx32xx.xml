@@ -192,6 +192,36 @@
     <CustomSet/>
   </Register>
   <Register>
+    <Id>Frequency1Way</Id>
+    <Description>MTU Id</Description>
+    <Type>int</Type>
+    <Address>10</Address>
+    <Size>4</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>Frequency2WayTx</Id>
+    <Description>MTU Id</Description>
+    <Type>int</Type>
+    <Address>14</Address>
+    <Size>4</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>Frequency2WayRx</Id>
+    <Description>MTU Id</Description>
+    <Type>int</Type>
+    <Address>18</Address>
+    <Size>4</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
     <Id>Shipbit</Id>
     <Description>System flags - Shipbit</Description>
     <Type>bool</Type>
