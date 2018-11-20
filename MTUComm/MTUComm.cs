@@ -351,7 +351,7 @@ namespace MTUComm
             Mtu mtu = form.mtu;
             // Prepare memory map
             byte[] memory = new byte[400];
-            dynamic map = new MemoryMap31xx32xx ( memory ); // TODO: identify map by mtu type
+            dynamic map = new MemoryMap.MemoryMap ( memory, "31xx32xx" ); // TODO: identify map by mtu type
 
             // meter type
             map.P1MeterType = form.MeterNumber.getValue();

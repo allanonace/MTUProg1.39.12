@@ -91,7 +91,7 @@
     <Custom/>
   </Register>
   <Register>
-    <Id>P1PciAlarm</Id>
+    <Id>P1InterfaceAlarm</Id>
     <Description>P1 mode - PCI alarm</Description>
     <Type>bool</Type>
     <Address>42</Address>
@@ -422,7 +422,7 @@
     <Description>Interface TamperS tatus</Description>
 	<Type>string</Type>
     <Registers>
-      <Register>P1PciAlarm</Register>
+      <Register>P1InterfaceAlarm</Register>
 	  <Register>ProgrammingCoilInterfaceTamper</Register>
     </Registers>
     <Custom>method</Custom>

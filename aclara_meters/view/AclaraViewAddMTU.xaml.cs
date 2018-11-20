@@ -759,7 +759,7 @@ namespace aclara_meters.view
         {
             /*// TEST
             byte[] memory = new byte[400];
-            dynamic map = new MTUComm.MemoryMap.MemoryMap31xx32xx(memory); // TODO: identify map by mtu type
+            dynamic map = new MTUComm.MemoryMap.MemoryMap(memory, "31xx32xx"); // TODO: identify map by mtu type
             map.ReadInterval = "24 Hours";
             map.MessageOverlapCount = 5;
             map.P1Reading = 0;

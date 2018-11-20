@@ -88,6 +88,7 @@ namespace Xml
         [XmlElement("Flow")]
         public int Flow { get; set; }
 
+        [XmlIgnore]
         public string NumberOfDials {
             get {
                 Match match = Regex.Match(this.Display,
@@ -98,10 +99,11 @@ namespace Xml
                 {
                     return match.Groups[2].Value;
                 }
-                return null;
+                return string.Empty;
             }
         }
 
+        [XmlIgnore]
         public string DriveDialSize
         {
             get
@@ -114,10 +116,11 @@ namespace Xml
                 {
                     return match.Groups[3].Value;
                 }
-                return null;
+                return string.Empty;
             }
         }
 
+        [XmlIgnore]
         public string UnitOfMeasure
         {
             get
@@ -130,7 +133,7 @@ namespace Xml
                 {
                     return match.Groups[4].Value;
                 }
-                return null;
+                return string.Empty;
             }
         }
 

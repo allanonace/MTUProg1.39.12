@@ -211,7 +211,7 @@ namespace MTUComm.MemoryMap
                         }
                         catch ( Exception e )
                         {
-                            Console.WriteLine ( "ERROR! " + e.Message + " " + e.InnerException );
+                            Console.WriteLine ( "ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException );
                         }
                     }
 
@@ -854,7 +854,8 @@ namespace MTUComm.MemoryMap
         }
 
         #endregion
-        #region CommonmeThods
+
+        #region Overloads
 
         public string DailySnap_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
@@ -928,10 +929,76 @@ namespace MTUComm.MemoryMap
 
             return translateErrorCodes(MemoryRegisters.P2ReadingErrorCode.Value);
         }
+
+        public string InterfaceTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1InterfaceAlarm.Value, MemoryRegisters.ProgrammingCoilInterfaceTamper.Value);
+        }
+
+        public string TiltTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1TiltAlarm.Value, MemoryRegisters.TiltTamper.Value);
+        }
+
+        public string MagneticTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1MagneticAlarm.Value, MemoryRegisters.MagneticTamper.Value);
+        }
+
+        public string RegisterCoverTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1RegisterCoverAlarm.Value, MemoryRegisters.RegisterCoverTamper.Value);
+        }
+
+        public string ReverseFlowTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetTemperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
+        }
+
+        #endregion
+
+        #region Registers GET
+
+        public string F12WAYRegister1_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return "0x" + MemoryRegisters.F12WAYRegister1Int.Value.ToString("X8");
+        }
+
+        public string F12WAYRegister10_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return "0x" + MemoryRegisters.F12WAYRegister10Int.Value.ToString("X8");
+        }
+
+        public string F12WAYRegister14_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return "0x" + MemoryRegisters.F12WAYRegister14Int.Value.ToString("X8");
+        }
+
+        #endregion
+
+        #region Registers SET
+
+        public int ReadIntervalMinutes_Logic(MemoryRegister<int> MemoryRegister, dynamic inputValue)
+        {
+            string[] readIntervalArray = ((string)inputValue).Split(' ');
+            string readIntervalStr = readIntervalArray[0];
+            string timeUnit = readIntervalArray[1];
+            int timeIntervalMins = Int32.Parse(readIntervalStr);
+
+            if (timeUnit is "Hours")
+                timeIntervalMins = timeIntervalMins * 60;
+
+            return timeIntervalMins;
+        }
+
         #endregion
 
         #region AuxiliaryFunctions
-
 
         private string translateErrorCodes(int encoderErrorcode)
         {
@@ -999,51 +1066,9 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        public string InterfaceTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
-        {
+        #endregion
 
-            return GetTemperStatus(MemoryRegisters.P1PciAlarm.Value, MemoryRegisters.ProgrammingCoilInterfaceTamper.Value);
-        }
-
-        public string TiltTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
-        {
-
-            return GetTemperStatus(MemoryRegisters.P1TiltAlarm.Value, MemoryRegisters.TiltTamper.Value);
-        }
-
-        public string MagneticTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
-        {
-
-            return GetTemperStatus(MemoryRegisters.P1MagneticAlarm.Value, MemoryRegisters.MagneticTamper.Value);
-        }
-
-        public string RegisterCoverTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
-        {
-
-            return GetTemperStatus(MemoryRegisters.P1RegisterCoverAlarm.Value, MemoryRegisters.RegisterCoverTamper.Value);
-        }
-
-        public string ReverseFlowTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
-        {
-
-            return GetTemperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
-        }
-
-        public string F12WAYRegister1_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
-        {
-            return "0x" + MemoryRegisters.F12WAYRegister1Int.Value.ToString("X8");
-        }
-
-        public string F12WAYRegister10_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
-        {
-            return "0x" + MemoryRegisters.F12WAYRegister10Int.Value.ToString("X8");
-        }
-
-        public string F12WAYRegister14_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
-        {
-            return "0x" + MemoryRegisters.F12WAYRegister14Int.Value.ToString("X8");
-        }
-
+        #region e-Coder
 
         public string BackFlowState_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
@@ -1063,7 +1088,6 @@ namespace MTUComm.MemoryMap
             }
             return reply;
         }
-
 
         public string DaysOfNoFlow_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {

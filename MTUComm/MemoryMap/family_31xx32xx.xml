@@ -1,49 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Registers>
   <Overload>
-    <Id>Overload_Operation</Id>
-    <Type>int</Type>
-    <Description>Overload field test description</Description>
-    <Registers>
-      <Register>MtuType</Register>
-      <Register>DailyRead</Register>
-    </Registers>
-    <Custom>_1_ + _2_</Custom>
-  </Overload>
-  <Overload>
-    <Id>Overload_Method</Id>
-    <Type>int</Type>
-    <Description>Overload field test description</Description>
-    <Registers>
-      <Register>MtuType</Register>
-      <Register>Shipbit</Register>
-      <Register>DailyRead</Register>
-    </Registers>
-    <Custom>method</Custom>
-  </Overload>
-  <Overload>
-    <Id>Overload_Method_Reuse</Id>
-    <Type>int</Type>
-    <Description>Overload field test description</Description>
-    <Registers>
-      <Register>MtuType</Register>
-      <Register>Shipbit</Register>
-      <Register>DailyRead</Register>
-    </Registers>
-    <Custom>method:Method_reuse</Custom>
-  </Overload>
-  <Overload>
-    <Id>Overload_Method_Array</Id>
-    <Type>int</Type>
-    <Description>Overload field test description</Description>
-    <Registers>
-      <Register>MtuType</Register>
-      <Register>Shipbit</Register>
-      <Register>DailyRead</Register>
-    </Registers>
-    <Custom>method</Custom>
-  </Overload>
-  <Overload>
     <Id>MtuStatus</Id>
     <Description>Mtu Status</Description>
     <Type>string</Type>
@@ -114,7 +71,7 @@
     <Description>Interface TamperS tatus</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P1PciAlarm</Register>
+      <Register>P1InterfaceAlarm</Register>
       <Register>ProgrammingCoilInterfaceTamper</Register>
     </Registers>
     <Custom>method</Custom>
@@ -241,7 +198,7 @@
     <Address>22</Address>
     <Size>0</Size>
     <Write>true</Write>
-    <CustomGet>method</CustomGet>
+    <CustomGet/>
     <CustomSet/>
   </Register>
   <Register>
@@ -251,7 +208,7 @@
     <Address>198</Address>
     <Size>1</Size>
     <Write>true</Write>
-    <CustomGet>method</CustomGet>
+    <CustomGet/>
     <CustomSet/>
   </Register>
   <Register>
@@ -506,28 +463,6 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>P1Reading</Id>
-    <Description>P1 Reading</Description>
-    <Type>int</Type>
-    <Address>96</Address>
-    <Size>6</Size>
-    <Write>false</Write>
-    <!-- NO SE -->
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register>
-    <Id>P2Reading</Id>
-    <Description>P2 Reading</Description>
-    <Type>int</Type>
-    <Address>104</Address>
-    <Size>6</Size>
-    <Write>false</Write>
-    <!-- NO SE -->
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register>
     <Id>P1ReadingErrorCode</Id>
     <Description>P1 Reading Error Code</Description>
     <Type>int</Type>
@@ -668,16 +603,6 @@
     <Write>false</Write>
     <!-- NO SE -->
     <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register>
-    <Id>DailySnap</Id>
-    <Description>DailySnap</Description>
-    <Type>string</Type>
-    <Address>198</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet>method</CustomGet>
     <CustomSet/>
   </Register>
   <Register>
