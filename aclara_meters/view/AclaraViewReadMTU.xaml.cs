@@ -311,12 +311,13 @@ namespace aclara_meters.view
 
                                         FinalReadListView.Add(new ReadMTUItem()
                                         {
-                                            Title = "\t\t\t\t\t" + param.getLogDisplay() + ":",
+                                            Title = param.getLogDisplay() + ":",
                                             isDisplayed = "true",
-                                            Height = "64",
-                                            isMTU = "true",
+                                            Height = "70",
+                                            isMTU = "false",
+                                            isDetailMeter = "true",
                                             isMeter = "false",
-                                            Description = "\t\t\t\t\t" + param.getValue() //parameter.Value
+                                            Description = param.getValue() //parameter.Value
                                         });
                                     }
 

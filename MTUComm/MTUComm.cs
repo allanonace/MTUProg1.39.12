@@ -165,7 +165,9 @@ namespace MTUComm
                 System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
                 System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
             }
-            catch (Exception e) { }
+            catch (Exception e) {
+            
+            }
 
             ReadMtuArgs args = new ReadMtuArgs(new MemoryMap.MemoryMap(buffer, memory_map_type), mtuType);
 

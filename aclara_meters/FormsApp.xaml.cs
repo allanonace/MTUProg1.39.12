@@ -19,6 +19,7 @@ using Plugin.DeviceInfo;
 using MTUComm;
 using aclara_meters.Helpers;
 using System.Threading.Tasks;
+using Renci.SshNet;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -164,9 +165,12 @@ namespace aclara_meters
 
             //Cargar la pantalla principal
             MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
-
-
+         
         }
+
+
+       
+
 
         public static string Base64Decode(string base64EncodedData)
         {
@@ -219,6 +223,8 @@ namespace aclara_meters
                 {
 
                 }
+
+
 
                 Task.Run(async () =>
                 {

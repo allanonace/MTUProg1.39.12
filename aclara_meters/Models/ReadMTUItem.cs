@@ -14,6 +14,7 @@ namespace aclara_meters.Models
             Description = "-";
             isMeter = "false";
             isMTU = "true";
+            isDetailMeter = "false";
 
             Title1 = "-";
             Title2 = "-";
@@ -45,6 +46,10 @@ namespace aclara_meters.Models
         { get; set; }
 
         public string isMTU
+        { get; set; }
+
+
+        public string isDetailMeter
         { get; set; }
 
         public string Title1

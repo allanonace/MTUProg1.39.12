@@ -56,6 +56,8 @@ namespace aclara_meters.view
             this.EmailEntry.Focused += (s, e) =>
             {
                 SetLayoutPosition(true, (int)-20);
+
+                ListSFTPDataFiles();
             };
 
             this.EmailEntry.Unfocused += (s, e) =>
@@ -93,6 +95,8 @@ namespace aclara_meters.view
                 await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
                 {
                     loginpage.IsVisible = true;
+
+
                     /*
                     if(IsLocationAvailable()){
 
@@ -432,14 +436,23 @@ namespace aclara_meters.view
 
         private void ListSFTPDataFiles()
         {
-            //string host = "192.168.1.39";
-            string host = "169.254.130.57";
-            string username = "ma.jimenez";
-            string password = "Ingen167";
-            string pathRemoteFile = "/Users/ma.jimenez/Desktop/xmltest/User.xml";
+            string host = "192.168.1.24";
+            string username = "aclara";
+            string password = "12345";
+            string pathRemoteFile = "/home/aclara/";// prueba_archivo.xml";
 
             // Path where the file should be saved once downloaded (locally)
-            string pathLocalFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "User.txt");
+           // string pathLocalFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "User.txt");
+
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+            if (Device.RuntimePlatform == Device.Android)
+            {
+                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
+            }
+
+            string name = "ReadMtuResult.xml";
+            string filename = Path.Combine(xml_documents, name);
 
             using (SftpClient sftp = new SftpClient(host, username, password))
             {
@@ -449,18 +462,49 @@ namespace aclara_meters.view
 
                     Console.WriteLine("Downloading {0}", pathRemoteFile);
 
-                    //var files = sftp.ListDirectory(remoteDirectory);
-                    //  foreach (var file in files)
-                    //  {
-                    // Console.WriteLine(file.Name);
-                    //   }
-                    //    sftp.Disconnect();
+                    var files = sftp.ListDirectory(pathRemoteFile);
+                    foreach (var file in files)
+                    {
+                        Console.WriteLine(file.Name);
+                    }
 
+                   
+
+
+                    var fileStream = new FileStream(filename, FileMode.Open);
+                    if (fileStream != null)
+                    {
+                        sftp.UploadFile(fileStream, Path.Combine(pathRemoteFile, name ), null);
+                    }
+                    long cont = fileStream.Length;
+
+                    fileStream.Close();
+                   
+                    File.Delete(filename);
+
+                    /**
+                    using (Stream fileStreamUpload = File.OpenWrite(filename))
+                    {
+                        fileStreamUpload.SetLength(0);
+                        fileStreamUpload.Position = 0;
+
+                        sftp.DownloadFile(pathRemoteFile, fileStreamUpload);
+
+
+                        if(fileStreamUpload.Length == cont){
+                          
+                        }
+                        //sftp.DownloadFile(pathRemoteFile, fileStreamUpload);
+                    }
+                    **/
+
+                    //   sftp.Disconnect();
+                    /*
                     using (Stream fileStream = File.OpenWrite(pathLocalFile))
                     {
                         sftp.DownloadFile(pathRemoteFile, fileStream);
                     }
-
+*/
                     sftp.Disconnect();
                 }
                 catch (Exception e)
