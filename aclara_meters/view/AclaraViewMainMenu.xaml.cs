@@ -955,22 +955,8 @@ namespace aclara_meters.view
             {
                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
             })
-            );
-              
-            
-                                  
-                                 
-            
+            ); 
         }
-
-
-
-
-
-
-
-
-
 
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
         {

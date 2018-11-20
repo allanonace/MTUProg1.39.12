@@ -386,7 +386,7 @@ namespace MTUComm
             // P2Reading
 
             // alarms
-            if (form.GetCondition(AddMtuForm.FIELD_CONDITIONS.MTU_REQUIRES_ALARM_PROFILE))
+            if (form.conditions.RequiresAlarmProfile)
             {
                 Alarm alarms = (Alarm)form.Alarm.getValue();
 

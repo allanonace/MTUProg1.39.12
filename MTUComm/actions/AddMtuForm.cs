@@ -120,12 +120,8 @@ namespace MTUComm.actions
                 },
             };
 
-        public Mtu mtu { get; private set; }
-
-        public AddMtuForm(Mtu mtu)
+        public AddMtuForm(Mtu mtu) : base( mtu )
         {
-            this.mtu = mtu;
-
             // PARA LAS CONDICIONES SE USA MTU Y GLOBALS
             // LO QUE SE PUEDE HACER ES RECUPERAR TODOS LOS MIEMBROS/VARIABLES
             // POR REFLEXION Y LOS QUE NO EXISTAN EN LOS OBJETOS, SERA PORQUE

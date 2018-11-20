@@ -326,7 +326,7 @@ namespace MTUComm
             logParameter(port, new Parameter("MeterModel", "Meter Model", "T-10")); // TODO: replace real value
             action.Add(port);
 
-            if (form.GetCondition(AddMtuForm.FIELD_CONDITIONS.MTU_TWO_PORTS))
+            if (form.conditions.TwoPorts)
             {
                 port = new XElement("Port");
                 addAtrribute(port, "display", "Port 2");
@@ -346,7 +346,7 @@ namespace MTUComm
             logParameter(action, new Parameter("DailyGMTHourRead", "GMT Daily Reads", "Disable")); // TODO: replace real value
             logParameter(action, new Parameter("DailyReads", "Daily Reads", "Disable")); // TODO: replace real value
 
-            if (form.GetCondition(AddMtuForm.FIELD_CONDITIONS.MTU_MTU_DEMAND))
+            if (form.conditions.RequiresAlarmProfile)
             {
                 XElement alarmSelection = new XElement("AlarmSelection");
                 addAtrribute(alarmSelection, "display", "Alarm Selection");
@@ -361,7 +361,7 @@ namespace MTUComm
                 action.Add(alarmSelection);
             }
 
-            if (form.GetCondition(AddMtuForm.FIELD_CONDITIONS.MTU_MTU_DEMAND))
+            if (form.conditions.MtuDemand)
             {
                 XElement demandConf = new XElement("DemandConfiguration");
                 addAtrribute(demandConf, "display", "Demand Configuration");
