@@ -92,9 +92,10 @@ namespace MTUComm
 
         private ParameterType mParameterType;
 
-        private String mValue;
+        private dynamic mValue;
 
         private bool optional = false;
+
 
         public Parameter(ParameterType type, String value)
         {
@@ -113,21 +114,13 @@ namespace MTUComm
             setPort(port);
         }
 
-        public Parameter(String custom_parameter, String custom_display, String value)
+        public Parameter(String custom_parameter, String custom_display, dynamic value, bool optional = false )
         {
-            mParameterType = ParameterType.Custom;
+            mParameterType   = ParameterType.Custom;
             mCustomParameter = custom_parameter;
-            mCustomDisplay = custom_display;
-            mValue = value;
-        }
-
-        public Parameter(String custom_parameter, String custom_display, String value, bool optional)
-        {
-            mParameterType = ParameterType.Custom;
-            mCustomParameter = custom_parameter;
-            mCustomDisplay = custom_display;
-            mValue = value;
-            this.optional = optional;
+            mCustomDisplay   = custom_display;
+            mValue           = value;
+            this.optional    = optional;
         }
 
         public ParameterType Type
@@ -170,9 +163,11 @@ namespace MTUComm
             return null;
         }
 
-        public String getValue()
+        public dynamic getValue()
         {
-            return mValue;
+            //if ( ! string.IsNullOrEmpty ( mValue ) )
+                return mValue;
+            //return ( string )mValue;
         }
 
         public Boolean doesGenerateLog()
@@ -196,7 +191,15 @@ namespace MTUComm
             }
         }
 
-        public string Value
+        public string CustomDisplay
+        {
+            get
+            {
+                return mCustomDisplay;
+            }
+        }
+
+        public dynamic Value
         {
             get
             {
@@ -208,6 +211,19 @@ namespace MTUComm
         {
             return CustomParameter + ": " + Value;
         }
+    }
 
+    public static class ParameterListExtension
+    {
+        private const int PARAMETER_INDEX = 1;
+
+        public static Parameter FindByParamId(
+            this List<Parameter> paramList, dynamic paramId, dynamic texts = null)
+        {
+            if ( texts == null )
+                return paramList.Find(x => string.Equals(x.CustomParameter, paramId));
+            
+            return paramList.Find(x => string.Equals(x.CustomParameter, texts[ paramId ][ PARAMETER_INDEX ]));
+        }
     }
 }

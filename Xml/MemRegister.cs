@@ -87,7 +87,10 @@ namespace Xml
             }
         }
 
-        [XmlElement("Custom")]
-        public string Custom { get; set; }
+        [XmlElement("CustomGet")]
+        public string Custom_Get { get; set; }
+
+        [XmlElement("CustomSet")]
+        public string Custom_Set { get; set; }
     }
 }

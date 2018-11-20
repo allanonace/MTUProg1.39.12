@@ -15,12 +15,16 @@ namespace MTUComm
         private const string XML_METERS   = "Meter.xml";
         private const string XML_GLOBAL   = "Global.xml";
         private const string XML_INTERFACE   = "Interface.xml";
+        private const string XML_ALARMS = "Alarm.xml";
+        private const string XML_DEMANDS = "DemandConf.xml";
 
         private String mbase_path;
         private MtuTypes mtuTypes;
         private MeterTypes meterTypes;
         private Global global;
         private InterfaceConfig interfaces;
+        private AlarmList alarms;
+        private DemandConf demands;
 
         private string device;
         private string deviceUUID;
@@ -82,6 +86,8 @@ namespace MTUComm
             meterTypes = config.GetMeters(Path.Combine(mbase_path, XML_METERS ));
             global = config.GetGlobal(Path.Combine(mbase_path, XML_GLOBAL ));
             interfaces = config.GetInterfaces(Path.Combine(mbase_path, XML_INTERFACE));
+            alarms = config.GetAlarms(Path.Combine(mbase_path, XML_ALARMS));
+            demands = config.GetDemandConf(Path.Combine(mbase_path, XML_DEMANDS));
         }
 
         public Configuration(String base_path)
@@ -89,17 +95,21 @@ namespace MTUComm
             mbase_path = base_path;
             device = "PC";
             Config config = new Config();
-            mtuTypes = config.GetMtu(Path.Combine(mbase_path, "Mtu.xml"));
-            meterTypes = config.GetMeters(Path.Combine(mbase_path, "Meter.xml"));
-            global = config.GetGlobal(Path.Combine(mbase_path, "Global.xml"));
-            interfaces = config.GetInterfaces(Path.Combine(mbase_path, "Interface.xml"));
+
+            mtuTypes = config.GetMtu(Path.Combine(mbase_path, XML_MTUS ));
+            meterTypes = config.GetMeters(Path.Combine(mbase_path, XML_METERS ));
+            global = config.GetGlobal(Path.Combine(mbase_path, XML_GLOBAL ));
+            interfaces = config.GetInterfaces(Path.Combine(mbase_path, XML_INTERFACE));
+            alarms = config.GetAlarms(Path.Combine(mbase_path, XML_ALARMS));
+            demands = config.GetDemandConf(Path.Combine(mbase_path, XML_DEMANDS));
         }
 
         public static Configuration GetInstance()
         {
             if (instance == null)
             {
-                instance = new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\run_basepath");// @"C: \Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog");
+                instance = new Configuration();
+                //instance = new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\run_basepath");// @"C: \Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog");
             }
             return instance;
         }
@@ -177,7 +187,6 @@ namespace MTUComm
             return meterTypes.GetModelsByVendorFromMeters(meterTypes.Meters, vendor);
         }
 
-
         public Boolean useDummyDigits()
         {
             return !global.LiveDigitsOnly;
@@ -218,6 +227,14 @@ namespace MTUComm
 
             return return_str; //get UUID from Xamarin
 
+        }
+
+        public AlarmList Alarms
+        {
+            get
+            {
+                return this.alarms;
+            }
         }
 
         public String getApplicationName()

@@ -20,6 +20,8 @@ using System.IO;
 using MTUComm;
 using Xml;
 using System.Threading;
+using MTUComm.actions;
+using FIELD = MTUComm.actions.AddMtuForm.FIELD;
 
 namespace aclara_meters.view
 {
@@ -148,7 +150,7 @@ namespace aclara_meters.view
         private string model;
         private string name;
 
-        private Global globalData;
+        private Global globals;
         private MtuTypes mtuData;
 
         /*
@@ -195,32 +197,31 @@ namespace aclara_meters.view
                     ShowReplaceMtuMeter, 
                     ShowReplaceMeter;
 
-
-
-        private bool mtuDailyReads,
-                     globalsAllowDailyReads,
-                     setGlobalSnap,
-                     globalsChangeDailyReads;
-
-        private double globalsDailyReadsDefault;
-        private double memoryMapValue;
-
         private Slider MeterSnapReadsPort1Slider;
         private BorderlessPicker MeterTwoWayPort1Picker;
         private BorderlessPicker MeterAlarmSettingsPort1Picker;
 
+        // Current MTU
+        private Mtu currentMtu;
 
+        // Snap reads
+        private bool mtuDailyReads;
+        private bool globalsAllowDailyReads;
+        private bool setGlobalSnap;
+        private bool globalsChangeDailyReads;
+        private double globalsDailyReadsDefault;
+        private double dailyReadsMemoryMapValue;
 
-        private bool mtuFastMessageConfig, globalsFastMessageConfig;
+        // 2-Way
+        private bool mtuFastMessageConfig;
+        private bool globalsFastMessageConfig;
 
-
-
-
+        // Alarms
         private bool mtuRequiresAlarmProfile;
 
 
-        private List<string> alarmListPort1;
-        private List<string> alarmListPort2;
+        private List<Alarm> alarmListPort1;
+        private List<Alarm> alarmListPort2;
 
     
         private List<string> demandListPort1;
@@ -230,6 +231,10 @@ namespace aclara_meters.view
         private List<ReadMTUItem> FinalReadListView { get; set; }
 
 
+        // Add MTU form
+        AddMtuForm addMtuForm;
+
+    
         public AclaraViewAddMTU()
         {
             InitializeComponent();
@@ -540,14 +545,14 @@ namespace aclara_meters.view
             }
         }
 
-        private void ReadMTU(object sender, EventArgs e)
+        private void AddMtu(object sender, EventArgs e)
         {
             isCancellable = true;
 
             if (!_userTapped)
             {
 
-               Task.Delay(100).ContinueWith(t =>
+               /*Task.Delay(100).ContinueWith(t =>
 
                Device.BeginInvokeOnMainThread(() =>
                {
@@ -741,13 +746,48 @@ namespace aclara_meters.view
                             });
                         });
                    }));
-               }));
+               }));*/
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    ThreadProcedureMTUCOMMAction();
+                });
             }
         }
 
    
         public AclaraViewAddMTU(IUserDialogs dialogs)
         {
+            /*// TEST
+            byte[] memory = new byte[400];
+            dynamic map = new MTUComm.MemoryMap.MemoryMap31xx32xx(memory); // TODO: identify map by mtu type
+            map.ReadInterval = "24 Hours";
+            map.MessageOverlapCount = 5;
+            map.P1Reading = 0;
+            map.P1MeterId = "1";
+            map.P1MeterType = "1";
+            map.EncryptionKey = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            List<dynamic> modifiedRegisters = map.GetModifiedRegisters().GetAllElements();
+            // END TEST */
+
+
+            /* Get detected mtu */
+            MTUBasicInfo mtuBasicInfo = MtuForm.mtuBasicInfo;
+            int DetectedMtuType = (int)mtuBasicInfo.Type;
+            currentMtu = FormsApp.config.GetMtuTypeById(DetectedMtuType);
+
+            /* Instantiate form */
+            addMtuForm = new AddMtuForm(currentMtu);
+            addMtuForm.SetCondition(AddMtuForm.FIELD_CONDITIONS.MTU_REQUIRES_ALARM_PROFILE, currentMtu.RequiresAlarmProfile);
+            addMtuForm.SetCondition(AddMtuForm.FIELD_CONDITIONS.MTU_TWO_PORTS, currentMtu.TwoPorts);
+
+            /* Get meters for detected mtu */
+            MeterTypes m = FormsApp.config.GetMeterTypes();
+            // TODO: dos puertos
+            this.meters = m.FindByPortTypeAndFlow(currentMtu.Ports[0].Type, currentMtu.Flow);
+
+            /* Get alarms for detected mtu */
+            alarmListPort1 = FormsApp.config.Alarms.FindByMtuType(DetectedMtuType);
+ 
             InitializeComponent();
 
             isCancellable = false;
@@ -945,28 +985,35 @@ namespace aclara_meters.view
 
         private void ThreadProcedureMTUCOMMAction()
         {
-            
+            // Create parameters with form fields content
+            addMtuForm.AddParameter(FIELD.SERVICE_PORT_ID, servicePortId.Text);
+            addMtuForm.AddParameter(FIELD.FIELD_ORDER, fieldOrder.Text);
+            addMtuForm.AddParameter(FIELD.METER_NUMBER, meterNumber.Text);
+            addMtuForm.AddParameter(FIELD.SELECTED_METER_ID, (Meter)MeterNamePicker.SelectedItem);
+            addMtuForm.AddParameter(FIELD.READ_INTERVAL, pickerReadInterval.SelectedItem.ToString());
+            addMtuForm.AddParameter(FIELD.SNAP_READS, SliderMain.Value.ToString());
+            addMtuForm.AddParameter(FIELD.TWO_WAY, pickerTwoWay.SelectedItem.ToString());
+            addMtuForm.AddParameter(FIELD.ALARM, (Alarm)pickerAlarms.SelectedItem);
+
             //Create Ation when opening Form
-            //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action add_mtu = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.AddMtu, user: FormsApp.CredentialsService.UserName);
+            // TODO: usuario real
+            MTUComm.Action add_mtu = new MTUComm.Action ( 
+                config    : FormsApp.config,
+                serial    : FormsApp.ble_interface,
+                actiontype: MTUComm.Action.ActionType.AddMtu,
+                user      : "iker");
 
-
-            //Define finish and error event handler
-            //add_mtu.OnFinish += Add_mtu_OnFinish;
-            //add_mtu.OnError += Add_mtu_OnError;
-
+            // Add parameters to the action
+            add_mtu.AddParameter ( addMtuForm );
 
             add_mtu.OnFinish += ((s, e) => {   
                 Console.WriteLine("Action Succefull");
                 Console.WriteLine("Press Key to Exit");
                 //Console.WriteLine(s.ToString());
 
-                /*
-                foreach(Parameter param in e.Result.getParameters()){
+                /*foreach(Parameter param in e.Result.getParameters()){
                     Console.WriteLine(param.getLogDisplay() + ":" + param.getValue());
-                }
-
-                */
+                }*/
 
                 FinalReadListView = new List<ReadMTUItem>(); // Saves the data to view
     
@@ -1161,82 +1208,94 @@ namespace aclara_meters.view
                  Console.WriteLine(result.ToString());
 
              });
-            add_mtu.Run();
+
+            // Launch the action!
+            add_mtu.Run ( addMtuForm );
              
         }
 
         private void TestOptionalFields()
         {
+            //globals =  FormsApp.config.GetGlobal();
 
-   
-            globalData =  FormsApp.config.GetGlobal();
+            //WorkOrderRecording = globals.WorkOrderRecording;
+            //AccountDualEntry = globals.AccountDualEntry;
+            //WorkOrderDualEntry = globals.WorkOrderDualEntry;
+            //IndividualReadInterval = globals.IndividualReadInterval;
+            //UseMeterSerialNumber = globals.UseMeterSerialNumber;
 
-            //mtuData = FormsApp.config.GetMtuTypeById(138);
+            ////mtuData
+            //Mtu mtu = FormsApp.config.GetMtuTypeById(138);
 
+            //WorkOrderRecording = globalData.WorkOrderRecording;
+            //AccountDualEntry = globalData.AccountDualEntry;
+            //WorkOrderDualEntry = globalData.WorkOrderDualEntry;
+            //IndividualReadInterval = globalData.IndividualReadInterval;
+            //UseMeterSerialNumber = globalData.UseMeterSerialNumber;
 
-            //mtuData
-            Mtu mtu = FormsApp.config.GetMtuTypeById(138);
+            ///******************/
+            ///**  Snap Reads  **/
+            //mtuDailyReads = mtu.DailyReads;
+            //globalsAllowDailyReads = globalData.AllowDailyReads;
 
-            WorkOrderRecording = globalData.WorkOrderRecording;
-            AccountDualEntry = globalData.AccountDualEntry;
-            WorkOrderDualEntry = globalData.WorkOrderDualEntry;
-            IndividualReadInterval = globalData.IndividualReadInterval;
-            UseMeterSerialNumber = globalData.UseMeterSerialNumber;
-
-            /******************/
-            /**  Snap Reads  **/
-            mtuDailyReads = mtu.DailyReads;
-            globalsAllowDailyReads = globalData.AllowDailyReads;
-            setGlobalSnap = true;
-            memoryMapValue = 15.0;
-            globalsChangeDailyReads = true;
-            globalsDailyReadsDefault =  Convert.ToDouble( globalData.DailyReadsDefault ); 
-            /****    ****    ****/
-
-
-            /******************/
-            /**     2-way    **/
-
-            mtuFastMessageConfig = true;
-            globalsFastMessageConfig = true;
-
-            /****   ****   ****/
+            //// Snap Reads
+            //mtuDailyReads = currentMtu.DailyReads;
+            //globalsAllowDailyReads = globals.AllowDailyReads;
+            //setGlobalSnap = true;
+            //dailyReadsMemoryMapValue = 15.0;
+            //globalsChangeDailyReads = true;
+            //globalsDailyReadsDefault =  Convert.ToDouble( globalData.DailyReadsDefault ); 
+            ///****    ****    ****/
 
 
-            /***************************/
-            /**     Alarm Settings    **/
+            ///******************/
+            ///**     2-way    **/
 
-            mtuRequiresAlarmProfile = true;
-            alarmListPort1 = new List<string>();
-            alarmListPort2 = new List<string>();
+            //mtuFastMessageConfig = true;
+            //globalsFastMessageConfig = true;
 
-            //ADD ALARMS TO LIST
-            for (int i = 1; i < 4; i++)
-            {
-                alarmListPort1.Add("Alarm "+i);
-                alarmListPort2.Add("Alarm "+ i);
-            }
-           
-
-            /***************************/
-            /**     Demand Settings    **/
-
-            demandListPort1 = new List<string>();
-            demandListPort2= new List<string>();
-
-            //ADD ALARMS TO LIST
-            for (int i = 1; i < 4; i++)
-            {
-                demandListPort1.Add("Demand " + i);
-                demandListPort2.Add("Demand " + i);
-            }
+            ///****   ****   ****/
 
 
+            ///***************************/
+            ///**     Alarm Settings    **/
 
+            //mtuRequiresAlarmProfile = true;
+            //alarmListPort1 = new List<string>();
+            //alarmListPort2 = new List<string>();
 
+            ////ADD ALARMS TO LIST
+            //for (int i = 1; i < 4; i++)
+            //{
+            //    alarmListPort1.Add("Alarm "+i);
+            //    alarmListPort2.Add("Alarm "+ i);
+            //globalsDailyReadsDefault = Convert.ToDouble(globals.DailyReadsDefault);
+            //if (globalsDailyReadsDefault > 23 || globalsDailyReadsDefault < 0)
+            //{
+            //    globalsDailyReadsDefault = 24.0;
+            //}
 
+            ///***************************/
+            ///**     Demand Settings    **/
 
-            /****  ****  ****  **** ****/
+            //demandListPort1 = new List<string>();
+            //demandListPort2= new List<string>();
+
+            ////ADD ALARMS TO LIST
+            //for (int i = 1; i < 4; i++)
+            //{
+            //    demandListPort1.Add("Demand " + i);
+            //    demandListPort2.Add("Demand " + i);
+            //}
+
+            ///****  ****  ****  **** ****/
+
+            //// 2-Way
+            //mtuFastMessageConfig = currentMtu.FastMessageConfig;
+            //globalsFastMessageConfig = globals.FastMessageConfig || globals.Fast2Way;
+
+            //// Alarm Settings
+            //mtuRequiresAlarmProfile = currentMtu.RequiresAlarmProfile;
         }
 
 
@@ -1257,7 +1316,7 @@ namespace aclara_meters.view
                 SliderMain.Value = globalsDailyReadsDefault;
             }else{
 
-                SliderMain.Value = memoryMapValue;
+                SliderMain.Value = dailyReadsMemoryMapValue;
             }
           
             if( !globalsChangeDailyReads )
@@ -1304,8 +1363,8 @@ namespace aclara_meters.view
 
             if( alarmListPort1.Count > 0 )
             {
-             
                 pickerAlarms.ItemsSource = alarmListPort1;
+                pickerAlarms.ItemDisplayBinding = new Binding("Name");
             } 
            
             if(alarmListPort2.Count > 0)
@@ -1580,12 +1639,12 @@ namespace aclara_meters.view
             meterTypes = FormsApp.config.GetMeterTypes();
 
 
-            int encoderType = 2;
-            int liveDigits = 6;
+            //int encoderType = 2;
+            //int liveDigits = 6;
 
-            meters = meterTypes.FindByEncoderTypeAndLiveDigits(encoderType, liveDigits);
+            //meters = meterTypes.FindByEncoderTypeAndLiveDigits(encoderType, liveDigits);
 
-            vendors = meterTypes.GetVendorsFromMeters(meterTypes.Meters);
+            vendors = meterTypes.GetVendorsFromMeters(meters);
 
             //Listado de los Selectores
             picker_List_Vendor_port1 = new List<string>();
@@ -2141,10 +2200,9 @@ namespace aclara_meters.view
             Console.WriteLine("Elemento Picker : " + j);
 
             vendor = vendors[j];
-
             models = null;
 
-            models = meterTypes.GetModelsByVendorFromMeters(meterTypes.Meters, vendor);
+            models = meterTypes.GetModelsByVendorFromMeters(meters, vendor);
             name = "";
 
             try
@@ -2239,9 +2297,7 @@ namespace aclara_meters.view
 
           
             model = models[i];
-            
-          
-            List<Meter> meterlist = meterTypes.GetMetersByModelAndVendorFromMeters(meterTypes.Meters, vendor, model);
+            List<Meter> meterlist = meterTypes.GetMetersByModelAndVendorFromMeters(meters, vendor, model);
 
             try
             {
@@ -2311,7 +2367,7 @@ namespace aclara_meters.view
             logout_button.Tapped += LogoutCallAsync;
             settings_button.Tapped += OpenSettingsCallAsync;
             back_button.Tapped += ReturnToMainView;
-            bg_read_mtu_button.Tapped += ReadMTU;
+            bg_read_mtu_button.Tapped += AddMtu;
             turnoffmtu_ok.Tapped += TurnOffMTUOkTapped;
             turnoffmtu_no.Tapped += TurnOffMTUNoTapped;
             turnoffmtu_ok_close.Tapped += TurnOffMTUCloseTapped;
@@ -2626,7 +2682,7 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
              Device.BeginInvokeOnMainThread(() =>
              {
-                dialog_open_bg.IsVisible = true;
+                 dialog_open_bg.IsVisible = true;
                  turnoff_mtu_background.IsVisible = true;
                  dialog_turnoff_one.IsVisible = false;
                  dialog_turnoff_two.IsVisible = false;

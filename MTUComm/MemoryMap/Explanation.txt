@@ -2,6 +2,7 @@
 ----
 <?xml version="1.0" encoding="utf-8"?>
 <Registers>
+
   <Register>
     <Id>_string_</Id>
     <Description>_string_</Description>
@@ -11,6 +12,7 @@
     <Write>false|_vacio_</Write>
     <Custom>_val_1_operacion_|_val_1_mascara_string_|method|_vacio_</Custom>
   </Register>
+
   <Overload>
     <Id>_string_</Id>
     <Description>_string_</Description>
@@ -18,8 +20,9 @@
       <Register>_id_register_param_1_</Register>
       <Register>_id_register_param_2_</Register>
     </Registers>
-    <Custom>_val1_valn_operacion_|method</Custom>
+    <Custom>_val1_valn_operacion_|method|method:id_method</Custom>
   </Overload>
+
 </Registers>
 
 Register
@@ -40,6 +43,11 @@ Registros presentes en los dispositivos, pudiendo ocupar una o mas posiciones ( 
 			 Para utilizar esta última funcionalidad habra que indicar <Custom>method</Custom> ( no es case sensitive )
              pej. Registro 'MtuType' -> Método 'MtuType_Logic'
 			 
+			 Además de poner "method" para referenciar el método automatico ( idRegistro_Logic ), también se puede
+			 indicar un método concreto, para favorecer la reutilización de código y no tener que editar el código
+			 cada vez que se añada un registro que requiera algún tratamiento especial. Se indica con ":idMetodo"
+			 pej. <custom>method:ConvertoToDouble</custom>
+
 			 Cabecera del metodo:
 			 public T DailyRead_Logic ( MemoryRegister<T> MemoryRegister )
 			 En vez de T se tendra que indicar el tipo de valor del registro ( <Type> )
@@ -67,13 +75,22 @@ Registros presentes en los dispositivos, pudiendo ocupar una o mas posiciones ( 
 
 Overload
 ----
-Son registros que como tal no existen en los dispositivos, al requerir de varios registros para calcular su valor
+Son registros que como tal no existen en los dispositivos, al requerir de varios otros registros para calcular su valor
 - Registers: Identificadores de los registros que se usaran para calcular el valor del registro/overload
              Han de ser exactamente iguales a los identificadores de los registros ( Register.Id )
 - Custom   : Similar al campo de los registros, pero solo admite dos modos, pudiendo indicar directamente la
-             operacion matematica a realizar o la cadena 'method' para que se invoque el metodo id_Logic
-			 
-			 Cabecera del metodo:
+             operacion matematica a realizar o la cadena 'method' para que se invoque el metodo id_Logic, y
+			 también se puede indicar 'method:id_metodo' para invocar un mñetodo concreto
+
+			 En la operación se indicaran los indices de los registros en base uno ( 1,2,3... ), en el mismo
+			 orden en que se hayan definido, de arriba-abajo, en el XML, encerrados entre guiones bajos ( _n_ )
+			 <Registers>
+			   <Register>_id_register_param_1_</Register>
+			   <Register>_id_register_param_2_</Register>
+			 </Registers>
+			 <Custom>_1_ * _2_</Custom>
+
+			 Cabecera 1 del metodo:
 			 public T Overload_Method_Logic ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters )
 			 En vez de T se tendra que indicar el tipo de valor del registro/overload ( <Type> )
 			 Se accede a los registros pasados como parametro con el operador punto ( MemoryRegisters.id_registro )
@@ -106,4 +123,24 @@ Son registros que como tal no existen en los dispositivos, al requerir de varios
 					 return MemoryRegisters.MtuType.Value + MemoryRegisters.DailyRead.Value;
 			
 				 return -1;
+			 }
+
+			 Cabecera 2 del metodo:
+			 public T Method_reuse ( MemoryOverload<T> MemoryOverload, dynamic[] MemoryRegisters )
+			 La diferencia entre esta versión y la anterior se encuentra en el segundo parámetro
+			 En la opción anterior se pasa un objeto dinámico con los nuevos miembros registrados, teniendo
+			 que acceder usando el operador punto ( MemoryRegisters.idRegistro ), mientras que en este caso
+			 se pasa un array para poder acceder por indice sin necesidad de conocer los identificadores de
+			 los registros indicados en el XML. Estos métodos se pueden reutilizar entre diferentes overloads
+
+			 public int Method_reuse ( MemoryOverload<int> MemoryOverload, dynamic[] MemoryRegisters )
+			 {
+			   Console.WriteLine ( MemoryRegisters[ 0 ].id + " -> " + MemoryRegisters[ 0 ].Value );
+			   Console.WriteLine ( MemoryRegisters[ 1 ].id + " -> " + MemoryRegisters[ 1 ].Value );
+			   Console.WriteLine ( MemoryRegisters[ 2 ].id + " -> " + MemoryRegisters[ 2 ].Value );
+
+			   if ( MemoryRegisters[ 1 ].Value )
+			     return MemoryRegisters[ 0 ].Value + MemoryRegisters[ 2 ].Value;
+
+			   return -1;
 			 }

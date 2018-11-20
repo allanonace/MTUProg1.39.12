@@ -96,7 +96,7 @@ namespace Xml
         public bool GasCutWireAlarm { get; set; }
 
         [XmlElement("Flow")]
-        public string Flow { get; set; }
+        public int Flow { get; set; }
 
         [XmlElement("MeterId")]
         public string MeterId { get; set; }
@@ -165,5 +165,14 @@ namespace Xml
         {
             return this.GetType().GetProperty(Name).GetValue(this, null).ToString();
         }
-}
+
+        [XmlIgnore]
+        public bool TwoPorts
+        {
+            get
+            {
+                return (this.Ports.Count > 1);
+            }
+        }
+    }
 }

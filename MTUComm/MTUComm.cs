@@ -1,8 +1,11 @@
 using Lexi.Interfaces;
+using MTUComm.actions;
 using MTUComm.MemoryMap;
-using System.Threading.Tasks;
-using System.Threading;
 using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 using Xml;
 using static MTUComm.LogQueryResult;
 using System.Collections.Generic;
@@ -11,6 +14,9 @@ namespace MTUComm
 {
     public class MTUComm
     {
+        private const int DEFAULT_OVERLAP = 6;
+        private const int DEFAULT_LENGTH_AES = 16;
+
         /// <summary>
         ///
         /// </summary>
@@ -39,6 +45,13 @@ namespace MTUComm
         public delegate void ReadMtuDataHandler(object sender, ReadMtuDataArgs e);
         public event ReadMtuDataHandler OnReadMtuData;
 
+        public delegate void AddMtuHandler(object sender, AddMtuArgs e);
+        public event AddMtuHandler OnAddMtu;
+
+        public delegate void BasicReadHandler(object sender, BasicReadArgs e);
+        public event BasicReadHandler OnBasicRead;
+
+        
         public MTUComm(ISerial serial, Configuration configuration)
         {
             this.configuration = configuration;
@@ -53,11 +66,10 @@ namespace MTUComm
         /// <remarks>Internaly saves internal MTU type and ID used for communication logic</remarks>
         private void getMTUBasicInfo()
         {
-
             MTUBasicInfo mtu_info = new MTUBasicInfo(lexi.Read(0, 10));
             mtu_changed = !((mtu_info.Id == latest_mtu.Id) && (mtu_info.Type == latest_mtu.Type));
             latest_mtu = mtu_info;
-
+            MtuForm.SetBasicInfo(latest_mtu);
         }
 
         /// <summary>
@@ -254,10 +266,28 @@ namespace MTUComm
             }
         }
 
+        public class AddMtuArgs : EventArgs
+        {
+            public AddMtuForm form;
+
+            public AddMtuArgs(AddMtuForm form)
+            {
+                this.form = form;
+            }
+        }
+
+        public class BasicReadArgs : EventArgs
+        {
+            public BasicReadArgs()
+            {
+            }
+        }
+
         public void TurnOffMtu()
         {
             Task.Factory.StartNew(TurnOffMtuTask);
         }
+
         public void TurnOffMtuTask()
         {
             Console.WriteLine("TurnOffMtu start");
@@ -281,7 +311,7 @@ namespace MTUComm
             TurnOffMtuArgs args = new TurnOffMtuArgs(latest_mtu.Id);
             OnTurnOffMtu(this, args);
         }
-
+   
         public void TurnOnMtu()
         {
             Task.Factory.StartNew(TurnOnMtuTask);
@@ -309,6 +339,182 @@ namespace MTUComm
 
             TurnOnMtuArgs args = new TurnOnMtuArgs(latest_mtu.Id);
             OnTurnOnMtu(this, args);
+        }
+
+        public void AddMtu(AddMtuForm addMtuForm)
+        {
+            Task.Factory.StartNew(() => AddMtuTask(addMtuForm));
+        }
+
+        private void AddMtuTask(dynamic form)
+        {
+            Mtu mtu = form.mtu;
+            // Prepare memory map
+            byte[] memory = new byte[400];
+            dynamic map = new MemoryMap31xx32xx ( memory ); // TODO: identify map by mtu type
+
+            // meter type
+            map.P1MeterType = form.MeterNumber.getValue();
+            // P2MeterType
+
+            // service port id, account number
+            map.P1MeterId = form.ServicePortId.getValue();
+            // P2MeterId
+
+            // reading interval
+            /*string[] readIntervalArray = form.ReadInterval.getValue().Split(' ');
+            string readIntervalStr = readIntervalArray[0];
+            string timeUnit = readIntervalArray[1];
+            int timeIntervalMins = Int32.Parse(readIntervalStr);
+            if (timeUnit is "Hours")
+                timeIntervalMins = timeIntervalMins * 60;
+
+            map.ReadInterval = timeIntervalMins; // In minutes*/
+
+            map.ReadInterval = form.ReadInterval.getValue();
+
+            // P2ReadInterval
+
+            // overlap
+            map.MessageOverlapCount = DEFAULT_OVERLAP;
+            // P2MessageOverlapCount
+
+            // initial reading
+            map.P1Reading = 0;
+            // P2Reading
+
+            // alarms
+            if (form.GetCondition(AddMtuForm.FIELD_CONDITIONS.MTU_REQUIRES_ALARM_PROFILE))
+            {
+                Alarm alarms = (Alarm)form.Alarm.getValue();
+
+                // Overlap
+                map.MessageOverlapCount = alarms.Overlap;
+
+                // P1ImmediateAlarm
+                if (alarms.ImmediateAlarmTransmit)
+                {
+                    map.P1ImmediateAlarm = true;
+                }
+
+                // P1UrgentAlarm
+                if (alarms.DcuUrgentAlarm)
+                {
+                    map.P1UrgentAlarm = true;
+                }
+
+                // P1MagneticAlarm
+                if (mtu.MagneticTamper)
+                {
+                    map.P1MagneticAlarm = alarms.Magnetic;
+                }
+
+                // P1RegisterCoverAlarm
+                if (mtu.RegisterCoverTamper)
+                {
+                    map.P1RegisterCoverAlarm = alarms.RegisterCover;
+                }
+
+                // P1ReverseFlowAlarm
+                if (mtu.ReverseFlowTamper)
+                {
+                    map.P1ReverseFlowAlarm = alarms.ReverseFlow;
+                }
+
+                // P1TiltAlarm
+                if (mtu.TiltTamper)
+                {
+                    map.P1TiltAlarm = alarms.Tilt;
+                }
+
+                // P1InterfaceAlarm
+                if (mtu.InterfaceTamper)
+                {
+                    map.P1InterfaceAlarm = alarms.InterfaceTamper;
+                }
+                // P2ImmediateAlarm
+                // P2UrgentAlarm
+                // P2MagneticAlarm
+                // P2RegisterCoverAlarm
+                // P2ReverseFlowAlarm
+                // P2TiltAlarm
+                // P2InterfaceAlarm
+            }
+
+            // Encryption key
+            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
+            byte[] aesKey = new byte[ DEFAULT_LENGTH_AES ];
+            rng.GetBytes ( aesKey );
+            map.EncryptionKey = aesKey;
+            for (int i = 0; i < 15; i++)
+            {
+                if (aesKey[i] != memory[256+i])
+                {
+                    throw new Exception("AES key does not match");
+                }
+            }
+            // Encrypted
+            // EncryptionIndex
+
+            string testAES = map.EncryptionKey;
+
+            // fast message (not in pulse)
+            // encoder digits to drop (not in pulse)
+
+            // Write changes into MTU
+            WriteModifiedRegisters(map);
+
+            AddMtuArgs args = new AddMtuArgs (form);
+            OnAddMtu ( this, args );
+        }
+
+        public void NewAddMtu(Parameter[] p)
+        {
+
+        }
+
+        public void WriteModifiedRegisters(MemoryMap.MemoryMap map)
+        {
+            List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
+            foreach ( dynamic r in modifiedRegisters )
+                this.writeParam((uint)r.address, map.memory, (uint)r.size);
+        }
+
+        public void writeParam(uint addr, byte[] memory, uint length)
+        {
+            byte[] tmp = new byte[length];
+            Array.Copy(memory, addr, tmp, 0, length);
+            Console.WriteLine("Addr {0} | Value {1} | Length {2}", addr, BitConverter.ToString(tmp), length);
+            lexi.Write(addr, tmp);
+        }
+
+        public byte[] readComplete(byte addr, uint length)
+        {
+            byte[] tmp = new byte[length];
+            uint maxReadBytes = 255;
+            uint readsNumber = length / maxReadBytes;
+            uint additionalBytes = length % maxReadBytes;
+
+            for (uint i = 0; i < readsNumber; i++)
+            {
+                uint currentAddr = i * maxReadBytes;
+                Array.Copy(lexi.Read(currentAddr, maxReadBytes), 0, tmp, currentAddr, maxReadBytes);
+            }
+
+            if (additionalBytes > 0)
+            {
+                uint currentAddr = readsNumber * maxReadBytes;
+                Array.Copy(lexi.Read(currentAddr, additionalBytes), 0, tmp, currentAddr, additionalBytes);
+            }
+
+            return tmp;
+        }
+
+        public void BasicRead()
+        {
+            getMTUBasicInfo();
+            BasicReadArgs args = new BasicReadArgs();
+            OnBasicRead(this, args);
         }
     }
 }
