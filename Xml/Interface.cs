@@ -12,6 +12,9 @@ namespace Xml
         [XmlAttribute("memorymap")]
         public string Memorymap { get; set; }
 
+        [XmlAttribute("memorysize")]
+        public int MemorymapSize { get; set; }
+
         [XmlElement("Action")]
         public List<ActionInterface> Actions { get; set; }
 

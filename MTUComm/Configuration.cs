@@ -168,13 +168,18 @@ namespace MTUComm
             return interfaces.GetInterfaceByMtuIdAndAction(mtuid, Action).getUserInterfaces();
         }
 
-        public string GetMemoryMapTyeByMtuId(int mtuid)
+        public string GetMemoryMapTypeByMtuId(int mtuid)
         {
-            return interfaces.GetmemoryMapTyeByMtuId(mtuid);
+            return interfaces.GetmemoryMapTypeByMtuId(mtuid);
+        }
+
+        public int GetmemoryMapSizeByMtuId(int mtuid)
+        {
+            return interfaces.GetmemoryMapSizeByMtuId(mtuid);
         }
 
 
-        
+   
 
         public List<string>  GetVendorsFromMeters()
         {

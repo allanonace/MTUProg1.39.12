@@ -164,6 +164,46 @@ namespace MTUComm
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
 
+        public void logReadDataResult(Action ref_action, ActionResult result, Mtu mtuType)
+        {
+            CreateFileIfNotExist();
+            XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
+
+            logReadDataResult(doc.Root.Element("Mtus"), ref_action, result, mtuType.Id);
+            doc.Save(Path.Combine(abs_path, getFileName()));
+        }
+
+
+        public void logReadDataResult(XElement parent, Action ref_action, ActionResult result, int mtu_type_id)
+        {
+            XElement action = new XElement("Action");
+
+            addAtrribute(action, "display", ref_action.getDisplay());
+            addAtrribute(action, "type", ref_action.getLogType());
+            addAtrribute(action, "reason", ref_action.getReason());
+
+            InterfaceParameters[] parameters = config.getLogInterfaceFields(mtu_type_id, "DataRead");
+            foreach (InterfaceParameters parameter in parameters)
+            {
+                if (parameter.Name == "Port")
+                {
+
+                    ActionResult[] ports = result.getPorts();
+                    for (int i = 0; i < ports.Length; i++)
+                    {
+                        logPort(i, action, ports[i], parameter.Parameters.ToArray());
+                    }
+                }
+                else
+                {
+                    logComplexParameter(action, result, parameter);
+                }
+
+            }
+
+            parent.Add(action);
+        }
+
         public void logReadResult(XElement parent, Action ref_action, ActionResult result, int mtu_type_id)
         {
             XElement action = new XElement("Action");

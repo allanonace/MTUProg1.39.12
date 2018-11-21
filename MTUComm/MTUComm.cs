@@ -150,20 +150,38 @@ namespace MTUComm
             }
 
 
-            String memory_map_type = configuration.GetMemoryMapTyeByMtuId(mtuType.Id);
+            String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
+            int memory_map_size = configuration.GetmemoryMapSizeByMtuId(mtuType.Id);
 
             lexi.Write(64, new byte[] { 1 });
             Thread.Sleep(1000);
 
-            byte[] buffer = new byte[512];
+            byte[] buffer = new byte[1024];
 
             System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
 
-
             try
             {
-                System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
-                System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
+                if(memory_map_size > 255)
+                {
+                    System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
+                    System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
+                }
+
+                if (memory_map_size > 320)
+                {
+                    //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
+                }
+
+                if (memory_map_size > 960)
+                {
+                    System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
+                }
+
+                
             }
             catch (Exception e) {
             

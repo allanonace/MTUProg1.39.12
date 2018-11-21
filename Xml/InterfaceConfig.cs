@@ -39,7 +39,7 @@ namespace Xml
             return action_interface;
         }
 
-        public string GetmemoryMapTyeByMtuId(int mtuid)
+        public string GetmemoryMapTypeByMtuId(int mtuid)
         {
             MtuInterface mtu = MtuInterfaces.Find(x => x.Id == mtuid);
             if (mtu == null)
@@ -55,6 +55,24 @@ namespace Xml
             }
 
             return mtu_interface.Memorymap;
+        }
+
+        public int GetmemoryMapSizeByMtuId(int mtuid)
+        {
+            MtuInterface mtu = MtuInterfaces.Find(x => x.Id == mtuid);
+            if (mtu == null)
+            {
+                throw new MtuNotFoundException("Mtu not found");
+            }
+
+            Interface mtu_interface = Interfaces.Find(x => x.Id == mtu.Interface);
+
+            if (mtu_interface == null)
+            {
+                throw new InterfaceNotFoundException("Meter not found");
+            }
+
+            return mtu_interface.MemorymapSize;
         }
     }
 }
