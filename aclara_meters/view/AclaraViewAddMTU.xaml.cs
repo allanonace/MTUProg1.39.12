@@ -445,7 +445,7 @@ namespace aclara_meters.view
             }
 
             //Now I am given ItemsSorce to the Pickers
-            pickerTwoWay.ItemsSource = objStringList;
+            twoWayPicker.ItemsSource = objStringList;
         }
 
         private void InitPickerTwoWay2()
@@ -470,7 +470,7 @@ namespace aclara_meters.view
             }
 
             //Now I am given ItemsSorce to the Pickers
-            pickerTwoWay2.ItemsSource = objStringList;
+            twoWay2Picker.ItemsSource = objStringList;
         }
 
         private void InitPickerReason()
@@ -551,7 +551,7 @@ namespace aclara_meters.view
             }
 
             //Now I am given ItemsSorce to the Pickers
-            pickerReadInterval.ItemsSource = objStringList;
+            readIntervalPicker.ItemsSource = objStringList;
         }
 
         private void InitPickerReadInterval2()
@@ -584,7 +584,7 @@ namespace aclara_meters.view
             }
 
             //Now I am given ItemsSorce to the Pickers
-            pickerReadInterval2.ItemsSource = objStringList;
+            readInterval2Picker.ItemsSource = objStringList;
         }
 
         private void InitConstructionPicker()
@@ -1330,21 +1330,21 @@ namespace aclara_meters.view
 
             if (mtuFastMessageConfig)
             {
-                TwoWay_Port1.IsVisible = true;
+                twoWayContainer.IsVisible = true;
             }
             else
             {
-                TwoWay_Port1.IsVisible = false;
+                twoWayContainer.IsVisible = false;
             }
 
             if (globalsFastMessageConfig)
             {
-                pickerTwoWay.SelectedIndex = 1;
+                twoWayPicker.SelectedIndex = 1;
                 //Fast
             }
             else
             {
-                pickerTwoWay.SelectedIndex = 0;
+                twoWayPicker.SelectedIndex = 0;
                 //slow
             }
 
@@ -1354,35 +1354,35 @@ namespace aclara_meters.view
 
             if (mtuRequiresAlarmProfile)
             {
-                Alarms_Port1.IsVisible = true;
+                alarmsContainer.IsVisible = true;
             }
             else
             {
-                Alarms_Port1.IsVisible = false;
+                alarmsContainer.IsVisible = false;
             }
 
             if (alarmListPort1.Count > 0)
             {
-                pickerAlarms.ItemsSource = alarmListPort1;
-                pickerAlarms.ItemDisplayBinding = new Binding("Name");
+                alarmsPicker.ItemsSource = alarmListPort1;
+                alarmsPicker.ItemDisplayBinding = new Binding("Name");
             }
 
             if (alarmListPort2.Count > 0)
             {
-                pickerAlarms2.ItemsSource = alarmListPort2;
-                pickerAlarms2.ItemDisplayBinding = new Binding("Name");
+                alarms2Picker.ItemsSource = alarmListPort2;
+                alarms2Picker.ItemDisplayBinding = new Binding("Name");
             }
 
             if (demandListPort1.Count > 0)
             {
-                pickerDemands.ItemsSource = demandListPort1;
-                pickerDemands.ItemDisplayBinding = new Binding("Name");
+                demandsPicker.ItemsSource = demandListPort1;
+                demandsPicker.ItemDisplayBinding = new Binding("Name");
             }
 
             if (demandListPort2.Count > 0)
             {
-                pickerDemands2.ItemsSource = demandListPort2;
-                pickerDemands2.ItemDisplayBinding = new Binding("Name");
+                demands2Picker.ItemsSource = demandListPort2;
+                demands2Picker.ItemDisplayBinding = new Binding("Name");
             }
             /****  ****  ****  **** ****/
 
@@ -1393,12 +1393,12 @@ namespace aclara_meters.view
 
             if (demandListPort1.Count > 0)
             {
-                pickerDemands.ItemsSource = demandListPort1;
+                demandsPicker.ItemsSource = demandListPort1;
             }
 
             if (demandListPort2.Count > 0)
             {
-                pickerDemands2.ItemsSource = demandListPort2;
+                demands2Picker.ItemsSource = demandListPort2;
             }
 
             /****  ****  ****  **** ****/
@@ -1413,48 +1413,48 @@ namespace aclara_meters.view
 
             if (WorkOrderRecording)
             {
-                fo_view.IsVisible = true;
+                fieldOrderContainer.IsVisible = true;
             }
             else
             {
-                fo_view.IsVisible = false;
+                fieldOrderContainer.IsVisible = false;
             }
 
             if (AccountDualEntry)
             {
-                servicePortId.Unfocused += (s, e) => { ServicePortId_validate(1); };
-                servicePortId2.Unfocused += (s, e) => { ServicePortId_validate(2); };
+                servicePortIdInput.Unfocused += (s, e) => { ServicePortId_validate(1); };
+                servicePortId2Input.Unfocused += (s, e) => { ServicePortId_validate(2); };
                 servicePortId_ok.Tapped += ServicePortId_Ok_Tapped;
                 servicePortId_cancel.Tapped += ServicePortId_Cancel_Tapped;
             }
 
             if (WorkOrderDualEntry)
             {
-                fieldOrder.Unfocused += (s, e) => { FieldOrder_validate(1); };
-                fieldOrder2.Unfocused += (s, e) => { FieldOrder_validate(2); };
+                fieldOrderInput.Unfocused += (s, e) => { FieldOrder_validate(1); };
+                fieldOrder2Input.Unfocused += (s, e) => { FieldOrder_validate(2); };
                 fieldOrder_ok.Tapped += FieldOrder_Ok_Tapped;
                 fieldOrder_cancel.Tapped += FieldOrder_Cancel_Tapped;
             }
 
             if (IndividualReadInterval)
             {
-                pickerReadInterval.IsEnabled = true;
-                read_view.Opacity = 1;
+                readIntervalPicker.IsEnabled = true;
+                readIntervalContainer.Opacity = 1;
 
             }
             else
             {
-                pickerReadInterval.IsEnabled = false;
-                read_view.Opacity = 0.8;
+                readIntervalPicker.IsEnabled = false;
+                readIntervalContainer.Opacity = 0.8;
             }
 
             if (UseMeterSerialNumber)
             {
-                mn_view.IsVisible = true;
+                meterSerialNumberContainer.IsVisible = true;
             }
             else
             {
-                mn_view.IsVisible = false;
+                meterSerialNumberContainer.IsVisible = false;
             }
 
         }
@@ -2191,7 +2191,7 @@ namespace aclara_meters.view
 
         private void ServicePortId_validate(int v)
         {
-            if (!servicePortId.Text.Equals(""))
+            if (!servicePortIdInput.Text.Equals(""))
             {
                 if (v == 1)
                 {
@@ -2211,7 +2211,7 @@ namespace aclara_meters.view
 
         private void FieldOrder_validate(int v)
         {
-            if (!fieldOrder.Text.Equals(""))
+            if (!fieldOrderInput.Text.Equals(""))
             {
 
                 if (v == 1)
@@ -2238,15 +2238,15 @@ namespace aclara_meters.view
             /** Check if visible fields are filled with the correct values in order to Enable Add MTU Cmd **/
 
             /////// Port 1 ///////
-            if (servicePortId.Text.Length < servicePortId.MaxLength)
+            if (servicePortIdInput.Text.Length < servicePortIdInput.MaxLength)
                 return false;
 
-            if (fo_view.IsVisible)
-                if (fieldOrder.Text.Length < fieldOrder.MaxLength)
+            if (fieldOrderContainer.IsVisible)
+                if (fieldOrderInput.Text.Length < fieldOrderInput.MaxLength)
                     return false;
 
-            if (mn_view.IsVisible)
-                if (meterNumber.Text.Length < meterNumber.MaxLength)
+            if (meterSerialNumberContainer.IsVisible)
+                if (meterSerialNumberInput.Text.Length < meterSerialNumberInput.MaxLength)
                     return false;
 
             if (EntriesStackLayout.Children[2].IsVisible)
@@ -2255,11 +2255,11 @@ namespace aclara_meters.view
                         if (name.Length < 0)
                             return false;
 
-            if (initialRead.Text.Length < initialRead.MaxLength)
+            if (initialReadInput.Text.Length < initialReadInput.MaxLength)
                 return false;
 
-            if (read_view.Opacity > 0.8)
-                if (pickerReadInterval.SelectedIndex == -1)
+            if (readIntervalContainer.Opacity > 0.8)
+                if (readIntervalPicker.SelectedIndex == -1)
                     return false;
 
             /*
@@ -2268,33 +2268,33 @@ namespace aclara_meters.view
                     isValid = false;
             */
 
-            if (TwoWay_Port1.IsVisible)
-                if (pickerTwoWay.SelectedIndex == -1)
+            if (twoWayContainer.IsVisible)
+                if (twoWayPicker.SelectedIndex == -1)
                     return false;
 
 
-            if (Alarms_Port1.IsVisible)
-                if (pickerAlarms.SelectedIndex == -1)
+            if (alarmsContainer.IsVisible)
+                if (alarmsPicker.SelectedIndex == -1)
                     return false;
 
 
-            if (Demands_Port1.IsVisible)
-                if (pickerDemands.SelectedIndex == -1)
+            if (demandsContainer.IsVisible)
+                if (demandsPicker.SelectedIndex == -1)
                     return false;
 
 
             /////// Port 2 ///////
 
-            if (servicePortId2.Text.Length < servicePortId2.MaxLength)
+            if (servicePortId2Input.Text.Length < servicePortId2Input.MaxLength)
                 return false;
 
-            if (fo_view2.IsVisible)
-                if (fieldOrder2.Text.Length < fieldOrder2.MaxLength)
+            if (fieldOrder2Container.IsVisible)
+                if (fieldOrder2Input.Text.Length < fieldOrder2Input.MaxLength)
                     return false;
 
 
-            if (mn_view2.IsVisible)
-                if (meterNumber2.Text.Length < meterNumber2.MaxLength)
+            if (meterSerialNumber2Container.IsVisible)
+                if (meterSerialNumber2Input.Text.Length < meterSerialNumber2Input.MaxLength)
                     return false;
 
 
@@ -2304,25 +2304,25 @@ namespace aclara_meters.view
                         if (name2.Length < 0)
                             return false;
 
-            if (initialRead2.Text.Length < initialRead2.MaxLength)
+            if (initialRead2Input.Text.Length < initialRead2Input.MaxLength)
                 return false;
 
-            if (read_view2.Opacity > 0.8)
-                if (pickerReadInterval2.SelectedIndex == -1)
+            if (readInterval2Container.Opacity > 0.8)
+                if (readInterval2Picker.SelectedIndex == -1)
                     return false;
 
-            if (TwoWay_Port2.IsVisible)
-                if (pickerTwoWay2.SelectedIndex == -1)
-                    return false;
-
-
-            if (Alarms_Port2.IsVisible)
-                if (pickerAlarms2.SelectedIndex == -1)
+            if (twoWay2Container.IsVisible)
+                if (twoWay2Picker.SelectedIndex == -1)
                     return false;
 
 
-            if (Demands_Port2.IsVisible)
-                if (pickerDemands2.SelectedIndex == -1)
+            if (alarms2Container.IsVisible)
+                if (alarms2Picker.SelectedIndex == -1)
+                    return false;
+
+
+            if (demands2Container.IsVisible)
+                if (demands2Picker.SelectedIndex == -1)
                     return false;
 
             /////// Misc ///////
@@ -2351,7 +2351,7 @@ namespace aclara_meters.view
         private void ServicePortId_Ok_Tapped(object sender, EventArgs e)
         {
 
-            if (servicePortId.Text.Equals(serviceCheckEntry.Text))
+            if (servicePortIdInput.Text.Equals(serviceCheckEntry.Text))
             {
                 errorServicePort.IsVisible = false;
                 dialog_open_bg.IsVisible = false;
@@ -2371,13 +2371,13 @@ namespace aclara_meters.view
             turnoff_mtu_background.IsVisible = false;
             dialog_servicePortId.IsVisible = false;
             errorServicePort.IsVisible = false;
-            servicePortId.Text = "";
+            servicePortIdInput.Text = "";
         }
 
         private void FieldOrder_Ok_Tapped(object sender, EventArgs e)
         {
 
-            if (fieldOrder.Text.Equals(fieldOrderCheckEntry.Text))
+            if (fieldOrderInput.Text.Equals(fieldOrderCheckEntry.Text))
             {
                 errorFieldOrder.IsVisible = false;
                 dialog_open_bg.IsVisible = false;
@@ -2397,7 +2397,7 @@ namespace aclara_meters.view
             turnoff_mtu_background.IsVisible = false;
             dialog_fieldOrder.IsVisible = false;
             errorFieldOrder.IsVisible = false;
-            fieldOrder.Text = "";
+            fieldOrderInput.Text = "";
         }
 
         #endregion
@@ -2716,14 +2716,14 @@ namespace aclara_meters.view
         private void AddMtu_Action()
         {
             // Create parameters with form fields content
-            addMtuForm.AddParameter(FIELD.SERVICE_PORT_ID, servicePortId.Text);
-            addMtuForm.AddParameter(FIELD.FIELD_ORDER, fieldOrder.Text);
-            addMtuForm.AddParameter(FIELD.METER_NUMBER, meterNumber.Text);
+            addMtuForm.AddParameter(FIELD.SERVICE_PORT_ID, servicePortIdInput.Text);
+            addMtuForm.AddParameter(FIELD.FIELD_ORDER, fieldOrderInput.Text);
+            addMtuForm.AddParameter(FIELD.METER_NUMBER, meterSerialNumberInput.Text);
             addMtuForm.AddParameter(FIELD.SELECTED_METER_ID, (Meter)MeterNamePicker.SelectedItem);
-            addMtuForm.AddParameter(FIELD.READ_INTERVAL, pickerReadInterval.SelectedItem.ToString());
+            addMtuForm.AddParameter(FIELD.READ_INTERVAL, readIntervalPicker.SelectedItem.ToString());
             addMtuForm.AddParameter(FIELD.SNAP_READS, SliderMain.Value.ToString());
-            addMtuForm.AddParameter(FIELD.TWO_WAY, pickerTwoWay.SelectedItem.ToString());
-            addMtuForm.AddParameter(FIELD.ALARM, (Alarm)pickerAlarms.SelectedItem);
+            addMtuForm.AddParameter(FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString());
+            addMtuForm.AddParameter(FIELD.ALARM, (Alarm)alarmsPicker.SelectedItem);
 
             //Create Ation when opening Form
             // TODO: usuario real

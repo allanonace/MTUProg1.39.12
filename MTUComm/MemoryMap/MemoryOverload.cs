@@ -9,9 +9,6 @@ namespace MTUComm.MemoryMap
     {
         private enum CUSTOM_TYPE { OPERATION, METHOD }
 
-        private const string METHOD       = "method";
-        private const string METHOD_KEY   = METHOD + ":";
-        private const string METHOD_SUFIX = "_Logic";
         private const string EXCEP_OVER_CUSTOM = "Custom field is empty";
 
         public Func<T> funcGet;
@@ -26,12 +23,12 @@ namespace MTUComm.MemoryMap
 
         private bool _HasCustomMethod
         {
-            get { return this.custom.ToLower ().StartsWith ( METHOD ); }
+            get { return this.custom.ToLower ().StartsWith ( MemoryMap.METHOD ); }
         }
 
         private bool _HasCustomMethodId
         {
-            get { return this.custom.ToLower ().StartsWith ( METHOD_KEY ); }
+            get { return this.custom.ToLower ().StartsWith (MemoryMap.METHOD_KEY ); }
         }
 
         private bool _HasCustomOperation
@@ -77,8 +74,8 @@ namespace MTUComm.MemoryMap
             if ( this.HasCustomMethod )
             {
                 if ( this._HasCustomMethodId )
-                     this.methodId = this.custom.Substring ( METHOD_KEY.Length );
-                else this.methodId = this.id + METHOD_SUFIX;
+                     this.methodId = this.custom.Substring ( MemoryMap.METHOD_KEY.Length );
+                else this.methodId = this.id + MemoryMap.METHOD_SUFIX_GET;
             }
         }
 
