@@ -19,12 +19,12 @@ namespace MTUComm
         private const string XML_DEMANDS = "DemandConf.xml";
 
         private String mbase_path;
-        private MtuTypes mtuTypes;
-        private MeterTypes meterTypes;
-        private Global global;
-        private InterfaceConfig interfaces;
-        private AlarmList alarms;
-        private DemandConf demands;
+        public MtuTypes mtuTypes;
+        public MeterTypes meterTypes;
+        public Global global;
+        public InterfaceConfig interfaces;
+        public AlarmList alarms;
+        public DemandConf demands;
 
         private string device;
         private string deviceUUID;
