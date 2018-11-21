@@ -301,6 +301,7 @@ namespace MTUComm.MemoryMap
 
         #region Create Property Get
 
+        // Custom header format: public T Id_Get|CustomId ( MemoryRegister<T> MemoryRegister )
         private void CreateProperty_Get<T> ( MemoryRegister<T> memoryRegister )
         {
             // All register have normal get block
@@ -353,6 +354,8 @@ namespace MTUComm.MemoryMap
             }
         }
 
+        // Custom header format 1: public T Id_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters ) <- ExpandoObject
+        // Custom header format 2: public T Id_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic[] MemoryRegisters )
         private void CreateOverload_Get<T> ( MemoryOverload<T> memoryOverload )
         {
             bool useParamArray = false;
@@ -423,6 +426,8 @@ namespace MTUComm.MemoryMap
 
         #region Create Property Set
 
+        // Using custom method we can't be assured of the type used for parameter, but yes about return value
+        // Custom header format: public T Id_Get|CustomId ( MemoryRegister<T> MemoryRegister, dynamic value )
         public void CreateProperty_Set<T>( MemoryRegister<T> memoryRegister )
         {
             base.AddMethod ( METHODS_SET_PREFIX + memoryRegister.id,
@@ -976,9 +981,6 @@ namespace MTUComm.MemoryMap
 
             return GetPortStatus(MemoryRegisters.P2StatusFlag.Value);
         }
-
-
-        
 
         #endregion
 
