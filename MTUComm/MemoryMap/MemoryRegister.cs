@@ -1,9 +1,8 @@
 ﻿using System;
 using Xml;
 
-using RegType = MTUComm.MemoryMap.MemoryMap.RegType;
 using REGISTER_TYPE = MTUComm.MemoryMap.AMemoryMap.REGISTER_TYPE;
-using System.Text;
+using RegType       = MTUComm.MemoryMap.MemoryMap.RegType;
 
 namespace MTUComm.MemoryMap
 {
@@ -12,10 +11,6 @@ namespace MTUComm.MemoryMap
         #region Constants
 
         private enum CUSTOM_TYPE { EMPTY, METHOD, OPERATION, FORMAT }
-
-        private const string METHOD       = "method";
-        private const string METHOD_KEY   = METHOD + ":";
-        private const string METHOD_SUFIX = "_Logic";
 
         #endregion
 
@@ -58,12 +53,12 @@ namespace MTUComm.MemoryMap
 
         private bool _HasCustomMethod_Get
         {
-            get { return this.custom_Get.ToLower ().StartsWith ( METHOD ); }
+            get { return this.custom_Get.ToLower ().StartsWith ( MemoryMap.METHOD ); }
         }
 
         private bool _HasCustomMethodId_Get
         {
-            get { return this.custom_Get.ToLower ().StartsWith ( METHOD_KEY ); }
+            get { return this.custom_Get.ToLower ().StartsWith ( MemoryMap.METHOD_KEY ); }
         }
 
         private bool _HasCustomOperation_Get
@@ -106,12 +101,12 @@ namespace MTUComm.MemoryMap
 
         private bool _HasCustomMethod_Set
         {
-            get { return this.custom_Set.ToLower ().StartsWith ( METHOD ); }
+            get { return this.custom_Set.ToLower ().StartsWith ( MemoryMap.METHOD ); }
         }
 
         private bool _HasCustomMethodId_Set
         {
-            get { return this.custom_Set.ToLower ().StartsWith ( METHOD_KEY ); }
+            get { return this.custom_Set.ToLower ().StartsWith ( MemoryMap.METHOD_KEY ); }
         }
 
         private bool _HasCustomOperation_Set
@@ -223,8 +218,8 @@ namespace MTUComm.MemoryMap
             if ( this.HasCustomMethod_Get )
             {
                 if ( this._HasCustomMethodId_Get )
-                     this.methodId_Get = this.custom_Get.Substring ( METHOD_KEY.Length + 1 );
-                else this.methodId_Get = this.id + METHOD_SUFIX;
+                     this.methodId_Get = this.custom_Get.Substring ( MemoryMap.METHOD_KEY.Length + 1 );
+                else this.methodId_Get = this.id + MemoryMap.METHOD_SUFIX_GET;
             }
 
             // Custom Set
@@ -236,8 +231,8 @@ namespace MTUComm.MemoryMap
             if ( this.HasCustomMethod_Set )
             {
                 if ( this._HasCustomMethodId_Set )
-                     this.methodId_Set = this.custom_Set.Substring ( METHOD_KEY.Length + 1 );
-                else this.methodId_Set = this.id + METHOD_SUFIX;
+                     this.methodId_Set = this.custom_Set.Substring ( MemoryMap.METHOD_KEY.Length + 1 );
+                else this.methodId_Set = this.id + MemoryMap.METHOD_SUFIX_SET;
             }  
         }
 

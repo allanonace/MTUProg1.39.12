@@ -66,21 +66,29 @@ namespace MTUComm.MemoryMap
 
         private const string XML_PREFIX         = "family_";
         private const string XML_EXTENSION      = ".xml";
+
         private const string METHODS_GET_PREFIX = "get_";
+        private const string METHODS_SET_PREFIX = "set_";
         private const string METHODS_GET_CUSTOM_PREFIX = "getCustom_";
         private const string METHODS_SET_CUSTOM_PREFIX = "setCustom_";
-        private const string METHODS_SET_PREFIX = "set_";
         private const string METHODS_SET_STRING_PREFIX = METHODS_SET_PREFIX + "string_";
-        private const string METHODS_SET_BYTE_PREFIX = METHODS_SET_PREFIX + "byte_";
+        private const string METHODS_SET_BYTE_PREFIX   = METHODS_SET_PREFIX + "byte_";
+
+        public  const string METHOD             = "method";
+        public  const string METHOD_KEY         = METHOD + ":";
+        public  const string METHOD_SUFIX_SET   = "_Set";
+        public  const string METHOD_SUFIX_GET   = "_Get";
+        
         private const string REGISTER_OP        = "_val_";
         private const string OVERLOAD_OP_SIGN   = "#";
         private const string OVERLOAD_OP        = "_" + OVERLOAD_OP_SIGN + "_";
+
         private const string EXCEP_SET_INT      = "String argument can't be casted to int";
         private const string EXCEP_SET_UINT     = "String argument can't be casted to uint";
         private const string EXCEP_SET_ULONG    = "String argument can't be casted to ulong";
         public  const string EXCEP_SET_USED     = "The specified record has not been mapped";
         public  const string EXCEP_SET_READONLY = "The specified record is readonly";
-        private const string EXCEP_CUST_METHOD  = "Method '#' is not present in MTU family class";
+        private const string EXCEP_CUST_METHOD  = "Custom method '#' is not present in MTU family class";
 
         #endregion
 
@@ -572,7 +580,7 @@ namespace MTUComm.MemoryMap
             for (int b = 0; b < size; b++)
                 value += (ulong)memory[address + b] << (b * 8);
 
-            return BcdToULong(value);
+            return value;
         }
 
         protected bool GetBoolFromMem(int address, int bit_index = MemRegister.DEF_BIT)
@@ -631,7 +639,7 @@ namespace MTUComm.MemoryMap
         protected void SetULongToMem(ulong value, int address, int size = MemRegister.DEF_SIZE)
         {
             for (int b = 0; b < size; b++)
-                this.memory[address + b] = (byte)(this.ULongToBcd(value.ToString()) >> (b * 8));
+                this.memory[address + b] = (byte)(value >> (b * 8));
         }
 
         private void SetULongToMem(string value, int address, int size = MemRegister.DEF_SIZE)
@@ -641,7 +649,7 @@ namespace MTUComm.MemoryMap
                 throw new SetMemoryFormatException(EXCEP_SET_ULONG + ": " + value);
             else
                 for (int b = 0; b < size; b++)
-                    this.memory[address + b] = (byte)(this.ULongToBcd(value) >> (b * 8));
+                    this.memory[address + b] = (byte)(vCasted >> (b * 8));
         }
 
         protected void SetBoolToMem (bool value, int address, int bit_index = MemRegister.DEF_BIT)
@@ -737,42 +745,6 @@ namespace MTUComm.MemoryMap
 
         #endregion
 
-        #region BCD
-
-        private ulong BcdToULong ( ulong valueInBCD )
-        {
-            // Define powers of 10 for the BCD conversion routines.
-            ulong powers = 1;
-            ulong outNum = 0;
-            byte tempNum;
-
-            for (int offset = 0; offset < 7; offset++)
-            {
-                tempNum = (byte)((valueInBCD >> offset * 8) & 0xff);
-                if ((tempNum & 0x0f) > 9)
-                {
-                    break;
-                }
-                outNum += (ulong)(tempNum & 0x0f) * powers;
-                powers *= 10;
-                if ((tempNum >> 4) > 9)
-                {
-                    break;
-                }
-                outNum += (ulong)(tempNum >> 4) * powers;
-                powers *= 10;
-            }
-
-            return outNum;
-        }
-
-        private ulong ULongToBcd ( string value )
-        {
-            return ulong.Parse ( value, System.Globalization.NumberStyles.HexNumber );
-        }
-
-        #endregion
-
         #region Used
 
         public void SetRegisterModified ( string id )
@@ -857,7 +829,7 @@ namespace MTUComm.MemoryMap
 
         #region Overloads
 
-        public string DailySnap_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string DailySnap_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             int timeDiff = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).Hours;
             int curTime = MemoryRegisters.DailyGMTHourRead.Value + timeDiff;
@@ -876,25 +848,25 @@ namespace MTUComm.MemoryMap
                 return "Off";
         }
 
-        public string MtuStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string MtuStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return MemoryRegisters.Shipbit.Value ? "OFF" : "ON";
         }
 
-        public string ReadInterval_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string ReadInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return timeFormatter(MemoryRegisters.ReadIntervalMinutes.Value);
         }
 
-        public string XmitInterval_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string XmitInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return timeFormatter(MemoryRegisters.ReadIntervalMinutes.Value * MemoryRegisters.MessageOverlapCount.Value);
         }
 
-        public string PCBNumber_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string PCBNumber_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return string.Format("{0}-{1:000000000}-{2}",
                 Convert.ToChar(MemoryRegisters.PCBSupplierCode.Value),
@@ -902,59 +874,59 @@ namespace MTUComm.MemoryMap
                 Convert.ToChar(MemoryRegisters.PCBProductRevision.Value));
         }
 
-        public string MtuSoftware_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string MtuSoftware_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return string.Format("Version {0:00}", MemoryRegisters.MTUFirmwareVersionFormatFlag.Value);
         }
 
-        public string Encryption_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string Encryption_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return MemoryRegisters.Encrypted.Value ? "Yes" : "No";
         }
 
-        public string MtuVoltageBattery_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string MtuVoltageBattery_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return ((MemoryRegisters.MtuMiliVoltageBattery.Value * 1.0) / 1000).ToString("0.00 V");
         }
 
-        public string P1ReadingError_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string P1ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return translateErrorCodes(MemoryRegisters.P1ReadingErrorCode.Value);
         }
 
-        public string P2ReadingError_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string P2ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return translateErrorCodes(MemoryRegisters.P2ReadingErrorCode.Value);
         }
 
-        public string InterfaceTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string InterfaceTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return GetTemperStatus(MemoryRegisters.P1InterfaceAlarm.Value, MemoryRegisters.ProgrammingCoilInterfaceTamper.Value);
         }
 
-        public string TiltTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string TiltTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return GetTemperStatus(MemoryRegisters.P1TiltAlarm.Value, MemoryRegisters.TiltTamper.Value);
         }
 
-        public string MagneticTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string MagneticTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return GetTemperStatus(MemoryRegisters.P1MagneticAlarm.Value, MemoryRegisters.MagneticTamper.Value);
         }
 
-        public string RegisterCoverTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string RegisterCoverTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return GetTemperStatus(MemoryRegisters.P1RegisterCoverAlarm.Value, MemoryRegisters.RegisterCoverTamper.Value);
         }
 
-        public string ReverseFlowTamperStatus_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string ReverseFlowTamperStatus(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return GetTemperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
@@ -962,28 +934,24 @@ namespace MTUComm.MemoryMap
 
         #endregion
 
-        #region Registers GET
+        #region Registers
 
-        public string F12WAYRegister1_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string F12WAYRegister1_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return "0x" + MemoryRegisters.F12WAYRegister1Int.Value.ToString("X8");
         }
 
-        public string F12WAYRegister10_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string F12WAYRegister10_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return "0x" + MemoryRegisters.F12WAYRegister10Int.Value.ToString("X8");
         }
 
-        public string F12WAYRegister14_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string F12WAYRegister14_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return "0x" + MemoryRegisters.F12WAYRegister14Int.Value.ToString("X8");
         }
 
-        #endregion
-
-        #region Registers SET
-
-        public int ReadIntervalMinutes_Logic(MemoryRegister<int> MemoryRegister, dynamic inputValue)
+        public int ReadIntervalMinutes_Set (MemoryRegister<int> MemoryRegister, dynamic inputValue)
         {
             string[] readIntervalArray = ((string)inputValue).Split(' ');
             string readIntervalStr = readIntervalArray[0];
@@ -1066,11 +1034,48 @@ namespace MTUComm.MemoryMap
             }
         }
 
+        public ulong BcdToULong ( ulong valueInBCD )
+        {
+            // Define powers of 10 for the BCD conversion routines.
+            ulong powers = 1;
+            ulong outNum = 0;
+            byte tempNum;
+
+            for (int offset = 0; offset < 7; offset++)
+            {
+                tempNum = (byte)((valueInBCD >> offset * 8) & 0xff);
+                if ((tempNum & 0x0f) > 9)
+                {
+                    break;
+                }
+                outNum += (ulong)(tempNum & 0x0f) * powers;
+                powers *= 10;
+                if ((tempNum >> 4) > 9)
+                {
+                    break;
+                }
+                outNum += (ulong)(tempNum >> 4) * powers;
+                powers *= 10;
+            }
+
+            return outNum;
+        }
+
+        public ulong ULongToBcd ( string value )
+        {
+            return ulong.Parse(value, System.Globalization.NumberStyles.HexNumber);
+        }
+
+        public ulong ULongToBcd ( ulong value )
+        {
+            return this.ULongToBcd ( value.ToString () );
+        }
+
         #endregion
 
         #region e-Coder
 
-        public string BackFlowState_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string BackFlowState_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             string reply = string.Empty;
             string param = Convert.ToString(MemoryRegisters.FlowState.Value, 2).PadLeft(8, '0').Substring(6);
@@ -1089,7 +1094,7 @@ namespace MTUComm.MemoryMap
             return reply;
         }
 
-        public string DaysOfNoFlow_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string DaysOfNoFlow_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             string reply = string.Empty;
             string param = Convert.ToString(MemoryRegisters.FlowState.Value, 2).PadLeft(8, '0').Substring(3, 3);
@@ -1121,7 +1126,7 @@ namespace MTUComm.MemoryMap
             return reply + " days of no consumption";
         }
 
-        public string LeakDetection_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string LeakDetection_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             string reply = string.Empty;
             string param = Convert.ToString(MemoryRegisters.LeakState.Value, 2).PadLeft(8, '0').Substring(5, 2);
@@ -1140,7 +1145,7 @@ namespace MTUComm.MemoryMap
             return reply;
         }
 
-        public string DaysOfLeak_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string DaysOfLeak_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             string reply = string.Empty;
             string param = Convert.ToString(MemoryRegisters.LeakState.Value, 2).PadLeft(8, '0').Substring(2, 3);
