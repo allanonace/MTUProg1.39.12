@@ -333,54 +333,57 @@ namespace MTUComm
                 {
                     if (parameter.Name.Equals("MeterReading"))
                     {
-                        string meter_reading_error = registers.GetProperty("P" + (portnumber + 1) + "ReadingError").Value.ToString();
-                        if (meter_reading_error.Length < 1)
+                        if (validateCondition(parameter.Conditional, registers, mtutype, "P" + (portnumber + 1)))
                         {
-                            int meter_reading = 0;
-                            try
+                            string meter_reading_error = registers.GetProperty("P" + (portnumber + 1) + "ReadingError").Value.ToString();
+                            if (meter_reading_error.Length < 1)
                             {
-                                meter_reading = registers.GetProperty("P" + (portnumber + 1) + "Reading").Value;
-                            }
-                            catch (Exception e) { }
+                                int meter_reading = 0;
+                                try
+                                {
+                                    meter_reading = registers.GetProperty("P" + (portnumber + 1) + "Reading").Value;
+                                }
+                                catch (Exception e) { }
 
-                            int tempReadingVal = 0;
-                            if (mtutype.PulseCountOnly)
-                            {
-                                tempReadingVal = meter_reading * (int)Metertype.HiResScaling;
+                                int tempReadingVal = 0;
+                                if (mtutype.PulseCountOnly)
+                                {
+                                    tempReadingVal = meter_reading * (int)Metertype.HiResScaling;
+                                }
+                                else
+                                {
+                                    tempReadingVal = meter_reading;
+                                }
+
+
+                                String tempReading = tempReadingVal.ToString();
+                                if (Metertype.LiveDigits < tempReading.Length)
+                                {
+                                    tempReading = tempReading.Substring(tempReading.Length - Metertype.LiveDigits - (tempReading.IndexOf('.') > -1 ? 1 : 0));
+                                }
+                                else
+                                {
+                                    tempReading = tempReading.PadLeft(Metertype.LiveDigits, '0');
+                                }
+                                if (Metertype.LeadingDummy > 0) // KG 12/08/2008
+                                    tempReading = tempReading.PadLeft(tempReading.Length + Metertype.LeadingDummy, configuration.useDummyDigits() ? 'X' : '0');
+                                if (Metertype.DummyDigits > 0)  // KG 12/08/2008
+                                    tempReading = tempReading.PadRight(tempReading.Length + Metertype.DummyDigits, configuration.useDummyDigits() ? 'X' : '0');
+                                if (Metertype.Scale > 0 && tempReading.IndexOf(".") == -1) // 8.12.2011 KG add for F1 Pulse
+                                    tempReading = tempReading.Insert(tempReading.Length - Metertype.Scale, ".");
+                                if (Metertype.PaintedDigits > 0 && configuration.useDummyDigits()) // KG 12/08/2008
+                                    tempReading = tempReading.PadRight(tempReading.Length + Metertype.PaintedDigits, '0').Insert(tempReading.Length, " - ");
+
+                                if (tempReading == "")
+                                {
+                                    tempReading = "INVALID";
+                                }
+                                result.AddParameter(new Parameter(parameter.Name, parameter.Display, tempReading));
                             }
                             else
                             {
-                                tempReadingVal = meter_reading;
+                                result.AddParameter(new Parameter(parameter.Name, parameter.Display, meter_reading_error));
                             }
-
-
-                            String tempReading = tempReadingVal.ToString();
-                            if (Metertype.LiveDigits < tempReading.Length)
-                            {
-                                tempReading = tempReading.Substring(tempReading.Length - Metertype.LiveDigits - (tempReading.IndexOf('.') > -1 ? 1 : 0));
-                            }
-                            else
-                            {
-                                tempReading = tempReading.PadLeft(Metertype.LiveDigits, '0');
-                            }
-                            if (Metertype.LeadingDummy > 0) // KG 12/08/2008
-                                tempReading = tempReading.PadLeft(tempReading.Length + Metertype.LeadingDummy, configuration.useDummyDigits() ? 'X' : '0');
-                            if (Metertype.DummyDigits > 0)  // KG 12/08/2008
-                                tempReading = tempReading.PadRight(tempReading.Length + Metertype.DummyDigits, configuration.useDummyDigits() ? 'X' : '0');
-                            if (Metertype.Scale > 0 && tempReading.IndexOf(".") == -1) // 8.12.2011 KG add for F1 Pulse
-                                tempReading = tempReading.Insert(tempReading.Length - Metertype.Scale, ".");
-                            if (Metertype.PaintedDigits > 0 && configuration.useDummyDigits()) // KG 12/08/2008
-                                tempReading = tempReading.PadRight(tempReading.Length + Metertype.PaintedDigits, '0').Insert(tempReading.Length, " - ");
-
-                            if(tempReading == "")
-                            {
-                                tempReading = "INVALID";
-                            }
-                            result.AddParameter(new Parameter(parameter.Name, parameter.Display, tempReading));
-                        }
-                        else
-                        {
-                            result.AddParameter(new Parameter(parameter.Name, parameter.Display, meter_reading_error));
                         }
 
                     }

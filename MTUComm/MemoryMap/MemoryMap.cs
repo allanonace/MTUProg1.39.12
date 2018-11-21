@@ -896,11 +896,23 @@ namespace MTUComm.MemoryMap
 
         public string PCBNumber_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            string pbc_number = string.Format("{0}-{1:000000000}-{2}",
-                Convert.ToChar(MemoryRegisters.PCBSupplierCode.Value),
-                MemoryRegisters.PCBCoreNumber.Value,
-                Convert.ToChar(MemoryRegisters.PCBProductRevision.Value));
-            return pbc_number.Replace('\0', '0');
+            string tempString = string.Empty;
+            //ASCII RANGE FOR PCBSupplierCode
+            if (MemoryRegisters.PCBSupplierCode.Value >=65 && MemoryRegisters.PCBSupplierCode.Value <= 90)
+            {
+                tempString = tempString + Convert.ToChar(MemoryRegisters.PCBSupplierCode.Value) + "-";
+            }
+
+            if(MemoryRegisters.PCBCoreNumber.Value >= 0)
+            {
+                tempString = tempString + string.Format("{0:000000000}", MemoryRegisters.PCBCoreNumber.Value);
+            }
+
+            if (MemoryRegisters.PCBProductRevision.Value >= 65 && MemoryRegisters.PCBProductRevision.Value <= 90)
+            {
+                tempString = tempString + "-" +Convert.ToChar(MemoryRegisters.PCBProductRevision.Value);
+            }
+            return tempString.Equals(String.Empty) ? "Not Available" : tempString;
         }
 
         public string MtuSoftware_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
