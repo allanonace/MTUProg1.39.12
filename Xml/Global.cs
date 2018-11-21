@@ -184,8 +184,24 @@ namespace Xml
         [XmlElement("DailyReadingOffset")]
         public int DailyReadingOffset { get; set; }
 
-        [XmlElement("DailyReadsDefault")]
+        [XmlIgnore]
         public int DailyReadsDefault { get; set; }
+
+        [XmlElement("DailyReadsDefault")]
+        public string DailyReadsDefaultAllowEmptyField
+        {
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    int v;
+                    if (int.TryParse(value, out v))
+                        this.DailyReadsDefault = v;
+                    else this.DailyReadsDefault = -1;
+                }
+                else this.DailyReadsDefault = -1;
+            }
+        }
 
         [XmlElement("dangerosZone")]
         public string dangerosZone { get; set; }
