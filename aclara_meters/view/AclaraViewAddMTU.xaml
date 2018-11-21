@@ -275,7 +275,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="MeterNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="meterSerialNumberInput" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
                                                                 FontSize="17" HorizontalTextAlignment="Start"/>
                                                     </StackLayout>
@@ -374,7 +374,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text="" MaxLength="10"  Keyboard="Numeric"
-                                                                HeightRequest="40"   x:Name="servicePortId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="servicePortIdInput" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
@@ -392,7 +392,7 @@
 
 
                                
-                                    <StackLayout x:Name="fo_view">
+                                    <StackLayout x:Name="fieldOrderContainer">
                                    
                                         <!-- Field Order -->
                                          <Label Text="Field Order" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
@@ -403,7 +403,7 @@
                                               <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                         <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                              <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                    HeightRequest="40"   x:Name="fieldOrder" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                    HeightRequest="40"   x:Name="fieldOrderInput" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                     Placeholder="" PlaceholderColor="#7a868c" MaxLength="20"  Keyboard="Numeric"
                                                                     FontSize="17" HorizontalTextAlignment="Start">
 
@@ -421,7 +421,7 @@
                                     </StackLayout>
 
                                     
-                                    <StackLayout x:Name="mn_view">
+                                    <StackLayout x:Name="meterSerialNumberContainer">
                                          <!-- Meter Number -->
                                          <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                                  />
@@ -431,7 +431,7 @@
                                               <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                         <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                              <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                    HeightRequest="40"   x:Name="meterNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                    HeightRequest="40"   x:Name="MeterNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                     Placeholder="" PlaceholderColor="#7a868c"  MaxLength="12"  Keyboard="Numeric"
                                                                     FontSize="17" HorizontalTextAlignment="Start">
 
@@ -471,7 +471,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="initialRead" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="initialReadInput" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
@@ -497,10 +497,10 @@
                                           
                                       
                                      <Frame CornerRadius="6"   HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                          <Frame CornerRadius="6"  HeightRequest="30" x:Name="read_view"  Opacity="1" Margin="-7" BackgroundColor="White"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30" x:Name="readIntervalContainer"  Opacity="1" Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
-                                                         <Controls:BorderlessPicker x:Name="pickerReadInterval" Title="" 
+                                                         <Controls:BorderlessPicker x:Name="readIntervalPicker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
                                                               SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
                                                            />
@@ -548,7 +548,7 @@
 
 
 
-                                 <StackLayout  Margin="0,4,0,0" x:Name="TwoWay_Port1" >  
+                                 <StackLayout  Margin="0,4,0,0" x:Name="twoWayContainer" >  
                                       <Label Text="2-Way" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
@@ -557,7 +557,7 @@
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
-                                                         <Controls:BorderlessPicker x:Name="pickerTwoWay" Title="" 
+                                                         <Controls:BorderlessPicker x:Name="twoWayPicker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
                                                               SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
                                                            />
@@ -571,7 +571,7 @@
 
 
 
-                                 <StackLayout  Margin="0,4,0,0" x:Name="Alarms_Port1" >  
+                                 <StackLayout  Margin="0,4,0,0" x:Name="alarmsContainer" >  
                                       <Label Text="Alarm Settings" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
@@ -580,7 +580,7 @@
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
-                                                         <Controls:BorderlessPicker x:Name="pickerAlarms" Title="" 
+                                                         <Controls:BorderlessPicker x:Name="alarmsPicker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
                                                               SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
                                                            />
@@ -592,7 +592,7 @@
                                   </StackLayout>
 
 
-                                    <StackLayout  Margin="0,4,0,0" x:Name="Demands_Port1" >  
+                                    <StackLayout  Margin="0,4,0,0" x:Name="demandsContainer" >  
                                       <Label Text="Demand Settings" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
@@ -601,7 +601,7 @@
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
-                                                         <Controls:BorderlessPicker x:Name="pickerDemands" Title="" 
+                                                         <Controls:BorderlessPicker x:Name="demandsPicker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
                                                               SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
                                                            />
@@ -650,7 +650,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text="" MaxLength="10"  Keyboard="Numeric"
-                                                                HeightRequest="40"   x:Name="servicePortId2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="servicePortId2Input" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
@@ -669,7 +669,7 @@
 
 
                                
-                                 <StackLayout x:Name="fo_view2">
+                                 <StackLayout x:Name="fieldOrder2Container">
                                 
                                     <!-- Field Order -->
                                      <Label Text="Field Order" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
@@ -681,7 +681,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="fieldOrder2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="fieldOrder2Input" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" MaxLength="20"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
@@ -699,7 +699,7 @@
 
                                 </StackLayout>
 
-                                     <StackLayout x:Name="mn_view2">
+                                     <StackLayout x:Name="meterSerialNumber2Container">
                                         
                                      <!-- Meter Number -->
                                      <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
@@ -711,7 +711,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="meterNumber2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="meterSerialNumber2Input" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
@@ -748,7 +748,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="initialRead2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="initialRead2Input" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
@@ -773,10 +773,10 @@
                                           
                                       
                                      <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                          <Frame CornerRadius="6"  HeightRequest="30"  x:Name="read_view2"   Margin="-7" BackgroundColor="White"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  x:Name="readInterval2Container"   Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
-                                                         <Controls:BorderlessPicker x:Name="pickerReadInterval2" Title="" 
+                                                         <Controls:BorderlessPicker x:Name="readInterval2Picker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
                                                               SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
                                                            />
@@ -824,7 +824,7 @@
 
 
 
-                                   <StackLayout  Margin="0,4,0,0" x:Name="TwoWay_Port2" >  
+                                   <StackLayout  Margin="0,4,0,0" x:Name="twoWay2Container" >  
                                       <Label Text="2-Way" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
@@ -833,7 +833,7 @@
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
-                                                         <Controls:BorderlessPicker x:Name="pickerTwoWay2" Title="" 
+                                                         <Controls:BorderlessPicker x:Name="twoWay2Picker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
                                                               SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
                                                            />
@@ -848,7 +848,7 @@
 
 
 
-                                 <StackLayout  Margin="0,4,0,0" x:Name="Alarms_Port2" >  
+                                 <StackLayout  Margin="0,4,0,0" x:Name="alarms2Container" >  
                                       <Label Text="Alarm Settings" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
@@ -857,7 +857,7 @@
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
-                                                         <Controls:BorderlessPicker x:Name="pickerAlarms2" Title="" 
+                                                         <Controls:BorderlessPicker x:Name="alarms2Picker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
                                                               SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
                                                            />
@@ -869,7 +869,7 @@
                                   </StackLayout>
 
 
-                                    <StackLayout  Margin="0,4,0,0" x:Name="Demands_Port2" >  
+                                    <StackLayout  Margin="0,4,0,0" x:Name="demands2Container" >  
                                       <Label Text="Demand Settings" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
@@ -878,7 +878,7 @@
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
-                                                         <Controls:BorderlessPicker x:Name="pickerDemands2" Title="" 
+                                                         <Controls:BorderlessPicker x:Name="demands2Picker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
                                                               SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
                                                            />
