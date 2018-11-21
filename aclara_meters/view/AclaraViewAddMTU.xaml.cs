@@ -77,10 +77,10 @@ namespace aclara_meters.view
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
 
-        private double StepValue;
-        private Slider SliderMain;
-        private double StepValue2;
-        private Slider SliderMain2;
+        private double snapReadsStep;
+        //private Slider snapReadsSlider;
+        private double snapReads2Step;
+        //private Slider snapReads2Slider;
 
         private BorderlessPicker MeterVendorPicker;
         private BorderlessPicker MeterModelPicker;
@@ -116,11 +116,11 @@ namespace aclara_meters.view
         private BorderlessPicker MeterTwoWayPort1Picker;
         private BorderlessPicker MeterAlarmSettingsPort1Picker;
 
-        private List<Alarm> alarmListPort1 = new List<Alarm>();
-        private List<Alarm> alarmListPort2 = new List<Alarm>();
+        private List<Alarm> alarmsList = new List<Alarm>();
+        private List<Alarm> alarms2List = new List<Alarm>();
 
-        private List<Demand> demandListPort1 = new List<Demand>();
-        private List<Demand> demandListPort2 = new List<Demand>();
+        private List<Demand> demandsList = new List<Demand>();
+        private List<Demand> demands2List = new List<Demand>();
 
         #endregion
 
@@ -130,6 +130,8 @@ namespace aclara_meters.view
         private MtuTypes mtuData;
         private Mtu currentMtu;
         private AddMtuForm addMtuForm;
+        private int detectedMtuType;
+        private Configuration config;
 
         private List<ReadMTUItem> FinalReadListView { get; set; }
 
@@ -184,27 +186,18 @@ namespace aclara_meters.view
 
         public AclaraViewAddMTU(IUserDialogs dialogs)
         {
-            /*// TEST
-            byte[] memory = new byte[400];
-            dynamic map = new MTUComm.MemoryMap.MemoryMap(memory, "31xx32xx"); // TODO: identify map by mtu type
-            map.ReadInterval = "24 Hours";
-            map.MessageOverlapCount = 5;
-            map.P1Reading = 0;
-            map.P1MeterId = "1";
-            map.P1MeterType = "1";
-            map.EncryptionKey = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-            List<dynamic> modifiedRegisters = map.GetModifiedRegisters().GetAllElements();
-            // END TEST */
-
             InitializeComponent();
+            this.config = Configuration.GetInstance();
 
             /* Get detected mtu */
             MTUBasicInfo mtuBasicInfo = MtuForm.mtuBasicInfo;
-            int DetectedMtuType = (int)mtuBasicInfo.Type;
-            currentMtu = FormsApp.config.GetMtuTypeById(DetectedMtuType);
+            this.detectedMtuType = (int)mtuBasicInfo.Type;
+            currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
 
             /* Instantiate form */
             addMtuForm = new AddMtuForm(currentMtu);
+
+            // Add conditions
 
             // Two Ports
             addMtuForm.conditions.mtu.AddCondition("TwoPorts");
@@ -215,7 +208,7 @@ namespace aclara_meters.view
             // Meter Number (serial number)
             addMtuForm.conditions.globals.AddCondition("UseMeterSerialNumber");
 
-            // Vendor / Meter / Name
+            // Vendor / Model / Name
             addMtuForm.conditions.globals.AddCondition("ShowMeterVendor");
 
             // Read Interval 
@@ -236,23 +229,6 @@ namespace aclara_meters.view
 
             // Demands
             addMtuForm.conditions.mtu.AddCondition("MtuDemand");
-
-            foreach ( KeyValuePair<string,bool> entry in addMtuForm.conditions.mtu.dictionary )
-                Console.WriteLine ( entry.Key + " " + entry.Value );
-
-            foreach (KeyValuePair<string, bool> entry in addMtuForm.conditions.globals.dictionary)
-                Console.WriteLine(entry.Key + " " + entry.Value);
-
-            /* Get meters for detected mtu */
-            MeterTypes m = FormsApp.config.GetMeterTypes();
-            // TODO: dos puertos
-            this.meters = m.FindByPortTypeAndFlow(currentMtu.Ports[0].Type, currentMtu.Flow);
-            //this.meters2 = m.FindByPortTypeAndFlow(currentMtu.Ports[1].Type, currentMtu.Flow);
-            this.meters2 = this.meters;
-
-            /* Get alarms for detected mtu */
-            alarmListPort1 = FormsApp.config.Alarms.FindByMtuType(DetectedMtuType);
-            alarmListPort2 = FormsApp.config.Alarms.FindByMtuType(DetectedMtuType);
 
             isCancellable = false;
 
@@ -286,9 +262,6 @@ namespace aclara_meters.view
             // Load side menu list
             LoadSideMenuElements();
 
-            //Init picker list elements
-            InitPickerList();
-
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
 
 
@@ -314,12 +287,16 @@ namespace aclara_meters.view
 
             InitializeLowerbarLabel();
 
-            InitializeBlocks();
+            InitializeAddMtuForm();
 
+            InitializeMeterVendorModelName();
+            // TODO
+            //InitializeMeterVendorModelName2();
+            InitMTULocationPicker();
+            InitMeterLocationPicker();
+            InitConstructionPicker();
 
-            TestOptionalFields();
-
-            Validations();
+            RegisterEventHandlers();
 
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
@@ -348,15 +325,307 @@ namespace aclara_meters.view
             ));
         }
 
-        private void InitializeBlocks()
+        private void InitializeAddMtuForm()
         {
-            ColectionElementsPort1();
-            ColectionElementsPort2();
-            InitMTULocationPicker();
-            InitMeterLocationPicker();
-            InitConstructionPicker();
-        }
+            #region Conditions
+            dynamic MtuConditions = addMtuForm.conditions.mtu;
+            dynamic GlobalsConditions = addMtuForm.conditions.globals;
+            #endregion
 
+            // TODO
+            #region Two ports
+            bool TwoPorts = MtuConditions.TwoPorts;
+            TwoPorts = true;
+            if (TwoPorts)
+            {
+                // TODO: enable second port
+            }
+            else
+            {
+                // TODO: disable second port
+            }
+            #endregion
+
+            #region Field Order (Work Order)
+
+            fieldOrderContainer.IsVisible = false;
+            fieldOrderContainer.IsEnabled = false;
+            fieldOrder2Container.IsVisible = false;
+            fieldOrder2Container.IsEnabled = false;
+
+            bool WorkOrderRecording = GlobalsConditions.WorkOrderRecording;
+            if (WorkOrderRecording)
+            {
+                fieldOrderContainer.IsVisible = true;
+                fieldOrderContainer.IsEnabled = true;
+                if (TwoPorts)
+                {
+                    fieldOrder2Container.IsVisible = true;
+                    fieldOrder2Container.IsEnabled = true;
+                }
+            }
+
+            #endregion
+
+            #region Meter Serial Number
+
+            meterSerialNumberContainer.IsVisible = false;
+            meterSerialNumberContainer.IsEnabled = false;
+            meterSerialNumber2Container.IsVisible = false;
+            meterSerialNumber2Container.IsEnabled = false;
+
+            bool UseMeterSerialNumber = GlobalsConditions.UseMeterSerialNumber;
+            if (UseMeterSerialNumber)
+            {
+                meterSerialNumberContainer.IsVisible = true;
+                meterSerialNumberContainer.IsEnabled = true;
+                if (TwoPorts)
+                {
+                    meterSerialNumber2Container.IsVisible = true;
+                    meterSerialNumber2Container.IsEnabled = true;
+                }
+            }
+
+            #endregion
+
+            // TODO
+            #region Meter Vendor / Model / Name
+            this.meters = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu.Ports[0].Type, currentMtu.Flow);
+            if (TwoPorts)
+            {
+                this.meters2 = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu.Ports[1].Type, currentMtu.Flow);
+            }
+
+            bool ShowMeterVendor = GlobalsConditions.ShowMeterVendor;
+            if (ShowMeterVendor)
+            {
+                // TODO: group meters by vendor / model / name
+            }
+            else
+            {
+                // TODO: display meter list directly, by  name
+            }
+            #endregion
+
+            #region Read Interval
+
+            readIntervalContainer.IsVisible = false;
+            readIntervalContainer.IsEnabled = false;
+            readInterval2Container.IsVisible = false;
+            readInterval2Container.IsEnabled = false;
+
+            bool IndividualReadInterval = GlobalsConditions.IndividualReadInterval;
+            if (IndividualReadInterval)
+            {
+                List<string> readIntervalList = new List<string>() {
+                    "24 Hours",
+                    "12 Hours",
+                    "6 Hours",
+                    "4 Hours",
+                    "3 Hours",
+                    "2 Hours",
+                    "1 Hour",
+                    "30 Min",
+                    "20 Min",
+                    "15 Min",
+                };
+                readIntervalContainer.IsVisible = true;
+                readIntervalContainer.IsEnabled = true;
+                readIntervalPicker.ItemsSource = readIntervalList;
+                if (TwoPorts)
+                {
+                    readInterval2Container.IsVisible = true;
+                    readInterval2Container.IsEnabled = true;
+                    readInterval2Picker.ItemsSource = readIntervalList;
+                }
+            }
+
+            #endregion
+
+            // TODO: get snap reads value from memory map
+            #region Snap Reads
+
+            snapReadsContainer.IsVisible = false;
+            snapReadsContainer.IsEnabled = false;
+            snapReadsSubContainer.IsEnabled = false;
+            snapReadsSubContainer.Opacity = 0.8;
+
+            snapReads2Container.IsVisible = false;
+            snapReads2Container.IsEnabled = false;
+            snapReads2SubContainer.IsEnabled = false;
+            snapReads2SubContainer.Opacity = 0.8;
+
+            bool allowSnapReads = GlobalsConditions.AllowDailyReads;
+            bool changeableSnapReads = GlobalsConditions.IndividualDailyReads;
+            bool snapReads = MtuConditions.DailyReads;
+
+            int snapReadsDefault = this.config.global.DailyReadsDefault;
+            int snapReadsFromMem = 6;
+
+            if (allowSnapReads && snapReads)
+            {
+                snapReadsContainer.IsEnabled = true;
+                snapReadsContainer.IsVisible = true;
+
+                if (changeableSnapReads)
+                {
+                    snapReadsSubContainer.IsEnabled = true;
+                    snapReadsSubContainer.Opacity = 1;
+                }
+
+                snapReadsStep = 1.0;
+                snapReadsSlider.ValueChanged += OnSnapReadsSliderValueChanged;
+
+                if (snapReadsDefault > -1)
+                {
+                    snapReadsSlider.Value = snapReadsDefault;
+                }
+                else
+                {
+                    snapReadsSlider.Value = snapReadsFromMem;
+                }
+
+                if (TwoPorts)
+                {
+                    snapReads2Container.IsEnabled = true;
+                    snapReads2Container.IsVisible = true;
+
+                    if (changeableSnapReads)
+                    {
+                        snapReads2SubContainer.IsEnabled = true;
+                        snapReads2SubContainer.Opacity = 1;
+                    }
+
+                    snapReads2Step = 1.0;
+                    snapReads2Slider.ValueChanged += OnSnapReads2SliderValueChanged;
+
+                    if (snapReadsDefault > -1)
+                    {
+                        snapReads2Slider.Value = snapReadsDefault;
+                    }
+                    else
+                    {
+                        snapReads2Slider.Value = snapReadsFromMem;
+                    }
+
+                }
+            }
+
+            #endregion
+
+            #region 2-Way
+            twoWayContainer.IsVisible = false;
+            twoWayContainer.IsEnabled = false;
+            twoWay2Container.IsVisible = false;
+            twoWay2Container.IsEnabled = false;
+
+            bool GlobalsFastMessageConfig = GlobalsConditions.FastMessageConfig;
+            bool GlobalsFast2Way = GlobalsConditions.Fast2Way;
+            bool MtuFastMessageConfig = MtuConditions.FastMessageConfig;
+            if (MtuFastMessageConfig)
+            {
+                List<string> twoWayList = new List<string>() {
+                    "Fast",
+                    "Slow",
+                };
+                twoWayContainer.IsVisible = true;
+                twoWayContainer.IsEnabled = true;
+                twoWayPicker.ItemsSource = twoWayList;
+                if (TwoPorts)
+                {
+                    twoWay2Container.IsVisible = true;
+                    twoWay2Container.IsEnabled = true;
+                    twoWay2Picker.ItemsSource = twoWayList;
+                }
+                if (GlobalsFastMessageConfig || GlobalsFast2Way)
+                {
+                    twoWayPicker.SelectedIndex = 0;
+                    if (TwoPorts)
+                    {
+                        twoWay2Picker.SelectedIndex = 0;
+                    }
+                }
+                else
+                {
+                    twoWayPicker.SelectedIndex = 1;
+                    if (TwoPorts)
+                    {
+                        twoWay2Picker.SelectedIndex = 1;
+                    }
+                }
+            }
+            #endregion
+
+            #region Alarms
+            alarmsPicker.ItemDisplayBinding = new Binding("Name");
+            alarms2Picker.ItemDisplayBinding = new Binding("Name");
+
+            alarmsContainer.IsEnabled = false;
+            alarmsContainer.IsVisible = false;
+            alarms2Container.IsEnabled = false;
+            alarms2Container.IsVisible = false;
+
+            bool RequiresAlarmProfile = MtuConditions.RequiresAlarmProfile;
+            if (RequiresAlarmProfile)
+            {
+                alarmsList = config.alarms.FindByMtuType(this.detectedMtuType);
+                if (alarmsList.Count > 0)
+                {
+                    alarmsPicker.ItemsSource = alarmsList;
+                    alarmsContainer.IsEnabled = true;
+                    alarmsContainer.IsVisible = true;
+                }
+                if (TwoPorts)
+                {
+                    alarms2List = config.alarms.FindByMtuType(this.detectedMtuType);
+                    if (alarms2List.Count > 0)
+                    {
+                        alarms2Picker.ItemsSource = alarms2List;
+                        alarms2Container.IsEnabled = true;
+                        alarms2Container.IsVisible = true;
+                    }
+                }
+            }
+            #endregion
+
+            #region Demands
+            demandsPicker.ItemDisplayBinding = new Binding("Name");
+            demands2Picker.ItemDisplayBinding = new Binding("Name");
+
+            demandsContainer.IsEnabled = false;
+            demandsContainer.IsVisible = false;
+            demands2Container.IsEnabled = false;
+            demands2Container.IsVisible = false;
+
+            bool MtuDemand = MtuConditions.MtuDemand;
+            if (MtuDemand)
+            {
+                demandsList = config.demands.FindByMtuType(this.detectedMtuType);
+                if (demandsList.Count > 0)
+                {
+                    demandsPicker.ItemsSource = demandsList;
+                    demandsContainer.IsEnabled = true;
+                    demandsContainer.IsVisible = true;
+                }
+                if (TwoPorts)
+                {
+                    demands2List = config.demands.FindByMtuType(this.detectedMtuType);
+                    if (demands2List.Count > 0)
+                    {
+                        demands2Picker.ItemsSource = demands2List;
+                        demands2Container.IsEnabled = true;
+                        demands2Container.IsVisible = true;
+                    }
+                }
+            }
+            #endregion
+
+            #region Cancel reason
+
+            cancelReasonPicker.ItemsSource = new List<string>() { "Complete", "Cancel", "Skip", "Not Home", "Other" };
+
+            #endregion
+        }
         #endregion
 
         #region Status message
@@ -422,170 +691,6 @@ namespace aclara_meters.view
         #region GUI Initialization
 
         #region Picker
-
-        private void InitPickerTwoWay()
-        {
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList = new ObservableCollection<string>();
-
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
-            {
-                new PickerItems { Name = "Slow" },
-                new PickerItems { Name = "Fast" }
-            };
-
-            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-
-            foreach (var item in objClassList)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList.Add(item.Name);
-            }
-
-            //Now I am given ItemsSorce to the Pickers
-            twoWayPicker.ItemsSource = objStringList;
-        }
-
-        private void InitPickerTwoWay2()
-        {
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList = new ObservableCollection<string>();
-
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
-            {
-                new PickerItems { Name = "Slow" },
-                new PickerItems { Name = "Fast" }
-            };
-
-            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-
-            foreach (var item in objClassList)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList.Add(item.Name);
-            }
-
-            //Now I am given ItemsSorce to the Pickers
-            twoWay2Picker.ItemsSource = objStringList;
-        }
-
-        private void InitPickerReason()
-        {
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList = new ObservableCollection<string>();
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>();
-            objClassList.Add(new PickerItems { Name = "Complete" });
-            objClassList.Add(new PickerItems { Name = "Cancel" });
-            objClassList.Add(new PickerItems { Name = "Skip" });
-            objClassList.Add(new PickerItems { Name = "Not Home" });
-            objClassList.Add(new PickerItems { Name = "Other" });
-
-            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-            foreach (var item in objClassList)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList.Add(item.Name);
-            }
-            //Now I am given ItemsSorce to the Pickers
-            pickerReason.ItemsSource = objStringList;
-        }
-
-        private void InitPickerList()
-        {
-            /* Desconozco completamente cual es el caso de tener varios puertos, o el procedimiento para ello. Dejo la función de cara a su implementación */
-            //
-            //port2enabled = true;
-            port2enabled = true;
-
-            InitPickerReadInterval();
-            InitPickerTwoWay();
-
-            if (port2enabled)
-            {
-                port2label.IsVisible = true; //Las vistas en si no provocan fallos, con controlar el boton, bastaria.
-                InitPickerReadInterval2();
-                InitPickerTwoWay2();
-            }
-            else
-            {
-                port2label.IsVisible = false;
-            }
-
-            InitPickerReason();
-
-        }
-
-        private void InitPickerReadInterval()
-        {
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList = new ObservableCollection<string>();
-
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
-            {
-                new PickerItems { Name = "24 Hours" },
-                new PickerItems { Name = "12 Hours" },
-                new PickerItems { Name = "6 Hours" },
-                new PickerItems { Name = "4 Hours" },
-                new PickerItems { Name = "3 Hours" },
-                new PickerItems { Name = "2 Hours" },
-                new PickerItems { Name = "1 Hour" },
-                new PickerItems { Name = "30 Min" },
-                new PickerItems { Name = "20 Min" },
-                new PickerItems { Name = "15 Min" }
-            };
-
-            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-
-            foreach (var item in objClassList)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList.Add(item.Name);
-            }
-
-            //Now I am given ItemsSorce to the Pickers
-            readIntervalPicker.ItemsSource = objStringList;
-        }
-
-        private void InitPickerReadInterval2()
-        {
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList = new ObservableCollection<string>();
-
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
-            {
-                new PickerItems { Name = "24 Hours" },
-                new PickerItems { Name = "12 Hours" },
-                new PickerItems { Name = "6 Hours" },
-                new PickerItems { Name = "4 Hours" },
-                new PickerItems { Name = "3 Hours" },
-                new PickerItems { Name = "2 Hours" },
-                new PickerItems { Name = "1 Hour" },
-                new PickerItems { Name = "30 Min" },
-                new PickerItems { Name = "20 Min" },
-                new PickerItems { Name = "15 Min" }
-            };
-
-            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-
-            foreach (var item in objClassList)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList.Add(item.Name);
-            }
-
-            //Now I am given ItemsSorce to the Pickers
-            readInterval2Picker.ItemsSource = objStringList;
-        }
 
         private void InitConstructionPicker()
         {
@@ -667,8 +772,7 @@ namespace aclara_meters.view
             mtuLocation.ItemsSource = objStringList;
         }
 
-        // TODO: Revisado
-        private void ColectionElementsPort1()
+        private void InitializeMeterVendorModelName()
         {
             meterTypes = FormsApp.config.GetMeterTypes();
             vendors = meterTypes.GetVendorsFromMeters(meters);
@@ -906,35 +1010,9 @@ namespace aclara_meters.view
 
             ElementoBloqueName.IsVisible = false;
             ElementoBloqueModelo.IsVisible = false;
-
-            StepValue = 1.0;
-
-            SliderMain = new Slider
-            {
-                Minimum = 0.0f,
-                Maximum = 20.0f,
-                HeightRequest = 40,
-                Value = 10.0f,
-                Margin = new Thickness(0, -20, 0, 0),
-                HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.CenterAndExpand
-            };
-
-            SliderMain.ValueChanged += OnSliderValueChanged;
-
-            IntegerSlider.Children.Add(new StackLayout
-            {
-                Children = { SliderMain },
-                Orientation = StackOrientation.Vertical,
-                HeightRequest = 40,
-                HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.CenterAndExpand
-            });
-
         }
 
-        // TODO: Revisado
-        private void ColectionElementsPort2()
+        private void InitializeMeterVendorModelName2()
         {
             meterTypes = FormsApp.config.GetMeterTypes();
             vendors2 = meterTypes.GetVendorsFromMeters(meters2);
@@ -1057,9 +1135,7 @@ namespace aclara_meters.view
                 Margin = new Thickness(1, 1, 1, 1),
                 BackgroundColor = Color.White
             };
-
-
-
+            
             // Generamos el Selector
             MeterModelPicker2 = new BorderlessPicker()
             {
@@ -1173,253 +1249,13 @@ namespace aclara_meters.view
 
             ElementoBloqueName.IsVisible = false;
             ElementoBloqueModelo.IsVisible = false;
-
-            StepValue2 = 1.0;
-
-            SliderMain2 = new Slider
-            {
-                Minimum = 0.0f,
-                Maximum = 20.0f,
-                HeightRequest = 40,
-                Value = 10.0f,
-                Margin = new Thickness(0, -20, 0, 0),
-                HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.CenterAndExpand
-            };
-
-            SliderMain2.ValueChanged += OnSliderValueChanged2;
-
-            IntegerSlider2.Children.Add(new StackLayout
-            {
-                Children = { SliderMain2 },
-                Orientation = StackOrientation.Vertical,
-                HeightRequest = 40,
-                HorizontalOptions = LayoutOptions.FillAndExpand,
-                VerticalOptions = LayoutOptions.CenterAndExpand
-            });
-
         }
         #endregion
 
         #region Forms
 
-        private void TestOptionalFields()
+        private void RegisterEventHandlers()
         {
-            //globals =  FormsApp.config.GetGlobal();
-
-            //WorkOrderRecording = globals.WorkOrderRecording;
-            //AccountDualEntry = globals.AccountDualEntry;
-            //WorkOrderDualEntry = globals.WorkOrderDualEntry;
-            //IndividualReadInterval = globals.IndividualReadInterval;
-            //UseMeterSerialNumber = globals.UseMeterSerialNumber;
-
-            ////mtuData
-            //Mtu mtu = FormsApp.config.GetMtuTypeById(138);
-
-            //WorkOrderRecording = globalData.WorkOrderRecording;
-            //AccountDualEntry = globalData.AccountDualEntry;
-            //WorkOrderDualEntry = globalData.WorkOrderDualEntry;
-            //IndividualReadInterval = globalData.IndividualReadInterval;
-            //UseMeterSerialNumber = globalData.UseMeterSerialNumber;
-
-            ///******************/
-            ///**  Snap Reads  **/
-            //mtuDailyReads = mtu.DailyReads;
-            //globalsAllowDailyReads = globalData.AllowDailyReads;
-
-            //// Snap Reads
-            //mtuDailyReads = currentMtu.DailyReads;
-            //globalsAllowDailyReads = globals.AllowDailyReads;
-            //setGlobalSnap = true;
-            //dailyReadsMemoryMapValue = 15.0;
-            //globalsChangeDailyReads = true;
-            //globalsDailyReadsDefault =  Convert.ToDouble( globalData.DailyReadsDefault ); 
-            ///****    ****    ****/
-
-
-            ///******************/
-            ///**     2-way    **/
-
-            //mtuFastMessageConfig = true;
-            //globalsFastMessageConfig = true;
-
-            ///****   ****   ****/
-
-
-            ///***************************/
-            ///**     Alarm Settings    **/
-
-            //mtuRequiresAlarmProfile = true;
-            //alarmListPort1 = new List<string>();
-            //alarmListPort2 = new List<string>();
-
-            ////ADD ALARMS TO LIST
-            //for (int i = 1; i < 4; i++)
-            //{
-            //    alarmListPort1.Add("Alarm "+i);
-            //    alarmListPort2.Add("Alarm "+ i);
-            //globalsDailyReadsDefault = Convert.ToDouble(globals.DailyReadsDefault);
-            //if (globalsDailyReadsDefault > 23 || globalsDailyReadsDefault < 0)
-            //{
-            //    globalsDailyReadsDefault = 24.0;
-            //}
-
-            ///***************************/
-            ///**     Demand Settings    **/
-
-            //demandListPort1 = new List<string>();
-            //demandListPort2= new List<string>();
-
-            ////ADD ALARMS TO LIST
-            //for (int i = 1; i < 4; i++)
-            //{
-            //    demandListPort1.Add("Demand " + i);
-            //    demandListPort2.Add("Demand " + i);
-            //}
-
-            ///****  ****  ****  **** ****/
-
-            //// 2-Way
-            //mtuFastMessageConfig = currentMtu.FastMessageConfig;
-            //globalsFastMessageConfig = globals.FastMessageConfig || globals.Fast2Way;
-
-            //// Alarm Settings
-            //mtuRequiresAlarmProfile = currentMtu.RequiresAlarmProfile;
-        }
-
-        private void FormsUILogic()
-        {
-            /******************/
-            /**  Snap Reads  **/
-
-            if (mtuDailyReads && globalsAllowDailyReads)
-            {
-                SnapReads_Port1.IsVisible = true;
-            }
-            else
-            {
-                SnapReads_Port1.IsVisible = false;
-            }
-
-            if (setGlobalSnap)
-            {
-                SliderMain.Value = globalsDailyReadsDefault;
-            }
-            else
-            {
-
-                SliderMain.Value = dailyReadsMemoryMapValue;
-            }
-
-            if (!globalsChangeDailyReads)
-            {
-                SnapReads_Port1.IsVisible = true;
-                SnapReads_Port1.IsEnabled = false;
-                SnapReadsViewPort1.IsEnabled = false;
-                SnapReadsViewPort1.Opacity = 0.8;
-            }
-            else
-            {
-                SnapReadsViewPort1.Opacity = 1;
-            }
-
-            /****    ****    ****/
-
-            /******************/
-            /**     2-way    **/
-
-            if (mtuFastMessageConfig)
-            {
-                twoWayContainer.IsVisible = true;
-            }
-            else
-            {
-                twoWayContainer.IsVisible = false;
-            }
-
-            if (globalsFastMessageConfig)
-            {
-                twoWayPicker.SelectedIndex = 1;
-                //Fast
-            }
-            else
-            {
-                twoWayPicker.SelectedIndex = 0;
-                //slow
-            }
-
-
-            /***************************/
-            /**     Alarm Settings    **/
-
-            if (mtuRequiresAlarmProfile)
-            {
-                alarmsContainer.IsVisible = true;
-            }
-            else
-            {
-                alarmsContainer.IsVisible = false;
-            }
-
-            if (alarmListPort1.Count > 0)
-            {
-                alarmsPicker.ItemsSource = alarmListPort1;
-                alarmsPicker.ItemDisplayBinding = new Binding("Name");
-            }
-
-            if (alarmListPort2.Count > 0)
-            {
-                alarms2Picker.ItemsSource = alarmListPort2;
-                alarms2Picker.ItemDisplayBinding = new Binding("Name");
-            }
-
-            if (demandListPort1.Count > 0)
-            {
-                demandsPicker.ItemsSource = demandListPort1;
-                demandsPicker.ItemDisplayBinding = new Binding("Name");
-            }
-
-            if (demandListPort2.Count > 0)
-            {
-                demands2Picker.ItemsSource = demandListPort2;
-                demands2Picker.ItemDisplayBinding = new Binding("Name");
-            }
-            /****  ****  ****  **** ****/
-
-
-
-            /***************************/
-            /**     Demand Settings    **/
-
-            if (demandListPort1.Count > 0)
-            {
-                demandsPicker.ItemsSource = demandListPort1;
-            }
-
-            if (demandListPort2.Count > 0)
-            {
-                demands2Picker.ItemsSource = demandListPort2;
-            }
-
-            /****  ****  ****  **** ****/
-
-        }
-
-        private void Validations()
-        {
-
-            FormsUILogic();
-
-
-            if (WorkOrderRecording)
-            {
-                fieldOrderContainer.IsVisible = true;
-            }
-            else
-            {
-                fieldOrderContainer.IsVisible = false;
-            }
-
             if (AccountDualEntry)
             {
                 servicePortIdInput.Unfocused += (s, e) => { ServicePortId_validate(1); };
@@ -1435,28 +1271,6 @@ namespace aclara_meters.view
                 fieldOrder_ok.Tapped += FieldOrder_Ok_Tapped;
                 fieldOrder_cancel.Tapped += FieldOrder_Cancel_Tapped;
             }
-
-            if (IndividualReadInterval)
-            {
-                readIntervalPicker.IsEnabled = true;
-                readIntervalContainer.Opacity = 1;
-
-            }
-            else
-            {
-                readIntervalPicker.IsEnabled = false;
-                readIntervalContainer.Opacity = 0.8;
-            }
-
-            if (UseMeterSerialNumber)
-            {
-                meterSerialNumberContainer.IsVisible = true;
-            }
-            else
-            {
-                meterSerialNumberContainer.IsVisible = false;
-            }
-
         }
 
         private void TappedListeners()
@@ -1611,21 +1425,18 @@ namespace aclara_meters.view
 
         #region Pickers
 
-        // TODO: revisado
         private void PickerSelection(object sender, EventArgs e)
         {
             var picker = (Picker)sender;
             int selectedIndex = picker.SelectedIndex;
         }
 
-        // TODO: revisado
         private void PickerSelection2(object sender, EventArgs e)
         {
             var picker = (Picker)sender;
             int selectedIndex = picker.SelectedIndex;
         }
 
-        // TODO: revisado
         private void PickerMarcas_SelectedIndexChanged(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
@@ -1657,7 +1468,6 @@ namespace aclara_meters.view
 
         }
 
-        // TODO: revisado
         private void PickerMarcas_SelectedIndexChanged2(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
@@ -1689,7 +1499,6 @@ namespace aclara_meters.view
 
         }
 
-        // TODO: revisado
         private void PickerName_SelectedIndexChanged(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
@@ -1711,7 +1520,6 @@ namespace aclara_meters.view
 
         }
 
-        // TODO: revisado
         private void PickerName_SelectedIndexChanged2(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
@@ -1733,7 +1541,6 @@ namespace aclara_meters.view
 
         }
 
-        // TODO: revisado
         private void PickerModelos_SelectedIndexChanged(object sender, EventArgs e)
         {
 
@@ -1769,7 +1576,6 @@ namespace aclara_meters.view
             }
         }
 
-        // TODO: revisado
         private void PickerModelos_SelectedIndexChanged2(object sender, EventArgs e)
         {
             int i = ((BorderlessPicker)sender).SelectedIndex;
@@ -1808,23 +1614,23 @@ namespace aclara_meters.view
 
         #region Sliders
 
-        void OnSliderValueChanged(object sender, ValueChangedEventArgs e)
+        void OnSnapReadsSliderValueChanged(object sender, ValueChangedEventArgs e)
         {
-            var newStep = Math.Round(e.NewValue / StepValue);
+            var newStep = Math.Round(e.NewValue / snapReadsStep);
 
-            SliderMain.Value = newStep * StepValue;
+            snapReadsSlider.Value = newStep * snapReadsStep;
 
-            sliderValue.Text = SliderMain.Value.ToString();
+            snapReadsLabel.Text = snapReadsSlider.Value.ToString();
 
         }
 
-        void OnSliderValueChanged2(object sender, ValueChangedEventArgs e)
+        void OnSnapReads2SliderValueChanged(object sender, ValueChangedEventArgs e)
         {
-            var newStep = Math.Round(e.NewValue / StepValue2);
+            var newStep = Math.Round(e.NewValue / snapReads2Step);
 
-            SliderMain2.Value = newStep * StepValue2;
+            snapReads2Slider.Value = newStep * snapReads2Step;
 
-            sliderValue2.Text = SliderMain2.Value.ToString();
+            snapReads2Label.Text = snapReads2Slider.Value.ToString();
 
         }
 
@@ -2263,8 +2069,8 @@ namespace aclara_meters.view
                     return false;
 
             /*
-            if (SnapReads_Port1.IsVisible)   if(SnapReadsViewPort1.Opacity>0.8)
-                if(sliderValue.Text -1)
+            if (snapReadsContainer.IsVisible)   if(snapReadsSubContainer.Opacity>0.8)
+                if(snapReadsLabel.Text -1)
                     isValid = false;
             */
 
@@ -2721,7 +2527,7 @@ namespace aclara_meters.view
             addMtuForm.AddParameter(FIELD.METER_NUMBER, meterSerialNumberInput.Text);
             addMtuForm.AddParameter(FIELD.SELECTED_METER_ID, (Meter)MeterNamePicker.SelectedItem);
             addMtuForm.AddParameter(FIELD.READ_INTERVAL, readIntervalPicker.SelectedItem.ToString());
-            addMtuForm.AddParameter(FIELD.SNAP_READS, SliderMain.Value.ToString());
+            addMtuForm.AddParameter(FIELD.SNAP_READS, snapReadsSlider.Value.ToString());
             addMtuForm.AddParameter(FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString());
             addMtuForm.AddParameter(FIELD.ALARM, (Alarm)alarmsPicker.SelectedItem);
 

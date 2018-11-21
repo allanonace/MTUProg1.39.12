@@ -499,12 +499,12 @@
                                      <Frame CornerRadius="6"   HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
                                           <Frame CornerRadius="6"  HeightRequest="30" x:Name="readIntervalContainer"  Opacity="1" Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        
-                                                         <Controls:BorderlessPicker x:Name="readIntervalPicker" Title="" 
-                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
-                                                           />
-                                                    </StackLayout>
+
+                                                        <Controls:BorderlessPicker x:Name="readIntervalPicker" Title="" 
+                                                                  HorizontalOptions="FillAndExpand"
+                                                                  SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                               />
+                                                </StackLayout>
                                              </Frame> 
                                         
                                     </Frame>
@@ -515,22 +515,40 @@
 
                                    <!--  Snap Reads -->
 
-                                 <StackLayout x:Name="SnapReads_Port1" >  
+                                 <StackLayout x:Name="snapReadsContainer" >  
                                   <Label Text="Snap Reads" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                          />
                                       
                                   
                                  <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                      <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" x:Name="SnapReadsViewPort1" BackgroundColor="White"  >
+                                      <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" x:Name="snapReadsSubContainer" BackgroundColor="White"  >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                       <!-- PORT ID -->
-                                   <Label Text="10" Margin="0,4,0,0" x:Name="sliderValue"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
+                                                    <Label Text="10" Margin="0,4,0,0" x:Name="snapReadsLabel"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
                                              />
                                                      <StackLayout  
                                                     HorizontalOptions="FillAndExpand" 
                                                     Margin="0,4,0,4"
                                                     HeightRequest="40" 
-                                                    x:Name="IntegerSlider">
+                                                    x:Name="snapReadsSliderContainer">
+
+                                                        <StackLayout
+                                                            Orientation="Vertical"
+                                                            HeightRequest="40"
+                                                            HorizontalOptions="FillAndExpand"
+                                                            VerticalOptions="CenterAndExpand">
+                                                            <Slider
+                                                                x:Name="snapReadsSlider"
+                                                                Minimum="0"
+                                                                Maximum="20"
+                                                                HeightRequest="40"
+                                                                Value="10"
+                                                                Margin="0,-20,0,0"
+                                                                HorizontalOptions="FillAndExpand"
+                                                                VerticalOptions="CenterAndExpand"/>
+                                                        </StackLayout>
+                                                         
+                                                         
                                                 </StackLayout>
 
                                                 </StackLayout>
@@ -558,7 +576,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessPicker x:Name="twoWayPicker" Title="" 
-                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              HorizontalOptions="FillAndExpand" 
                                                               SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
                                                            />
                                                     </StackLayout>
@@ -777,7 +795,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessPicker x:Name="readInterval2Picker" Title="" 
-                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              HorizontalOptions="FillAndExpand"
                                                               SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
                                                            />
                                                     </StackLayout>
@@ -791,36 +809,54 @@
 
                                    <!--  Snap Reads -->
 
-                                 <StackLayout >  
-                                  <Label Text="Snap Reads" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                    <StackLayout x:Name="snapReads2Container" >
+                                        <Label Text="Snap Reads" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                          />
-                                      
-                                  
-                                 <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                      <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+
+
+                                        <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" x:Name="snapReads2SubContainer" BackgroundColor="White"  >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                      <!-- PORT ID -->
-                                   <Label Text="10" Margin="0,4,0,0" x:Name="sliderValue2"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
+                                                    <!-- PORT ID -->
+                                                    <Label Text="10" Margin="0,4,0,0" x:Name="snapReads2Label"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
                                              />
-                                                     <StackLayout  
+                                                    <StackLayout  
                                                     HorizontalOptions="FillAndExpand" 
                                                     Margin="0,4,0,4"
                                                     HeightRequest="40" 
-                                                    x:Name="IntegerSlider2">
-                                                </StackLayout>
+                                                    x:Name="snapReads2SliderContainer">
+
+                                                        <StackLayout
+                                                            Orientation="Vertical"
+                                                            HeightRequest="40"
+                                                            HorizontalOptions="FillAndExpand"
+                                                            VerticalOptions="CenterAndExpand">
+                                                            <Slider
+                                                                x:Name="snapReads2Slider"
+                                                                Minimum="0"
+                                                                Maximum="20"
+                                                                HeightRequest="40"
+                                                                Value="10"
+                                                                Margin="0,-20,0,0"
+                                                                HorizontalOptions="FillAndExpand"
+                                                                VerticalOptions="CenterAndExpand"/>
+                                                        </StackLayout>
+
+
+                                                    </StackLayout>
 
                                                 </StackLayout>
-                                         </Frame> 
-                                        
-                                    </Frame>
-                                    
-                                  </StackLayout>
-                                
+                                            </Frame>
+
+                                        </Frame>
+
+                                    </StackLayout>
 
 
 
-                                
-                                  <!--  2-Way -->
+
+
+                                    <!--  2-Way -->
 
 
 
@@ -834,7 +870,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessPicker x:Name="twoWay2Picker" Title="" 
-                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
+                                                              HorizontalOptions="FillAndExpand" 
                                                               SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
                                                            />
                                                     </StackLayout>
@@ -1534,8 +1570,8 @@
                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                         
-                                       <Controls:BorderlessPicker Margin="0,0,0,0" x:Name="pickerReason" Title="" 
-                                      HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" FontSize="16"
+                                       <Controls:BorderlessPicker Margin="0,0,0,0" x:Name="cancelReasonPicker" Title="" 
+                                      HorizontalOptions="FillAndExpand" FontSize="16"
                                       SelectedIndexChanged="PickerSelection" HeightRequest="30"  TextColor="Black"/>
 
                                     </StackLayout>
