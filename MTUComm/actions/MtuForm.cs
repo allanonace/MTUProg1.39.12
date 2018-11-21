@@ -73,18 +73,16 @@ namespace MTUComm.actions
 
         #endregion
 
+        #region Attributes
+
+        private Dictionary<string,Parameter> dictionary;
+        public Conditions conditions { get; private set; }
         public static MTUBasicInfo mtuBasicInfo { get; private set; }
-
-        public static void SetBasicInfo ( MTUBasicInfo mtuBasicInfo )
-        {
-            MtuForm.mtuBasicInfo = mtuBasicInfo;
-        }
-
-        private Dictionary<string, Parameter> dictionary;
-
         private Mtu mtu;
 
-        public Conditions conditions { get; private set; }
+        #endregion
+
+        #region Initialization
 
         public MtuForm(Mtu mtu)
         {
@@ -93,11 +91,15 @@ namespace MTUComm.actions
             this.conditions = new Conditions(mtu);
         }
 
+        #endregion
+
+        #region Set and Get
+
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
-            if ( ! this.dictionary.ContainsKey(binder.Name))
+            if (!this.dictionary.ContainsKey(binder.Name))
             {
-                this.dictionary[binder.Name] = (Parameter) value;
+                this.dictionary[binder.Name] = (Parameter)value;
                 return true;
             }
 
@@ -115,13 +117,22 @@ namespace MTUComm.actions
             throw new Exception();
         }
 
-        public void AddParameter (string id_parameter, string custom_parameter, string custom_display, dynamic value)
+        public static void SetBasicInfo(MTUBasicInfo mtuBasicInfo)
         {
-            this.dictionary[id_parameter] =
-                new Parameter(custom_parameter, custom_display, value);
+            MtuForm.mtuBasicInfo = mtuBasicInfo;
         }
 
-        public Parameter FindById(string paramId)
+        #endregion
+
+        #region Parameters
+
+        public void AddParameter (string paramId, string customParameter, string customDisplay, dynamic value)
+        {
+            this.dictionary[paramId] =
+                new Parameter(customParameter, customDisplay, value);
+        }
+
+        public Parameter FindParameterById(string paramId)
         {
             return GetParameter(paramId);
         }
@@ -131,12 +142,14 @@ namespace MTUComm.actions
             return new List<Parameter>(this.dictionary.Values).ToArray();
         }
 
-        public Parameter GetParameter(string id)
+        public Parameter GetParameter(string paramId)
         {
-            if (this.dictionary.ContainsKey(id))
-                return this.dictionary[id];
+            if (this.dictionary.ContainsKey(paramId))
+                return this.dictionary[paramId];
             
             throw new Exception();
         }
+
+        #endregion
     }
 }

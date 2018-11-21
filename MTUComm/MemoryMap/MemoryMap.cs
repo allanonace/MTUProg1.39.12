@@ -35,17 +35,6 @@ using Xml;
 ///      "memoryMap.registers.idProperty" to get value, and "memoryMap.registers.idProperty = value" to set
 ///      Never need to call directly to registers.get_idProperty nor registers.set_idProperty, because
 ///      Value property do it for us, invoking funcGet and funcSet methods
-///      
-/// CURRENT:
-/// - Seems that get methods are created ok but when call CreateProperty_Set_XXX breaks
-///   Inside CreateProperty_Set_Int logic sentence is commented
-/// > Also breaks when try to set funcGet|Set references to the methods
-///   - El problema estaba en que no se puede castear Func<object> a Func<int> y lo mismo para Action
-///   - Pero el siguiente problema es que si se usa una coleccion del tipo padre de los registros ( RegisterObj )
-///     se usaran las referencias de funciones de la clase padre, no invocandose los metodos hijos por mucho que se
-///     haya usado 'new' para ocultar los miembros de la clase padre. La solucion vuelve a ser usar un tipo dinamico,
-///     en este caso para la coleccion de registros, convirtiendo ademas la clase padre en generica ( RegisterObj<T> ),
-///     ademas de los metodos CreatePropertySet|Get y los delegados Func|Action<T>
 /// </summary>
 
 namespace MTUComm.MemoryMap

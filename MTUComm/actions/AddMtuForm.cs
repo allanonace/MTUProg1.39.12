@@ -138,7 +138,7 @@ namespace MTUComm.actions
         public Parameter FindById(FIELD field_type)
         {
             string[] texts = Texts[field_type];
-            return base.FindById(texts[0]);
+            return base.FindParameterById(texts[0]);
         }
 
         /*
