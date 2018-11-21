@@ -131,6 +131,22 @@ namespace MTUComm
             }
         }
 
+
+        public int Port
+        {
+            get
+            {
+                if (hasPort())
+                {
+                    return port;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+        }
+
         public Boolean isInMemoryMap()
         {
             return paremeter_defines[mParameterType].memory_present;

@@ -896,15 +896,29 @@ namespace MTUComm.MemoryMap
 
         public string PCBNumber_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return string.Format("{0}-{1:000000000}-{2}",
+            string pbc_number = string.Format("{0}-{1:000000000}-{2}",
                 Convert.ToChar(MemoryRegisters.PCBSupplierCode.Value),
                 MemoryRegisters.PCBCoreNumber.Value,
                 Convert.ToChar(MemoryRegisters.PCBProductRevision.Value));
+            return pbc_number.Replace('\0', '0');
         }
 
         public string MtuSoftware_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return string.Format("Version {0:00}", MemoryRegisters.MTUFirmwareVersionFormatFlag.Value);
+
+            //if (MemoryRegisters)
+            if(MemoryOverload.registerIds.Length > 1)
+            {
+                return string.Format("Version {0:00}.{1:00}.{2:0000}", 
+                    MemoryRegisters.MTUFirmwareVersionMaior.Value,
+                    MemoryRegisters.MTUFirmwareVersionMinor.Value,
+                    MemoryRegisters.MTUFirmwareVersionBuild.Value);
+            }
+            else
+            {
+                return string.Format("Version {0:00}", MemoryRegisters.MTUFirmwareVersionFormatFlag.Value);
+            }
+            
         }
 
         public string Encryption_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
@@ -959,6 +973,39 @@ namespace MTUComm.MemoryMap
 
             return GetTemperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
         }
+
+        public string FastMessagingMode_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return MemoryRegisters.Fast2Way.Value ? "Fast" : "Slow";
+        }
+
+        public string LastGasp_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return MemoryRegisters.LastGaspTamper.Value ? "Enabled" : "Triggered";
+        }
+
+        public string InsufficentMemory_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return MemoryRegisters.InsufficentMemoryTamper.Value ? "Enabled" : "Triggered";
+        }
+
+        public string P1Status_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetPortStatus(MemoryRegisters.P1StatusFlag.Value);
+        }
+
+        public string P2Status_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+
+            return GetPortStatus(MemoryRegisters.P2StatusFlag.Value);
+        }
+
+
+        
 
         #endregion
 
@@ -1064,6 +1111,11 @@ namespace MTUComm.MemoryMap
             {
                 return "Disabled";
             }
+        }
+
+        public string GetPortStatus(bool status)
+        {
+            return status ? "Enabled" : "Disabled";
         }
 
         #endregion
