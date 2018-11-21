@@ -146,9 +146,20 @@ namespace aclara_meters.view
         private List<string> vendors;
         private List<string> models;
         private List<Meter> names;
+
         private string vendor;
         private string model;
         private string name;
+
+        private List<string> vendors2;
+        private List<string> models2;
+        private List<Meter> names2;
+
+
+        private string vendor2;
+        private string model2;
+        private string name2;
+
 
         private Global globals;
         private MtuTypes mtuData;
@@ -547,6 +558,12 @@ namespace aclara_meters.view
 
         private void AddMtu(object sender, EventArgs e)
         {
+            if (!ValidateEmptyFields()){
+
+                DisplayAlert("Error", "Mandatory fields are not filled in","Ok");
+                return;
+            }
+
             isCancellable = true;
 
             if (!_userTapped)
@@ -754,7 +771,120 @@ namespace aclara_meters.view
             }
         }
 
-   
+        private bool ValidateEmptyFields()
+        {
+           
+            /** Validation **/
+            /** Check if visible fields are filled with the correct values in order to Enable Add MTU Cmd **/
+                
+            /////// Port 1 ///////
+            if (servicePortId.Text.Length < servicePortId.MaxLength)
+                return false;
+
+            if (fo_view.IsVisible)
+                if (fieldOrder.Text.Length < fieldOrder.MaxLength)
+                return false;
+            
+            if (mn_view.IsVisible)
+                if (meterNumber.Text.Length < meterNumber.MaxLength)
+                return false;
+            
+            if (EntriesStackLayout.Children[2].IsVisible)
+                if (model != null)
+                    if (EntriesStackLayout.Children[1].IsVisible)
+                        if (name.Length < 0)
+                            return false;
+
+            if (initialRead.Text.Length < initialRead.MaxLength)
+                return false;
+         
+            if(read_view.Opacity>0.8)
+                if (pickerReadInterval.SelectedIndex == -1)
+                    return false;
+            
+            /*
+            if (SnapReads_Port1.IsVisible)   if(SnapReadsViewPort1.Opacity>0.8)
+                if(sliderValue.Text -1)
+                    isValid = false;
+            */
+
+            if (TwoWay_Port1.IsVisible)
+                if (pickerTwoWay.SelectedIndex == -1)
+                    return false;
+               
+
+            if (Alarms_Port1.IsVisible)
+                if (pickerAlarms.SelectedIndex == -1)
+                    return false;
+
+
+            if (Demands_Port1.IsVisible)
+                if (pickerDemands.SelectedIndex == -1)
+                    return false;
+            
+
+            /////// Port 2 ///////
+           
+            if (servicePortId2.Text.Length < servicePortId2.MaxLength)
+                return false;
+           
+            if (fo_view2.IsVisible)
+                if (fieldOrder2.Text.Length < fieldOrder2.MaxLength)
+                return false;
+
+
+            if (mn_view2.IsVisible)
+                if (meterNumber2.Text.Length < meterNumber2.MaxLength)
+                return false;
+
+
+            if (EntriesStackLayout2.Children[2].IsVisible)
+                if (model2 != null)
+                    if (EntriesStackLayout2.Children[1].IsVisible)
+                        if (name2.Length < 0)
+                            return false;
+
+            if (initialRead2.Text.Length < initialRead2.MaxLength)
+                return false;
+
+            if(read_view2.Opacity>0.8)
+                if (pickerReadInterval2.SelectedIndex == -1)
+                    return false;
+
+            if (TwoWay_Port2.IsVisible)
+                if (pickerTwoWay2.SelectedIndex == -1)
+                    return false;
+
+
+            if (Alarms_Port2.IsVisible)
+                if (pickerAlarms2.SelectedIndex == -1)
+                    return false;
+
+
+            if (Demands_Port2.IsVisible)
+                if (pickerDemands2.SelectedIndex == -1)
+                    return false;
+            
+            /////// Misc ///////
+
+            if (mtuGeolocationLat.Text.Length < 0)
+                return false;
+            
+            if (mtuGeolocationLong.Text.Length < 0)
+                return false;
+
+            if (mtuLocation.SelectedIndex == -1)
+                return false;
+
+            if (meterLocation.SelectedIndex == -1)
+                return false;
+
+            if (construction.SelectedIndex == -1)
+                return false;
+            
+            return true;
+        }
+
         public AclaraViewAddMTU(IUserDialogs dialogs)
         {
             /*// TEST
@@ -787,7 +917,18 @@ namespace aclara_meters.view
 
             /* Get alarms for detected mtu */
             alarmListPort1 = FormsApp.config.Alarms.FindByMtuType(DetectedMtuType);
- 
+            alarmListPort2 = FormsApp.config.Alarms.FindByMtuType(DetectedMtuType);
+
+            demandListPort1 = new List<string>();
+            demandListPort2 = new List<string>();
+
+            //ADD ALARMS TO LIST
+            for (int i = 1; i < 4; i++)
+            {
+                demandListPort1.Add("Demand " + i);
+                demandListPort2.Add("Demand " + i);
+            }
+
             InitializeComponent();
 
             isCancellable = false;
@@ -990,6 +1131,7 @@ namespace aclara_meters.view
             addMtuForm.AddParameter(FIELD.FIELD_ORDER, fieldOrder.Text);
             addMtuForm.AddParameter(FIELD.METER_NUMBER, meterNumber.Text);
             addMtuForm.AddParameter(FIELD.SELECTED_METER_ID, (Meter)MeterNamePicker.SelectedItem);
+
             addMtuForm.AddParameter(FIELD.READ_INTERVAL, pickerReadInterval.SelectedItem.ToString());
             addMtuForm.AddParameter(FIELD.SNAP_READS, SliderMain.Value.ToString());
             addMtuForm.AddParameter(FIELD.TWO_WAY, pickerTwoWay.SelectedItem.ToString());
@@ -1370,6 +1512,7 @@ namespace aclara_meters.view
             if(alarmListPort2.Count > 0)
             {
                 pickerAlarms2.ItemsSource = alarmListPort2;
+                pickerAlarms2.ItemDisplayBinding = new Binding("Name");
             }
 
             /****  ****  ****  **** ****/
@@ -1645,6 +1788,7 @@ namespace aclara_meters.view
             //meters = meterTypes.FindByEncoderTypeAndLiveDigits(encoderType, liveDigits);
 
             vendors = meterTypes.GetVendorsFromMeters(meters);
+           
 
             //Listado de los Selectores
             picker_List_Vendor_port1 = new List<string>();
@@ -1913,10 +2057,28 @@ namespace aclara_meters.view
             /*******************************************/
             /**                  MARCA [0]            **/
 
+
+            meterTypes = FormsApp.config.GetMeterTypes();
+
+
+            //int encoderType = 2;
+            //int liveDigits = 6;
+
+            //meters = meterTypes.FindByEncoderTypeAndLiveDigits(encoderType, liveDigits);
+
+            vendors2 = meterTypes.GetVendorsFromMeters(meters);
+
+
             //Listado de los Selectores
             picker_List_Vendor_port2 = new List<string>();
 
-            Frame fm1_vendor2 = new Frame()
+            for (int i1 = 0; i1 < vendors2.Count; i1++)
+            {
+                picker_List_Vendor_port2.Add(vendors2[i1]);
+            }
+
+
+            Frame fm1_vendor = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -1925,7 +2087,7 @@ namespace aclara_meters.view
             };
 
 
-            Frame fm2_vendor2 = new Frame()
+            Frame fm2_vendor = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -1933,7 +2095,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            StackLayout st_vendor2 = new StackLayout()
+            StackLayout st_vendor = new StackLayout()
             {
                 Orientation = StackOrientation.Horizontal,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -1955,13 +2117,13 @@ namespace aclara_meters.view
 
 
             //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloque2 = new StackLayout()
+            StackLayout ElementoBloque = new StackLayout()
             {
                 StyleId = "bloque" + 1
             };
 
             //Texto del titulo
-            Label textoTitulo2 = new Label()
+            Label textoTitulo = new Label()
             {
                 Text = "Vendor",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
@@ -1971,7 +2133,7 @@ namespace aclara_meters.view
             //Añadimos el titulo y el selector al bloque
 
             //Texto del titulo
-            Label textoTituloCamposGrandes2 = new Label()
+            Label textoTituloCamposGrandes = new Label()
             {
                 Text = "Vistas de Colección",
                 Font = Font.SystemFontOfSize(NamedSize.Large).WithAttributes(FontAttributes.Bold),
@@ -1981,18 +2143,18 @@ namespace aclara_meters.view
             };
 
 
-            st_vendor2.Children.Add(MeterVendorPicker2);
-            fm2_vendor2.Content = st_vendor2;
-            fm1_vendor2.Content = fm2_vendor2;
+            st_vendor.Children.Add(MeterVendorPicker2);
+            fm2_vendor.Content = st_vendor;
+            fm1_vendor.Content = fm2_vendor;
 
-            ElementoBloque2.Children.Add(textoTituloCamposGrandes2);
-            ElementoBloque2.Children.Add(textoTitulo2);
+            ElementoBloque.Children.Add(textoTituloCamposGrandes);
+            ElementoBloque.Children.Add(textoTitulo);
 
             // Picker to    fm1_vendor --> fm2_vendor --> st_vendor --> picker
-            ElementoBloque2.Children.Add(fm1_vendor2);
+            ElementoBloque.Children.Add(fm1_vendor);
 
             //Introducimos el bloque en la vista
-            EntriesStackLayout2.Children.Add(ElementoBloque2);
+            EntriesStackLayout2.Children.Add(ElementoBloque);
 
             /*******************************************//*******************************************//*******************************************/
             /*******************************************/
@@ -2000,7 +2162,7 @@ namespace aclara_meters.view
             //Listado de los Selectores
             picker_List_Model_port2 = new List<string>();
 
-            Frame fm1_model2 = new Frame()
+            Frame fm1_model = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -2009,7 +2171,7 @@ namespace aclara_meters.view
             };
 
 
-            Frame fm2_model2 = new Frame()
+            Frame fm2_model = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -2017,7 +2179,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            StackLayout st_model2 = new StackLayout()
+            StackLayout st_model = new StackLayout()
             {
                 Orientation = StackOrientation.Horizontal,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -2028,26 +2190,26 @@ namespace aclara_meters.view
 
 
             // Generamos el Selector
-            MeterVendorPicker2 = new BorderlessPicker()
+            MeterModelPicker2 = new BorderlessPicker()
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 HeightRequest = 40,
                 FontSize = 17,
                 ItemsSource = picker_List_Model_port2,
-                StyleId = "pickerModelos"
+                StyleId = "pickerModelos2"
             };
 
             //Detectar el Selector clickado
-            MeterVendorPicker2.SelectedIndexChanged += PickerModelos_SelectedIndexChanged2;
+            MeterModelPicker2.SelectedIndexChanged += PickerModelos_SelectedIndexChanged2;
 
             //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloqueModelo2 = new StackLayout()
+            StackLayout ElementoBloqueModelo = new StackLayout()
             {
                 StyleId = "bloque" + 2
             };
 
             //Texto del titulo
-            Label textoTituloModelo2 = new Label()
+            Label textoTituloModelo = new Label()
             {
                 Text = "Model",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
@@ -2055,17 +2217,17 @@ namespace aclara_meters.view
             };
 
 
-            st_model2.Children.Add(MeterVendorPicker2);
-            fm2_model2.Content = st_model2;
-            fm1_model2.Content = fm2_model2;
+            st_model.Children.Add(MeterModelPicker2);
+            fm2_model.Content = st_model;
+            fm1_model.Content = fm2_model;
 
 
             //Añadimos el titulo y el selector al bloque
-            ElementoBloqueModelo2.Children.Add(textoTituloModelo2);
-            ElementoBloqueModelo2.Children.Add(fm1_model2);
+            ElementoBloqueModelo.Children.Add(textoTituloModelo);
+            ElementoBloqueModelo.Children.Add(fm1_model);
 
             //Introducimos el bloque en la vista
-            EntriesStackLayout2.Children.Add(ElementoBloqueModelo2);
+            EntriesStackLayout2.Children.Add(ElementoBloqueModelo);
 
             /*******************************************//*******************************************//*******************************************/
             /*******************************************/
@@ -2073,7 +2235,7 @@ namespace aclara_meters.view
             //Listado de los Selectores
             picker_List_Name_port2 = new List<string>();
 
-            Frame fm1_name2 = new Frame()
+            Frame fm1_name = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -2082,7 +2244,7 @@ namespace aclara_meters.view
             };
 
 
-            Frame fm2_name2 = new Frame()
+            Frame fm2_name = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -2090,7 +2252,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            StackLayout st_name2 = new StackLayout()
+            StackLayout st_name = new StackLayout()
             {
                 Orientation = StackOrientation.Horizontal,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -2107,40 +2269,39 @@ namespace aclara_meters.view
                 HeightRequest = 40,
                 FontSize = 17,
                 ItemsSource = picker_List_Name_port2,
-                StyleId = "pickerName"
+                StyleId = "pickerName2"
             };
 
             //Detectar el Selector clickado
             MeterNamePicker2.SelectedIndexChanged += PickerName_SelectedIndexChanged2;
 
             //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloqueName2 = new StackLayout()
+            StackLayout ElementoBloqueName = new StackLayout()
             {
                 StyleId = "bloque" + 3
             };
 
             //Texto del titulo
-            Label textoTituloName2 = new Label()
+            Label textoTituloName = new Label()
             {
                 Text = "Meter Type",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
-
-            st_name2.Children.Add(MeterNamePicker2);
-            fm2_name2.Content = st_name2;
-            fm1_name2.Content = fm2_name2;
+            st_name.Children.Add(MeterNamePicker2);
+            fm2_name.Content = st_name;
+            fm1_name.Content = fm2_name;
 
             //Añadimos el titulo y el selector al bloque
-            ElementoBloqueName2.Children.Add(textoTituloName2);
-            ElementoBloqueName2.Children.Add(fm1_name2);
+            ElementoBloqueName.Children.Add(textoTituloName);
+            ElementoBloqueName.Children.Add(fm1_name);
 
             //Introducimos el bloque en la vista
-            EntriesStackLayout2.Children.Add(ElementoBloqueName2);
+            EntriesStackLayout2.Children.Add(ElementoBloqueName);
 
-            ElementoBloqueName2.IsVisible = false;
-            ElementoBloqueModelo2.IsVisible = false;
+            ElementoBloqueName.IsVisible = false;
+            ElementoBloqueModelo.IsVisible = false;
 
             StepValue2 = 1.0;
 
@@ -2230,13 +2391,36 @@ namespace aclara_meters.view
         private void PickerMarcas_SelectedIndexChanged2(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
-            if (j == -1)
-                return;
             Console.WriteLine("Elemento Picker : " + j);
-            // TODO: change MeterModelPicker2
+
+            vendor2 = vendors2[j];
+            models2 = null;
+
+            models2 = meterTypes.GetModelsByVendorFromMeters(meters, vendor2);
+            name2 = "";
+
+            try
+            {
+                MeterModelPicker2.ItemsSource = null;
+                MeterModelPicker2.ItemsSource = models2;
+
+
+
+                EntriesStackLayout2.Children[1].IsVisible = true;
+                EntriesStackLayout2.Children[2].IsVisible = false;
+            }
+            catch (Exception e3)
+            {
+                MeterModelPicker2.ItemsSource = null;
+                EntriesStackLayout2.Children[1].IsVisible = false;
+                EntriesStackLayout2.Children[2].IsVisible = false;
+                Console.WriteLine(e3.StackTrace);
+            }
+
         }
 
-        private void PickerName_SelectedIndexChanged(object sender, EventArgs e)
+
+		private void PickerName_SelectedIndexChanged(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + j);
@@ -2257,23 +2441,20 @@ namespace aclara_meters.view
 
         }
 
-
+        
         private void PickerName_SelectedIndexChanged2(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
             Console.WriteLine("Elemento Picker : " + j);
 
-
             if (j == -1)
                 return;
 
-
-            List<string> itemsColores = (List<string>)((BorderlessPicker)sender).ItemsSource;
-
-
+            Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
+            name2 = selectedMeter.Display;
             try
             {
-                Console.WriteLine(itemsColores[j] + " Selected");
+                Console.WriteLine(name2 + " Selected");
             }
             catch (Exception n2)
             {
@@ -2281,6 +2462,7 @@ namespace aclara_meters.view
             }
 
         }
+
 
 
 
@@ -2327,7 +2509,32 @@ namespace aclara_meters.view
             Console.WriteLine("Elemento Picker : " + i);
             if (i == -1)
                 return;
-            List<string> valores = (List<string>)((BorderlessPicker)sender).ItemsSource;
+
+
+            MeterNamePicker2.ItemDisplayBinding = new Binding("Display");
+
+
+            model2 = models[i];
+            List<Meter> meterlist2 = meterTypes.GetMetersByModelAndVendorFromMeters(meters, vendor2, model2);
+
+            try
+            {
+
+                MeterNamePicker2.ItemsSource = null;
+
+                MeterNamePicker2.ItemsSource = meterlist2;
+
+                EntriesStackLayout2.Children[2].IsVisible = true;
+                EntriesStackLayout2.Children[1].IsVisible = true;
+            }
+            catch (Exception e3)
+            {
+                MeterNamePicker2.ItemsSource = null;
+                MeterNamePicker2.ItemsSource = meterlist2;
+                EntriesStackLayout2.Children[1].IsVisible = false;
+                EntriesStackLayout2.Children[2].IsVisible = false;
+                Console.WriteLine(e3.StackTrace);
+            }
         }
 
 

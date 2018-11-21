@@ -373,7 +373,7 @@
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
-                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text="" MaxLength="10"  Keyboard="Numeric"
                                                                 HeightRequest="40"   x:Name="servicePortId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
                                                                 FontSize="17" HorizontalTextAlignment="Start">
@@ -404,7 +404,7 @@
                                                         <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                              <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                     HeightRequest="40"   x:Name="fieldOrder" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                    Placeholder="" PlaceholderColor="#7a868c" 
+                                                                    Placeholder="" PlaceholderColor="#7a868c" MaxLength="20"  Keyboard="Numeric"
                                                                     FontSize="17" HorizontalTextAlignment="Start">
 
                                                                 <Controls:BorderlessEntry.Behaviors>
@@ -432,7 +432,7 @@
                                                         <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                              <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                     HeightRequest="40"   x:Name="meterNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                    Placeholder="" PlaceholderColor="#7a868c" 
+                                                                    Placeholder="" PlaceholderColor="#7a868c"  MaxLength="12"  Keyboard="Numeric"
                                                                     FontSize="17" HorizontalTextAlignment="Start">
 
                                                                 <Controls:BorderlessEntry.Behaviors>
@@ -472,7 +472,7 @@
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                 HeightRequest="40"   x:Name="initialRead" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
                                                                 <Controls:BorderlessEntry.Behaviors>
@@ -638,7 +638,8 @@
                                     
 
 
-                                    
+
+                                  
                                           
                                    <!-- PORT ID -->
                                    <Label Text="Service Port ID" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
@@ -648,7 +649,7 @@
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
-                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text="" MaxLength="10"  Keyboard="Numeric"
                                                                 HeightRequest="40"   x:Name="servicePortId2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
                                                                 FontSize="17" HorizontalTextAlignment="Start">
@@ -668,7 +669,7 @@
 
 
                                
-
+                                 <StackLayout x:Name="fo_view2">
                                 
                                     <!-- Field Order -->
                                      <Label Text="Field Order" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
@@ -681,7 +682,7 @@
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                 HeightRequest="40"   x:Name="fieldOrder2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                Placeholder="" PlaceholderColor="#7a868c" MaxLength="20"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
                                                                 <Controls:BorderlessEntry.Behaviors>
@@ -696,7 +697,10 @@
                                         
                                     </Frame>
 
-                              
+                                </StackLayout>
+
+                                     <StackLayout x:Name="mn_view2">
+                                        
                                      <!-- Meter Number -->
                                      <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
@@ -708,7 +712,7 @@
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                 HeightRequest="40"   x:Name="meterNumber2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
                                                                 <Controls:BorderlessEntry.Behaviors>
@@ -722,7 +726,7 @@
                                              </Frame> 
                                         
                                     </Frame>
-
+                                    </StackLayout>
                                 
                                     <StackLayout Margin="0,0,0,0" >
 
@@ -745,7 +749,7 @@
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                                 HeightRequest="40"   x:Name="initialRead2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
                                                                 <Controls:BorderlessEntry.Behaviors>
@@ -769,7 +773,7 @@
                                           
                                       
                                      <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  x:Name="read_view2"   Margin="-7" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessPicker x:Name="pickerReadInterval2" Title="" 
@@ -820,7 +824,7 @@
 
 
 
-                                   <StackLayout  Margin="0,4,0,0"  > 
+                                   <StackLayout  Margin="0,4,0,0" x:Name="TwoWay_Port2" >  
                                       <Label Text="2-Way" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
@@ -921,7 +925,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
 
                               
-                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text="" 
                                                                 HeightRequest="28"   x:Name="mtuGeolocationLat" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" 
                                                                 FontSize="17" HorizontalTextAlignment="Start"/>
