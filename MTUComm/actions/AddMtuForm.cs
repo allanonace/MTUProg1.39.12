@@ -19,30 +19,6 @@ namespace MTUComm.actions
             ALARM
         }
 
-        public enum FIELD_CONDITIONS
-        {
-            MTU_TWO_PORTS,
-            MTU_REQUIRES_ALARM_PROFILE,
-            MTU_MTU_DEMAND
-        }
-
-        public static Dictionary<FIELD_CONDITIONS,bool> Conditions_Mtu =
-            new Dictionary<FIELD_CONDITIONS,bool>()
-            {
-                {
-                    FIELD_CONDITIONS.MTU_TWO_PORTS,
-                    false
-                },
-                {
-                    FIELD_CONDITIONS.MTU_REQUIRES_ALARM_PROFILE,
-                    false
-                },
-                {
-                    FIELD_CONDITIONS.MTU_MTU_DEMAND,
-                    false
-                }
-            };
-
         public static Dictionary<FIELD, string[]> Texts =
             new Dictionary<FIELD, string[]>()
             {
@@ -122,11 +98,6 @@ namespace MTUComm.actions
 
         public AddMtuForm(Mtu mtu) : base( mtu )
         {
-            // PARA LAS CONDICIONES SE USA MTU Y GLOBALS
-            // LO QUE SE PUEDE HACER ES RECUPERAR TODOS LOS MIEMBROS/VARIABLES
-            // POR REFLEXION Y LOS QUE NO EXISTAN EN LOS OBJETOS, SERA PORQUE
-            // NO SE VAYAN A USAR, AL PERTENECER A OTRAS FAMILIAS, MODELOS...
-
         }
 
         public void AddParameter (FIELD field_type, dynamic value)
@@ -140,35 +111,5 @@ namespace MTUComm.actions
             string[] texts = Texts[field_type];
             return base.FindParameterById(texts[0]);
         }
-
-        /*
-        public class Condition
-        {
-            public bool this[ FIELD_CONDITIONS ]
-            {
-                get { return  }
-            }
-        }
-        */
-
-        public void SetCondition ( FIELD_CONDITIONS field, bool value )
-        {
-            Conditions_Mtu[ field ] = value;
-        }
-
-        public bool GetCondition ( FIELD_CONDITIONS field )
-        {
-            return Conditions_Mtu[ field ];
-        }
-
-        /*public override string ToString()
-        {
-            StringBuilder builder = new StringBuilder();
-            foreach (var p in paramsList)
-            {
-                builder.AppendLine(p.CustomParameter + " | " + p.CustomDisplay);
-            }
-            return builder.ToString();
-        }*/
     }
 }

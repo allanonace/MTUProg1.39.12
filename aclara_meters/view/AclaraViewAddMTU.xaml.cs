@@ -187,6 +187,9 @@ namespace aclara_meters.view
         public AclaraViewAddMTU(IUserDialogs dialogs)
         {
             InitializeComponent();
+
+            #region Prepare mtuForm
+
             this.config = Configuration.GetInstance();
 
             /* Get detected mtu */
@@ -197,7 +200,9 @@ namespace aclara_meters.view
             /* Instantiate form */
             addMtuForm = new AddMtuForm(currentMtu);
 
-            // Add conditions
+            #endregion
+
+            #region Conditions
 
             // Two Ports
             addMtuForm.conditions.mtu.AddCondition("TwoPorts");
@@ -231,6 +236,8 @@ namespace aclara_meters.view
             addMtuForm.conditions.mtu.AddCondition("MtuDemand");
 
             isCancellable = false;
+
+            #endregion
 
             Task.Run(() =>
             {
