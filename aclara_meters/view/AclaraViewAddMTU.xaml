@@ -454,7 +454,7 @@
                                         <StackLayout 
                                             HorizontalOptions="FillAndExpand" 
                                             Margin="0,4,0,0"
-                                            x:Name="EntriesStackLayout">
+                                            x:Name="meterVendorsModelsNamesContainer">
                                         </StackLayout>
 
                                   </StackLayout>
@@ -751,7 +751,7 @@
                                         <StackLayout 
                                             HorizontalOptions="FillAndExpand" 
                                             Margin="0,4,0,0"
-                                            x:Name="EntriesStackLayout2">
+                                            x:Name="meterVendorsModelsNames2Container">
                                         </StackLayout>
 
                                   </StackLayout>

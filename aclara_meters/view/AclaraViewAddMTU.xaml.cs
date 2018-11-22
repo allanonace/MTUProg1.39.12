@@ -78,31 +78,34 @@ namespace aclara_meters.view
         private bool _userTapped;
 
         private double snapReadsStep;
-        //private Slider snapReadsSlider;
         private double snapReads2Step;
-        //private Slider snapReads2Slider;
 
-        private BorderlessPicker MeterVendorPicker;
-        private BorderlessPicker MeterModelPicker;
-        private BorderlessPicker MeterNamePicker;
-        private BorderlessPicker MeterVendorPicker2;
-        private BorderlessPicker MeterModelPicker2;
-        private BorderlessPicker MeterNamePicker2;
+        private StackLayout meterVendorsContainerA;
+        private StackLayout meterModelsContainerA;
+        private StackLayout meterNamesContainerA;
+        private StackLayout meterVendors2ContainerA;
+        private StackLayout meterModels2ContainerA;
+        private StackLayout meterNames2ContainerA;
 
-        private List<string> picker_List_Vendor_port1;
-        private List<string> picker_List_Model_port1;
-        private List<string> picker_List_Name_port1;
-        private List<string> picker_List_Vendor_port2;
-        private List<string> picker_List_Model_port2;
-        private List<string> picker_List_Name_port2;
+        private BorderlessPicker meterVendorsPicker;
+        private BorderlessPicker meterModelsPicker;
+        private BorderlessPicker meterNamesPicker;
+        private BorderlessPicker meterVendors2Picker;
+        private BorderlessPicker meterModels2Picker;
+        private BorderlessPicker meterNames2Picker;
+
+        private List<string> meterVendorsList;
+        private List<string> meterModelsList;
+        private List<string> meterNamesList;
+        private List<string> meterVendors2List;
+        private List<string> meterModels2List;
+        private List<string> meterNames2List;
 
         private MeterTypes meterTypes;
         private List<Xml.Meter> meters;
         private List<Xml.Meter> meters2;
         private List<string> vendors;
         private List<string> vendors2;
-        private List<string> models;
-        private List<string> models2;
         private List<Meter> names;
         private List<Meter> names2;
         private string vendor;
@@ -296,9 +299,6 @@ namespace aclara_meters.view
 
             InitializeAddMtuForm();
 
-            InitializeMeterVendorModelName();
-            // TODO
-            //InitializeMeterVendorModelName2();
             InitMTULocationPicker();
             InitMeterLocationPicker();
             InitConstructionPicker();
@@ -339,10 +339,9 @@ namespace aclara_meters.view
             dynamic GlobalsConditions = addMtuForm.conditions.globals;
             #endregion
 
-            // TODO
+            // TODO: hide/show Port2 tab
             #region Two ports
             bool TwoPorts = MtuConditions.TwoPorts;
-            TwoPorts = true;
             if (TwoPorts)
             {
                 // TODO: enable second port
@@ -397,10 +396,14 @@ namespace aclara_meters.view
 
             // TODO
             #region Meter Vendor / Model / Name
+
             this.meters = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu.Ports[0].Type, currentMtu.Flow);
+            InitializeMeterPickers();
+
             if (TwoPorts)
             {
                 this.meters2 = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu.Ports[1].Type, currentMtu.Flow);
+                InitializeMeter2Pickers();
             }
 
             bool ShowMeterVendor = GlobalsConditions.ShowMeterVendor;
@@ -627,6 +630,10 @@ namespace aclara_meters.view
             }
             #endregion
 
+            // TODO: load misc tab
+            #region Misc
+            #endregion
+
             #region Cancel reason
 
             cancelReasonPicker.ItemsSource = new List<string>() { "Complete", "Cancel", "Skip", "Not Home", "Other" };
@@ -779,30 +786,19 @@ namespace aclara_meters.view
             mtuLocation.ItemsSource = objStringList;
         }
 
-        private void InitializeMeterVendorModelName()
+        private void InitializeMeterPickers()
         {
-            meterTypes = FormsApp.config.GetMeterTypes();
-            vendors = meterTypes.GetVendorsFromMeters(meters);
+            meterVendorsList = this.config.meterTypes.GetVendorsFromMeters(meters);
 
-            //Listado de los Selectores
-            picker_List_Vendor_port1 = new List<string>();
-
-            for (int i1 = 0; i1 < vendors.Count; i1++)
-            {
-                picker_List_Vendor_port1.Add(vendors[i1]);
-            }
-
-
-            Frame fm1_vendor = new Frame()
+            Frame meterVendorsContainerB = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
                 Margin = new Thickness(0, 4, 0, 0),
                 BackgroundColor = Color.FromHex("#7a868c")
             };
-
-
-            Frame fm2_vendor = new Frame()
+            
+            Frame meterVendorsContainerC = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -810,7 +806,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            StackLayout st_vendor = new StackLayout()
+            StackLayout meterVendorsContainerD = new StackLayout()
             {
                 Orientation = StackOrientation.Horizontal,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -818,66 +814,37 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            // Generamos el Selector
-            MeterVendorPicker = new BorderlessPicker()
+            meterVendorsPicker = new BorderlessPicker()
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 HeightRequest = 40,
                 FontSize = 17,
-                ItemsSource = picker_List_Vendor_port1
+                ItemsSource = meterVendorsList
             };
 
-            //Detectar el Selector clickado
-            MeterVendorPicker.SelectedIndexChanged += PickerMarcas_SelectedIndexChanged;
+            meterVendorsPicker.SelectedIndexChanged += MeterVendorsPicker_SelectedIndexChanged;
 
-
-            //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloque = new StackLayout()
+            meterVendorsContainerA = new StackLayout()
             {
                 StyleId = "bloque" + 1
             };
 
-            //Texto del titulo
-            Label textoTitulo = new Label()
+            Label meterVendorsLabel = new Label()
             {
                 Text = "Vendor",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
-            //Añadimos el titulo y el selector al bloque
+            meterVendorsContainerD.Children.Add(meterVendorsPicker);
+            meterVendorsContainerC.Content = meterVendorsContainerD;
+            meterVendorsContainerB.Content = meterVendorsContainerC;
+            meterVendorsContainerA.Children.Add(meterVendorsLabel);
+            meterVendorsContainerA.Children.Add(meterVendorsContainerB);
 
-            //Texto del titulo
-            Label textoTituloCamposGrandes = new Label()
-            {
-                Text = "Vistas de Colección",
-                Font = Font.SystemFontOfSize(NamedSize.Large).WithAttributes(FontAttributes.Bold),
-                IsVisible = false,
-                Margin = new Thickness(0, 8, 0, 0)
+            meterModelsList = new List<string>();
 
-            };
-
-
-            st_vendor.Children.Add(MeterVendorPicker);
-            fm2_vendor.Content = st_vendor;
-            fm1_vendor.Content = fm2_vendor;
-
-            ElementoBloque.Children.Add(textoTituloCamposGrandes);
-            ElementoBloque.Children.Add(textoTitulo);
-
-            // Picker to    fm1_vendor --> fm2_vendor --> st_vendor --> picker
-            ElementoBloque.Children.Add(fm1_vendor);
-
-            //Introducimos el bloque en la vista
-            EntriesStackLayout.Children.Add(ElementoBloque);
-
-            /*******************************************//*******************************************//*******************************************/
-            /*******************************************/
-            /**                  MODELO  [1]          **/
-            //Listado de los Selectores
-            picker_List_Model_port1 = new List<string>();
-
-            Frame fm1_model = new Frame()
+            Frame meterModelsContainerB = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -885,8 +852,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.FromHex("#7a868c")
             };
 
-
-            Frame fm2_model = new Frame()
+            Frame meterModelsContainerC = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -894,7 +860,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            StackLayout st_model = new StackLayout()
+            StackLayout meterModelsContainerD = new StackLayout()
             {
                 Orientation = StackOrientation.Horizontal,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -902,55 +868,38 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-
-
-            // Generamos el Selector
-            MeterModelPicker = new BorderlessPicker()
+            meterModelsPicker = new BorderlessPicker()
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 HeightRequest = 40,
                 FontSize = 17,
-                ItemsSource = picker_List_Model_port1,
+                ItemsSource = meterModelsList,
                 StyleId = "pickerModelos"
             };
 
-            //Detectar el Selector clickado
-            MeterModelPicker.SelectedIndexChanged += PickerModelos_SelectedIndexChanged;
+            meterModelsPicker.SelectedIndexChanged += MeterModelsPicker_SelectedIndexChanged;
 
-            //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloqueModelo = new StackLayout()
+            meterModelsContainerA = new StackLayout()
             {
                 StyleId = "bloque" + 2
             };
 
-            //Texto del titulo
-            Label textoTituloModelo = new Label()
+            Label meterModelsLabel = new Label()
             {
                 Text = "Model",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
+            meterModelsContainerD.Children.Add(meterModelsPicker);
+            meterModelsContainerC.Content = meterModelsContainerD;
+            meterModelsContainerB.Content = meterModelsContainerC;
+            meterModelsContainerA.Children.Add(meterModelsLabel);
+            meterModelsContainerA.Children.Add(meterModelsContainerB);
 
-            st_model.Children.Add(MeterModelPicker);
-            fm2_model.Content = st_model;
-            fm1_model.Content = fm2_model;
+            meterNamesList = new List<string>();
 
-
-            //Añadimos el titulo y el selector al bloque
-            ElementoBloqueModelo.Children.Add(textoTituloModelo);
-            ElementoBloqueModelo.Children.Add(fm1_model);
-
-            //Introducimos el bloque en la vista
-            EntriesStackLayout.Children.Add(ElementoBloqueModelo);
-
-            /*******************************************//*******************************************//*******************************************/
-            /*******************************************/
-            /**                  COLOR  [2]          **/
-            //Listado de los Selectores
-            picker_List_Name_port1 = new List<string>();
-
-            Frame fm1_name = new Frame()
+            Frame meterNamesContainerB = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -958,8 +907,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.FromHex("#7a868c")
             };
 
-
-            Frame fm2_name = new Frame()
+            Frame meterNamesContainerC = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -967,7 +915,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            StackLayout st_name = new StackLayout()
+            StackLayout meterNamesContainerD = new StackLayout()
             {
                 Orientation = StackOrientation.Horizontal,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -975,66 +923,48 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-
-
-            // Generamos el Selector
-            MeterNamePicker = new BorderlessPicker()
+            meterNamesPicker = new BorderlessPicker()
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 HeightRequest = 40,
                 FontSize = 17,
-                ItemsSource = picker_List_Name_port1,
+                ItemsSource = meterNamesList,
                 StyleId = "pickerName"
             };
 
-            //Detectar el Selector clickado
-            MeterNamePicker.SelectedIndexChanged += PickerName_SelectedIndexChanged;
+            meterNamesPicker.SelectedIndexChanged += MeterNamesPicker_SelectedIndexChanged;
 
-            //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloqueName = new StackLayout()
+            meterNamesContainerA = new StackLayout()
             {
                 StyleId = "bloque" + 3
             };
 
-            //Texto del titulo
-            Label textoTituloName = new Label()
+            Label meterNamesLabel = new Label()
             {
                 Text = "Meter Type",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
-            st_name.Children.Add(MeterNamePicker);
-            fm2_name.Content = st_name;
-            fm1_name.Content = fm2_name;
+            meterNamesContainerD.Children.Add(meterNamesPicker);
+            meterNamesContainerC.Content = meterNamesContainerD;
+            meterNamesContainerB.Content = meterNamesContainerC;
+            meterNamesContainerA.Children.Add(meterNamesLabel);
+            meterNamesContainerA.Children.Add(meterNamesContainerB);
 
-            //Añadimos el titulo y el selector al bloque
-            ElementoBloqueName.Children.Add(textoTituloName);
-            ElementoBloqueName.Children.Add(fm1_name);
+            meterVendorsModelsNamesContainer.Children.Add(meterVendorsContainerA);
+            meterVendorsModelsNamesContainer.Children.Add(meterModelsContainerA);
+            meterVendorsModelsNamesContainer.Children.Add(meterNamesContainerA);
 
-            //Introducimos el bloque en la vista
-            EntriesStackLayout.Children.Add(ElementoBloqueName);
-
-            ElementoBloqueName.IsVisible = false;
-            ElementoBloqueModelo.IsVisible = false;
+            meterNamesContainerA.IsVisible = false;
+            meterModelsContainerA.IsVisible = false;
         }
 
-        private void InitializeMeterVendorModelName2()
+        private void InitializeMeter2Pickers()
         {
-            meterTypes = FormsApp.config.GetMeterTypes();
-            vendors2 = meterTypes.GetVendorsFromMeters(meters2);
+            meterVendors2List = this.config.meterTypes.GetVendorsFromMeters(meters2);
 
-
-            //Listado de los Selectores
-            picker_List_Vendor_port2 = new List<string>();
-
-            for (int i1 = 0; i1 < vendors2.Count; i1++)
-            {
-                picker_List_Vendor_port2.Add(vendors2[i1]);
-            }
-
-
-            Frame fm1_vendor = new Frame()
+            Frame meterVendors2ContainerB = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -1042,8 +972,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.FromHex("#7a868c")
             };
 
-
-            Frame fm2_vendor = new Frame()
+            Frame meterVendors2ContainerC = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -1051,7 +980,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            StackLayout st_vendor = new StackLayout()
+            StackLayout meterVendors2ContainerD = new StackLayout()
             {
                 Orientation = StackOrientation.Horizontal,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -1059,66 +988,37 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            // Generamos el Selector
-            MeterVendorPicker2 = new BorderlessPicker()
+            meterVendors2Picker = new BorderlessPicker()
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 HeightRequest = 40,
                 FontSize = 17,
-                ItemsSource = picker_List_Vendor_port2
+                ItemsSource = meterVendors2List
             };
 
-            //Detectar el Selector clickado
-            MeterVendorPicker2.SelectedIndexChanged += PickerMarcas_SelectedIndexChanged2;
+            meterVendors2Picker.SelectedIndexChanged += MeterVendors2Picker_SelectedIndexChanged2;
 
-
-            //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloque = new StackLayout()
+            meterVendors2ContainerA = new StackLayout()
             {
                 StyleId = "bloque" + 1
             };
 
-            //Texto del titulo
-            Label textoTitulo = new Label()
+            Label meterVendors2Label = new Label()
             {
                 Text = "Vendor",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
-            //Añadimos el titulo y el selector al bloque
+            meterVendors2ContainerD.Children.Add(meterVendors2Picker);
+            meterVendors2ContainerC.Content = meterVendors2ContainerD;
+            meterVendors2ContainerB.Content = meterVendors2ContainerC;
+            meterVendors2ContainerA.Children.Add(meterVendors2Label);
+            meterVendors2ContainerA.Children.Add(meterVendors2ContainerB);
 
-            //Texto del titulo
-            Label textoTituloCamposGrandes = new Label()
-            {
-                Text = "Vistas de Colección",
-                Font = Font.SystemFontOfSize(NamedSize.Large).WithAttributes(FontAttributes.Bold),
-                IsVisible = false,
-                Margin = new Thickness(0, 8, 0, 0)
+            meterModels2List = new List<string>();
 
-            };
-
-
-            st_vendor.Children.Add(MeterVendorPicker2);
-            fm2_vendor.Content = st_vendor;
-            fm1_vendor.Content = fm2_vendor;
-
-            ElementoBloque.Children.Add(textoTituloCamposGrandes);
-            ElementoBloque.Children.Add(textoTitulo);
-
-            // Picker to    fm1_vendor --> fm2_vendor --> st_vendor --> picker
-            ElementoBloque.Children.Add(fm1_vendor);
-
-            //Introducimos el bloque en la vista
-            EntriesStackLayout2.Children.Add(ElementoBloque);
-
-            /*******************************************//*******************************************//*******************************************/
-            /*******************************************/
-            /**                  MODELO  [1]          **/
-            //Listado de los Selectores
-            picker_List_Model_port2 = new List<string>();
-
-            Frame fm1_model = new Frame()
+            Frame meterModels2ContainerB = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -1126,8 +1026,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.FromHex("#7a868c")
             };
 
-
-            Frame fm2_model = new Frame()
+            Frame meterModels2ContainerC = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -1135,7 +1034,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            StackLayout st_model = new StackLayout()
+            StackLayout meterModels2ContainerD = new StackLayout()
             {
                 Orientation = StackOrientation.Horizontal,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -1143,53 +1042,38 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
             
-            // Generamos el Selector
-            MeterModelPicker2 = new BorderlessPicker()
+            meterModels2Picker = new BorderlessPicker()
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 HeightRequest = 40,
                 FontSize = 17,
-                ItemsSource = picker_List_Model_port2,
+                ItemsSource = meterModels2List,
                 StyleId = "pickerModelos2"
             };
 
-            //Detectar el Selector clickado
-            MeterModelPicker2.SelectedIndexChanged += PickerModelos_SelectedIndexChanged2;
+            meterModels2Picker.SelectedIndexChanged += MeterModels2Picker_SelectedIndexChanged2;
 
-            //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloqueModelo = new StackLayout()
+            meterModels2ContainerA = new StackLayout()
             {
                 StyleId = "bloque" + 2
             };
 
-            //Texto del titulo
-            Label textoTituloModelo = new Label()
+            Label meterModels2Label = new Label()
             {
                 Text = "Model",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
+            meterModels2ContainerD.Children.Add(meterModels2Picker);
+            meterModels2ContainerC.Content = meterModels2ContainerD;
+            meterModels2ContainerB.Content = meterModels2ContainerC;
+            meterModels2ContainerA.Children.Add(meterModels2Label);
+            meterModels2ContainerA.Children.Add(meterModels2ContainerB);
+            
+            meterNames2List = new List<string>();
 
-            st_model.Children.Add(MeterModelPicker2);
-            fm2_model.Content = st_model;
-            fm1_model.Content = fm2_model;
-
-
-            //Añadimos el titulo y el selector al bloque
-            ElementoBloqueModelo.Children.Add(textoTituloModelo);
-            ElementoBloqueModelo.Children.Add(fm1_model);
-
-            //Introducimos el bloque en la vista
-            EntriesStackLayout2.Children.Add(ElementoBloqueModelo);
-
-            /*******************************************//*******************************************//*******************************************/
-            /*******************************************/
-            /**                  COLOR  [2]          **/
-            //Listado de los Selectores
-            picker_List_Name_port2 = new List<string>();
-
-            Frame fm1_name = new Frame()
+            Frame meterNames2ContainerB = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -1197,8 +1081,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.FromHex("#7a868c")
             };
 
-
-            Frame fm2_name = new Frame()
+            Frame meterNames2ContainerC = new Frame()
             {
                 CornerRadius = 6,
                 HeightRequest = 30,
@@ -1206,7 +1089,7 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-            StackLayout st_name = new StackLayout()
+            StackLayout meterNames2ContainerD = new StackLayout()
             {
                 Orientation = StackOrientation.Horizontal,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -1214,48 +1097,41 @@ namespace aclara_meters.view
                 BackgroundColor = Color.White
             };
 
-
-
-            // Generamos el Selector
-            MeterNamePicker2 = new BorderlessPicker()
+            meterNames2Picker = new BorderlessPicker()
             {
                 HorizontalOptions = LayoutOptions.FillAndExpand,
                 HeightRequest = 40,
                 FontSize = 17,
-                ItemsSource = picker_List_Name_port2,
+                ItemsSource = meterNames2List,
                 StyleId = "pickerName2"
             };
 
-            //Detectar el Selector clickado
-            MeterNamePicker2.SelectedIndexChanged += PickerName_SelectedIndexChanged2;
+            meterNames2Picker.SelectedIndexChanged += MeterNames2Picker_SelectedIndexChanged2;
 
-            //Creamos el Bloque con toda la informacion
-            StackLayout ElementoBloqueName = new StackLayout()
+            meterNames2ContainerA = new StackLayout()
             {
                 StyleId = "bloque" + 3
             };
 
-            //Texto del titulo
-            Label textoTituloName = new Label()
+            Label meterNames2Label = new Label()
             {
                 Text = "Meter Type",
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
-            st_name.Children.Add(MeterNamePicker2);
-            fm2_name.Content = st_name;
-            fm1_name.Content = fm2_name;
+            meterNames2ContainerD.Children.Add(meterNames2Picker);
+            meterNames2ContainerC.Content = meterNames2ContainerD;
+            meterNames2ContainerB.Content = meterNames2ContainerC;
+            meterNames2ContainerA.Children.Add(meterNames2Label);
+            meterNames2ContainerA.Children.Add(meterNames2ContainerB);
 
-            //Añadimos el titulo y el selector al bloque
-            ElementoBloqueName.Children.Add(textoTituloName);
-            ElementoBloqueName.Children.Add(fm1_name);
+            meterVendorsModelsNames2Container.Children.Add(meterVendors2ContainerA);
+            meterVendorsModelsNames2Container.Children.Add(meterModels2ContainerA);
+            meterVendorsModelsNames2Container.Children.Add(meterNames2ContainerA);
 
-            //Introducimos el bloque en la vista
-            EntriesStackLayout2.Children.Add(ElementoBloqueName);
-
-            ElementoBloqueName.IsVisible = false;
-            ElementoBloqueModelo.IsVisible = false;
+            meterNames2ContainerA.IsVisible = false;
+            meterModels2ContainerA.IsVisible = false;
         }
         #endregion
 
@@ -1444,78 +1320,109 @@ namespace aclara_meters.view
             int selectedIndex = picker.SelectedIndex;
         }
 
-        private void PickerMarcas_SelectedIndexChanged(object sender, EventArgs e)
+        private void MeterVendorsPicker_SelectedIndexChanged(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
-            Console.WriteLine("Elemento Picker : " + j);
 
-            vendor = vendors[j];
-            models = null;
-
-            models = meterTypes.GetModelsByVendorFromMeters(meters, vendor);
+            vendor = meterVendorsList[j];
+            meterModelsList = this.config.meterTypes.GetModelsByVendorFromMeters(meters, vendor);
             name = "";
 
             try
             {
-                MeterModelPicker.ItemsSource = null;
-                MeterModelPicker.ItemsSource = models;
-
-
-
-                EntriesStackLayout.Children[1].IsVisible = true;
-                EntriesStackLayout.Children[2].IsVisible = false;
+                meterModelsPicker.ItemsSource = meterModelsList;
+                meterModelsContainerA.IsVisible = true;
+                meterNamesContainerA.IsVisible = false;
             }
             catch (Exception e3)
             {
-                MeterModelPicker.ItemsSource = null;
-                EntriesStackLayout.Children[1].IsVisible = false;
-                EntriesStackLayout.Children[2].IsVisible = false;
-                Console.WriteLine(e3.StackTrace);
+                meterModelsPicker.ItemsSource = null;
+                meterModelsContainerA.IsVisible = false;
+                meterNamesContainerA.IsVisible = false;
             }
 
         }
 
-        private void PickerMarcas_SelectedIndexChanged2(object sender, EventArgs e)
+        private void MeterVendors2Picker_SelectedIndexChanged2(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
-            Console.WriteLine("Elemento Picker : " + j);
 
-            vendor2 = vendors2[j];
-            models2 = null;
+            vendor2 = meterVendors2List[j];
 
-            models2 = meterTypes.GetModelsByVendorFromMeters(meters, vendor2);
+            meterModels2List = this.config.meterTypes.GetModelsByVendorFromMeters(meters2, vendor2);
             name2 = "";
 
             try
             {
-                MeterModelPicker2.ItemsSource = null;
-                MeterModelPicker2.ItemsSource = models2;
-
-
-
-                EntriesStackLayout2.Children[1].IsVisible = true;
-                EntriesStackLayout2.Children[2].IsVisible = false;
+                meterModels2Picker.ItemsSource = meterModels2List;
+                meterModels2ContainerA.IsVisible = true;
+                meterNames2ContainerA.IsVisible = false;
             }
             catch (Exception e3)
             {
-                MeterModelPicker2.ItemsSource = null;
-                EntriesStackLayout2.Children[1].IsVisible = false;
-                EntriesStackLayout2.Children[2].IsVisible = false;
-                Console.WriteLine(e3.StackTrace);
+                meterModels2Picker.ItemsSource = null;
+                meterModels2ContainerA.IsVisible = false;
+                meterNames2ContainerA.IsVisible = false;
             }
-
         }
 
-        private void PickerName_SelectedIndexChanged(object sender, EventArgs e)
+        private void MeterModelsPicker_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+            int i = ((BorderlessPicker)sender).SelectedIndex;
+
+            meterNamesPicker.ItemDisplayBinding = new Binding("Display");
+
+            model = meterModelsList[i];
+
+            List<Meter> meterlist = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(meters, vendor, model);
+
+            try
+            {
+                meterNamesPicker.ItemsSource = meterlist;
+                meterModelsContainerA.IsVisible = true;
+                meterNamesContainerA.IsVisible = true;
+            }
+            catch (Exception e3)
+            {
+                meterNamesPicker.ItemsSource = null;
+                meterModelsContainerA.IsVisible = false;
+                meterNamesContainerA.IsVisible = false;
+            }
+        }
+
+        private void MeterModels2Picker_SelectedIndexChanged2(object sender, EventArgs e)
+        {
+            int i = ((BorderlessPicker)sender).SelectedIndex;
+
+            meterNames2Picker.ItemDisplayBinding = new Binding("Display");
+
+            model2 = meterModels2List[i];
+
+            List<Meter> meterlist2 = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(meters2, vendor2, model2);
+
+            try
+            {
+                meterNames2Picker.ItemsSource = meterlist2;
+                meterModels2ContainerA.IsVisible = true;
+                meterNames2ContainerA.IsVisible = true;
+            }
+            catch (Exception e3)
+            {
+                meterNames2Picker.ItemsSource = null;
+                meterModels2ContainerA.IsVisible = false;
+                meterNames2ContainerA.IsVisible = false;
+            }
+        }
+
+        private void MeterNamesPicker_SelectedIndexChanged(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
-            Console.WriteLine("Elemento Picker : " + j);
-
-            if (j == -1)
-                return;
 
             Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
+
             name = selectedMeter.Display;
+
             try
             {
                 Console.WriteLine(name + " Selected");
@@ -1527,16 +1434,14 @@ namespace aclara_meters.view
 
         }
 
-        private void PickerName_SelectedIndexChanged2(object sender, EventArgs e)
+        private void MeterNames2Picker_SelectedIndexChanged2(object sender, EventArgs e)
         {
             int j = ((BorderlessPicker)sender).SelectedIndex;
-            Console.WriteLine("Elemento Picker : " + j);
-
-            if (j == -1)
-                return;
 
             Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
+
             name2 = selectedMeter.Display;
+
             try
             {
                 Console.WriteLine(name2 + " Selected");
@@ -1544,76 +1449,6 @@ namespace aclara_meters.view
             catch (Exception n2)
             {
                 Console.WriteLine(n2.StackTrace);
-            }
-
-        }
-
-        private void PickerModelos_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-            int i = ((BorderlessPicker)sender).SelectedIndex;
-            Console.WriteLine("Elemento Picker : " + i);
-            if (i == -1)
-                return;
-
-
-            MeterNamePicker.ItemDisplayBinding = new Binding("Display");
-
-
-            model = models[i];
-            List<Meter> meterlist = meterTypes.GetMetersByModelAndVendorFromMeters(meters, vendor, model);
-
-            try
-            {
-
-                MeterNamePicker.ItemsSource = null;
-
-                MeterNamePicker.ItemsSource = meterlist;
-
-                EntriesStackLayout.Children[2].IsVisible = true;
-                EntriesStackLayout.Children[1].IsVisible = true;
-            }
-            catch (Exception e3)
-            {
-                MeterNamePicker.ItemsSource = null;
-                MeterNamePicker.ItemsSource = meterlist;
-                EntriesStackLayout.Children[1].IsVisible = false;
-                EntriesStackLayout.Children[2].IsVisible = false;
-                Console.WriteLine(e3.StackTrace);
-            }
-        }
-
-        private void PickerModelos_SelectedIndexChanged2(object sender, EventArgs e)
-        {
-            int i = ((BorderlessPicker)sender).SelectedIndex;
-            Console.WriteLine("Elemento Picker : " + i);
-            if (i == -1)
-                return;
-
-
-            MeterNamePicker2.ItemDisplayBinding = new Binding("Display");
-
-
-            model2 = models[i];
-            List<Meter> meterlist2 = meterTypes.GetMetersByModelAndVendorFromMeters(meters, vendor2, model2);
-
-            try
-            {
-
-                MeterNamePicker2.ItemsSource = null;
-
-                MeterNamePicker2.ItemsSource = meterlist2;
-
-                EntriesStackLayout2.Children[2].IsVisible = true;
-                EntriesStackLayout2.Children[1].IsVisible = true;
-            }
-            catch (Exception e3)
-            {
-                MeterNamePicker2.ItemsSource = null;
-                MeterNamePicker2.ItemsSource = meterlist2;
-                EntriesStackLayout2.Children[1].IsVisible = false;
-                EntriesStackLayout2.Children[2].IsVisible = false;
-                Console.WriteLine(e3.StackTrace);
             }
         }
 
@@ -2062,9 +1897,9 @@ namespace aclara_meters.view
                 if (meterSerialNumberInput.Text.Length < meterSerialNumberInput.MaxLength)
                     return false;
 
-            if (EntriesStackLayout.Children[2].IsVisible)
+            if (meterVendorsModelsNamesContainer.Children[2].IsVisible)
                 if (model != null)
-                    if (EntriesStackLayout.Children[1].IsVisible)
+                    if (meterVendorsModelsNamesContainer.Children[1].IsVisible)
                         if (name.Length < 0)
                             return false;
 
@@ -2111,9 +1946,9 @@ namespace aclara_meters.view
                     return false;
 
 
-            if (EntriesStackLayout2.Children[2].IsVisible)
+            if (meterVendorsModelsNames2Container.Children[2].IsVisible)
                 if (model2 != null)
-                    if (EntriesStackLayout2.Children[1].IsVisible)
+                    if (meterVendorsModelsNames2Container.Children[1].IsVisible)
                         if (name2.Length < 0)
                             return false;
 
@@ -2313,12 +2148,12 @@ namespace aclara_meters.view
 
         private void AddMtu(object sender, EventArgs e)
         {
-            if (!ValidateEmptyFields())
+            /*if (!ValidateEmptyFields())
             {
 
                 DisplayAlert("Error", "Mandatory fields are not filled in", "Ok");
                 return;
-            }
+            }*/
 
             isCancellable = true;
 
@@ -2532,7 +2367,7 @@ namespace aclara_meters.view
             addMtuForm.AddParameter(FIELD.SERVICE_PORT_ID, servicePortIdInput.Text);
             addMtuForm.AddParameter(FIELD.FIELD_ORDER, fieldOrderInput.Text);
             addMtuForm.AddParameter(FIELD.METER_NUMBER, meterSerialNumberInput.Text);
-            addMtuForm.AddParameter(FIELD.SELECTED_METER_ID, (Meter)MeterNamePicker.SelectedItem);
+            addMtuForm.AddParameter(FIELD.SELECTED_METER_ID, (Meter)meterNamesPicker.SelectedItem);
             addMtuForm.AddParameter(FIELD.READ_INTERVAL, readIntervalPicker.SelectedItem.ToString());
             addMtuForm.AddParameter(FIELD.SNAP_READS, snapReadsSlider.Value.ToString());
             addMtuForm.AddParameter(FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString());
