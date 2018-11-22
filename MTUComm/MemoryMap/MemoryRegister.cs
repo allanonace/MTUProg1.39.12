@@ -231,9 +231,9 @@ namespace MTUComm.MemoryMap
             if ( this.HasCustomMethod_Set )
             {
                 if ( this._HasCustomMethodId_Set )
-                     this.methodId_Set = this.custom_Set.Substring ( MemoryMap.METHOD_KEY.Length + 1 );
+                     this.methodId_Set = this.custom_Set.Substring ( MemoryMap.METHOD_KEY.Length );
                 else this.methodId_Set = this.id + MemoryMap.METHOD_SUFIX_SET;
-            }  
+            }
         }
 
         #endregion

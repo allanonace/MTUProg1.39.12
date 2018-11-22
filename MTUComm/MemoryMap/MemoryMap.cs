@@ -35,6 +35,14 @@ using Xml;
 ///      "memoryMap.registers.idProperty" to get value, and "memoryMap.registers.idProperty = value" to set
 ///      Never need to call directly to registers.get_idProperty nor registers.set_idProperty, because
 ///      Value property do it for us, invoking funcGet and funcSet methods
+///      
+/// HEADERS:
+/// - Registers
+///   - Get. public T RegisterId_Get|CustomId ( MemoryRegister<T> MemoryRegister )
+///   - Set. public T RegisterId_Get|CustomId ( MemoryRegister<T> MemoryRegister, dynamic inputValue )
+/// - Overloads
+///   - Get. public T RegisterId_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters ) -> ExpandoObject
+///   - Get. public T RegisterId_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic[] MemoryRegisters )
 /// </summary>
 
 namespace MTUComm.MemoryMap
@@ -301,7 +309,7 @@ namespace MTUComm.MemoryMap
 
         #region Create Property Get
 
-        // Custom header format: public T Id_Get|CustomId ( MemoryRegister<T> MemoryRegister )
+        // Custom header format: public T RegisterId_Get|CustomId ( MemoryRegister<T> MemoryRegister )
         private void CreateProperty_Get<T> ( MemoryRegister<T> memoryRegister )
         {
             // All register have normal get block
@@ -354,8 +362,8 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        // Custom header format 1: public T Id_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters ) <- ExpandoObject
-        // Custom header format 2: public T Id_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic[] MemoryRegisters )
+        // Custom header format 1: public T RegisterId_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters ) -> ExpandoObject
+        // Custom header format 2: public T RegisterId_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic[] MemoryRegisters )
         private void CreateOverload_Get<T> ( MemoryOverload<T> memoryOverload )
         {
             bool useParamArray = false;
@@ -427,7 +435,7 @@ namespace MTUComm.MemoryMap
         #region Create Property Set
 
         // Using custom method we can't be assured of the type used for parameter, but yes about return value
-        // Custom header format: public T Id_Get|CustomId ( MemoryRegister<T> MemoryRegister, dynamic value )
+        // Custom header format: public T RegisterId_Get|CustomId ( MemoryRegister<T> MemoryRegister, dynamic inputValue )
         public void CreateProperty_Set<T>( MemoryRegister<T> memoryRegister )
         {
             base.AddMethod ( METHODS_SET_PREFIX + memoryRegister.id,
@@ -550,7 +558,7 @@ namespace MTUComm.MemoryMap
 
         #region Get value
 
-        protected int GetIntFromMem(int address, int size = MemRegister.DEF_SIZE)
+        private int GetIntFromMem(int address, int size = MemRegister.DEF_SIZE)
         {
             int value = 0;
             for (int b = 0; b < size; b++)
@@ -559,7 +567,7 @@ namespace MTUComm.MemoryMap
             return value;
         }
 
-        protected uint GetUIntFromMem(int address, int size = MemRegister.DEF_SIZE)
+        private uint GetUIntFromMem(int address, int size = MemRegister.DEF_SIZE)
         {
             uint value = 0;
             for (int b = 0; b < size; b++)
@@ -568,7 +576,7 @@ namespace MTUComm.MemoryMap
             return value;
         }
 
-        protected ulong GetULongFromMem(int address, int size = MemRegister.DEF_SIZE)
+        private ulong GetULongFromMem(int address, int size = MemRegister.DEF_SIZE)
         {
             ulong value = 0;
             for (int b = 0; b < size; b++)
@@ -577,17 +585,17 @@ namespace MTUComm.MemoryMap
             return value;
         }
 
-        protected bool GetBoolFromMem(int address, int bit_index = MemRegister.DEF_BIT)
+        private bool GetBoolFromMem(int address, int bit_index = MemRegister.DEF_BIT)
         {
             return (((memory[address] >> bit_index) & 1) == 1);
         }
 
-        protected char GetCharFromMem(int address)
+        private char GetCharFromMem(int address)
         {
             return Convert.ToChar(memory[address]);
         }
 
-        protected string GetStringFromMem(int address, int size = MemRegister.DEF_SIZE)
+        private string GetStringFromMem(int address, int size = MemRegister.DEF_SIZE)
         {
             byte[] dataRead = new byte[size];
             Array.Copy(memory, address, dataRead, 0, size);
@@ -598,7 +606,7 @@ namespace MTUComm.MemoryMap
 
         #region Set value
 
-        protected void SetIntToMem(int value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetIntToMem(int value, int address, int size = MemRegister.DEF_SIZE)
         {
             for (int b = 0; b < size; b++)
                 this.memory[address + b] = (byte)(value >> (b * 8));
@@ -614,7 +622,7 @@ namespace MTUComm.MemoryMap
                     this.memory[address + b] = (byte)(vCasted >> (b * 8));
         }
 
-        protected void SetUIntToMem(uint value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetUIntToMem(uint value, int address, int size = MemRegister.DEF_SIZE)
         {
             for (int b = 0; b < size; b++)
                 this.memory[address + b] = (byte)(value >> (b * 8));
@@ -630,7 +638,7 @@ namespace MTUComm.MemoryMap
                     this.memory[address + b] = (byte)(vCasted >> (b * 8));
         }
 
-        protected void SetULongToMem(ulong value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetULongToMem(ulong value, int address, int size = MemRegister.DEF_SIZE)
         {
             for (int b = 0; b < size; b++)
                 this.memory[address + b] = (byte)(value >> (b * 8));
@@ -646,17 +654,17 @@ namespace MTUComm.MemoryMap
                     this.memory[address + b] = (byte)(vCasted >> (b * 8));
         }
 
-        protected void SetBoolToMem (bool value, int address, int bit_index = MemRegister.DEF_BIT)
+        private void SetBoolToMem (bool value, int address, int bit_index = MemRegister.DEF_BIT)
         {
             memory[address] = ( byte ) ( memory[address] | (1 << bit_index) );
         }
 
-        protected void SetCharToMem (char value, int address)
+        private void SetCharToMem (char value, int address)
         {
             this.memory[address] = (byte)value;
         }
 
-        protected void SetStringToMem ( TypeCode registerType, string value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetStringToMem ( TypeCode registerType, string value, int address, int size = MemRegister.DEF_SIZE)
         {
             // If value to set is "real" string
             if ( registerType is TypeCode.String )
@@ -677,7 +685,7 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        protected void SetByteArrayToMem ( byte[] value, int address, int size = MemRegister.DEF_SIZE )
+        private void SetByteArrayToMem ( byte[] value, int address, int size = MemRegister.DEF_SIZE )
         {
             for ( int i = 0; i < size; i++ )
                 this.memory[ address + i ] = value[ i ];
@@ -844,19 +852,16 @@ namespace MTUComm.MemoryMap
 
         public string MtuStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return MemoryRegisters.Shipbit.Value ? "OFF" : "ON";
         }
 
         public string ReadInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return timeFormatter(MemoryRegisters.ReadIntervalMinutes.Value);
         }
 
         public string XmitInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return timeFormatter(MemoryRegisters.ReadIntervalMinutes.Value * MemoryRegisters.MessageOverlapCount.Value);
         }
 
@@ -982,26 +987,26 @@ namespace MTUComm.MemoryMap
             return GetPortStatus(MemoryRegisters.P2StatusFlag.Value);
         }
 
-        #endregion
-
-        #region Registers
-
-        public string F12WAYRegister1_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string F12WAYRegister1_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return "0x" + MemoryRegisters.F12WAYRegister1Int.Value.ToString("X8");
         }
 
-        public string F12WAYRegister10_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string F12WAYRegister10_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return "0x" + MemoryRegisters.F12WAYRegister10Int.Value.ToString("X8");
         }
 
-        public string F12WAYRegister14_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string F12WAYRegister14_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return "0x" + MemoryRegisters.F12WAYRegister14Int.Value.ToString("X8");
         }
 
-        public int ReadIntervalMinutes_Set (MemoryRegister<int> MemoryRegister, dynamic inputValue)
+        #endregion
+
+        #region Registers
+
+        public int ReadIntervalMinutes_Set ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
         {
             string[] readIntervalArray = ((string)inputValue).Split(' ');
             string readIntervalStr = readIntervalArray[0];
@@ -1014,116 +1019,18 @@ namespace MTUComm.MemoryMap
             return timeIntervalMins;
         }
 
-        #endregion
-
-        #region AuxiliaryFunctions
-
-        private string translateErrorCodes(int encoderErrorcode)
+        // Use with <CustomGet>method:ULongToBcd</CustomGet>
+        public ulong BcdToULong ( MemoryRegister<ulong> MemoryRegister )
         {
-            if (encoderErrorcode == 0xFF)
-                return "ERROR - Check Meter";
-            if (encoderErrorcode == 0xFE)
-                return "ERROR - Bad Digits";
-            if (encoderErrorcode == 0xFD)
-                return "ERROR - Delta Overflow";
-            if (encoderErrorcode == 0xFC)
-                return "ERROR - Readings Purged";
-            return "";
+            return this.BcdToULong ( MemoryRegister.Value );
         }
 
-        private string timeFormatter(int time)
+        // Use with <CustomSet>method:ULongToBcd</CustomSet>
+        public ulong ULongToBcd ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
         {
-            switch (time)
-            {
-                case 2880: return "48 Hrs";
-                case 2160: return "36 Hrs";
-                case 1440: return "24 Hrs";
-                case 720: return "12 Hrs";
-                case 480: return "8 Hrs";
-                case 360: return "6 Hrs";
-                case 240: return "4 Hrs";
-                case 180: return "3 Hrs";
-                case 120: return "2 Hrs";
-                case 90: return "1 Hr 30 Min";
-                case 60: return "1 Hr";
-                case 30: return "30 Min";
-                case 15: return "15 Min";
-                case 10: return "10 Min";
-                case 5: return "5 Min";
-                default: // KG 3.10.2010 add HR-Min calc:
-                    if (time % 60 == 0)
-                        return (time / 60).ToString() + " Hrs";
-                    else
-                        if (time < 60)
-                        return (time % 60).ToString() + " Min";
-                    else if (time < 120)
-                        return (time / 60).ToString() + " Hr " + (time % 60).ToString() + " Min";
-                    else
-                        return (time / 60).ToString() + " Hrs " + (time % 60).ToString() + " Min";
-                    //return xMit.ToString() + " Min";//"BAD READ";
-
-            }
-        }
-
-        public string GetTemperStatus(bool alarm, bool temper)
-        {
-            if (alarm)
-            {
-                if (temper)
-                {
-                    return "Triggered";
-                }
-                else
-                {
-                    return "Enabled";
-                }
-            }
-            else
-            {
-                return "Disabled";
-            }
-        }
-
-        public string GetPortStatus(bool status)
-        {
-            return status ? "Enabled" : "Disabled";
-        }
-
-        public ulong BcdToULong ( ulong valueInBCD )
-        {
-            // Define powers of 10 for the BCD conversion routines.
-            ulong powers = 1;
-            ulong outNum = 0;
-            byte tempNum;
-
-            for (int offset = 0; offset < 7; offset++)
-            {
-                tempNum = (byte)((valueInBCD >> offset * 8) & 0xff);
-                if ((tempNum & 0x0f) > 9)
-                {
-                    break;
-                }
-                outNum += (ulong)(tempNum & 0x0f) * powers;
-                powers *= 10;
-                if ((tempNum >> 4) > 9)
-                {
-                    break;
-                }
-                outNum += (ulong)(tempNum >> 4) * powers;
-                powers *= 10;
-            }
-
-            return outNum;
-        }
-
-        public ulong ULongToBcd ( string value )
-        {
-            return ulong.Parse(value, System.Globalization.NumberStyles.HexNumber);
-        }
-
-        public ulong ULongToBcd ( ulong value )
-        {
-            return this.ULongToBcd ( value.ToString () );
+            if ( value is string )
+                return this.ULongToBcd ( value );
+            return this.ULongToBcd ( ( ulong )value );
         }
 
         #endregion
@@ -1230,6 +1137,118 @@ namespace MTUComm.MemoryMap
             }
 
             return reply + " days of leak detection";
+        }
+
+        #endregion
+
+        #region AuxiliaryFunctions
+
+        private string translateErrorCodes(int encoderErrorcode)
+        {
+            if (encoderErrorcode == 0xFF)
+                return "ERROR - Check Meter";
+            if (encoderErrorcode == 0xFE)
+                return "ERROR - Bad Digits";
+            if (encoderErrorcode == 0xFD)
+                return "ERROR - Delta Overflow";
+            if (encoderErrorcode == 0xFC)
+                return "ERROR - Readings Purged";
+            return "";
+        }
+
+        private string timeFormatter(int time)
+        {
+            switch (time)
+            {
+                case 2880: return "48 Hrs";
+                case 2160: return "36 Hrs";
+                case 1440: return "24 Hrs";
+                case 720: return "12 Hrs";
+                case 480: return "8 Hrs";
+                case 360: return "6 Hrs";
+                case 240: return "4 Hrs";
+                case 180: return "3 Hrs";
+                case 120: return "2 Hrs";
+                case 90: return "1 Hr 30 Min";
+                case 60: return "1 Hr";
+                case 30: return "30 Min";
+                case 15: return "15 Min";
+                case 10: return "10 Min";
+                case 5: return "5 Min";
+                default: // KG 3.10.2010 add HR-Min calc:
+                    if (time % 60 == 0)
+                        return (time / 60).ToString() + " Hrs";
+                    else
+                        if (time < 60)
+                        return (time % 60).ToString() + " Min";
+                    else if (time < 120)
+                        return (time / 60).ToString() + " Hr " + (time % 60).ToString() + " Min";
+                    else
+                        return (time / 60).ToString() + " Hrs " + (time % 60).ToString() + " Min";
+                    //return xMit.ToString() + " Min";//"BAD READ";
+
+            }
+        }
+
+        private string GetTemperStatus(bool alarm, bool temper)
+        {
+            if (alarm)
+            {
+                if (temper)
+                {
+                    return "Triggered";
+                }
+                else
+                {
+                    return "Enabled";
+                }
+            }
+            else
+            {
+                return "Disabled";
+            }
+        }
+
+        private string GetPortStatus(bool status)
+        {
+            return status ? "Enabled" : "Disabled";
+        }
+
+        private ulong BcdToULong ( ulong valueInBCD )
+        {
+            // Define powers of 10 for the BCD conversion routines.
+            ulong powers = 1;
+            ulong outNum = 0;
+            byte tempNum;
+
+            for (int offset = 0; offset < 7; offset++)
+            {
+                tempNum = (byte)((valueInBCD >> offset * 8) & 0xff);
+                if ((tempNum & 0x0f) > 9)
+                {
+                    break;
+                }
+                outNum += (ulong)(tempNum & 0x0f) * powers;
+                powers *= 10;
+                if ((tempNum >> 4) > 9)
+                {
+                    break;
+                }
+                outNum += (ulong)(tempNum >> 4) * powers;
+                powers *= 10;
+            }
+
+            return outNum;
+        }
+
+        private ulong ULongToBcd ( string value )
+        {
+            return ulong.Parse(value, System.Globalization.NumberStyles.HexNumber);
+        }
+
+        private ulong ULongToBcd ( ulong value )
+        {
+            return this.ULongToBcd ( value.ToString () );
         }
 
         #endregion
