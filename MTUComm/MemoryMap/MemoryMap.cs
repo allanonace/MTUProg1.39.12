@@ -312,6 +312,8 @@ namespace MTUComm.MemoryMap
         // Custom header format: public T RegisterId_Get|CustomId ( MemoryRegister<T> MemoryRegister )
         private void CreateProperty_Get<T> ( MemoryRegister<T> memoryRegister )
         {
+            #region Normal Get
+
             // All register have normal get block
             base.AddMethod ( METHODS_GET_PREFIX + memoryRegister.id,
                 new Func<T>(() =>
@@ -339,6 +341,10 @@ namespace MTUComm.MemoryMap
                     return ( T )result;
                 }));
 
+            #endregion
+
+            #region Custom Get that internally uses Normal Get
+
             // But only someone have special get block/method defined on MTU family classes
             if ( memoryRegister.HasCustomMethod_Get )
             {
@@ -360,6 +366,8 @@ namespace MTUComm.MemoryMap
                         return ( T )customMethod.Invoke ( this, new object[] { memoryRegister } );
                     }));
             }
+
+            #endregion
         }
 
         // Custom header format 1: public T RegisterId_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters ) -> ExpandoObject
@@ -438,6 +446,8 @@ namespace MTUComm.MemoryMap
         // Custom header format: public T RegisterId_Get|CustomId ( MemoryRegister<T> MemoryRegister, dynamic inputValue )
         public void CreateProperty_Set<T>( MemoryRegister<T> memoryRegister )
         {
+            #region Normal Set
+
             base.AddMethod ( METHODS_SET_PREFIX + memoryRegister.id,
                 new Action<T>((_value) =>
                 {
@@ -455,6 +465,10 @@ namespace MTUComm.MemoryMap
                         //case TypeCode.String : this.SetStringToMem(TypeCode.String, (string)(object)_value, regObj.address); break;
                     }
                 }));
+
+            #endregion
+
+            #region Custom Set previous to Normal Set
 
             // But only someone have special set block/method defined on MTU family classes
             if ( memoryRegister.HasCustomMethod_Set )
@@ -477,6 +491,8 @@ namespace MTUComm.MemoryMap
                         return customMethod.Invoke ( this, new object[] { memoryRegister, _value } );
                     }));
             }
+
+            #endregion
         }
 
         public void CreateProperty_Set_String<T> ( MemoryRegister<T> memoryRegister )
@@ -1022,7 +1038,7 @@ namespace MTUComm.MemoryMap
         // Use with <CustomGet>method:ULongToBcd</CustomGet>
         public ulong BcdToULong ( MemoryRegister<ulong> MemoryRegister )
         {
-            return this.BcdToULong ( MemoryRegister.Value );
+            return this.BcdToULong ( ( ulong )MemoryRegister.Value );
         }
 
         // Use with <CustomSet>method:ULongToBcd</CustomSet>

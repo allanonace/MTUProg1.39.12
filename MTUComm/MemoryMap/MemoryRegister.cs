@@ -218,7 +218,7 @@ namespace MTUComm.MemoryMap
             if ( this.HasCustomMethod_Get )
             {
                 if ( this._HasCustomMethodId_Get )
-                     this.methodId_Get = this.custom_Get.Substring ( MemoryMap.METHOD_KEY.Length + 1 );
+                     this.methodId_Get = this.custom_Get.Substring ( MemoryMap.METHOD_KEY.Length );
                 else this.methodId_Get = this.id + MemoryMap.METHOD_SUFIX_GET;
             }
 
