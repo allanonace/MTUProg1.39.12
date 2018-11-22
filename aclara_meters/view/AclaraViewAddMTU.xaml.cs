@@ -303,24 +303,29 @@ namespace aclara_meters.view
 
                     Keyboard keyboard = Keyboard.Default;
 
-                    if(format.Equals("alpha"))
-                    {
-                        keyboard = Keyboard.Default;
-                    }
-                    else if (format.Equals("alphanumeric"))
-                    {
-                        keyboard = Keyboard.Numeric;
+                    try{
+                        if(format.Equals("alpha"))
+                        {
+                            keyboard = Keyboard.Default;
+                        }
+                        else if (format.Equals("alphanumeric"))
+                        {
+                            keyboard = Keyboard.Numeric;
 
+                        }
+                        else if (format.Equals("date"))
+                        {
+                            keyboard = Keyboard.Default;
+                        }
+                        else if (format.Equals("time"))
+                        {
+                            keyboard = Keyboard.Numeric;
+                        }
                     }
-                    else if (format.Equals("date"))
+                    catch (Exception e)
                     {
-                        keyboard = Keyboard.Default;
+                        Console.WriteLine(e.StackTrace);
                     }
-                    else if (format.Equals("time"))
-                    {
-                        keyboard = Keyboard.Numeric;
-                    }
-
                     BorderlessEntry optionalText = new BorderlessEntry()
                     {
                         HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -329,7 +334,7 @@ namespace aclara_meters.view
                         FontSize = 17
                     };
 
-                    EntryLengthValidatorBehavior behavior = new EntryLengthValidatorBehavior();
+                    CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
                     behavior.MaxLength = opt.Len;
 
                     optionalText.Behaviors.Add(behavior);
