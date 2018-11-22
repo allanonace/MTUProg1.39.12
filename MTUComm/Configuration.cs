@@ -41,7 +41,7 @@ namespace MTUComm
             SDCARD
         }
 
-        private string[] paths =
+        private static string[] paths =
         {
             "/storage/emulated/0/",      // Espacio de trabajo del usuario cero/0
             "/storage/emulated/legacy/", // Enlace simbolico a "/storage/emulated/0/"
@@ -50,44 +50,51 @@ namespace MTUComm
             "/sdcard/"                   // Enlace simbolico a "/storage/sdcard0/" y "/mnt/sdcard/"
         };
 
-        private string GetPath ( PATHS ePath )
+        private static string GetPath ( PATHS ePath )
         {
             return paths[ (int)ePath ];
         }
 
-        private Configuration ()
+        public static string GetPathForAndroid ()
         {
-            mbase_path = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
-
-            if ( Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android )
+            // Search the first valid path to recover XML files
+            PATHS  ePath;
+            string path;
+            string[] names = Enum.GetNames(typeof(PATHS));
+            for (int i = 0; i < names.Length; i++)
             {
-                // Search the first valid path to recover XML files
-                PATHS  ePath;
-                string path;
-                string[] names = Enum.GetNames(typeof(PATHS));
-                for (int i = 0; i < names.Length; i++)
-                {
-                    Enum.TryParse<PATHS> ( names[i], out ePath );
-                    path = this.GetPath ( ePath );
+                Enum.TryParse<PATHS> ( names[i], out ePath );
+                path = GetPath ( ePath );
 
-                    if ( Directory.Exists ( this.GetPath ( ePath ) ) &&
-                         File.Exists ( path + SUBPATHFILES + XML_MTUS ) )
-                    {
-                        mbase_path = path + SUBPATHFILES;
-                        break;
-                    }
+                if ( Directory.Exists ( GetPath ( ePath ) ) &&
+                        File.Exists ( path + SUBPATHFILES + XML_MTUS ) )
+                {
+                    return path + SUBPATHFILES;
                 }
             }
+            return null;
+        }
+
+        private Configuration ( bool isUnitTest = false, string pathUnityTest = "" )
+        {
+            mbase_path = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
+            
+            if ( ! isUnitTest )
+            {
+                if ( Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android )
+                    mbase_path = GetPathForAndroid ();
+            }
+            else mbase_path = pathUnityTest;
 
             device = "PC";
             Config config = new Config();
 
-            mtuTypes = config.GetMtu(Path.Combine(mbase_path, XML_MTUS ));
+            mtuTypes   = config.GetMtu(Path.Combine(mbase_path, XML_MTUS ));
             meterTypes = config.GetMeters(Path.Combine(mbase_path, XML_METERS ));
-            global = config.GetGlobal(Path.Combine(mbase_path, XML_GLOBAL ));
+            global     = config.GetGlobal(Path.Combine(mbase_path, XML_GLOBAL ));
             interfaces = config.GetInterfaces(Path.Combine(mbase_path, XML_INTERFACE));
-            alarms = config.GetAlarms(Path.Combine(mbase_path, XML_ALARMS));
-            demands = config.GetDemandConf(Path.Combine(mbase_path, XML_DEMANDS));
+            alarms     = config.GetAlarms(Path.Combine(mbase_path, XML_ALARMS));
+            demands    = config.GetDemandConf(Path.Combine(mbase_path, XML_DEMANDS));
         }
 
         public Configuration(String base_path)
@@ -104,11 +111,11 @@ namespace MTUComm
             demands = config.GetDemandConf(Path.Combine(mbase_path, XML_DEMANDS));
         }
 
-        public static Configuration GetInstance()
+        public static Configuration GetInstance ( bool isUnitTest = false, string pathUnityTest = "" )
         {
             if (instance == null)
             {
-                instance = new Configuration();
+                instance = new Configuration ( isUnitTest, pathUnityTest );
                 //instance = new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\run_basepath");// @"C: \Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog");
             }
             return instance;

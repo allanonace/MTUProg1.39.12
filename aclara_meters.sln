@@ -6,17 +6,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aclara_meters.Android", "ac
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aclara_meters.iOS", "aclara_meters.iOS\aclara_meters.iOS.csproj", "{6647D796-74D3-48BC-8011-1E783F835121}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aclara_meters", "aclara_meters\aclara_meters.csproj", "{81D262C1-FBC5-40E5-941A-A4CD3727E932}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "aclara_meters", "aclara_meters\aclara_meters.csproj", "{81D262C1-FBC5-40E5-941A-A4CD3727E932}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ble_library", "ble_library\ble_library.csproj", "{8CB6F328-19DD-414E-8925-224894C76FF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ble_library", "ble_library\ble_library.csproj", "{8CB6F328-19DD-414E-8925-224894C76FF9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AclaraMetersShareExtension", "AclaraMetersShareExtension\AclaraMetersShareExtension.csproj", "{884ACC36-012A-4AFC-AAAC-1A85B0D17616}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MTUComm", "MTUComm\MTUComm.csproj", "{20113951-5BD8-473F-BC70-7AF5F875C305}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MTUComm", "MTUComm\MTUComm.csproj", "{20113951-5BD8-473F-BC70-7AF5F875C305}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xml", "Xml\Xml.csproj", "{24AEF988-DFC4-49B1-9343-6AB379CB5AAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xml", "Xml\Xml.csproj", "{24AEF988-DFC4-49B1-9343-6AB379CB5AAC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lexi", "Lexi\Lexi.csproj", "{F2C69001-7FA1-4A03-A434-ABF1AF43FF9E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lexi", "Lexi\Lexi.csproj", "{F2C69001-7FA1-4A03-A434-ABF1AF43FF9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTest", "UnitTest\UnitTest.csproj", "{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -229,6 +231,30 @@ Global
 		{F2C69001-7FA1-4A03-A434-ABF1AF43FF9E}.Release|iPhone.Build.0 = Release|Any CPU
 		{F2C69001-7FA1-4A03-A434-ABF1AF43FF9E}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
 		{F2C69001-7FA1-4A03-A434-ABF1AF43FF9E}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Ad-Hoc|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Ad-Hoc|Any CPU.Build.0 = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Ad-Hoc|iPhone.ActiveCfg = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Ad-Hoc|iPhone.Build.0 = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Ad-Hoc|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Ad-Hoc|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.AppStore|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.AppStore|Any CPU.Build.0 = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.AppStore|iPhone.ActiveCfg = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.AppStore|iPhone.Build.0 = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.AppStore|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.AppStore|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Debug|iPhone.ActiveCfg = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Debug|iPhone.Build.0 = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Debug|iPhoneSimulator.ActiveCfg = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Debug|iPhoneSimulator.Build.0 = Debug|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Release|iPhone.ActiveCfg = Release|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Release|iPhone.Build.0 = Release|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Release|iPhoneSimulator.ActiveCfg = Release|Any CPU
+		{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}.Release|iPhoneSimulator.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

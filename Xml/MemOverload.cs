@@ -17,7 +17,7 @@ namespace Xml
         [XmlArrayItem("Register")]
         public MemOverloadRegister[] Registers { get; set; }
 
-        [XmlElement("Custom")]
-        public string Custom { get; set; }
+        [XmlElement("CustomGet")]
+        public string CustomGet { get; set; }
     }
 }

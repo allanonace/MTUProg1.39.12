@@ -180,7 +180,9 @@ namespace MTUComm.MemoryMap
                 else
                 {
                     Console.WriteLine ( "Set " + id + ": Error - Can't write to this register" );
-                    throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
+
+                    if ( ! MemoryMap.isUnityTest )
+                        throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
                 }
             }
         }

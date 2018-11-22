@@ -85,11 +85,14 @@ namespace MTUComm.MemoryMap
         private const string EXCEP_SET_ULONG    = "String argument can't be casted to ulong";
         public  const string EXCEP_SET_USED     = "The specified record has not been mapped";
         public  const string EXCEP_SET_READONLY = "The specified record is readonly";
-        private const string EXCEP_CUST_METHOD  = "Custom method '#' is not present in MTU family class";
+        private const string EXCEP_REGI_METHOD  = "Custom register method '#' is not present in MTU family class";
+        private const string EXCEP_OVER_METHOD  = "Custom overload method '#' is not present in MTU family class";
 
         #endregion
 
         #region Attributes
+
+        public static bool isUnityTest { get; private set; }
 
         public byte[] memory { private set; get; }
         private Dictionary<string,dynamic> registersObjs;
@@ -98,15 +101,21 @@ namespace MTUComm.MemoryMap
 
         #region Initialization
 
-        public MemoryMap ( byte[] memory, string family )
+        public MemoryMap ( byte[] memory, string family, string pathUnityTest = "" )
         {
             this.memory = memory;
             this.registersObjs = new Dictionary<string,dynamic>();
 
+            isUnityTest = ! string.IsNullOrEmpty ( pathUnityTest );
+
             // Read MTU family XML and prepare setters and getters
-            Configuration config = Configuration.GetInstance();
+            Configuration config = Configuration.GetInstance ( isUnityTest, pathUnityTest );
             XmlSerializer s = new XmlSerializer ( typeof ( MemRegisterList ) );
-            using (TextReader reader = new StreamReader(Path.Combine(config.GetBasePath(), XML_PREFIX + family + XML_EXTENSION)))
+
+            // Parameter "family" when testing is full path to use
+            string path = ( ! isUnityTest ) ? Path.Combine(config.GetBasePath(), XML_PREFIX + family + XML_EXTENSION) : pathUnityTest + family + XML_EXTENSION;
+
+            using (TextReader reader = new StreamReader ( path ))
             {
                 MemRegisterList list = s.Deserialize(reader) as MemRegisterList;
 
@@ -245,7 +254,7 @@ namespace MTUComm.MemoryMap
                             type,
                             xmlOverload.Description,
                             xmlOverload.Registers.Select ( o => o.Id ).ToArray (),
-                            xmlOverload.Custom );
+                            xmlOverload.CustomGet );
 
                         this.CreateOverload_Get ( memoryOverload );
 
@@ -266,43 +275,6 @@ namespace MTUComm.MemoryMap
 
                 #endregion
             }
-
-            #region Tests
-
-            // TEST: Diferentes opciones campo custom ( metodo y operacion matematica )
-            //Console.WriteLine ( "Test operation register: " + base.registers.BatteryVoltage );
-            //Console.WriteLine ( "Test custom format: " + base.registers.DailyRead );
-
-            // TEST: Separacion entre Value.get y funGetCustom
-            //dynamic mInt = this.GetProperty_Int ( "DailyRead" );
-            //Console.WriteLine ( base.registers.DailyRead + " == " + mInt.Value );
-            //mInt.Value = 123;
-            //Console.WriteLine ( base.registers.DailyRead + " == " + mInt.Value );
-
-            // TEST: Registros de solo lectura
-            //Console.WriteLine ( "Test lectura 1: " + base.registers.MtuType);
-            //this.registers.MtuType = 12321; // Not allow. Error!
-
-            // TEST: Recuperar registros modificados
-            //this.SetRegisterModified ( "MtuType"   );
-            //this.SetRegisterModified ( "Shipbit"   );
-            //this.SetRegisterModified ( "DailyRead" );
-            //MemoryRegisterDictionary regs = this.GetModifiedRegisters ();
-
-            // TEST: Recuperar objetos registro
-            //dynamic             reg1 = this.GetProperty      ( "MtuType" );
-            //MemoryRegister<int> reg2 = this.GetProperty<int> ( "MtuType" );
-            //MemoryRegister<int> reg3 = this.GetProperty_Int  ( "MtuType" );
-            //Console.WriteLine ( "Registro MtuType: " +
-            //    reg1.Value + " " + reg2.Value + " " + reg3.Value );
-
-            // TEST: Trabajar con overloads
-            //Console.WriteLine ( "Test metodo overload: "       + base.registers.Overload_Method );
-            //Console.WriteLine ( "Test metodo reuse overload: " + base.registers.Overload_Method_Reuse );
-            //Console.WriteLine ( "Test metodo array overload: " + base.registers.Overload_Method_Array );
-            //Console.WriteLine ( "Test operation overload: "    + base.registers.Overload_Operation );
-
-            #endregion
         }
 
         #endregion
@@ -355,9 +327,11 @@ namespace MTUComm.MemoryMap
                 // Method is not present in MTU family class
                 if ( customMethod == null )
                 {
-                    string strError = EXCEP_CUST_METHOD.Replace ( "#", memoryRegister.methodId_Get );
+                    string strError = EXCEP_REGI_METHOD.Replace ( "#", memoryRegister.methodId_Get );
                     Console.WriteLine ( "Create Custom Get " + memoryRegister.id + ": Error - " + strError );
-                    throw new CustomMethodNotExistException ( strError + ": " + memoryRegister.id );
+
+                    if ( ! isUnityTest )
+                        throw new CustomMethodNotExistException ( strError + ": " + memoryRegister.id );
                 }
 
                 base.AddMethod ( METHODS_GET_CUSTOM_PREFIX + memoryRegister.id,
@@ -395,9 +369,11 @@ namespace MTUComm.MemoryMap
                     // If both options are not present, thow an exception
                     if ( customMethod == null )
                     {
-                        string strError = EXCEP_CUST_METHOD.Replace ( "#", memoryOverload.methodId );
+                        string strError = EXCEP_OVER_METHOD.Replace ( "#", memoryOverload.methodId );
                         Console.WriteLine ( "Create Custom Get " + memoryOverload.id + ": Error - " + strError );
-                        throw new CustomMethodNotExistException ( strError + ": " + memoryOverload.id );
+
+                        if ( ! isUnityTest )
+                            throw new CustomMethodNotExistException ( strError + ": " + memoryOverload.id );
                     }
                 }
             }
@@ -433,7 +409,7 @@ namespace MTUComm.MemoryMap
                         foreach ( string id in dictionary.Keys )
                             values[ i++ ] = base[ id ].Value;
 
-                        return this.ExecuteOperation<T> ( memoryOverload.custom, values );
+                        return this.ExecuteOperation<T> ( memoryOverload.custom_Get, values );
                     }
                 }));
         }
@@ -480,9 +456,11 @@ namespace MTUComm.MemoryMap
                 // Method is not present in MTU family class
                 if ( customMethod == null )
                 {
-                    string strError = EXCEP_CUST_METHOD.Replace ( "#", memoryRegister.methodId_Set );
+                    string strError = EXCEP_REGI_METHOD.Replace ( "#", memoryRegister.methodId_Set );
                     Console.WriteLine ( "Create Custom Set " + memoryRegister.id + ": Error - " + strError );
-                    throw new CustomMethodNotExistException ( strError + ": " + memoryRegister.id );
+
+                    if ( ! isUnityTest )
+                        throw new CustomMethodNotExistException ( strError + ": " + memoryRegister.id );
                 }
 
                 base.AddMethod ( METHODS_SET_CUSTOM_PREFIX + memoryRegister.id,
@@ -632,7 +610,10 @@ namespace MTUComm.MemoryMap
         {
             int vCasted;
             if (!int.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException(EXCEP_SET_INT + ": " + value);
+            {
+                if ( ! isUnityTest )
+                    throw new SetMemoryFormatException(EXCEP_SET_INT + ": " + value);
+            }
             else
                 for (int b = 0; b < size; b++)
                     this.memory[address + b] = (byte)(vCasted >> (b * 8));
@@ -648,7 +629,10 @@ namespace MTUComm.MemoryMap
         {
             uint vCasted;
             if (!uint.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException(EXCEP_SET_UINT + ": " + value);
+            {
+                if ( ! isUnityTest )
+                    throw new SetMemoryFormatException(EXCEP_SET_UINT + ": " + value);
+            }
             else
                 for (int b = 0; b < size; b++)
                     this.memory[address + b] = (byte)(vCasted >> (b * 8));
@@ -664,7 +648,10 @@ namespace MTUComm.MemoryMap
         {
             ulong vCasted;
             if (!ulong.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException(EXCEP_SET_ULONG + ": " + value);
+            {
+                if ( ! isUnityTest )
+                    throw new SetMemoryFormatException(EXCEP_SET_ULONG + ": " + value);
+            }
             else
                 for (int b = 0; b < size; b++)
                     this.memory[address + b] = (byte)(vCasted >> (b * 8));
@@ -718,7 +705,10 @@ namespace MTUComm.MemoryMap
 
             // Selected dynamic member not exists
             Console.WriteLine("Set " + id + ": Error - Selected register is not loaded");
-            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
+
+            if ( ! isUnityTest )
+                throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
+            return null;
         }
 
         public MemoryRegister<T> GetProperty<T>(string id)
@@ -728,7 +718,10 @@ namespace MTUComm.MemoryMap
 
             // Selected dynamic member not exists
             Console.WriteLine("Set " + id + ": Error - Selected register is not loaded");
-            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
+
+            if ( ! isUnityTest )
+                throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
+            return null;
         }
 
         public MemoryRegister<int> GetProperty_Int(string id)
@@ -769,7 +762,8 @@ namespace MTUComm.MemoryMap
         {
             if ( this.registersObjs.ContainsKey ( id ) )
                 this.registersObjs[ id ].used = true;
-            else
+
+            else if ( ! isUnityTest )
                 throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + ": " + id );
         }
 
@@ -777,7 +771,8 @@ namespace MTUComm.MemoryMap
         {
             if ( this.registersObjs.ContainsKey ( id ) )
                 this.registersObjs[ id ].used = false;
-            else
+
+            else if ( ! isUnityTest )
                 throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + ": "  + id );
         }
 
@@ -1016,6 +1011,11 @@ namespace MTUComm.MemoryMap
         public string F12WAYRegister14_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return "0x" + MemoryRegisters.F12WAYRegister14Int.Value.ToString("X8");
+        }
+
+        public string ReverseFlowTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        {
+            return MemoryOverload.Value;
         }
 
         #endregion
