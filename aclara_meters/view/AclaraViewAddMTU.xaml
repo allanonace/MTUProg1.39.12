@@ -1017,79 +1017,20 @@
                                     
                                 </StackLayout>
 
-                                
-                                  <!-- MTU Location -->
 
 
-                                  <StackLayout >  
-                                      <Label Text="MTU Location" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
-                                             />
-                                          
-                                      
-                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        
-                                                         <Controls:BorderlessPicker x:Name="mtuLocation" Title="" 
-                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                              SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
-                                                           />
-                                                    </StackLayout>
-                                             </Frame> 
-                                        
-                                    </Frame>
-                                    
+                                  <StackLayout Margin="0,0,0,144" >
+
+                                        <StackLayout 
+                                            HorizontalOptions="FillAndExpand" 
+                                            Margin="0,4,0,0"
+                                            x:Name="OptionsStackLayout">
+                                        </StackLayout>
+
                                   </StackLayout>
 
 
-                                
-                                   <!--  Meter Location -->
-
-
-                                  <StackLayout >  
-                                      <Label Text="Meter Location" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
-                                             />
-                                          
-                                      
-                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        
-                                                         <Controls:BorderlessPicker x:Name="meterLocation" Title="" 
-                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                              SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
-                                                           />
-                                                    </StackLayout>
-                                             </Frame> 
-                                        
-                                    </Frame>
                                     
-                                  </StackLayout>
-
-                              
-
-                                 <!--  Construction -->
-
-
-                                  <StackLayout >  
-                                      <Label Text="Construction" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
-                                             />
-                                          
-                                      
-                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,148" BackgroundColor="#7a868c"  >
-                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        
-                                                         <Controls:BorderlessPicker x:Name="construction" Title="" 
-                                                              HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                              SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
-                                                           />
-                                                    </StackLayout>
-                                             </Frame> 
-                                        
-                                    </Frame>
-                                    
-                                  </StackLayout>
 
                               </StackLayout>
                          

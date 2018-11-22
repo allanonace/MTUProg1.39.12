@@ -15,6 +15,15 @@ namespace Xml
         [XmlAttribute("required")]
         public bool Required { get; set; }
 
+        [XmlAttribute("len")]
+        public int Len { get; set; }
+
+        [XmlAttribute("minlen")]
+        public int MinLen { get; set; }
+
+        [XmlAttribute("format")]
+        public string Format { get; set; }
+
         [XmlElement("display")]
         public string Display { get; set; }
 

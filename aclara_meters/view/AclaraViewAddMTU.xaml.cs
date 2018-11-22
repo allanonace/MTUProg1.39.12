@@ -16,6 +16,7 @@ using Xml;
 using System.Threading;
 using MTUComm.actions;
 using FIELD = MTUComm.actions.AddMtuForm.FIELD;
+using aclara_meters.Behaviors;
 
 /*
 Optional 1  WorkOrderRecording      Hides/shows Field Order
@@ -187,6 +188,10 @@ namespace aclara_meters.view
             InitializeComponent();
         }
 
+
+        List<BorderlessPicker> optionalLists;
+        List<BorderlessEntry> optionalTexts;
+
         public AclaraViewAddMTU(IUserDialogs dialogs)
         {
             InitializeComponent();
@@ -199,6 +204,168 @@ namespace aclara_meters.view
             MTUBasicInfo mtuBasicInfo = MtuForm.mtuBasicInfo;
             this.detectedMtuType = (int)mtuBasicInfo.Type;
             currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
+
+            #region Delete this, only define foreach global options here
+
+            List<Option> list_of_options  = this.config.global.Options;
+
+            optionalLists = new List<BorderlessPicker>();
+            optionalTexts = new List<BorderlessEntry>();
+
+            foreach (Option opt in list_of_options)
+            {
+        
+                Console.WriteLine(opt.Display);
+
+                List <string> options_list = opt.OptionList;
+
+                foreach (string str in options_list)
+                {
+                    Console.WriteLine(str);
+                }
+
+                #region Dynamic UI
+
+                Frame fm1_vendor = new Frame()
+                {
+                    CornerRadius = 6,
+                    HeightRequest = 30,
+                    Margin = new Thickness(0, 4, 0, 0),
+                    BackgroundColor = Color.FromHex("#7a868c")
+                };
+
+                Frame fm2_vendor = new Frame()
+                {
+                    CornerRadius = 6,
+                    HeightRequest = 30,
+                    Margin = new Thickness(-7, -7, -7, -7),
+                    BackgroundColor = Color.White
+                };
+
+                StackLayout st_vendor = new StackLayout()
+                {
+                    Orientation = StackOrientation.Horizontal,
+                    HorizontalOptions = LayoutOptions.FillAndExpand,
+                    Margin = new Thickness(1, 1, 1, 1),
+                    BackgroundColor = Color.White
+                };
+
+                //Texto del titulo
+                Label textoTitulo = new Label()
+                {
+                    Text = opt.Display,
+                    Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                    Margin = new Thickness(0, 4, 0, 0)
+                };
+
+                if (opt.Type.Equals("list"))
+                {
+                    BorderlessPicker optionalList = new BorderlessPicker()
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        HeightRequest = 40,
+                        FontSize = 17,
+                        ItemsSource = options_list
+                    };
+
+                    //Detectar el Selector clickado
+                    optionalList.SelectedIndexChanged += PickerMisc_SelectedIndexChanged;
+
+                    optionalLists.Add(optionalList);
+
+                    st_vendor.Children.Add(optionalList);
+                    fm2_vendor.Content = st_vendor;
+                    fm1_vendor.Content = fm2_vendor;
+
+
+                    //Creamos el Bloque con toda la informacion
+                    StackLayout ElementoBloque = new StackLayout()
+                    {
+                        StyleId = "bloque" + 1
+                    };
+
+                    ElementoBloque.Children.Add(textoTitulo);
+                    ElementoBloque.Children.Add(fm1_vendor);
+                    OptionsStackLayout.Children.Add(ElementoBloque);
+                }
+                else if (opt.Type.Equals("text"))
+                {
+                    string format = opt.Format;
+                    int maxLen = opt.Len;
+                    int minLen = opt.MinLen;
+                    bool required = opt.Required;
+
+                    /*
+                    <Controls:BorderlessEntry.Behaviors>
+                        <behaviors:EntryLengthValidatorBehavior MaxLength="12"/>
+                    </Controls:BorderlessEntry.Behaviors>
+                     */
+
+                    Keyboard keyboard = Keyboard.Default;
+
+                    if(format.Equals("alpha"))
+                    {
+                        keyboard = Keyboard.Default;
+                    }
+                    else if (format.Equals("alphanumeric"))
+                    {
+                        keyboard = Keyboard.Numeric;
+
+                    }
+                    else if (format.Equals("date"))
+                    {
+                        keyboard = Keyboard.Default;
+                    }
+                    else if (format.Equals("time"))
+                    {
+                        keyboard = Keyboard.Numeric;
+                    }
+
+                    BorderlessEntry optionalText = new BorderlessEntry()
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        HeightRequest = 40,
+                        Keyboard = keyboard,
+                        FontSize = 17
+                    };
+
+                    EntryLengthValidatorBehavior behavior = new EntryLengthValidatorBehavior();
+                    behavior.MaxLength = opt.Len;
+
+                    optionalText.Behaviors.Add(behavior);
+
+                    // TODO
+                    optionalTexts.Add(optionalText);
+
+                    st_vendor.Children.Add(optionalText);
+                    fm2_vendor.Content = st_vendor;
+                    fm1_vendor.Content = fm2_vendor;
+
+
+                    //Creamos el Bloque con toda la informacion
+                    StackLayout ElementoBloque = new StackLayout()
+                    {
+                        StyleId = "bloque" + 1
+                    };
+
+                    ElementoBloque.Children.Add(textoTitulo);
+                    ElementoBloque.Children.Add(fm1_vendor);
+
+                    OptionsStackLayout.Children.Add(ElementoBloque);
+
+                }
+                else
+                {
+                    // do nothing
+                }
+
+                #endregion
+
+            }
+
+            //OptionsStackLayout
+
+            #endregion
 
             /* Instantiate form */
             addMtuForm = new AddMtuForm(currentMtu);
@@ -298,10 +465,6 @@ namespace aclara_meters.view
             InitializeLowerbarLabel();
 
             InitializeAddMtuForm();
-
-            InitMTULocationPicker();
-            InitMeterLocationPicker();
-            InitConstructionPicker();
 
             RegisterEventHandlers();
 
@@ -525,7 +688,8 @@ namespace aclara_meters.view
             twoWay2Container.IsVisible = false;
             twoWay2Container.IsEnabled = false;
 
-            bool GlobalsFastMessageConfig = GlobalsConditions.FastMessageConfig;
+            bool GlobalsFastMessageConfig = GlobalsConditions.FastMessageConfig; 
+            
             bool GlobalsFast2Way = GlobalsConditions.Fast2Way;
             bool MtuFastMessageConfig = MtuConditions.FastMessageConfig;
             if (MtuFastMessageConfig)
@@ -702,85 +866,7 @@ namespace aclara_meters.view
 
         #region Picker
 
-        private void InitConstructionPicker()
-        {
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList = new ObservableCollection<string>();
 
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
-            {
-                new PickerItems { Name = "Vinyl" },
-                new PickerItems { Name = "Wood" },
-                new PickerItems { Name = "Brick" },
-                new PickerItems { Name = "Aluminium" },
-                new PickerItems { Name = "Other" }
-            };
-
-            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-
-            foreach (var item in objClassList)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList.Add(item.Name);
-            }
-
-            //Now I am given ItemsSorce to the Pickers
-            construction.ItemsSource = objStringList;
-        }
-
-        private void InitMeterLocationPicker()
-        {
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList = new ObservableCollection<string>();
-
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
-            {
-                new PickerItems { Name = "Outside" },
-                new PickerItems { Name = "Inside" },
-                new PickerItems { Name = "Basement" }
-            };
-
-            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-
-            foreach (var item in objClassList)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList.Add(item.Name);
-            }
-
-            //Now I am given ItemsSorce to the Pickers
-            meterLocation.ItemsSource = objStringList;
-        }
-
-        private void InitMTULocationPicker()
-        {
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList = new ObservableCollection<string>();
-
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
-            {
-                new PickerItems { Name = "Outside" },
-                new PickerItems { Name = "Inside" },
-                new PickerItems { Name = "Basement" }
-            };
-
-            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-
-            foreach (var item in objClassList)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList.Add(item.Name);
-            }
-
-            //Now I am given ItemsSorce to the Pickers
-            mtuLocation.ItemsSource = objStringList;
-        }
 
         private void InitializeMeterPickers()
         {
@@ -1311,6 +1397,12 @@ namespace aclara_meters.view
         }
 
         private void PickerSelection2(object sender, EventArgs e)
+        {
+            var picker = (Picker)sender;
+            int selectedIndex = picker.SelectedIndex;
+        }
+
+        private void PickerMisc_SelectedIndexChanged(object sender, EventArgs e)
         {
             var picker = (Picker)sender;
             int selectedIndex = picker.SelectedIndex;
@@ -1977,14 +2069,21 @@ namespace aclara_meters.view
             if (mtuGeolocationLong.Text.Length < 0)
                 return false;
 
-            if (mtuLocation.SelectedIndex == -1)
-                return false;
+            foreach (BorderlessPicker picker in optionalLists)
+            {
+                if(picker.SelectedIndex != -1)
+                {
+                    return false;
+                }
+            }
 
-            if (meterLocation.SelectedIndex == -1)
-                return false;
-
-            if (construction.SelectedIndex == -1)
-                return false;
+            foreach (BorderlessEntry entry in optionalTexts)
+            {
+                if(entry.Text.Equals(""))
+                {
+                    return false;
+                }
+            }
 
             return true;
         }

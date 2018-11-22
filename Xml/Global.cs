@@ -551,7 +551,8 @@ namespace Xml
         [XmlElement("XmitTimer")]
         public int XmitTimer { get; set; }
 
-        [XmlElement("Options")]
+        [XmlArray("Options")]
+        [XmlArrayItem("option")]
         public List<Option> Options { get; set; }
 
         [XmlElement("FastMessageConfig")]
