@@ -857,12 +857,12 @@ namespace MTUComm.MemoryMap
 
         public string ReadInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return timeFormatter(MemoryRegisters.ReadIntervalMinutes.Value);
+            return TimeFormatter(MemoryRegisters.ReadIntervalMinutes.Value);
         }
 
         public string XmitInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return timeFormatter(MemoryRegisters.ReadIntervalMinutes.Value * MemoryRegisters.MessageOverlapCount.Value);
+            return TimeFormatter(MemoryRegisters.ReadIntervalMinutes.Value * MemoryRegisters.MessageOverlapCount.Value);
         }
 
         public string PCBNumber_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
@@ -918,13 +918,13 @@ namespace MTUComm.MemoryMap
 
         public string P1ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return translateErrorCodes(MemoryRegisters.P1ReadingErrorCode.Value);
+            return TranslateErrorCodes(MemoryRegisters.P1ReadingErrorCode.Value);
         }
 
         public string P2ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
-            return translateErrorCodes(MemoryRegisters.P2ReadingErrorCode.Value);
+            return TranslateErrorCodes(MemoryRegisters.P2ReadingErrorCode.Value);
         }
 
         public string InterfaceTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
@@ -1028,9 +1028,9 @@ namespace MTUComm.MemoryMap
         // Use with <CustomSet>method:ULongToBcd</CustomSet>
         public ulong ULongToBcd ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
         {
-            if ( value is string )
-                return this.ULongToBcd ( value );
-            return this.ULongToBcd ( ( ulong )value );
+            if ( inputValue is string )
+                return this.ULongToBcd ( inputValue );
+            return this.ULongToBcd ( ( ulong )inputValue );
         }
 
         #endregion
@@ -1143,7 +1143,7 @@ namespace MTUComm.MemoryMap
 
         #region AuxiliaryFunctions
 
-        private string translateErrorCodes(int encoderErrorcode)
+        private string TranslateErrorCodes (int encoderErrorcode)
         {
             if (encoderErrorcode == 0xFF)
                 return "ERROR - Check Meter";
@@ -1156,7 +1156,7 @@ namespace MTUComm.MemoryMap
             return "";
         }
 
-        private string timeFormatter(int time)
+        private string TimeFormatter (int time)
         {
             switch (time)
             {
@@ -1190,7 +1190,7 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        private string GetTemperStatus(bool alarm, bool temper)
+        private string GetTemperStatus (bool alarm, bool temper)
         {
             if (alarm)
             {
@@ -1209,7 +1209,7 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        private string GetPortStatus(bool status)
+        private string GetPortStatus (bool status)
         {
             return status ? "Enabled" : "Disabled";
         }
