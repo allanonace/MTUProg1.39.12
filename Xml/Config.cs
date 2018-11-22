@@ -26,7 +26,7 @@ namespace Xml
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 throw new DemandConfLoadException("Error loading DemandConf file");
             }
@@ -115,7 +115,7 @@ namespace Xml
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 throw new AlarmLoadException("Error loading Alarm file");
             }
