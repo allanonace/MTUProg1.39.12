@@ -967,37 +967,37 @@ namespace MTUComm.MemoryMap
             return GetTemperStatus(MemoryRegisters.P1RegisterCoverAlarm.Value, MemoryRegisters.RegisterCoverTamper.Value);
         }
 
-        public string ReverseFlowTamperStatus(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string ReverseFlowTamperStatus_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return GetTemperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
         }
 
-        public string FastMessagingMode_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string FastMessagingMode_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return MemoryRegisters.Fast2Way.Value ? "Fast" : "Slow";
         }
 
-        public string LastGasp_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string LastGasp_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return MemoryRegisters.LastGaspTamper.Value ? "Enabled" : "Triggered";
         }
 
-        public string InsufficentMemory_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string InsufficentMemory_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return MemoryRegisters.InsufficentMemoryTamper.Value ? "Enabled" : "Triggered";
         }
 
-        public string P1Status_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string P1Status_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return GetPortStatus(MemoryRegisters.P1StatusFlag.Value);
         }
 
-        public string P2Status_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string P2Status_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
 
             return GetPortStatus(MemoryRegisters.P2StatusFlag.Value);

@@ -256,18 +256,31 @@ namespace MTUComm
 
             try
             {
-                MatchCollection matches = Regex.Matches(condition, @"[&]?(([^&=]+)=([^&=#]*))", RegexOptions.Compiled);
-                Dictionary<string, string> conditions = matches.Cast<Match>().ToDictionary(
-                        m => Uri.UnescapeDataString(m.Groups[2].Value),
-                        m => Uri.UnescapeDataString(m.Groups[3].Value)
-                );
+                MatchCollection matches = Regex.Matches(condition, @"([&|]?)(([^&|=]+)=([^&|=#]*))", RegexOptions.Compiled);
+                
+                List < ConditionObjet > conditions = new List<ConditionObjet>();
 
-                foreach (KeyValuePair<string, string> item in conditions)
+                foreach(Match m in matches.Cast<Match>().ToList())
+                {
+                    conditions.Add(new ConditionObjet(Uri.UnescapeDataString(m.Groups[1].Value), Uri.UnescapeDataString(m.Groups[3].Value), Uri.UnescapeDataString(m.Groups[4].Value)));
+                }
+
+                int condition_final_result = 0;
+
+                foreach (ConditionObjet item in conditions)
                 {
                     string condition_value = "";
+                    int condition_result = 0;
 
                     switch (item.Key.Split(new char[] { '.' })[0])
                     {
+                        case "Port":
+                            try
+                            {
+                                condition_value = port;
+                            }
+                            catch (Exception e) { }
+                            break;
                         case "Action":
                             try
                             {
@@ -298,15 +311,39 @@ namespace MTUComm
                     }
 
                     if (condition_value.Length > 0 && !condition_value.ToLower().Equals(item.Value.ToLower()))
-                    {
-                        return false;
+                    { 
+                        condition_result = 0;
                     }
+                    else
+                    {
+                        condition_result = 1;
+                    }
+
+                    if (item.Condition.Equals("|"))
+                    {
+                        condition_final_result = condition_final_result + condition_result;
+                    }
+
+                    if (item.Condition.Equals("&"))
+                    {
+                        condition_final_result = condition_final_result * condition_result;
+                    }
+
+
+                }
+
+                if(condition_final_result > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
             catch (Exception e) {
                 Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
             };
-
 
             return true;
         }
@@ -338,17 +375,17 @@ namespace MTUComm
                             string meter_reading_error = registers.GetProperty("P" + (portnumber + 1) + "ReadingError").Value.ToString();
                             if (meter_reading_error.Length < 1)
                             {
-                                int meter_reading = 0;
+                                ulong meter_reading = 0;
                                 try
                                 {
                                     meter_reading = registers.GetProperty("P" + (portnumber + 1) + "Reading").Value;
                                 }
                                 catch (Exception e) { }
 
-                                int tempReadingVal = 0;
+                                ulong tempReadingVal = 0;
                                 if (mtutype.PulseCountOnly)
                                 {
-                                    tempReadingVal = meter_reading * (int)Metertype.HiResScaling;
+                                    tempReadingVal = meter_reading *  (ulong)Metertype.HiResScaling;
                                 }
                                 else
                                 {
@@ -745,6 +782,28 @@ namespace MTUComm
             {
                 Status = -1;
                 Message = message;
+            }
+        }
+
+        private class ConditionObjet
+        {
+            public String Condition { get; private set; }
+            public String Key { get; private set; }
+            public String Value { get; private set; }
+
+            public ConditionObjet(string condition, string key, string value)
+            {
+                if(!condition.Equals("&") && !condition.Equals("|"))
+                {
+                    Condition = "|";
+                }
+                else
+                {
+                    Condition = condition;
+                }
+
+                Key = key;
+                Value = value;
             }
         }
 
