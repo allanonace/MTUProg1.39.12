@@ -85,6 +85,7 @@ namespace MTUComm.MemoryMap
         private const string EXCEP_SET_ULONG    = "String argument can't be casted to ulong";
         public  const string EXCEP_SET_USED     = "The specified record has not been mapped";
         public  const string EXCEP_SET_READONLY = "The specified record is readonly";
+        public  const string EXCEP_OVE_READONLY = "All overloads are readonly";
         private const string EXCEP_REGI_METHOD  = "Custom register method '#' is not present in MTU family class";
         private const string EXCEP_OVER_METHOD  = "Custom overload method '#' is not present in MTU family class";
 
@@ -795,7 +796,7 @@ namespace MTUComm.MemoryMap
                         if ( ( RegType )register.valueType == RegType.UINT )
                             changes.AddElement<uint> ( register );
                         break;
-                    case TypeCode.Int64:
+                    case TypeCode.UInt64:
                         if ( ( RegType )register.valueType == RegType.ULONG )
                             changes.AddElement<ulong> ( register );
                         break;
@@ -1005,14 +1006,14 @@ namespace MTUComm.MemoryMap
 
         #region Registers
 
-        public int ReadIntervalMinutes_Set ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
+        public int ReadIntervalMinutes_Set ( MemoryRegister<int> MemoryRegister, dynamic inputValue )
         {
             string[] readIntervalArray = ((string)inputValue).Split(' ');
-            string readIntervalStr = readIntervalArray[0];
+            string readIntervalStr = readIntervalArray[0].ToLower ();
             string timeUnit = readIntervalArray[1];
             int timeIntervalMins = Int32.Parse(readIntervalStr);
 
-            if (timeUnit is "Hours")
+            if (timeUnit is "hours")
                 timeIntervalMins = timeIntervalMins * 60;
 
             return timeIntervalMins;
