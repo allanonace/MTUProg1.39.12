@@ -330,8 +330,7 @@ namespace MTUComm.MemoryMap
                     string strError = EXCEP_REGI_METHOD.Replace ( "#", memoryRegister.methodId_Get );
                     Console.WriteLine ( "Create Custom Get " + memoryRegister.id + ": Error - " + strError );
 
-                    if ( ! isUnityTest )
-                        throw new CustomMethodNotExistException ( strError + ": " + memoryRegister.id );
+                    throw new CustomMethodNotExistException ( strError );
                 }
 
                 base.AddMethod ( METHODS_GET_CUSTOM_PREFIX + memoryRegister.id,
@@ -372,8 +371,7 @@ namespace MTUComm.MemoryMap
                         string strError = EXCEP_OVER_METHOD.Replace ( "#", memoryOverload.methodId );
                         Console.WriteLine ( "Create Custom Get " + memoryOverload.id + ": Error - " + strError );
 
-                        if ( ! isUnityTest )
-                            throw new CustomMethodNotExistException ( strError + ": " + memoryOverload.id );
+                        throw new CustomMethodNotExistException ( strError );
                     }
                 }
             }
@@ -459,8 +457,7 @@ namespace MTUComm.MemoryMap
                     string strError = EXCEP_REGI_METHOD.Replace ( "#", memoryRegister.methodId_Set );
                     Console.WriteLine ( "Create Custom Set " + memoryRegister.id + ": Error - " + strError );
 
-                    if ( ! isUnityTest )
-                        throw new CustomMethodNotExistException ( strError + ": " + memoryRegister.id );
+                    throw new CustomMethodNotExistException ( strError );
                 }
 
                 base.AddMethod ( METHODS_SET_CUSTOM_PREFIX + memoryRegister.id,
@@ -610,10 +607,7 @@ namespace MTUComm.MemoryMap
         {
             int vCasted;
             if (!int.TryParse(value, out vCasted))
-            {
-                if ( ! isUnityTest )
-                    throw new SetMemoryFormatException(EXCEP_SET_INT + ": " + value);
-            }
+                throw new SetMemoryFormatException(EXCEP_SET_INT + ": " + value);
             else
                 for (int b = 0; b < size; b++)
                     this.memory[address + b] = (byte)(vCasted >> (b * 8));
@@ -629,10 +623,7 @@ namespace MTUComm.MemoryMap
         {
             uint vCasted;
             if (!uint.TryParse(value, out vCasted))
-            {
-                if ( ! isUnityTest )
-                    throw new SetMemoryFormatException(EXCEP_SET_UINT + ": " + value);
-            }
+                throw new SetMemoryFormatException(EXCEP_SET_UINT + ": " + value);
             else
                 for (int b = 0; b < size; b++)
                     this.memory[address + b] = (byte)(vCasted >> (b * 8));
@@ -648,10 +639,7 @@ namespace MTUComm.MemoryMap
         {
             ulong vCasted;
             if (!ulong.TryParse(value, out vCasted))
-            {
-                if ( ! isUnityTest )
-                    throw new SetMemoryFormatException(EXCEP_SET_ULONG + ": " + value);
-            }
+                throw new SetMemoryFormatException(EXCEP_SET_ULONG + ": " + value);
             else
                 for (int b = 0; b < size; b++)
                     this.memory[address + b] = (byte)(vCasted >> (b * 8));
@@ -698,6 +686,7 @@ namespace MTUComm.MemoryMap
 
         #region Get register
 
+        // Registers and Overloads
         public dynamic GetProperty ( string id )
         {
             if ( base.ContainsMember ( id ) )
@@ -706,9 +695,7 @@ namespace MTUComm.MemoryMap
             // Selected dynamic member not exists
             Console.WriteLine("Set " + id + ": Error - Selected register is not loaded");
 
-            if ( ! isUnityTest )
-                throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
-            return null;
+            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
         }
 
         public MemoryRegister<T> GetProperty<T>(string id)
@@ -719,9 +706,7 @@ namespace MTUComm.MemoryMap
             // Selected dynamic member not exists
             Console.WriteLine("Set " + id + ": Error - Selected register is not loaded");
 
-            if ( ! isUnityTest )
-                throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
-            return null;
+            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
         }
 
         public MemoryRegister<int> GetProperty_Int(string id)
@@ -763,8 +748,7 @@ namespace MTUComm.MemoryMap
             if ( this.registersObjs.ContainsKey ( id ) )
                 this.registersObjs[ id ].used = true;
 
-            else if ( ! isUnityTest )
-                throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + ": " + id );
+            throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + ": " + id );
         }
 
         public void SetRegisterNotModified ( string id )
@@ -772,8 +756,7 @@ namespace MTUComm.MemoryMap
             if ( this.registersObjs.ContainsKey ( id ) )
                 this.registersObjs[ id ].used = false;
 
-            else if ( ! isUnityTest )
-                throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + ": "  + id );
+            throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + ": "  + id );
         }
 
         public MemoryRegisterDictionary GetModifiedRegisters ()
