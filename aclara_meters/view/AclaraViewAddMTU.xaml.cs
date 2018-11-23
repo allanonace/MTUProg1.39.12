@@ -1903,7 +1903,7 @@ namespace aclara_meters.view
                         if (name.Length < 0)
                             return false;
 
-            if (initialReadInput.Text.Length < initialReadInput.MaxLength)
+            if (initialReadingInput.Text.Length < initialReadingInput.MaxLength)
                 return false;
 
             if (readIntervalContainer.Opacity > 0.8)
@@ -1952,7 +1952,7 @@ namespace aclara_meters.view
                         if (name2.Length < 0)
                             return false;
 
-            if (initialRead2Input.Text.Length < initialRead2Input.MaxLength)
+            if (initialReading2Input.Text.Length < initialReading2Input.MaxLength)
                 return false;
 
             if (readInterval2Container.Opacity > 0.8)
@@ -2363,15 +2363,94 @@ namespace aclara_meters.view
 
         private void AddMtu_Action()
         {
-            // Create parameters with form fields content
+            dynamic MtuConditions = addMtuForm.conditions.mtu;
+            dynamic GlobalsConditions = addMtuForm.conditions.globals;
+
             addMtuForm.AddParameter(FIELD.SERVICE_PORT_ID, servicePortIdInput.Text);
-            addMtuForm.AddParameter(FIELD.FIELD_ORDER, fieldOrderInput.Text);
-            addMtuForm.AddParameter(FIELD.METER_NUMBER, meterSerialNumberInput.Text);
-            addMtuForm.AddParameter(FIELD.SELECTED_METER_ID, (Meter)meterNamesPicker.SelectedItem);
-            addMtuForm.AddParameter(FIELD.READ_INTERVAL, readIntervalPicker.SelectedItem.ToString());
-            addMtuForm.AddParameter(FIELD.SNAP_READS, snapReadsSlider.Value.ToString());
-            addMtuForm.AddParameter(FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString());
-            addMtuForm.AddParameter(FIELD.ALARM, (Alarm)alarmsPicker.SelectedItem);
+
+            if (GlobalsConditions.WorkOrderRecording)
+            {
+                addMtuForm.AddParameter(FIELD.FIELD_ORDER, fieldOrderInput.Text);
+            }
+
+            if (GlobalsConditions.UseMeterSerialNumber)
+            {
+                addMtuForm.AddParameter(FIELD.METER_NUMBER, meterSerialNumberInput.Text);
+            }
+
+            addMtuForm.AddParameter(FIELD.INITIAL_READING, initialReadingInput.Text);
+
+            addMtuForm.AddParameter(FIELD.SELECTED_METER, (Meter)meterNamesPicker.SelectedItem);
+
+            if (GlobalsConditions.IndividualReadInterval)
+            {
+                addMtuForm.AddParameter(FIELD.READ_INTERVAL, readIntervalPicker.SelectedItem.ToString());
+            }
+
+            if (GlobalsConditions.AllowDailyReads && MtuConditions.DailyReads)
+            {
+                addMtuForm.AddParameter(FIELD.SNAP_READS, snapReadsSlider.Value.ToString());
+            }
+
+            if (MtuConditions.FastMessageConfig)
+            {
+                addMtuForm.AddParameter(FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString());
+            }
+
+            if (MtuConditions.RequiresAlarmProfile)
+            {
+                addMtuForm.AddParameter(FIELD.ALARM, (Alarm)alarmsPicker.SelectedItem);
+            }
+
+            if (MtuConditions.MtuDemand)
+            {
+                addMtuForm.AddParameter(FIELD.DEMAND, (Demand) demandsPicker.SelectedItem);
+            }
+
+            if (MtuConditions.TwoPorts)
+            {
+                addMtuForm.AddParameter(FIELD.SERVICE_PORT_ID2, servicePortId2Input.Text);
+
+                if (GlobalsConditions.WorkOrderRecording)
+                {
+                    addMtuForm.AddParameter(FIELD.FIELD_ORDER2, fieldOrder2Input.Text);
+                }
+
+                if (GlobalsConditions.UseMeterSerialNumber)
+                {
+                    addMtuForm.AddParameter(FIELD.METER_NUMBER2, meterSerialNumber2Input.Text);
+                }
+
+                addMtuForm.AddParameter(FIELD.INITIAL_READING2, initialReading2Input.Text);
+
+                addMtuForm.AddParameter(FIELD.SELECTED_METER2, (Meter)meterNames2Picker.SelectedItem);
+
+                if (GlobalsConditions.IndividualReadInterval)
+                {
+                    addMtuForm.AddParameter(FIELD.READ_INTERVAL2, readInterval2Picker.SelectedItem.ToString());
+                }
+
+                if (GlobalsConditions.AllowDailyReads && MtuConditions.DailyReads)
+                {
+                    addMtuForm.AddParameter(FIELD.SNAP_READS2, snapReads2Slider.Value.ToString());
+                }
+
+                if (MtuConditions.FastMessageConfig)
+                {
+                    addMtuForm.AddParameter(FIELD.TWO_WAY2, twoWay2Picker.SelectedItem.ToString());
+                }
+
+                if (MtuConditions.RequiresAlarmProfile)
+                {
+                    addMtuForm.AddParameter(FIELD.ALARM2, (Alarm)alarms2Picker.SelectedItem);
+                }
+
+                if (MtuConditions.MtuDemand)
+                {
+                    addMtuForm.AddParameter(FIELD.DEMAND2, (Demand)demands2Picker.SelectedItem);
+                }
+            }
+
 
             //Create Ation when opening Form
             // TODO: usuario real

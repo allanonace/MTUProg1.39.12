@@ -868,7 +868,7 @@ namespace MTUComm.MemoryMap
                 tempString = tempString + Convert.ToChar(MemoryRegisters.PCBSupplierCode.Value) + "-";
             }
 
-            if(MemoryRegisters.PCBCoreNumber.Value >= 0)
+            if (MemoryRegisters.PCBCoreNumber.Value >= 0)
             {
                 tempString = tempString + string.Format("{0:000000000}", MemoryRegisters.PCBCoreNumber.Value);
             }
@@ -882,9 +882,7 @@ namespace MTUComm.MemoryMap
 
         public string MtuSoftware_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
-            //if (MemoryRegisters)
-            if(MemoryOverload.registerIds.Length > 1)
+            if (MemoryOverload.registerIds.Length > 1)
             {
                 return string.Format("Version {0:00}.{1:00}.{2:0000}", 
                     MemoryRegisters.MTUFirmwareVersionMaior.Value,
@@ -894,19 +892,16 @@ namespace MTUComm.MemoryMap
             else
             {
                 return string.Format("Version {0:00}", MemoryRegisters.MTUFirmwareVersionFormatFlag.Value);
-            }
-            
+            }   
         }
 
         public string Encryption_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return MemoryRegisters.Encrypted.Value ? "Yes" : "No";
         }
 
         public string MtuVoltageBattery_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return ((MemoryRegisters.MtuMiliVoltageBattery.Value * 1.0) / 1000).ToString("0.00 V");
         }
 
@@ -917,81 +912,70 @@ namespace MTUComm.MemoryMap
 
         public string P2ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return TranslateErrorCodes(MemoryRegisters.P2ReadingErrorCode.Value);
         }
 
         public string InterfaceTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return GetTemperStatus(MemoryRegisters.P1InterfaceAlarm.Value, MemoryRegisters.ProgrammingCoilInterfaceTamper.Value);
         }
 
         public string TiltTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return GetTemperStatus(MemoryRegisters.P1TiltAlarm.Value, MemoryRegisters.TiltTamper.Value);
         }
 
         public string MagneticTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return GetTemperStatus(MemoryRegisters.P1MagneticAlarm.Value, MemoryRegisters.MagneticTamper.Value);
         }
 
         public string RegisterCoverTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return GetTemperStatus(MemoryRegisters.P1RegisterCoverAlarm.Value, MemoryRegisters.RegisterCoverTamper.Value);
         }
 
-        public string ReverseFlowTamperStatus(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string ReverseFlowTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return GetTemperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
         }
 
-        public string FastMessagingMode_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string FastMessagingMode_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return MemoryRegisters.Fast2Way.Value ? "Fast" : "Slow";
         }
 
-        public string LastGasp_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string LastGasp_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return MemoryRegisters.LastGaspTamper.Value ? "Enabled" : "Triggered";
         }
 
-        public string InsufficentMemory_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string InsufficentMemory_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return MemoryRegisters.InsufficentMemoryTamper.Value ? "Enabled" : "Triggered";
         }
 
-        public string P1Status_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string P1Status_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return GetPortStatus(MemoryRegisters.P1StatusFlag.Value);
         }
 
-        public string P2Status_Logic(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string P2Status_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-
             return GetPortStatus(MemoryRegisters.P2StatusFlag.Value);
         }
 
-        public string F12WAYRegister1_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string F12WAYRegister1_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return "0x" + MemoryRegisters.F12WAYRegister1Int.Value.ToString("X8");
         }
 
-        public string F12WAYRegister10_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string F12WAYRegister10_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return "0x" + MemoryRegisters.F12WAYRegister10Int.Value.ToString("X8");
         }
 
-        public string F12WAYRegister14_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string F12WAYRegister14_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return "0x" + MemoryRegisters.F12WAYRegister14Int.Value.ToString("X8");
         }

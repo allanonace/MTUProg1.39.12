@@ -369,42 +369,55 @@ namespace MTUComm
         private void AddMtuTask(dynamic form)
         {
             Mtu mtu = form.mtu;
+            dynamic MtuConditions = form.conditions.mtu;
+            dynamic GlobalsConditions = form.conditions.globals;
+
             // Prepare memory map
             byte[] memory = new byte[400];
             dynamic map = new MemoryMap.MemoryMap ( memory, "31xx32xx" ); // TODO: identify map by mtu type
 
             // meter type
-            map.P1MeterType = form.MeterNumber.getValue();
-            // P2MeterType
+            Meter selectedMeter = (Meter)form.Meter.getValue();
+            map.P1MeterType = selectedMeter.Id;
+            if (MtuConditions.TwoPorts)
+            {
+                Meter selectedMeter2 = (Meter)form.Meter2.getValue();
+                map.P2MeterType = selectedMeter2.Id;
+            }
 
             // service port id, account number
             map.P1MeterId = form.ServicePortId.getValue();
-            // P2MeterId
+            if (MtuConditions.TwoPorts)
+            {
+                map.P2MeterId = form.ServicePortId2.getValue();
+            }
 
             // reading interval
-            /*string[] readIntervalArray = form.ReadInterval.getValue().Split(' ');
-            string readIntervalStr = readIntervalArray[0];
-            string timeUnit = readIntervalArray[1];
-            int timeIntervalMins = Int32.Parse(readIntervalStr);
-            if (timeUnit is "Hours")
-                timeIntervalMins = timeIntervalMins * 60;
-
-            map.ReadInterval = timeIntervalMins; // In minutes*/
-
-            map.ReadInterval = form.ReadInterval.getValue();
-
-            // P2ReadInterval
+            if (GlobalsConditions.IndividualReadInterval)
+            {
+                map.ReadInterval = form.ReadInterval.getValue();
+                if (MtuConditions.TwoPorts)
+                {
+                    map.P2ReadInterval = form.ReadInterval2.getValue();
+                }
+            }
 
             // overlap
             map.MessageOverlapCount = DEFAULT_OVERLAP;
-            // P2MessageOverlapCount
+            if (MtuConditions.TwoPorts)
+            {
+                map.P2MessageOverlapCount = DEFAULT_OVERLAP;
+            }
 
             // initial reading
-            map.P1Reading = 0;
-            // P2Reading
+            map.P1Reading = form.InitialReading.getValue();
+            if (MtuConditions.TwoPorts)
+            {
+                map.P2Reading = form.InitialReading2.getValue();
+            }
 
             // alarms
-            if (form.conditions.RequiresAlarmProfile)
+            if (MtuConditions.RequiresAlarmProfile)
             {
                 Alarm alarms = (Alarm)form.Alarm.getValue();
 
@@ -452,13 +465,54 @@ namespace MTUComm
                 {
                     map.P1InterfaceAlarm = alarms.InterfaceTamper;
                 }
-                // P2ImmediateAlarm
-                // P2UrgentAlarm
-                // P2MagneticAlarm
-                // P2RegisterCoverAlarm
-                // P2ReverseFlowAlarm
-                // P2TiltAlarm
-                // P2InterfaceAlarm
+
+                if (MtuConditions.TwoPorts)
+                {
+                    // Overlap
+                    map.P2MessageOverlapCount = alarms.Overlap;
+
+                    // P2ImmediateAlarm
+                    if (alarms.ImmediateAlarmTransmit)
+                    {
+                        map.P2ImmediateAlarm = true;
+                    }
+
+                    // P2UrgentAlarm
+                    if (alarms.DcuUrgentAlarm)
+                    {
+                        map.P2UrgentAlarm = true;
+                    }
+
+                    // P2MagneticAlarm
+                    if (mtu.MagneticTamper)
+                    {
+                        map.P2MagneticAlarm = alarms.Magnetic;
+                    }
+
+                    // P2RegisterCoverAlarm
+                    if (mtu.RegisterCoverTamper)
+                    {
+                        map.P2RegisterCoverAlarm = alarms.RegisterCover;
+                    }
+
+                    // P2ReverseFlowAlarm
+                    if (mtu.ReverseFlowTamper)
+                    {
+                        map.P2ReverseFlowAlarm = alarms.ReverseFlow;
+                    }
+
+                    // P2TiltAlarm
+                    if (mtu.TiltTamper)
+                    {
+                        map.P2TiltAlarm = alarms.Tilt;
+                    }
+
+                    // P2InterfaceAlarm
+                    if (mtu.InterfaceTamper)
+                    {
+                        map.P2InterfaceAlarm = alarms.InterfaceTamper;
+                    }
+                }
             }
 
             // Encryption key
