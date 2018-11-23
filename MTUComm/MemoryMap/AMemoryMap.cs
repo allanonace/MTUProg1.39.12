@@ -198,7 +198,7 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        public String DailySnap
+        public string DailySnap
         {
             get
             {
@@ -226,13 +226,13 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        public int ReadInterval
+        public string ReadInterval
         {
             get
             {
                 object result;
                 this.Get("ReadInterval", out result);
-                return (int)result;
+                return ( string )result;
             }
             set
             {
@@ -352,13 +352,13 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        public int P1Reading
+        public ulong P1Reading
         {
             get
             {
                 object result;
                 this.Get("P1Reading", out result);
-                return (int)result;
+                return (ulong)result;
             }
             set
             {
@@ -366,13 +366,13 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        public int P2Reading
+        public ulong P2Reading
         {
             get
             {
                 object result;
                 this.Get("P2Reading", out result);
-                return (int)result;
+                return (ulong)result;
             }
             set
             {

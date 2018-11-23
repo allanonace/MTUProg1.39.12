@@ -78,7 +78,7 @@ namespace MTUComm.actions
         private Dictionary<string,Parameter> dictionary;
         public Conditions conditions { get; private set; }
         public static MTUBasicInfo mtuBasicInfo { get; private set; }
-        private Mtu mtu;
+        public Mtu mtu;
 
         #endregion
 
