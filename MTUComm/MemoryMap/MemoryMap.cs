@@ -980,11 +980,6 @@ namespace MTUComm.MemoryMap
             return "0x" + MemoryRegisters.F12WAYRegister14Int.Value.ToString("X8");
         }
 
-        public string ReverseFlowTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return MemoryOverload.Value;
-        }
-
         #endregion
 
         #region Registers
