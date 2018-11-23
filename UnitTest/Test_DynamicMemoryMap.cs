@@ -18,13 +18,14 @@ namespace UnitTest.Tests
         private const string ERROR_REG_CUS_GET  = ERROR + "Register custom get method not registered";
         private const string ERROR_REG_CUS_SET  = ERROR + "Register custom set method not registered";
         private const string ERROR_OVR_CUS_GET  = ERROR + "Overload custom get method not registered";
-        private const string ERROR_REG_USE_GET  = ERROR + "Register custom get method not registered";
-        private const string ERROR_REG_USE_SET  = ERROR + "Register custom set method not registered";
-        private const string ERROR_OVR_USE_GET  = ERROR + "Overload custom get method not registered";
+        private const string ERROR_REG_USE_GET  = ERROR + "Register custom get method not registered [ Use ]";
+        private const string ERROR_REG_USE_SET  = ERROR + "Register custom set method not registered [ Use ]";
+        private const string ERROR_OVR_USE_GET  = ERROR + "Overload custom get method not registered [ Use ]";
         private const string ERROR_REG_CUS_MIN  = ERROR + "Converting hours to minutes";
         private const string ERROR_BCD_ULONG_1  = ERROR + "Converting invoking BCD methods";
-        private const string ERROR_BCD_ULONG_2  = ERROR + "Converting ulong to bcd and vice versa";
+        private const string ERROR_BCD_ULONG_2  = ERROR + "Converting ULONG to BCD and vice versa";
         private const string ERROR_LIMIT_INT    = ERROR + "Setted value is larger than INT type limit";
+        private const string ERROR_LIMIT_BYTES  = ERROR + "Setted value is larger than number of BYTES limit";
 
         private bool TestExpression ( Func<dynamic> func )
         {
@@ -93,10 +94,16 @@ namespace UnitTest.Tests
             Assert.True ( memory[ p1MeterId.address + 1 ] == 0x12, ERROR_BCD_ULONG_2 );
 
             // TEST: Limit INT ( 2^16 = 65536 )
-            map.P1MeterType = 65538; // Overflow and sets 2 ( 65538 - 65536 )
-            Assert.True ( map.P1MeterType <= 65536, ERROR_LIMIT_INT );
-            map.P1MeterType = 65535; // Not overflow and set 
-            Assert.True ( map.P1MeterType == 65535, ERROR_LIMIT_INT);
+            //map.P1MeterType = 65538; // Overflow and sets 2 ( 65538 - 65536 )
+            //Assert.True ( map.P1MeterType <= 65536, ERROR_LIMIT_INT );
+            //map.P1MeterType = 65535; // Not overflow and set 
+            //Assert.True ( map.P1MeterType == 65535, ERROR_LIMIT_INT);
+            // 1. Value is outside assigned bytes limit
+            Assert.True ( ! test(() => { return map.P1MeterType = 65536; }), ERROR_LIMIT_BYTES ); // int 2 bytes ( 2^16 = 65536 )
+            // 2. Value is outside type limit ( int max. 2147483647 )
+            Assert.True ( ! test(() => { return map.P1MeterId   = 281474976710656; }), ERROR_LIMIT_INT ); // int 6 bytes ( 2^48 = 281474976710656 )
+
+            return;
 
             // TEST: Recover only modified registers
             map.P1Reading       = 2;     // ulong
