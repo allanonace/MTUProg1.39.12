@@ -811,12 +811,23 @@ namespace aclara_meters.view
             dialog_turnoff_one.IsVisible = false;
             dialog_turnoff_two.IsVisible = true;
 
-            Task.Delay(2000).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
+            MTUComm.Action turnOffAction = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.TurnOffMtu, user: FormsApp.CredentialsService.UserName);
+
+            turnOffAction.OnFinish += ((s, args) =>
             {
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = true;
-            }));
+                ActionResult actionResult = args.Result;
+
+                Task.Delay(2000).ContinueWith(t =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                       dialog_turnoff_two.IsVisible = false;
+                       dialog_turnoff_three.IsVisible = true;
+                   }));
+            });
+
+            turnOffAction.Run();
+
+           
 
         }
 
