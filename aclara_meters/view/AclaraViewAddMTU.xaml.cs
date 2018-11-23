@@ -339,16 +339,12 @@ namespace aclara_meters.view
             dynamic GlobalsConditions = addMtuForm.conditions.globals;
             #endregion
 
-            // TODO: hide/show Port2 tab
             #region Two ports
             bool TwoPorts = MtuConditions.TwoPorts;
+            port2label.IsVisible = false;
             if (TwoPorts)
             {
-                // TODO: enable second port
-            }
-            else
-            {
-                // TODO: disable second port
+                port2label.IsVisible = true;
             }
             #endregion
 
