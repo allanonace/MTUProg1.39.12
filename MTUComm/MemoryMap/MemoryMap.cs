@@ -984,7 +984,7 @@ namespace MTUComm.MemoryMap
 
         #region Registers
 
-        public int ReadIntervalMinutes_Set ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
+        public int ReadIntervalMinutes_Set ( MemoryRegister<int> MemoryRegister, dynamic inputValue )
         {
             string[] readIntervalArray = ((string)inputValue).Split(' ');
             string readIntervalStr = readIntervalArray[0];
