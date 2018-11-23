@@ -113,22 +113,30 @@ namespace MTUComm.MemoryMap
             isUnityTest = ! string.IsNullOrEmpty ( pathUnityTest );
 
             // Read MTU family XML and prepare setters and getters
-            Configuration config = Configuration.GetInstance ( isUnityTest, pathUnityTest );
-            XmlSerializer s = new XmlSerializer ( typeof ( MemRegisterList ) );
+            Configuration config     = Configuration.GetInstance ( isUnityTest, pathUnityTest );
+            XmlSerializer serializer = new XmlSerializer ( typeof ( MemRegisterList ) );
 
             // Parameter "family" when testing is full path to use
-            string path = ( ! isUnityTest ) ? Path.Combine(config.GetBasePath(), XML_PREFIX + family + XML_EXTENSION) : pathUnityTest + family + XML_EXTENSION;
+            string path = ( ! isUnityTest ) ?
+                Path.Combine ( config.GetBasePath(), XML_PREFIX + family + XML_EXTENSION) :
+                pathUnityTest + family + XML_EXTENSION;
 
             using (TextReader reader = new StreamReader ( path ))
             {
-                MemRegisterList list = s.Deserialize(reader) as MemRegisterList;
+                MemRegisterList list = serializer.Deserialize(reader) as MemRegisterList;
 
                 #region Registers
 
                 if ( list.Registers != null )
                     foreach ( MemRegister xmlRegister in list.Registers )
                     {
-                        try {
+                        //try {
+
+                        // TEST: PARA PODER CAPTURAR LA EJECUCION EN UN REGISTRO CONCRETO
+                        if ( string.Equals ( xmlRegister.Id, "P1MeterId" ) )
+                        {
+                            { }
+                        }
 
                         RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlRegister.Type.ToUpper () );
                         Type SysType = typeof(System.Object);
@@ -226,11 +234,14 @@ namespace MTUComm.MemoryMap
                         // filtered to only recover modified registers
                         this.registersObjs.Add(xmlRegister.Id, memoryRegister);
 
+                        /*
                         }
                         catch ( Exception e )
                         {
+                            throw new MemoryMapParseXmlException ( "ERROR: " + e.Message );
                             Console.WriteLine ( "ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException );
                         }
+                        */
                     }
 
                 #endregion
@@ -452,7 +463,11 @@ namespace MTUComm.MemoryMap
             if ( memoryRegister.HasCustomMethod_Set )
             {
                 MethodInfo customMethod = this.GetType().GetMethod (
-                    memoryRegister.methodId_Set ); //,
+                    memoryRegister.methodId_Set,
+                    BindingFlags.Instance     |
+                    BindingFlags.IgnoreReturn |
+                    BindingFlags.NonPublic    |
+                    BindingFlags.Public );
                     //new Type[] { typeof( MemoryRegister<T> ), typeof ( dynamic } );
 
                 // Method is not present in MTU family class
@@ -1067,15 +1082,15 @@ namespace MTUComm.MemoryMap
         // Use with <CustomGet>method:ULongToBcd</CustomGet>
         public ulong BcdToULong ( MemoryRegister<ulong> MemoryRegister )
         {
-            return this.BcdToULong ( ( ulong )MemoryRegister.Value );
+            return this.BcdToULong_Logic ( ( ulong )MemoryRegister.Value );
         }
 
         // Use with <CustomSet>method:ULongToBcd</CustomSet>
         public ulong ULongToBcd ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
         {
             if ( inputValue is string )
-                return this.ULongToBcd ( inputValue );
-            return this.ULongToBcd ( ( ulong )inputValue );
+                return this.ULongToBcd_Logic ( inputValue );
+            return this.ULongToBcd_Logic ( ( ulong )inputValue );
         }
 
         #endregion
@@ -1259,7 +1274,7 @@ namespace MTUComm.MemoryMap
             return status ? "Enabled" : "Disabled";
         }
 
-        private ulong BcdToULong ( ulong valueInBCD )
+        private ulong BcdToULong_Logic ( ulong valueInBCD )
         {
             // Define powers of 10 for the BCD conversion routines.
             ulong powers = 1;
@@ -1286,14 +1301,14 @@ namespace MTUComm.MemoryMap
             return outNum;
         }
 
-        private ulong ULongToBcd ( string value )
+        public ulong ULongToBcd_Logic ( string value )
         {
             return ulong.Parse(value, System.Globalization.NumberStyles.HexNumber);
         }
 
-        private ulong ULongToBcd ( ulong value )
+        public ulong ULongToBcd_Logic ( ulong value )
         {
-            return this.ULongToBcd ( value.ToString () );
+            return this.ULongToBcd_Logic ( value.ToString () );
         }
 
         #endregion

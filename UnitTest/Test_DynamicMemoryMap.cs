@@ -12,7 +12,7 @@ namespace UnitTest.Tests
         private const string ERROR  = "ERROR: ";
         private const string FOLDER = @"\Aclara_Test_Files\";
 
-        private const string ERROR_MMAP         = ERROR + "Dynamic mapping of memory map from XML fails";
+        private const string ERROR_MMAP         = ERROR + "Dynamic mapping from XML has failed";
         private const string ERROR_REG_READONLY = ERROR + "Register readonly protection not works as expected";
         private const string ERROR_OVR_READONLY = ERROR + "Overloads readonly protection not works as expected";
         private const string ERROR_REG_CUS_GET  = ERROR + "Register custom get method not registered";
@@ -27,6 +27,8 @@ namespace UnitTest.Tests
         private const string ERROR_LIMIT_INT    = ERROR + "Setted value is larger than INT type limit";
         private const string ERROR_LIMIT_BYTES  = ERROR + "Setted value is larger than number of BYTES limit";
 
+        private string exceptionError;
+
         private bool TestExpression ( Func<dynamic> func )
         {
             dynamic value = false;
@@ -37,9 +39,18 @@ namespace UnitTest.Tests
             }
             catch ( Exception e )
             {
+                this.exceptionError = e.Message;
+
                 return false;
             }
             return true;
+        }
+
+        private string Error ( string constMessage = "" )
+        {
+            if ( ! string.IsNullOrEmpty ( constMessage ) )
+                return constMessage + " => Message: " + this.exceptionError;
+            return ERROR + this.exceptionError;
         }
 
         [Theory]
@@ -48,24 +59,34 @@ namespace UnitTest.Tests
         //[InlineData("family_31xx32xx_test3")]
         public void Test_GenerateMemoryMapFromXml ( string xmlName )
         {
+            Func<Func<dynamic>,bool> test = this.TestExpression;
+
             string path = Environment.GetFolderPath ( Environment.SpecialFolder.Desktop );
 
             byte[] memory = new byte[400];
 
             // Dynamic memory map generation
-            dynamic map   = null;
-            string  error = string.Empty;
-            try { map = new MemoryMap ( memory, xmlName, path + FOLDER ); }
-            catch ( Exception e ) { error = e.Message; }
-
-            bool isMapOk = ( map != null );
-            Assert.True ( isMapOk, ERROR + error );
+            dynamic map = null;
+            Assert.True ( test(() => { return map = new MemoryMap ( memory, xmlName, path + FOLDER ); }), Error ( ERROR_MMAP ) );
 
             // If memory map can't be created, test finishes
-            if ( ! isMapOk )
+            if ( map == null )
                 return;
 
-            Func<Func<dynamic>, bool> test = this.TestExpression;
+            string val = "1234567890";
+
+            ulong bcd1 = map.ULongToBcd_Logic ( val );
+            ulong bcd2 = map.ULongToBcd_Logic ( 1234567890 );
+
+            
+            map.P1MeterId = val; // >>> CASCA EN EL CUSTOM_SET <<<
+            ulong recoveredVal = map.P1MeterId;
+            
+            Assert.True ( test(() => { return map.P1MeterId = val; }), this.exceptionError );
+
+            //ulong ulon = map.ULongToBcd ( "1234567890" );
+
+            return;
 
             // TEST: Readonly
             Assert.False ( ! test ( () => { return map.MtuType == 123; } ), ERROR_REG_READONLY ); // Register
@@ -101,7 +122,7 @@ namespace UnitTest.Tests
             // 1. Value is outside assigned bytes limit
             Assert.True ( ! test(() => { return map.P1MeterType = 65536; }), ERROR_LIMIT_BYTES ); // int 2 bytes ( 2^16 = 65536 )
             // 2. Value is outside type limit ( int max. 2147483647 )
-            Assert.True ( ! test(() => { return map.P1MeterId   = 281474976710656; }), ERROR_LIMIT_INT ); // int 6 bytes ( 2^48 = 281474976710656 )
+            Assert.True ( ! test(() => { return map.P1MeterId   = 281474976710656; }), ERROR_LIMIT_INT ); // int 6 bytes ( 2^48 = 281,474.976,710.656 )
 
             return;
 
