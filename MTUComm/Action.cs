@@ -191,7 +191,7 @@ namespace MTUComm
                         break;
                     case ActionType.AddMtu:
                         comm.OnAddMtu += Comm_OnAddMtu;
-                        comm.AddMtu(( AddMtuForm )mtuForm); // this.getParameters());
+                        comm.AddMtu(( AddMtuForm )mtuForm, this.getUser());
                         break;
                     case ActionType.TurnOffMtu:
                         comm.OnTurnOffMtu += Comm_OnTurnOffMtu;
@@ -719,7 +719,6 @@ namespace MTUComm
         private void Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)
         {
             AddMtuForm form = e.form;
-            logger.logAddMtuResult(this, form);
             ActionFinishArgs args = new ActionFinishArgs(null); // TODO: add add mtu result
             OnFinish(this, args);
         }

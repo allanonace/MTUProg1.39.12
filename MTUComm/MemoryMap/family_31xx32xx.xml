@@ -7,7 +7,7 @@
     <Registers>
       <Register>Shipbit</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>DailySnap</Id>
@@ -16,7 +16,7 @@
     <Registers>
       <Register>DailyGMTHourRead</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>ReadInterval</Id>
@@ -25,7 +25,7 @@
     <Registers>
       <Register>ReadIntervalMinutes</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>XmitInterval</Id>
@@ -35,7 +35,7 @@
       <Register>MessageOverlapCount</Register>
       <Register>ReadIntervalMinutes</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>PCBNumber</Id>
@@ -46,7 +46,7 @@
       <Register>PCBCoreNumber</Register>
       <Register>PCBProductRevision</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>MtuSoftware</Id>
@@ -55,7 +55,7 @@
     <Registers>
       <Register>MTUFirmwareVersionFormatFlag</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>Encryption</Id>
@@ -64,7 +64,7 @@
     <Registers>
       <Register>Encrypted</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>InterfaceTamperStatus</Id>
@@ -74,7 +74,7 @@
       <Register>P1InterfaceAlarm</Register>
       <Register>ProgrammingCoilInterfaceTamper</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>TiltTamperStatus</Id>
@@ -84,7 +84,7 @@
       <Register>P1TiltAlarm</Register>
       <Register>TiltTamper</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>MagneticTamperStatus</Id>
@@ -94,7 +94,7 @@
       <Register>P1MagneticAlarm</Register>
       <Register>MagneticTamper</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>RegisterCoverTamperStatus</Id>
@@ -104,7 +104,7 @@
       <Register>P1RegisterCoverAlarm</Register>
       <Register>RegisterCoverTamper</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>ReverseFlowTamperStatus</Id>
@@ -114,7 +114,7 @@
       <Register>P1ReverseFlowAlarm</Register>
       <Register>ReverseFlowTamper</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>MtuVoltageBattery</Id>
@@ -123,7 +123,7 @@
     <Registers>
       <Register>MtuMiliVoltageBattery</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>F12WAYRegister1</Id>
@@ -132,7 +132,7 @@
     <Registers>
       <Register>F12WAYRegister1Int</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>F12WAYRegister10</Id>
@@ -141,7 +141,7 @@
     <Registers>
       <Register>F12WAYRegister10Int</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>F12WAYRegister14</Id>
@@ -150,7 +150,7 @@
     <Registers>
       <Register>F12WAYRegister14Int</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>P1ReadingError</Id>
@@ -159,7 +159,7 @@
     <Registers>
       <Register>P1ReadingErrorCode</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
     <Id>P2ReadingError</Id>
@@ -168,7 +168,7 @@
     <Registers>
       <Register>P2ReadingErrorCode</Register>
     </Registers>
-    <Custom>method</Custom>
+    <CustomGet>method</CustomGet>
   </Overload>
   
   <Register>

@@ -498,7 +498,7 @@ namespace MTUComm
             lexi.Write(22, new byte[] { systemFlags });
             byte valueWritten = (lexi.Read(22, 1))[0];
             Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
-            Console.WriteLine("TurnOffMtu end");
+            Console.WriteLine("TurnOnMtu end");
 
             if (systemFlags != valueWritten)
             {
@@ -541,13 +541,30 @@ namespace MTUComm
             OnTurnOnMtu(this, args);
         }
 
-        public void AddMtu(AddMtuForm addMtuForm)
+        public void AddMtu(AddMtuForm addMtuForm, string user)
         {
-            Task.Factory.StartNew(() => AddMtuTask(addMtuForm));
+            Task.Factory.StartNew(() => AddMtuTask(addMtuForm, user));
         }
 
-        private void AddMtuTask(dynamic form)
+        private void AddMtuTask(dynamic form, string user)
         {
+            Logger logger = new Logger(Configuration.GetInstance());
+            AddMtuLog addMtuLog = new AddMtuLog(logger, form, user);
+
+            #region Turn Off MTU
+
+            byte mask = 1;
+            byte systemFlags = (lexi.Read(22, 1))[0];
+            systemFlags |= mask; // set bit 0
+            lexi.Write(22, new byte[] { systemFlags });
+            byte valueWritten = (lexi.Read(22, 1))[0];
+
+            addMtuLog.LogTurnOff();
+
+            #endregion
+
+            #region Add MTU
+
             Mtu mtu = form.mtu;
             dynamic MtuConditions = form.conditions.mtu;
             dynamic GlobalsConditions = form.conditions.globals;
@@ -575,7 +592,7 @@ namespace MTUComm
             // reading interval
             if (GlobalsConditions.IndividualReadInterval)
             {
-                map.ReadInterval = form.ReadInterval.getValue();
+                map.ReadIntervalMinutes = form.ReadInterval.getValue();
                 if (MtuConditions.TwoPorts)
                 {
                     map.P2ReadInterval = form.ReadInterval2.getValue();
@@ -710,21 +727,36 @@ namespace MTUComm
             // Encrypted
             // EncryptionIndex
 
-            string testAES = map.EncryptionKey;
-
             // fast message (not in pulse)
             // encoder digits to drop (not in pulse)
 
             // Write changes into MTU
             WriteModifiedRegisters(map);
 
+            addMtuLog.LogAction();
+
+            #endregion
+
+            #region Turn On MTU
+
+            mask = 1;
+            systemFlags = (lexi.Read(22, 1))[0];
+            systemFlags &= (byte)~mask; // clear bit 0
+            lexi.Write(22, new byte[] { systemFlags });
+            valueWritten = (lexi.Read(22, 1))[0];
+
+            addMtuLog.LogTurnOn();
+
+            #endregion
+
+            #region Read MTU
+            addMtuLog.LogReadMtu();
+            #endregion
+
+            addMtuLog.Save();
+
             AddMtuArgs args = new AddMtuArgs (form);
             OnAddMtu ( this, args );
-        }
-
-        public void NewAddMtu(Parameter[] p)
-        {
-
         }
 
         public void WriteModifiedRegisters(MemoryMap.MemoryMap map)

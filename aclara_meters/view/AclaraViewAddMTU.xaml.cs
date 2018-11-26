@@ -2454,7 +2454,7 @@ namespace aclara_meters.view
                 config: FormsApp.config,
                 serial: FormsApp.ble_interface,
                 actiontype: MTUComm.Action.ActionType.AddMtu,
-                user: "iker");
+                user: FormsApp.CredentialsService.UserName);
 
             // Add parameters to the action
             add_mtu.AddParameter(addMtuForm);
