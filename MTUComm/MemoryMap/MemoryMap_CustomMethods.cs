@@ -162,6 +162,11 @@ namespace MTUComm.MemoryMap
             return HEX_PREFIX + MemoryRegisters.F12WAYRegister14Int.Value.ToString("X8");
         }
 
+        public string InstallationConfirmationStatus_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return MemoryRegisters.InstallationConfirmationRequest.Value ? "NOT CONFIRMED" : "CONFIRMED";
+        }
+
         #endregion
 
         #region Registers
