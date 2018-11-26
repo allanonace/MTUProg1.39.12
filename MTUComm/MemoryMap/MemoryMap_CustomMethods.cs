@@ -187,7 +187,7 @@ namespace MTUComm.MemoryMap
         // Use with <CustomGet>method:ULongToBcd</CustomGet>
         public ulong BcdToULong ( MemoryRegister<ulong> MemoryRegister )
         {
-            return this.BcdToULong_Logic ( ( ulong )MemoryRegister.Value );
+            return this.BcdToULong_Logic ( ( ulong )MemoryRegister.ValueRaw );
         }
 
         // Use with <CustomSet>method:ULongToBcd</CustomSet>

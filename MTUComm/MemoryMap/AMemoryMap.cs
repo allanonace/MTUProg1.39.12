@@ -4,7 +4,6 @@ using System.Dynamic;
 
 namespace MTUComm.MemoryMap
 {
-
     public abstract class AMemoryMap : DynamicObject
     {
         #region Constants
@@ -121,8 +120,8 @@ namespace MTUComm.MemoryMap
                 {
                     // Some registers have customized get method
                     if ( ! register.HasCustomMethod_Get )
-                         result = ( object )this.dictionary[ id ].Value; // Invokes funGet method internally
-                    else result = ( object )this.dictionary[ id ].funcGetCustom ();
+                         result = ( object )this.dictionary[ id ].ValueRaw; // Invokes funGet method
+                    else result = ( object )this.dictionary[ id ].Value;    // Invokes funGetCustom method
                 }
                 else // Overload
                     result = ( object )this.dictionary[ id ].Value;

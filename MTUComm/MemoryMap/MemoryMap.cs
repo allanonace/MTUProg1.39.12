@@ -44,7 +44,6 @@ using Xml;
 ///   - Get. public T RegisterId_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters ) -> ExpandoObject
 ///   - Get. public T RegisterId_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic[] MemoryRegisters )
 /// </summary>
-
 namespace MTUComm.MemoryMap
 {
     public partial class MemoryMap : AMemoryMap
@@ -80,7 +79,7 @@ namespace MTUComm.MemoryMap
         private const string OVERLOAD_OP_SIGN    = "#";
         private const string OVERLOAD_OP         = "_" + OVERLOAD_OP_SIGN + "_";
 
-        private const string HEX_PREFIX = "0x";
+        private const string HEX_PREFIX          = "0x";
 
         private const string EXCEP_SET_INT       = "String argument can't be casted to int";
         private const string EXCEP_SET_UINT      = "String argument can't be casted to uint";

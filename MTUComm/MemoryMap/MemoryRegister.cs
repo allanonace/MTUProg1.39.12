@@ -145,12 +145,27 @@ namespace MTUComm.MemoryMap
 
         #endregion
 
+        // Read and write without processing data, raw info
+        public dynamic ValueRaw
+        {
+            get { return (T)this.funcGet (); }
+            set { this.funcSet ( (T)value ); }
+        }
+
+        // Use custom methods if them are registered
         public dynamic Value
         {
             // Register Value property always returns value from byte array without any modification
             // This behaviour is mandatory to be able to use original value inside custom get methods,
-            // avoiding to create infinite loop Custom Get -> Value -> Custom Get -> Value...
-            get { return (T)this.funcGet(); }
+            // avoiding to create infinite loop: Custom Get -> Value -> Custom Get -> Value...
+            get
+            {
+                // If register has not customized get method, use normal/direct get raw value
+                if ( ! this.HasCustomMethod_Get )
+                    return this.ValueRaw; // Invokes funGet method internally
+
+                return this.funcGetCustom ();
+            }
             set
             {
                 // Register with read and write
@@ -173,7 +188,7 @@ namespace MTUComm.MemoryMap
                     // Try to set value of waited type
                     // If XML custom field is a math expression ( e.g. _val_ * 2 / 5 )
                     else
-                        this.funcSet((T)value);
+                        this.ValueRaw = value;
                 }
 
                 // Register is readonly
