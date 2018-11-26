@@ -89,6 +89,12 @@ namespace MTUComm.MemoryMap
             // Selected dynamic member exists
             if ( this.dictionary.ContainsKey ( id ) )
             {
+                dynamic register = this.dictionary[id];
+
+                // Overloads are readonly
+                if ( register.GetType().GetGenericTypeDefinition() == typeof( MemoryOverload<> ) )
+                    throw new MemoryOverloadsAreReadOnly ( MemoryMap.EXCEP_OVE_READONLY + ": " + id );
+
                 this.dictionary[id].Value = value;
                 this.dictionary[id].used  = true;
 
