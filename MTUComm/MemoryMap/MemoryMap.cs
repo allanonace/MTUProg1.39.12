@@ -71,22 +71,26 @@ namespace MTUComm.MemoryMap
         private const string METHODS_SET_STRING_PREFIX = METHODS_SET_PREFIX + "string_";
         private const string METHODS_SET_BYTE_PREFIX   = METHODS_SET_PREFIX + "byte_";
 
-        public  const string METHOD             = "method";
-        public  const string METHOD_KEY         = METHOD + ":";
-        public  const string METHOD_SUFIX_SET   = "_Set";
-        public  const string METHOD_SUFIX_GET   = "_Get";
+        public  const string METHOD              = "method";
+        public  const string METHOD_KEY          = METHOD + ":";
+        public  const string METHOD_SUFIX_SET    = "_Set";
+        public  const string METHOD_SUFIX_GET    = "_Get";
         
-        private const string REGISTER_OP        = "_val_";
-        private const string OVERLOAD_OP_SIGN   = "#";
-        private const string OVERLOAD_OP        = "_" + OVERLOAD_OP_SIGN + "_";
+        private const string REGISTER_OP         = "_val_";
+        private const string OVERLOAD_OP_SIGN    = "#";
+        private const string OVERLOAD_OP         = "_" + OVERLOAD_OP_SIGN + "_";
 
-        private const string EXCEP_SET_INT      = "String argument can't be casted to int";
-        private const string EXCEP_SET_UINT     = "String argument can't be casted to uint";
-        private const string EXCEP_SET_ULONG    = "String argument can't be casted to ulong";
-        public  const string EXCEP_SET_USED     = "The specified record has not been mapped";
-        public  const string EXCEP_SET_READONLY = "The specified record is readonly";
-        private const string EXCEP_REGI_METHOD  = "Custom register method '#' is not present in MTU family class";
-        private const string EXCEP_OVER_METHOD  = "Custom overload method '#' is not present in MTU family class";
+        private const string EXCEP_SET_INT       = "String argument can't be casted to int";
+        private const string EXCEP_SET_UINT      = "String argument can't be casted to uint";
+        private const string EXCEP_SET_ULONG     = "String argument can't be casted to ulong";
+        private const string EXCEP_SET_LIM_INT   = "Argument value is outside int limits";
+        private const string EXCEP_SET_LIM_UINT  = "Argument value is outside uint limits";
+        private const string EXCEP_SET_LIM_ULONG = "Argument value is outside ulong limits";
+        public  const string EXCEP_SET_USED      = "The specified record has not been mapped";
+        public  const string EXCEP_SET_READONLY  = "The specified record is readonly";
+        public  const string EXCEP_OVE_READONLY  = "All overloads are readonly";
+        private const string EXCEP_REGI_METHOD   = "Custom register method '#' is not present in MTU family class";
+        private const string EXCEP_OVER_METHOD   = "Custom overload method '#' is not present in MTU family class";
 
         #endregion
 
@@ -109,22 +113,30 @@ namespace MTUComm.MemoryMap
             isUnityTest = ! string.IsNullOrEmpty ( pathUnityTest );
 
             // Read MTU family XML and prepare setters and getters
-            Configuration config = Configuration.GetInstance ( isUnityTest, pathUnityTest );
-            XmlSerializer s = new XmlSerializer ( typeof ( MemRegisterList ) );
+            Configuration config     = Configuration.GetInstance ( isUnityTest, pathUnityTest );
+            XmlSerializer serializer = new XmlSerializer ( typeof ( MemRegisterList ) );
 
             // Parameter "family" when testing is full path to use
-            string path = ( ! isUnityTest ) ? Path.Combine(config.GetBasePath(), XML_PREFIX + family + XML_EXTENSION) : pathUnityTest + family + XML_EXTENSION;
+            string path = ( ! isUnityTest ) ?
+                Path.Combine ( config.GetBasePath(), XML_PREFIX + family + XML_EXTENSION) :
+                pathUnityTest + family + XML_EXTENSION;
 
             using (TextReader reader = new StreamReader ( path ))
             {
-                MemRegisterList list = s.Deserialize(reader) as MemRegisterList;
+                MemRegisterList list = serializer.Deserialize(reader) as MemRegisterList;
 
                 #region Registers
 
                 if ( list.Registers != null )
                     foreach ( MemRegister xmlRegister in list.Registers )
                     {
-                        try {
+                        //try {
+
+                        // TEST: PARA PODER CAPTURAR LA EJECUCION EN UN REGISTRO CONCRETO
+                        if ( string.Equals ( xmlRegister.Id, "P1MeterId" ) )
+                        {
+                            { }
+                        }
 
                         RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlRegister.Type.ToUpper () );
                         Type SysType = typeof(System.Object);
@@ -222,11 +234,14 @@ namespace MTUComm.MemoryMap
                         // filtered to only recover modified registers
                         this.registersObjs.Add(xmlRegister.Id, memoryRegister);
 
+                        /*
                         }
                         catch ( Exception e )
                         {
+                            throw new MemoryMapParseXmlException ( "ERROR: " + e.Message );
                             Console.WriteLine ( "ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException );
                         }
+                        */
                     }
 
                 #endregion
@@ -429,7 +444,7 @@ namespace MTUComm.MemoryMap
                     if ( memoryRegister.HasCustomOperation_Set )
                         _value = this.ExecuteOperation<T> ( memoryRegister.mathExpression_Set, _value );
 
-                    switch ( Type.GetTypeCode(typeof(T)) )
+                    switch ( Type.GetTypeCode( typeof(T)) )
                     {
                         case TypeCode.Int32  : this.SetIntToMem   ((int  )(object)_value, memoryRegister.address, memoryRegister.size); break;
                         case TypeCode.UInt32 : this.SetUIntToMem  ((uint )(object)_value, memoryRegister.address, memoryRegister.size); break;
@@ -448,7 +463,11 @@ namespace MTUComm.MemoryMap
             if ( memoryRegister.HasCustomMethod_Set )
             {
                 MethodInfo customMethod = this.GetType().GetMethod (
-                    memoryRegister.methodId_Set ); //,
+                    memoryRegister.methodId_Set,
+                    BindingFlags.Instance     |
+                    BindingFlags.IgnoreReturn |
+                    BindingFlags.NonPublic    |
+                    BindingFlags.Public );
                     //new Type[] { typeof( MemoryRegister<T> ), typeof ( dynamic } );
 
                 // Method is not present in MTU family class
@@ -490,6 +509,24 @@ namespace MTUComm.MemoryMap
                 {
                     this.SetByteArrayToMem ( _value, regObj.address, regObj.size );
                 }));
+        }
+
+        #endregion
+
+        #region Validations
+
+        private bool ValidateNumeric<T> ( dynamic value, int size )
+        {
+            bool okBytes = ( ( ulong )value < ( ulong )Math.Pow ( 2, size * 8 ) );
+            bool okType  = false;
+
+            switch ( Type.GetTypeCode( typeof(T)) )
+            {
+                case TypeCode.Int32  : okType = ( value < Int32.MaxValue  ); break;
+                case TypeCode.UInt32 : okType = ( value < UInt32.MaxValue ); break;
+                case TypeCode.UInt64 : okType = ( value < UInt64.MaxValue ); break;
+            }
+            return okBytes && okType;
         }
 
         #endregion
@@ -599,50 +636,74 @@ namespace MTUComm.MemoryMap
 
         private void SetIntToMem(int value, int address, int size = MemRegister.DEF_SIZE)
         {
-            for (int b = 0; b < size; b++)
-                this.memory[address + b] = (byte)(value >> (b * 8));
+            if ( this.ValidateNumeric<int> ( value, size ) )
+                for (int b = 0; b < size; b++)
+                    this.memory[address + b] = (byte)(value >> (b * 8));
+            else
+                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " + value + " -> " + address );
         }
 
         private void SetIntToMem(string value, int address, int size = MemRegister.DEF_SIZE)
         {
             int vCasted;
             if (!int.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException(EXCEP_SET_INT + ": " + value);
+                throw new SetMemoryFormatException ( EXCEP_SET_INT + ": " + value + " -> " + address );
             else
-                for (int b = 0; b < size; b++)
-                    this.memory[address + b] = (byte)(vCasted >> (b * 8));
+            {
+                if ( this.ValidateNumeric<int> ( value, size ) )
+                    for (int b = 0; b < size; b++)
+                        this.memory[address + b] = (byte)(vCasted >> (b * 8));
+                else
+                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " + value + " -> " + address );
+            }
         }
 
         private void SetUIntToMem(uint value, int address, int size = MemRegister.DEF_SIZE)
         {
-            for (int b = 0; b < size; b++)
-                this.memory[address + b] = (byte)(value >> (b * 8));
+            if ( this.ValidateNumeric<uint> ( value, size ) )
+                for (int b = 0; b < size; b++)
+                    this.memory[address + b] = (byte)(value >> (b * 8));
+            else
+                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " + value + " -> " + address );
         }
 
         private void SetUIntToMem(string value, int address, int size = MemRegister.DEF_SIZE)
         {
             uint vCasted;
             if (!uint.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException(EXCEP_SET_UINT + ": " + value);
+                throw new SetMemoryFormatException ( EXCEP_SET_UINT + ": " + value + " -> " + address );
             else
-                for (int b = 0; b < size; b++)
-                    this.memory[address + b] = (byte)(vCasted >> (b * 8));
+            {
+                if ( this.ValidateNumeric<uint> ( value, size ) )
+                    for (int b = 0; b < size; b++)
+                        this.memory[address + b] = (byte)(vCasted >> (b * 8));
+                else
+                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " + value + " -> " + address );
+            }
         }
 
         private void SetULongToMem(ulong value, int address, int size = MemRegister.DEF_SIZE)
         {
-            for (int b = 0; b < size; b++)
-                this.memory[address + b] = (byte)(value >> (b * 8));
+            if ( this.ValidateNumeric<ulong> ( value, size ) )
+                for (int b = 0; b < size; b++)
+                    this.memory[address + b] = (byte)(value >> (b * 8));
+            else
+                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " + value + " -> " + address );
         }
 
         private void SetULongToMem(string value, int address, int size = MemRegister.DEF_SIZE)
         {
             ulong vCasted;
             if (!ulong.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException(EXCEP_SET_ULONG + ": " + value);
+                throw new SetMemoryFormatException ( EXCEP_SET_ULONG + ": " + value + " -> " + address );
             else
-                for (int b = 0; b < size; b++)
-                    this.memory[address + b] = (byte)(vCasted >> (b * 8));
+            {
+                if ( this.ValidateNumeric<ulong> ( value, size ) )
+                    for (int b = 0; b < size; b++)
+                        this.memory[address + b] = (byte)(vCasted >> (b * 8));
+                else
+                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " + value + " -> " + address );
+            }
         }
 
         private void SetBoolToMem (bool value, int address, int bit_index = MemRegister.DEF_BIT)
@@ -795,7 +856,7 @@ namespace MTUComm.MemoryMap
                         if ( ( RegType )register.valueType == RegType.UINT )
                             changes.AddElement<uint> ( register );
                         break;
-                    case TypeCode.Int64:
+                    case TypeCode.UInt64:
                         if ( ( RegType )register.valueType == RegType.ULONG )
                             changes.AddElement<ulong> ( register );
                         break;
@@ -987,11 +1048,11 @@ namespace MTUComm.MemoryMap
         public int ReadIntervalMinutes_Set ( MemoryRegister<int> MemoryRegister, dynamic inputValue )
         {
             string[] readIntervalArray = ((string)inputValue).Split(' ');
-            string readIntervalStr = readIntervalArray[0];
+            string readIntervalStr = readIntervalArray[0].ToLower ();
             string timeUnit = readIntervalArray[1];
             int timeIntervalMins = Int32.Parse(readIntervalStr);
 
-            if (timeUnit is "Hours")
+            if (timeUnit is "hours")
                 timeIntervalMins = timeIntervalMins * 60;
 
             return timeIntervalMins;
@@ -1000,15 +1061,15 @@ namespace MTUComm.MemoryMap
         // Use with <CustomGet>method:ULongToBcd</CustomGet>
         public ulong BcdToULong ( MemoryRegister<ulong> MemoryRegister )
         {
-            return this.BcdToULong ( ( ulong )MemoryRegister.Value );
+            return this.BcdToULong_Logic ( ( ulong )MemoryRegister.Value );
         }
 
         // Use with <CustomSet>method:ULongToBcd</CustomSet>
         public ulong ULongToBcd ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
         {
             if ( inputValue is string )
-                return this.ULongToBcd ( inputValue );
-            return this.ULongToBcd ( ( ulong )inputValue );
+                return this.ULongToBcd_Logic ( inputValue );
+            return this.ULongToBcd_Logic ( ( ulong )inputValue );
         }
 
         #endregion
@@ -1192,7 +1253,7 @@ namespace MTUComm.MemoryMap
             return status ? "Enabled" : "Disabled";
         }
 
-        private ulong BcdToULong ( ulong valueInBCD )
+        private ulong BcdToULong_Logic ( ulong valueInBCD )
         {
             // Define powers of 10 for the BCD conversion routines.
             ulong powers = 1;
@@ -1219,14 +1280,14 @@ namespace MTUComm.MemoryMap
             return outNum;
         }
 
-        private ulong ULongToBcd ( string value )
+        public ulong ULongToBcd_Logic ( string value )
         {
             return ulong.Parse(value, System.Globalization.NumberStyles.HexNumber);
         }
 
-        private ulong ULongToBcd ( ulong value )
+        public ulong ULongToBcd_Logic ( ulong value )
         {
-            return this.ULongToBcd ( value.ToString () );
+            return this.ULongToBcd_Logic ( value.ToString () );
         }
 
         #endregion

@@ -26,7 +26,7 @@ namespace MTUComm.MemoryMap
             {
                 case TypeCode.Int32  : this.dictionary[ RegType.INT    ].Add ( register ); break;
                 case TypeCode.UInt32 : this.dictionary[ RegType.UINT   ].Add ( register ); break;
-                case TypeCode.Int64  : this.dictionary[ RegType.ULONG  ].Add ( register ); break;
+                case TypeCode.UInt64  : this.dictionary[ RegType.ULONG  ].Add ( register ); break;
                 case TypeCode.Boolean: this.dictionary[ RegType.BOOL   ].Add ( register ); break;
                 case TypeCode.Char   : this.dictionary[ RegType.CHAR   ].Add ( register ); break;
                 case TypeCode.String : this.dictionary[ RegType.STRING ].Add ( register ); break;
