@@ -179,6 +179,10 @@ namespace Xml
             output = output.Replace(">TRUE<", ">true<");
             output = output.Replace(">False<", ">false<");
             output = output.Replace(">FALSE<", ">false<");
+            output = output.Replace("\"True\"", "\"true\"");
+            output = output.Replace("\"TRUE\"", "\"true\"");
+            output = output.Replace("\"False\"", "\"false\"");
+            output = output.Replace("\"FALSE\"", "\"false\"");
             return output;
         }
     }
