@@ -502,7 +502,7 @@
 
                                                         <Controls:BorderlessPicker x:Name="readIntervalPicker" Title="" 
                                                                   HorizontalOptions="FillAndExpand"
-                                                                  SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                                  SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" 
                                                                />
                                                 </StackLayout>
                                              </Frame> 
@@ -577,7 +577,7 @@
                                                         
                                                          <Controls:BorderlessPicker x:Name="twoWayPicker" Title="" 
                                                               HorizontalOptions="FillAndExpand" 
-                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                              SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" 
                                                            />
                                                     </StackLayout>
                                              </Frame> 
@@ -600,7 +600,7 @@
                                                         
                                                          <Controls:BorderlessPicker x:Name="alarmsPicker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                              SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" 
                                                            />
                                                     </StackLayout>
                                              </Frame> 
@@ -621,7 +621,7 @@
                                                         
                                                          <Controls:BorderlessPicker x:Name="demandsPicker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                              SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" 
                                                            />
                                                     </StackLayout>
                                              </Frame> 
@@ -796,7 +796,7 @@
                                                         
                                                          <Controls:BorderlessPicker x:Name="readInterval2Picker" Title="" 
                                                               HorizontalOptions="FillAndExpand"
-                                                              SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
+                                                              SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" 
                                                            />
                                                     </StackLayout>
                                              </Frame> 
@@ -871,7 +871,7 @@
                                                         
                                                          <Controls:BorderlessPicker x:Name="twoWay2Picker" Title="" 
                                                               HorizontalOptions="FillAndExpand" 
-                                                              SelectedIndexChanged="PickerSelection2" FontSize="17" HeightRequest="40" 
+                                                              SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" 
                                                            />
                                                     </StackLayout>
                                              </Frame> 
@@ -895,7 +895,7 @@
                                                         
                                                          <Controls:BorderlessPicker x:Name="alarms2Picker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                              SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" 
                                                            />
                                                     </StackLayout>
                                              </Frame> 
@@ -916,7 +916,7 @@
                                                         
                                                          <Controls:BorderlessPicker x:Name="demands2Picker" Title="" 
                                                               HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                              SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" 
+                                                              SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" 
                                                            />
                                                     </StackLayout>
                                              </Frame> 
@@ -1024,7 +1024,7 @@
                                         <StackLayout 
                                             HorizontalOptions="FillAndExpand" 
                                             Margin="0,4,0,0"
-                                            x:Name="OptionsStackLayout">
+                                            x:Name="optionalFields">
                                         </StackLayout>
 
                                   </StackLayout>
@@ -1513,7 +1513,7 @@
                                         
                                        <Controls:BorderlessPicker Margin="0,0,0,0" x:Name="cancelReasonPicker" Title="" 
                                       HorizontalOptions="FillAndExpand" FontSize="16"
-                                      SelectedIndexChanged="PickerSelection" HeightRequest="30"  TextColor="Black"/>
+                                      SelectedIndexChanged="GenericPicker_SelectedIndexChanged" HeightRequest="30"  TextColor="Black"/>
 
                                     </StackLayout>
                              </Frame> 

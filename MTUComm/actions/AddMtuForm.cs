@@ -29,6 +29,7 @@ namespace MTUComm.actions
             ALARM2,
             DEMAND,
             DEMAND2,
+            OPTIONAL_PARAMS,
         }
 
         public static Dictionary<FIELD, string[]> Texts =
@@ -212,6 +213,15 @@ namespace MTUComm.actions
                         "Demand2",
                         "Demands2",
                         "Demands 2"
+                    }
+                },
+                {
+                    FIELD.OPTIONAL_PARAMS,
+                    new string[]
+                    {
+                        "OptionalParams",
+                        "OptionalParams",
+                        "OptionalParams"
                     }
                 },
             };

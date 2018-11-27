@@ -294,14 +294,12 @@ namespace MTUComm
             }
             #endregion
 
-            // TODO: log real optional params
             #region Misc/Optional
-            logger.logParameter(this.addMtuAction, new Parameter("MTU_Location_Data", "MTU Location", "Inside", true));
-            logger.logParameter(this.addMtuAction, new Parameter("LocationInfo", "Meter Location", "Inside", true));
-            logger.logParameter(this.addMtuAction, new Parameter("Construction_Type", "Construction", "Vinyl", true));
-            logger.logParameter(this.addMtuAction, new Parameter("GPS_Y", "Lat", "43.8", true));
-            logger.logParameter(this.addMtuAction, new Parameter("GPS_X", "Long", "23.2", true));
-            logger.logParameter(this.addMtuAction, new Parameter("Altitude", "Elevation", "1", true));
+            List<Parameter> optionalParams = (List<Parameter>)form.OptionalParams.getValue();
+            foreach (Parameter p in optionalParams)
+            {
+                logger.logParameter(this.addMtuAction, p);
+            }
             #endregion
         }
 

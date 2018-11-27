@@ -102,6 +102,9 @@ namespace aclara_meters.view
         private List<string> meterModels2List;
         private List<string> meterNames2List;
 
+        private List<BorderlessPicker> optionalPickers;
+        private List<BorderlessEntry> optionalEntries;
+
         private MeterTypes meterTypes;
         private List<Xml.Meter> meters;
         private List<Xml.Meter> meters2;
@@ -188,10 +191,6 @@ namespace aclara_meters.view
             InitializeComponent();
         }
 
-
-        List<BorderlessPicker> optionalLists;
-        List<BorderlessEntry> optionalTexts;
-
         public AclaraViewAddMTU(IUserDialogs dialogs)
         {
             InitializeComponent();
@@ -204,174 +203,6 @@ namespace aclara_meters.view
             MTUBasicInfo mtuBasicInfo = MtuForm.mtuBasicInfo;
             this.detectedMtuType = (int)mtuBasicInfo.Type;
             currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
-
-            #region Delete this, only define foreach global options here
-
-            List<Option> list_of_options  = this.config.global.Options;
-
-            optionalLists = new List<BorderlessPicker>();
-            optionalTexts = new List<BorderlessEntry>();
-
-            foreach (Option opt in list_of_options)
-            {
-        
-                Console.WriteLine(opt.Display);
-
-                List <string> options_list = opt.OptionList;
-
-                foreach (string str in options_list)
-                {
-                    Console.WriteLine(str);
-                }
-
-                #region Dynamic UI
-
-                Frame fm1_vendor = new Frame()
-                {
-                    CornerRadius = 6,
-                    HeightRequest = 30,
-                    Margin = new Thickness(0, 4, 0, 0),
-                    BackgroundColor = Color.FromHex("#7a868c")
-                };
-
-                Frame fm2_vendor = new Frame()
-                {
-                    CornerRadius = 6,
-                    HeightRequest = 30,
-                    Margin = new Thickness(-7, -7, -7, -7),
-                    BackgroundColor = Color.White
-                };
-
-                StackLayout st_vendor = new StackLayout()
-                {
-                    Orientation = StackOrientation.Horizontal,
-                    HorizontalOptions = LayoutOptions.FillAndExpand,
-                    Margin = new Thickness(1, 1, 1, 1),
-                    BackgroundColor = Color.White
-                };
-
-                //Texto del titulo
-                Label textoTitulo = new Label()
-                {
-                    Text = opt.Display,
-                    Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
-                    Margin = new Thickness(0, 4, 0, 0)
-                };
-
-                if (opt.Type.Equals("list"))
-                {
-                    BorderlessPicker optionalList = new BorderlessPicker()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                        HeightRequest = 40,
-                        FontSize = 17,
-                        ItemsSource = options_list
-                    };
-
-                    //Detectar el Selector clickado
-                    optionalList.SelectedIndexChanged += PickerMisc_SelectedIndexChanged;
-
-                    optionalLists.Add(optionalList);
-
-                    st_vendor.Children.Add(optionalList);
-                    fm2_vendor.Content = st_vendor;
-                    fm1_vendor.Content = fm2_vendor;
-
-
-                    //Creamos el Bloque con toda la informacion
-                    StackLayout ElementoBloque = new StackLayout()
-                    {
-                        StyleId = "bloque" + 1
-                    };
-
-                    ElementoBloque.Children.Add(textoTitulo);
-                    ElementoBloque.Children.Add(fm1_vendor);
-                    OptionsStackLayout.Children.Add(ElementoBloque);
-                }
-                else if (opt.Type.Equals("text"))
-                {
-                    string format = opt.Format;
-                    int maxLen = opt.Len;
-                    int minLen = opt.MinLen;
-                    bool required = opt.Required;
-
-                    /*
-                    <Controls:BorderlessEntry.Behaviors>
-                        <behaviors:EntryLengthValidatorBehavior MaxLength="12"/>
-                    </Controls:BorderlessEntry.Behaviors>
-                     */
-
-                    Keyboard keyboard = Keyboard.Default;
-
-                    try{
-                        if(format.Equals("alpha"))
-                        {
-                            keyboard = Keyboard.Default;
-                        }
-                        else if (format.Equals("alphanumeric"))
-                        {
-                            keyboard = Keyboard.Numeric;
-
-                        }
-                        else if (format.Equals("date"))
-                        {
-                            keyboard = Keyboard.Default;
-                        }
-                        else if (format.Equals("time"))
-                        {
-                            keyboard = Keyboard.Numeric;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.StackTrace);
-                    }
-                    BorderlessEntry optionalText = new BorderlessEntry()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                        HeightRequest = 40,
-                        Keyboard = keyboard,
-                        FontSize = 17
-                    };
-
-                    CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    behavior.MaxLength = opt.Len;
-
-                    optionalText.Behaviors.Add(behavior);
-
-                    // TODO
-                    optionalTexts.Add(optionalText);
-
-                    st_vendor.Children.Add(optionalText);
-                    fm2_vendor.Content = st_vendor;
-                    fm1_vendor.Content = fm2_vendor;
-
-
-                    //Creamos el Bloque con toda la informacion
-                    StackLayout ElementoBloque = new StackLayout()
-                    {
-                        StyleId = "bloque" + 1
-                    };
-
-                    ElementoBloque.Children.Add(textoTitulo);
-                    ElementoBloque.Children.Add(fm1_vendor);
-
-                    OptionsStackLayout.Children.Add(ElementoBloque);
-
-                }
-                else
-                {
-                    // do nothing
-                }
-
-                #endregion
-
-            }
-
-            //OptionsStackLayout
-
-            #endregion
-
             /* Instantiate form */
             addMtuForm = new AddMtuForm(currentMtu);
 
@@ -446,7 +277,6 @@ namespace aclara_meters.view
 
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
 
-
             Device.BeginInvokeOnMainThread(() =>
             {
                 label_read.Opacity = 1;
@@ -462,8 +292,7 @@ namespace aclara_meters.view
             {
                 userName.Text = FormsApp.CredentialsService.UserName; //"Kartik";
             }
-
-
+            
             battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
             rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
 
@@ -795,8 +624,10 @@ namespace aclara_meters.view
             }
             #endregion
 
-            // TODO: load misc tab
             #region Misc
+
+            InitializeOptionalFields();
+
             #endregion
 
             #region Cancel reason
@@ -869,9 +700,143 @@ namespace aclara_meters.view
 
         #region GUI Initialization
 
+        void InitializeOptionalFields()
+        {
+            List<Option> optionalFields = this.config.global.Options;
+
+            optionalPickers = new List<BorderlessPicker>();
+            optionalEntries = new List<BorderlessEntry>();
+
+            foreach (Option optionalField in optionalFields)
+            {
+                Frame optionalContainerB = new Frame()
+                {
+                    CornerRadius = 6,
+                    HeightRequest = 30,
+                    Margin = new Thickness(0, 4, 0, 0),
+                    BackgroundColor = Color.FromHex("#7a868c")
+                };
+
+                Frame optionalContainerC = new Frame()
+                {
+                    CornerRadius = 6,
+                    HeightRequest = 30,
+                    Margin = new Thickness(-7, -7, -7, -7),
+                    BackgroundColor = Color.White
+                };
+
+                StackLayout optionalContainerD = new StackLayout()
+                {
+                    Orientation = StackOrientation.Horizontal,
+                    HorizontalOptions = LayoutOptions.FillAndExpand,
+                    Margin = new Thickness(1, 1, 1, 1),
+                    BackgroundColor = Color.White
+                };
+
+                StackLayout optionalContainerA = new StackLayout()
+                {
+                    StyleId = "bloque" + 1
+                };
+
+                Label optionalLabel = new Label()
+                {
+                    Text = optionalField.Display,
+                    Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                    Margin = new Thickness(0, 4, 0, 0)
+                };
+
+                if (optionalField.Type.Equals("list"))
+                {
+                    List<string> optionalFieldOptions = optionalField.OptionList;
+                    BorderlessPicker optionalPicker = new BorderlessPicker()
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        HeightRequest = 40,
+                        FontSize = 17,
+                        ItemsSource = optionalFieldOptions
+                    };
+                    optionalPicker.Name = optionalField.Name.Replace(" ", "_");
+                    optionalPicker.Display = optionalField.Display;
+
+                    optionalPicker.SelectedIndexChanged += GenericPicker_SelectedIndexChanged;
+
+
+                    optionalPickers.Add(optionalPicker);
+
+                    optionalContainerD.Children.Add(optionalPicker);
+                    optionalContainerC.Content = optionalContainerD;
+                    optionalContainerB.Content = optionalContainerC;
+                    optionalContainerA.Children.Add(optionalLabel);
+                    optionalContainerA.Children.Add(optionalContainerB);
+
+                    this.optionalFields.Children.Add(optionalContainerA);
+                }
+                else if (optionalField.Type.Equals("text"))
+                {
+                    string format = optionalField.Format;
+                    int maxLen = optionalField.Len;
+                    int minLen = optionalField.MinLen;
+                    bool required = optionalField.Required;
+
+                    Keyboard keyboard = Keyboard.Default;
+
+                    try
+                    {
+                        if (format.Equals("alpha"))
+                        {
+                            keyboard = Keyboard.Default;
+                        }
+                        else if (format.Equals("alphanumeric"))
+                        {
+                            keyboard = Keyboard.Numeric;
+                        }
+                        else if (format.Equals("date"))
+                        {
+                            keyboard = Keyboard.Default;
+                        }
+                        else if (format.Equals("time"))
+                        {
+                            keyboard = Keyboard.Numeric;
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.StackTrace);
+                    }
+
+                    BorderlessEntry optionalEntry = new BorderlessEntry()
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        HeightRequest = 40,
+                        Keyboard = keyboard,
+                        FontSize = 17
+                    };
+                    optionalEntry.Name = optionalField.Name.Replace(" ", "_");
+                    optionalEntry.Display = optionalField.Display;
+
+                    CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
+                    behavior.MaxLength = optionalField.Len;
+
+                    optionalEntry.Behaviors.Add(behavior);
+
+                    optionalEntries.Add(optionalEntry);
+
+                    optionalContainerD.Children.Add(optionalEntry);
+                    optionalContainerC.Content = optionalContainerD;
+                    optionalContainerB.Content = optionalContainerC;
+                    optionalContainerA.Children.Add(optionalLabel);
+                    optionalContainerA.Children.Add(optionalContainerB);
+
+                    this.optionalFields.Children.Add(optionalContainerA);
+                }
+                else
+                {
+                    // do nothing
+                }
+            }
+        }
+
         #region Picker
-
-
 
         private void InitializeMeterPickers()
         {
@@ -1395,19 +1360,7 @@ namespace aclara_meters.view
 
         #region Pickers
 
-        private void PickerSelection(object sender, EventArgs e)
-        {
-            var picker = (Picker)sender;
-            int selectedIndex = picker.SelectedIndex;
-        }
-
-        private void PickerSelection2(object sender, EventArgs e)
-        {
-            var picker = (Picker)sender;
-            int selectedIndex = picker.SelectedIndex;
-        }
-
-        private void PickerMisc_SelectedIndexChanged(object sender, EventArgs e)
+        private void GenericPicker_SelectedIndexChanged(object sender, EventArgs e)
         {
             var picker = (Picker)sender;
             int selectedIndex = picker.SelectedIndex;
@@ -2086,7 +2039,7 @@ namespace aclara_meters.view
             if (mtuGeolocationLong.Text.Length < 0)
                 return false;
 
-            foreach (BorderlessPicker picker in optionalLists)
+            foreach (BorderlessPicker picker in optionalPickers)
             {
                 if(picker.SelectedIndex != -1)
                 {
@@ -2094,7 +2047,7 @@ namespace aclara_meters.view
                 }
             }
 
-            foreach (BorderlessEntry entry in optionalTexts)
+            foreach (BorderlessEntry entry in optionalEntries)
             {
                 if(entry.Text.Equals(""))
                 {
@@ -2563,6 +2516,17 @@ namespace aclara_meters.view
                 }
             }
 
+            List<Parameter> optionalParams = new List<Parameter>();
+
+            foreach (BorderlessPicker p in optionalPickers)
+            {
+                optionalParams.Add(new Parameter(p.Name, p.Display, p.SelectedItem, true));
+            }
+            foreach (BorderlessEntry e in optionalEntries)
+            {
+                optionalParams.Add(new Parameter(e.Name, e.Display, e.Text, true));
+            }
+            addMtuForm.AddParameter(FIELD.OPTIONAL_PARAMS, optionalParams);
 
             //Create Ation when opening Form
             // TODO: usuario real
