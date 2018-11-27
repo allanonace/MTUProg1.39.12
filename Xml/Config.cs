@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using Xamarin.Forms;
 
@@ -175,15 +176,12 @@ namespace Xml
 
         private string NormalizeBooleans(string input)
         {
-            string output = input.Replace(">True<", ">true<");
-            output = output.Replace(">TRUE<", ">true<");
-            output = output.Replace(">False<", ">false<");
-            output = output.Replace(">FALSE<", ">false<");
-            output = output.Replace("\"True\"", "\"true\"");
-            output = output.Replace("\"TRUE\"", "\"true\"");
-            output = output.Replace("\"False\"", "\"false\"");
-            output = output.Replace("\"FALSE\"", "\"false\"");
-            return output;
+            string pattern = "(?:\"|>)(?i)(#)(?:\"|<)";
+            List<string> words = new List<string>() { "true", "false" };
+
+            return Regex.Replace(input,
+                pattern.Replace("#", String.Join("|", words)),
+                entry => entry.Value.ToLower());
         }
     }
 }
