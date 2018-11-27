@@ -26,6 +26,7 @@ namespace MTUComm
             TurnOffMtu,
             TurnOnMtu,
             ReadData,
+            InstallConfirmation,
             Diagnosis,
             BasicRead
         }
@@ -42,6 +43,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu,"Turn Off MTU" },
             {ActionType.TurnOnMtu,"Turn On MTU" },
             {ActionType.ReadData,"Read Data Log" },
+            {ActionType.InstallConfirmation,"Install Confirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -57,6 +59,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu,"TurnOffMtu" },
             {ActionType.TurnOnMtu,"TurnOnMTU" },
             {ActionType.ReadData, "Program MTU" },
+            {ActionType.InstallConfirmation,"InstallConfirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -72,6 +75,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu, null },
             {ActionType.TurnOnMtu, null },
             {ActionType.ReadData, "DataRead" },
+            {ActionType.InstallConfirmation,"InstallConfirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -109,6 +113,7 @@ namespace MTUComm
             comm = new MTUComm(serial, config);
             mActionType = actiontype;
             mUser = null;
+            comm.OnError += Comm_OnError;
         }
 
         public Action(Configuration config, ISerial serial, ActionType actiontype, String user)
@@ -118,6 +123,7 @@ namespace MTUComm
             comm = new MTUComm(serial, config);
             mActionType = actiontype;
             mUser = user;
+            comm.OnError += Comm_OnError;
         }
 
         public Action(Configuration config, ISerial serial, ActionType actiontype, String user, String outputfile)
@@ -127,6 +133,7 @@ namespace MTUComm
             comm = new MTUComm(serial, config);
             mActionType = actiontype;
             mUser = user;
+            comm.OnError += Comm_OnError;
         }
 
         public void addParameter(Parameter parameter)
@@ -194,6 +201,12 @@ namespace MTUComm
                         comm.OnTurnOnMtu += Comm_OnTurnOnMtu;
                         comm.TurnOnMtu();
                         break;
+                    case ActionType.InstallConfirmation:
+                        comm.OnReadMtu += Comm_OnReadMtu;
+                        comm.OnProgress += Comm_OnProgress;
+                        comm.InstallConfirmation();
+                        break;
+
                     case ActionType.ReadData:
                         Parameter param = mparameters.Find(x => (x.Type == Parameter.ParameterType.DaysOfRead));
                         int DaysOfRead = 0;
@@ -227,7 +240,34 @@ namespace MTUComm
 
         }
 
-       
+        private void Comm_OnProgress(object sender, MTUComm.ProgressArgs e)
+        {
+
+            
+            try
+            {
+                OnProgress(this, new ActionProgressArgs(e.Step, e.TotalSteps, e.Message));
+            }
+            catch (Exception pe)
+            {
+
+            }
+            
+        }
+
+        private void Comm_OnError(object sender, MTUComm.ErrorArgs e)
+        {
+            logger.LogError(e.Status, e.LogMessage);
+            try
+            {
+                OnError(this, new ActionErrorArgs(e.Status, e.Message));
+            }
+            catch (Exception ee)
+            {
+
+            }
+            
+        }
 
         public int Order
         {

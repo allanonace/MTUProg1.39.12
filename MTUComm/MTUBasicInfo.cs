@@ -12,6 +12,8 @@ namespace MTUComm
 
         private Boolean mEncoder = true;
 
+        private int shipbit;
+
         private PortType[] ports = new PortType[] { PortType.TYPE_NONE, PortType.TYPE_NONE }; //Currently max 2 ports
 
 
@@ -62,6 +64,19 @@ namespace MTUComm
             Array.Copy(buffer, buffer.Length- 4, id_stream, 0, 4);
 
             mtu_id = BitConverter.ToUInt32(id_stream, 0);
+
+            byte mask = 1;
+            shipbit = buffer[22];
+            shipbit &= mask;
+        }
+
+
+        public bool Shipbit
+        {
+            get
+            {
+                return (shipbit > 0) ? true : false;
+            }
         }
 
         public uint Type
