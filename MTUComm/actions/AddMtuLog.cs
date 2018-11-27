@@ -86,11 +86,40 @@ namespace MTUComm
             logger.logParameter(this.addMtuAction, new Parameter("MtuId", "MTU ID", this.mtuBasicInfo.Id));
             logger.logParameter(this.addMtuAction, new Parameter("MtuType", "MTU Type", this.mtuBasicInfo.Type));
 
-            logger.logParameter(this.addMtuAction, new Parameter("ReadInterval", "Read Interval", "15 Min")); // TODO: replace real value
-            logger.logParameter(this.addMtuAction, new Parameter("Fast-2-Way", "Fast Message Config", "Fast")); // TODO: replace real value
+            if (GlobalsConditions.IndividualReadInterval)
+            {
+                string readInterval = form.ReadInterval.getValue();
+                logger.logParameter(this.addMtuAction, new Parameter("ReadInterval", "Read Interval", readInterval));
+            }
 
-            logger.logParameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", "Disable")); // TODO: replace real value
-            logger.logParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", "Disable")); // TODO: replace real value
+            if (MtuConditions.FastMessageConfig)
+            {
+                string fastTwoWay = form.TwoWay.getValue();
+                logger.logParameter(this.addMtuAction, new Parameter("Fast-2-Way", "Fast Message Config", fastTwoWay));
+            }
+
+            if (MtuConditions.DailyReads)
+            {
+                string dailyReads = "Disable";
+                string dailyGmtHourRead = "Disable";
+
+                if (GlobalsConditions.IndividualDailyReads) // TODO: check values
+                {
+                    dailyReads = form.SnapReads.getValue();
+                    dailyGmtHourRead = form.SnapReads.getValue();
+
+                }
+                logger.logParameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
+                logger.logParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
+            }
+
+            string afc = "Off";
+            if (Configuration.GetInstance().global.AFC)
+            {
+                afc = "Set";
+            }
+            logger.logParameter(this.addMtuAction, new Parameter("AFC", "AFC", afc));
+
             #endregion
 
             #region Port 1
@@ -248,7 +277,7 @@ namespace MTUComm
             }
             #endregion
 
-            // TODO
+            // TODO (encoders)
             #region Demands
             if (MtuConditions.MtuDemand)
             {
@@ -265,8 +294,8 @@ namespace MTUComm
             }
             #endregion
 
-            #region Misc/Optional
             // TODO: log real optional params
+            #region Misc/Optional
             logger.logParameter(this.addMtuAction, new Parameter("MTU_Location_Data", "MTU Location", "Inside", true));
             logger.logParameter(this.addMtuAction, new Parameter("LocationInfo", "Meter Location", "Inside", true));
             logger.logParameter(this.addMtuAction, new Parameter("Construction_Type", "Construction", "Vinyl", true));
@@ -274,7 +303,6 @@ namespace MTUComm
             logger.logParameter(this.addMtuAction, new Parameter("GPS_X", "Long", "23.2", true));
             logger.logParameter(this.addMtuAction, new Parameter("Altitude", "Elevation", "1", true));
             #endregion
-
         }
 
         public void LogTurnOn()

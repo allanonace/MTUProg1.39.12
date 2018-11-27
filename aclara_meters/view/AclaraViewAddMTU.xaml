@@ -540,7 +540,7 @@
                                                             <Slider
                                                                 x:Name="snapReadsSlider"
                                                                 Minimum="0"
-                                                                Maximum="20"
+                                                                Maximum="24"
                                                                 HeightRequest="40"
                                                                 Value="10"
                                                                 Margin="0,-20,0,0"

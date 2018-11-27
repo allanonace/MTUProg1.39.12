@@ -1555,8 +1555,14 @@ namespace aclara_meters.view
 
             snapReadsSlider.Value = newStep * snapReadsStep;
 
-            snapReadsLabel.Text = snapReadsSlider.Value.ToString();
-
+            if (snapReadsSlider.Value == 24)
+            {
+                snapReadsLabel.Text = "Disable";
+            }
+            else
+            {
+                snapReadsLabel.Text = snapReadsSlider.Value.ToString();
+            }
         }
 
         void OnSnapReads2SliderValueChanged(object sender, ValueChangedEventArgs e)
@@ -1565,8 +1571,14 @@ namespace aclara_meters.view
 
             snapReads2Slider.Value = newStep * snapReads2Step;
 
-            snapReads2Label.Text = snapReads2Slider.Value.ToString();
-
+            if (snapReads2Slider.Value == 24)
+            {
+                snapReads2Label.Text = "Disable";
+            }
+            else
+            {
+                snapReads2Label.Text = snapReads2Slider.Value.ToString();
+            }
         }
 
         #endregion
