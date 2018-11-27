@@ -118,8 +118,9 @@ namespace Xml
         [XmlElement("ByPassAutoDetect")]
         public bool ByPassAutoDetect { get; set; }
 
-        [XmlElement("Cancel")]
-        public string Cancel { get; set; }
+        [XmlArray("Cancel")]
+        [XmlArrayItem("option")]
+        public List<string> Cancel { get; set; }
 
         [XmlElement("CertPair")]
         public bool CertPair { get; set; }
