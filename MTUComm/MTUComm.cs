@@ -157,6 +157,13 @@ namespace MTUComm
         public void InstallConfirmationTask()
         {
             getMTUBasicInfo();
+
+            //If MTU has changed or critical settings/configuration force detection rutine
+            if (this.changedMTUSettings)
+            {
+                DetectMeters();
+            }
+
             if (latest_mtu.Shipbit)
             {
                 string message = "Current MTU ID: " + latest_mtu.Id + " type " + latest_mtu.Type + " is OFF";
@@ -164,13 +171,31 @@ namespace MTUComm
             }
             else
             {
+                String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
+                MemRegister register = configuration.getFamilyRegister(memory_map_type, "InstallationConfirmationRequest");
+                
                 Console.WriteLine("InstallConfirmation trigger start");
 
                 byte mask = 2;
-                byte systemFlags = (lexi.Read(116, 1))[0];
+                uint inConFlag = 116;
+
+                if(register != null)
+                {
+                    mask = (byte)Math.Pow(2, register.Size);
+                    inConFlag = (uint)register.Address;
+                }
+
+                byte systemFlags = (lexi.Read(inConFlag, 1))[0];
                 systemFlags |= mask; // set bit 0
                 lexi.Write(116, new byte[] { systemFlags });
-                byte valueWritten = (lexi.Read(116, 1))[0];
+
+                byte sync_mask = 4;
+                byte sync_systemFlags = (lexi.Read(65, 1))[0];
+                sync_systemFlags |= sync_mask; // set bit 0
+                lexi.Write(65, new byte[] { sync_systemFlags });
+
+
+                byte valueWritten = (lexi.Read(inConFlag, 1))[0];
                 Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
                 Console.WriteLine("InstallConfirmation trigger end");
 
@@ -181,7 +206,7 @@ namespace MTUComm
                 {
                     OnProgress(this, new ProgressArgs(4 - max_iters, 3, "Install Confirmation("+ max_iters.ToString() + ")..."));
                     Thread.Sleep(60000);
-                    valueWritten = (lexi.Read(116, 1))[0];
+                    valueWritten = (lexi.Read(inConFlag, 1))[0];
                     valueWritten &= mask;
                     max_iters--;
                 }
@@ -257,9 +282,38 @@ namespace MTUComm
             }
             catch (Exception e)
             {
-                OnError(this, new ErrorArgs("sss"));
+                OnError(this, TranslateException(e));
             }
           
+        }
+
+
+        private ErrorArgs TranslateException(Exception e)
+        {
+            int status = -1;
+            string message = e.Message;
+            string logmessage = e.Message;
+            Type ex_type = e.GetType();
+            switch (ex_type.Name)
+            {
+                case "DemandConfLoadException":
+                    break;
+                case "MeterLoadException":
+                    break;
+                case "MtuLoadException":
+                    break;
+                case "AlarmLoadException":
+                    break;
+                case "MtuNotFoundException":
+                    break;
+                case "InterfaceLoadException":
+                    break;
+                case "GlobalLoadException":
+                    break;
+                case "MeterNotFoundException":
+                    break;
+            }
+            return new ErrorArgs(status, message, logmessage);
         }
 
         private void DetectMeters()

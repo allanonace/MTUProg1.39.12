@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Xml;
 
 namespace MTUComm
@@ -185,8 +186,25 @@ namespace MTUComm
             return interfaces.GetmemoryMapSizeByMtuId(mtuid);
         }
 
-
-   
+        public MemRegister getFamilyRegister(string family, string regsiter_name)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(MemRegisterList));
+            using (TextReader reader = new StreamReader(Path.Combine(mbase_path, "family_" + family + ".xml")))
+            {
+                MemRegisterList list = serializer.Deserialize(reader) as MemRegisterList;
+                if (list.Registers != null)
+                {
+                    foreach (MemRegister xmlRegister in list.Registers)
+                    {
+                        if (xmlRegister.Id.ToLower().Equals(regsiter_name.ToLower()))
+                        {
+                            return xmlRegister;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
 
         public List<string>  GetVendorsFromMeters()
         {
