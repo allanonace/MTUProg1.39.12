@@ -12,6 +12,10 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Collections.Generic;
+using System.Linq;
+using Plugin.DeviceInfo;
+using Xamarin.Essentials;
+using System.Globalization;
 
 namespace aclara_meters.view
 {
@@ -49,6 +53,37 @@ namespace aclara_meters.view
                 {
                     loginpage.IsVisible = true;
                     Console.WriteLine("Data: " + data);
+
+                    if (CheckIfNetworkIsAvailable())
+                    {
+                        #region Upload all the data
+
+                        if (UploadingLogFiles())
+                        {
+                            DisplayAlert("Information", "All Log files uploaded!", "Ok");
+                        }
+                        else
+                        {
+                            #region Error Dialog Must be shown on Uploading
+
+                            DisplayAlert("Error", "Error Uploading files", "Ok");
+
+                            #endregion
+                        }
+
+                        #endregion
+
+                    }
+                    else
+                    {
+                        #region Error Dialog Must be shown on Loading
+
+                        DisplayAlert("Error", "No connection available", "Ok");
+
+                        #endregion
+                    }
+
+
                 });
             });
 
@@ -78,6 +113,36 @@ namespace aclara_meters.view
 
         }
 
+
+        private bool CheckIfNetworkIsAvailable()
+        {
+            var current = Connectivity.NetworkAccess;
+
+            var profiles = Connectivity.Profiles;
+
+            if (profiles.Contains(ConnectionProfile.WiFi))
+            {
+                if (current == NetworkAccess.Internet)
+                {
+                    return true;
+                    // Connection to internet is available
+                }
+            }
+            else
+            if (profiles.Contains(ConnectionProfile.Cellular))
+            {
+                if (current == NetworkAccess.Internet)
+                {
+                    return true;
+                    // Connection to internet is available
+                }
+            }
+
+            return false;
+        }
+
+
+
         public AclaraViewLogin(IUserDialogs dialogs)
         {
             InitializeComponent();
@@ -91,9 +156,12 @@ namespace aclara_meters.view
             loginpage.IsVisible = false;
             Task.Run(async () =>
             {
-                await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
+                await Task.Delay(1000); 
+                Device.BeginInvokeOnMainThread(() =>
                 {
                     loginpage.IsVisible = true;
+
+
 
 
                     /*
@@ -103,6 +171,7 @@ namespace aclara_meters.view
                         //ListSFTPDataFiles();
                     }
                     */
+
                 });
             });
 
@@ -134,8 +203,139 @@ namespace aclara_meters.view
 
 
            
+           
+
+        }
+
+        private bool UploadingLogFiles()
+        {
+
+            string ftp_username = FormsApp.config.global.ftpUserName;
+            string ftp_password = FormsApp.config.global.ftpPassword;
+            string ftp_remoteHost = FormsApp.config.global.ftpRemoteHost;
+            string ftp_remotePath = FormsApp.config.global.ftpRemotePath; //For the logs...
 
 
+            string host = FormsApp.config.global.ftpRemoteHost;
+            string username = FormsApp.config.global.ftpUserName;
+            string password = FormsApp.config.global.ftpPassword;
+
+            //string pathRemoteFile = "/home/aclara/"; // prueba_archivo.xml";
+
+            //TODO: UUID MOVIL EN PATH REMOTE FILE
+            string pathRemoteFile = "/home/aclara"+ FormsApp.config.global.ftpRemotePath + CrossDeviceInfo.Current.Id + "/"; // prueba_archivo.xml";
+
+
+
+            // Path where the file should be saved once downloaded (locally)
+            // string pathLocalFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "User.txt");
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
+            {
+                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
+            }
+            //string name = "ReadMtuResult.xml";
+            //string filename = Path.Combine(xml_documents, name);
+            using (SftpClient sftp = new SftpClient(host, username, password))
+            {
+                try
+                {
+                    sftp.Connect();
+
+                    if(!sftp.Exists(pathRemoteFile)){
+                        sftp.CreateDirectory(pathRemoteFile);
+                    }
+                    //TODO
+
+                    List<string> saved_array_files = new List<string>();
+
+                    try
+                    {
+                        var lines = File.ReadAllLines(Path.Combine(xml_documents, "SavedLogsList.txt"));
+                        foreach (var line in lines)
+                        {
+                            saved_array_files.Add(line);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.StackTrace);
+                    }
+
+                    List<FileInfo> local_array_files = new List<FileInfo>();
+                    DirectoryInfo info = new DirectoryInfo(xml_documents);
+                    FileInfo[] files = info.GetFiles().OrderBy(p => p.LastWriteTimeUtc).ToArray();
+
+                    foreach (FileInfo file in files)
+                    { 
+                        Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
+                        if (file.Name.Contains("Log.xml"))
+                        {
+                            bool enc = false;
+                            foreach (string fileFtp in saved_array_files)
+                            {
+                                if (fileFtp.Equals(file.Name))
+                                {
+                                    enc = true;
+                                }
+                            }
+
+                            if (!enc)
+                            {
+                                string dayfix = file.Name.Split('.')[0].Replace("Log", "");
+                                DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
+                                TimeSpan diff = date - DateTime.UtcNow;
+                                int hours = (int)diff.TotalHours;
+                                if (hours < 0)
+                                {
+                                    local_array_files.Add(file);
+                                }
+                            }
+
+                        }
+                    }
+
+                    if (local_array_files.Count > 0)
+                    {
+                        foreach (FileInfo file in local_array_files)
+                        {
+                            var fileStream = new FileStream(file.FullName, FileMode.Open);
+                            if (fileStream != null)
+                            {
+                                sftp.UploadFile(fileStream, Path.Combine(pathRemoteFile, file.Name), null);
+                            }
+                            long cont = fileStream.Length;
+                            fileStream.Close();
+                            File.Delete(file.FullName);  
+                        }
+                    }
+                    try
+                    {
+                        using (TextWriter tw = new StreamWriter(Path.Combine(xml_documents, "SavedLogsList.txt")))
+                        {
+                            foreach (string fileFtp in saved_array_files)
+                            {
+                                tw.WriteLine(fileFtp);
+                            }
+                            foreach (FileInfo s in local_array_files)
+                                tw.WriteLine(s.Name);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.StackTrace);
+                    }
+
+                    sftp.Disconnect();
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("An exception has been caught " + e.ToString());
+                }
+            }
+
+            return false;
         }
 
         private void CertsTask()
