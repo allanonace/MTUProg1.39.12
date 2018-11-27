@@ -22,12 +22,23 @@ using System.Threading.Tasks;
 using Renci.SshNet;
 using System.Linq;
 using System.Globalization;
+using Xamarin.Essentials;
+using Renci.SshNet.Sftp;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
 {
     public partial class FormsApp : Application
     {
+        #region Initial FTP - Default Config data
+
+        string host = "159.89.29.176";
+        string username = "aclara";
+        string password = "aclara1234";
+        string pathRemoteFile = "/home/aclara";
+
+        #endregion
+
         public static string AppName { get { return "Aclara MTU Programmer"; } }
         public static ICredentialsService CredentialsService { get; private set; }
         public static BleSerial ble_interface;
@@ -163,22 +174,247 @@ namespace aclara_meters
                 Console.WriteLine(e.StackTrace);
             }
 
-            LoadConfiguration();
 
-            #region SFTP Protocol
 
-            RunSftpProtocol();
 
-            #endregion
 
-            //Cargar la pantalla principal
-            MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
-         
+      #region Init Configuration Files
+
+            if ( CheckForLocalFiles() )
+            {
+                ItJustWorks(dialogs, data);
+
+            }else{
+                
+                DownloadConfigurationFiles(dialogs, data);
+            }
+
+      #endregion
+
         }
 
 
-       
 
+    #region Init Configuration Files Implementation
+
+        private async void DownloadConfigurationFiles(IUserDialogs dialogs, string data)
+        {
+            
+            #region Check the Network channels
+
+            if (CheckIfNetworkIsAvailable())
+            {
+                #region Download all the data
+
+                if( DownloadInitialConfigFiles() )
+                {
+                    ItJustWorks(dialogs, data);
+                }else{
+                    
+                    #region Error Dialog Must be shown on downloading
+
+                    MainPage = new NavigationPage(new ErrorInitView("Error Downloading files"));
+
+                    #endregion
+                }
+
+                #endregion
+
+            }
+            else
+            {
+                #region Error Dialog Must be shown on Loading
+
+                MainPage = new NavigationPage(new ErrorInitView());
+
+                #endregion
+            }
+
+            #endregion
+
+        }
+
+        #region Initial Config Files Download from SFTP
+
+        private bool DownloadInitialConfigFiles()
+        {
+            try
+            {
+                using (SftpClient sftp = new SftpClient(host, username, password))
+                {
+                    try
+                    {
+                        sftp.Connect();
+
+                   
+                        /*--------------------------------------------------*/
+                        // List all posible files in the documents directory 
+                        // Check if file's lastwritetime is the lastest 
+                        /*--------------------------------------------------*/
+                        List<SftpFile> ftp_array_files = new List<SftpFile>();
+
+                        // Remote FTP File directory
+                        var ftp_files = sftp.ListDirectory(pathRemoteFile);
+                        foreach (var file in ftp_files)
+                        {
+
+                            if(file.Name.Contains(".xml")){
+                                ftp_array_files.Add(file);
+                            }
+                           
+
+                        }
+
+                        var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+                        if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
+                        {
+                            xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
+                        }
+
+                        foreach (var file in ftp_array_files)
+                        {
+                            string remoteFileName = file.Name;
+                         
+
+                            using (Stream file1 = File.OpenWrite( Path.Combine (xml_documents, remoteFileName) ))
+                            {
+                                sftp.DownloadFile( Path.Combine (pathRemoteFile, remoteFileName ), file1);
+                            }
+
+                        }
+
+                       
+                        sftp.Disconnect();
+
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("An exception has been caught " + e.ToString());
+                    }
+
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("An exception has been caught " + e.ToString());
+            }
+
+            return false;
+        }
+
+        #endregion
+
+        private bool CheckIfNetworkIsAvailable()
+        {
+            var current = Connectivity.NetworkAccess;
+
+            var profiles = Connectivity.Profiles;
+
+            if (profiles.Contains(ConnectionProfile.WiFi))
+            {
+                if (current == NetworkAccess.Internet)
+                {
+                    return true;
+                    // Connection to internet is available
+                }
+            }else 
+            if (profiles.Contains(ConnectionProfile.Cellular))
+            {
+                if (current == NetworkAccess.Internet)
+                {
+                    return true;
+                    // Connection to internet is available
+                }
+            }
+
+            return false;
+        }
+
+
+        #region Testing Purposes - Not final - Control the connectivity to network in Realtime
+
+        /*
+        public ConnectivityTest()
+        {
+            // Register for connectivity changes, be sure to unsubscribe when finished
+            Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
+        }
+
+        void Connectivity_ConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
+        {
+            var access = e.NetworkAccess;
+            var profiles = e.Profiles;
+        }
+        */
+        #endregion
+
+        private void ItJustWorks(IUserDialogs dialogs, string data)
+        {
+
+            LoadConfiguration();
+            //Load Login View
+            MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
+        }
+
+        #region Check if Local config files exists
+
+        private bool CheckForLocalFiles()
+        {
+            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+          
+            if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
+            {
+                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
+            }
+
+            var filesLocal = System.IO.Directory.GetFiles(xml_documents);
+
+            if (!filesLocal.Any())
+                return false;
+
+            string[] filesToCheck = {
+                                    "Alarm.xml",
+                                    "DemandConf.xml",
+                                    "Global.xml",
+                                    "Interface.xml",
+                                    "Meter.xml",
+                                    "Mtu.xml"
+                                 };
+
+            int ContOfChecks = 0;
+
+            foreach (var file in filesLocal)
+            {
+                foreach (string checkStr in filesToCheck)
+                {
+                    string compareStr = checkStr;
+                    compareStr = compareStr.Replace(xml_documents, "");
+
+                    string fileStr = file.ToString();
+                    fileStr = fileStr.Replace(xml_documents + "/", "");
+                    
+                    if (fileStr.Equals(compareStr))
+                    {
+                        ContOfChecks++;
+                    }
+                }
+            }
+
+            if (ContOfChecks < filesToCheck.Length)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        #endregion
+
+
+    #endregion
 
         public static string Base64Decode(string base64EncodedData)
         {
@@ -265,10 +501,19 @@ namespace aclara_meters
 
         private void RunSftpProtocol()
         {
-            string host = "192.168.1.24";
+            //string host = "192.168.1.24";
+            //string password = "12345";
+
+            string host = "159.89.29.176";
             string username = "aclara";
-            string password = "12345";
-            string pathRemoteFile = "/home/aclara/"; // prueba_archivo.xml";
+            string password = "aclara1234";
+
+            //string pathRemoteFile = "/home/aclara/"; // prueba_archivo.xml";
+
+            //TODO: UUID MOVIL EN PATH REMOTE FILE
+            string pathRemoteFile = "/home/aclara/logfiles/"+CrossDeviceInfo.Current.Id; // prueba_archivo.xml";
+
+
             // Path where the file should be saved once downloaded (locally)
             // string pathLocalFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "User.txt");
             var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -283,6 +528,7 @@ namespace aclara_meters
                 try
                 {
                     sftp.Connect();
+                
                     //Console.WriteLine("Downloading {0}", pathRemoteFile);
                     /*--------------------------------------------------*/
                     // List all posible files in the documents directory 
@@ -304,6 +550,50 @@ namespace aclara_meters
                         }
                     }
                     */
+
+                    #region Check if Local config files exist
+
+                    var filesLocal = System.IO.Directory.GetFiles(xml_documents);
+
+                    if (!filesLocal.Any())
+                        return;
+
+                    string [] filesToCheck = { 
+                                                "Alarm.xml", 
+                                                "DemandConf.xml", 
+                                                "Global.xml",
+                                                "Interface.xml",
+                                                "Meter.xml",
+                                                "Mtu.xml"
+                                             };
+
+                    int ContOfChecks = 0;
+
+                    foreach (var file in filesLocal)
+                    {
+                        foreach (string checkStr in filesToCheck)
+                        {
+                            string compareStr = checkStr;
+                            compareStr = compareStr.Replace(xml_documents, "");
+                            string fileStr = file.ToString();
+                            fileStr = fileStr.Replace(xml_documents+"/", "");
+
+                            if (fileStr.Equals(compareStr))
+                            {
+                                ContOfChecks++;
+                            } 
+                        }  
+                    }
+
+                    if(ContOfChecks < filesToCheck.Length)
+                    {
+                        return;
+                    }
+
+                    #endregion
+
+                    //TODO
+
                     List<string> saved_array_files = new List<string>();
                     try
                     {
@@ -336,6 +626,7 @@ namespace aclara_meters
                                     enc = true;
                                 }
                             }
+
                             /*
                             foreach ( SftpFile fileFtp in ftp_array_files)
                             {
@@ -349,6 +640,7 @@ namespace aclara_meters
                                 }
                             }
                             */
+
                             if (!enc)
                             {
                                 string dayfix = file.Name.Split('.')[0].Replace("Log", "");
@@ -363,8 +655,10 @@ namespace aclara_meters
                                     local_array_files.Add(file);
                                 }
                             }
+
                         }
                     }
+
                     if (local_array_files.Count > 0)
                     {
                         foreach (FileInfo file in local_array_files)

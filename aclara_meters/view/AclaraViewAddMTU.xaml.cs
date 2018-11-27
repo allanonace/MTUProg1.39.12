@@ -2739,7 +2739,7 @@ namespace aclara_meters.view
                   }));
 
 
-
+                DisplayAlert("Error", result, "Ok");
                 Console.WriteLine(result.ToString());
 
             });
