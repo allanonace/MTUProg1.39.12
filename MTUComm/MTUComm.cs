@@ -51,11 +51,18 @@ namespace MTUComm
         public delegate void BasicReadHandler(object sender, BasicReadArgs e);
         public event BasicReadHandler OnBasicRead;
 
-        
+
+        public delegate void ErrorHandler(object sender, ErrorArgs e);
+        public event ErrorHandler OnError;
+
+        public delegate void ProgresshHandler(object sender, ProgressArgs e);
+        public event ProgresshHandler OnProgress;
+
+
         public MTUComm(ISerial serial, Configuration configuration)
         {
             this.configuration = configuration;
-            latest_mtu = new MTUBasicInfo(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 });
+            latest_mtu = new MTUBasicInfo(new byte[25]);
             lexi = new Lexi.Lexi(serial, 10000);
         }
 
@@ -66,10 +73,18 @@ namespace MTUComm
         /// <remarks>Internaly saves internal MTU type and ID used for communication logic</remarks>
         private void getMTUBasicInfo()
         {
-            MTUBasicInfo mtu_info = new MTUBasicInfo(lexi.Read(0, 10));
-            mtu_changed = !((mtu_info.Id == latest_mtu.Id) && (mtu_info.Type == latest_mtu.Type));
-            latest_mtu = mtu_info;
-            MtuForm.SetBasicInfo(latest_mtu);
+            try
+            {
+                MTUBasicInfo mtu_info = new MTUBasicInfo(lexi.Read(0, 25));
+                mtu_changed = !((mtu_info.Id == latest_mtu.Id) && (mtu_info.Type == latest_mtu.Type));
+                latest_mtu = mtu_info;
+                MtuForm.SetBasicInfo(latest_mtu);
+            }
+            catch (Exception e)
+            {
+                OnError(this, new ErrorArgs(510, e.Message, "getMTU info returned 0 bytes."));
+            }
+
         }
 
         /// <summary>
@@ -133,6 +148,48 @@ namespace MTUComm
         }
 
 
+        public void InstallConfirmation()
+        {
+
+            Task.Factory.StartNew(InstallConfirmationTask);
+        }
+
+        public void InstallConfirmationTask()
+        {
+            getMTUBasicInfo();
+            if (latest_mtu.Shipbit)
+            {
+                string message = "Current MTU ID: " + latest_mtu.Id + " type " + latest_mtu.Type + " is OFF";
+                OnError(this, new ErrorArgs(112, message, "Installation Confirmation Cancellation - "+ message));
+            }
+            else
+            {
+                Console.WriteLine("InstallConfirmation trigger start");
+
+                byte mask = 2;
+                byte systemFlags = (lexi.Read(116, 1))[0];
+                systemFlags |= mask; // set bit 0
+                lexi.Write(116, new byte[] { systemFlags });
+                byte valueWritten = (lexi.Read(116, 1))[0];
+                Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
+                Console.WriteLine("InstallConfirmation trigger end");
+
+                valueWritten &= mask;
+                int max_iters = 3;
+
+                while (valueWritten > 0 && max_iters > 0)
+                {
+                    OnProgress(this, new ProgressArgs(4 - max_iters, 3, "Install Confirmation("+ max_iters.ToString() + ")..."));
+                    Thread.Sleep(60000);
+                    valueWritten = (lexi.Read(116, 1))[0];
+                    valueWritten &= mask;
+                    max_iters--;
+                }
+            }
+            ReadMTUTask(true);
+        }
+
+
         public void ReadMTU(){
 
             Task.Factory.StartNew(ReadMTUTask);
@@ -140,11 +197,17 @@ namespace MTUComm
 
         public void ReadMTUTask()
         {
+            ReadMTUTask(false);
+        }
+
+
+        public void ReadMTUTask(bool forcedetect)
+        {
             //Gets MTU casci info (type and id)
             getMTUBasicInfo();
 
             //If MTU has changed or critical settings/configuration force detection rutine
-            if (this.changedMTUSettings)
+            if (this.changedMTUSettings || forcedetect)
             {
                 DetectMeters();
             }
@@ -184,12 +247,19 @@ namespace MTUComm
                 
             }
             catch (Exception e) {
-            
+                
             }
 
-            ReadMtuArgs args = new ReadMtuArgs(new MemoryMap.MemoryMap(buffer, memory_map_type), mtuType);
-
-            OnReadMtu(this, args);
+            try
+            {
+                ReadMtuArgs args = new ReadMtuArgs(new MemoryMap.MemoryMap(buffer, memory_map_type), mtuType);
+                OnReadMtu(this, args);
+            }
+            catch (Exception e)
+            {
+                OnError(this, new ErrorArgs("sss"));
+            }
+          
         }
 
         private void DetectMeters()
@@ -206,6 +276,43 @@ namespace MTUComm
 
             }
 
+        }
+
+        public class ErrorArgs : EventArgs
+        {
+            public int Status { get; private set; }
+
+            public String Message { get; private set; }
+
+            public String LogMessage { get; private set; }
+
+            public ErrorArgs(int status, String message, String logMessage)
+            {
+                Status = status;
+                Message = message;
+                LogMessage = logMessage;
+            }
+
+            public ErrorArgs(int status, String message)
+            {
+                Status = status;
+                Message = message;
+                LogMessage = message;
+            }
+
+            public ErrorArgs(String message, String logMessage)
+            {
+                Status = -1;
+                Message = message;
+                LogMessage = logMessage;
+            }
+
+            public ErrorArgs(String message)
+            {
+                Status = -1;
+                Message = message;
+                LogMessage = message;
+            }
         }
 
         public class ReadMtuArgs : EventArgs
@@ -266,7 +373,26 @@ namespace MTUComm
 
         }
 
-        
+        public class ProgressArgs : EventArgs
+        {
+            public int Step { get; private set; }
+            public int TotalSteps { get; private set; }
+            public string Message { get; private set; }
+
+            public ProgressArgs(int step, int totalsteps)
+            {
+                Step = step;
+                TotalSteps = totalsteps;
+                Message = "";
+            }
+
+            public ProgressArgs(int step, int totalsteps, string message)
+            {
+                Step = step;
+                TotalSteps = totalsteps;
+                Message = message;
+            }
+        }
 
         public class TurnOffMtuArgs : EventArgs
         {
