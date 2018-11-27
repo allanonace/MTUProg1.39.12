@@ -3,6 +3,7 @@ using MTUComm.MemoryMap;
 using System;
 using System.Collections.Generic;
 using Xunit;
+using System.IO;
 
 // http://blog.benhall.me.uk/2008/01/introduction-to-xunit
 // https://www.devexpress.com/Support/Center/Question/Details/T562649/test-runner-does-not-run-xunit-2-2-unit-tests-in-net-standard-2-0-project
@@ -13,7 +14,7 @@ namespace UnitTest.Tests
         #region Constants
 
         private const string ERROR  = "ERROR: ";
-        private const string FOLDER = @"\Aclara_Test_Files\";
+        private const string FOLDER = @"Aclara_Test_Files\";
 
         private const string ERROR_VAL_STR      = ERROR + "String parameter is not a valid numeric value";
         private const string ERROR_VAL_INT      = ERROR + "Parameter is not a valid numeric integer";
@@ -82,11 +83,21 @@ namespace UnitTest.Tests
 
         #region Tests
 
+        private string GetPath ()
+        {
+            // NOTE: Path.Combine returns second parameter when it is an absolute path...
+            // but the problem is that using @"\folder\" .NET understand that is also absolute,
+            // and for that reason we have to add @"\" here and not in the const FOLDER
+            string p1 = Environment.GetFolderPath ( Environment.SpecialFolder.Desktop ) + @"\";
+            string p2 = Path.Combine ( p1, FOLDER );
+
+            return Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Desktop ) + @"\", FOLDER );
+        }
+
         [Fact]
         public void Test_Validations ()
         {
-            // TEST: Validations
-            // 1. IsNumeric
+            // TEST: Numerics
             string strNumGood = "1234";
             string strNumBad  = "12c34";
             string strNumNeg  = "-1234";
@@ -101,12 +112,14 @@ namespace UnitTest.Tests
             Assert.True ( Validations.IsNumeric<int>   ( numIntNeg  ), ERROR_VAL_INT_NEG ); // true
             Assert.True ( Validations.IsNumeric<uint>  ( numUInt    ), ERROR_VAL_UINT    ); // true
             Assert.True ( Validations.IsNumeric<ulong> ( numULong   ), ERROR_VAL_ULONG   ); // true
-            // 2. Limit by Bytes
+
+            // TEST: Limit by Bytes
             numInt   = 65535; // Last possible value using two bytes ( 2^16 = 65536 = {0-65535} )
             numULong = 65536;
             Assert.True ( Validations.NumericBytesLimit<int>     ( numInt,   2 ), ERROR_VAL_BYTES ); // true
             Assert.True ( ! Validations.NumericBytesLimit<ulong> ( numULong, 2 ), ERROR_VAL_BYTES ); // false
-            // 3. Limit by Type
+
+            // TEST: Limit by Type
             Assert.True ( Validations.NumericTypeLimit<int>     ( int.MaxValue ), ERROR_TYPE_INT   ); // true
             Assert.True ( ! Validations.NumericTypeLimit<int>   ( "2147483648" ), ERROR_TYPE_INT   ); // false Int.max = 2147483647
             Assert.True ( Validations.NumericTypeLimit<int>     ( "-555"       ), ERROR_TYPE_INT   ); // true
@@ -114,31 +127,42 @@ namespace UnitTest.Tests
             Assert.True ( Validations.NumericTypeLimit<uint>    ( 5678         ), ERROR_TYPE_UINT  ); // true
             Assert.True ( Validations.NumericTypeLimit<ulong>   ( 2147483648   ), ERROR_TYPE_ULONG ); // true
             Assert.True ( ! Validations.NumericTypeLimit<ulong> ( -5678        ), ERROR_TYPE_ULONG ); // false
-            // 4. Strings validations
+
+            // TEST: Strings validations
             string str1 = "texto de prueba";
             string str2 = string.Empty;
-            Assert.True ( Validations.TextLength   ( str1, 20,   5 ), ERROR_STRING_OUT   ); // true
-            Assert.True ( ! Validations.TextLength ( str1, 10,   5 ), ERROR_STRING_MORE  ); // false More chars
-            Assert.True ( ! Validations.TextLength ( str1, 100, 20 ), ERROR_STRING_LESS  ); // false Less chars
-            Assert.True ( ! Validations.TextLength ( str2, 20,   5 ), ERROR_STRING_EMPTY ); // false
-            Assert.True ( ! Validations.TextLength ( str1, 15, 5, false ), ERROR_STRING_LESS );
+            Assert.True ( Validations.TextLength   ( str1, 20,   5 ), ERROR_STRING_OUT   );     // true
+            Assert.True ( ! Validations.TextLength ( str1, 10,   5 ), ERROR_STRING_MORE  );     // false More chars
+            Assert.True ( ! Validations.TextLength ( str1, 100, 20 ), ERROR_STRING_LESS  );     // false Less chars
+            Assert.True ( ! Validations.TextLength ( str2, 20,   5 ), ERROR_STRING_EMPTY );     // false
+            Assert.True ( ! Validations.TextLength ( str1, 15, 5, false ), ERROR_STRING_LESS ); // false
         }
 
+        // XMLs FOLDER:
+        // Create "Aclara_Test_Files" on your OS desktop and put inside all configuration xml files
+        // and MTU families xmls to test, adding all them ( MTU xmls ) using [InlineData] attributes
         [Theory]
         [InlineData("family_31xx32xx_test1")]
         //[InlineData("family_31xx32xx_test2")]
         //[InlineData("family_31xx32xx_test3")]
-        public void Test_GenerateMemoryMapFromXml ( string xmlName )
+        public void Test_MemoryMaps ( string xmlName )
+        {
+            Func<Func<dynamic>, bool> test = this.TestExpression;
+
+            // Dynamic memory map generation
+            Assert.True(test(() => { return new MemoryMap ( new byte[ 400 ], xmlName, this.GetPath () ); }), Error ( ERROR_MMAP ) );
+        }
+
+        [Theory]
+        [InlineData("family_31xx32xx_test1")]
+        public void Test_MemoryMapAndProperties ( string xmlName )
         {
             Func<Func<dynamic>,bool> test = this.TestExpression;
 
-            string path = Environment.GetFolderPath ( Environment.SpecialFolder.Desktop );
-
-            byte[] memory = new byte[400];
-
             // Dynamic memory map generation
-            dynamic map = null;
-            Assert.True ( test(() => { return map = new MemoryMap ( memory, xmlName, path + FOLDER ); }), Error ( ERROR_MMAP ) );
+            byte[] memory = new byte[400];
+            dynamic map   = null;
+            Assert.True ( test(() => { return map = new MemoryMap ( memory, xmlName, this.GetPath () ); }), Error ( ERROR_MMAP ) );
 
             // If memory map can't be created, test finishes
             if ( map == null )
