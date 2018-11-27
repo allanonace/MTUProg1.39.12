@@ -1,9 +1,8 @@
-﻿using MTUComm.MemoryMap;
+﻿using MTUComm;
+using MTUComm.MemoryMap;
 using System;
 using System.Collections.Generic;
 using Xunit;
-
-using MTUComm;
 
 // http://blog.benhall.me.uk/2008/01/introduction-to-xunit
 // https://www.devexpress.com/Support/Center/Question/Details/T562649/test-runner-does-not-run-xunit-2-2-unit-tests-in-net-standard-2-0-project
@@ -26,9 +25,12 @@ namespace UnitTest.Tests
         private const string ERROR_TYPE_UINT    = ERROR + "Parameter value is outside limits for unsigned integer type";
         private const string ERROR_TYPE_ULONG   = ERROR + "Parameter value is outside limits for unsigned long type";
         private const string ERROR_STRING_OUT   = ERROR + "String parameter has less or more characters than the limit";
+        private const string ERROR_STRING_MORE  = ERROR + "String parameter has less characters than the upper limit";
+        private const string ERROR_STRING_LESS  = ERROR + "String parameter has less characters than the lower limit";
         private const string ERROR_STRING_EMPTY = ERROR + "String parameter is empty";
 
         private const string ERROR_MMAP         = ERROR + "Dynamic mapping from XML has failed";
+        private const string ERROR_MODIFIED     = ERROR + "The number of modified registers is wrong";
         private const string ERROR_RAW          = ERROR + "Work with raw or custom data have failed";
         private const string ERROR_REG_READONLY = ERROR + "Register readonly protection not works as expected";
         private const string ERROR_OVR_READONLY = ERROR + "Overloads readonly protection not works as expected";
@@ -116,9 +118,10 @@ namespace UnitTest.Tests
             string str1 = "texto de prueba";
             string str2 = string.Empty;
             Assert.True ( Validations.TextLength   ( str1, 20,   5 ), ERROR_STRING_OUT   ); // true
-            Assert.True ( ! Validations.TextLength ( str1, 10,   5 ), ERROR_STRING_OUT   ); // false More chars
-            Assert.True ( ! Validations.TextLength ( str1, 100, 20 ), ERROR_STRING_OUT   ); // false Less chars
+            Assert.True ( ! Validations.TextLength ( str1, 10,   5 ), ERROR_STRING_MORE  ); // false More chars
+            Assert.True ( ! Validations.TextLength ( str1, 100, 20 ), ERROR_STRING_LESS  ); // false Less chars
             Assert.True ( ! Validations.TextLength ( str2, 20,   5 ), ERROR_STRING_EMPTY ); // false
+            Assert.True ( ! Validations.TextLength ( str1, 15, 5, false ), ERROR_STRING_LESS );
         }
 
         [Theory]
@@ -140,6 +143,15 @@ namespace UnitTest.Tests
             // If memory map can't be created, test finishes
             if ( map == null )
                 return;
+
+            // TEST: Recover only modified registers
+            map.P1Reading       = 2;     // ulong
+            map.P2Reading       = "2";   // ulong
+            map.EncryptionKey   = "key"; // string
+            map.Encrypted       = true;  // bool
+            map.PCBSupplierCode = 2;     // int
+            List<dynamic> mods = map.GetModifiedRegisters ().GetAllElements ();
+            Assert.True ( mods.Count == 5, ERROR_MODIFIED );
 
             // TEST: Value raw y processed
             MemoryRegister<ulong> p1mid = map.GetProperty ( "P1MeterId" );
@@ -183,17 +195,6 @@ namespace UnitTest.Tests
             Assert.True ( ! test(() => { return map.P1MeterType = 65536; }), ERROR_LIMIT_BYTES ); // int 2 bytes ( 2^16 = 65536 )
             // 2. Value is outside type limit ( int max. 2147483647 )
             Assert.True ( ! test(() => { return map.P1MeterId   = 281474976710656; }), ERROR_LIMIT_INT ); // int 6 bytes ( 2^48 = 281,474.976,710.656 )
-
-            return;
-
-            // TEST: Recover only modified registers
-            map.P1Reading       = 2;     // ulong
-            map.P2Reading       = "2";   // ulong
-            map.EncryptionKey   = "key"; // string
-            map.Encrypted       = true;  // bool
-            map.PCBSupplierCode = 2;     // int
-            List<dynamic> mods = map.GetModifiedRegisters ().GetAllElements ();
-            Assert.True ( mods.Count == 5, "FAIL!" );
 
             // TEST: Diferentes opciones campo custom ( metodo y operacion matematica )
             //Console.WriteLine ( "Test operation register: " + base.registers.BatteryVoltage );

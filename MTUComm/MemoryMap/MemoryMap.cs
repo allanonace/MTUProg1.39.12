@@ -518,16 +518,8 @@ namespace MTUComm.MemoryMap
 
         private bool ValidateNumeric<T> ( dynamic value, int size )
         {
-            bool okBytes = ( ( ulong )value < ( ulong )Math.Pow ( 2, size * 8 ) );
-            bool okType  = false;
-
-            switch ( Type.GetTypeCode( typeof(T)) )
-            {
-                case TypeCode.Int32  : okType = ( value < Int32.MaxValue  ); break;
-                case TypeCode.UInt32 : okType = ( value < UInt32.MaxValue ); break;
-                case TypeCode.UInt64 : okType = ( value < UInt64.MaxValue ); break;
-            }
-            return okBytes && okType;
+            return ( Validations.NumericBytesLimit<T> ( value, size ) &&
+                     Validations.NumericTypeLimit <T> ( value ) );
         }
 
         #endregion
@@ -641,21 +633,23 @@ namespace MTUComm.MemoryMap
                 for (int b = 0; b < size; b++)
                     this.memory[address + b] = (byte)(value >> (b * 8));
             else
-                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " + value + " -> " + address );
+                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " +
+                    value + " -> " + address + " + " + size + "bytes" );
         }
 
         private void SetIntToMem(string value, int address, int size = MemRegister.DEF_SIZE)
         {
             int vCasted;
             if (!int.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException ( EXCEP_SET_INT + ": " + value + " -> " + address );
+                throw new SetMemoryFormatException ( EXCEP_SET_INT + ": " + value );
             else
             {
                 if ( this.ValidateNumeric<int> ( value, size ) )
                     for (int b = 0; b < size; b++)
                         this.memory[address + b] = (byte)(vCasted >> (b * 8));
                 else
-                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " + value + " -> " + address );
+                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " +
+                        value + " -> " + address + " + " + size + "bytes" );
             }
         }
 
@@ -665,21 +659,23 @@ namespace MTUComm.MemoryMap
                 for (int b = 0; b < size; b++)
                     this.memory[address + b] = (byte)(value >> (b * 8));
             else
-                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " + value + " -> " + address );
+                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " +
+                    value + " -> " + address + " + " + size + "bytes" );
         }
 
         private void SetUIntToMem(string value, int address, int size = MemRegister.DEF_SIZE)
         {
             uint vCasted;
             if (!uint.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException ( EXCEP_SET_UINT + ": " + value + " -> " + address );
+                throw new SetMemoryFormatException ( EXCEP_SET_UINT + ": " + value );
             else
             {
                 if ( this.ValidateNumeric<uint> ( value, size ) )
                     for (int b = 0; b < size; b++)
                         this.memory[address + b] = (byte)(vCasted >> (b * 8));
                 else
-                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " + value + " -> " + address );
+                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " +
+                        value + " -> " + address + " + " + size + "bytes" );
             }
         }
 
@@ -689,21 +685,23 @@ namespace MTUComm.MemoryMap
                 for (int b = 0; b < size; b++)
                     this.memory[address + b] = (byte)(value >> (b * 8));
             else
-                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " + value + " -> " + address );
+                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " +
+                    value + " -> " + address + " + " + size + "bytes" );
         }
 
         private void SetULongToMem(string value, int address, int size = MemRegister.DEF_SIZE)
         {
             ulong vCasted;
             if (!ulong.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException ( EXCEP_SET_ULONG + ": " + value + " -> " + address );
+                throw new SetMemoryFormatException ( EXCEP_SET_ULONG + ": " + value );
             else
             {
                 if ( this.ValidateNumeric<ulong> ( value, size ) )
                     for (int b = 0; b < size; b++)
                         this.memory[address + b] = (byte)(vCasted >> (b * 8));
                 else
-                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " + value + " -> " + address );
+                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " +
+                        value + " -> " + address + " + " + size + "bytes" );
             }
         }
 
@@ -733,7 +731,7 @@ namespace MTUComm.MemoryMap
                     case TypeCode.Int32  : this.SetIntToMem   (value, address, size); break;
                     case TypeCode.UInt32 : this.SetUIntToMem  (value, address, size); break;
                     case TypeCode.UInt64 : this.SetULongToMem (value, address, size); break;
-                    case TypeCode.Char   : this.SetCharToMem  (value[ 0 ], address); break;
+                    case TypeCode.Char   : this.SetCharToMem  (value[ 0 ], address);  break;
                 }
             }
         }

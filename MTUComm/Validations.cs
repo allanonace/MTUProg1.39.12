@@ -7,14 +7,16 @@ namespace MTUComm
     {
         public static bool IsNumeric<T> ( dynamic value )
         {
-            // 1. Direct validation
-            if ( value is Int32  ||
-                 value is UInt32 ||
-                 value is UInt64 )
+            if ( value is null )
+                return false;
+            
+            else if ( value is Int32  ||
+                      value is UInt32 ||
+                      value is UInt64 )
                 return true;
 
-            // 2. String conversion for used types
-            if ( value is string )
+            // String conversion for used types
+            else if ( value is string )
             {
                 string valueString = ( string )( object )value;
                 switch ( Type.GetTypeCode( typeof(T)) )
@@ -39,7 +41,7 @@ namespace MTUComm
                 }
             }
 
-            // 3. Validation for other numeric types
+            // Validation for other numeric types
             string chars = value.ToString ();
             if ( char.Equals ( chars[ 0 ], "-" ) )
                 chars = chars.Remove ( 0, 1 );
@@ -49,7 +51,6 @@ namespace MTUComm
         }
 
         public static bool NumericBytesLimit<T> ( dynamic value, int numBytes )
-            where T : struct
         {
             if ( ! IsNumeric<T> ( value ) )
                 return false;
@@ -58,6 +59,8 @@ namespace MTUComm
 
             switch ( Type.GetTypeCode( typeof(T)) )
             {
+                #region Int
+
                 case TypeCode.Int32:
                     int valueInt = 0;
                     if ( isString )
@@ -76,7 +79,22 @@ namespace MTUComm
                             return false;
                         }
                     }
-                    return ( valueInt < ( int )Math.Pow ( 2, numBytes * 8 ) );
+                    
+                    int iLimit = 0;
+                    try
+                    {
+                        iLimit = Convert.ToInt32 ( Math.Pow ( 2, numBytes * 8 ) );
+                    }
+                    // Launchs error when result is bigger than ulong upper limit
+                    catch ( Exception e )
+                    {
+                        iLimit = int.MaxValue;
+                    }
+
+                    return ( valueInt < iLimit );
+
+                #endregion
+                #region UInt
 
                 case TypeCode.UInt32:
                     uint valueUInt = 0;
@@ -96,7 +114,22 @@ namespace MTUComm
                             return false;
                         }
                     }
-                    return ( valueUInt < ( uint  )Math.Pow ( 2, numBytes * 8 ) );
+
+                    uint uLimit = 0;
+                    try
+                    {
+                        uLimit = Convert.ToUInt32 ( Math.Pow ( 2, numBytes * 8 ) );
+                    }
+                    // Launchs error when result is bigger than ulong upper limit
+                    catch ( Exception e )
+                    {
+                        uLimit = uint.MaxValue;
+                    }
+
+                    return ( valueUInt < uLimit );
+
+                #endregion
+                #region ULong
 
                 case TypeCode.UInt64:
                     ulong valueULong = 0;
@@ -116,13 +149,26 @@ namespace MTUComm
                             return false;
                         }
                     }
-                    return ( valueULong < ( ulong )Math.Pow ( 2, numBytes * 8 ) );
+
+                    ulong ulLimit = 0;
+                    try
+                    {
+                        ulLimit = Convert.ToUInt64 ( Math.Pow ( 2, numBytes * 8 ) );
+                    }
+                    // Launchs error when result is bigger than ulong upper limit
+                    catch ( Exception e )
+                    {
+                        ulLimit = ulong.MaxValue;
+                    }
+
+                    return ( valueULong < ulLimit );
+
+                #endregion
             }
             return false;
         }
 
         public static bool NumericTypeLimit<T> ( dynamic value )
-            where T : struct
         {
             if ( ! IsNumeric<T> ( value ) )
                 return false;
@@ -131,7 +177,9 @@ namespace MTUComm
 
             switch ( Type.GetTypeCode( typeof(T)) )
             {
-                case TypeCode.Int32 :
+                #region Int
+
+                case TypeCode.Int32:
                     int valueInt = 0;
                     if ( isString )
                     {
@@ -149,7 +197,11 @@ namespace MTUComm
                             return false;
                         }
                     }
-                    return ( valueInt >= Int32.MinValue && valueInt <= Int32 .MaxValue );
+                    return ( valueInt >= Int32.MinValue &&
+                             valueInt <= Int32 .MaxValue );
+
+                #endregion
+                #region UInt
 
                 case TypeCode.UInt32:
                     uint valueUInt = 0;
@@ -169,7 +221,11 @@ namespace MTUComm
                             return false;
                         }
                     }
-                    return ( valueUInt >= UInt32.MinValue && valueUInt <= UInt32 .MaxValue );
+                    return ( valueUInt >= UInt32.MinValue &&
+                             valueUInt <= UInt32 .MaxValue );
+
+                #endregion
+                #region ULong
 
                 case TypeCode.UInt64:
                     ulong valueULong = 0;
@@ -189,17 +245,29 @@ namespace MTUComm
                             return false;
                         }
                     }
-                    return ( valueULong >= UInt64.MinValue && valueULong <= UInt64.MaxValue );
+                    return ( valueULong >= UInt64.MinValue &&
+                             valueULong <= UInt64.MaxValue );
+
+                #endregion
             }
             return false;
         }
 
-        public static bool TextLength ( string value, int maxLength, int minLength = 0 )
+        public static bool TextLength (
+            string value,
+            int  maxLength,
+            int  minLength    = 0,
+            bool maxInclusive = true,
+            bool minInclusive = true )
         {
             if ( string.IsNullOrEmpty ( value ) )
                 return false;
 
-            return ( value.Length >= minLength && value.Length <= maxLength );
+            int length = value.Length;
+            return ( ( ! minInclusive && length >  minLength ||
+                         minInclusive && length >= minLength ) &&
+                     ( ! maxInclusive && length <  maxLength ||
+                         maxInclusive && length <= maxLength ) );
         }
     }
 }
