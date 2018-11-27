@@ -122,9 +122,9 @@ namespace MTUComm.MemoryMap
                 Path.Combine ( config.GetBasePath(), XML_PREFIX + family + XML_EXTENSION) :
                 Path.Combine ( pathUnityTest, family + XML_EXTENSION );
 
-            using (TextReader reader = new StreamReader ( path ))
+            using ( TextReader reader = new StreamReader ( path ) )
             {
-                MemRegisterList list = serializer.Deserialize(reader) as MemRegisterList;
+                MemRegisterList list = Validations.DeserializeXml<MemRegisterList> ( reader );
 
                 #region Registers
 
@@ -160,7 +160,7 @@ namespace MTUComm.MemoryMap
                                 xmlRegister.Description,
                                 xmlRegister.Address,
                                 xmlRegister.Size,
-                                xmlRegister.Write,
+                                xmlRegister.WriteAsBool,
                                 xmlRegister.Custom_Get,
                                 xmlRegister.Custom_Set );
 
@@ -169,7 +169,7 @@ namespace MTUComm.MemoryMap
                         //typeof( MemoryMap ).GetMethod("CreateProperty_Get").MakeGenericMethod(SysType).Invoke(null, new object[] { regObj });
                         //typeof( MemoryMap ).GetMethod("CreateProperty_Set").MakeGenericMethod(SysType).Invoke(null, new object[] { regObj });
                         this.CreateProperty_Get ( memoryRegister );
-                        if ( xmlRegister.Write )
+                        if ( xmlRegister.WriteAsBool )
                         {
                             this.CreateProperty_Set ( memoryRegister );
                             this.CreateProperty_Set_String ( memoryRegister );

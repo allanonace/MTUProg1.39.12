@@ -12,7 +12,7 @@ namespace Xml
 
         [XmlElement("AccountEnabledAppt")]
         public bool AccountEnabledAppt { get; set; }
- 
+
         [XmlElement("AccountFilled")]
         public bool AccountFilled { get; set; }
 

@@ -1,10 +1,23 @@
 ﻿using System;
 using System.Linq;
+using System.IO;
+using System.Reflection;
+using System.Xml.Serialization;
+using MTUComm.MemoryMap;
+using Xml;
 
 namespace MTUComm
 {
     public sealed class Validations
     {
+        #region Constants
+
+        private const string PREFIX_AUX     = "_AllowEmptyField";
+        private const string EXCEP_NAME_SGN = "_";
+        private const string EXCEP_VALIDATE = "Deserializing XML has failed due to validate required fields [ " + EXCEP_NAME_SGN + " ]";
+
+        #endregion
+
         public static bool IsNumeric<T> ( dynamic value )
         {
             if ( value is null )
@@ -268,6 +281,67 @@ namespace MTUComm
                          minInclusive && length >= minLength ) &&
                      ( ! maxInclusive && length <  maxLength ||
                          maxInclusive && length <= maxLength ) );
+        }
+
+        public static T DeserializeXml<T> ( TextReader reader )
+        {
+            Type typeXml  = typeof ( T );
+            T deserialize = ( T )new XmlSerializer ( typeXml ).Deserialize ( reader );
+
+            try
+            {
+                DeserializeXml_Logic ( deserialize, typeXml.GetProperties () );
+            }
+            catch ( Exception e )
+            {
+                // Capture validation error with element name and launch new exception
+                throw new MemoryMapXmlValidationException ( EXCEP_VALIDATE.Replace ( EXCEP_NAME_SGN, e.Message ) );
+            }
+            return deserialize;
+        }
+
+        private static bool DeserializeXml_Logic ( dynamic instance, PropertyInfo[] psInfo, int index = 1 )
+        {
+            Type typeAt = typeof ( XmlElementAttribute );
+            Type typeInstance = instance.GetType ();
+
+            XmlElementAttribute attribute;
+            foreach ( PropertyInfo pinfo in psInfo )
+            {
+                // We only want to work with XmlElements, without not XmlIgnore properties
+                if ( ( attribute = ( XmlElementAttribute )pinfo.GetCustomAttribute ( typeAt ) ) != null )
+                {
+                    object value = pinfo.GetValue ( instance );
+
+                    // Element not nullable and without value ( empty or null )
+                    if ( ! attribute.IsNullable &&
+                         ( value is string &&
+                           // Empty string elements
+                           ( string.IsNullOrEmpty ( ( string )value ) ||
+                           // Int elements with string auxiliary method to allow correct deserialization
+                             string.Equals ( value, MemRegister.ERROR_STR ) ||
+                           // Bool elements with string auxiliary method to allow correct deserialization
+                             pinfo.Name.Contains ( PREFIX_AUX ) &&
+                             typeInstance.GetProperty (
+                                 pinfo.Name.Substring ( 0, pinfo.Name.IndexOf ( PREFIX_AUX ) ) )
+                                 .GetValue ( instance ) == MemRegister.ERROR_VAL ) ||
+                           // Value of different type than string, for arrays mainly
+                           ! ( value is string ) && value == null ) )
+                        throw new Exception ( attribute.ElementName + " #" + index );
+
+                    // Element is an array
+                    else if ( value != null &&
+                              pinfo.PropertyType.IsArray )
+                    {
+                        // Iterate for each entry of registers or overloads array
+                        int i = 0;
+                        foreach ( var register in ( Array )value )
+                            DeserializeXml_Logic ( register, register.GetType().GetProperties (), ++i );
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }

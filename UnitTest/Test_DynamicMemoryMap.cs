@@ -2,11 +2,14 @@
 using MTUComm.MemoryMap;
 using System;
 using System.Collections.Generic;
-using Xunit;
 using System.IO;
+using System.Xml.Serialization;
+using Xml;
+using Xunit;
 
 // http://blog.benhall.me.uk/2008/01/introduction-to-xunit
 // https://www.devexpress.com/Support/Center/Question/Details/T562649/test-runner-does-not-run-xunit-2-2-unit-tests-in-net-standard-2-0-project
+// https://stackoverflow.com/questions/53102/why-does-path-combine-not-properly-concatenate-filenames-that-start-with-path-di
 namespace UnitTest.Tests
 {
     public class Test_DynamicMemoryMap
@@ -29,6 +32,8 @@ namespace UnitTest.Tests
         private const string ERROR_STRING_MORE  = ERROR + "String parameter has less characters than the upper limit";
         private const string ERROR_STRING_LESS  = ERROR + "String parameter has less characters than the lower limit";
         private const string ERROR_STRING_EMPTY = ERROR + "String parameter is empty";
+
+        private const string ERROR_MAP_GLOBAL   = ERROR + "Deserialization of Global XML has failed";
 
         private const string ERROR_MMAP         = ERROR + "Dynamic mapping from XML has failed";
         private const string ERROR_MODIFIED     = ERROR + "The number of modified registers is wrong";
@@ -85,9 +90,6 @@ namespace UnitTest.Tests
 
         private string GetPath ()
         {
-            // NOTE: Path.Combine returns second parameter when it is an absolute path...
-            // but the problem is that using @"\folder\" .NET understand that is also absolute,
-            // and for that reason we have to add @"\" here and not in the const FOLDER
             return Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Desktop ), FOLDER );
         }
 
@@ -133,6 +135,24 @@ namespace UnitTest.Tests
             Assert.True ( ! Validations.TextLength ( str1, 100, 20 ), ERROR_STRING_LESS  );     // false Less chars
             Assert.True ( ! Validations.TextLength ( str2, 20,   5 ), ERROR_STRING_EMPTY );     // false
             Assert.True ( ! Validations.TextLength ( str1, 15, 5, false ), ERROR_STRING_LESS ); // false
+        }
+
+        [Fact]
+        public void Test_Global ()
+        {
+            XmlSerializer s = new XmlSerializer(typeof(Global));
+            Func<Func<dynamic>, bool> test = this.TestExpression;
+
+            string path = Path.Combine ( this.GetPath (), "Global.xml" );
+
+            using ( StreamReader streamReader = new StreamReader ( path ) )
+            {
+                string fileContent = Config.NormalizeBooleans(streamReader.ReadToEnd());
+                using (StringReader reader = new StringReader(fileContent))
+                {
+                    Assert.True(test(() => { return ( Global )s.Deserialize ( reader ); }), Error ( ERROR_MAP_GLOBAL ) );
+                }
+            }
         }
 
         // XMLs FOLDER:

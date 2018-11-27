@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using Xamarin.Forms;
+using System.Text.RegularExpressions;
 
 namespace Xml
 {
@@ -174,14 +175,14 @@ namespace Xml
             return global;
         }
 
-        private string NormalizeBooleans(string input)
+        public static string NormalizeBooleans(string input)
         {
-            string pattern = "(?:\"|>)(?i)(#)(?:\"|<)";
-            List<string> words = new List<string>() { "true", "false" };
+            string       pattern = "(?:\"|>)(?i)(#)(?:\"|<)";
+            List<string> words   = new List<string> () { "true", "false" };
 
-            return Regex.Replace(input,
-                pattern.Replace("#", String.Join("|", words)),
-                entry => entry.Value.ToLower());
+            return Regex.Replace ( input,
+                pattern.Replace ( "#", String.Join ( "|", words ) ),
+                entry => entry.Value.ToLower() );
         }
     }
 }
