@@ -14,7 +14,7 @@ namespace UnitTest.Tests
         #region Constants
 
         private const string ERROR  = "ERROR: ";
-        private const string FOLDER = @"Aclara_Test_Files\";
+        private const string FOLDER = "Aclara_Test_Files";
 
         private const string ERROR_VAL_STR      = ERROR + "String parameter is not a valid numeric value";
         private const string ERROR_VAL_INT      = ERROR + "Parameter is not a valid numeric integer";
@@ -88,10 +88,7 @@ namespace UnitTest.Tests
             // NOTE: Path.Combine returns second parameter when it is an absolute path...
             // but the problem is that using @"\folder\" .NET understand that is also absolute,
             // and for that reason we have to add @"\" here and not in the const FOLDER
-            string p1 = Environment.GetFolderPath ( Environment.SpecialFolder.Desktop ) + @"\";
-            string p2 = Path.Combine ( p1, FOLDER );
-
-            return Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Desktop ) + @"\", FOLDER );
+            return Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Desktop ), FOLDER );
         }
 
         [Fact]
@@ -147,7 +144,7 @@ namespace UnitTest.Tests
         //[InlineData("family_31xx32xx_test3")]
         public void Test_MemoryMaps ( string xmlName )
         {
-            Func<Func<dynamic>, bool> test = this.TestExpression;
+            Func<Func<dynamic>,bool> test = this.TestExpression;
 
             // Dynamic memory map generation
             Assert.True(test(() => { return new MemoryMap ( new byte[ 400 ], xmlName, this.GetPath () ); }), Error ( ERROR_MMAP ) );
