@@ -37,6 +37,7 @@ namespace UnitTest.Tests
 
         private const string ERROR_MMAP         = ERROR + "Dynamic mapping from XML has failed";
         private const string ERROR_MODIFIED     = ERROR + "The number of modified registers is wrong";
+        private const string ERROR_CORRECT_SET  = ERROR + "Modified registers returned value is not ok";
         private const string ERROR_RAW          = ERROR + "Work with raw or custom data have failed";
         private const string ERROR_REG_READONLY = ERROR + "Register readonly protection not works as expected";
         private const string ERROR_OVR_READONLY = ERROR + "Overloads readonly protection not works as expected";
@@ -189,13 +190,22 @@ namespace UnitTest.Tests
                 return;
 
             // TEST: Recover only modified registers
-            map.P1Reading       = 2;     // ulong
-            map.P2Reading       = "2";   // ulong
-            map.EncryptionKey   = "key"; // string
-            map.Encrypted       = true;  // bool
-            map.PCBSupplierCode = 2;     // int
+            map.P1Reading        = 26;     // ulong
+            map.P2Reading        = "41";   // ulong
+            map.EncryptionKey    = "k e y"; // string
+            map.P2UrgentAlarm    = true;  // bool
+            map.P2InterfaceAlarm = false; // bool
+            map.P2MeterType      = 34;     // int
             List<dynamic> mods = map.GetModifiedRegisters ().GetAllElements ();
-            Assert.True ( mods.Count == 5, ERROR_MODIFIED );
+            Assert.True ( mods.Count == 6, ERROR_MODIFIED );
+
+            // TEST: Validate set action
+            Assert.True ( map.P1Reading        == 26,      ERROR_CORRECT_SET + " [ ulong ]"  );
+            Assert.True ( map.P2Reading        == 41,      ERROR_CORRECT_SET + " [ ulong ]"  );
+            Assert.True ( map.EncryptionKey    == "k e y", ERROR_CORRECT_SET + " [ String ]" );
+            Assert.True ( map.P2UrgentAlarm    == true,    ERROR_CORRECT_SET + " [ Bool ]"   );
+            Assert.True ( map.P2InterfaceAlarm == false,   ERROR_CORRECT_SET + " [ Bool ]"   );
+            Assert.True ( map.P2MeterType      == 34,      ERROR_CORRECT_SET + " [ Int ]"    );
 
             // TEST: Value raw y processed
             MemoryRegister<ulong> p1mid = map.GetProperty ( "P1MeterId" );

@@ -645,8 +645,23 @@ namespace MTUComm.MemoryMap
         private string GetStringFromMem(int address, int size = MemRegister.DEF_SIZE)
         {
             byte[] dataRead = new byte[size];
-            Array.Copy(memory, address, dataRead, 0, size);
-            return Encoding.UTF8.GetString(dataRead);
+            Array.Copy ( memory, address, dataRead, 0, size );
+
+            bool trimRight = true;
+            List<byte> bytes = new List<byte> ();
+            for ( int i = dataRead.Length - 1; i >= 0; i-- )
+            {
+                if ( trimRight && dataRead[ i ] == 0 )
+                    continue;
+
+                // Only removes consecutive empty bytes on the right
+                trimRight = false;
+
+                bytes.Add ( dataRead[ i ] );
+            }
+            bytes.Reverse ();
+
+            return Encoding.UTF8.GetString ( bytes.ToArray () ).Trim ();
         }
 
         #endregion
