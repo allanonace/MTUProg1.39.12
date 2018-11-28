@@ -6,7 +6,7 @@ using RegType       = MTUComm.MemoryMap.MemoryMap.RegType;
 
 namespace MTUComm.MemoryMap
 {
-    public class MemoryRegister<T>
+    public class MemoryRegister<T> : IEquatable<MemoryRegister<T>>
     {
         #region Constants
 
@@ -206,6 +206,8 @@ namespace MTUComm.MemoryMap
 
         #region Initialization
 
+        public MemoryRegister () { }
+
         public MemoryRegister (
             string id,
             RegType type,
@@ -251,6 +253,30 @@ namespace MTUComm.MemoryMap
                      this.methodId_Set = this.custom_Set.Substring ( MemoryMap.METHOD_KEY.Length );
                 else this.methodId_Set = this.id + MemoryMap.METHOD_SUFIX_SET;
             }
+        }
+
+        #endregion
+
+        #region Compare
+
+        public bool Equals ( MemoryRegister<T> other )
+        {
+            if ( other == null )
+                return false;
+
+            bool ok_id          = string.Equals ( this.id, other.id );
+            bool ok_description = string.Equals ( this.description, other.description );
+            bool ok_address     = ( this.address  == other.address );
+            bool ok_size        = ( this.size     == other.size    );
+            bool ok_write       = ( this.write    == other.write   );
+            bool ok_value       = object.Equals ( this.ValueRaw, other.ValueRaw );
+
+            return ok_id          &&
+                   ok_description &&
+                   ok_address     &&
+                   ok_size        &&
+                   ok_write       &&
+                   ok_value;
         }
 
         #endregion

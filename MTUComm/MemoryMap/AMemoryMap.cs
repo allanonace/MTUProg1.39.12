@@ -76,7 +76,7 @@ namespace MTUComm.MemoryMap
             return this.dictionary.ContainsKey ( id );
         }
 
-        #region Using dot operator
+        #region Dot operator
 
         public override bool TrySetMember ( SetMemberBinder binder, object value )
         {

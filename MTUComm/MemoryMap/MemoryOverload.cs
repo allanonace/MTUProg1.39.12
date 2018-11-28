@@ -1,15 +1,21 @@
 ﻿using System;
 
-using RegType = MTUComm.MemoryMap.MemoryMap.RegType;
+using RegType       = MTUComm.MemoryMap.MemoryMap.RegType;
 using REGISTER_TYPE = MTUComm.MemoryMap.AMemoryMap.REGISTER_TYPE;
 
 namespace MTUComm.MemoryMap
 {
-    public class MemoryOverload<T>
+    public class MemoryOverload<T> : IEquatable<MemoryOverload<T>>
     {
+        #region Constants
+
         private enum CUSTOM_TYPE { OPERATION, METHOD }
 
         private const string EXCEP_OVER_CUSTOM = "Custom field is empty";
+
+        #endregion
+
+        #region Attributes
 
         public Func<T> funcGet;
         public string id { get; }
@@ -20,6 +26,10 @@ namespace MTUComm.MemoryMap
         public string methodId { get; }
         private CUSTOM_TYPE customType;
         public REGISTER_TYPE registerType { get; }
+
+        #endregion
+
+        #region Properties
 
         private bool _HasCustomMethod
         {
@@ -47,6 +57,15 @@ namespace MTUComm.MemoryMap
         {
             get { return this.customType == CUSTOM_TYPE.OPERATION; }
         }
+
+        public T Value
+        {
+            get { return (T)this.funcGet(); }
+        }
+
+        #endregion
+
+        #region Initialization
 
         public MemoryOverload (
             string id,
@@ -81,9 +100,29 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        public T Value
+        #endregion
+
+        #region Compare
+
+        public bool Equals ( MemoryOverload<T> other )
         {
-            get { return (T)this.funcGet(); }
+            if ( other == null )
+                return false;
+
+            if ( this.registerIds.Length == other.registerIds.Length )
+                for ( int i = this.registerIds.Length - 1; i >= 0; i-- )
+                    if ( ! string.Equals ( this.registerIds[ i ], other.registerIds[ i ] ) )
+                        return false;
+
+            bool ok_id          = string.Equals ( this.id, other.id );
+            bool ok_description = string.Equals ( this.description, other.description );
+            bool ok_methodId    = string.Equals ( this.methodId, other.methodId );
+
+            return ok_id          &&
+                   ok_description &&
+                   ok_methodId;
         }
+
+        #endregion
     }
 }

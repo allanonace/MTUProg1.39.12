@@ -522,6 +522,32 @@ namespace MTUComm.MemoryMap
                      Validations.NumericTypeLimit <T> ( value ) );
         }
 
+        public string[] GetModifiedRegistersDifferences ( MemoryMap otherMap )
+        {
+            List<string> difs = new List<string> ();
+
+            // Only check modified registers
+            List<dynamic> modifiedRegisters = this.GetModifiedRegisters ().GetAllElements ();
+            foreach ( dynamic register in modifiedRegisters )
+            {
+                string name = register.id;
+                
+                if ( ! otherMap.ContainsMember ( name ) ||       // Register not present in other memory map
+                     ! base[ name ].Equals ( otherMap[ name ] )) // Both registers are not equal
+                {
+                    difs.Add ( name );
+                    continue;
+                }
+            }
+
+            return difs.ToArray ();
+        }
+
+        public bool ValidateModifiedRegisters_Bool ( MemoryMap otherMap )
+        {
+            return ( this.GetModifiedRegistersDifferences ( otherMap ).Length == 0 );
+        }
+
         #endregion
 
         #region Operations
@@ -634,7 +660,7 @@ namespace MTUComm.MemoryMap
                     this.memory[address + b] = (byte)(value >> (b * 8));
             else
                 throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " +
-                    value + " -> " + address + " + " + size + "bytes" );
+                    value + " -> Address: " + address + " + Bytes: " + size );
         }
 
         private void SetIntToMem(string value, int address, int size = MemRegister.DEF_SIZE)
@@ -649,7 +675,7 @@ namespace MTUComm.MemoryMap
                         this.memory[address + b] = (byte)(vCasted >> (b * 8));
                 else
                     throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " +
-                        value + " -> " + address + " + " + size + "bytes" );
+                        value + " -> Address: " + address + " + Bytes: " + size );
             }
         }
 
@@ -660,7 +686,7 @@ namespace MTUComm.MemoryMap
                     this.memory[address + b] = (byte)(value >> (b * 8));
             else
                 throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " +
-                    value + " -> " + address + " + " + size + "bytes" );
+                    value + " -> Address: " + address + " + Bytes: " + size );
         }
 
         private void SetUIntToMem(string value, int address, int size = MemRegister.DEF_SIZE)
@@ -675,7 +701,7 @@ namespace MTUComm.MemoryMap
                         this.memory[address + b] = (byte)(vCasted >> (b * 8));
                 else
                     throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " +
-                        value + " -> " + address + " + " + size + "bytes" );
+                        value + " -> Address: " + address + " + Bytes: " + size );
             }
         }
 
@@ -686,7 +712,7 @@ namespace MTUComm.MemoryMap
                     this.memory[address + b] = (byte)(value >> (b * 8));
             else
                 throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " +
-                    value + " -> " + address + " + " + size + "bytes" );
+                    value + " -> Address: " + address + " + Bytes: " + size );
         }
 
         private void SetULongToMem(string value, int address, int size = MemRegister.DEF_SIZE)
@@ -701,13 +727,13 @@ namespace MTUComm.MemoryMap
                         this.memory[address + b] = (byte)(vCasted >> (b * 8));
                 else
                     throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " +
-                        value + " -> " + address + " + " + size + "bytes" );
+                        value + " -> Address: " + address + " + Bytes: " + size );
             }
         }
 
         private void SetBoolToMem (bool value, int address, int bit_index = MemRegister.DEF_BIT)
         {
-            memory[address] = ( byte ) ( memory[address] | (1 << bit_index) );
+            memory[address] = ( byte ) ( memory[address] | ( ( ( value ) ? 1 : 0 ) << bit_index ) );
         }
 
         private void SetCharToMem (char value, int address)

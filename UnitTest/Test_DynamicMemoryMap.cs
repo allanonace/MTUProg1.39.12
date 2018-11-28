@@ -52,6 +52,9 @@ namespace UnitTest.Tests
         private const string ERROR_LIMIT_INT    = ERROR + "Setted value is larger than INT type limit";
         private const string ERROR_LIMIT_BYTES  = ERROR + "Setted value is larger than number of BYTES limit";
 
+        private const string ERROR_COMPARE_MAP  = ERROR + "Both memory maps should be different";
+        private const string ERROR_COMPARE_REG  = ERROR + "Register should be listed inside differences list";
+
         #endregion
 
         #region Attributes
@@ -219,7 +222,7 @@ namespace UnitTest.Tests
 
             // TEST: Custom method to convert hours to minutes
             map.ReadIntervalMinutes = "24 Hours"; // On memory writes in minutes: 24 * 60 = 1440
-            Assert.True ( map.ReadIntervalMinutes == 24, ERROR_REG_CUS_MIN );
+            Assert.True ( map.ReadIntervalMinutes == 24 * 60, ERROR_REG_CUS_MIN );
 
             // TEST: Custom BCD methods ( get = bcd to ulong, set = ulong to bcd )
             map.P1MeterId = 1234; // En memoria escribe 0x34 y 0x12
@@ -265,6 +268,50 @@ namespace UnitTest.Tests
             //Console.WriteLine ( "Test metodo reuse overload: " + base.registers.Overload_Method_Reuse );
             //Console.WriteLine ( "Test metodo array overload: " + base.registers.Overload_Method_Array );
             //Console.WriteLine ( "Test operation overload: "    + base.registers.Overload_Operation );
+        }
+
+        [Theory]
+        [InlineData("family_31xx32xx_test1")]
+        public void Test_CompareModifiedRegisters ( string xmlName )
+        {
+            Func<Func<dynamic>,bool> test = this.TestExpression;
+
+            // Dynamic memory map generation
+            byte[] memory = new byte[400];
+            dynamic map   = null;
+            Assert.True ( test(() => { return map = new MemoryMap ( memory, xmlName, this.GetPath () ); }), Error ( ERROR_MMAP ) );
+
+            // If memory map can't be created, test finishes
+            if ( map == null )
+                return;
+
+            byte[] memory2 = new byte[400];
+            dynamic map2   = null;
+            Assert.True ( test(() => { return map2 = new MemoryMap ( memory2, xmlName, this.GetPath () ); }), Error ( ERROR_MMAP ) );
+
+            map.Shipbit              = true;
+            map.MessageOverlapCount  = 200;
+            map.P1MeterType          = 321;
+            map.P1MeterId            = 1357;
+            map.EncryptionKey        = "123456789876543";
+
+            map2.Shipbit             = false;
+            map2.MessageOverlapCount = 200; // Same value
+            map2.P1MeterType         = 32;
+            map2.P1MeterId           = 135;
+            map2.EncryptionKey       = "12345678987654";
+
+            string[] difs     = map.GetModifiedRegistersDifferences ( map2 );
+            bool     areEqual = map.ValidateModifiedRegisters_Bool ( map2 );
+
+            Assert.True ( ! areEqual, ERROR_COMPARE_MAP );
+
+            List<string> list = new List<string> ( difs );
+            Assert.True ( ! list.Contains ( "MessageOverlapCount" ), ERROR_COMPARE_REG );
+            Assert.True ( list.Contains ( "Shipbit"       ), ERROR_COMPARE_REG );
+            Assert.True ( list.Contains ( "P1MeterType"   ), ERROR_COMPARE_REG );
+            Assert.True ( list.Contains ( "P1MeterId"     ), ERROR_COMPARE_REG );
+            Assert.True ( list.Contains ( "EncryptionKey" ), ERROR_COMPARE_REG );
         }
 
         #endregion

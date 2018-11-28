@@ -31,9 +31,9 @@ namespace MTUComm.MemoryMap
         private const string MESAG_FAST  = "Fast";
         private const string MESAG_SLOW  = "Slow";
 
-        private const string HOURS       = " Hrs ";
-        private const string HOUR        = " Hr ";
-        private const string MIN         = " Min ";
+        private const string HOURS       = " Hrs";
+        private const string HOUR        = " Hr";
+        private const string MIN         = " Min";
 
         private const char   ZERO        = '0';
         private const int    INDEX_STATE = 2;
@@ -248,7 +248,7 @@ namespace MTUComm.MemoryMap
         {
             string[] readIntervalArray = ((string)inputValue).Split(' ');
             string readIntervalStr = readIntervalArray[0].ToLower ();
-            string timeUnit = readIntervalArray[1];
+            string timeUnit = readIntervalArray[1].ToLower ();
             int timeIntervalMins = Int32.Parse(readIntervalStr);
 
             if (timeUnit is "hours")
@@ -356,9 +356,9 @@ namespace MTUComm.MemoryMap
             return string.Empty;
         }
 
-        private string TimeFormatter (int time)
+        private string TimeFormatter ( int time )
         {
-            switch (time)
+            switch ( time )
             {
                 case 2880: return 48 + HOURS;
                 case 2160: return 36 + HOURS;
@@ -369,23 +369,17 @@ namespace MTUComm.MemoryMap
                 case 240 : return 4  + HOURS;
                 case 180 : return 3  + HOURS;
                 case 120 : return 2  + HOURS;
-                case 90  : return 1  + HOUR + 30 + MIN;
+                case 90  : return 1  + HOUR + " " + 30 + MIN;
                 case 60  : return 1  + HOUR;
                 case 30  : return 30 + MIN;
                 case 15  : return 15 + MIN;
                 case 10  : return 10 + MIN;
                 case 5   : return 5  + MIN;
                 default: // KG 3.10.2010 add HR-Min calc:
-                    if (time % 60 == 0)
-                        return (time / 60).ToString() + HOURS;
-                    else
-                        if (time < 60)
-                        return (time % 60).ToString() + MIN;
-                    else if (time < 120)
-                        return (time / 60).ToString() + HOUR + (time % 60).ToString() + MIN;
-                    else
-                        return (time / 60).ToString() + HOURS + (time % 60).ToString() + MIN;
-                    //return xMit.ToString() + " Min";//"BAD READ";
+                    if  ( time % 60 == 0 ) return ( time / 60 ).ToString() + HOURS;
+                    else if ( time <  60 ) return ( time % 60 ).ToString() + MIN;
+                    else if ( time < 120 ) return ( time / 60 ).ToString() + HOUR + " " + (time % 60).ToString() + MIN;
+                    else return ( time / 60 ).ToString() + HOURS + " " + (time % 60).ToString() + MIN;
             }
         }
 
