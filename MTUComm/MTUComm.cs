@@ -486,27 +486,50 @@ namespace MTUComm
             }
         }
 
-        public void TurnOffMtu()
+        private void TurnOffMtu_Logic ()
         {
-            Task.Factory.StartNew(TurnOffMtuTask);
-        }
-
-        public void TurnOffMtuTask()
-        {
-            Console.WriteLine("TurnOffMtu start");
-
             byte mask = 1;
             byte systemFlags = (lexi.Read(22, 1))[0];
             systemFlags |= mask; // set bit 0
             lexi.Write(22, new byte[] { systemFlags });
             byte valueWritten = (lexi.Read(22, 1))[0];
+
             Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
             Console.WriteLine("TurnOnMtu end");
 
-            if (systemFlags != valueWritten)
+            if ( systemFlags != valueWritten )
             {
                 // TODO: handle error condition
             }
+        }
+
+        private void TurnOnMtu_Logic()
+        {
+            byte mask = 1;
+            byte systemFlags = (lexi.Read(22, 1))[0];
+            systemFlags &= (byte)~mask; // clear bit 0
+            lexi.Write(22, new byte[] { systemFlags });
+            byte valueWritten = (lexi.Read(22, 1))[0];
+
+            Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
+            Console.WriteLine("TurnOffMtu end");
+
+            if ( systemFlags != valueWritten )
+            {
+                // TODO: handle error condition
+            }
+        }
+
+        public void TurnOffMtu ()
+        {
+            Task.Factory.StartNew(TurnOffMtuTask);
+        }
+
+        public void TurnOffMtuTask ()
+        {
+            Console.WriteLine("TurnOffMtu start");
+
+            this.TurnOffMtu_Logic ();
 
             getMTUBasicInfo();
             Console.WriteLine("MTU ID: " + latest_mtu.Id);
@@ -517,25 +540,14 @@ namespace MTUComm
    
         public void TurnOnMtu()
         {
-            Task.Factory.StartNew(TurnOnMtuTask);
+            Task.Factory.StartNew ( TurnOnMtuTask );
         }
 
-        public void TurnOnMtuTask()
+        public void TurnOnMtuTask ()
         {
             Console.WriteLine("TurnOnMtu start");
 
-            byte mask = 1;
-            byte systemFlags = (lexi.Read(22, 1))[0];
-            systemFlags &= (byte)~mask; // clear bit 0
-            lexi.Write(22, new byte[] { systemFlags });
-            byte valueWritten = (lexi.Read(22, 1))[0];
-            Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
-            Console.WriteLine("TurnOffMtu end");
-
-            if (systemFlags != valueWritten)
-            {
-                // TODO: handle error condition
-            }
+            this.TurnOnMtu_Logic ();
 
             getMTUBasicInfo();
             Console.WriteLine("MTU ID: " + latest_mtu.Id);
@@ -556,165 +568,122 @@ namespace MTUComm
 
             #region Turn Off MTU
 
-            byte mask = 1;
-            byte systemFlags = (lexi.Read(22, 1))[0];
-            systemFlags |= mask; // set bit 0
-            lexi.Write(22, new byte[] { systemFlags });
-            byte valueWritten = (lexi.Read(22, 1))[0];
-
-            addMtuLog.LogTurnOff();
+            this.TurnOffMtu_Logic ();
+            addMtuLog.LogTurnOff ();
 
             #endregion
 
             #region Add MTU
 
             Mtu mtu = form.mtu;
-            dynamic MtuConditions = form.conditions.mtu;
+            dynamic MtuConditions     = form.conditions.mtu;
             dynamic GlobalsConditions = form.conditions.globals;
 
             // Prepare memory map
-            String memory_map_type = configuration.GetMemoryMapTypeByMtuId((int)MtuForm.mtuBasicInfo.Type);
-            int memory_map_size = configuration.GetmemoryMapSizeByMtuId((int)MtuForm.mtuBasicInfo.Type);
+            String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
+            int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
 
-            byte[] memory = new byte[memory_map_size];
-            dynamic map = new MemoryMap.MemoryMap ( memory, memory_map_type);
+            byte[] memory = new byte[ memory_map_size ];
+            dynamic map   = new MemoryMap.MemoryMap ( memory, memory_map_type );
+
+            bool useTwoPorts = MtuConditions.TwoPorts;
 
             // meter type
-            Meter selectedMeter = (Meter)form.Meter.getValue();
+            Meter selectedMeter = ( Meter )form.Meter.getValue ();
             map.P1MeterType = selectedMeter.Id;
-            if (MtuConditions.TwoPorts)
+            if ( useTwoPorts )
             {
-                Meter selectedMeter2 = (Meter)form.Meter2.getValue();
+                Meter selectedMeter2 = ( Meter )form.Meter2.getValue ();
                 map.P2MeterType = selectedMeter2.Id;
             }
 
             // service port id, account number
-            map.P1MeterId = form.ServicePortId.getValue();
-            if (MtuConditions.TwoPorts)
-            {
-                map.P2MeterId = form.ServicePortId2.getValue();
-            }
+            map.P1MeterId = form.ServicePortId.getValue ();
+            if ( useTwoPorts )
+                map.P2MeterId = form.ServicePortId2.getValue ();
 
             // reading interval
-            if (GlobalsConditions.IndividualReadInterval)
+            if ( GlobalsConditions.IndividualReadInterval )
             {
-                map.ReadIntervalMinutes = form.ReadInterval.getValue();
-                if (MtuConditions.TwoPorts)
-                {
-                    map.P2ReadInterval = form.ReadInterval2.getValue();
-                }
+                map.ReadIntervalMinutes = form.ReadInterval.getValue ();
+                if ( useTwoPorts )
+                    map.P2ReadInterval = form.ReadInterval2.getValue ();
             }
 
             // overlap
             map.MessageOverlapCount = DEFAULT_OVERLAP;
-            if (MtuConditions.TwoPorts)
-            {
+            if ( useTwoPorts )
                 map.P2MessageOverlapCount = DEFAULT_OVERLAP;
-            }
 
             // initial reading
-            map.P1Reading = form.InitialReading.getValue();
-            if (MtuConditions.TwoPorts)
-            {
-                map.P2Reading = form.InitialReading2.getValue();
-            }
+            map.P1Reading = form.InitialReading.getValue ();
+            if ( useTwoPorts )
+                map.P2Reading = form.InitialReading2.getValue ();
 
-            // alarms
-            if (MtuConditions.RequiresAlarmProfile)
+            // Alarms
+            if ( MtuConditions.RequiresAlarmProfile )
             {
-                Alarm alarms = (Alarm)form.Alarm.getValue();
+                Alarm alarms = ( Alarm )form.Alarm.getValue ();
 
                 // Overlap
                 map.MessageOverlapCount = alarms.Overlap;
 
                 // P1ImmediateAlarm
-                if (alarms.ImmediateAlarmTransmit)
-                {
-                    map.P1ImmediateAlarm = true;
-                }
+                map.P1ImmediateAlarm = alarms.ImmediateAlarmTransmit;
 
                 // P1UrgentAlarm
-                if (alarms.DcuUrgentAlarm)
-                {
-                    map.P1UrgentAlarm = true;
-                }
+                map.P1UrgentAlarm = alarms.DcuUrgentAlarm;
 
                 // P1MagneticAlarm
-                if (mtu.MagneticTamper)
-                {
+                if ( mtu.MagneticTamper )
                     map.P1MagneticAlarm = alarms.Magnetic;
-                }
 
                 // P1RegisterCoverAlarm
-                if (mtu.RegisterCoverTamper)
-                {
+                if ( mtu.RegisterCoverTamper )
                     map.P1RegisterCoverAlarm = alarms.RegisterCover;
-                }
 
                 // P1ReverseFlowAlarm
-                if (mtu.ReverseFlowTamper)
-                {
+                if ( mtu.ReverseFlowTamper )
                     map.P1ReverseFlowAlarm = alarms.ReverseFlow;
-                }
 
                 // P1TiltAlarm
-                if (mtu.TiltTamper)
-                {
+                if ( mtu.TiltTamper )
                     map.P1TiltAlarm = alarms.Tilt;
-                }
 
                 // P1InterfaceAlarm
-                if (mtu.InterfaceTamper)
-                {
+                if ( mtu.InterfaceTamper )
                     map.P1InterfaceAlarm = alarms.InterfaceTamper;
-                }
 
-                if (MtuConditions.TwoPorts)
+                if ( useTwoPorts )
                 {
                     // Overlap
                     map.P2MessageOverlapCount = alarms.Overlap;
 
                     // P2ImmediateAlarm
-                    if (alarms.ImmediateAlarmTransmit)
-                    {
-                        map.P2ImmediateAlarm = true;
-                    }
+                    map.P2ImmediateAlarm = alarms.ImmediateAlarmTransmit;
 
                     // P2UrgentAlarm
-                    if (alarms.DcuUrgentAlarm)
-                    {
-                        map.P2UrgentAlarm = true;
-                    }
+                    map.P2UrgentAlarm = alarms.DcuUrgentAlarm;
 
                     // P2MagneticAlarm
-                    if (mtu.MagneticTamper)
-                    {
+                    if ( mtu.MagneticTamper )
                         map.P2MagneticAlarm = alarms.Magnetic;
-                    }
 
                     // P2RegisterCoverAlarm
-                    if (mtu.RegisterCoverTamper)
-                    {
+                    if ( mtu.RegisterCoverTamper )
                         map.P2RegisterCoverAlarm = alarms.RegisterCover;
-                    }
 
                     // P2ReverseFlowAlarm
-                    if (mtu.ReverseFlowTamper)
-                    {
+                    if ( mtu.ReverseFlowTamper )
                         map.P2ReverseFlowAlarm = alarms.ReverseFlow;
-                    }
 
                     // P2TiltAlarm
-                    if (mtu.TiltTamper)
-                    {
+                    if ( mtu.TiltTamper )
                         map.P2TiltAlarm = alarms.Tilt;
-                    }
 
                     // P2InterfaceAlarm
-                    if (mtu.InterfaceTamper)
-                    {
+                    if ( mtu.InterfaceTamper )
                         map.P2InterfaceAlarm = alarms.InterfaceTamper;
-                    }
                 }
             }
 
@@ -737,20 +706,14 @@ namespace MTUComm
             // encoder digits to drop (not in pulse)
 
             // Write changes into MTU
-            WriteModifiedRegisters(map);
-
-            addMtuLog.LogAction();
+            WriteModifiedRegisters ( map );
+            addMtuLog.LogAction ();
 
             #endregion
 
             #region Turn On MTU
 
-            mask = 1;
-            systemFlags = (lexi.Read(22, 1))[0];
-            systemFlags &= (byte)~mask; // clear bit 0
-            lexi.Write(22, new byte[] { systemFlags });
-            valueWritten = (lexi.Read(22, 1))[0];
-
+            this.TurnOnMtu_Logic ();
             addMtuLog.LogTurnOn();
 
             #endregion
@@ -820,7 +783,7 @@ namespace MTUComm
 
             #endregion
 
-            addMtuLog.Save();
+            addMtuLog.Save ();
         }
 
         public void WriteModifiedRegisters(MemoryMap.MemoryMap map)

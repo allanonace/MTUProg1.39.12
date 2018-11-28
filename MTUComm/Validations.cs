@@ -19,6 +19,8 @@ namespace MTUComm
 
         #endregion
 
+        #region Tests
+
         public static bool IsNumeric<T> ( dynamic value )
         {
             if ( value is null )
@@ -391,5 +393,7 @@ namespace MTUComm
 
             return true;
         }
+
+        #endregion
     }
 }

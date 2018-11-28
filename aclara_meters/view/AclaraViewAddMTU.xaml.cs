@@ -2604,117 +2604,161 @@ namespace aclara_meters.view
         {
             #region Form Parameters
 
-            dynamic MtuConditions = addMtuForm.conditions.mtu;
+            dynamic MtuConditions     = addMtuForm.conditions.mtu;
             dynamic GlobalsConditions = addMtuForm.conditions.globals;
 
-            addMtuForm.AddParameter(FIELD.SERVICE_PORT_ID, servicePortIdInput.Text);
+            #region Port 1
 
-            if (GlobalsConditions.WorkOrderRecording)
+            // Service Port ID
+            addMtuForm.AddParameter (
+                FIELD.SERVICE_PORT_ID,
+                servicePortIdInput.Text );
+
+            // Field Order
+            if ( GlobalsConditions.WorkOrderRecording )
+                addMtuForm.AddParameter (
+                    FIELD.FIELD_ORDER,
+                    fieldOrderInput.Text );
+
+            // Meter Number
+            if ( GlobalsConditions.UseMeterSerialNumber )
+                addMtuForm.AddParameter (
+                    FIELD.METER_NUMBER,
+                    meterSerialNumberInput.Text );
+
+            // Initial Reading
+            addMtuForm.AddParameter (
+                FIELD.INITIAL_READING,
+                initialReadingInput.Text);
+
+            // Selected Meter ID
+            addMtuForm.AddParameter (
+                FIELD.SELECTED_METER,
+                ( Meter )meterNamesPicker.SelectedItem );
+
+            // Read Interval
+            if ( GlobalsConditions.IndividualReadInterval )
+                addMtuForm.AddParameter (
+                    FIELD.READ_INTERVAL,
+                    readIntervalPicker.SelectedItem.ToString() );
+
+            // Snap Reads
+            if ( GlobalsConditions.AllowDailyReads && MtuConditions.DailyReads )
+                addMtuForm.AddParameter (
+                    FIELD.SNAP_READS,
+                    snapReadsSlider.Value.ToString() );
+
+            // 2-Way
+            if ( MtuConditions.FastMessageConfig )
+                addMtuForm.AddParameter (
+                    FIELD.TWO_WAY,
+                    twoWayPicker.SelectedItem.ToString() );
+
+            // Alarms
+            if ( MtuConditions.RequiresAlarmProfile )
+                addMtuForm.AddParameter (
+                    FIELD.ALARM,
+                    ( Alarm )alarmsPicker.SelectedItem );
+
+            // Demands
+            if ( MtuConditions.MtuDemand )
+                addMtuForm.AddParameter (
+                    FIELD.DEMAND,
+                    ( Demand )demandsPicker.SelectedItem );
+
+            #endregion
+
+            #region Port 2
+
+            if ( MtuConditions.TwoPorts )
             {
-                addMtuForm.AddParameter(FIELD.FIELD_ORDER, fieldOrderInput.Text);
+                // Service Port ID 2
+                addMtuForm.AddParameter (
+                    FIELD.SERVICE_PORT_ID2,
+                    servicePortId2Input.Text );
+
+                // Field Order 2
+                if ( GlobalsConditions.WorkOrderRecording )
+                    addMtuForm.AddParameter (
+                        FIELD.FIELD_ORDER2,
+                        fieldOrder2Input.Text );
+
+                // Meter Number 2
+                if ( GlobalsConditions.UseMeterSerialNumber )
+                    addMtuForm.AddParameter (
+                        FIELD.METER_NUMBER2,
+                        meterSerialNumber2Input.Text );
+
+                // Initial Reading 2
+                addMtuForm.AddParameter (
+                    FIELD.INITIAL_READING2,
+                    initialReading2Input.Text );
+
+                // Selected Meter ID 2
+                addMtuForm.AddParameter (
+                    FIELD.SELECTED_METER2,
+                    ( Meter )meterNames2Picker.SelectedItem );
+
+                // Read Interval 2
+                if ( GlobalsConditions.IndividualReadInterval )
+                    addMtuForm.AddParameter (
+                        FIELD.READ_INTERVAL2,
+                        readInterval2Picker.SelectedItem.ToString() );
+
+                // Snap Reads 2
+                if ( GlobalsConditions.AllowDailyReads && MtuConditions.DailyReads )
+                    addMtuForm.AddParameter (
+                        FIELD.SNAP_READS2,
+                        snapReads2Slider.Value.ToString());
+
+                // 2-Way 2
+                if ( MtuConditions.FastMessageConfig )
+                    addMtuForm.AddParameter (
+                        FIELD.TWO_WAY2,
+                        twoWay2Picker.SelectedItem.ToString() );
+
+                // Alarms 2
+                if ( MtuConditions.RequiresAlarmProfile )
+                    addMtuForm.AddParameter (
+                        FIELD.ALARM2,
+                        ( Alarm )alarms2Picker.SelectedItem );
+
+                // Demands 2
+                if ( MtuConditions.MtuDemand )
+                    addMtuForm.AddParameter (
+                        FIELD.DEMAND2,
+                        ( Demand )demands2Picker.SelectedItem );
             }
 
-            if (GlobalsConditions.UseMeterSerialNumber)
-            {
-                addMtuForm.AddParameter(FIELD.METER_NUMBER, meterSerialNumberInput.Text);
-            }
+            #endregion
 
-            addMtuForm.AddParameter(FIELD.INITIAL_READING, initialReadingInput.Text);
-
-            addMtuForm.AddParameter(FIELD.SELECTED_METER, (Meter)meterNamesPicker.SelectedItem);
-
-            if (GlobalsConditions.IndividualReadInterval)
-            {
-                addMtuForm.AddParameter(FIELD.READ_INTERVAL, readIntervalPicker.SelectedItem.ToString());
-            }
-
-            if (GlobalsConditions.AllowDailyReads && MtuConditions.DailyReads)
-            {
-                addMtuForm.AddParameter(FIELD.SNAP_READS, snapReadsSlider.Value.ToString());
-            }
-
-            if (MtuConditions.FastMessageConfig)
-            {
-                addMtuForm.AddParameter(FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString());
-            }
-
-            if (MtuConditions.RequiresAlarmProfile)
-            {
-                addMtuForm.AddParameter(FIELD.ALARM, (Alarm)alarmsPicker.SelectedItem);
-            }
-
-            if (MtuConditions.MtuDemand)
-            {
-                addMtuForm.AddParameter(FIELD.DEMAND, (Demand) demandsPicker.SelectedItem);
-            }
-
-            if (MtuConditions.TwoPorts)
-            {
-                addMtuForm.AddParameter(FIELD.SERVICE_PORT_ID2, servicePortId2Input.Text);
-
-                if (GlobalsConditions.WorkOrderRecording)
-                {
-                    addMtuForm.AddParameter(FIELD.FIELD_ORDER2, fieldOrder2Input.Text);
-                }
-
-                if (GlobalsConditions.UseMeterSerialNumber)
-                {
-                    addMtuForm.AddParameter(FIELD.METER_NUMBER2, meterSerialNumber2Input.Text);
-                }
-
-                addMtuForm.AddParameter(FIELD.INITIAL_READING2, initialReading2Input.Text);
-
-                addMtuForm.AddParameter(FIELD.SELECTED_METER2, (Meter)meterNames2Picker.SelectedItem);
-
-                if (GlobalsConditions.IndividualReadInterval)
-                {
-                    addMtuForm.AddParameter(FIELD.READ_INTERVAL2, readInterval2Picker.SelectedItem.ToString());
-                }
-
-                if (GlobalsConditions.AllowDailyReads && MtuConditions.DailyReads)
-                {
-                    addMtuForm.AddParameter(FIELD.SNAP_READS2, snapReads2Slider.Value.ToString());
-                }
-
-                if (MtuConditions.FastMessageConfig)
-                {
-                    addMtuForm.AddParameter(FIELD.TWO_WAY2, twoWay2Picker.SelectedItem.ToString());
-                }
-
-                if (MtuConditions.RequiresAlarmProfile)
-                {
-                    addMtuForm.AddParameter(FIELD.ALARM2, (Alarm)alarms2Picker.SelectedItem);
-                }
-
-                if (MtuConditions.MtuDemand)
-                {
-                    addMtuForm.AddParameter(FIELD.DEMAND2, (Demand)demands2Picker.SelectedItem);
-                }
-            }
+            #region Optional parameters
 
             List<Parameter> optionalParams = new List<Parameter>();
 
-            foreach (BorderlessPicker p in optionalPickers)
-            {
-                optionalParams.Add(new Parameter(p.Name, p.Display, p.SelectedItem, true));
-            }
-            foreach (BorderlessEntry e in optionalEntries)
-            {
-                optionalParams.Add(new Parameter(e.Name, e.Display, e.Text, true));
-            }
-            addMtuForm.AddParameter(FIELD.OPTIONAL_PARAMS, optionalParams);
+            foreach ( BorderlessPicker p in optionalPickers )
+                optionalParams.Add ( new Parameter ( p.Name, p.Display, p.SelectedItem, true ) );
+
+            foreach ( BorderlessEntry e in optionalEntries )
+                optionalParams.Add ( new Parameter ( e.Name, e.Display, e.Text, true ) );
+
+            addMtuForm.AddParameter (
+                FIELD.OPTIONAL_PARAMS,
+                optionalParams );
+
+            #endregion
 
             #endregion
 
             #region Add MTU Action
 
-            MTUComm.Action add_mtu = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
+            MTUComm.Action add_mtu = new MTUComm.Action (
+                config    : FormsApp.config,
+                serial    : FormsApp.ble_interface,
                 actiontype: MTUComm.Action.ActionType.AddMtu,
-                user: FormsApp.CredentialsService.UserName);
+                user      : FormsApp.CredentialsService.UserName );
 
-            add_mtu.AddParameter(addMtuForm);
+            //add_mtu.AddParameter ( addMtuForm ); <--- PROBAR SIN ESTO, PORQUE EN LA ACCION ADD SE USA addMtuForm
 
             #region On Add MTU Action finish
 
@@ -2730,7 +2774,7 @@ namespace aclara_meters.view
                 {
                     try
                     {
-                        if (p.CustomParameter.Equals("MtuType"))
+                        if ( p.CustomParameter.Equals("MtuType") )
                         {
                             mtu_type = Int32.Parse(p.Value.ToString());
                         }
@@ -2892,7 +2936,7 @@ namespace aclara_meters.view
             #endregion
 
             // Launch the action!
-            add_mtu.Run(addMtuForm);
+            add_mtu.Run ( addMtuForm );
 
             #endregion
         }

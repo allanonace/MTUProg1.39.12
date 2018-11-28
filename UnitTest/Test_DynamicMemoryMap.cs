@@ -199,7 +199,7 @@ namespace UnitTest.Tests
             List<dynamic> mods = map.GetModifiedRegisters ().GetAllElements ();
             Assert.True ( mods.Count == 6, ERROR_MODIFIED );
 
-            // TEST: Validate set action
+            // TEST: Validate previous set actions
             Assert.True ( map.P1Reading        == 26,      ERROR_CORRECT_SET + " [ ulong ]"  );
             Assert.True ( map.P2Reading        == 41,      ERROR_CORRECT_SET + " [ ulong ]"  );
             Assert.True ( map.EncryptionKey    == "k e y", ERROR_CORRECT_SET + " [ String ]" );
@@ -312,7 +312,7 @@ namespace UnitTest.Tests
             map2.EncryptionKey       = "12345678987654";
 
             string[] difs     = map.GetModifiedRegistersDifferences ( map2 );
-            bool     areEqual = map.ValidateModifiedRegisters_Bool ( map2 );
+            bool     areEqual = map.ValidateModifiedRegisters ( map2 );
 
             Assert.True ( ! areEqual, ERROR_COMPARE_MAP );
 
