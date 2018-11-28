@@ -358,12 +358,13 @@
 
                                   <StackLayout x:Name="port1view" IsVisible="true" Margin="12,0,12,0"> 
 
+                                      
                               
                                    <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" Text="Add MTU"  />
 
 
 
-                                    
+
                                           
                                    <!-- PORT ID -->
                                    <Label Text="Service Port ID" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
@@ -515,51 +516,61 @@
 
                                    <!--  Snap Reads -->
 
-                                 <StackLayout x:Name="snapReadsContainer" >  
+                                 <StackLayout x:Name="snapReadsContainer" Orientation="Vertical" HorizontalOptions="FillAndExpand" >  
                                   <Label Text="Snap Reads" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                          />
                                       
                                   
-                                 <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                      <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" x:Name="snapReadsSubContainer" BackgroundColor="White"  >
-                                                <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                      <!-- PORT ID -->
-                                                    <Label Text="10" Margin="0,4,0,0" x:Name="snapReadsLabel"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
-                                             />
-                                                     <StackLayout  
-                                                    HorizontalOptions="FillAndExpand" 
-                                                    Margin="0,4,0,4"
-                                                    HeightRequest="40" 
-                                                    x:Name="snapReadsSliderContainer">
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" x:Name="snapReadsSubContainer" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                          <!-- PORT ID -->
+                                                        <Label Text="10" Margin="0,4,0,0" x:Name="snapReadsLabel"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
+                                                 />
+                                                         <StackLayout  
+                                                        HorizontalOptions="FillAndExpand" 
+                                                        Margin="0,4,0,4"
+                                                        HeightRequest="40" 
+                                                        x:Name="snapReadsSliderContainer">
 
-                                                        <StackLayout
-                                                            Orientation="Vertical"
-                                                            HeightRequest="40"
-                                                            HorizontalOptions="FillAndExpand"
-                                                            VerticalOptions="CenterAndExpand">
-                                                            <Slider
-                                                                x:Name="snapReadsSlider"
-                                                                Minimum="0"
-                                                                Maximum="24"
-                                                                HeightRequest="40"
-                                                                Value="10"
-                                                                Margin="0,-20,0,0"
+                                                            <StackLayout
+                                                                Orientation="Horizontal"
+                                                                HeightRequest="48"
                                                                 HorizontalOptions="FillAndExpand"
-                                                                VerticalOptions="CenterAndExpand"/>
-                                                        </StackLayout>
-                                                         
-                                                         
-                                                </StackLayout>
+                                                                VerticalOptions="CenterAndExpand">
+                                                                <Slider
+                                                                    x:Name="snapReadsSlider"
+                                                                    Minimum="0"
+                                                                    Maximum="24"
+                                                                    HeightRequest="40"
+                                                                    Value="10"
+                                                                    Margin="0,-24,0,0"
+                                                                    HorizontalOptions="FillAndExpand"
+                                                                    VerticalOptions="CenterAndExpand"/>
+                                                             <Image Source="checkbox_on" x:Name="Checkbox_SnapReads_Port1"  Margin="0,0,0,24" WidthRequest="48" HeightRequest="48">
+                                                
+                                                             </Image>
+                                                            
+                                                            </StackLayout>
+                                                             
+                                                             
+                                                    </StackLayout>
 
-                                                </StackLayout>
-                                         </Frame> 
+                                                    </StackLayout>
+                                             </Frame> 
+
+                                           
+                                        </Frame>
+
+                                         
+                                                
+                                      
+                                           
                                         
-                                    </Frame>
-                                    
-                                  </StackLayout>
+                                      </StackLayout>
                                 
-
-
+                                  
+                              
 
                                 
                                   <!--  2-Way -->
@@ -834,52 +845,58 @@
 
                                 
 
-                                   <!--  Snap Reads -->
+                                      <!--  Snap Reads -->
 
-                                    <StackLayout x:Name="snapReads2Container" >
-                                        <Label Text="Snap Reads" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                 <StackLayout x:Name="snapReads2Container" Orientation="Vertical" HorizontalOptions="FillAndExpand" >  
+                                  <Label Text="Snap Reads" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                          />
+                                      
+                                  
+                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                          <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" x:Name="snapReads2SubContainer" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                          <!-- PORT ID -->
+                                                        <Label Text="10" Margin="0,4,0,0" x:Name="snapReads2Label"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
+                                                 />
+                                                         <StackLayout  
+                                                        HorizontalOptions="FillAndExpand" 
+                                                        Margin="0,4,0,4"
+                                                        HeightRequest="40" 
+                                                        x:Name="snapReads2SliderContainer">
 
-
-                                        <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" x:Name="snapReads2SubContainer" BackgroundColor="White"  >
-                                                <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                    <!-- PORT ID -->
-                                                    <Label Text="10" Margin="0,4,0,0" x:Name="snapReads2Label"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
-                                             />
-                                                    <StackLayout  
-                                                    HorizontalOptions="FillAndExpand" 
-                                                    Margin="0,4,0,4"
-                                                    HeightRequest="40" 
-                                                    x:Name="snapReads2SliderContainer">
-
-                                                        <StackLayout
-                                                            Orientation="Vertical"
-                                                            HeightRequest="40"
-                                                            HorizontalOptions="FillAndExpand"
-                                                            VerticalOptions="CenterAndExpand">
-                                                            <Slider
-                                                                x:Name="snapReads2Slider"
-                                                                Minimum="0"
-                                                                Maximum="20"
-                                                                HeightRequest="40"
-                                                                Value="10"
-                                                                Margin="0,-20,0,0"
+                                                            <StackLayout
+                                                                Orientation="Horizontal"
+                                                                HeightRequest="48"
                                                                 HorizontalOptions="FillAndExpand"
-                                                                VerticalOptions="CenterAndExpand"/>
-                                                        </StackLayout>
-
-
+                                                                VerticalOptions="CenterAndExpand">
+                                                                <Slider
+                                                                    x:Name="snapReads2Slider"
+                                                                    Minimum="0"
+                                                                    Maximum="24"
+                                                                    HeightRequest="40"
+                                                                    Value="10"
+                                                                    Margin="0,-24,0,0"
+                                                                    HorizontalOptions="FillAndExpand"
+                                                                    VerticalOptions="CenterAndExpand"/>
+                                                             <Image Source="checkbox_on" x:Name="Checkbox_SnapReads_Port2"  Margin="0,0,0,24" WidthRequest="48" HeightRequest="48">
+                                                
+                                                             </Image>
+                                                            
+                                                            </StackLayout>
+                                                             
+                                                             
                                                     </StackLayout>
 
-                                                </StackLayout>
-                                            </Frame>
+                                                    </StackLayout>
+                                             </Frame> 
 
+                                           
                                         </Frame>
 
-                                    </StackLayout>
 
-
+                                      </StackLayout>
+                                
+                                  
 
 
 
@@ -1497,7 +1514,7 @@
         <!-- POP UP START -->
 
 
-         <ContentView   Scale="1.1" IsVisible="true" Margin="-21"
+         <ContentView   Scale="1.1" IsVisible="false" Margin="-21"
                         HeightRequest="396" 
                         x:Name="Popup_start" 
                         

@@ -325,11 +325,17 @@ namespace aclara_meters.view
                         background_scan_page.IsEnabled = true;
                         label_read.Text = "Press Button to Start";
 
-                        #region Port 2 Buttons Listener
+                    #region Port 2 Buttons Listener
 
                         SetPort2Buttons();
 
-                        #endregion
+                    #endregion
+
+                    #region Snap Read CheckBox Controller
+
+                        CheckBoxController();
+
+                    #endregion
 
                     }));
               }
@@ -339,6 +345,120 @@ namespace aclara_meters.view
 
 
         }
+
+        #region Port 2 status vars
+        bool snapRead1Status = false;
+        bool snapRead2Status = false;
+        #endregion
+
+        #region Checkbox Controller 
+        private void CheckBoxController()
+        {
+
+            #region Port 1 
+            snapReadsContainer.IsVisible = true;
+            snapReadsContainer.IsEnabled = true;
+            snapReadsSubContainer.IsEnabled = true;
+            snapReadsSlider.IsEnabled = false;
+            snapReadsSubContainer.Opacity = 0.8;
+            Checkbox_SnapReads_Port1.Source = "checkbox_off";
+            #endregion
+
+            #region Port 2
+            snapReads2Container.IsVisible = true;
+            snapReads2Container.IsEnabled = true;
+            snapReads2SubContainer.IsEnabled = true;
+            snapReads2Slider.IsEnabled = false;
+            snapReads2SubContainer.Opacity = 0.8;
+            Checkbox_SnapReads_Port2.Source = "checkbox_off";
+            #endregion
+
+            #region Start Slider Logic ? Should come from globals...
+
+            int snapReadsDefault = 10;
+            int snapReadsFromMem = 6;
+
+            snapReadsStep = 1.0;
+            snapReadsSlider.ValueChanged += OnSnapReadsSliderValueChanged;
+
+            if (snapReadsDefault > -1)
+            {
+                snapReadsSlider.Value = snapReadsDefault;
+            }
+            else
+            {
+                snapReadsSlider.Value = snapReadsFromMem;
+            }
+
+      
+            snapReads2Step = 1.0;
+            snapReads2Slider.ValueChanged += OnSnapReads2SliderValueChanged;
+
+            if (snapReadsDefault > -1)
+            {
+                snapReads2Slider.Value = snapReadsDefault;
+            }
+            else
+            {
+                snapReads2Slider.Value = snapReadsFromMem;
+            }
+
+
+            #endregion
+
+
+            #region  Here lies the logic...
+
+            Checkbox_SnapReads_Port1.GestureRecognizers.Add(new TapGestureRecognizer
+             {
+                 Command = new Command(() =>
+                 {
+                    if (!snapRead1Status)
+                     {
+                         Checkbox_SnapReads_Port1.Source = "checkbox_on";
+                         snapReadsSlider.IsEnabled = true;
+                         snapReadsSubContainer.Opacity = 1;
+                         snapRead1Status = true;
+                     }
+                     else
+                     {
+                         Checkbox_SnapReads_Port1.Source = "checkbox_off";
+                         snapReadsSlider.IsEnabled = false;
+                         snapReadsSubContainer.Opacity = 0.8;
+                         snapRead1Status = false;
+                     }
+                 }),
+             });
+
+
+            Checkbox_SnapReads_Port2.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(() =>
+                {
+                    if (!snapRead2Status)
+                    {
+                        Checkbox_SnapReads_Port2.Source = "checkbox_on";
+                        snapReads2Slider.IsEnabled = true;
+                        snapReads2SubContainer.Opacity = 1;
+                        snapRead2Status = true;
+                    }
+                    else
+                    {
+                        Checkbox_SnapReads_Port2.Source = "checkbox_off";
+                        snapReads2Slider.IsEnabled = false;
+                        snapReads2SubContainer.Opacity = 0.8;
+                        snapRead2Status = false;
+                    }
+                }),
+            });
+
+
+            #endregion
+
+        }
+
+    #endregion
+
 
         #region Port 2 status vars
         bool port2status = false;
@@ -380,7 +500,6 @@ namespace aclara_meters.view
 
                 }),
             });
-
 
         }
 
