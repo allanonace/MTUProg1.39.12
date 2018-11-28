@@ -443,37 +443,19 @@ namespace aclara_meters.view
 
                 foreach (InterfaceParameters intparam in para)
                 {
-                    if (intparam.Name.Equals("InstallationConfirmationStatus"))
-                    {
+                    if (intparam.Name.Equals("InstallationConfirmationStatus") && intparam.Value.Equals("NOT CONFIRMED"))
+
                         enc = true;
-                  
-                        if(intparam.Value!=null)
-                        {
-                            resultMsg = intparam.Value;
-                        }else{
-                            enc = false;
-                        }
-
-                        /*
-                         * 
-                        string condition = intparam.Conditional;
-                        condition = condition.Replace("MemoryMap.InstallationConfirmationRequest=", "");
-                        if(condition.Equals("true"))
-                        {
-                            resultMsg = "Successful Installation done";
-                        }else{
-                            resultMsg = "Error during Installation";
-                        }
-                        
-                        */
-
-                    }
+    
+                    
 
                 }
                
-                if(!enc)
+                if(enc)
                     resultMsg = "Error during Installation";
-
+                else
+                    resultMsg = "Successful Installation";
+                
                 byte[] readData;
 
                 Task.Delay(100).ContinueWith(t =>
