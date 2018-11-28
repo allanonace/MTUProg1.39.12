@@ -1101,6 +1101,10 @@ namespace aclara_meters.view
                             OnCaseReplaceMTUReplaceMeter();
                             break;
 
+						case "InstallConfirm":
+							OnCaseInstallConfirm();
+                            break;
+                     
                     }
                 }
                 catch (Exception w1)
@@ -1110,6 +1114,41 @@ namespace aclara_meters.view
             }else{
                 Application.Current.MainPage.DisplayAlert("Alert", "Connect to a device and retry", "Ok");
             }
+        }
+
+        private void OnCaseInstallConfirm()
+        {
+            background_scan_page.Opacity = 1;
+            background_scan_page_detail.Opacity = 1;
+            background_scan_page.IsEnabled = true;
+            background_scan_page_detail.IsEnabled = true;
+
+            if (Device.Idiom == TargetIdiom.Phone)
+            {
+                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+            }
+
+            Task.Delay(200).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                navigationDrawerList.SelectedItem = null;
+                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewInstallConfirmation(dialogsSaved), false);
+                background_scan_page.Opacity = 1;
+                background_scan_page_detail.Opacity = 1;
+                if (Device.Idiom == TargetIdiom.Tablet)
+                {
+                    ContentNav.Opacity = 1;
+                    ContentNav.IsVisible = true;
+                }
+                else
+                {
+                    ContentNav.Opacity = 0;
+                    ContentNav.IsVisible = false;
+                }
+                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+            }));
+
         }
 
         private void OnCaseReplaceMTUReplaceMeter()
