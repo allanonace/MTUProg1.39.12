@@ -468,11 +468,14 @@ namespace MTUComm
 
         public class AddMtuArgs : EventArgs
         {
-            public AddMtuForm form;
+            public AMemoryMap MemoryMap { get; private set; }
 
-            public AddMtuArgs(AddMtuForm form)
+            public Mtu MtuType { get; private set; }
+
+            public AddMtuArgs(AMemoryMap memorymap, Mtu mtype)
             {
-                this.form = form;
+                MemoryMap = memorymap;
+                MtuType = mtype;
             }
         }
 
@@ -570,8 +573,11 @@ namespace MTUComm
             dynamic GlobalsConditions = form.conditions.globals;
 
             // Prepare memory map
-            byte[] memory = new byte[400];
-            dynamic map = new MemoryMap.MemoryMap ( memory, "31xx32xx" ); // TODO: identify map by mtu type
+            String memory_map_type = configuration.GetMemoryMapTypeByMtuId((int)MtuForm.mtuBasicInfo.Type);
+            int memory_map_size = configuration.GetmemoryMapSizeByMtuId((int)MtuForm.mtuBasicInfo.Type);
+
+            byte[] memory = new byte[memory_map_size];
+            dynamic map = new MemoryMap.MemoryMap ( memory, memory_map_type);
 
             // meter type
             Meter selectedMeter = (Meter)form.Meter.getValue();
@@ -750,13 +756,59 @@ namespace MTUComm
             #endregion
 
             #region Read MTU
+
+            lexi.Write(64, new byte[] { 1 });
+            Thread.Sleep(1000);
+
+            byte[] buffer = new byte[1024];
+
+            System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
+
+            try
+            {
+                if (memory_map_size > 255)
+                {
+                    System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
+                    System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
+                }
+
+                if (memory_map_size > 320)
+                {
+                    //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
+                }
+
+                if (memory_map_size > 960)
+                {
+                    System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
+                }
+
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            MemoryMap.MemoryMap readMemoryMap = new MemoryMap.MemoryMap(buffer, memory_map_type);
             addMtuLog.LogReadMtu();
             #endregion
 
+            #region Result
             addMtuLog.Save();
-
-            AddMtuArgs args = new AddMtuArgs (form);
-            OnAddMtu ( this, args );
+            try
+            {
+                AddMtuArgs addMtuArgs = new AddMtuArgs(readMemoryMap, mtu);
+                OnAddMtu(this, addMtuArgs);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                OnError(this, TranslateException(e));
+            }
+            #endregion
         }
 
         public void WriteModifiedRegisters(MemoryMap.MemoryMap map)

@@ -2428,6 +2428,8 @@ namespace aclara_meters.view
 
         private void AddMtu_Action()
         {
+            #region Form Parameters
+
             dynamic MtuConditions = addMtuForm.conditions.mtu;
             dynamic GlobalsConditions = addMtuForm.conditions.globals;
 
@@ -2528,28 +2530,23 @@ namespace aclara_meters.view
             }
             addMtuForm.AddParameter(FIELD.OPTIONAL_PARAMS, optionalParams);
 
-            //Create Ation when opening Form
-            // TODO: usuario real
+            #endregion
+
+            #region Add MTU Action
+
             MTUComm.Action add_mtu = new MTUComm.Action(
                 config: FormsApp.config,
                 serial: FormsApp.ble_interface,
                 actiontype: MTUComm.Action.ActionType.AddMtu,
                 user: FormsApp.CredentialsService.UserName);
 
-            // Add parameters to the action
             add_mtu.AddParameter(addMtuForm);
+
+            #region On Add MTU Action finish
 
             add_mtu.OnFinish += ((s, e) =>
             {
-                Console.WriteLine("Action Succefull");
-                Console.WriteLine("Press Key to Exit");
-                //Console.WriteLine(s.ToString());
-
-                /*foreach(Parameter param in e.Result.getParameters()){
-                    Console.WriteLine(param.getLogDisplay() + ":" + param.getValue());
-                }*/
-
-                FinalReadListView = new List<ReadMTUItem>(); // Saves the data to view
+                FinalReadListView = new List<ReadMTUItem>();
 
                 Parameter[] paramResult = e.Result.getParameters();
 
@@ -2563,35 +2560,25 @@ namespace aclara_meters.view
                         {
                             mtu_type = Int32.Parse(p.Value.ToString());
                         }
-
                     }
                     catch (Exception e5)
                     {
                         Console.WriteLine(e5.StackTrace);
                     }
-
                 }
-
 
                 InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, "ReadMTU");
 
                 foreach (InterfaceParameters parameter in interfacesParams)
                 {
-
                     if (parameter.Name.Equals("Port"))
                     {
-
-
-
-                        ActionResult[] ports = e.Result.getPorts(); //parameter.Parameters.ToArray()
-
+                        ActionResult[] ports = e.Result.getPorts();
 
                         for (int i = 0; i < ports.Length; i++)
                         {
-
                             foreach (InterfaceParameters port_parameter in parameter.Parameters)
                             {
-
                                 Parameter param = null;
 
                                 if (port_parameter.Name.Equals("Description"))
@@ -2607,11 +2594,9 @@ namespace aclara_meters.view
                                         isMeter = "true",
                                         Description = "Port " + i + ": " + param.getValue() //parameter.Value
                                     });
-
                                 }
                                 else
                                 {
-
                                     if (port_parameter.Source != null)
                                     {
                                         try
@@ -2622,8 +2607,8 @@ namespace aclara_meters.view
                                         {
                                             Console.WriteLine(e2.StackTrace);
                                         }
-
                                     }
+
                                     if (param == null)
                                     {
                                         param = ports[i].getParameterByTag(port_parameter.Name);
@@ -2631,8 +2616,6 @@ namespace aclara_meters.view
 
                                     if (param != null)
                                     {
-
-
                                         FinalReadListView.Add(new ReadMTUItem()
                                         {
                                             Title = "\t\t\t\t\t" + param.getLogDisplay() + ":",
@@ -2646,12 +2629,9 @@ namespace aclara_meters.view
                                 }
                             }
                         }
-
-
                     }
                     else
                     {
-
                         Parameter param = null;
 
                         if (parameter.Source != null)
@@ -2662,10 +2642,10 @@ namespace aclara_meters.view
                             }
                             catch (Exception e3)
                             {
-                                Console.WriteLine(e3.StackTrace); //{System.IndexOutOfRangeException: Index was outside the bounds of the array.t aclara_meters.view.AclaraViewReadMTU.< ThreadProcedureMTUCOMMAction > b__19_0(System.Object s, MTUComm.Action + ActionFinishArgs e)[0x0031d] in / Users / ma.jimenez / Desktop / Proyectos / proyecto_aclara / aclara_meters / view / AclaraViewReadMTU.xaml.cs:385 }
+                                Console.WriteLine(e3.StackTrace);
                             }
-
                         }
+
                         if (param == null)
                         {
                             param = e.Result.getParameterByTag(parameter.Name);
@@ -2673,7 +2653,6 @@ namespace aclara_meters.view
 
                         if (param != null)
                         {
-
                             FinalReadListView.Add(new ReadMTUItem()
                             {
                                 Title = param.getLogDisplay() + ":",
@@ -2681,20 +2660,15 @@ namespace aclara_meters.view
                                 Height = "64",
                                 isMTU = "true",
                                 isMeter = "false",
-                                Description = param.Value //parameter.Value
+                                Description = param.Value
                             });
                         }
-
                     }
                 }
-
-
-
 
                 Task.Delay(100).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
-
                     _userTapped = false;
                     bg_read_mtu_button.NumberOfTapsRequired = 1;
                     ChangeLowerButtonImage(false);
@@ -2702,19 +2676,16 @@ namespace aclara_meters.view
                     indicator.IsVisible = false;
                     label_read.Text = "Successful MTU write";
                     background_scan_page.IsEnabled = true;
-
-                    /*
+                    
                     ReadMTUChangeView.IsVisible = false;
                     listaMTUread.IsVisible = true;
                     listaMTUread.ItemsSource = FinalReadListView;
-                    */
-
                 }));
-
-
-
             });
 
+            #endregion
+
+            #region On Add MTU Action error
 
             add_mtu.OnError += ((s, e) =>
             {
@@ -2744,9 +2715,12 @@ namespace aclara_meters.view
 
             });
 
+            #endregion
+
             // Launch the action!
             add_mtu.Run(addMtuForm);
 
+            #endregion
         }
 
         #endregion

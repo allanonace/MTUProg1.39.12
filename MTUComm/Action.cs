@@ -718,8 +718,8 @@ namespace MTUComm
 
         private void Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)
         {
-            AddMtuForm form = e.form;
-            ActionFinishArgs args = new ActionFinishArgs(null); // TODO: add add mtu result
+            ActionResult result = ReadMTU(e.MemoryMap, e.MtuType);
+            ActionFinishArgs args = new ActionFinishArgs(result);
             OnFinish(this, args);
         }
 
