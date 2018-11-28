@@ -13,6 +13,7 @@ namespace MTUComm
         #region Constants
 
         private const string PREFIX_AUX     = "_AllowEmptyField";
+        private const string EXCEP_NAME_INI = "#";
         private const string EXCEP_NAME_SGN = "_";
         private const string EXCEP_VALIDATE = "Deserializing XML has failed due to validate required fields [ " + EXCEP_NAME_SGN + " ]";
 
@@ -294,50 +295,97 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                // Capture validation error with element name and launch new exception
+                // Capture validation error with element name and launch a new exception
                 throw new MemoryMapXmlValidationException ( EXCEP_VALIDATE.Replace ( EXCEP_NAME_SGN, e.Message ) );
             }
             return deserialize;
         }
 
-        private static bool DeserializeXml_Logic ( dynamic instance, PropertyInfo[] psInfo, int index = 1 )
+        // TO-DO: Valida bien la falta de registros de los Overload, pero solo devuelve bien el error
+        // cuando no hay ningun elemento register listado, porque si se indica uno vacio ( <Register/> )
+        // el mensaje de error resultante devuelto es "Value cannot be null"
+        private static bool DeserializeXml_Logic ( dynamic instance, PropertyInfo[] psInfo, string index = EXCEP_NAME_INI )
         {
-            Type typeAt = typeof ( XmlElementAttribute );
-            Type typeInstance = instance.GetType ();
+            Type typeAtrArray   = typeof ( XmlArrayAttribute );
+            Type typeAtrElement = typeof ( XmlElementAttribute );
+            Type typeAtrText    = typeof ( XmlTextAttribute );
+            Type typeInstance   = instance.GetType ();
 
-            XmlElementAttribute attribute;
+            XmlArrayAttribute   atrArray;
+            XmlElementAttribute atrElement;
+            XmlTextAttribute    atrText;
             foreach ( PropertyInfo pinfo in psInfo )
             {
-                // We only want to work with XmlElements, without not XmlIgnore properties
-                if ( ( attribute = ( XmlElementAttribute )pinfo.GetCustomAttribute ( typeAt ) ) != null )
+                string name  = pinfo.Name;
+                object value = pinfo.GetValue ( instance );
+
+                // [XmlArray("...")]
+                if ( ( atrArray = ( XmlArrayAttribute )pinfo.GetCustomAttribute ( typeAtrArray ) ) != null )
                 {
-                    object value = pinfo.GetValue ( instance );
+                    Array ar = ( Array )value;
+
+                    if ( ! atrArray.IsNullable &&
+                         ( ar == null || ar.Length == 0 || ar.GetValue ( 0 ) == null ) )
+                        throw new Exception ( name + " " + index + " | Array" );
+
+                    int i = 0;
+                    foreach ( var element in ar )
+                        DeserializeXml_Logic (
+                            element,
+                            element.GetType().GetProperties (),
+                            index + ( ( string.Equals ( index, EXCEP_NAME_INI ) ) ? string.Empty : EXCEP_NAME_SGN ) + ++i );
+                }
+
+                // [XmlElement("...")]
+                else if ( ( atrElement = ( XmlElementAttribute )pinfo.GetCustomAttribute ( typeAtrElement ) ) != null )
+                {
+                    // NOTE: "value is Array" not works
+                    bool isArray = pinfo.PropertyType.IsArray;
 
                     // Element not nullable and without value ( empty or null )
-                    if ( ! attribute.IsNullable &&
-                         ( value is string &&
-                           // Empty string elements
-                           ( string.IsNullOrEmpty ( ( string )value ) ||
-                           // Int elements with string auxiliary method to allow correct deserialization
-                             string.Equals ( value, MemRegister.ERROR_STR ) ||
-                           // Bool elements with string auxiliary method to allow correct deserialization
-                             pinfo.Name.Contains ( PREFIX_AUX ) &&
-                             typeInstance.GetProperty (
-                                 pinfo.Name.Substring ( 0, pinfo.Name.IndexOf ( PREFIX_AUX ) ) )
-                                 .GetValue ( instance ) == MemRegister.ERROR_VAL ) ||
-                           // Value of different type than string, for arrays mainly
-                           ! ( value is string ) && value == null ) )
-                        throw new Exception ( attribute.ElementName + " #" + index );
+                    if ( ! atrElement.IsNullable )
+                    {
+                        if ( value is string )
+                        {
+                            // Empty string elements
+                            if ( string.IsNullOrEmpty ( ( string )value ) )
+                                throw new Exception ( name + " " + index + " | String" );
+
+                            // Int elements with string auxiliary method to allow correct deserialization
+                            if ( string.Equals ( value, MemRegister.ERROR_STR ) )
+                                throw new Exception ( name + " " + index + " | Int" );
+
+                            // Bool elements with string auxiliary method to allow correct deserialization
+                            if ( name.Contains ( PREFIX_AUX ) &&
+                                 typeInstance.GetProperty (
+                                    ( name = name.Substring ( 0, name.IndexOf ( PREFIX_AUX ) ) ) )
+                                 .GetValue ( instance ) == MemRegister.ERROR_VAL )
+                                throw new Exception ( name + " " + index + " | Bool" );
+                        }
+
+                        // Empty array
+                        else if ( isArray &&
+                                  ( value == null || ( ( Array )value ).Length == 0 ) )
+                                throw new Exception ( name + " " + index + " | Array" );
+                    }
 
                     // Element is an array
-                    else if ( value != null &&
-                              pinfo.PropertyType.IsArray )
+                    if ( isArray )
                     {
-                        // Iterate for each entry of registers or overloads array
                         int i = 0;
-                        foreach ( var register in ( Array )value )
-                            DeserializeXml_Logic ( register, register.GetType().GetProperties (), ++i );
+                        foreach ( var element in ( Array )value )
+                            DeserializeXml_Logic (
+                                element,
+                                element.GetType().GetProperties (),
+                                index + ( ( string.Equals ( index, EXCEP_NAME_INI ) ) ? string.Empty : EXCEP_NAME_SGN ) + ++i );
                     }
+                }
+
+                // [XmlText]
+                else if ( ( atrText = ( XmlTextAttribute )pinfo.GetCustomAttribute ( typeAtrText ) ) != null )
+                {
+                    if ( string.IsNullOrEmpty ( ( string )value ) )
+                        throw new Exception ( name + " " + index + " | Text" );
                 }
             }
 

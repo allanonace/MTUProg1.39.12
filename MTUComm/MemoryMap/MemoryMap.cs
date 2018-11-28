@@ -755,7 +755,7 @@ namespace MTUComm.MemoryMap
             // Selected dynamic member not exists
             Console.WriteLine("Set " + id + ": Error - Selected register is not loaded");
 
-            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
+            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + " [ GetProperty ]: " + id);
         }
 
         public MemoryRegister<T> GetProperty<T>(string id)
@@ -766,7 +766,7 @@ namespace MTUComm.MemoryMap
             // Selected dynamic member not exists
             Console.WriteLine("Set " + id + ": Error - Selected register is not loaded");
 
-            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + ": " + id);
+            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + " [ GetProperty<> ]: " + id);
         }
 
         public MemoryRegister<int> GetProperty_Int(string id)
@@ -808,7 +808,7 @@ namespace MTUComm.MemoryMap
             if ( this.registersObjs.ContainsKey ( id ) )
                 this.registersObjs[ id ].used = true;
 
-            throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + ": " + id );
+            throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + " [ Set Modified ]: " + id );
         }
 
         public void SetRegisterNotModified ( string id )
@@ -816,7 +816,7 @@ namespace MTUComm.MemoryMap
             if ( this.registersObjs.ContainsKey ( id ) )
                 this.registersObjs[ id ].used = false;
 
-            throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + ": "  + id );
+            throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + " [ Set Not Modified ]: " + id );
         }
 
         public MemoryRegisterDictionary GetModifiedRegisters ()

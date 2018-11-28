@@ -32,7 +32,7 @@ namespace MTUComm.MemoryMap
 
                 // Selected dynamic member not exists
                 Console.WriteLine ( "Get " + id + ": Error - " + MemoryMap.EXCEP_SET_USED );
-                throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + ": " + id );
+                throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + " [ Indexer ]: " + id );
             }
         }
 
@@ -102,7 +102,7 @@ namespace MTUComm.MemoryMap
 
             // Selected dynamic member not exists
             Console.WriteLine ( "Set " + id + ": Error - Selected register is not loaded" );
-            throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + ": " + id );
+            throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + " [ Set ]: " + id );
         }
 
         public override bool TryGetMember ( GetMemberBinder binder, out object result )
@@ -131,7 +131,7 @@ namespace MTUComm.MemoryMap
 
             // Selected dynamic member not exists
             Console.WriteLine ( "Get " + id + ": Error - Selected register is not loaded" );
-            throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + ": " + id );
+            throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + " [ Get ]: " + id );
         }
 
         #endregion
