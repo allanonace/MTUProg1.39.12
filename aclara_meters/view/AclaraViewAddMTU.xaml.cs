@@ -324,9 +324,64 @@ namespace aclara_meters.view
                         indicator.IsVisible = false;
                         background_scan_page.IsEnabled = true;
                         label_read.Text = "Press Button to Start";
+
+                        #region Port 2 Buttons Listener
+
+                        SetPort2Buttons();
+
+                        #endregion
+
                     }));
               }
+                                             
             ));
+
+
+
+        }
+
+        #region Port 2 status vars
+        bool port2status = false;
+        #endregion
+
+        private void SetPort2Buttons()
+        {
+            block_view_port2.IsVisible = false;
+
+
+            enablePort2.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(() => 
+                {
+                    if(port2status)
+                    {
+                        enablePort2.Text = "Enable Port 2";
+                        enablePort2.TextColor = Color.White;
+                        block_view_port2.IsVisible = false;
+                        port2status = false;
+                    }else
+                    {
+                        enablePort2.Text = "Disable Port 2";
+                        enablePort2.TextColor = Color.Gold;
+                        block_view_port2.IsVisible = true;
+                        port2status = true;
+                    }
+                }),
+            });
+
+            copyPort1.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(() =>
+                {
+                    #region Do The Port 1 Copy here
+
+                     
+                    #endregion
+
+                }),
+            });
+
+
         }
 
         private void InitializeAddMtuForm()
