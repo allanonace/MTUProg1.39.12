@@ -194,15 +194,15 @@
 
                                      <StackLayout  IsVisible="{Binding isMeter}" >
                                        <Label Text="{Binding Description}" Margin="14,4,0,0" VerticalOptions="Center"  
-                                              Font="Bold,20"/> 
+                                              Font="Bold,16"/> 
                                         <BoxView BackgroundColor="#7a868c" HeightRequest="1" Margin="8,-4,24,0" />
                           
                                         </StackLayout>
                                    
                                       <StackLayout IsVisible="{Binding isMTU}">       
                                             <Label Text="{Binding Title}" Margin="14,0,0,0" VerticalOptions="Center" 
-                                                   Font="Bold,20" />
-                                            <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" 
+                                                   Font="Bold,18" />
+                                            <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="16" 
                                                    VerticalOptions="Center"/>
 
                                        </StackLayout>   
@@ -210,8 +210,8 @@
 
                                          <StackLayout IsVisible="{Binding isDetailMeter}">       
                                         <Label Text="{Binding Title}" Margin="36,0,0,0" VerticalOptions="Center" 
-                                               Font="Bold,19" />
-                                        <Label Text="{Binding Description}" Margin="36,-4,0,0" FontSize="17" 
+                                               Font="Bold,17" />
+                                        <Label Text="{Binding Description}" Margin="36,-4,0,0" FontSize="16" 
                                                VerticalOptions="Center"/>
 
                                         </StackLayout>   

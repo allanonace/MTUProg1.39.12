@@ -206,12 +206,28 @@ namespace aclara_meters.view
 
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action add_mtu = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.ReadMtu, user: FormsApp.CredentialsService.UserName);
+            MTUComm.Action add_mtu = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.InstallConfirmation, user: FormsApp.CredentialsService.UserName);
 
             //Define finish and error event handler
             //add_mtu.OnFinish += Add_mtu_OnFinish;
             //add_mtu.OnError += Add_mtu_OnError;
+            add_mtu.OnProgress += ((s, e) =>
+            {
+                string mensaje = e.Message;
 
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                   
+                    label_read.Text = mensaje;
+
+
+
+
+                });
+
+
+            });
+                                   
             add_mtu.OnFinish += ((s, e) => {
 
 
@@ -415,8 +431,49 @@ namespace aclara_meters.view
                     }
                 }
 
+                List <Interface> list = FormsApp.config.interfaces.Interfaces;
 
-                string resultMsg = "Successful MTU read";
+                ActionInterface action = FormsApp.config.interfaces.GetInterfaceByMtuIdAndAction(mtu_type,"ReadMTU");
+
+                List<InterfaceParameters> para = action.Parameters;
+
+                string resultMsg = "";
+
+                bool enc = false;
+
+                foreach (InterfaceParameters intparam in para)
+                {
+                    if (intparam.Name.Equals("InstallationConfirmationStatus"))
+                    {
+                        enc = true;
+                  
+                        if(intparam.Value!=null)
+                        {
+                            resultMsg = intparam.Value;
+                        }else{
+                            enc = false;
+                        }
+
+                        /*
+                         * 
+                        string condition = intparam.Conditional;
+                        condition = condition.Replace("MemoryMap.InstallationConfirmationRequest=", "");
+                        if(condition.Equals("true"))
+                        {
+                            resultMsg = "Successful Installation done";
+                        }else{
+                            resultMsg = "Error during Installation";
+                        }
+                        
+                        */
+
+                    }
+
+                }
+               
+                if(!enc)
+                    resultMsg = "Error during Installation";
+
                 byte[] readData;
 
                 Task.Delay(100).ContinueWith(t =>
