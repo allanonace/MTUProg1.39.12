@@ -14,6 +14,7 @@ using Xamarin.Forms;
 using Plugin.Settings;
 using Xml;
 using MTUComm;
+using Plugin.Multilingual;
 
 namespace aclara_meters.view
 {
@@ -488,7 +489,13 @@ namespace aclara_meters.view
                 //Console.WriteLine(result.ToString());
 
 
-                string resultMsg = "Timeout";
+
+               // extension.ProvideValue("Timeout");
+
+                string resultMsg = AppResources.Timeout;
+
+
+
                 Task.Delay(100).ContinueWith(t =>
                      Device.BeginInvokeOnMainThread(() =>
                      {

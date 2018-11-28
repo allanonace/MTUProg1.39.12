@@ -5,8 +5,8 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters"
                Title="{Binding PageTitle}"
-                    NavigationPage.HasBackButton="false"
-            
+               NavigationPage.HasBackButton="false"
+               xmlns:i18n="clr-namespace:aclara_meters.Helpers"
                x:Class="aclara_meters.view.AclaraViewInstallConfirmation">
 
 
@@ -164,7 +164,7 @@
 
                     <StackLayout >
                             
-                        <Label Margin="16,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Install Confirmation"  />
+                        <Label Margin="16,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="{i18n:Translate InstallConfirmation}"  />
 
                             
                         <Image Margin="-16,4,-16,0" WidthRequest="380"  HeightRequest="2" BackgroundColor="#6aa2b8"/>

@@ -24,6 +24,7 @@ using System.Linq;
 using System.Globalization;
 using Xamarin.Essentials;
 using Renci.SshNet.Sftp;
+using Plugin.Multilingual;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -174,7 +175,7 @@ namespace aclara_meters
                 Console.WriteLine(e.StackTrace);
             }
 
-
+            AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
 
 
 
