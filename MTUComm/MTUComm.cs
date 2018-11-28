@@ -45,7 +45,7 @@ namespace MTUComm
         public delegate void ReadMtuDataHandler(object sender, ReadMtuDataArgs e);
         public event ReadMtuDataHandler OnReadMtuData;
 
-        public delegate void AddMtuHandler(object sender, AddMtuArgs e);
+        public delegate ActionResult AddMtuHandler(object sender, AddMtuArgs e);
         public event AddMtuHandler OnAddMtu;
 
         public delegate void BasicReadHandler(object sender, BasicReadArgs e);
@@ -793,22 +793,22 @@ namespace MTUComm
             }
 
             MemoryMap.MemoryMap readMemoryMap = new MemoryMap.MemoryMap(buffer, memory_map_type);
-            addMtuLog.LogReadMtu();
-            #endregion
-
-            #region Result
-            addMtuLog.Save();
+            
             try
             {
                 AddMtuArgs addMtuArgs = new AddMtuArgs(readMemoryMap, mtu);
-                OnAddMtu(this, addMtuArgs);
+                ActionResult result = OnAddMtu(this, addMtuArgs);
+                addMtuLog.LogReadMtu(result);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 OnError(this, TranslateException(e));
             }
+
             #endregion
+
+            addMtuLog.Save();
         }
 
         public void WriteModifiedRegisters(MemoryMap.MemoryMap map)

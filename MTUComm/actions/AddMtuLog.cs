@@ -15,6 +15,7 @@ namespace MTUComm
         private dynamic form;
         private MTUBasicInfo mtuBasicInfo;
         private string logUri;
+        private Mtu mtu;
 
         private const string addMtuDisplay = "Add MTU";
         private const string addMtuType = "Program MTU";
@@ -65,7 +66,7 @@ namespace MTUComm
 
         public void LogAction()
         {
-            Mtu mtu = form.mtu;
+            this.mtu = form.mtu;
             dynamic MtuConditions = form.conditions.mtu;
             dynamic GlobalsConditions = form.conditions.globals;
             Meter meter = (Meter)form.Meter.getValue();
@@ -216,7 +217,7 @@ namespace MTUComm
                 string overlap = alarms.Overlap.ToString();
                 logger.logParameter(alarmSelection, new Parameter("Overlap", "Message Overlap", overlap));
 
-                if (mtu.MagneticTamper)
+                if (this.mtu.MagneticTamper)
                 {
                     string magneticTamper = "Disabled";
                     if (alarms.Magnetic)
@@ -226,7 +227,7 @@ namespace MTUComm
                     logger.logParameter(alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper", magneticTamper));
                 }
 
-                if (mtu.RegisterCoverTamper)
+                if (this.mtu.RegisterCoverTamper)
                 {
                     string registerCoverTamper = "Disabled";
                     if (alarms.RegisterCover)
@@ -236,7 +237,7 @@ namespace MTUComm
                     logger.logParameter(alarmSelection, new Parameter("RegisterCoverTamper", "Register Cover Tamper", registerCoverTamper));
                 }
 
-                if (mtu.TiltTamper)
+                if (this.mtu.TiltTamper)
                 {
                     string tiltTamper = "Disabled";
                     if (alarms.Tilt)
@@ -246,7 +247,7 @@ namespace MTUComm
                     logger.logParameter(alarmSelection, new Parameter("TiltTamper", "Tilt Tamper", tiltTamper));
                 }
 
-                if (mtu.ReverseFlowTamper)
+                if (this.mtu.ReverseFlowTamper)
                 {
                     string reverseFlow = "Disabled";
                     if (alarms.ReverseFlow)
@@ -258,7 +259,7 @@ namespace MTUComm
                     logger.logParameter(alarmSelection, new Parameter("FlowDirection", "Flow Direction", flowDirection));
                 }
 
-                if (mtu.InterfaceTamper)
+                if (this.mtu.InterfaceTamper)
                 {
                     // Add interfaace tamper log to AlarmSelection node
                     string interfaceTamper = "Disabled";
@@ -318,16 +319,33 @@ namespace MTUComm
             logger.logParameter(this.turnOnAction, new Parameter("MtuId", "MTU ID", this.mtuBasicInfo.Id));
         }
 
-        public void LogReadMtu()
+        public void LogReadMtu(ActionResult result)
         {
             logger.addAtrribute(this.readMtuAction, "display", readMtuDisplay);
             logger.addAtrribute(this.readMtuAction, "type", readMtuType);
 
-            logger.logParameter(this.readMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            /*logger.logParameter(this.readMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
             if (!string.IsNullOrEmpty(this.user))
             {
                 logger.logParameter(this.readMtuAction, new Parameter("User", "User", this.user));
+            }*/
+
+            InterfaceParameters[] parameters = Configuration.GetInstance().getLogInterfaceFields(this.mtu.Id, "ReadMTU");
+            foreach (InterfaceParameters parameter in parameters)
+            {
+                if (parameter.Name == "Port")
+                {
+                    ActionResult[] ports = result.getPorts();
+                    for (int i = 0; i < ports.Length; i++)
+                    {
+                        logger.logPort(i, this.readMtuAction, ports[i], parameter.Parameters.ToArray());
+                    }
+                }
+                else
+                {
+                    logger.logComplexParameter(this.readMtuAction, result, parameter);
+                }
             }
         }
 

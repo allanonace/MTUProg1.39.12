@@ -592,7 +592,7 @@ namespace MTUComm
             return result;
         }
 
-        private ActionResult ReadMTU(dynamic registers, Mtu mtutype)
+        public ActionResult ReadMTU(dynamic registers, Mtu mtutype)
         {
             InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtutype.Id, "ReadMTU");
 
@@ -716,11 +716,12 @@ namespace MTUComm
             return "";
         }
 
-        private void Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)
+        private ActionResult Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)
         {
             ActionResult result = ReadMTU(e.MemoryMap, e.MtuType);
             ActionFinishArgs args = new ActionFinishArgs(result);
             OnFinish(this, args);
+            return result;
         }
 
         private void Comm_OnBasicRead(object sender, MTUComm.BasicReadArgs e)

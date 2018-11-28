@@ -253,7 +253,7 @@ namespace MTUComm
                 parent.Add(action);
         }
 
-        private void logPort(int portnumber, XElement parent, ActionResult result, InterfaceParameters[] parameters)
+        public void logPort(int portnumber, XElement parent, ActionResult result, InterfaceParameters[] parameters)
         {
             XElement port = new XElement("Port");
 
@@ -466,7 +466,7 @@ namespace MTUComm
             return path;
         }
 
-        private void logComplexParameter(XElement parent, ActionResult result, InterfaceParameters parameter)
+        public void logComplexParameter(XElement parent, ActionResult result, InterfaceParameters parameter)
         {
             Parameter param = null;
 
