@@ -543,7 +543,7 @@ namespace MTUComm.MemoryMap
             return difs.ToArray ();
         }
 
-        public bool ValidateModifiedRegisters_Bool ( MemoryMap otherMap )
+        public bool ValidateModifiedRegisters ( MemoryMap otherMap )
         {
             return ( this.GetModifiedRegistersDifferences ( otherMap ).Length == 0 );
         }

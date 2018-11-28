@@ -793,7 +793,19 @@ namespace MTUComm
             }
 
             MemoryMap.MemoryMap readMemoryMap = new MemoryMap.MemoryMap(buffer, memory_map_type);
-            
+
+            #region Check
+            List<string> diff = new List<string>(map.GetModifiedRegistersDifferences(readMemoryMap));
+            if (diff.Count > 1 || (diff.Count == 1 && !diff.Contains("EncryptionKey")))
+            {
+                // ERROR
+            }
+            else
+            {
+                // OK
+            }
+            #endregion
+
             try
             {
                 AddMtuArgs addMtuArgs = new AddMtuArgs(readMemoryMap, mtu);
