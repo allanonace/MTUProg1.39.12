@@ -713,14 +713,13 @@ namespace aclara_meters.view
 
             #region Cancel reason
 
-            cancelReasonPicker.ItemsSource = new List<string> ()
-            {
-                "Complete",
-                "Cancel",
-                "Skip",
-                "Not Home",
-                "Other"
-            };
+            // Load cancel reasons from Global.xml
+            List<string> cancelReasons = this.config.global.Cancel;
+
+            // Add "Other" option
+            cancelReasons.Add("Other");
+
+            cancelReasonPicker.ItemsSource = cancelReasons;
 
             #endregion
         }
