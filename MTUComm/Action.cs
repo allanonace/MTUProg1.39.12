@@ -737,10 +737,10 @@ namespace MTUComm
             return mUser;
         }
 
-        public void Cancel()
+        public void Cancel(string cancelReason="410 DR Defective Register")
         {
             canceled = true;
-            logger.logCancel(this, "User Cancelled", "410 DR Defective Register");
+            logger.logCancel(this, "User Cancelled", cancelReason);
 
         }
 

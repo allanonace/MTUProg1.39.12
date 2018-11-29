@@ -2216,6 +2216,16 @@ namespace aclara_meters.view
 
         private void submit_send(object sender, EventArgs e)
         {
+            int selectedCancelReasonIndex = cancelReasonPicker.SelectedIndex;
+            string selectedCancelReason = "Other";
+
+            if (selectedCancelReasonIndex > -1)
+            {
+                selectedCancelReason = cancelReasonPicker.Items[cancelReasonPicker.SelectedIndex];
+            }
+
+            this.add_mtu.Cancel(selectedCancelReason);
+
             dialog_open_bg.IsVisible = false;
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
