@@ -297,7 +297,7 @@ namespace MTUComm
             //If MTU has changed or critical settings/configuration force detection rutine
             if (this.changedMTUSettings)
             {
-                DetectMeters();
+                RecoverMeterByMtuType();
             }
 
             DateTime start = DateTime.UtcNow.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
@@ -334,9 +334,7 @@ namespace MTUComm
         {
             //If MTU has changed or critical settings/configuration force detection rutine
             if (this.changedMTUSettings)
-            {
-                DetectMeters();
-            }
+                RecoverMeterByMtuType ();
 
             if (latest_mtu.Shipbit)
             {
@@ -450,9 +448,7 @@ namespace MTUComm
         {
             //If MTU has changed or critical settings/configuration force detection rutine
             if (this.changedMTUSettings || forcedetect)
-            {
-                DetectMeters();
-            }
+                RecoverMeterByMtuType ();
 
             String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
             int memory_map_size = configuration.GetmemoryMapSizeByMtuId(mtuType.Id);
@@ -804,14 +800,14 @@ namespace MTUComm
             }
         }
 
-        private void DetectMeters()
+        private void RecoverMeterByMtuType ()
         {
-            mtuType = configuration.GetMtuTypeById((int)latest_mtu.Type);
+            this.mtuType = configuration.GetMtuTypeById ( ( int )this.latest_mtu.Type );
 
-            for (int i = 0; i < mtuType.Ports.Count; i++)
-                latest_mtu.setPortType(i, mtuType.Ports[i].Type);
+            for ( int i = 0; i < mtuType.Ports.Count; i++ )
+                latest_mtu.setPortType ( i, mtuType.Ports[ i ].Type );
 
-            if (latest_mtu.isEncoder)
+            if ( latest_mtu.isEncoder )
             {
             }
         }

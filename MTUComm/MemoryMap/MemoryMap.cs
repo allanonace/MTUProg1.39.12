@@ -38,11 +38,11 @@ using Xml;
 ///      
 /// HEADERS:
 /// - Registers
-///   - Get. public T RegisterId_Get|CustomId ( MemoryRegister<T> MemoryRegister )
-///   - Set. public T RegisterId_Get|CustomId ( MemoryRegister<T> MemoryRegister, dynamic inputValue )
+///   - Get. public T RegisterId_Get|CustomId ( MemoryRegister<T> memoryRegister )
+///   - Set. public T RegisterId_Get|CustomId ( MemoryRegister<T> memoryRegister, dynamic inputValue )
 /// - Overloads
-///   - Get. public T RegisterId_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters ) -> ExpandoObject
-///   - Get. public T RegisterId_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic[] MemoryRegisters )
+///   - Get. public T RegisterId_Get|CustomId ( MemoryOverload<T> memoryOverload, dynamic memoryRegisters ) -> ExpandoObject
+///   - Get. public T RegisterId_Get|CustomId ( MemoryOverload<T> memoryOverload, dynamic[] memoryRegisters )
 /// </summary>
 namespace MTUComm.MemoryMap
 {
@@ -131,7 +131,7 @@ namespace MTUComm.MemoryMap
                 if ( list.Registers != null )
                     foreach ( MemRegister xmlRegister in list.Registers )
                     {
-                        try {
+                        //try {
 
                         // TEST: PARA PODER CAPTURAR LA EJECUCION EN UN REGISTRO CONCRETO
                         if ( string.Equals ( xmlRegister.Id, "P1MeterId" ) )
@@ -235,21 +235,24 @@ namespace MTUComm.MemoryMap
                         // filtered to only recover modified registers
                         this.registersObjs.Add(xmlRegister.Id, memoryRegister);
 
+                        /*
                         }
                         catch ( Exception e )
                         {
                             throw new MemoryMapParseXmlException ( "ERROR: " + e.Message );
                             Console.WriteLine ( "ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException );
                         }
+                        */
                     }
 
                 #endregion
+
                 #region Overloads
 
                 if ( list.Overloads != null )
                     foreach ( MemOverload xmlOverload in list.Overloads )
                     {
-                        try {
+                        //try {
 
                         RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlOverload.Type.ToUpper () );
                         Type SysType = typeof(System.Object);
@@ -287,13 +290,15 @@ namespace MTUComm.MemoryMap
                         }
 
                         AddProperty ( memoryOverload );
-
+                        
+                        /*
                         }
                         catch ( Exception e )
                         {
                             throw new MemoryMapParseXmlException ( "ERROR: " + e.Message );
                             Console.WriteLine ( "ERROR! " + xmlOverload.Id + " -> " + e.Message + " " + e.InnerException );
                         }
+                        */
                     }
 
                 #endregion
