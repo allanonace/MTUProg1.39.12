@@ -721,6 +721,26 @@ namespace aclara_meters.view
 
             cancelReasonPicker.ItemsSource = cancelReasons;
 
+            // Select default reason
+            cancelReasonPicker.SelectedIndex = 0;
+
+            // Enable "Other" reason box if default is "Other"
+            string defaultCancelReason = cancelReasonPicker.Items[cancelReasonPicker.SelectedIndex];
+            if ("Other".Equals(defaultCancelReason))
+            {
+                cancelReasonOtherInput.IsEnabled = true;
+                cancelReasonOtherInputContainer.Opacity = 1;
+            }
+            else
+            {
+                cancelReasonOtherInput.IsEnabled = false;
+                cancelReasonOtherInputContainer.Opacity = 0.8;
+            }
+
+            // Add handler
+            cancelReasonPicker.SelectedIndexChanged += CancelReasonPicker_SelectedIndexChanged;
+
+
             #endregion
         }
 
@@ -1453,6 +1473,27 @@ namespace aclara_meters.view
         {
             var picker = (Picker)sender;
             int selectedIndex = picker.SelectedIndex;
+        }
+
+        private void CancelReasonPicker_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var picker = (Picker)sender;
+            int selectedCancelReasonIndex = picker.SelectedIndex;
+            if (selectedCancelReasonIndex > -1)
+            {
+                string selectedCancelReason = picker.Items[selectedCancelReasonIndex];
+
+                if ("Other".Equals(selectedCancelReason))
+                {
+                    cancelReasonOtherInput.IsEnabled = true;
+                    cancelReasonOtherInputContainer.Opacity = 1;
+                }
+                else
+                {
+                    cancelReasonOtherInput.IsEnabled = false;
+                    cancelReasonOtherInputContainer.Opacity = 0.8;
+                }
+            }
         }
 
         private void MeterVendorsPicker_SelectedIndexChanged(object sender, EventArgs e)

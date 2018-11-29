@@ -1571,10 +1571,10 @@
                             
 
                           <Frame CornerRadius="6" HeightRequest="96" Margin="12" BackgroundColor="#7a868c"  >
-                               <Frame CornerRadius="6"  HeightRequest="96"  Margin="-7" BackgroundColor="White"  >
+                               <Frame x:Name="cancelReasonOtherInputContainer" CornerRadius="6"  HeightRequest="96"  Margin="-7" BackgroundColor="White"  >
                                     <StackLayout Margin="1"  Orientation="Vertical" HorizontalOptions="FillAndExpand" >
                                         
-                                     <local:EditorMultiline  Margin="-7"  HorizontalOptions="FillAndExpand"  x:Name="input_Other" TextColor="Black" 
+                                     <local:EditorMultiline  Margin="-7"  HorizontalOptions="FillAndExpand"  x:Name="cancelReasonOtherInput" TextColor="Black" 
                                          WidthRequest="200"  HeightRequest="96" 
                                      FontSize="18" 
                                                               
