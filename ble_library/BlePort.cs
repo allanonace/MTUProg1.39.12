@@ -11,6 +11,7 @@ using Plugin.Settings.Abstractions;
 using Plugin.Settings;
 using nexus.core;
 using Xamarin.Forms;
+using System.Threading;
 
 namespace ble_library
 {
@@ -654,6 +655,9 @@ namespace ble_library
                 }
                 while (!hayServicio && (reintentos>0));
 
+
+                Thread.Sleep(400);
+
                                 
                 Listen_aes_conection_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
@@ -721,6 +725,7 @@ namespace ble_library
 
                 }else
                 {
+                    Thread.Sleep(400);
                     if (isOnState)
                     {
                         Listen_Characteristic_Notification();
@@ -771,7 +776,7 @@ namespace ble_library
                       hi_msg
                     );
                 }
-
+                Thread.Sleep(400);
 
                 Listen_Battery_level = gattServer_connection.NotifyCharacteristicValue(
                     new Guid("1d632100-dc5a-41ab-bdbb-7cff9901210d"),
