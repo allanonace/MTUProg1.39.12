@@ -183,61 +183,62 @@ namespace MTUComm
             }
             else
             {
-                switch (mActionType)
+                List<object> parameters = new List<object> ();
+
+                switch ( mActionType )
                 {
                     case ActionType.ReadMtu:
                         comm.OnReadMtu += Comm_OnReadMtu;
-                        comm.ReadMTU();
                         break;
+
                     case ActionType.AddMtu:
                         comm.OnAddMtu += Comm_OnAddMtu;
-                        comm.AddMtu(( AddMtuForm )mtuForm, this.getUser());
+                        parameters.AddRange ( new object[] { ( AddMtuForm )mtuForm, this.getUser() } );
                         break;
+
                     case ActionType.TurnOffMtu:
                         comm.OnTurnOffMtu += Comm_OnTurnOffMtu;
-                        comm.TurnOffMtu();
                         break;
+
                     case ActionType.TurnOnMtu:
                         comm.OnTurnOnMtu += Comm_OnTurnOnMtu;
-                        comm.TurnOnMtu();
                         break;
+
                     case ActionType.InstallConfirmation:
-                        comm.OnReadMtu += Comm_OnReadMtu;
+                        comm.OnReadMtu  += Comm_OnReadMtu;
                         comm.OnProgress += Comm_OnProgress;
-                        comm.InstallConfirmation();
                         break;
 
                     case ActionType.ReadData:
-                        Parameter param = mparameters.Find(x => (x.Type == Parameter.ParameterType.DaysOfRead));
+                        Parameter param = mparameters.Find ( x => ( x.Type == Parameter.ParameterType.DaysOfRead ) );
+                        if ( param == null )
+                        {
+                            OnError ( this, new ActionErrorArgs("Days Of Read parameter Not Defined or Invalid" ) );
+                            break;
+                        }
                         int DaysOfRead = 0;
-                        if(param == null)
+                        if ( ! Int32.TryParse ( param.Value, out DaysOfRead ) || DaysOfRead <= 0 )
                         {
-                            ActionErrorArgs e_args = new ActionErrorArgs("Days Of Read parameter Not Defined or Invalid");
-                            OnError(this, e_args);
+                            OnError ( this, new ActionErrorArgs("Days Of Read parameter Invalid" ) );
                             break;
                         }
-
-                        if(!Int32.TryParse(param.Value, out DaysOfRead) || DaysOfRead <= 0)
-                        {
-                            ActionErrorArgs e_args = new ActionErrorArgs("Days Of Read parameter Invalid");
-                            OnError(this, e_args);
-                            break;
-                        }
-
-                        comm.ReadMTUdata(DaysOfRead);
                         comm.OnReadMtuData += Comm_OnReadMtuData;
+                        parameters.Add ( DaysOfRead );
                         break;
+
                     case ActionType.BasicRead:
                         comm.OnBasicRead += Comm_OnBasicRead;
-                        comm.BasicRead();
                         break;
+
                     default:
-                        ActionRunSimulator();
+                        ActionRunSimulator ();
                         break;
                 }
 
+                // Is more easy to control one point of invokation
+                // than N, one for each action/new task to launch
+                comm.LaunchActionThread ( mActionType, parameters.ToArray () );
             }
-
         }
 
         private void Comm_OnProgress(object sender, MTUComm.ProgressArgs e)

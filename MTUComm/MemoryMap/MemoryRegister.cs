@@ -266,9 +266,9 @@ namespace MTUComm.MemoryMap
 
             bool ok_id          = string.Equals ( this.id, other.id );
             bool ok_description = string.Equals ( this.description, other.description );
-            bool ok_address     = ( this.address  == other.address );
-            bool ok_size        = ( this.size     == other.size    );
-            bool ok_write       = ( this.write    == other.write   );
+            bool ok_address     = ( this.address == other.address );
+            bool ok_size        = ( this.size    == other.size    );
+            bool ok_write       = ( this.write   == other.write   );
             bool ok_value       = object.Equals ( this.ValueRaw, other.ValueRaw );
 
             return ok_id          &&

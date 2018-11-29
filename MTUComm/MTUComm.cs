@@ -7,31 +7,33 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Xml;
-using static MTUComm.LogQueryResult;
-using System.Collections.Generic;
+
+using LogDataType = MTUComm.LogQueryResult.LogDataType;
+using ActionType  = MTUComm.Action.ActionType;
 
 namespace MTUComm
 {
     public class MTUComm
     {
-        private const int DEFAULT_OVERLAP = 6;
+        #region Constants
+
+        private const int BASIC_READ_ADDRESS = 0;
+        private const int BASIC_READ_DATA    = 25;
+        private const int DEFAULT_OVERLAP    = 6;
         private const int DEFAULT_LENGTH_AES = 16;
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <remarks></remarks>
-        private Lexi.Lexi lexi;
+        private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
+        private const string ERROR_LOADMETER = "MeterLoadException";
+        private const string ERROR_LOADMTU = "MtuLoadException";
+        private const string ERROR_LOADALARM = "AlarmLoadException";
+        private const string ERROR_NOTFOUNDMTU = "MtuNotFoundException";
+        private const string ERROR_LOADINTERFACE = "InterfaceLoadException";
+        private const string ERROR_LOADGLOBAL = "GlobalLoadException";
+        private const string ERROR_NOTFOUNDMETER = "MeterNotFoundException";
 
-        private MTUBasicInfo latest_mtu;
+        #endregion
 
-        private Boolean mtu_changed;
-
-        private Configuration configuration;
-
-        private Boolean isPulse = false;
-
-        private Mtu mtuType;
+        #region Delegates and Events
 
         public delegate void ReadMtuHandler(object sender, ReadMtuArgs e);
         public event ReadMtuHandler OnReadMtu;
@@ -51,286 +53,15 @@ namespace MTUComm
         public delegate void BasicReadHandler(object sender, BasicReadArgs e);
         public event BasicReadHandler OnBasicRead;
 
-
         public delegate void ErrorHandler(object sender, ErrorArgs e);
         public event ErrorHandler OnError;
 
         public delegate void ProgresshHandler(object sender, ProgressArgs e);
         public event ProgresshHandler OnProgress;
 
+        #endregion
 
-        public MTUComm(ISerial serial, Configuration configuration)
-        {
-            this.configuration = configuration;
-            latest_mtu = new MTUBasicInfo(new byte[25]);
-            lexi = new Lexi.Lexi(serial, 10000);
-        }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <remarks>Internaly saves internal MTU type and ID used for communication logic</remarks>
-        private void getMTUBasicInfo()
-        {
-            try
-            {
-                MTUBasicInfo mtu_info = new MTUBasicInfo(lexi.Read(0, 25));
-                mtu_changed = !((mtu_info.Id == latest_mtu.Id) && (mtu_info.Type == latest_mtu.Type));
-                latest_mtu = mtu_info;
-                MtuForm.SetBasicInfo(latest_mtu);
-            }
-            catch (Exception e)
-            {
-                OnError(this, new ErrorArgs(510, e.Message, "getMTU info returned 0 bytes."));
-            }
-
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether latest connected MTU has changed or MTU critical settings/configuration has changed.
-        /// </summary>
-        /// <value>
-        ///   <see langword="true" /> if ; otherwise, <see langword="false" />.</value>
-        /// <remarks>This flag is used to force Meter/Encoders/MemoryMap redetection </remarks>
-        private Boolean changedMTUSettings
-        {
-            get
-            {
-                return mtu_changed;
-            }
-        }
-
-        public void ReadMTUdata(int NumOfDays)
-        {
-
-            Task.Factory.StartNew(() => ReadMTUDataTask(NumOfDays));
-        }
-
-        public void ReadMTUDataTask(int NumOfDays)
-        {
-            getMTUBasicInfo();
-
-            //If MTU has changed or critical settings/configuration force detection rutine
-            if (this.changedMTUSettings)
-            {
-                DetectMeters();
-            }
-
-            DateTime start = DateTime.UtcNow.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
-            DateTime end = DateTime.UtcNow.Date.AddSeconds(86399);
-
-            lexi.TriggerReadEventLogs(start, end);
-
-            List<LogDataEntry> entries = new List<LogDataEntry>();
-
-           bool last_packet = false;
-            while (!last_packet)
-            {
-                LogQueryResult response = new LogQueryResult(lexi.GetNextLogQueryResult());
-                switch (response.Status)
-                {
-                    case LogDataType.LastPacket:
-                        last_packet = true;
-                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu, entries));
-                        break;
-                    case LogDataType.Bussy:
-                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu));
-                        Thread.Sleep(100);
-                        break;
-                    case LogDataType.NewPacket:
-                        entries.Add(response.Entry);
-                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu, response.TotalEntries, response.CurrentEntry));
-                        break;
-
-                }
-            }
-        }
-
-
-        public void InstallConfirmation()
-        {
-
-            Task.Factory.StartNew(InstallConfirmationTask);
-        }
-
-        public void InstallConfirmationTask()
-        {
-            getMTUBasicInfo();
-
-            //If MTU has changed or critical settings/configuration force detection rutine
-            if (this.changedMTUSettings)
-            {
-                DetectMeters();
-            }
-
-            if (latest_mtu.Shipbit)
-            {
-                string message = "Current MTU ID: " + latest_mtu.Id + " type " + latest_mtu.Type + " is OFF";
-                OnError(this, new ErrorArgs(112, message, "Installation Confirmation Cancellation - "+ message));
-            }
-            else
-            {
-                String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
-                MemRegister register = configuration.getFamilyRegister(memory_map_type, "InstallationConfirmationRequest");
-                
-                Console.WriteLine("InstallConfirmation trigger start");
-
-                byte mask = 2;
-                uint inConFlag = 116;
-
-                if(register != null)
-                {
-                    mask = (byte)Math.Pow(2, register.Size);
-                    inConFlag = (uint)register.Address;
-                }
-
-                byte systemFlags = (lexi.Read(inConFlag, 1))[0];
-                systemFlags |= mask; // set bit 0
-                lexi.Write(116, new byte[] { systemFlags });
-
-                byte sync_mask = 4;
-                byte sync_systemFlags = (lexi.Read(65, 1))[0];
-                sync_systemFlags |= sync_mask; // set bit 0
-                lexi.Write(65, new byte[] { sync_systemFlags });
-
-
-                byte valueWritten = (lexi.Read(inConFlag, 1))[0];
-                Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
-                Console.WriteLine("InstallConfirmation trigger end");
-
-                valueWritten &= mask;
-                int max_iters = 3;
-
-                while (valueWritten > 0 && max_iters > 0)
-                {
-                    OnProgress(this, new ProgressArgs(4 - max_iters, 3, "Install Confirmation("+ max_iters.ToString() + ")..."));
-                    Thread.Sleep(60000);
-                    valueWritten = (lexi.Read(inConFlag, 1))[0];
-                    valueWritten &= mask;
-                    max_iters--;
-                }
-            }
-            ReadMTUTask(true);
-        }
-
-
-        public void ReadMTU(){
-
-            Task.Factory.StartNew(ReadMTUTask);
-        }
-
-        public void ReadMTUTask()
-        {
-            ReadMTUTask(false);
-        }
-
-
-        public void ReadMTUTask(bool forcedetect)
-        {
-            //Gets MTU casci info (type and id)
-            getMTUBasicInfo();
-
-            //If MTU has changed or critical settings/configuration force detection rutine
-            if (this.changedMTUSettings || forcedetect)
-            {
-                DetectMeters();
-            }
-
-
-            String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
-            int memory_map_size = configuration.GetmemoryMapSizeByMtuId(mtuType.Id);
-
-            lexi.Write(64, new byte[] { 1 });
-            Thread.Sleep(1000);
-
-            byte[] buffer = new byte[1024];
-
-            System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
-
-            try
-            {
-                if(memory_map_size > 255)
-                {
-                    System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
-                    System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
-                }
-
-                if (memory_map_size > 320)
-                {
-                    //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
-                }
-
-                if (memory_map_size > 960)
-                {
-                    System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
-                }
-
-                
-            }
-            catch (Exception e) {
-                
-            }
-
-            try
-            {
-                ReadMtuArgs args = new ReadMtuArgs(new MemoryMap.MemoryMap(buffer, memory_map_type), mtuType);
-                OnReadMtu(this, args);
-            }
-            catch (Exception e)
-            {
-                OnError(this, TranslateException(e));
-            }
-          
-        }
-
-
-        private ErrorArgs TranslateException(Exception e)
-        {
-            int status = -1;
-            string message = e.Message;
-            string logmessage = e.Message;
-            Type ex_type = e.GetType();
-            switch (ex_type.Name)
-            {
-                case "DemandConfLoadException":
-                    break;
-                case "MeterLoadException":
-                    break;
-                case "MtuLoadException":
-                    break;
-                case "AlarmLoadException":
-                    break;
-                case "MtuNotFoundException":
-                    break;
-                case "InterfaceLoadException":
-                    break;
-                case "GlobalLoadException":
-                    break;
-                case "MeterNotFoundException":
-                    break;
-            }
-            return new ErrorArgs(status, message, logmessage);
-        }
-
-        private void DetectMeters()
-        {
-            mtuType = configuration.GetMtuTypeById((int)latest_mtu.Type);
-
-            for (int i = 0; i < mtuType.Ports.Count; i++)
-            {
-                latest_mtu.setPortType(i, mtuType.Ports[i].Type);
-            }
-
-            if (latest_mtu.isEncoder)
-            {
-
-            }
-
-        }
+        #region Class Args
 
         public class ErrorArgs : EventArgs
         {
@@ -384,7 +115,6 @@ namespace MTUComm
 
         public class ReadMtuDataArgs : EventArgs
         {
-           
             public LogDataType Status { get; private set; }
 
             public int TotalEntries { get; private set; }
@@ -486,6 +216,202 @@ namespace MTUComm
             }
         }
 
+        #endregion
+
+        #region Attributes
+
+        private Lexi.Lexi lexi;
+        private Configuration configuration;
+        private MTUBasicInfo latest_mtu;
+        private Mtu mtuType;
+        private Boolean isPulse = false;
+        private Boolean mtu_changed;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets a value indicating whether latest connected MTU has changed or MTU critical settings/configuration has changed.
+        /// </summary>
+        /// <value>
+        ///   <see langword="true" /> if ; otherwise, <see langword="false" />.</value>
+        /// <remarks>This flag is used to force Meter/Encoders/MemoryMap redetection </remarks>
+        private Boolean changedMTUSettings
+        {
+            get
+            {
+                return mtu_changed;
+            }
+        }
+
+        #endregion
+
+        #region Initialization
+
+        public MTUComm(ISerial serial, Configuration configuration)
+        {
+            this.configuration = configuration;
+            latest_mtu = new MTUBasicInfo(new byte[25]);
+            lexi = new Lexi.Lexi(serial, 10000);
+        }
+
+        #endregion
+
+        #region Launch Actions
+
+        public void LaunchActionThread ( ActionType type, params object[] args )
+        {
+            System.Action actionToLaunch = null;
+
+            switch ( type )
+            {
+                // NOTE: TaskFactory uses Action without parameters and elegant
+                // form to be able to do it, is using a lambda expression
+                case ActionType.ReadMtu   : actionToLaunch = ( () => Task_ReadMtu () ); break;
+                case ActionType.AddMtu    : actionToLaunch = ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ] ) ); break;
+                case ActionType.TurnOffMtu: actionToLaunch = Task_TurnOffMtu; break;
+                case ActionType.TurnOnMtu : actionToLaunch = Task_TurnOnMtu; break;
+                case ActionType.ReadData  : actionToLaunch = ( () => Task_ReadDataMtu ( ( int )args[ 0 ] ) ); break;
+                case ActionType.BasicRead : actionToLaunch = Task_BasicRead; break;
+                case ActionType.InstallConfirmation: actionToLaunch = Task_InstallConfirmation; break;
+                default: break;
+            }
+
+            if ( actionToLaunch != null )
+            {
+                //Gets MTU casci info ( type and id )
+                LoadMtuBasicInfo ();
+
+                // Launch asynchronous task
+                Task.Factory.StartNew ( actionToLaunch );
+            }
+        }
+
+        #endregion
+
+        #region Actions
+
+        public void Task_ReadDataMtu ( int NumOfDays )
+        {
+            //If MTU has changed or critical settings/configuration force detection rutine
+            if (this.changedMTUSettings)
+            {
+                DetectMeters();
+            }
+
+            DateTime start = DateTime.UtcNow.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
+            DateTime end = DateTime.UtcNow.Date.AddSeconds(86399);
+
+            lexi.TriggerReadEventLogs(start, end);
+
+            List<LogDataEntry> entries = new List<LogDataEntry>();
+
+           bool last_packet = false;
+            while (!last_packet)
+            {
+                LogQueryResult response = new LogQueryResult(lexi.GetNextLogQueryResult());
+                switch (response.Status)
+                {
+                    case LogDataType.LastPacket:
+                        last_packet = true;
+                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu, entries));
+                        break;
+                    case LogDataType.Bussy:
+                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu));
+                        Thread.Sleep(100);
+                        break;
+                    case LogDataType.NewPacket:
+                        entries.Add(response.Entry);
+                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu, response.TotalEntries, response.CurrentEntry));
+                        break;
+
+                }
+            }
+        }
+
+        public void Task_InstallConfirmation ()
+        {
+            //If MTU has changed or critical settings/configuration force detection rutine
+            if (this.changedMTUSettings)
+            {
+                DetectMeters();
+            }
+
+            if (latest_mtu.Shipbit)
+            {
+                string message = "Current MTU ID: " + latest_mtu.Id + " type " + latest_mtu.Type + " is OFF";
+                OnError(this, new ErrorArgs(112, message, "Installation Confirmation Cancellation - "+ message));
+            }
+            else
+            {
+                String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
+                MemRegister register = configuration.getFamilyRegister(memory_map_type, "InstallationConfirmationRequest");
+                
+                Console.WriteLine("InstallConfirmation trigger start");
+
+                byte mask = 2;
+                uint inConFlag = 116;
+
+                if(register != null)
+                {
+                    mask = (byte)Math.Pow(2, register.Size);
+                    inConFlag = (uint)register.Address;
+                }
+
+                byte systemFlags = (lexi.Read(inConFlag, 1))[0];
+                systemFlags |= mask; // set bit 0
+                lexi.Write(116, new byte[] { systemFlags });
+
+                byte sync_mask = 4;
+                byte sync_systemFlags = (lexi.Read(65, 1))[0];
+                sync_systemFlags |= sync_mask; // set bit 0
+                lexi.Write(65, new byte[] { sync_systemFlags });
+
+
+                byte valueWritten = (lexi.Read(inConFlag, 1))[0];
+                Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
+                Console.WriteLine("InstallConfirmation trigger end");
+
+                valueWritten &= mask;
+                int max_iters = 3;
+
+                while (valueWritten > 0 && max_iters > 0)
+                {
+                    OnProgress(this, new ProgressArgs(4 - max_iters, 3, "Install Confirmation("+ max_iters.ToString() + ")..."));
+                    Thread.Sleep(60000);
+                    valueWritten = (lexi.Read(inConFlag, 1))[0];
+                    valueWritten &= mask;
+                    max_iters--;
+                }
+            }
+            Task_ReadMtu(true);
+        }
+
+        public void Task_TurnOffMtu ()
+        {
+            Console.WriteLine("TurnOffMtu start");
+
+            this.TurnOffMtu_Logic();
+
+            Console.WriteLine("MTU ID: " + latest_mtu.Id);
+
+            TurnOffMtuArgs args = new TurnOffMtuArgs(latest_mtu.Id);
+            OnTurnOffMtu(this, args);
+        }
+
+        public void Task_TurnOnMtu ()
+        {
+            Console.WriteLine("TurnOnMtu start");
+
+            this.TurnOnMtu_Logic();
+
+            Console.WriteLine("MTU ID: " + latest_mtu.Id);
+
+            TurnOnMtuArgs args = new TurnOnMtuArgs(latest_mtu.Id);
+            OnTurnOnMtu(this, args);
+        }
+
         private void TurnOffMtu_Logic ()
         {
             byte mask = 1;
@@ -497,13 +423,13 @@ namespace MTUComm
             Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
             Console.WriteLine("TurnOnMtu end");
 
-            if ( systemFlags != valueWritten )
+            if (systemFlags != valueWritten)
             {
                 // TODO: handle error condition
             }
         }
 
-        private void TurnOnMtu_Logic()
+        private void TurnOnMtu_Logic ()
         {
             byte mask = 1;
             byte systemFlags = (lexi.Read(22, 1))[0];
@@ -514,116 +440,131 @@ namespace MTUComm
             Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
             Console.WriteLine("TurnOffMtu end");
 
-            if ( systemFlags != valueWritten )
+            if (systemFlags != valueWritten)
             {
                 // TODO: handle error condition
             }
         }
 
-        public void TurnOffMtu ()
+        public void Task_ReadMtu ( bool forcedetect = false )
         {
-            Task.Factory.StartNew(TurnOffMtuTask);
+            //If MTU has changed or critical settings/configuration force detection rutine
+            if (this.changedMTUSettings || forcedetect)
+            {
+                DetectMeters();
+            }
+
+            String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
+            int memory_map_size = configuration.GetmemoryMapSizeByMtuId(mtuType.Id);
+
+            lexi.Write(64, new byte[] { 1 });
+            Thread.Sleep(1000);
+
+            byte[] buffer = new byte[1024];
+
+            System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
+
+            try
+            {
+                if(memory_map_size > 255)
+                {
+                    System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
+                    System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
+                }
+
+                if (memory_map_size > 320)
+                {
+                    //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
+                }
+
+                if (memory_map_size > 960)
+                {
+                    System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
+                }
+
+                
+            }
+            catch (Exception e) {
+                
+            }
+
+            try
+            {
+                ReadMtuArgs args = new ReadMtuArgs(new MemoryMap.MemoryMap(buffer, memory_map_type), mtuType);
+                OnReadMtu(this, args);
+            }
+            catch (Exception e)
+            {
+                OnError(this, TranslateException(e));
+            }
         }
 
-        public void TurnOffMtuTask ()
-        {
-            Console.WriteLine("TurnOffMtu start");
-
-            this.TurnOffMtu_Logic ();
-
-            getMTUBasicInfo();
-            Console.WriteLine("MTU ID: " + latest_mtu.Id);
-
-            TurnOffMtuArgs args = new TurnOffMtuArgs(latest_mtu.Id);
-            OnTurnOffMtu(this, args);
-        }
-   
-        public void TurnOnMtu()
-        {
-            Task.Factory.StartNew ( TurnOnMtuTask );
-        }
-
-        public void TurnOnMtuTask ()
-        {
-            Console.WriteLine("TurnOnMtu start");
-
-            this.TurnOnMtu_Logic ();
-
-            getMTUBasicInfo();
-            Console.WriteLine("MTU ID: " + latest_mtu.Id);
-
-            TurnOnMtuArgs args = new TurnOnMtuArgs(latest_mtu.Id);
-            OnTurnOnMtu(this, args);
-        }
-
-        public void AddMtu(AddMtuForm addMtuForm, string user)
-        {
-            Task.Factory.StartNew(() => AddMtuTask(addMtuForm, user));
-        }
-
-        private void AddMtuTask(dynamic form, string user)
+        private void Task_AddMtu ( dynamic form, string user )
         {
             Logger logger = new Logger(Configuration.GetInstance());
             AddMtuLog addMtuLog = new AddMtuLog(logger, form, user);
 
             #region Turn Off MTU
 
-            this.TurnOffMtu_Logic ();
-            addMtuLog.LogTurnOff ();
+            this.TurnOffMtu_Logic();
+            addMtuLog.LogTurnOff();
 
             #endregion
 
             #region Add MTU
 
             Mtu mtu = form.mtu;
-            dynamic MtuConditions     = form.conditions.mtu;
+            dynamic MtuConditions = form.conditions.mtu;
             dynamic GlobalsConditions = form.conditions.globals;
 
             // Prepare memory map
-            String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
-            int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
+            String memory_map_type = configuration.GetMemoryMapTypeByMtuId((int)MtuForm.mtuBasicInfo.Type);
+            int memory_map_size = configuration.GetmemoryMapSizeByMtuId((int)MtuForm.mtuBasicInfo.Type);
 
-            byte[] memory = new byte[ memory_map_size ];
-            dynamic map   = new MemoryMap.MemoryMap ( memory, memory_map_type );
+            byte[] memory = new byte[memory_map_size];
+            dynamic map = new MemoryMap.MemoryMap(memory, memory_map_type);
 
             bool useTwoPorts = MtuConditions.TwoPorts;
 
             // meter type
-            Meter selectedMeter = ( Meter )form.Meter.getValue ();
+            Meter selectedMeter = (Meter)form.Meter.getValue();
             map.P1MeterType = selectedMeter.Id;
-            if ( useTwoPorts )
+            if (useTwoPorts)
             {
-                Meter selectedMeter2 = ( Meter )form.Meter2.getValue ();
+                Meter selectedMeter2 = (Meter)form.Meter2.getValue();
                 map.P2MeterType = selectedMeter2.Id;
             }
 
             // service port id, account number
-            map.P1MeterId = form.ServicePortId.getValue ();
-            if ( useTwoPorts )
-                map.P2MeterId = form.ServicePortId2.getValue ();
+            map.P1MeterId = form.ServicePortId.getValue();
+            if (useTwoPorts)
+                map.P2MeterId = form.ServicePortId2.getValue();
 
             // reading interval
-            if ( GlobalsConditions.IndividualReadInterval )
+            if (GlobalsConditions.IndividualReadInterval)
             {
-                map.ReadIntervalMinutes = form.ReadInterval.getValue ();
-                if ( useTwoPorts )
-                    map.P2ReadInterval = form.ReadInterval2.getValue ();
+                map.ReadIntervalMinutes = form.ReadInterval.getValue();
+                if (useTwoPorts)
+                    map.P2ReadInterval = form.ReadInterval2.getValue();
             }
 
             // overlap
             map.MessageOverlapCount = DEFAULT_OVERLAP;
-            if ( useTwoPorts )
+            if (useTwoPorts)
                 map.P2MessageOverlapCount = DEFAULT_OVERLAP;
 
             // initial reading
-            map.P1Reading = form.InitialReading.getValue ();
-            if ( useTwoPorts )
-                map.P2Reading = form.InitialReading2.getValue ();
+            map.P1Reading = form.InitialReading.getValue();
+            if (useTwoPorts)
+                map.P2Reading = form.InitialReading2.getValue();
 
             // Alarms
-            if ( MtuConditions.RequiresAlarmProfile )
+            if (MtuConditions.RequiresAlarmProfile)
             {
-                Alarm alarms = ( Alarm )form.Alarm.getValue ();
+                Alarm alarms = (Alarm)form.Alarm.getValue();
 
                 // Overlap
                 map.MessageOverlapCount = alarms.Overlap;
@@ -635,26 +576,26 @@ namespace MTUComm
                 map.P1UrgentAlarm = alarms.DcuUrgentAlarm;
 
                 // P1MagneticAlarm
-                if ( mtu.MagneticTamper )
+                if (mtu.MagneticTamper)
                     map.P1MagneticAlarm = alarms.Magnetic;
 
                 // P1RegisterCoverAlarm
-                if ( mtu.RegisterCoverTamper )
+                if (mtu.RegisterCoverTamper)
                     map.P1RegisterCoverAlarm = alarms.RegisterCover;
 
                 // P1ReverseFlowAlarm
-                if ( mtu.ReverseFlowTamper )
+                if (mtu.ReverseFlowTamper)
                     map.P1ReverseFlowAlarm = alarms.ReverseFlow;
 
                 // P1TiltAlarm
-                if ( mtu.TiltTamper )
+                if (mtu.TiltTamper)
                     map.P1TiltAlarm = alarms.Tilt;
 
                 // P1InterfaceAlarm
-                if ( mtu.InterfaceTamper )
+                if (mtu.InterfaceTamper)
                     map.P1InterfaceAlarm = alarms.InterfaceTamper;
 
-                if ( useTwoPorts )
+                if (useTwoPorts)
                 {
                     // Overlap
                     map.P2MessageOverlapCount = alarms.Overlap;
@@ -666,35 +607,35 @@ namespace MTUComm
                     map.P2UrgentAlarm = alarms.DcuUrgentAlarm;
 
                     // P2MagneticAlarm
-                    if ( mtu.MagneticTamper )
+                    if (mtu.MagneticTamper)
                         map.P2MagneticAlarm = alarms.Magnetic;
 
                     // P2RegisterCoverAlarm
-                    if ( mtu.RegisterCoverTamper )
+                    if (mtu.RegisterCoverTamper)
                         map.P2RegisterCoverAlarm = alarms.RegisterCover;
 
                     // P2ReverseFlowAlarm
-                    if ( mtu.ReverseFlowTamper )
+                    if (mtu.ReverseFlowTamper)
                         map.P2ReverseFlowAlarm = alarms.ReverseFlow;
 
                     // P2TiltAlarm
-                    if ( mtu.TiltTamper )
+                    if (mtu.TiltTamper)
                         map.P2TiltAlarm = alarms.Tilt;
 
                     // P2InterfaceAlarm
-                    if ( mtu.InterfaceTamper )
+                    if (mtu.InterfaceTamper)
                         map.P2InterfaceAlarm = alarms.InterfaceTamper;
                 }
             }
 
             // Encryption key
             RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-            byte[] aesKey = new byte[ DEFAULT_LENGTH_AES ];
-            rng.GetBytes ( aesKey );
+            byte[] aesKey = new byte[DEFAULT_LENGTH_AES];
+            rng.GetBytes(aesKey);
             map.EncryptionKey = aesKey;
             for (int i = 0; i < 15; i++)
             {
-                if (aesKey[i] != memory[256+i])
+                if (aesKey[i] != memory[256 + i])
                 {
                     throw new Exception("AES key does not match");
                 }
@@ -706,14 +647,14 @@ namespace MTUComm
             // encoder digits to drop (not in pulse)
 
             // Write changes into MTU
-            WriteModifiedRegisters ( map );
-            addMtuLog.LogAction ();
+            WriteMtuModifiedRegisters(map);
+            addMtuLog.LogAction();
 
             #endregion
 
             #region Turn On MTU
 
-            this.TurnOnMtu_Logic ();
+            this.TurnOnMtu_Logic();
             addMtuLog.LogTurnOn();
 
             #endregion
@@ -783,25 +724,43 @@ namespace MTUComm
 
             #endregion
 
-            addMtuLog.Save ();
+            addMtuLog.Save();
         }
 
-        public void WriteModifiedRegisters(MemoryMap.MemoryMap map)
+        public void Task_BasicRead ()
+        {
+            BasicReadArgs args = new BasicReadArgs();
+            OnBasicRead(this, args);
+        }
+
+        #endregion
+
+        #region Write to MTU
+
+        public void WriteMtuModifiedRegisters ( MemoryMap.MemoryMap map )
         {
             List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
             foreach ( dynamic r in modifiedRegisters )
-                this.writeParam((uint)r.address, map.memory, (uint)r.size);
+                this.WriteMtuRegister ( ( uint )r.address, map.memory, ( uint )r.size );
+
+            modifiedRegisters.Clear ();
+            modifiedRegisters = null;
         }
 
-        public void writeParam(uint addr, byte[] memory, uint length)
+        public void WriteMtuRegister ( uint address, byte[] memory, uint length )
         {
-            byte[] tmp = new byte[length];
-            Array.Copy(memory, addr, tmp, 0, length);
-            Console.WriteLine("Addr {0} | Value {1} | Length {2}", addr, BitConverter.ToString(tmp), length);
-            lexi.Write(addr, tmp);
+            byte[] tmp = new byte[ length ];
+            Array.Copy ( memory, address, tmp, 0, length );
+
+            Console.WriteLine ( "Addr {0} | Value {1} | Length {2}", address, BitConverter.ToString(tmp), length );
+
+            lexi.Write ( address, tmp );
         }
 
-        public byte[] readComplete(byte addr, uint length)
+        #endregion
+
+        // NO SE USA
+        public byte[] ReadComplete ( byte addr, uint length )
         {
             byte[] tmp = new byte[length];
             uint maxReadBytes = 255;
@@ -823,11 +782,62 @@ namespace MTUComm
             return tmp;
         }
 
-        public void BasicRead()
+        #region AuxiliaryFunctions
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <remarks>Internaly saves internal MTU type and ID used for communication logic</remarks>
+        private void LoadMtuBasicInfo ()
         {
-            getMTUBasicInfo();
-            BasicReadArgs args = new BasicReadArgs();
-            OnBasicRead(this, args);
+            try
+            {
+                MTUBasicInfo mtu_info = new MTUBasicInfo ( lexi.Read ( BASIC_READ_ADDRESS, BASIC_READ_DATA ) );
+                mtu_changed = ! ( ( mtu_info.Id == latest_mtu.Id ) && ( mtu_info.Type == latest_mtu.Type ) );
+                latest_mtu = mtu_info;
+
+                MtuForm.SetBasicInfo ( latest_mtu );
+            }
+            catch ( Exception e )
+            {
+                OnError(this, new ErrorArgs(510, e.Message, "getMTU info returned 0 bytes."));
+            }
         }
+
+        private void DetectMeters()
+        {
+            mtuType = configuration.GetMtuTypeById((int)latest_mtu.Type);
+
+            for (int i = 0; i < mtuType.Ports.Count; i++)
+                latest_mtu.setPortType(i, mtuType.Ports[i].Type);
+
+            if (latest_mtu.isEncoder)
+            {
+            }
+        }
+
+        private ErrorArgs TranslateException ( Exception e )
+        {
+            int    status     = -1;
+            string message    = e.Message;
+            string logmessage = e.Message;
+
+            switch ( e.GetType ().Name )
+            {
+                case ERROR_LOADDEMANDCONF:
+                case ERROR_LOADMETER:
+                case ERROR_LOADMTU:
+                case ERROR_LOADALARM:
+                case ERROR_NOTFOUNDMTU:
+                case ERROR_LOADINTERFACE:
+                case ERROR_LOADGLOBAL:
+                case ERROR_NOTFOUNDMETER:
+                    break;
+            }
+
+            return new ErrorArgs ( status, message, logmessage );
+        }
+
+        #endregion
     }
 }
