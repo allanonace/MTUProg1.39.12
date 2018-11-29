@@ -139,7 +139,7 @@ namespace aclara_meters.view
         private AddMtuForm addMtuForm;
         private int detectedMtuType;
         private Configuration config;
-
+        private MTUComm.Action add_mtu;
         private List<ReadMTUItem> FinalReadListView { get; set; }
 
         private bool port2enabled;
@@ -299,6 +299,15 @@ namespace aclara_meters.view
             InitializeLowerbarLabel();
 
             InitializeAddMtuForm();
+
+            #region Prepare Add MTU Action
+
+            this.add_mtu = new MTUComm.Action(
+                config: FormsApp.config,
+                serial: FormsApp.ble_interface,
+                actiontype: MTUComm.Action.ActionType.AddMtu,
+                user: FormsApp.CredentialsService.UserName);
+            #endregion
 
             RegisterEventHandlers();
 
@@ -2659,17 +2668,11 @@ namespace aclara_meters.view
 
             #region Add MTU Action
 
-            MTUComm.Action add_mtu = new MTUComm.Action (
-                config    : FormsApp.config,
-                serial    : FormsApp.ble_interface,
-                actiontype: MTUComm.Action.ActionType.AddMtu,
-                user      : FormsApp.CredentialsService.UserName );
-
-            //add_mtu.AddParameter ( addMtuForm ); <--- PROBAR SIN ESTO, PORQUE EN LA ACCION ADD SE USA addMtuForm
+            //this.add_mtu.AddParameter(addMtuForm);
 
             #region On Add MTU Action finish
 
-            add_mtu.OnFinish += ((s, e) =>
+            this.add_mtu.OnFinish += ((s, e) =>
             {
                 FinalReadListView = new List<ReadMTUItem>();
 
@@ -2812,7 +2815,7 @@ namespace aclara_meters.view
 
             #region On Add MTU Action error
 
-            add_mtu.OnError += ((s, e) =>
+            this.add_mtu.OnError += ((s, e) =>
             {
                 Console.WriteLine("Action Errror");
                 Console.WriteLine("Press Key to Exit");
@@ -2843,7 +2846,7 @@ namespace aclara_meters.view
             #endregion
 
             // Launch the action!
-            add_mtu.Run ( addMtuForm );
+            this.add_mtu.Run(addMtuForm);
 
             #endregion
         }
