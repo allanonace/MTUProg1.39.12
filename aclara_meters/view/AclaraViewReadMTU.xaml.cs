@@ -161,7 +161,7 @@ namespace aclara_meters.view
                     label_read.Text = "Reading from MTU ... ";
 
 
-                    ThreadProcedureMTUCOMMAction();
+                    Task.Factory.StartNew(ThreadProcedureMTUCOMMAction);
 
 
                 });
