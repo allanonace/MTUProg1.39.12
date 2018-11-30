@@ -92,7 +92,7 @@ namespace MTUComm
         private int order = 0;
 
 
-        public MTUComm comm { get; private set; }
+        private MTUComm comm;
 
 
         public delegate void ActionProgresshHandler(object sender, ActionProgressArgs e);
@@ -129,7 +129,7 @@ namespace MTUComm
         public Action(Configuration config, ISerial serial, ActionType actiontype, String user, String outputfile)
         {
             configuration = config;
-            logger = new Logger(config, outputfile);
+            logger = new Logger(config, System.IO.Path.GetFileName(outputfile));
             comm = new MTUComm(serial, config);
             mActionType = actiontype;
             mUser = user;
