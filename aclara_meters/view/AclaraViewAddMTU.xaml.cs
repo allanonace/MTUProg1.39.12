@@ -1,22 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Acr.UserDialogs;
+﻿using aclara_meters.Behaviors;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
-using Xamarin.Forms;
-using System.Collections.ObjectModel;
-using Plugin.Settings;
+using Acr.UserDialogs;
+using MTUComm;
+using MTUComm.actions;
 using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
-using System.Xml.Serialization;
-using System.IO;
-using MTUComm;
+using Plugin.Settings;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xamarin.Forms;
 using Xml;
-using System.Threading;
-using MTUComm.actions;
+
 using FIELD = MTUComm.actions.AddMtuForm.FIELD;
-using aclara_meters.Behaviors;
 
 /*
 Optional 1  WorkOrderRecording      Hides/shows Field Order
@@ -68,6 +65,15 @@ namespace aclara_meters.view
         {
             Name1 = 0
         };
+
+        public const string TWOWAY_FAST     = "Fast";
+        public const string TWOWAY_SLOW     = "Slow";
+
+        public const string CANCEL_COMPLETE = "Complete";
+        public const string CANCEL_CANCEL   = "Cancel";
+        public const string CANCEL_SKIP     = "Skip";
+        public const string CANCEL_NOTHOME  = "Not Home";
+        public const string CANCEL_OTHER    = "Other";
 
         #endregion
 
@@ -133,17 +139,21 @@ namespace aclara_meters.view
 
         #region Attributes
 
+        private MTUComm.Action add_mtu;
         private Global globals;
         private MtuTypes mtuData;
         private Mtu currentMtu;
         private AddMtuForm addMtuForm;
         private int detectedMtuType;
         private Configuration config;
-        private MTUComm.Action add_mtu;
+
         private List<ReadMTUItem> FinalReadListView { get; set; }
 
         private bool port2enabled;
         private bool isCancellable;
+        private bool snapRead1Status = false;
+        private bool snapRead2Status = false;
+        private bool port2status;
 
         // Conditions - Globals
         private bool WorkOrderRecording;
@@ -186,15 +196,19 @@ namespace aclara_meters.view
 
         #region Initialization
 
-        public AclaraViewAddMTU()
+        public AclaraViewAddMTU ()
         {
-            InitializeComponent();
+            InitializeComponent ();
+
+            this.add_mtu = new MTUComm.Action (
+                config    : FormsApp.config,
+                serial    : FormsApp.ble_interface,
+                actiontype: MTUComm.Action.ActionType.AddMtu,
+                user      : FormsApp.CredentialsService.UserName );
         }
 
-        public AclaraViewAddMTU(IUserDialogs dialogs)
+        public AclaraViewAddMTU ( IUserDialogs dialogs ) : this ()
         {
-            InitializeComponent();
-
             #region Prepare mtuForm
 
             this.config = Configuration.GetInstance();
@@ -300,15 +314,6 @@ namespace aclara_meters.view
 
             InitializeAddMtuForm();
 
-            #region Prepare Add MTU Action
-
-            this.add_mtu = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                actiontype: MTUComm.Action.ActionType.AddMtu,
-                user: FormsApp.CredentialsService.UserName);
-            #endregion
-
             RegisterEventHandlers();
 
             Popup_start.IsVisible = false;
@@ -348,19 +353,11 @@ namespace aclara_meters.view
 
                     }));
               }
-                                             
             ));
-
-
-
         }
 
-        #region Port 2 status vars
-        bool snapRead1Status = false;
-        bool snapRead2Status = false;
-        #endregion
+        #region Checkbox Controller
 
-        #region Checkbox Controller 
         private void CheckBoxController()
         {
 
@@ -466,36 +463,31 @@ namespace aclara_meters.view
 
         }
 
-    #endregion
-
-        #region Port 2 status vars
-        bool port2status = false;
         #endregion
 
         private void SetPort2Buttons ()
         {
-            // Port2 form starts hidden
-            block_view_port2.IsVisible = false;
+            // Port2 form starts visible or hidden depends on bit 1 of byte 28
+            this.port2status = this.add_mtu.comm.ReadMtuBit ( 28, 1 );
+            this.UpdateStatusPort2 ();
 
             // Switch On/Off port2 form tab
             enablePort2.GestureRecognizers.Add ( new TapGestureRecognizer
             {
                 Command = new Command ( () => 
                 {
-                    if ( port2status )
-                    {
-                        enablePort2.Text = "Enable Port 2";
-                        enablePort2.TextColor = Color.White;
-                        block_view_port2.IsVisible = false;
-                        port2status = false;
-                    }
+                    this.port2status = ! this.port2status;
+
+                    bool ok = this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, port2status );
+                    Console.WriteLine ( "-> UPDATE PORT 2 STATUS: " + ok + " " + this.port2status );
+
+                    // Bit correctly modified
+                    if ( ok )
+                        this.UpdateStatusPort2 ();
+
+                    // Bit can't be modified and return to previous state
                     else
-                    {
-                        enablePort2.Text = "Disable Port 2";
-                        enablePort2.TextColor = Color.Gold;
-                        block_view_port2.IsVisible = true;
-                        port2status = true;
-                    }
+                        this.port2status = ! this.port2status;
                 }),
             });
 
@@ -648,8 +640,8 @@ namespace aclara_meters.view
 
             List<string> twoWayList = new List<string> ()
             {
-                "Fast",
-                "Slow",
+                TWOWAY_FAST,
+                TWOWAY_SLOW,
             };
             
             twoWayContainer .IsVisible     = MtuFastMessageConfig;
@@ -808,7 +800,84 @@ namespace aclara_meters.view
 
         #region GUI Initialization
 
-        void InitializeOptionalFields()
+        private void LoadSideMenuElements()
+        {
+            MenuList = new List<PageItem>
+            {
+                // Creating our pages for menu navigation
+                // Here you can define title for item, 
+                // icon on the left side, and page that you want to open after selection
+
+                // Adding menu items to MenuList
+                new PageItem()
+                {
+                    Title = "Read MTU",
+                    Icon = "readmtu_icon.png",
+                    TargetType = "ReadMTU"
+                },
+
+                new PageItem()
+                {
+                    Title = "Turn Off MTU",
+                    Icon = "turnoff_icon.png",
+                    TargetType = "turnOff"
+                },
+
+                new PageItem()
+                {
+                    Title = "Add MTU",
+                    Icon = "addMTU.png",
+                    TargetType = "AddMTU"
+                },
+
+                new PageItem()
+                {
+                    Title = "Replace MTU",
+                    Icon = "replaceMTU2.png",
+                    TargetType = "replaceMTU"
+                },
+
+                new PageItem()
+                {
+                    Title = "Replace Meter",
+                    Icon = "replaceMeter.png",
+                    TargetType = "replaceMeter"
+                },
+
+                new PageItem()
+                {
+                    Title = "Add MTU / Add meter",
+                    Icon = "addMTUaddmeter.png",
+                    TargetType = "AddMTUAddMeter"
+                },
+
+                new PageItem()
+                {
+                    Title = "Add MTU / Rep. Meter",
+                    Icon = "addMTUrepmeter.png",
+                    TargetType = "AddMTUReplaceMeter"
+                },
+
+                new PageItem()
+                {
+                    Title = "Rep.MTU / Rep. Meter",
+                    Icon = "repMTUrepmeter.png",
+                    TargetType = "ReplaceMTUReplaceMeter"
+                },
+
+                new PageItem()
+                {
+                    Title = "Install Confirmation",
+                    Icon = "installConfirm.png",
+                    TargetType = "InstallConfirm"
+                }
+            };
+
+            // Setting our list to be ItemSource for ListView in MainPage.xaml
+            navigationDrawerList.ItemsSource = MenuList;
+        }
+
+        private void InitializeOptionalFields()
         {
             List<Option> optionalFields = this.config.global.Options;
 
@@ -944,7 +1013,60 @@ namespace aclara_meters.view
             }
         }
 
-        #region Picker
+        private void RegisterEventHandlers()
+        {
+            if (AccountDualEntry)
+            {
+                servicePortIdInput.Unfocused += (s, e) => { ServicePortId_validate(1); };
+                servicePortId2Input.Unfocused += (s, e) => { ServicePortId_validate(2); };
+                servicePortId_ok.Tapped += ServicePortId_Ok_Tapped;
+                servicePortId_cancel.Tapped += ServicePortId_Cancel_Tapped;
+            }
+
+            if (WorkOrderDualEntry)
+            {
+                fieldOrderInput.Unfocused += (s, e) => { FieldOrder_validate(1); };
+                fieldOrder2Input.Unfocused += (s, e) => { FieldOrder_validate(2); };
+                fieldOrder_ok.Tapped += FieldOrder_Ok_Tapped;
+                fieldOrder_cancel.Tapped += FieldOrder_Cancel_Tapped;
+            }
+        }
+
+        private void TappedListeners()
+        {
+            logout_button.Tapped += LogoutCallAsync;
+            settings_button.Tapped += OpenSettingsCallAsync;
+            back_button.Tapped += ReturnToMainView;
+            bg_read_mtu_button.Tapped += AddMtu;
+            turnoffmtu_ok.Tapped += TurnOffMTUOkTapped;
+            turnoffmtu_no.Tapped += TurnOffMTUNoTapped;
+            turnoffmtu_ok_close.Tapped += TurnOffMTUCloseTapped;
+            replacemeter_ok.Tapped += ReplaceMeterOkTapped;
+            replacemeter_cancel.Tapped += ReplaceMeterCancelTapped;
+            meter_ok.Tapped += MeterOkTapped;
+            meter_cancel.Tapped += MeterCancelTapped;
+
+            port1label.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(() => port1_command()),
+            });
+            misclabel.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(() => misc_command()),
+            });
+            port2label.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(() => port2_command()),
+            });
+
+            gps_icon_button.Tapped += GPSUpdateButton;
+
+        }
+
+        private void InitializeLowerbarLabel()
+        {
+            label_read.Text = "Push Button to START";
+        }
 
         private void InitializeMeterPickers()
         {
@@ -1293,149 +1415,9 @@ namespace aclara_meters.view
             meterNames2ContainerA.IsVisible = false;
             meterModels2ContainerA.IsVisible = false;
         }
-        #endregion
-
-        #region Forms
-
-        private void RegisterEventHandlers()
-        {
-            if (AccountDualEntry)
-            {
-                servicePortIdInput.Unfocused += (s, e) => { ServicePortId_validate(1); };
-                servicePortId2Input.Unfocused += (s, e) => { ServicePortId_validate(2); };
-                servicePortId_ok.Tapped += ServicePortId_Ok_Tapped;
-                servicePortId_cancel.Tapped += ServicePortId_Cancel_Tapped;
-            }
-
-            if (WorkOrderDualEntry)
-            {
-                fieldOrderInput.Unfocused += (s, e) => { FieldOrder_validate(1); };
-                fieldOrder2Input.Unfocused += (s, e) => { FieldOrder_validate(2); };
-                fieldOrder_ok.Tapped += FieldOrder_Ok_Tapped;
-                fieldOrder_cancel.Tapped += FieldOrder_Cancel_Tapped;
-            }
-        }
-
-        private void TappedListeners()
-        {
-            logout_button.Tapped += LogoutCallAsync;
-            settings_button.Tapped += OpenSettingsCallAsync;
-            back_button.Tapped += ReturnToMainView;
-            bg_read_mtu_button.Tapped += AddMtu;
-            turnoffmtu_ok.Tapped += TurnOffMTUOkTapped;
-            turnoffmtu_no.Tapped += TurnOffMTUNoTapped;
-            turnoffmtu_ok_close.Tapped += TurnOffMTUCloseTapped;
-            replacemeter_ok.Tapped += ReplaceMeterOkTapped;
-            replacemeter_cancel.Tapped += ReplaceMeterCancelTapped;
-            meter_ok.Tapped += MeterOkTapped;
-            meter_cancel.Tapped += MeterCancelTapped;
-
-            port1label.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = new Command(() => port1_command()),
-            });
-            misclabel.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = new Command(() => misc_command()),
-            });
-            port2label.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = new Command(() => port2_command()),
-            });
-
-            gps_icon_button.Tapped += GPSUpdateButton;
-
-        }
-
-        private void InitializeLowerbarLabel()
-        {
-            label_read.Text = "Push Button to START";
-        }
-        
-        #endregion
-
-        #region Menu options
-
-        private void LoadSideMenuElements()
-        {
-            MenuList = new List<PageItem>
-            {
-                // Creating our pages for menu navigation
-                // Here you can define title for item, 
-                // icon on the left side, and page that you want to open after selection
-
-                // Adding menu items to MenuList
-                new PageItem()
-                {
-                    Title = "Read MTU",
-                    Icon = "readmtu_icon.png",
-                    TargetType = "ReadMTU"
-                },
-
-                new PageItem()
-                {
-                    Title = "Turn Off MTU",
-                    Icon = "turnoff_icon.png",
-                    TargetType = "turnOff"
-                },
-
-                new PageItem()
-                {
-                    Title = "Add MTU",
-                    Icon = "addMTU.png",
-                    TargetType = "AddMTU"
-                },
-
-                new PageItem()
-                {
-                    Title = "Replace MTU",
-                    Icon = "replaceMTU2.png",
-                    TargetType = "replaceMTU"
-                },
-
-                new PageItem()
-                {
-                    Title = "Replace Meter",
-                    Icon = "replaceMeter.png",
-                    TargetType = "replaceMeter"
-                },
-
-                new PageItem()
-                {
-                    Title = "Add MTU / Add meter",
-                    Icon = "addMTUaddmeter.png",
-                    TargetType = "AddMTUAddMeter"
-                },
-
-                new PageItem()
-                {
-                    Title = "Add MTU / Rep. Meter",
-                    Icon = "addMTUrepmeter.png",
-                    TargetType = "AddMTUReplaceMeter"
-                },
-
-                new PageItem()
-                {
-                    Title = "Rep.MTU / Rep. Meter",
-                    Icon = "repMTUrepmeter.png",
-                    TargetType = "ReplaceMTUReplaceMeter"
-                },
-
-                new PageItem()
-                {
-                    Title = "Install Confirmation",
-                    Icon = "installConfirm.png",
-                    TargetType = "InstallConfirm"
-                }
-            };
-
-            // Setting our list to be ItemSource for ListView in MainPage.xaml
-            navigationDrawerList.ItemsSource = MenuList;
-        }
-
-        #endregion
 
         #region Phone/Tablet
+
         private void LoadPhoneUI()
         {
             background_scan_page.Margin = new Thickness(0, 0, 0, 0);
@@ -1461,6 +1443,7 @@ namespace aclara_meters.view
             aclara_logo.TranslationX = 42;
             aclara_logo.TranslationX = 42;
         }
+
         #endregion
 
         #endregion
@@ -1963,6 +1946,7 @@ namespace aclara_meters.view
             }
 
         }
+
         private void ReplaceMeterCancelTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
@@ -2006,20 +1990,170 @@ namespace aclara_meters.view
 
         }
 
-        void MeterCancelTapped(object sender, EventArgs e)
+        private void MeterCancelTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
             dialog_meter_replace_one.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
 
-        void MeterOkTapped(object sender, EventArgs e)
+        private void MeterOkTapped(object sender, EventArgs e)
         {
             dialog_meter_replace_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
         }
+
+        #endregion
+
+        #region Confirmation dialogs
+
+        private void ServicePortId_Ok_Tapped(object sender, EventArgs e)
+        {
+
+            if (servicePortIdInput.Text.Equals(serviceCheckEntry.Text))
+            {
+                errorServicePort.IsVisible = false;
+                dialog_open_bg.IsVisible = false;
+                turnoff_mtu_background.IsVisible = false;
+                dialog_servicePortId.IsVisible = false;
+                serviceCheckEntry.Text = "";
+            }
+            else
+            {
+                errorServicePort.IsVisible = true;
+            }
+        }
+
+        private void ServicePortId_Cancel_Tapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            dialog_servicePortId.IsVisible = false;
+            errorServicePort.IsVisible = false;
+            servicePortIdInput.Text = "";
+        }
+
+        private void FieldOrder_Ok_Tapped(object sender, EventArgs e)
+        {
+
+            if (fieldOrderInput.Text.Equals(fieldOrderCheckEntry.Text))
+            {
+                errorFieldOrder.IsVisible = false;
+                dialog_open_bg.IsVisible = false;
+                turnoff_mtu_background.IsVisible = false;
+                dialog_fieldOrder.IsVisible = false;
+                fieldOrderCheckEntry.Text = "";
+            }
+            else
+            {
+                errorFieldOrder.IsVisible = true;
+            }
+        }
+
+        private void FieldOrder_Cancel_Tapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            dialog_fieldOrder.IsVisible = false;
+            errorFieldOrder.IsVisible = false;
+            fieldOrderInput.Text = "";
+        }
+
+        #endregion
+
+        #region Form
+
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            background_scan_page.Opacity = 0.5;
+            background_scan_page.FadeTo(1, 500);
+        }
+
+        private void submit_send(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            Popup_start.IsVisible = false;
+            Popup_start.IsEnabled = false;
+            Task.Run(async () =>
+            {
+                await Task.Delay(500); Device.BeginInvokeOnMainThread(() =>
+                {
+                    Application.Current.MainPage.Navigation.PopAsync(false);
+                });
+            });
+
+        }
+
+        private void misc_command()
+        {
+            port1label.Opacity = 0.5;
+            misclabel.Opacity = 1;
+            port2label.Opacity = 0.5;
+
+            port1label.FontSize = 19;
+            misclabel.FontSize = 22;
+            port2label.FontSize = 19;
+
+            port1view.IsVisible = false;
+            port2view.IsVisible = false;
+            miscview.IsVisible = true;
+        }
+
+        private void port2_command()
+        {
+            port1label.Opacity = 0.5;
+            misclabel.Opacity = 0.5;
+            port2label.Opacity = 1;
+
+            port1label.FontSize = 19;
+            misclabel.FontSize = 19;
+            port2label.FontSize = 22;
+
+            port1view.IsVisible = false;
+            port2view.IsVisible = true;
+            miscview.IsVisible = false;
+
+
+        }
+
+        private void port1_command()
+        {
+            port1label.Opacity = 1;
+            misclabel.Opacity = 0.5;
+            port2label.Opacity = 0.5;
+
+            port1label.FontSize = 22;
+            misclabel.FontSize = 19;
+            port2label.FontSize = 19;
+
+            port1view.IsVisible = true;
+            port2view.IsVisible = false;
+            miscview.IsVisible = false;
+        }
+
+        private void ReturnToMainView(object sender, EventArgs e)
+        {
+            if (isCancellable)
+            {
+                Application.Current.MainPage.Navigation.PopAsync(false);
+            }
+            else
+            {
+                //REASON
+                dialog_open_bg.IsVisible = true;
+
+                Popup_start.IsVisible = true;
+                Popup_start.IsEnabled = true;
+            }
+
+
+        }
+
+        #endregion
 
         #endregion
 
@@ -2187,72 +2321,19 @@ namespace aclara_meters.view
 
             return true;
         }
-        #endregion
-
-        #region Confirmation dialogs
-
-        private void ServicePortId_Ok_Tapped(object sender, EventArgs e)
-        {
-
-            if (servicePortIdInput.Text.Equals(serviceCheckEntry.Text))
-            {
-                errorServicePort.IsVisible = false;
-                dialog_open_bg.IsVisible = false;
-                turnoff_mtu_background.IsVisible = false;
-                dialog_servicePortId.IsVisible = false;
-                serviceCheckEntry.Text = "";
-            }
-            else
-            {
-                errorServicePort.IsVisible = true;
-            }
-        }
-
-        private void ServicePortId_Cancel_Tapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            dialog_servicePortId.IsVisible = false;
-            errorServicePort.IsVisible = false;
-            servicePortIdInput.Text = "";
-        }
-
-        private void FieldOrder_Ok_Tapped(object sender, EventArgs e)
-        {
-
-            if (fieldOrderInput.Text.Equals(fieldOrderCheckEntry.Text))
-            {
-                errorFieldOrder.IsVisible = false;
-                dialog_open_bg.IsVisible = false;
-                turnoff_mtu_background.IsVisible = false;
-                dialog_fieldOrder.IsVisible = false;
-                fieldOrderCheckEntry.Text = "";
-            }
-            else
-            {
-                errorFieldOrder.IsVisible = true;
-            }
-        }
-
-        private void FieldOrder_Cancel_Tapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            dialog_fieldOrder.IsVisible = false;
-            errorFieldOrder.IsVisible = false;
-            fieldOrderInput.Text = "";
-        }
 
         #endregion
 
-        #region Form
+        #region GUI Logic
 
-        protected override void OnAppearing()
+        private void UpdateStatusPort2 ()
         {
-            base.OnAppearing();
+            block_view_port2.IsVisible = this.port2status;
+            enablePort2.Text      = ( this.port2status ) ? "Disable Port 2" : "Enable Port 2";
+            enablePort2.TextColor = ( this.port2status ) ? Color.Gold : Color.White;
 
-            background_scan_page.Opacity = 0.5;
-            background_scan_page.FadeTo(1, 500);
+            this.copyPort1.IsEnabled = this.port2status;
+            this.copyPort1.IsVisible = this.port2status;
         }
 
         private void submit_send(object sender, EventArgs e)
@@ -2726,10 +2807,6 @@ namespace aclara_meters.view
 
             #endregion
 
-            #region Add MTU Action
-
-            //this.add_mtu.AddParameter(addMtuForm);
-
             #region On Add MTU Action finish
 
             this.add_mtu.OnFinish += ((s, e) =>
@@ -2905,10 +2982,8 @@ namespace aclara_meters.view
 
             #endregion
 
-            // Launch the action!
-            this.add_mtu.Run(addMtuForm);
-
-            #endregion
+            // Launch action!
+            add_mtu.Run ( addMtuForm );
         }
 
         #endregion

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Xml;
 
 using LogDataType = MTUComm.LogQueryResult.LogDataType;
-using ActionType = MTUComm.Action.ActionType;
+using ActionType  = MTUComm.Action.ActionType;
 
 namespace MTUComm
 {
@@ -18,8 +18,8 @@ namespace MTUComm
         #region Constants
 
         private const int BASIC_READ_ADDRESS = 0;
-        private const int BASIC_READ_DATA = 32;
-        private const int DEFAULT_OVERLAP = 6;
+        private const int BASIC_READ_DATA    = 25;
+        private const int DEFAULT_OVERLAP    = 6;
         private const int DEFAULT_LENGTH_AES = 16;
 
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
@@ -260,31 +260,38 @@ namespace MTUComm
 
         #region Launch Actions
 
-        public void LaunchActionThread(ActionType type, params object[] args)
+        public void LaunchActionThread ( ActionType type, params object[] args )
         {
             System.Action actionToLaunch = null;
 
-            switch (type)
+            switch ( type )
             {
                 // NOTE: TaskFactory uses Action without parameters and elegant
                 // form to be able to do it, is using a lambda expression
-                case ActionType.ReadMtu: actionToLaunch = (() => Task_ReadMtu()); break;
-                case ActionType.AddMtu: actionToLaunch = (() => Task_AddMtu((AddMtuForm)args[0], (string)args[1])); break;
+                case ActionType.ReadMtu   : actionToLaunch = ( () => Task_ReadMtu () ); break;
+                case ActionType.AddMtu    : actionToLaunch = ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ] ) ); break;
                 case ActionType.TurnOffMtu: actionToLaunch = Task_TurnOffMtu; break;
-                case ActionType.TurnOnMtu: actionToLaunch = Task_TurnOnMtu; break;
-                case ActionType.ReadData: actionToLaunch = (() => Task_ReadDataMtu((int)args[0])); break;
-                case ActionType.BasicRead: actionToLaunch = Task_BasicRead; break;
+                case ActionType.TurnOnMtu : actionToLaunch = Task_TurnOnMtu; break;
+                case ActionType.ReadData  : actionToLaunch = ( () => Task_ReadDataMtu ( ( int )args[ 0 ] ) ); break;
+                case ActionType.BasicRead : actionToLaunch = Task_BasicRead; break;
                 case ActionType.InstallConfirmation: actionToLaunch = Task_InstallConfirmation; break;
                 default: break;
             }
 
-            if (actionToLaunch != null)
+            if ( actionToLaunch != null )
             {
                 //Gets MTU casci info ( type and id )
-                LoadMtuBasicInfo();
+                LoadMtuBasicInfo ();
 
                 // Launch asynchronous task
-                Task.Factory.StartNew(actionToLaunch);
+                try
+                {
+                    Task.Factory.StartNew(actionToLaunch);
+                }
+                catch ( Exception e )
+                {
+                    OnError ( this, TranslateException ( e ) );
+                }
             }
         }
 
@@ -292,7 +299,7 @@ namespace MTUComm
 
         #region Actions
 
-        public void Task_ReadDataMtu(int NumOfDays)
+        public void Task_ReadDataMtu ( int NumOfDays )
         {
             //If MTU has changed or critical settings/configuration force detection rutine
             if (this.changedMTUSettings)
@@ -330,11 +337,11 @@ namespace MTUComm
             }
         }
 
-        public void Task_InstallConfirmation()
+        public void Task_InstallConfirmation ()
         {
             //If MTU has changed or critical settings/configuration force detection rutine
             if (this.changedMTUSettings)
-                RecoverMeterByMtuType();
+                RecoverMeterByMtuType ();
 
             if (latest_mtu.Shipbit)
             {
@@ -382,7 +389,7 @@ namespace MTUComm
             Task_ReadMtu(true);
         }
 
-        public void Task_TurnOffMtu()
+        public void Task_TurnOffMtu ()
         {
             Console.WriteLine("TurnOffMtu start");
 
@@ -394,7 +401,7 @@ namespace MTUComm
             OnTurnOffMtu(this, args);
         }
 
-        public void Task_TurnOnMtu()
+        public void Task_TurnOnMtu ()
         {
             Console.WriteLine("TurnOnMtu start");
 
@@ -406,7 +413,7 @@ namespace MTUComm
             OnTurnOnMtu(this, args);
         }
 
-        private void TurnOffMtu_Logic()
+        private void TurnOffMtu_Logic ()
         {
             byte mask = 1;
             byte systemFlags = (lexi.Read(22, 1))[0];
@@ -423,7 +430,7 @@ namespace MTUComm
             }
         }
 
-        private void TurnOnMtu_Logic()
+        private void TurnOnMtu_Logic ()
         {
             byte mask = 1;
             byte systemFlags = (lexi.Read(22, 1))[0];
@@ -440,11 +447,11 @@ namespace MTUComm
             }
         }
 
-        public void Task_ReadMtu(bool forcedetect = false)
+        public void Task_ReadMtu ( bool forcedetect = false )
         {
             //If MTU has changed or critical settings/configuration force detection rutine
             if (this.changedMTUSettings || forcedetect)
-                RecoverMeterByMtuType();
+                RecoverMeterByMtuType ();
 
             String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
             int memory_map_size = configuration.GetmemoryMapSizeByMtuId(mtuType.Id);
@@ -477,7 +484,7 @@ namespace MTUComm
                     System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
                 }
 
-
+                
             }
             catch (Exception e)
             {
@@ -495,7 +502,7 @@ namespace MTUComm
             }
         }
 
-        private void Task_AddMtu(dynamic form, string user)
+        private void Task_AddMtu ( dynamic form, string user )
         {
             Logger logger = new Logger(Configuration.GetInstance());
             AddMtuLog addMtuLog = new AddMtuLog(logger, form, user);
@@ -720,7 +727,7 @@ namespace MTUComm
             addMtuLog.Save();
         }
 
-        public void Task_BasicRead()
+        public void Task_BasicRead ()
         {
             BasicReadArgs args = new BasicReadArgs();
             OnBasicRead(this, args);
@@ -730,30 +737,71 @@ namespace MTUComm
 
         #region Write to MTU
 
-        public void WriteMtuModifiedRegisters(MemoryMap.MemoryMap map)
+        public void WriteMtuModifiedRegisters ( MemoryMap.MemoryMap map )
         {
-            List<dynamic> modifiedRegisters = map.GetModifiedRegisters().GetAllElements();
-            foreach (dynamic r in modifiedRegisters)
-                this.WriteMtuRegister((uint)r.address, map.memory, (uint)r.size);
+            List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
+            foreach ( dynamic r in modifiedRegisters )
+                this.WriteMtuRegister ( ( uint )r.address, map.memory, ( uint )r.size );
 
-            modifiedRegisters.Clear();
+            modifiedRegisters.Clear ();
             modifiedRegisters = null;
         }
 
         public void WriteMtuRegister(uint address, byte[] memory, uint length)
         {
-            byte[] tmp = new byte[length];
-            Array.Copy(memory, address, tmp, 0, length);
+            byte[] tmp = new byte[ length ];
+            Array.Copy ( memory, address, tmp, 0, length );
 
-            Console.WriteLine("Addr {0} | Value {1} | Length {2}", address, BitConverter.ToString(tmp), length);
+            Console.WriteLine ( "Write subpart: Addr {0} | Value {1} | Length {2}", address, BitConverter.ToString(tmp), length );
 
-            lexi.Write(address, tmp);
+            lexi.Write ( address, tmp );
+        }
+
+        public void WriteMtuRegister ( uint address, byte[] values )
+        {
+            Console.WriteLine ( "Write values: Addr {0} | Value {1} | Length {2}", address, BitConverter.ToString(values), values.Length );
+
+            lexi.Write ( address, values );
+        }
+
+        public T ReadMtuRegister<T> ( uint address, uint length )
+        {
+            byte value = ( lexi.Read ( address, length ) )[ 0 ];
+
+            return ( T )( object )value;
+        }
+
+        public bool ReadMtuBit ( uint address, uint bit )
+        {
+            byte value = ( lexi.Read ( address, 1 ) )[ 0 ];
+
+            return ( ( ( value >> ( int )bit ) & 1 ) == 1 );
+        }
+
+        public bool WriteMtuBitAndVerify ( uint address, uint bit, bool active, bool verify = true )
+        {
+            // Read current value
+            byte systemFlags = ( lexi.Read ( 22, 1 ) )[ 0 ];
+
+            // Modify bit and write to MTU
+            systemFlags = ( byte ) ( systemFlags | ( ( ( active ) ? 1 : 0 ) << ( int )bit ) );
+            lexi.Write ( address, new byte[] { systemFlags } );
+
+            // Read new written value to verify modification
+            if ( verify )
+            {
+                byte valueWritten = ( lexi.Read ( address, 1 ) )[ 0 ];
+                return ( ( ( valueWritten >> ( int )bit ) & 1 ) == ( ( active ) ? 1 : 0 ) );
+            }
+
+            // Without verification
+            return true;
         }
 
         #endregion
 
         // NO SE USA
-        public byte[] ReadComplete(byte addr, uint length)
+        public byte[] ReadComplete ( byte addr, uint length )
         {
             byte[] tmp = new byte[length];
             uint maxReadBytes = 255;
@@ -781,41 +829,41 @@ namespace MTUComm
         /// 
         /// </summary>
         /// <remarks>Internaly saves internal MTU type and ID used for communication logic</remarks>
-        private void LoadMtuBasicInfo()
+        private void LoadMtuBasicInfo ()
         {
             try
             {
-                MTUBasicInfo mtu_info = new MTUBasicInfo(lexi.Read(BASIC_READ_ADDRESS, BASIC_READ_DATA));
-                mtu_changed = !((mtu_info.Id == latest_mtu.Id) && (mtu_info.Type == latest_mtu.Type));
+                MTUBasicInfo mtu_info = new MTUBasicInfo ( lexi.Read ( BASIC_READ_ADDRESS, BASIC_READ_DATA ) );
+                mtu_changed = ! ( ( mtu_info.Id == latest_mtu.Id ) && ( mtu_info.Type == latest_mtu.Type ) );
                 latest_mtu = mtu_info;
 
-                MtuForm.SetBasicInfo(latest_mtu);
+                MtuForm.SetBasicInfo ( latest_mtu );
             }
-            catch (Exception e)
+            catch ( Exception e )
             {
                 OnError(this, new ErrorArgs(510, e.Message, "getMTU info returned 0 bytes."));
             }
         }
 
-        private void RecoverMeterByMtuType()
+        private void RecoverMeterByMtuType ()
         {
-            this.mtuType = configuration.GetMtuTypeById((int)this.latest_mtu.Type);
+            this.mtuType = configuration.GetMtuTypeById ( ( int )this.latest_mtu.Type );
 
-            for (int i = 0; i < mtuType.Ports.Count; i++)
-                latest_mtu.setPortType(i, mtuType.Ports[i].Type);
+            for ( int i = 0; i < mtuType.Ports.Count; i++ )
+                latest_mtu.setPortType ( i, mtuType.Ports[ i ].Type );
 
-            if (latest_mtu.isEncoder)
+            if ( latest_mtu.isEncoder )
             {
             }
         }
 
-        private ErrorArgs TranslateException(Exception e)
+        private ErrorArgs TranslateException ( Exception e )
         {
-            int status = -1;
-            string message = e.Message;
+            int    status     = -1;
+            string message    = e.Message;
             string logmessage = e.Message;
 
-            switch (e.GetType().Name)
+            switch ( e.GetType ().Name )
             {
                 case ERROR_LOADDEMANDCONF:
                 case ERROR_LOADMETER:
@@ -828,7 +876,7 @@ namespace MTUComm
                     break;
             }
 
-            return new ErrorArgs(status, message, logmessage);
+            return new ErrorArgs ( status, message, logmessage );
         }
 
         #endregion
