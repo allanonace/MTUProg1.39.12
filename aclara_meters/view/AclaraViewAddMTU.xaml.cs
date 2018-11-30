@@ -441,27 +441,15 @@ namespace aclara_meters.view
             {
                 Command = new Command(() =>
                 {
-                    if (!snapRead2Status)
-                    {
-                        Checkbox_SnapReads_Port2.Source = "checkbox_on";
-                        snapReads2Slider.IsEnabled = true;
-                        snapReads2SubContainer.Opacity = 1;
-                        snapRead2Status = true;
-                    }
-                    else
-                    {
-                        Checkbox_SnapReads_Port2.Source = "checkbox_off";
-                        snapReads2Slider.IsEnabled = false;
-                        snapReads2SubContainer.Opacity = 0.8;
-                        snapRead2Status = false;
-                    }
+                    this.ChangeCheckboxSnapReads ( ! snapRead2Status );
                 }),
             });
-
 
             #endregion
 
         }
+
+        
 
         #endregion
 
@@ -485,7 +473,7 @@ namespace aclara_meters.view
                     if ( ok )
                         this.UpdateStatusPort2 ();
 
-                    // Bit can't be modified and return to previous state
+                    // Bit have not changed -> return to previous state
                     else
                         this.port2status = ! this.port2status;
                 }),
@@ -506,6 +494,8 @@ namespace aclara_meters.view
                     twoWay2Picker          .SelectedIndex = twoWayPicker          .SelectedIndex;
                     alarms2Picker          .SelectedIndex = alarmsPicker          .SelectedIndex;
                     demands2Picker         .SelectedIndex = demandsPicker         .SelectedIndex;
+
+                    this.ChangeCheckboxSnapReads ( this.snapRead1Status );
                 }),
             });
         }
@@ -1620,15 +1610,7 @@ namespace aclara_meters.view
             var newStep = Math.Round(e.NewValue / snapReadsStep);
 
             snapReadsSlider.Value = newStep * snapReadsStep;
-
-            if (snapReadsSlider.Value == 24)
-            {
-                snapReadsLabel.Text = "Disable";
-            }
-            else
-            {
-                snapReadsLabel.Text = snapReadsSlider.Value.ToString();
-            }
+            snapReadsLabel .Text  = snapReadsSlider.Value.ToString ();
         }
 
         void OnSnapReads2SliderValueChanged(object sender, ValueChangedEventArgs e)
@@ -1636,15 +1618,7 @@ namespace aclara_meters.view
             var newStep = Math.Round(e.NewValue / snapReads2Step);
 
             snapReads2Slider.Value = newStep * snapReads2Step;
-
-            if (snapReads2Slider.Value == 24)
-            {
-                snapReads2Label.Text = "Disable";
-            }
-            else
-            {
-                snapReads2Label.Text = snapReads2Slider.Value.ToString();
-            }
+            snapReads2Label .Text  = snapReads2Slider.Value.ToString();
         }
 
         #endregion
@@ -2339,8 +2313,17 @@ namespace aclara_meters.view
             enablePort2.Text      = ( this.port2status ) ? "Disable Port 2" : "Enable Port 2";
             enablePort2.TextColor = ( this.port2status ) ? Color.Gold : Color.White;
 
+            this.ContainerCopyPort1.IsVisible = this.port2status;
             this.copyPort1.IsEnabled = this.port2status;
-            this.copyPort1.IsVisible = this.port2status;
+            //this.copyPort1.IsVisible = this.port2status;
+        }
+
+        private void ChangeCheckboxSnapReads ( bool active )
+        {
+            snapReads2SubContainer.Opacity = ( active ) ? 1 : 0.8;
+            Checkbox_SnapReads_Port2.Source = "checkbox_" + ( ( active ) ? "on" : "off" );
+            snapReads2Slider.IsEnabled = active;
+            snapRead2Status = active;
         }
 
         #endregion
