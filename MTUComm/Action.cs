@@ -92,7 +92,7 @@ namespace MTUComm
         private int order = 0;
 
 
-        private MTUComm comm;
+        public MTUComm comm { get; private set; }
 
 
         public delegate void ActionProgresshHandler(object sender, ActionProgressArgs e);
