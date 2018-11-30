@@ -18,7 +18,7 @@ namespace MTUComm
         #region Constants
 
         private const int BASIC_READ_ADDRESS = 0;
-        private const int BASIC_READ_DATA    = 25;
+        private const int BASIC_READ_DATA    = 32;
         private const int DEFAULT_OVERLAP    = 6;
         private const int DEFAULT_LENGTH_AES = 16;
 
