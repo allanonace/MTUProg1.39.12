@@ -252,7 +252,7 @@ namespace MTUComm
         public MTUComm(ISerial serial, Configuration configuration)
         {
             this.configuration = configuration;
-            latest_mtu = new MTUBasicInfo(new byte[25]);
+            latest_mtu = new MTUBasicInfo(new byte[BASIC_READ_DATA]);
             lexi = new Lexi.Lexi(serial, 10000);
         }
 
@@ -367,16 +367,13 @@ namespace MTUComm
 
 
                 byte valueWritten = (lexi.Read(inConFlag, 1))[0];
-                Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
-                Console.WriteLine("InstallConfirmation trigger end");
-
                 valueWritten &= mask;
-                int max_iters = 3;
 
+                int max_iters = 36;
                 while (valueWritten > 0 && max_iters > 0)
                 {
-                    OnProgress(this, new ProgressArgs(4 - max_iters, 3, "Install Confirmation(" + max_iters.ToString() + ")..."));
-                    Thread.Sleep(60000);
+                    OnProgress(this, new ProgressArgs(37 - max_iters, 36, "Checking Install Confirmation..."));
+                    Thread.Sleep(5000);
                     valueWritten = (lexi.Read(inConFlag, 1))[0];
                     valueWritten &= mask;
                     max_iters--;
