@@ -186,23 +186,40 @@ namespace MTUComm
             return interfaces.GetmemoryMapSizeByMtuId(mtuid);
         }
 
+        public MemRegister getFamilyRegister(int mtuid, string regsiter_name)
+        {
+            try
+            {
+                return getFamilyRegister(interfaces.GetmemoryMapTypeByMtuId(mtuid), regsiter_name);
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+            
+        }
+
         public MemRegister getFamilyRegister(string family, string regsiter_name)
         {
-            XmlSerializer serializer = new XmlSerializer(typeof(MemRegisterList));
-            using (TextReader reader = new StreamReader(Path.Combine(mbase_path, "family_" + family + ".xml")))
+            try
             {
-                MemRegisterList list = serializer.Deserialize(reader) as MemRegisterList;
-                if (list.Registers != null)
+                XmlSerializer serializer = new XmlSerializer(typeof(MemRegisterList));
+                using (TextReader reader = new StreamReader(Path.Combine(mbase_path, "family_" + family + ".xml")))
                 {
-                    foreach (MemRegister xmlRegister in list.Registers)
+                    MemRegisterList list = serializer.Deserialize(reader) as MemRegisterList;
+                    if (list.Registers != null)
                     {
-                        if (xmlRegister.Id.ToLower().Equals(regsiter_name.ToLower()))
+                        foreach (MemRegister xmlRegister in list.Registers)
                         {
-                            return xmlRegister;
+                            if (xmlRegister.Id.ToLower().Equals(regsiter_name.ToLower()))
+                            {
+                                return xmlRegister;
+                            }
                         }
                     }
                 }
-            }
+            }catch (Exception e) { }
+
             return null;
         }
 

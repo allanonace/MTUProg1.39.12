@@ -14,6 +14,9 @@ namespace MTUComm
 
         private int shipbit;
 
+        private int p1enabled;
+        private int p2enabled;
+
         private PortType[] ports = new PortType[] { PortType.TYPE_NONE, PortType.TYPE_NONE }; //Currently max 2 ports
 
 
@@ -68,6 +71,29 @@ namespace MTUComm
             byte mask = 1;
             shipbit = buffer[22];
             shipbit &= mask;
+
+            p1enabled = buffer[28];
+            shipbit &= 1;
+
+            p2enabled = buffer[28];
+            shipbit &= 2;
+
+        }
+
+        public bool P1Enabled
+        {
+            get
+            {
+                return (p1enabled > 0);
+            }
+        }
+
+        public bool P2Enabled
+        {
+            get
+            {
+                return (p2enabled > 0);
+            }
         }
 
 
