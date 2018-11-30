@@ -676,6 +676,20 @@ namespace aclara_meters.view
             battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
             rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
 
+            Task.Run(async () =>
+            {
+                await Task.Delay(250); Device.BeginInvokeOnMainThread(() =>
+                {
+                    ReadMTU(null, null);
+                });
+            });
+
+
+           
+
+
+
+           
         }
 
         private void TappedListeners()
