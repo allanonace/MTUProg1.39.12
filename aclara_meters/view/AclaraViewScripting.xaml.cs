@@ -279,31 +279,24 @@ namespace aclara_meters.view
                                 {
                                     await Task.Delay(50); Device.BeginInvokeOnMainThread(() =>
                                     {
-                                        try
-                                        {
+                                    try
+                                    {
 
-                                            Device.BeginInvokeOnMainThread(() =>
-                                            {
-                                                backdark_bg.IsVisible = true;
-                                                indicator.IsVisible = true;
-                                                ContentView_Scripting.IsEnabled = false;
-                                                _userTapped = true;
-                                                ContentView_Scripting_label_read.Text = "Executing Script ... ";
-                                            });
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                            backdark_bg.IsVisible = true;
+                                            indicator.IsVisible = true;
+                                            ContentView_Scripting.IsEnabled = false;
+                                            _userTapped = true;
+                                            ContentView_Scripting_label_read.Text = "Executing Script ... ";
+                                        });
 
 
 
                                             //ScriptRunner runner = new ScriptRunner(FormsApp.config.GetBasePath(), FormsApp.ble_interface, FormsApp.config.GetBasePath() + "/data_share.xml");
 
-                                            ScriptRunner runner = new ScriptRunner(FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length);
+                                            Task.Factory.StartNew(scriptFunction);
 
-                                            //Define finish and error event handler
-                                            runner.OnFinish += Add_mtu_OnFinish;
-                                            runner.onStepFinish += Runner_onStepFinish;
-                                            runner.OnError += Add_mtu_OnError;
-
-                                            //Run
-                                            runner.Run();
 
                                         }
                                         catch (Exception e2)
@@ -363,6 +356,19 @@ namespace aclara_meters.view
 
                 Thread.Sleep(500); // 0.5 Second
             }
+        }
+
+        private void scriptFunction()
+        {
+            ScriptRunner runner = new ScriptRunner(FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length);
+
+            //Define finish and error event handler
+            runner.OnFinish += Add_mtu_OnFinish;
+            runner.onStepFinish += Runner_onStepFinish;
+            runner.OnError += Add_mtu_OnError;
+
+            //Run
+            runner.Run();
         }
 
         private async Task ChangeListViewData()
