@@ -2550,7 +2550,7 @@ namespace aclara_meters.view
                     }));*/
                     Device.BeginInvokeOnMainThread(() =>
                 {
-                    AddMtu_Action();
+                    Task.Factory.StartNew(AddMtu_Action);
                 });
             }
         }

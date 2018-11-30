@@ -953,14 +953,20 @@ namespace aclara_meters.view
             {
                 // TODO: cambiar usuario
                 // TODO: BasicRead no loguea
-                MTUComm.Action basicRead = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.BasicRead, user: "martxel");
-                basicRead.OnFinish += ((s, args) =>
-                {
-                });
-                basicRead.Run();
+                Task.Factory.StartNew(BasicReadThread);
             });
 
             //Bug fix Android UI Animation
+
+        }
+
+        void BasicReadThread()
+        {
+            MTUComm.Action basicRead = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.BasicRead, user: FormsApp.CredentialsService.UserName);
+            basicRead.OnFinish += ((s, args) =>
+            {
+            });
+            basicRead.Run();
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
