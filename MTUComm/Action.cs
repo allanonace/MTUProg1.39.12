@@ -26,7 +26,7 @@ namespace MTUComm
             TurnOffMtu,
             TurnOnMtu,
             ReadData,
-            InstallConfirmation,
+            MtuInstallationConfirmation,
             Diagnosis,
             BasicRead
         }
@@ -43,7 +43,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu,"Turn Off MTU" },
             {ActionType.TurnOnMtu,"Turn On MTU" },
             {ActionType.ReadData,"Read Data Log" },
-            {ActionType.InstallConfirmation,"Install Confirmation" },
+            {ActionType.MtuInstallationConfirmation,"Install Confirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -59,7 +59,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu,"TurnOffMtu" },
             {ActionType.TurnOnMtu,"TurnOnMTU" },
             {ActionType.ReadData, "Program MTU" },
-            {ActionType.InstallConfirmation,"InstallConfirmation" },
+            {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -75,7 +75,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu, null },
             {ActionType.TurnOnMtu, null },
             {ActionType.ReadData, "DataRead" },
-            {ActionType.InstallConfirmation,"InstallConfirmation" },
+            {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -204,7 +204,7 @@ namespace MTUComm
                         comm.OnTurnOnMtu += Comm_OnTurnOnMtu;
                         break;
 
-                    case ActionType.InstallConfirmation:
+                    case ActionType.MtuInstallationConfirmation:
                         comm.OnReadMtu  += Comm_OnReadMtu;
                         comm.OnProgress += Comm_OnProgress;
                         break;

@@ -274,7 +274,7 @@ namespace MTUComm
                 case ActionType.TurnOnMtu: actionToLaunch = Task_TurnOnMtu; break;
                 case ActionType.ReadData: actionToLaunch = (() => Task_ReadDataMtu((int)args[0])); break;
                 case ActionType.BasicRead: actionToLaunch = Task_BasicRead; break;
-                case ActionType.InstallConfirmation: actionToLaunch = Task_InstallConfirmation; break;
+                case ActionType.MtuInstallationConfirmation: actionToLaunch = Task_InstallConfirmation; break;
                 default: break;
             }
 
