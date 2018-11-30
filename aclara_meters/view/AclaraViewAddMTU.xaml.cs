@@ -2075,6 +2075,16 @@ namespace aclara_meters.view
 
         private void submit_send(object sender, EventArgs e)
         {
+            int selectedCancelReasonIndex = cancelReasonPicker.SelectedIndex;
+            string selectedCancelReason = "Other";
+
+            if (selectedCancelReasonIndex > -1)
+            {
+                selectedCancelReason = cancelReasonPicker.Items[cancelReasonPicker.SelectedIndex];
+            }
+
+            this.add_mtu.Cancel(selectedCancelReason);
+
             dialog_open_bg.IsVisible = false;
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
@@ -2085,7 +2095,6 @@ namespace aclara_meters.view
                     Application.Current.MainPage.Navigation.PopAsync(false);
                 });
             });
-
         }
 
         private void misc_command()
@@ -2149,8 +2158,6 @@ namespace aclara_meters.view
                 Popup_start.IsVisible = true;
                 Popup_start.IsEnabled = true;
             }
-
-
         }
 
         #endregion
@@ -2335,98 +2342,6 @@ namespace aclara_meters.view
             this.copyPort1.IsEnabled = this.port2status;
             this.copyPort1.IsVisible = this.port2status;
         }
-
-        private void submit_send(object sender, EventArgs e)
-        {
-            int selectedCancelReasonIndex = cancelReasonPicker.SelectedIndex;
-            string selectedCancelReason = "Other";
-
-            if (selectedCancelReasonIndex > -1)
-            {
-                selectedCancelReason = cancelReasonPicker.Items[cancelReasonPicker.SelectedIndex];
-            }
-
-            this.add_mtu.Cancel(selectedCancelReason);
-
-            dialog_open_bg.IsVisible = false;
-            Popup_start.IsVisible = false;
-            Popup_start.IsEnabled = false;
-            Task.Run(async () =>
-            {
-                await Task.Delay(500); Device.BeginInvokeOnMainThread(() =>
-                {
-                    Application.Current.MainPage.Navigation.PopAsync(false);
-                });
-            });
-
-        }
-
-        private void misc_command()
-        {
-            port1label.Opacity = 0.5;
-            misclabel.Opacity = 1;
-            port2label.Opacity = 0.5;
-
-            port1label.FontSize = 19;
-            misclabel.FontSize = 22;
-            port2label.FontSize = 19;
-
-            port1view.IsVisible = false;
-            port2view.IsVisible = false;
-            miscview.IsVisible = true;
-        }
-
-        private void port2_command()
-        {
-            port1label.Opacity = 0.5;
-            misclabel.Opacity = 0.5;
-            port2label.Opacity = 1;
-
-            port1label.FontSize = 19;
-            misclabel.FontSize = 19;
-            port2label.FontSize = 22;
-
-            port1view.IsVisible = false;
-            port2view.IsVisible = true;
-            miscview.IsVisible = false;
-
-
-        }
-
-        private void port1_command()
-        {
-            port1label.Opacity = 1;
-            misclabel.Opacity = 0.5;
-            port2label.Opacity = 0.5;
-
-            port1label.FontSize = 22;
-            misclabel.FontSize = 19;
-            port2label.FontSize = 19;
-
-            port1view.IsVisible = true;
-            port2view.IsVisible = false;
-            miscview.IsVisible = false;
-        }
-
-        private void ReturnToMainView(object sender, EventArgs e)
-        {
-            if (isCancellable)
-            {
-                Application.Current.MainPage.Navigation.PopAsync(false);
-            }
-            else
-            {
-                //REASON
-                dialog_open_bg.IsVisible = true;
-
-                Popup_start.IsVisible = true;
-                Popup_start.IsEnabled = true;
-            }
-
-
-        }
-
-        #endregion
 
         #endregion
 
