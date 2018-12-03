@@ -151,7 +151,7 @@ namespace MTUComm
                     ulong valueULong = 0;
                     if ( isString )
                     {
-                        if ( ! ulong.TryParse ( value, out valueULong ) )
+                        if ( ! ulong.TryParse ( ( string )value, out valueULong ) )
                             return false;
                     }
                     else

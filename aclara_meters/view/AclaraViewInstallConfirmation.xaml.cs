@@ -432,17 +432,19 @@ namespace aclara_meters.view
                     }
                 }
 
-                List <Interface> list = FormsApp.config.interfaces.Interfaces;
 
-                ActionInterface action = FormsApp.config.interfaces.GetInterfaceByMtuIdAndAction(mtu_type,"ReadMTU");
 
-                List<InterfaceParameters> para = action.Parameters;
+                //List <Interface> list = FormsApp.config.interfaces.Interfaces;
+
+                //ActionInterface action = FormsApp.config.interfaces.GetInterfaceByMtuIdAndAction(mtu_type,"ReadMTU");
+
+                //List<InterfaceParameters> para = action.Parameters;
 
                 string resultMsg = "";
 
                 bool enc = false;
 
-                foreach (InterfaceParameters intparam in para)
+                foreach (InterfaceParameters intparam in interfacesParams)
                 {
                     if (intparam.Name.Equals("InstallationConfirmationStatus") && intparam.Value.Equals("NOT CONFIRMED"))
 

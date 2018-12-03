@@ -136,7 +136,9 @@ namespace MTUComm.MemoryMap
                  MemoryRegisters.PCBProductRevision.Value <= 90 )
                 tempString = tempString + "-" + Convert.ToChar(MemoryRegisters.PCBProductRevision.Value);
 
-            return ( string.IsNullOrEmpty ( tempString ) ) ? NTAVAILABLE : tempString;
+            string result = ( string.IsNullOrEmpty ( tempString ) ) ? NTAVAILABLE : tempString;
+
+            return result;
         }
 
         public string MtuSoftware_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)

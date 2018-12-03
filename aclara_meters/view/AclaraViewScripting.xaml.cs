@@ -556,7 +556,7 @@ namespace aclara_meters.view
                                                             "&code= 1 "+
                                                             "&message=error%20message"));
 
-
+            FormsApp.ble_interface.Close();
             Console.WriteLine("HI ERROR");
             // throw new NotImplementedException();
         }
@@ -618,6 +618,9 @@ namespace aclara_meters.view
                                                              "status=success" +
                                                              "&output_filename="+resultScriptName +
                                                              "&output_data=" + System.Web.HttpUtility.UrlEncode(Base64Encode(xmlResultTocallback)) ));
+
+                        FormsApp.ble_interface.Close();
+
                     });
 
                 });

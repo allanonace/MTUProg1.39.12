@@ -384,7 +384,7 @@ namespace aclara_meters.view
             int timeout_connecting = 0;
             while (true)
             {
-                      
+                   
                 //if (!FormsApp.ble_interface.GetPairingStatusOk())
                 int status = FormsApp.ble_interface.GetConnectionStatus();
 
@@ -967,12 +967,18 @@ namespace aclara_meters.view
             {
             });
             basicRead.Run();
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
+
+            basicRead.OnFinish += ((s, e) =>
             {
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
-            })
-            ); 
+                Task.Delay(200).ContinueWith(t =>
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
+                    })
+                );
+             });
+                                   
         }
 
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
@@ -1028,25 +1034,32 @@ namespace aclara_meters.view
                 reassociate = true;
             }
 
-            FormsApp.ble_interface.Open(item.Peripheral, reassociate);
-            peripheral = item.Peripheral;
+            try{
+                FormsApp.ble_interface.Open(item.Peripheral, reassociate);
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                try
+                peripheral = item.Peripheral;
+
+                Device.BeginInvokeOnMainThread(() =>
                 {
-                    deviceID.Text = item.deviceName;
-                    macAddress.Text = item.deviceMacAddress;
-                    imageBattery.Source = item.deviceBatteryIcon;
-                    imageRssi.Source = item.deviceRssiIcon;
-                    batteryLevel.Text = item.deviceBattery;
-                    rssiLevel.Text = item.deviceRssi;
-                }
-                catch (Exception e4)
-                {
-                    Console.WriteLine(e4.StackTrace);
-                }
-            });
+                    try
+                    {
+                        deviceID.Text = item.deviceName;
+                        macAddress.Text = item.deviceMacAddress;
+                        imageBattery.Source = item.deviceBatteryIcon;
+                        imageRssi.Source = item.deviceRssiIcon;
+                        batteryLevel.Text = item.deviceBattery;
+                        rssiLevel.Text = item.deviceRssi;
+                    }
+                    catch (Exception e4)
+                    {
+                        Console.WriteLine(e4.StackTrace);
+                    }
+                });
+
+            }catch (Exception e22){
+                Console.WriteLine(e22.StackTrace);
+            }
+          
         }
 
         // Event for Menu Item selection, here we are going to handle navigation based

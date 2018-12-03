@@ -199,16 +199,18 @@ namespace aclara_meters.view
         public AclaraViewAddMTU ()
         {
             InitializeComponent ();
-
-            this.add_mtu = new MTUComm.Action (
-                config    : FormsApp.config,
-                serial    : FormsApp.ble_interface,
-                actiontype: MTUComm.Action.ActionType.AddMtu,
-                user      : FormsApp.CredentialsService.UserName );
         }
 
-        public AclaraViewAddMTU ( IUserDialogs dialogs ) : this ()
+        public AclaraViewAddMTU ( IUserDialogs dialogs )
         {
+            InitializeComponent();
+
+            this.add_mtu = new MTUComm.Action(
+                config: FormsApp.config,
+                serial: FormsApp.ble_interface,
+                actiontype: MTUComm.Action.ActionType.AddMtu,
+                user: FormsApp.CredentialsService.UserName);
+
             #region Prepare mtuForm
 
             this.config = Configuration.GetInstance();
@@ -339,9 +341,10 @@ namespace aclara_meters.view
                         background_scan_page.IsEnabled = true;
                         label_read.Text = "Press Button to Start";
 
-                    #region Port 2 Buttons Listener
+                        #region Port 2 Buttons Listener
 
-                        SetPort2Buttons();
+                        //Task.Factory.StartNew(SetPort2Buttons);
+                        
 
                     #endregion
 
@@ -457,47 +460,56 @@ namespace aclara_meters.view
         {
             // Port2 form starts visible or hidden depends on bit 1 of byte 28
             this.port2status = this.add_mtu.comm.ReadMtuBit ( 28, 1 );
-            this.UpdateStatusPort2 ();
 
-            // Switch On/Off port2 form tab
-            enablePort2.GestureRecognizers.Add ( new TapGestureRecognizer
+
+            Device.BeginInvokeOnMainThread(() =>
             {
-                Command = new Command ( () => 
+                // Switch On/Off port2 form tab
+                enablePort2.GestureRecognizers.Add(new TapGestureRecognizer
                 {
-                    this.port2status = ! this.port2status;
+                    Command = new Command(() =>
+                    {
+                        this.port2status = !this.port2status;
 
-                    bool ok = this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, port2status );
-                    Console.WriteLine ( "-> UPDATE PORT 2 STATUS: " + ok + " " + this.port2status );
+                        bool ok = this.add_mtu.comm.WriteMtuBitAndVerify(28, 1, port2status);
+                        Console.WriteLine("-> UPDATE PORT 2 STATUS: " + ok + " " + this.port2status);
 
-                    // Bit correctly modified
-                    if ( ok )
-                        this.UpdateStatusPort2 ();
+                        // Bit correctly modified
+                        if (ok)
+                            this.UpdateStatusPort2();
 
-                    // Bit have not changed -> return to previous state
-                    else
-                        this.port2status = ! this.port2status;
-                }),
-            });
+                        // Bit have not changed -> return to previous state
+                        else
+                            this.port2status = !this.port2status;
+                    }),
+                });
 
-            // Copy current values of port1 form controls to port2 form controls
-            copyPort1.GestureRecognizers.Add ( new TapGestureRecognizer
-            {
-                Command = new Command ( () =>
+                // Copy current values of port1 form controls to port2 form controls
+                copyPort1.GestureRecognizers.Add(new TapGestureRecognizer
                 {
-                    servicePortId2Input    .Text          = servicePortIdInput    .Text;
-                    fieldOrder2Input       .Text          = fieldOrderInput       .Text;
-                    meterSerialNumber2Input.Text          = meterSerialNumberInput.Text;
-                    initialReading2Input   .Text          = initialReadingInput   .Text;
-                    readInterval2Picker    .SelectedIndex = readIntervalPicker    .SelectedIndex;
-                    meterNames2Picker      .SelectedIndex = meterNamesPicker      .SelectedIndex;
-                    snapReads2Slider       .Value         = snapReadsSlider       .Value;
-                    twoWay2Picker          .SelectedIndex = twoWayPicker          .SelectedIndex;
-                    alarms2Picker          .SelectedIndex = alarmsPicker          .SelectedIndex;
-                    demands2Picker         .SelectedIndex = demandsPicker         .SelectedIndex;
+                    Command = new Command(() =>
+                    {
+                        servicePortId2Input.Text = servicePortIdInput.Text;
+                        fieldOrder2Input.Text = fieldOrderInput.Text;
+                        meterSerialNumber2Input.Text = meterSerialNumberInput.Text;
+                        initialReading2Input.Text = initialReadingInput.Text;
+                        readInterval2Picker.SelectedIndex = readIntervalPicker.SelectedIndex;
+                        meterNames2Picker.SelectedIndex = meterNamesPicker.SelectedIndex;
+                        snapReads2Slider.Value = snapReadsSlider.Value;
+                        twoWay2Picker.SelectedIndex = twoWayPicker.SelectedIndex;
+                        alarms2Picker.SelectedIndex = alarmsPicker.SelectedIndex;
+                        demands2Picker.SelectedIndex = demandsPicker.SelectedIndex;
 
-                    this.ChangeCheckboxSnapReads ( this.snapRead1Status );
-                }),
+                        this.ChangeCheckboxSnapReads(this.snapRead1Status);
+                    }),
+                });
+
+                this.UpdateStatusPort2();
+
             });
+           
+
+
         }
 
         private void InitializeAddMtuForm ()
@@ -2343,7 +2355,7 @@ namespace aclara_meters.view
 
             if (!_userTapped)
             {
-                Task.Delay(100).ContinueWith(t =>
+                //Task.Delay(100).ContinueWith(t =>
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -2352,7 +2364,7 @@ namespace aclara_meters.view
                     _userTapped = true;
                     background_scan_page.IsEnabled = false;
                     ChangeLowerButtonImage(true);
-                }));
+                //}));
                     /*Task.Delay(100).ContinueWith(t =>
 
                     Device.BeginInvokeOnMainThread(() =>
@@ -2548,9 +2560,11 @@ namespace aclara_meters.view
                              });
                         }));
                     }));*/
-                    Device.BeginInvokeOnMainThread(() =>
-                {
+                //    Device.BeginInvokeOnMainThread(() =>
+                //{
                     Task.Factory.StartNew(AddMtu_Action);
+                    //Task.Run ( async () => await AddMtu_Action () );
+                    //AddMtu_Action();
                 });
             }
         }

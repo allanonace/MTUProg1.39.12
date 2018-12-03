@@ -260,39 +260,68 @@ namespace MTUComm
 
         #region Launch Actions
 
-        public void LaunchActionThread ( ActionType type, params object[] args )
+        public async void LaunchActionThread ( ActionType type, params object[] args )
         {
             System.Action actionToLaunch = null;
 
+            //Gets MTU casci info ( type and id )
+            if ( type != ActionType.AddMtu )
+                LoadMtuBasicInfo ();
+
+            /*
             switch ( type )
             {
                 // NOTE: TaskFactory uses Action without parameters and elegant
                 // form to be able to do it, is using a lambda expression
                 case ActionType.ReadMtu   : actionToLaunch = ( () => Task_ReadMtu () ); break;
                 case ActionType.AddMtu    : actionToLaunch = ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ] ) ); break;
-                case ActionType.TurnOffMtu: actionToLaunch = Task_TurnOffMtu; break;
-                case ActionType.TurnOnMtu: actionToLaunch = Task_TurnOnMtu; break;
-                case ActionType.ReadData: actionToLaunch = (() => Task_ReadDataMtu((int)args[0])); break;
-                case ActionType.BasicRead: actionToLaunch = Task_BasicRead; break;
-                case ActionType.MtuInstallationConfirmation: actionToLaunch = Task_InstallConfirmation; break;
+                case ActionType.TurnOffMtu: actionToLaunch = ( () => Task_TurnOffMtu () ); break;
+                case ActionType.TurnOnMtu: actionToLaunch = ( () => Task_TurnOnMtu () ); break;
+                case ActionType.ReadData: actionToLaunch = ( () => Task_ReadDataMtu((int)args[0])); break;
+                case ActionType.BasicRead: actionToLaunch = ( () => Task_BasicRead () ); break;
+                case ActionType.MtuInstallationConfirmation: actionToLaunch = ( () => Task_InstallConfirmation() ); break;
                 default: break;
             }
+            */
 
+            try
+            {
+                switch (type)
+                {
+                    // NOTE: TaskFactory uses Action without parameters and elegant
+                    // form to be able to do it, is using a lambda expression
+                    case ActionType.ReadMtu: await Task.Run(() => Task_ReadMtu()); break;
+                    case ActionType.AddMtu: await Task.Run(() => Task_AddMtu((AddMtuForm)args[0], (string)args[1])); break;
+                    case ActionType.TurnOffMtu: await Task.Run(() => Task_TurnOffMtu()); break;
+                    case ActionType.TurnOnMtu: await Task.Run(() => Task_TurnOnMtu()); break;
+                    case ActionType.ReadData: await Task.Run(() => Task_ReadDataMtu((int)args[0])); break;
+                    case ActionType.BasicRead: await Task.Run(() => Task_BasicRead()); break;
+                    case ActionType.MtuInstallationConfirmation: await Task.Run(() => Task_InstallConfirmation()); break;
+                    default: break;
+                }
+            }
+            catch (Exception e)
+            {
+                OnError(this, TranslateException(e));
+            }
+
+            //await Task.Run( () => Task_BasicRead () );
+
+            /*
             if ( actionToLaunch != null )
             {
-                //Gets MTU casci info ( type and id )
-                LoadMtuBasicInfo ();
-
                 // Launch asynchronous task
                 try
                 {
-                    Task.Factory.StartNew(actionToLaunch);
+                    //Task.Factory.StartNew(actionToLaunch);
+                    await Task.Run ( () => actionToLaunch () );
                 }
                 catch ( Exception e )
                 {
                     OnError ( this, TranslateException ( e ) );
                 }
             }
+            */
         }
 
         #endregion
@@ -504,6 +533,9 @@ namespace MTUComm
 
         private void Task_AddMtu ( dynamic form, string user )
         {
+           
+            //LoadMtuBasicInfo();
+
             Logger logger = new Logger(Configuration.GetInstance());
             AddMtuLog addMtuLog = new AddMtuLog(logger, form, user);
 

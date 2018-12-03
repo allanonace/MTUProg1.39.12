@@ -421,10 +421,7 @@ namespace ble_library
         /// <param name="ble_device">The Bluetooth LE peripheral to connect.</param>
         public async Task ConnectoToDevice(IBlePeripheral ble_device, bool isBounded)
         {
-            int retriesCounter = 0;
-
-            while(retriesCounter < 3)
-            {
+         
                 try
                 {
                     isConnected = CONNECTING;
@@ -446,7 +443,7 @@ namespace ble_library
 
                     if (connection.IsSuccessful())
                     {
-                        retriesCounter = 3;
+                     
 
                         gattServer_connection = connection.GattServer;
         //                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
@@ -462,13 +459,8 @@ namespace ble_library
                     }
                     else
                     {
-                        retriesCounter++;
-
-                        if(retriesCounter==3)
-                        {
-                            isConnected = NO_CONNECTED;
-                            connectionError = CONECTION_ERRROR;
-                        }
+                     
+                       
 
                         // Do something to inform user or otherwise handle unsuccessful connection.
         //                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
@@ -484,7 +476,7 @@ namespace ble_library
                 {
                     Console.WriteLine(e);
                 }
-            }
+
 
         }
 
@@ -919,7 +911,10 @@ namespace ble_library
                 isConnected = NO_CONNECTED;
                 try
                 {
-                    await gattServer_connection.Disconnect();
+                    if (gattServer_connection.State == ConnectionState.Connected)
+                    {
+                        await gattServer_connection.Disconnect();
+                    }
                 }
                 catch (Exception e2)
                 {
@@ -932,7 +927,11 @@ namespace ble_library
                 isConnected = NO_CONNECTED;
                 try
                 {
-                    await gattServer_connection.Disconnect();
+                    if(gattServer_connection.State == ConnectionState.Connected)
+                    {
+                        await gattServer_connection.Disconnect();
+                    }
+                   
                 }
                 catch (Exception e2)
                 {
