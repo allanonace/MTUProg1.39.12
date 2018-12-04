@@ -511,7 +511,7 @@ namespace MTUComm.MemoryMap
                     if ( memoryRegister.HasCustomFormat_Set )
                         _value = this.ApplyFormat ( _value, memoryRegister.format_Set );
 
-                    this.SetStringToMem(Type.GetTypeCode(typeof(T)), _value, memoryRegister.address,memoryRegister.size);
+                    this.SetStringToMem<T> ( _value, memoryRegister.address, memoryRegister.size );
                 }));
         }
 
@@ -530,8 +530,6 @@ namespace MTUComm.MemoryMap
 
         private bool ValidateNumeric<T> ( dynamic value, int size )
         {
-            return true;
-
             return ( Validations.NumericBytesLimit<T> ( value, size ) &&
                      Validations.NumericTypeLimit <T> ( value ) );
         }
@@ -682,7 +680,10 @@ namespace MTUComm.MemoryMap
 
         #region Set value
 
-        private void SetIntToMem(int value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetIntToMem (
+            int value,
+            int address,
+            int size = MemRegister.DEF_SIZE )
         {
             if ( this.ValidateNumeric<int> ( value, size ) )
                 for (int b = 0; b < size; b++)
@@ -692,7 +693,10 @@ namespace MTUComm.MemoryMap
                     value + " -> Address: " + address + " + Bytes: " + size );
         }
 
-        private void SetIntToMem(string value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetIntToMem (
+            string value,
+            int address,
+            int size = MemRegister.DEF_SIZE )
         {
             int vCasted;
             if (!int.TryParse(value, out vCasted))
@@ -708,7 +712,10 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        private void SetUIntToMem(uint value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetUIntToMem (
+            uint value,
+            int address,
+            int size = MemRegister.DEF_SIZE )
         {
             if ( this.ValidateNumeric<uint> ( value, size ) )
                 for (int b = 0; b < size; b++)
@@ -718,7 +725,10 @@ namespace MTUComm.MemoryMap
                     value + " -> Address: " + address + " + Bytes: " + size );
         }
 
-        private void SetUIntToMem(string value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetUIntToMem (
+            string value,
+            int address,
+            int size = MemRegister.DEF_SIZE )
         {
             uint vCasted;
             if (!uint.TryParse(value, out vCasted))
@@ -734,7 +744,10 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        private void SetULongToMem(ulong value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetULongToMem (
+            ulong value,
+            int address,
+            int size = MemRegister.DEF_SIZE )
         {
             if ( this.ValidateNumeric<ulong> ( value, size ) )
                 for (int b = 0; b < size; b++)
@@ -744,7 +757,10 @@ namespace MTUComm.MemoryMap
                     value + " -> Address: " + address + " + Bytes: " + size );
         }
 
-        private void SetULongToMem(string value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetULongToMem (
+            string value,
+            int address,
+            int size = MemRegister.DEF_SIZE )
         {
             ulong vCasted;
             if (!ulong.TryParse(value, out vCasted))
@@ -760,20 +776,30 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        private void SetBoolToMem (bool value, int address, int bit_index = MemRegister.DEF_BIT)
+        private void SetBoolToMem (
+            bool value,
+            int address,
+            int bit_index = MemRegister.DEF_BIT )
         {
             memory[address] = ( byte ) ( memory[address] | ( ( ( value ) ? 1 : 0 ) << bit_index ) );
         }
 
-        private void SetCharToMem (char value, int address)
+        private void SetCharToMem (
+            char value, 
+            int address )
         {
             this.memory[address] = (byte)value;
         }
 
-        private void SetStringToMem ( TypeCode registerType, string value, int address, int size = MemRegister.DEF_SIZE)
+        private void SetStringToMem<T> (
+            string value,
+            int address,
+            int size = MemRegister.DEF_SIZE )
         {
+            TypeCode type = Type.GetTypeCode( typeof( T ) );
+
             // If value to set is "real" string
-            if ( registerType is TypeCode.String )
+            if ( type is TypeCode.String )
             {
                 foreach(char c in value)
                     this.memory[address++] = (byte)c;
@@ -781,7 +807,7 @@ namespace MTUComm.MemoryMap
             else
             {
                 // If value to set is NOT to register of type string
-                switch ( registerType )
+                switch ( type )
                 {
                     case TypeCode.Int32  : this.SetIntToMem   (value, address, size); break;
                     case TypeCode.UInt32 : this.SetUIntToMem  (value, address, size); break;
@@ -791,7 +817,10 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        private void SetByteArrayToMem ( byte[] value, int address, int size = MemRegister.DEF_SIZE )
+        private void SetByteArrayToMem (
+            byte[] value,
+            int address,
+            int size = MemRegister.DEF_SIZE )
         {
             for ( int i = 0; i < size; i++ )
                 this.memory[ address + i ] = value[ i ];
