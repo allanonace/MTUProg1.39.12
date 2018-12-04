@@ -530,8 +530,6 @@ namespace MTUComm.MemoryMap
 
         private bool ValidateNumeric<T> ( dynamic value, int size )
         {
-            return true;
-
             return ( Validations.NumericBytesLimit<T> ( value, size ) &&
                      Validations.NumericTypeLimit <T> ( value ) );
         }
