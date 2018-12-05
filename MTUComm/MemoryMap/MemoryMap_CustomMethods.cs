@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace MTUComm.MemoryMap
 {
@@ -236,6 +237,23 @@ namespace MTUComm.MemoryMap
         {
             return HEX_PREFIX + MemoryRegisters.F12WAYRegister14Int.Value.ToString ( FWAYFORMAT );
         }
+
+
+        public string Frequency1Way_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return String.Format(new CultureInfo("en-us"), "{0:0.000}",(MemoryRegisters.Frequency1WayHz.Value / 1000000.0));
+        }
+
+        public string Frequency2WayTx_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return String.Format(new CultureInfo("en-us"), "{0:0.000}", (MemoryRegisters.Frequency2WayTxHz.Value / 1000000.0));
+        }
+
+        public string Frequency2WayRx_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return String.Format(new CultureInfo("en-us"), "{0:0.000}", (MemoryRegisters.Frequency2WayRxHz.Value / 1000000.0));
+        }
+
 
         public string InstallationConfirmationStatus_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
