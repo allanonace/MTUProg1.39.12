@@ -10,6 +10,10 @@ using Xml;
 
 using LogDataType = MTUComm.LogQueryResult.LogDataType;
 using ActionType  = MTUComm.Action.ActionType;
+using System.Globalization;
+using System.Reflection;
+using System.Resources;
+using System.Collections;
 
 namespace MTUComm
 {
@@ -894,9 +898,10 @@ namespace MTUComm
 
         private ErrorArgs TranslateException ( Exception e )
         {
+
             int    status     = -1;
-            string message    = e.Message;
-            string logmessage = e.Message;
+            string message    = TranslateExceptionMessage(e, CultureInfo.GetCultureInfo("en-US"));
+            string logmessage = TranslateExceptionMessage(e, CultureInfo.GetCultureInfo("en-US"));
 
             switch ( e.GetType ().Name )
             {
@@ -912,6 +917,23 @@ namespace MTUComm
             }
 
             return new ErrorArgs ( status, message, logmessage );
+        }
+
+        public static string TranslateExceptionMessage(Exception E, CultureInfo targetCulture)
+        {
+            try
+            {
+                Assembly a = E.GetType().Assembly;
+                ResourceManager rm = new ResourceManager(a.GetName().Name, a);
+                ResourceSet rsOriginal = rm.GetResourceSet(Thread.CurrentThread.CurrentUICulture, true, true);
+                ResourceSet rsTranslated = rm.GetResourceSet(targetCulture, true, true);
+                foreach (DictionaryEntry item in rsOriginal)
+                    if (item.Value.ToString() == E.Message.ToString())
+                        return rsTranslated.GetString(item.Key.ToString(), false); // success
+
+            }
+            catch { }
+            return E.Message; // failed (error or cause it's not intelligent enough to locale '{0}'-patterns
         }
 
         #endregion
