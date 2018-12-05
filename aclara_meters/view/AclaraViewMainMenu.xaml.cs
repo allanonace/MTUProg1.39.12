@@ -1110,24 +1110,29 @@ namespace aclara_meters.view
                             break;
 
                         case "replaceMTU":
-                            OnCaseReplaceMTU();
+                            Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            //OnCaseReplaceMTU();
                             break;
 
                         case "replaceMeter":
-                            OnCaseReplaceMeter();
+                            Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            //OnCaseReplaceMeter();
                             break;
 
                         case "AddMTUAddMeter":
-                            OnCaseAddMTUAddMeter();
+                            Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            //OnCaseAddMTUAddMeter();
                             break;
 
                         case "AddMTUReplaceMeter":
-                            OnCaseAddMTUReplaceMeter();
+                            Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            //OnCaseAddMTUReplaceMeter();
                             break;
 
 
                         case "ReplaceMTUReplaceMeter":
-                            OnCaseReplaceMTUReplaceMeter();
+                            Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            //OnCaseReplaceMTUReplaceMeter();
                             break;
 
 						case "InstallConfirm":
