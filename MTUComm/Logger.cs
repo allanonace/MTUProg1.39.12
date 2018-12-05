@@ -12,10 +12,8 @@ namespace MTUComm
 {
     public class Logger
     {
-
         private String abs_path = "";
         private String fixed_name = "";
-
         private Configuration config;
 
         public Logger(Configuration config)
@@ -31,7 +29,6 @@ namespace MTUComm
             fixed_name = Filename;
             abs_path = config.GetBasePath();
         }
-
 
         private Boolean isFixedName()
         {
@@ -88,7 +85,6 @@ namespace MTUComm
 
             return uri;
         }
-
 
         private string getEventBaseFileHandler()
         {
@@ -172,7 +168,6 @@ namespace MTUComm
             logReadDataResult(doc.Root.Element("Mtus"), ref_action, result, mtuType.Id);
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
-
 
         public void logReadDataResult(XElement parent, Action ref_action, ActionResult result, int mtu_type_id)
         {
@@ -353,7 +348,7 @@ namespace MTUComm
             LogError(-1, e_message);
         }
 
-       public void LogError(int id, String e_message)
+        public void LogError(int id, String e_message)
         {
             CreateFileIfNotExist();
             XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
@@ -429,7 +424,7 @@ namespace MTUComm
             read_event.Add(new XElement("MeterRead", entry.MeterRead.ToString()));
             read_event.Add(new XElement("ErrorStatus", entry.ErrorStatus.ToString()));
             read_event.Add(new XElement("ReadInterval", "PT"+entry.ReadInterval.ToString()+"M"));
-            read_event.Add(new XElement("PortNumber", "PORT"+entry.PortNumber.ToString()));
+            read_event.Add(new XElement("PortNumber", "PORT"+(entry.PortNumber + 1 ).ToString()));
             read_event.Add(new XElement("IsDailyRead", entry.IsDailyRead.ToString()));
             read_event.Add(new XElement("IsTopOfHourRead", entry.IsTopOfHourRead.ToString()));
             read_event.Add(new XElement("ReadReason", entry.ReasonForRead.ToString()));
