@@ -808,8 +808,21 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
-            dialog_turnoff_one.IsVisible = false;
-            dialog_turnoff_two.IsVisible = true;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                dialog_turnoff_one.IsVisible = false;
+                dialog_turnoff_two.IsVisible = true;
+
+
+                Task.Factory.StartNew(TurnOffMethod);
+
+
+            });
+        }
+
+        private void TurnOffMethod()
+        {
 
             MTUComm.Action turnOffAction = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.TurnOffMtu, user: FormsApp.CredentialsService.UserName);
 
@@ -826,9 +839,6 @@ namespace aclara_meters.view
             });
 
             turnOffAction.Run();
-
-           
-
         }
 
         void MeterCancelTapped(object sender, EventArgs e)
