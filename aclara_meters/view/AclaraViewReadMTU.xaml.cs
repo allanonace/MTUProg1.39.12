@@ -280,6 +280,8 @@ namespace aclara_meters.view
                                 {
                                     param = ports[i].getParameterByTag(port_parameter.Name);
 
+                                    int posPort = i + 1;
+
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
                                         Title = "Here lies the Port title...",
@@ -287,7 +289,7 @@ namespace aclara_meters.view
                                         Height = "40",
                                         isMTU = "false",
                                         isMeter = "true",
-                                        Description = "Port " + i + ": " + param.getValue() //parameter.Value
+                                        Description = "Port " + posPort + ": " + param.getValue() //parameter.Value
                                     });
 
                                 }else{
