@@ -29,3 +29,5 @@ Resource.Designer.cs
 *.bak
 project.lock.json
 artifacts/
+
+*.Cache
