@@ -405,14 +405,17 @@ namespace MTUComm
                 byte valueWritten = (lexi.Read(inConFlag, 1))[0];
                 valueWritten &= mask;
 
-                int max_iters = 36;
-                while (valueWritten > 0 && max_iters > 0)
+                int max_iters = 1;
+                while (valueWritten > 0 && max_iters <= 36)
                 {
-                    OnProgress(this, new ProgressArgs(37 - max_iters, 36, "Checking Install Confirmation..."));
+                    int loop = (int)Math.Round((decimal)((max_iters * 100.0) / 36.0));
+
+
+                    OnProgress(this, new ProgressArgs(max_iters, 36, "Checking Install Confirmation... ("+ loop.ToString() + "%)"));
                     Thread.Sleep(5000);
                     valueWritten = (lexi.Read(inConFlag, 1))[0];
                     valueWritten &= mask;
-                    max_iters--;
+                    max_iters++;
                 }
             }
             Task_ReadMtu(true);

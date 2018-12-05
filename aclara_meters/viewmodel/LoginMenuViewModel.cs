@@ -56,6 +56,8 @@ namespace aclara_meters.viewmodel
         {
             if (FormsApp.CredentialsService.DoCredentialsExist())
             {
+
+                FormsApp.loggger.logLogin(FormsApp.CredentialsService.UserName);
                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewMainMenu(dialogs_save),false);
                 //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewGlobalUIController(), false);
             }   
@@ -127,6 +129,8 @@ namespace aclara_meters.viewmodel
                             }
                             Settings.IsLoggedIn = true;
                             Settings.SavedUserName = User.Email;
+
+                            FormsApp.loggger.logLogin(FormsApp.CredentialsService.UserName);
                             await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewMainMenu(dialogs_save), false);
                             //await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewGlobalUIController(), false);
                         }

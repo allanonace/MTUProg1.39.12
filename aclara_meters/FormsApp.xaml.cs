@@ -48,7 +48,7 @@ namespace aclara_meters
         public string Version;
         public string deviceId;
 
-
+        public static Logger loggger;
         public static Configuration config;
 
         public FormsApp()
@@ -93,6 +93,8 @@ namespace aclara_meters
             }
 
             config = new Configuration(xml_documents);
+
+            loggger = new Logger(config);
 
             if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
             {

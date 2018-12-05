@@ -10,6 +10,28 @@ namespace MTUComm.MemoryMap
 
         public enum REGISTER_TYPE { REGISTER, OVERLOAD }
 
+        private const string ID_MTUTYPE      = "MtuType";
+        private const string ID_MTUID        = "MtuId";
+        private const string ID_SHIPTBIT     = "Shipbit";
+        private const string ID_DAILYREAD    = "DailyRead";
+        private const string ID_DAILYSNAP    = "DailySnap";
+        private const string ID_MSGOVERLAP   = "MessageOverlapCount";
+        private const string ID_READINTERVAL = "ReadInterval";
+        private const string ID_MTUVOLTAGE   = "MtuMiliVoltageBattery";
+        private const string ID_MTUFIRMFMT   = "MtuFirmwareVersionFormatFlag";
+        private const string ID_MTUFIRM      = "MtuFirmwareVersion";
+        private const string ID_PCBNUMBER    = "PcbNumber";
+        private const string ID_P1METERTYPE  = "P1MeterType";
+        private const string ID_P2METERTYPE  = "P2MeterType";
+        private const string ID_P1METERID    = "P1MeterId";
+        private const string ID_P2METERID    = "P2MeterId";
+        private const string ID_P1READING    = "P1Reading";
+        private const string ID_P2READING    = "P2Reading";
+        private const string ID_P1SCALER     = "P1Scaler";
+        private const string ID_P2SCALER     = "P2Scaler";
+        private const string ID_P1READERROR  = "P1ReadingError";
+        private const string ID_P2READERROR  = "P2ReadingError";
+
         #endregion
 
         #region Attributes
@@ -147,297 +169,297 @@ namespace MTUComm.MemoryMap
         // La unica forma que parece viable de asociar ambos miembros es trabajar con
         // el dinamico desde la propiedad estatica, a modo de wrapper
 
-        public int MtuType
+        public dynamic MtuType
         {
             get
             {
                 object result;
-                this.Get ( "MtuType", out result );
+                this.Get ( ID_MTUTYPE, out result );
                 return ( int )result;
             }
             set
             {
-                this.Set ( "MtuType", value );
+                this.Set ( ID_MTUTYPE, value );
             }
         }
 
-        public int MtuId
+        public dynamic MtuId
         {
             get
             {
                 object result;
-                this.Get("MtuId", out result);
+                this.Get(ID_MTUID, out result);
                 return (int)result;
             }
             set
             {
-                this.Set("MtuId", value);
+                this.Set(ID_MTUID, value);
             }
         }
 
-        public bool Shipbit
+        public dynamic Shipbit
         {
             get
             {
                 object result;
-                this.Get("Shipbit", out result);
+                this.Get(ID_SHIPTBIT, out result);
                 return (bool)result;
             }
             set
             {
-                this.Set("Shipbit", value);
+                this.Set(ID_SHIPTBIT, value);
             }
         }
 
-        public int DailyRead
+        public dynamic DailyRead
         {
             get
             {
                 object result;
-                this.Get("DailyRead", out result);
+                this.Get(ID_DAILYREAD, out result);
                 return (int)result;
             }
             set
             {
-                this.Set("DailyRead", value);
+                this.Set(ID_DAILYREAD, value);
             }
         }
 
-        public string DailySnap
+        public dynamic DailySnap
         {
             get
             {
                 object result;
-                this.Get("DailySnap", out result);
+                this.Get(ID_DAILYSNAP, out result);
                 return (String)result;
             }
             set
             {
-                this.Set("DailySnap", value);
+                this.Set(ID_DAILYSNAP, value);
             }
         }
 
-        public int MessageOverlapCount
+        public dynamic MessageOverlapCount
         {
             get
             {
                 object result;
-                this.Get("MessageOverlapCount", out result);
+                this.Get(ID_MSGOVERLAP, out result);
                 return (int)result;
             }
             set
             {
-                this.Set("MessageOverlapCount", value);
+                this.Set(ID_MSGOVERLAP, value);
             }
         }
 
-        public string ReadInterval
+        public dynamic ReadInterval
         {
             get
             {
                 object result;
-                this.Get("ReadInterval", out result);
+                this.Get(ID_READINTERVAL, out result);
                 return ( string )result;
             }
             set
             {
-                this.Set("ReadInterval", value);
+                this.Set(ID_READINTERVAL, value);
             }
         }
 
-        public int MtuMiliVoltageBattery
+        public dynamic MtuMiliVoltageBattery
         {
             get
             {
                 object result;
-                this.Get("MtuMiliVoltageBattery", out result);
+                this.Get(ID_MTUVOLTAGE, out result);
                 return (int)result;
             }
             set
             {
-                this.Set("MtuMiliVoltageBattery", value);
+                this.Set(ID_MTUVOLTAGE, value);
             }
         }
 
-        public int MtuFirmwareVersionFormatFlag
+        public dynamic MtuFirmwareVersionFormatFlag
         {
             get
             {
                 object result;
-                this.Get("MtuFirmwareVersionFormatFlag", out result);
+                this.Get(ID_MTUFIRMFMT, out result);
                 return (int)result;
             }
             set
             {
-                this.Set("MtuFirmwareVersionFormatFlag", value);
+                this.Set(ID_MTUFIRMFMT, value);
             }
         }
 
-        public string MtuFirmwareVersion
+        public dynamic MtuFirmwareVersion
         {
             get
             {
                 object result;
-                this.Get("MtuFirmwareVersion", out result);
+                this.Get(ID_MTUFIRM, out result);
                 return (string)result;
             }
             set
             {
-                this.Set("MtuFirmwareVersion", value);
+                this.Set(ID_MTUFIRM, value);
             }
         }
 
-        public string PcbNumber
+        public dynamic PcbNumber
         {
             get
             {
                 object result;
-                this.Get("PcbNumber", out result);
+                this.Get(ID_PCBNUMBER, out result);
                 return (string)result;
             }
             set
             {
-                this.Set("PcbNumber", value);
+                this.Set(ID_PCBNUMBER, value);
             }
         }
 
-        public int P1MeterType
+        public dynamic P1MeterType
         {
             get
             {
                 object result;
-                this.Get("P1MeterType", out result);
+                this.Get(ID_P1METERTYPE, out result);
                 return (int)result;
             }
             set
             {
-                this.Set("P1MeterType", value);
+                this.Set(ID_P1METERTYPE, value);
             }
         }
 
-        public int P2MeterType
+        public dynamic P2MeterType
         {
             get
             {
                 object result;
-                this.Get("P2MeterType", out result);
+                this.Get(ID_P2METERTYPE, out result);
                 return (int)result;
             }
             set
             {
-                this.Set("P2MeterType", value);
+                this.Set(ID_P2METERTYPE, value);
             }
         }
 
-        public ulong P1MeterId
+        public dynamic P1MeterId
         {
             get
             {
                 object result;
-                this.Get("P1MeterId", out result);
+                this.Get(ID_P1METERID, out result);
                 return (ulong)result;
             }
             set
             {
-                this.Set("P1MeterId", value);
+                this.Set(ID_P1METERID, value);
             }
         }
 
-        public ulong P2MeterId
+        public dynamic P2MeterId
         {
             get
             {
                 object result;
-                this.Get("P2MeterId", out result);
+                this.Get(ID_P2METERID, out result);
                 return (ulong)result;
             }
             set
             {
-                this.Set("P2MeterId", value);
+                this.Set(ID_P2METERID, value);
             }
         }
 
-        public ulong P1Reading
+        public dynamic P1Reading
         {
             get
             {
                 object result;
-                this.Get("P1Reading", out result);
+                this.Get(ID_P1READING, out result);
                 return (ulong)result;
             }
             set
             {
-                this.Set("P1Reading", value);
+                this.Set(ID_P1READING, value);
             }
         }
 
-        public ulong P2Reading
+        public dynamic P2Reading
         {
             get
             {
                 object result;
-                this.Get("P2Reading", out result);
+                this.Get(ID_P2READING, out result);
                 return (ulong)result;
             }
             set
             {
-                this.Set("P2Reading", value);
+                this.Set(ID_P2READING, value);
             }
         }
 
-        public int P1Scaler
+        public dynamic P1Scaler
         {
             get
             {
                 object result;
-                this.Get("P1Scaler", out result);
+                this.Get(ID_P1SCALER, out result);
                 return (int)result;
             }
             set
             {
-                this.Set("P1Scaler", value);
+                this.Set(ID_P1SCALER, value);
             }
         }
 
-        public int P2Scaler
+        public dynamic P2Scaler
         {
             get
             {
                 object result;
-                this.Get("P2Scaler", out result);
+                this.Get(ID_P2SCALER, out result);
                 return (int)result;
             }
             set
             {
-                this.Set("P2Scaler", value);
+                this.Set(ID_P2SCALER, value);
             }
         }
 
-        public string P1ReadingError
+        public dynamic P1ReadingError
         {
             get
             {
                 object result;
-                this.Get("P1ReadingError", out result);
+                this.Get(ID_P1READERROR, out result);
                 return (string)result;
             }
             set
             {
-                this.Set("P1ReadingError", value);
+                this.Set(ID_P1READERROR, value);
             }
         }
 
-        public string P2ReadingError
+        public dynamic P2ReadingError
         {
             get
             {
                 object result;
-                this.Get("P2ReadingError", out result);
+                this.Get(ID_P2READERROR, out result);
                 return (string)result;
             }
             set
             {
-                this.Set("P2ReadingError", value);
+                this.Set(ID_P2READERROR, value);
             }
         }
 
