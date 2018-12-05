@@ -1637,6 +1637,11 @@ namespace aclara_meters.view
 
         #region Menu options
 
+        object menu_sender;
+        ItemTappedEventArgs menu_tappedevents;
+
+
+
         private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
         {
             ((ListView)sender).SelectedItem = null;
@@ -1646,54 +1651,77 @@ namespace aclara_meters.view
         // on user selection in menu ListView
         private void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
         {
-            if (!FormsApp.ble_interface.IsOpen())
+            if (Device.Idiom == TargetIdiom.Tablet)
             {
-                // don't do anything if we just de-selected the row.
-                if (e.Item == null) return;
-                // Deselect the item.
-                if (sender is ListView lv) lv.SelectedItem = null;
-            }
+                
+                menu_sender = sender;
+                menu_tappedevents = e;
 
-            if (FormsApp.ble_interface.IsOpen())
-            {
-                navigationDrawerList.SelectedItem = null;
-                try
+                if (isCancellable)
                 {
-                    var item = (PageItem)e.Item;
-                    String page = item.TargetType;
-
-                    ((ListView)sender).SelectedItem = null;
-
-                    switch (page)
+                    //Application.Current.MainPage.Navigation.PopAsync(false);0
+                    if (!FormsApp.ble_interface.IsOpen())
                     {
-                        case "ReadMTU":
-                            OnMenuCaseReadMTU();
-                            break;
-
-                        case "AddMTU":
-                            OnMenuCaseAddMTU();
-                            break;
-
-                        case "turnOff":
-                            OnMenuCaseTurnOFF();
-                            break;
-
-                        case "replaceMTU":
-                            OnMenuCaseReplaceMTU();
-                            break;
-
-                        case "replaceMeter":
-                            OnMenuCaseReplaceMeter();
-                            break;
-
-
+                        // don't do anything if we just de-selected the row.
+                        if (e.Item == null) return;
+                        // Deselect the item.
+                        if (sender is ListView lv) lv.SelectedItem = null;
                     }
+
+
+                    if (FormsApp.ble_interface.IsOpen())
+                    {
+                        navigationDrawerList.SelectedItem = null;
+                        try
+                        {
+                            var item = (PageItem)e.Item;
+                            String page = item.TargetType;
+
+                            ((ListView)sender).SelectedItem = null;
+
+                            switch (page)
+                            {
+                                case "ReadMTU":
+                                    OnMenuCaseReadMTU();
+                                    break;
+
+                                case "AddMTU":
+                                    OnMenuCaseAddMTU();
+                                    break;
+
+                                case "turnOff":
+                                    OnMenuCaseTurnOFF();
+                                    break;
+
+                                case "replaceMTU":
+                                    OnMenuCaseReplaceMTU();
+                                    break;
+
+                                case "replaceMeter":
+                                    OnMenuCaseReplaceMeter();
+                                    break;
+                            }
+                        }
+                        catch (Exception w1)
+                        {
+                            Console.WriteLine(w1.StackTrace);
+                        }
+                    }
+
                 }
-                catch (Exception w1)
+                else
                 {
-                    Console.WriteLine(w1.StackTrace);
+                    //REASON
+                    dialog_open_bg.IsVisible = true;
+
+                    Popup_start.IsVisible = true;
+                    Popup_start.IsEnabled = true;
                 }
             }
+           
+
+          
+           
         }
 
         private void OnMenuCaseReplaceMeter()
@@ -2059,7 +2087,7 @@ namespace aclara_meters.view
             background_scan_page.FadeTo(1, 500);
         }
 
-        private void submit_send(object sender, EventArgs e)
+        private void submit_send(object sender, EventArgs e3)
         {
             int selectedCancelReasonIndex = cancelReasonPicker.SelectedIndex;
             string selectedCancelReason = "Other";
@@ -2074,11 +2102,62 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
+
             Task.Run(async () =>
             {
                 await Task.Delay(500); Device.BeginInvokeOnMainThread(() =>
                 {
-                    Application.Current.MainPage.Navigation.PopAsync(false);
+                    //Application.Current.MainPage.Navigation.PopAsync(false);
+
+                    //Application.Current.MainPage.Navigation.PopAsync(false);0
+                    if (!FormsApp.ble_interface.IsOpen())
+                    {
+                        // don't do anything if we just de-selected the row.
+                        if (e.Item == null) return;
+                        // Deselect the item.
+                        if (sender is ListView lv) lv.SelectedItem = null;
+                    }
+
+
+                    if (FormsApp.ble_interface.IsOpen())
+                    {
+                        navigationDrawerList.SelectedItem = null;
+                        try
+                        {
+                            var item = (PageItem)e.Item;
+                            String page = item.TargetType;
+
+                            ((ListView)sender).SelectedItem = null;
+
+                            switch (page)
+                            {
+                                case "ReadMTU":
+                                    OnMenuCaseReadMTU();
+                                    break;
+
+                                case "AddMTU":
+                                    OnMenuCaseAddMTU();
+                                    break;
+
+                                case "turnOff":
+                                    OnMenuCaseTurnOFF();
+                                    break;
+
+                                case "replaceMTU":
+                                    OnMenuCaseReplaceMTU();
+                                    break;
+
+                                case "replaceMeter":
+                                    OnMenuCaseReplaceMeter();
+                                    break;
+                            }
+                        }
+                        catch (Exception w1)
+                        {
+                            Console.WriteLine(w1.StackTrace);
+                        }
+                    }
+
                 });
             });
         }
