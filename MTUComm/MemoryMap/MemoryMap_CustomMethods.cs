@@ -271,7 +271,7 @@ namespace MTUComm.MemoryMap
             string timeUnit = readIntervalArray[1].ToLower ();
             int timeIntervalMins = Int32.Parse(readIntervalStr);
 
-            if (timeUnit is "hours")
+            if ( timeUnit.StartsWith ( "hour" ) )
                 timeIntervalMins = timeIntervalMins * 60;
 
             return timeIntervalMins;
