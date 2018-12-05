@@ -2113,9 +2113,9 @@ namespace aclara_meters.view
                     if (!FormsApp.ble_interface.IsOpen())
                     {
                         // don't do anything if we just de-selected the row.
-                        if (e.Item == null) return;
+                        if (menu_tappedevents.Item == null) return;
                         // Deselect the item.
-                        if (sender is ListView lv) lv.SelectedItem = null;
+                        if (menu_sender is ListView lv) lv.SelectedItem = null;
                     }
 
 
@@ -2124,10 +2124,10 @@ namespace aclara_meters.view
                         navigationDrawerList.SelectedItem = null;
                         try
                         {
-                            var item = (PageItem)e.Item;
+                            var item = (PageItem)menu_tappedevents.Item;
                             String page = item.TargetType;
 
-                            ((ListView)sender).SelectedItem = null;
+                            ((ListView)menu_sender).SelectedItem = null;
 
                             switch (page)
                             {
