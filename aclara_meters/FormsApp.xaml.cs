@@ -490,7 +490,8 @@ namespace aclara_meters
 
         protected override void OnStart()
         {
-            AppCenter.Start("ios=cb622ad5-e2ad-469d-b1cd-7461f140b2dc;" + "android=53abfbd5-4a3f-4eb2-9dea-c9f7810394be", typeof(Analytics), typeof(Crashes), typeof(Distribute) );
+            //https://docs.microsoft.com/en-us/appcenter/sdk/getting-started/xamarin
+            //AppCenter.Start("ios=cb622ad5-e2ad-469d-b1cd-7461f140b2dc;" + "android=53abfbd5-4a3f-4eb2-9dea-c9f7810394be", typeof(Analytics), typeof(Crashes), typeof(Distribute) );
         }
 
         protected override void OnSleep()
