@@ -11,9 +11,7 @@ namespace MTUComm
 {
     public class Configuration
     {
-        private const string APP_SUBF     = "com.aclara.mtu.programmer/files/";
-        private const string PREFAB_PATH  = "/data/data/" + APP_SUBF;
-        private const string SEARCH_PATH  = "Android/data/" + APP_SUBF;
+        private const string SUBPATHFILES = "Android/data/com.aclara.mtu.programmer/files/";
         private const string XML_MTUS     = "Mtu.xml";
         private const string XML_METERS   = "Meter.xml";
         private const string XML_GLOBAL   = "Global.xml";
@@ -41,11 +39,7 @@ namespace MTUComm
             STORAGE_EMULATED_LEGACY,
             STORAGE_SDCARD_ZERO,
             SDCARD_MNT,
-            SDCARD,
-            //DATA_MEDIA_ZERO,
-            //DATA_MEDIA,
-            //DATA_ZERO,
-            //DATA
+            SDCARD
         }
 
         private static string[] paths =
@@ -55,10 +49,7 @@ namespace MTUComm
             "/storage/sdcard0/",         // Android >= 4.0
             "/mnt/sdcard/",              // Android < 4.0
             "/sdcard/",                  // Enlace simbolico a "/storage/sdcard0/" y "/mnt/sdcard/"
-            //"/data/media/0/",            // 
-            //"/data/media/",
-            //"/data/0/",
-            //"/data/",
+            "/data/media/0/"
         };
 
         private static string GetPath ( PATHS ePath )
@@ -68,13 +59,7 @@ namespace MTUComm
 
         public static string GetPathForAndroid ()
         {
-            // Works with dev unit ZTE but not with Alcatel
-            if ( Directory.Exists ( PREFAB_PATH ) &&
-                 File.Exists ( PREFAB_PATH + XML_MTUS ) )
-                return PREFAB_PATH;
-
             // Search the first valid path to recover XML files
-            // Works with dev unit Alcatel but no with ZTE
             PATHS  ePath;
             string path;
             string[] names = Enum.GetNames(typeof(PATHS));
@@ -83,13 +68,12 @@ namespace MTUComm
                 Enum.TryParse<PATHS> ( names[i], out ePath );
                 path = GetPath ( ePath );
 
-                if ( Directory.Exists ( path ) &&
-                     File.Exists ( path + SEARCH_PATH + XML_MTUS ) )
+                if ( Directory.Exists ( GetPath ( ePath ) ) &&
+                     File.Exists ( path + SUBPATHFILES + XML_MTUS ) )
                 {
-                    return path + SEARCH_PATH;
+                    return path + SUBPATHFILES;
                 }
             }
-
             return null;
         }
 
@@ -260,9 +244,6 @@ namespace MTUComm
         {
             string return_str = "";
 
-            return_str = deviceUUID;
-
-            /*
             if (device.Equals("PC"))
             {
                 return_str = "ACLARATECH-CLE5478L-KGUILER";
@@ -272,7 +253,6 @@ namespace MTUComm
             {
                 return_str = deviceUUID;
             }
-            */
 
             return return_str; //get UUID from Xamarin
         }

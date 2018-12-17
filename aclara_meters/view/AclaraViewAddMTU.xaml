@@ -422,7 +422,7 @@
                                     </StackLayout>
 
                                     
-                                    <StackLayout x:Name="meterSerialNumberContainer">
+                                    <StackLayout x:Name="meterSerialContainer">
                                          <!-- Meter Number -->
                                          <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                                  />
@@ -432,7 +432,7 @@
                                               <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
                                                         <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                              <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                    HeightRequest="40"   x:Name="meterSerialNumberInput" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                    HeightRequest="40"   x:Name="meterSerialInput" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                     Placeholder="" PlaceholderColor="#7a868c"  MaxLength="12"  Keyboard="Numeric"
                                                                     FontSize="17" HorizontalTextAlignment="Start">
 
@@ -472,8 +472,8 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="initialReadingInput" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
+                                                                HeightRequest="40"   x:Name="initialReadInput" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" MaxLength="6"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
                                                                 <Controls:BorderlessEntry.Behaviors>
@@ -525,8 +525,7 @@
                                           <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" x:Name="snapReadsSubContainer" BackgroundColor="White"  >
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                           <!-- PORT ID -->
-                                                        <Label Text="10" Margin="0,4,0,0" x:Name="snapReadsLabel"  VerticalOptions="Center" FontSize="17" WidthRequest="32"
-                                                 />
+                                                        <Label Text="10" Margin="0,4,0,0" x:Name="snapReadsLabel"  VerticalOptions="Center" FontSize="17" WidthRequest="32"/>
                                                          <StackLayout  
                                                         HorizontalOptions="FillAndExpand" 
                                                         Margin="0,4,0,4"
@@ -755,7 +754,7 @@
 
                                 </StackLayout>
 
-                                     <StackLayout x:Name="meterSerialNumber2Container">
+                                     <StackLayout x:Name="meterSerial2Container">
                                         
                                      <!-- Meter Number -->
                                      <Label Text="Meter Number" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
@@ -767,7 +766,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="meterSerialNumber2Input" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="meterSerial2Input" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 
@@ -804,7 +803,7 @@
                                                     <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
                                                         
                                                          <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="initialReading2Input" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                HeightRequest="40"   x:Name="initialRead2Input" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                                 Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
                                                                 FontSize="17" HorizontalTextAlignment="Start">
 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using Xml;
 
+using ParameterType = MTUComm.Parameter.ParameterType;
+
 namespace MTUComm.actions
 {
     public class AddMtuForm : MtuForm
@@ -29,18 +31,40 @@ namespace MTUComm.actions
             ALARM2,
             DEMAND,
             DEMAND2,
-            OPTIONAL_PARAMS,
+            GPS_LATITUDE,
+            GPS_LONGITUDE,
+            GPS_ALTITUDE,
+            OPTIONAL_PARAMS
         }
 
-        public static Dictionary<FIELD, string[]> Texts =
+        public Dictionary<ParameterType,FIELD> IdsAclara =
+            new Dictionary<ParameterType,FIELD> ()
+            {
+                { ParameterType.ActivityLogId,     FIELD.SERVICE_PORT_ID }, // SE USA
+                { ParameterType.WorkOrder,         FIELD.FIELD_ORDER     },
+                { ParameterType.MeterSerialNumber, FIELD.METER_NUMBER    },
+                { ParameterType.MeterReading,      FIELD.INITIAL_READING }, // SE USA
+                { ParameterType.MeterType,         FIELD.SELECTED_METER  }, // SE USA
+                { ParameterType.SnapRead,          FIELD.SNAP_READS      },
+                { ParameterType.Custom,            FIELD.OPTIONAL_PARAMS },
+                { ParameterType.ReadInterval,      FIELD.READ_INTERVAL   }, // SE USA
+                { ParameterType.Alarm,             FIELD.ALARM           }
+            };
+
+        // Elements array
+        // 0. Parameter ID
+        // 1. Custom parameter
+        // 2. Custom display
+        public Dictionary<FIELD, string[]> Texts =
             new Dictionary<FIELD, string[]>()
             {
+                #region Service Port ID = Account Number = Activity Log ID
                 {
                     FIELD.SERVICE_PORT_ID,
                     new string[]
                     {
                         "ServicePortId",
-                        "ServicePortId",
+                        "AccountNumber",
                         "Service Port ID"
                     }
                 },
@@ -49,16 +73,18 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "ServicePortId2",
-                        "ServicePortId2",
-                        "Service Port ID 2"
+                        "AccountNumber",
+                        "Service Port ID"
                     }
                 },
+                #endregion
+                #region Field Order
                 {
                     FIELD.FIELD_ORDER,
                     new string[]
                     {
                         "FieldOrder",
-                        "FieldOrder",
+                        "WorkOrder",
                         "Field Order"
                     }
                 },
@@ -67,17 +93,19 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "FieldOrder2",
-                        "FieldOrder2",
-                        "Field Order 2"
+                        "WorkOrder",
+                        "Field Order"
                     }
                 },
+                #endregion
+                #region Meter Number
                 {
                     FIELD.METER_NUMBER,
                     new string[]
                     {
                         "MeterNumber",
-                        "MeterNumber",
-                        "Meter Number"
+                        "NewMeterSerialNumber",
+                        "New Meter Serial Number"
                     }
                 },
                 {
@@ -85,17 +113,19 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "MeterNumber2",
-                        "MeterNumber2",
-                        "Meter Number 2"
+                        "NewMeterSerialNumber",
+                        "New Meter Serial Number"
                     }
                 },
+                #endregion
+                #region Initial Reading
                 {
                     FIELD.INITIAL_READING,
                     new string[]
                     {
                         "InitialReading",
-                        "InitialReading",
-                        "Initial Reading"
+                        "MeterReading",
+                        "Meter Reading"
                     }
                 },
                 {
@@ -103,10 +133,12 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "InitialReading2",
-                        "InitialReading2",
-                        "Initial Reading 2"
+                        "MeterReading",
+                        "Meter Reading"
                     }
                 },
+                #endregion
+                #region Selected Meter
                 {
                     FIELD.SELECTED_METER,
                     new string[]
@@ -125,6 +157,8 @@ namespace MTUComm.actions
                         "Selected Meter ID 2"
                     }
                 },
+                #endregion
+                #region Read Interval
                 {
                     FIELD.READ_INTERVAL,
                     new string[]
@@ -139,10 +173,12 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "ReadInterval2",
-                        "ReadInterval2",
+                        "ReadInterval 2",
                         "Read Interval 2"
                     }
                 },
+                #endregion
+                #region Snap Reads
                 {
                     FIELD.SNAP_READS,
                     new string[]
@@ -161,13 +197,15 @@ namespace MTUComm.actions
                         "Snap Reads 2"
                     }
                 },
+                #endregion
+                #region 2Way
                 {
                     FIELD.TWO_WAY,
                     new string[]
                     {
                         "TwoWay",
-                        "TwoWay",
-                        "2-Way"
+                        "Fast-2-Way",
+                        "Fast Message Config"
                     }
                 },
                 {
@@ -175,10 +213,12 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "TwoWay2",
-                        "TwoWay2",
-                        "2-Way 2"
+                        "Fast-2-Way 2",
+                        "Fast Message Config 2"
                     }
                 },
+                #endregion
+                #region Alarm
                 {
                     FIELD.ALARM,
                     new string[]
@@ -197,6 +237,8 @@ namespace MTUComm.actions
                         "Alarms 2"
                     }
                 },
+                #endregion
+                #region Demand
                 {
                     FIELD.DEMAND,
                     new string[]
@@ -215,6 +257,37 @@ namespace MTUComm.actions
                         "Demands 2"
                     }
                 },
+                #endregion
+                #region GPS
+                {
+                    FIELD.GPS_LATITUDE,
+                    new string[]
+                    {
+                        "GPSLat",
+                        "GPS_Y",
+                        "Lat"
+                    }
+                },
+                {
+                    FIELD.GPS_LONGITUDE,
+                    new string[]
+                    {
+                        "GPSLon",
+                        "GPS_X",
+                        "Long"
+                    }
+                },
+                {
+                    FIELD.GPS_ALTITUDE,
+                    new string[]
+                    {
+                        "GPSAlt",
+                        "Altitude",
+                        "Elevation"
+                    }
+                },
+                #endregion
+                #region Optional Parameters
                 {
                     FIELD.OPTIONAL_PARAMS,
                     new string[]
@@ -223,23 +296,90 @@ namespace MTUComm.actions
                         "OptionalParams",
                         "OptionalParams"
                     }
-                },
+                }
+                #endregion
             };
 
-        public AddMtuForm(Mtu mtu) : base( mtu )
+        public AddMtuForm ( Mtu mtu ) : base ( mtu )
         {
+            // Two Ports
+            base.conditions.mtu.AddCondition("TwoPorts");
+
+            // Field order (work order)
+            base.conditions.globals.AddCondition("WorkOrderRecording");
+
+            // Meter Number (serial number)
+            base.conditions.globals.AddCondition("UseMeterSerialNumber");
+
+            // Vendor / Model / Name
+            base.conditions.globals.AddCondition("ShowMeterVendor");
+
+            // Read Interval 
+            base.conditions.globals.AddCondition("IndividualReadInterval");
+
+            // Snap Reads
+            base.conditions.globals.AddCondition("AllowDailyReads");
+            base.conditions.globals.AddCondition("IndividualDailyReads");
+            base.conditions.mtu.AddCondition("DailyReads");
+
+            // 2-Way
+            base.conditions.globals.AddCondition("FastMessageConfig");
+            base.conditions.globals.AddCondition("Fast2Way");
+            base.conditions.mtu.AddCondition("FastMessageConfig");
+
+            // Alarms
+            base.conditions.mtu.AddCondition("RequiresAlarmProfile");
+
+            // Demands
+            base.conditions.mtu.AddCondition("MtuDemand");
         }
 
-        public void AddParameter (FIELD field_type, dynamic value)
+        public void AddParameter ( FIELD fieldType, dynamic value )
         {
-            string[] texts = Texts[field_type];
+            string[] texts = Texts[ fieldType ];
             AddParameter ( texts[ 0 ], texts[ 1 ], texts[ 2 ], value ); // base method
+        }
+
+        public void AddParameters ( FIELD fieldType, Parameter[] parameters )
+        {
+            foreach ( Parameter parameter in parameters )
+                this.AddParameter ( fieldType, parameter );
+        }
+
+        public void AddParameterTranslatingAclaraXml ( Parameter parameter )
+        {
+            ParameterType typeAclara;
+            FIELD typeOwn;
+
+            string nameTypeAclara = parameter.Type.ToString ();
+
+            // Translate aclara tag/id to us
+            if ( ! Enum.TryParse<ParameterType> ( nameTypeAclara, out typeAclara ) )
+                return; //throw new Exception ();
+            else
+            {
+                if ( IdsAclara.ContainsKey ( typeAclara ) )
+                    typeOwn = IdsAclara[ typeAclara ];
+                else
+                    return;
+
+                // If is for port two, find the correct enum element adding two ( '2' ) as sufix
+                if ( parameter.Port == 2 )
+                    Enum.TryParse<FIELD> ( typeOwn.ToString () + "2", out typeOwn );
+            }
+
+            this.AddParameter ( typeOwn, parameter.getValue () );
         }
 
         public Parameter FindById(FIELD field_type)
         {
             string[] texts = Texts[field_type];
             return base.FindParameterById(texts[0]);
+        }
+
+        public bool ContainsParameter ( FIELD fieldType )
+        {
+            return base.ContainsParameter ( Texts[ fieldType ][ 0 ] );
         }
     }
 }

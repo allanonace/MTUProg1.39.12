@@ -134,10 +134,10 @@ namespace MTUComm.MemoryMap
                         try {
 
                         // TEST: PARA PODER CAPTURAR LA EJECUCION EN UN REGISTRO CONCRETO
-                        if ( string.Equals ( xmlRegister.Id, "P1MeterId" ) )
-                        {
-                            { }
-                        }
+                        //if ( string.Equals ( xmlRegister.Id, "P1MeterId" ) )
+                        //{
+                        //    { }
+                        //}
 
                         RegType type = ( RegType )Enum.Parse ( typeof( RegType ), xmlRegister.Type.ToUpper () );
                         Type SysType = typeof(System.Object);
@@ -530,6 +530,8 @@ namespace MTUComm.MemoryMap
 
         private bool ValidateNumeric<T> ( dynamic value, int size )
         {
+            return true;
+
             return ( Validations.NumericBytesLimit<T> ( value, size ) &&
                      Validations.NumericTypeLimit <T> ( value ) );
         }

@@ -1,10 +1,6 @@
-﻿using MTUComm.actions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
 using Xml;
 
@@ -13,20 +9,13 @@ namespace MTUComm
     public class Logger
     {
         private String abs_path = "";
-        private String fixed_name = "";
+        public  String fixed_name = "";
         private Configuration config;
 
-        public Logger(Configuration config)
-        {
-
-            this.config = config;
-            abs_path = config.GetBasePath(); 
-        }
-
-        public Logger(Configuration config, String Filename)
+        public Logger(Configuration config, string outFileName = "" )
         {
             this.config = config;
-            fixed_name = Filename;
+            fixed_name = outFileName;
             abs_path = config.GetBasePath();
         }
 
@@ -71,15 +60,36 @@ namespace MTUComm
             return base_stream;
         }
 
-        public string CreateFileIfNotExist()
+        public string CreateFileIfNotExist ( bool append = true )
         {
             string uri = Path.Combine(abs_path, getFileName());
 
-            if (!File.Exists(uri))
+            if ( ! File.Exists ( uri ) )
             { 
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(Path.Combine(abs_path, getFileName()), true))
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(Path.Combine(abs_path, getFileName()), append ))
                 {
                     file.WriteLine(getBaseFileHandler());
+                }
+            }
+            else if ( ! append )
+            {
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(Path.Combine(abs_path, getFileName()), false ))
+                {
+                    file.WriteLine(getBaseFileHandler());
+                }
+            }
+            else
+            {
+                try
+                {
+                    XDocument.Load(Path.Combine(abs_path, getFileName()));
+                }
+                catch ( Exception e )
+                {
+                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(Path.Combine(abs_path, getFileName()), false ))
+                    {
+                        file.WriteLine(getBaseFileHandler());
+                    }
                 }
             }
 
@@ -95,7 +105,7 @@ namespace MTUComm
             return base_stream;
         }
 
-        public string CreateEventFileIfNotExist(string mtu_id)
+        public string CreateEventFileIfNotExist ( string mtu_id )
         {
             string file_name = "MTUID"+ mtu_id+ "-" + System.DateTime.Now.ToString("MMddyyyyHH") + "-" + DateTime.Now.Ticks.ToString() + "DataLog.xml"; 
             string uri = Path.Combine(abs_path, file_name);
@@ -147,8 +157,31 @@ namespace MTUComm
         public string logReadResultString(Action ref_action, ActionResult result)
         {
             XDocument doc = XDocument.Parse(getBaseFileHandler());
-            logReadResult(doc.Root.Element("Mtus"), ref_action, result, Int32.Parse(result.getParameterByTag("MtuType").Value));
+            try
+            {
+                logReadResult(doc.Root.Element("Mtus"), ref_action, result, Int32.Parse(result.getParameterByTag("MtuType").Value));
+            }
+            catch ( Exception e )
+            {
+                logFullResult ( doc.Root.Element ( "Mtus" ), ref_action, result );
+            }
             return doc.ToString();
+        }
+
+        public void logFullResult(XElement parent, Action ref_action, ActionResult result)
+        {
+            XElement action = new XElement("Action");
+
+            addAtrribute(action, "display", ref_action.DisplayText);
+            addAtrribute(action, "type", ref_action.LogText);
+            addAtrribute(action, "reason", ref_action.Reason);
+
+            foreach (Parameter parameter in result.getParameters())
+            {
+                logParameter(action, parameter, parameter.getLogTag());
+            }
+
+            parent.Add(action);
         }
 
         public void logReadResult(Action ref_action, ActionResult result, Mtu mtuType)
@@ -173,9 +206,9 @@ namespace MTUComm
         {
             XElement action = new XElement("Action");
 
-            addAtrribute(action, "display", ref_action.getDisplay());
-            addAtrribute(action, "type", ref_action.getLogType());
-            addAtrribute(action, "reason", ref_action.getReason());
+            addAtrribute(action, "display", ref_action.DisplayText);
+            addAtrribute(action, "type", ref_action.LogText);
+            addAtrribute(action, "reason", ref_action.Reason);
 
             InterfaceParameters[] parameters = config.getLogInterfaceFields(mtu_type_id, "DataRead");
             foreach (InterfaceParameters parameter in parameters)
@@ -203,9 +236,9 @@ namespace MTUComm
         {
             XElement action = new XElement("Action");
 
-            addAtrribute(action, "display", ref_action.getDisplay());
-            addAtrribute(action, "type", ref_action.getLogType());
-            addAtrribute(action, "reason", ref_action.getReason());
+            addAtrribute(action, "display", ref_action.DisplayText);
+            addAtrribute(action, "type", ref_action.LogText);
+            addAtrribute(action, "reason", ref_action.Reason);
 
             InterfaceParameters[] parameters = config.getLogInterfaceFields(mtu_type_id, "ReadMTU");
             foreach (InterfaceParameters parameter in parameters)
@@ -268,7 +301,9 @@ namespace MTUComm
             CreateFileIfNotExist();
             XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
 
-            logTurnOffResult(doc.Root.Element("Mtus"), ref_action.getDisplay(), ref_action.getLogType(), ref_action.getUser(), MtuId);
+            // << AHORA NO SE ESTA USANDO PARA NADA LA INFORMACION RECUPERADA DE INTERFACE >>
+
+            logTurnOffResult(doc.Root.Element("Mtus"), ref_action.DisplayText, ref_action.LogText, ref_action.user, MtuId);
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
 
@@ -297,7 +332,7 @@ namespace MTUComm
             CreateFileIfNotExist();
             XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
             
-            logTurnOnResult(doc.Root.Element("Mtus"), ref_action.getDisplay(), ref_action.getLogType(), ref_action.getUser(), MtuId);
+            logTurnOnResult(doc.Root.Element("Mtus"), ref_action.DisplayText, ref_action.LogText, ref_action.user, MtuId);
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
 
@@ -328,12 +363,12 @@ namespace MTUComm
 
             XElement action = new XElement("Action");
 
-            addAtrribute(action, "display", ref_action.getDisplay());
-            addAtrribute(action, "type", ref_action.getLogType());
-            addAtrribute(action, "reason", ref_action.getReason());
+            addAtrribute(action, "display", ref_action.DisplayText);
+            addAtrribute(action, "type", ref_action.LogText);
+            addAtrribute(action, "reason", ref_action.Reason);
 
             logParameter(action, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
-            logParameter(action, new Parameter("User", "User", ref_action.getUser()));
+            logParameter(action, new Parameter("User", "User", ref_action.user));
 
             logParameter(action, new Parameter("Cancel", "Cancel Action", cancel));
             logParameter(action, new Parameter("Reason", "Cancel Reason", reason));
@@ -383,18 +418,18 @@ namespace MTUComm
 
             XElement action = new XElement("Action");
 
-            addAtrribute(action, "display", ref_action.getDisplay());
-            addAtrribute(action, "type", ref_action.getLogType());
-            addAtrribute(action, "reason", ref_action.getReason());
+            addAtrribute(action, "display", ref_action.DisplayText);
+            addAtrribute(action, "type", ref_action.LogText);
+            addAtrribute(action, "reason", ref_action.Reason);
 
 
-            if(ref_action.getUser() != null)
+            if(ref_action.user != null)
             {
                 logParameter(action, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
-                logParameter(action, new Parameter("User", "User", ref_action.getUser()));
+                logParameter(action, new Parameter("User", "User", ref_action.user));
             }
 
-            Parameter[] parameters = ref_action.getParameters();
+            Parameter[] parameters = ref_action.GetParameters();
             foreach (Parameter parameter in parameters)
             {
                 if (parameter.doesGenerateLog()) {
@@ -404,7 +439,7 @@ namespace MTUComm
             }
 
 
-            Action[] sub_actions = ref_action.getSubActions();
+            Action[] sub_actions = ref_action.GetSubActions();
             foreach(Action subaction in sub_actions)
             {
                 logAction(action, subaction);

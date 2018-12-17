@@ -1,4 +1,7 @@
-﻿using aclara_meters.Behaviors;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using aclara_meters.Behaviors;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
 using Acr.UserDialogs;
@@ -7,9 +10,6 @@ using MTUComm.actions;
 using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
 using Plugin.Settings;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xml;
 
@@ -42,6 +42,24 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewAddMTU
     {
+        #region Debug
+
+        private const bool   DEBUG_AUTO_MODE_ON  = false;
+        private const int    DEBUG_VENDOR_INDEX  = 0;
+        private const int    DEBUG_MODEL_INDEX   = 0;
+        private const int    DEBUG_METER_INDEX   = 0;
+        private const int    DEBUG_MTRNAME_INDEX = 0;
+        private const int    DEBUG_ALARM_INDEX   = 0;
+        private const int    DEBUG_DEMAND_INDEX  = 0;
+        private const string DEBUG_SERVICEPORTID = "1234567891";
+        private const string DEBUG_FIELDORDER    = "12345678901234567890";
+        private const string DEBUG_METERSERIAL   = "123456789012";
+        private const string DEBUG_INITREADING   = "123456789012";
+        private const string DEBUG_SNAPSREADS    = "10";
+        private const string DEBUG_READSINTERVAL = "1 Hour";
+
+        #endregion
+
         #region Constants
 
         public enum MTUStatus
@@ -192,6 +210,9 @@ namespace aclara_meters.view
         // Conditions - Alarms
         private bool mtuRequiresAlarmProfile;
 
+        // GPS
+        private string altitude;
+
         #endregion
 
         #region Initialization
@@ -208,7 +229,7 @@ namespace aclara_meters.view
             this.add_mtu = new MTUComm.Action(
                 config: FormsApp.config,
                 serial: FormsApp.ble_interface,
-                actiontype: MTUComm.Action.ActionType.AddMtu,
+                type: MTUComm.Action.ActionType.AddMtu,
                 user: FormsApp.CredentialsService.UserName);
 
             #region Prepare mtuForm
@@ -224,42 +245,7 @@ namespace aclara_meters.view
 
             #endregion
 
-            #region Conditions
-
-            // Two Ports
-            addMtuForm.conditions.mtu.AddCondition("TwoPorts");
-
-            // Field order (work order)
-            addMtuForm.conditions.globals.AddCondition("WorkOrderRecording");
-            
-            // Meter Number (serial number)
-            addMtuForm.conditions.globals.AddCondition("UseMeterSerialNumber");
-
-            // Vendor / Model / Name
-            addMtuForm.conditions.globals.AddCondition("ShowMeterVendor");
-
-            // Read Interval 
-            addMtuForm.conditions.globals.AddCondition("IndividualReadInterval");
-
-            // Snap Reads
-            addMtuForm.conditions.globals.AddCondition("AllowDailyReads");
-            addMtuForm.conditions.globals.AddCondition("IndividualDailyReads");
-            addMtuForm.conditions.mtu.AddCondition("DailyReads");
-
-            // 2-Way
-            addMtuForm.conditions.globals.AddCondition("FastMessageConfig");
-            addMtuForm.conditions.globals.AddCondition("Fast2Way");
-            addMtuForm.conditions.mtu.AddCondition("FastMessageConfig");
-
-            // Alarms
-            addMtuForm.conditions.mtu.AddCondition("RequiresAlarmProfile");
-
-            // Demands
-            addMtuForm.conditions.mtu.AddCondition("MtuDemand");
-
             isCancellable = false;
-
-            #endregion
 
             Task.Run(() =>
             {
@@ -452,8 +438,6 @@ namespace aclara_meters.view
 
         }
 
-        
-
         #endregion
 
         private void SetPort2Buttons ()
@@ -491,8 +475,8 @@ namespace aclara_meters.view
                     {
                         servicePortId2Input.Text = servicePortIdInput.Text;
                         fieldOrder2Input.Text = fieldOrderInput.Text;
-                        meterSerialNumber2Input.Text = meterSerialNumberInput.Text;
-                        initialReading2Input.Text = initialReadingInput.Text;
+                        meterSerial2Input.Text = meterSerialInput.Text;
+                        initialRead2Input.Text = initialReadInput.Text;
                         readInterval2Picker.SelectedIndex = readIntervalPicker.SelectedIndex;
                         meterNames2Picker.SelectedIndex = meterNamesPicker.SelectedIndex;
                         snapReads2Slider.Value = snapReadsSlider.Value;
@@ -543,10 +527,10 @@ namespace aclara_meters.view
 
             bool UseMeterSerialNumber = GlobalsConditions.UseMeterSerialNumber;
 
-            meterSerialNumberContainer .IsVisible = UseMeterSerialNumber;
-            meterSerialNumberContainer .IsEnabled = UseMeterSerialNumber;
-            meterSerialNumber2Container.IsVisible = hasTwoPorts && UseMeterSerialNumber;
-            meterSerialNumber2Container.IsEnabled = hasTwoPorts && UseMeterSerialNumber;
+            meterSerialContainer .IsVisible = UseMeterSerialNumber;
+            meterSerialContainer .IsEnabled = UseMeterSerialNumber;
+            meterSerial2Container.IsVisible = hasTwoPorts && UseMeterSerialNumber;
+            meterSerial2Container.IsEnabled = hasTwoPorts && UseMeterSerialNumber;
 
             #endregion
 
@@ -661,6 +645,10 @@ namespace aclara_meters.view
 
             alarmsList  = config.alarms.FindByMtuType ( this.detectedMtuType );
             alarms2List = ( hasTwoPorts ) ? config.alarms.FindByMtuType ( this.detectedMtuType ) : new List<Alarm> ();
+
+            // Remove "Scripting" option in interactive mode
+            alarmsList  = alarmsList .FindAll ( alarm => ! string.Equals ( alarm.Name.ToLower (), "scripting" ) );
+            alarms2List = alarms2List.FindAll ( alarm => ! string.Equals ( alarm.Name.ToLower (), "scripting" ) );
 
             bool RequiresAlarmProfile = MtuConditions.RequiresAlarmProfile;
             bool portHasSomeAlarm     = ( RequiresAlarmProfile && alarmsList.Count > 0 );
@@ -1061,7 +1049,7 @@ namespace aclara_meters.view
                 Command = new Command(() => port2_command()),
             });
 
-            gps_icon_button.Tapped += GPSUpdateButton;
+            gps_icon_button.Tapped += GpsUpdateButton;
 
         }
 
@@ -1483,9 +1471,12 @@ namespace aclara_meters.view
 
         private void MeterVendorsPicker_SelectedIndexChanged(object sender, EventArgs e)
         {
-            int j = ((BorderlessPicker)sender).SelectedIndex;
+            this.SetMeterVendor ( ((BorderlessPicker)sender).SelectedIndex );
+        }
 
-            vendor = meterVendorsList[j];
+        private void SetMeterVendor ( int selectedIndex )
+        {
+            vendor = meterVendorsList [ selectedIndex ];
             meterModelsList = this.config.meterTypes.GetModelsByVendorFromMeters(meters, vendor);
             name = "";
 
@@ -1495,13 +1486,12 @@ namespace aclara_meters.view
                 meterModelsContainerA.IsVisible = true;
                 meterNamesContainerA.IsVisible = false;
             }
-            catch (Exception e3)
+            catch ( Exception e )
             {
                 meterModelsPicker.ItemsSource = null;
                 meterModelsContainerA.IsVisible = false;
                 meterNamesContainerA.IsVisible = false;
             }
-
         }
 
         private void MeterVendors2Picker_SelectedIndexChanged2(object sender, EventArgs e)
@@ -1529,12 +1519,14 @@ namespace aclara_meters.view
 
         private void MeterModelsPicker_SelectedIndexChanged(object sender, EventArgs e)
         {
+            this.SetMeterModel ( ((BorderlessPicker)sender).SelectedIndex );
+        }
 
-            int i = ((BorderlessPicker)sender).SelectedIndex;
-
+        private void SetMeterModel ( int selectedIndex )
+        {
             meterNamesPicker.ItemDisplayBinding = new Binding("Display");
 
-            model = meterModelsList[i];
+            model = meterModelsList[ selectedIndex ];
 
             List<Meter> meterlist = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(meters, vendor, model);
 
@@ -1544,7 +1536,7 @@ namespace aclara_meters.view
                 meterModelsContainerA.IsVisible = true;
                 meterNamesContainerA.IsVisible = true;
             }
-            catch (Exception e3)
+            catch ( Exception e )
             {
                 meterNamesPicker.ItemsSource = null;
                 meterModelsContainerA.IsVisible = false;
@@ -2099,6 +2091,8 @@ namespace aclara_meters.view
 
             this.add_mtu.Cancel(selectedCancelReason);
 
+
+
             dialog_open_bg.IsVisible = false;
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
@@ -2275,121 +2269,74 @@ namespace aclara_meters.view
 
         private bool ValidateEmptyFields()
         {
+            dynamic NoVal = new Func<string,int,bool> ( ( value, maxLength ) =>
+                                ! Validations.NumericText ( value, maxLength ) );
 
-            /** Validation **/
-            /** Check if visible fields are filled with the correct values in order to Enable Add MTU Cmd **/
+            #region Port 1
 
-            /////// Port 1 ///////
-            if (servicePortIdInput.Text.Length < servicePortIdInput.MaxLength)
+            bool spid = NoVal ( servicePortIdInput.Text, servicePortIdInput  .MaxLength );
+            bool fo   = fieldOrderContainer   .IsVisible && NoVal ( fieldOrderInput   .Text, fieldOrderInput     .MaxLength );
+            bool ms   = meterSerialContainer  .IsVisible && NoVal ( meterSerialInput  .Text, meterSerialInput    .MaxLength );
+            bool ir   = NoVal ( initialReadInput  .Text, initialReadInput    .MaxLength );
+            bool sn   = snapReadsContainer    .IsVisible && NoVal ( snapReadsLabel    .Text, (int)snapReadsSlider.Maximum   ) && snapRead1Status;
+            bool ri   = readIntervalContainer .IsVisible && readIntervalPicker.SelectedIndex <= -1;
+            bool mn   = meterVendorsContainerA.IsVisible && meterNamesPicker  .SelectedIndex <= -1;
+            bool tw   = twoWayContainer       .IsVisible && twoWayPicker      .SelectedIndex <= -1;
+            bool a    = alarmsContainer       .IsVisible && alarmsPicker      .SelectedIndex <= -1;
+            bool d    = demandsContainer      .IsVisible && demandsPicker     .SelectedIndex <= -1;
+
+            if (                                     NoVal ( servicePortIdInput.Text, servicePortIdInput  .MaxLength ) ||
+                 fieldOrderContainer   .IsVisible && NoVal ( fieldOrderInput   .Text, fieldOrderInput     .MaxLength ) ||
+                 meterSerialContainer  .IsVisible && NoVal ( meterSerialInput  .Text, meterSerialInput    .MaxLength ) ||
+                                                     NoVal ( initialReadInput  .Text, initialReadInput    .MaxLength ) ||
+                 snapReadsContainer    .IsVisible && NoVal ( snapReadsLabel    .Text, (int)snapReadsSlider.Maximum   ) && snapRead1Status ||
+                 readIntervalContainer .IsVisible && readIntervalPicker.SelectedIndex <= -1 ||
+                 meterVendorsContainerA.IsVisible && meterNamesPicker  .SelectedIndex <= -1 ||
+                 twoWayContainer       .IsVisible && twoWayPicker      .SelectedIndex <= -1 ||
+                 alarmsContainer       .IsVisible && alarmsPicker      .SelectedIndex <= -1 ||
+                 demandsContainer      .IsVisible && demandsPicker     .SelectedIndex <= -1 )
                 return false;
 
-            if (fieldOrderContainer.IsVisible)
-                if (fieldOrderInput.Text.Length < fieldOrderInput.MaxLength)
-                    return false;
+            #endregion
 
-            if (meterSerialNumberContainer.IsVisible)
-                if (meterSerialNumberInput.Text.Length < meterSerialNumberInput.MaxLength)
-                    return false;
-
-            if (meterVendorsModelsNamesContainer.Children[2].IsVisible)
-                if (model != null)
-                    if (meterVendorsModelsNamesContainer.Children[1].IsVisible)
-                        if (name.Length < 0)
-                            return false;
-
-            if (initialReadingInput.Text.Length < initialReadingInput.MaxLength)
-                return false;
-
-            if (readIntervalContainer.Opacity > 0.8)
-                if (readIntervalPicker.SelectedIndex == -1)
-                    return false;
+            #region Port 2
 
             /*
-            if (snapReadsContainer.IsVisible)   if(snapReadsSubContainer.Opacity>0.8)
-                if(snapReadsLabel.Text -1)
-                    isValid = false;
+            if ( port2enabled &&
+                                                      NoVal ( servicePortId2Input.Text, servicePortId2Input  .MaxLength ) ||
+                 fieldOrder2Container   .IsVisible && NoVal ( fieldOrder2Input   .Text, fieldOrder2Input     .MaxLength ) ||
+                 meterSerial2Container  .IsVisible && NoVal ( meterSerial2Input  .Text, meterSerial2Input    .MaxLength ) ||
+                                                      NoVal ( initialRead2Input  .Text, initialRead2Input    .MaxLength ) ||
+                 snapReads2Container    .IsVisible && NoVal ( snapReads2Label    .Text, (int)snapReads2Slider.Maximum   ) && snapRead2Status ||
+                 readInterval2Container .IsVisible && readInterval2Picker.SelectedIndex <= -1 ||
+                 meterVendors2ContainerA.IsVisible && meterNames2Picker  .SelectedIndex <= -1 ||
+                 twoWay2Container       .IsVisible && twoWay2Picker      .SelectedIndex <= -1 ||
+                 alarms2Container       .IsVisible && alarms2Picker      .SelectedIndex <= -1 ||
+                 demands2Container      .IsVisible && demands2Picker     .SelectedIndex <= -1 )
+                return false;
             */
 
-            if (twoWayContainer.IsVisible)
-                if (twoWayPicker.SelectedIndex == -1)
-                    return false;
+            #endregion
 
+            NoVal = new Func<string,bool> ( ( value ) =>
+                            ! string.IsNullOrEmpty ( value ) &&
+                            ! Validations.IsNumeric<int> ( value ) );
 
-            if (alarmsContainer.IsVisible)
-                if (alarmsPicker.SelectedIndex == -1)
-                    return false;
+            #region Miscelanea
 
-
-            if (demandsContainer.IsVisible)
-                if (demandsPicker.SelectedIndex == -1)
-                    return false;
-
-
-            /////// Port 2 ///////
-
-            if (servicePortId2Input.Text.Length < servicePortId2Input.MaxLength)
+            if ( NoVal ( mtuGeolocationLat .Text ) ||
+                 NoVal ( mtuGeolocationLong.Text ) )
                 return false;
 
-            if (fieldOrder2Container.IsVisible)
-                if (fieldOrder2Input.Text.Length < fieldOrder2Input.MaxLength)
+            foreach ( BorderlessPicker picker in optionalPickers )
+                if ( picker.SelectedIndex <= -1 )
                     return false;
 
-
-            if (meterSerialNumber2Container.IsVisible)
-                if (meterSerialNumber2Input.Text.Length < meterSerialNumber2Input.MaxLength)
+            foreach ( BorderlessEntry entry in optionalEntries )
+                if ( string.IsNullOrEmpty ( entry.Text ) )
                     return false;
 
-
-            if (meterVendorsModelsNames2Container.Children[2].IsVisible)
-                if (model2 != null)
-                    if (meterVendorsModelsNames2Container.Children[1].IsVisible)
-                        if (name2.Length < 0)
-                            return false;
-
-            if (initialReading2Input.Text.Length < initialReading2Input.MaxLength)
-                return false;
-
-            if (readInterval2Container.Opacity > 0.8)
-                if (readInterval2Picker.SelectedIndex == -1)
-                    return false;
-
-            if (twoWay2Container.IsVisible)
-                if (twoWay2Picker.SelectedIndex == -1)
-                    return false;
-
-
-            if (alarms2Container.IsVisible)
-                if (alarms2Picker.SelectedIndex == -1)
-                    return false;
-
-
-            if (demands2Container.IsVisible)
-                if (demands2Picker.SelectedIndex == -1)
-                    return false;
-
-            /////// Misc ///////
-
-            if (mtuGeolocationLat.Text.Length < 0)
-                return false;
-
-            if (mtuGeolocationLong.Text.Length < 0)
-                return false;
-
-            foreach (BorderlessPicker picker in optionalPickers)
-            {
-                if(picker.SelectedIndex != -1)
-                {
-                    return false;
-                }
-            }
-
-            foreach (BorderlessEntry entry in optionalEntries)
-            {
-                if(entry.Text.Equals(""))
-                {
-                    return false;
-                }
-            }
+            #endregion
 
             return true;
         }
@@ -2421,14 +2368,13 @@ namespace aclara_meters.view
 
         #region Action
 
-        private void AddMtu(object sender, EventArgs e)
+        private void AddMtu ( object sender, EventArgs e )
         {
-            /*if (!ValidateEmptyFields())
+            if ( ! ValidateEmptyFields () )
             {
-
-                DisplayAlert("Error", "Mandatory fields are not filled in", "Ok");
+                DisplayAlert ( "Error", "Mandatory fields are not filled in", "Ok" );
                 return;
-            }*/
+            }
 
             isCancellable = true;
 
@@ -2438,12 +2384,21 @@ namespace aclara_meters.view
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
+                    // DEBUG
+                    if ( DEBUG_AUTO_MODE_ON )
+                    {
+                        this.SetMeterVendor ( DEBUG_VENDOR_INDEX );
+                        this.SetMeterModel  ( DEBUG_MODEL_INDEX  );
+                    }
+
                     backdark_bg.IsVisible = true;
                     indicator.IsVisible = true;
                     _userTapped = true;
                     background_scan_page.IsEnabled = false;
                     ChangeLowerButtonImage(true);
-                //}));
+
+                    #region comment
+                    //}));
                     /*Task.Delay(100).ContinueWith(t =>
 
                     Device.BeginInvokeOnMainThread(() =>
@@ -2639,8 +2594,10 @@ namespace aclara_meters.view
                              });
                         }));
                     }));*/
-                //    Device.BeginInvokeOnMainThread(() =>
-                //{
+                    //    Device.BeginInvokeOnMainThread(() =>
+                    //{
+                    #endregion
+
                     Task.Factory.StartNew(AddMtu_Action);
                     //Task.Run ( async () => await AddMtu_Action () );
                     //AddMtu_Action();
@@ -2650,7 +2607,42 @@ namespace aclara_meters.view
 
         private void AddMtu_Action()
         {
-            #region Form Parameters
+            string value_spi;
+            string value_fo;
+            string value_msn;
+            string value_ir;
+            string value_srs;
+            string value_ri;
+            Meter  value_mtr;
+            Alarm  value_alr;
+            Demand value_dmd;
+
+            // DEBUG
+            if ( DEBUG_AUTO_MODE_ON )
+            {
+                value_spi = DEBUG_SERVICEPORTID;
+                value_fo  = DEBUG_FIELDORDER;
+                value_msn = DEBUG_METERSERIAL;
+                value_ir  = DEBUG_INITREADING;
+                value_srs = DEBUG_SNAPSREADS;
+                value_ri  = DEBUG_READSINTERVAL;
+                value_mtr = (Meter)meterNamesPicker.ItemsSource[ DEBUG_MTRNAME_INDEX ];
+                value_alr = (Alarm)alarmsPicker    .ItemsSource[ DEBUG_ALARM_INDEX   ];
+                //value_dmd = (Demand)demandsPicker  .ItemsSource[ DEBUG_DEMAND_INDEX  ];
+            }
+            else
+            {
+                // Real values
+                value_spi = servicePortIdInput.Text;
+                value_fo  = fieldOrderInput.Text;
+                value_msn = meterSerialInput.Text;
+                value_ir  = initialReadInput.Text;
+                value_srs = snapReadsSlider.Value.ToString();
+                value_ri  = readIntervalPicker.SelectedItem.ToString();
+                value_mtr = ( Meter )meterNamesPicker.SelectedItem;
+                value_alr = ( Alarm )alarmsPicker.SelectedItem;
+                //value_dmd = ( Demand )demandsPicker.SelectedItem;
+            }
 
             dynamic MtuConditions     = addMtuForm.conditions.mtu;
             dynamic GlobalsConditions = addMtuForm.conditions.globals;
@@ -2658,61 +2650,41 @@ namespace aclara_meters.view
             #region Port 1
 
             // Service Port ID
-            addMtuForm.AddParameter (
-                FIELD.SERVICE_PORT_ID,
-                servicePortIdInput.Text );
+            addMtuForm.AddParameter ( FIELD.SERVICE_PORT_ID, value_spi );
 
-            // Field Order
+            // Field Order [ SOLO SE LOGEA ¿? ]
             if ( GlobalsConditions.WorkOrderRecording )
-                addMtuForm.AddParameter (
-                    FIELD.FIELD_ORDER,
-                    fieldOrderInput.Text );
+                addMtuForm.AddParameter ( FIELD.FIELD_ORDER, value_fo );
 
-            // Meter Number
+            // Meter Number [ SOLO SE LOGEA ¿? ]
             if ( GlobalsConditions.UseMeterSerialNumber )
-                addMtuForm.AddParameter (
-                    FIELD.METER_NUMBER,
-                    meterSerialNumberInput.Text );
+                addMtuForm.AddParameter ( FIELD.METER_NUMBER, value_msn );
 
             // Initial Reading
-            addMtuForm.AddParameter (
-                FIELD.INITIAL_READING,
-                initialReadingInput.Text);
+            addMtuForm.AddParameter ( FIELD.INITIAL_READING, value_ir );
 
             // Selected Meter ID
-            addMtuForm.AddParameter (
-                FIELD.SELECTED_METER,
-                ( Meter )meterNamesPicker.SelectedItem );
+            addMtuForm.AddParameter ( FIELD.SELECTED_METER, value_mtr );
 
             // Read Interval
             if ( GlobalsConditions.IndividualReadInterval )
-                addMtuForm.AddParameter (
-                    FIELD.READ_INTERVAL,
-                    readIntervalPicker.SelectedItem.ToString() );
+                addMtuForm.AddParameter ( FIELD.READ_INTERVAL, value_ri );
 
-            // Snap Reads
+            // Snap Reads [ SOLO SE LOGEA ¿? ]
             if ( GlobalsConditions.AllowDailyReads && MtuConditions.DailyReads )
-                addMtuForm.AddParameter (
-                    FIELD.SNAP_READS,
-                    snapReadsSlider.Value.ToString() );
+                addMtuForm.AddParameter ( FIELD.SNAP_READS, value_srs );
 
-            // 2-Way
+            // 2-Way [ SOLO SE LOGEA ¿? ]
             if ( MtuConditions.FastMessageConfig )
-                addMtuForm.AddParameter (
-                    FIELD.TWO_WAY,
-                    twoWayPicker.SelectedItem.ToString() );
+                addMtuForm.AddParameter ( FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString() );
 
             // Alarms
             if ( MtuConditions.RequiresAlarmProfile )
-                addMtuForm.AddParameter (
-                    FIELD.ALARM,
-                    ( Alarm )alarmsPicker.SelectedItem );
+                addMtuForm.AddParameter ( FIELD.ALARM, value_alr );
 
-            // Demands
-            if ( MtuConditions.MtuDemand )
-                addMtuForm.AddParameter (
-                    FIELD.DEMAND,
-                    ( Demand )demandsPicker.SelectedItem );
+            // Demands [ SOLO SE LOGEA ¿? ]
+            //if ( MtuConditions.MtuDemand )
+            //    addMtuForm.AddParameter ( FIELD.DEMAND, value_dmd );
 
             #endregion
 
@@ -2721,80 +2693,74 @@ namespace aclara_meters.view
             if ( MtuConditions.TwoPorts )
             {
                 // Service Port ID 2
-                addMtuForm.AddParameter (
-                    FIELD.SERVICE_PORT_ID2,
-                    servicePortId2Input.Text );
+                addMtuForm.AddParameter ( FIELD.SERVICE_PORT_ID2, servicePortId2Input.Text );
 
                 // Field Order 2
                 if ( GlobalsConditions.WorkOrderRecording )
-                    addMtuForm.AddParameter (
-                        FIELD.FIELD_ORDER2,
-                        fieldOrder2Input.Text );
+                    addMtuForm.AddParameter ( FIELD.FIELD_ORDER2, fieldOrder2Input.Text );
 
                 // Meter Number 2
                 if ( GlobalsConditions.UseMeterSerialNumber )
-                    addMtuForm.AddParameter (
-                        FIELD.METER_NUMBER2,
-                        meterSerialNumber2Input.Text );
+                    addMtuForm.AddParameter ( FIELD.METER_NUMBER2, meterSerial2Input.Text );
 
                 // Initial Reading 2
-                addMtuForm.AddParameter (
-                    FIELD.INITIAL_READING2,
-                    initialReading2Input.Text );
+                addMtuForm.AddParameter ( FIELD.INITIAL_READING2, initialRead2Input.Text );
 
                 // Read Interval 2
                 if ( GlobalsConditions.IndividualReadInterval )
-                    addMtuForm.AddParameter (
-                        FIELD.READ_INTERVAL2,
-                        readInterval2Picker.SelectedItem.ToString() );
+                    addMtuForm.AddParameter ( FIELD.READ_INTERVAL2, readInterval2Picker.SelectedItem.ToString() );
 
                 // Selected Meter ID 2
-                addMtuForm.AddParameter (
-                    FIELD.SELECTED_METER2,
-                    ( Meter )meterNames2Picker.SelectedItem );
+                addMtuForm.AddParameter ( FIELD.SELECTED_METER2, ( Meter )meterNames2Picker.SelectedItem );
 
                 // Snap Reads 2
                 if ( GlobalsConditions.AllowDailyReads && MtuConditions.DailyReads )
-                    addMtuForm.AddParameter (
-                        FIELD.SNAP_READS2,
-                        snapReads2Slider.Value.ToString() );
+                    addMtuForm.AddParameter ( FIELD.SNAP_READS2, snapReads2Slider.Value.ToString() );
 
                 // 2-Way 2
                 if ( MtuConditions.FastMessageConfig )
-                    addMtuForm.AddParameter (
-                        FIELD.TWO_WAY2,
-                        twoWay2Picker.SelectedItem.ToString() );
+                    addMtuForm.AddParameter ( FIELD.TWO_WAY2, twoWay2Picker.SelectedItem.ToString() );
 
                 // Alarms 2
                 if ( MtuConditions.RequiresAlarmProfile )
-                    addMtuForm.AddParameter (
-                        FIELD.ALARM2,
-                        ( Alarm )alarms2Picker.SelectedItem );
+                    addMtuForm.AddParameter ( FIELD.ALARM2, ( Alarm )alarms2Picker.SelectedItem );
 
                 // Demands 2
                 if ( MtuConditions.MtuDemand )
-                    addMtuForm.AddParameter (
-                        FIELD.DEMAND2,
-                        ( Demand )demands2Picker.SelectedItem );
+                    addMtuForm.AddParameter ( FIELD.DEMAND2, ( Demand )demands2Picker.SelectedItem );
             }
 
             #endregion
 
             #region Optional parameters
 
+            // Gps
+            if ( ! string.IsNullOrEmpty ( mtuGeolocationLat .Text ) &&
+                 ! string.IsNullOrEmpty ( mtuGeolocationLong.Text ) )
+            {
+                double lat    = Convert.ToDouble ( mtuGeolocationLat .Text );
+                double lon    = Convert.ToDouble ( mtuGeolocationLong.Text );
+                string latDir = ( lat < 0d ) ? "S" : "N";
+                string lonDir = ( lon < 0d ) ? "W" : "E";
+
+                addMtuForm.AddParameter ( FIELD.GPS_LATITUDE,  lat );
+                addMtuForm.AddParameter ( FIELD.GPS_LONGITUDE, lon );
+                addMtuForm.AddParameter ( FIELD.GPS_ALTITUDE,  altitude );
+            }
+
             List<Parameter> optionalParams = new List<Parameter>();
 
             foreach ( BorderlessPicker p in optionalPickers )
-                optionalParams.Add ( new Parameter ( p.Name, p.Display, p.SelectedItem, true ) );
+                if ( p.SelectedItem != null )
+                    optionalParams.Add ( new Parameter ( p.Name, p.Display, p.SelectedItem, true ) );
 
             foreach ( BorderlessEntry e in optionalEntries )
-                optionalParams.Add ( new Parameter ( e.Name, e.Display, e.Text, true ) );
+                if ( ! string.IsNullOrEmpty ( e.Text ) )
+                    optionalParams.Add ( new Parameter ( e.Name, e.Display, e.Text, true ) );
 
-            addMtuForm.AddParameter (
-                FIELD.OPTIONAL_PARAMS,
-                optionalParams );
-
-            #endregion
+            if ( optionalParams.Count > 0 )
+                addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );
+                //addMtuForm.AddParameters ( FIELD.OPTIONAL_PARAMS, optionalParams.ToArray () );
 
             #endregion
 
@@ -2848,7 +2814,7 @@ namespace aclara_meters.view
                                         Height = "40",
                                         isMTU = "false",
                                         isMeter = "true",
-                                        Description = "Port " + i + ": " + param.getValue() //parameter.Value
+                                        Description = "Port " + (i+1) + ": " + param.getValue() //parameter.Value
                                     });
                                 }
                                 else
@@ -2874,12 +2840,12 @@ namespace aclara_meters.view
                                     {
                                         FinalReadListView.Add(new ReadMTUItem()
                                         {
-                                            Title = "\t\t\t\t\t" + param.getLogDisplay() + ":",
+                                            Title = param.getLogDisplay() + ":",
                                             isDisplayed = "true",
                                             Height = "64",
                                             isMTU = "true",
                                             isMeter = "false",
-                                            Description = "\t\t\t\t\t" + param.getValue() //parameter.Value
+                                            Description = param.getValue() //parameter.Value
                                         });
                                     }
                                 }
@@ -2980,19 +2946,14 @@ namespace aclara_meters.view
         #endregion
 
         #region Location
-        private void GPSUpdateButton(object sender, EventArgs e)
+
+        private void GpsUpdateButton ( object sender, EventArgs e )
         {
-
-            if (IsLocationAvailable())
-            {
-
-                Task.Run(async () => { await StartListening(); });
-            }
-
+            if ( IsLocationAvailable () )
+                Task.Run(async () => { await GpsStartListening(); });
         }
 
-
-        public bool IsLocationAvailable()
+        public bool IsLocationAvailable ()
         {
             if (!CrossGeolocator.IsSupported)
                 return false;
@@ -3003,17 +2964,17 @@ namespace aclara_meters.view
             return CrossGeolocator.Current.IsGeolocationAvailable;
         }
 
-        async Task StartListening()
+        async Task GpsStartListening ()
         {
             if (CrossGeolocator.Current.IsListening)
                 return;
             await CrossGeolocator.Current.StartListeningAsync(TimeSpan.FromSeconds(1), 1, true);
             CrossGeolocator.Current.PositionChanged += PositionChanged;
             CrossGeolocator.Current.PositionError += PositionError;
-            await Task.Delay(5000).ContinueWith(t => StopListening());
+            await Task.Delay(5000).ContinueWith(t => GpsStopListening());
         }
 
-        private void PositionChanged(object sender, PositionEventArgs e)
+        private void PositionChanged ( object sender, PositionEventArgs e )
         {
             //If updating the UI, ensure you invoke on main thread
             var position = e.Position;
@@ -3027,17 +2988,17 @@ namespace aclara_meters.view
             Console.WriteLine(output);
             //accuracy.Text = output.ToString();
 
-            mtuGeolocationLat.Text = position.Latitude.ToString();
-            mtuGeolocationLong.Text = position.Longitude.ToString();
-
+            mtuGeolocationLat .Text = position.Latitude .ToString ();
+            mtuGeolocationLong.Text = position.Longitude.ToString ();
+            this.altitude           = position.Altitude .ToString ();
         }
 
-        private void PositionError(object sender, PositionErrorEventArgs e)
+        private void PositionError ( object sender, PositionErrorEventArgs e )
         {
             Console.WriteLine(e.Error);
         }
 
-        private async Task StopListening()
+        private async Task GpsStopListening ()
         {
             if (!CrossGeolocator.Current.IsListening)
                 return;
@@ -3045,6 +3006,7 @@ namespace aclara_meters.view
             CrossGeolocator.Current.PositionChanged -= PositionChanged;
             CrossGeolocator.Current.PositionError -= PositionError;
         }
+
         #endregion
 
         #region Other methods

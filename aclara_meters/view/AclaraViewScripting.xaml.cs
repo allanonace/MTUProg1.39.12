@@ -36,7 +36,6 @@ namespace aclara_meters.view
 
         private string resultDataXml;
 
-
         public AclaraViewScripting()
         {
             InitializeComponent();
@@ -123,7 +122,8 @@ namespace aclara_meters.view
 
 
         /*--------------------------------------------------*/
-        /*          Device List Interface Contenview         /--------------------------------------------------*/
+        /*          Device List Interface Contenview
+        /---------------------------------------------------*/
 
         private void Interface_ContentView_DeviceList()
         {
@@ -363,9 +363,9 @@ namespace aclara_meters.view
             ScriptRunner runner = new ScriptRunner(FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length);
 
             //Define finish and error event handler
-            runner.OnFinish += Add_mtu_OnFinish;
-            runner.onStepFinish += Runner_onStepFinish;
-            runner.OnError += Add_mtu_OnError;
+            runner.OnFinish     += OnFinish;
+            runner.onStepFinish += onStepFinish;
+            runner.OnError      += OnError;
 
             //Run
             runner.Run();
@@ -520,8 +520,6 @@ namespace aclara_meters.view
             });
         }
 
-
-
         private string DecodeId(byte[] id)
         {
             string s;
@@ -542,12 +540,7 @@ namespace aclara_meters.view
             return s;
         }
 
-
-        /*                                                   /--------------------------------------------------*/
-        /*--------------------------------------------------*/
-
-
-        private void Add_mtu_OnError(object sender, MTUComm.Action.ActionErrorArgs e)
+        private void OnError(object sender, MTUComm.Action.ActionErrorArgs e)
         {
 
         
@@ -561,20 +554,18 @@ namespace aclara_meters.view
             // throw new NotImplementedException();
         }
 
-        private void Runner_onStepFinish(object sender, int step, MTUComm.Action.ActionFinishArgs e)
+        private void onStepFinish(object sender, int step, MTUComm.Action.ActionFinishArgs e)
         {
             Console.WriteLine("HI FINISH RUNNER");
             //throw new NotImplementedException();
         }
 
-        private void Add_mtu_OnFinish(object sender, MTUComm.Action.ActionFinishArgs e)
+        private void OnFinish(object sender, MTUComm.Action.ActionFinishArgs e)
         {
-
             Task.Run(() =>
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-
                     ContentView_Scripting_textScript.Text = "";
                     Parameter[] allParams = e.Result.getParameters();
 
@@ -598,10 +589,12 @@ namespace aclara_meters.view
                             String val = ContentView_Scripting_textScript.Text;
                             ContentView_Scripting_textScript.Text = val + res + "\r\n";
                         }
-
                     }
 
-                    String xmlResultTocallback = ((MTUComm.Action)sender).getResultXML(e.Result);
+                    String xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(e.Result);
+
+                    int length  = Base64Encode(xmlResultTocallback).Length;
+                    int length2 = System.Web.HttpUtility.UrlEncode(Base64Encode(xmlResultTocallback)).Length;
 
                     Device.BeginInvokeOnMainThread(() =>
                     {
@@ -611,13 +604,11 @@ namespace aclara_meters.view
                         _userTapped = false;
                         ContentView_Scripting_label_read.Text = "Successful Script Execution";
 
-
-
-
                         Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
                                                              "status=success" +
                                                              "&output_filename="+resultScriptName +
-                                                             "&output_data=" + System.Web.HttpUtility.UrlEncode(Base64Encode(xmlResultTocallback)) ));
+                                                             "&output_data=" + System.Web.HttpUtility.UrlEncode(
+                                                                Base64Encode( xmlResultTocallback ) ) ));
 
                         FormsApp.ble_interface.Close();
 
@@ -625,12 +616,7 @@ namespace aclara_meters.view
 
                 });
             });
-
-
-
         }
-
-
 
         public static string Base64Decode(string base64EncodedData)
         {
@@ -643,8 +629,6 @@ namespace aclara_meters.view
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
             return System.Convert.ToBase64String(plainTextBytes);
         }
-
-
 
         private void TappedListeners()
         {
@@ -784,7 +768,6 @@ namespace aclara_meters.view
             ((ListView)sender).SelectedItem = null;
         }
 
-
         private IBlePeripheral peripheral = null;
         private int peripheralConnected = ble_library.BlePort.NO_CONNECTED;
         private Boolean peripheralManualDisconnection = false;
@@ -836,6 +819,5 @@ namespace aclara_meters.view
 
             */
         }
-
     }
 }

@@ -203,13 +203,16 @@ namespace MTUComm
         public class AddMtuArgs : EventArgs
         {
             public AMemoryMap MemoryMap { get; private set; }
-
             public Mtu MtuType { get; private set; }
+            public MtuForm Form { get; private set; }
+            public AddMtuLog AddMtuLog { get; private set; }
 
-            public AddMtuArgs(AMemoryMap memorymap, Mtu mtype)
+            public AddMtuArgs(AMemoryMap memorymap, Mtu mtype, MtuForm form, AddMtuLog addMtuLog )
             {
                 MemoryMap = memorymap;
                 MtuType = mtype;
+                Form = form;
+                AddMtuLog = addMtuLog;
             }
         }
 
@@ -249,6 +252,8 @@ namespace MTUComm
             }
         }
 
+        private AddMtuLog addMtuLog;
+
         #endregion
 
         #region Initialization
@@ -266,10 +271,15 @@ namespace MTUComm
 
         public async void LaunchActionThread ( ActionType type, params object[] args )
         {
-            System.Action actionToLaunch = null;
+            //System.Action actionToLaunch = null;
 
             //Gets MTU casci info ( type and id )
-            if ( type != ActionType.AddMtu )
+            // TODO: Descubrir porque al hacer un segundo basic read en la accion de AddMtu,
+            // cuando se pulsa el boton, habiendo sido el primero el que se hace nada mas cargar
+            // el formulario, la lectura casca. Ahora mismo esta condicion es para evitar que en
+            // la accion AddMtu se haga una segunda lectura basica en modo interactivo pero si que
+            // se permite hacer la primera en modo scripting
+            if ( type != ActionType.AddMtu || type == ActionType.AddMtu && args.Length == 1 )
                 LoadMtuBasicInfo ();
 
             /*
@@ -295,7 +305,12 @@ namespace MTUComm
                     // NOTE: TaskFactory uses Action without parameters and elegant
                     // form to be able to do it, is using a lambda expression
                     case ActionType.ReadMtu: await Task.Run(() => Task_ReadMtu()); break;
-                    case ActionType.AddMtu: await Task.Run(() => Task_AddMtu((AddMtuForm)args[0], (string)args[1])); break;
+                    case ActionType.AddMtu:
+                        // Interactive and Scripting
+                        if ( args.Length == 2 )
+                             await Task.Run(() => Task_AddMtu((AddMtuForm)args[0], (string)args[1]));
+                        else await Task.Run(() => Task_AddMtu((Action)args[0]));
+                        break;
                     case ActionType.TurnOffMtu: await Task.Run(() => Task_TurnOffMtu()); break;
                     case ActionType.TurnOnMtu: await Task.Run(() => Task_TurnOnMtu()); break;
                     case ActionType.ReadData: await Task.Run(() => Task_ReadDataMtu((int)args[0])); break;
@@ -449,8 +464,11 @@ namespace MTUComm
             OnTurnOnMtu(this, args);
         }
 
-        private void TurnOffMtu_Logic ()
+        private void TurnOffMtu_Logic ( int time = 0 )
         {
+            // TEST
+            //this.TurnOnMtu_Logic ();
+
             byte mask = 1;
             byte systemFlags = (lexi.Read(22, 1))[0];
             systemFlags |= mask; // set bit 0
@@ -460,9 +478,16 @@ namespace MTUComm
             Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
             Console.WriteLine("TurnOnMtu end");
 
-            if (systemFlags != valueWritten)
+            // Fail to turn off MTU
+            if ( systemFlags != valueWritten )
             {
-                // TODO: handle error condition
+                Thread.Sleep ( 500 );
+
+                // Retry action ( thre times = first plus two replies )
+                if ( time < 2 )
+                    TurnOffMtu_Logic ( ++time );
+                else
+                    throw new Exception ( "TurnOff was not possible" );
             }
         }
 
@@ -538,13 +563,52 @@ namespace MTUComm
             }
         }
 
-        private void Task_AddMtu ( dynamic form, string user )
-        {
-           
-            //LoadMtuBasicInfo();
+        private Action truquitoAction;
 
-            Logger logger = new Logger(Configuration.GetInstance());
-            AddMtuLog addMtuLog = new AddMtuLog(logger, form, user);
+        private void Task_AddMtu ( Action addMtuAction )
+        {
+            truquitoAction = addMtuAction;
+
+            Mtu mtu = Configuration.GetInstance().mtuTypes.FindByMtuId ( (int)MtuForm.mtuBasicInfo.Type );
+            AddMtuForm form = new AddMtuForm ( mtu );
+
+            foreach ( Parameter parameter in addMtuAction.GetParameters () )
+                form.AddParameterTranslatingAclaraXml ( parameter );
+
+            this.Task_AddMtu ( form, addMtuAction.user, true );
+        }
+
+        private void Task_AddMtu ( dynamic form, string user, bool isFromScripting = false )
+        {
+            Mtu mtu = form.mtu;
+            dynamic MtuConditions     = form.conditions.mtu;
+            dynamic GlobalsConditions = form.conditions.globals;
+
+            /*
+            bool mtu_twoports        = form.conditions.mtu.TwoPorts;
+            bool glo_workorder       = form.conditions.globals.WorkOrderRecording;
+            bool glo_meterserial     = form.conditions.globals.UseMeterSerialNumber;
+            bool glo_metervendor     = form.conditions.globals.ShowMeterVendor;
+            bool glo_readinterval    = form.conditions.globals.IndividualReadInterval;
+            bool glo_allowdailyreads = form.conditions.globals.AllowDailyReads;
+            bool glo_indidailyreads  = form.conditions.globals.IndividualDailyReads;
+            bool mtu_dailyreads      = form.conditions.mtu.DailyReads;
+            bool glo_fastmsg         = form.conditions.globals.FastMessageConfig;
+            bool glo_fasttwoway      = form.conditions.globals.Fast2Way;
+            bool mtu_fastmsgconfig   = form.conditions.mtu.FastMessageConfig;
+            bool mtu_alarmprof       = form.conditions.mtu.RequiresAlarmProfile;
+            bool mtu_demand          = form.conditions.mtu.MtuDemand;
+
+            string P1MeterId         = form.ServicePortId.Value;
+            string P1MeterType       = ( ( Meter )form.Meter.Value ).Id.ToString ();
+            string ReadIntervalM     = form.ReadInterval.Value;
+            */
+
+            try
+            {
+
+            Logger logger = ( ! isFromScripting ) ? new Logger ( Configuration.GetInstance () ) : truquitoAction.logger;
+            addMtuLog = new AddMtuLog ( logger, form, user, isFromScripting );
 
             #region Turn Off MTU
 
@@ -555,55 +619,81 @@ namespace MTUComm
 
             #region Add MTU
 
-            Mtu mtu = form.mtu;
-            dynamic MtuConditions = form.conditions.mtu;
-            dynamic GlobalsConditions = form.conditions.globals;
-
             // Prepare memory map
-            String memory_map_type = configuration.GetMemoryMapTypeByMtuId((int)MtuForm.mtuBasicInfo.Type);
-            int memory_map_size = configuration.GetmemoryMapSizeByMtuId((int)MtuForm.mtuBasicInfo.Type);
+            String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
+            int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
 
-            byte[] memory = new byte[memory_map_size];
-            dynamic map = new MemoryMap.MemoryMap(memory, memory_map_type);
+            byte[] memory = new byte[ memory_map_size ];
+            dynamic map = new MemoryMap.MemoryMap ( memory, memory_map_type );
 
             bool useTwoPorts = MtuConditions.TwoPorts;
 
-            // meter type
-            Meter selectedMeter = (Meter)form.Meter.getValue();
+            #region Meter Type
+
+            Meter selectedMeter  = null;
+            Meter selectedMeter2 = null;
+               
+            if ( ! isFromScripting )
+                 selectedMeter = (Meter)form.Meter.Value;
+            else selectedMeter = Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
             map.P1MeterType = selectedMeter.Id;
-            if (useTwoPorts)
+
+            if ( useTwoPorts )
             {
-                Meter selectedMeter2 = (Meter)form.Meter2.getValue();
+                if ( ! isFromScripting )
+                     selectedMeter2 = (Meter)form.Meter2.Value;
+                else selectedMeter2 = Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter2.Value ) );
                 map.P2MeterType = selectedMeter2.Id;
             }
 
-            // service port id, account number
-            map.P1MeterId = form.ServicePortId.getValue();
-            if (useTwoPorts)
-                map.P2MeterId = form.ServicePortId2.getValue();
+            #endregion
 
-            // reading interval
+            #region Service Port = Account Number = Activity Log ID
+
+            map.P1MeterId = form.ServicePortId.Value;
+            if ( useTwoPorts )
+                map.P2MeterId = form.ServicePortId2.Value;
+
+            #endregion
+
+            #region Reading Interval
+
+                // reading interval
             if (GlobalsConditions.IndividualReadInterval)
             {
-                map.ReadIntervalMinutes = form.ReadInterval.getValue();
+                map.ReadIntervalMinutes = form.ReadInterval.Value;
                 if (useTwoPorts)
-                    map.P2ReadInterval = form.ReadInterval2.getValue();
+                    map.P2ReadInterval = form.ReadInterval2.Value;
             }
 
-            // overlap
+            #endregion
+
+            #region Overlap count
+
             map.MessageOverlapCount = DEFAULT_OVERLAP;
             if (useTwoPorts)
                 map.P2MessageOverlapCount = DEFAULT_OVERLAP;
 
-            // initial reading
-            map.P1Reading = form.InitialReading.getValue();
-            if (useTwoPorts)
-                map.P2Reading = form.InitialReading2.getValue();
+            #endregion
 
-            // Alarms
-            if (MtuConditions.RequiresAlarmProfile)
+            #region Initial Reading = Meter Reading
+
+            map.P1Reading = Convert.ToUInt64 ( ( string )form.InitialReading.Value ) /
+                            ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
+            
+            if ( useTwoPorts )
+                map.P2Reading = Convert.ToUInt64 ( ( string )form.InitialReading2.Value ) /
+                                ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
+
+            #endregion
+
+            #region Alarm
+
+                // Alarms
+            if ( ! isFromScripting &&
+                 MtuConditions.RequiresAlarmProfile )
             {
-                Alarm alarms = (Alarm)form.Alarm.getValue();
+                Alarm alarms = (Alarm)form.Alarm.Value;
 
                 // Overlap
                 map.MessageOverlapCount = alarms.Overlap;
@@ -667,18 +757,20 @@ namespace MTUComm
                 }
             }
 
-            // Encryption key
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider();
-            byte[] aesKey = new byte[DEFAULT_LENGTH_AES];
-            rng.GetBytes(aesKey);
+            #endregion
+
+            #region Encription Key
+
+            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
+            byte[] aesKey = new byte[ DEFAULT_LENGTH_AES ];
+            rng.GetBytes ( aesKey );
             map.EncryptionKey = aesKey;
-            for (int i = 0; i < 15; i++)
-            {
-                if (aesKey[i] != memory[256 + i])
-                {
-                    throw new Exception("AES key does not match");
-                }
-            }
+            for ( int i = 0; i < 15; i++ )
+                if ( aesKey[ i ] != memory[ 256 + i ] )
+                    throw new Exception ( "AES key does not match" );
+
+            #endregion
+
             // Encrypted
             // EncryptionIndex
 
@@ -686,8 +778,8 @@ namespace MTUComm
             // encoder digits to drop (not in pulse)
 
             // Write changes into MTU
-            WriteMtuModifiedRegisters(map);
-            addMtuLog.LogAction();
+            WriteMtuModifiedRegisters( map );
+            addMtuLog.LogAddMtu ( isFromScripting );
 
             #endregion
 
@@ -706,38 +798,26 @@ namespace MTUComm
             byte[] buffer = new byte[1024];
 
             System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
-
-            try
+           
+            if (memory_map_size > 255)
             {
-                if (memory_map_size > 255)
-                {
-                    System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
-                    System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
-                }
-
-                if (memory_map_size > 320)
-                {
-                    //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
-                }
-
-                if (memory_map_size > 960)
-                {
-                    System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
-                }
-
-
+                System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
+                System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
             }
-            catch (Exception e)
+            if (memory_map_size > 320)
             {
-                Console.WriteLine(e.Message);
+                //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
+                //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
+                //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
+                //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
+            }
+            if (memory_map_size > 960)
+            {
+                System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
             }
 
             MemoryMap.MemoryMap readMemoryMap = new MemoryMap.MemoryMap(buffer, memory_map_type);
 
-            #region Check
             List<string> diff = new List<string>(map.GetModifiedRegistersDifferences(readMemoryMap));
             if (diff.Count > 1 || (diff.Count == 1 && !diff.Contains("EncryptionKey")))
             {
@@ -747,23 +827,30 @@ namespace MTUComm
             {
                 // OK
             }
-            #endregion
 
-            try
-            {
-                AddMtuArgs addMtuArgs = new AddMtuArgs(readMemoryMap, mtu);
-                ActionResult result = OnAddMtu(this, addMtuArgs);
-                addMtuLog.LogReadMtu(result);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                OnError(this, TranslateException(e));
-            }
+            //if ( ! isFromScripting )
+                //form.logger.fixed_name = "";
 
             #endregion
 
-            addMtuLog.Save();
+            // Generate log to show on device screen
+            AddMtuArgs addMtuArgs = new AddMtuArgs(readMemoryMap, mtu, form, addMtuLog );
+            ActionResult result = OnAddMtu(this, addMtuArgs);
+            //addMtuLog.LogReadMtu(result);
+
+            // Generate xml log file and save on device
+            //addMtuLog.Save ();
+
+            }
+            catch ( Exception e )
+            {
+                OnError ( this, TranslateException( e ) );
+            }
+        }
+
+        public string GetResultXML ()
+        {
+            return addMtuLog.ToString ();
         }
 
         public void Task_BasicRead ()
@@ -934,6 +1021,11 @@ namespace MTUComm
             }
             catch { }
             return E.Message; // failed (error or cause it's not intelligent enough to locale '{0}'-patterns
+        }
+
+        public MTUBasicInfo GetBasicInfo ()
+        {
+            return this.latest_mtu;
         }
 
         #endregion

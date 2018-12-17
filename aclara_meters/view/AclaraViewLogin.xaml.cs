@@ -34,7 +34,7 @@ namespace aclara_meters.view
             return true;
         }
 
-       
+
 
         public AclaraViewLogin(IUserDialogs dialogs, string data)
         {
@@ -61,6 +61,8 @@ namespace aclara_meters.view
                         if (UploadingLogFiles())
                         {
                             DisplayAlert("Information", "All Log files uploaded!", "Ok");
+
+                            //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
                         }
                         else
                         {
@@ -83,7 +85,8 @@ namespace aclara_meters.view
                         #endregion
                     }
 
-
+                    // Force to
+                    (( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
                 });
             });
 

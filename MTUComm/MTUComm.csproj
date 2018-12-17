@@ -26,4 +26,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Observer\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove=".Configuration.cs.swp" />
+  </ItemGroup>
 </Project>

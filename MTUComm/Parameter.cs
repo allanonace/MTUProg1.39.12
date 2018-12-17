@@ -35,7 +35,6 @@ namespace MTUComm
             NewMeterReading = 22,
             DaysOfRead = 23,
             Custom = 24
-
         };
 
         private class ParameterDefine {
@@ -96,6 +95,10 @@ namespace MTUComm
 
         private bool optional = false;
 
+        public Parameter ()
+        {
+            mValue = string.Empty;
+        }
 
         public Parameter(ParameterType type, String value)
         {

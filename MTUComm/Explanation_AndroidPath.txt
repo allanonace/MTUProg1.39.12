@@ -1,5 +1,6 @@
 https://forums.xamarin.com/discussion/3773/system-environment-specialfolder
 https://www.preguntandroid.com/pregunta/535/confundido-por-los-muchos-lugares-de-la-sdcard-virtual
+https://www.reddit.com/r/Android/comments/496sn3/lets_clear_up_the_confusion_regarding_storage_in
 
 Información importante
 ----
@@ -121,3 +122,10 @@ PATHS.STORAGE_EMULATED_LEGACY: '/storage/emulated/legacy/Android/data/com.aclara
 PATHS.STORAGE_SDCARD_ZERO    : '/storage/sdcard0/Android/data/com.aclara.mtu.programmer/files/Mtu.xml'         -> Dir: False File: False
 PATHS.SDCARD_MNT             : '/mnt/sdcard/Android/data/com.aclara.mtu.programmer/files/Mtu.xml'              -> Dir: True  File: True
 PATHS.SDCARD                 : '/sdcard/Android/data/com.aclara.mtu.programmer/files/Mtu.xml'                  -> Dir: True  File: True
+
+Atención
+----
+De repente ha dejado de funcionar el planteamiento anterior en el ZTE, que no se si lo habrán actualizado,
+y ha pasado a funcionar usar el path "/data/data/com.aclara.mtu.programmer/files/", lo cual antes no servía
+
+El mismo path que devuelven: Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments|Personal|UserProfile );

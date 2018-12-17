@@ -12,6 +12,8 @@ namespace MTUComm
     public class ScriptRunner
     {
 
+
+
         private List<Action> actions;
 
         public delegate void ActionFinishHandler(object sender, Action.ActionFinishArgs e);
@@ -123,7 +125,7 @@ namespace MTUComm
 
                             String name = parameter.Name;
                             ActionParameter action_parameter = (ActionParameter)action.GetType().GetProperty(parameter.Name).GetValue(action, null);
-                            new_action.addParameter(new Parameter(parseParameterType(parameter.Name), action_parameter.Value, action_parameter.Port));
+                            new_action.AddParameter(new Parameter(parseParameterType(parameter.Name), action_parameter.Value, action_parameter.Port));
                         }
 
                     }
@@ -131,7 +133,7 @@ namespace MTUComm
                     { }
                 }
 
-                new_action.Order = step;
+                new_action.order = step;
                 new_action.OnFinish += Action_OnFinish;
                 new_action.OnError += Action_OnError;
 
@@ -155,10 +157,10 @@ namespace MTUComm
         private void Action_OnFinish(object sender, Action.ActionFinishArgs e)
         {
             Action act = (Action)sender;
-            if (act.Order < (actions.Count-1))
+            if (act.order < (actions.Count-1))
             {
-                onStepFinish(act, act.Order, e);
-                actions.ToArray()[act.Order+1].Run();
+                onStepFinish(act, act.order, e);
+                actions.ToArray()[act.order+1].Run();
             }
             else
             {

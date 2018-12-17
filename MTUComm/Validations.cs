@@ -34,6 +34,9 @@ namespace MTUComm
             // String conversion for used types
             else if ( value is string )
             {
+                if ( string.IsNullOrEmpty ( value ) )
+                    return false;
+
                 string valueString = ( string )( object )value;
                 switch ( Type.GetTypeCode( typeof(T)) )
                 {
@@ -392,6 +395,21 @@ namespace MTUComm
             }
 
             return true;
+        }
+
+        public static bool NumericText (
+            string value,
+            int  maxLength,
+            int  minLength    = 1,
+            bool maxInclusive = true,
+            bool minInclusive = true,
+            bool equalsLength = true )
+        {
+            bool okTextLength = TextLength ( value, maxLength, minLength, maxInclusive, minInclusive );
+            bool okNumeric    = IsNumeric<ulong> ( value );
+            bool okEquals     = ( ! equalsLength || value.Length == maxLength );
+
+            return okTextLength && okNumeric && okEquals;
         }
 
         #endregion

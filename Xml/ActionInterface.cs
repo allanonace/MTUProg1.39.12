@@ -16,20 +16,20 @@ namespace Xml
         public InterfaceParameters[] getLogInterfaces()
         {
             List<InterfaceParameters> parameters = Parameters.FindAll(x => x.Log == true);
-            parameters.Sort(new Comparison<InterfaceParameters>((x, y) => x.Index - y.Index));
+            //parameters.Sort(new Comparison<InterfaceParameters>((x, y) => x.Index - y.Index));
             return parameters.ToArray();
         }
 
         public InterfaceParameters[] getUserInterfaces()
         {
             List<InterfaceParameters> parameters = Parameters.FindAll(x => x.Interface == true);
-            parameters.Sort(new Comparison<InterfaceParameters>((x, y) => x.Index - y.Index));
+            //parameters.Sort(new Comparison<InterfaceParameters>((x, y) => x.Index - y.Index));
             return parameters.ToArray();
         }
 
         public InterfaceParameters[] getAllInterfaces()
         {
-            Parameters.Sort(new Comparison<InterfaceParameters>((x, y) => x.Index - y.Index));
+            //Parameters.Sort(new Comparison<InterfaceParameters>((x, y) => x.Index - y.Index));
             return Parameters.ToArray();
         }
 

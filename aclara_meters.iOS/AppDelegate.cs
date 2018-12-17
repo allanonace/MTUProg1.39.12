@@ -8,7 +8,7 @@ using UIKit;
 using Xamarin.Forms;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Distribute;
-using Microsoft.Intune.MAM;
+//using Microsoft.Intune.MAM;
 
 namespace aclara_meters.iOS
 {
@@ -34,6 +34,7 @@ namespace aclara_meters.iOS
             Forms.Init();
             Distribute.DontCheckForUpdatesInDebug();
 
+            /*
             IntuneMAMPolicyManager value = IntuneMAMPolicyManager.Instance;
             NSDictionary dictionary =  value.DiagnosticInformation;
 
@@ -86,8 +87,9 @@ namespace aclara_meters.iOS
             try{
                 listaDatos.Add("ftp_host: " + ftp_host);
             }catch (Exception c1) { }
+            */
 
-
+            List<string> listaDatos = new List<string>();
 
             var AppVersion = NSBundle.MainBundle.InfoDictionary["CFBundleVersion"];
 

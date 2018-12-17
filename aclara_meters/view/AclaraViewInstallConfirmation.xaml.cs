@@ -207,7 +207,11 @@ namespace aclara_meters.view
 
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action add_mtu = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.MtuInstallationConfirmation, user: FormsApp.CredentialsService.UserName);
+            MTUComm.Action add_mtu = new MTUComm.Action(
+                config: FormsApp.config,
+                serial: FormsApp.ble_interface,
+                type: MTUComm.Action.ActionType.MtuInstallationConfirmation,
+                user: FormsApp.CredentialsService.UserName);
 
             //Define finish and error event handler
             //add_mtu.OnFinish += Add_mtu_OnFinish;
@@ -446,12 +450,13 @@ namespace aclara_meters.view
 
                 foreach (InterfaceParameters intparam in interfacesParams)
                 {
-                    if (intparam.Name.Equals("InstallationConfirmationStatus") && intparam.Value.Equals("NOT CONFIRMED"))
-
+                    if ( intparam.Name.Equals("InstallationConfirmationStatus") &&
+                         ! String.IsNullOrEmpty ( intparam.Value ) &&
+                         intparam.Value.Equals("NOT CONFIRMED"))
+                    {
                         enc = true;
-    
-                    
-
+                        break;
+                    }
                 }
                
                 if(enc)

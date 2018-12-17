@@ -104,6 +104,12 @@ namespace aclara_meters.view
                 } 
                 DeviceList.IsRefreshing = true;
 
+
+
+                // <<< LA BUSQUEDA SE HACE AQUI >>>
+
+
+
                 employees = new ObservableCollection<DeviceItem>();
 
                 await FormsApp.ble_interface.Scan();
@@ -120,7 +126,11 @@ namespace aclara_meters.view
             {
                 DeviceList.ItemsSource = employees;
             }
-           
+        }
+
+        public void FirstRefreshSearchPucs ()
+        {
+            DeviceList.RefreshCommand.Execute ( true );
         }
 
         private void LoadSideMenuElements()
@@ -384,7 +394,6 @@ namespace aclara_meters.view
             int timeout_connecting = 0;
             while (true)
             {
-                   
                 //if (!FormsApp.ble_interface.GetPairingStatusOk())
                 int status = FormsApp.ble_interface.GetConnectionStatus();
 
@@ -454,9 +463,7 @@ namespace aclara_meters.view
 
                             IsConnectedUIChange(false);
                         });
-
                     }
-
                 }
                 if (peripheralConnected == ble_library.BlePort.CONNECTING)
                 {
@@ -730,8 +737,9 @@ namespace aclara_meters.view
                                         }
                                     }
                                 }
-                            }catch (Exception er){
-                               
+                            }
+                            catch (Exception er)
+                            {
                                 Console.WriteLine(er.StackTrace); //2018-09-21 13:08:25.918 aclara_meters.iOS[505:190980] System.NullReferenceException: Object reference not set to an instance of an object
                             }
                         }
@@ -744,7 +752,10 @@ namespace aclara_meters.view
             });
         } 
 
-
+        protected override void OnAppearing ()
+        {
+            DeviceList.RefreshCommand.Execute ( true );
+        }
 
         private void LogOffOkTapped(object sender, EventArgs e)
         {
@@ -767,7 +778,6 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
-
 
         private void ReplaceMeterCancelTapped(object sender, EventArgs e)
         {
@@ -824,7 +834,11 @@ namespace aclara_meters.view
         private void TurnOffMethod()
         {
 
-            MTUComm.Action turnOffAction = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.TurnOffMtu, user: FormsApp.CredentialsService.UserName);
+            MTUComm.Action turnOffAction = new MTUComm.Action(
+                config: FormsApp.config,
+                serial: FormsApp.ble_interface,
+                type: MTUComm.Action.ActionType.TurnOffMtu,
+                user: FormsApp.CredentialsService.UserName);
 
             turnOffAction.OnFinish += ((s, args) =>
             {
@@ -864,7 +878,6 @@ namespace aclara_meters.view
            
         }
 
-
         void dialog_AddMTUAddMeter_cancelTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
@@ -888,8 +901,6 @@ namespace aclara_meters.view
             
            
         }
-
-
 
         void dialog_AddMTUReplaceMeter_cancelTapped(object sender, EventArgs e)
         {
@@ -916,10 +927,6 @@ namespace aclara_meters.view
           
         }
 
-
-
-
-
         void dialog_ReplaceMTUReplaceMeter_cancelTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
@@ -944,7 +951,6 @@ namespace aclara_meters.view
             
 
         }
-
 
         void dialog_AddMTU_cancelTapped(object sender, EventArgs e)
         {
@@ -972,7 +978,12 @@ namespace aclara_meters.view
 
         void BasicReadThread()
         {
-            MTUComm.Action basicRead = new MTUComm.Action(config: FormsApp.config, serial: FormsApp.ble_interface, actiontype: MTUComm.Action.ActionType.BasicRead, user: FormsApp.CredentialsService.UserName);
+            MTUComm.Action basicRead = new MTUComm.Action(
+                config: FormsApp.config,
+                serial: FormsApp.ble_interface,
+                type: MTUComm.Action.ActionType.BasicRead,
+                user: FormsApp.CredentialsService.UserName);
+
             basicRead.OnFinish += ((s, args) =>
             {
             });
@@ -1074,7 +1085,6 @@ namespace aclara_meters.view
 
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
-
         private void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
         {
             if (!FormsApp.ble_interface.IsOpen())
@@ -1536,7 +1546,6 @@ namespace aclara_meters.view
        
         private void OpenSettingsTapped(object sender, EventArgs e)
         {
-
             printer.Suspend();
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;

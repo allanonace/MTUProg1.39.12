@@ -1,19 +1,45 @@
-﻿using Lexi.Interfaces;
-using MTUComm.actions;
-using MTUComm.MemoryMap;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Lexi.Interfaces;
+using MTUComm.actions;
 using Xml;
 
 namespace MTUComm
 {
-
     public class Action
     {
+        #region Nested class
+
+        private class ConditionObjet
+        {
+            public String Condition { get; private set; }
+            public String Key       { get; private set; }
+            public String Value     { get; private set; }
+
+            public ConditionObjet ( string condition, string key, string value )
+            {
+                if ( ! condition.Equals ( "&" ) &&
+                     ! condition.Equals ( "|" ) )
+                     Condition = "|";
+                else Condition = condition;
+
+                Key   = key;
+                Value = value;
+            }
+        }
+
+        #endregion
+
+        #region Constants
+
+        private const string NET_IDS   = @"[@_a-zA-Z][_a-zA-Z0-9]+";
+        private const string REGEX_IFS = @"([&|]?)((" + NET_IDS + @"." + NET_IDS + @")=(" + NET_IDS + @"))";
+        //@"([&|]?)(([^&|=]+)=([^&|=#]*))"
+
         public enum ActionType
         {
             ReadMtu,
@@ -79,21 +105,9 @@ namespace MTUComm
             {ActionType.Diagnosis, "" }
         };
 
-        private ActionType mActionType;
-        private List<Parameter> mparameters = new List<Parameter>();
-        private Boolean canceled = false;
-        private String mUser;
+        #endregion
 
-        private Logger logger;
-        private Configuration configuration;
-
-        private List<Action> sub_actions = new List<Action>();
-
-        private int order = 0;
-
-
-        public MTUComm comm { get; private set; }
-
+        #region Events and Delegates
 
         public delegate void ActionProgresshHandler(object sender, ActionProgressArgs e);
         public event ActionProgresshHandler OnProgress;
@@ -101,42 +115,116 @@ namespace MTUComm
         public delegate void ActionFinishHandler(object sender, ActionFinishArgs e);
         public event ActionFinishHandler OnFinish;
 
-
         public delegate void ActionErrorHandler(object sender, ActionErrorArgs e);
         public event ActionErrorHandler OnError;
 
+        #endregion
 
-        public Action(Configuration config, ISerial serial, ActionType actiontype)
+        #region Args
+
+        public class ActionProgressArgs : EventArgs
         {
-            configuration = config;
-            logger = new Logger(config);
-            comm = new MTUComm(serial, config);
-            mActionType = actiontype;
-            mUser = null;
-            comm.OnError += Comm_OnError;
+            public int Step { get; private set; }
+            public int TotalSteps { get; private set; }
+            public string Message { get; private set; }
+
+            public ActionProgressArgs(int step, int totalsteps)
+            {
+                Step = step;
+                TotalSteps = totalsteps;
+                Message = "";
+            }
+
+            public ActionProgressArgs(int step, int totalsteps, string message)
+            {
+                Step = step;
+                TotalSteps = totalsteps;
+                Message = message;
+            }
         }
 
-        public Action(Configuration config, ISerial serial, ActionType actiontype, String user)
+        public class ActionFinishArgs : EventArgs
         {
-            configuration = config;
-            logger = new Logger(config);
-            comm = new MTUComm(serial, config);
-            mActionType = actiontype;
-            mUser = user;
-            comm.OnError += Comm_OnError;
+            public ActionResult Result { get; private set; }
+
+            public ActionFinishArgs(ActionResult result)
+            {
+                Result = result;
+            }
         }
 
-        public Action(Configuration config, ISerial serial, ActionType actiontype, String user, String outputfile)
+        public class ActionErrorArgs : EventArgs
+        {
+            public int Status { get; private set; }
+
+            public String Message { get; private set; }
+
+            public ActionErrorArgs(int status, String message)
+            {
+                Status = status;
+                Message = message;
+            }
+
+            public ActionErrorArgs(String message)
+            {
+                Status = -1;
+                Message = message;
+            }
+        }
+
+        #endregion
+
+        #region Attributes
+
+        public MTUComm comm { get; private set; }
+        private ActionType type;
+        private List<Parameter> mparameters = new List<Parameter>();
+        private Boolean canceled = false;
+        public  String user { get; private set; }
+        public  Logger logger;
+        private Configuration configuration;
+        private List<Action> sub_actions = new List<Action>();
+        public  int order = 0;
+        //public Func<object, object, object> OnFinish;
+
+        #endregion
+
+        #region Properties
+
+        public String DisplayText
+        {
+            get { return displays[this.type]; }
+        }
+
+        public String LogText
+        {
+            get { return tag_types[this.type]; }
+        }
+
+        public String Reason
+        {
+            get { return tag_reasons[this.type]; }
+        }
+
+        #endregion
+
+        #region Initialization
+
+        public Action(Configuration config, ISerial serial, ActionType type, String user = "", String outputfile = "")
         {
             configuration = config;
             logger = new Logger(config, System.IO.Path.GetFileName(outputfile));
             comm = new MTUComm(serial, config);
-            mActionType = actiontype;
-            mUser = user;
+            this.type = type;
+            this.user = user;
             comm.OnError += Comm_OnError;
         }
 
-        public void addParameter(Parameter parameter)
+        #endregion
+
+        #region Parameters
+
+        public void AddParameter (Parameter parameter)
         {
             mparameters.Add(parameter);
         }
@@ -148,34 +236,145 @@ namespace MTUComm
                 mparameters.Add (parameter);
         }
 
-        public void addActions(Action action)
-        {
-            sub_actions.Add(action);
-        }
-
-        public Parameter[] getParameters()
+        public Parameter[] GetParameters()
         {
             return mparameters.ToArray();
         }
 
-
-        public Parameter getParameterByTag(string tag)
+        public Parameter GetParameterByTag(string tag, int port = -1)
         {
-            return mparameters.Find(x => x.getLogTag().Equals(tag));
+            return mparameters.Find(x => x.getLogTag().Equals(tag) && ( port == -1 || x.Port == port ) );
         }
 
-        public Parameter getParameterByTagAndPort(string tag, int port)
+        #endregion
+
+        #region Actions
+
+        public void AddActions(Action action)
         {
-            return mparameters.Find(x => (x.getLogTag().Equals(tag) && x.Port == port));
+            sub_actions.Add(action);
         }
 
-
-        public Action[] getSubActions()
+        public Action[] GetSubActions()
         {
             return sub_actions.ToArray();
-        } 
+        }
 
-        public void Run ( MtuForm mtuForm = null )
+        #endregion
+
+        #region Validation
+
+        private bool ValidateCondition ( string condition, dynamic map, Mtu mtu, String port = "", dynamic actionParams = null )
+        {
+            if ( condition == null )
+                return true;
+
+            try
+            {
+                List<ConditionObjet> conditions = new List<ConditionObjet> ();
+
+                MatchCollection matches = Regex.Matches ( condition, REGEX_IFS, RegexOptions.Compiled );
+                foreach ( Match m in matches.Cast<Match> ().ToList () )
+                    conditions.Add (
+                        new ConditionObjet (
+                            Uri.UnescapeDataString ( m.Groups[ 1 ].Value ),     // & or |
+                            Uri.UnescapeDataString ( m.Groups[ 3 ].Value ),     // Class.Property
+                            Uri.UnescapeDataString ( m.Groups[ 4 ].Value ) ) ); // Value
+
+                int finalResult = 0;
+
+                foreach ( ConditionObjet item in conditions )
+                {
+                    string value  = string.Empty;
+                    int    result = 0;
+
+                    string[] member   = item.Key.Split ( new char[]{ '.' } ); // Class.Property
+                    string   property = member[ 1 ];
+
+                    switch ( member[ 0 ] )
+                    {
+                        case "Port":
+                            // P1 or P2
+                            value = port;
+                            break;
+                        case "Action":
+                            // User, Date or Type
+                            value = GetProperty ( property );
+                            break;
+                        case "MeterType":
+                            break;
+                        case "MtuType":
+                            // Reflection over Mtu class
+                            value = mtu.GetProperty ( property );
+                            break;
+                        case "MemoryMap":
+                            // Recover register from MTU memory map
+                            // Some registers have port sufix but other not
+                            if ( string.IsNullOrEmpty ( port ) &&
+                                 map.ContainsMember ( port + property ) )
+                                value = map.GetProperty ( port + property ).Value.ToString ();
+                            // Try to recover register without port prefix
+                            else if ( map.ContainsMember ( property ) )
+                                value = map.GetProperty ( property ).Value.ToString ();
+                            break;
+                        case "ActionParams":
+                            value = actionParams.GetType().GetProperty ( member[ 0 ] )
+                                .GetValue ( actionParams, null ).ToString();
+                            break;
+                    }
+
+                    // Compare property value with condition value
+                    if ( ! string.IsNullOrEmpty ( value ) &&
+                         value.ToLower ().Equals ( item.Value.ToLower () ))
+                        result = 1;
+
+                    // Concatenate conditions results
+                    // If one validate, pass
+                    if ( item.Condition.Equals ( "|" ) )
+                        finalResult = finalResult + result;
+                    // All conditions have to validate
+                    else if ( item.Condition.Equals ( "&" ) )
+                        finalResult = finalResult * result;
+                }
+
+                return ( finalResult > 0 );
+            }
+            catch ( Exception e )
+            {
+                Console.WriteLine ( e.Message + "\r\n" + e.StackTrace );
+            }
+
+            return true;
+        }
+
+        #endregion
+
+        #region Gets
+
+        public String GetProperty(string name)
+        {
+            switch (name)
+            {
+                case "User": return user;
+                case "Date": return DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss");
+                case "Type": return type.ToString();
+                default    : return "";
+            }
+        }
+
+        public String GetResultXML(ActionResult result)
+        {
+            if (type == ActionType.AddMtu)
+                return comm.GetResultXML();
+            else
+                return logger.logReadResultString(this, result);
+        }
+
+        #endregion
+
+        #region Execution
+
+        public void Run(MtuForm mtuForm = null)
         {
             if (canceled)
             {
@@ -183,9 +382,9 @@ namespace MTUComm
             }
             else
             {
-                List<object> parameters = new List<object> ();
+                List<object> parameters = new List<object>();
 
-                switch ( mActionType )
+                switch (type)
                 {
                     case ActionType.ReadMtu:
                         comm.OnReadMtu += Comm_OnReadMtu;
@@ -193,7 +392,10 @@ namespace MTUComm
 
                     case ActionType.AddMtu:
                         comm.OnAddMtu += Comm_OnAddMtu;
-                        parameters.AddRange ( new object[] { ( AddMtuForm )mtuForm, this.getUser() } );
+                        // Interactive and Scripting
+                        if (mtuForm != null)
+                             parameters.AddRange(new object[] { (AddMtuForm)mtuForm, this.user });
+                        else parameters.Add(this);
                         break;
 
                     case ActionType.TurnOffMtu:
@@ -205,25 +407,25 @@ namespace MTUComm
                         break;
 
                     case ActionType.MtuInstallationConfirmation:
-                        comm.OnReadMtu  += Comm_OnReadMtu;
+                        comm.OnReadMtu += Comm_OnReadMtu;
                         comm.OnProgress += Comm_OnProgress;
                         break;
 
                     case ActionType.ReadData:
-                        Parameter param = mparameters.Find ( x => ( x.Type == Parameter.ParameterType.DaysOfRead ) );
-                        if ( param == null )
+                        Parameter param = mparameters.Find(x => (x.Type == Parameter.ParameterType.DaysOfRead));
+                        if (param == null)
                         {
-                            OnError ( this, new ActionErrorArgs("Days Of Read parameter Not Defined or Invalid" ) );
+                            OnError(this, new ActionErrorArgs("Days Of Read parameter Not Defined or Invalid"));
                             break;
                         }
                         int DaysOfRead = 0;
-                        if ( ! Int32.TryParse ( param.Value, out DaysOfRead ) || DaysOfRead <= 0 )
+                        if (!Int32.TryParse(param.Value, out DaysOfRead) || DaysOfRead <= 0)
                         {
-                            OnError ( this, new ActionErrorArgs("Days Of Read parameter Invalid" ) );
+                            OnError(this, new ActionErrorArgs("Days Of Read parameter Invalid"));
                             break;
                         }
                         comm.OnReadMtuData += Comm_OnReadMtuData;
-                        parameters.Add ( DaysOfRead );
+                        parameters.Add(DaysOfRead);
                         break;
 
                     case ActionType.BasicRead:
@@ -231,20 +433,28 @@ namespace MTUComm
                         break;
 
                     default:
-                        ActionRunSimulator ();
+                        ActionRunSimulator();
                         break;
                 }
 
                 // Is more easy to control one point of invokation
                 // than N, one for each action/new task to launch
-                comm.LaunchActionThread ( mActionType, parameters.ToArray () );
+                comm.LaunchActionThread(type, parameters.ToArray());
             }
         }
 
+        public void Cancel(string cancelReason = "410 DR Defective Register")
+        {
+            canceled = true;
+            logger.logCancel(this, "User Cancelled", cancelReason);
+        }
+
+        #endregion
+
+        #region OnEvents
+
         private void Comm_OnProgress(object sender, MTUComm.ProgressArgs e)
         {
-
-            
             try
             {
                 OnProgress(this, new ActionProgressArgs(e.Step, e.TotalSteps, e.Message));
@@ -253,7 +463,6 @@ namespace MTUComm
             {
 
             }
-            
         }
 
         private void Comm_OnError(object sender, MTUComm.ErrorArgs e)
@@ -267,137 +476,94 @@ namespace MTUComm
             {
 
             }
-            
         }
 
-        public int Order
+        private void Comm_OnReadMtuData(object sender, MTUComm.ReadMtuDataArgs e)
         {
-            get
+            ActionProgressArgs args;
+            switch (e.Status)
             {
-                return this.order;
-            }
-
-            set
-            {
-                this.order = value;
+                case LogQueryResult.LogDataType.Bussy:
+                    args = new ActionProgressArgs(0, 0);
+                    OnProgress(this, args);
+                    break;
+                case LogQueryResult.LogDataType.NewPacket:
+                    args = new ActionProgressArgs(e.CurrentEntry, e.TotalEntries);
+                    OnProgress(this, args);
+                    break;
+                case LogQueryResult.LogDataType.LastPacket:
+                    Mtu mtu_type = configuration.GetMtuTypeById((int)e.MtuType.Type);
+                    ActionResult result = ReadMTUData(e.Start, e.End, e.Entries, e.MtuType, mtu_type);
+                    logger.logReadDataResult(this, result, mtu_type);
+                    ActionFinishArgs f_args = new ActionFinishArgs(null);
+                    OnFinish(this, f_args);
+                    break;
             }
         }
 
-        private bool validateCondition(string condition, dynamic registers, Mtu mtutype)
+        private void Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
         {
-            return validateCondition(condition, registers, mtutype, "");
+            ActionResult result = CreateActionResultUsingInterface ( e.MemoryMap, e.MtuType );
+            logger.logReadResult ( this, result, e.MtuType );
+            ActionFinishArgs args = new ActionFinishArgs ( result );
+
+            OnFinish ( this, args );
         }
 
-        private bool validateCondition(string condition, dynamic registers, Mtu mtutype, String port)
+        private void Comm_OnTurnOffMtu ( object sender, MTUComm.TurnOffMtuArgs e )
         {
-            if(condition == null)
-            {
-                return true;
-            }
+            //Mtu mtu = this.configuration.GetMtuTypeById ( 138 ); // ( int )e.MtuId );
 
-            try
-            {
-                MatchCollection matches = Regex.Matches(condition, @"([&|]?)(([^&|=]+)=([^&|=#]*))", RegexOptions.Compiled);
-                
-                List < ConditionObjet > conditions = new List<ConditionObjet>();
+            //ActionResult result = CreateActionResultUsingInterface ( null, mtu, null, e, "TurnOff" );
 
-                foreach(Match m in matches.Cast<Match>().ToList())
-                {
-                    conditions.Add(new ConditionObjet(Uri.UnescapeDataString(m.Groups[1].Value), Uri.UnescapeDataString(m.Groups[3].Value), Uri.UnescapeDataString(m.Groups[4].Value)));
-                }
+            ActionResult result = getBasciInfoResult();
+            logger.logTurnOffResult ( this, e.MtuId );
+            ActionFinishArgs args = new ActionFinishArgs ( result );
 
-                int condition_final_result = 0;
-
-                foreach (ConditionObjet item in conditions)
-                {
-                    string condition_value = "";
-                    int condition_result = 0;
-
-                    switch (item.Key.Split(new char[] { '.' })[0])
-                    {
-                        case "Port":
-                            try
-                            {
-                                condition_value = port;
-                            }
-                            catch (Exception e) { }
-                            break;
-                        case "Action":
-                            try
-                            {
-                                string action_property_name = item.Key.Split(new char[] { '.' })[1];
-                                condition_value = GetProperty(action_property_name);
-                            }
-                            catch (Exception e) { }
-                            break;
-                        case "MeterType":
-                            break;
-                        case "MtuType":
-                            try
-                            {
-                                string mtu_property_name = item.Key.Split(new char[] { '.' })[1];
-                                condition_value = mtutype.GetProperty(mtu_property_name);
-                            }
-                            catch (Exception e) { }
-                            break;
-                        default:
-                            try
-                            {
-                                string memory_property_name = item.Key.Split(new char[] { '.' })[1];
-                                condition_value = registers.GetProperty(port+memory_property_name).Value.ToString();
-                            }
-                            catch (Exception e) { }
-                            break;
-
-                    }
-
-                    if (condition_value.Length > 0 && !condition_value.ToLower().Equals(item.Value.ToLower()))
-                    { 
-                        condition_result = 0;
-                    }
-                    else
-                    {
-                        condition_result = 1;
-                    }
-
-                    if (item.Condition.Equals("|"))
-                    {
-                        condition_final_result = condition_final_result + condition_result;
-                    }
-
-                    if (item.Condition.Equals("&"))
-                    {
-                        condition_final_result = condition_final_result * condition_result;
-                    }
-
-
-                }
-
-                if(condition_final_result > 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch (Exception e) {
-                Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
-            };
-
-            return true;
+            OnFinish ( this, args );
         }
 
+        private void Comm_OnTurnOnMtu(object sender, MTUComm.TurnOnMtuArgs e)
+        {
+            ActionResult result = getBasciInfoResult();
+            logger.logTurnOnResult(this, e.MtuId);
+            ActionFinishArgs args = new ActionFinishArgs(result); // TODO: add turn on result
 
-        private ActionResult ReadPort(int portnumber, InterfaceParameters[] parameters, dynamic registers, Mtu mtutype)
+            OnFinish(this, args);
+        }
+
+        private ActionResult Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)
+        {
+            ActionResult result = CreateActionResultUsingInterface(e.MemoryMap, e.MtuType, e.Form );
+            ActionFinishArgs args = new ActionFinishArgs(result);
+
+            e.AddMtuLog.LogReadMtu(result);
+
+            // Generate xml log file and save on device
+            e.AddMtuLog.Save ();
+
+            OnFinish(this, args);
+            return result;
+        }
+
+        private void Comm_OnBasicRead(object sender, MTUComm.BasicReadArgs e)
+        {
+            ActionResult result = new ActionResult();
+            ActionFinishArgs args = new ActionFinishArgs(result);
+            OnFinish(this, args);
+        }
+
+        #endregion
+
+        #region Reads
+
+        private ActionResult ReadPort ( int portnumber, InterfaceParameters[] parameters, dynamic map, Mtu mtu )
         {
             ActionResult result = new ActionResult();
 
-            Port PortType = mtutype.Ports[portnumber];
-           
+            Port PortType = mtu.Ports[portnumber];
 
-            int meterid = registers.GetProperty("P" + (portnumber + 1) + "MeterType").Value;
+            int meterid = map.GetProperty("P" + (portnumber + 1) + "MeterType").Value;
 
             if (meterid != 0)
             {
@@ -411,22 +577,22 @@ namespace MTUComm
                 {
                     if (parameter.Name.Equals("MeterReading"))
                     {
-                        if (validateCondition(parameter.Conditional, registers, mtutype, "P" + (portnumber + 1)))
+                        if (ValidateCondition(parameter.Conditional, map, mtu, "P" + (portnumber + 1)))
                         {
-                            string meter_reading_error = registers.GetProperty("P" + (portnumber + 1) + "ReadingError").Value.ToString();
+                            string meter_reading_error = map.GetProperty("P" + (portnumber + 1) + "ReadingError").Value.ToString();
                             if (meter_reading_error.Length < 1)
                             {
                                 ulong meter_reading = 0;
                                 try
                                 {
-                                    meter_reading = registers.GetProperty("P" + (portnumber + 1) + "Reading").Value;
+                                    meter_reading = map.GetProperty("P" + (portnumber + 1) + "Reading").Value;
                                 }
                                 catch (Exception e) { }
 
                                 ulong tempReadingVal = 0;
-                                if (mtutype.PulseCountOnly)
+                                if (mtu.PulseCountOnly)
                                 {
-                                    tempReadingVal = meter_reading *  (ulong)Metertype.HiResScaling;
+                                    tempReadingVal = meter_reading * (ulong)Metertype.HiResScaling;
                                 }
                                 else
                                 {
@@ -469,7 +635,7 @@ namespace MTUComm
                     {
                         try
                         {
-                            if (validateCondition(parameter.Conditional, registers, mtutype, "P" + (portnumber + 1)))
+                            if (ValidateCondition(parameter.Conditional, map, mtu, "P" + (portnumber + 1)))
                             {
                                 if (parameter.Source == null)
                                 {
@@ -478,8 +644,8 @@ namespace MTUComm
                                 string val = null;
                                 string property_type = "";
                                 string property_name = "";
-                                
-                                if(parameter.Source.Contains(".") && parameter.Source.Length >= 3)
+
+                                if (parameter.Source.Contains(".") && parameter.Source.Length >= 3)
                                 {
                                     property_type = parameter.Source.Split(new char[] { '.' })[0];
                                     property_name = parameter.Source.Split(new char[] { '.' })[1];
@@ -496,14 +662,14 @@ namespace MTUComm
                                         val = Metertype.GetProperty(property_name);
                                         break;
                                     case "MtuType":
-                                        val = mtutype.GetProperty(property_name);
+                                        val = mtu.GetProperty(property_name);
                                         break;
                                     case "MemoryMap":
-                                        val = registers.GetProperty("P" + (portnumber + 1) + property_name).Value.ToString();
+                                        val = map.GetProperty("P" + (portnumber + 1) + property_name).Value.ToString();
                                         name = property_name;
                                         break;
                                     default:
-                                        val = registers.GetProperty("P" + (portnumber + 1) + parameter.Name).Value.ToString();
+                                        val = map.GetProperty("P" + (portnumber + 1) + parameter.Name).Value.ToString();
                                         break;
 
                                 }
@@ -535,30 +701,30 @@ namespace MTUComm
             return result;
         }
 
-        private ActionResult ReadMTUData(DateTime start, DateTime end, List<LogDataEntry> Entries, MTUBasicInfo mtuInfo, Mtu mtutype)
+        private ActionResult ReadMTUData ( DateTime start, DateTime end, List<LogDataEntry> Entries, MTUBasicInfo mtuInfo, Mtu mtu )
         {
             ActionResult result = new ActionResult();
 
-            string log_path = logger.logReadDataResultEntries(mtuInfo.Id.ToString("d15"), start, end , Entries);
+            string log_path = logger.logReadDataResultEntries(mtuInfo.Id.ToString("d15"), start, end, Entries);
 
-            InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtutype.Id, "DataRead");
+            InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtu.Id, "DataRead");
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name.Equals("Port"))
                 {
-                    for (int i = 0; i < mtutype.Ports.Count; i++)
+                    for (int i = 0; i < mtu.Ports.Count; i++)
                     {
                         foreach (InterfaceParameters port_parameter in parameter.Parameters)
                         {
-                            if(port_parameter.Source != null && port_parameter.Source.StartsWith("ActionParams"))
+                            if (port_parameter.Source != null && port_parameter.Source.StartsWith("ActionParams"))
                             {
-                                Parameter sel_parameter = getParameterByTagAndPort(port_parameter.Name, i + 1);
-                                if(sel_parameter != null)
+                                Parameter sel_parameter = GetParameterByTag(port_parameter.Name, i + 1);
+                                if (sel_parameter != null)
                                 {
                                     result.AddParameter(new Parameter(port_parameter.Name, port_parameter.Display, sel_parameter.Value));
                                 }
                             }
-                            
+
                         }
 
 
@@ -571,7 +737,7 @@ namespace MTUComm
 
                         if (parameter.Source != null && parameter.Source.StartsWith("ActionParams"))
                         {
-                            Parameter sel_parameter = getParameterByTag(parameter.Name);
+                            Parameter sel_parameter = GetParameterByTag(parameter.Name);
                             if (sel_parameter != null)
                             {
                                 result.AddParameter(new Parameter(parameter.Name, parameter.Display, sel_parameter.Value));
@@ -587,69 +753,84 @@ namespace MTUComm
             }
 
             result.AddParameter(new Parameter("ReadRequest", "Number Read Request Days", ""));
-            result.AddParameter(new Parameter("ReadResult", "Read Result", "Number of Reads "+ Entries.Count.ToString()+ " for Selected Period From "+start.ToString("dd/MM/yyyy") + " 0:00:00 Till "+ end.ToString("dd/MM/yyyy") + " 23:59:59"));
+            result.AddParameter(new Parameter("ReadResult", "Read Result", "Number of Reads " + Entries.Count.ToString() + " for Selected Period From " + start.ToString("dd/MM/yyyy") + " 0:00:00 Till " + end.ToString("dd/MM/yyyy") + " 23:59:59"));
             result.AddParameter(new Parameter("ReadResultFile", "Read Result File", log_path));
 
             return result;
         }
 
-        public ActionResult ReadMTU(dynamic registers, Mtu mtutype)
+        private ActionResult CreateActionResultUsingInterface (
+            dynamic map = null,
+            Mtu mtutype = null,
+            MtuForm form = null,
+            dynamic actionParams = null,
+            string actionType = "ReadMTU" )
         {
-            InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtutype.Id, "ReadMTU");
+            InterfaceParameters[] parameters = configuration.getAllInterfaceFields ( mtutype.Id, actionType );
 
-            ActionResult result = new ActionResult();
-            foreach (InterfaceParameters parameter in parameters)
+            ActionResult result = new ActionResult ();
+            foreach ( InterfaceParameters parameter in parameters )
             {
-                if (parameter.Name.Equals("Port"))
-                {
-                    for (int i = 0; i < mtutype.Ports.Count; i++)
-                    {
-
-                        result.addPort(ReadPort(i, parameter.Parameters.ToArray(), registers, mtutype));
-                    }
-                }
+                if ( parameter.Name.Equals ( "Port" ) )
+                    for ( int i = 0; i < mtutype.Ports.Count; i++ )
+                        result.addPort ( ReadPort ( i, parameter.Parameters.ToArray (), map, mtutype ) );
                 else
                 {
                     try
                     {
-                        if (validateCondition(parameter.Conditional, registers, mtutype))
+                        if ( ValidateCondition ( parameter.Conditional, map, mtutype, "", actionParams ) )
                         {
-                            if (parameter.Source == null)
+                            //if ( parameter.Source == null )
+                            //    parameter.Source = "";
+
+                            string sourceWhere    = string.Empty;
+                            string sourceProperty = string.Empty;
+
+                            if ( ! string.IsNullOrEmpty ( parameter.Source ) )
                             {
-                                parameter.Source = "";
+                                string[] sources = parameter.Source.Split(new char[] { '.' });
+                                sourceWhere      = sources[ 0 ];
+                                sourceProperty   = sources[ 1 ];
                             }
 
-                            switch (parameter.Source.Split(new char[] { '.' })[0])
+                            Parameter paramToAdd = null;
+                            switch ( sourceWhere )
                             {
                                 case "Action":
-                                    string action_property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                    string action_property_value = GetProperty(action_property_name);
-                                    if (action_property_value != null)
-                                    {
-                                        result.AddParameter(new Parameter(parameter.Name, parameter.Display, action_property_value));
-                                    }
+                                    string action_property_value = GetProperty ( sourceProperty );
+                                    if ( action_property_value != null )
+                                        paramToAdd = new Parameter ( parameter.Name, parameter.Display, action_property_value );
                                     break;
                                 case "MeterType":
                                     break;
                                 case "MtuType":
-                                    string mtu_property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                    result.AddParameter(new Parameter(parameter.Name, parameter.Display, mtutype.GetProperty(mtu_property_name)));
+                                    paramToAdd = new Parameter ( parameter.Name, parameter.Display, mtutype.GetProperty( sourceProperty ));
                                     break;
                                 case "MemoryMap":
-                                    string memory_alt_property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                    result.AddParameter(new Parameter(memory_alt_property_name, parameter.Display, registers.GetProperty(memory_alt_property_name).Value.ToString()));
+                                    paramToAdd = new Parameter ( sourceProperty, parameter.Display, map.GetProperty( sourceProperty ).Value.ToString());
                                     break;
+                                case "Form":
+                                    if ( form.ContainsParameter ( sourceProperty ) )
+                                        paramToAdd = form.GetParameter ( sourceProperty );
+                                    break;
+                                case "ActionParams":
+                                    paramToAdd = new Parameter ( parameter.Name, parameter.Display,
+                                                                 actionParams.GetType().GetProperty ( sourceProperty )
+                                                                    .GetValue ( actionParams, null ).ToString() );
+                            break;
                                 default:
-                                    result.AddParameter(new Parameter(parameter.Name, parameter.Display, registers.GetProperty(parameter.Name).Value.ToString()));
-                                break;
-
+                                    paramToAdd = new Parameter ( parameter.Name, parameter.Display, map.GetProperty(parameter.Name).Value.ToString() );
+                                    break;
                             }
 
+                            if ( paramToAdd != null )
+                                result.AddParameter ( paramToAdd );
                         }
-                
+
                     }
-                    catch (Exception e) {
-                        Console.WriteLine(e.Message+"\r\n"+e.StackTrace);
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
                     }
                 }
 
@@ -657,213 +838,23 @@ namespace MTUComm
             return result;
         }
 
-        private void Comm_OnReadMtuData(object sender, MTUComm.ReadMtuDataArgs e)
-        {
-            ActionProgressArgs args;
-            switch (e.Status)
-            {
-                case LogQueryResult.LogDataType.Bussy:
-                    args = new ActionProgressArgs(0,0);
-                    OnProgress(this, args);
-                    break;
-                case LogQueryResult.LogDataType.NewPacket:
-                    args = new ActionProgressArgs(e.CurrentEntry, e.TotalEntries);
-                    OnProgress(this, args);
-                    break;
-                case LogQueryResult.LogDataType.LastPacket:
-                    Mtu mtu_type = configuration.GetMtuTypeById((int)e.MtuType.Type);
-                    ActionResult result = ReadMTUData(e.Start, e.End, e.Entries, e.MtuType, mtu_type);
-                    logger.logReadDataResult(this, result, mtu_type);
-                    ActionFinishArgs f_args = new ActionFinishArgs(null);
-                    OnFinish(this, f_args);
-                    break;
-            }
-        }
-
-
-        private void Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
-        {
-            ActionResult result = ReadMTU(e.MemoryMap, e.MtuType);
-            logger.logReadResult(this, result, e.MtuType);
-            ActionFinishArgs args = new ActionFinishArgs(result);
-            OnFinish(this, args);
-        }
-
-        private void Comm_OnTurnOffMtu(object sender, MTUComm.TurnOffMtuArgs e)
-        {
-            logger.logTurnOffResult(this, e.MtuId);
-            ActionFinishArgs args = new ActionFinishArgs(null); // TODO: add turn off result
-            OnFinish(this, args);
-        }
-
-        private void Comm_OnTurnOnMtu(object sender, MTUComm.TurnOnMtuArgs e)
-        {
-            logger.logTurnOnResult(this, e.MtuId);
-            ActionFinishArgs args = new ActionFinishArgs(null); // TODO: add turn on result
-            OnFinish(this, args);
-        }
-
-        public String GetProperty(string name)
-        {
-            switch (name)
-            {
-                case "User":
-                    return mUser;
-                case "Date":
-                    return DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss");
-                default:
-                    return "";
-            }
-            return "";
-        }
-
-        private ActionResult Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)
-        {
-            ActionResult result = ReadMTU(e.MemoryMap, e.MtuType);
-            ActionFinishArgs args = new ActionFinishArgs(result);
-            OnFinish(this, args);
-            return result;
-        }
-
-        private void Comm_OnBasicRead(object sender, MTUComm.BasicReadArgs e)
+        private ActionResult getBasciInfoResult()
         {
             ActionResult result = new ActionResult();
-            ActionFinishArgs args = new ActionFinishArgs(result);
-            OnFinish(this, args);
-        }
 
-        public String getUser()
-        {
-            return mUser;
-        }
+            MTUBasicInfo basic = comm.GetBasicInfo ();
 
-        public void Cancel(string cancelReason="410 DR Defective Register")
-        {
-            canceled = true;
-            logger.logCancel(this, "User Cancelled", cancelReason);
-
-        }
-
-        public String getDisplay()
-        {
-            return displays[mActionType];
-        }
-
-        public String getLogType()
-        {
-            return tag_types[mActionType];
-        }
-
-        public String getReason()
-        {
-            return tag_reasons[mActionType];
-        }
-
-        public ActionType GetActionType
-        {
-            get
-            {
-                return mActionType;
-            }
-        }
-
-        public String getResultXML(ActionResult result)
-        {
-            return logger.logReadResultString(this, result);
-
-        }
-        
-        //
-
-        public class ActionProgressArgs : EventArgs
-        {
-            public int Step { get; private set; }
-            public int TotalSteps { get; private set; }
-            public string Message { get; private set; }
-
-            public ActionProgressArgs(int step, int totalsteps)
-            {
-                Step = step;
-                TotalSteps = totalsteps;
-                Message = "";
-            }
-
-            public ActionProgressArgs(int step, int totalsteps, string message)
-            {
-                Step = step;
-                TotalSteps = totalsteps;
-                Message = message;
-            }
-        }
-
-        public class ActionFinishArgs : EventArgs
-        {
-            public ActionResult Result { get; private set; }
-
-            public ActionFinishArgs(ActionResult result)
-            {
-                Result = result;
-            }
-        }
-
-        //
-        public class ActionErrorArgs : EventArgs
-        {
-            public int Status { get; private set; }
-
-            public String Message { get; private set; }
-
-            public ActionErrorArgs(int status, String message)
-            {
-                Status = status;
-                Message = message;
-            }
-
-            public ActionErrorArgs(String message)
-            {
-                Status = -1;
-                Message = message;
-            }
-        }
-
-        private class ConditionObjet
-        {
-            public String Condition { get; private set; }
-            public String Key { get; private set; }
-            public String Value { get; private set; }
-
-            public ConditionObjet(string condition, string key, string value)
-            {
-                if(!condition.Equals("&") && !condition.Equals("|"))
-                {
-                    Condition = "|";
-                }
-                else
-                {
-                    Condition = condition;
-                }
-
-                Key = key;
-                Value = value;
-            }
-        }
-
-
-        private void successAction()
-        {
-            logger.logAction(this);
-            ActionFinishArgs args = new ActionFinishArgs(new ActionResult());
-            OnFinish(this, args);
-        }
-
-        private void errorAction()
-        {
             
-            ActionErrorArgs args = new ActionErrorArgs(240, "No valid meter types were found for MTU type 152");
-
-            logger.LogError(args.Status, args.Message);
-            OnError(this, args);
+            result.AddParameter(new Parameter("Date", "Date/Time", GetProperty("Date")));
+            result.AddParameter(new Parameter("User", "User", GetProperty("User")));
+            result.AddParameter(new Parameter("MtuId", "MTU ID", basic.Id));
+    
+            return result;
         }
+
+        #endregion
+
+        #region Simulator
 
         //MOK FUNCTIONS FOR DEV
         //Simulates Rando Success/Fail writin on MTU
@@ -874,10 +865,27 @@ namespace MTUComm
                 Thread.Sleep(random.Next(4000, 5500));
             });
             if (task.Wait(TimeSpan.FromSeconds(5)))
-                successAction();
+                SuccessAction();
             else
-                errorAction();
+                ErrorAction();
         }
 
+        private void SuccessAction()
+        {
+            logger.logAction(this);
+            ActionFinishArgs args = new ActionFinishArgs(new ActionResult());
+            OnFinish(this, args);
+        }
+
+        private void ErrorAction()
+        {
+
+            ActionErrorArgs args = new ActionErrorArgs(240, "No valid meter types were found for MTU type 152");
+
+            logger.LogError(args.Status, args.Message);
+            OnError(this, args);
+        }
+
+        #endregion
     }
 }

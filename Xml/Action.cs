@@ -80,8 +80,5 @@ namespace Xml
 
         [XmlElement("NewMeterReading")]
         public ActionParameter NewMeterReading { get; set; }
-
-
-
     }
 }

@@ -84,7 +84,7 @@ namespace MTUComm.actions
 
         #region Initialization
 
-        public MtuForm(Mtu mtu)
+        public MtuForm ( Mtu mtu )
         {
             this.mtu = mtu;
             this.dictionary = new Dictionary<string, Parameter>();
@@ -114,7 +114,12 @@ namespace MTUComm.actions
                 return true;
             }
 
-            throw new Exception();
+            // IF PARAMETER NOT EXIST FOR THE MOMENT RETURN EMPTY/NEW PARAMETER
+            // AND SET VALUE TO EMPTY STRING
+            result = new Parameter ();
+            return true;
+
+            //throw new Exception();
         }
 
         public static void SetBasicInfo(MTUBasicInfo mtuBasicInfo)
@@ -130,6 +135,11 @@ namespace MTUComm.actions
         {
             this.dictionary[paramId] =
                 new Parameter(customParameter, customDisplay, value);
+        }
+
+        public void AddParameter ( Parameter parameter )
+        {
+            this.dictionary[ parameter.Type.ToString () ] = parameter;
         }
 
         public Parameter FindParameterById(string paramId)
@@ -148,6 +158,11 @@ namespace MTUComm.actions
                 return this.dictionary[paramId];
             
             throw new Exception();
+        }
+
+        public bool ContainsParameter ( string paramId )
+        {
+            return this.dictionary.ContainsKey ( paramId );
         }
 
         #endregion

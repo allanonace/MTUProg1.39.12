@@ -82,14 +82,14 @@ namespace MTUComm.MemoryMap
         protected void AddProperty ( dynamic register )
         {
             if ( ! this.dictionary.ContainsKey ( register.id ) )
-                this.dictionary[ register.id ] = register;
+                this.dictionary.Add ( register.id, register );
         }
 
         // Add dynamic member of type Func<> or Action<>
         protected void AddMethod ( string id, dynamic method )
         {
             if ( ! this.dictionary.ContainsKey ( id ) )
-                this.dictionary[id] = method;
+                this.dictionary.Add ( id, method );
         }
 
         // Ask if a dynamic member exists in the object
