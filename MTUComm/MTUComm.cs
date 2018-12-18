@@ -575,6 +575,17 @@ namespace MTUComm
             foreach ( Parameter parameter in addMtuAction.GetParameters () )
                 form.AddParameterTranslatingAclaraXml ( parameter );
 
+            /*
+             *  public List<Meter> FindByDialDescription(int NumberOfDials, int DriveDialSize, int UnitOfMeasure) to get meterId if 
+             *      
+             *      <NumberOfDials Port="1">4</NumberOfDials>
+             *      <DriveDialSize Port="1">2</DriveDialSize>
+             *      <UnitOfMeasure Port="1">CCF</UnitOfMeasure>
+             * 
+
+
+             * */
+
             this.Task_AddMtu ( form, addMtuAction.user, true );
         }
 

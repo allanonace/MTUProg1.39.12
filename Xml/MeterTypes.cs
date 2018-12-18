@@ -42,12 +42,13 @@ namespace Xml
             return meters;
         }
 
-        public List<Meter> FindByDialDescription(int NumberOfDials, int DriveDialSize, int UnitOfMeasure)
+        public List<Meter> FindByDialDescription(int NumberOfDials, int DriveDialSize, int UnitOfMeasure, int flow)
         {
             List<Meter> meters = Meters.FindAll(x => (
                 x.NumberOfDials.Equals(NumberOfDials.ToString()) &&
                 x.DriveDialSize.Equals(DriveDialSize.ToString()) &&
-                x.UnitOfMeasure.Equals(UnitOfMeasure.ToString())
+                x.UnitOfMeasure.Equals(UnitOfMeasure.ToString()) &&
+                x.Flow == flow
                 ));
             if (meters == null)
             {
