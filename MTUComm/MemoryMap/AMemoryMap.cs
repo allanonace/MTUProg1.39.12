@@ -93,7 +93,7 @@ namespace MTUComm.MemoryMap
         }
 
         // Ask if a dynamic member exists in the object
-        protected bool ContainsMember ( string id )
+        public bool ContainsMember ( string id )
         {
             return this.dictionary.ContainsKey ( id );
         }

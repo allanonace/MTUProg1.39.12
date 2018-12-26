@@ -64,7 +64,7 @@ namespace MTUComm
             mtu_type = buffer[0];
 
             byte[] id_stream = new byte[4];
-            Array.Copy(buffer, buffer.Length- 4, id_stream, 0, 4);
+            Array.Copy ( buffer, 6, id_stream, 0, 4 );
 
             mtu_id = BitConverter.ToUInt32(id_stream, 0);
 
@@ -73,11 +73,10 @@ namespace MTUComm
             shipbit &= mask;
 
             p1enabled = buffer[28];
-            shipbit &= 1;
+            p1enabled &= 1;
 
             p2enabled = buffer[28];
-            shipbit &= 2;
-
+            p2enabled &= 2;
         }
 
         public bool P1Enabled

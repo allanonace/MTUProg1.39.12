@@ -4,10 +4,6 @@ using aclara_meters.view;
 using nexus.protocols.ble;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using Microsoft.AppCenter;
-using Microsoft.AppCenter.Analytics;
-using Microsoft.AppCenter.Crashes;
-using Microsoft.AppCenter.Distribute;
 using ble_library;
 using System.Web;
 using System.Collections.Generic;
@@ -109,6 +105,8 @@ namespace aclara_meters
             {
                 config.setPlatform("Unknown");
             }
+
+            Configuration.SetInstance ( config );
         }
 
 
@@ -147,6 +145,8 @@ namespace aclara_meters
             //Inicializar libreria personalizada
             ble_interface = new BleSerial(adapter);
            
+
+            //ble_interface.Close ();
 
 
             string data = "";
@@ -490,7 +490,8 @@ namespace aclara_meters
 
         protected override void OnStart()
         {
-            AppCenter.Start("ios=cb622ad5-e2ad-469d-b1cd-7461f140b2dc;" + "android=53abfbd5-4a3f-4eb2-9dea-c9f7810394be", typeof(Analytics), typeof(Crashes), typeof(Distribute) );
+            // https://appcenter.ms/users/ma.jimenez/apps/Aclara-MTU-Testing-App
+            //AppCenter.Start("ios=cb622ad5-e2ad-469d-b1cd-7461f140b2dc;" + "android=53abfbd5-4a3f-4eb2-9dea-c9f7810394be", typeof(Analytics), typeof(Crashes), typeof(Distribute) );
         }
 
         protected override void OnSleep()

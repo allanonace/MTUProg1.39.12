@@ -193,7 +193,16 @@ namespace Lexi
             {
                 if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                 {
-                    throw new TimeoutException();
+                   
+                    if(serial.BytesToRead() <= response_offest)
+                    {
+                        throw new IOException();
+                    }
+                    else
+                    {
+                        throw new TimeoutException();
+                    }
+                    
                 }
                 //Thread.Sleep(100);
                 // await Task.Delay(100);
@@ -305,8 +314,15 @@ namespace Lexi
             {
                 if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                 {
-                    //if even no data response no puck error..
-                    throw new TimeoutException();
+
+                    if (serial.BytesToRead() <= response_offest)
+                    {
+                        throw new IOException();
+                    }
+                    else
+                    {
+                        throw new TimeoutException();
+                    }
                 }
                 Thread.Sleep(10);
             }
@@ -368,7 +384,15 @@ namespace Lexi
                 if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                 {
                     //if even no data response no puck error..
-                    throw new TimeoutException();
+
+                    if (serial.BytesToRead() <= response_offest)
+                    {
+                        throw new IOException();
+                    }
+                    else
+                    {
+                        throw new TimeoutException();
+                    }
                 }
                 Thread.Sleep(10);
             }
@@ -414,7 +438,15 @@ namespace Lexi
                 if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                 {
                     //if even no data response no puck error..
-                    throw new TimeoutException();
+
+                    if (serial.BytesToRead() <= response_offest)
+                    {
+                        throw new IOException();
+                    }
+                    else
+                    {
+                        throw new TimeoutException();
+                    }
                 }
                 Thread.Sleep(10);
             }
@@ -447,7 +479,15 @@ namespace Lexi
                     if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                     {
                         //if even no data response no puck error..
-                        throw new TimeoutException();
+
+                        if (serial.BytesToRead() <= response_offest)
+                        {
+                            throw new IOException();
+                        }
+                        else
+                        {
+                            throw new TimeoutException();
+                        }
                     }
                     Thread.Sleep(10);
                 }
@@ -488,7 +528,15 @@ namespace Lexi
                 if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                 {
                     //if even no data response no puck error..
-                    throw new TimeoutException();
+
+                    if (serial.BytesToRead() <= response_offest)
+                    {
+                        throw new IOException();
+                    }
+                    else
+                    {
+                        throw new TimeoutException();
+                    }
                 }
                 Thread.Sleep(10);
             }

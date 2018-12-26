@@ -15,6 +15,9 @@ namespace Xml
         [XmlElement("Type")]
         public string Type { get; set; }
 
+        [XmlElement("MeterMask")]
+        public string MeterMask { get; set; }
+
         [XmlElement("Vendor")]
         public string Vendor { get; set; }
 

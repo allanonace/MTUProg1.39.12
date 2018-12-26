@@ -768,10 +768,10 @@
                     </StackLayout>
 
 
-                       <StackLayout  x:Name="dialog_turnoff_three" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                       <StackLayout x:Name="dialog_turnoff_three" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
                         
-                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                        <Label x:Name="dialog_turnoff_text" Margin="12,12,12,12" HorizontalTextAlignment="Center" 
                                  FontSize="20" Text="MTU turned off Successfully">
                             
                         </Label>

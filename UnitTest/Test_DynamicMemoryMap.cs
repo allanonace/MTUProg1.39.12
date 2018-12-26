@@ -98,6 +98,15 @@ namespace UnitTest.Tests
         }
 
         [Fact]
+        public void Test_Errors ()
+        {
+            Errors errors = new Errors ( this.GetPath () );
+
+            var error = errors.Get ( 112, "VALOR1", "VALOR2" );
+
+        }
+
+        [Fact]
         public void Test_Validations ()
         {
             // TEST: Numerics
@@ -190,12 +199,12 @@ namespace UnitTest.Tests
                 return;
 
             // TEST: Recover only modified registers
-            map.P1Reading        = 26;     // ulong
-            map.P2Reading        = "41";   // ulong
+            map.P1Reading        = 26;      // ulong
+            map.P2Reading        = "41";    // ulong
             map.EncryptionKey    = "k e y"; // string
-            map.P2UrgentAlarm    = true;  // bool
-            map.P2InterfaceAlarm = false; // bool
-            map.P2MeterType      = 34;     // int
+            map.P2UrgentAlarm    = true;    // bool
+            map.P2InterfaceAlarm = false;   // bool
+            map.P2MeterType      = 34;      // int
             List<dynamic> mods = map.GetModifiedRegisters ().GetAllElements ();
             Assert.True ( mods.Count == 6, ERROR_MODIFIED );
 

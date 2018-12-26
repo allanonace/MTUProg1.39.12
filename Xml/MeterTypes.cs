@@ -42,6 +42,25 @@ namespace Xml
             return meters;
         }
 
+        public List<Meter> FindByDialDescription (
+            int    NumberOfDials,
+            int    DriveDialSize,
+            string UnitOfMeasure,
+            int    flow )
+        {
+            List<Meter> meters = Meters.FindAll ( x => (
+                x.NumberOfDials.Equals ( NumberOfDials.ToString () ) &&
+                x.DriveDialSize.Equals ( DriveDialSize.ToString () ) &&
+                x.UnitOfMeasure.Equals ( UnitOfMeasure ) &&
+                x.Flow == flow
+            ));
+
+            if ( meters == null )
+                throw new MeterNotFoundException ( "Meter not found" );
+
+            return meters;
+        }
+
         public List<Meter> FindByPortTypeAndFlow(string portType, int flow = -1)
         {
             List<string> portTypes;
@@ -151,7 +170,6 @@ namespace Xml
 
             return names.ToList();
         }
-
 
         public List<Meter> GetMetersByModelAndVendorFromMeters(List<Meter> meters, string vendor, string model)
         {

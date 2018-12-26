@@ -19,9 +19,11 @@ namespace MTUComm
         public delegate void ActionFinishHandler(object sender, Action.ActionFinishArgs e);
         public event ActionFinishHandler OnFinish;
 
+        public delegate void ActionOnProgressHandler(object sender, Action.ActionProgressArgs e);
+        public event ActionOnProgressHandler OnProgress;
+
         public delegate void ActionStepFinishHandler(object sender, int step, Action.ActionFinishArgs e);
         public event ActionStepFinishHandler onStepFinish;
-
 
         public delegate void ActionErrorHandler(object sender, Action.ActionErrorArgs e);
         public event ActionErrorHandler OnError;
@@ -54,28 +56,33 @@ namespace MTUComm
             }
         }
 
-        public ScriptRunner(String base_path, ISerial serial_device, String script_stream, int stream_size)
+        public ScriptRunner()
         {
+        }
 
+        public void ParseScriptAndRun ( String base_path, ISerial serial_device, String script_stream, int stream_size)
+        {
             Script script = new Script();
-
             XmlSerializer s = new XmlSerializer(typeof(Script));
 
             try
             {
-
                 using (StringReader reader = new StringReader(script_stream.Substring(0, stream_size)))
                 {
                     script = (Script)s.Deserialize(reader);
                 }
                 buildScriptActions(base_path, serial_device, script);
             }
-
             catch (Exception e)
             {
-                throw new MtuLoadException("Error loading Script file");
+                //throw new MtuLoadException("Error loading Script file");
+
+                OnError ( this, new Action.ActionErrorArgs ( 113, "Error in parsing Trigger File" ) );
+
+                return;
             }
 
+            this.Run ();
         }
 
         private Action.ActionType parseType(string action_type)
@@ -88,9 +95,7 @@ namespace MTUComm
             {
                 return Action.ActionType.ReadMtu;
             }
-
         }
-
 
         private Parameter.ParameterType parseParameterType(string action_type)
         {
@@ -134,6 +139,7 @@ namespace MTUComm
                 }
 
                 new_action.order = step;
+                new_action.OnProgress += Action_OnProgress;
                 new_action.OnFinish += Action_OnFinish;
                 new_action.OnError += Action_OnError;
 
@@ -152,6 +158,11 @@ namespace MTUComm
         private void Action_OnError(object sender, Action.ActionErrorArgs e)
         {
             OnError(sender, e);
+        }
+
+        private void Action_OnProgress(object sender, Action.ActionProgressArgs e)
+        {
+            OnProgress(sender, e);
         }
 
         private void Action_OnFinish(object sender, Action.ActionFinishArgs e)

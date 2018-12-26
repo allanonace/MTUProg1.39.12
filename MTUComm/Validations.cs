@@ -21,9 +21,9 @@ namespace MTUComm
 
         #region Tests
 
-        public static bool IsNumeric<T> ( dynamic value )
+        public static bool IsNumeric ( dynamic value )
         {
-            if ( value is null )
+            if ( string.IsNullOrEmpty ( value.ToString () ) )
                 return false;
             
             else if ( value is Int32  ||
@@ -31,8 +31,22 @@ namespace MTUComm
                       value is UInt64 )
                 return true;
 
+            // Validation for other numeric types
+            string chars = value.ToString ().Trim ();
+            chars = chars.Replace ( ",", string.Empty )
+                         .Replace ( ".", string.Empty )
+                         .Replace ( "-", string.Empty );
+
+            // NOTA: No funciona con numeros negativos
+            return chars.All ( c => char.IsDigit ( c ) );
+        }
+
+        public static bool IsNumeric<T> ( dynamic value )
+        {
+            bool ok1 = IsNumeric ( value );
+
             // String conversion for used types
-            else if ( value is string )
+            if ( ! ok1 && value is string )
             {
                 if ( string.IsNullOrEmpty ( value ) )
                     return false;
@@ -60,13 +74,7 @@ namespace MTUComm
                 }
             }
 
-            // Validation for other numeric types
-            string chars = value.ToString ();
-            if ( char.Equals ( chars[ 0 ], "-" ) )
-                chars = chars.Remove ( 0, 1 );
-
-            // NOTA: No funciona con numeros negativos
-            return chars.All ( c => char.IsDigit ( c ) );
+            return false;
         }
 
         public static bool NumericBytesLimit<T> ( dynamic value, int numBytes )
@@ -403,11 +411,20 @@ namespace MTUComm
             int  minLength    = 1,
             bool maxInclusive = true,
             bool minInclusive = true,
-            bool equalsLength = true )
+            bool equalsLength = true,
+            bool validateNumericLength = false )
         {
-            bool okTextLength = TextLength ( value, maxLength, minLength, maxInclusive, minInclusive );
-            bool okNumeric    = IsNumeric<ulong> ( value );
-            bool okEquals     = ( ! equalsLength || value.Length == maxLength );
+            if ( value is null )
+                return false;
+
+            string valueClean = value.ToString ().Trim ()
+                                    .Replace ( ",", string.Empty )
+                                    .Replace ( ".", string.Empty )
+                                    .Replace ( "-", string.Empty );
+
+            bool okTextLength = TextLength ( valueClean, maxLength, minLength, maxInclusive, minInclusive );
+            bool okNumeric    = IsNumeric ( valueClean );
+            bool okEquals     = ( ! equalsLength || valueClean.Length == maxLength );
 
             return okTextLength && okNumeric && okEquals;
         }

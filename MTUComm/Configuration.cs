@@ -139,6 +139,11 @@ namespace MTUComm
             return instance;
         }
 
+        public static void SetInstance ( Configuration configuration )
+        {
+            instance = configuration;
+        }
+
         public String GetBasePath()
         {
             return mbase_path;

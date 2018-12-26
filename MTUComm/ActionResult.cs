@@ -40,6 +40,8 @@ namespace MTUComm
 
         public Parameter getParameterByTag(string tag)
         {
+            // The first element that matches the conditions defined by the specified predicate,
+            // if found, returns the default value for type T
             return parameters.Find(x => x.getLogTag().Equals(tag));
         }
 

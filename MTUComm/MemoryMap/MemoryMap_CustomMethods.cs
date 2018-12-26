@@ -118,7 +118,7 @@ namespace MTUComm.MemoryMap
 
         public string XmitInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return TimeFormatter(MemoryRegisters.ReadIntervalMinutes.Value * MemoryRegisters.MessageOverlapCount.Value);
+            return TimeFormatter ( MemoryRegisters.ReadIntervalMinutes.Value * ( 12 - MemoryRegisters.MessageOverlapCount.Value ) );
         }
 
         public string PCBNumber_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
@@ -238,7 +238,6 @@ namespace MTUComm.MemoryMap
             return HEX_PREFIX + MemoryRegisters.F12WAYRegister14Int.Value.ToString ( FWAYFORMAT );
         }
 
-
         public string Frequency1Way_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return String.Format(new CultureInfo("en-us"), "{0:0.000}",(MemoryRegisters.Frequency1WayHz.Value / 1000000.0));
@@ -253,7 +252,6 @@ namespace MTUComm.MemoryMap
         {
             return String.Format(new CultureInfo("en-us"), "{0:0.000}", (MemoryRegisters.Frequency2WayRxHz.Value / 1000000.0));
         }
-
 
         public string InstallationConfirmationStatus_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {

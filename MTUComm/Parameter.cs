@@ -97,7 +97,7 @@ namespace MTUComm
 
         public Parameter ()
         {
-            mValue = string.Empty;
+            mValue = null;
         }
 
         public Parameter(ParameterType type, String value)
@@ -182,13 +182,6 @@ namespace MTUComm
             return null;
         }
 
-        public dynamic getValue()
-        {
-            //if ( ! string.IsNullOrEmpty ( mValue ) )
-                return mValue;
-            //return ( string )mValue;
-        }
-
         public Boolean doesGenerateLog()
         {
             return paremeter_defines[mParameterType].log_generation;
@@ -222,6 +215,10 @@ namespace MTUComm
         {
             get
             {
+                //if ( this.mParameterType == ParameterType.MeterReading ||
+                //     this.mCustomParameter.Equals ( "MeterReading" ) )
+
+
                 return mValue;
             }
         }

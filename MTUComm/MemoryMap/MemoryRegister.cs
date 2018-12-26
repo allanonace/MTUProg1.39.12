@@ -202,6 +202,22 @@ namespace MTUComm.MemoryMap
             }
         }
 
+        public string ValueWithXMask ( string xMask, int digits )
+        {
+            string value = this.Value.ToString ();
+
+            // Ejemplo: num 1234 mask X00 digits 6
+            // 1. 4 < 6
+            // 2. 6 - 4 == 3 - 1
+            if ( value.Length < digits &&
+                 digits - value.Length == xMask.Length - 1 )
+            {
+                value = xMask.Substring ( 1, xMask.Length - 1 ) + value;
+            }
+
+            throw new Exception ();
+        }
+
         #endregion
 
         #region Initialization

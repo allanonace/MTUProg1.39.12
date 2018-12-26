@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Lexi.Interfaces;
 using MTUComm.actions;
 using Xml;
+using System.IO;
 
 namespace MTUComm
 {
@@ -212,8 +213,11 @@ namespace MTUComm
 
         public Action(Configuration config, ISerial serial, ActionType type, String user = "", String outputfile = "")
         {
+            // outputfile = new FileInfo ( outputfile ).Name; // NO
+            // System.IO.Path.GetFileName(outputfile)); // NO
+
             configuration = config;
-            logger = new Logger(config, System.IO.Path.GetFileName(outputfile));
+            logger = new Logger(config, outputfile.Substring(outputfile.LastIndexOf('\\') + 1) ); 
             comm = new MTUComm(serial, config);
             this.type = type;
             this.user = user;
@@ -307,19 +311,19 @@ namespace MTUComm
                             // Reflection over Mtu class
                             value = mtu.GetProperty ( property );
                             break;
-                        case "MemoryMap":
+                        case "ActionParams":
+                            value = actionParams.GetType().GetProperty ( member[ 0 ] )
+                                .GetValue ( actionParams, null ).ToString();
+                            break;
+                        default: // MemoryMap
                             // Recover register from MTU memory map
                             // Some registers have port sufix but other not
-                            if ( string.IsNullOrEmpty ( port ) &&
+                            if ( ! string.IsNullOrEmpty ( port ) &&
                                  map.ContainsMember ( port + property ) )
                                 value = map.GetProperty ( port + property ).Value.ToString ();
                             // Try to recover register without port prefix
                             else if ( map.ContainsMember ( property ) )
                                 value = map.GetProperty ( property ).Value.ToString ();
-                            break;
-                        case "ActionParams":
-                            value = actionParams.GetType().GetProperty ( member[ 0 ] )
-                                .GetValue ( actionParams, null ).ToString();
                             break;
                     }
 
@@ -351,7 +355,7 @@ namespace MTUComm
 
         #region Gets
 
-        public String GetProperty(string name)
+        public String GetProperty ( string name )
         {
             switch (name)
             {
@@ -362,7 +366,12 @@ namespace MTUComm
             }
         }
 
-        public String GetResultXML(ActionResult result)
+        public String GetErrorXML ( int status, string message )
+        {
+            return logger.logErrorString ( this, status, message );
+        }
+
+        public String GetResultXML ( ActionResult result )
         {
             if (type == ActionType.AddMtu)
                 return comm.GetResultXML();
@@ -446,7 +455,7 @@ namespace MTUComm
         public void Cancel(string cancelReason = "410 DR Defective Register")
         {
             canceled = true;
-            logger.logCancel(this, "User Cancelled", cancelReason);
+            logger.logCancel ( this, "User Cancelled", cancelReason );
         }
 
         #endregion
@@ -771,6 +780,11 @@ namespace MTUComm
             ActionResult result = new ActionResult ();
             foreach ( InterfaceParameters parameter in parameters )
             {
+                if ( parameter.Name.Equals ( "MtuVoltageBattery" ) )
+                {
+
+                }
+
                 if ( parameter.Name.Equals ( "Port" ) )
                     for ( int i = 0; i < mtutype.Ports.Count; i++ )
                         result.addPort ( ReadPort ( i, parameter.Parameters.ToArray (), map, mtutype ) );
@@ -817,7 +831,7 @@ namespace MTUComm
                                     paramToAdd = new Parameter ( parameter.Name, parameter.Display,
                                                                  actionParams.GetType().GetProperty ( sourceProperty )
                                                                     .GetValue ( actionParams, null ).ToString() );
-                            break;
+                                    break;
                                 default:
                                     paramToAdd = new Parameter ( parameter.Name, parameter.Display, map.GetProperty(parameter.Name).Value.ToString() );
                                     break;
@@ -825,6 +839,10 @@ namespace MTUComm
 
                             if ( paramToAdd != null )
                                 result.AddParameter ( paramToAdd );
+                            else
+                            {
+
+                            }
                         }
 
                     }

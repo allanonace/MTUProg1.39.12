@@ -154,6 +154,26 @@ namespace MTUComm
             doc.Save(Path.Combine(abs_path, getFileName()));
         }
 
+        public string logErrorString(Action ref_action, int id, string e_message)
+        {
+            XDocument doc = XDocument.Parse(getBaseFileHandler());
+
+            XElement error = new XElement("AppError");
+
+            logParameter(error, new Parameter("Date", null, DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+
+            XElement message = new XElement("Message", e_message);
+            if (id >= 0)
+            {
+            addAtrribute(message, "ErrorId", id.ToString());
+            }
+            error.Add(message);
+
+            doc.Root.Element("Error").Add(error);
+
+            return doc.ToString();
+        }
+
         public string logReadResultString(Action ref_action, ActionResult result)
         {
             XDocument doc = XDocument.Parse(getBaseFileHandler());
@@ -527,7 +547,7 @@ namespace MTUComm
 
         public void logParameter(XElement parent, Parameter parameter, string TagName)
         {
-            XElement xml_parameter = new XElement(TagName, parameter.getValue());
+            XElement xml_parameter = new XElement(TagName, parameter.Value );
             addAtrribute(xml_parameter, "display", parameter.getLogDisplay());
             if (parameter.Optional)
             {
@@ -535,6 +555,5 @@ namespace MTUComm
             }
             parent.Add(xml_parameter);
         }
-
     }
 }

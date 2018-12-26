@@ -85,8 +85,10 @@ namespace aclara_meters.view
                         #endregion
                     }
 
+                    //var TEST = Application.Current.MainPage.Navigation.NavigationStack;
+
                     // Force to
-                    (( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
+                    //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
                 });
             });
 

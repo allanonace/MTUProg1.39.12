@@ -126,6 +126,8 @@ namespace aclara_meters.view
             {
                 DeviceList.ItemsSource = employees;
             }
+
+            //BluetoothPeripheralDisconnect ( null, null );
         }
 
         public void FirstRefreshSearchPucs ()
@@ -818,17 +820,10 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
+            dialog_turnoff_one.IsVisible = false;
+            dialog_turnoff_two.IsVisible = true;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                dialog_turnoff_one.IsVisible = false;
-                dialog_turnoff_two.IsVisible = true;
-
-
-                Task.Factory.StartNew(TurnOffMethod);
-
-
-            });
+            Task.Factory.StartNew(TurnOffMethod);
         }
 
         private void TurnOffMethod()
@@ -847,6 +842,20 @@ namespace aclara_meters.view
                 Task.Delay(2000).ContinueWith(t =>
                    Device.BeginInvokeOnMainThread(() =>
                    {
+                       this.dialog_turnoff_text.Text = "MTU turned off Successfully";
+
+                       dialog_turnoff_two.IsVisible = false;
+                       dialog_turnoff_three.IsVisible = true;
+                   }));
+            });
+
+            turnOffAction.OnError += ((s, args) =>
+            {
+                Task.Delay(2000).ContinueWith(t =>
+                   Device.BeginInvokeOnMainThread(() =>
+                   {
+                       this.dialog_turnoff_text.Text = "MTU turned off Unsuccessfully";
+
                        dialog_turnoff_two.IsVisible = false;
                        dialog_turnoff_three.IsVisible = true;
                    }));
@@ -1119,6 +1128,10 @@ namespace aclara_meters.view
                             OnCaseTurnOff();
                             break;
 
+                        case "InstallConfirm":
+                            OnCaseInstallConfirm();
+                            break;
+
                         case "replaceMTU":
                             Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
                             //OnCaseReplaceMTU();
@@ -1139,16 +1152,10 @@ namespace aclara_meters.view
                             //OnCaseAddMTUReplaceMeter();
                             break;
 
-
                         case "ReplaceMTUReplaceMeter":
                             Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
                             //OnCaseReplaceMTUReplaceMeter();
                             break;
-
-						case "InstallConfirm":
-							OnCaseInstallConfirm();
-                            break;
-                     
                     }
                 }
                 catch (Exception w1)

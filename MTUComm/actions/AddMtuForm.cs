@@ -21,6 +21,12 @@ namespace MTUComm.actions
             INITIAL_READING2,
             SELECTED_METER,
             SELECTED_METER2,
+            NUMBER_OF_DIALS,
+            NUMBER_OF_DIALS2,
+            DRIVE_DIAL_SIZE,
+            DRIVE_DIAL_SIZE2,
+            UNIT_MEASURE,
+            UNIT_MEASURE2,
             READ_INTERVAL,
             READ_INTERVAL2,
             SNAP_READS,
@@ -40,14 +46,17 @@ namespace MTUComm.actions
         public Dictionary<ParameterType,FIELD> IdsAclara =
             new Dictionary<ParameterType,FIELD> ()
             {
-                { ParameterType.ActivityLogId,     FIELD.SERVICE_PORT_ID }, // SE USA
+                { ParameterType.ActivityLogId,     FIELD.SERVICE_PORT_ID },
                 { ParameterType.WorkOrder,         FIELD.FIELD_ORDER     },
                 { ParameterType.MeterSerialNumber, FIELD.METER_NUMBER    },
-                { ParameterType.MeterReading,      FIELD.INITIAL_READING }, // SE USA
-                { ParameterType.MeterType,         FIELD.SELECTED_METER  }, // SE USA
+                { ParameterType.MeterReading,      FIELD.INITIAL_READING },
+                { ParameterType.MeterType,         FIELD.SELECTED_METER  },
+                { ParameterType.NumberOfDials,     FIELD.NUMBER_OF_DIALS },
+                { ParameterType.DriveDialSize,     FIELD.DRIVE_DIAL_SIZE },
+                { ParameterType.UnitOfMeasure,     FIELD.UNIT_MEASURE    },
                 { ParameterType.SnapRead,          FIELD.SNAP_READS      },
                 { ParameterType.Custom,            FIELD.OPTIONAL_PARAMS },
-                { ParameterType.ReadInterval,      FIELD.READ_INTERVAL   }, // SE USA
+                { ParameterType.ReadInterval,      FIELD.READ_INTERVAL   },
                 { ParameterType.Alarm,             FIELD.ALARM           }
             };
 
@@ -58,7 +67,7 @@ namespace MTUComm.actions
         public Dictionary<FIELD, string[]> Texts =
             new Dictionary<FIELD, string[]>()
             {
-                #region Service Port ID = Account Number = Activity Log ID
+                #region Service Port ID = Account Number = Activity Log ID = Functl Loctn
                 {
                     FIELD.SERVICE_PORT_ID,
                     new string[]
@@ -78,7 +87,7 @@ namespace MTUComm.actions
                     }
                 },
                 #endregion
-                #region Field Order
+                #region Field Order = Work Order
                 {
                     FIELD.FIELD_ORDER,
                     new string[]
@@ -118,7 +127,7 @@ namespace MTUComm.actions
                     }
                 },
                 #endregion
-                #region Initial Reading
+                #region Initial Reading = Meter Reading
                 {
                     FIELD.INITIAL_READING,
                     new string[]
@@ -158,6 +167,68 @@ namespace MTUComm.actions
                     }
                 },
                 #endregion
+
+                #region Number of Dials
+                {
+                    FIELD.NUMBER_OF_DIALS,
+                    new string[]
+                    {
+                        "NumberOfDials",
+                        "NumberOfDials",
+                        "Number of Dials"
+                    }
+                },
+                {
+                    FIELD.NUMBER_OF_DIALS2,
+                    new string[]
+                    {
+                        "NumberOfDials2",
+                        "NumberOfDials2",
+                        "Number of Dials 2"
+                    }
+                },
+                #endregion
+                #region Drive Dial Size
+                {
+                    FIELD.DRIVE_DIAL_SIZE,
+                    new string[]
+                    {
+                        "DriveDialSize",
+                        "DriveDialSize",
+                        "Drive Dial Size"
+                    }
+                },
+                {
+                    FIELD.DRIVE_DIAL_SIZE2,
+                    new string[]
+                    {
+                        "DriveDialSize2",
+                        "DriveDialSize2",
+                        "Drive Dial Size 2"
+                    }
+                },
+                #endregion
+                #region Unit of Measure
+                {
+                    FIELD.UNIT_MEASURE,
+                    new string[]
+                    {
+                        "UnitOfMeasure",
+                        "UnitOfMeasure",
+                        "Unit of Measure"
+                    }
+                },
+                {
+                    FIELD.UNIT_MEASURE2,
+                    new string[]
+                    {
+                        "UnitOfMeasure2",
+                        "UnitOfMeasure2",
+                        "Unit of Measure 2"
+                    }
+                },
+                #endregion
+
                 #region Read Interval
                 {
                     FIELD.READ_INTERVAL,
@@ -368,7 +439,7 @@ namespace MTUComm.actions
                     Enum.TryParse<FIELD> ( typeOwn.ToString () + "2", out typeOwn );
             }
 
-            this.AddParameter ( typeOwn, parameter.getValue () );
+            this.AddParameter ( typeOwn, parameter.Value );
         }
 
         public Parameter FindById(FIELD field_type)

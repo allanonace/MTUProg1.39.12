@@ -19,8 +19,6 @@ using Xamarin.Forms.Platform.Android;
 using Application = Android.App.Application;
 using Android.Content;
 
-using Microsoft.AppCenter;
-using Microsoft.AppCenter.Distribute;
 using Plugin.CurrentActivity;
 using System.Collections.Generic;
 

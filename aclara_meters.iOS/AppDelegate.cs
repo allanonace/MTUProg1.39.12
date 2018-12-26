@@ -6,8 +6,6 @@ using Foundation;
 using nexus.protocols.ble;
 using UIKit;
 using Xamarin.Forms;
-using Microsoft.AppCenter;
-using Microsoft.AppCenter.Distribute;
 //using Microsoft.Intune.MAM;
 
 namespace aclara_meters.iOS
@@ -32,7 +30,7 @@ namespace aclara_meters.iOS
         public override bool FinishedLaunching(UIApplication app, NSDictionary options)
         {
             Forms.Init();
-            Distribute.DontCheckForUpdatesInDebug();
+            //Distribute.DontCheckForUpdatesInDebug();
 
             /*
             IntuneMAMPolicyManager value = IntuneMAMPolicyManager.Instance;

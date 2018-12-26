@@ -115,9 +115,6 @@ namespace aclara_meters.view
 
                 });
             });
-
-          
-
         }
 
 
@@ -360,15 +357,15 @@ namespace aclara_meters.view
 
         private void scriptFunction()
         {
-            ScriptRunner runner = new ScriptRunner(FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length);
+            ScriptRunner runner = new ScriptRunner();
 
             //Define finish and error event handler
             runner.OnFinish     += OnFinish;
+            runner.OnProgress   += OnProgress;
             runner.onStepFinish += onStepFinish;
             runner.OnError      += OnError;
 
-            //Run
-            runner.Run();
+            runner.ParseScriptAndRun ( FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length );
         }
 
         private async Task ChangeListViewData()
@@ -542,22 +539,60 @@ namespace aclara_meters.view
 
         private void OnError(object sender, MTUComm.Action.ActionErrorArgs e)
         {
+            Task.Run(() =>
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    ContentView_Scripting_textScript.Text = "Error code: " + e.Status + "\n" + e.Message;
 
-        
-            Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
-                                                            "status=error" +
-                                                            "&code= 1 "+
-                                                            "&message=error%20message"));
+                    /*
+                    String xmlResultTocallback = string.Empty;
+                    if ( sender is MTUComm.Action )
+                         xmlResultTocallback = ((MTUComm.Action)sender).GetErrorXML ( e.Status, e.Message );
+                    else xmlResultTocallback = Logger.getBaseFileHandlerGeneric ( e.Status, e.Message );
+                    */
 
-            FormsApp.ble_interface.Close();
-            Console.WriteLine("HI ERROR");
-            // throw new NotImplementedException();
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        backdark_bg.IsVisible = false;
+                        indicator.IsVisible = false;
+                        ContentView_Scripting.IsEnabled = true;
+                        _userTapped = false;
+                        ContentView_Scripting_label_read.Text = "Script Execution Error";
+
+                        /*
+                        Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
+                                                             "status=error" +
+                                                             "&output_filename="+resultScriptName +
+                                                             "&output_data=" + System.Web.HttpUtility.UrlEncode (
+                                                                Base64Encode ( xmlResultTocallback ) ) ) );*/
+                    
+                        Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
+                                                                        "status=error" +
+                                                                        "&code= " + e.Status +
+                                                                        "&message=" + System.Web.HttpUtility.UrlEncode ( e.Message )));
+
+                        FormsApp.ble_interface.Close();
+                    });
+                });
+            });
         }
 
         private void onStepFinish(object sender, int step, MTUComm.Action.ActionFinishArgs e)
         {
             Console.WriteLine("HI FINISH RUNNER");
             //throw new NotImplementedException();
+        }
+
+        private void OnProgress ( object sender, MTUComm.Action.ActionProgressArgs e )
+        {
+            string mensaje = e.Message;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                if ( ! string.IsNullOrEmpty ( mensaje ) )
+                    ContentView_Scripting_label_read.Text = mensaje;
+            });
         }
 
         private void OnFinish(object sender, MTUComm.Action.ActionFinishArgs e)
@@ -592,9 +627,6 @@ namespace aclara_meters.view
                     }
 
                     String xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(e.Result);
-
-                    int length  = Base64Encode(xmlResultTocallback).Length;
-                    int length2 = System.Web.HttpUtility.UrlEncode(Base64Encode(xmlResultTocallback)).Length;
 
                     Device.BeginInvokeOnMainThread(() =>
                     {

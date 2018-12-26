@@ -1,9 +1,7 @@
-﻿using MTUComm.actions;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Linq;
+using MTUComm.actions;
 using Xml;
 
 using FIELD = MTUComm.actions.AddMtuForm.FIELD;
@@ -18,6 +16,9 @@ namespace MTUComm
         private MTUBasicInfo mtuBasicInfo;
         private string logUri;
         private Mtu mtu;
+
+        private const string ENABLE  = "Enable";
+        private const string DISABLE = "Disable";
 
         private const string addMtuDisplay = "Add MTU";
         private const string addMtuType = "Program MTU";
@@ -85,7 +86,7 @@ namespace MTUComm
             dynamic GlobalsConditions = form.conditions.globals;
 
             Meter meter = ( ! isFromScripting ) ?
-                ( Meter )form.Meter.getValue() :
+                ( Meter )form.Meter.Value :
                 Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
 
             #region General
@@ -115,8 +116,8 @@ namespace MTUComm
 
                 if (GlobalsConditions.IndividualDailyReads) // TODO: check values
                 {
-                    dailyReads       = form.SnapReads.getValue ();
-                    dailyGmtHourRead = form.SnapReads.getValue ();
+                    dailyReads       = form.SnapReads.Value;
+                    dailyGmtHourRead = form.SnapReads.Value;
                 }
                 logger.logParameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
                 logger.logParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
@@ -145,6 +146,8 @@ namespace MTUComm
             logger.logParameter ( port, new Parameter("MeterModel", "Meter Model", meter.Model));
             logger.logParameter ( port, form.MeterNumber );
             logger.logParameter ( port, form.InitialReading );
+            logger.logParameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
+            logger.logParameter ( port, new Parameter("PulseLo","Pulse Low Time", meter.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
 
             this.addMtuAction.Add(port);
 
@@ -155,7 +158,7 @@ namespace MTUComm
             if (MtuConditions.TwoPorts)
             {
                 Meter meter2 = ( ! isFromScripting ) ?
-                    ( Meter )form.Meter2.getValue() :
+                    ( Meter )form.Meter2.Value :
                     Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter2.Value ) );
 
                 port = new XElement ( "Port");
@@ -182,91 +185,59 @@ namespace MTUComm
 
             #region Alarms
 
-            if ( ! isFromScripting &&
-                 MtuConditions.RequiresAlarmProfile)
+            if ( MtuConditions.RequiresAlarmProfile )
             {
-                Alarm alarms = (Alarm)form.Alarm.getValue();
-                XElement alarmSelection = new XElement("AlarmSelection");
-                logger.addAtrribute(alarmSelection, "display", "Alarm Selection");
-
-                string alarmConfiguration = alarms.Name;
-                logger.logParameter(alarmSelection, new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
-
-                string immediateAlarmTransmit = "False";
-                if (alarms.ImmediateAlarmTransmit)
+                Alarm alarms = (Alarm)form.Alarm.Value;
+                if ( alarms != null )
                 {
-                    immediateAlarmTransmit = "True";
-                }
-                logger.logParameter(alarmSelection, new Parameter("ImmediateAlarm", "Immediate Alarm Transmit", immediateAlarmTransmit));
+                    XElement alarmSelection = new XElement("AlarmSelection");
+                    logger.addAtrribute(alarmSelection, "display", "Alarm Selection");
 
-                string urgentAlarm = "False";
-                if (alarms.DcuUrgentAlarm)
-                {
-                    urgentAlarm = "True";
-                }
-                logger.logParameter(alarmSelection, new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
+                    string alarmConfiguration = alarms.Name;
+                    logger.logParameter(alarmSelection, new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
 
-                string overlap = alarms.Overlap.ToString();
-                logger.logParameter(alarmSelection, new Parameter("Overlap", "Message Overlap", overlap));
-
-                if (this.mtu.MagneticTamper)
-                {
-                    string magneticTamper = "Disabled";
-                    if (alarms.Magnetic)
+                    string immediateAlarmTransmit = "False";
+                    if (alarms.ImmediateAlarmTransmit)
                     {
-                        magneticTamper = "Enabled";
+                        immediateAlarmTransmit = "True";
                     }
-                    logger.logParameter(alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper", magneticTamper));
-                }
+                    logger.logParameter(alarmSelection, new Parameter("ImmediateAlarm", "Immediate Alarm Transmit", immediateAlarmTransmit));
 
-                if (this.mtu.RegisterCoverTamper)
-                {
-                    string registerCoverTamper = "Disabled";
-                    if (alarms.RegisterCover)
+                    string urgentAlarm = "False";
+                    if (alarms.DcuUrgentAlarm)
                     {
-                        registerCoverTamper = "Enabled";
+                        urgentAlarm = "True";
                     }
-                    logger.logParameter(alarmSelection, new Parameter("RegisterCoverTamper", "Register Cover Tamper", registerCoverTamper));
-                }
+                    logger.logParameter(alarmSelection, new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
 
-                if (this.mtu.TiltTamper)
-                {
-                    string tiltTamper = "Disabled";
-                    if (alarms.Tilt)
+                    string overlap = alarms.Overlap.ToString();
+                    logger.logParameter(alarmSelection, new Parameter("Overlap", "Message Overlap", overlap));
+
+                    if ( this.mtu.MagneticTamper )
+                        logger.logParameter ( alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper",
+                                              ( alarms.Magnetic ) ? ENABLE : DISABLE ));
+
+                    if ( this.mtu.RegisterCoverTamper )
+                        logger.logParameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Register Cover Tamper",
+                                              ( alarms.RegisterCover ) ? ENABLE : DISABLE ));
+
+                    if ( this.mtu.TiltTamper )
+                        logger.logParameter( alarmSelection, new Parameter("TiltTamper", "Tilt Tamper",
+                                             ( alarms.Tilt ) ? ENABLE : DISABLE ));
+
+                    if ( this.mtu.ReverseFlowTamper )
                     {
-                        tiltTamper = "Enabled";
+                        logger.logParameter ( alarmSelection, new Parameter("ReverseFlow", "Reverse Flow Tamper",
+                                              ( alarms.ReverseFlow ) ? ENABLE : DISABLE ));
+                        logger.logParameter(alarmSelection, new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
                     }
-                    logger.logParameter(alarmSelection, new Parameter("TiltTamper", "Tilt Tamper", tiltTamper));
+
+                    if (this.mtu.InterfaceTamper)
+                        logger.logParameter ( alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper",
+                                              ( alarms.InterfaceTamper ) ? ENABLE : DISABLE ));
+
+                    this.addMtuAction.Add(alarmSelection);
                 }
-
-                if (this.mtu.ReverseFlowTamper)
-                {
-                    string reverseFlow = "Disabled";
-                    if (alarms.ReverseFlow)
-                    {
-                        reverseFlow = "Enabled";
-                    }
-                    logger.logParameter(alarmSelection, new Parameter("ReverseFlow", "Reverse Flow Tamper", reverseFlow));
-                    string flowDirection = meter.Flow.ToString();
-                    logger.logParameter(alarmSelection, new Parameter("FlowDirection", "Flow Direction", flowDirection));
-                }
-
-                if (this.mtu.InterfaceTamper)
-                {
-                    // Add interfaace tamper log to AlarmSelection node
-                    string interfaceTamper = "Disabled";
-                    if (alarms.InterfaceTamper)
-                    {
-                        interfaceTamper = "Enabled";
-                    }
-                    logger.logParameter(alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper", interfaceTamper));
-
-                    // Add interface tamper log to Action node
-                    logger.logParameter(this.addMtuAction, new Parameter("InterfaceTamper", "Interface Tamper", interfaceTamper));
-
-                }
-
-                this.addMtuAction.Add(alarmSelection);
             }
 
             #endregion
@@ -300,14 +271,14 @@ namespace MTUComm
                 //logger.logParameter ( this.addMtuAction, form.GPS_LONGITUDE );
                 //logger.logParameter ( this.addMtuAction, form.GPS_ALTITUDE  );
 
-                logger.logParameter(this.addMtuAction, new Parameter("GPS_Y", "Lat", form.GPSLat.getValue ()));
-                logger.logParameter(this.addMtuAction, new Parameter("GPS_X", "Long", form.GPSLon.getValue ()));
-                logger.logParameter(this.addMtuAction, new Parameter("Altitude", "Elevation", form.GPSAlt.getValue ()));
+                logger.logParameter(this.addMtuAction, new Parameter("GPS_Y", "Lat", form.GPSLat.Value ));
+                logger.logParameter(this.addMtuAction, new Parameter("GPS_X", "Long", form.GPSLon.Value ));
+                logger.logParameter(this.addMtuAction, new Parameter("Altitude", "Elevation", form.GPSAlt.Value ));
             }
 
-            if ( ! ( form.OptionalParams.getValue() is string ) )
+            if ( ! ( form.OptionalParams.Value is string ) )
             {
-                List<Parameter> optionalParams = (List<Parameter>)form.OptionalParams.getValue();
+                List<Parameter> optionalParams = (List<Parameter>)form.OptionalParams.Value;
 
                 if (optionalParams != null)
                     foreach (Parameter p in optionalParams)

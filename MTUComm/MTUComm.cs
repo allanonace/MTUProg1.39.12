@@ -273,33 +273,36 @@ namespace MTUComm
         {
             //System.Action actionToLaunch = null;
 
-            //Gets MTU casci info ( type and id )
-            // TODO: Descubrir porque al hacer un segundo basic read en la accion de AddMtu,
-            // cuando se pulsa el boton, habiendo sido el primero el que se hace nada mas cargar
-            // el formulario, la lectura casca. Ahora mismo esta condicion es para evitar que en
-            // la accion AddMtu se haga una segunda lectura basica en modo interactivo pero si que
-            // se permite hacer la primera en modo scripting
-            if ( type != ActionType.AddMtu || type == ActionType.AddMtu && args.Length == 1 )
-                LoadMtuBasicInfo ();
-
-            /*
-            switch ( type )
-            {
-                // NOTE: TaskFactory uses Action without parameters and elegant
-                // form to be able to do it, is using a lambda expression
-                case ActionType.ReadMtu   : actionToLaunch = ( () => Task_ReadMtu () ); break;
-                case ActionType.AddMtu    : actionToLaunch = ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ] ) ); break;
-                case ActionType.TurnOffMtu: actionToLaunch = ( () => Task_TurnOffMtu () ); break;
-                case ActionType.TurnOnMtu: actionToLaunch = ( () => Task_TurnOnMtu () ); break;
-                case ActionType.ReadData: actionToLaunch = ( () => Task_ReadDataMtu((int)args[0])); break;
-                case ActionType.BasicRead: actionToLaunch = ( () => Task_BasicRead () ); break;
-                case ActionType.MtuInstallationConfirmation: actionToLaunch = ( () => Task_InstallConfirmation() ); break;
-                default: break;
-            }
-            */
-
             try
             {
+
+                //Gets MTU casci info ( type and id )
+                // TODO: Descubrir porque al hacer un segundo basic read en la accion de AddMtu,
+                // cuando se pulsa el boton, habiendo sido el primero el que se hace nada mas cargar
+                // el formulario, la lectura casca. Ahora mismo esta condicion es para evitar que en
+                // la accion AddMtu se haga una segunda lectura basica en modo interactivo pero si que
+                // se permite hacer la primera en modo scripting
+                if ( type != ActionType.AddMtu || type == ActionType.AddMtu && args.Length == 1 )
+                    LoadMtuBasicInfo ();
+                //if ( ! LoadMtuBasicInfo () )
+                //    return;
+
+                /*
+                switch ( type )
+                {
+                    // NOTE: TaskFactory uses Action without parameters and elegant
+                    // form to be able to do it, is using a lambda expression
+                    case ActionType.ReadMtu   : actionToLaunch = ( () => Task_ReadMtu () ); break;
+                    case ActionType.AddMtu    : actionToLaunch = ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ] ) ); break;
+                    case ActionType.TurnOffMtu: actionToLaunch = ( () => Task_TurnOffMtu () ); break;
+                    case ActionType.TurnOnMtu: actionToLaunch = ( () => Task_TurnOnMtu () ); break;
+                    case ActionType.ReadData: actionToLaunch = ( () => Task_ReadDataMtu((int)args[0])); break;
+                    case ActionType.BasicRead: actionToLaunch = ( () => Task_BasicRead () ); break;
+                    case ActionType.MtuInstallationConfirmation: actionToLaunch = ( () => Task_InstallConfirmation() ); break;
+                    default: break;
+                }
+                */
+
                 switch (type)
                 {
                     // NOTE: TaskFactory uses Action without parameters and elegant
@@ -323,24 +326,6 @@ namespace MTUComm
             {
                 OnError(this, TranslateException(e));
             }
-
-            //await Task.Run( () => Task_BasicRead () );
-
-            /*
-            if ( actionToLaunch != null )
-            {
-                // Launch asynchronous task
-                try
-                {
-                    //Task.Factory.StartNew(actionToLaunch);
-                    await Task.Run ( () => actionToLaunch () );
-                }
-                catch ( Exception e )
-                {
-                    OnError ( this, TranslateException ( e ) );
-                }
-            }
-            */
         }
 
         #endregion
@@ -398,77 +383,78 @@ namespace MTUComm
             }
             else
             {
-                MemRegister register = configuration.getFamilyRegister(mtuType.Id, "InstallationConfirmationRequest");
-
-                Console.WriteLine("InstallConfirmation trigger start");
-
-                byte mask = 2;
-                uint inConFlag = 116;
-
-                if (register != null)
+                try
                 {
-                    mask = (byte)Math.Pow(2, register.Size);
-                    inConFlag = (uint)register.Address;
-                }
+                    MemRegister register = configuration.getFamilyRegister(mtuType.Id, "InstallationConfirmationRequest");
 
-                byte systemFlags = (lexi.Read(inConFlag, 1))[0];
-                systemFlags |= mask; // set bit 0
-                lexi.Write(116, new byte[] { systemFlags });
+                    Console.WriteLine("InstallConfirmation trigger start");
 
-                byte sync_mask = 4;
-                byte sync_systemFlags = (lexi.Read(65, 1))[0];
-                sync_systemFlags |= sync_mask; // set bit 0
-                lexi.Write(65, new byte[] { sync_systemFlags });
+                    byte mask = 2;
+                    uint inConFlag = 116;
+
+                    if (register != null)
+                    {
+                        mask = (byte)Math.Pow(2, register.Size);
+                        inConFlag = (uint)register.Address;
+                    }
+
+                    byte systemFlags = (lexi.Read(inConFlag, 1))[0];
+                    systemFlags |= mask; // set bit 0
+                    lexi.Write(116, new byte[] { systemFlags });
+
+                    byte sync_mask = 4;
+                    byte sync_systemFlags = (lexi.Read(65, 1))[0];
+                    sync_systemFlags |= sync_mask; // set bit 0
+                    lexi.Write(65, new byte[] { sync_systemFlags });
 
 
-                byte valueWritten = (lexi.Read(inConFlag, 1))[0];
-                valueWritten &= mask;
-
-                int max_iters = 1;
-                while (valueWritten > 0 && max_iters <= 36)
-                {
-                    int loop = (int)Math.Round((decimal)((max_iters * 100.0) / 36.0));
-
-
-                    OnProgress(this, new ProgressArgs(max_iters, 36, "Checking Install Confirmation... ("+ loop.ToString() + "%)"));
-                    Thread.Sleep(5000);
-                    valueWritten = (lexi.Read(inConFlag, 1))[0];
+                    byte valueWritten = (lexi.Read(inConFlag, 1))[0];
                     valueWritten &= mask;
-                    max_iters++;
+
+                    int max_iters = 1;
+                    while (valueWritten > 0 && max_iters <= 36)
+                    {
+                        int loop = (int)Math.Round((decimal)((max_iters * 100.0) / 36.0));
+
+
+                        OnProgress(this, new ProgressArgs(max_iters, 36, "Checking Install Confirmation... ("+ loop.ToString() + "%)"));
+                        Thread.Sleep(5000);
+                        valueWritten = (lexi.Read(inConFlag, 1))[0];
+                        valueWritten &= mask;
+                        max_iters++;
+                    }
                 }
+                catch ( Exception e )
+                {
+                    OnError(this, TranslateException(e));
+                    return;
+                }
+
+                this.Task_ReadMtu(true);
             }
-            Task_ReadMtu(true);
         }
 
         public void Task_TurnOffMtu ()
         {
-            Console.WriteLine("TurnOffMtu start");
+            try
+            {
+                Console.WriteLine("TurnOffMtu start");
 
-            this.TurnOffMtu_Logic();
+                this.TurnOffMtu_Logic();
 
-            Console.WriteLine("MTU ID: " + latest_mtu.Id);
+                Console.WriteLine("MTU ID: " + latest_mtu.Id);
 
-            TurnOffMtuArgs args = new TurnOffMtuArgs(latest_mtu.Id);
-            OnTurnOffMtu(this, args);
-        }
-
-        public void Task_TurnOnMtu ()
-        {
-            Console.WriteLine("TurnOnMtu start");
-
-            this.TurnOnMtu_Logic();
-
-            Console.WriteLine("MTU ID: " + latest_mtu.Id);
-
-            TurnOnMtuArgs args = new TurnOnMtuArgs(latest_mtu.Id);
-            OnTurnOnMtu(this, args);
+                TurnOffMtuArgs args = new TurnOffMtuArgs(latest_mtu.Id);
+                OnTurnOffMtu(this, args);
+            }
+            catch ( Exception e )
+            {
+                OnError(this, TranslateException(e));
+            }
         }
 
         private void TurnOffMtu_Logic ( int time = 0 )
         {
-            // TEST
-            //this.TurnOnMtu_Logic ();
-
             byte mask = 1;
             byte systemFlags = (lexi.Read(22, 1))[0];
             systemFlags |= mask; // set bit 0
@@ -491,6 +477,25 @@ namespace MTUComm
             }
         }
 
+        public void Task_TurnOnMtu ()
+        {
+            try
+            {
+                Console.WriteLine("TurnOnMtu start");
+
+                this.TurnOnMtu_Logic();
+
+                Console.WriteLine("MTU ID: " + latest_mtu.Id);
+
+                TurnOnMtuArgs args = new TurnOnMtuArgs(latest_mtu.Id);
+                OnTurnOnMtu(this, args);
+            }
+            catch ( Exception e )
+            {
+                OnError(this, TranslateException(e));
+            }
+        }
+
         private void TurnOnMtu_Logic ()
         {
             byte mask = 1;
@@ -510,22 +515,22 @@ namespace MTUComm
 
         public void Task_ReadMtu ( bool forcedetect = false )
         {
-            //If MTU has changed or critical settings/configuration force detection rutine
-            if (this.changedMTUSettings || forcedetect)
-                RecoverMeterByMtuType ();
-
-            String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
-            int memory_map_size = configuration.GetmemoryMapSizeByMtuId(mtuType.Id);
-
-            lexi.Write(64, new byte[] { 1 });
-            Thread.Sleep(1000);
-
-            byte[] buffer = new byte[1024];
-
-            System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
-
             try
             {
+                //If MTU has changed or critical settings/configuration force detection rutine
+                if (this.changedMTUSettings || forcedetect)
+                    RecoverMeterByMtuType ();
+
+                String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
+                int memory_map_size = configuration.GetmemoryMapSizeByMtuId(mtuType.Id);
+
+                lexi.Write(64, new byte[] { 1 });
+                Thread.Sleep(1000);
+
+                byte[] buffer = new byte[1024];
+
+                System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
+
                 if (memory_map_size > 255)
                 {
                     System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
@@ -541,20 +546,9 @@ namespace MTUComm
                 }
 
                 if (memory_map_size > 960)
-                {
                     System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
-                }
 
-                
-            }
-            catch (Exception e)
-            {
-
-            }
-
-            try
-            {
-                ReadMtuArgs args = new ReadMtuArgs(new MemoryMap.MemoryMap(buffer, memory_map_type), mtuType);
+                ReadMtuArgs args = new ReadMtuArgs( new MemoryMap.MemoryMap ( buffer, memory_map_type ), mtuType );
                 OnReadMtu(this, args);
             }
             catch (Exception e)
@@ -569,11 +563,52 @@ namespace MTUComm
         {
             truquitoAction = addMtuAction;
 
-            Mtu mtu = Configuration.GetInstance().mtuTypes.FindByMtuId ( (int)MtuForm.mtuBasicInfo.Type );
-            AddMtuForm form = new AddMtuForm ( mtu );
+            Mtu     mtu  = configuration.mtuTypes.FindByMtuId ( (int)MtuForm.mtuBasicInfo.Type );
+            dynamic form = new AddMtuForm ( mtu );
 
-            foreach ( Parameter parameter in addMtuAction.GetParameters () )
-                form.AddParameterTranslatingAclaraXml ( parameter );
+            try
+            {
+                foreach ( Parameter parameter in addMtuAction.GetParameters () )
+                    form.AddParameterTranslatingAclaraXml ( parameter );
+
+                // Auto-detect meter
+                if ( ! form.ContainsParameter ( AddMtuForm.FIELD.SELECTED_METER  ) &&
+                       form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS ) &&
+                       form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE ) &&
+                       form.ContainsParameter ( AddMtuForm.FIELD.UNIT_MEASURE    ) )
+                {
+                    List<Meter> meters = configuration.meterTypes.FindByDialDescription (
+                        int.Parse ( form.NumberOfDials.Value ),
+                        int.Parse ( form.DriveDialSize.Value ),
+                        form.UnitOfMeasure.Value,
+                        mtu.Flow );
+
+                    if ( meters.Count > 0 )
+                        form.AddParameter ( AddMtuForm.FIELD.SELECTED_METER, meters[ 0 ].Id.ToString () );
+                    else
+                    {
+                        OnError ( this, new ErrorArgs ( 100,
+                            "Meter.xml file does not exist or does not have selected Meter Type",
+                            "Meter.xml file does not exist or does not have selected Meter Type" ) );
+                        return;
+                    }
+                }
+
+                // Auto-detect scripting alarm profile
+                List<Alarm> alarms = configuration.alarms.FindByMtuType ( (int)MtuForm.mtuBasicInfo.Type );
+                if ( alarms.Count > 0 )
+                {
+                    Alarm alarm = alarms.Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
+                    if ( alarm != null &&
+                         form.conditions.mtu.RequiresAlarmProfile )
+                        form.AddParameter ( AddMtuForm.FIELD.ALARM, alarm );
+                }
+            }
+            catch ( Exception e )
+            {
+                OnError ( this, new ErrorArgs ( 113, "Error in parsing Trigger File", "Error in parsing Trigger File" ) );
+                return;
+            }
 
             this.Task_AddMtu ( form, addMtuAction.user, true );
         }
@@ -606,246 +641,286 @@ namespace MTUComm
 
             try
             {
+                Logger logger = ( ! isFromScripting ) ? new Logger ( this.configuration ) : truquitoAction.logger;
+                addMtuLog = new AddMtuLog ( logger, form, user, isFromScripting );
 
-            Logger logger = ( ! isFromScripting ) ? new Logger ( Configuration.GetInstance () ) : truquitoAction.logger;
-            addMtuLog = new AddMtuLog ( logger, form, user, isFromScripting );
+                #region Turn Off MTU
 
-            #region Turn Off MTU
+                this.TurnOffMtu_Logic();
+                addMtuLog.LogTurnOff();
 
-            this.TurnOffMtu_Logic();
-            addMtuLog.LogTurnOff();
+                #endregion
 
-            #endregion
+                #region Add MTU
 
-            #region Add MTU
+                // Prepare memory map
+                String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
+                int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
 
-            // Prepare memory map
-            String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
-            int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
+                byte[] memory = new byte[ memory_map_size ];
+                dynamic map = new MemoryMap.MemoryMap ( memory, memory_map_type );
 
-            byte[] memory = new byte[ memory_map_size ];
-            dynamic map = new MemoryMap.MemoryMap ( memory, memory_map_type );
+                bool useTwoPorts = MtuConditions.TwoPorts;
 
-            bool useTwoPorts = MtuConditions.TwoPorts;
+                #region Meter Type
 
-            #region Meter Type
-
-            Meter selectedMeter  = null;
-            Meter selectedMeter2 = null;
-               
-            if ( ! isFromScripting )
-                 selectedMeter = (Meter)form.Meter.Value;
-            else selectedMeter = Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
-            map.P1MeterType = selectedMeter.Id;
-
-            if ( useTwoPorts )
-            {
+                Meter selectedMeter  = null;
+                Meter selectedMeter2 = null;
+                   
                 if ( ! isFromScripting )
-                     selectedMeter2 = (Meter)form.Meter2.Value;
-                else selectedMeter2 = Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter2.Value ) );
-                map.P2MeterType = selectedMeter2.Id;
-            }
+                     selectedMeter = (Meter)form.Meter.Value;
+                else selectedMeter = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
+                map.P1MeterType = selectedMeter.Id;
 
-            #endregion
-
-            #region Service Port = Account Number = Activity Log ID
-
-            map.P1MeterId = form.ServicePortId.Value;
-            if ( useTwoPorts )
-                map.P2MeterId = form.ServicePortId2.Value;
-
-            #endregion
-
-            #region Reading Interval
-
-                // reading interval
-            if (GlobalsConditions.IndividualReadInterval)
-            {
-                map.ReadIntervalMinutes = form.ReadInterval.Value;
-                if (useTwoPorts)
-                    map.P2ReadInterval = form.ReadInterval2.Value;
-            }
-
-            #endregion
-
-            #region Overlap count
-
-            map.MessageOverlapCount = DEFAULT_OVERLAP;
-            if (useTwoPorts)
-                map.P2MessageOverlapCount = DEFAULT_OVERLAP;
-
-            #endregion
-
-            #region Initial Reading = Meter Reading
-
-            map.P1Reading = Convert.ToUInt64 ( ( string )form.InitialReading.Value ) /
-                            ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
-            
-            if ( useTwoPorts )
-                map.P2Reading = Convert.ToUInt64 ( ( string )form.InitialReading2.Value ) /
-                                ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
-
-            #endregion
-
-            #region Alarm
-
-                // Alarms
-            if ( ! isFromScripting &&
-                 MtuConditions.RequiresAlarmProfile )
-            {
-                Alarm alarms = (Alarm)form.Alarm.Value;
-
-                // Overlap
-                map.MessageOverlapCount = alarms.Overlap;
-
-                // P1ImmediateAlarm
-                map.P1ImmediateAlarm = alarms.ImmediateAlarmTransmit;
-
-                // P1UrgentAlarm
-                map.P1UrgentAlarm = alarms.DcuUrgentAlarm;
-
-                // P1MagneticAlarm
-                if (mtu.MagneticTamper)
-                    map.P1MagneticAlarm = alarms.Magnetic;
-
-                // P1RegisterCoverAlarm
-                if (mtu.RegisterCoverTamper)
-                    map.P1RegisterCoverAlarm = alarms.RegisterCover;
-
-                // P1ReverseFlowAlarm
-                if (mtu.ReverseFlowTamper)
-                    map.P1ReverseFlowAlarm = alarms.ReverseFlow;
-
-                // P1TiltAlarm
-                if (mtu.TiltTamper)
-                    map.P1TiltAlarm = alarms.Tilt;
-
-                // P1InterfaceAlarm
-                if (mtu.InterfaceTamper)
-                    map.P1InterfaceAlarm = alarms.InterfaceTamper;
-
-                if (useTwoPorts)
+                if ( useTwoPorts )
                 {
-                    // Overlap
-                    map.P2MessageOverlapCount = alarms.Overlap;
-
-                    // P2ImmediateAlarm
-                    map.P2ImmediateAlarm = alarms.ImmediateAlarmTransmit;
-
-                    // P2UrgentAlarm
-                    map.P2UrgentAlarm = alarms.DcuUrgentAlarm;
-
-                    // P2MagneticAlarm
-                    if (mtu.MagneticTamper)
-                        map.P2MagneticAlarm = alarms.Magnetic;
-
-                    // P2RegisterCoverAlarm
-                    if (mtu.RegisterCoverTamper)
-                        map.P2RegisterCoverAlarm = alarms.RegisterCover;
-
-                    // P2ReverseFlowAlarm
-                    if (mtu.ReverseFlowTamper)
-                        map.P2ReverseFlowAlarm = alarms.ReverseFlow;
-
-                    // P2TiltAlarm
-                    if (mtu.TiltTamper)
-                        map.P2TiltAlarm = alarms.Tilt;
-
-                    // P2InterfaceAlarm
-                    if (mtu.InterfaceTamper)
-                        map.P2InterfaceAlarm = alarms.InterfaceTamper;
+                    if ( ! isFromScripting )
+                         selectedMeter2 = (Meter)form.Meter2.Value;
+                    else selectedMeter2 = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter2.Value ) );
+                    map.P2MeterType = selectedMeter2.Id;
                 }
-            }
 
-            #endregion
+                #endregion
 
-            #region Encription Key
+                #region Service Port = Account Number = Activity Log ID
 
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
-            byte[] aesKey = new byte[ DEFAULT_LENGTH_AES ];
-            rng.GetBytes ( aesKey );
-            map.EncryptionKey = aesKey;
-            for ( int i = 0; i < 15; i++ )
-                if ( aesKey[ i ] != memory[ 256 + i ] )
-                    throw new Exception ( "AES key does not match" );
+                map.P1MeterId = form.ServicePortId.Value;
+                if ( useTwoPorts )
+                    map.P2MeterId = form.ServicePortId2.Value;
 
-            #endregion
+                #endregion
 
-            // Encrypted
-            // EncryptionIndex
+                #region Reading Interval
 
-            // fast message (not in pulse)
-            // encoder digits to drop (not in pulse)
+                if ( GlobalsConditions.IndividualReadInterval )
+                {
+                        // If not present in scripted mode, set default value to one/1 hour
+                    map.ReadIntervalMinutes = ( form.ContainsParameter ( AddMtuForm.FIELD.READ_INTERVAL ) ) ?
+                                                form.ReadInterval.Value : "1 Hr";
+                    if ( useTwoPorts )
+                        map.P2ReadInterval = ( form.ContainsParameter ( AddMtuForm.FIELD.READ_INTERVAL2 ) ) ?
+                                               form.ReadInterval2.Value : "1 Hr";
+                }
 
-            // Write changes into MTU
-            WriteMtuModifiedRegisters( map );
-            addMtuLog.LogAddMtu ( isFromScripting );
+                #endregion
 
-            #endregion
+                #region Overlap count
 
-            #region Turn On MTU
+                map.MessageOverlapCount = DEFAULT_OVERLAP;
+                if (useTwoPorts)
+                    map.P2MessageOverlapCount = DEFAULT_OVERLAP;
 
-            this.TurnOnMtu_Logic();
-            addMtuLog.LogTurnOn();
+                #endregion
 
-            #endregion
+                #region Initial Reading = Meter Reading
 
-            #region Read MTU
+                string mask = selectedMeter.MeterMask;
+                string p1readingStr = "0";
+                string p2readingStr = "0";
 
-            lexi.Write(64, new byte[] { 1 });
-            Thread.Sleep(1000);
+                if ( form.ContainsParameter ( AddMtuForm.FIELD.INITIAL_READING ) )
+                {
+                    if ( ! isFromScripting ||
+                         string.IsNullOrEmpty ( mask ) ) // No mask
+                    {
+                        p1readingStr = form.InitialReading .Value;
+                        p2readingStr = form.InitialReading2.Value;
+                    }
+                    else
+                    {
+                        p1readingStr = this.ApplyInitialReadMask ( mask, form.InitialReading .Value, selectedMeter.LiveDigits );
+                        p2readingStr = this.ApplyInitialReadMask ( mask, form.InitialReading2.Value, selectedMeter.LiveDigits );
+                    }
+                }
 
-            byte[] buffer = new byte[1024];
+                ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( (  p1readingStr ) ) : 0;
+                ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( (  p1readingStr ) ) : 0;
 
-            System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
-           
-            if (memory_map_size > 255)
-            {
-                System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
-                System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
-            }
-            if (memory_map_size > 320)
-            {
-                //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
-                //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
-                //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
-                //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
-            }
-            if (memory_map_size > 960)
-            {
-                System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
-            }
+                map.P1Reading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
+                if ( useTwoPorts )
+                    map.P2Reading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
 
-            MemoryMap.MemoryMap readMemoryMap = new MemoryMap.MemoryMap(buffer, memory_map_type);
+                #endregion
 
-            List<string> diff = new List<string>(map.GetModifiedRegistersDifferences(readMemoryMap));
-            if (diff.Count > 1 || (diff.Count == 1 && !diff.Contains("EncryptionKey")))
-            {
-                // ERROR
-            }
-            else
-            {
-                // OK
-            }
+                #region Alarm
 
-            //if ( ! isFromScripting )
-                //form.logger.fixed_name = "";
+                if ( MtuConditions.RequiresAlarmProfile )
+                {
+                    Alarm alarms = (Alarm)form.Alarm.Value;
+                    if ( alarms != null )
+                    {
+                        // Overlap
+                        map.MessageOverlapCount = alarms.Overlap;
 
-            #endregion
+                        // P1ImmediateAlarm
+                        map.P1ImmediateAlarm = alarms.ImmediateAlarmTransmit;
 
-            // Generate log to show on device screen
-            AddMtuArgs addMtuArgs = new AddMtuArgs(readMemoryMap, mtu, form, addMtuLog );
-            ActionResult result = OnAddMtu(this, addMtuArgs);
-            //addMtuLog.LogReadMtu(result);
+                        // P1UrgentAlarm
+                        map.P1UrgentAlarm = alarms.DcuUrgentAlarm;
 
-            // Generate xml log file and save on device
-            //addMtuLog.Save ();
+                        // P1MagneticAlarm
+                        if (mtu.MagneticTamper)
+                            map.P1MagneticAlarm = alarms.Magnetic;
 
+                        // P1RegisterCoverAlarm
+                        if (mtu.RegisterCoverTamper)
+                            map.P1RegisterCoverAlarm = alarms.RegisterCover;
+
+                        // P1ReverseFlowAlarm
+                        if (mtu.ReverseFlowTamper)
+                            map.P1ReverseFlowAlarm = alarms.ReverseFlow;
+
+                        // P1TiltAlarm
+                        if (mtu.TiltTamper)
+                            map.P1TiltAlarm = alarms.Tilt;
+
+                        // P1InterfaceAlarm
+                        if (mtu.InterfaceTamper)
+                            map.P1InterfaceAlarm = alarms.InterfaceTamper;
+
+                        if (useTwoPorts)
+                        {
+                            // Overlap
+                            map.P2MessageOverlapCount = alarms.Overlap;
+
+                            // P2ImmediateAlarm
+                            map.P2ImmediateAlarm = alarms.ImmediateAlarmTransmit;
+
+                            // P2UrgentAlarm
+                            map.P2UrgentAlarm = alarms.DcuUrgentAlarm;
+
+                            // P2MagneticAlarm
+                            if (mtu.MagneticTamper)
+                                map.P2MagneticAlarm = alarms.Magnetic;
+
+                            // P2RegisterCoverAlarm
+                            if (mtu.RegisterCoverTamper)
+                                map.P2RegisterCoverAlarm = alarms.RegisterCover;
+
+                            // P2ReverseFlowAlarm
+                            if (mtu.ReverseFlowTamper)
+                                map.P2ReverseFlowAlarm = alarms.ReverseFlow;
+
+                            // P2TiltAlarm
+                            if (mtu.TiltTamper)
+                                map.P2TiltAlarm = alarms.Tilt;
+
+                            // P2InterfaceAlarm
+                            if (mtu.InterfaceTamper)
+                                map.P2InterfaceAlarm = alarms.InterfaceTamper;
+                        }
+                
+                    }
+                }
+
+                #endregion
+
+                #region Encription Key
+
+                RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
+                byte[] aesKey = new byte[ DEFAULT_LENGTH_AES ];
+                rng.GetBytes ( aesKey );
+                map.EncryptionKey = aesKey;
+                for ( int i = 0; i < 15; i++ )
+                    if ( aesKey[ i ] != memory[ 256 + i ] )
+                        throw new Exception ( "AES key does not match" );
+
+                #endregion
+
+                // Encrypted
+                // EncryptionIndex
+
+                // fast message (not in pulse)
+                // encoder digits to drop (not in pulse)
+
+                // Write changes into MTU
+                WriteMtuModifiedRegisters( map );
+                addMtuLog.LogAddMtu ( isFromScripting );
+
+                #endregion
+
+                #region Turn On MTU
+
+                this.TurnOnMtu_Logic();
+                addMtuLog.LogTurnOn();
+
+                #endregion
+
+                #region Read MTU
+
+                lexi.Write(64, new byte[] { 1 });
+                Thread.Sleep(1000);
+
+                byte[] buffer = new byte[1024];
+
+                System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
+               
+                if (memory_map_size > 255)
+                {
+                    System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
+                    System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
+                }
+                if (memory_map_size > 320)
+                {
+                    //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
+                    //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
+                }
+                if (memory_map_size > 960)
+                {
+                    System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
+                }
+
+                MemoryMap.MemoryMap readMemoryMap = new MemoryMap.MemoryMap(buffer, memory_map_type);
+
+                List<string> diff = new List<string>(map.GetModifiedRegistersDifferences(readMemoryMap));
+                if (diff.Count > 1 || (diff.Count == 1 && !diff.Contains("EncryptionKey")))
+                {
+                    // ERROR
+                }
+                else
+                {
+                    // OK
+                }
+
+                //if ( ! isFromScripting )
+                    //form.logger.fixed_name = "";
+
+                #endregion
+
+                // Generate log to show on device screen
+                AddMtuArgs addMtuArgs = new AddMtuArgs(readMemoryMap, mtu, form, addMtuLog );
+                ActionResult result = OnAddMtu(this, addMtuArgs);
+                //addMtuLog.LogReadMtu(result);
+
+                // Generate xml log file and save on device
+                //addMtuLog.Save ();
             }
             catch ( Exception e )
             {
-                OnError ( this, TranslateException( e ) );
+                if ( isFromScripting )
+                     OnError ( this, new ErrorArgs ( 113, "Error in parsing Trigger File", "Error in parsing Trigger File" ) );
+                else OnError ( this, TranslateException( e ) );
             }
+        }
+
+        private string ApplyInitialReadMask ( string mask, string value, int liveDigits )
+        {
+            if ( mask != string.Empty )
+            {
+                if (mask.IndexOfAny(new Char[] { 'X', 'x' }) >= 0)
+                {
+                    string leadingRead = mask.Substring(0, mask.IndexOfAny(new Char[] { 'X', 'x' }));
+                    string trailingRead = mask.Substring(mask.IndexOfAny(new Char[] { 'X', 'x' }) + 1);
+                    value = leadingRead + value + trailingRead; // por tanto seria ""+Port1Reading+"00"
+
+                    if ( liveDigits < value.Length )
+                        value = value.Substring ( value.Length - liveDigits );
+                }
+            }
+
+            return value;
         }
 
         public string GetResultXML ()
@@ -957,18 +1032,11 @@ namespace MTUComm
         /// <remarks>Internaly saves internal MTU type and ID used for communication logic</remarks>
         private void LoadMtuBasicInfo ()
         {
-            try
-            {
-                MTUBasicInfo mtu_info = new MTUBasicInfo ( lexi.Read ( BASIC_READ_ADDRESS, BASIC_READ_DATA ) );
-                mtu_changed = ! ( ( mtu_info.Id == latest_mtu.Id ) && ( mtu_info.Type == latest_mtu.Type ) );
-                latest_mtu = mtu_info;
+            MTUBasicInfo mtu_info = new MTUBasicInfo ( lexi.Read ( BASIC_READ_ADDRESS, BASIC_READ_DATA ) );
+            mtu_changed = ! ( ( mtu_info.Id == latest_mtu.Id ) && ( mtu_info.Type == latest_mtu.Type ) );
+            latest_mtu = mtu_info;
 
-                MtuForm.SetBasicInfo ( latest_mtu );
-            }
-            catch ( Exception e )
-            {
-                OnError(this, new ErrorArgs(510, e.Message, "getMTU info returned 0 bytes."));
-            }
+            MtuForm.SetBasicInfo ( latest_mtu );
         }
 
         private void RecoverMeterByMtuType ()
