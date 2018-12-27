@@ -61,10 +61,10 @@ namespace aclara_meters.view
             LoadPostUIGFX();
 
             //Change username textview to Prefs. String
-            if (FormsApp.CredentialsService.UserName != null)
+            if (FormsApp.credentialsService.UserName != null)
             {
-                userName.Text = FormsApp.CredentialsService.UserName; //"Kartik";
-                CrossSettings.Current.AddOrUpdateValue("session_username", FormsApp.CredentialsService.UserName);           
+                userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
+                CrossSettings.Current.AddOrUpdateValue("session_username", FormsApp.credentialsService.UserName);           
             }
 
             LoadSideMenuElements();
@@ -715,7 +715,7 @@ namespace aclara_meters.view
 
                                         //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
                                         if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
-                                            FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
+                                            FormsApp.credentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
                                             bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
                                             blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
                                             !peripheralManualDisconnection &&
@@ -766,7 +766,7 @@ namespace aclara_meters.view
             turnoff_mtu_background.IsVisible = false;
             printer.Suspend();
             Settings.IsLoggedIn = false;
-            FormsApp.CredentialsService.DeleteCredentials();
+            FormsApp.credentialsService.DeleteCredentials();
             FormsApp.ble_interface.Close();
             background_scan_page.IsEnabled = true;
             background_scan_page_detail.IsEnabled = true;
@@ -798,7 +798,7 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);             
+                ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);             
             }));
 
 
@@ -833,7 +833,7 @@ namespace aclara_meters.view
                 config: FormsApp.config,
                 serial: FormsApp.ble_interface,
                 type: MTUComm.Action.ActionType.TurnOffMtu,
-                user: FormsApp.CredentialsService.UserName);
+                user: FormsApp.credentialsService.UserName);
 
             turnOffAction.OnFinish += ((s, args) =>
             {
@@ -881,7 +881,7 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
+                ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
             }));
             
            
@@ -904,7 +904,7 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTUAddMeter(dialogsSaved), false);
+                ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTUAddMeter(dialogsSaved), false);
             })
             );
             
@@ -928,7 +928,7 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTUReplaceMeter(dialogsSaved), false);
+                ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTUReplaceMeter(dialogsSaved), false);
             })
             );
 
@@ -954,7 +954,7 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTUReplaceMeter(dialogsSaved), false);
+                ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTUReplaceMeter(dialogsSaved), false);
             })
             );
             
@@ -991,7 +991,7 @@ namespace aclara_meters.view
                 config: FormsApp.config,
                 serial: FormsApp.ble_interface,
                 type: MTUComm.Action.ActionType.BasicRead,
-                user: FormsApp.CredentialsService.UserName);
+                user: FormsApp.credentialsService.UserName);
 
             basicRead.OnFinish += ((s, args) =>
             {
@@ -1057,7 +1057,7 @@ namespace aclara_meters.view
             background_scan_page.IsEnabled = false;
             bool reassociate = false;
             if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
-                FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
+                FormsApp.credentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
                 System.Convert.ToBase64String(item.Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()).Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty)) &&
                 item.Peripheral.Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)))
             {

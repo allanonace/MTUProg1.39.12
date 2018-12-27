@@ -14,31 +14,31 @@ using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using Plugin.DeviceInfo;
-using Xamarin.Essentials;
 using System.Globalization;
+using MTUComm;
 
 namespace aclara_meters.view
 {
     public partial class AclaraViewLogin : ContentPage
     {
+        #region Attributes
+
         public viewmodel.LoginMenuViewModel viewModel;
 
-        public AclaraViewLogin()
+        #endregion
+
+        #region Initialization
+
+        public AclaraViewLogin ()
         {
             InitializeComponent();
         }
 
-        protected override bool OnBackButtonPressed()
+        public AclaraViewLogin (
+            IUserDialogs dialogs,
+            string data )
+            : this ()
         {
-            // This prevents a user from being able to hit the back button and leave the login page.
-            return true;
-        }
-
-
-
-        public AclaraViewLogin(IUserDialogs dialogs, string data)
-        {
-            InitializeComponent();
             Settings.IsNotConnectedInSettings = false;
             BindingContext = viewModel = new viewmodel.LoginMenuViewModel(dialogs);
             viewModel.Navigation = this.Navigation;
@@ -47,108 +47,54 @@ namespace aclara_meters.view
             NavigationPage.SetHasNavigationBar(this, false);
 
             loginpage.IsVisible = false;
-            Task.Run(async () =>
+            Task.Run ( async () =>
             {
-                await Task.Delay(1000); Device.BeginInvokeOnMainThread(() =>
+                await Task.Delay ( 1000 );
+                Device.BeginInvokeOnMainThread ( () =>
                 {
                     loginpage.IsVisible = true;
-                    Console.WriteLine("Data: " + data);
+                    Console.WriteLine ( "Data: " + data );
 
-                    if (CheckIfNetworkIsAvailable())
+                    if ( Mobile.IsNetAvailable () )
                     {
-                        #region Upload all the data
-
-                        if (UploadingLogFiles())
+                        if ( this.UploadingLogFiles () )
                         {
-                            DisplayAlert("Information", "All Log files uploaded!", "Ok");
+                            base.DisplayAlert ( "Information", "All Log files uploaded!", "Ok" );
 
                             //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
                         }
-                        else
-                        {
-                            #region Error Dialog Must be shown on Uploading
-
-                            DisplayAlert("Error", "Error Uploading files", "Ok");
-
-                            #endregion
-                        }
-
-                        #endregion
-
+                        else base.DisplayAlert ( "Error", "Error Uploading files", "Ok" );
                     }
-                    else
-                    {
-                        #region Error Dialog Must be shown on Loading
-
-                        DisplayAlert("Error", "No connection available", "Ok");
-
-                        #endregion
-                    }
-
-                    //var TEST = Application.Current.MainPage.Navigation.NavigationStack;
+                    else base.DisplayAlert ( "Error", "No connection available", "Ok" );
 
                     // Force to
                     //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
                 });
             });
 
-
-            this.EmailEntry.Focused += (s, e) =>
-            {
-                SetLayoutPosition(true, (int)-20);
-
-            };
-
-            this.EmailEntry.Unfocused += (s, e) =>
-            {
-                SetLayoutPosition(false, (int)-20);
-
-            };
-
-            this.PasswordEntry.Focused += (s, e) =>
-            {
-                SetLayoutPosition(true, (int)-80);
-            };
-
-            this.PasswordEntry.Unfocused += (s, e) =>
-            {
-                SetLayoutPosition(false, (int)-80);
-            };
-
-
+            this.EmailEntry   .Focused   += (s, e) => { SetLayoutPosition ( true,  (int)-20 ); };
+            this.EmailEntry   .Unfocused += (s, e) => { SetLayoutPosition ( false, (int)-20 ); };
+            this.PasswordEntry.Focused   += (s, e) => { SetLayoutPosition ( true,  (int)-80 ); };
+            this.PasswordEntry.Unfocused += (s, e) => { SetLayoutPosition ( false, (int)-80 ); };
         }
 
+        #endregion
 
-        private bool CheckIfNetworkIsAvailable()
+        #region Log files
+
+
+
+        #endregion
+
+        protected override bool OnBackButtonPressed ()
         {
-            var current = Connectivity.NetworkAccess;
-
-            var profiles = Connectivity.Profiles;
-
-            if (profiles.Contains(ConnectionProfile.WiFi))
-            {
-                if (current == NetworkAccess.Internet)
-                {
-                    return true;
-                    // Connection to internet is available
-                }
-            }
-            else
-            if (profiles.Contains(ConnectionProfile.Cellular))
-            {
-                if (current == NetworkAccess.Internet)
-                {
-                    return true;
-                    // Connection to internet is available
-                }
-            }
-
-            return false;
+            // This prevents a user from being able to hit the back button and leave the login page.
+            return true;
         }
 
+        
 
-
-        public AclaraViewLogin(IUserDialogs dialogs)
+        public AclaraViewLogin ( IUserDialogs dialogs )
         {
             InitializeComponent();
             Settings.IsNotConnectedInSettings = false;
@@ -212,7 +158,7 @@ namespace aclara_meters.view
 
         }
 
-        private bool UploadingLogFiles()
+        private bool UploadingLogFiles ()
         {
 
             string ftp_username = FormsApp.config.global.ftpUserName;
@@ -343,7 +289,7 @@ namespace aclara_meters.view
             return false;
         }
 
-        private void CertsTask()
+        private void CertsTask ()
         {
             /* */
 
@@ -498,6 +444,7 @@ namespace aclara_meters.view
         }
 
 
+
         private static int GetIntegerSize(BinaryReader binr)
         {
             byte bt = 0;
@@ -532,7 +479,6 @@ namespace aclara_meters.view
             return count;
         }
 
-
         public static byte[] GetBytesFromPEM(string pemString, string type)
         {
             string header; string footer;
@@ -554,8 +500,6 @@ namespace aclara_meters.view
             int end = pemString.IndexOf(footer, start) - start;
             return Convert.FromBase64String(pemString.Substring(start, end));
         }
-
-
 
         private static X509Certificate2 GetSigningCertificate(string subject)
         {
@@ -587,8 +531,6 @@ namespace aclara_meters.view
             return theCert;
         }
 
-
-
         public static byte[] EncryptDataOaepSha1(X509Certificate2 cert, byte[] data)
         {
             // GetRSAPublicKey returns an object with an independent lifetime, so it should be
@@ -600,7 +542,6 @@ namespace aclara_meters.view
                 return rsa.Encrypt(data, RSAEncryptionPadding.OaepSHA1);
             }
         }
-
 
         public static byte[] DecryptDataOaepSha1(X509Certificate2 cert, byte[] data)
         {
@@ -637,7 +578,6 @@ namespace aclara_meters.view
                 }
             }
         }
-
 
         public bool IsLocationAvailable()
         {

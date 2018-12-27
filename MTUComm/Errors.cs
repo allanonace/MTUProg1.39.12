@@ -49,14 +49,15 @@ namespace MTUComm
             }
         }
 
-        public Errors ( string pathUnityTest = "" )
+        public Errors ( string path = "" )
         {
-            bool isUnityTest = ! string.IsNullOrEmpty ( pathUnityTest );
+            bool isUnityTest = ! string.IsNullOrEmpty ( path );
 
-            Configuration config = Configuration.GetInstance ( isUnityTest, pathUnityTest );
+            Configuration config = Configuration.GetInstance ( path );
 
-            string path = Path.Combine (
-                ( ( ! isUnityTest ) ? config.GetBasePath() : pathUnityTest ), FILE_NAME );
+            path = Path.Combine (
+                    ( ( ! isUnityTest ) ? config.GetBasePath() : path ),
+                    FILE_NAME );
 
             XmlSerializer serializer = new XmlSerializer ( typeof ( ErrorList ) );
 

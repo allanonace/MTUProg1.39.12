@@ -50,7 +50,7 @@ namespace aclara_meters.view
             resultCallback = callback;
             resultScriptName = script_name;
 
-            FormsApp.CredentialsService.SaveCredentials("test", "test");
+            FormsApp.credentialsService.SaveCredentials("test", "test");
 
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -76,9 +76,9 @@ namespace aclara_meters.view
             TappedListeners();
 
             //Change username textview to Prefs. String
-            if (FormsApp.CredentialsService.UserName != null)
+            if (FormsApp.credentialsService.UserName != null)
             {
-                username = FormsApp.CredentialsService.UserName; //"Kartik";
+                username = FormsApp.credentialsService.UserName; //"Kartik";
             }
 
             ContentView_Scripting_battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
@@ -721,7 +721,7 @@ namespace aclara_meters.view
             dialog_replacemeter_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);
+            ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);
         }
 
         private void TurnOffMTUCloseTapped(object sender, EventArgs e)
@@ -763,13 +763,13 @@ namespace aclara_meters.view
             dialog_meter_replace_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
+            ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
         }
 
         private async void LogoutAsync(object sender, EventArgs e)
         {
             Settings.IsLoggedIn = false;
-            FormsApp.CredentialsService.DeleteCredentials();
+            FormsApp.credentialsService.DeleteCredentials();
             int contador = Navigation.NavigationStack.Count;
             while (contador > 0)
             {
@@ -814,7 +814,7 @@ namespace aclara_meters.view
             ContentView_DeviceList.IsEnabled = false;
             bool reassociate = false;
             if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
-                FormsApp.CredentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
+                FormsApp.credentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
                 System.Convert.ToBase64String(item.Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()).Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty)) &&
                 item.Peripheral.Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)))
             {

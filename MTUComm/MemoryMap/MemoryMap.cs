@@ -114,7 +114,7 @@ namespace MTUComm.MemoryMap
             isUnityTest = ! string.IsNullOrEmpty ( pathUnityTest );
 
             // Read MTU family XML and prepare setters and getters
-            Configuration config     = Configuration.GetInstance ( isUnityTest, pathUnityTest );
+            Configuration config     = Configuration.GetInstance ( pathUnityTest );
             XmlSerializer serializer = new XmlSerializer ( typeof ( MemRegisterList ) );
 
             // Parameter "family" when testing is full path to use

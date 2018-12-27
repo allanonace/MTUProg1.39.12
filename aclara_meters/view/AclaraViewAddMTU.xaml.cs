@@ -240,7 +240,7 @@ namespace aclara_meters.view
                 config: FormsApp.config,
                 serial: FormsApp.ble_interface,
                 type: MTUComm.Action.ActionType.AddMtu,
-                user: FormsApp.CredentialsService.UserName);
+                user: FormsApp.credentialsService.UserName);
 
             #region Prepare mtuForm
 
@@ -300,9 +300,9 @@ namespace aclara_meters.view
             TappedListeners();
 
             //Change username textview to Prefs. String
-            if (FormsApp.CredentialsService.UserName != null)
+            if (FormsApp.credentialsService.UserName != null)
             {
-                userName.Text = FormsApp.CredentialsService.UserName; //"Kartik";
+                userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
             }
             
             battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
@@ -2008,7 +2008,7 @@ namespace aclara_meters.view
         private async void LogoutCallAsync(object sender, EventArgs e)
         {
             Settings.IsLoggedIn = false;
-            FormsApp.CredentialsService.DeleteCredentials();
+            FormsApp.credentialsService.DeleteCredentials();
 
             int contador = Navigation.NavigationStack.Count;
             while (contador > 0)
@@ -2047,7 +2047,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);
+            ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);
         }
 
         private void TurnOffMTUCloseTapped(object sender, EventArgs e)
@@ -2078,7 +2078,7 @@ namespace aclara_meters.view
                 config: FormsApp.config,
                 serial: FormsApp.ble_interface,
                 type: MTUComm.Action.ActionType.TurnOffMtu,
-                user: FormsApp.CredentialsService.UserName);
+                user: FormsApp.credentialsService.UserName);
 
             turnOffAction.OnFinish += ((s, args) =>
             {
@@ -2121,7 +2121,7 @@ namespace aclara_meters.view
             dialog_meter_replace_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
+            ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
         }
 
         #endregion

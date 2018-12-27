@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Xml;
 
@@ -11,15 +8,12 @@ namespace MTUComm
 {
     public class Configuration
     {
-        private const string APP_SUBF     = "com.aclara.mtu.programmer/files/";
-        private const string PREFAB_PATH  = "/data/data/" + APP_SUBF;
-        private const string SEARCH_PATH  = "Android/data/" + APP_SUBF;
-        private const string XML_MTUS     = "Mtu.xml";
-        private const string XML_METERS   = "Meter.xml";
-        private const string XML_GLOBAL   = "Global.xml";
-        private const string XML_INTERFACE   = "Interface.xml";
-        private const string XML_ALARMS = "Alarm.xml";
-        private const string XML_DEMANDS = "DemandConf.xml";
+        private const string XML_MTUS      = "Mtu.xml";
+        private const string XML_METERS    = "Meter.xml";
+        private const string XML_GLOBAL    = "Global.xml";
+        private const string XML_INTERFACE = "Interface.xml";
+        private const string XML_ALARMS    = "Alarm.xml";
+        private const string XML_DEMANDS   = "DemandConf.xml";
 
         private String mbase_path;
         public MtuTypes mtuTypes;
@@ -35,105 +29,26 @@ namespace MTUComm
         private string appName;
         private static Configuration instance;
 
-        private enum PATHS
+        private Configuration ( string path = "" )
         {
-            STORAGE_EMULATED_ZERO,
-            STORAGE_EMULATED_LEGACY,
-            STORAGE_SDCARD_ZERO,
-            SDCARD_MNT,
-            SDCARD,
-            //DATA_MEDIA_ZERO,
-            //DATA_MEDIA,
-            //DATA_ZERO,
-            //DATA
-        }
-
-        private static string[] paths =
-        {
-            "/storage/emulated/0/",      // Espacio de trabajo del usuario cero/0
-            "/storage/emulated/legacy/", // Enlace simbolico a "/storage/emulated/0/"
-            "/storage/sdcard0/",         // Android >= 4.0
-            "/mnt/sdcard/",              // Android < 4.0
-            "/sdcard/",                  // Enlace simbolico a "/storage/sdcard0/" y "/mnt/sdcard/"
-            //"/data/media/0/",            // 
-            //"/data/media/",
-            //"/data/0/",
-            //"/data/",
-        };
-
-        private static string GetPath ( PATHS ePath )
-        {
-            return paths[ (int)ePath ];
-        }
-
-        public static string GetPathForAndroid ()
-        {
-            // Works with dev unit ZTE but not with Alcatel
-            if ( Directory.Exists ( PREFAB_PATH ) &&
-                 File.Exists ( PREFAB_PATH + XML_MTUS ) )
-                return PREFAB_PATH;
-
-            // Search the first valid path to recover XML files
-            // Works with dev unit Alcatel but no with ZTE
-            PATHS  ePath;
-            string path;
-            string[] names = Enum.GetNames(typeof(PATHS));
-            for (int i = 0; i < names.Length; i++)
-            {
-                Enum.TryParse<PATHS> ( names[i], out ePath );
-                path = GetPath ( ePath );
-
-                if ( Directory.Exists ( path ) &&
-                     File.Exists ( path + SEARCH_PATH + XML_MTUS ) )
-                {
-                    return path + SEARCH_PATH;
-                }
-            }
-
-            return null;
-        }
-
-        private Configuration ( bool isUnitTest = false, string pathUnityTest = "" )
-        {
-            mbase_path = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
-            
-            if ( ! isUnitTest )
-            {
-                if ( Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android )
-                    mbase_path = GetPathForAndroid ();
-            }
-            else mbase_path = pathUnityTest;
+            mbase_path = ( string.IsNullOrEmpty ( path ) ) ? Mobile.pathCache : path;
 
             device = "PC";
-            Config config = new Config();
+            Config config = new Config ();
 
-            mtuTypes   = config.GetMtu(Path.Combine(mbase_path, XML_MTUS ));
-            meterTypes = config.GetMeters(Path.Combine(mbase_path, XML_METERS ));
-            global     = config.GetGlobal(Path.Combine(mbase_path, XML_GLOBAL ));
-            interfaces = config.GetInterfaces(Path.Combine(mbase_path, XML_INTERFACE));
-            alarms     = config.GetAlarms(Path.Combine(mbase_path, XML_ALARMS));
-            demands    = config.GetDemandConf(Path.Combine(mbase_path, XML_DEMANDS));
+            mtuTypes   = config.GetMtu        ( Path.Combine(mbase_path, XML_MTUS      ) );
+            meterTypes = config.GetMeters     ( Path.Combine(mbase_path, XML_METERS    ) );
+            global     = config.GetGlobal     ( Path.Combine(mbase_path, XML_GLOBAL    ) );
+            interfaces = config.GetInterfaces ( Path.Combine(mbase_path, XML_INTERFACE ) );
+            alarms     = config.GetAlarms     ( Path.Combine(mbase_path, XML_ALARMS    ) );
+            demands    = config.GetDemandConf ( Path.Combine(mbase_path, XML_DEMANDS   ) );
         }
 
-        public Configuration(String base_path)
+        public static Configuration GetInstance ( string path = "" )
         {
-            mbase_path = base_path;
-            device = "PC";
-            Config config = new Config();
-
-            mtuTypes = config.GetMtu(Path.Combine(mbase_path, XML_MTUS ));
-            meterTypes = config.GetMeters(Path.Combine(mbase_path, XML_METERS ));
-            global = config.GetGlobal(Path.Combine(mbase_path, XML_GLOBAL ));
-            interfaces = config.GetInterfaces(Path.Combine(mbase_path, XML_INTERFACE));
-            alarms = config.GetAlarms(Path.Combine(mbase_path, XML_ALARMS));
-            demands = config.GetDemandConf(Path.Combine(mbase_path, XML_DEMANDS));
-        }
-
-        public static Configuration GetInstance ( bool isUnitTest = false, string pathUnityTest = "" )
-        {
-            if (instance == null)
+            if ( instance == null )
             {
-                instance = new Configuration ( isUnitTest, pathUnityTest );
+                instance = new Configuration ( path );
                 //instance = new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\run_basepath");// @"C: \Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog");
             }
             return instance;
@@ -148,7 +63,6 @@ namespace MTUComm
         {
             return mbase_path;
         }
-
 
         public Global GetGlobal()
         {
@@ -181,7 +95,6 @@ namespace MTUComm
         {
             return meterTypes.FindByMterId(meterId);
         }
-
 
         public InterfaceParameters[] getAllInterfaceFields(int mtuid, string Action)
         {
@@ -249,7 +162,6 @@ namespace MTUComm
         {
             return meterTypes.GetVendorsFromMeters(meterTypes.Meters);
         }
-
 
         public List<string> GetModelsByVendorFromMeters(String vendor)
         {
@@ -336,7 +248,6 @@ namespace MTUComm
             device = device_os;
         }
 
-
         public void setDeviceUUID(string UUID)
         {
             deviceUUID = UUID; 
@@ -351,6 +262,5 @@ namespace MTUComm
         {
             appName = NAME;
         }
-
     }
 }

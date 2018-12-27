@@ -54,10 +54,10 @@ namespace aclara_meters.viewmodel
 
         public void Load()
         {
-            if (FormsApp.CredentialsService.DoCredentialsExist())
+            if (FormsApp.credentialsService.DoCredentialsExist())
             {
 
-                FormsApp.loggger.logLogin(FormsApp.CredentialsService.UserName);
+                FormsApp.loggger.logLogin(FormsApp.credentialsService.UserName);
                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewMainMenu(dialogs_save),false);
                 //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewGlobalUIController(), false);
             }   
@@ -121,16 +121,16 @@ namespace aclara_meters.viewmodel
 
                         if (isValid)
                         {
-                            bool doCredentialsExist = FormsApp.CredentialsService.DoCredentialsExist();
+                            bool doCredentialsExist = FormsApp.credentialsService.DoCredentialsExist();
                             if (!doCredentialsExist)
                             {
-                                FormsApp.CredentialsService.SaveCredentials(userName, password);
+                                FormsApp.credentialsService.SaveCredentials(userName, password);
                         
                             }
                             Settings.IsLoggedIn = true;
                             Settings.SavedUserName = User.Email;
 
-                            FormsApp.loggger.logLogin(FormsApp.CredentialsService.UserName);
+                            FormsApp.loggger.logLogin(FormsApp.credentialsService.UserName);
                             await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewMainMenu(dialogs_save), false);
                             //await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewGlobalUIController(), false);
                         }

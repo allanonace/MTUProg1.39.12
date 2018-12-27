@@ -134,9 +134,9 @@ namespace aclara_meters.view
             navigationDrawerList.Opacity = 0.65;
 
             //Change username textview to Prefs. String
-            if (FormsApp.CredentialsService.UserName != null)
+            if (FormsApp.credentialsService.UserName != null)
             {
-                userName.Text = FormsApp.CredentialsService.UserName;
+                userName.Text = FormsApp.credentialsService.UserName;
             }
 
             // portrait
@@ -214,9 +214,9 @@ namespace aclara_meters.view
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
 
             //Change username textview to Prefs. String
-            if (FormsApp.CredentialsService.UserName != null)
+            if (FormsApp.credentialsService.UserName != null)
             {
-                userName.Text = FormsApp.CredentialsService.UserName;
+                userName.Text = FormsApp.credentialsService.UserName;
             }
 
             ButtonListeners();
@@ -293,7 +293,7 @@ namespace aclara_meters.view
             dialog_replacemeter_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);
+            ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);
         }
 
         private void TurnOffMTUCloseTapped(object sender, EventArgs e)
@@ -336,13 +336,13 @@ namespace aclara_meters.view
             dialog_meter_replace_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
+            ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
         }
 
         private async void LogoutButtonTapped(object sender, EventArgs e)
         {
             Settings.IsLoggedIn = false;
-            FormsApp.CredentialsService.DeleteCredentials();
+            FormsApp.credentialsService.DeleteCredentials();
 
             try
             {

@@ -34,31 +34,43 @@
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\iPhoneSimulator\Release</OutputPath>
-    <DefineConstants></DefineConstants>
-    <DefineConstants></DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <DocumentationFile></DocumentationFile>
+    <DocumentationFile>
+    </DocumentationFile>
     <MtouchLink>None</MtouchLink>
     <MtouchArch>x86_64</MtouchArch>
     <ConsolePause>false</ConsolePause>
     <CrashReportingEnabled>false</CrashReportingEnabled>
-    <CodesignEntitlements></CodesignEntitlements>
-    <OnDemandResourcesInitialInstallTags></OnDemandResourcesInitialInstallTags>
-    <OnDemandResourcesPrefetchOrder></OnDemandResourcesPrefetchOrder>
-    <NoWarn></NoWarn>
+    <CodesignEntitlements>
+    </CodesignEntitlements>
+    <OnDemandResourcesInitialInstallTags>
+    </OnDemandResourcesInitialInstallTags>
+    <OnDemandResourcesPrefetchOrder>
+    </OnDemandResourcesPrefetchOrder>
+    <NoWarn>
+    </NoWarn>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <LangVersion>Default</LangVersion>
     <NoStdLib>false</NoStdLib>
     <PlatformTarget>anycpu</PlatformTarget>
-    <WarningsNotAsErrors></WarningsNotAsErrors>
-    <OnDemandResourcesInitialInstallTags></OnDemandResourcesInitialInstallTags>
-    <OnDemandResourcesPrefetchOrder></OnDemandResourcesPrefetchOrder>
+    <WarningsNotAsErrors>
+    </WarningsNotAsErrors>
+    <OnDemandResourcesInitialInstallTags>
+    </OnDemandResourcesInitialInstallTags>
+    <OnDemandResourcesPrefetchOrder>
+    </OnDemandResourcesPrefetchOrder>
     <CodesignKey>iPhone Developer: Daniel Del Rio (76ZMLN49HH)</CodesignKey>
-    <CodesignProvision></CodesignProvision>
-    <MtouchDebug></MtouchDebug>
+    <CodesignProvision>
+    </CodesignProvision>
+    <MtouchDebug>
+    </MtouchDebug>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
     <DebugSymbols>true</DebugSymbols>
@@ -76,10 +88,12 @@
     <BuildIpa>true</BuildIpa>
     <CodesignProvision>bizintekdist</CodesignProvision>
     <MtouchLink>None</MtouchLink>
-    <OnDemandResourcesInitialInstallTags></OnDemandResourcesInitialInstallTags>
+    <OnDemandResourcesInitialInstallTags>
+    </OnDemandResourcesInitialInstallTags>
     <MtouchArch>ARMv7, ARMv7s, ARM64</MtouchArch>
     <DeviceSpecificBuild>true</DeviceSpecificBuild>
     <MtouchFastDev>true</MtouchFastDev>
+    <OptimizePNGs>false</OptimizePNGs>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
@@ -95,19 +109,30 @@
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <CodesignProvision>bizintekdist</CodesignProvision>
     <MtouchLink>None</MtouchLink>
-    <OptimizePNGs></OptimizePNGs>
-    <MtouchFloat32></MtouchFloat32>
-    <CodesignExtraArgs></CodesignExtraArgs>
-    <CodesignExtraArgs></CodesignExtraArgs>
-    <MtouchEnableBitcode></MtouchEnableBitcode>
-    <IOSDebuggerPort></IOSDebuggerPort>
-    <IOSDebuggerPort></IOSDebuggerPort>
-    <IOSDebuggerPort></IOSDebuggerPort>
+    <OptimizePNGs>
+    </OptimizePNGs>
+    <MtouchFloat32>
+    </MtouchFloat32>
+    <CodesignExtraArgs>
+    </CodesignExtraArgs>
+    <CodesignExtraArgs>
+    </CodesignExtraArgs>
+    <MtouchEnableBitcode>
+    </MtouchEnableBitcode>
+    <IOSDebuggerPort>
+    </IOSDebuggerPort>
+    <IOSDebuggerPort>
+    </IOSDebuggerPort>
+    <IOSDebuggerPort>
+    </IOSDebuggerPort>
     <NoStdLib>false</NoStdLib>
     <MtouchHttpClientHandler>HttpClientHandler</MtouchHttpClientHandler>
-    <MtouchDebug></MtouchDebug>
-    <MtouchEnableSGenConc></MtouchEnableSGenConc>
-    <OnDemandResourcesInitialInstallTags></OnDemandResourcesInitialInstallTags>
+    <MtouchDebug>
+    </MtouchDebug>
+    <MtouchEnableSGenConc>
+    </MtouchEnableSGenConc>
+    <OnDemandResourcesInitialInstallTags>
+    </OnDemandResourcesInitialInstallTags>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Ad-Hoc|iPhone' ">
     <DebugType>none</DebugType>
@@ -136,6 +161,9 @@
     <CodesignProvision>Automatic:AppStore</CodesignProvision>
     <CodesignKey>iPhone Developer: Daniel Del Rio (76ZMLN49HH)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <AppExtensionDebugBundleId />
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -241,7 +269,7 @@
       <Version>4.5.0</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Essentials">
-      <Version>0.11.0-preview</Version>
+      <Version>1.0.0</Version>
     </PackageReference>
     <PackageReference Include="Plugin.Multilingual">
       <Version>1.1.6-beta</Version>

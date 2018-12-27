@@ -1,35 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿//using Microsoft.Intune.MAM;
 using Acr.UserDialogs;
 using Foundation;
 using nexus.protocols.ble;
+using System;
+using System.Collections.Generic;
 using UIKit;
 using Xamarin.Forms;
-//using Microsoft.Intune.MAM;
+using Xamarin.Forms.Platform.iOS;
 
 namespace aclara_meters.iOS
 {
     // The UIApplicationDelegate for the application. This class is responsible for launching the 
     // User Interface of the application, as well as listening (and optionally responding) to 
-    // application events from iOS.
+    // application events from iOS
     [Register("AppDelegate")]
-    public partial class AppDelegate : global::Xamarin.Forms.Platform.iOS.FormsApplicationDelegate
+    public partial class AppDelegate : FormsApplicationDelegate
     {
         private FormsApp appSave;
         private string identity = "";
 
-
-        //
         // This method is invoked when the application has loaded and is ready to run. In this 
-        // method you should instantiate the window, load the UI into it and then make the window
-        // visible.
-        //
-        // You have 17 seconds to return from this method, or iOS will terminate your application.
-        //
-        public override bool FinishedLaunching(UIApplication app, NSDictionary options)
+        // method you should instantiate the window, load the UI into it and make window visible
+        // NOTE: You have 17 seconds to return from this method or iOS will terminate application
+        public override bool FinishedLaunching (
+            UIApplication app,
+            NSDictionary  options )
         {
-            Forms.Init();
+            Forms.Init ();
             //Distribute.DontCheckForUpdatesInDebug();
 
             /*
@@ -48,7 +45,6 @@ namespace aclara_meters.iOS
         
             for (int i = 0, keyCount = (int)key.Count; i < keyCount; i++)
             {
-                
                 NSObject fields_values = key.ElementAt(i).Value;
 
                 ftp_username = fields_values.ValueForKey(new NSString("ftp_username"));
@@ -59,12 +55,9 @@ namespace aclara_meters.iOS
 
                 Console.WriteLine("ftp_username: {0}, ftp_pathremotefile: {1}, cert_file: {2}, ftp_password: {3}, ftp_host: {4}", 
                                   ftp_username, ftp_pathremotefile, cert_file, ftp_password, ftp_host );
-              
             }
-
      
             List <string> listaDatos = new List<string>();
-
 
             try{
                 listaDatos.Add("ftp_username: " + ftp_username );
@@ -89,31 +82,26 @@ namespace aclara_meters.iOS
 
             List<string> listaDatos = new List<string>();
 
-            var AppVersion = NSBundle.MainBundle.InfoDictionary["CFBundleVersion"];
+            var AppVersion = NSBundle.MainBundle.InfoDictionary[ "CFBundleVersion" ];
 
+            this.appSave = new FormsApp (
+                BluetoothLowEnergyAdapter.ObtainDefaultAdapter (),
+                UserDialogs.Instance,
+                listaDatos,
+                AppVersion.Description );
 
-            appSave = new FormsApp(BluetoothLowEnergyAdapter.ObtainDefaultAdapter(), UserDialogs.Instance, listaDatos, AppVersion.Description);
+            base.LoadApplication ( appSave );
 
-            LoadApplication( appSave );
-          
-
-            return base.FinishedLaunching(app, options);
+            return base.FinishedLaunching ( app, options );
         }
 
-
-        public override bool OpenUrl(UIApplication app, NSUrl url, NSDictionary options)
+        public override bool OpenUrl (
+            UIApplication app,
+            NSUrl         url,
+            NSDictionary  options )
         {
-            appSave.HandleUrl((Uri)url);
-
+            appSave.HandleUrl ( ( Uri )url );
             return true;
         }
-
-
- 
-
-
     }
-
-
-
 }
