@@ -117,6 +117,10 @@ namespace aclara_meters
 
             AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
 
+            // TEST
+            //Mobile.GetPath ();
+            //this.LoadXmlsAndCreateContainer ( dialogs, data );
+
             // Downloads, if necesary, and loads configuration from XML files
             if ( this.HasDeviceAllXmls () )
                  this.LoadXmlsAndCreateContainer ( dialogs, data );
@@ -206,27 +210,19 @@ namespace aclara_meters
 
                         }
 
-                        var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                        string path = Mobile.GetPath ();
 
-                        if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
-                        {
-                            xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-                        }
-
-                        foreach (var file in ftp_array_files)
+                        foreach ( var file in ftp_array_files )
                         {
                             string remoteFileName = file.Name;
 
-
-                            using (Stream file1 = File.OpenWrite(Path.Combine(xml_documents, remoteFileName)))
+                            using (Stream file1 = File.OpenWrite(Path.Combine( path, remoteFileName)))
                             {
                                 sftp.DownloadFile(Path.Combine(pathRemoteFile, remoteFileName), file1);
                             }
-
                         }
 
-
-                        sftp.Disconnect();
+                        sftp.Disconnect ();
 
                         return true;
                     }

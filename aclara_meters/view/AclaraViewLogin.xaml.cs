@@ -176,15 +176,9 @@ namespace aclara_meters.view
             //TODO: UUID MOVIL EN PATH REMOTE FILE
             string pathRemoteFile = "/home/aclara"+ FormsApp.config.global.ftpRemotePath + CrossDeviceInfo.Current.Id + "/"; // prueba_archivo.xml";
 
-
-
             // Path where the file should be saved once downloaded (locally)
-            // string pathLocalFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "User.txt");
-            var xml_documents = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            if (Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android)
-            {
-                xml_documents = xml_documents.Replace("/data/user/0/", "/storage/emulated/0/Android/data/");
-            }
+            string path = Mobile.GetPath ();
+            
             //string name = "ReadMtuResult.xml";
             //string filename = Path.Combine(xml_documents, name);
             using (SftpClient sftp = new SftpClient(host, username, password))
@@ -202,7 +196,7 @@ namespace aclara_meters.view
 
                     try
                     {
-                        var lines = File.ReadAllLines(Path.Combine(xml_documents, "SavedLogsList.txt"));
+                        var lines = File.ReadAllLines(Path.Combine( path, "SavedLogsList.txt"));
                         foreach (var line in lines)
                         {
                             saved_array_files.Add(line);
@@ -214,7 +208,7 @@ namespace aclara_meters.view
                     }
 
                     List<FileInfo> local_array_files = new List<FileInfo>();
-                    DirectoryInfo info = new DirectoryInfo(xml_documents);
+                    DirectoryInfo info = new DirectoryInfo( path );
                     FileInfo[] files = info.GetFiles().OrderBy(p => p.LastWriteTimeUtc).ToArray();
 
                     foreach (FileInfo file in files)
@@ -262,7 +256,7 @@ namespace aclara_meters.view
                     }
                     try
                     {
-                        using (TextWriter tw = new StreamWriter(Path.Combine(xml_documents, "SavedLogsList.txt")))
+                        using (TextWriter tw = new StreamWriter(Path.Combine( path, "SavedLogsList.txt")))
                         {
                             foreach (string fileFtp in saved_array_files)
                             {

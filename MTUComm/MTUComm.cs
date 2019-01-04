@@ -372,14 +372,24 @@ namespace MTUComm
 
         public void Task_InstallConfirmation ()
         {
-            //If MTU has changed or critical settings/configuration force detection rutine
-            if (this.changedMTUSettings)
-                RecoverMeterByMtuType ();
+            ErrorArgs errorArgs = this.InstallConfirmation_Logic ();
 
-            if (latest_mtu.Shipbit)
+            if ( errorArgs == null )
+                this.Task_ReadMtu ( true );
+            else
+                this.OnError ( this, errorArgs );
+        }
+
+        private ErrorArgs InstallConfirmation_Logic ()
+        {
+            //If MTU has changed or critical settings/configuration force detection rutine
+            if ( this.changedMTUSettings )
+                this.RecoverMeterByMtuType ();
+
+            if ( this.latest_mtu.Shipbit )
             {
-                string message = "Current MTU ID: " + latest_mtu.Id + " type " + latest_mtu.Type + " is OFF";
-                OnError(this, new ErrorArgs(112, message, "Installation Confirmation Cancellation - " + message));
+                string message = "Current MTU ID: " + this.latest_mtu.Id + " type " + this.latest_mtu.Type + " is OFF";
+                return new ErrorArgs ( 112, message, "Installation Confirmation Cancellation - " + message );
             }
             else
             {
@@ -407,7 +417,6 @@ namespace MTUComm
                     sync_systemFlags |= sync_mask; // set bit 0
                     lexi.Write(65, new byte[] { sync_systemFlags });
 
-
                     byte valueWritten = (lexi.Read(inConFlag, 1))[0];
                     valueWritten &= mask;
 
@@ -415,7 +424,6 @@ namespace MTUComm
                     while (valueWritten > 0 && max_iters <= 36)
                     {
                         int loop = (int)Math.Round((decimal)((max_iters * 100.0) / 36.0));
-
 
                         OnProgress(this, new ProgressArgs(max_iters, 36, "Checking Install Confirmation... ("+ loop.ToString() + "%)"));
                         Thread.Sleep(5000);
@@ -426,12 +434,11 @@ namespace MTUComm
                 }
                 catch ( Exception e )
                 {
-                    OnError(this, TranslateException(e));
-                    return;
+                    return TranslateException ( e );
                 }
-
-                this.Task_ReadMtu(true);
             }
+
+            return null; // OK!
         }
 
         public void Task_TurnOffMtu ()
@@ -571,7 +578,7 @@ namespace MTUComm
                 foreach ( Parameter parameter in addMtuAction.GetParameters () )
                     form.AddParameterTranslatingAclaraXml ( parameter );
 
-                // Auto-detect meter
+                // Auto-detect Meter
                 if ( ! form.ContainsParameter ( AddMtuForm.FIELD.SELECTED_METER  ) &&
                        form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS ) &&
                        form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE ) &&
@@ -594,7 +601,7 @@ namespace MTUComm
                     }
                 }
 
-                // Auto-detect scripting alarm profile
+                // Auto-detect scripting Alarm profile
                 List<Alarm> alarms = configuration.alarms.FindByMtuType ( (int)MtuForm.mtuBasicInfo.Type );
                 if ( alarms.Count > 0 )
                 {
@@ -610,40 +617,28 @@ namespace MTUComm
                 return;
             }
 
-            /*
-             *  public List<Meter> FindByDialDescription(int NumberOfDials, int DriveDialSize, int UnitOfMeasure) to get meterId if 
-             *      
-             *      <NumberOfDials Port="1">4</NumberOfDials>
-             *      <DriveDialSize Port="1">2</DriveDialSize>
-             *      <UnitOfMeasure Port="1">CCF</UnitOfMeasure>
-             * 
-
-
-             * */
-
             this.Task_AddMtu ( form, addMtuAction.user, true );
         }
 
         private void Task_AddMtu ( dynamic form, string user, bool isFromScripting = false )
         {
-            Mtu mtu = form.mtu;
-            dynamic MtuConditions     = form.conditions.mtu;
-            dynamic GlobalsConditions = form.conditions.globals;
+            Mtu    mtu     = form.mtu;
+            Global globals = form.globals;
 
             /*
-            bool mtu_twoports        = form.conditions.mtu.TwoPorts;
-            bool glo_workorder       = form.conditions.globals.WorkOrderRecording;
-            bool glo_meterserial     = form.conditions.globals.UseMeterSerialNumber;
-            bool glo_metervendor     = form.conditions.globals.ShowMeterVendor;
-            bool glo_readinterval    = form.conditions.globals.IndividualReadInterval;
-            bool glo_allowdailyreads = form.conditions.globals.AllowDailyReads;
-            bool glo_indidailyreads  = form.conditions.globals.IndividualDailyReads;
-            bool mtu_dailyreads      = form.conditions.mtu.DailyReads;
-            bool glo_fastmsg         = form.conditions.globals.FastMessageConfig;
-            bool glo_fasttwoway      = form.conditions.globals.Fast2Way;
-            bool mtu_fastmsgconfig   = form.conditions.mtu.FastMessageConfig;
-            bool mtu_alarmprof       = form.conditions.mtu.RequiresAlarmProfile;
-            bool mtu_demand          = form.conditions.mtu.MtuDemand;
+            bool mtu_twoports        = mtu.TwoPorts;
+            bool glo_workorder       = globals.WorkOrderRecording;
+            bool glo_meterserial     = globals.UseMeterSerialNumber;
+            bool glo_metervendor     = globals.ShowMeterVendor;
+            bool glo_readinterval    = globals.IndividualReadInterval;
+            bool glo_allowdailyreads = globals.AllowDailyReads;
+            bool glo_indidailyreads  = globals.IndividualDailyReads;
+            bool mtu_dailyreads      = mtu.DailyReads;
+            bool glo_fastmsg         = globals.FastMessageConfig;
+            bool glo_fasttwoway      = globals.Fast2Way;
+            bool mtu_fastmsgconfig   = mtu.FastMessageConfig;
+            bool mtu_alarmprof       = mtu.RequiresAlarmProfile;
+            bool mtu_demand          = mtu.MtuDemand;
 
             string P1MeterId         = form.ServicePortId.Value;
             string P1MeterType       = ( ( Meter )form.Meter.Value ).Id.ToString ();
@@ -671,7 +666,7 @@ namespace MTUComm
                 byte[] memory = new byte[ memory_map_size ];
                 dynamic map = new MemoryMap.MemoryMap ( memory, memory_map_type );
 
-                bool useTwoPorts = MtuConditions.TwoPorts;
+                bool useTwoPorts = mtu.TwoPorts;
 
                 #region Meter Type
 
@@ -703,7 +698,7 @@ namespace MTUComm
 
                 #region Reading Interval
 
-                if ( GlobalsConditions.IndividualReadInterval )
+                if ( globals.IndividualReadInterval )
                 {
                         // If not present in scripted mode, set default value to one/1 hour
                     map.ReadIntervalMinutes = ( form.ContainsParameter ( AddMtuForm.FIELD.READ_INTERVAL ) ) ?
@@ -755,7 +750,7 @@ namespace MTUComm
 
                 #region Alarm
 
-                if ( MtuConditions.RequiresAlarmProfile )
+                if ( mtu.RequiresAlarmProfile )
                 {
                     Alarm alarms = (Alarm)form.Alarm.Value;
                     if ( alarms != null )
@@ -770,7 +765,7 @@ namespace MTUComm
                         map.P1UrgentAlarm = alarms.DcuUrgentAlarm;
 
                         // P1MagneticAlarm
-                        if (mtu.MagneticTamper)
+                        if ( mtu.MagneticTamper)
                             map.P1MagneticAlarm = alarms.Magnetic;
 
                         // P1RegisterCoverAlarm
@@ -857,6 +852,19 @@ namespace MTUComm
 
                 #endregion
 
+                #region Install Confirmation
+
+                // If field ForceTimeSync is true inside Global,
+                // after TurnOn it has to be performed an InstallConfirmation
+                if ( globals.ForceTimeSync )
+                {
+                    ErrorArgs errorArgs = this.InstallConfirmation_Logic ();
+                    if ( errorArgs != null )
+                        this.OnError ( this, errorArgs );
+                }
+
+                #endregion
+
                 #region Read MTU
 
                 lexi.Write(64, new byte[] { 1 });
@@ -901,8 +909,10 @@ namespace MTUComm
                 #endregion
 
                 // Generate log to show on device screen
-                AddMtuArgs addMtuArgs = new AddMtuArgs(readMemoryMap, mtu, form, addMtuLog );
-                ActionResult result = OnAddMtu(this, addMtuArgs);
+                AddMtuArgs addMtuArgs = new AddMtuArgs ( readMemoryMap, mtu, form, addMtuLog );
+                this.OnAddMtu ( this, addMtuArgs );
+
+                //ActionResult result = this.OnAddMtu ( this, addMtuArgs );
                 //addMtuLog.LogReadMtu(result);
 
                 // Generate xml log file and save on device
@@ -912,7 +922,7 @@ namespace MTUComm
             {
                 if ( isFromScripting )
                      OnError ( this, new ErrorArgs ( 113, "Error in parsing Trigger File", "Error in parsing Trigger File" ) );
-                else OnError ( this, TranslateException( e ) );
+                else OnError ( this, this.TranslateException ( e ) );
             }
         }
 
@@ -1012,7 +1022,7 @@ namespace MTUComm
 
         #endregion
 
-        // NO SE USA
+        // NO PARECE USARSE
         public byte[] ReadComplete ( byte addr, uint length )
         {
             byte[] tmp = new byte[length];

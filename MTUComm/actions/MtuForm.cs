@@ -11,8 +11,9 @@ namespace MTUComm.actions
     {
         #region Conditions
 
+        /*
         public enum FROM { GLOBALS, MTU }
-
+        
         public sealed class Conditions
         {
             public class Conditions_Base : DynamicObject
@@ -25,9 +26,9 @@ namespace MTUComm.actions
                 public Conditions_Base ( Mtu mtu, FROM from )
                 {
                     this.dictionary = new Dictionary<string, bool>();
-                    this.globals = Configuration.GetInstance().GetGlobal();
-                    this.mtu = mtu;
-                    this.from = from;
+                    this.globals    = Configuration.GetInstance().GetGlobal ();
+                    this.mtu        = mtu;
+                    this.from       = from;
                 }
 
                 public override bool TrySetMember(SetMemberBinder binder, object value)
@@ -70,15 +71,17 @@ namespace MTUComm.actions
                 this.globals = new Conditions_Base ( mtu, FROM.GLOBALS );
             }
         }
+        */
 
         #endregion
 
         #region Attributes
 
         private Dictionary<string,Parameter> dictionary;
-        public Conditions conditions { get; private set; }
+        //public Conditions conditions { get; private set; }
         public static MTUBasicInfo mtuBasicInfo { get; private set; }
-        public Mtu mtu;
+        public Global globals { get; }
+        public Mtu mtu { get; }
 
         #endregion
 
@@ -86,14 +89,15 @@ namespace MTUComm.actions
 
         public MtuForm ( Mtu mtu )
         {
-            this.mtu = mtu;
-            this.dictionary = new Dictionary<string, Parameter>();
-            this.conditions = new Conditions(mtu);
+            this.dictionary = new Dictionary<string,Parameter> ();
+            //this.conditions = new Conditions ( mtu );
+            this.globals = Configuration.GetInstance().GetGlobal ();
+            this.mtu     = mtu;
         }
 
         #endregion
 
-        #region Set and Get
+        #region Set and Get Parameter
 
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {

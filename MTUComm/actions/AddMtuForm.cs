@@ -373,6 +373,7 @@ namespace MTUComm.actions
 
         public AddMtuForm ( Mtu mtu ) : base ( mtu )
         {
+            /*
             // Two Ports
             base.conditions.mtu.AddCondition("TwoPorts");
 
@@ -403,6 +404,7 @@ namespace MTUComm.actions
 
             // Demands
             base.conditions.mtu.AddCondition("MtuDemand");
+            */
         }
 
         public void AddParameter ( FIELD fieldType, dynamic value )

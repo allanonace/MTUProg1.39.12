@@ -244,14 +244,15 @@ namespace aclara_meters.view
 
             #region Prepare mtuForm
 
-            this.config = Configuration.GetInstance();
+            this.config = Configuration.GetInstance ();
 
-            /* Get detected mtu */
+            // Get detected mtu
             MTUBasicInfo mtuBasicInfo = MtuForm.mtuBasicInfo;
             this.detectedMtuType = (int)mtuBasicInfo.Type;
             currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
-            /* Instantiate form */
-            addMtuForm = new AddMtuForm(currentMtu);
+
+            // Initialize logic-form
+            this.addMtuForm = new AddMtuForm ( currentMtu );
 
             #endregion
 
@@ -300,10 +301,8 @@ namespace aclara_meters.view
             TappedListeners();
 
             //Change username textview to Prefs. String
-            if (FormsApp.credentialsService.UserName != null)
-            {
+            if ( ! string.IsNullOrEmpty ( FormsApp.credentialsService.UserName ) )
                 userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
-            }
             
             battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
             rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
@@ -508,23 +507,31 @@ namespace aclara_meters.view
 
         private void InitializeAddMtuForm ()
         {
+            Global global = this.config.GetGlobal ();
+
             #region Conditions
 
-            dynamic MtuConditions     = addMtuForm.conditions.mtu;
-            dynamic GlobalsConditions = addMtuForm.conditions.globals;
+            Mtu    mtu     = this.addMtuForm.mtu;
+            Global globals = this.addMtuForm.globals;
 
             #endregion
 
             #region Two ports
 
-            bool hasTwoPorts = MtuConditions.TwoPorts;
+            bool hasTwoPorts = mtu.TwoPorts;
             port2label.IsVisible = hasTwoPorts;
+
+            #endregion
+
+            #region Service Port ID
+
+            this.servicePortIdInputDualContainer.IsVisible = globals.AccountDualEntry;
 
             #endregion
 
             #region Field Order ( Work Order )
 
-            bool WorkOrderRecording = GlobalsConditions.WorkOrderRecording;
+            bool WorkOrderRecording = globals.WorkOrderRecording;
 
             fieldOrderContainer .IsVisible = WorkOrderRecording;
             fieldOrderContainer .IsEnabled = WorkOrderRecording;
@@ -535,7 +542,7 @@ namespace aclara_meters.view
 
             #region Meter Serial Number
 
-            bool UseMeterSerialNumber = GlobalsConditions.UseMeterSerialNumber;
+            bool UseMeterSerialNumber = globals.UseMeterSerialNumber;
 
             meterSerialContainer .IsVisible = UseMeterSerialNumber;
             meterSerialContainer .IsEnabled = UseMeterSerialNumber;
@@ -556,7 +563,7 @@ namespace aclara_meters.view
                 InitializeMeter2Pickers();
             }
 
-            bool ShowMeterVendor = GlobalsConditions.ShowMeterVendor;
+            bool ShowMeterVendor = globals.ShowMeterVendor;
             if (ShowMeterVendor)
             {
                 // TODO: group meters by vendor / model / name
@@ -584,24 +591,38 @@ namespace aclara_meters.view
                 "15 Min",
             };
 
-            bool IndividualReadInterval = GlobalsConditions.IndividualReadInterval;
-
-            readIntervalContainer .IsVisible   = IndividualReadInterval;
-            readIntervalContainer .IsEnabled   = IndividualReadInterval;
-            readInterval2Container.IsVisible   = hasTwoPorts && IndividualReadInterval;
-            readInterval2Container.IsEnabled   = hasTwoPorts && IndividualReadInterval;
+            readInterval2Container.IsVisible   = hasTwoPorts;
+            readInterval2Container.IsEnabled   = hasTwoPorts;
             readIntervalPicker    .ItemsSource = readIntervalList;
             readInterval2Picker   .ItemsSource = readIntervalList;
+
+            // If field NormXmitInterval is present inside Global,
+            // its value is used as default selection
+            string normXmitInterval = global.NormXmitInterval;
+            if ( ! globals.IndividualReadInterval &&
+                 ! string.IsNullOrEmpty ( normXmitInterval ) )
+            {
+                // Convert "Hr/s" to "Hour/s"
+                normXmitInterval = normXmitInterval.ToLower ()
+                                   .Replace ( "hr", "hour" )
+                                   .Replace ( "h", "H" );
+
+                int index = readIntervalList.IndexOf ( normXmitInterval );
+                readIntervalPicker.SelectedIndex = ( ( index > -1 ) ? index : readIntervalList.IndexOf ( "1 Hour" ) );
+            }
+            // Default value
+            else if ( globals.IndividualReadInterval )
+                readIntervalPicker.SelectedIndex = readIntervalList.IndexOf ( "1 Hour" );
 
             #endregion
 
             // TODO: get snap reads value from memory map
             #region Snap Reads
 
-            bool allowSnapReads      = GlobalsConditions.AllowDailyReads;
-            bool snapReads           = MtuConditions.DailyReads;
+            bool allowSnapReads      = globals.AllowDailyReads;
+            bool snapReads           = mtu.DailyReads;
             bool snapReadActive      = allowSnapReads && snapReads;
-            bool changeableSnapReads = GlobalsConditions.IndividualDailyReads;
+            bool changeableSnapReads = globals.IndividualDailyReads;
             int  snapReadsDefault    = this.config.global.DailyReadsDefault;
 
             this.snapReadsContainer .IsEnabled = snapReadActive;
@@ -630,9 +651,9 @@ namespace aclara_meters.view
 
             #region 2-Way
 
-            bool GlobalsFastMessageConfig = GlobalsConditions.FastMessageConfig; 
-            bool GlobalsFast2Way          = GlobalsConditions.Fast2Way;
-            bool MtuFastMessageConfig     = MtuConditions.FastMessageConfig;
+            bool GlobalsFastMessageConfig = globals.FastMessageConfig; 
+            bool GlobalsFast2Way          = globals.Fast2Way;
+            bool MtuFastMessageConfig     = mtu.FastMessageConfig;
 
             List<string> twoWayList = new List<string> ()
             {
@@ -660,7 +681,7 @@ namespace aclara_meters.view
             alarmsList  = alarmsList .FindAll ( alarm => ! string.Equals ( alarm.Name.ToLower (), "scripting" ) );
             alarms2List = alarms2List.FindAll ( alarm => ! string.Equals ( alarm.Name.ToLower (), "scripting" ) );
 
-            bool RequiresAlarmProfile = MtuConditions.RequiresAlarmProfile;
+            bool RequiresAlarmProfile = mtu.RequiresAlarmProfile;
             bool portHasSomeAlarm     = ( RequiresAlarmProfile && alarmsList.Count > 0 );
             bool port2HasSomeAlarm    = ( hasTwoPorts && RequiresAlarmProfile && alarms2List.Count > 0 );
 
@@ -685,7 +706,7 @@ namespace aclara_meters.view
             demandsList  = config.demands.FindByMtuType ( this.detectedMtuType );
             demands2List = ( hasTwoPorts ) ? config.demands.FindByMtuType ( this.detectedMtuType ) : new List<Demand> ();
 
-            bool MtuDemand          = MtuConditions.MtuDemand;
+            bool MtuDemand          = mtu.MtuDemand;
             bool portHasSomeDemand  = ( MtuDemand && demandsList.Count > 0 );
             bool port2HasSomeDemand = ( hasTwoPorts && MtuDemand && demands2List.Count > 0 );
 
@@ -741,8 +762,6 @@ namespace aclara_meters.view
             #region Set Max
 
             // Set maximum values from global.xml
-            Global global = this.config.GetGlobal ();
-
             servicePortIdInput.MaxLength = global.AccountLength;
             fieldOrderInput   .MaxLength = global.WorkOrderLength;
             meterSerialInput  .MaxLength = global.MeterNumberLength;
@@ -1656,8 +1675,6 @@ namespace aclara_meters.view
         object menu_sender;
         ItemTappedEventArgs menu_tappedevents;
 
-
-
         private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
         {
             ((ListView)sender).SelectedItem = null;
@@ -2073,7 +2090,6 @@ namespace aclara_meters.view
 
         private void TurnOffMethod()
         {
-
             MTUComm.Action turnOffAction = new MTUComm.Action(
                 config: FormsApp.config,
                 serial: FormsApp.ble_interface,
@@ -2411,6 +2427,7 @@ namespace aclara_meters.view
             #region Port 1
 
             bool okSP =                                     NoValEq ( servicePortIdInput.Text, global.AccountLength           );
+            bool okSD = globals.AccountDualEntry         && NoValEq ( servicePortIdInputDual.Text, global.AccountLength       );
             bool okFO = fieldOrderContainer   .IsVisible && NoValEL ( fieldOrderInput   .Text, global.WorkOrderLength         );
             bool okMS = meterSerialContainer  .IsVisible && NoValEL ( meterSerialInput  .Text, global.MeterNumberLength       );
             bool okIR =                                     NoValEq ( initialReadInput  .Text, initialReadInput    .MaxLength );
@@ -2421,7 +2438,8 @@ namespace aclara_meters.view
             bool okAL = alarmsContainer       .IsVisible && alarmsPicker      .SelectedIndex <= -1;
             bool okDM = demandsContainer      .IsVisible && demandsPicker     .SelectedIndex <= -1;
            
-            if      ( okSP ) msgError = "Service Port ID";
+            if      ( okSP ) msgError = "Service Port ID" + ( ( globals.AccountDualEntry ) ? " ( First entry )" : string.Empty );
+            else if ( okSD ) msgError = "Service Port ID ( Second entry )";
             else if ( okFO ) msgError = "Field Order";
             else if ( okMS ) msgError = "Meter Serial Number";
             else if ( okMN ) msgError = "Meter Type";
@@ -2434,6 +2452,14 @@ namespace aclara_meters.view
 
             if ( okSP || okFO || okMS || okIR || okSR || okRI || okMN || okTW || okAL || okDM )
                 return false;
+
+            // If Global.AccountDualEntry is true, two ServicePortId entries have to be equal
+            if ( globals.AccountDualEntry &&
+                 ! string.Equals ( servicePortIdInput.Text, servicePortIdInputDual.Text ) )
+            {
+                msgError = "Service Port ID entries are not the same";
+                return false;
+            }
 
             #endregion
 
@@ -2513,7 +2539,7 @@ namespace aclara_meters.view
         {
             string msgError = string.Empty;
             if ( ! DEBUG_AUTO_MODE_ON &&
-                 ! ValidateFields ( ref msgError ) )
+                 ! this.ValidateFields ( ref msgError ) )
             {
                 DisplayAlert ( "Error", "Mandatory '" + msgError + "' field is not or incorrectly filled in", "Ok" );
                 return;
@@ -2748,8 +2774,13 @@ namespace aclara_meters.view
             }
         }
 
-        private void AddMtu_Action()
+        private void AddMtu_Action ()
         {
+            #region Get Values from Form
+
+            Mtu    mtu     = this.addMtuForm.mtu;
+            Global globals = this.addMtuForm.globals;
+
             string value_spi;
             string value_fo;
             string value_msn;
@@ -2801,98 +2832,97 @@ namespace aclara_meters.view
                     value_alr = ( Alarm )alarmsPicker.SelectedItem;
             }
 
-            dynamic MtuConditions     = addMtuForm.conditions.mtu;
-            dynamic GlobalsConditions = addMtuForm.conditions.globals;
+            #endregion
 
-            #region Port 1
+            #region Set parameters Port 1
 
             // Service Port ID
-            addMtuForm.AddParameter ( FIELD.SERVICE_PORT_ID, value_spi );
+            this.addMtuForm.AddParameter ( FIELD.SERVICE_PORT_ID, value_spi );
 
             // Field Order [ SOLO SE LOGEA ¿? ]
-            if ( GlobalsConditions.WorkOrderRecording )
-                addMtuForm.AddParameter ( FIELD.FIELD_ORDER, value_fo );
+            if ( globals.WorkOrderRecording )
+                this.addMtuForm.AddParameter ( FIELD.FIELD_ORDER, value_fo );
 
             // Meter Number [ SOLO SE LOGEA ¿? ]
-            if ( GlobalsConditions.UseMeterSerialNumber )
-                addMtuForm.AddParameter ( FIELD.METER_NUMBER, value_msn );
+            if ( globals.UseMeterSerialNumber )
+                this.addMtuForm.AddParameter ( FIELD.METER_NUMBER, value_msn );
 
             // Initial Reading
-            addMtuForm.AddParameter ( FIELD.INITIAL_READING, value_ir );
+            this.addMtuForm.AddParameter ( FIELD.INITIAL_READING, value_ir );
 
             // Selected Meter ID
-            addMtuForm.AddParameter ( FIELD.SELECTED_METER, value_mtr );
+            this.addMtuForm.AddParameter ( FIELD.SELECTED_METER, value_mtr );
 
             // Read Interval
-            if ( GlobalsConditions.IndividualReadInterval )
-                addMtuForm.AddParameter ( FIELD.READ_INTERVAL, value_ri );
+            if ( globals.IndividualReadInterval )
+                this.addMtuForm.AddParameter ( FIELD.READ_INTERVAL, value_ri );
 
             // Snap Reads [ SOLO SE LOGEA ¿? ]
             if ( ( DEBUG_AUTO_MODE_ON && DEBUG_SNAPSREADS_OK || ! DEBUG_AUTO_MODE_ON ) &&
-                 GlobalsConditions.AllowDailyReads &&
-                 MtuConditions.DailyReads )
-                addMtuForm.AddParameter ( FIELD.SNAP_READS, value_srs );
+                 globals.AllowDailyReads &&
+                 mtu.DailyReads )
+                this.addMtuForm.AddParameter ( FIELD.SNAP_READS, value_srs );
 
             // 2-Way [ SOLO SE LOGEA ¿? ]
-            if ( MtuConditions.FastMessageConfig )
-                addMtuForm.AddParameter ( FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString() );
+            if ( mtu.FastMessageConfig )
+                this.addMtuForm.AddParameter ( FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString() );
 
             // Alarms
             if ( value_alr != null &&
-                 MtuConditions.RequiresAlarmProfile )
-                addMtuForm.AddParameter ( FIELD.ALARM, value_alr );
+                 mtu.RequiresAlarmProfile )
+                this.addMtuForm.AddParameter ( FIELD.ALARM, value_alr );
 
             // Demands [ SOLO SE LOGEA ¿? ]
             //if ( MtuConditions.MtuDemand )
-            //    addMtuForm.AddParameter ( FIELD.DEMAND, value_dmd );
+            //    this.addMtuForm.AddParameter ( FIELD.DEMAND, value_dmd );
 
             #endregion
 
-            #region Port 2
+            #region Set parameters Port 2
 
-            if ( MtuConditions.TwoPorts )
+            if ( mtu.TwoPorts )
             {
                 // Service Port ID 2
-                addMtuForm.AddParameter ( FIELD.SERVICE_PORT_ID2, servicePortId2Input.Text );
+                this.addMtuForm.AddParameter ( FIELD.SERVICE_PORT_ID2, servicePortId2Input.Text );
 
                 // Field Order 2
-                if ( GlobalsConditions.WorkOrderRecording )
-                    addMtuForm.AddParameter ( FIELD.FIELD_ORDER2, fieldOrder2Input.Text );
+                if ( globals.WorkOrderRecording )
+                    this.addMtuForm.AddParameter ( FIELD.FIELD_ORDER2, fieldOrder2Input.Text );
 
                 // Meter Number 2
-                if ( GlobalsConditions.UseMeterSerialNumber )
-                    addMtuForm.AddParameter ( FIELD.METER_NUMBER2, meterSerial2Input.Text );
+                if ( globals.UseMeterSerialNumber )
+                    this.addMtuForm.AddParameter ( FIELD.METER_NUMBER2, meterSerial2Input.Text );
 
                 // Initial Reading 2
-                addMtuForm.AddParameter ( FIELD.INITIAL_READING2, initialRead2Input.Text );
+                this.addMtuForm.AddParameter ( FIELD.INITIAL_READING2, initialRead2Input.Text );
 
                 // Read Interval 2
-                if ( GlobalsConditions.IndividualReadInterval )
-                    addMtuForm.AddParameter ( FIELD.READ_INTERVAL2, readInterval2Picker.SelectedItem.ToString() );
+                if ( globals.IndividualReadInterval )
+                    this.addMtuForm.AddParameter ( FIELD.READ_INTERVAL2, readInterval2Picker.SelectedItem.ToString() );
 
                 // Selected Meter ID 2
-                addMtuForm.AddParameter ( FIELD.SELECTED_METER2, ( Meter )meterNames2Picker.SelectedItem );
+                this.addMtuForm.AddParameter ( FIELD.SELECTED_METER2, ( Meter )meterNames2Picker.SelectedItem );
 
                 // Snap Reads 2
-                if ( GlobalsConditions.AllowDailyReads && MtuConditions.DailyReads )
-                    addMtuForm.AddParameter ( FIELD.SNAP_READS2, snapReads2Slider.Value.ToString() );
+                if ( globals.AllowDailyReads && mtu.DailyReads )
+                    this.addMtuForm.AddParameter ( FIELD.SNAP_READS2, snapReads2Slider.Value.ToString() );
 
                 // 2-Way 2
-                if ( MtuConditions.FastMessageConfig )
-                    addMtuForm.AddParameter ( FIELD.TWO_WAY2, twoWay2Picker.SelectedItem.ToString() );
+                if ( mtu.FastMessageConfig )
+                    this.addMtuForm.AddParameter ( FIELD.TWO_WAY2, twoWay2Picker.SelectedItem.ToString() );
 
                 // Alarms 2
-                if ( MtuConditions.RequiresAlarmProfile )
-                    addMtuForm.AddParameter ( FIELD.ALARM2, ( Alarm )alarms2Picker.SelectedItem );
+                if ( mtu.RequiresAlarmProfile )
+                    this.addMtuForm.AddParameter ( FIELD.ALARM2, ( Alarm )alarms2Picker.SelectedItem );
 
                 // Demands 2
-                if ( MtuConditions.MtuDemand )
-                    addMtuForm.AddParameter ( FIELD.DEMAND2, ( Demand )demands2Picker.SelectedItem );
+                if ( mtu.MtuDemand )
+                    this.addMtuForm.AddParameter ( FIELD.DEMAND2, ( Demand )demands2Picker.SelectedItem );
             }
 
             #endregion
 
-            #region Optional parameters
+            #region Set Optional parameters
 
             // Gps
             if ( ! string.IsNullOrEmpty ( value_lat ) &&
@@ -2903,9 +2933,9 @@ namespace aclara_meters.view
                 //string latDir = ( lat < 0d ) ? "S" : "N";
                 //string lonDir = ( lon < 0d ) ? "W" : "E";
 
-                addMtuForm.AddParameter ( FIELD.GPS_LATITUDE,  lat );
-                addMtuForm.AddParameter ( FIELD.GPS_LONGITUDE, lon );
-                addMtuForm.AddParameter ( FIELD.GPS_ALTITUDE,  value_alt );
+                this.addMtuForm.AddParameter ( FIELD.GPS_LATITUDE,  lat );
+                this.addMtuForm.AddParameter ( FIELD.GPS_LONGITUDE, lon );
+                this.addMtuForm.AddParameter ( FIELD.GPS_ALTITUDE,  value_alt );
             }
 
             List<Parameter> optionalParams = new List<Parameter>();
@@ -2919,13 +2949,28 @@ namespace aclara_meters.view
                     optionalParams.Add ( new Parameter ( e.Name, e.Display, e.Text, true ) );
 
             if ( optionalParams.Count > 0 )
-                addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );
+                this.addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );
 
             #endregion
 
-            #region On Add MTU Action finish
+            #region OnProgress
 
-            this.add_mtu.OnFinish += ((s, e) =>
+            this.add_mtu.OnProgress += ( ( s, e ) =>
+            {
+                string mensaje = e.Message;
+
+                Device.BeginInvokeOnMainThread ( () =>
+                {
+                    if ( ! string.IsNullOrEmpty ( mensaje ) )
+                        label_read.Text = mensaje;
+                });
+            });
+
+            #endregion
+
+            #region OnFinish
+
+            this.add_mtu.OnFinish += ( ( s, e ) =>
             {
                 FinalReadListView = new List<ReadMTUItem>();
 
@@ -3048,9 +3093,9 @@ namespace aclara_meters.view
 
             #endregion
 
-            #region On Add MTU Action error
+            #region OnError
 
-            this.add_mtu.OnError += ((s, e) =>
+            this.add_mtu.OnError += ( ( s, e ) =>
             {
                 Console.WriteLine("Action Errror");
                 Console.WriteLine("Press Key to Exit");
@@ -3081,7 +3126,7 @@ namespace aclara_meters.view
             #endregion
 
             // Launch action!
-            add_mtu.Run ( addMtuForm );
+            add_mtu.Run ( this.addMtuForm );
         }
 
         #endregion
