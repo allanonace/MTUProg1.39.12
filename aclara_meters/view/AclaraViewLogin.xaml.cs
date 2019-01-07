@@ -59,7 +59,7 @@ namespace aclara_meters.view
                     {
                         if ( this.UploadingLogFiles () )
                         {
-                            base.DisplayAlert ( "Information", "All Log files uploaded!", "Ok" );
+                            //base.DisplayAlert ( "Information", "All Log files uploaded!", "Ok" );
 
                             //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
                         }

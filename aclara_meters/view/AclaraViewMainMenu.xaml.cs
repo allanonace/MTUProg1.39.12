@@ -22,10 +22,12 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewMainMenu
     {
+        public DeviceItem last_item;
+
         private List<PageItem> MenuList { get; set; }
         private IUserDialogs dialogsSaved;
         private ObservableCollection<DeviceItem> employees;
-        private IBlePeripheral peripheral = null;
+       
         private int peripheralConnected = ble_library.BlePort.NO_CONNECTED;
         private Boolean peripheralManualDisconnection = false;
         private Thread printer;
@@ -81,51 +83,66 @@ namespace aclara_meters.view
 
             }
 
-            printer = new Thread(new ThreadStart(InvokeMethod));
-            printer.Start();
 
-            employees = new ObservableCollection<DeviceItem>();
-
-            DeviceList.RefreshCommand = new Command(async () =>
+            Task.Run(() =>
             {
-                // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
-                // Problema: solo se hace si se refresca DeviceList
-                // TO-DO: eliminar el hilo o eliminar el suspend
-                if (printer.ThreadState == ThreadState.Suspended)
+                Task.Delay(500);
+
+                Device.BeginInvokeOnMainThread(() =>
                 {
-                    try
+
+                    printer = new Thread(new ThreadStart(InvokeMethod));
+                    printer.Start();
+
+                    employees = new ObservableCollection<DeviceItem>();
+
+                    DeviceList.RefreshCommand = new Command(async () =>
                     {
-                        printer.Resume();
-                    }
-                    catch (Exception e11)
+                        // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
+                        // Problema: solo se hace si se refresca DeviceList
+                        // TO-DO: eliminar el hilo o eliminar el suspend
+                        if (printer.ThreadState == ThreadState.Suspended)
+                        {
+                            try
+                            {
+                                printer.Resume();
+                            }
+                            catch (Exception e11)
+                            {
+                                Console.WriteLine(e11.StackTrace);
+                            }
+                        }
+                        DeviceList.IsRefreshing = true;
+
+
+
+                        // <<< LA BUSQUEDA SE HACE AQUI >>>
+
+
+
+                        employees = new ObservableCollection<DeviceItem>();
+
+                        await FormsApp.ble_interface.Scan();
+                        await ChangeListViewData();
+                        DeviceList.IsRefreshing = false;
+
+                        if (employees.Count != 0)
+                        {
+                            DeviceList.ItemsSource = employees;
+                        }
+                    });
+
+                    DeviceList.RefreshCommand.Execute(true);
+
+                    if (employees.Count != 0)
                     {
-                        Console.WriteLine(e11.StackTrace);
+                        DeviceList.ItemsSource = employees;
                     }
-                } 
-                DeviceList.IsRefreshing = true;
 
-
-
-                // <<< LA BUSQUEDA SE HACE AQUI >>>
-
-
-
-                employees = new ObservableCollection<DeviceItem>();
-
-                await FormsApp.ble_interface.Scan();
-                await ChangeListViewData();
-                DeviceList.IsRefreshing = false;
-
-                if (employees.Count != 0)
-                {
-                    DeviceList.ItemsSource = employees;
-                }
+                });
             });
-            DeviceList.RefreshCommand.Execute(true);
-            if(employees.Count != 0)
-            {
-                DeviceList.ItemsSource = employees;
-            }
+
+
 
             //BluetoothPeripheralDisconnect ( null, null );
         }
@@ -434,7 +451,7 @@ namespace aclara_meters.view
 
                             });
                             peripheralConnected = status;
-                            peripheral = null;
+                            FormsApp.peripheral = null;
                         }
                         else // status == ble_library.BlePort.CONNECTED
                         {
@@ -456,7 +473,7 @@ namespace aclara_meters.view
                         DeviceList.IsEnabled = true;
                         // status DEBERIA SER SIEMPRE ble_library.BlePort.NO_CONNECTED
                         peripheralConnected = status;
-                        peripheral = null;
+                        FormsApp.peripheral = null;
                         Device.BeginInvokeOnMainThread(() =>
                         {
                             fondo.Opacity = 1;
@@ -499,15 +516,15 @@ namespace aclara_meters.view
                 try
                 {
                     // TODO: la siguente linea siempre da error xq peripheral es null
-                    deviceID.Text = peripheral.Advertisement.DeviceName;
-                    macAddress.Text = DecodeId(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray());
+                    deviceID.Text = FormsApp.peripheral.Advertisement.DeviceName;
+                    macAddress.Text = DecodeId(FormsApp.peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray());
                    
                     //imageBattery.Source = "battery_toolbar_high";
                     // imageRssi.Source = "rssi_toolbar_high";
                     // batteryLevel.Text = "100%";
                     // rssiLevel.Text = peripheral.Rssi.ToString() + " dBm";
 
-                    byte[] battery_ui = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
+                    byte[] battery_ui = FormsApp.peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
 
                     if (battery_ui[0] < 101 && battery_ui[0] > 1)
                     {
@@ -540,19 +557,19 @@ namespace aclara_meters.view
                     }
 
                     /*** RSSI ICONS UPDATE ***/
-                    if (peripheral.Rssi <= -90)
+                    if (FormsApp.peripheral.Rssi <= -90)
                     {
                         imageRssi.Source = "rssi_toolbar_empty";
                         rssi_level.Source = "rssi_toolbar_empty_white";
                         rssi_level_detail.Source = "rssi_toolbar_empty_white";
                     }
-                    else if (peripheral.Rssi <= -80 && peripheral.Rssi > -90)
+                    else if (FormsApp.peripheral.Rssi <= -80 && FormsApp.peripheral.Rssi > -90)
                     {
                         imageRssi.Source = "rssi_toolbar_low";
                         rssi_level.Source = "rssi_toolbar_low_white";
                         rssi_level_detail.Source = "rssi_toolbar_low_white";
                     }
-                    else if (peripheral.Rssi <= -60 && peripheral.Rssi > -80)
+                    else if (FormsApp.peripheral.Rssi <= -60 && FormsApp.peripheral.Rssi > -80)
                     {
                         imageRssi.Source = "rssi_toolbar_mid";
                         rssi_level.Source = "rssi_toolbar_mid_white";
@@ -719,16 +736,16 @@ namespace aclara_meters.view
                                             bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
                                             blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
                                             !peripheralManualDisconnection &&
-                                            peripheral == null)
+                                            FormsApp.peripheral == null)
                                         {
                                             if (!FormsApp.ble_interface.IsOpen())
                                             {
                                                 try
                                                 {
-                                                    peripheral = blePeripherals[i];
+                                                    FormsApp.peripheral = blePeripherals[i];
                                                     peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                                                     peripheralManualDisconnection = false;
-                                                    FormsApp.ble_interface.Open(peripheral, true);
+                                                    FormsApp.ble_interface.Open(FormsApp.peripheral, true);
                                                 }
                                                 catch (Exception e)
                                                 {
@@ -756,7 +773,7 @@ namespace aclara_meters.view
 
         protected override void OnAppearing ()
         {
-            DeviceList.RefreshCommand.Execute ( true );
+            //DeviceList.RefreshCommand.Execute ( true );
         }
 
         private void LogOffOkTapped(object sender, EventArgs e)
@@ -1047,6 +1064,11 @@ namespace aclara_meters.view
           
         }
 
+        public void externalReconnect(Boolean reassociate)
+        {
+            FormsApp.ble_interface.Open(FormsApp.peripheral, reassociate);
+        }
+
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
         private void OnMenuItemSelectedListDevices(object sender, ItemTappedEventArgs e)
@@ -1064,10 +1086,15 @@ namespace aclara_meters.view
                 reassociate = true;
             }
 
-            try{
-                FormsApp.ble_interface.Open(item.Peripheral, reassociate);
 
-                peripheral = item.Peripheral;
+            last_item = item;
+
+            try
+            {
+
+                FormsApp.peripheral = item.Peripheral;
+
+                externalReconnect(reassociate);
 
                 Device.BeginInvokeOnMainThread(() =>
                 {

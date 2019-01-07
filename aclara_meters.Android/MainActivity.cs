@@ -111,7 +111,7 @@ namespace aclara_meters.Droid
             LoadApplication(app);
 
 
-            app.HandleUrl(new System.Uri(data.ToString())); 
+            app.HandleUrl(new System.Uri(data.ToString()), bluetooth); 
                            
         }
 

@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 using System.Web;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using nexus.protocols.ble.scan;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -61,6 +62,7 @@ namespace aclara_meters
         public static BleSerial ble_interface;
         public static Logger loggger;
         public static Configuration config;
+        public static IBlePeripheral peripheral;
 
         #endregion
 
@@ -296,10 +298,29 @@ namespace aclara_meters
 
         #endregion
 
-        public void HandleUrl ( Uri url )
+        public void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
         {
+
+            try
+            {
+
+                ble_interface.Close();
+                adapter.DisableAdapter();
+
+                adapter.EnableAdapter();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
+
+
             if ( url != null )
             {
+             
+                //adapter.DisableAdapter();
+                //adapter.EnableAdapter();
+
                 string path = Mobile.pathCache;
                 NameValueCollection query = HttpUtility.ParseQueryString ( url.Query );
 
@@ -315,12 +336,15 @@ namespace aclara_meters
 
                 if ( callback != null ) { /* ... */ }
 
+               
+
                 Task.Run(async () =>
                 {
                     await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread ( async () =>
                     {
-                        Settings.IsLoggedIn = false;
-                        credentialsService.DeleteCredentials ();
+                        //Settings.IsLoggedIn = false;
+                        //credentialsService.DeleteCredentials ();
+
 
                         MainPage = new NavigationPage(new AclaraViewScripting ( path, callback, script_name ) );
                         await MainPage.Navigation.PopToRootAsync ( true );
@@ -343,6 +367,16 @@ namespace aclara_meters
 
         protected override void OnResume()
         {
+        }
+
+        #endregion
+
+
+        #region External Reconnect
+
+        public static void externalReconnect(Boolean reassociate)
+        {
+            FormsApp.ble_interface.Open(peripheral, reassociate);
         }
 
         #endregion

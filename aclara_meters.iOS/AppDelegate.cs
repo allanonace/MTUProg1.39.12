@@ -100,7 +100,7 @@ namespace aclara_meters.iOS
             NSUrl         url,
             NSDictionary  options )
         {
-            appSave.HandleUrl ( ( Uri )url );
+            appSave.HandleUrl ( ( Uri )url, BluetoothLowEnergyAdapter.ObtainDefaultAdapter() );
             return true;
         }
     }
