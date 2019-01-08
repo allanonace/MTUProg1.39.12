@@ -259,6 +259,14 @@ namespace aclara_meters.view
                                 ContentView_DeviceList.Opacity = 1;
                                 ContentView_DeviceList.IsEnabled = true;
 
+                                #region New Circular Progress bar Animations    
+
+                                DeviceList.IsRefreshing = false;
+                                backdark_bg.IsVisible = false;
+                                indicator.IsVisible = false;
+
+                                #endregion
+
                             });
                             peripheralConnected = status;
                             peripheral = null;
@@ -331,6 +339,18 @@ namespace aclara_meters.view
 
                                             ContentView_Scripting_battery_level.Source = icono_bateria + "_white";
                                             ContentView_Scripting_rssi_level.Source = rssiIcono + "_white";
+
+
+
+
+                                            #region New Circular Progress bar Animations    
+
+                                            DeviceList.IsRefreshing = false;
+                                            backdark_bg.IsVisible = false;
+                                            indicator.IsVisible = false;
+
+                                            #endregion
+
 
                                         }
                                         catch (Exception e)
@@ -938,6 +958,16 @@ namespace aclara_meters.view
             //fondo.Opacity = 0;
             ContentView_DeviceList.Opacity = 0.5;
             ContentView_DeviceList.IsEnabled = false;
+
+            #region New Circular Progress bar Animations    
+
+            DeviceList.IsRefreshing = false;
+            backdark_bg.IsVisible = true;
+            indicator.IsVisible = true;
+
+            #endregion
+
+
             bool reassociate = false;
             if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
                 FormsApp.credentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&

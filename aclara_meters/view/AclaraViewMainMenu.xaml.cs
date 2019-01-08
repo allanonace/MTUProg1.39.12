@@ -155,8 +155,9 @@ namespace aclara_meters.view
                         await ChangeListViewData();
                         //DeviceList.IsRefreshing = false;
 
-                        #region Disable Circular Progress bar Animations when done
+                        #region New Circular Progress bar Animations    
 
+                        DeviceList.IsRefreshing = false;
                         backdark_bg.IsVisible = false;
                         indicator.IsVisible = false;
 
@@ -500,6 +501,15 @@ namespace aclara_meters.view
                                 background_scan_page.Opacity = 1;
                                 background_scan_page.IsEnabled = true;
 
+                                #region New Circular Progress bar Animations    
+
+                                DeviceList.IsRefreshing = false;
+                                backdark_bg.IsVisible = false;
+                                indicator.IsVisible = false;
+
+                                #endregion
+
+
                             });
                             peripheralConnected = status;
                             FormsApp.peripheral = null;
@@ -652,12 +662,25 @@ namespace aclara_meters.view
                 navigationDrawerList.IsEnabled = true;
                 navigationDrawerList.Opacity = 1;
 
-            }else{
+                #region Disable Circular Progress bar Animations when done
+
+                backdark_bg.IsVisible = false;
+                indicator.IsVisible = false;
+
+                #endregion
+
+
+
+            }
+            else
+            {
                 background_scan_page_detail.IsVisible = false;
                 navigationDrawerList.Opacity = 0.65;
                 navigationDrawerList.IsEnabled = true;
                 background_scan_page.IsVisible = true;
                 DeviceList.RefreshCommand.Execute(true);
+
+
             }
         }
 
@@ -804,14 +827,12 @@ namespace aclara_meters.view
 
                                                     Device.StartTimer(minutes2, () => {
 
-
                                                         Device.BeginInvokeOnMainThread(() =>
                                                         {
 
                                                             Task.Factory.StartNew(NewOpenConnectionWithDevice);
 
                                                         });
-
 
 
                                                         return false;
@@ -1170,10 +1191,22 @@ namespace aclara_meters.view
         // on user selection in menu ListView
         private void OnMenuItemSelectedListDevices(object sender, ItemTappedEventArgs e)
         {
+
+
             var item = (DeviceItem)e.Item;
-            fondo.Opacity = 0;
-            background_scan_page.Opacity = 0.5;
+            //fondo.Opacity = 0;
+            //background_scan_page.Opacity = 0.5;
             background_scan_page.IsEnabled = false;
+
+            #region New Circular Progress bar Animations    
+
+            DeviceList.IsRefreshing = false;
+            backdark_bg.IsVisible = true;
+            indicator.IsVisible = true;
+
+            #endregion
+
+
             bool reassociate = false;
             if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
                 FormsApp.credentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
