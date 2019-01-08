@@ -84,12 +84,41 @@ namespace aclara_meters.view
             }
 
 
+            #region New Scripting method is called
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+
+                Task.Factory.StartNew(Init_Scripting_Method);
+
+            });
+
+            #endregion
+
+
+
+
+
+            //BluetoothPeripheralDisconnect ( null, null );
+        }
+
+        private void Init_Scripting_Method()
+        {
+
             Task.Run(() =>
             {
-                Task.Delay(500);
+                Task.Delay(100);
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
+
+                    #region New Circular Progress bar Animations    
+
+                    DeviceList.IsRefreshing = false;
+                    backdark_bg.IsVisible = true;
+                    indicator.IsVisible = true;
+
+                    #endregion
 
                     printer = new Thread(new ThreadStart(InvokeMethod));
                     printer.Start();
@@ -112,7 +141,7 @@ namespace aclara_meters.view
                                 Console.WriteLine(e11.StackTrace);
                             }
                         }
-                        DeviceList.IsRefreshing = true;
+                        //DeviceList.IsRefreshing = true;
 
 
 
@@ -124,7 +153,14 @@ namespace aclara_meters.view
 
                         await FormsApp.ble_interface.Scan();
                         await ChangeListViewData();
-                        DeviceList.IsRefreshing = false;
+                        //DeviceList.IsRefreshing = false;
+
+                        #region Disable Circular Progress bar Animations when done
+
+                        backdark_bg.IsVisible = false;
+                        indicator.IsVisible = false;
+
+                        #endregion
 
                         if (employees.Count != 0)
                         {
@@ -132,7 +168,26 @@ namespace aclara_meters.view
                         }
                     });
 
-                    DeviceList.RefreshCommand.Execute(true);
+
+
+                    #region Execute the Refresh List method every 3 seconds if no elements are on list
+
+                    var minutes = TimeSpan.FromSeconds(3);
+
+                    Device.StartTimer(minutes, () => {
+
+                        // call your method to check for notifications here
+
+                        if (employees.Count < 1)
+                            DeviceList.RefreshCommand.Execute(true);
+
+                        // Returning true means you want to repeat this timer
+                        return true;
+                    });
+
+                    #endregion
+
+
 
                     if (employees.Count != 0)
                     {
@@ -141,10 +196,6 @@ namespace aclara_meters.view
 
                 });
             });
-
-
-
-            //BluetoothPeripheralDisconnect ( null, null );
         }
 
         public void FirstRefreshSearchPucs ()
@@ -747,7 +798,29 @@ namespace aclara_meters.view
                                                     peripheralManualDisconnection = false;
 
 
-                                                    FormsApp.ble_interface.Open(FormsApp.peripheral, true);
+                                                    #region Autoconnect to stored device 
+
+                                                    var minutes2 = TimeSpan.FromSeconds(2);
+
+                                                    Device.StartTimer(minutes2, () => {
+
+
+                                                        Device.BeginInvokeOnMainThread(() =>
+                                                        {
+
+                                                            Task.Factory.StartNew(NewOpenConnectionWithDevice);
+
+                                                        });
+
+
+
+                                                        return false;
+                                                    });
+
+                                                    #endregion
+
+
+                                                  
                                                 }
                                                 catch (Exception e)
                                                 {
@@ -772,6 +845,28 @@ namespace aclara_meters.view
                 }
             });
         } 
+
+
+        private void NewOpenConnectionWithDevice()
+        {
+            while (FormsApp.ble_interface.IsScanning())
+            {
+
+            }
+
+            Thread.Sleep(100);
+
+
+            if (!FormsApp.ble_interface.IsOpen())
+            {
+
+                // call your method to check for notifications here
+                FormsApp.ble_interface.Open(FormsApp.peripheral, true);
+            }
+
+
+        }
+
 
         protected override void OnAppearing ()
         {

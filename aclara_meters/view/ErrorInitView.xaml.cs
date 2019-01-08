@@ -30,7 +30,6 @@ namespace aclara_meters.view
         }
 
 
-
         private async void CheckError(string error = "")
         {
             string respstr = "No connection available";
