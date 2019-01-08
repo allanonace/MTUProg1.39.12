@@ -105,32 +105,37 @@ namespace aclara_meters.view
             ContentView_Scripting_textScript.Text = "Processing ...";
             ContentView_Scripting_fieldpath_script.Text = url;
 
+
+			#region New Scripting method is called
+			
+            Device.BeginInvokeOnMainThread(() =>
+            {
+
+                Task.Factory.StartNew(Init_Scripting_Method);
+
+            });
+				
+			#endregion
+
+
+
+
+
+        }
+
+        private void Init_Scripting_Method()
+        {
             Task.Run(() =>
             {
-                Task.Delay(1500); 
+                Task.Delay(100);
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    backdark_bg.IsVisible = false;
-                    indicator.IsVisible = false;
 
                     Interface_ContentView_DeviceList();
-                    /*
-                    if (CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty).Equals(string.Empty)) 
-                        Interface_ContentView_DeviceList();
-                    else
-                    {
-                        FormsApp.externalReconnect(true);
-                        runScript();
-                    }
-                    */
 
                 });
             });
-
-
-
-
         }
 
 
@@ -146,6 +151,15 @@ namespace aclara_meters.view
 
             DeviceList.RefreshCommand = new Command(async () =>
             {
+            
+            	#region New Circular Progress bar Animations	
+            	
+                DeviceList.IsRefreshing = false;
+                backdark_bg.IsVisible = true;
+                indicator.IsVisible = true;
+
+                #endregion
+                
                 // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
                 // Problema: solo se hace si se refresca DeviceList
                 // TO-DO: eliminar el hilo o eliminar el suspend
@@ -160,20 +174,46 @@ namespace aclara_meters.view
                         Console.WriteLine(e11.StackTrace);
                     }
                 }
-                DeviceList.IsRefreshing = true;
+                //DeviceList.IsRefreshing = true;
 
                 employees = new ObservableCollection<DeviceItem>();
 
                 await FormsApp.ble_interface.Scan();
                 await ChangeListViewData();
-                DeviceList.IsRefreshing = false;
+                //DeviceList.IsRefreshing = false;
 
+                #region Disable Circular Progress bar Animations when done
+                
+                backdark_bg.IsVisible = false;
+                indicator.IsVisible = false;
+
+				#endregion
+				
                 if (employees.Count != 0)
                 {
+                
                     DeviceList.ItemsSource = employees;
                 }
             });
-            DeviceList.RefreshCommand.Execute(true);
+
+            
+            #region Execute the Refresh List method every 3 seconds if no elements are on list
+            
+            var minutes = TimeSpan.FromSeconds(3);
+
+            Device.StartTimer(minutes, () => {
+
+                // call your method to check for notifications here
+
+                if(employees.Count  < 1 )
+                    DeviceList.RefreshCommand.Execute(true);
+
+                // Returning true means you want to repeat this timer
+                return true;
+            });
+
+			#endregion
+
             if (employees.Count != 0)
             {
                 DeviceList.ItemsSource = employees;
@@ -244,50 +284,62 @@ namespace aclara_meters.view
                                 {
                                     Device.BeginInvokeOnMainThread(() =>
                                     {
-                                        byte[] bateria = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
+										// Minor bug fix in case of missing battery data
+                                        try
+                                        {
+                                            byte[] bateria = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
 
-                                        String icono_bateria = "battery_toolbar_high";
+                                            String icono_bateria = "battery_toolbar_high";
 
-                                        if (bateria[0] >= 75)
-                                        {
-                                            icono_bateria = "battery_toolbar_high";
+                                            if (bateria[0] >= 75)
+                                            {
+                                                icono_bateria = "battery_toolbar_high";
+                                            }
+                                            else if (bateria[0] >= 45 && bateria[0] < 75)
+                                            {
+                                                icono_bateria = "battery_toolbar_mid";
+                                            }
+                                            else if (bateria[0] >= 15 && bateria[0] < 45)
+                                            {
+                                                icono_bateria = "battery_toolbar_low";
+                                            }
+                                            else // bateria[0] < 15
+                                            {
+                                                icono_bateria = "battery_toolbar_empty";
+                                            }
+
+                                            string rssiIcono = "rssi_toolbar_high";
+
+                                            /*** RSSI ICONS UPDATE ***/
+
+                                            if (peripheral.Rssi <= -90)
+                                            {
+                                                rssiIcono = "rssi_toolbar_empty";
+                                            }
+                                            else if (peripheral.Rssi <= -80 && peripheral.Rssi > -90)
+                                            {
+                                                rssiIcono = "rssi_toolbar_low";
+                                            }
+                                            else if (peripheral.Rssi <= -60 && peripheral.Rssi > -80)
+                                            {
+                                                rssiIcono = "rssi_toolbar_mid";
+                                            }
+                                            else // (blePeripherals[i].Rssi > -60) 
+                                            {
+                                                rssiIcono = "rssi_toolbar_high";
+                                            }
+
+                                            ContentView_Scripting_battery_level.Source = icono_bateria + "_white";
+                                            ContentView_Scripting_rssi_level.Source = rssiIcono + "_white";
+
                                         }
-                                        else if (bateria[0] >= 45 && bateria[0] < 75)
+                                        catch (Exception e)
                                         {
-                                            icono_bateria = "battery_toolbar_mid";
-                                        }
-                                        else if (bateria[0] >= 15 && bateria[0] < 45)
-                                        {
-                                            icono_bateria = "battery_toolbar_low";
-                                        }
-                                        else // bateria[0] < 15
-                                        {
-                                            icono_bateria = "battery_toolbar_empty";
+                                            Console.WriteLine(e.StackTrace);
                                         }
 
-                                        string rssiIcono = "rssi_toolbar_high";
 
-                                        /*** RSSI ICONS UPDATE ***/
-
-                                        if (peripheral.Rssi <= -90)
-                                        {
-                                            rssiIcono = "rssi_toolbar_empty";
-                                        }
-                                        else if (peripheral.Rssi <= -80 && peripheral.Rssi > -90)
-                                        {
-                                            rssiIcono = "rssi_toolbar_low";
-                                        }
-                                        else if (peripheral.Rssi <= -60 && peripheral.Rssi > -80)
-                                        {
-                                            rssiIcono = "rssi_toolbar_mid";
-                                        }
-                                        else // (blePeripherals[i].Rssi > -60) 
-                                        {
-                                            rssiIcono = "rssi_toolbar_high";
-                                        }
-
-                                        ContentView_Scripting_battery_level.Source = icono_bateria + "_white";
-                                        ContentView_Scripting_rssi_level.Source = rssiIcono + "_white";
+                                      
 
                                     });
 
@@ -297,12 +349,9 @@ namespace aclara_meters.view
                                     Console.WriteLine(e.StackTrace);
                                 }
 
-
                                 //Connection Method
                                 runScript();
 
-
-                                //IsConnectedUIChange(true);
                             });
                         }
                     }
@@ -321,7 +370,7 @@ namespace aclara_meters.view
                             Console.WriteLine("NOT CONNECTED");
                             ContentView_Scripting.IsVisible = false;
                             ContentView_DeviceList.IsVisible = true;
-                            //IsConnectedUIChange(false);
+                          
                         });
 
                     }
@@ -372,8 +421,7 @@ namespace aclara_meters.view
                             ContentView_Scripting_label_read.Text = "Executing Script ... ";
                         });
 
-                        //ScriptRunner runner = new ScriptRunner(FormsApp.config.GetBasePath(), FormsApp.ble_interface, FormsApp.config.GetBasePath() + "/data_share.xml");
-
+                     
                         Task.Factory.StartNew(scriptFunction);
 
 
@@ -521,7 +569,30 @@ namespace aclara_meters.view
                                                     peripheral = blePeripherals[i];
                                                     peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                                                     peripheralManualDisconnection = false;
-                                                    FormsApp.ble_interface.Open(peripheral, true);
+
+                                                    
+                                                    #region Autoconnect to stored device 
+
+                                                    var minutes2 = TimeSpan.FromSeconds(2);
+
+                                                    Device.StartTimer(minutes2, () => {
+
+                                                      
+                                                        Device.BeginInvokeOnMainThread(() =>
+                                                        {
+
+                                                            Task.Factory.StartNew(NewOpenConnectionWithDevice);
+
+                                                        });
+
+
+
+                                                        return false;
+                                                    });
+
+													#endregion
+
+                                                   
 
 
                                                 }
@@ -550,6 +621,26 @@ namespace aclara_meters.view
                     }
                 }
             });
+        }
+
+        private void NewOpenConnectionWithDevice()
+        {
+            while (FormsApp.ble_interface.IsScanning())
+            {
+
+            }
+
+            Thread.Sleep(100);
+
+
+            if (!FormsApp.ble_interface.IsOpen())
+            {
+
+                // call your method to check for notifications here
+                FormsApp.ble_interface.Open(peripheral, true);
+            }
+
+
         }
 
         private string DecodeId(byte[] id)

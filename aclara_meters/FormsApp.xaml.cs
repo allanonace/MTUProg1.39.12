@@ -249,8 +249,31 @@ namespace aclara_meters
             // Load configuration from XML files
             this.LoadXmls ();
 
-            // Load pages container ( ContentPage )
-            this.MainPage = new NavigationPage ( new AclaraViewLogin ( dialogs, data ) );
+            #region Scripting Mode Detection 
+
+            MainPage = new NavigationPage(new ErrorInitView("scripting"));
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(1100); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
+                {
+                    if (!ScriptingMode)
+                    {
+                        // Load pages container ( ContentPage )
+                        MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
+                    }
+                    else
+                    {
+                        MainPage = new NavigationPage(new ErrorInitView("scripting"));
+                    }
+                });
+            });
+
+
+           
+
+            #endregion
+
         }
 
         private void LoadXmls ()
@@ -298,14 +321,19 @@ namespace aclara_meters
 
         #endregion
 
+        public static bool ScriptingMode = false;
+
         public void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
         {
 
+
+
             try
             {
-
+                ScriptingMode = true; 
                 ble_interface.Close();
                 adapter.DisableAdapter();
+
 
                 adapter.EnableAdapter();
             }
@@ -372,13 +400,6 @@ namespace aclara_meters
         #endregion
 
 
-        #region External Reconnect
-
-        public static void externalReconnect(Boolean reassociate)
-        {
-            FormsApp.ble_interface.Open(peripheral, reassociate);
-        }
-
-        #endregion
+ 
     }
 }

@@ -152,7 +152,8 @@
                               SeparatorVisibility="None"
                               SeparatorColor="#6aa2b8"                
                               BackgroundColor="White"
-
+                         RefreshAllowed="
+                         true"
                               ItemTapped="OnMenuItemSelectedListDevices"
 
                               

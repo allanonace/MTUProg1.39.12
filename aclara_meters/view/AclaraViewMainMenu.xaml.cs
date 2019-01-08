@@ -745,6 +745,8 @@ namespace aclara_meters.view
                                                     FormsApp.peripheral = blePeripherals[i];
                                                     peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                                                     peripheralManualDisconnection = false;
+
+
                                                     FormsApp.ble_interface.Open(FormsApp.peripheral, true);
                                                 }
                                                 catch (Exception e)
