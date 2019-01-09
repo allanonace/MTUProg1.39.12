@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 using Xamarin.Forms;
 
 namespace aclara_meters.view
@@ -10,6 +12,40 @@ namespace aclara_meters.view
         public ErrorInitView(string error = "")
         {
             InitializeComponent();
+
+
+            #region Permissions
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(1000); Device.BeginInvokeOnMainThread(async () =>
+                {
+                    try
+                    {
+                        var statusLocation = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
+                        var statusStorage = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
+
+                        if (statusLocation != PermissionStatus.Granted)
+                        {
+                            await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
+                        }
+
+                        if (statusStorage != PermissionStatus.Granted)
+                        {
+                            await CrossPermissions.Current.RequestPermissionsAsync(Permission.Storage);
+                        }
+
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
+
+                });
+            });
+
+            #endregion
+
 
             //Turn off the Navigation bar
             NavigationPage.SetHasNavigationBar(this, false);

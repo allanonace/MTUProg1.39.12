@@ -16,6 +16,8 @@ using System.Linq;
 using Plugin.DeviceInfo;
 using System.Globalization;
 using MTUComm;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 
 namespace aclara_meters.view
 {
@@ -39,6 +41,8 @@ namespace aclara_meters.view
             string data )
             : this ()
         {
+
+         
             Settings.IsNotConnectedInSettings = false;
             BindingContext = viewModel = new viewmodel.LoginMenuViewModel(dialogs);
             viewModel.Navigation = this.Navigation;
