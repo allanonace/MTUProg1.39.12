@@ -31,7 +31,7 @@ namespace MTUComm
 
         private Configuration ( string path = "" )
         {
-            mbase_path = ( string.IsNullOrEmpty ( path ) ) ? Mobile.pathCache : path;
+            mbase_path = ( string.IsNullOrEmpty ( path ) ) ? Mobile.GetPath () : path;
 
             device = "PC";
             Config config = new Config ();

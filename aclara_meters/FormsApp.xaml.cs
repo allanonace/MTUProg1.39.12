@@ -36,6 +36,8 @@ namespace aclara_meters
 
         #region Constants
 
+        private const bool   DEBUG_MODE_ON = false;
+
         private const string SO_ANDROID = "Android";
         private const string SO_IOS     = "iOS";
         private const string SO_UNKNOWN = "Unknown";
@@ -145,14 +147,16 @@ namespace aclara_meters
 
             AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
 
-            // TEST
-            //Mobile.GetPath ();
-            //this.LoadXmlsAndCreateContainer ( dialogs, data );
-
-            // Downloads, if necesary, and loads configuration from XML files
-            if (HasDeviceAllXmls())
-                LoadXmlsAndCreateContainer(dialogs, data);
-            else DownloadXmlsIfNecessary(dialogs, data);
+            // Force to not download server XML files
+            if ( DEBUG_MODE_ON )
+                this.LoadXmlsAndCreateContainer ( dialogs, data );
+            else
+            {
+                // Downloads, if necesary, and loads configuration from XML files
+                if ( this.HasDeviceAllXmls () )
+                     this.LoadXmlsAndCreateContainer ( dialogs, data );
+                else this.DownloadXmlsIfNecessary ( dialogs, data );
+            }
         }
 
         #endregion
@@ -399,7 +403,7 @@ namespace aclara_meters
 
             if ( url != null )
             {
-                string path = Mobile.pathCache;
+                string path = Mobile.GetPath ();
                 NameValueCollection query = HttpUtility.ParseQueryString ( url.Query );
 
                 var script_name = query.Get ( "script_name" );

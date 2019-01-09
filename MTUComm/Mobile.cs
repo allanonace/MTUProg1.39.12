@@ -38,7 +38,7 @@ namespace MTUComm
             //"/data/"
         };
 
-        public static string pathCache { get; private set; }
+        private static string pathCache;
 
         private static string GetEnumPath ( PATHS ePath )
         {
@@ -74,10 +74,18 @@ namespace MTUComm
 
         public static string GetPath ()
         {
+            // Use cached path
+            if ( ! string.IsNullOrEmpty ( pathCache ) )
+                return pathCache;
+        
+            // Try to recover new valid path for the current connected device
             string path = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
 
             if ( Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android )
-                path = Mobile.GetPathForAndroid ();
+            {
+                if ( string.IsNullOrEmpty ( ( path = Mobile.GetPathForAndroid () ) ) )
+                    return string.Empty;
+            }
 
             return ( pathCache = path );
         }

@@ -15,7 +15,7 @@ namespace MTUComm
         private dynamic form;
         private MTUBasicInfo mtuBasicInfo;
         private string logUri;
-        private Mtu mtu;
+        //private Mtu mtu;
 
         private const string ENABLE  = "Enable";
         private const string DISABLE = "Disable";
@@ -81,9 +81,8 @@ namespace MTUComm
 
         public void LogAddMtu ( bool isFromScripting = false )
         {
-            this.mtu = form.mtu;
-            dynamic MtuConditions     = form.conditions.mtu;
-            dynamic GlobalsConditions = form.conditions.globals;
+            Mtu    mtu    = form.mtu;
+            Global global = form.global;
 
             Meter meter = ( ! isFromScripting ) ?
                 ( Meter )form.Meter.Value :
@@ -103,18 +102,18 @@ namespace MTUComm
             logger.logParameter ( this.addMtuAction, new Parameter ( "MtuId",   "MTU ID",   this.mtuBasicInfo.Id   ) );
             logger.logParameter ( this.addMtuAction, new Parameter ( "MtuType", "MTU Type", this.mtuBasicInfo.Type ) );
 
-            if ( GlobalsConditions.IndividualReadInterval )
+            if ( global.IndividualReadInterval )
                 logger.logParameter ( this.addMtuAction, form.ReadInterval );
 
-            if ( MtuConditions.FastMessageConfig )
+            if ( mtu.FastMessageConfig )
                 logger.logParameter ( this.addMtuAction, form.TwoWay );
 
-            if ( MtuConditions.DailyReads )
+            if ( mtu.DailyReads )
             {
                 string dailyReads       = "Disable";
                 string dailyGmtHourRead = "Disable";
 
-                if (GlobalsConditions.IndividualDailyReads) // TODO: check values
+                if (global.IndividualDailyReads) // TODO: check values
                 {
                     dailyReads       = form.SnapReads.Value;
                     dailyGmtHourRead = form.SnapReads.Value;
@@ -136,7 +135,7 @@ namespace MTUComm
 
             logger.logParameter ( port, form.ServicePortId );
 
-            if ( GlobalsConditions.WorkOrderRecording )
+            if ( global.WorkOrderRecording )
                 logger.logParameter ( port, form.FieldOrder );
 
             string meterType = string.Format("({0}) {1}", meter.Id, meter.Display);
@@ -155,7 +154,7 @@ namespace MTUComm
 
             #region Port 2
 
-            if (MtuConditions.TwoPorts)
+            if ( mtu.TwoPorts )
             {
                 Meter meter2 = ( ! isFromScripting ) ?
                     ( Meter )form.Meter2.Value :
@@ -167,7 +166,7 @@ namespace MTUComm
 
                 logger.logParameter ( port, form.ServicePortId2 );
 
-                if ( GlobalsConditions.WorkOrderRecording )
+                if ( global.WorkOrderRecording )
                     logger.logParameter ( port, form.FieldOrder2 );
 
                 string meterType2 = string.Format("({0}) {1}", meter2.Id, meter2.Display);
@@ -185,7 +184,7 @@ namespace MTUComm
 
             #region Alarms
 
-            if ( MtuConditions.RequiresAlarmProfile )
+            if ( mtu.RequiresAlarmProfile )
             {
                 Alarm alarms = (Alarm)form.Alarm.Value;
                 if ( alarms != null )
@@ -213,26 +212,26 @@ namespace MTUComm
                     string overlap = alarms.Overlap.ToString();
                     logger.logParameter(alarmSelection, new Parameter("Overlap", "Message Overlap", overlap));
 
-                    if ( this.mtu.MagneticTamper )
+                    if ( mtu.MagneticTamper )
                         logger.logParameter ( alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper",
                                               ( alarms.Magnetic ) ? ENABLE : DISABLE ));
 
-                    if ( this.mtu.RegisterCoverTamper )
+                    if ( mtu.RegisterCoverTamper )
                         logger.logParameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Register Cover Tamper",
                                               ( alarms.RegisterCover ) ? ENABLE : DISABLE ));
 
-                    if ( this.mtu.TiltTamper )
+                    if ( mtu.TiltTamper )
                         logger.logParameter( alarmSelection, new Parameter("TiltTamper", "Tilt Tamper",
                                              ( alarms.Tilt ) ? ENABLE : DISABLE ));
 
-                    if ( this.mtu.ReverseFlowTamper )
+                    if ( mtu.ReverseFlowTamper )
                     {
                         logger.logParameter ( alarmSelection, new Parameter("ReverseFlow", "Reverse Flow Tamper",
                                               ( alarms.ReverseFlow ) ? ENABLE : DISABLE ));
                         logger.logParameter(alarmSelection, new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
                     }
 
-                    if (this.mtu.InterfaceTamper)
+                    if ( mtu.InterfaceTamper)
                         logger.logParameter ( alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper",
                                               ( alarms.InterfaceTamper ) ? ENABLE : DISABLE ));
 
@@ -245,7 +244,7 @@ namespace MTUComm
             // TODO (encoders)
             #region Demands
 
-            if (MtuConditions.MtuDemand)
+            if ( mtu.MtuDemand )
             {
                 XElement demandConf = new XElement("DemandConfiguration");
                 logger.addAtrribute(demandConf, "display", "Demand Configuration");
@@ -300,7 +299,7 @@ namespace MTUComm
                 logger.logParameter(this.readMtuAction, new Parameter("User", "User", this.user));
             }*/
 
-            InterfaceParameters[] parameters = Configuration.GetInstance().getLogInterfaceFields(this.mtu.Id, "ReadMTU");
+            InterfaceParameters[] parameters = Configuration.GetInstance().getLogInterfaceFields( form.mtu.Id, "ReadMTU");
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name == "Port")

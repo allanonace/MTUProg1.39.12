@@ -80,7 +80,7 @@ namespace MTUComm.actions
         private Dictionary<string,Parameter> dictionary;
         //public Conditions conditions { get; private set; }
         public static MTUBasicInfo mtuBasicInfo { get; private set; }
-        public Global globals { get; }
+        public Global global { get; }
         public Mtu mtu { get; }
 
         #endregion
@@ -91,7 +91,7 @@ namespace MTUComm.actions
         {
             this.dictionary = new Dictionary<string,Parameter> ();
             //this.conditions = new Conditions ( mtu );
-            this.globals = Configuration.GetInstance().GetGlobal ();
+            this.global  = Configuration.GetInstance().GetGlobal ();
             this.mtu     = mtu;
         }
 

@@ -383,7 +383,7 @@ namespace MTUComm
         private ErrorArgs InstallConfirmation_Logic ()
         {
             //If MTU has changed or critical settings/configuration force detection rutine
-            if ( this.changedMTUSettings )
+            //if ( this.changedMTUSettings )
                 this.RecoverMeterByMtuType ();
 
             if ( this.latest_mtu.Shipbit )
@@ -622,28 +622,8 @@ namespace MTUComm
 
         private void Task_AddMtu ( dynamic form, string user, bool isFromScripting = false )
         {
-            Mtu    mtu     = form.mtu;
-            Global globals = form.globals;
-
-            /*
-            bool mtu_twoports        = mtu.TwoPorts;
-            bool glo_workorder       = globals.WorkOrderRecording;
-            bool glo_meterserial     = globals.UseMeterSerialNumber;
-            bool glo_metervendor     = globals.ShowMeterVendor;
-            bool glo_readinterval    = globals.IndividualReadInterval;
-            bool glo_allowdailyreads = globals.AllowDailyReads;
-            bool glo_indidailyreads  = globals.IndividualDailyReads;
-            bool mtu_dailyreads      = mtu.DailyReads;
-            bool glo_fastmsg         = globals.FastMessageConfig;
-            bool glo_fasttwoway      = globals.Fast2Way;
-            bool mtu_fastmsgconfig   = mtu.FastMessageConfig;
-            bool mtu_alarmprof       = mtu.RequiresAlarmProfile;
-            bool mtu_demand          = mtu.MtuDemand;
-
-            string P1MeterId         = form.ServicePortId.Value;
-            string P1MeterType       = ( ( Meter )form.Meter.Value ).Id.ToString ();
-            string ReadIntervalM     = form.ReadInterval.Value;
-            */
+            Mtu    mtu    = form.mtu;
+            Global global = form.global;
 
             try
             {
@@ -698,7 +678,7 @@ namespace MTUComm
 
                 #region Reading Interval
 
-                if ( globals.IndividualReadInterval )
+                if ( global.IndividualReadInterval )
                 {
                         // If not present in scripted mode, set default value to one/1 hour
                     map.ReadIntervalMinutes = ( form.ContainsParameter ( AddMtuForm.FIELD.READ_INTERVAL ) ) ?
@@ -856,7 +836,7 @@ namespace MTUComm
 
                 // If field ForceTimeSync is true inside Global,
                 // after TurnOn it has to be performed an InstallConfirmation
-                if ( globals.ForceTimeSync )
+                if ( global.ForceTimeSync )
                 {
                     ErrorArgs errorArgs = this.InstallConfirmation_Logic ();
                     if ( errorArgs != null )
