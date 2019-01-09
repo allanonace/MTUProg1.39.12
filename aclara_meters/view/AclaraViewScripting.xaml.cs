@@ -787,9 +787,11 @@ namespace aclara_meters.view
                                                              "&output_filename="+resultScriptName +
                                                              "&output_data=" + System.Web.HttpUtility.UrlEncode(
                                                                 Base64Encode( xmlResultTocallback ) ) ));
-
+ 
                         FormsApp.ble_interface.Close();
-
+                        
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                        
                     });
 
                 });
