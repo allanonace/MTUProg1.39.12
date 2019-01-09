@@ -10,11 +10,12 @@ using Xamarin.Forms.Platform.iOS;
 
 namespace aclara_meters.iOS
 {
+
     // The UIApplicationDelegate for the application. This class is responsible for launching the 
     // User Interface of the application, as well as listening (and optionally responding) to 
     // application events from iOS
     [Register("AppDelegate")]
-    public partial class AppDelegate : FormsApplicationDelegate
+    public partial class AppDelegate : global::Xamarin.Forms.Platform.iOS.FormsApplicationDelegate
     {
         private FormsApp appSave;
         private string identity = "";
@@ -26,7 +27,7 @@ namespace aclara_meters.iOS
             UIApplication app,
             NSDictionary  options )
         {
-            Forms.Init ();
+            global::Xamarin.Forms.Forms.Init();
             //Distribute.DontCheckForUpdatesInDebug();
 
             /*
@@ -84,11 +85,25 @@ namespace aclara_meters.iOS
 
             var AppVersion = NSBundle.MainBundle.InfoDictionary[ "CFBundleVersion" ];
 
-            this.appSave = new FormsApp (
-                BluetoothLowEnergyAdapter.ObtainDefaultAdapter (),
-                UserDialogs.Instance,
+            IBluetoothLowEnergyAdapter bluetoothLowEnergyAdapter = BluetoothLowEnergyAdapter.ObtainDefaultAdapter();
+            IUserDialogs userDialogs = UserDialogs.Instance;
+            NSString appversion = (Foundation.NSString) AppVersion.Description;
+
+            /*
+            appSave = new FormsApp (
+                bluetoothLowEnergyAdapter,
+                userDialogs,
                 listaDatos,
-                AppVersion.Description );
+                appversion);
+              */
+
+
+            appSave = new FormsApp(
+                bluetoothLowEnergyAdapter, listaDatos, userDialogs, appversion);
+
+
+
+            //appSave = new FormsApp(bluetoothLowEnergyAdapter);
 
             base.LoadApplication ( appSave );
 

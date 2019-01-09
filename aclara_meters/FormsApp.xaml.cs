@@ -55,7 +55,7 @@ namespace aclara_meters
 
         #region Attributes
 
-        public string appVersion;
+        public string appVersion_str;
         public string deviceId;
         
         public static ICredentialsService credentialsService { get; private set; }
@@ -80,29 +80,60 @@ namespace aclara_meters
         public FormsApp ()
         {
             InitializeComponent ();
+
+           
         }
 
-        public FormsApp (
-            IBluetoothLowEnergyAdapter adapter,
-            IUserDialogs dialogs,
-            List<string> listaDatos,
-            string appVersion)
-            : this ()
-        {
+
+        IBluetoothLowEnergyAdapter adapter;
+        List<string> listaDatos;
+        IUserDialogs dialogs;
+        string appVersion;
+
+
+        public FormsApp(
+           IBluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
+
+
+            {
+
+            InitializeComponent();
+
+
+            this.adapter = adapter;
+            this.listaDatos = listaDatos;
+            this.dialogs = dialogs;
             this.appVersion = appVersion;
-            this.deviceId   = CrossDeviceInfo.Current.Id;
+
+
+            Task.Factory.StartNew(ThreadProcedure);
+
+
+
+        }
+
+        private void ThreadProcedure()
+        {
+            TestMethod(adapter, listaDatos, dialogs, appVersion);
+        }
+
+        private void TestMethod(IBluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
+        {
+            appVersion_str = appVersion;
+            deviceId = CrossDeviceInfo.Current.Id;
 
             // Profiles manager
-            credentialsService = new CredentialsService ();
+            credentialsService = new CredentialsService();
 
             // Initializes Bluetooth
-            ble_interface = new BleSerial ( adapter );
+            ble_interface = new BleSerial(adapter);
 
             string data = string.Empty;
-            if ( listaDatos.Count != 0 ||
-                 listaDatos != null )
-                for ( int i = 0; i < listaDatos.Count; i++ )
-                    data = data + listaDatos[ i ] + "\r\n";
+
+            if (listaDatos.Count != 0 ||
+                 listaDatos != null)
+                for (int i = 0; i < listaDatos.Count; i++)
+                    data = data + listaDatos[i] + "\r\n";
 
             string base64CertificateString = "";
 
@@ -112,9 +143,9 @@ namespace aclara_meters
                 byte[] bytes = Convert.FromBase64String(base64CertificateString);
                 X509Certificate2 x509certificate = new X509Certificate2(bytes);
             }
-            catch ( Exception e )
+            catch (Exception e)
             {
-                Console.WriteLine ( e.StackTrace );
+                Console.WriteLine(e.StackTrace);
             }
 
             AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
@@ -124,10 +155,12 @@ namespace aclara_meters
             //this.LoadXmlsAndCreateContainer ( dialogs, data );
 
             // Downloads, if necesary, and loads configuration from XML files
-            if ( this.HasDeviceAllXmls () )
-                 this.LoadXmlsAndCreateContainer ( dialogs, data );
-            else this.DownloadXmlsIfNecessary ( dialogs, data );
+            if (HasDeviceAllXmls())
+                LoadXmlsAndCreateContainer(dialogs, data);
+            else DownloadXmlsIfNecessary(dialogs, data);
         }
+
+
 
         #endregion
 
@@ -172,24 +205,40 @@ namespace aclara_meters
             string data )
         {
             // Checks network channels
-            if ( Mobile.IsNetAvailable () )
+            if (Mobile.IsNetAvailable())
             {
                 // Donwloads all configuracion XML files
-                if ( this.DownloadXmls () )
-                     this.LoadXmlsAndCreateContainer ( dialogs, data );
-                else this.MainPage = new NavigationPage ( new ErrorInitView ( "Error Downloading files" ) );
+                if (this.DownloadXmls())
+                {
+                    this.LoadXmlsAndCreateContainer(dialogs, data);
+                }
+                else
+                {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        this.MainPage = new NavigationPage(new ErrorInitView("Error Downloading files"));
+                    });
+                }
             }
-            else this.MainPage = new NavigationPage ( new ErrorInitView () );
+            else 
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    this.MainPage = new NavigationPage(new ErrorInitView());
+                });
+
+            }
         }
 
         private bool DownloadXmls ()
         {
             try
             {
-                using (SftpClient sftp = new SftpClient(host, username, password))
+                using (SftpClient sftp = new SftpClient(host, 22, username, password))
                 {
                     try
                     {
+
                         sftp.Connect();
 
 
@@ -251,7 +300,12 @@ namespace aclara_meters
 
             #region Scripting Mode Detection 
 
-            MainPage = new NavigationPage(new ErrorInitView("scripting"));
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                MainPage = new NavigationPage(new ErrorInitView("scripting"));
+            });
+
+
 
             Task.Run(async () =>
             {
@@ -260,11 +314,22 @@ namespace aclara_meters
                     if (!ScriptingMode)
                     {
                         // Load pages container ( ContentPage )
-                        MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
+                        });
+
+                       
                     }
                     else
                     {
-                        MainPage = new NavigationPage(new ErrorInitView("scripting"));
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            MainPage = new NavigationPage(new ErrorInitView("scripting"));
+                        });
+
+
                     }
                 });
             });
@@ -286,13 +351,13 @@ namespace aclara_meters
                 case Device.Android:
                     config.setPlatform   ( SO_ANDROID );
                     config.setAppName    ( AppName    );
-                    config.setVersion    ( appVersion );
+                    config.setVersion    ( appVersion_str);
                     config.setDeviceUUID ( deviceId   );
                     break;
                 case Device.iOS:
                     config.setPlatform   ( SO_IOS     );
                     config.setAppName    ( AppName    );
-                    config.setVersion    ( appVersion );
+                    config.setVersion    ( appVersion_str);
                     config.setDeviceUUID ( deviceId   );
                     break;
                 default:

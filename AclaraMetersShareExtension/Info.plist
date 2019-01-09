@@ -14,10 +14,8 @@
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
 	<string>XPC!</string>
-	<key>CFBundleShortVersionString</key>
-	<string>8</string>
 	<key>CFBundleVersion</key>
-	<string>1.07</string>
+	<string>1.32</string>
 	<key>MinimumOSVersion</key>
 	<string>8.0</string>
 	<key>NSExtension</key>
@@ -32,5 +30,7 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.share-services</string>
 	</dict>
+	<key>CFBundleShortVersionString</key>
+	<string>32</string>
 </dict>
 </plist>
