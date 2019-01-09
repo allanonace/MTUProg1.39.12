@@ -90,7 +90,7 @@ namespace aclara_meters
            
         }
 
-        public FormsApp( BluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
+        public FormsApp( IBluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
         {
             InitializeComponent();
 
