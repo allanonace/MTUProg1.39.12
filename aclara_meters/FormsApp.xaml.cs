@@ -40,6 +40,7 @@ namespace aclara_meters
         private const string SO_IOS     = "iOS";
         private const string SO_UNKNOWN = "Unknown";
         private const string XML_EXT    = ".xml";
+        public static bool ScriptingMode = false;
 
         private string[] filesToCheck =
         {
@@ -64,6 +65,11 @@ namespace aclara_meters
         public static Configuration config;
         public static IBlePeripheral peripheral;
 
+        private IBluetoothLowEnergyAdapter adapter;
+        private List<string> listaDatos;
+        private IUserDialogs dialogs;
+        private string appVersion;
+
         #endregion
 
         #region Properties
@@ -84,42 +90,31 @@ namespace aclara_meters
            
         }
 
-
-        IBluetoothLowEnergyAdapter adapter;
-        List<string> listaDatos;
-        IUserDialogs dialogs;
-        string appVersion;
-
-
-        public FormsApp(
-           IBluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
-
-
-            {
-
+        public FormsApp( BluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
+        {
             InitializeComponent();
-
 
             this.adapter = adapter;
             this.listaDatos = listaDatos;
             this.dialogs = dialogs;
             this.appVersion = appVersion;
 
-
             Task.Factory.StartNew(ThreadProcedure);
 
-
-
         }
+
+        #region iPad & iPhone devices have a different behaviour when initializating the app, this sems to fix it
 
         private void ThreadProcedure()
         {
-            TestMethod(adapter, listaDatos, dialogs, appVersion);
+            CallToInitApp(adapter, listaDatos, dialogs, appVersion);
         }
 
-        private void TestMethod(IBluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
+
+        private void CallToInitApp(IBluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
         {
             appVersion_str = appVersion;
+
             deviceId = CrossDeviceInfo.Current.Id;
 
             // Profiles manager
@@ -160,6 +155,7 @@ namespace aclara_meters
             else DownloadXmlsIfNecessary(dialogs, data);
         }
 
+        #endregion
 
 
         #endregion
@@ -258,7 +254,6 @@ namespace aclara_meters
                                 ftp_array_files.Add(file);
                             }
 
-
                         }
 
                         string path = Mobile.GetPath ();
@@ -306,7 +301,6 @@ namespace aclara_meters
             });
 
 
-
             Task.Run(async () =>
             {
                 await Task.Delay(1100); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
@@ -333,9 +327,6 @@ namespace aclara_meters
                     }
                 });
             });
-
-
-           
 
             #endregion
 
@@ -386,34 +377,28 @@ namespace aclara_meters
 
         #endregion
 
-        public static bool ScriptingMode = false;
+
 
         public void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
         {
-
-
-
             try
             {
                 ScriptingMode = true; 
                 ble_interface.Close();
+                #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
+
                 adapter.DisableAdapter();
+                adapter.EnableAdapter(); //Android shows a window to allow bluetooth
 
-
-                adapter.EnableAdapter();
+                #endregion
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.StackTrace);
             }
 
-
             if ( url != null )
             {
-             
-                //adapter.DisableAdapter();
-                //adapter.EnableAdapter();
-
                 string path = Mobile.pathCache;
                 NameValueCollection query = HttpUtility.ParseQueryString ( url.Query );
 
@@ -429,8 +414,7 @@ namespace aclara_meters
 
                 if ( callback != null ) { /* ... */ }
 
-               
-
+            
                 Task.Run(async () =>
                 {
                     await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread ( async () =>
