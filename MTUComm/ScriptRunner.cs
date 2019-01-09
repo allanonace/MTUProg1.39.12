@@ -71,7 +71,7 @@ namespace MTUComm
                 {
                     script = (Script)s.Deserialize(reader);
                 }
-                buildScriptActions(base_path, serial_device, script);
+                buildScriptActions(base_path, serial_device, script); 
             }
             catch (Exception e)
             {

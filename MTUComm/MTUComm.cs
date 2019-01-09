@@ -607,7 +607,7 @@ namespace MTUComm
                 {
                     Alarm alarm = alarms.Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
                     if ( alarm != null &&
-                         form.conditions.mtu.RequiresAlarmProfile )
+                         form.mtu.RequiresAlarmProfile )
                         form.AddParameter ( AddMtuForm.FIELD.ALARM, alarm );
                 }
             }

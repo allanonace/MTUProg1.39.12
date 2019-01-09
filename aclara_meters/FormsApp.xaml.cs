@@ -299,41 +299,20 @@ namespace aclara_meters
 
             #region Scripting Mode Detection 
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                MainPage = new NavigationPage(new ErrorInitView("scripting"));
-            });
-
-
             Task.Run(async () =>
             {
                 await Task.Delay(1100); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
                 {
-                    if (!ScriptingMode)
-                    {
-                        // Load pages container ( ContentPage )
+                    // Load pages container ( ContentPage )
+                    if ( ! ScriptingMode )
                         Device.BeginInvokeOnMainThread(() =>
                         {
                             MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
                         });
-
-                       
-                    }
-                    else
-                    {
-
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            MainPage = new NavigationPage(new ErrorInitView("scripting"));
-                        });
-
-
-                    }
                 });
             });
 
             #endregion
-
         }
 
         private void LoadXmls ()

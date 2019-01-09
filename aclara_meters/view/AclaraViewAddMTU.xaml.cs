@@ -1070,6 +1070,9 @@ namespace aclara_meters.view
         private void TappedListeners()
         {
             logout_button.Tapped += LogoutCallAsync;
+            
+            //logout_button.Tapped += LogoutTapped;
+            
             settings_button.Tapped += OpenSettingsCallAsync;
             back_button.Tapped += ReturnToMainView;
             bg_read_mtu_button.Tapped += AddMtu;
@@ -2781,11 +2784,10 @@ namespace aclara_meters.view
         {
             #region Get Values from Form
 
-            Mtu    mtu     = this.addMtuForm.mtu;
-            Global globals = this.addMtuForm.global;
+            Mtu    mtu    = this.addMtuForm.mtu;
+            Global global = this.addMtuForm.global;
 
             string value_spi;
-            string value_spd;
             string value_fo;
             string value_msn;
             string value_ir;
@@ -2844,11 +2846,11 @@ namespace aclara_meters.view
             this.addMtuForm.AddParameter ( FIELD.SERVICE_PORT_ID, value_spi );
 
             // Field Order [ SOLO SE LOGEA ¿? ]
-            if ( globals.WorkOrderRecording )
+            if ( global.WorkOrderRecording )
                 this.addMtuForm.AddParameter ( FIELD.FIELD_ORDER, value_fo );
 
             // Meter Number [ SOLO SE LOGEA ¿? ]
-            if ( globals.UseMeterSerialNumber )
+            if ( global.UseMeterSerialNumber )
                 this.addMtuForm.AddParameter ( FIELD.METER_NUMBER, value_msn );
 
             // Initial Reading
@@ -2858,12 +2860,13 @@ namespace aclara_meters.view
             this.addMtuForm.AddParameter ( FIELD.SELECTED_METER, value_mtr );
 
             // Read Interval
-            if ( globals.IndividualReadInterval )
+            // TODO: CHANGE
+            if ( global.IndividualReadInterval )
                 this.addMtuForm.AddParameter ( FIELD.READ_INTERVAL, value_ri );
 
             // Snap Reads [ SOLO SE LOGEA ¿? ]
             if ( ( DEBUG_AUTO_MODE_ON && DEBUG_SNAPSREADS_OK || ! DEBUG_AUTO_MODE_ON ) &&
-                 globals.AllowDailyReads &&
+                 global.AllowDailyReads &&
                  mtu.DailyReads )
                 this.addMtuForm.AddParameter ( FIELD.SNAP_READS, value_srs );
 
@@ -2890,25 +2893,25 @@ namespace aclara_meters.view
                 this.addMtuForm.AddParameter ( FIELD.SERVICE_PORT_ID2, servicePortId2Input.Text );
 
                 // Field Order 2
-                if ( globals.WorkOrderRecording )
+                if ( global.WorkOrderRecording )
                     this.addMtuForm.AddParameter ( FIELD.FIELD_ORDER2, fieldOrder2Input.Text );
 
                 // Meter Number 2
-                if ( globals.UseMeterSerialNumber )
+                if ( global.UseMeterSerialNumber )
                     this.addMtuForm.AddParameter ( FIELD.METER_NUMBER2, meterSerial2Input.Text );
 
                 // Initial Reading 2
                 this.addMtuForm.AddParameter ( FIELD.INITIAL_READING2, initialRead2Input.Text );
 
                 // Read Interval 2
-                if ( globals.IndividualReadInterval )
+                if ( global.IndividualReadInterval )
                     this.addMtuForm.AddParameter ( FIELD.READ_INTERVAL2, readInterval2Picker.SelectedItem.ToString() );
 
                 // Selected Meter ID 2
                 this.addMtuForm.AddParameter ( FIELD.SELECTED_METER2, ( Meter )meterNames2Picker.SelectedItem );
 
                 // Snap Reads 2
-                if ( globals.AllowDailyReads && mtu.DailyReads )
+                if ( global.AllowDailyReads && mtu.DailyReads )
                     this.addMtuForm.AddParameter ( FIELD.SNAP_READS2, snapReads2Slider.Value.ToString() );
 
                 // 2-Way 2
