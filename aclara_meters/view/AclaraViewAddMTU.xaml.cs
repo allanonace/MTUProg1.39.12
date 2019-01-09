@@ -168,7 +168,7 @@ namespace aclara_meters.view
         #region Attributes
 
         private MTUComm.Action add_mtu;
-        private Global globals;
+        //private Global globals;
         private MtuTypes mtuData;
         private Mtu currentMtu;
         private AddMtuForm addMtuForm;
@@ -507,12 +507,12 @@ namespace aclara_meters.view
 
         private void InitializeAddMtuForm ()
         {
-            Global global = this.config.GetGlobal ();
+            //Global global = this.config.GetGlobal ();
 
             #region Conditions
 
-            Mtu    mtu     = this.addMtuForm.mtu;
-            Global globals = this.addMtuForm.globals;
+            Mtu    mtu    = this.addMtuForm.mtu;
+            Global global = this.addMtuForm.global;
 
             #endregion
 
@@ -525,13 +525,14 @@ namespace aclara_meters.view
 
             #region Service Port ID
 
-            this.servicePortIdInputDualContainer.IsVisible = globals.AccountDualEntry;
+            // Hide container if second account number is no needed
+            this.servicePortIdInputDualContainer.IsVisible = global.AccountDualEntry;
 
             #endregion
 
             #region Field Order ( Work Order )
 
-            bool WorkOrderRecording = globals.WorkOrderRecording;
+            bool WorkOrderRecording = global.WorkOrderRecording;
 
             fieldOrderContainer .IsVisible = WorkOrderRecording;
             fieldOrderContainer .IsEnabled = WorkOrderRecording;
@@ -542,7 +543,7 @@ namespace aclara_meters.view
 
             #region Meter Serial Number
 
-            bool UseMeterSerialNumber = globals.UseMeterSerialNumber;
+            bool UseMeterSerialNumber = global.UseMeterSerialNumber;
 
             meterSerialContainer .IsVisible = UseMeterSerialNumber;
             meterSerialContainer .IsEnabled = UseMeterSerialNumber;
@@ -563,7 +564,7 @@ namespace aclara_meters.view
                 InitializeMeter2Pickers();
             }
 
-            bool ShowMeterVendor = globals.ShowMeterVendor;
+            bool ShowMeterVendor = global.ShowMeterVendor;
             if (ShowMeterVendor)
             {
                 // TODO: group meters by vendor / model / name
@@ -599,7 +600,7 @@ namespace aclara_meters.view
             // If field NormXmitInterval is present inside Global,
             // its value is used as default selection
             string normXmitInterval = global.NormXmitInterval;
-            if ( ! globals.IndividualReadInterval &&
+            if ( ! global.IndividualReadInterval &&
                  ! string.IsNullOrEmpty ( normXmitInterval ) )
             {
                 // Convert "Hr/s" to "Hour/s"
@@ -611,7 +612,7 @@ namespace aclara_meters.view
                 readIntervalPicker.SelectedIndex = ( ( index > -1 ) ? index : readIntervalList.IndexOf ( "1 Hour" ) );
             }
             // Default value
-            else if ( globals.IndividualReadInterval )
+            else if ( global.IndividualReadInterval )
                 readIntervalPicker.SelectedIndex = readIntervalList.IndexOf ( "1 Hour" );
 
             #endregion
@@ -619,10 +620,10 @@ namespace aclara_meters.view
             // TODO: get snap reads value from memory map
             #region Snap Reads
 
-            bool allowSnapReads      = globals.AllowDailyReads;
+            bool allowSnapReads      = global.AllowDailyReads;
             bool snapReads           = mtu.DailyReads;
             bool snapReadActive      = allowSnapReads && snapReads;
-            bool changeableSnapReads = globals.IndividualDailyReads;
+            bool changeableSnapReads = global.IndividualDailyReads;
             int  snapReadsDefault    = this.config.global.DailyReadsDefault;
 
             this.snapReadsContainer .IsEnabled = snapReadActive;
@@ -651,8 +652,8 @@ namespace aclara_meters.view
 
             #region 2-Way
 
-            bool GlobalsFastMessageConfig = globals.FastMessageConfig; 
-            bool GlobalsFast2Way          = globals.Fast2Way;
+            bool GlobalsFastMessageConfig = global.FastMessageConfig; 
+            bool GlobalsFast2Way          = global.Fast2Way;
             bool MtuFastMessageConfig     = mtu.FastMessageConfig;
 
             List<string> twoWayList = new List<string> ()
@@ -762,9 +763,10 @@ namespace aclara_meters.view
             #region Set Max
 
             // Set maximum values from global.xml
-            servicePortIdInput.MaxLength = global.AccountLength;
-            fieldOrderInput   .MaxLength = global.WorkOrderLength;
-            meterSerialInput  .MaxLength = global.MeterNumberLength;
+            servicePortIdInput    .MaxLength = global.AccountLength;
+            servicePortIdInputDual.MaxLength = global.AccountLength;
+            fieldOrderInput       .MaxLength = global.WorkOrderLength;
+            meterSerialInput      .MaxLength = global.MeterNumberLength;
 
             #endregion
         }
@@ -2427,7 +2429,7 @@ namespace aclara_meters.view
             #region Port 1
 
             bool okSP =                                     NoValEq ( servicePortIdInput.Text, global.AccountLength           );
-            bool okSD = globals.AccountDualEntry         && NoValEq ( servicePortIdInputDual.Text, global.AccountLength       );
+            bool okSD = global.AccountDualEntry          && NoValEq ( servicePortIdInputDual.Text, global.AccountLength       );
             bool okFO = fieldOrderContainer   .IsVisible && NoValEL ( fieldOrderInput   .Text, global.WorkOrderLength         );
             bool okMS = meterSerialContainer  .IsVisible && NoValEL ( meterSerialInput  .Text, global.MeterNumberLength       );
             bool okIR =                                     NoValEq ( initialReadInput  .Text, initialReadInput    .MaxLength );
@@ -2438,8 +2440,8 @@ namespace aclara_meters.view
             bool okAL = alarmsContainer       .IsVisible && alarmsPicker      .SelectedIndex <= -1;
             bool okDM = demandsContainer      .IsVisible && demandsPicker     .SelectedIndex <= -1;
            
-            if      ( okSP ) msgError = "Service Port ID" + ( ( globals.AccountDualEntry ) ? " ( First entry )" : string.Empty );
-            else if ( okSD ) msgError = "Service Port ID ( Second entry )";
+            if      ( okSP ) msgError = "Service Port ID" + ( ( global.AccountDualEntry ) ? " ( First entry )" : string.Empty );
+            else if ( okSD && ! DEBUG_AUTO_MODE_ON ) msgError = "Service Port ID ( Second entry )";
             else if ( okFO ) msgError = "Field Order";
             else if ( okMS ) msgError = "Meter Serial Number";
             else if ( okMN ) msgError = "Meter Type";
@@ -2454,7 +2456,8 @@ namespace aclara_meters.view
                 return false;
 
             // If Global.AccountDualEntry is true, two ServicePortId entries have to be equal
-            if ( globals.AccountDualEntry &&
+            if ( ! DEBUG_AUTO_MODE_ON    &&
+                 global.AccountDualEntry &&
                  ! string.Equals ( servicePortIdInput.Text, servicePortIdInputDual.Text ) )
             {
                 msgError = "Service Port ID entries are not the same";
@@ -2779,9 +2782,10 @@ namespace aclara_meters.view
             #region Get Values from Form
 
             Mtu    mtu     = this.addMtuForm.mtu;
-            Global globals = this.addMtuForm.globals;
+            Global globals = this.addMtuForm.global;
 
             string value_spi;
+            string value_spd;
             string value_fo;
             string value_msn;
             string value_ir;
