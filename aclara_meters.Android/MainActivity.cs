@@ -105,8 +105,8 @@ namespace aclara_meters.Droid
 
             //SetContentView(Resource.Layout.SplashScreen);
 
-            FormsApp app = new FormsApp(bluetooth, UserDialogs.Instance, new List<string>(), value);
-
+          
+            FormsApp app =  new FormsApp(bluetooth, new List<string>(), UserDialogs.Instance, value);
 
             LoadApplication(app);
 
@@ -210,9 +210,7 @@ namespace aclara_meters.Droid
 
 
 
-          
-
-            LoadApplication(new FormsApp(bluetooth, UserDialogs.Instance, new List<string>(),  value));
+            LoadApplication(new FormsApp(bluetooth, new List<string>(), UserDialogs.Instance, value));
 
         }
 
