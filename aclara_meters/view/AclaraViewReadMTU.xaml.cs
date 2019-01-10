@@ -882,7 +882,10 @@ namespace aclara_meters.view
                 {
                     if ( ! string.IsNullOrEmpty ( p.CustomParameter ) &&
                          p.CustomParameter.Equals ( "MtuType" ) )
+                    {
                         mtu_type = Int32.Parse(p.Value.ToString());
+                        break;
+                    }
                 }
 
                 InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, "ReadMTU");
@@ -903,8 +906,14 @@ namespace aclara_meters.view
                                 // Port header
                                 if (pParameter.Name.Equals("Description"))
                                 {
-                                    param = ports[i].getParameterByTag(pParameter.Name);
-
+                                    string description;
+                                    param = ports[i].getParameterByTag ( pParameter.Name );
+                                    
+                                    // For Read action when no Meter is installed on readed MTU
+                                    if ( param != null )
+                                         description = param.Value;
+                                    else description = MTUComm.Action.currentMtu.Ports[i].GetProperty ( pParameter.Name );
+                                    
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
                                         Title = "Here lies the Port title...",
@@ -912,7 +921,8 @@ namespace aclara_meters.view
                                         Height = "40",
                                         isMTU = "false",
                                         isMeter = "true",
-                                        Description = "Port " + ( i + 1 ) + ": " + param.Value
+                                        Description = "Port " + ( i + 1 ) + ": " + description
+                                        //Description = "Port " + ( i + 1 ) + ": " + ( ( param != null ) ? param.Value : "Not Installed" )
                                     });
                                 }
                                 // Port fields

@@ -22,7 +22,7 @@ namespace MTUComm
         public InterfaceConfig interfaces;
         public AlarmList alarms;
         public DemandConf demands;
-
+        
         private string device;
         private string deviceUUID;
         private string version;

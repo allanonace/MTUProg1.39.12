@@ -177,6 +177,8 @@ namespace MTUComm
 
         #region Attributes
 
+        public static Mtu currentMtu;
+
         public MTUComm comm { get; private set; }
         private ActionType type;
         private List<Parameter> mparameters = new List<Parameter>();
@@ -512,6 +514,8 @@ namespace MTUComm
 
         private void Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
         {
+            currentMtu = e.MtuType;
+        
             ActionResult result = CreateActionResultUsingInterface ( e.MemoryMap, e.MtuType );
             logger.logReadResult ( this, result, e.MtuType );
             ActionFinishArgs args = new ActionFinishArgs ( result );
@@ -574,6 +578,7 @@ namespace MTUComm
 
             int meterid = map.GetProperty("P" + (portnumber + 1) + "MeterType").Value;
 
+            // Port has installed a Meter
             if (meterid != 0)
             {
                 Meter Metertype = configuration.getMeterTypeById(meterid);
@@ -707,12 +712,18 @@ namespace MTUComm
                 }
 
             }
+            // Port has not installed a Meter
             else
             {
+                result.AddParameter(new Parameter("Status", "Status", "Not Installed"));
+                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", "000000000"));
+                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
+                /*
                 result.AddParameter(new Parameter("MeterType", "Meter Type", "Not Installed"));
                 result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", meterid.ToString()));
                 result.AddParameter(new Parameter("AcctNumber", "Service Pt. ID", "000000000"));
                 result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
+                */
             }
 
             return result;
