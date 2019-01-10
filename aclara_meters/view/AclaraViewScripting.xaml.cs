@@ -37,6 +37,7 @@ namespace aclara_meters.view
         private string resultDataXml;
         private bool autoConnect;
 
+        private ScriptRunner runner;
 
         public AclaraViewScripting()
         {
@@ -487,7 +488,7 @@ namespace aclara_meters.view
 
         }
 
-        private ScriptRunner runner;
+
 
         private void scriptFunction()
         {
