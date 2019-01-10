@@ -849,10 +849,10 @@ namespace aclara_meters.view
             ContentView_Scripting.Opacity = 1;
 
             ContentView_Scripting_hamburger_icon.IsVisible = false;
-            ContentView_Scripting.Margin = new Thickness(310, 0, 0, 0);
+            ContentView_Scripting.Margin = new Thickness(0, 0, 0, 0);
 
 
-            shadoweffect.IsVisible = true;
+
             ContentView_Scripting_aclara_logo.Scale = 1.2;
             ContentView_Scripting_aclara_logo.TranslationX = 42;
             ContentView_Scripting_hamburger_icon.TranslationX = 42;

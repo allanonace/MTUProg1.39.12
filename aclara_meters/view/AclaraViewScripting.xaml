@@ -358,11 +358,6 @@
         
 
 
-      <Image Source="shadoweffect" Margin="298,0,0,0" Opacity="0.75" IsVisible="false" 
-             WidthRequest="29" HeightRequest="768" x:Name="shadoweffect">
-      </Image>
-
-       
     
 
              <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" 
