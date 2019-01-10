@@ -35,6 +35,8 @@ namespace aclara_meters.view
         private string resultScriptName;
 
         private string resultDataXml;
+        private bool autoConnect;
+
 
         public AclaraViewScripting()
         {
@@ -51,8 +53,6 @@ namespace aclara_meters.view
             resultScriptName = script_name;
 
             //FormsApp.credentialsService.SaveCredentials("test", "test");
-
-
 
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -100,8 +100,6 @@ namespace aclara_meters.view
 
             resultDataXml = File.ReadAllText(url);
 
-            //ContentView_Scripting_textScript.Text = dec;
-
             ContentView_Scripting_textScript.Text = "Processing ...";
             ContentView_Scripting_fieldpath_script.Text = url;
 
@@ -117,10 +115,6 @@ namespace aclara_meters.view
 				
 			#endregion
 
-
-
-
-
         }
 
         private void Init_Scripting_Method()
@@ -129,12 +123,7 @@ namespace aclara_meters.view
             {
                 Task.Delay(100);
 
-                Device.BeginInvokeOnMainThread(() =>
-                {
-
-                    Interface_ContentView_DeviceList();
-
-                });
+                Device.BeginInvokeOnMainThread(Interface_ContentView_DeviceList);
             });
         }
 
@@ -152,51 +141,57 @@ namespace aclara_meters.view
             DeviceList.RefreshCommand = new Command(async () =>
             {
             
-            	#region New Circular Progress bar Animations	
-            	
-                DeviceList.IsRefreshing = false;
-                backdark_bg.IsVisible = true;
-                indicator.IsVisible = true;
-
-                #endregion
-                
-                // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
-                // Problema: solo se hace si se refresca DeviceList
-                // TO-DO: eliminar el hilo o eliminar el suspend
-                if (printer.ThreadState == System.Threading.ThreadState.Suspended)
-                {
-                    try
-                    {
-                        printer.Resume();
-                    }
-                    catch (Exception e11)
-                    {
-                        Console.WriteLine(e11.StackTrace);
-                    }
-                }
-                //DeviceList.IsRefreshing = true;
-
-                employees = new ObservableCollection<DeviceItem>();
-
-                await FormsApp.ble_interface.Scan();
-                await ChangeListViewData();
-                //DeviceList.IsRefreshing = false;
-
-                #region Disable Circular Progress bar Animations when done
-                
-                backdark_bg.IsVisible = false;
-                indicator.IsVisible = false;
-
-				#endregion
-				
-                if (employees.Count != 0)
+                if (!autoConnect)
                 {
                 
-                    DeviceList.ItemsSource = employees;
-                }
+	            	#region New Circular Progress bar Animations	
+	            	
+	                DeviceList.IsRefreshing = false;
+	                backdark_bg.IsVisible = true;
+	                indicator.IsVisible = true;
+	
+	                #endregion
+	                
+	                // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
+	                // Problema: solo se hace si se refresca DeviceList
+	                // TO-DO: eliminar el hilo o eliminar el suspend
+	                if (printer.ThreadState == System.Threading.ThreadState.Suspended)
+	                {
+	                    try
+	                    {
+	                        printer.Resume();
+	                    }
+	                    catch (Exception e11)
+	                    {
+	                        Console.WriteLine(e11.StackTrace);
+	                    }
+	                }
+	                //DeviceList.IsRefreshing = true;
+	
+	                employees = new ObservableCollection<DeviceItem>();
+	
+	               
+	                    await FormsApp.ble_interface.Scan();
+	                    await ChangeListViewData();
+	               
+	
+	                //DeviceList.IsRefreshing = false;
+	
+	                #region Disable Circular Progress bar Animations when done
+	                
+	                backdark_bg.IsVisible = false;
+	                indicator.IsVisible = false;
+	
+					#endregion
+					
+	                if (employees.Count != 0)
+	                {
+	                
+	                    DeviceList.ItemsSource = employees;
+	                }
+                 }
             });
 
-            
             #region Execute the Refresh List method every 3 seconds if no elements are on list
             
             var minutes = TimeSpan.FromSeconds(3);
@@ -417,8 +412,39 @@ namespace aclara_meters.view
                     }
                 }
 
-                Thread.Sleep(500); // 0.5 Second
+                Thread.Sleep(300); // 0.5 Second
+
+                if (autoConnect)
+                {
+
+                    autoConnect = false;
+                    #region Autoconnect to stored device 
+
+                    var minutes2 = TimeSpan.FromSeconds(0.5);
+
+                    Device.StartTimer(minutes2, () => {
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            Task.Factory.StartNew(NewOpenConnectionWithDevice);
+                        });
+                        return false;
+                    });
+
+
+
+                    #endregion
+                }
+
+
             }
+
+
+         
+
+        
+        
         }
 
 
@@ -427,7 +453,8 @@ namespace aclara_meters.view
         {
             Task.Run(async () =>
             {
-                await Task.Delay(50); Device.BeginInvokeOnMainThread(() =>
+                await Task.Delay(150); 
+                Device.BeginInvokeOnMainThread(() =>
                 {
                     try
                     {
@@ -441,9 +468,12 @@ namespace aclara_meters.view
                             ContentView_Scripting_label_read.Text = "Executing Script ... ";
                         });
 
-                     
-                        Task.Factory.StartNew(scriptFunction);
 
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            Task.Factory.StartNew(scriptFunction);
+                        });
 
                     }
                     catch (Exception e2)
@@ -457,18 +487,30 @@ namespace aclara_meters.view
 
         }
 
+        private ScriptRunner runner;
 
         private void scriptFunction()
         {
-            ScriptRunner runner = new ScriptRunner();
+            runner = new ScriptRunner();
 
-            //Define finish and error event handler
-            runner.OnFinish     += OnFinish;
-            runner.OnProgress   += OnProgress;
-            runner.onStepFinish += onStepFinish;
-            runner.OnError      += OnError;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                //Define finish and error event handler
+                runner.OnFinish     += OnFinish;
+                runner.OnProgress   += OnProgress;
+                runner.onStepFinish += onStepFinish;
+                runner.OnError      += OnError;
 
-            runner.ParseScriptAndRun ( FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length );
+                Task.Factory.StartNew(calltoScriptRun);
+            });
+
+
+           
+        }
+
+        private void calltoScriptRun()
+        {
+            runner.ParseScriptAndRun(FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length);
         }
 
         private async Task ChangeListViewData()
@@ -590,28 +632,22 @@ namespace aclara_meters.view
                                                     peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                                                     peripheralManualDisconnection = false;
 
-                                                    
                                                     #region Autoconnect to stored device 
 
-                                                    var minutes2 = TimeSpan.FromSeconds(2);
+                                                    var minutes2 = TimeSpan.FromSeconds(0.5);
 
                                                     Device.StartTimer(minutes2, () => {
 
-                                                      
-                                                        Device.BeginInvokeOnMainThread(() =>
-                                                        {
-
-                                                            Task.Factory.StartNew(NewOpenConnectionWithDevice);
-
-                                                        });
-
-
+                                                        autoConnect = true;
 
                                                         return false;
                                                     });
 
-													#endregion
+                                                    #endregion
 
+
+
+                                                  
                                                    
 
 
@@ -643,22 +679,40 @@ namespace aclara_meters.view
             });
         }
 
+        #region We want to connect to the device if there is not scanning running
+        
         private void NewOpenConnectionWithDevice()
         {
             while (FormsApp.ble_interface.IsScanning())
             {
-
+                Thread.Sleep(100);
             }
 
-            Thread.Sleep(100);
-
-
-            if (!FormsApp.ble_interface.IsOpen())
+            Device.BeginInvokeOnMainThread(() =>
             {
+                var seconds = TimeSpan.FromSeconds(1); // Don't execute it asap!
 
-                // call your method to check for notifications here
-                FormsApp.ble_interface.Open(peripheral, true);
-            }
+                Device.StartTimer(seconds, () =>
+                {
+                 	Device.BeginInvokeOnMainThread(() =>
+       				{
+                        if (!FormsApp.ble_interface.IsOpen())
+                        {
+                            while (FormsApp.ble_interface.IsScanning())
+                            {
+                                Thread.Sleep(100);
+                            }
+
+                            // call your method to check for notifications here
+                            FormsApp.ble_interface.Open(peripheral, true);
+                        }
+                    });
+
+                    return true;
+                });
+            });
+
+		#endregion
 
 
         }

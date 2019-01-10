@@ -872,10 +872,10 @@ namespace aclara_meters.view
         {
             while (FormsApp.ble_interface.IsScanning())
             {
-
+                Thread.Sleep(100);
             }
 
-            Thread.Sleep(100);
+          
 
 
             if (!FormsApp.ble_interface.IsOpen())
