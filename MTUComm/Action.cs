@@ -678,7 +678,15 @@ namespace MTUComm
                                         name = property_name;
                                         break;
                                     default:
-                                        val = map.GetProperty("P" + (portnumber + 1) + parameter.Name).Value.ToString();
+
+                                        try
+                                        {
+                                            val = map.GetProperty("P" + (portnumber + 1) + parameter.Name).Value.ToString();
+                                        }catch (Exception e)
+                                        {
+                                            val = null;
+                                        }
+
                                         break;
 
                                 }
@@ -833,7 +841,15 @@ namespace MTUComm
                                                                     .GetValue ( actionParams, null ).ToString() );
                                     break;
                                 default:
-                                    paramToAdd = new Parameter ( parameter.Name, parameter.Display, map.GetProperty(parameter.Name).Value.ToString() );
+                                    try
+                                    {
+                                        paramToAdd = new Parameter(parameter.Name, parameter.Display, map.GetProperty(parameter.Name).Value.ToString());
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        paramToAdd = null;
+                                    }
+                                   
                                     break;
                             }
 
