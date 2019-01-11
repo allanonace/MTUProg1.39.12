@@ -62,18 +62,35 @@ namespace MTUComm
 
         public string CreateFileIfNotExist ( bool append = true )
         {
-            string uri = Path.Combine(abs_path, getFileName());
+            string file_name = getFileName();
+            String filename_clean = Path.GetFileName(file_name);
+            String rel_path = file_name.Replace(filename_clean, "");
+
+            if (rel_path.Length > 1 && rel_path.StartsWith("/"))
+            {
+                rel_path = rel_path.Substring(1);
+            }
+
+            string full_new_path = Path.Combine(abs_path, rel_path);
+
+            if (!Directory.Exists(full_new_path))
+            {
+                Directory.CreateDirectory(full_new_path);
+            }
+                    
+
+            string uri = Path.Combine(full_new_path, filename_clean);
 
             if ( ! File.Exists ( uri ) )
             { 
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(Path.Combine(abs_path, getFileName()), append ))
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, append ))
                 {
                     file.WriteLine(getBaseFileHandler());
                 }
             }
             else if ( ! append )
             {
-                using (System.IO.StreamWriter file = new System.IO.StreamWriter(Path.Combine(abs_path, getFileName()), false ))
+                using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, false ))
                 {
                     file.WriteLine(getBaseFileHandler());
                 }
@@ -82,11 +99,11 @@ namespace MTUComm
             {
                 try
                 {
-                    XDocument.Load(Path.Combine(abs_path, getFileName()));
+                    XDocument.Load(uri);
                 }
                 catch ( Exception e )
                 {
-                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(Path.Combine(abs_path, getFileName()), false ))
+                    using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, false ))
                     {
                         file.WriteLine(getBaseFileHandler());
                     }
@@ -123,8 +140,8 @@ namespace MTUComm
 
         private XElement getRootElement()
         {
-            CreateFileIfNotExist();
-            XDocument doc =  XDocument.Load(Path.Combine(abs_path, getFileName()));
+            String uri = CreateFileIfNotExist();
+            XDocument doc =  XDocument.Load(uri);
             XElement root = new XElement("StarSystem");
 
             return root;
@@ -140,8 +157,8 @@ namespace MTUComm
 
         public void logLogin(String username)
         {
-            CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
+            String uri = CreateFileIfNotExist();
+            XDocument doc = XDocument.Load(uri);
 
             XElement error = new XElement("AppMessage");
 
@@ -151,7 +168,7 @@ namespace MTUComm
             error.Add(message);
 
             doc.Root.Element("Message").Add(error);
-            doc.Save(Path.Combine(abs_path, getFileName()));
+            doc.Save(uri);
         }
 
         public string logErrorString(Action ref_action, int id, string e_message)
@@ -206,20 +223,20 @@ namespace MTUComm
 
         public void logReadResult(Action ref_action, ActionResult result, Mtu mtuType)
         {
-            CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
+            String uri = CreateFileIfNotExist();
+            XDocument doc = XDocument.Load(uri);
 
             logReadResult(doc.Root.Element("Mtus"), ref_action, result, mtuType.Id);
-            doc.Save(Path.Combine(abs_path, getFileName()));
+            doc.Save(uri);
         }
 
         public void logReadDataResult(Action ref_action, ActionResult result, Mtu mtuType)
         {
-            CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
+            String uri = CreateFileIfNotExist();
+            XDocument doc = XDocument.Load(uri);
 
             logReadDataResult(doc.Root.Element("Mtus"), ref_action, result, mtuType.Id);
-            doc.Save(Path.Combine(abs_path, getFileName()));
+            doc.Save(uri);
         }
 
         public void logReadDataResult(XElement parent, Action ref_action, ActionResult result, int mtu_type_id)
@@ -318,13 +335,13 @@ namespace MTUComm
 
         public void logTurnOffResult(Action ref_action, uint MtuId)
         {
-            CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
+            String uri = CreateFileIfNotExist();
+            XDocument doc = XDocument.Load(uri);
 
             // << AHORA NO SE ESTA USANDO PARA NADA LA INFORMACION RECUPERADA DE INTERFACE >>
 
             logTurnOffResult(doc.Root.Element("Mtus"), ref_action.DisplayText, ref_action.LogText, ref_action.user, MtuId);
-            doc.Save(Path.Combine(abs_path, getFileName()));
+            doc.Save(uri);
         }
 
         public void logTurnOffResult(XElement parent, string display, string type, string user, uint MtuId)
@@ -349,11 +366,11 @@ namespace MTUComm
 
         public void logTurnOnResult(Action ref_action, uint MtuId)
         {
-            CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
+            String uri = CreateFileIfNotExist();
+            XDocument doc = XDocument.Load(uri);
             
             logTurnOnResult(doc.Root.Element("Mtus"), ref_action.DisplayText, ref_action.LogText, ref_action.user, MtuId);
-            doc.Save(Path.Combine(abs_path, getFileName()));
+            doc.Save(uri);
         }
 
         public void logTurnOnResult(XElement parent, string display, string type, string user, uint MtuId)
@@ -378,8 +395,8 @@ namespace MTUComm
 
         public void logCancel(Action ref_action, String cancel, String reason)
         {
-            CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
+            String uri = CreateFileIfNotExist();
+            XDocument doc = XDocument.Load(uri);
 
             XElement action = new XElement("Action");
 
@@ -394,7 +411,7 @@ namespace MTUComm
             logParameter(action, new Parameter("Reason", "Cancel Reason", reason));
 
             doc.Root.Element("Mtus").Add(action);
-            doc.Save(Path.Combine(abs_path, getFileName()));
+            doc.Save(uri);
 
         }
 
@@ -405,8 +422,8 @@ namespace MTUComm
 
         public void LogError(int id, String e_message)
         {
-            CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
+            String uri = CreateFileIfNotExist();
+            XDocument doc = XDocument.Load(uri);
 
             XElement error = new XElement("AppError");
 
@@ -420,16 +437,16 @@ namespace MTUComm
             error.Add(message);
 
             doc.Root.Element("Error").Add(error);
-            doc.Save(Path.Combine(abs_path, getFileName()));
+            doc.Save(uri);
         }
 
         public void logAction(Action ref_action)
         {
-            CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(Path.Combine(abs_path, getFileName()));
+            String uri = CreateFileIfNotExist();
+            XDocument doc = XDocument.Load(uri);
 
             logAction(doc.Root.Element("Mtus"), ref_action);
-            doc.Save(Path.Combine(abs_path, getFileName()));
+            doc.Save(uri);
     
         }
 
