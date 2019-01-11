@@ -181,6 +181,33 @@ namespace aclara_meters
             //    return false;
             
             int count = 0;
+
+            foreach ( string fileNeeded in filesToCheck )
+            {
+                foreach ( string filePath in filesLocal )
+                {
+                    string compareStr = fileNeeded + XML_EXT;
+                    compareStr = compareStr.Replace ( path, "" ).Replace("/", "");
+
+                    string fileStr = filePath.ToString ();
+                    fileStr = fileStr.Replace ( path, "" ).Replace("/","");
+
+                    if ( fileStr.Equals ( compareStr ) )
+                    {
+                        count++;
+                        break;
+                    }
+
+                }
+            }
+
+            if(count == filesToCheck.Length)
+                return true;
+
+            return false;
+
+            /*
+
             foreach ( string filePath in filesLocal )
             {
                 foreach ( string fileNeeded in filesToCheck )
@@ -198,6 +225,8 @@ namespace aclara_meters
             }
 
             return false;
+
+            */
         }
 
         private void DownloadXmlsIfNecessary (
