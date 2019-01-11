@@ -170,25 +170,24 @@ namespace aclara_meters.view
 	                employees = new ObservableCollection<DeviceItem>();
 	
 	               
-	                    await FormsApp.ble_interface.Scan();
-	                    await ChangeListViewData();
+                    await FormsApp.ble_interface.Scan();
+                    await ChangeListViewData();
 	               
 	
 	                //DeviceList.IsRefreshing = false;
 	
-	                #region Disable Circular Progress bar Animations when done
-	                
-	                backdark_bg.IsVisible = false;
-	                indicator.IsVisible = false;
-	
-					#endregion
+	        
 					
 	                if (employees.Count != 0)
 	                {
 	                
 	                    DeviceList.ItemsSource = employees;
 	                }
-                 }
+
+
+
+                   
+                }
             });
 
             #region Execute the Refresh List method every 3 seconds if no elements are on list
@@ -239,12 +238,39 @@ namespace aclara_meters.view
                                     case ble_library.BlePort.NO_ERROR:
                                         break;
                                     case ble_library.BlePort.CONECTION_ERRROR:
+
+                                        #region New Circular Progress bar Animations    
+
+                                        DeviceList.IsRefreshing = false;
+                                        backdark_bg.IsVisible = false;
+                                        indicator.IsVisible = false;
+
+                                        #endregion
+
                                         Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
                                         break;
                                     case ble_library.BlePort.DYNAMIC_KEY_ERROR:
+
+                                        #region New Circular Progress bar Animations    
+
+                                        DeviceList.IsRefreshing = false;
+                                        backdark_bg.IsVisible = false;
+                                        indicator.IsVisible = false;
+
+                                        #endregion
+
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
                                     case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
+
+                                        #region New Circular Progress bar Animations    
+
+                                        DeviceList.IsRefreshing = false;
+                                        backdark_bg.IsVisible = false;
+                                        indicator.IsVisible = false;
+
+                                        #endregion
+
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
                                 }
@@ -253,13 +279,7 @@ namespace aclara_meters.view
                                 ContentView_DeviceList.Opacity = 1;
                                 ContentView_DeviceList.IsEnabled = true;
 
-                                #region New Circular Progress bar Animations    
-
-                                DeviceList.IsRefreshing = false;
-                                backdark_bg.IsVisible = false;
-                                indicator.IsVisible = false;
-
-                                #endregion
+                               
 
                             });
                             peripheralConnected = status;
@@ -336,15 +356,18 @@ namespace aclara_meters.view
 
 
 
-
+                                            /*
+                                                                                   
                                             #region New Circular Progress bar Animations    
+
 
                                             DeviceList.IsRefreshing = false;
                                             backdark_bg.IsVisible = false;
                                             indicator.IsVisible = false;
 
                                             #endregion
-
+                                                                                       
+                                            */
 
                                         }
                                         catch (Exception e)
@@ -644,6 +667,25 @@ namespace aclara_meters.view
                                                 }
 
                                             }
+                                            else
+                                            {
+                                                #region Disable Circular Progress bar Animations when done
+
+                                                backdark_bg.IsVisible = false;
+                                                indicator.IsVisible = false;
+
+                                                #endregion
+                                            }
+                                        }
+                                        else
+                                        {
+                                                #region Disable Circular Progress bar Animations when done
+
+                                                backdark_bg.IsVisible = false;
+                                                indicator.IsVisible = false;
+
+                                                #endregion
+  
                                         }
 
 
