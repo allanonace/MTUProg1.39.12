@@ -37,8 +37,6 @@ namespace aclara_meters.view
         private string resultDataXml;
         private bool autoConnect;
 
-        private ScriptRunner runner;
-
         public AclaraViewScripting()
         {
             InitializeComponent();
@@ -488,30 +486,17 @@ namespace aclara_meters.view
 
         }
 
-
-
         private void scriptFunction()
         {
-            runner = new ScriptRunner();
+            ScriptRunner runner = new ScriptRunner();
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                //Define finish and error event handler
-                runner.OnFinish     += OnFinish;
-                runner.OnProgress   += OnProgress;
-                runner.onStepFinish += onStepFinish;
-                runner.OnError      += OnError;
+            //Define finish and error event handler
+            runner.OnFinish     += OnFinish;
+            runner.OnProgress   += OnProgress;
+            runner.onStepFinish += onStepFinish;
+            runner.OnError      += OnError;
 
-                Task.Factory.StartNew(calltoScriptRun);
-            });
-
-
-           
-        }
-
-        private void calltoScriptRun()
-        {
-            runner.ParseScriptAndRun(FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length);
+            runner.ParseScriptAndRun ( FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length );
         }
 
         private async Task ChangeListViewData()
@@ -712,11 +697,9 @@ namespace aclara_meters.view
                     return true;
                 });
             });
-
-		#endregion
-
-
         }
+
+        #endregion
 
         private string DecodeId(byte[] id)
         {
