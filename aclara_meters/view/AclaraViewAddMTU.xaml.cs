@@ -737,8 +737,8 @@ namespace aclara_meters.view
             // Load cancel reasons from Global.xml
             List<string> cancelReasons = this.config.global.Cancel;
 
-            // Add "Other" option
-            cancelReasons.Add("Other");
+            if(!cancelReasons.Contains("Other"))
+                cancelReasons.Add("Other"); // Add "Other" option
 
             cancelReasonPicker.ItemsSource = cancelReasons;
 
