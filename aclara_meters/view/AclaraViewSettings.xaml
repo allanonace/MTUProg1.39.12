@@ -5,8 +5,11 @@
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters"
                Title="{Binding PageTitle}"
-                    NavigationPage.HasBackButton="false"
-             xmlns:accordion="clr-namespace:Xamarin.CustomControls;assembly=Xamarin.CustomControls.AccordionView"
+               NavigationPage.HasBackButton="false"
+               xmlns:accordion="clr-namespace:Xamarin.CustomControls;assembly=Xamarin.CustomControls.AccordionView"
+               xmlns:local="clr-namespace:aclara_meters;assembly=aclara_meters"
+               xmlns:Controls="clr-namespace:aclara_meters" 
+               xmlns:behaviors="clr-namespace:aclara_meters.Behaviors"
                x:Class="aclara_meters.view.AclaraViewSettings">
 
 
@@ -824,7 +827,7 @@
 
         
         
-        <!-- Menu desplegable -->
+      <!-- Menu desplegable -->
         
     <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" 
                  IsVisible="false"
@@ -919,7 +922,7 @@
 
 
 
-                     <ContentView  Margin="0,240,0,-20"
+                     <ContentView  Margin="0,92,0,-20"
                                        RelativeLayout.YConstraint=
                       "{ConstraintExpression Type=RelativeToParent,
                                              Property=Height,
@@ -1055,7 +1058,7 @@
                            
                             <Image IsVisible="true"  
                                 x:Name="close_menu_icon"
-                                Margin="0,0,0,0"  HeightRequest="56"
+                                Margin="0,8,0,0"  HeightRequest="56"
                                 Scale="1" 
                                 Source="back_arrow.png"  
                                 HorizontalOptions="Start">
@@ -1068,10 +1071,10 @@
                             </Image>
 
                             <Image  x:Name="logo_tablet_aclara" 
-                                    WidthRequest="256" 
+                                    WidthRequest="216" 
                                     HeightRequest="128"
                                     IsEnabled="false"
-                                    Margin="-36,0,0,0" 
+                                    Margin="-32,-12,0,4" 
                                     Scale="1" 
                                     Opacity="1"
                                     Source="aclara_logo_menu.png">
@@ -1080,33 +1083,49 @@
                         
                       </StackLayout>
 
-                          <StackLayout Margin="0,-32,0,0" x:Name="tablet_user_view" HorizontalOptions="Center">
-                          <Image  
-                            Margin="0,0,0,0"
-                            IsEnabled="false"
-                            WidthRequest="72" 
-                            HeightRequest="72"
-                            Scale="1" 
-                                
-                            Source="user_menu_icon.png"
-                                     
-                            >
-                          </Image>
+
+                          <StackLayout Margin="0,-40,0,0"  x:Name="tablet_user_view" HorizontalOptions="Center">
+                       
                         
-                      <Label x:Name="userName" TextColor="White" HorizontalTextAlignment="Center" Text="test@email.com" FontSize="16"></Label>
-                      <Label x:Name="Company" TextColor="White" HorizontalTextAlignment="Center"  Text="Company" FontSize="16"> </Label>
-
-  
-                </StackLayout>
-                    
-                </StackLayout>
-
-                      <Image Margin="0,0,0,0" Source="background_menu"  HeightRequest="240" Opacity="0.2"  InputTransparent="true">
-                    
-                </Image>
-                    
-            </RelativeLayout>
+                      <Label x:Name="userName" Margin="0,-12,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" 
+                             FontSize="20"></Label>
+                     
         
+                    
+                </StackLayout>
+
+
+
+          
+                    
+                </StackLayout>
+                <StackLayout VerticalOptions="Start" InputTransparent="true">
+                    <StackLayout.HeightRequest>
+                      <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="iOS" Value="114" />
+                        <On Platform="Android" Value="96" />
+                     
+                      </OnPlatform>
+                    </StackLayout.HeightRequest>
+                    
+                    <Image Margin="0,0,0,0"  x:Name="backmenu" Source="background_menu"  Opacity="0.1"  InputTransparent="true">
+
+                    <Image.HeightRequest>
+                      <OnPlatform x:TypeArguments="x:Double">
+                        <On Platform="iOS" Value="94" />
+                        <On Platform="Android" Value="76" />
+                     
+                      </OnPlatform>
+                            
+                    </Image.HeightRequest>
+                        
+                    </Image>
+
+                </StackLayout>
+
+                  
+            </RelativeLayout>
+      
 
                 
             
@@ -1142,18 +1161,104 @@
         </StackLayout>
 
 
-
-        <!--   DIALOGS   -->
+        
+       <!--   DIALOGS   -->
            <Image BackgroundColor="Black"  x:Name="dialog_open_bg" WidthRequest="1024"  IsVisible="false"
                   HeightRequest="1024" Opacity="0.5">
                 
             </Image>
 
 
+        <!-- POP UP START -->
 
 
-          <ContentView     Scale="1.2" IsVisible="false"
-                        HeightRequest="185" 
+         <ContentView   Scale="1.1" IsVisible="false" Margin="-21"
+                        HeightRequest="396" 
+                        x:Name="Popup_start" 
+                        
+            RelativeLayout.XConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Width,
+                                     Factor=0.19}"
+            RelativeLayout.WidthConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Width,
+                                     Factor=0.620}"
+            RelativeLayout.YConstraint=
+              "{ConstraintExpression Type=RelativeToParent,
+                                     Property=Height,
+                                     Factor=0.24}"
+
+                          
+            >
+                
+           
+   
+                <Frame   CornerRadius="6"  HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">
+                 <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" > 
+
+                     <StackLayout  IsVisible="true" 
+                                  Margin="0" Opacity="1">
+                 
+                  <Label IsVisible="true" 
+                            Margin="16,16,0,4" FontSize="20" TextColor="#6aa2b8" Text="PORT *:"  />
+                           
+                    
+
+                     <Image Margin="0,0,0,0" HeightRequest="1" WidthRequest="1024" BackgroundColor="#6ba2b7"/>
+                     
+
+                      
+                      <Label Text="Other" Margin="16,4,0,0" VerticalOptions="Center" Font="Bold, 16"
+                             TextColor="Black"/>
+                            
+
+                          <Frame CornerRadius="6" HeightRequest="96" Margin="12" BackgroundColor="#7a868c"  >
+                               <Frame x:Name="cancelReasonOtherInputContainer" CornerRadius="6"  HeightRequest="96"  Margin="-7" BackgroundColor="White"  >
+                                    <StackLayout Margin="1"  Orientation="Vertical" HorizontalOptions="FillAndExpand" >
+                                        
+                                     <local:EditorMultiline  Margin="-7"  HorizontalOptions="FillAndExpand"  x:Name="cancelReasonOtherInput" TextColor="Black" 
+                                         WidthRequest="200"  HeightRequest="96" 
+                                     FontSize="18" 
+                                                              
+                                    ></local:EditorMultiline>
+
+                                    </StackLayout>
+                             </Frame> 
+                            
+                         </Frame> 
+                        
+                     <Button IsVisible="true"  
+                             x:Name="submit_dialog" Margin="-2,0,-2,-2" Text="SUBMIT" WidthRequest="320"  BorderWidth="1"  
+                             CornerRadius="0" FontSize="18" BorderColor="Gray" TextColor="White" BackgroundColor="#6aa2b8">  </Button>    
+
+                     </StackLayout>
+                    
+               </StackLayout>
+                
+            </Frame>
+            
+            </ContentView>
+
+        
+       <!-- POP UP END -->
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+          <ContentView     Scale="1.2" IsVisible="false" Margin="-18"
+                        HeightRequest="224" 
                         x:Name="turnoff_mtu_background" 
                         
             RelativeLayout.XConstraint=
@@ -1176,6 +1281,42 @@
    
                 <Frame  CornerRadius="6"  HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">
                  <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" > 
+
+                     <StackLayout  x:Name="dialog_logoff" IsVisible="false" 
+                                  Margin="0" Opacity="1">
+                 
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="20" Text="Are you sure you want to Log off?">    
+                        </Label>
+                            
+                        <StackLayout Margin="0,12,0,0" Orientation="Horizontal"  >
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                         TextColor="#6aa2b8"
+                                         FontSize="20"  Text="Yes">
+
+                                         <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="logoff_ok" />
+                                        </Label.GestureRecognizers>
+                                
+                            </Label>
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                        TextColor="#6aa2b8"
+                                        FontSize="20" Text="No"> 
+                                
+                                          <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="logoff_no" />
+                                        </Label.GestureRecognizers>
+
+                            </Label>
+
+                          </StackLayout>
+                      
+                     </StackLayout>
+                    
+
+
+                    
                     <StackLayout  x:Name="dialog_turnoff_one" IsVisible="false" 
                                   Margin="0" Opacity="1">
                  
@@ -1236,7 +1377,7 @@
                        <StackLayout  x:Name="dialog_turnoff_three" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
                         
-                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                        <Label x:Name="dialog_turnoff_text" Margin="12,12,12,12" HorizontalTextAlignment="Center" 
                                  FontSize="20" Text="MTU turned off Successfully">
                             
                         </Label>
@@ -1356,6 +1497,163 @@
 
 
 
+
+                    <!--    -->
+
+
+                       <StackLayout  x:Name="dialog_servicePortId" IsVisible="false" HorizontalOptions="CenterAndExpand" 
+                                     VerticalOptions="CenterAndExpand"
+                                  Margin="0" Opacity="1" >
+                     
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="18" Text="Please, re-enter the Service Port ID">
+                            
+                        </Label>
+
+
+                         <Frame CornerRadius="6" HeightRequest="30" Margin="12,4,12,0" BackgroundColor="#7a868c"  >
+                              <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                        <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                            
+                                             <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                    HeightRequest="40"   x:Name="serviceCheckEntry" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                    Placeholder="" PlaceholderColor="#7a868c" 
+                                                    FontSize="17" HorizontalTextAlignment="Start"/>
+                                        </StackLayout>
+                                 </Frame> 
+                            
+                        </Frame>
+
+                         <Label   HorizontalTextAlignment="Start" TextColor="Red" x:Name="errorServicePort" IsVisible="false"
+                                FontSize="12" Margin="12,0,0,0" Text="Entered fields are not equal">
+                            
+                        </Label>
+                        
+                 
+                        <StackLayout Margin="8,8,0,0" Orientation="Horizontal"  >
+                                
+
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                        TextColor="#6aa2b8"
+                                         FontSize="20"  Text="Ok">
+
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="servicePortId_ok" />
+                                        </Label.GestureRecognizers>
+
+                                
+                                  </Label>
+
+
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                       TextColor="#6aa2b8"
+                                        FontSize="20" Text="Cancel"> 
+                                
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="servicePortId_cancel" />
+                                        </Label.GestureRecognizers>
+                                
+
+                                </Label>
+                                
+                          </StackLayout>
+                      
+
+
+                        
+                     </StackLayout>
+
+
+
+
+
+
+
+                    
+                    <!--    -->
+
+
+
+
+                    <!--    -->
+
+
+                       <StackLayout  x:Name="dialog_fieldOrder" IsVisible="false" HorizontalOptions="CenterAndExpand" 
+                                     VerticalOptions="CenterAndExpand"
+                                  Margin="0" Opacity="1" >
+                     
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="18" Text="Please, re-enter the Field order">
+                            
+                        </Label>
+
+
+                         <Frame CornerRadius="6" HeightRequest="30" Margin="12,4,12,0" BackgroundColor="#7a868c"  >
+                              <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                        <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                            
+                                             <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                    HeightRequest="40"   x:Name="fieldOrderCheckEntry" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                    Placeholder="" PlaceholderColor="#7a868c" 
+                                                    FontSize="17" HorizontalTextAlignment="Start"/>
+                                        </StackLayout>
+                                 </Frame> 
+                            
+                        </Frame>
+
+                         <Label   HorizontalTextAlignment="Start" TextColor="Red" x:Name="errorFieldOrder" IsVisible="false"
+                                FontSize="12" Margin="12,0,0,0" Text="Entered fields are not equal">
+                            
+                        </Label>
+                        
+                 
+                        <StackLayout Margin="8,8,0,0" Orientation="Horizontal"  >
+                                
+
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                        TextColor="#6aa2b8"
+                                         FontSize="20"  Text="Ok">
+
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="fieldOrder_ok" />
+                                        </Label.GestureRecognizers>
+
+                                
+                                  </Label>
+
+
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                       TextColor="#6aa2b8"
+                                        FontSize="20" Text="Cancel"> 
+                                
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="fieldOrder_cancel" />
+                                        </Label.GestureRecognizers>
+                                
+
+                                </Label>
+                                
+                          </StackLayout>
+                      
+
+
+                        
+                     </StackLayout>
+
+
+
+
+
+
+
+                    
+                    <!--    -->
+
+
+
+                    
                      </StackLayout>
 
 
@@ -1367,9 +1665,8 @@
 
           <!--  END DIALOGS   -->
 
-
         
-   
+           
       
          
     </RelativeLayout>

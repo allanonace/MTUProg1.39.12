@@ -339,48 +339,49 @@ namespace aclara_meters.view
             ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
         }
 
-        private async void LogoutButtonTapped(object sender, EventArgs e)
+        private async void LogoutTapped(object sender, EventArgs e)
         {
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                dialog_turnoff_one.IsVisible = false;
+                dialog_open_bg.IsVisible = true;
+                dialog_meter_replace_one.IsVisible = false;
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = false;
+                dialog_replacemeter_one.IsVisible = false;
+                dialog_logoff.IsVisible = true;
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+            });
+
+            /*
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
 
-            try
-            {
-               
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine("Exception Message: " + ex.Message);
-            }
-
-            // Application.Current.MainPage = new LoginMenuPage(bleAdapterSaved, dialogsSaved);
             int contador = Navigation.NavigationStack.Count;
-
-            //Navigation.RemovePage(Navigation.NavigationStack[Navigation.NavigationStack.Count - 1]);
             while (contador > 0)
             {
-              
                 try
                 {
                     await Navigation.PopAsync(false);
                 }
-                catch (Exception v1)
+                catch (Exception v)
                 {
-                    Console.WriteLine(v1.StackTrace);
+                    Console.WriteLine(v.StackTrace);
                 }
-
                 contador--;
             }
 
             try
             {
                 await Navigation.PopToRootAsync(false);
-
             }
-            catch (Exception v2)
+            catch (Exception v1)
             {
-                Console.WriteLine(v2.StackTrace);
+                Console.WriteLine(v1.StackTrace);
             }
+            */
 
         }
 
@@ -649,7 +650,7 @@ namespace aclara_meters.view
             sync_button_pressed.Tapped += SyncButtonTapped;
             force_sync.Clicked += ForceSyncButtonTapped;
             back_button.Tapped += ReturnToMainView;
-            logout_button.Tapped += LogoutButtonTapped;
+            logout_button.Tapped += LogoutTapped;
             turnoffmtu_ok.Tapped += TurnOffMTUOKTapped;
             turnoffmtu_no.Tapped += TurnOffMTUNoTapped;
             turnoffmtu_ok_close.Tapped += TurnOffMTUCloseTapped;
@@ -657,7 +658,59 @@ namespace aclara_meters.view
             replacemeter_cancel.Tapped += ReplaceMeterCancelTapped;
             meter_ok.Tapped += MeterOkTapped;
             meter_cancel.Tapped += MeterCancelTapped;
+
+
+            logoff_no.Tapped += LogOffNoTapped;
+            logoff_ok.Tapped += LogOffOkTapped;
+
         }
+
+
+        private void LogOffOkTapped(object sender, EventArgs e)
+        {
+            dialog_logoff.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Settings.IsLoggedIn = false;
+            FormsApp.credentialsService.DeleteCredentials();
+            FormsApp.ble_interface.Close();
+            background_scan_page.IsEnabled = true;
+
+            int contador = Navigation.NavigationStack.Count;
+            while (contador > 0)
+            {
+                try
+                {
+                    Navigation.PopAsync(false);
+                }
+                catch (Exception v)
+                {
+                    Console.WriteLine(v.StackTrace);
+                }
+                contador--;
+            }
+
+            try
+            {
+                Navigation.PopToRootAsync(false);
+            }
+            catch (Exception v1)
+            {
+                Console.WriteLine(v1.StackTrace);
+            }
+
+
+        }
+
+        private void LogOffNoTapped(object sender, EventArgs e)
+        {
+            dialog_logoff.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+
 
         private void AboutButtonTapped(object sender, EventArgs e)
         {

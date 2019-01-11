@@ -223,6 +223,9 @@ namespace aclara_meters.view
         // GPS
         private string altitude;
 
+        //Logout control
+        private bool isLogout;
+
         #endregion
 
         #region Initialization
@@ -1069,9 +1072,7 @@ namespace aclara_meters.view
 
         private void TappedListeners()
         {
-            logout_button.Tapped += LogoutCallAsync;
-            
-            //logout_button.Tapped += LogoutTapped;
+            logout_button.Tapped += LogoutTapped;
             
             settings_button.Tapped += OpenSettingsCallAsync;
             back_button.Tapped += ReturnToMainView;
@@ -1099,7 +1100,39 @@ namespace aclara_meters.view
 
             gps_icon_button.Tapped += GpsUpdateButton;
 
+
+            logoff_no.Tapped += LogOffNoTapped;
+            logoff_ok.Tapped += LogOffOkTapped;
+
         }
+
+
+        private void LogOffOkTapped(object sender, EventArgs e)
+        {
+
+
+            dialog_logoff.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                //REASON
+                isLogout = true;
+                dialog_open_bg.IsVisible = true;
+                Popup_start.IsVisible = true;
+                Popup_start.IsEnabled = true;
+            });
+           
+        }
+
+        private void LogOffNoTapped(object sender, EventArgs e)
+        {
+            dialog_logoff.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
 
         private void InitializeLowerbarLabel()
         {
@@ -2027,8 +2060,30 @@ namespace aclara_meters.view
             });
         }
 
-        private async void LogoutCallAsync(object sender, EventArgs e)
+
+        private async void LogoutTapped(object sender, EventArgs e)
         {
+            #region Check if no action done
+
+     
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                dialog_turnoff_one.IsVisible = false;
+                dialog_open_bg.IsVisible = true;
+                dialog_meter_replace_one.IsVisible = false;
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = false;
+                dialog_replacemeter_one.IsVisible = false;
+                dialog_logoff.IsVisible = true;
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+            });
+            
+
+            #endregion
+
+
+            /*
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
 
@@ -2054,6 +2109,7 @@ namespace aclara_meters.view
             {
                 Console.WriteLine(v1.StackTrace);
             }
+            */
 
         }
 
@@ -2244,7 +2300,41 @@ namespace aclara_meters.view
 
                     if (FormsApp.ble_interface.IsOpen())
                     {
-                        Navigation.PopAsync ();
+                        if(isLogout)
+                        {
+                            Settings.IsLoggedIn = false;
+                            FormsApp.credentialsService.DeleteCredentials();
+                            FormsApp.ble_interface.Close();
+                            background_scan_page.IsEnabled = true;
+
+                            int contador = Navigation.NavigationStack.Count;
+                            while (contador > 0)
+                            {
+                                try
+                                {
+                                    Navigation.PopAsync(false);
+                                }
+                                catch (Exception v)
+                                {
+                                    Console.WriteLine(v.StackTrace);
+                                }
+                                contador--;
+                            }
+
+                            try
+                            {
+                                Navigation.PopToRootAsync(false);
+                            }
+                            catch (Exception v1)
+                            {
+                                Console.WriteLine(v1.StackTrace);
+                            }
+                        }
+                        else
+                        {
+                            Navigation.PopAsync();
+                        }
+
 
                         /*
                         navigationDrawerList.SelectedItem = null;

@@ -304,7 +304,7 @@
 
         
         
-        <!-- Menu desplegable -->
+            <!-- Menu desplegable -->
         
     <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" 
                  IsVisible="false"
@@ -535,7 +535,7 @@
                            
                             <Image IsVisible="true"  
                                 x:Name="close_menu_icon"
-                                Margin="0,0,0,0"  HeightRequest="56"
+                                Margin="0,8,0,0"  HeightRequest="56"
                                 Scale="1" 
                                 Source="back_arrow.png"  
                                 HorizontalOptions="Start">
@@ -560,10 +560,11 @@
                         
                       </StackLayout>
 
-                          <StackLayout Margin="0,-40,0,0" x:Name="tablet_user_view" HorizontalOptions="Center">
 
+                          <StackLayout Margin="0,-40,0,0"  x:Name="tablet_user_view" HorizontalOptions="Center">
+                       
                         
-                <Label x:Name="userName" Margin="0,-12,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" 
+                      <Label x:Name="userName" Margin="0,-12,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" 
                              FontSize="20"></Label>
                      
         

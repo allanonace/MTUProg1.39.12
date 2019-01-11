@@ -683,9 +683,59 @@ namespace aclara_meters.view
             replacemeter_cancel.Tapped += ReplaceMeterCancelTapped;
             meter_ok.Tapped += MeterOkTapped;
             meter_cancel.Tapped += MeterCancelTapped;
-            logout_button.Tapped += LogoutAsync;
+            logout_button.Tapped += LogoutTapped;
             settings_button.Tapped += OpenSettingsView;
+
+            logoff_no.Tapped += LogOffNoTapped;
+            logoff_ok.Tapped += LogOffOkTapped;
+
         }
+
+
+        private void LogOffOkTapped(object sender, EventArgs e)
+        {
+            dialog_logoff.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Settings.IsLoggedIn = false;
+            FormsApp.credentialsService.DeleteCredentials();
+            FormsApp.ble_interface.Close();
+            background_scan_page.IsEnabled = true;
+
+            int contador = Navigation.NavigationStack.Count;
+            while (contador > 0)
+            {
+                try
+                {
+                    Navigation.PopAsync(false);
+                }
+                catch (Exception v)
+                {
+                    Console.WriteLine(v.StackTrace);
+                }
+                contador--;
+            }
+
+            try
+            {
+                Navigation.PopToRootAsync(false);
+            }
+            catch (Exception v1)
+            {
+                Console.WriteLine(v1.StackTrace);
+            }
+
+
+        }
+
+        private void LogOffNoTapped(object sender, EventArgs e)
+        {
+            dialog_logoff.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
 
         private void LoadPhoneUI()
         {
@@ -800,10 +850,26 @@ namespace aclara_meters.view
             ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
         }
 
-        private async void LogoutAsync(object sender, EventArgs e)
+        private async void LogoutTapped(object sender, EventArgs e)
         {
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                dialog_turnoff_one.IsVisible = false;
+                dialog_open_bg.IsVisible = true;
+                dialog_meter_replace_one.IsVisible = false;
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = false;
+                dialog_replacemeter_one.IsVisible = false;
+                dialog_logoff.IsVisible = true;
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+            });
+
+            /*
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
+
             int contador = Navigation.NavigationStack.Count;
             while (contador > 0)
             {
@@ -821,12 +887,13 @@ namespace aclara_meters.view
             try
             {
                 await Navigation.PopToRootAsync(false);
-
             }
-            catch (Exception v)
+            catch (Exception v1)
             {
-                Console.WriteLine(v.StackTrace);
+                Console.WriteLine(v1.StackTrace);
             }
+            */
+
         }
 
         private void ReturnToMainView(object sender, EventArgs e)

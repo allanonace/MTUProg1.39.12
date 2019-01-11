@@ -415,7 +415,57 @@ namespace aclara_meters.view
             meter_cancel       .Tapped += MeterCancelTapped;
             logout_button      .Tapped += LogoutAsync;
             settings_button    .Tapped += OpenSettingsView;
+
+            logoff_no.Tapped += LogOffNoTapped;
+            logoff_ok.Tapped += LogOffOkTapped;
+
         }
+
+
+        private void LogOffOkTapped(object sender, EventArgs e)
+        {
+            dialog_logoff.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Settings.IsLoggedIn = false;
+            FormsApp.credentialsService.DeleteCredentials();
+            FormsApp.ble_interface.Close();
+            background_scan_page.IsEnabled = true;
+
+            int contador = Navigation.NavigationStack.Count;
+            while (contador > 0)
+            {
+                try
+                {
+                    Navigation.PopAsync(false);
+                }
+                catch (Exception v)
+                {
+                    Console.WriteLine(v.StackTrace);
+                }
+                contador--;
+            }
+
+            try
+            {
+                Navigation.PopToRootAsync(false);
+            }
+            catch (Exception v1)
+            {
+                Console.WriteLine(v1.StackTrace);
+            }
+
+
+        }
+
+        private void LogOffNoTapped(object sender, EventArgs e)
+        {
+            dialog_logoff.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
 
         private void LoadPhoneUI()
         {
