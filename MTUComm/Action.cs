@@ -403,6 +403,7 @@ namespace MTUComm
 
                     case ActionType.AddMtu:
                         comm.OnAddMtu += Comm_OnAddMtu;
+                        comm.OnProgress += Comm_OnProgress;
                         // Interactive and Scripting
                         if (mtuForm != null)
                              parameters.AddRange(new object[] { (AddMtuForm)mtuForm, this.user });

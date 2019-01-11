@@ -383,7 +383,7 @@ namespace MTUComm
         private ErrorArgs InstallConfirmation_Logic ()
         {
             //If MTU has changed or critical settings/configuration force detection rutine
-            //if ( this.changedMTUSettings )
+            if ( this.changedMTUSettings )
                 this.RecoverMeterByMtuType ();
 
             if ( this.latest_mtu.Shipbit )
@@ -625,6 +625,8 @@ namespace MTUComm
             Mtu    mtu    = form.mtu;
             Global global = form.global;
 
+            this.mtuType = mtu;
+
             try
             {
                 Logger logger = ( ! isFromScripting ) ? new Logger ( this.configuration ) : truquitoAction.logger;
@@ -801,20 +803,24 @@ namespace MTUComm
 
                 #endregion
 
-                #region Encription Key
+                #region Encription
 
-                RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
-                byte[] aesKey = new byte[ DEFAULT_LENGTH_AES ];
-                rng.GetBytes ( aesKey );
-                map.EncryptionKey = aesKey;
-                for ( int i = 0; i < 15; i++ )
-                    if ( aesKey[ i ] != memory[ 256 + i ] )
-                        throw new Exception ( "AES key does not match" );
+                // Only encrypt the key if MTU.SpecialSet tag is true
+                if ( mtu.SpecialSet )
+                {
+                    RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
+                    byte[] aesKey = new byte[ DEFAULT_LENGTH_AES ];
+                    rng.GetBytes ( aesKey );
+                    map.EncryptionKey = aesKey;
+                    for ( int i = 0; i < 15; i++ )
+                        if ( aesKey[ i ] != memory[ 256 + i ] )
+                            throw new Exception ( "AES key does not match" );
 
+                    // Encrypted
+                    // EncryptionIndex
+                }
+                
                 #endregion
-
-                // Encrypted
-                // EncryptionIndex
 
                 // fast message (not in pulse)
                 // encoder digits to drop (not in pulse)
@@ -836,7 +842,8 @@ namespace MTUComm
 
                 // If field ForceTimeSync is true inside Global,
                 // after TurnOn it has to be performed an InstallConfirmation
-                if ( global.ForceTimeSync )
+                if ( global.ForceTimeSync ) //&&
+                     //! this.latest_mtu.Shipbit )
                 {
                     ErrorArgs errorArgs = this.InstallConfirmation_Logic ();
                     if ( errorArgs != null )
