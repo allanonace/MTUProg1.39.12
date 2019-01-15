@@ -218,7 +218,7 @@ namespace aclara_meters.view
                     foreach (FileInfo file in files)
                     { 
                         Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
-                        if (file.Name.Contains("Log.xml"))
+                        if (file.Name.Contains("Log.xml") || file.Name.Contains("Result") )
                         {
                             bool enc = false;
                             foreach (string fileFtp in saved_array_files)

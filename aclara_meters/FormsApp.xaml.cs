@@ -397,12 +397,14 @@ namespace aclara_meters
             {
                 ScriptingMode = true; 
                 ble_interface.Close();
+
                 #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
 
                 adapter.DisableAdapter();
                 adapter.EnableAdapter(); //Android shows a window to allow bluetooth
 
                 #endregion
+
             }
             catch (Exception e)
             {
@@ -433,7 +435,6 @@ namespace aclara_meters
                     {
                         //Settings.IsLoggedIn = false;
                         //credentialsService.DeleteCredentials ();
-
 
                         MainPage = new NavigationPage(new AclaraViewScripting ( path, callback, script_name ) );
                         await MainPage.Navigation.PopToRootAsync ( true );
