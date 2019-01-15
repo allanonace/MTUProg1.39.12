@@ -7,6 +7,195 @@ namespace Xml
     [XmlRoot("Globals")]
     public class Global
     {
+        public Global ()
+        {
+            // Default values extracted from Konstantin code
+            this.AccountDualEntry           = true; // Should the account number require dual entry?
+            this.AccountEnabledAppt         = false; // Enable or disable values after appointment in interactive mode ( Account Number )
+            this.WorkOrderEnabledAppt       = false; // Enable or disable values after appointment in interactive mode ( Work Order )
+            this.MeterSerialEnabledAppt     = false; //  Enable or disable values after appointment in interactive mode ( Meter Old/Serial Number )
+            //this.AccountFilled            = NOT PRESENT IN K.CODE
+            this.AccountLabel               = "Account #"; // The account number label
+            this.AccountLength              = 7; // Account number length
+            this.ActionVerify               = true; // Pop up the Message box after Add MTU
+            this.AddressVerify              = false; // Appointment verify address
+            this.AddressLine1               = string.Empty; // First field of verification
+            this.AddressLine2               = string.Empty; // Second...
+            this.AddressLine3               = string.Empty; // Third...
+            this.AddressLine4               = string.Empty; // Fourth...
+            this.Address1Len                = 100; // Works with above
+            this.Address2Len                = 100; // Works...
+            this.Address3Len                = 100; // Works...
+            this.Address4Len                = 100; // Works...
+            this.AFC                        = true; // Register Changes indicator change for 3000 MTUs
+            this.Allow2Port1Appt            = false; // Allow 2 Port MTU for 1 Port Appointment
+            this.AllowAbort                 = false; // Allow to have an abort button on cancellation screen during real installation
+            this.AllowDailyReads            = true; // For DailyReads CheckBox
+            this.AppointmentsLocation       = string.Empty; // The alternate appointments location, if specified
+            this.AppointmentsName           = "Appointments.xml"; // ...
+            this.AppointmentsReq            = false; // [ NYC ] Preclude NoApp Botton from Appointments Screen
+            this.ApptGridConditionStatus    = "ALL"; // Condition for Appt Grid
+            //this.ApptInstallerId          = IS apptInstallerIdPrepend or InstallerIdTag?
+            this.ApptInstallerName          = string.Empty; // [ NYC ] The name from above
+            this.ApptPort1Field             = string.Empty; // ...
+            this.ApptPort2Field             = string.Empty; // ...
+            this.ApptSave                   = false; // Allow to save appoitments: works only if loadoptions is true
+            this.ApptScreen                 = true; // Should the appointments screen be shown if appointments are available?
+            //this.ApptStatusDefinitions    = IN K.CODE is string[] that not string // Appintment Grid Statuses for LoadOptions
+            this.AreYouSure                 = false; // To ask the question before pushing Ok
+            this.NewMeterPort2isTheSame     = false; // To carry on NewMeter from Port1 to Port2
+            this.AutoNewMeterPort2isTheSame = false; // Auto carry above
+            this.AutoPurge                  = false; // Should log files be automatically purged?
+            this.AutoPurgeSize              = 0; // Size at which the auto purge should take place
+            this.AutoRegisterRecording      = false; // Record based on New# and Old#
+            //this.AutoRFCheck              = NOT PRESENT IN K.CODE
+            //this.ByPassAutoDetect         = IS showByPass? // It will create additional button for autodetect overwrite
+            this.Cancel                     = new List<string> (); // Reason why the programming was cancelled
+            this.CertPair                   = false; // ...
+            this.CertPath                   = string.Empty; // ...
+            this.CertPswd                   = string.Empty; // ...
+            //this.CertPubKey               = IS certPublicKey? Is string that not byte[] // ...
+            this.CertRecord                 = true; // record the cert values to Global.xml
+            this.CertSubject                = string.Empty; // ...
+            this.CertThumbprint             = string.Empty; // ...
+            this.CertUpdate                 = string.Empty; // IN K.CODE IS DateTime that no string
+            this.CertUpdateValid            = false; // Make update one day before valid
+            this.CertValid                  = string.Empty; // IN K.CODE IS DateTime that no string
+            this.CheckMTUfield              = string.Empty; // [ NYC ] what field to use fo above
+            this.CheckMTUvalue              = string.Empty; // [ NYC ] what value of the field to use fo above
+            this.CheckMTUtype               = false; // [ NYC ] to check if MTU is right type appointments only
+            this.CheckSavedField            = false; // Check fields and values
+            this.CoilDetect                 = true; // New for MC75A needs to be false
+            this.ColorEntry                 = false; // [ NYC ] To show entry fields in Color
+            this.ComPort                    = string.Empty; // The fallback comport from the XML file
+            this.ConfigLocation             = string.Empty; // Configuration Location (XML) new entry in Global.xml
+            this.CustomerMeterError         = string.Empty; // Special Customer Meter Error
+            this.CustomerName               = "Aclara"; // To show customer name in About Screen
+            this.DailyReadingOffset         = 0; // S4E (92) Default
+            this.DailyReadsDefault          = 0; // Default Value for Daily Reads 3.30.2016 Makes it disable when it 255. -> got back 0
+            this.dangerosZone               = "cache disk"; // PPC W 5.0 and Up volotile area "flash file store"
+            //this.DefaultF1ReadInterval    = IN K.CODE IS bool THAT NO string //false; // [ NYC ] Force F1 MTU read every hour
+            this.DeviceCertSubject          = string.Empty; // ...
+            //this.ElectricPort1_2Interval  = IN K.CODE IS string THAT NO int //string.Empty; // The default read/transmit interval for ports 1&2 on electrics
+            //this.ElectricPort3_4Interval  = IN K.CODE IS string THAT NO int //string.Empty; // The default read/transmit interval for ports 3&4 on electrics
+            this.EMeterConnected            = false; // [ NYC ] To display the meter info in full read MTU
+            //this.EnableFEC                = IN K.CODE IS string THAT NO bool //string.Empty; // Turn FEC on/off for electric, null - do nothing
+            this.ErrorId                    = false; // [ SCG ] errorId reporting
+            //this.F12WAYRegister1          = IN K.CODE IS byte[] THAT NO string //BitConverter.GetBytes ( 0x01C7D011 ).ToString ();
+            //this.F12WAYRegister10         = IN K.CODE IS byte[] THAT NO string //BitConverter.GetBytes ( 0x0130360A ).ToString ();
+            //this.F12WAYRegister14         = IN K.CODE IS byte[] THAT NO string //BitConverter.GetBytes ( 0x021B5021 ).ToString ();
+            this.F1TamperCheck              = false; // To check F1 Pulser Tamper
+            this.forceElectricMtuOn         = true; // [ MTU 91 ] Force on
+            this.ForceTimeSync              = false; // F1 force to ask for timesync from dcu
+            this.ftpUserName                = string.Empty; // FTP user name
+            this.ftpPassword                = string.Empty; // FTP Password
+            this.ftpRemoteHost              = string.Empty; // FTP Remote Host address
+            this.ftpRemotePath              = string.Empty; // FTP Remote Location for Files
+            this.ftpTransferredPath         = string.Empty; // Where to copy files inside FTP
+            this.FullResult                 = false; // for Product Management SCG fiasco
+            this.FutureDate                 = 7; // How many days in a future from appt date
+            //this.GetMtuDelay              = IS getMtuInfoDelay?
+            this.GpsBaudRate                = 9600; // GPS connection speed
+            this.GpsComPort                 = string.Empty; // Name of the port where the GPS can be found
+            this.GpsMetric                  = false; // GPS Altitude Values default in feets ( 1 meter = 3.2808399 feets )
+            //this.gridColumn               = NOT PRESENT IN K.CODE
+            this.HideProgressScreen         = false; // [ SCG ] To hide Progress Screen during MTU interogation. Only in Scripted Mode
+            this.HideRevision               = false; // [ NYC ] To show Release Candidate / Revision
+            //this.HourToAdjust             = IN K.CODE IS short THAT NO bool //0; // [ MTU 3000 ] Use Hours to randomize
+            //this.ICfield1                 = IN K.CODE IS string THAT NO int //string.Empty; // Installation confirmation Data entry field1
+            //this.ICfield2                 = IN K.CODE IS string THAT NO int //string.Empty; // Installation confirmation Data entry field2
+            //this.IndividualDailyReads     = NOT PRESENT IN K.CODE
+            this.IndividualReadInterval     = false; // Should the read interval be allowed to change?
+            //this.LatestVersion            = NOT PRESENT IN K.CODE
+            //this.LiveDigitsOnly           = IS eForceDigits?
+            this.LoadOptions                = false; // Allow to load options screen through appointments
+            //this.LogLocation              = IN K.CODE IS string[] THAT NO string; // List of possible log file locations
+            this.MeterNumberLength          = 12; // Maximum number of characters for meter serial number
+            /*
+            this.MeterWorkRecording          = ;
+            this.MinDate                     = ;
+            this.MtuIdLength                 = ;
+            this.NewMeterCalc                = ;
+            this.NewMeterFormat              = ;
+            this.NewMeterLabel               = ;
+            this.NewMeterPort2isTheSame      = ;
+            this.NewMeterPrefix              = ;
+            this.NewMeterValidation          = ;
+            this.NewSerialNumDualEntry       = ;
+            this.NormXmitInterval            = "1 Hr";
+            this.OldReadingDualEntry         = ;
+            this.OldReadingRecording         = ;
+            this.OldSerialNumDualEntry       = ;
+            this.OtherCancelCode             = ;
+            this.OverWriteAutoDetect         = ;
+            this.PasswordMaxLength           = ;
+            this.PasswordMinLength           = ;
+            this.PlaySound                   = ;
+            this.Port2DisableNo              = ;
+            this.Port2MeterTypeTheSameWarning= ;
+            this.PowerPolicy                 = ;
+            this.ReadDelay                   = ;
+            this.ReadingDualEntry            = ;
+            this.RegisterRecording           = ;
+            this.RegisterRecordingDefault    = ;
+            this.RegisterRecordingItems      = ;
+            this.RegisterRecordingReq        = ;
+            this.ReportLogLocationStatus     = ;
+            this.ReverseReading              = ;
+            this.ScanDetail                  = ;
+            this.ScanDetailLength            = ;
+            this.scanfield                   = ;
+            this.ScanMtu                     = ;
+            this.ScanSumCheck                = ;
+            this.ScriptOnly                  = ;
+            this.SecondNormXmitCondition     = ;
+            this.SecondNormXmitField         = ;
+            this.SecondNormXmitInterval      = ;
+            this.SerialNumLabel              = ;
+            this.ShowAddMTU                  = ;
+            this.ShowAddMTUMeter             = ;
+            this.ShowAddMTUReplaceMeter      = ;
+            this.ShowFreq                    = ;
+            this.ShowInstallConfirmation     = ;
+            this.ShowMeterVendor             = ;
+            this.ShowReplaceMeter            = ;
+            this.ShowReplaceMTU              = ;
+            this.ShowReplaceMTUMeter         = ;
+            this.ShowScriptErrorMessage      = ;
+            this.ShowTime                    = ;
+            this.ShowTurnOff                 = ;
+            this.Siesta                      = ;
+            this.SpecialSet                  = ;
+            this.StartPoint                  = ;
+            this.SystemDateVerify            = ;
+            this.TempXmitCount               = ;
+            this.TempXmitInterval            = ;
+            this.TimeSyncCountDefault        = ;
+            this.TimeToSync                  = ;
+            this.TimeToSyncHR                = ;
+            this.TimeToSyncMin               = ;
+            this.UploadPrompt                = ;
+            this.Use83                       = ;
+            this.UseMeterSerialNumber        = ;
+            this.UserIdMaxLength             = ;
+            this.UserIdMinLength             = ;
+            this.UTCOffset                   = ;
+            this.WakeUpCount                 = ;
+            this.WorkOrderDualEntry          = ;
+            this.WorkOrderLabel              = ;
+            this.WorkOrderLength             = ;
+            this.WorkOrderRecording          = ;
+            this.WriteDelay                  = ;
+            this.WriteF1SystemTime           = ;
+            this.XmitTimer                   = ;
+            this.Options                     = ;
+            this.FastMessageConfig           = ;
+            this.Fast2Way                    = ;
+            */
+        }
+
+        #region Tags
+
         [XmlElement("AccountDualEntry")]
         public bool AccountDualEntry { get; set; }
 
@@ -133,6 +322,19 @@ namespace Xml
 
         [XmlElement("CertPubKey")]
         public string CertPubKey { get; set; }
+
+        #endregion
+
+
+
+
+
+
+
+
+
+
+
 
         [XmlElement("CertRecord")]
         public bool CertRecord { get; set; }

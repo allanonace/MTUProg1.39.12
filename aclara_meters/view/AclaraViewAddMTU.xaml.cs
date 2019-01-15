@@ -600,11 +600,10 @@ namespace aclara_meters.view
             readIntervalPicker    .ItemsSource = readIntervalList;
             readInterval2Picker   .ItemsSource = readIntervalList;
 
-            // If field NormXmitInterval is present inside Global,
+            // If tag NormXmitInterval is present inside Global,
             // its value is used as default selection
             string normXmitInterval = global.NormXmitInterval;
-            if ( ! global.IndividualReadInterval &&
-                 ! string.IsNullOrEmpty ( normXmitInterval ) )
+            if ( ! string.IsNullOrEmpty ( normXmitInterval ) )
             {
                 // Convert "Hr/s" to "Hour/s"
                 normXmitInterval = normXmitInterval.ToLower ()
@@ -614,9 +613,17 @@ namespace aclara_meters.view
                 int index = readIntervalList.IndexOf ( normXmitInterval );
                 readIntervalPicker.SelectedIndex = ( ( index > -1 ) ? index : readIntervalList.IndexOf ( "1 Hour" ) );
             }
-            // Default value
-            else if ( global.IndividualReadInterval )
+            // If tag NormXmitInterval is NOT present, use "1 Hour" as default value
+            else
                 readIntervalPicker.SelectedIndex = readIntervalList.IndexOf ( "1 Hour" );
+            
+            // Use IndividualReadInterval tag to enable o disable read interval picker
+            if ( ! ( this.readIntervalPicker.IsEnabled = global.IndividualReadInterval ) )
+            {
+              this.readIntervalContainer.BackgroundColor = Color.LightGray;
+              this.readIntervalPicker   .BackgroundColor = Color.LightGray;
+              this.readIntervalPicker   .TextColor       = Color.Gray;
+            }
 
             #endregion
 
