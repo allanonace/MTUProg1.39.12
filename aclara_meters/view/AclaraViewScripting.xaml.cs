@@ -508,6 +508,8 @@ namespace aclara_meters.view
 
                             autoConnect = false;
 
+                            printer.Suspend();
+
                             #region Disable Circular Progress bar Animations when done
 
                             backdark_bg.IsVisible = false;
@@ -1150,6 +1152,16 @@ namespace aclara_meters.view
         // on user selection in menu ListView
         private void OnMenuItemSelectedListDevices(object sender, ItemTappedEventArgs e)
         {
+            try
+            {
+                printer.Resume();
+            }
+            catch (Exception e5)
+            {
+                Console.WriteLine(e5.StackTrace);
+            }
+           
+
             var item = (DeviceItem)e.Item;
             //fondo.Opacity = 0;
             ContentView_DeviceList.Opacity = 0.5;
