@@ -382,6 +382,16 @@
     <CustomSet/>
   </Register>
   <Register>
+    <Id>P1CutWireAlarm</Id>
+    <Description>P1 mode2 - Cut wire alarm</Description>
+    <Type>bool</Type>
+    <Address>45</Address>
+    <Size>0</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
     <Id>P2TiltAlarm</Id>
     <Description> P2 mode - Tilt alarm</Description>
     <Type>bool</Type>

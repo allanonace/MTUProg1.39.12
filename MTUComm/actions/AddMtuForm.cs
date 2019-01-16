@@ -40,7 +40,8 @@ namespace MTUComm.actions
             GPS_LATITUDE,
             GPS_LONGITUDE,
             GPS_ALTITUDE,
-            OPTIONAL_PARAMS
+            OPTIONAL_PARAMS,
+            FORCE_TIME_SYNC
         }
 
         public Dictionary<ParameterType,FIELD> IdsAclara =
@@ -366,6 +367,17 @@ namespace MTUComm.actions
                         "OptionalParams",
                         "OptionalParams",
                         "OptionalParams"
+                    }
+                },
+                #endregion
+                #region Force TimeSync -> Install Confirmation
+                {
+                    FIELD.FORCE_TIME_SYNC,
+                    new string[]
+                    {
+                        "ForceTimeSync",
+                        "ForceTimeSync",
+                        "Force TimeSync"
                     }
                 }
                 #endregion

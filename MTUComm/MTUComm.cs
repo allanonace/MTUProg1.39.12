@@ -737,34 +737,40 @@ namespace MTUComm
                     Alarm alarms = (Alarm)form.Alarm.Value;
                     if ( alarms != null )
                     {
-                        // Overlap
-                        map.MessageOverlapCount = alarms.Overlap;
-
-                        // P1ImmediateAlarm
-                        map.P1ImmediateAlarm = alarms.ImmediateAlarmTransmit;
-
-                        // P1UrgentAlarm
-                        map.P1UrgentAlarm = alarms.DcuUrgentAlarm;
-
+                        // Tilt alarm
+                        if ( mtu.TiltTamper )
+                            map.P1TiltAlarm = alarms.Tilt;
+                    
                         // P1MagneticAlarm
                         if ( mtu.MagneticTamper)
                             map.P1MagneticAlarm = alarms.Magnetic;
-
-                        // P1RegisterCoverAlarm
-                        if (mtu.RegisterCoverTamper)
-                            map.P1RegisterCoverAlarm = alarms.RegisterCover;
-
-                        // P1ReverseFlowAlarm
-                        if (mtu.ReverseFlowTamper)
-                            map.P1ReverseFlowAlarm = alarms.ReverseFlow;
-
-                        // P1TiltAlarm
-                        if (mtu.TiltTamper)
-                            map.P1TiltAlarm = alarms.Tilt;
-
-                        // P1InterfaceAlarm
-                        if (mtu.InterfaceTamper)
+                    
+                        // P1ImmediateAlarm
+                        map.P1ImmediateAlarm = alarms.ImmediateAlarmTransmit;
+                    
+                        // P1UrgentAlarm
+                        map.P1UrgentAlarm = alarms.DcuUrgentAlarm;
+                    
+                        // PCI/Coil interface alarm
+                        if ( mtu.InterfaceTamper )
                             map.P1InterfaceAlarm = alarms.InterfaceTamper;
+                    
+                        // P1RegisterCoverAlarm
+                        if ( mtu.RegisterCoverTamper )
+                            map.P1RegisterCoverAlarm = alarms.RegisterCover;
+                    
+                        // Reverse flow alarm
+                        if ( mtu.ReverseFlowTamper )
+                            map.P1ReverseFlowAlarm = alarms.ReverseFlow;
+                    
+                        // Cut wire alarm
+                        // Only for MTU Types: 144, 146, 148 and 154
+                        if ( mtu.GasCutWireAlarm )
+                            map.P1CutWireAlarm = alarms.LastGasp;
+                    
+                        // Message overlap count
+                        // Number of new readings to take before transmit
+                        map.MessageOverlapCount = alarms.Overlap;
 
                         if (useTwoPorts)
                         {
@@ -840,10 +846,16 @@ namespace MTUComm
 
                 #region Install Confirmation
 
-                // If field ForceTimeSync is true inside Global,
-                // after TurnOn it has to be performed an InstallConfirmation
-                if ( global.ForceTimeSync ) //&&
-                     //! this.latest_mtu.Shipbit )
+                // After TurnOn has to be performed an InstallConfirmation
+                // if certain tags/registers are validated/true
+                if ( mtu.TimeToSync &&
+                     mtu.OnTimeSync &&
+                     // If script contains ForceTimeSync, use it
+                     // but if not use value from tag in Global
+                     ( ! form.ContainsParameter ( AddMtuForm.FIELD.FORCE_TIME_SYNC ) &&
+                       global.ForceTimeSync ||
+                       form.ContainsParameter ( AddMtuForm.FIELD.FORCE_TIME_SYNC ) &&
+                       form.ForceTimeSync ) )
                 {
                     ErrorArgs errorArgs = this.InstallConfirmation_Logic ();
                     if ( errorArgs != null )

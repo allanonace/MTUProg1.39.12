@@ -213,10 +213,6 @@ namespace aclara_meters.view
         private double globalsDailyReadsDefault;
         private double dailyReadsMemoryMapValue;
 
-        // Conditions - Register 2-Way [ Encoders ]
-        private bool mtuFastMessageConfig;
-        private bool globalsFastMessageConfig;
-
         // Conditions - Alarms
         private bool mtuRequiresAlarmProfile;
 
@@ -662,9 +658,7 @@ namespace aclara_meters.view
 
             #region 2-Way
 
-            bool GlobalsFastMessageConfig = global.FastMessageConfig; 
-            bool GlobalsFast2Way          = global.Fast2Way;
-            bool MtuFastMessageConfig     = mtu.FastMessageConfig;
+            bool onTimeSync = mtu.OnTimeSync;
 
             List<string> twoWayList = new List<string> ()
             {
@@ -672,14 +666,12 @@ namespace aclara_meters.view
                 TWOWAY_SLOW,
             };
             
-            twoWayContainer .IsVisible     = MtuFastMessageConfig;
-            twoWayContainer .IsEnabled     = MtuFastMessageConfig;
-            twoWay2Container.IsVisible     = hasTwoPorts && MtuFastMessageConfig;
-            twoWay2Container.IsEnabled     = hasTwoPorts && MtuFastMessageConfig;
-            twoWayPicker    .ItemsSource   = twoWayList;
-            twoWay2Picker   .ItemsSource   = twoWayList;
-            twoWayPicker    .SelectedIndex = ( GlobalsFastMessageConfig || GlobalsFast2Way ) ? 0 : 1;
-            twoWay2Picker   .SelectedIndex = ( GlobalsFastMessageConfig || GlobalsFast2Way ) ? 0 : 1;
+            twoWayContainer .IsVisible   = onTimeSync;
+            twoWayContainer .IsEnabled   = onTimeSync;
+            twoWay2Container.IsVisible   = hasTwoPorts && onTimeSync;
+            twoWay2Container.IsEnabled   = hasTwoPorts && onTimeSync;
+            twoWayPicker    .ItemsSource = twoWayList;
+            twoWay2Picker   .ItemsSource = twoWayList;
 
             #endregion
 
@@ -2957,7 +2949,6 @@ namespace aclara_meters.view
             this.addMtuForm.AddParameter ( FIELD.SELECTED_METER, value_mtr );
 
             // Read Interval
-            // TODO: CHANGE
             if ( global.IndividualReadInterval )
                 this.addMtuForm.AddParameter ( FIELD.READ_INTERVAL, value_ri );
 
@@ -2968,7 +2959,7 @@ namespace aclara_meters.view
                 this.addMtuForm.AddParameter ( FIELD.SNAP_READS, value_srs );
 
             // 2-Way [ SOLO SE LOGEA ¿? ]
-            if ( mtu.FastMessageConfig )
+            if ( mtu.OnTimeSync ) // Is a two-way MTU and forces time sync ( InstallConfirmation )
                 this.addMtuForm.AddParameter ( FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString() );
 
             // Alarms
@@ -3012,7 +3003,7 @@ namespace aclara_meters.view
                     this.addMtuForm.AddParameter ( FIELD.SNAP_READS2, snapReads2Slider.Value.ToString() );
 
                 // 2-Way 2
-                if ( mtu.FastMessageConfig )
+                if ( mtu.OnTimeSync )
                     this.addMtuForm.AddParameter ( FIELD.TWO_WAY2, twoWay2Picker.SelectedItem.ToString() );
 
                 // Alarms 2
