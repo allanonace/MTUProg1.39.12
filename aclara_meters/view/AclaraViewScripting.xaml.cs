@@ -508,6 +508,14 @@ namespace aclara_meters.view
 
                             autoConnect = false;
 
+                            #region Disable Circular Progress bar Animations when done
+
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+
+                            #endregion
+
+
                         });
                         peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                         timeout_connecting = 0;
