@@ -191,6 +191,7 @@ namespace aclara_meters.view
 	                        Console.WriteLine(e11.StackTrace);
 	                    }
 	                }
+
 	                //DeviceList.IsRefreshing = true;
 	
 	                employees = new ObservableCollection<DeviceItem>();

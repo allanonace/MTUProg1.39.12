@@ -231,16 +231,23 @@ namespace aclara_meters.view
 
                             if (!enc)
                             {
-                                string dayfix = file.Name.Split('.')[0].Replace("Log", "");
-                                DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
-                                TimeSpan diff = date - DateTime.UtcNow;
-                                int hours = (int)diff.TotalHours;
-                                if (hours < 0)
+
+                                if( file.Name.Contains("Result") )
                                 {
                                     local_array_files.Add(file);
                                 }
+                                else
+                                {
+                                    string dayfix = file.Name.Split('.')[0].Replace("Log", "");
+                                    DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
+                                    TimeSpan diff = date - DateTime.UtcNow;
+                                    int hours = (int)diff.TotalHours;
+                                    if (hours < 0)
+                                    {
+                                        local_array_files.Add(file);
+                                    }
+                                }
                             }
-
                         }
                     }
 

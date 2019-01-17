@@ -1637,7 +1637,6 @@ namespace aclara_meters.view
         private void CallLoadViewTurnOff()
         {
             dialog_turnoff_one.IsVisible = false;
-            dialog_turnoff_one.IsVisible = false;
             dialog_turnoff_two.IsVisible = true;
 
             Task.Factory.StartNew(TurnOffMethod);
@@ -1673,8 +1672,18 @@ namespace aclara_meters.view
                 dialog_AddMTUReplaceMeter.IsVisible = false;
                 dialog_ReplaceMTUReplaceMeter.IsVisible = false;
 
-                dialog_AddMTU.IsVisible = true;
 
+                #region Check ActionVerify
+
+                if (FormsApp.config.global.ActionVerify)
+                    dialog_AddMTU.IsVisible = true;
+                else
+                    CallLoadViewAddMtu();
+
+                #endregion
+
+
+          
                 background_scan_page.Opacity = 1;
                 background_scan_page_detail.Opacity = 1;
 
@@ -1690,6 +1699,18 @@ namespace aclara_meters.view
                 }
                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
             }));
+        }
+
+        private void CallLoadViewAddMtu()
+        {
+            dialog_AddMTU.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                Task.Factory.StartNew(BasicReadThread);
+            });
         }
 
         private void OnCaseReadMTU()
