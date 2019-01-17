@@ -1600,29 +1600,47 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-               dialog_open_bg.IsVisible = true;
-               turnoff_mtu_background.IsVisible = true;
-               dialog_meter_replace_one.IsVisible = false;
-               dialog_turnoff_one.IsVisible = true;
-               dialog_turnoff_two.IsVisible = false;
-               dialog_turnoff_three.IsVisible = false;
-               dialog_replacemeter_one.IsVisible = false;
-               background_scan_page.Opacity = 1;
-               background_scan_page_detail.Opacity = 1;
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+                dialog_meter_replace_one.IsVisible = false;
 
-               if (Device.Idiom == TargetIdiom.Tablet)
-               {
-                   ContentNav.Opacity = 1;
-                   ContentNav.IsVisible = true;
-               }
-               else
-               {
-                   ContentNav.Opacity = 0;
-                   ContentNav.IsVisible = false;
-               }
+                #region Check ActionVerify
 
-               shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
+                if (FormsApp.config.global.ActionVerify)
+                    dialog_turnoff_one.IsVisible = true;
+                else
+                    CallLoadViewTurnOff();
+
+                #endregion
+
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = false;
+                dialog_replacemeter_one.IsVisible = false;
+                background_scan_page.Opacity = 1;
+                background_scan_page_detail.Opacity = 1;
+
+                if (Device.Idiom == TargetIdiom.Tablet)
+                {
+                    ContentNav.Opacity = 1;
+                    ContentNav.IsVisible = true;
+                }
+                else
+                {
+                    ContentNav.Opacity = 0;
+                    ContentNav.IsVisible = false;
+                }
+
+                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+             }));
+        }
+
+        private void CallLoadViewTurnOff()
+        {
+            dialog_turnoff_one.IsVisible = false;
+            dialog_turnoff_one.IsVisible = false;
+            dialog_turnoff_two.IsVisible = true;
+
+            Task.Factory.StartNew(TurnOffMethod);
         }
 
         private void OnCaseAddMTU()

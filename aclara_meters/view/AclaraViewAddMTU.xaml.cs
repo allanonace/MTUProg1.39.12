@@ -318,7 +318,7 @@ namespace aclara_meters.view
 
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
-            submit_dialog.Clicked += submit_send;
+           
 
             listaMTUread.IsVisible = false;
 
@@ -779,6 +779,18 @@ namespace aclara_meters.view
             meterSerialInput      .MaxLength = global.MeterNumberLength;
 
             #endregion
+
+
+
+            #region AccountLabel
+
+            AccountLabel_Port1.Text = global.AccountLabel;
+            AccountLabel_Port2.Text = global.AccountLabel;
+
+
+            #endregion
+
+
         }
 
         #endregion
@@ -1111,8 +1123,16 @@ namespace aclara_meters.view
             logoff_no.Tapped += LogOffNoTapped;
             logoff_ok.Tapped += LogOffOkTapped;
 
+            submit_dialog.Clicked += submit_send;
+            cancel_dialog.Clicked += CancelTapped;
         }
 
+        private void CancelTapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            Popup_start.IsVisible = false;
+            Popup_start.IsEnabled = false;
+        }
 
         private void LogOffOkTapped(object sender, EventArgs e)
         {
