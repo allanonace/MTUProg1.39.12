@@ -158,14 +158,18 @@ namespace aclara_meters.view
 
                     PrintToConsole("va a Activar la barra de progreso circular - Interface_ContentView_DeviceList");
 
-                    #region New Circular Progress bar Animations	
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        #region New Circular Progress bar Animations	
 
-                    DeviceList.IsRefreshing = false;
-                    backdark_bg.IsVisible = true;
-                    indicator.IsVisible = true;
+                        DeviceList.IsRefreshing = false;
+                        backdark_bg.IsVisible = true;
+                        indicator.IsVisible = true;
+                        ContentView_DeviceList.IsEnabled = false;
 
-                    #endregion
+                        #endregion
 
+                    });
                     PrintToConsole("Mostrar barra de progreso - Interface_ContentView_DeviceList");
 
                     // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
@@ -235,10 +239,31 @@ namespace aclara_meters.view
                     DeviceList.RefreshCommand.Execute(true);
                 }
 
+                if(employees.Count > 0)
+                {
+                    DeviceList.ItemsSource = employees;
+                }
                 PrintToConsole("un ciclo del bucle (BUCLE REFRESH LIST) - Interface_ContentView_DeviceList");
 
 
-            
+                if (conectarDevice)
+                {
+                    PrintToConsole("autoConnect se pone a false - InvokeMethod");
+                    autoConnect = false;
+                    conectarDevice = false;
+
+                    #region Autoconnect to stored device 
+
+                    PrintToConsole("Se va a crear una Tarea al de 0.5 segundos (Task.Factory.StartNew(NewOpenConnectionWithDevice);) - InvokeMethod");
+                    Task.Factory.StartNew(NewOpenConnectionWithDevice);
+
+                    #endregion
+
+
+                }
+
+
+
 
 
                 // Returning true means you want to repeat this timer
@@ -304,38 +329,56 @@ namespace aclara_meters.view
                                     case ble_library.BlePort.CONECTION_ERRROR:
                                         PrintToConsole("Estado conexion: CONECTION_ERRROR - InvokeMethod");
 
-                                        #region New Circular Progress bar Animations    
 
-                                        DeviceList.IsRefreshing = false;
-                                        backdark_bg.IsVisible = false;
-                                        indicator.IsVisible = false;
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                            #region New Circular Progress bar Animations    
 
-                                        #endregion
+                                            DeviceList.IsRefreshing = false;
+                                            backdark_bg.IsVisible = false;
+                                            indicator.IsVisible = false;
+                                            ContentView_DeviceList.IsEnabled = true;
+
+                                            #endregion
+                                        });
+
                                         PrintToConsole("Desactivar barra de progreso - InvokeMethod");
 
                                         Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
                                         break;
                                     case ble_library.BlePort.DYNAMIC_KEY_ERROR:
                                         PrintToConsole("Estado conexion: DYNAMIC_KEY_ERROR - InvokeMethod");
-                                        #region New Circular Progress bar Animations    
 
-                                        DeviceList.IsRefreshing = false;
-                                        backdark_bg.IsVisible = false;
-                                        indicator.IsVisible = false;
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                            #region New Circular Progress bar Animations    
 
-                                        #endregion
+                                            DeviceList.IsRefreshing = false;
+                                            backdark_bg.IsVisible = false;
+                                            indicator.IsVisible = false;
+                                            ContentView_DeviceList.IsEnabled = true;
+
+                                            #endregion
+                                        });
+
                                         PrintToConsole("Desactivar barra de progreso - InvokeMethod");
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
                                     case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
                                         PrintToConsole("Estado conexion: NO_DYNAMIC_KEY_ERROR - InvokeMethod");
-                                        #region New Circular Progress bar Animations    
 
-                                        DeviceList.IsRefreshing = false;
-                                        backdark_bg.IsVisible = false;
-                                        indicator.IsVisible = false;
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                            #region New Circular Progress bar Animations    
 
-                                        #endregion
+                                            DeviceList.IsRefreshing = false;
+                                            backdark_bg.IsVisible = false;
+                                            indicator.IsVisible = false;
+                                            ContentView_DeviceList.IsEnabled = true;
+
+                                            #endregion
+
+                                        });
                                         PrintToConsole("Desactivar barra de progreso - InvokeMethod");
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
@@ -459,6 +502,17 @@ namespace aclara_meters.view
 
                                 PrintToConsole("Se va a ejecutar el Script - InvokeMethod");
 
+                                try
+                                {
+                                    printer.Suspend();
+                                }
+                                catch (Exception e5)
+                                {
+                                    Console.WriteLine(e5.StackTrace);
+                                }
+
+
+
                                 //Connection Method
                                 runScript();
 
@@ -508,15 +562,27 @@ namespace aclara_meters.view
 
                             autoConnect = false;
 
-                            printer.Suspend();
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
 
-                            #region Disable Circular Progress bar Animations when done
+                                #region Disable Circular Progress bar Animations when done
 
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
+                                backdark_bg.IsVisible = false;
+                                indicator.IsVisible = false;
+                                ContentView_DeviceList.IsEnabled = true;
 
-                            #endregion
+                                #endregion
 
+                            });
+
+                            try
+                            {
+                                printer.Suspend();
+                            }
+                            catch (Exception e5)
+                            {
+                                Console.WriteLine(e5.StackTrace);
+                            }
 
                         });
                         peripheralConnected = ble_library.BlePort.NO_CONNECTED;
@@ -538,26 +604,10 @@ namespace aclara_meters.view
                 PrintToConsole("¿Se va a realizar reconexion? - InvokeMethod");
 
 
-                if (conectarDevice)
-                {
-                    PrintToConsole("autoConnect se pone a false - InvokeMethod");
-                    autoConnect = false;
-                    conectarDevice = false;
-
-                    #region Autoconnect to stored device 
-
-                    PrintToConsole("Se va a crear una Tarea al de 0.5 segundos (Task.Factory.StartNew(NewOpenConnectionWithDevice);) - InvokeMethod");
-                    Task.Factory.StartNew(NewOpenConnectionWithDevice);
-
-                    #endregion
 
 
-                }
 
             }
-
-
-
 
         }
 
@@ -579,6 +629,7 @@ namespace aclara_meters.view
 
                             backdark_bg.IsVisible = true;
                             indicator.IsVisible = true;
+                            ContentView_DeviceList.IsEnabled = false;
                             ContentView_Scripting.IsEnabled = false;
                             _userTapped = true;
                             ContentView_Scripting_label_read.Text = "Executing Script ... ";
@@ -724,8 +775,9 @@ namespace aclara_meters.view
 
                                         employees.Add(device);
 
+                                      
 
-                                      if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
+                                        if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
 
                                       
                                         bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
@@ -764,28 +816,43 @@ namespace aclara_meters.view
 
                                                 if (autoConnect)
                                                 {
-                                                    #region Disable Circular Progress bar Animations when done
 
-                                                    backdark_bg.IsVisible = false;
-                                                    indicator.IsVisible = false;
+                                                    Device.BeginInvokeOnMainThread(() =>
+                                                    {
+                                                        #region Disable Circular Progress bar Animations when done
 
-                                                    #endregion
+                                                        backdark_bg.IsVisible = false;
+                                                        indicator.IsVisible = false;
+                                                        ContentView_DeviceList.IsEnabled = true;
+
+                                                        #endregion
+                                                    });
+
                                                 }
 
                                             }
                                         }
                                         else
                                         {
-                                            if (autoConnect)
+
+                                            // if (autoConnect)
+                                            //  {
+
+                                            Device.BeginInvokeOnMainThread(() =>
                                             {
                                                 #region Disable Circular Progress bar Animations when done
 
+                                                DeviceList.IsRefreshing = false;
                                                 backdark_bg.IsVisible = false;
                                                 indicator.IsVisible = false;
+                                                ContentView_DeviceList.IsEnabled = true;
 
                                                 #endregion
-                                            }
-  
+
+                                            });
+
+                                            //  }
+
                                         }
 
 
@@ -833,6 +900,7 @@ namespace aclara_meters.view
        				{
 
                        PrintToConsole("¿Esta la conexion abierta ? - NewOpenConnectionWithDevice");
+
 
                        if (!FormsApp.ble_interface.IsOpen())
                        {
@@ -1167,14 +1235,17 @@ namespace aclara_meters.view
             ContentView_DeviceList.Opacity = 0.5;
             ContentView_DeviceList.IsEnabled = false;
 
-            #region New Circular Progress bar Animations    
+            Device.BeginInvokeOnMainThread(() =>
+            {
 
-            DeviceList.IsRefreshing = false;
-            backdark_bg.IsVisible = true;
-            indicator.IsVisible = true;
+                #region New Circular Progress bar Animations    
 
-            #endregion
-
+                DeviceList.IsRefreshing = false;
+                backdark_bg.IsVisible = true;
+                indicator.IsVisible = true;
+                ContentView_DeviceList.IsEnabled = false;
+                #endregion
+            });
 
             bool reassociate = false;
             if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
