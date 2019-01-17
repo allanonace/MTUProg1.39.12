@@ -248,6 +248,8 @@ namespace aclara_meters.view
 
                 if (conectarDevice)
                 {
+
+
                     PrintToConsole("autoConnect se pone a false - InvokeMethod");
                     autoConnect = false;
                     conectarDevice = false;
