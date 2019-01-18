@@ -663,6 +663,7 @@ namespace aclara_meters.view
             logoff_no.Tapped += LogOffNoTapped;
             logoff_ok.Tapped += LogOffOkTapped;
 
+      
         }
 
 
@@ -729,6 +730,15 @@ namespace aclara_meters.view
 
         private void InitLayout(int valor)
         {
+
+
+            #region Customer name
+
+            customers_name.Text = "Licensed to: " + FormsApp.config.global.CustomerName;
+
+            #endregion
+
+
             switch (valor)
             {
                 case 1:

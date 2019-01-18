@@ -8,9 +8,14 @@
                xmlns:Controls="clr-namespace:aclara_meters"  
                x:Class="aclara_meters.view.AclaraViewMainMenu">
 
-  <RelativeLayout IsVisible="true">
-
-
+  <RelativeLayout IsVisible="true"  >
+  
+   <RelativeLayout.GestureRecognizers>
+            <SwipeGestureRecognizer Direction="Left" Swiped="OnSwiped"/>
+            <SwipeGestureRecognizer Direction="Right" Swiped="OnSwiped"/>
+        </RelativeLayout.GestureRecognizers>
+    
+        
     <ContentView BackgroundColor="White" WidthRequest="1024" x:Name="fondo"
                  IsVisible="true"
 
@@ -442,9 +447,7 @@
                     </ListView>
                                      
                             
-         
-                    
-
+                   
                      
 
 
@@ -635,7 +638,7 @@
 
 
 
-
+                               
                      <ContentView  Margin="0,92,0,-20"
                                        RelativeLayout.YConstraint=
                       "{ConstraintExpression Type=RelativeToParent,
@@ -714,8 +717,7 @@
                                             
 
                         
-                   
-
+        
                      </ContentView>
 
 

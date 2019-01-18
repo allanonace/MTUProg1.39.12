@@ -132,33 +132,44 @@ namespace aclara_meters.view
 
 
             this.EmailEntry.Focused += (s, e) => 
-            { 
-                SetLayoutPosition(true, (int) -20); 
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(true, (int) -40);
+                else
+                    SetLayoutPosition(true, (int) -20);
             };
 
             this.EmailEntry.Unfocused += (s, e) => 
-            { 
-                SetLayoutPosition(false, (int)-20);
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(false, (int) -40);
+                else
+                    SetLayoutPosition(false, (int) -20);
             };
 
-
             this.PasswordEntry.Focused += (s, e) => 
-            { 
-                SetLayoutPosition(true, (int) -80);
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(true, (int) -120);
+                else
+                    SetLayoutPosition(true, (int) -80);
             };
 
             this.PasswordEntry.Unfocused += (s, e) => 
-            { 
-                SetLayoutPosition(false, (int) -80); 
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(false, (int) -120);
+                else
+                    SetLayoutPosition(false, (int) -80);
             };
 
 
+            EmailEntry.MaxLength = FormsApp.config.global.UserIdMaxLength;
 
+            //EmailEntry.MaxLength = FormsApp.config.global.UserIdMinLength;
 
+            PasswordEntry.MaxLength = FormsApp.config.global.PasswordMaxLength;
 
-
-           
-           
 
         }
 
