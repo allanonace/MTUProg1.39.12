@@ -34,80 +34,49 @@ namespace aclara_meters.view
 
         private void LoadMTUData()
         {
-            MenuList = new List<PageItem>
-            {
-                // Creating our pages for menu navigation
-                // Here you can define title for item, 
-                // icon on the left side, and page that you want to open after selection
+            // Creating our pages for menu navigation
+            // Here you can define title for item, 
+            // icon on the left side, and page that you want to open after selection
 
-                // Adding menu items to MenuList
-                new PageItem()
-                {
-                    Title = "Read MTU",
-                    Icon = "readmtu_icon.png",
-                    TargetType = "ReadMTU"
-                },
+            MenuList = new List<PageItem>();
 
-                new PageItem()
-                {
-                    Title = "Turn Off MTU",
-                    Icon = "turnoff_icon.png",
-                    TargetType = "turnOff"
-                },
+            // Adding menu items to MenuList
 
-                new PageItem()
-                {
-                    Title = "Add MTU",
-                    Icon = "addMTU.png",
-                    TargetType = "AddMTU"
-                },
+            MenuList.Add( new PageItem() {  Title = "Read MTU", Icon = "readmtu_icon.png", TargetType = "ReadMTU" });
 
-                new PageItem()
-                {
-                    Title = "Replace MTU",
-                    Icon = "replaceMTU2.png",
-                    TargetType = "replaceMTU"
-                },
+            if (FormsApp.config.global.ShowTurnOff)
+                MenuList.Add( new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", TargetType = "turnOff" });
 
-                new PageItem()
-                {
-                    Title = "Replace Meter",
-                    Icon = "replaceMeter.png",
-                    TargetType = "replaceMeter"
-                },
+            if (FormsApp.config.global.ShowAddMTU)
+                MenuList.Add( new PageItem() { Title = "Add MTU", Icon = "addMTU.png", TargetType = "AddMTU" });
 
-                new PageItem()
-                {
-                    Title = "Add MTU / Add meter",
-                    Icon = "addMTUaddmeter.png",
-                    TargetType = "AddMTUAddMeter"
-                },
+            if (FormsApp.config.global.ShowReplaceMTU)
+                MenuList.Add( new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", TargetType = "replaceMTU" });
 
-                new PageItem()
-                {
-                    Title = "Add MTU / Rep. Meter",
-                    Icon = "addMTUrepmeter.png",
-                    TargetType = "AddMTUReplaceMeter"
-                },
+            if (FormsApp.config.global.ShowReplaceMeter)
+                MenuList.Add( new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", TargetType = "replaceMeter" });
 
-                new PageItem()
-                {
-                    Title = "Rep.MTU / Rep. Meter",
-                    Icon = "repMTUrepmeter.png",
-                    TargetType = "ReplaceMTUReplaceMeter"
-                },
+            if (FormsApp.config.global.ShowAddMTUMeter)
+                MenuList.Add( new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", TargetType = "AddMTUAddMeter" });
 
-                new PageItem()
-                {
-                    Title = "Install Confirmation",
-                    Icon = "installConfirm.png",
-                    TargetType = "InstallConfirm"
-                }
-            };
+            if (FormsApp.config.global.ShowAddMTUReplaceMeter)
+                MenuList.Add( new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", TargetType = "AddMTUReplaceMeter" });
+
+            if (FormsApp.config.global.ShowReplaceMTUMeter)
+                MenuList.Add( new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = "ReplaceMTUReplaceMeter" });
+
+            if (FormsApp.config.global.ShowInstallConfirmation)
+                MenuList.Add( new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = "InstallConfirm" });
+
+
+      
+            // ListView needs to be at least  elements for UI Purposes, even empty ones
+            while (MenuList.Count < 9)
+                MenuList.Add(new PageItem() { Title = "", Icon = "", TargetType = "" });
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
             navigationDrawerList.ItemsSource = MenuList;
-          
+
         }
 
         private void OpenSettingsView(object sender, EventArgs e)
