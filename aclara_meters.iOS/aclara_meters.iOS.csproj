@@ -86,7 +86,7 @@
     <MtouchDebug>true</MtouchDebug>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <BuildIpa>true</BuildIpa>
-    <CodesignProvision>Internal</CodesignProvision>
+    <CodesignProvision>External</CodesignProvision>
     <MtouchLink>SdkOnly</MtouchLink>
     <OnDemandResourcesInitialInstallTags>
     </OnDemandResourcesInitialInstallTags>
