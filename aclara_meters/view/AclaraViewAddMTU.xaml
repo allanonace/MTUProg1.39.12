@@ -430,7 +430,7 @@
                                     <StackLayout x:Name="fieldOrderContainer">
                                    
                                         <!-- Field Order -->
-                                         <Label Text="Field Order" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                         <Label Text="Field Order" Margin="0,4,0,0" x:Name="field_order_port1" VerticalOptions="Center" Font="Bold,17" 
                                                  />
                                               
                                           
@@ -761,7 +761,7 @@
                                  <StackLayout x:Name="fieldOrder2Container">
                                 
                                     <!-- Field Order -->
-                                     <Label Text="Field Order" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                     <Label Text="Field Order" x:Name="field_order_port2" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                           
                                       

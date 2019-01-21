@@ -781,18 +781,22 @@ namespace aclara_meters.view
             #endregion
 
 
-
             #region AccountLabel
 
             AccountLabel_Port1.Text = global.AccountLabel;
             AccountLabel_Port2.Text = global.AccountLabel;
 
-
             #endregion
 
 
-            //WorkOrderLabel
+            #region WorkOrderLabel
 
+            field_order_port1.Text = global.WorkOrderLabel;
+            field_order_port2.Text = global.WorkOrderLabel;
+
+            #endregion
+
+        
 
         }
 
@@ -2617,6 +2621,31 @@ namespace aclara_meters.view
             this.ContainerCopyPort1.IsVisible = this.port2status;
             this.copyPort1.IsEnabled = this.port2status;
             //this.copyPort1.IsVisible = this.port2status;
+
+            if(FormsApp.config.global.NewMeterPort2isTheSame)
+                this.copyPort1.IsVisible = true;
+            else
+                this.copyPort1.IsVisible = false;
+
+
+            if(FormsApp.config.global.Port2DisableNo)
+            {
+                enablePort2.IsVisible = false;
+
+                this.port2status = !this.port2status;
+
+                bool ok = this.add_mtu.comm.WriteMtuBitAndVerify(28, 1, port2status);
+                Console.WriteLine("-> UPDATE PORT 2 STATUS: " + ok + " " + this.port2status);
+
+                // Bit correctly modified
+                if (ok)
+                    this.UpdateStatusPort2();
+
+                // Bit have not changed -> return to previous state
+                else
+                    this.port2status = !this.port2status;
+            }
+        
         }
 
         private void ChangeCheckboxSnapReads ( bool active )
