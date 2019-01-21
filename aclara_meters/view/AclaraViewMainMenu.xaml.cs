@@ -254,8 +254,10 @@ namespace aclara_meters.view
 
         void OnSwiped(object sender, SwipedEventArgs e)
         {
+            if (Device.Idiom == TargetIdiom.Tablet)
+                return;
 
-            switch (e.Direction)
+                switch (e.Direction)
             {
                 case SwipeDirection.Left:
 

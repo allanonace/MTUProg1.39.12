@@ -150,17 +150,17 @@ namespace aclara_meters.view
             this.PasswordEntry.Focused += (s, e) => 
             {
                 if (Device.Idiom == TargetIdiom.Tablet)
-                    SetLayoutPosition(true, (int) -120);
+                    SetLayoutPosition(true, (int) -320);
                 else
-                    SetLayoutPosition(true, (int) -80);
+                    SetLayoutPosition(true, (int) -280);
             };
 
             this.PasswordEntry.Unfocused += (s, e) => 
             {
                 if (Device.Idiom == TargetIdiom.Tablet)
-                    SetLayoutPosition(false, (int) -120);
+                    SetLayoutPosition(false, (int) -320);
                 else
-                    SetLayoutPosition(false, (int) -80);
+                    SetLayoutPosition(false, (int) -280);
             };
 
 
