@@ -337,7 +337,12 @@ namespace aclara_meters
 
                     try
                     {
-                        if (DateTime.Parse(DateTime.Now.ToString("MM/dd/yyyy")) < DateTime.Parse(FormsApp.config.global.MinDate))
+                        string datenow = DateTime.Now.ToString("MM/dd/yyyy");
+                        string mindate = FormsApp.config.global.MinDate;
+
+                  
+
+                        if (DateTime.ParseExact(datenow, "MM/dd/yyyy", null) < DateTime.ParseExact(mindate, "MM/dd/yyyy", null))
                         {
                             Device.BeginInvokeOnMainThread(() =>
                             {
