@@ -335,12 +335,21 @@ namespace aclara_meters
 
                     #region Min Date Check
 
-                    if ( DateTime.Parse(DateTime.Now.ToString("MM/dd/yyyy")) < DateTime.Parse(FormsApp.config.global.MinDate))
+                    try
                     {
-                        Device.BeginInvokeOnMainThread(() =>
+                        if (DateTime.Parse(DateTime.Now.ToString("MM/dd/yyyy")) < DateTime.Parse(FormsApp.config.global.MinDate))
                         {
-                            this.MainPage = new NavigationPage(new ErrorInitView("System is not ahead or equals to Minimum expected Date!"));
-                        });
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                MainPage = new NavigationPage(new ErrorInitView("System is not ahead or equals to Minimum expected Date!"));
+                            });
+                        }
+
+
+                    }
+                    catch (Exception e41)
+                    {
+
                     }
 
                     #endregion

@@ -786,6 +786,33 @@ namespace aclara_meters.view
             AccountLabel_Port1.Text = global.AccountLabel;
             AccountLabel_Port2.Text = global.AccountLabel;
 
+            #region Mandatory Fields should be labeled with colored field
+
+            if (global.ColorEntry)
+            {
+                AccountLabel_Port1.TextColor = Color.FromHex("#FF0000");
+                AccountLabel_Port2.TextColor = Color.FromHex("#FF0000");
+
+                repeat_serviceportid_port1.TextColor = Color.FromHex("#FF0000");
+                repeat_serviceportid_port2.TextColor = Color.FromHex("#FF0000");
+
+                meter_number_port1.TextColor = Color.FromHex("#FF0000");
+                meter_number_port2.TextColor = Color.FromHex("#FF0000");
+
+
+                read_interval_port1.TextColor = Color.FromHex("#FF0000");
+                read_interval_port2.TextColor = Color.FromHex("#FF0000");
+           
+
+
+                //Vendor is modified in realtime
+            }
+
+
+
+            #endregion
+
+
             #endregion
 
 
@@ -1193,6 +1220,16 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterVendorsLabel.TextColor = Color.FromHex("#FF0000");
+       
+            }
+
+            #endregion
+
             meterVendorsContainerD.Children.Add(meterVendorsPicker);
             meterVendorsContainerC.Content = meterVendorsContainerD;
             meterVendorsContainerB.Content = meterVendorsContainerC;
@@ -1248,6 +1285,18 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
+
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterModelsLabel.TextColor = Color.FromHex("#FF0000");
+
+            }
+
+            #endregion
+
+
             meterModelsContainerD.Children.Add(meterModelsPicker);
             meterModelsContainerC.Content = meterModelsContainerD;
             meterModelsContainerB.Content = meterModelsContainerC;
@@ -1302,6 +1351,18 @@ namespace aclara_meters.view
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
+
+
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterNamesLabel.TextColor = Color.FromHex("#FF0000");
+
+            }
+
+            #endregion
+
 
             meterNamesContainerD.Children.Add(meterNamesPicker);
             meterNamesContainerC.Content = meterNamesContainerD;
@@ -1367,6 +1428,17 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
+
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterVendors2Label.TextColor = Color.FromHex("#FF0000");
+
+            }
+
+            #endregion
+
             meterVendors2ContainerD.Children.Add(meterVendors2Picker);
             meterVendors2ContainerC.Content = meterVendors2ContainerD;
             meterVendors2ContainerB.Content = meterVendors2ContainerC;
@@ -1422,6 +1494,18 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
+
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterModels2Label.TextColor = Color.FromHex("#FF0000");
+
+            }
+
+            #endregion
+
+
             meterModels2ContainerD.Children.Add(meterModels2Picker);
             meterModels2ContainerC.Content = meterModels2ContainerD;
             meterModels2ContainerB.Content = meterModels2ContainerC;
@@ -1476,6 +1560,18 @@ namespace aclara_meters.view
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
+
+
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterNames2Label.TextColor = Color.FromHex("#FF0000");
+
+            }
+
+            #endregion
+
 
             meterNames2ContainerD.Children.Add(meterNames2Picker);
             meterNames2ContainerC.Content = meterNames2ContainerD;
