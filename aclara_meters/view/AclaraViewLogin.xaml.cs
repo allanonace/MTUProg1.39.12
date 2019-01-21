@@ -134,7 +134,7 @@ namespace aclara_meters.view
             this.EmailEntry.Focused += (s, e) => 
             {
                 if (Device.Idiom == TargetIdiom.Tablet)
-                    SetLayoutPosition(true, (int) -40);
+                    SetLayoutPosition(true, (int) -600);
                 else
                     SetLayoutPosition(true, (int) -20);
             };
@@ -142,7 +142,7 @@ namespace aclara_meters.view
             this.EmailEntry.Unfocused += (s, e) => 
             {
                 if (Device.Idiom == TargetIdiom.Tablet)
-                    SetLayoutPosition(false, (int) -40);
+                    SetLayoutPosition(false, (int) -600);
                 else
                     SetLayoutPosition(false, (int) -20);
             };
@@ -150,17 +150,17 @@ namespace aclara_meters.view
             this.PasswordEntry.Focused += (s, e) => 
             {
                 if (Device.Idiom == TargetIdiom.Tablet)
-                    SetLayoutPosition(true, (int) -320);
+                    SetLayoutPosition(true, (int) -1200);
                 else
-                    SetLayoutPosition(true, (int) -280);
+                    SetLayoutPosition(true, (int) -80);
             };
 
             this.PasswordEntry.Unfocused += (s, e) => 
             {
                 if (Device.Idiom == TargetIdiom.Tablet)
-                    SetLayoutPosition(false, (int) -320);
+                    SetLayoutPosition(false, (int) -1200);
                 else
-                    SetLayoutPosition(false, (int) -280);
+                    SetLayoutPosition(false, (int) -80);
             };
 
 
