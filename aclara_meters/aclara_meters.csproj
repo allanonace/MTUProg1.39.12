@@ -81,6 +81,7 @@
     <None Remove="Xml_Files\Memory.xml" />
     <None Remove="Xml_Files\Mtu.xml" />
     <None Remove="Xml_Files\Meter.xml" />
+    <None Remove=".DS_Store" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ble_library\ble_library.csproj" />

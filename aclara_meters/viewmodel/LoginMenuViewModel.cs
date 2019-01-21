@@ -117,6 +117,24 @@ namespace aclara_meters.viewmodel
                         string userName = User.Email;
                         string password = User.Password;
 
+                        #region Credentials length Validation
+
+                        if (userName.Length < FormsApp.config.global.UserIdMinLength || userName.Length > FormsApp.config.global.UserIdMaxLength)
+                        {
+                            IsBusy = false;
+                            Message = "The field UserName must be with a minimum length of " + FormsApp.config.global.UserIdMinLength+ " and a maximum length of " + FormsApp.config.global.UserIdMaxLength;
+                            return;
+                        }
+
+                        if(password.Length < FormsApp.config.global.PasswordMinLength || password.Length > FormsApp.config.global.PasswordMaxLength)
+                        {
+                            IsBusy = false;
+                            Message = "The field Password must be with a minimum length of " + FormsApp.config.global.PasswordMinLength + " and a maximum length of " + FormsApp.config.global.PasswordMaxLength;
+                            return;
+                        }
+
+                        #endregion
+
                         var isValid = AreCredentialsCorrect(userName, password);
 
                         if (isValid)
@@ -138,6 +156,7 @@ namespace aclara_meters.viewmodel
                         {
                             Message = "Wrong username or password";
                         }
+
                         IsBusy = false;
                     }
                     else
