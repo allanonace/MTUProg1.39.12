@@ -209,7 +209,7 @@ namespace aclara_meters.view
             MTUComm.Action add_mtu = new MTUComm.Action(
                 config: FormsApp.config,
                 serial: FormsApp.ble_interface,
-                type: MTUComm.Action.ActionType.MtuInstallationConfirmation,
+                type: MTUComm.Action.ActionType.InstallConf,
                 user: FormsApp.credentialsService.UserName);
 
             //Define finish and error event handler

@@ -21,10 +21,12 @@ namespace MTUComm
     {
         #region Constants
 
-        private const int BASIC_READ_ADDRESS = 0;
-        private const int BASIC_READ_DATA    = 32;
-        private const int DEFAULT_OVERLAP    = 6;
-        private const int DEFAULT_LENGTH_AES = 16;
+        private const int BASIC_READ_1_ADDRESS = 0;
+        private const int BASIC_READ_1_DATA    = 32;
+        private const int BASIC_READ_2_ADDRESS = 244;
+        private const int BASIC_READ_2_DATA    = 1;
+        private const int DEFAULT_OVERLAP      = 6;
+        private const int DEFAULT_LENGTH_AES   = 16;
 
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
         private const string ERROR_LOADMETER = "MeterLoadException";
@@ -261,7 +263,7 @@ namespace MTUComm
         public MTUComm(ISerial serial, Configuration configuration)
         {
             this.configuration = configuration;
-            latest_mtu = new MTUBasicInfo(new byte[BASIC_READ_DATA]);
+            latest_mtu = new MTUBasicInfo(new byte[BASIC_READ_1_DATA + BASIC_READ_2_DATA]);
             lexi = new Lexi.Lexi(serial, 10000);
         }
 
@@ -307,18 +309,23 @@ namespace MTUComm
                 {
                     // NOTE: TaskFactory uses Action without parameters and elegant
                     // form to be able to do it, is using a lambda expression
-                    case ActionType.ReadMtu: await Task.Run(() => Task_ReadMtu()); break;
                     case ActionType.AddMtu:
+                    case ActionType.AddMtuAddMeter:
+                    case ActionType.AddMtuReplaceMeter:
+                    case ActionType.ReplaceMTU:
+                    case ActionType.ReplaceMeter:
+                    case ActionType.ReplaceMtuReplaceMeter:
                         // Interactive and Scripting
-                        if ( args.Length == 2 )
-                             await Task.Run(() => Task_AddMtu((AddMtuForm)args[0], (string)args[1]));
-                        else await Task.Run(() => Task_AddMtu((Action)args[0]));
+                        if ( args.Length > 1 )
+                             await Task.Run(() => Task_AddMtu ( (AddMtuForm)args[0], (string)args[1], (ActionType)args[2] ) );
+                        else await Task.Run(() => Task_AddMtu ( (Action)args[0] ) );
                         break;
-                    case ActionType.TurnOffMtu: await Task.Run(() => Task_TurnOffMtu()); break;
-                    case ActionType.TurnOnMtu: await Task.Run(() => Task_TurnOnMtu()); break;
-                    case ActionType.ReadData: await Task.Run(() => Task_ReadDataMtu((int)args[0])); break;
-                    case ActionType.BasicRead: await Task.Run(() => Task_BasicRead()); break;
-                    case ActionType.MtuInstallationConfirmation: await Task.Run(() => Task_InstallConfirmation()); break;
+                    case ActionType.ReadMtu    : await Task.Run(() => Task_ReadMtu()); break;
+                    case ActionType.TurnOffMtu : await Task.Run(() => Task_TurnOffMtu()); break;
+                    case ActionType.TurnOnMtu  : await Task.Run(() => Task_TurnOnMtu()); break;
+                    case ActionType.ReadData   : await Task.Run(() => Task_ReadDataMtu((int)args[0])); break;
+                    case ActionType.BasicRead  : await Task.Run(() => Task_BasicRead()); break;
+                    case ActionType.InstallConf: await Task.Run(() => Task_InstallConfirmation()); break;
                     default: break;
                 }
             }
@@ -380,13 +387,16 @@ namespace MTUComm
                 this.OnError ( this, errorArgs );
         }
 
-        private ErrorArgs InstallConfirmation_Logic ()
+        private ErrorArgs InstallConfirmation_Logic ( bool force = false, int time = 0 )
         {
+            Global global = this.configuration.global;
+        
             //If MTU has changed or critical settings/configuration force detection rutine
             if ( this.changedMTUSettings )
                 this.RecoverMeterByMtuType ();
 
-            if ( this.latest_mtu.Shipbit )
+            if ( ! force &&
+                 this.latest_mtu.Shipbit )
             {
                 string message = "Current MTU ID: " + this.latest_mtu.Id + " type " + this.latest_mtu.Type + " is OFF";
                 return new ErrorArgs ( 112, message, "Installation Confirmation Cancellation - " + message );
@@ -420,21 +430,30 @@ namespace MTUComm
                     byte valueWritten = (lexi.Read(inConFlag, 1))[0];
                     valueWritten &= mask;
 
-                    int max_iters = 1;
-                    while (valueWritten > 0 && max_iters <= 36)
-                    {
-                        int loop = (int)Math.Round((decimal)((max_iters * 100.0) / 36.0));
+                    // TENGO QUE MIRAR EL MIRAR EL MAIL DE KONSTANTIN PORQUE
+                    // AQUI FALTA UNA CONDICION DENTRO DEL WHILE PARA SALIR
 
-                        OnProgress(this, new ProgressArgs(max_iters, 36, "Checking Install Confirmation... ("+ loop.ToString() + "%)"));
-                        Thread.Sleep(5000);
+                    int count = 1;
+                    int wait  = 5;
+                    int max   = ( int )( ( global.TimeSyncCountDefault * 100 ) / wait ); // Minutes to Seconds / Seconds = Max number of iterations
+                    while (valueWritten > 0 && count <= max )
+                    {
+                        int loop = ( int )Math.Round ( ( decimal )( ( count * 100.0 ) / max ) );
+
+                        OnProgress(this, new ProgressArgs(count, max, "Checking Install Confirmation... ("+ loop.ToString() + "%)"));
+                        Thread.Sleep ( wait * 1000 );
                         valueWritten = (lexi.Read(inConFlag, 1))[0];
                         valueWritten &= mask;
-                        max_iters++;
+                        count++;
                     }
                 }
                 catch ( Exception e )
                 {
-                    return TranslateException ( e );
+                    // Try one more time, up to three
+                    if ( time >= global.TimeSyncCountRepeat )
+                        return this.InstallConfirmation_Logic ();
+                    else
+                        return TranslateException ( e );
                 }
             }
 
@@ -555,7 +574,9 @@ namespace MTUComm
                 if (memory_map_size > 960)
                     System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
 
-                ReadMtuArgs args = new ReadMtuArgs( new MemoryMap.MemoryMap ( buffer, memory_map_type ), mtuType );
+                dynamic map = new MemoryMap.MemoryMap ( buffer, memory_map_type );
+
+                ReadMtuArgs args = new ReadMtuArgs( map, mtuType );
                 OnReadMtu(this, args);
             }
             catch (Exception e)
@@ -617,15 +638,20 @@ namespace MTUComm
                 return;
             }
 
-            this.Task_AddMtu ( form, addMtuAction.user, true );
+            this.Task_AddMtu ( form, addMtuAction.user, addMtuAction.type, true );
         }
 
-        private void Task_AddMtu ( dynamic form, string user, bool isFromScripting = false )
+        private void Task_AddMtu (
+            dynamic form,
+            string user,
+            ActionType actionType = ActionType.AddMtu,
+            bool isFromScripting = false )
         {
             Mtu    mtu    = form.mtu;
             Global global = form.global;
-
-            this.mtuType = mtu;
+        
+            this.mtuType    = mtu;
+            form.actionType = actionType;
 
             try
             {
@@ -647,6 +673,8 @@ namespace MTUComm
 
                 byte[] memory = new byte[ memory_map_size ];
                 dynamic map = new MemoryMap.MemoryMap ( memory, memory_map_type );
+                
+                form.map = map;
 
                 bool useTwoPorts = mtu.TwoPorts;
 
@@ -809,13 +837,13 @@ namespace MTUComm
 
                 #endregion
 
-                #region Encription
+                #region Encryption
 
                 // Only encrypt the key if MTU.SpecialSet tag is true
                 if ( mtu.SpecialSet )
                 {
                     RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
-                    byte[] aesKey = new byte[ DEFAULT_LENGTH_AES ];
+                    byte[] aesKey = new byte[ map[ "EncryptionKey" ].Size ]; // DEFAULT_LENGTH_AES ];
                     rng.GetBytes ( aesKey );
                     map.EncryptionKey = aesKey;
                     for ( int i = 0; i < 15; i++ )
@@ -825,7 +853,20 @@ namespace MTUComm
                     // Encrypted
                     // EncryptionIndex
                 }
-                
+
+                #endregion
+
+                #region Frequencies
+
+                if ( mtu.TimeToSync &&
+                     global.AFC &&
+                     map.MtuSoftVersion >= 19 )
+                {
+                    map.F12WAYRegister1Int  = global.F12WAYRegister1;
+                    map.F12WAYRegister10Int = global.F12WAYRegister10;
+                    map.F12WAYRegister14Int = global.F12WAYRegister14;
+                }
+
                 #endregion
 
                 // fast message (not in pulse)
@@ -848,16 +889,18 @@ namespace MTUComm
 
                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true
-                if ( mtu.TimeToSync &&
-                     mtu.OnTimeSync &&
-                     // If script contains ForceTimeSync, use it
-                     // but if not use value from tag in Global
+                if ( global.TimeToSync && // Enables TimeSync request
+                     mtu.TimeToSync    && // Enables TimeSync request
+                     mtu.OnTimeSync    && // This is an MTU that can do TimeSync
+                     // If script contains ForceTimeSync, use it but if not use value from Global
                      ( ! form.ContainsParameter ( AddMtuForm.FIELD.FORCE_TIME_SYNC ) &&
                        global.ForceTimeSync ||
                        form.ContainsParameter ( AddMtuForm.FIELD.FORCE_TIME_SYNC ) &&
                        form.ForceTimeSync ) )
                 {
-                    ErrorArgs errorArgs = this.InstallConfirmation_Logic ();
+                    // Force to execute Install Confirmation avoiding problems
+                    // with MTU shipbit, because MTU is just turned on
+                    ErrorArgs errorArgs = this.InstallConfirmation_Logic ( true );
                     if ( errorArgs != null )
                         this.OnError ( this, errorArgs );
                 }
@@ -1052,7 +1095,13 @@ namespace MTUComm
         /// <remarks>Internaly saves internal MTU type and ID used for communication logic</remarks>
         private void LoadMtuBasicInfo ()
         {
-            MTUBasicInfo mtu_info = new MTUBasicInfo ( lexi.Read ( BASIC_READ_ADDRESS, BASIC_READ_DATA ) );
+            byte[] firstRead  = lexi.Read ( BASIC_READ_1_ADDRESS, BASIC_READ_1_DATA );
+            byte[] secondRead = lexi.Read ( BASIC_READ_2_ADDRESS, BASIC_READ_2_DATA );
+            List<byte> finalRead = new List<byte> ();
+            finalRead.AddRange ( firstRead  );
+            finalRead.AddRange ( secondRead );
+        
+            MTUBasicInfo mtu_info = new MTUBasicInfo ( finalRead.ToArray () );
             mtu_changed = ! ( ( mtu_info.Id == latest_mtu.Id ) && ( mtu_info.Type == latest_mtu.Type ) );
             latest_mtu = mtu_info;
 
@@ -1073,7 +1122,6 @@ namespace MTUComm
 
         private ErrorArgs TranslateException ( Exception e )
         {
-
             int    status     = -1;
             string message    = TranslateExceptionMessage(e, CultureInfo.GetCultureInfo("en-US"));
             string logmessage = TranslateExceptionMessage(e, CultureInfo.GetCultureInfo("en-US"));

@@ -81,9 +81,9 @@ namespace Xml
             this.EMeterConnected            = false; // [ NYC ] To display the meter info in full read MTU
             //this.EnableFEC                = IN K.CODE IS string THAT NO bool //string.Empty; // Turn FEC on/off for electric, null - do nothing
             this.ErrorId                    = false; // [ SCG ] errorId reporting
-            //this.F12WAYRegister1          = IN K.CODE IS byte[] THAT NO string //BitConverter.GetBytes ( 0x01C7D011 ).ToString ();
-            //this.F12WAYRegister10         = IN K.CODE IS byte[] THAT NO string //BitConverter.GetBytes ( 0x0130360A ).ToString ();
-            //this.F12WAYRegister14         = IN K.CODE IS byte[] THAT NO string //BitConverter.GetBytes ( 0x021B5021 ).ToString ();
+            this.F12WAYRegister1            = "0x01C7D011";
+            this.F12WAYRegister10           = "0x0130360A";
+            this.F12WAYRegister14           = "0x021B5021";
             this.F1TamperCheck              = false; // To check F1 Pulser Tamper
             this.forceElectricMtuOn         = true; // [ MTU 91 ] Force on
             this.ForceTimeSync              = false; // F1 force to ask for timesync from dcu
@@ -106,7 +106,7 @@ namespace Xml
             //this.ICfield2                 = IN K.CODE IS string THAT NO int //string.Empty; // Installation confirmation Data entry field2
             //this.IndividualDailyReads     = NOT PRESENT IN K.CODE
             this.IndividualReadInterval     = false; // Should the read interval be allowed to change?
-            //this.LatestVersion            = NOT PRESENT IN K.CODE
+            this.LatestVersion              = 16;
             //this.LiveDigitsOnly           = IS eForceDigits?
             this.LoadOptions                = false; // Allow to load options screen through appointments
             //this.LogLocation              = IN K.CODE IS string[] THAT NO string; // List of possible log file locations
@@ -155,7 +155,7 @@ namespace Xml
             this.ShowAddMTU                  = ;
             this.ShowAddMTUMeter             = ;
             this.ShowAddMTUReplaceMeter      = ;
-            this.ShowFreq                    = ;
+            this.ShowFreq                    = false;
             this.ShowInstallConfirmation     = ;
             this.ShowMeterVendor             = ;
             this.ShowReplaceMeter            = ;
@@ -700,6 +700,9 @@ namespace Xml
         [XmlElement("TimeSyncCountDefault")]
         public int TimeSyncCountDefault { get; set; }
 
+        [XmlElement("TimeSyncCountRepeat")]
+        public int TimeSyncCountRepeat { get; set; }
+        
         [XmlElement("TimeToSync")]
         public bool TimeToSync { get; set; }
 

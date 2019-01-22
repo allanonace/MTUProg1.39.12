@@ -16,15 +16,10 @@ namespace MTUComm
 
         private int p1enabled;
         private int p2enabled;
+        
+        public  int version { get; }
 
         private PortType[] ports = new PortType[] { PortType.TYPE_NONE, PortType.TYPE_NONE }; //Currently max 2 ports
-
-
-        public enum Version
-        {
-            ARCH,
-            NEW
-        }
 
         public enum PortType
         {
@@ -77,6 +72,9 @@ namespace MTUComm
 
             p2enabled = buffer[28];
             p2enabled &= 2;
+            
+            // If new soft version is equal to 255, use old soft version register
+            this.version = ( buffer[ 32 ] == 255 ) ? buffer[ 1 ] : buffer[ 32 ];
         }
 
         public bool P1Enabled
@@ -94,7 +92,6 @@ namespace MTUComm
                 return (p2enabled > 0);
             }
         }
-
 
         public bool Shipbit
         {
@@ -182,8 +179,6 @@ namespace MTUComm
                 }
             }
         }
-
-
 
         public Boolean isEncoder
         {

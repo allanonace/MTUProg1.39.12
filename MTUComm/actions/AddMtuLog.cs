@@ -5,6 +5,7 @@ using MTUComm.actions;
 using Xml;
 
 using FIELD = MTUComm.actions.AddMtuForm.FIELD;
+using ActionType = MTUComm.Action.ActionType;
 
 namespace MTUComm
 {
@@ -81,8 +82,10 @@ namespace MTUComm
 
         public void LogAddMtu ( bool isFromScripting = false )
         {
-            Mtu    mtu    = form.mtu;
-            Global global = form.global;
+            Mtu     mtu    = form.mtu;
+            Global  global = form.global;
+            dynamic map    = form.map;
+            string  temp   = string.Empty;
 
             Meter meter = ( ! isFromScripting ) ?
                 ( Meter )form.Meter.Value :
@@ -122,8 +125,11 @@ namespace MTUComm
                 logger.logParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
             }
 
-            string afc = (Configuration.GetInstance().global.AFC) ? "Set" : "Off";
-            logger.logParameter(this.addMtuAction, new Parameter("AFC", "AFC", afc));
+            // Related to F12WAYRegister1XX registers
+            string afc = ( mtu.TimeToSync &&
+                           global.AFC &&
+                           map.MtuSoftVersion >= 19 ) ? "Set" : "Off";
+            logger.logParameter ( this.addMtuAction, new Parameter ( "AFC", "AFC", afc ) );
 
             #endregion
 
@@ -147,6 +153,16 @@ namespace MTUComm
             logger.logParameter ( port, form.InitialReading );
             logger.logParameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
             logger.logParameter ( port, new Parameter("PulseLo","Pulse Low Time", meter.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
+
+            if ( global.AutoRegisterRecording &&
+                 ( form.addMode == ActionType.ReplaceMeter ||
+                   form.addMode == ActionType.ReplaceMtuReplaceMeter ||
+                   form.addMode == ActionType.AddMtuReplaceMeter ) )
+            {
+                temp = ( string.Equals ( form.MeterNumber, form.MeterNumberOld ) ) ?
+                         "Register head change" : "Meter change";
+                logger.logParameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
+            }
 
             this.addMtuAction.Add(port);
 
@@ -176,6 +192,16 @@ namespace MTUComm
                 logger.logParameter ( port, new Parameter("MeterModel", "Meter Model", meter2.Model));
                 logger.logParameter ( port, form.MeterNumber2 );
                 logger.logParameter ( port, form.InitialReading2 );
+
+                if ( global.AutoRegisterRecording &&
+                     ( form.addMode == ActionType.ReplaceMeter ||
+                       form.addMode == ActionType.ReplaceMtuReplaceMeter ||
+                       form.addMode == ActionType.AddMtuReplaceMeter ) )
+                {
+                    temp = ( string.Equals ( form.MeterNumber2, form.MeterNumber2Old ) ) ?
+                             "Register head change" : "Meter change";
+                    logger.logParameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
+                }
 
                 this.addMtuAction.Add(port);
             }

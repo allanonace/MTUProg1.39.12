@@ -11,14 +11,19 @@ namespace MTUComm.actions
     {
         public enum FIELD
         {
+            MTU_ID_OLD,
             SERVICE_PORT_ID,
             SERVICE_PORT_ID2,
             FIELD_ORDER,
             FIELD_ORDER2,
             METER_NUMBER,
             METER_NUMBER2,
+            METER_NUMBER_OLD,
+            METER_NUMBER2_OLD,
             INITIAL_READING,
             INITIAL_READING2,
+            INITIAL_READING_OLD,
+            INITIAL_READING2_OLD,
             SELECTED_METER,
             SELECTED_METER2,
             NUMBER_OF_DIALS,
@@ -47,18 +52,25 @@ namespace MTUComm.actions
         public Dictionary<ParameterType,FIELD> IdsAclara =
             new Dictionary<ParameterType,FIELD> ()
             {
-                { ParameterType.ActivityLogId,     FIELD.SERVICE_PORT_ID },
-                { ParameterType.WorkOrder,         FIELD.FIELD_ORDER     },
-                { ParameterType.MeterSerialNumber, FIELD.METER_NUMBER    },
-                { ParameterType.MeterReading,      FIELD.INITIAL_READING },
-                { ParameterType.MeterType,         FIELD.SELECTED_METER  },
-                { ParameterType.NumberOfDials,     FIELD.NUMBER_OF_DIALS },
-                { ParameterType.DriveDialSize,     FIELD.DRIVE_DIAL_SIZE },
-                { ParameterType.UnitOfMeasure,     FIELD.UNIT_MEASURE    },
-                { ParameterType.SnapRead,          FIELD.SNAP_READS      },
-                { ParameterType.Custom,            FIELD.OPTIONAL_PARAMS },
-                { ParameterType.ReadInterval,      FIELD.READ_INTERVAL   },
-                { ParameterType.Alarm,             FIELD.ALARM           }
+                { ParameterType.OldMtuId,             FIELD.MTU_ID_OLD          },
+                { ParameterType.ActivityLogId,        FIELD.SERVICE_PORT_ID     },
+                { ParameterType.WorkOrder,            FIELD.FIELD_ORDER         },
+                { ParameterType.MeterType,            FIELD.SELECTED_METER      },
+                { ParameterType.NumberOfDials,        FIELD.NUMBER_OF_DIALS     },
+                { ParameterType.DriveDialSize,        FIELD.DRIVE_DIAL_SIZE     },
+                { ParameterType.UnitOfMeasure,        FIELD.UNIT_MEASURE        },
+                { ParameterType.SnapRead,             FIELD.SNAP_READS          },
+                { ParameterType.Custom,               FIELD.OPTIONAL_PARAMS     },
+                { ParameterType.ReadInterval,         FIELD.READ_INTERVAL       },
+                { ParameterType.Alarm,                FIELD.ALARM               },
+                
+                { ParameterType.MeterSerialNumber,    FIELD.METER_NUMBER        },
+                { ParameterType.NewMeterSerialNumber, FIELD.METER_NUMBER        },
+                { ParameterType.OldMeterSerialNumber, FIELD.METER_NUMBER_OLD    },
+                
+                { ParameterType.MeterReading,         FIELD.INITIAL_READING     },
+                { ParameterType.NewMeterReading,      FIELD.INITIAL_READING     },
+                { ParameterType.OldMeterReading,      FIELD.INITIAL_READING_OLD }
             };
 
         // Elements array
@@ -108,7 +120,7 @@ namespace MTUComm.actions
                     }
                 },
                 #endregion
-                #region Meter Number
+                #region Meter Serial Number
                 {
                     FIELD.METER_NUMBER,
                     new string[]
@@ -125,6 +137,24 @@ namespace MTUComm.actions
                         "MeterNumber2",
                         "NewMeterSerialNumber",
                         "New Meter Serial Number"
+                    }
+                },
+                {
+                    FIELD.METER_NUMBER_OLD,
+                    new string[]
+                    {
+                        "MeterNumberOld",
+                        "NewMeterSerialNumberOld",
+                        "New Meter Serial Number Old"
+                    }
+                },
+                {
+                    FIELD.METER_NUMBER2_OLD,
+                    new string[]
+                    {
+                        "MeterNumber2Old",
+                        "NewMeterSerialNumberOld",
+                        "New Meter Serial Number Old"
                     }
                 },
                 #endregion
@@ -147,8 +177,26 @@ namespace MTUComm.actions
                         "Meter Reading"
                     }
                 },
+                {
+                    FIELD.INITIAL_READING_OLD,
+                    new string[]
+                    {
+                        "InitialReadingOld",
+                        "MeterReadingOld",
+                        "Meter Reading Old"
+                    }
+                },
+                {
+                    FIELD.INITIAL_READING2_OLD,
+                    new string[]
+                    {
+                        "InitialReading2Old",
+                        "MeterReadingOld",
+                        "Meter Reading Old"
+                    }
+                },
                 #endregion
-                #region Selected Meter
+                #region Selected Meter ID
                 {
                     FIELD.SELECTED_METER,
                     new string[]

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Lexi.Interfaces;
 using MTUComm.actions;
 using Xml;
-using System.IO;
 
 namespace MTUComm
 {
@@ -53,7 +52,7 @@ namespace MTUComm
             TurnOffMtu,
             TurnOnMtu,
             ReadData,
-            MtuInstallationConfirmation,
+            InstallConf,
             Diagnosis,
             BasicRead
         }
@@ -70,7 +69,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu,"Turn Off MTU" },
             {ActionType.TurnOnMtu,"Turn On MTU" },
             {ActionType.ReadData,"Read Data Log" },
-            {ActionType.MtuInstallationConfirmation,"Install Confirmation" },
+            {ActionType.InstallConf,"Install Confirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -86,7 +85,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu,"TurnOffMtu" },
             {ActionType.TurnOnMtu,"TurnOnMTU" },
             {ActionType.ReadData, "Program MTU" },
-            {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
+            {ActionType.InstallConf,"InstallConfirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -102,7 +101,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu, null },
             {ActionType.TurnOnMtu, null },
             {ActionType.ReadData, "DataRead" },
-            {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
+            {ActionType.InstallConf,"InstallConfirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -180,7 +179,7 @@ namespace MTUComm
         public static Mtu currentMtu;
 
         public MTUComm comm { get; private set; }
-        private ActionType type;
+        public ActionType type { get; }
         private List<Parameter> mparameters = new List<Parameter>();
         private Boolean canceled = false;
         public  String user { get; private set; }
@@ -289,6 +288,8 @@ namespace MTUComm
 
                 int finalResult = 0;
 
+                Global global = Configuration.GetInstance ().GetGlobal ();
+
                 foreach ( ConditionObjet item in conditions )
                 {
                     string value  = string.Empty;
@@ -316,6 +317,10 @@ namespace MTUComm
                         case "ActionParams":
                             value = actionParams.GetType().GetProperty ( member[ 0 ] )
                                 .GetValue ( actionParams, null ).ToString();
+                            break;
+                        case "Global":
+                            value = global.GetType ().GetProperty ( member[ 0 ] )
+                                .GetValue ( global, null ).ToString();
                             break;
                         default: // MemoryMap
                             // Recover register from MTU memory map
@@ -402,11 +407,16 @@ namespace MTUComm
                         break;
 
                     case ActionType.AddMtu:
-                        comm.OnAddMtu += Comm_OnAddMtu;
+                    case ActionType.AddMtuAddMeter:
+                    case ActionType.AddMtuReplaceMeter:
+                    case ActionType.ReplaceMTU:
+                    case ActionType.ReplaceMeter:
+                    case ActionType.ReplaceMtuReplaceMeter:
+                        comm.OnAddMtu   += Comm_OnAddMtu;
                         comm.OnProgress += Comm_OnProgress;
                         // Interactive and Scripting
                         if (mtuForm != null)
-                             parameters.AddRange(new object[] { (AddMtuForm)mtuForm, this.user });
+                             parameters.AddRange(new object[] { (AddMtuForm)mtuForm, this.user, type });
                         else parameters.Add(this);
                         break;
 
@@ -418,7 +428,7 @@ namespace MTUComm
                         comm.OnTurnOnMtu += Comm_OnTurnOnMtu;
                         break;
 
-                    case ActionType.MtuInstallationConfirmation:
+                    case ActionType.InstallConf:
                         comm.OnReadMtu += Comm_OnReadMtu;
                         comm.OnProgress += Comm_OnProgress;
                         break;

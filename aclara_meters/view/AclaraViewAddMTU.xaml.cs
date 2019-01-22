@@ -506,12 +506,11 @@ namespace aclara_meters.view
 
         private void InitializeAddMtuForm ()
         {
-            //Global global = this.config.GetGlobal ();
-
             #region Conditions
 
             Mtu    mtu    = this.addMtuForm.mtu;
             Global global = this.addMtuForm.global;
+            MTUBasicInfo mtuBasicinfo = MtuForm.mtuBasicInfo;
 
             #endregion
 
@@ -577,19 +576,49 @@ namespace aclara_meters.view
 
             #region Read Interval
 
-            List<string> readIntervalList = new List<string>()
+            List<string> readIntervalList;
+
+            if ( mtuBasicinfo.version >= global.LatestVersion )
             {
-                "24 Hours",
-                "12 Hours",
-                "6 Hours",
-                "4 Hours",
-                "3 Hours",
-                "2 Hours",
-                "1 Hour",
-                "30 Min",
-                "20 Min",
-                "15 Min",
-            };
+                readIntervalList = new List<string>()
+                {
+                    "24 Hours",
+                    "12 Hours",
+                    "8 Hours",
+                    "6 Hours",
+                    "4 Hours",
+                    "3 Hours",
+                    "2 Hours",
+                    "1 Hour",
+                    "30 Min",
+                    "20 Min",
+                    "15 Min"
+                };
+            
+                // TwoWay MTU reading interval cannot be less than 15 minutes
+                if ( ! mtu.TimeToSync )
+                {
+                    readIntervalList.Add ( "10 Min" );
+                    readIntervalList.Add ( "5 Min" );
+                }
+            }
+            else
+            {
+                readIntervalList = new List<string>()
+                {
+                    "1 Hour",
+                    "30 Min",
+                    "20 Min",
+                    "15 Min"
+                };
+                
+                // TwoWay MTU reading interval cannot be less than 15 minutes
+                if ( ! mtu.TimeToSync )
+                {
+                    readIntervalList.Add ( "10 Min" );
+                    readIntervalList.Add ( "5 Min" );
+                }
+            }
 
             readInterval2Container.IsVisible   = hasTwoPorts;
             readInterval2Container.IsEnabled   = hasTwoPorts;
@@ -2881,6 +2910,7 @@ namespace aclara_meters.view
             string value_msn;
             string value_ir;
             string value_srs;
+            string value_tw;
             string value_ri;
             Meter  value_mtr;
             Alarm  value_alr = null;
@@ -2897,6 +2927,7 @@ namespace aclara_meters.view
                 value_msn = DEBUG_METERSERIAL;
                 value_ir  = DEBUG_INITREADING;
                 value_srs = DEBUG_SNAPSREADS;
+                //value_tw  = (string)twoWayPicker.ItemsSource[ 0 ];
                 value_ri  = DEBUG_READSINTERVAL;
                 value_mtr = (Meter)meterNamesPicker.ItemsSource[ DEBUG_MTRNAME_INDEX ];
                 value_alr = (Alarm)alarmsPicker    .ItemsSource[ DEBUG_ALARM_INDEX   ];
@@ -2913,6 +2944,7 @@ namespace aclara_meters.view
                 value_msn = meterSerialInput.Text;
                 value_ir  = initialReadInput.Text;
                 value_srs = snapReadsSlider.Value.ToString();
+                //value_tw  = twoWayPicker.SelectedItem.ToString();
                 value_ri  = readIntervalPicker.SelectedItem.ToString();
                 value_mtr = ( Meter )meterNamesPicker.SelectedItem;
                 //value_dmd = ( Demand )demandsPicker.SelectedItem;
@@ -2959,8 +2991,8 @@ namespace aclara_meters.view
                 this.addMtuForm.AddParameter ( FIELD.SNAP_READS, value_srs );
 
             // 2-Way [ SOLO SE LOGEA ¿? ]
-            if ( mtu.OnTimeSync ) // Is a two-way MTU and forces time sync ( InstallConfirmation )
-                this.addMtuForm.AddParameter ( FIELD.TWO_WAY, twoWayPicker.SelectedItem.ToString() );
+            //if ( mtu.OnTimeSync ) // Is a two-way MTU and forces time sync ( InstallConfirmation )
+            //    this.addMtuForm.AddParameter ( FIELD.TWO_WAY,  );
 
             // Alarms
             if ( value_alr != null &&
@@ -3003,8 +3035,8 @@ namespace aclara_meters.view
                     this.addMtuForm.AddParameter ( FIELD.SNAP_READS2, snapReads2Slider.Value.ToString() );
 
                 // 2-Way 2
-                if ( mtu.OnTimeSync )
-                    this.addMtuForm.AddParameter ( FIELD.TWO_WAY2, twoWay2Picker.SelectedItem.ToString() );
+                //if ( mtu.OnTimeSync )
+                //    this.addMtuForm.AddParameter ( FIELD.TWO_WAY2, twoWay2Picker.SelectedItem.ToString() );
 
                 // Alarms 2
                 if ( mtu.RequiresAlarmProfile )

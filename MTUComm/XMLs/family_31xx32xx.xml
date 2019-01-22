@@ -49,11 +49,11 @@
     <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
-    <Id>MtuSoftware</Id>
-    <Description>Mtu Firmware version</Description>
+    <Id>InstallationConfirmationStatus</Id>
+    <Description>Installation Confirmation Status</Description>
     <Type>string</Type>
     <Registers>
-      <Register>MTUFirmwareVersionFormatFlag</Register>
+      <Register>InstallationConfirmationRequest</Register>
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
@@ -153,6 +153,33 @@
     <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
+    <Id>Frequency1Way</Id>
+    <Description>1 Way channel Frequency</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>Frequency1WayHz</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>Frequency2WayTx</Id>
+    <Description>1 Way channel Transimision Frequency</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>Frequency2WayTxHz</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>Frequency2WayRx</Id>
+    <Description>1 Way channel Reception Frequency</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>Frequency2WayRxHz</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
     <Id>P1ReadingError</Id>
     <Description>P1 Reading Error Message</Description>
     <Type>string</Type>
@@ -170,7 +197,24 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
-  
+  <Overload>
+    <Id>P1Status</Id>
+    <Description>Status of Port 1</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>P1StatusFlag</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2Status</Id>
+    <Description>Status of Port 2</Description>
+	<Type>string</Type>
+    <Registers>
+      <Register>P2StatusFlag</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
   <Register>
     <Id>MtuType</Id>
     <Description>MTU Type</Description>
@@ -181,6 +225,82 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
+  
+  <Overload>
+    <Id>MtuSoftVersion</Id>
+    <Description>Mtu software version</Description>
+    <Type>int</Type>
+    <Registers>
+      <Register>MtuSoftVersionLegacy</Register>
+      <Register>MtuSoftVersionNew</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>MtuSoftVersionString</Id>
+    <Description>Mtu software version</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>MtuSoftVersion</Register>
+      <Register>MtuSoftRevYear</Register>
+      <Register>MtuSoftRevMonth</Register>
+      <Register>MtuSoftRevDay</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  
+  <Register>
+    <Id>MtuSoftVersionLegacy</Id>
+    <Description>MTU software version for legacy handheld tools</Description>
+    <Type>int</Type>
+    <Address>1</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>MtuSoftVersionNew</Id>
+    <Description>MTU software version</Description>
+    <Type>int</Type>
+    <Address>244</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  
+  <Register>
+    <Id>MtuSoftRevYear</Id>
+    <Description>MTU software revision year</Description>
+    <Type>int</Type>
+    <Address>245</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>MtuSoftRevMonth</Id>
+    <Description>MTU software revision month</Description>
+    <Type>int</Type>
+    <Address>246</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>MtuSoftRevDay</Id>
+    <Description>MTU software revision day</Description>
+    <Type>int</Type>
+    <Address>247</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  
   <Register>
     <Id>MtuSerialNumber</Id>
     <Description>MTU Id</Description>
@@ -192,7 +312,7 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>Frequency1Way</Id>
+    <Id>Frequency1WayHz</Id>
     <Description>MTU Id</Description>
     <Type>int</Type>
     <Address>10</Address>
@@ -202,7 +322,7 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>Frequency2WayTx</Id>
+    <Id>Frequency2WayTxHz</Id>
     <Description>MTU Id</Description>
     <Type>int</Type>
     <Address>14</Address>
@@ -212,7 +332,7 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>Frequency2WayRx</Id>
+    <Id>Frequency2WayRxHz</Id>
     <Description>MTU Id</Description>
     <Type>int</Type>
     <Address>18</Address>
@@ -272,6 +392,26 @@
     <CustomSet>method</CustomSet>
   </Register>
   <Register>
+    <Id>DcuId</Id>
+    <Description>Dcu Id</Description>
+    <Type>int</Type>
+    <Address>92</Address>
+    <Size>4</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>RSSI</Id>
+    <Description>Dcu Packet RSSI</Description>
+    <Type>int</Type>
+    <Address>120</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet>(_val_ / 2) - 130</CustomGet>
+    <CustomSet/>
+  </Register>
+  <Register>
     <Id>P2ReadInterval</Id>
     <Description>Read interval port 2</Description>
     <Type>int</Type>
@@ -289,26 +429,6 @@
     <Size>1</Size>
     <Write>false</Write>
     <CustomGet>(_val_ * 9.766 * 2) + 250</CustomGet>
-    <CustomSet/>
-  </Register>
-  <Register>
-    <Id>MTUFirmwareVersionFormatFlag</Id>
-    <Description>MTU software version</Description>
-    <Type>int</Type>
-    <Address>244</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register>
-    <Id>MtuFirmwareVersion</Id>
-    <Description>MTU software version</Description>
-    <Type>string</Type>
-    <Address>244</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
     <CustomSet/>
   </Register>
   <Register>
@@ -462,6 +582,26 @@
     <CustomSet/>
   </Register>
   <Register>
+    <Id>P1StatusFlag</Id>
+    <Description>Raw P1 Status</Description>
+    <Type>bool</Type>
+    <Address>28</Address>
+    <Size>0</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	<CustomSet/>
+  </Register>  
+  <Register>
+    <Id>P2StatusFlag</Id>
+    <Description>Raw P2 Status</Description>
+    <Type>bool</Type>
+    <Address>28</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	<CustomSet/>
+  </Register>  
+  <Register>
     <Id>P1MeterType</Id>
     <Description>P1 meter Type</Description>
     <Type>int</Type>
@@ -476,7 +616,7 @@
     <Description>P2 meter Type</Description>
     <Type>int</Type>
     <Address>49</Address>
-    <Size>1</Size>
+    <Size>2</Size>
     <Write>true</Write>
     <!-- NO SE -->
     <CustomGet/>
@@ -489,8 +629,8 @@
     <Address>34</Address>
     <Size>6</Size>
     <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
+    <CustomGet>method:BcdToULong</CustomGet>
+    <CustomSet>method:ULongToBcd</CustomSet>
   </Register>
   <Register>
     <Id>P2MeterId</Id>
@@ -607,10 +747,9 @@
     <Type>int</Type>
     <Address>132</Address>
     <Size>4</Size>
-    <Write>false</Write>
-    <!-- NO SE -->
+    <Write>true</Write>
     <CustomGet/>
-    <CustomSet/>
+    <CustomSet>method:HexToInt</CustomSet>
   </Register>
   <Register>
     <Id>F12WAYRegister10Int</Id>
@@ -618,10 +757,9 @@
     <Type>int</Type>
     <Address>168</Address>
     <Size>4</Size>
-    <Write>false</Write>
-    <!-- NO SE -->
+    <Write>true</Write>
     <CustomGet/>
-    <CustomSet/>
+    <CustomSet>method:HexToInt</CustomSet>
   </Register>
   <Register>
     <Id>F12WAYRegister14Int</Id>
@@ -629,10 +767,9 @@
     <Type>int</Type>
     <Address>184</Address>
     <Size>4</Size>
-    <Write>false</Write>
-    <!-- NO SE -->
+    <Write>true</Write>
     <CustomGet/>
-    <CustomSet/>
+    <CustomSet>method:HexToInt</CustomSet>
   </Register>
   <Register>
     <Id>RxInterval</Id>
@@ -650,7 +787,7 @@
     <Description>P1Reading</Description>
     <Type>ulong</Type>
     <Address>96</Address>
-    <Size>8</Size>
+    <Size>6</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
@@ -660,8 +797,18 @@
     <Description>P2Reading</Description>
     <Type>ulong</Type>
     <Address>104</Address>
-    <Size>8</Size>
+    <Size>6</Size>
     <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>InstallationConfirmationRequest</Id>
+    <Description>Installation Confirmation Request Flag</Description>
+    <Type>bool</Type>
+    <Address>116</Address>
+    <Size>1</Size>
+    <Write>false</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>

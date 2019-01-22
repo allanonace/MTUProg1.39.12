@@ -142,6 +142,7 @@ namespace MTUComm.MemoryMap
             return result;
         }
 
+        /*
         public string MtuSoftware_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             if ( MemoryOverload.registerIds.Length > 1 )
@@ -152,6 +153,7 @@ namespace MTUComm.MemoryMap
 
             return string.Format( MTUFORMAT_2, MemoryRegisters.MTUFirmwareVersionFormatFlag.Value);
         }
+        */
 
         public string Encryption_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
@@ -258,6 +260,26 @@ namespace MTUComm.MemoryMap
             return ( MemoryRegisters.InstallationConfirmationRequest.Value ) ? NTCONFIRMED : CONFIRMED;
         }
 
+        public int MtuSoftVersion_Get ( MemoryOverload<int> memoryOverload, dynamic MemoryRegisters )
+        {
+            if ( MemoryRegisters.MtuSoftVersionNew.Value == 255 )
+                return MemoryRegisters.MtuSoftVersionLegacy;
+            return MemoryRegisters.MtuSoftVersionNew.Value;
+        }
+
+        public string MtuSoftVersionString_Get ( MemoryOverload<string> memoryOverload, dynamic MemoryRegisters )
+        {
+            int mtuSoftVersionNew = MemoryRegisters.MtuSoftVersion.Value;
+        
+            if ( mtuSoftVersionNew == 254 )
+                return MemoryRegisters.MtuSoftRevMonth.Value.ToString().PadLeft(2,'0') +
+                       "." +
+                       MemoryRegisters.MtuSoftRevDay.Value.ToString().PadLeft(2,'0')+
+                       "." +
+                       MemoryRegisters.MtuSoftRevYear.Value.ToString().PadLeft(4,'0');
+            return mtuSoftVersionNew.ToString ();
+        }
+
         #endregion
 
         #region Registers
@@ -288,6 +310,15 @@ namespace MTUComm.MemoryMap
             if ( inputValue is string )
                 return this.ULongToBcd_Logic ( inputValue );
             return this.ULongToBcd_Logic ( ( ulong )inputValue );
+        }
+
+        // Convert hexadecimal number to integer value
+        // Use with <CustomSet>method:HexToInt</CustomSet>
+        public int HexToInt ( MemoryRegister<int> MemoryRegister, dynamic inputValue )
+        {
+            if ( inputValue is string ) // Removes 0x prefix
+                 return int.Parse ( inputValue.Substring ( 2 ), NumberStyles.HexNumber );
+            else return ( int ) inputValue;
         }
 
         #endregion
