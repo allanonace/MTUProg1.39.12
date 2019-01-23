@@ -405,53 +405,48 @@ namespace MTUComm
             {
                 try
                 {
-                    MemRegister register = configuration.getFamilyRegister(mtuType.Id, "InstallationConfirmationRequest");
+                    MemRegister regICNotSynced = configuration.getFamilyRegister ( mtuType.Id, "InstallConfirmationNotSynced" );
+                    MemRegister regICRequest   = configuration.getFamilyRegister ( mtuType.Id, "InstallConfirmationRequest"   );
 
-                    Console.WriteLine("InstallConfirmation trigger start");
+                    Console.WriteLine ( "InstallConfirmation trigger start" );
 
-                    byte mask = 2;
-                    uint inConFlag = 116;
+                    // Reset to fail state the Install Confirmation result
+                    // Set bit to true/one, because loop detection will continue while it doesn't change to false/zero
+                    uint addressNotSynced = ( uint )regICNotSynced.Address;
+                    uint bitSynced        = ( uint )regICNotSynced.Size;
+                    this.WriteMtuBit ( addressNotSynced, bitSynced, true );
 
-                    if (register != null)
+                    // Set to true/one this flag to request a time sync
+                    this.WriteMtuBit ( ( uint )regICRequest.Address, ( uint )regICRequest.Size, true );
+
+                    bool regValue;
+                    int  count = 1;
+                    int  wait  = 5;
+                    int  max   = ( int )( global.TimeSyncCountDefault / wait ); // Seconds / Seconds = Rounded max number of iterations
+                    do
                     {
-                        mask = (byte)Math.Pow(2, register.Size);
-                        inConFlag = (uint)register.Address;
-                    }
-
-                    byte systemFlags = (lexi.Read(inConFlag, 1))[0];
-                    systemFlags |= mask; // set bit 0
-                    lexi.Write(116, new byte[] { systemFlags });
-
-                    byte sync_mask = 4;
-                    byte sync_systemFlags = (lexi.Read(65, 1))[0];
-                    sync_systemFlags |= sync_mask; // set bit 0
-                    lexi.Write(65, new byte[] { sync_systemFlags });
-
-                    byte valueWritten = (lexi.Read(inConFlag, 1))[0];
-                    valueWritten &= mask;
-
-                    // TENGO QUE MIRAR EL MIRAR EL MAIL DE KONSTANTIN PORQUE
-                    // AQUI FALTA UNA CONDICION DENTRO DEL WHILE PARA SALIR
-
-                    int count = 1;
-                    int wait  = 5;
-                    int max   = ( int )( ( global.TimeSyncCountDefault * 100 ) / wait ); // Minutes to Seconds / Seconds = Max number of iterations
-                    while (valueWritten > 0 && count <= max )
-                    {
-                        int loop = ( int )Math.Round ( ( decimal )( ( count * 100.0 ) / max ) );
-
-                        OnProgress(this, new ProgressArgs(count, max, "Checking Install Confirmation... ("+ loop.ToString() + "%)"));
+                        // Update interface text to look the progress
+                        int progress = ( int )Math.Round ( ( decimal )( ( count * 100.0 ) / max ) );
+                        OnProgress ( this, new ProgressArgs ( count, max, "Checking Install Confirmation... "+ progress.ToString() + "%" ) );
+                        
                         Thread.Sleep ( wait * 1000 );
-                        valueWritten = (lexi.Read(inConFlag, 1))[0];
-                        valueWritten &= mask;
-                        count++;
+                        
+                        regValue = this.ReadMtuBit ( addressNotSynced, bitSynced );
                     }
+                    // Is value already updated and is false/zero ( MTU synced with DCU )?
+                    while ( regValue &&
+                            ++count <= max );
+                    
+                    // If synced has failed, try one more time, up to three
+                    if ( regValue &&
+                         ++time >= global.TimeSyncCountRepeat )
+                        return this.InstallConfirmation_Logic ( force, time );
                 }
                 catch ( Exception e )
                 {
                     // Try one more time, up to three
-                    if ( time >= global.TimeSyncCountRepeat )
-                        return this.InstallConfirmation_Logic ();
+                    if ( ++time >= global.TimeSyncCountRepeat )
+                        return this.InstallConfirmation_Logic ( force, time );
                     else
                         return TranslateException ( e );
                 }
@@ -891,7 +886,7 @@ namespace MTUComm
                 // if certain tags/registers are validated/true
                 if ( global.TimeToSync && // Enables TimeSync request
                      mtu.TimeToSync    && // Enables TimeSync request
-                     mtu.OnTimeSync    && // This is an MTU that can do TimeSync
+                     mtu.OnTimeSync    && // Force to do a TimeSync
                      // If script contains ForceTimeSync, use it but if not use value from Global
                      ( ! form.ContainsParameter ( AddMtuForm.FIELD.FORCE_TIME_SYNC ) &&
                        global.ForceTimeSync ||
@@ -1042,6 +1037,11 @@ namespace MTUComm
             return ( ( ( value >> ( int )bit ) & 1 ) == 1 );
         }
 
+        public void WriteMtuBit ( uint address, uint bit, bool active )
+        {
+            this.WriteMtuBitAndVerify ( address, bit, active, false );
+        }
+
         public bool WriteMtuBitAndVerify ( uint address, uint bit, bool active, bool verify = true )
         {
             // Read current value
@@ -1162,6 +1162,24 @@ namespace MTUComm
         public MTUBasicInfo GetBasicInfo ()
         {
             return this.latest_mtu;
+        }
+
+        private byte GetByteSettingOnlyOneBit ( int bit )
+        {
+            BitArray bits = new BitArray ( bit + 1 );
+            
+            if ( bit > 0 )
+                for ( int i = 0; i < bit; i++ )
+                    bits[ i ] = false;
+                    
+            bits[ bit ] = true;
+            
+            // Left to right: e.g. 4 is not 100 but false false true
+            
+            byte[] result = new byte[ 1 ];
+            bits.CopyTo ( result, 0 );
+            
+            return result[ 0 ];
         }
 
         #endregion

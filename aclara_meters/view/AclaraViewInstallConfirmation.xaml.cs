@@ -398,13 +398,13 @@ namespace aclara_meters.view
                 bool ok = false;
                 foreach ( Parameter parameter in paramResult )
                 {
-                    if ( parameter.getLogTag ().Equals ( "InstallationConfirmationStatus" ) )
+                    if ( parameter.getLogTag ().Equals ( "InstallConfirmationStatus" ) )
                     {
                         string name = parameter.getLogTag ();
                         dynamic value = parameter.Value;
                     }
 
-                    if ( parameter.getLogTag ().Equals ( "InstallationConfirmationStatus" ) &&
+                    if ( parameter.getLogTag ().Equals ( "InstallConfirmationStatus" ) &&
                          ! string.IsNullOrEmpty ( parameter.Value ) &&
                          ! string.Equals ( parameter.Value.ToUpper (), "NOT CONFIRMED" ) )
                     {

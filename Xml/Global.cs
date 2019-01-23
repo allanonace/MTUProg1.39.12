@@ -111,6 +111,10 @@ namespace Xml
             this.LoadOptions                = false; // Allow to load options screen through appointments
             //this.LogLocation              = IN K.CODE IS string[] THAT NO string; // List of possible log file locations
             this.MeterNumberLength          = 12; // Maximum number of characters for meter serial number
+            
+            this.TimeSyncCountRepeat        = 1;
+            this.TimeSyncCountDefault       = 63;
+            
             /*
             this.MeterWorkRecording          = ;
             this.MinDate                     = ;
@@ -700,8 +704,18 @@ namespace Xml
         [XmlElement("TimeSyncCountDefault")]
         public int TimeSyncCountDefault { get; set; }
 
-        [XmlElement("TimeSyncCountRepeat")]
+        [XmlIgnore]
         public int TimeSyncCountRepeat { get; set; }
+        
+        [XmlElement("TimeSyncCountRepeat")]
+        public int TimeSyncCountRepeat_Range
+        {
+            set
+            {
+                // Value must be always inside the range [1,3]
+                this.TimeSyncCountRepeat = ( value < 1 ) ? 1 : ( ( value > 3 ) ? 3 : value );
+            }
+        }
         
         [XmlElement("TimeToSync")]
         public bool TimeToSync { get; set; }

@@ -652,12 +652,9 @@ namespace aclara_meters.view
 
             #endregion
 
-            // TODO: get snap reads value from memory map
-            #region Snap Reads
+            #region Snap Reads / Daily Reads
 
-            bool allowSnapReads      = global.AllowDailyReads;
-            bool snapReads           = mtu.DailyReads;
-            bool snapReadActive      = allowSnapReads && snapReads;
+            bool snapReadActive      = global.AllowDailyReads && mtu.DailyReads;
             bool changeableSnapReads = global.IndividualDailyReads;
             int  snapReadsDefault    = this.config.global.DailyReadsDefault;
 

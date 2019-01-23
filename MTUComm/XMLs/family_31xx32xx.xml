@@ -49,11 +49,11 @@
     <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
-    <Id>InstallationConfirmationStatus</Id>
+    <Id>InstallConfirmationStatus</Id>
     <Description>Installation Confirmation Status</Description>
     <Type>string</Type>
     <Registers>
-      <Register>InstallationConfirmationRequest</Register>
+      <Register>InstallConfirmationNotSynced</Register>
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
@@ -803,12 +803,22 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>InstallationConfirmationRequest</Id>
-    <Description>Installation Confirmation Request Flag</Description>
+    <Id>InstallConfirmationNotSynced</Id>
+    <Description>Installation Confirmation not synced with DCU flag</Description>
     <Type>bool</Type>
     <Address>116</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>InstallConfirmationRequest</Id>
+    <Description>Set this flag to request a time sync</Description>
+    <Type>bool</Type>
+    <Address>65</Address>
+    <Size>2</Size>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>

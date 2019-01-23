@@ -255,9 +255,9 @@ namespace MTUComm.MemoryMap
             return String.Format(new CultureInfo("en-us"), "{0:0.000}", (MemoryRegisters.Frequency2WayRxHz.Value / 1000000.0));
         }
 
-        public string InstallationConfirmationStatus_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public string InstallConfirmationStatus_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return ( MemoryRegisters.InstallationConfirmationRequest.Value ) ? NTCONFIRMED : CONFIRMED;
+            return ( MemoryRegisters.InstallConfirmationNotSynced.Value ) ? NTCONFIRMED : CONFIRMED;
         }
 
         public int MtuSoftVersion_Get ( MemoryOverload<int> memoryOverload, dynamic MemoryRegisters )

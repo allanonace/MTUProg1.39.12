@@ -111,7 +111,8 @@ namespace MTUComm
             if ( mtu.FastMessageConfig )
                 logger.logParameter ( this.addMtuAction, form.TwoWay );
 
-            if ( mtu.DailyReads )
+            if ( global.AllowDailyReads &&
+                 mtu.DailyReads )
             {
                 string dailyReads       = "Disable";
                 string dailyGmtHourRead = "Disable";
