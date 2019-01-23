@@ -314,7 +314,7 @@ namespace aclara_meters.view
 
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
-            submit_dialog.Clicked += submit_send;
+           
 
             listaMTUread.IsVisible = false;
 
@@ -797,6 +797,52 @@ namespace aclara_meters.view
             meterSerialInput      .MaxLength = global.MeterNumberLength;
 
             #endregion
+
+
+            #region AccountLabel
+
+            AccountLabel_Port1.Text = global.AccountLabel;
+            AccountLabel_Port2.Text = global.AccountLabel;
+
+            #region Mandatory Fields should be labeled with colored field
+
+            if (global.ColorEntry)
+            {
+                AccountLabel_Port1.TextColor = Color.FromHex("#FF0000");
+                AccountLabel_Port2.TextColor = Color.FromHex("#FF0000");
+
+                repeat_serviceportid_port1.TextColor = Color.FromHex("#FF0000");
+                repeat_serviceportid_port2.TextColor = Color.FromHex("#FF0000");
+
+                meter_number_port1.TextColor = Color.FromHex("#FF0000");
+                meter_number_port2.TextColor = Color.FromHex("#FF0000");
+
+
+                read_interval_port1.TextColor = Color.FromHex("#FF0000");
+                read_interval_port2.TextColor = Color.FromHex("#FF0000");
+           
+
+
+                //Vendor is modified in realtime
+            }
+
+
+
+            #endregion
+
+
+            #endregion
+
+
+            #region WorkOrderLabel
+
+            field_order_port1.Text = global.WorkOrderLabel;
+            field_order_port2.Text = global.WorkOrderLabel;
+
+            #endregion
+
+        
+
         }
 
         #endregion
@@ -865,79 +911,49 @@ namespace aclara_meters.view
 
         private void LoadSideMenuElements()
         {
-            MenuList = new List<PageItem>
-            {
-                // Creating our pages for menu navigation
-                // Here you can define title for item, 
-                // icon on the left side, and page that you want to open after selection
+            // Creating our pages for menu navigation
+            // Here you can define title for item, 
+            // icon on the left side, and page that you want to open after selection
 
-                // Adding menu items to MenuList
-                new PageItem()
-                {
-                    Title = "Read MTU",
-                    Icon = "readmtu_icon.png",
-                    TargetType = "ReadMTU"
-                },
+            MenuList = new List<PageItem>();
 
-                new PageItem()
-                {
-                    Title = "Turn Off MTU",
-                    Icon = "turnoff_icon.png",
-                    TargetType = "turnOff"
-                },
+            // Adding menu items to MenuList
 
-                new PageItem()
-                {
-                    Title = "Add MTU",
-                    Icon = "addMTU.png",
-                    TargetType = "AddMTU"
-                },
+            MenuList.Add(new PageItem() { Title = "Read MTU", Icon = "readmtu_icon.png", TargetType = "ReadMTU" });
 
-                new PageItem()
-                {
-                    Title = "Replace MTU",
-                    Icon = "replaceMTU2.png",
-                    TargetType = "replaceMTU"
-                },
+            if (FormsApp.config.global.ShowTurnOff)
+                MenuList.Add(new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", TargetType = "turnOff" });
 
-                new PageItem()
-                {
-                    Title = "Replace Meter",
-                    Icon = "replaceMeter.png",
-                    TargetType = "replaceMeter"
-                },
+            if (FormsApp.config.global.ShowAddMTU)
+                MenuList.Add(new PageItem() { Title = "Add MTU", Icon = "addMTU.png", TargetType = "AddMTU" });
 
-                new PageItem()
-                {
-                    Title = "Add MTU / Add meter",
-                    Icon = "addMTUaddmeter.png",
-                    TargetType = "AddMTUAddMeter"
-                },
+            if (FormsApp.config.global.ShowReplaceMTU)
+                MenuList.Add(new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", TargetType = "replaceMTU" });
 
-                new PageItem()
-                {
-                    Title = "Add MTU / Rep. Meter",
-                    Icon = "addMTUrepmeter.png",
-                    TargetType = "AddMTUReplaceMeter"
-                },
+            if (FormsApp.config.global.ShowReplaceMeter)
+                MenuList.Add(new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", TargetType = "replaceMeter" });
 
-                new PageItem()
-                {
-                    Title = "Rep.MTU / Rep. Meter",
-                    Icon = "repMTUrepmeter.png",
-                    TargetType = "ReplaceMTUReplaceMeter"
-                },
+            if (FormsApp.config.global.ShowAddMTUMeter)
+                MenuList.Add(new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", TargetType = "AddMTUAddMeter" });
 
-                new PageItem()
-                {
-                    Title = "Install Confirmation",
-                    Icon = "installConfirm.png",
-                    TargetType = "InstallConfirm"
-                }
-            };
+            if (FormsApp.config.global.ShowAddMTUReplaceMeter)
+                MenuList.Add(new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", TargetType = "AddMTUReplaceMeter" });
+
+            if (FormsApp.config.global.ShowReplaceMTUMeter)
+                MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = "ReplaceMTUReplaceMeter" });
+
+            if (FormsApp.config.global.ShowInstallConfirmation)
+                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = "InstallConfirm" });
+
+
+
+            // ListView needs to be at least  elements for UI Purposes, even empty ones
+            while (MenuList.Count < 9)
+                MenuList.Add(new PageItem() { Title = "", Icon = "", TargetType = "" });
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
             navigationDrawerList.ItemsSource = MenuList;
+
         }
 
         private void InitializeOptionalFields()
@@ -1129,8 +1145,16 @@ namespace aclara_meters.view
             logoff_no.Tapped += LogOffNoTapped;
             logoff_ok.Tapped += LogOffOkTapped;
 
+            submit_dialog.Clicked += submit_send;
+            cancel_dialog.Clicked += CancelTapped;
         }
 
+        private void CancelTapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            Popup_start.IsVisible = false;
+            Popup_start.IsEnabled = false;
+        }
 
         private void LogOffOkTapped(object sender, EventArgs e)
         {
@@ -1214,6 +1238,16 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterVendorsLabel.TextColor = Color.FromHex("#FF0000");
+       
+            }
+
+            #endregion
+
             meterVendorsContainerD.Children.Add(meterVendorsPicker);
             meterVendorsContainerC.Content = meterVendorsContainerD;
             meterVendorsContainerB.Content = meterVendorsContainerC;
@@ -1269,6 +1303,18 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
+
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterModelsLabel.TextColor = Color.FromHex("#FF0000");
+
+            }
+
+            #endregion
+
+
             meterModelsContainerD.Children.Add(meterModelsPicker);
             meterModelsContainerC.Content = meterModelsContainerD;
             meterModelsContainerB.Content = meterModelsContainerC;
@@ -1323,6 +1369,18 @@ namespace aclara_meters.view
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
+
+
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterNamesLabel.TextColor = Color.FromHex("#FF0000");
+
+            }
+
+            #endregion
+
 
             meterNamesContainerD.Children.Add(meterNamesPicker);
             meterNamesContainerC.Content = meterNamesContainerD;
@@ -1388,6 +1446,17 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
+
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterVendors2Label.TextColor = Color.FromHex("#FF0000");
+
+            }
+
+            #endregion
+
             meterVendors2ContainerD.Children.Add(meterVendors2Picker);
             meterVendors2ContainerC.Content = meterVendors2ContainerD;
             meterVendors2ContainerB.Content = meterVendors2ContainerC;
@@ -1442,6 +1511,18 @@ namespace aclara_meters.view
                 Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
                 Margin = new Thickness(0, 4, 0, 0)
             };
+
+
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterModels2Label.TextColor = Color.FromHex("#FF0000");
+
+            }
+
+            #endregion
+
 
             meterModels2ContainerD.Children.Add(meterModels2Picker);
             meterModels2ContainerC.Content = meterModels2ContainerD;
@@ -1498,6 +1579,18 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
+
+            #region Color Entry
+
+            if (FormsApp.config.global.ColorEntry)
+            {
+                meterNames2Label.TextColor = Color.FromHex("#FF0000");
+
+            }
+
+            #endregion
+
+
             meterNames2ContainerD.Children.Add(meterNames2Picker);
             meterNames2ContainerC.Content = meterNames2ContainerD;
             meterNames2ContainerB.Content = meterNames2ContainerC;
@@ -1538,6 +1631,7 @@ namespace aclara_meters.view
             aclara_logo.Scale = 1.2;
             aclara_logo.TranslationX = 42;
             aclara_logo.TranslationX = 42;
+            shadoweffect.Source = "shadow_effect_tablet";
         }
 
         #endregion
@@ -2642,6 +2736,31 @@ namespace aclara_meters.view
             this.ContainerCopyPort1.IsVisible = this.port2status;
             this.copyPort1.IsEnabled = this.port2status;
             //this.copyPort1.IsVisible = this.port2status;
+
+            if(FormsApp.config.global.NewMeterPort2isTheSame)
+                this.copyPort1.IsVisible = true;
+            else
+                this.copyPort1.IsVisible = false;
+
+
+            if(FormsApp.config.global.Port2DisableNo)
+            {
+                enablePort2.IsVisible = false;
+
+                this.port2status = !this.port2status;
+
+                bool ok = this.add_mtu.comm.WriteMtuBitAndVerify(28, 1, port2status);
+                Console.WriteLine("-> UPDATE PORT 2 STATUS: " + ok + " " + this.port2status);
+
+                // Bit correctly modified
+                if (ok)
+                    this.UpdateStatusPort2();
+
+                // Bit have not changed -> return to previous state
+                else
+                    this.port2status = !this.port2status;
+            }
+        
         }
 
         private void ChangeCheckboxSnapReads ( bool active )

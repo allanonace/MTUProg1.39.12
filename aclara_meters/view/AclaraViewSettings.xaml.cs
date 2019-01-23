@@ -189,6 +189,7 @@ namespace aclara_meters.view
             aclara_logo.Scale = 1.2;
             aclara_logo.TranslationX = 42;
             aclara_logo.TranslationX = 42;
+            shadoweffect.Source = "shadow_effect_tablet";
         }
 
         public AclaraViewSettings(IUserDialogs dialogs)
@@ -663,6 +664,7 @@ namespace aclara_meters.view
             logoff_no.Tapped += LogOffNoTapped;
             logoff_ok.Tapped += LogOffOkTapped;
 
+      
         }
 
 
@@ -729,6 +731,15 @@ namespace aclara_meters.view
 
         private void InitLayout(int valor)
         {
+
+
+            #region Customer name
+
+            customers_name.Text = "Licensed to: " + FormsApp.config.global.CustomerName;
+
+            #endregion
+
+
             switch (valor)
             {
                 case 1:

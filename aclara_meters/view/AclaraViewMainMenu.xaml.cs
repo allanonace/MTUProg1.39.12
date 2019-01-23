@@ -206,81 +206,99 @@ namespace aclara_meters.view
 
         private void LoadSideMenuElements()
         {
+            // Creating our pages for menu navigation
+            // Here you can define title for item, 
+            // icon on the left side, and page that you want to open after selection
 
-            MenuList = new List<PageItem>
-            {
-                // Creating our pages for menu navigation
-                // Here you can define title for item, 
-                // icon on the left side, and page that you want to open after selection
+            MenuList = new List<PageItem>();
 
-                // Adding menu items to MenuList
-                new PageItem()
-                {
-                    Title = "Read MTU",
-                    Icon = "readmtu_icon.png",
-                    TargetType = "ReadMTU"
-                },
+            // Adding menu items to MenuList
 
-                new PageItem()
-                {
-                    Title = "Turn Off MTU",
-                    Icon = "turnoff_icon.png",
-                    TargetType = "turnOff"
-                },
+            MenuList.Add( new PageItem() {  Title = "Read MTU", Icon = "readmtu_icon.png", TargetType = "ReadMTU" });
 
-                new PageItem()
-                {
-                    Title = "Add MTU",
-                    Icon = "addMTU.png",
-                    TargetType = "AddMTU"
-                },
+            if (FormsApp.config.global.ShowTurnOff)
+                MenuList.Add( new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", TargetType = "turnOff" });
 
-                new PageItem()
-                {
-                    Title = "Replace MTU",
-                    Icon = "replaceMTU2.png",
-                    TargetType = "replaceMTU"
-                },
+            if (FormsApp.config.global.ShowAddMTU)
+                MenuList.Add( new PageItem() { Title = "Add MTU", Icon = "addMTU.png", TargetType = "AddMTU" });
 
-                new PageItem()
-                {
-                    Title = "Replace Meter",
-                    Icon = "replaceMeter.png",
-                    TargetType = "replaceMeter"
-                },
+            if (FormsApp.config.global.ShowReplaceMTU)
+                MenuList.Add( new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", TargetType = "replaceMTU" });
 
-                new PageItem()
-                {
-                    Title = "Add MTU / Add meter",
-                    Icon = "addMTUaddmeter.png",
-                    TargetType = "AddMTUAddMeter"
-                },
+            if (FormsApp.config.global.ShowReplaceMeter)
+                MenuList.Add( new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", TargetType = "replaceMeter" });
 
-                new PageItem()
-                {
-                    Title = "Add MTU / Rep. Meter",
-                    Icon = "addMTUrepmeter.png",
-                    TargetType = "AddMTUReplaceMeter"
-                },
+            if (FormsApp.config.global.ShowAddMTUMeter)
+                MenuList.Add( new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", TargetType = "AddMTUAddMeter" });
 
-                new PageItem()
-                {
-                    Title = "Rep.MTU / Rep. Meter",
-                    Icon = "repMTUrepmeter.png",
-                    TargetType = "ReplaceMTUReplaceMeter"
-                },
+            if (FormsApp.config.global.ShowAddMTUReplaceMeter)
+                MenuList.Add( new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", TargetType = "AddMTUReplaceMeter" });
 
-                new PageItem()
-                {
-                    Title = "Install Confirmation",
-                    Icon = "installConfirm.png",
-                    TargetType = "InstallConfirm"
-                }
-            };
+            if (FormsApp.config.global.ShowReplaceMTUMeter)
+                MenuList.Add( new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = "ReplaceMTUReplaceMeter" });
+
+            if (FormsApp.config.global.ShowInstallConfirmation)
+                MenuList.Add( new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = "InstallConfirm" });
+
+
+      
+            // ListView needs to be at least  elements for UI Purposes, even empty ones
+            while (MenuList.Count < 9)
+                MenuList.Add(new PageItem() { Title = "", Icon = "", TargetType = "" });
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
             navigationDrawerList.ItemsSource = MenuList;
+
         }
+
+
+        void OnSwiped(object sender, SwipedEventArgs e)
+        {
+            if (Device.Idiom == TargetIdiom.Tablet)
+                return;
+
+                switch (e.Direction)
+            {
+                case SwipeDirection.Left:
+
+
+                    fondo.Opacity = 1;
+                    ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+
+                    Task.Delay(200).ContinueWith(t =>
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        ContentNav.Opacity = 0;
+                        shadoweffect.IsVisible = false;
+                        ContentNav.IsVisible = false;
+                        background_scan_page.IsEnabled = true;
+                        background_scan_page_detail.IsEnabled = true;
+                    }));
+
+                    break;
+                case SwipeDirection.Right:
+                    fondo.Opacity = 0;
+                    ContentNav.IsVisible = true;
+                    shadoweffect.IsVisible = true;
+                    background_scan_page.Opacity = 0.5;
+                    background_scan_page_detail.Opacity = 0.5;
+                    ContentNav.Opacity = 1;
+                    ContentNav.TranslateTo(0, 0, 175, Easing.SinIn);
+                    shadoweffect.TranslateTo(0, 0, 175, Easing.SinIn);
+                    background_scan_page.IsEnabled = false;
+                    background_scan_page_detail.IsEnabled = false;
+                    break;
+ 
+            }
+        }
+
+
+
+
+
 
         private void LoadPreUIGFX()
         {
@@ -358,6 +376,9 @@ namespace aclara_meters.view
             aclara_detail_logo.Scale = 1.2;
             aclara_detail_logo.TranslationX = 42;
             aclara_logo.TranslationX = 42;
+
+            shadoweffect.Source = "shadow_effect_tablet";
+
         }
 
         private void TappedListeners()
@@ -1600,29 +1621,46 @@ namespace aclara_meters.view
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-               dialog_open_bg.IsVisible = true;
-               turnoff_mtu_background.IsVisible = true;
-               dialog_meter_replace_one.IsVisible = false;
-               dialog_turnoff_one.IsVisible = true;
-               dialog_turnoff_two.IsVisible = false;
-               dialog_turnoff_three.IsVisible = false;
-               dialog_replacemeter_one.IsVisible = false;
-               background_scan_page.Opacity = 1;
-               background_scan_page_detail.Opacity = 1;
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+                dialog_meter_replace_one.IsVisible = false;
 
-               if (Device.Idiom == TargetIdiom.Tablet)
-               {
-                   ContentNav.Opacity = 1;
-                   ContentNav.IsVisible = true;
-               }
-               else
-               {
-                   ContentNav.Opacity = 0;
-                   ContentNav.IsVisible = false;
-               }
+                #region Check ActionVerify
 
-               shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
+                if (FormsApp.config.global.ActionVerify)
+                    dialog_turnoff_one.IsVisible = true;
+                else
+                    CallLoadViewTurnOff();
+
+                #endregion
+
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = false;
+                dialog_replacemeter_one.IsVisible = false;
+                background_scan_page.Opacity = 1;
+                background_scan_page_detail.Opacity = 1;
+
+                if (Device.Idiom == TargetIdiom.Tablet)
+                {
+                    ContentNav.Opacity = 1;
+                    ContentNav.IsVisible = true;
+                }
+                else
+                {
+                    ContentNav.Opacity = 0;
+                    ContentNav.IsVisible = false;
+                }
+
+                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+             }));
+        }
+
+        private void CallLoadViewTurnOff()
+        {
+            dialog_turnoff_one.IsVisible = false;
+            dialog_turnoff_two.IsVisible = true;
+
+            Task.Factory.StartNew(TurnOffMethod);
         }
 
         private void OnCaseAddMTU()
@@ -1655,8 +1693,18 @@ namespace aclara_meters.view
                 dialog_AddMTUReplaceMeter.IsVisible = false;
                 dialog_ReplaceMTUReplaceMeter.IsVisible = false;
 
-                dialog_AddMTU.IsVisible = true;
 
+                #region Check ActionVerify
+
+                if (FormsApp.config.global.ActionVerify)
+                    dialog_AddMTU.IsVisible = true;
+                else
+                    CallLoadViewAddMtu();
+
+                #endregion
+
+
+          
                 background_scan_page.Opacity = 1;
                 background_scan_page_detail.Opacity = 1;
 
@@ -1672,6 +1720,18 @@ namespace aclara_meters.view
                 }
                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
             }));
+        }
+
+        private void CallLoadViewAddMtu()
+        {
+            dialog_AddMTU.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                Task.Factory.StartNew(BasicReadThread);
+            });
         }
 
         private void OnCaseReadMTU()

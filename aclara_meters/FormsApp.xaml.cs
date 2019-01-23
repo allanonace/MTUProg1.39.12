@@ -332,6 +332,33 @@ namespace aclara_meters
             {
                 await Task.Delay(1100); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
                 {
+
+                    #region Min Date Check
+
+                    try
+                    {
+                        string datenow = DateTime.Now.ToString("MM/dd/yyyy");
+                        string mindate = FormsApp.config.global.MinDate;
+
+                  
+
+                        if (DateTime.ParseExact(datenow, "MM/dd/yyyy", null) < DateTime.ParseExact(mindate, "MM/dd/yyyy", null))
+                        {
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                MainPage = new NavigationPage(new ErrorInitView("System is not ahead or equals to Minimum expected Date!"));
+                            });
+                        }
+
+
+                    }
+                    catch (Exception e41)
+                    {
+
+                    }
+
+                    #endregion
+
                     // Load pages container ( ContentPage )
                     if ( ! ScriptingMode )
                         Device.BeginInvokeOnMainThread(() =>

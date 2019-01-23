@@ -946,7 +946,6 @@ namespace ble_library
         private async Task ScanForBroadcasts()
         {
             if(!isScanning){
-
                 //List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
                 BlePeripheralList.Clear();
                 isScanning = true;
@@ -975,7 +974,7 @@ namespace ble_library
                     },
                     // TimeSpan or CancellationToken to stop the scan
                     // If you omit this argument, it will use BluetoothLowEnergyUtils.DefaultScanTimeout
-                    TimeSpan.FromSeconds(10)                    
+                    TimeSpan.FromSeconds(5)                    
                 );  
                 //BlePeripheralList = BlePeripheralListAux;
             }

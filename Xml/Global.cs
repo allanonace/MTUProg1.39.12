@@ -647,13 +647,13 @@ namespace Xml
         [XmlElement("SerialNumLabel")]
         public string SerialNumLabel { get; set; }
 
-        [XmlElement("ShowAddMTU")]
+        [XmlElement("ShowAddMtu")]
         public bool ShowAddMTU { get; set; }
 
-        [XmlElement("ShowAddMTUMeter")]
+        [XmlElement("ShowAddMtuMeter")]
         public bool ShowAddMTUMeter { get; set; }
 
-        [XmlElement("ShowAddMTUReplaceMeter")]
+        [XmlElement("ShowAddMtuReplaceMeter")]
         public bool ShowAddMTUReplaceMeter { get; set; }
 
         [XmlElement("ShowFreq")]
@@ -668,10 +668,10 @@ namespace Xml
         [XmlElement("ShowReplaceMeter")]
         public bool ShowReplaceMeter { get; set; }
 
-        [XmlElement("ShowReplaceMTU")]
+        [XmlElement("ShowReplaceMtu")]
         public bool ShowReplaceMTU { get; set; }
 
-        [XmlElement("ShowReplaceMTUMeter")]
+        [XmlElement("ShowReplaceMtuMeter")]
         public bool ShowReplaceMTUMeter { get; set; }
 
         [XmlElement("ShowScriptErrorMessage")]
