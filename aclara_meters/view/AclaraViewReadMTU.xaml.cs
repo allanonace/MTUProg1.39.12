@@ -826,7 +826,7 @@ namespace aclara_meters.view
              Device.BeginInvokeOnMainThread(() =>
              {
                  navigationDrawerList.SelectedItem = null;
-                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
+                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, "AddMTU"), false);
                  background_scan_page.Opacity = 1;
                  if (Device.Idiom == TargetIdiom.Tablet)
                  {
