@@ -114,7 +114,20 @@ namespace Xml
             
             this.TimeSyncCountRepeat        = 1;
             this.TimeSyncCountDefault       = 63;
+
+            #region Menu options
             
+            this.ShowInstallConfirmation    = false; // Whether or nor the Install Confirmation option is displayed
+            this.ShowTurnOff                = true;  // Whether or not the Turn Off MTU option is displayed
+            this.ShowAddMTU                 = true;  // Whether or not the Add MTU option is displayed
+            this.ShowAddMTUMeter            = true;  // Whether or not the Add MTU/Meter is displayed
+            this.ShowReplaceMTU             = true;  // Whether or not the Replace MTU is displayed
+            this.ShowReplaceMeter           = true;  // Whether or nor the Replace Meter is displayed
+            this.ShowReplaceMTUMeter        = true;  // Whether or not the Replace MTU/Meter is displayed
+            this.ShowAddMTUReplaceMeter     = true;  // Whether or not the Add MTU/replace Meter is displayed
+
+            #endregion
+
             /*
             this.MeterWorkRecording          = ;
             this.MinDate                     = ;
