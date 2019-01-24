@@ -523,7 +523,31 @@
                                             
                                         </Frame>
                                     </StackLayout>
-                                                
+                                           
+                                        
+                                                                                                                
+                                    <StackLayout x:Name="newMeterContainer" IsVisible="false" >                                     
+                                         <!-- Meter Number -->
+                                         <Label Text="New Meter #" x:Name="new_meter_number_port1" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                                 />
+                                              
+                                          
+                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                              <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="newMeter" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                            
+                                        </Frame>
+                                                                            
+                                   </StackLayout>      
+                                        
+                                        
                                 
                                     <StackLayout x:Name="oldReadingContainer" IsVisible="false" >
                                                     
@@ -589,28 +613,7 @@
                                     
                                      </StackLayout>
                                           
-                                                                        
-                                    <StackLayout x:Name="newMeterContainer" IsVisible="false" >                                     
-                                         <!-- Meter Number -->
-                                         <Label Text="New Meter #" x:Name="new_meter_number_port1" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
-                                                 />
-                                              
-                                          
-                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                              <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        
-                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="newMeter" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                Placeholder="" PlaceholderColor="#7a868c" 
-                                                                FontSize="17" HorizontalTextAlignment="Start"/>
-                                                    </StackLayout>
-                                             </Frame> 
-                                            
-                                        </Frame>
-                                                                            
-                                   </StackLayout>      
-                                        
+
                                         
                                         
                                         
@@ -633,7 +636,7 @@
 
 
 
-                                    <Label Text="Initial read" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                    <Label Text="Meter Reading" TextColor="Red" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                         
                                      <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
@@ -1026,7 +1029,30 @@
                                         </Frame>
                                     </StackLayout>
                                                 
-                                
+   
+                                            
+                                    <StackLayout x:Name="newMeterContainer2" IsVisible="false" >                                     
+                                         <!-- Meter Number -->
+                                         <Label Text="New Meter #" x:Name="new_meter_number_port2" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                                 />
+                                              
+                                          
+                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
+                                              <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
+                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
+                                                        
+                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
+                                                                HeightRequest="40"   x:Name="newMeter2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
+                                                                Placeholder="" PlaceholderColor="#7a868c" 
+                                                                FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    </StackLayout>
+                                             </Frame> 
+                                            
+                                        </Frame>
+                                                                            
+                                   </StackLayout>      
+                                            
+                                            
                                     <StackLayout x:Name="oldReadingContainer2" IsVisible="false" >
                                                     
                                           <Label Text="Old Reading" x:Name="old_reading_port2" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" 
@@ -1091,26 +1117,7 @@
                                      </StackLayout>
                                           
                                                                         
-                                    <StackLayout x:Name="newMeterContainer2" IsVisible="false" >                                     
-                                         <!-- Meter Number -->
-                                         <Label Text="New Meter #" x:Name="new_meter_number_port2" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
-                                                 />
-                                              
-                                          
-                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >
-                                              <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                                    <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        
-                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                                HeightRequest="40"   x:Name="newMeter2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                                Placeholder="" PlaceholderColor="#7a868c" 
-                                                                FontSize="17" HorizontalTextAlignment="Start"/>
-                                                    </StackLayout>
-                                             </Frame> 
-                                            
-                                        </Frame>
-                                                                            
-                                   </StackLayout>      
+
                                         
                                              
                                             
@@ -1132,7 +1139,7 @@
 
 
 
-                                     <Label Text="Initial read" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
+                                     <Label Text="Meter Reading" TextColor="Red" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" 
                                              />
                                         
                                      <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c"  >

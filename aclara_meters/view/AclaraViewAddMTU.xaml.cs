@@ -264,6 +264,7 @@ namespace aclara_meters.view
 
                         bg_read_mtu_button_img.Source = "add_mtu_btn.png";
 
+              
                         #endregion
                     });
 
@@ -414,13 +415,27 @@ namespace aclara_meters.view
                         newMeterContainer2.IsVisible = true;
 
 
+                        #region NewMeterLabel Validation
+
+                        if (FormsApp.config.global.NewMeterLabel != null)
+                        {
+                            new_meter_number_port1.Text = FormsApp.config.global.NewMeterLabel;
+                            new_meter_number_port2.Text = FormsApp.config.global.NewMeterLabel;
+                        }
+
+                        #endregion
+
+
+
                         #region Color Entry
 
                         if (FormsApp.config.global.ColorEntry)
                         {
+                            new_meter_number_port1.TextColor = Color.FromHex("#FF0000");
+                            new_meter_number_port2.TextColor = Color.FromHex("#FF0000");
+
                             old_mtu_id_port1.TextColor = Color.FromHex("#FF0000");
                             old_mtu_id_port2.TextColor = Color.FromHex("#FF0000");
-
                         }
 
                         #endregion
@@ -588,6 +603,12 @@ namespace aclara_meters.view
 
              
                         #region NewMeterLabel Validation
+
+                        if(FormsApp.config.global.NewMeterLabel != null)
+                        {
+                            new_meter_number_port1.Text = FormsApp.config.global.NewMeterLabel;
+                            new_meter_number_port2.Text = FormsApp.config.global.NewMeterLabel;
+                        }
 
                         #endregion
 
@@ -770,8 +791,8 @@ namespace aclara_meters.view
                             oldMeterWorkingContainer2.IsVisible = true;
                         }
 
-                        replaceMeterContainer.IsVisible = true;
-                        replaceMeterContainer2.IsVisible = true;
+                        replaceMeterContainer.IsVisible = false;
+                        replaceMeterContainer2.IsVisible = false;
 
                         newMeterContainer.IsVisible = true;
                         newMeterContainer2.IsVisible = true;
@@ -779,7 +800,17 @@ namespace aclara_meters.view
                         meterSerialContainer.IsVisible = false;
                         meterSerial2Container.IsVisible = false;
 
-                 
+
+                        #region NewMeterLabel Validation
+
+                        if (FormsApp.config.global.NewMeterLabel != null)
+                        {
+                            new_meter_number_port1.Text = FormsApp.config.global.NewMeterLabel;
+                            new_meter_number_port2.Text = FormsApp.config.global.NewMeterLabel;
+                        }
+
+                        #endregion
+
                         #endregion
 
                         #region Color Entry
@@ -966,6 +997,17 @@ namespace aclara_meters.view
 
                         meterSerialContainer.IsVisible = false;
                         meterSerial2Container.IsVisible = false;
+
+
+                        #region NewMeterLabel Validation
+
+                        if (FormsApp.config.global.NewMeterLabel != null)
+                        {
+                            new_meter_number_port1.Text = FormsApp.config.global.NewMeterLabel;
+                            new_meter_number_port2.Text = FormsApp.config.global.NewMeterLabel;
+                        }
+
+                        #endregion
 
 
                         #endregion
@@ -1162,6 +1204,18 @@ namespace aclara_meters.view
 
                         meterSerialContainer.IsVisible = false;
                         meterSerial2Container.IsVisible = false;
+
+
+                        #region NewMeterLabel Validation
+
+                        if (FormsApp.config.global.NewMeterLabel != null)
+                        {
+                            new_meter_number_port1.Text = FormsApp.config.global.NewMeterLabel;
+                            new_meter_number_port2.Text = FormsApp.config.global.NewMeterLabel;
+                        }
+
+                        #endregion
+
 
                         #endregion
 
