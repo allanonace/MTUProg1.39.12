@@ -253,16 +253,19 @@ namespace aclara_meters.view
             {
                 case "AddMTU":
 
-                    #region Set Add MTU Info
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
 
-                    name_of_window_port1.Text = "Add MTU";
-                    name_of_window_port2.Text = "Add MTU";
-                    name_of_window_misc.Text = "Add MTU";
+                        #region Set Add MTU Info
 
-                    bg_read_mtu_button_img.Source = "add_mtu_btn.png";
+                        name_of_window_port1.Text = "Add MTU";
+                        name_of_window_port2.Text = "Add MTU";
+                        name_of_window_misc.Text = "Add MTU";
 
-                    #endregion
+                        bg_read_mtu_button_img.Source = "add_mtu_btn.png";
 
+                        #endregion
+                    });
 
                     #region AddMTU Case
 
@@ -389,28 +392,39 @@ namespace aclara_meters.view
 
                 case "replaceMTU":
 
-                    #region Set Replace MTU Info
-
-                    name_of_window_port1.Text = "Replace MTU";
-                    name_of_window_port2.Text = "Replace MTU";
-                    name_of_window_misc.Text = "Replace MTU";
-
-                    bg_read_mtu_button_img.Source = "rep_mtu_btn.png";
-
-                    oldMtuContainer.IsVisible = true;
-                    oldMtuContainer2.IsVisible = true;
-
-                    #region Color Entry
-
-                    if (FormsApp.config.global.ColorEntry)
+                    Device.BeginInvokeOnMainThread(() =>
                     {
-                        old_mtu_id_port1.TextColor = Color.FromHex("#FF0000");
-                        old_mtu_id_port2.TextColor = Color.FromHex("#FF0000");
 
-                    }
+                        #region Set Replace MTU Info
 
-                    #endregion
+                        name_of_window_port1.Text = "Replace MTU";
+                        name_of_window_port2.Text = "Replace MTU";
+                        name_of_window_misc.Text = "Replace MTU";
 
+                        bg_read_mtu_button_img.Source = "rep_mtu_btn.png";
+
+                        oldMtuContainer.IsVisible = true;
+                        oldMtuContainer2.IsVisible = true;
+
+
+                        meterSerialContainer.IsVisible = false;
+                        meterSerial2Container.IsVisible = false;
+
+                        newMeterContainer.IsVisible = true;
+                        newMeterContainer2.IsVisible = true;
+
+
+                        #region Color Entry
+
+                        if (FormsApp.config.global.ColorEntry)
+                        {
+                            old_mtu_id_port1.TextColor = Color.FromHex("#FF0000");
+                            old_mtu_id_port2.TextColor = Color.FromHex("#FF0000");
+
+                        }
+
+                        #endregion
+                    });
 
                     #endregion
 
@@ -539,109 +553,75 @@ namespace aclara_meters.view
 
                 case "replaceMeter":
 
-                    #region Set Replace MTU Info
-
-                    name_of_window_port1.Text = "Replace Meter";
-                    name_of_window_port2.Text = "Replace Meter";
-                    name_of_window_misc.Text = "Replace Meter";
-
-                    bg_read_mtu_button_img.Source = "rep_meter_btn.png";
-
-                    oldMeterContainer.IsVisible = true;
-                    oldMeterContainer2.IsVisible = true;
-
-                    oldReadingContainer.IsVisible = true;
-                    oldReadingContainer2.IsVisible = true;
-
-                    oldMeterWorkingContainer.IsVisible = true;
-                    oldMeterWorkingContainer2.IsVisible = true;
-
-                    replaceMeterContainer.IsVisible = true;
-                    replaceMeterContainer2.IsVisible = true;
-
-                    newMeterContainer.IsVisible = true;
-                    newMeterContainer2.IsVisible = true;
-
-
-                    #region Color Entry
-
-                    if (FormsApp.config.global.ColorEntry)
+                    Device.BeginInvokeOnMainThread(() =>
                     {
 
-                        old_meter_number_port1.TextColor = Color.FromHex("#FF0000");
-                        old_meter_number_port2.TextColor = Color.FromHex("#FF0000");
+                        #region Set Replace meter Info
 
-                        old_reading_port1.TextColor = Color.FromHex("#FF0000");
-                        old_reading_port2.TextColor = Color.FromHex("#FF0000");
+                        name_of_window_port1.Text = "Replace Meter";
+                        name_of_window_port2.Text = "Replace Meter";
+                        name_of_window_misc.Text = "Replace Meter";
 
-                        old_meter_working_port1.TextColor = Color.FromHex("#FF0000");
-                        old_meter_working_port2.TextColor = Color.FromHex("#FF0000");
+                        bg_read_mtu_button_img.Source = "rep_meter_btn.png";
 
-                        replace_meter_port1.TextColor = Color.FromHex("#FF0000");
-                        replace_meter_port2.TextColor = Color.FromHex("#FF0000");
+                        oldMeterContainer.IsVisible = true;
+                        oldMeterContainer2.IsVisible = true;
 
-                        new_meter_number_port1.TextColor = Color.FromHex("#FF0000");
-                        new_meter_number_port2.TextColor = Color.FromHex("#FF0000");
-                    }
+                        oldReadingContainer.IsVisible = true;
+                        oldReadingContainer2.IsVisible = true;
 
-                    #region HardCoded Picker for Meter working  // Should be global???
+                        if(FormsApp.config.global.MeterWorkRecording)
+                        {
+                            oldMeterWorkingContainer.IsVisible = true;
+                            oldMeterWorkingContainer2.IsVisible = true;
+                        }
+                      
+                        replaceMeterContainer.IsVisible = true;
+                        replaceMeterContainer2.IsVisible = true;
 
-                    //This ObservableCollection later we will assign ItemsSource for Picker.
-                    ObservableCollection<string> objStringList = new ObservableCollection<string>();
-                    //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-                    ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
-                    {
-                        new PickerItems { Name = "Yes" },
-                        new PickerItems { Name = "No" },
-                        new PickerItems { Name = "Broken" }
-                    };
-
-                    /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-                    I am using foreach and we can add each item to the ObservableCollection<string>(). */
-                    foreach (var item in objClassList)
-                    {
-                        // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                        objStringList.Add(item.Name);
-                    }
-                    //Now I am given ItemsSorce to the Pickers
-                    pickerOldMeterWorking.ItemsSource = objStringList;
-                    pickerOldMeterWorking2.ItemsSource = objStringList;
-
-                    #endregion
-
-                    #region HardCoded Picker for Replace Metee Register // Should be global???
+                        newMeterContainer.IsVisible = true;
+                        newMeterContainer2.IsVisible = true;
 
 
-                    //This ObservableCollection later we will assign ItemsSource for Picker.
-                    ObservableCollection<string> objStringList2 = new ObservableCollection<string>();
-                    //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-                    ObservableCollection<PickerItems> objClassList2 = new ObservableCollection<PickerItems>
-                    {
-                        new PickerItems { Name = "Meter" },
-                        new PickerItems { Name = "Register" },
-                        new PickerItems { Name = "Both" }
-                    };
-                    /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-                    I am using foreach and we can add each item to the ObservableCollection<string>(). */
-                    foreach (var item in objClassList2)
-                    {
-                        // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                        objStringList2.Add(item.Name);
-                    }
+                        meterSerialContainer.IsVisible = false;
+                        meterSerial2Container.IsVisible = false;
 
-                    //Now I am given ItemsSorce to the Pickers
-                    pickerReplaceMeterRegister.ItemsSource = objStringList2;
-                    pickerReplaceMeterRegister2.ItemsSource = objStringList2;
+             
+                        #region NewMeterLabel Validation
+
+                        #endregion
+
+                        #region Color Entry
+
+                        if (FormsApp.config.global.ColorEntry)
+                        {
+
+                            old_meter_number_port1.TextColor = Color.FromHex("#FF0000");
+                            old_meter_number_port2.TextColor = Color.FromHex("#FF0000");
+
+                            old_reading_port1.TextColor = Color.FromHex("#FF0000");
+                            old_reading_port2.TextColor = Color.FromHex("#FF0000");
+
+                            old_meter_working_port1.TextColor = Color.FromHex("#FF0000");
+                            old_meter_working_port2.TextColor = Color.FromHex("#FF0000");
+
+                            replace_meter_port1.TextColor = Color.FromHex("#FF0000");
+                            replace_meter_port2.TextColor = Color.FromHex("#FF0000");
+
+                            new_meter_number_port1.TextColor = Color.FromHex("#FF0000");
+                            new_meter_number_port2.TextColor = Color.FromHex("#FF0000");
+                        }
+
+                    });
+
+                    CallToInitNewUIPickers();
 
                     #endregion
 
 
                     #endregion
 
-
-                    #endregion
-
-                    #region ReplaceMTU Case
+                    #region ReplaceMeter Case
 
                     this.add_mtu = new MTUComm.Action(
                         config: FormsApp.config,
@@ -763,8 +743,637 @@ namespace aclara_meters.view
 
                     break;
 
+
+                case "AddMTUAddMeter":
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        #region Set Add MTU Add Meter Info
+
+                        name_of_window_port1.Text = "Add MTU / Add Meter";
+                        name_of_window_port2.Text = "Add MTU / Add Meter";
+                        name_of_window_misc.Text = "Add MTU / Add Meter";
+
+                        bg_read_mtu_button_img.Source = "add_mtu_meter_btn.png";
+
+                        #endregion
+
+
+                        #region Set UI for Add Mtu Add Meter
+
+                        meterSerialContainer.IsVisible = false;
+                        meterSerial2Container.IsVisible = false;
+
+                        if (FormsApp.config.global.MeterWorkRecording)
+                        {
+                            oldMeterWorkingContainer.IsVisible = true;
+                            oldMeterWorkingContainer2.IsVisible = true;
+                        }
+
+                        replaceMeterContainer.IsVisible = true;
+                        replaceMeterContainer2.IsVisible = true;
+
+                        newMeterContainer.IsVisible = true;
+                        newMeterContainer2.IsVisible = true;
+
+                        meterSerialContainer.IsVisible = false;
+                        meterSerial2Container.IsVisible = false;
+
+                 
+                        #endregion
+
+                        #region Color Entry
+
+                        if (FormsApp.config.global.ColorEntry)
+                        {
+                            old_meter_working_port1.TextColor = Color.FromHex("#FF0000");
+                            old_meter_working_port2.TextColor = Color.FromHex("#FF0000");
+
+                            replace_meter_port1.TextColor = Color.FromHex("#FF0000");
+                            replace_meter_port2.TextColor = Color.FromHex("#FF0000");
+
+                            new_meter_number_port1.TextColor = Color.FromHex("#FF0000");
+                            new_meter_number_port2.TextColor = Color.FromHex("#FF0000");
+                        }
+
+                    });
+
+                    #endregion
+
+                    CallToInitNewUIPickers();
+
+                    #region AddMTU | AddMeter Case
+
+                    this.add_mtu = new MTUComm.Action(
+                        config: FormsApp.config,
+                        serial: FormsApp.ble_interface,
+                        type: MTUComm.Action.ActionType.AddMtuAddMeter,
+                        user: FormsApp.credentialsService.UserName);
+
+                    #region Prepare mtuForm
+
+                    this.config = Configuration.GetInstance();
+
+                    // Get detected mtu
+                    MTUBasicInfo mtuBasicInfo_addmtuaddmeter = MtuForm.mtuBasicInfo;
+                    this.detectedMtuType = (int)mtuBasicInfo_addmtuaddmeter.Type;
+                    currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
+
+                    // Initialize logic-form
+                    this.addMtuForm = new AddMtuForm(currentMtu);
+
+                    #endregion
+
+                    isCancellable = false;
+
+                    Task.Run(() =>
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            label_read.Opacity = 1;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                        });
+                    });
+
+                    if (Device.Idiom == TargetIdiom.Tablet)
+                    {
+                        Task.Run(() =>
+                        {
+                            Device.BeginInvokeOnMainThread(LoadTabletUI);
+                        });
+                    }
+                    else
+                    {
+                        Task.Run(() =>
+                        {
+                            Device.BeginInvokeOnMainThread(LoadPhoneUI);
+                        });
+                    }
+
+                    // Load side menu list
+                    LoadSideMenuElements();
+
+                    NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        label_read.Opacity = 1;
+                    });
+
+                    _userTapped = false;
+
+                    //Initialize Tap/Clickable element listeners
+                    TappedListeners();
+
+                    //Change username textview to Prefs. String
+                    if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
+                        userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
+
+                    battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
+                    rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
+
+                    InitializeLowerbarLabel();
+
+                    InitializeAddMtuForm();
+
+                    RegisterEventHandlers();
+
+                    Popup_start.IsVisible = false;
+                    Popup_start.IsEnabled = false;
+
+                    listaMTUread.IsVisible = false;
+
+                    Task.Delay(10).ContinueWith(t =>
+
+                      Device.BeginInvokeOnMainThread(() =>
+                      {
+                          backdark_bg.IsVisible = true;
+                          indicator.IsVisible = true;
+                          background_scan_page.IsEnabled = false;
+
+                          Task.Delay(100).ContinueWith(t0 =>
+
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                label_read.Opacity = 1;
+                                backdark_bg.IsVisible = false;
+                                indicator.IsVisible = false;
+                                background_scan_page.IsEnabled = true;
+                                label_read.Text = "Press Button to Start";
+
+                                #region Port 2 Buttons Listener
+
+                                //Task.Factory.StartNew(SetPort2Buttons);
+
+                                #endregion
+
+                                #region Snap Read CheckBox Controller
+
+                                CheckBoxController();
+
+                                #endregion
+
+                            })
+                         );
+                      })
+                    );
+
+                    #endregion
+
+
+                    break;
+
+
+                case "AddMTUReplaceMeter":
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        #region Set Add MTU Replace Meter Info
+
+                        name_of_window_port1.Text = "Add MTU / Replace Meter";
+                        name_of_window_port2.Text = "Add MTU / Replace Meter";
+                        name_of_window_misc.Text = "Add MTU / Replace Meter";
+
+                        bg_read_mtu_button_img.Source = "add_mtu_rep_meter_btn.png";
+
+                        #endregion
+
+
+                        #region Set UI for Add Mtu Replace Meter
+
+                        meterSerialContainer.IsVisible = false;
+                        meterSerial2Container.IsVisible = false;
+
+                        if (FormsApp.config.global.MeterWorkRecording)
+                        {
+                            oldMeterWorkingContainer.IsVisible = true;
+                            oldMeterWorkingContainer2.IsVisible = true;
+                        }
+
+                        replaceMeterContainer.IsVisible = true;
+                        replaceMeterContainer2.IsVisible = true;
+
+                        newMeterContainer.IsVisible = true;
+                        newMeterContainer2.IsVisible = true;
+
+                        oldMeterContainer.IsVisible = true;
+                        oldMeterContainer2.IsVisible = true;
+
+                        oldReadingContainer.IsVisible = true;
+                        oldReadingContainer2.IsVisible = true;
+
+
+                        meterSerialContainer.IsVisible = false;
+                        meterSerial2Container.IsVisible = false;
+
+
+                        #endregion
+
+                        #region Color Entry
+
+                        if (FormsApp.config.global.ColorEntry)
+                        {
+                            old_meter_working_port1.TextColor = Color.FromHex("#FF0000");
+                            old_meter_working_port2.TextColor = Color.FromHex("#FF0000");
+
+                            replace_meter_port1.TextColor = Color.FromHex("#FF0000");
+                            replace_meter_port2.TextColor = Color.FromHex("#FF0000");
+
+                            new_meter_number_port1.TextColor = Color.FromHex("#FF0000");
+                            new_meter_number_port2.TextColor = Color.FromHex("#FF0000");
+
+                            old_reading_port1.TextColor = Color.FromHex("#FF0000");
+                            old_reading_port2.TextColor = Color.FromHex("#FF0000");
+
+                            old_meter_number_port1.TextColor = Color.FromHex("#FF0000");
+                            old_meter_number_port2.TextColor = Color.FromHex("#FF0000");
+                        }
+
+                    });
+
+                    #endregion
+
+                    CallToInitNewUIPickers();
+
+                    #region AddMTU | Replace Meter Case
+
+                    this.add_mtu = new MTUComm.Action(
+                        config: FormsApp.config,
+                        serial: FormsApp.ble_interface,
+                        type: MTUComm.Action.ActionType.AddMtuReplaceMeter,
+                        user: FormsApp.credentialsService.UserName);
+
+                    #region Prepare mtuForm
+
+                    this.config = Configuration.GetInstance();
+
+                    // Get detected mtu
+                    MTUBasicInfo mtuBasicInfo_addmtureplacemeter = MtuForm.mtuBasicInfo;
+                    this.detectedMtuType = (int)mtuBasicInfo_addmtureplacemeter.Type;
+                    currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
+
+                    // Initialize logic-form
+                    this.addMtuForm = new AddMtuForm(currentMtu);
+
+                    #endregion
+
+                    isCancellable = false;
+
+                    Task.Run(() =>
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            label_read.Opacity = 1;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                        });
+                    });
+
+                    if (Device.Idiom == TargetIdiom.Tablet)
+                    {
+                        Task.Run(() =>
+                        {
+                            Device.BeginInvokeOnMainThread(LoadTabletUI);
+                        });
+                    }
+                    else
+                    {
+                        Task.Run(() =>
+                        {
+                            Device.BeginInvokeOnMainThread(LoadPhoneUI);
+                        });
+                    }
+
+                    // Load side menu list
+                    LoadSideMenuElements();
+
+                    NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        label_read.Opacity = 1;
+                    });
+
+                    _userTapped = false;
+
+                    //Initialize Tap/Clickable element listeners
+                    TappedListeners();
+
+                    //Change username textview to Prefs. String
+                    if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
+                        userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
+
+                    battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
+                    rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
+
+                    InitializeLowerbarLabel();
+
+                    InitializeAddMtuForm();
+
+                    RegisterEventHandlers();
+
+                    Popup_start.IsVisible = false;
+                    Popup_start.IsEnabled = false;
+
+                    listaMTUread.IsVisible = false;
+
+                    Task.Delay(10).ContinueWith(t =>
+
+                      Device.BeginInvokeOnMainThread(() =>
+                      {
+                          backdark_bg.IsVisible = true;
+                          indicator.IsVisible = true;
+                          background_scan_page.IsEnabled = false;
+
+                          Task.Delay(100).ContinueWith(t0 =>
+
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                label_read.Opacity = 1;
+                                backdark_bg.IsVisible = false;
+                                indicator.IsVisible = false;
+                                background_scan_page.IsEnabled = true;
+                                label_read.Text = "Press Button to Start";
+
+                                #region Port 2 Buttons Listener
+
+                                //Task.Factory.StartNew(SetPort2Buttons);
+
+                                #endregion
+
+                                #region Snap Read CheckBox Controller
+
+                                CheckBoxController();
+
+                                #endregion
+
+                            })
+                         );
+                      })
+                    );
+
+                    #endregion
+
+
+                    break;
+
+
+                case "ReplaceMTUReplaceMeter":
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        #region Set Replace MTU Replace Meter Info
+
+                        name_of_window_port1.Text = "Replace MTU / Replace Meter";
+                        name_of_window_port2.Text = "Replace MTU / Replace Meter";
+                        name_of_window_misc.Text = "Replace MTU / Replace Meter";
+
+                        bg_read_mtu_button_img.Source = "rep_mtu_rep_meter_btn.png";
+
+                        #endregion
+
+
+                        #region Set UI for Replace Mtu Replace Meter
+
+                        meterSerialContainer.IsVisible = false;
+                        meterSerial2Container.IsVisible = false;
+
+                        if (FormsApp.config.global.MeterWorkRecording)
+                        {
+                            oldMeterWorkingContainer.IsVisible = true;
+                            oldMeterWorkingContainer2.IsVisible = true;
+                        }
+
+                        replaceMeterContainer.IsVisible = true;
+                        replaceMeterContainer2.IsVisible = true;
+
+                        newMeterContainer.IsVisible = true;
+                        newMeterContainer2.IsVisible = true;
+
+                        oldMeterContainer.IsVisible = true;
+                        oldMeterContainer2.IsVisible = true;
+
+                        oldReadingContainer.IsVisible = true;
+                        oldReadingContainer2.IsVisible = true;
+
+                        oldMtuContainer.IsVisible = true;
+                        oldMtuContainer2.IsVisible = true;
+
+                        meterSerialContainer.IsVisible = false;
+                        meterSerial2Container.IsVisible = false;
+
+                        #endregion
+
+                        #region Color Entry
+
+                        if (FormsApp.config.global.ColorEntry)
+                        {
+                            old_meter_working_port1.TextColor = Color.FromHex("#FF0000");
+                            old_meter_working_port2.TextColor = Color.FromHex("#FF0000");
+
+                            replace_meter_port1.TextColor = Color.FromHex("#FF0000");
+                            replace_meter_port2.TextColor = Color.FromHex("#FF0000");
+
+                            new_meter_number_port1.TextColor = Color.FromHex("#FF0000");
+                            new_meter_number_port2.TextColor = Color.FromHex("#FF0000");
+
+                            old_reading_port1.TextColor = Color.FromHex("#FF0000");
+                            old_reading_port2.TextColor = Color.FromHex("#FF0000");
+
+                            old_meter_number_port1.TextColor = Color.FromHex("#FF0000");
+                            old_meter_number_port2.TextColor = Color.FromHex("#FF0000");
+
+                            old_mtu_id_port1.TextColor = Color.FromHex("#FF0000");
+                            old_mtu_id_port2.TextColor = Color.FromHex("#FF0000");
+                        }
+
+                    });
+
+                    #endregion
+
+                    CallToInitNewUIPickers();
+
+                    #region AddMTU | AddMeter Case
+
+                    this.add_mtu = new MTUComm.Action(
+                        config: FormsApp.config,
+                        serial: FormsApp.ble_interface,
+                        type: MTUComm.Action.ActionType.ReplaceMtuReplaceMeter,
+                        user: FormsApp.credentialsService.UserName);
+
+                    #region Prepare mtuForm
+
+                    this.config = Configuration.GetInstance();
+
+                    // Get detected mtu
+                    MTUBasicInfo mtuBasicInfo_replacemtureplacemeter = MtuForm.mtuBasicInfo;
+                    this.detectedMtuType = (int)mtuBasicInfo_replacemtureplacemeter.Type;
+                    currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
+
+                    // Initialize logic-form
+                    this.addMtuForm = new AddMtuForm(currentMtu);
+
+                    #endregion
+
+                    isCancellable = false;
+
+                    Task.Run(() =>
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            label_read.Opacity = 1;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                        });
+                    });
+
+                    if (Device.Idiom == TargetIdiom.Tablet)
+                    {
+                        Task.Run(() =>
+                        {
+                            Device.BeginInvokeOnMainThread(LoadTabletUI);
+                        });
+                    }
+                    else
+                    {
+                        Task.Run(() =>
+                        {
+                            Device.BeginInvokeOnMainThread(LoadPhoneUI);
+                        });
+                    }
+
+                    // Load side menu list
+                    LoadSideMenuElements();
+
+                    NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        label_read.Opacity = 1;
+                    });
+
+                    _userTapped = false;
+
+                    //Initialize Tap/Clickable element listeners
+                    TappedListeners();
+
+                    //Change username textview to Prefs. String
+                    if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
+                        userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
+
+                    battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
+                    rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
+
+                    InitializeLowerbarLabel();
+
+                    InitializeAddMtuForm();
+
+                    RegisterEventHandlers();
+
+                    Popup_start.IsVisible = false;
+                    Popup_start.IsEnabled = false;
+
+                    listaMTUread.IsVisible = false;
+
+                    Task.Delay(10).ContinueWith(t =>
+
+                      Device.BeginInvokeOnMainThread(() =>
+                      {
+                          backdark_bg.IsVisible = true;
+                          indicator.IsVisible = true;
+                          background_scan_page.IsEnabled = false;
+
+                          Task.Delay(100).ContinueWith(t0 =>
+
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                label_read.Opacity = 1;
+                                backdark_bg.IsVisible = false;
+                                indicator.IsVisible = false;
+                                background_scan_page.IsEnabled = true;
+                                label_read.Text = "Press Button to Start";
+
+                                #region Port 2 Buttons Listener
+
+                                //Task.Factory.StartNew(SetPort2Buttons);
+
+                                #endregion
+
+                                #region Snap Read CheckBox Controller
+
+                                CheckBoxController();
+
+                                #endregion
+
+                            })
+                         );
+                      })
+                    );
+
+                    #endregion
+
+
+                    break;
+
             }
 
+
+        }
+
+        private void CallToInitNewUIPickers()
+        {
+
+            #region HardCoded Picker for Meter working  // Should be global???
+
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList = new ObservableCollection<string>();
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
+                    {
+                        new PickerItems { Name = "Yes" },
+                        new PickerItems { Name = "No" },
+                        new PickerItems { Name = "Broken" }
+                    };
+
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+            foreach (var item in objClassList)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList.Add(item.Name);
+            }
+            //Now I am given ItemsSorce to the Pickers
+            pickerOldMeterWorking.ItemsSource = objStringList;
+            pickerOldMeterWorking2.ItemsSource = objStringList;
+
+            #endregion
+
+            #region HardCoded Picker for Replace Metee Register // Should be global???
+
+
+            //This ObservableCollection later we will assign ItemsSource for Picker.
+            ObservableCollection<string> objStringList2 = new ObservableCollection<string>();
+            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
+            ObservableCollection<PickerItems> objClassList2 = new ObservableCollection<PickerItems>
+                    {
+                        new PickerItems { Name = "Meter" },
+                        new PickerItems { Name = "Register" },
+                        new PickerItems { Name = "Both" }
+                    };
+            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
+            I am using foreach and we can add each item to the ObservableCollection<string>(). */
+            foreach (var item in objClassList2)
+            {
+                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
+                objStringList2.Add(item.Name);
+            }
+
+            //Now I am given ItemsSorce to the Pickers
+            pickerReplaceMeterRegister.ItemsSource = objStringList2;
+            pickerReplaceMeterRegister2.ItemsSource = objStringList2;
+
+            #endregion
 
         }
 
@@ -3897,6 +4506,45 @@ namespace aclara_meters.view
                     else
                     {
                         bg_read_mtu_button_img.Source = "rep_meter_btn.png";
+                    }
+
+                    break;
+
+                case "AddMTUAddMeter":
+
+                    if (v)
+                    {
+                        bg_read_mtu_button_img.Source = "add_mtu_meter_btn_black.png";
+                    }
+                    else
+                    {
+                        bg_read_mtu_button_img.Source = "add_mtu_meter_btn.png";
+                    }
+
+                    break;
+
+                case "AddMTUReplaceMeter":
+
+                    if (v)
+                    {
+                        bg_read_mtu_button_img.Source = "add_mtu_rep_meter_btn_black.png";
+                    }
+                    else
+                    {
+                        bg_read_mtu_button_img.Source = "add_mtu_rep_meter_btn.png";
+                    }
+
+                    break;
+
+                case "ReplaceMTUReplaceMeter":
+
+                    if (v)
+                    {
+                        bg_read_mtu_button_img.Source = "rep_mtu_rep_meter_btn_black.png";
+                    }
+                    else
+                    {
+                        bg_read_mtu_button_img.Source = "rep_mtu_rep_meter_btn.png";
                     }
 
                     break;
