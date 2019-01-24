@@ -2190,7 +2190,7 @@ namespace aclara_meters.view
 
         private void OpenSettingsTapped(object sender, EventArgs e)
         {
-            printer.Suspend();
+            //printer.Suspend();
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
             background_scan_page.IsEnabled = true;
