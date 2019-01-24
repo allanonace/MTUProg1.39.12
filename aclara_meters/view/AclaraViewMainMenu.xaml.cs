@@ -22,6 +22,11 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewMainMenu
     {
+        private const bool DEBUG_MODE_ON = true;
+
+        private bool autoConnect;
+        private bool conectarDevice;
+
         private string page_to_controller;
 
         public DeviceItem last_item;
@@ -90,8 +95,11 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread(() =>
             {
+                PrintToConsole("Se va a empezar el flujo");
 
-                Task.Factory.StartNew(Init_Scripting_Method);
+                PrintToConsole("Se va a lanzar una Tarea. Task.Factory.StartNew(Init_Scripting_Method)");
+
+                Task.Factory.StartNew(Interface_background_scan_page);
 
             });
 
@@ -104,102 +112,170 @@ namespace aclara_meters.view
             //BluetoothPeripheralDisconnect ( null, null );
         }
 
-        private void Init_Scripting_Method()
+        /*--------------------------------------------------*/
+        /*          Device List Interface Contenview
+        /---------------------------------------------------*/
+
+        private bool GetAutoConnectStatus()
+        {
+            return autoConnect;
+        }
+
+        private void Interface_background_scan_page()
         {
 
-            Task.Run(() =>
-            {
-                Task.Delay(100);
+            PrintToConsole("Va a lanzar un delay. Task.Delay(100)");
 
-                Device.BeginInvokeOnMainThread(() =>
+            PrintToConsole("Va a lanzar, en el hilo UI, la acción: Interface_background_scan_page");
+
+            printer = new Thread(new ThreadStart(InvokeMethod));
+
+            PrintToConsole("Va a lanzar un Hilo-Thread. new Thread(new ThreadStart(InvokeMethod)) printer.Start() - Interface_background_scan_page");
+
+            printer.Start();
+
+            employees = new ObservableCollection<DeviceItem>();
+
+            DeviceList.RefreshCommand = new Command(async () =>
+            {
+
+                PrintToConsole("está ejecutando el RefreshCommand - Interface_background_scan_page");
+
+                PrintToConsole("comprobar si autoConnect es falso - Interface_ContentView_DeviceLis");
+
+
+                if (!GetAutoConnectStatus())
                 {
 
-                    #region New Circular Progress bar Animations    
+                    PrintToConsole("ha entrado en la condicion - Interface_background_scan_page");
 
-                    DeviceList.IsRefreshing = false;
-                    backdark_bg.IsVisible = true;
-                    indicator.IsVisible = true;
+                    PrintToConsole("va a Activar la barra de progreso circular - Interface_background_scan_page");
 
-                    #endregion
-
-                    printer = new Thread(new ThreadStart(InvokeMethod));
-                    printer.Start();
-
-                    employees = new ObservableCollection<DeviceItem>();
-
-                    DeviceList.RefreshCommand = new Command(async () =>
+                    Device.BeginInvokeOnMainThread(() =>
                     {
-                        // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
-                        // Problema: solo se hace si se refresca DeviceList
-                        // TO-DO: eliminar el hilo o eliminar el suspend
-                        if (printer.ThreadState == ThreadState.Suspended)
-                        {
-                            try
-                            {
-                                printer.Resume();
-                            }
-                            catch (Exception e11)
-                            {
-                                Console.WriteLine(e11.StackTrace);
-                            }
-                        }
-                        //DeviceList.IsRefreshing = true;
-
-
-
-                        // <<< LA BUSQUEDA SE HACE AQUI >>>
-
-
-
-                        employees = new ObservableCollection<DeviceItem>();
-
-                        await FormsApp.ble_interface.Scan();
-                        await ChangeListViewData();
-                        //DeviceList.IsRefreshing = false;
-
                         #region New Circular Progress bar Animations    
 
                         DeviceList.IsRefreshing = false;
-                        backdark_bg.IsVisible = false;
-                        indicator.IsVisible = false;
+                        backdark_bg.IsVisible = true;
+                        indicator.IsVisible = true;
+                        background_scan_page.IsEnabled = false;
 
                         #endregion
 
-                        if (employees.Count != 0)
+                    });
+                    PrintToConsole("Mostrar barra de progreso - Interface_background_scan_page");
+
+                    // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
+                    // Problema: solo se hace si se refresca DeviceList
+                    // TO-DO: eliminar el hilo o eliminar el suspend
+
+                    PrintToConsole("comprobar si el hilo -printer- esta suspendido - Interface_background_scan_page");
+
+                    if (printer.ThreadState == System.Threading.ThreadState.Suspended)
+                    {
+                        try
                         {
-                            DeviceList.ItemsSource = employees;
+                            PrintToConsole("hilo -printer- suspendido, arranca -printer- printer.Resume(); -Interface_background_scan_page");
+
+                            printer.Resume();
                         }
-                    });
+                        catch (Exception e11)
+                        {
+                            Console.WriteLine(e11.StackTrace);
+                        }
+                    }
+
+                    //DeviceList.IsRefreshing = true;
+
+                    employees = new ObservableCollection<DeviceItem>();
+
+                    PrintToConsole("comienza el Escaneo de dispositivos - Interface_background_scan_page");
+
+                    await FormsApp.ble_interface.Scan();
+
+                    PrintToConsole("finaliza el Escaneo de dispositivos - Interface_background_scan_page");
+
+                    PrintToConsole("comienza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
+
+                    await ChangeListViewData();
+
+                    PrintToConsole("finaliza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
+
+                    //DeviceList.IsRefreshing = false;
+
+                    if (employees.Count != 0)
+                    {
+
+                        DeviceList.ItemsSource = employees;
+                    }
+
+                }
 
 
+            });
 
-                    #region Execute the Refresh List method every 3 seconds if no elements are on list
+            PrintToConsole("en 3 segundos comienza un bucle cada 3 segundos (BUCLE REFRESH LIST) - Interface_background_scan_page");
 
-                    var minutes = TimeSpan.FromSeconds(3);
+            #region Execute the Refresh List method every 3 seconds if no elements are on list
 
-                    Device.StartTimer(minutes, () => {
+            var minutes = TimeSpan.FromSeconds(3);
 
-                        // call your method to check for notifications here
+            Device.StartTimer(minutes, () => {
 
-                        if (employees.Count < 1)
-                            DeviceList.RefreshCommand.Execute(true);
+                PrintToConsole("Dentro del bucle (BUCLE REFRESH LIST) - Interface_background_scan_page");
 
-                        // Returning true means you want to repeat this timer
-                        return true;
-                    });
+                // call your method to check for notifications here
+
+                if (employees.Count < 1)
+                {
+                    PrintToConsole("se va lanzar un Refresh Command (BUCLE REFRESH LIST) - Interface_background_scan_page");
+
+                    DeviceList.RefreshCommand.Execute(true);
+                }
+
+                if (employees.Count > 0)
+                {
+                    DeviceList.ItemsSource = employees;
+                }
+                PrintToConsole("un ciclo del bucle (BUCLE REFRESH LIST) - Interface_background_scan_page");
+
+
+                if (conectarDevice)
+                {
+
+
+                    PrintToConsole("autoConnect se pone a false - InvokeMethod");
+                    autoConnect = false;
+                    conectarDevice = false;
+
+                    #region Autoconnect to stored device 
+
+                    PrintToConsole("Se va a crear una Tarea al de 0.5 segundos (Task.Factory.StartNew(NewOpenConnectionWithDevice);) - InvokeMethod");
+                    Task.Factory.StartNew(NewOpenConnectionWithDevice);
 
                     #endregion
 
 
+                }
 
-                    if (employees.Count != 0)
-                    {
-                        DeviceList.ItemsSource = employees;
-                    }
 
-                });
+
+
+
+                // Returning true means you want to repeat this timer
+                return true;
             });
+
+            #endregion
+
+            if (employees.Count != 0)
+            {
+                DeviceList.ItemsSource = employees;
+            }
         }
+
+
+
 
         public void FirstRefreshSearchPucs()
         {
@@ -481,41 +557,104 @@ namespace aclara_meters.view
 
 
         private void InvokeMethod()
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // printer = new Thread(new ThreadStart(InvokeMethod));
-        // printer.Start();
         {
+            PrintToConsole("dentro del metodo - InvokeMethod");
+
             int timeout_connecting = 0;
+
+            PrintToConsole("se va a ejecutar un bucle (WHILE TRUE) - InvokeMethod");
+
             while (true)
             {
-                //if (!FormsApp.ble_interface.GetPairingStatusOk())
+                PrintToConsole("dentro del bucle (WHILE TRUE) - InvokeMethod");
+
+                PrintToConsole("buscamos el estado de la conexion - InvokeMethod");
+
                 int status = FormsApp.ble_interface.GetConnectionStatus();
+
+                PrintToConsole("se obtiene el estado de la conexion - InvokeMethod");
 
                 if (status != peripheralConnected)
                 {
+                    PrintToConsole("buscamos el estado de la conexion - InvokeMethod");
+
+                    PrintToConsole("¿ES NO_CONNECTED? - InvokeMethod");
+
                     if (peripheralConnected == ble_library.BlePort.NO_CONNECTED)
                     {
-                        // status DEBERIA SER SIEMPRE ble_library.BlePort.CONNECTING
                         peripheralConnected = status;
                         timeout_connecting = 0;
                     }
                     else if (peripheralConnected == ble_library.BlePort.CONNECTING)
                     {
+                        PrintToConsole("Nop, es CONNECTING - InvokeMethod");
+
                         if (status == ble_library.BlePort.NO_CONNECTED)
                         {
+                            PrintToConsole("Se va a ejecutar algo en la UI - InvokeMethod");
+
                             Device.BeginInvokeOnMainThread(() =>
                             {
+                                PrintToConsole("Se va a detectar el estado de la conexion - InvokeMethod");
+
                                 switch (FormsApp.ble_interface.GetConnectionError())
                                 {
                                     case ble_library.BlePort.NO_ERROR:
+                                        PrintToConsole("Estado conexion: NO_ERROR - InvokeMethod");
                                         break;
                                     case ble_library.BlePort.CONECTION_ERRROR:
+                                        PrintToConsole("Estado conexion: CONECTION_ERRROR - InvokeMethod");
+
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                            #region New Circular Progress bar Animations    
+
+                                            DeviceList.IsRefreshing = false;
+                                            backdark_bg.IsVisible = false;
+                                            indicator.IsVisible = false;
+                                            background_scan_page.IsEnabled = true;
+
+                                            #endregion
+                                        });
+
+                                        PrintToConsole("Desactivar barra de progreso - InvokeMethod");
+
                                         Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
                                         break;
                                     case ble_library.BlePort.DYNAMIC_KEY_ERROR:
+                                        PrintToConsole("Estado conexion: DYNAMIC_KEY_ERROR - InvokeMethod");
+
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                            #region New Circular Progress bar Animations    
+
+                                            DeviceList.IsRefreshing = false;
+                                            backdark_bg.IsVisible = false;
+                                            indicator.IsVisible = false;
+                                            background_scan_page.IsEnabled = true;
+
+                                            #endregion
+                                        });
+
+                                        PrintToConsole("Desactivar barra de progreso - InvokeMethod");
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
                                     case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
+                                        PrintToConsole("Estado conexion: NO_DYNAMIC_KEY_ERROR - InvokeMethod");
+
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                            #region New Circular Progress bar Animations    
+
+                                            DeviceList.IsRefreshing = false;
+                                            backdark_bg.IsVisible = false;
+                                            indicator.IsVisible = false;
+                                            background_scan_page.IsEnabled = true;
+
+                                            #endregion
+
+                                        });
+                                        PrintToConsole("Desactivar barra de progreso - InvokeMethod");
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
                                 }
@@ -524,23 +663,16 @@ namespace aclara_meters.view
                                 background_scan_page.Opacity = 1;
                                 background_scan_page.IsEnabled = true;
 
-                                #region New Circular Progress bar Animations    
-
-                                DeviceList.IsRefreshing = false;
-                                backdark_bg.IsVisible = false;
-                                indicator.IsVisible = false;
-
-                                #endregion
-
-
                             });
                             peripheralConnected = status;
                             FormsApp.peripheral = null;
                         }
                         else // status == ble_library.BlePort.CONNECTED
                         {
+                            PrintToConsole("Estas Conectado - InvokeMethod");
+
                             DeviceList.IsEnabled = true;
-                            // status DEBERIA SER SIEMPRE ble_library.BlePort.CONNECTED
+                           
                             peripheralConnected = status;
                             Device.BeginInvokeOnMainThread(() =>
                             {
@@ -554,8 +686,10 @@ namespace aclara_meters.view
                     }
                     else if (peripheralConnected == ble_library.BlePort.CONNECTED)
                     {
+                        PrintToConsole("Nop, es CONNECTED - InvokeMethod");
+
                         DeviceList.IsEnabled = true;
-                        // status DEBERIA SER SIEMPRE ble_library.BlePort.NO_CONNECTED
+                       
                         peripheralConnected = status;
                         FormsApp.peripheral = null;
                         Device.BeginInvokeOnMainThread(() =>
@@ -568,29 +702,69 @@ namespace aclara_meters.view
                         });
                     }
                 }
+
+                PrintToConsole("¿Está en CONNECTING? - InvokeMethod");
                 if (peripheralConnected == ble_library.BlePort.CONNECTING)
                 {
-
+                    PrintToConsole("Si, es CONNECTING - InvokeMethod");
                     timeout_connecting++;
                     if (timeout_connecting >= 2 * 10) // 10 seconds
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
+                            PrintToConsole("Un Timeout que te llevas - InvokeMethod");
                             Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
                             DeviceList.IsEnabled = true;
                             fondo.Opacity = 1;
                             background_scan_page.Opacity = 1;
                             background_scan_page.IsEnabled = true;
 
+                            autoConnect = false;
+
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+
+                                #region Disable Circular Progress bar Animations when done
+
+                                backdark_bg.IsVisible = false;
+                                indicator.IsVisible = false;
+                                background_scan_page.IsEnabled = true;
+
+                                #endregion
+
+                            });
+
+                            try
+                            {
+                                printer.Suspend();
+                            }
+                            catch (Exception e5)
+                            {
+                                Console.WriteLine(e5.StackTrace);
+                            }
+
+
                         });
                         peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                         timeout_connecting = 0;
+
+                        PrintToConsole("Cerrar Conexion - InvokeMethod");
+
                         FormsApp.ble_interface.Close();
                     }
                 }
+                else
+                {
+                    PrintToConsole("Nop, no es CONNECTING - InvokeMethod");
+                }
 
-                Thread.Sleep(500); // 0.5 Second
+                PrintToConsole("Esperamos 300 ms - InvokeMethod");
+                Thread.Sleep(300); // 0.5 Second
+
+                PrintToConsole("¿Se va a realizar reconexion? - InvokeMethod");
+
             }
+
         }
 
         private void IsConnectedUIChange(bool v)
@@ -846,20 +1020,9 @@ namespace aclara_meters.view
 
                                                     #region Autoconnect to stored device 
 
-                                                    var minutes2 = TimeSpan.FromSeconds(2);
+                                                    conectarDevice = true;
 
-                                                    Device.StartTimer(minutes2, () => {
-
-                                                        Device.BeginInvokeOnMainThread(() =>
-                                                        {
-
-                                                            Task.Factory.StartNew(NewOpenConnectionWithDevice);
-
-                                                        });
-
-
-                                                        return false;
-                                                    });
+                                                    autoConnect = true;
 
                                                     #endregion
 
@@ -872,6 +1035,51 @@ namespace aclara_meters.view
                                                 }
 
                                             }
+                                            else
+                                            {
+
+                                                if (autoConnect)
+                                                {
+
+                                                    Device.BeginInvokeOnMainThread(() =>
+                                                    {
+                                                        #region Disable Circular Progress bar Animations when done
+
+                                                        backdark_bg.IsVisible = false;
+                                                        indicator.IsVisible = false;
+                                                        background_scan_page.IsEnabled = true;
+
+                                                        #endregion
+                                                    });
+
+                                                }
+
+                                            }
+
+
+                                        }
+
+                                        else
+                                        {
+
+                                            // if (autoConnect)
+                                            //  {
+
+                                            Device.BeginInvokeOnMainThread(() =>
+                                            {
+                                                #region Disable Circular Progress bar Animations when done
+
+                                                DeviceList.IsRefreshing = false;
+                                                backdark_bg.IsVisible = false;
+                                                indicator.IsVisible = false;
+                                                background_scan_page.IsEnabled = true;
+
+                                                #endregion
+
+                                            });
+
+                                            //  }
+
                                         }
                                     }
                                 }
@@ -891,25 +1099,58 @@ namespace aclara_meters.view
         }
 
 
+        #region We want to connect to the device if there is not scanning running
+
         private void NewOpenConnectionWithDevice()
         {
+
+            PrintToConsole("Se va a entrar en un bucle mientras esté Escaneando bluetooth - NewOpenConnectionWithDevice");
+
             while (FormsApp.ble_interface.IsScanning())
             {
+                PrintToConsole("A esperar 100 ms mientras escanea... - NewOpenConnectionWithDevice");
                 Thread.Sleep(100);
             }
 
+            PrintToConsole("Se va a ejecutar algo en el UI - NewOpenConnectionWithDevice");
 
-
-
-            if (!FormsApp.ble_interface.IsOpen())
+            Device.BeginInvokeOnMainThread(() =>
             {
+                var seconds = TimeSpan.FromSeconds(1); // Don't execute it asap!
 
-                // call your method to check for notifications here
-                FormsApp.ble_interface.Open(FormsApp.peripheral, true);
-            }
+                Device.StartTimer(seconds, () =>
+                {
+                    PrintToConsole("Cada 1 segundo, se ejectua lo siguinete en el UI - NewOpenConnectionWithDevice");
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+
+                        PrintToConsole("¿Esta la conexion abierta ? - NewOpenConnectionWithDevice");
 
 
+                        if (!FormsApp.ble_interface.IsOpen())
+                        {
+                            PrintToConsole("¿Esta escaneando perifericos ? - NewOpenConnectionWithDevice");
+                            while (FormsApp.ble_interface.IsScanning())
+                            {
+                                PrintToConsole("A esperar 100 ms en bucle - NewOpenConnectionWithDevice");
+                                Thread.Sleep(100);
+                            }
+
+                            // call your method to check for notifications here
+                            FormsApp.ble_interface.Open(FormsApp.peripheral, true);
+                        }
+                        else
+                        {
+                            PrintToConsole("NOPE, no lo esta - NewOpenConnectionWithDevice");
+                        }
+                    });
+
+                    return false;
+                });
+            });
         }
+
+        #endregion
 
 
         protected override void OnAppearing()
@@ -2054,5 +2295,15 @@ namespace aclara_meters.view
             bool value = FormsApp.ble_interface.IsOpen();
             value &= Navigation.NavigationStack.Count >= 3; //  if(Navigation.NavigationStack.Count < 3) Settings.IsLoggedIn = false;
         }
+
+
+        public void PrintToConsole(string printConsole)
+        {
+
+            if (DEBUG_MODE_ON)
+                Console.WriteLine("DEBUG_ACL: " + printConsole);
+        }
+
+
     }
 }
