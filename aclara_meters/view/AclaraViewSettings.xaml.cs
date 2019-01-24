@@ -281,6 +281,8 @@ namespace aclara_meters.view
             aclara_logo.Scale = 1.2;
             aclara_logo.TranslationX = 42;
             aclara_logo.TranslationX = 42;
+
+            shadoweffect.Source = "shadow_effect_tablet";
         }
 
         private void ReplaceMeterCancelTapped(object sender, EventArgs e)
