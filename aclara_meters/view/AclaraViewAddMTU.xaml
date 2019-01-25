@@ -715,10 +715,10 @@
                                                                     Minimum="1"
                                                                     HeightRequest="40"
                                                                     Value="10"
-                                                                    Margin="0,-24,0,0"
+                                                                    Margin="0,-26,0,0"
                                                                     HorizontalOptions="FillAndExpand"
                                                                     VerticalOptions="CenterAndExpand"/>
-                                                             <Image Source="checkbox_on" x:Name="Checkbox_SnapReads_Port1"  Margin="0,0,0,24" WidthRequest="48" HeightRequest="48">
+                                                             <Image Source="checkbox_on" x:Name="Checkbox_SnapReads_Port1"  Margin="0,-4,0,24" WidthRequest="48" HeightRequest="48">
                                                 
                                                              </Image>
                                                             
@@ -1218,10 +1218,10 @@
                                                                     Maximum="24"
                                                                     HeightRequest="40"
                                                                     Value="10"
-                                                                    Margin="0,-24,0,0"
+                                                                    Margin="0,-26,0,0"
                                                                     HorizontalOptions="FillAndExpand"
                                                                     VerticalOptions="CenterAndExpand"/>
-                                                             <Image Source="checkbox_on" x:Name="Checkbox_SnapReads_Port2"  Margin="0,0,0,24" WidthRequest="48" HeightRequest="48">
+                                                             <Image Source="checkbox_on" x:Name="Checkbox_SnapReads_Port2"  Margin="0,-4,0,24" WidthRequest="48" HeightRequest="48">
                                                 
                                                              </Image>
                                                             
