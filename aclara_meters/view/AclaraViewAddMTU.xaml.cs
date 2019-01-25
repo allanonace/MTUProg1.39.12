@@ -2199,11 +2199,14 @@ namespace aclara_meters.view
             settings_button.Tapped += OpenSettingsCallAsync;
             back_button.Tapped += ReturnToMainView;
             bg_read_mtu_button.Tapped += AddMtu;
+
             turnoffmtu_ok.Tapped += TurnOffMTUOkTapped;
             turnoffmtu_no.Tapped += TurnOffMTUNoTapped;
             turnoffmtu_ok_close.Tapped += TurnOffMTUCloseTapped;
-            replacemeter_ok.Tapped += ReplaceMeterOkTapped;
-            replacemeter_cancel.Tapped += ReplaceMeterCancelTapped;
+
+            replacemeter_ok.Tapped += ReplaceMtuOkTapped;
+            replacemeter_cancel.Tapped += ReplaceMtuCancelTapped;
+
             meter_ok.Tapped += MeterOkTapped;
             meter_cancel.Tapped += MeterCancelTapped;
 
@@ -2228,7 +2231,124 @@ namespace aclara_meters.view
 
             submit_dialog.Clicked += submit_send;
             cancel_dialog.Clicked += CancelTapped;
+
+
+            dialog_AddMTUAddMeter_ok.Tapped += dialog_AddMTUAddMeter_okTapped;
+            dialog_AddMTUAddMeter_cancel.Tapped += dialog_AddMTUAddMeter_cancelTapped;
+
+            dialog_AddMTUReplaceMeter_ok.Tapped += dialog_AddMTUReplaceMeter_okTapped;
+            dialog_AddMTUReplaceMeter_cancel.Tapped += dialog_AddMTUReplaceMeter_cancelTapped;
+
+            dialog_ReplaceMTUReplaceMeter_ok.Tapped += dialog_ReplaceMTUReplaceMeter_okTapped;
+            dialog_ReplaceMTUReplaceMeter_cancel.Tapped += dialog_ReplaceMTUReplaceMeter_cancelTapped;
+
+
+            dialog_AddMTU_ok.Tapped += dialog_AddMTU_okTapped;
+            dialog_AddMTU_cancel.Tapped += dialog_AddMTU_cancelTapped;
+
+
         }
+
+
+
+        void dialog_AddMTUAddMeter_cancelTapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_AddMTUAddMeter.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+        void dialog_AddMTUAddMeter_okTapped(object sender, EventArgs e)
+        {
+            dialog_AddMTUAddMeter.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                page_to_controller = "AddMTUAddMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
+
+
+        }
+
+        void dialog_AddMTUReplaceMeter_cancelTapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_AddMTUReplaceMeter.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+        void dialog_AddMTUReplaceMeter_okTapped(object sender, EventArgs e)
+        {
+            dialog_AddMTUReplaceMeter.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                page_to_controller = "AddMTUReplaceMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
+
+        }
+
+        void dialog_ReplaceMTUReplaceMeter_cancelTapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+        void dialog_ReplaceMTUReplaceMeter_okTapped(object sender, EventArgs e)
+        {
+            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                page_to_controller = "ReplaceMTUReplaceMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
+
+
+        }
+
+        void dialog_AddMTU_cancelTapped(object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_AddMTU.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+        }
+
+        void dialog_AddMTU_okTapped(object sender, EventArgs e)
+        {
+            dialog_AddMTU.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                // TODO: cambiar usuario
+                // TODO: BasicRead no loguea
+                try
+                {
+                    page_to_controller = "AddMTU";
+                    Task.Factory.StartNew(BasicReadThread);
+                }
+                catch (Exception addmtu)
+                {
+                    Console.WriteLine(addmtu.StackTrace);
+                }
+
+            });
+
+            //Bug fix Android UI Animation
+
+        }
+
 
         private void CancelTapped(object sender, EventArgs e)
         {
@@ -3024,8 +3144,6 @@ namespace aclara_meters.view
                
             }
         }
-
-
 
 
         private void NavigationController(string page)
@@ -3999,20 +4117,28 @@ namespace aclara_meters.view
 
         }
 
-        private void ReplaceMeterCancelTapped(object sender, EventArgs e)
+
+        private void ReplaceMtuCancelTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
 
-        private void ReplaceMeterOkTapped(object sender, EventArgs e)
+        private void ReplaceMtuOkTapped(object sender, EventArgs e)
         {
             dialog_replacemeter_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                page_to_controller = "replaceMTU";
+                Task.Factory.StartNew(BasicReadThread);
+            });
+
         }
+
 
         private void TurnOffMTUCloseTapped(object sender, EventArgs e)
         {
@@ -4072,20 +4198,29 @@ namespace aclara_meters.view
             turnOffAction.Run();
         }
 
-        private void MeterCancelTapped(object sender, EventArgs e)
+
+        void MeterCancelTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
             dialog_meter_replace_one.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
 
-        private void MeterOkTapped(object sender, EventArgs e)
+        void MeterOkTapped(object sender, EventArgs e)
         {
             dialog_meter_replace_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                page_to_controller = "replaceMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
+
+
         }
+
 
         #endregion
 
