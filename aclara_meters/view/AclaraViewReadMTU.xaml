@@ -652,7 +652,7 @@
 
 
           <ContentView     Scale="1.2" IsVisible="false"
-                        HeightRequest="185" 
+                        HeightRequest="200" 
                         x:Name="turnoff_mtu_background" 
                         
             RelativeLayout.XConstraint=
@@ -768,7 +768,7 @@
                     </StackLayout>
 
 
-                       <StackLayout x:Name="dialog_turnoff_three" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                       <StackLayout  x:Name="dialog_turnoff_three" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
                         
                         <Label x:Name="dialog_turnoff_text" Margin="12,12,12,12" HorizontalTextAlignment="Center" 
@@ -887,9 +887,173 @@
                      </StackLayout>
 
 
+
+
+
+
+
+
+                     <StackLayout  x:Name="dialog_AddMTUAddMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                                  Margin="0" Opacity="1" >
+            
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="20" Text="Install new MTU / Add Meter, and prepare for reading MTU">
+                            
+                        </Label>
                     
+                 
+                        <StackLayout Margin="8,8,0,0" Orientation="Horizontal"  >
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                  TextColor="#6aa2b8"
+                                         FontSize="20"  Text="OK">
+
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_AddMTUAddMeter_ok" />
+                                        </Label.GestureRecognizers>
+
+                                
+                                 </Label>
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                       TextColor="#6aa2b8"
+                                        FontSize="20" Text="Cancel"> 
+                                
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_AddMTUAddMeter_cancel" />
+                                        </Label.GestureRecognizers>
+                                
+
+                                </Label>
+
+                          </StackLayout>
+                      
+
+                     </StackLayout>
+
+                    
+                      <StackLayout  x:Name="dialog_AddMTUReplaceMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                                  Margin="0" Opacity="1" >
+            
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="20" Text="Install new MTU / Replace Meter, and prepare for reading MTU">
+                            
+                        </Label>
+                    
+                 
+                        <StackLayout Margin="8,8,0,0" Orientation="Horizontal"  >
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                  TextColor="#6aa2b8"
+                                         FontSize="20"  Text="OK">
+
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_AddMTUReplaceMeter_ok" />
+                                        </Label.GestureRecognizers>
+
+                                
+                                 </Label>
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                       TextColor="#6aa2b8"
+                                        FontSize="20" Text="Cancel"> 
+                                
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_AddMTUReplaceMeter_cancel" />
+                                        </Label.GestureRecognizers>
+                                
+
+                                </Label>
+
+                          </StackLayout>
+                      
+
+                     </StackLayout>
 
 
+
+
+                      <StackLayout  x:Name="dialog_ReplaceMTUReplaceMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                                  Margin="0" Opacity="1" >
+            
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="20" Text="Replace MTU / Replace Meter, and prepare for reading MTU">
+                            
+                        </Label>
+                    
+                 
+                        <StackLayout Margin="8,8,0,0" Orientation="Horizontal"  >
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                  TextColor="#6aa2b8"
+                                         FontSize="20"  Text="OK">
+
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_ReplaceMTUReplaceMeter_ok" />
+                                        </Label.GestureRecognizers>
+
+                                
+                                 </Label>
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                       TextColor="#6aa2b8"
+                                        FontSize="20" Text="Cancel"> 
+                                
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_ReplaceMTUReplaceMeter_cancel" />
+                                        </Label.GestureRecognizers>
+                                
+
+                                </Label>
+
+                          </StackLayout>
+                      
+
+                     </StackLayout>
+                  
+
+
+
+
+                     <StackLayout  x:Name="dialog_AddMTU" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                                  Margin="0" Opacity="1" >
+            
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="20" Text="Install new MTU, and prepare for reading MTU">
+                            
+                        </Label>
+                    
+                 
+                        <StackLayout Margin="8,8,0,0" Orientation="Horizontal"  >
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                  TextColor="#6aa2b8"
+                                         FontSize="20"  Text="OK">
+
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_AddMTU_ok" />
+                                        </Label.GestureRecognizers>
+
+                                
+                                 </Label>
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                       TextColor="#6aa2b8"
+                                        FontSize="20" Text="Cancel"> 
+                                
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_AddMTU_cancel" />
+                                        </Label.GestureRecognizers>
+                                
+
+                                </Label>
+
+                          </StackLayout>
+                      
+
+                     </StackLayout>
+
+
+
+
+
+                    
 
                      </StackLayout>
 
