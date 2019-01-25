@@ -1387,21 +1387,74 @@ namespace aclara_meters.view
                type: MTUComm.Action.ActionType.BasicRead,
                user: FormsApp.credentialsService.UserName);
 
+            /*
             basicRead.OnFinish += ((s, args) =>
             { });
-
-            basicRead.Run();
+            */
 
             basicRead.OnFinish += ((s, e) =>
             {
-                Task.Delay(200).ContinueWith(t =>
+                Task.Delay(100).ContinueWith(t =>
                     Device.BeginInvokeOnMainThread(() =>
                     {
+
                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, page_to_controller), false);
+
+                        #region New Circular Progress bar Animations    
+
+                        DeviceList.IsRefreshing = false;
+                        backdark_bg.IsVisible = false;
+                        indicator.IsVisible = false;
+                        background_scan_page.IsEnabled = true;
+
+                        #endregion
+
                     })
                 );
             });
 
+            basicRead.OnError += ((s, e) =>
+            {
+                Task.Delay(100).ContinueWith(t =>
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            #region New Circular Progress bar Animations    
+
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+
+                            #endregion
+
+                            Application.Current.MainPage.DisplayAlert("Alert", "Cannot read device, try again", "Ok");
+
+                        });
+
+                    })
+                );
+            });
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                #region New Circular Progress bar Animations    
+
+                DeviceList.IsRefreshing = false;
+                backdark_bg.IsVisible = true;
+                indicator.IsVisible = true;
+                background_scan_page.IsEnabled = false;
+
+                #endregion
+
+            });
+
+            basicRead.Run();
+
+           
 
         }
 
