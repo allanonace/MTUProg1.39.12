@@ -88,5 +88,7 @@
 	<string>Assets.xcassets/LaunchImage-4.launchimage</string>
 	<key>UIMainStoryboardFile</key>
 	<string>LaunchScreen</string>
+	<key>UIRequiresFullScreen</key>
+	<true/>
 </dict>
 </plist>
