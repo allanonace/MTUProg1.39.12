@@ -321,7 +321,7 @@
                                 
                 <!-- LOWER BAR -->    
                 <StackLayout  IsVisible="true"   IsClippedToBounds="true"    HeightRequest="78" BackgroundColor="#6aa2b8" >
-                       <Label   x:Name="ContentView_Scripting_label_read" Margin="17,22,0,0" FontSize="20" TextColor="White"  
+                       <Label   x:Name="ContentView_Scripting_label_read" LineBreakMode="TailTruncation" Margin="17,22,0,0" FontSize="20" TextColor="White"  
                                 Text="Push Button to START" > </Label>  
                 </StackLayout>
 

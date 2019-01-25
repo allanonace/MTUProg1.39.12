@@ -246,7 +246,7 @@
                              
 
 
-                               <Label   x:Name="label_read" Margin="17,22,0,0" FontSize="20" TextColor="White" 
+                               <Label   x:Name="label_read" Margin="17,22,0,0" FontSize="20" TextColor="White" LineBreakMode="TailTruncation"
                                         Text="Push Button to START" > </Label>
     
                               
