@@ -2243,6 +2243,8 @@ namespace aclara_meters.view
 
         private void OpenSettingsTapped(object sender, EventArgs e)
         {
+
+
             //printer.Suspend();
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
@@ -2255,11 +2257,26 @@ namespace aclara_meters.view
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
+           
+
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
                 try
                 {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        #region New Circular Progress bar Animations    
+
+                        DeviceList.IsRefreshing = false;
+                        backdark_bg.IsVisible = true;
+                        indicator.IsVisible = true;
+                        background_scan_page.IsEnabled = false;
+
+                        #endregion
+
+                    });
+
                     if (FormsApp.ble_interface.IsOpen())
                     {
                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
@@ -2277,6 +2294,22 @@ namespace aclara_meters.view
                         background_scan_page_detail.Opacity = 1;
 
                         shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //   if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            #region New Circular Progress bar Animations    
+
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+
+                            #endregion
+
+
+                        });
+
                         return;
                     }
                     else
@@ -2298,6 +2331,22 @@ namespace aclara_meters.view
                         background_scan_page_detail.Opacity = 1;
 
                         shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false; 
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            #region New Circular Progress bar Animations    
+
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+
+                            #endregion
+
+
+                        });
+
                     }
                 }
                 catch (Exception i2)
