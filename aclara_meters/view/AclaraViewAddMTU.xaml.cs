@@ -3598,6 +3598,8 @@ namespace aclara_meters.view
 
         private void misc_command()
         {
+            miscview.Opacity = 0;
+
             port1label.Opacity = 0.5;
             misclabel.Opacity = 1;
             port2label.Opacity = 0.5;
@@ -3609,10 +3611,15 @@ namespace aclara_meters.view
             port1view.IsVisible = false;
             port2view.IsVisible = false;
             miscview.IsVisible = true;
+
+            miscview.FadeTo(1, 200);
+
         }
 
         private void port2_command()
         {
+            port2view.Opacity = 0;
+
             port1label.Opacity = 0.5;
             misclabel.Opacity = 0.5;
             port2label.Opacity = 1;
@@ -3625,11 +3632,15 @@ namespace aclara_meters.view
             port2view.IsVisible = true;
             miscview.IsVisible = false;
 
+            port2view.FadeTo(1, 200);
+
 
         }
 
         private void port1_command()
         {
+            port1view.Opacity = 0;
+
             port1label.Opacity = 1;
             misclabel.Opacity = 0.5;
             port2label.Opacity = 0.5;
@@ -3638,9 +3649,15 @@ namespace aclara_meters.view
             misclabel.FontSize = 19;
             port2label.FontSize = 19;
 
+           
+
             port1view.IsVisible = true;
             port2view.IsVisible = false;
             miscview.IsVisible = false;
+
+            port1view.FadeTo(1, 200);
+
+
         }
 
         private void ReturnToMainView(object sender, EventArgs e)

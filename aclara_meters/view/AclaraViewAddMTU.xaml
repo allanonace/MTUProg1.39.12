@@ -1450,11 +1450,13 @@
                         </Grid.RowDefinitions>
                     
                <StackLayout  Margin="0,46,0,0" InputTransparent="true"  VerticalOptions="End">
+                        
+                        
                     <!-- LOWER BAR -->
                         
-                <StackLayout  IsVisible="true"  Margin="0,28,0,0"   HeightRequest="128" BackgroundColor="#6aa2b8" >
+                <StackLayout  IsVisible="true"  Margin="0,40,0,0"   HeightRequest="128" BackgroundColor="#6aa2b8" >
      
-                       <Label   InputTransparent="true"   x:Name="label_read" Margin="17,22,0,44" FontSize="20" TextColor="White" 
+                       <Label   InputTransparent="true"   x:Name="label_read" Margin="17,18,0,44" FontSize="20" TextColor="White" 
                                 Text="Push Button to START" > </Label>
 
                       

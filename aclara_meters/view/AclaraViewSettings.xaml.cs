@@ -745,30 +745,54 @@ namespace aclara_meters.view
             switch (valor)
             {
                 case 1:
+                    about_block.Opacity = 0;
+                    logs_block.Opacity = 0;
+                    sync_block.Opacity = 0;
+
                     about_block.IsVisible = true; logs_block.IsVisible = false; sync_block.IsVisible = false;
                     about_block.IsEnabled = true; logs_block.IsEnabled = false; sync_block.IsEnabled = false;
                     about_button_text.Opacity = 1; about_button.Opacity = 1;
                     logs_button_text.Opacity = 0.5; logs_button.Opacity = 0.5;
                     sync_button_text.Opacity = 0.5; sync_button.Opacity = 0.5;
                     title_text.Text = "About";
+
+                    about_block.FadeTo(1, 200);
+
                     break;
 
                 case 2:
+
+                    about_block.Opacity = 0;
+                    logs_block.Opacity = 0;
+                    sync_block.Opacity = 0;
+
+
                     about_block.IsVisible = false; logs_block.IsVisible = true; sync_block.IsVisible = false;
                     about_block.IsEnabled = false; logs_block.IsEnabled = true; sync_block.IsEnabled = false;
                     about_button_text.Opacity = 0.5; about_button.Opacity = 0.5;
                     logs_button_text.Opacity = 1; logs_button.Opacity = 1;
                     sync_button_text.Opacity = 0.5; sync_button.Opacity = 0.5;
                     title_text.Text = "Activity Logs";
+
+                    logs_block.FadeTo(1, 200);
+
                     break;
 
                 case 3:
+
+                    about_block.Opacity = 0;
+                    logs_block.Opacity = 0;
+                    sync_block.Opacity = 0;
+
                     about_block.IsVisible = false; logs_block.IsVisible = false; sync_block.IsVisible = true;
                     about_block.IsEnabled = false; logs_block.IsEnabled = false; sync_block.IsEnabled = true;
                     about_button_text.Opacity = 0.5; about_button.Opacity = 0.5;
                     logs_button_text.Opacity = 0.5; logs_button.Opacity = 0.5;
                     sync_button_text.Opacity = 1; sync_button.Opacity = 1;
                     title_text.Text = "File Syncronization";
+
+                    sync_block.FadeTo(1, 200);
+
                     break;
             }
         }
