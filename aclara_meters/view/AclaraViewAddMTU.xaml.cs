@@ -4419,10 +4419,8 @@ namespace aclara_meters.view
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
 
-
-            if (!page_to_controller.Equals(""))
+            if (Device.Idiom == TargetIdiom.Tablet && !isLogout)
             {
-
                 SwitchToControler(page_to_controller);
             }
             else
@@ -4466,9 +4464,10 @@ namespace aclara_meters.view
                         }
                     });
                 });
-
-                #endregion
             }
+
+            #endregion
+
 
 
         }
@@ -5306,6 +5305,15 @@ namespace aclara_meters.view
                     ReadMTUChangeView.IsVisible = false;
                     listaMTUread.IsVisible = true;
                     listaMTUread.ItemsSource = FinalReadListView;
+
+                   #region Hide button
+
+                    bg_read_mtu_button_img.IsEnabled = false;
+                    bg_read_mtu_button_img.Opacity = 0;
+
+                    #endregion
+
+
                 }));
             });
 
