@@ -27,7 +27,6 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
-
   <Register>
     <Id>MtuType</Id>
     <Description>MTU Type</Description>
@@ -127,16 +126,6 @@
     <Write>false</Write>
     <CustomGet>(_val_ * 9.766 * 2) + 250</CustomGet>
 	<CustomSet/>
-  </Register>
-  <Register>
-    <Id>MTUFirmwareVersionFormatFlag</Id>
-    <Description>MTU software version</Description>
-    <Type>int</Type>
-    <Address>244</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
   </Register>
   <Register>
     <Id>P1TiltAlarm</Id>
@@ -556,15 +545,91 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>    
-   <Overload>
-    <Id>MtuSoftware</Id>
-    <Description>Mtu Firmware version</Description>
-	<Type>string</Type>
+
+  <Overload>
+    <Id>MtuSoftVersion</Id>
+    <Description>Mtu software/firmware version</Description>
+    <Type>int</Type>
     <Registers>
-      <Register>MTUFirmwareVersionFormatFlag</Register>
+      <Register>MtuSoftVersionLegacy</Register>
+      <Register>MtuSoftVersionNew</Register>
     </Registers>
     <CustomGet>method</CustomGet>
-  </Overload>   
+  </Overload>
+  <Overload>
+    <Id>MtuSoftVersionString</Id>
+    <Description>Mtu software version</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>MtuSoftRevYear</Register>
+      <Register>MtuSoftRevMonth</Register>
+      <Register>MtuSoftBuildNumber</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  
+  <Register>
+    <Id>MtuSoftVersionLegacy</Id>
+    <Description>MTU software version for legacy handheld tools</Description>
+    <Type>int</Type>
+    <Address>1</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>MtuSoftVersionNew</Id>
+    <Description>MTU software version</Description>
+    <Type>int</Type>
+    <Address>244</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  
+  <Register>
+    <Id>MtuSoftBuildNumber</Id>
+    <Description>MTU software build number</Description>
+    <Type>int</Type>
+    <Address>240</Address>
+    <Size>2</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>MtuSoftRevYear</Id>
+    <Description>MTU software revision year</Description>
+    <Type>int</Type>
+    <Address>245</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>MtuSoftRevMonth</Id>
+    <Description>MTU software revision month</Description>
+    <Type>int</Type>
+    <Address>246</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>MtuSoftRevDay</Id>
+    <Description>MTU software revision day</Description>
+    <Type>int</Type>
+    <Address>247</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+
   <Overload>
     <Id>InstallConfirmationStatus</Id>
     <Description>Installation Confirmation Status</Description>

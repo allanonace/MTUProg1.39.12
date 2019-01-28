@@ -128,8 +128,40 @@
     <CustomGet>(_val_ * 10) + 1500</CustomGet>
 	<CustomSet/>
   </Register>
+  
+  <Overload>
+    <Id>MtuSoftVersion</Id>
+    <Description>Mtu software/firmware version</Description>
+    <Type>int</Type>
+    <Registers>
+      <Register>MtuSoftFormatFlag</Register>
+    </Registers>
+    <CustomGet>method:MtuSoftVersion342x_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>MtuSoftVersionString</Id>
+    <Description>Mtu Firmware version</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>MtuSoftVersionMajor</Register>
+      <Register>MtuSoftVersionMinor</Register>
+      <Register>MtuSoftBuildNumber</Register>
+    </Registers>
+    <CustomGet>method:MtuSoftVersionString342x_Get</CustomGet>
+  </Overload>
+  
   <Register>
-    <Id>MTUFirmwareVersionFormatFlag</Id>
+    <Id>MtuSoftBuildNumber</Id>
+    <Description>MTU software build number</Description>
+    <Type>int</Type>
+    <Address>240</Address>
+    <Size>2</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>MtuSoftFormatFlag</Id>
     <Description>MTU software version</Description>
     <Type>int</Type>
     <Address>244</Address>
@@ -138,9 +170,8 @@
     <CustomGet/>
 	<CustomSet/>
   </Register>
-  
   <Register>
-    <Id>MTUFirmwareVersionMaior</Id>
+    <Id>MtuSoftVersionMajor</Id>
     <Description>MTU software version</Description>
     <Type>int</Type>
     <Address>245</Address>
@@ -150,7 +181,7 @@
 	<CustomSet/>
   </Register>
   <Register>
-    <Id>MTUFirmwareVersionMinor</Id>
+    <Id>MtuSoftVersionMinor</Id>
     <Description>MTU software version</Description>
     <Type>int</Type>
     <Address>246</Address>
@@ -159,16 +190,7 @@
     <CustomGet/>
 	<CustomSet/>
   </Register>
-  <Register>
-    <Id>MTUFirmwareVersionBuild</Id>
-    <Description>MTU software version</Description>
-    <Type>int</Type>
-    <Address>240</Address>
-    <Size>2</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	<CustomSet/>
-  </Register>
+  
   <Register>
     <Id>P1StatusFlag</Id>
     <Description>Raw P1 Status</Description>
@@ -755,18 +777,7 @@
       <Register>PCBProductRevision</Register>
     </Registers>
     <CustomGet>method</CustomGet>
-  </Overload>    
-   <Overload>
-    <Id>MtuSoftware</Id>
-    <Description>Mtu Firmware version</Description>
-	<Type>string</Type>
-    <Registers>
-      <Register>MTUFirmwareVersionMaior</Register>
-	  <Register>MTUFirmwareVersionMinor</Register>
-	  <Register>MTUFirmwareVersionBuild</Register>
-    </Registers>
-    <CustomGet>method</CustomGet>
-  </Overload>   
+  </Overload>
   <Overload>
     <Id>InstallConfirmationStatus</Id>
     <Description>Installation Confirmation Status</Description>
@@ -795,7 +806,6 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
-
   <Overload>
     <Id>TiltTamperStatus</Id>
     <Description>Tilt Tamper Status</Description>

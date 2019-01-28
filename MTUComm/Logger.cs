@@ -149,10 +149,8 @@ namespace MTUComm
 
         public void addAtrribute(XElement node, String attname, String att_value)
         {
-            if(att_value != null && att_value.Length > 0)
-            {
+            if ( att_value != null && att_value.Length > 0 )
                 node.Add(new XAttribute(attname, att_value));
-            }
         }
 
         public void logLogin(String username)

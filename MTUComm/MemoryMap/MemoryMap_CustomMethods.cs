@@ -22,8 +22,8 @@ namespace MTUComm.MemoryMap
         private const string PCBFORMAT   = "{0:000000000}";
         private const string NTAVAILABLE = "Not Available";
 
-        private const string MTUFORMAT_1 = "Version {0:00}.{1:00}.{2:0000}";
-        private const string MTUFORMAT_2 = "Version {0:00}";
+        private const string MTU_SOFTVERSION_LONG = "Version {0:00}.{1:00}.{2:0000}";
+        private const string MTU_SOFTVERSION_SMALL = "Version {0:00}";
 
         private const string MTUVLFORMAT = "0.00 V";
 
@@ -142,19 +142,6 @@ namespace MTUComm.MemoryMap
             return result;
         }
 
-        /*
-        public string MtuSoftware_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
-        {
-            if ( MemoryOverload.registerIds.Length > 1 )
-                return string.Format ( MTUFORMAT_1, 
-                    MemoryRegisters.MTUFirmwareVersionMaior.Value,
-                    MemoryRegisters.MTUFirmwareVersionMinor.Value,
-                    MemoryRegisters.MTUFirmwareVersionBuild.Value );
-
-            return string.Format( MTUFORMAT_2, MemoryRegisters.MTUFirmwareVersionFormatFlag.Value);
-        }
-        */
-
         public string Encryption_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             return ( MemoryRegisters.Encrypted.Value ) ? YES : NO;
@@ -263,21 +250,34 @@ namespace MTUComm.MemoryMap
         public int MtuSoftVersion_Get ( MemoryOverload<int> memoryOverload, dynamic MemoryRegisters )
         {
             if ( MemoryRegisters.MtuSoftVersionNew.Value == 255 )
-                return MemoryRegisters.MtuSoftVersionLegacy;
+                return MemoryRegisters.MtuSoftVersionLegacy.Value;
             return MemoryRegisters.MtuSoftVersionNew.Value;
         }
 
         public string MtuSoftVersionString_Get ( MemoryOverload<string> memoryOverload, dynamic MemoryRegisters )
         {
-            int mtuSoftVersionNew = MemoryRegisters.MtuSoftVersion.Value;
+            int mtuSoftVersion = MemoryRegisters.MtuSoftVersion.Value;
         
-            if ( mtuSoftVersionNew == 254 )
-                return MemoryRegisters.MtuSoftRevMonth.Value.ToString().PadLeft(2,'0') +
-                       "." +
-                       MemoryRegisters.MtuSoftRevDay.Value.ToString().PadLeft(2,'0')+
-                       "." +
-                       MemoryRegisters.MtuSoftRevYear.Value.ToString().PadLeft(4,'0');
-            return mtuSoftVersionNew.ToString ();
+            if ( mtuSoftVersion == 254 )
+                return string.Format ( MTU_SOFTVERSION_LONG,
+                    MemoryRegisters.MtuSoftRevYear    .Value,
+                    MemoryRegisters.MtuSoftRevMonth   .Value,
+                    MemoryRegisters.MtuSoftBuildNumber.Value );
+            
+            return string.Format ( MTU_SOFTVERSION_SMALL, mtuSoftVersion );
+        }
+
+        public int MtuSoftVersion342x_Get ( MemoryOverload<int> memoryOverload, dynamic MemoryRegisters )
+        {
+            return MemoryRegisters.MtuSoftFormatFlag.Value;
+        }
+
+        public string MtuSoftVersionString342x_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        {
+            return string.Format ( MTU_SOFTVERSION_LONG, 
+                MemoryRegisters.MtuSoftVersionMajor.Value,
+                MemoryRegisters.MtuSoftVersionMinor.Value,
+                MemoryRegisters.MtuSoftBuildNumber .Value );
         }
 
         #endregion

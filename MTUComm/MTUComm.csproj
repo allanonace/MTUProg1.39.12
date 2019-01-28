@@ -34,4 +34,7 @@
     <None Remove=".Configuration.cs.swp" />
     <None Remove="XMLs\Interface.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="TaskExtensions.cs" />
+  </ItemGroup>
 </Project>

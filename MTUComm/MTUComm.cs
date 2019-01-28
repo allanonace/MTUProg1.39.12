@@ -255,7 +255,7 @@ namespace MTUComm
         }
 
         private AddMtuLog addMtuLog;
-
+        
         #endregion
 
         #region Initialization

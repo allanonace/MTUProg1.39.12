@@ -228,7 +228,7 @@
   
   <Overload>
     <Id>MtuSoftVersion</Id>
-    <Description>Mtu software version</Description>
+    <Description>Mtu software/firmware version</Description>
     <Type>int</Type>
     <Registers>
       <Register>MtuSoftVersionLegacy</Register>
@@ -241,10 +241,9 @@
     <Description>Mtu software version</Description>
     <Type>string</Type>
     <Registers>
-      <Register>MtuSoftVersion</Register>
       <Register>MtuSoftRevYear</Register>
       <Register>MtuSoftRevMonth</Register>
-      <Register>MtuSoftRevDay</Register>
+      <Register>MtuSoftBuildNumber</Register>
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
@@ -270,6 +269,16 @@
     <CustomSet/>
   </Register>
   
+  <Register>
+    <Id>MtuSoftBuildNumber</Id>
+    <Description>MTU software build number</Description>
+    <Type>int</Type>
+    <Address>240</Address>
+    <Size>2</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
   <Register>
     <Id>MtuSoftRevYear</Id>
     <Description>MTU software revision year</Description>
