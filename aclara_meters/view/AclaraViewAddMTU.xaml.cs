@@ -2781,7 +2781,7 @@ namespace aclara_meters.view
             if ( ! DEBUG_AUTO_MODE_ON &&
                  ! this.ValidateFields ( ref msgError ) )
             {
-                DisplayAlert ( "Error", "Mandatory '" + msgError + "' field is not or incorrectly filled in", "Ok" );
+                DisplayAlert ( "Error", "Mandatory '" + msgError + "' field is incorrectly filled", "OK" );
                 return;
             }
 
