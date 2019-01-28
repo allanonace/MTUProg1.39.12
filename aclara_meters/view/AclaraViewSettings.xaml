@@ -1161,103 +1161,17 @@
 
 
         
-       <!--   DIALOGS   -->
+           <!--   DIALOGS   -->
            <Image BackgroundColor="Black"  x:Name="dialog_open_bg" WidthRequest="1024"  IsVisible="false"
                   HeightRequest="1024" Opacity="0.5">
                 
             </Image>
 
 
-        <!-- POP UP START -->
 
 
-         <ContentView   Scale="1.1" IsVisible="false" Margin="-21"
-                        HeightRequest="396" 
-                        x:Name="Popup_start" 
-                        
-            RelativeLayout.XConstraint=
-              "{ConstraintExpression Type=RelativeToParent,
-                                     Property=Width,
-                                     Factor=0.19}"
-            RelativeLayout.WidthConstraint=
-              "{ConstraintExpression Type=RelativeToParent,
-                                     Property=Width,
-                                     Factor=0.620}"
-            RelativeLayout.YConstraint=
-              "{ConstraintExpression Type=RelativeToParent,
-                                     Property=Height,
-                                     Factor=0.24}"
-
-                          
-            >
-                
-           
-   
-                <Frame   CornerRadius="6"  HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">
-                 <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" > 
-
-                     <StackLayout  IsVisible="true" 
-                                  Margin="0" Opacity="1">
-                 
-                  <Label IsVisible="true" 
-                            Margin="16,16,0,4" FontSize="20" TextColor="#6aa2b8" Text="PORT *:"  />
-                           
-                    
-
-                     <Image Margin="0,0,0,0" HeightRequest="1" WidthRequest="1024" BackgroundColor="#6ba2b7"/>
-                     
-
-                      
-                      <Label Text="Other" Margin="16,4,0,0" VerticalOptions="Center" Font="Bold, 16"
-                             TextColor="Black"/>
-                            
-
-                          <Frame CornerRadius="6" HeightRequest="96" Margin="12" BackgroundColor="#7a868c"  >
-                               <Frame x:Name="cancelReasonOtherInputContainer" CornerRadius="6"  HeightRequest="96"  Margin="-7" BackgroundColor="White"  >
-                                    <StackLayout Margin="1"  Orientation="Vertical" HorizontalOptions="FillAndExpand" >
-                                        
-                                     <local:EditorMultiline  Margin="-7"  HorizontalOptions="FillAndExpand"  x:Name="cancelReasonOtherInput" TextColor="Black" 
-                                         WidthRequest="200"  HeightRequest="96" 
-                                     FontSize="18" 
-                                                              
-                                    ></local:EditorMultiline>
-
-                                    </StackLayout>
-                             </Frame> 
-                            
-                         </Frame> 
-                        
-                     <Button IsVisible="true"  
-                             x:Name="submit_dialog" Margin="-2,0,-2,-2" Text="SUBMIT" WidthRequest="320"  BorderWidth="1"  
-                             CornerRadius="0" FontSize="18" BorderColor="Gray" TextColor="White" BackgroundColor="#6aa2b8">  </Button>    
-
-                     </StackLayout>
-                    
-               </StackLayout>
-                
-            </Frame>
-            
-            </ContentView>
-
-        
-       <!-- POP UP END -->
-
-
-
-
-
-
-
-
-        
-
-
-
-
-
-
-          <ContentView     Scale="1.2" IsVisible="false" Margin="-18"
-                        HeightRequest="224" 
+          <ContentView     Scale="1.2" IsVisible="false"
+                        HeightRequest="200" 
                         x:Name="turnoff_mtu_background" 
                         
             RelativeLayout.XConstraint=
@@ -1492,167 +1406,174 @@
                      </StackLayout>
 
 
-                    
 
 
 
 
-                    <!--    -->
 
 
-                       <StackLayout  x:Name="dialog_servicePortId" IsVisible="false" HorizontalOptions="CenterAndExpand" 
-                                     VerticalOptions="CenterAndExpand"
+                     <StackLayout  x:Name="dialog_AddMTUAddMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
-                     
+            
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
-                                FontSize="18" Text="Please, re-enter the Service Port ID">
+                                FontSize="20" Text="Install new MTU / Add Meter, and prepare for reading MTU">
                             
                         </Label>
-
-
-                         <Frame CornerRadius="6" HeightRequest="30" Margin="12,4,12,0" BackgroundColor="#7a868c"  >
-                              <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                        <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                            
-                                             <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                    HeightRequest="40"   x:Name="serviceCheckEntry" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                    Placeholder="" PlaceholderColor="#7a868c" 
-                                                    FontSize="17" HorizontalTextAlignment="Start"/>
-                                        </StackLayout>
-                                 </Frame> 
-                            
-                        </Frame>
-
-                         <Label   HorizontalTextAlignment="Start" TextColor="Red" x:Name="errorServicePort" IsVisible="false"
-                                FontSize="12" Margin="12,0,0,0" Text="Entered fields are not equal">
-                            
-                        </Label>
-                        
+                    
                  
                         <StackLayout Margin="8,8,0,0" Orientation="Horizontal"  >
-                                
-
                                   <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
-                                        TextColor="#6aa2b8"
-                                         FontSize="20"  Text="Ok">
+                                  TextColor="#6aa2b8"
+                                         FontSize="20"  Text="OK">
 
                                            <Label.GestureRecognizers>
-                                            <TapGestureRecognizer x:Name="servicePortId_ok" />
+                                            <TapGestureRecognizer x:Name="dialog_AddMTUAddMeter_ok" />
                                         </Label.GestureRecognizers>
 
                                 
-                                  </Label>
-
-
+                                 </Label>
 
                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
                                        TextColor="#6aa2b8"
                                         FontSize="20" Text="Cancel"> 
                                 
                                            <Label.GestureRecognizers>
-                                            <TapGestureRecognizer x:Name="servicePortId_cancel" />
+                                            <TapGestureRecognizer x:Name="dialog_AddMTUAddMeter_cancel" />
                                         </Label.GestureRecognizers>
                                 
 
                                 </Label>
-                                
+
                           </StackLayout>
                       
 
-
-                        
                      </StackLayout>
 
-
-
-
-
-
-
                     
-                    <!--    -->
-
-
-
-
-                    <!--    -->
-
-
-                       <StackLayout  x:Name="dialog_fieldOrder" IsVisible="false" HorizontalOptions="CenterAndExpand" 
-                                     VerticalOptions="CenterAndExpand"
+                      <StackLayout  x:Name="dialog_AddMTUReplaceMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
-                     
+            
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
-                                FontSize="18" Text="Please, re-enter the Field order">
+                                FontSize="20" Text="Install new MTU / Replace Meter, and prepare for reading MTU">
                             
                         </Label>
-
-
-                         <Frame CornerRadius="6" HeightRequest="30" Margin="12,4,12,0" BackgroundColor="#7a868c"  >
-                              <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White"  >
-                                        <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                            
-                                             <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                    HeightRequest="40"   x:Name="fieldOrderCheckEntry" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                    Placeholder="" PlaceholderColor="#7a868c" 
-                                                    FontSize="17" HorizontalTextAlignment="Start"/>
-                                        </StackLayout>
-                                 </Frame> 
-                            
-                        </Frame>
-
-                         <Label   HorizontalTextAlignment="Start" TextColor="Red" x:Name="errorFieldOrder" IsVisible="false"
-                                FontSize="12" Margin="12,0,0,0" Text="Entered fields are not equal">
-                            
-                        </Label>
-                        
+                    
                  
                         <StackLayout Margin="8,8,0,0" Orientation="Horizontal"  >
-                                
-
                                   <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
-                                        TextColor="#6aa2b8"
-                                         FontSize="20"  Text="Ok">
+                                  TextColor="#6aa2b8"
+                                         FontSize="20"  Text="OK">
 
                                            <Label.GestureRecognizers>
-                                            <TapGestureRecognizer x:Name="fieldOrder_ok" />
+                                            <TapGestureRecognizer x:Name="dialog_AddMTUReplaceMeter_ok" />
                                         </Label.GestureRecognizers>
 
                                 
-                                  </Label>
-
-
+                                 </Label>
 
                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
                                        TextColor="#6aa2b8"
                                         FontSize="20" Text="Cancel"> 
                                 
                                            <Label.GestureRecognizers>
-                                            <TapGestureRecognizer x:Name="fieldOrder_cancel" />
+                                            <TapGestureRecognizer x:Name="dialog_AddMTUReplaceMeter_cancel" />
                                         </Label.GestureRecognizers>
                                 
 
                                 </Label>
-                                
+
                           </StackLayout>
                       
 
+                     </StackLayout>
 
-                        
+
+
+
+                      <StackLayout  x:Name="dialog_ReplaceMTUReplaceMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                                  Margin="0" Opacity="1" >
+            
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="20" Text="Replace MTU / Replace Meter, and prepare for reading MTU">
+                            
+                        </Label>
+                    
+                 
+                        <StackLayout Margin="8,8,0,0" Orientation="Horizontal"  >
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                  TextColor="#6aa2b8"
+                                         FontSize="20"  Text="OK">
+
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_ReplaceMTUReplaceMeter_ok" />
+                                        </Label.GestureRecognizers>
+
+                                
+                                 </Label>
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                       TextColor="#6aa2b8"
+                                        FontSize="20" Text="Cancel"> 
+                                
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_ReplaceMTUReplaceMeter_cancel" />
+                                        </Label.GestureRecognizers>
+                                
+
+                                </Label>
+
+                          </StackLayout>
+                      
+
+                     </StackLayout>
+                  
+
+
+
+
+                     <StackLayout  x:Name="dialog_AddMTU" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                                  Margin="0" Opacity="1" >
+            
+                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
+                                FontSize="20" Text="Install new MTU, and prepare for reading MTU">
+                            
+                        </Label>
+                    
+                 
+                        <StackLayout Margin="8,8,0,0" Orientation="Horizontal"  >
+                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
+                                  TextColor="#6aa2b8"
+                                         FontSize="20"  Text="OK">
+
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_AddMTU_ok" />
+                                        </Label.GestureRecognizers>
+
+                                
+                                 </Label>
+
+                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
+                                       TextColor="#6aa2b8"
+                                        FontSize="20" Text="Cancel"> 
+                                
+                                           <Label.GestureRecognizers>
+                                            <TapGestureRecognizer x:Name="dialog_AddMTU_cancel" />
+                                        </Label.GestureRecognizers>
+                                
+
+                                </Label>
+
+                          </StackLayout>
+                      
+
                      </StackLayout>
 
 
 
 
 
-
-
                     
-                    <!--    -->
 
-
-
-                    
                      </StackLayout>
 
 
