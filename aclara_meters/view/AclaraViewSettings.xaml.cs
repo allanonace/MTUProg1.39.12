@@ -19,6 +19,10 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewSettings
     {
+        private const string TEXT_COPYR   = "Copyright © 2018 Aclara Technologies LLC.";
+        private const string TEXT_SUPPORT = "System tech Support: 1-866-205-5058";
+        private const string TEXT_VERSION = "Application Version: 1.33.2";
+        private const string TEXT_LICENSE = "Licensed to: ";
 
         private IUserDialogs dialogsSaved;
         private CustomSampleViewModel _viewModelread;
@@ -735,7 +739,10 @@ namespace aclara_meters.view
 
             #region Customer name
 
-            customers_name.Text = "Licensed to: " + FormsApp.config.global.CustomerName;
+            customers_copyr  .Text = TEXT_COPYR;
+            customers_support.Text = TEXT_SUPPORT;
+            customers_version.Text = TEXT_VERSION;
+            customers_name   .Text = TEXT_LICENSE + FormsApp.config.global.CustomerName;
 
             #endregion
 
