@@ -83,7 +83,7 @@ namespace aclara_meters.viewmodel
             // Path where the file should be saved once downloaded (locally)
             //string pathLocalFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "User.txt");
             //string[] arr = XDocument.Load(pathLocalFile).Descendants("Users").Select(element => element.Value).ToArray();
-           
+
             /*
 
             XmlSerializer serializer = new XmlSerializer(typeof(XML.XmlElementList.Users));
@@ -101,6 +101,14 @@ namespace aclara_meters.viewmodel
             }
 
             */
+
+            #region We should check user from local storage's User.xml (Users --> User -- > Name Password ) 
+
+            //The magic goes here...
+
+
+            #endregion
+
             return username == Constants.Username && password == Constants.Password;
         }
 

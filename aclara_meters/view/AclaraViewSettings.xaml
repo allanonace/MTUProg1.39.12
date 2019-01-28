@@ -66,7 +66,21 @@
                                             </Image.GestureRecognizers>       
                                             
                                         </Image>
+                                        
+                        
+                                        <Image  x:Name="hamburger_icon_home" IsVisible="false"
+                                                Margin="4,24,0,0"  HeightRequest="56"
+                                                Scale="1" 
+                                                Source="back_menu_puck.png"  
+                                                HorizontalOptions="Start">
 
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer  x:Name="back_button_home"  NumberOfTapsRequired="1" />
+                                            </Image.GestureRecognizers>       
+                                            
+                                        </Image>
+                                        
+                                        
                                   </StackLayout>
                                    
                                  <StackLayout  Margin="-20,34,-20,-44"  Orientation="Horizontal" 

@@ -493,6 +493,19 @@ namespace aclara_meters.view
 
             logoff_no.Tapped += LogOffNoTapped;
             logoff_ok.Tapped += LogOffOkTapped;
+
+
+            if (Device.Idiom == TargetIdiom.Tablet)
+            {
+                hamburger_icon_home.IsVisible = true;
+                hamburger_icon_home_detail.IsVisible = true;
+
+                hamburger_icon_home.Opacity = 0;
+                hamburger_icon_home_detail.Opacity = 0;
+            }
+
+        
+        
         }
 
 
@@ -1461,6 +1474,7 @@ namespace aclara_meters.view
 
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
         {
+
             FormsApp.ble_interface.Close();
 
             peripheralManualDisconnection = true;
@@ -1488,7 +1502,15 @@ namespace aclara_meters.view
 
         public void externalReconnect(Boolean reassociate)
         {
-            FormsApp.ble_interface.Open(FormsApp.peripheral, reassociate);
+            try
+            {
+                FormsApp.ble_interface.Open(FormsApp.peripheral, reassociate);
+            }
+            catch (Exception e5)
+            {
+                Console.WriteLine(e5.StackTrace);
+            }
+           
         }
 
         // Event for Menu Item selection, here we are going to handle navigation based

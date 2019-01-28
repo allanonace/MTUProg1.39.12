@@ -403,6 +403,35 @@ namespace aclara_meters.view
             dialog_AddMTU_ok.Tapped += dialog_AddMTU_okTapped;
             dialog_AddMTU_cancel.Tapped += dialog_AddMTU_cancelTapped;
 
+
+            if (Device.Idiom == TargetIdiom.Tablet)
+            {
+                hamburger_icon_home.IsVisible = true;
+                back_button_home.Tapped += TapToHome_Tabletmode;
+            }
+
+
+        }
+
+        private void TapToHome_Tabletmode(object sender, EventArgs e)
+        {
+
+            int contador = Navigation.NavigationStack.Count;
+
+            while (contador > 2)
+            {
+                try
+                {
+                    Navigation.PopAsync(false);
+                }
+                catch (Exception v)
+                {
+                    Console.WriteLine(v.StackTrace);
+                }
+                contador--;
+            }
+
+
         }
 
 

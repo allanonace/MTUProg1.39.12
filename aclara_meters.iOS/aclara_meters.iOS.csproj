@@ -333,6 +333,7 @@
     <BundleResource Include="Resources\rep_mtu_rep_meter_btn_black.png" />
     <BundleResource Include="Resources\rep_mtu_rep_meter_btn.png" />
     <BundleResource Include="Resources\shadow_effect_tablet.png" />
+    <BundleResource Include="Resources\back_menu_puck.png" />
   </ItemGroup>
   <ItemGroup>
     <ITunesArtwork Include="iTunesArtwork" />
