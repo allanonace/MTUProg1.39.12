@@ -1510,28 +1510,13 @@ namespace aclara_meters.view
             FormsApp.ble_interface.Close();
             background_scan_page.IsEnabled = true;
 
-            int contador = Navigation.NavigationStack.Count;
-            while (contador > 0)
-            {
-                try
-                {
-                    Navigation.PopAsync(false);
-                }
-                catch (Exception v)
-                {
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
+         
+            Navigation.PopToRootAsync(false);
 
-            try
-            {
-                Navigation.PopToRootAsync(false);
-            }
-            catch (Exception v1)
-            {
-                Console.WriteLine(v1.StackTrace);
-            }
+            
+
+
+
 
 
         }

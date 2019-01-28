@@ -1643,6 +1643,16 @@ namespace aclara_meters.view
             {
                 case "ReadMTU":
 
+
+                    #region New Circular Progress bar Animations    
+
+                    DeviceList.IsRefreshing = false;
+                    backdark_bg.IsVisible = true;
+                    indicator.IsVisible = true;
+
+                    #endregion
+
+
                     #region Read Mtu Controller
 
                     background_scan_page.Opacity = 1;
@@ -1679,6 +1689,15 @@ namespace aclara_meters.view
                                 ContentNav.IsVisible = false;
                             }
                             shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+
+                            #region New Circular Progress bar Animations    
+
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+
+                            #endregion
+
                         })
                     );
 

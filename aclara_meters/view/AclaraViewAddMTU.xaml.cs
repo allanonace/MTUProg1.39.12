@@ -3072,51 +3072,60 @@ namespace aclara_meters.view
                         switch (page)
                         {
                             case "ReadMTU":
-                                NavigationController("ReadMTU");
+                                if(!page_to_controller.Equals(page))
+                                    NavigationController("ReadMTU");
                                 //OnCaseReadMTU();
                                 break;
 
                             case "AddMTU":
-                                NavigationController("AddMTU");
+                                if (!page_to_controller.Equals(page))
+                                    NavigationController("AddMTU");
                                 //OnCaseAddMTU();
                                 break;
 
                             case "turnOff":
-                                NavigationController("turnOff");
+                                if (!page_to_controller.Equals(page))
+                                    NavigationController("turnOff");
                                 //OnCaseTurnOff();
                                 break;
 
                             case "InstallConfirm":
-                                NavigationController("InstallConfirm");
+                                if (!page_to_controller.Equals(page))
+                                    NavigationController("InstallConfirm");
                                 //OnCaseInstallConfirm();
                                 break;
 
                             case "replaceMTU":
-                                NavigationController("replaceMTU");
+                                if (!page_to_controller.Equals(page))
+                                    NavigationController("replaceMTU");
                                 //OnCaseReplaceMTU();
                                 break;
 
                             case "replaceMeter":
-                                //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
-                                NavigationController("replaceMeter");
+                                if (!page_to_controller.Equals(page))
+                                    //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                                    NavigationController("replaceMeter");
                                 //OnCaseReplaceMeter();
                                 break;
 
                             case "AddMTUAddMeter":
-                                //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
-                                NavigationController("AddMTUAddMeter");
+                                if (!page_to_controller.Equals(page))
+                                    //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                                    NavigationController("AddMTUAddMeter");
                                 //OnCaseAddMTUAddMeter();
                                 break;
 
                             case "AddMTUReplaceMeter":
-                                //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
-                                NavigationController("AddMTUReplaceMeter");
+                                if (!page_to_controller.Equals(page))
+                                    //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                                    NavigationController("AddMTUReplaceMeter");
                                 //OnCaseAddMTUReplaceMeter();
                                 break;
 
                             case "ReplaceMTUReplaceMeter":
-                                //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
-                                NavigationController("ReplaceMTUReplaceMeter");
+                                if (!page_to_controller.Equals(page))
+                                    //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                                    NavigationController("ReplaceMTUReplaceMeter");
                                 //OnCaseReplaceMTUReplaceMeter();
                                 break;
 
@@ -3174,6 +3183,15 @@ namespace aclara_meters.view
             {
                 case "ReadMTU":
 
+                    #region New Circular Progress bar Animations    
+
+             
+                    backdark_bg.IsVisible = true;
+                    indicator.IsVisible = true;
+
+                    #endregion
+
+
                     #region Read Mtu Controller
 
                     background_scan_page.Opacity = 1;
@@ -3207,6 +3225,14 @@ namespace aclara_meters.view
                                 ContentNav.IsVisible = false;
                             }
                             shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+
+                            #region New Circular Progress bar Animations    
+
+                  
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+
+                            #endregion
                         })
                     );
 
@@ -4134,6 +4160,7 @@ namespace aclara_meters.view
 
                             #region New Circular Progress bar Animations    
 
+                          
                             backdark_bg.IsVisible = false;
                             indicator.IsVisible = false;
                             background_scan_page.IsEnabled = true;
@@ -4426,28 +4453,10 @@ namespace aclara_meters.view
                                 FormsApp.ble_interface.Close();
                                 background_scan_page.IsEnabled = true;
 
-                                int contador = Navigation.NavigationStack.Count;
-                                while (contador > 0)
-                                {
-                                    try
-                                    {
-                                        Navigation.PopAsync(false);
-                                    }
-                                    catch (Exception v)
-                                    {
-                                        Console.WriteLine(v.StackTrace);
-                                    }
-                                    contador--;
-                                }
 
-                                try
-                                {
-                                    Navigation.PopToRootAsync(false);
-                                }
-                                catch (Exception v1)
-                                {
-                                    Console.WriteLine(v1.StackTrace);
-                                }
+                                Navigation.PopToRootAsync(false);
+
+
                             }
                             else
                             {

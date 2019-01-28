@@ -995,28 +995,7 @@ namespace aclara_meters.view
             FormsApp.ble_interface.Close();
             background_scan_page.IsEnabled = true;
 
-            int contador = Navigation.NavigationStack.Count;
-            while (contador > 0)
-            {
-                try
-                {
-                    Navigation.PopAsync(false);
-                }
-                catch (Exception v)
-                {
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
-
-            try
-            {
-                Navigation.PopToRootAsync(false);
-            }
-            catch (Exception v1)
-            {
-                Console.WriteLine(v1.StackTrace);
-            }
+            Navigation.PopToRootAsync(false);
 
 
         }
@@ -1212,7 +1191,7 @@ namespace aclara_meters.view
                             break;
 
                         case "InstallConfirm":
-                            NavigationController("InstallConfirm");
+                            //NavigationController("InstallConfirm");
                             //OnCaseInstallConfirm();
                             break;
 
@@ -1264,6 +1243,14 @@ namespace aclara_meters.view
             {
                 case "ReadMTU":
 
+                    #region New Circular Progress bar Animations    
+
+                   
+                    backdark_bg.IsVisible = true;
+                    indicator.IsVisible = true;
+
+                    #endregion
+
                     #region Read Mtu Controller
 
                     background_scan_page.Opacity = 1;
@@ -1300,6 +1287,14 @@ namespace aclara_meters.view
                                 ContentNav.IsVisible = false;
                             }
                             shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+
+                            #region New Circular Progress bar Animations    
+
+
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+
+                            #endregion
                         })
                     );
 
