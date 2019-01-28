@@ -1153,9 +1153,11 @@
                                                      Factor=1}">
 
                                   
-                    <ActivityIndicator x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2"
+   
+                        
+                         <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2"
                         VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
-
+            
             
         </StackLayout>
 
