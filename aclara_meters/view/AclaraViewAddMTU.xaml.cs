@@ -4043,25 +4043,113 @@ namespace aclara_meters.view
 
         private void OpenSettingsCallAsync(object sender, EventArgs e)
         {
+
+
+            //printer.Suspend();
+            background_scan_page.Opacity = 1;
+            background_scan_page.IsEnabled = true;
+
+            if (Device.Idiom == TargetIdiom.Phone)
+            {
+                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+            }
+
+
+
+            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
                 try
                 {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        #region New Circular Progress bar Animations    
+
+                    
+                        backdark_bg.IsVisible = true;
+                        indicator.IsVisible = true;
+                        background_scan_page.IsEnabled = false;
+
+                        #endregion
+
+                    });
+
                     if (FormsApp.ble_interface.IsOpen())
                     {
                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
+                        if (Device.Idiom == TargetIdiom.Tablet)
+                        {
+                            ContentNav.Opacity = 1;
+                            ContentNav.IsVisible = true;
+                        }
+                        else
+                        {
+                            ContentNav.Opacity = 0;
+                            ContentNav.IsVisible = false;
+                        }
+                        background_scan_page.Opacity = 1;
+   
+
+                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //   if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            #region New Circular Progress bar Animations    
+
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+
+                            #endregion
+
+
+                        });
+
                         return;
                     }
                     else
                     {
                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(true), false);
+
+                        if (Device.Idiom == TargetIdiom.Tablet)
+                        {
+                            ContentNav.Opacity = 1;
+                            ContentNav.IsVisible = true;
+                        }
+                        else
+                        {
+                            ContentNav.Opacity = 0;
+                            ContentNav.IsVisible = false;
+                        }
+
+                        background_scan_page.Opacity = 1;
+            
+
+                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false; 
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            #region New Circular Progress bar Animations    
+
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+
+                            #endregion
+
+
+                        });
+
                     }
                 }
                 catch (Exception i2)
                 {
                     Console.WriteLine(i2.StackTrace);
                 }
-            });
+            }));
         }
 
 
