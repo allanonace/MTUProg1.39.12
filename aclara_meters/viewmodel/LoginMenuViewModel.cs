@@ -7,6 +7,10 @@ using aclara_meters.view;
 using Acr.UserDialogs;
 using System.Threading.Tasks;
 
+using MTUComm;
+using System.Linq;
+using System.Collections.Generic;
+
 namespace aclara_meters.viewmodel
 {
     public class LoginMenuViewModel : ViewModelBase
@@ -101,7 +105,27 @@ namespace aclara_meters.viewmodel
             }
 
             */
-            return username == Constants.Username && password == Constants.Password;
+            //return username == Constants.Username && password == Constants.Password;
+            
+            Xml.User[] dbUsers = Configuration.GetInstance ().users;
+            
+            IEnumerable<Xml.User> coincidences = dbUsers.Where ( user => user.Name.Equals ( username ) );
+            if ( coincidences.Count () == 1 )
+            {
+                Xml.User dbUser = coincidences.ToList<Xml.User> ()[ 0 ];
+                
+                string dbPassword = dbUser.Pass;
+                
+                if ( dbUser.Encrypted )
+                {
+                    // DESENCRIPTAR LA CONTRASEÑA
+                    // dbPassword = ...
+                }
+                
+                return string.Equals ( dbPassword, password );
+            }
+            
+            return false;
         }
 
         public async void Login()

@@ -14,6 +14,7 @@ namespace MTUComm
         private const string XML_INTERFACE = "Interface.xml";
         private const string XML_ALARMS    = "Alarm.xml";
         private const string XML_DEMANDS   = "DemandConf.xml";
+        private const string XML_USERS     = "User.xml";
 
         private String mbase_path;
         public MtuTypes mtuTypes;
@@ -22,6 +23,7 @@ namespace MTUComm
         public InterfaceConfig interfaces;
         public AlarmList alarms;
         public DemandConf demands;
+        public User[] users;
         
         private string device;
         private string deviceUUID;
@@ -42,6 +44,7 @@ namespace MTUComm
             interfaces = config.GetInterfaces ( Path.Combine(mbase_path, XML_INTERFACE ) );
             alarms     = config.GetAlarms     ( Path.Combine(mbase_path, XML_ALARMS    ) );
             demands    = config.GetDemandConf ( Path.Combine(mbase_path, XML_DEMANDS   ) );
+            users      = config.GetUsers      ( Path.Combine(mbase_path, XML_USERS     ) ).List;
         }
 
         public static Configuration GetInstance ( string path = "" )

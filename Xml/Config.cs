@@ -1,17 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
-using Xamarin.Forms;
-using System.Text.RegularExpressions;
 
 namespace Xml
 {
     public class Config
     {
+        public UserList GetUsers (string path)
+        {
+            UserList users;
+        
+            try
+            {
+                
+                XmlSerializer s = new XmlSerializer(typeof(UserList));
+            
+                using (StreamReader streamReader = new StreamReader(path))
+                {
+                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                    using (StringReader reader = new StringReader(fileContent))
+                    {
+                        users = (UserList)s.Deserialize(reader);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new DemandConfLoadException("Error loading Users file");
+            }
+ 
+            return users;
+        }
+    
         public DemandConf GetDemandConf(string path)
         {
             DemandConf demandConf;
