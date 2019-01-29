@@ -22,12 +22,19 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewMainMenu
     {
+        private const bool DEBUG_MODE_ON = true;
+
+        private bool autoConnect;
+        private bool conectarDevice;
+
+        private string page_to_controller;
+
         public DeviceItem last_item;
 
         private List<PageItem> MenuList { get; set; }
         private IUserDialogs dialogsSaved;
         private ObservableCollection<DeviceItem> employees;
-       
+
         private int peripheralConnected = ble_library.BlePort.NO_CONNECTED;
         private Boolean peripheralManualDisconnection = false;
         private Thread printer;
@@ -39,10 +46,10 @@ namespace aclara_meters.view
 
         public AclaraViewMainMenu()
         {
-           InitializeComponent();
+            InitializeComponent();
         }
-      
-        public AclaraViewMainMenu(IUserDialogs dialogs )
+
+        public AclaraViewMainMenu(IUserDialogs dialogs)
         {
             InitializeComponent();
             Settings.IsConnectedBLE = false;
@@ -58,7 +65,7 @@ namespace aclara_meters.view
             {
                 LoadPhoneUI();
             }
-          
+
             dialogsSaved = dialogs;
             LoadPostUIGFX();
 
@@ -66,7 +73,7 @@ namespace aclara_meters.view
             if (FormsApp.credentialsService.UserName != null)
             {
                 userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
-                CrossSettings.Current.AddOrUpdateValue("session_username", FormsApp.credentialsService.UserName);           
+                CrossSettings.Current.AddOrUpdateValue("session_username", FormsApp.credentialsService.UserName);
             }
 
             LoadSideMenuElements();
@@ -76,7 +83,7 @@ namespace aclara_meters.view
                 background_scan_page.Opacity = 0;
                 background_scan_page.FadeTo(1, 250);
             }
-          
+
             if (Device.RuntimePlatform == Device.Android)
             {
                 backmenu.Scale = 1.42;
@@ -88,8 +95,11 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread(() =>
             {
+                PrintToConsole("Se va a empezar el flujo");
 
-                Task.Factory.StartNew(Init_Scripting_Method);
+                PrintToConsole("Se va a lanzar una Tarea. Task.Factory.StartNew(Init_Scripting_Method)");
+
+                Task.Factory.StartNew(Interface_background_scan_page);
 
             });
 
@@ -102,106 +112,174 @@ namespace aclara_meters.view
             //BluetoothPeripheralDisconnect ( null, null );
         }
 
-        private void Init_Scripting_Method()
+        /*--------------------------------------------------*/
+        /*          Device List Interface Contenview
+        /---------------------------------------------------*/
+
+        private bool GetAutoConnectStatus()
+        {
+            return autoConnect;
+        }
+
+        private void Interface_background_scan_page()
         {
 
-            Task.Run(() =>
-            {
-                Task.Delay(100);
+            PrintToConsole("Va a lanzar un delay. Task.Delay(100)");
 
-                Device.BeginInvokeOnMainThread(() =>
+            PrintToConsole("Va a lanzar, en el hilo UI, la acción: Interface_background_scan_page");
+
+            printer = new Thread(new ThreadStart(InvokeMethod));
+
+            PrintToConsole("Va a lanzar un Hilo-Thread. new Thread(new ThreadStart(InvokeMethod)) printer.Start() - Interface_background_scan_page");
+
+            printer.Start();
+
+            employees = new ObservableCollection<DeviceItem>();
+
+            DeviceList.RefreshCommand = new Command(async () =>
+            {
+
+                PrintToConsole("está ejecutando el RefreshCommand - Interface_background_scan_page");
+
+                PrintToConsole("comprobar si autoConnect es falso - Interface_ContentView_DeviceLis");
+
+
+                if (!GetAutoConnectStatus())
                 {
 
-                    #region New Circular Progress bar Animations    
+                    PrintToConsole("ha entrado en la condicion - Interface_background_scan_page");
 
-                    DeviceList.IsRefreshing = false;
-                    backdark_bg.IsVisible = true;
-                    indicator.IsVisible = true;
+                    PrintToConsole("va a Activar la barra de progreso circular - Interface_background_scan_page");
 
-                    #endregion
-
-                    printer = new Thread(new ThreadStart(InvokeMethod));
-                    printer.Start();
-
-                    employees = new ObservableCollection<DeviceItem>();
-
-                    DeviceList.RefreshCommand = new Command(async () =>
+                    Device.BeginInvokeOnMainThread(() =>
                     {
-                        // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
-                        // Problema: solo se hace si se refresca DeviceList
-                        // TO-DO: eliminar el hilo o eliminar el suspend
-                        if (printer.ThreadState == ThreadState.Suspended)
-                        {
-                            try
-                            {
-                                printer.Resume();
-                            }
-                            catch (Exception e11)
-                            {
-                                Console.WriteLine(e11.StackTrace);
-                            }
-                        }
-                        //DeviceList.IsRefreshing = true;
-
-
-
-                        // <<< LA BUSQUEDA SE HACE AQUI >>>
-
-
-
-                        employees = new ObservableCollection<DeviceItem>();
-
-                        await FormsApp.ble_interface.Scan();
-                        await ChangeListViewData();
-                        //DeviceList.IsRefreshing = false;
-
                         #region New Circular Progress bar Animations    
 
                         DeviceList.IsRefreshing = false;
-                        backdark_bg.IsVisible = false;
-                        indicator.IsVisible = false;
+                        backdark_bg.IsVisible = true;
+                        indicator.IsVisible = true;
+                        background_scan_page.IsEnabled = false;
 
                         #endregion
 
-                        if (employees.Count != 0)
+                    });
+                    PrintToConsole("Mostrar barra de progreso - Interface_background_scan_page");
+
+                    // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
+                    // Problema: solo se hace si se refresca DeviceList
+                    // TO-DO: eliminar el hilo o eliminar el suspend
+
+                    PrintToConsole("comprobar si el hilo -printer- esta suspendido - Interface_background_scan_page");
+
+                    if (printer.ThreadState == System.Threading.ThreadState.Suspended)
+                    {
+                        try
                         {
-                            DeviceList.ItemsSource = employees;
+                            PrintToConsole("hilo -printer- suspendido, arranca -printer- printer.Resume(); -Interface_background_scan_page");
+
+                            printer.Resume();
                         }
-                    });
+                        catch (Exception e11)
+                        {
+                            Console.WriteLine(e11.StackTrace);
+                        }
+                    }
+
+                    //DeviceList.IsRefreshing = true;
+
+                    employees = new ObservableCollection<DeviceItem>();
+
+                    PrintToConsole("comienza el Escaneo de dispositivos - Interface_background_scan_page");
+
+                    await FormsApp.ble_interface.Scan();
+
+                    PrintToConsole("finaliza el Escaneo de dispositivos - Interface_background_scan_page");
+
+                    PrintToConsole("comienza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
+
+                    await ChangeListViewData();
+
+                    PrintToConsole("finaliza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
+
+                    //DeviceList.IsRefreshing = false;
+
+                    if (employees.Count != 0)
+                    {
+
+                        DeviceList.ItemsSource = employees;
+                    }
+
+                }
 
 
+            });
 
-                    #region Execute the Refresh List method every 3 seconds if no elements are on list
+            PrintToConsole("en 3 segundos comienza un bucle cada 3 segundos (BUCLE REFRESH LIST) - Interface_background_scan_page");
 
-                    var minutes = TimeSpan.FromSeconds(3);
+            #region Execute the Refresh List method every 3 seconds if no elements are on list
 
-                    Device.StartTimer(minutes, () => {
+            var minutes = TimeSpan.FromSeconds(3);
 
-                        // call your method to check for notifications here
+            Device.StartTimer(minutes, () => {
 
-                        if (employees.Count < 1)
-                            DeviceList.RefreshCommand.Execute(true);
+                PrintToConsole("Dentro del bucle (BUCLE REFRESH LIST) - Interface_background_scan_page");
 
-                        // Returning true means you want to repeat this timer
-                        return true;
-                    });
+                // call your method to check for notifications here
+
+                if (employees.Count < 1)
+                {
+                    PrintToConsole("se va lanzar un Refresh Command (BUCLE REFRESH LIST) - Interface_background_scan_page");
+
+                    DeviceList.RefreshCommand.Execute(true);
+                }
+
+                if (employees.Count > 0)
+                {
+                    DeviceList.ItemsSource = employees;
+                }
+                PrintToConsole("un ciclo del bucle (BUCLE REFRESH LIST) - Interface_background_scan_page");
+
+
+                if (conectarDevice)
+                {
+
+
+                    PrintToConsole("autoConnect se pone a false - InvokeMethod");
+                    autoConnect = false;
+                    conectarDevice = false;
+
+                    #region Autoconnect to stored device 
+
+                    PrintToConsole("Se va a crear una Tarea al de 0.5 segundos (Task.Factory.StartNew(NewOpenConnectionWithDevice);) - InvokeMethod");
+                    Task.Factory.StartNew(NewOpenConnectionWithDevice);
 
                     #endregion
 
 
+                }
 
-                    if (employees.Count != 0)
-                    {
-                        DeviceList.ItemsSource = employees;
-                    }
 
-                });
+
+
+
+                // Returning true means you want to repeat this timer
+                return true;
             });
+
+            #endregion
+
+            if (employees.Count != 0)
+            {
+                DeviceList.ItemsSource = employees;
+            }
         }
 
-        public void FirstRefreshSearchPucs ()
+
+
+
+        public void FirstRefreshSearchPucs()
         {
-            DeviceList.RefreshCommand.Execute ( true );
+            DeviceList.RefreshCommand.Execute(true);
         }
 
         private void LoadSideMenuElements()
@@ -214,34 +292,34 @@ namespace aclara_meters.view
 
             // Adding menu items to MenuList
 
-            MenuList.Add( new PageItem() {  Title = "Read MTU", Icon = "readmtu_icon.png", TargetType = "ReadMTU" });
+            MenuList.Add(new PageItem() { Title = "Read MTU", Icon = "readmtu_icon.png", TargetType = "ReadMTU" });
 
             if (FormsApp.config.global.ShowTurnOff)
-                MenuList.Add( new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", TargetType = "turnOff" });
+                MenuList.Add(new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", TargetType = "turnOff" });
 
             if (FormsApp.config.global.ShowAddMTU)
-                MenuList.Add( new PageItem() { Title = "Add MTU", Icon = "addMTU.png", TargetType = "AddMTU" });
+                MenuList.Add(new PageItem() { Title = "Add MTU", Icon = "addMTU.png", TargetType = "AddMTU" });
 
             if (FormsApp.config.global.ShowReplaceMTU)
-                MenuList.Add( new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", TargetType = "replaceMTU" });
+                MenuList.Add(new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", TargetType = "replaceMTU" });
 
             if (FormsApp.config.global.ShowReplaceMeter)
-                MenuList.Add( new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", TargetType = "replaceMeter" });
+                MenuList.Add(new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", TargetType = "replaceMeter" });
 
             if (FormsApp.config.global.ShowAddMTUMeter)
-                MenuList.Add( new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", TargetType = "AddMTUAddMeter" });
+                MenuList.Add(new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", TargetType = "AddMTUAddMeter" });
 
             if (FormsApp.config.global.ShowAddMTUReplaceMeter)
-                MenuList.Add( new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", TargetType = "AddMTUReplaceMeter" });
+                MenuList.Add(new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", TargetType = "AddMTUReplaceMeter" });
 
             if (FormsApp.config.global.ShowReplaceMTUMeter)
-                MenuList.Add( new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = "ReplaceMTUReplaceMeter" });
+                MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = "ReplaceMTUReplaceMeter" });
 
             if (FormsApp.config.global.ShowInstallConfirmation)
-                MenuList.Add( new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = "InstallConfirm" });
+                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = "InstallConfirm" });
 
 
-      
+
             // ListView needs to be at least  elements for UI Purposes, even empty ones
             while (MenuList.Count < 9)
                 MenuList.Add(new PageItem() { Title = "", Icon = "", TargetType = "" });
@@ -257,7 +335,7 @@ namespace aclara_meters.view
             if (Device.Idiom == TargetIdiom.Tablet)
                 return;
 
-                switch (e.Direction)
+            switch (e.Direction)
             {
                 case SwipeDirection.Left:
 
@@ -291,7 +369,7 @@ namespace aclara_meters.view
                     background_scan_page.IsEnabled = false;
                     background_scan_page_detail.IsEnabled = false;
                     break;
- 
+
             }
         }
 
@@ -327,7 +405,7 @@ namespace aclara_meters.view
             }
 
 
-           
+
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
         }
@@ -386,14 +464,14 @@ namespace aclara_meters.view
             turnoffmtu_ok.Tapped += TurnOffMTUOkTapped;
             turnoffmtu_no.Tapped += TurnOffMTUNoTapped;
             turnoffmtu_ok_close.Tapped += TurnOffMTUCloseTapped;
-            replacemeter_ok.Tapped += ReplaceMeterOkTapped;
-            replacemeter_cancel.Tapped += ReplaceMeterCancelTapped;
+            replacemeter_ok.Tapped += ReplaceMtuOkTapped;
+            replacemeter_cancel.Tapped += ReplaceMtuCancelTapped;
             meter_ok.Tapped += MeterOkTapped;
             meter_cancel.Tapped += MeterCancelTapped;
 
             dialog_AddMTUAddMeter_ok.Tapped += dialog_AddMTUAddMeter_okTapped;
             dialog_AddMTUAddMeter_cancel.Tapped += dialog_AddMTUAddMeter_cancelTapped;
-           
+
             dialog_AddMTUReplaceMeter_ok.Tapped += dialog_AddMTUReplaceMeter_okTapped;
             dialog_AddMTUReplaceMeter_cancel.Tapped += dialog_AddMTUReplaceMeter_cancelTapped;
 
@@ -415,6 +493,19 @@ namespace aclara_meters.view
 
             logoff_no.Tapped += LogOffNoTapped;
             logoff_ok.Tapped += LogOffOkTapped;
+
+
+            if (Device.Idiom == TargetIdiom.Tablet)
+            {
+                hamburger_icon_home.IsVisible = true;
+                hamburger_icon_home_detail.IsVisible = true;
+
+                hamburger_icon_home.Opacity = 0;
+                hamburger_icon_home_detail.Opacity = 0;
+            }
+
+        
+        
         }
 
 
@@ -479,41 +570,104 @@ namespace aclara_meters.view
 
 
         private void InvokeMethod()
-        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-        // printer = new Thread(new ThreadStart(InvokeMethod));
-        // printer.Start();
         {
+            PrintToConsole("dentro del metodo - InvokeMethod");
+
             int timeout_connecting = 0;
+
+            PrintToConsole("se va a ejecutar un bucle (WHILE TRUE) - InvokeMethod");
+
             while (true)
             {
-                //if (!FormsApp.ble_interface.GetPairingStatusOk())
+                PrintToConsole("dentro del bucle (WHILE TRUE) - InvokeMethod");
+
+                PrintToConsole("buscamos el estado de la conexion - InvokeMethod");
+
                 int status = FormsApp.ble_interface.GetConnectionStatus();
+
+                PrintToConsole("se obtiene el estado de la conexion - InvokeMethod");
 
                 if (status != peripheralConnected)
                 {
+                    PrintToConsole("buscamos el estado de la conexion - InvokeMethod");
+
+                    PrintToConsole("¿ES NO_CONNECTED? - InvokeMethod");
+
                     if (peripheralConnected == ble_library.BlePort.NO_CONNECTED)
                     {
-                        // status DEBERIA SER SIEMPRE ble_library.BlePort.CONNECTING
                         peripheralConnected = status;
                         timeout_connecting = 0;
                     }
                     else if (peripheralConnected == ble_library.BlePort.CONNECTING)
                     {
+                        PrintToConsole("Nop, es CONNECTING - InvokeMethod");
+
                         if (status == ble_library.BlePort.NO_CONNECTED)
                         {
+                            PrintToConsole("Se va a ejecutar algo en la UI - InvokeMethod");
+
                             Device.BeginInvokeOnMainThread(() =>
                             {
+                                PrintToConsole("Se va a detectar el estado de la conexion - InvokeMethod");
+
                                 switch (FormsApp.ble_interface.GetConnectionError())
                                 {
                                     case ble_library.BlePort.NO_ERROR:
+                                        PrintToConsole("Estado conexion: NO_ERROR - InvokeMethod");
                                         break;
                                     case ble_library.BlePort.CONECTION_ERRROR:
+                                        PrintToConsole("Estado conexion: CONECTION_ERRROR - InvokeMethod");
+
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                            #region New Circular Progress bar Animations    
+
+                                            DeviceList.IsRefreshing = false;
+                                            backdark_bg.IsVisible = false;
+                                            indicator.IsVisible = false;
+                                            background_scan_page.IsEnabled = true;
+
+                                            #endregion
+                                        });
+
+                                        PrintToConsole("Desactivar barra de progreso - InvokeMethod");
+
                                         Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
                                         break;
                                     case ble_library.BlePort.DYNAMIC_KEY_ERROR:
+                                        PrintToConsole("Estado conexion: DYNAMIC_KEY_ERROR - InvokeMethod");
+
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                            #region New Circular Progress bar Animations    
+
+                                            DeviceList.IsRefreshing = false;
+                                            backdark_bg.IsVisible = false;
+                                            indicator.IsVisible = false;
+                                            background_scan_page.IsEnabled = true;
+
+                                            #endregion
+                                        });
+
+                                        PrintToConsole("Desactivar barra de progreso - InvokeMethod");
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
                                     case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
+                                        PrintToConsole("Estado conexion: NO_DYNAMIC_KEY_ERROR - InvokeMethod");
+
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                            #region New Circular Progress bar Animations    
+
+                                            DeviceList.IsRefreshing = false;
+                                            backdark_bg.IsVisible = false;
+                                            indicator.IsVisible = false;
+                                            background_scan_page.IsEnabled = true;
+
+                                            #endregion
+
+                                        });
+                                        PrintToConsole("Desactivar barra de progreso - InvokeMethod");
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
                                 }
@@ -522,23 +676,16 @@ namespace aclara_meters.view
                                 background_scan_page.Opacity = 1;
                                 background_scan_page.IsEnabled = true;
 
-                                #region New Circular Progress bar Animations    
-
-                                DeviceList.IsRefreshing = false;
-                                backdark_bg.IsVisible = false;
-                                indicator.IsVisible = false;
-
-                                #endregion
-
-
                             });
                             peripheralConnected = status;
                             FormsApp.peripheral = null;
                         }
                         else // status == ble_library.BlePort.CONNECTED
                         {
+                            PrintToConsole("Estas Conectado - InvokeMethod");
+
                             DeviceList.IsEnabled = true;
-                            // status DEBERIA SER SIEMPRE ble_library.BlePort.CONNECTED
+                           
                             peripheralConnected = status;
                             Device.BeginInvokeOnMainThread(() =>
                             {
@@ -552,8 +699,10 @@ namespace aclara_meters.view
                     }
                     else if (peripheralConnected == ble_library.BlePort.CONNECTED)
                     {
+                        PrintToConsole("Nop, es CONNECTED - InvokeMethod");
+
                         DeviceList.IsEnabled = true;
-                        // status DEBERIA SER SIEMPRE ble_library.BlePort.NO_CONNECTED
+                       
                         peripheralConnected = status;
                         FormsApp.peripheral = null;
                         Device.BeginInvokeOnMainThread(() =>
@@ -566,41 +715,81 @@ namespace aclara_meters.view
                         });
                     }
                 }
+
+                PrintToConsole("¿Está en CONNECTING? - InvokeMethod");
                 if (peripheralConnected == ble_library.BlePort.CONNECTING)
                 {
-                    
+                    PrintToConsole("Si, es CONNECTING - InvokeMethod");
                     timeout_connecting++;
-                    if (timeout_connecting >= 2*10) // 10 seconds
+                    if (timeout_connecting >= 2 * 10) // 10 seconds
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
+                            PrintToConsole("Un Timeout que te llevas - InvokeMethod");
                             Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
                             DeviceList.IsEnabled = true;
                             fondo.Opacity = 1;
                             background_scan_page.Opacity = 1;
                             background_scan_page.IsEnabled = true;
 
+                            autoConnect = false;
+
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+
+                                #region Disable Circular Progress bar Animations when done
+
+                                backdark_bg.IsVisible = false;
+                                indicator.IsVisible = false;
+                                background_scan_page.IsEnabled = true;
+
+                                #endregion
+
+                            });
+
+                            try
+                            {
+                                printer.Suspend();
+                            }
+                            catch (Exception e5)
+                            {
+                                Console.WriteLine(e5.StackTrace);
+                            }
+
+
                         });
                         peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                         timeout_connecting = 0;
+
+                        PrintToConsole("Cerrar Conexion - InvokeMethod");
+
                         FormsApp.ble_interface.Close();
                     }
                 }
+                else
+                {
+                    PrintToConsole("Nop, no es CONNECTING - InvokeMethod");
+                }
 
-                Thread.Sleep(500); // 0.5 Second
+                PrintToConsole("Esperamos 300 ms - InvokeMethod");
+                Thread.Sleep(300); // 0.5 Second
+
+                PrintToConsole("¿Se va a realizar reconexion? - InvokeMethod");
+
             }
+
         }
 
         private void IsConnectedUIChange(bool v)
         {
-            if(v)
+            if (v)
             {
                 try
                 {
                     // TODO: la siguente linea siempre da error xq peripheral es null
                     deviceID.Text = FormsApp.peripheral.Advertisement.DeviceName;
                     macAddress.Text = DecodeId(FormsApp.peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray());
-                   
+
                     //imageBattery.Source = "battery_toolbar_high";
                     // imageRssi.Source = "rssi_toolbar_high";
                     // batteryLevel.Text = "100%";
@@ -748,10 +937,10 @@ namespace aclara_meters.view
                         {
                             try
                             {
-                                if(blePeripherals[i] != null)
+                                if (blePeripherals[i] != null)
                                 {
                                     byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
-                                   
+
                                     bool enc = false;
                                     int sizeListTemp = employees.Count;
 
@@ -844,32 +1033,66 @@ namespace aclara_meters.view
 
                                                     #region Autoconnect to stored device 
 
-                                                    var minutes2 = TimeSpan.FromSeconds(2);
+                                                    conectarDevice = true;
 
-                                                    Device.StartTimer(minutes2, () => {
-
-                                                        Device.BeginInvokeOnMainThread(() =>
-                                                        {
-
-                                                            Task.Factory.StartNew(NewOpenConnectionWithDevice);
-
-                                                        });
-
-
-                                                        return false;
-                                                    });
+                                                    autoConnect = true;
 
                                                     #endregion
 
 
-                                                  
+
                                                 }
                                                 catch (Exception e)
                                                 {
                                                     Console.WriteLine(e.StackTrace);
                                                 }
-                                   
+
                                             }
+                                            else
+                                            {
+
+                                                if (autoConnect)
+                                                {
+
+                                                    Device.BeginInvokeOnMainThread(() =>
+                                                    {
+                                                        #region Disable Circular Progress bar Animations when done
+
+                                                        backdark_bg.IsVisible = false;
+                                                        indicator.IsVisible = false;
+                                                        background_scan_page.IsEnabled = true;
+
+                                                        #endregion
+                                                    });
+
+                                                }
+
+                                            }
+
+
+                                        }
+
+                                        else
+                                        {
+
+                                            // if (autoConnect)
+                                            //  {
+
+                                            Device.BeginInvokeOnMainThread(() =>
+                                            {
+                                                #region Disable Circular Progress bar Animations when done
+
+                                                DeviceList.IsRefreshing = false;
+                                                backdark_bg.IsVisible = false;
+                                                indicator.IsVisible = false;
+                                                background_scan_page.IsEnabled = true;
+
+                                                #endregion
+
+                                            });
+
+                                            //  }
+
                                         }
                                     }
                                 }
@@ -886,31 +1109,64 @@ namespace aclara_meters.view
                     }
                 }
             });
-        } 
-
-
-        private void NewOpenConnectionWithDevice()
-        {
-            while (FormsApp.ble_interface.IsScanning())
-            {
-                Thread.Sleep(100);
-            }
-
-          
-
-
-            if (!FormsApp.ble_interface.IsOpen())
-            {
-
-                // call your method to check for notifications here
-                FormsApp.ble_interface.Open(FormsApp.peripheral, true);
-            }
-
-
         }
 
 
-        protected override void OnAppearing ()
+        #region We want to connect to the device if there is not scanning running
+
+        private void NewOpenConnectionWithDevice()
+        {
+
+            PrintToConsole("Se va a entrar en un bucle mientras esté Escaneando bluetooth - NewOpenConnectionWithDevice");
+
+            while (FormsApp.ble_interface.IsScanning())
+            {
+                PrintToConsole("A esperar 100 ms mientras escanea... - NewOpenConnectionWithDevice");
+                Thread.Sleep(100);
+            }
+
+            PrintToConsole("Se va a ejecutar algo en el UI - NewOpenConnectionWithDevice");
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                var seconds = TimeSpan.FromSeconds(1); // Don't execute it asap!
+
+                Device.StartTimer(seconds, () =>
+                {
+                    PrintToConsole("Cada 1 segundo, se ejectua lo siguinete en el UI - NewOpenConnectionWithDevice");
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+
+                        PrintToConsole("¿Esta la conexion abierta ? - NewOpenConnectionWithDevice");
+
+
+                        if (!FormsApp.ble_interface.IsOpen())
+                        {
+                            PrintToConsole("¿Esta escaneando perifericos ? - NewOpenConnectionWithDevice");
+                            while (FormsApp.ble_interface.IsScanning())
+                            {
+                                PrintToConsole("A esperar 100 ms en bucle - NewOpenConnectionWithDevice");
+                                Thread.Sleep(100);
+                            }
+
+                            // call your method to check for notifications here
+                            FormsApp.ble_interface.Open(FormsApp.peripheral, true);
+                        }
+                        else
+                        {
+                            PrintToConsole("NOPE, no lo esta - NewOpenConnectionWithDevice");
+                        }
+                    });
+
+                    return false;
+                });
+            });
+        }
+
+        #endregion
+
+
+        protected override void OnAppearing()
         {
             //DeviceList.RefreshCommand.Execute ( true );
         }
@@ -937,29 +1193,25 @@ namespace aclara_meters.view
             turnoff_mtu_background.IsVisible = false;
         }
 
-        private void ReplaceMeterCancelTapped(object sender, EventArgs e)
+        private void ReplaceMtuCancelTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
 
-        private void ReplaceMeterOkTapped(object sender, EventArgs e)
+        private void ReplaceMtuOkTapped(object sender, EventArgs e)
         {
             dialog_replacemeter_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
 
-            //Bug fix Android UI Animation
-            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);             
-            }));
+                page_to_controller = "replaceMTU";
+                Task.Factory.StartNew(BasicReadThread);
+            });
 
-
-
-                 
         }
 
         private void TurnOffMTUCloseTapped(object sender, EventArgs e)
@@ -1033,14 +1285,13 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            //Bug fix Android UI Animation
-            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
-            }));
-            
-           
+                page_to_controller = "replaceMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
+
+
         }
 
         void dialog_AddMTUAddMeter_cancelTapped(object sender, EventArgs e)
@@ -1056,15 +1307,13 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            //Bug fix Android UI Animation
-            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTUAddMeter(dialogsSaved), false);
-            })
-            );
-            
-           
+                page_to_controller = "AddMTUAddMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
+
+
         }
 
         void dialog_AddMTUReplaceMeter_cancelTapped(object sender, EventArgs e)
@@ -1080,16 +1329,12 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            //Bug fix Android UI Animation
-            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTUReplaceMeter(dialogsSaved), false);
-            })
-            );
+                page_to_controller = "AddMTUReplaceMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
 
-
-          
         }
 
         void dialog_ReplaceMTUReplaceMeter_cancelTapped(object sender, EventArgs e)
@@ -1105,15 +1350,12 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-
-            //Bug fix Android UI Animation
-            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTUReplaceMeter(dialogsSaved), false);
-            })
-            );
-            
+                page_to_controller = "ReplaceMTUReplaceMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
+
 
         }
 
@@ -1134,7 +1376,16 @@ namespace aclara_meters.view
             {
                 // TODO: cambiar usuario
                 // TODO: BasicRead no loguea
-                Task.Factory.StartNew(BasicReadThread);
+                try
+                {
+                    page_to_controller = "AddMTU";
+                    Task.Factory.StartNew(BasicReadThread);
+                }
+                catch (Exception addmtu)
+                {
+                    Console.WriteLine(addmtu.StackTrace);
+                }
+
             });
 
             //Bug fix Android UI Animation
@@ -1144,46 +1395,92 @@ namespace aclara_meters.view
         void BasicReadThread()
         {
             MTUComm.Action basicRead = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type: MTUComm.Action.ActionType.BasicRead,
-                user: FormsApp.credentialsService.UserName);
+               config: FormsApp.config,
+               serial: FormsApp.ble_interface,
+               type: MTUComm.Action.ActionType.BasicRead,
+               user: FormsApp.credentialsService.UserName);
 
+            /*
             basicRead.OnFinish += ((s, args) =>
-            {
-            });
-            basicRead.Run();
+            { });
+            */
 
             basicRead.OnFinish += ((s, e) =>
             {
-                Task.Delay(200).ContinueWith(t =>
+                Task.Delay(100).ContinueWith(t =>
                     Device.BeginInvokeOnMainThread(() =>
                     {
 
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved), false);
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, page_to_controller), false);
+
+                        #region New Circular Progress bar Animations    
+
+                        DeviceList.IsRefreshing = false;
+                        backdark_bg.IsVisible = false;
+                        indicator.IsVisible = false;
+                        background_scan_page.IsEnabled = true;
+
+                        #endregion
+
                     })
                 );
-             });
-                                   
+            });
+
+            basicRead.OnError += ((s, e) =>
+            {
+                Task.Delay(100).ContinueWith(t =>
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            #region New Circular Progress bar Animations    
+
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+
+                            #endregion
+
+                            Application.Current.MainPage.DisplayAlert("Alert", "Cannot read device, try again", "Ok");
+
+                        });
+
+                    })
+                );
+            });
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                #region New Circular Progress bar Animations    
+
+                DeviceList.IsRefreshing = false;
+                backdark_bg.IsVisible = true;
+                indicator.IsVisible = true;
+                background_scan_page.IsEnabled = false;
+
+                #endregion
+
+            });
+
+            basicRead.Run();
+
+           
+
         }
+
 
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
         {
+
             FormsApp.ble_interface.Close();
-        
+
             peripheralManualDisconnection = true;
 
             CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
-            /*
-            try
-            {
-                printer.Start();
-            }
-            catch (Exception t12)
-            {
-                Console.WriteLine(t12.StackTrace);
-            }
-            */
+
         }
 
         private void LogoutTapped(object sender, EventArgs e)
@@ -1200,20 +1497,26 @@ namespace aclara_meters.view
                 dialog_open_bg.IsVisible = true;
                 turnoff_mtu_background.IsVisible = true;
             });
-          
+
         }
 
         public void externalReconnect(Boolean reassociate)
         {
-            FormsApp.ble_interface.Open(FormsApp.peripheral, reassociate);
+            try
+            {
+                FormsApp.ble_interface.Open(FormsApp.peripheral, reassociate);
+            }
+            catch (Exception e5)
+            {
+                Console.WriteLine(e5.StackTrace);
+            }
+           
         }
 
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
         private void OnMenuItemSelectedListDevices(object sender, ItemTappedEventArgs e)
         {
-
-
             var item = (DeviceItem)e.Item;
             //fondo.Opacity = 0;
             //background_scan_page.Opacity = 0.5;
@@ -1227,8 +1530,8 @@ namespace aclara_meters.view
 
             #endregion
 
-
             bool reassociate = false;
+
             if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
                 FormsApp.credentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
                 System.Convert.ToBase64String(item.Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()).Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty)) &&
@@ -1236,7 +1539,6 @@ namespace aclara_meters.view
             {
                 reassociate = true;
             }
-
 
             last_item = item;
 
@@ -1264,10 +1566,12 @@ namespace aclara_meters.view
                     }
                 });
 
-            }catch (Exception e22){
+            }
+            catch (Exception e22)
+            {
                 Console.WriteLine(e22.StackTrace);
             }
-          
+
         }
 
         // Event for Menu Item selection, here we are going to handle navigation based
@@ -1295,43 +1599,51 @@ namespace aclara_meters.view
                     switch (page)
                     {
                         case "ReadMTU":
-                            OnCaseReadMTU();
+                            NavigationController("ReadMTU");
+                            //OnCaseReadMTU();
                             break;
 
                         case "AddMTU":
-                            OnCaseAddMTU();
+                            NavigationController("AddMTU");
+                            //OnCaseAddMTU();
                             break;
 
                         case "turnOff":
-                            OnCaseTurnOff();
+                            NavigationController("turnOff");
+                            //OnCaseTurnOff();
                             break;
 
                         case "InstallConfirm":
-                            OnCaseInstallConfirm();
+                            NavigationController("InstallConfirm");
+                            //OnCaseInstallConfirm();
                             break;
 
                         case "replaceMTU":
-                            Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            NavigationController("replaceMTU");
                             //OnCaseReplaceMTU();
                             break;
 
                         case "replaceMeter":
-                            Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            NavigationController("replaceMeter");
                             //OnCaseReplaceMeter();
                             break;
 
                         case "AddMTUAddMeter":
-                            Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            NavigationController("AddMTUAddMeter");
                             //OnCaseAddMTUAddMeter();
                             break;
 
                         case "AddMTUReplaceMeter":
-                            Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            NavigationController("AddMTUReplaceMeter");
                             //OnCaseAddMTUReplaceMeter();
                             break;
 
                         case "ReplaceMTUReplaceMeter":
-                            Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
+                            NavigationController("ReplaceMTUReplaceMeter");
                             //OnCaseReplaceMTUReplaceMeter();
                             break;
                     }
@@ -1340,319 +1652,611 @@ namespace aclara_meters.view
                 {
                     Console.WriteLine(w1.StackTrace);
                 }
-            }else{
+            }
+            else
+            {
                 Application.Current.MainPage.DisplayAlert("Alert", "Connect to a device and retry", "Ok");
             }
         }
 
-        private void OnCaseInstallConfirm()
+        private void NavigationController(string page)
         {
-            background_scan_page.Opacity = 1;
-            background_scan_page_detail.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-            background_scan_page_detail.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
+            switch (page)
             {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
+                case "ReadMTU":
 
-            Task.Delay(200).ContinueWith(t =>
+
+                    #region New Circular Progress bar Animations    
+
+                    DeviceList.IsRefreshing = false;
+                    backdark_bg.IsVisible = true;
+                    indicator.IsVisible = true;
+
+                    #endregion
+
+
+                    #region Read Mtu Controller
+
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            navigationDrawerList.SelectedItem = null;
+
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
+
+                            background_scan_page.Opacity = 1;
+                            background_scan_page_detail.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+
+                            #region New Circular Progress bar Animations    
+
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+
+                            #endregion
+
+                        })
+                    );
+
+                    #endregion
+
+                    break;
+
+                case "AddMTU":
+
+                    #region Add Mtu Controller
+
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            dialog_open_bg.IsVisible = true;
+                            turnoff_mtu_background.IsVisible = true;
+                            dialog_turnoff_one.IsVisible = false;
+                            dialog_turnoff_two.IsVisible = false;
+                            dialog_turnoff_three.IsVisible = false;
+                            dialog_replacemeter_one.IsVisible = false;
+                            dialog_meter_replace_one.IsVisible = false;
+
+                            dialog_AddMTUAddMeter.IsVisible = false;
+                            dialog_AddMTUReplaceMeter.IsVisible = false;
+                            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
+
+                            #region Check ActionVerify
+
+                            if (FormsApp.config.global.ActionVerify)
+                                dialog_AddMTU.IsVisible = true;
+                            else
+                                CallLoadViewAddMtu();
+
+                            #endregion
+
+                            background_scan_page.Opacity = 1;
+                            background_scan_page_detail.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone;
+                        })
+                    );
+
+                    #endregion
+
+                    break;
+
+                case "turnOff":
+
+                    #region Turn Off Controller
+
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            dialog_open_bg.IsVisible = true;
+                            turnoff_mtu_background.IsVisible = true;
+                            dialog_meter_replace_one.IsVisible = false;
+
+                            #region Check ActionVerify
+
+                            if (FormsApp.config.global.ActionVerify)
+                                dialog_turnoff_one.IsVisible = true;
+                            else
+                                CallLoadViewTurnOff();
+
+                            #endregion
+
+                            dialog_turnoff_two.IsVisible = false;
+                            dialog_turnoff_three.IsVisible = false;
+                            dialog_replacemeter_one.IsVisible = false;
+
+                            background_scan_page.Opacity = 1;
+                            background_scan_page_detail.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone;
+                        })
+                    );
+
+                    #endregion
+
+                    break;
+
+                case "InstallConfirm":
+
+                    #region Install Confirm Controller
+
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            navigationDrawerList.SelectedItem = null;
+
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewInstallConfirmation(dialogsSaved), false);
+
+                            background_scan_page.Opacity = 1;
+                            background_scan_page_detail.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone;
+                        })
+                    );
+
+                    #endregion
+
+                    break;
+
+                case "replaceMTU":
+
+                    #region Replace Mtu Controller
+
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            dialog_open_bg.IsVisible = true;
+                            turnoff_mtu_background.IsVisible = true;
+                            dialog_meter_replace_one.IsVisible = false;
+                            dialog_turnoff_one.IsVisible = false;
+                            dialog_turnoff_two.IsVisible = false;
+                            dialog_turnoff_three.IsVisible = false;
+
+                            #region Check ActionVerify
+
+                            if (FormsApp.config.global.ActionVerify)
+                                dialog_replacemeter_one.IsVisible = true;
+                            else
+                                CallLoadViewReplaceMtu();
+
+                            #endregion
+
+                            background_scan_page.Opacity = 1;
+                            background_scan_page_detail.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                        })
+                    );
+
+                    #endregion
+
+                    break;
+
+                case "replaceMeter":
+
+                    #region Replace Meter Controller
+
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            dialog_open_bg.IsVisible = true;
+                            turnoff_mtu_background.IsVisible = true;
+                            dialog_turnoff_one.IsVisible = false;
+                            dialog_turnoff_two.IsVisible = false;
+                            dialog_turnoff_three.IsVisible = false;
+                            dialog_replacemeter_one.IsVisible = false;
+
+
+                            #region Check ActionVerify
+
+                            if (FormsApp.config.global.ActionVerify)
+                                dialog_meter_replace_one.IsVisible = true;
+                            else
+                                CallLoadViewReplaceMeter();
+
+                            #endregion
+
+                            background_scan_page.Opacity = 1;
+                            background_scan_page_detail.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                        })
+                    );
+
+                    #endregion
+
+                    break;
+
+                case "AddMTUAddMeter":
+
+                    #region Add Mtu | Add Meter Controller
+
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            dialog_open_bg.IsVisible = true;
+                            turnoff_mtu_background.IsVisible = true;
+                            dialog_turnoff_one.IsVisible = false;
+                            dialog_turnoff_two.IsVisible = false;
+                            dialog_turnoff_three.IsVisible = false;
+                            dialog_replacemeter_one.IsVisible = false;
+                            dialog_meter_replace_one.IsVisible = false;
+
+                            #region Check ActionVerify
+
+                            if (FormsApp.config.global.ActionVerify)
+                                dialog_AddMTUAddMeter.IsVisible = true;
+                            else
+                                CallLoadViewAddMTUAddMeter();
+
+                            #endregion
+
+                            background_scan_page.Opacity = 1;
+                            background_scan_page_detail.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                        })
+                    );
+
+                    #endregion
+
+                    break;
+
+                case "AddMTUReplaceMeter":
+
+                    #region Add Mtu | Replace Meter Controller
+
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            dialog_open_bg.IsVisible = true;
+                            turnoff_mtu_background.IsVisible = true;
+                            dialog_turnoff_one.IsVisible = false;
+                            dialog_turnoff_two.IsVisible = false;
+                            dialog_turnoff_three.IsVisible = false;
+                            dialog_replacemeter_one.IsVisible = false;
+                            dialog_meter_replace_one.IsVisible = false;
+                            dialog_AddMTUAddMeter.IsVisible = false;
+
+                            #region Check ActionVerify
+
+                            if (FormsApp.config.global.ActionVerify)
+                                dialog_AddMTUReplaceMeter.IsVisible = true;
+                            else
+                                CallLoadViewAddMTUReplaceMeter();
+
+                            #endregion
+
+                            background_scan_page.Opacity = 1;
+                            background_scan_page_detail.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                        })
+                    );
+
+                    #endregion
+
+                    break;
+
+                case "ReplaceMTUReplaceMeter":
+
+                    #region Replace Mtu | Replace Meter Controller
+
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            dialog_open_bg.IsVisible = true;
+                            turnoff_mtu_background.IsVisible = true;
+                            dialog_turnoff_one.IsVisible = false;
+                            dialog_turnoff_two.IsVisible = false;
+                            dialog_turnoff_three.IsVisible = false;
+                            dialog_replacemeter_one.IsVisible = false;
+                            dialog_meter_replace_one.IsVisible = false;
+                            dialog_AddMTUAddMeter.IsVisible = false;
+                            dialog_AddMTUReplaceMeter.IsVisible = false;
+
+                            #region Check ActionVerify
+
+                            if (FormsApp.config.global.ActionVerify)
+                                dialog_ReplaceMTUReplaceMeter.IsVisible = true;
+                            else
+                                CallLoadViewReplaceMTUReplaceMeter();
+
+                            #endregion
+
+
+                            background_scan_page.Opacity = 1;
+                            background_scan_page_detail.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                        })
+                    );
+
+                    #endregion
+
+                    break;
+
+            }
+        }
+
+        private void CallLoadViewReplaceMTUReplaceMeter()
+        {
+            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+
             Device.BeginInvokeOnMainThread(() =>
             {
-                navigationDrawerList.SelectedItem = null;
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewInstallConfirmation(dialogsSaved), false);
-                background_scan_page.Opacity = 1;
-                background_scan_page_detail.Opacity = 1;
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
+                page_to_controller = "ReplaceMTUReplaceMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
 
         }
 
-        private void OnCaseReplaceMTUReplaceMeter()
+        private void CallLoadViewAddMTUReplaceMeter()
         {
-            background_scan_page.Opacity = 1;
-            background_scan_page_detail.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-            background_scan_page_detail.IsEnabled = true;
+            dialog_AddMTUReplaceMeter.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
 
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-
-            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialog_turnoff_one.IsVisible = false;
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = false;
-                dialog_replacemeter_one.IsVisible = false;
-                dialog_meter_replace_one.IsVisible = false;
-
-                dialog_AddMTUAddMeter.IsVisible = false;
-                dialog_AddMTUReplaceMeter.IsVisible = false;
-                dialog_ReplaceMTUReplaceMeter.IsVisible = true;
-
-                background_scan_page.Opacity = 1;
-                background_scan_page_detail.Opacity = 1;
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
+                page_to_controller = "AddMTUReplaceMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
         }
 
-        private void OnCaseAddMTUReplaceMeter()
+        private void CallLoadViewAddMTUAddMeter()
         {
-            background_scan_page.Opacity = 1;
-            background_scan_page_detail.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-            background_scan_page_detail.IsEnabled = true;
 
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
+            dialog_AddMTUAddMeter.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
 
-
-            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialog_turnoff_one.IsVisible = false;
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = false;
-                dialog_replacemeter_one.IsVisible = false;
-                dialog_meter_replace_one.IsVisible = false;
+                page_to_controller = "AddMTUAddMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
 
-                dialog_AddMTUAddMeter.IsVisible = false;
-                dialog_AddMTUReplaceMeter.IsVisible = true;
-
-                background_scan_page.Opacity = 1;
-                background_scan_page_detail.Opacity = 1;
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
         }
 
-        private void OnCaseAddMTUAddMeter()
+        private void CallLoadViewReplaceMeter()
         {
-            background_scan_page.Opacity = 1;
-            background_scan_page_detail.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-            background_scan_page_detail.IsEnabled = true;
+            dialog_meter_replace_one.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
 
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-
-            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialog_turnoff_one.IsVisible = false;
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = false;
-                dialog_replacemeter_one.IsVisible = false;
-                dialog_meter_replace_one.IsVisible = false;
-
-                dialog_AddMTUAddMeter.IsVisible = true;
-
-                background_scan_page.Opacity = 1;
-                background_scan_page_detail.Opacity = 1;
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
+                page_to_controller = "replaceMeter";
+                Task.Factory.StartNew(BasicReadThread);
+            });
         }
 
-        private void OnCaseReplaceMeter()
+        private void CallLoadViewReplaceMtu()
         {
-            background_scan_page.Opacity = 1;
-            background_scan_page_detail.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-            background_scan_page_detail.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
+            dialog_replacemeter_one.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
 
 
-            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialog_turnoff_one.IsVisible = false;
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = false;
-                dialog_replacemeter_one.IsVisible = false;
-                dialog_meter_replace_one.IsVisible = true;
-                background_scan_page.Opacity = 1;
-                background_scan_page_detail.Opacity = 1;
+                page_to_controller = "replaceMTU";
+                Task.Factory.StartNew(BasicReadThread);
+            });
 
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
-         
-        }
-
-        private void OnCaseReplaceMTU()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page_detail.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-            background_scan_page_detail.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-               dialog_open_bg.IsVisible = true;
-               turnoff_mtu_background.IsVisible = true;
-               dialog_meter_replace_one.IsVisible = false;
-               dialog_turnoff_one.IsVisible = false;
-               dialog_turnoff_two.IsVisible = false;
-               dialog_turnoff_three.IsVisible = false;
-               dialog_replacemeter_one.IsVisible = true;
-               background_scan_page.Opacity = 1;
-               background_scan_page_detail.Opacity = 1;
-
-               if (Device.Idiom == TargetIdiom.Tablet)
-               {
-                   ContentNav.Opacity = 1;
-                   ContentNav.IsVisible = true;
-               }
-               else
-               {
-                   ContentNav.Opacity = 0;
-                   ContentNav.IsVisible = false;
-               }
-
-               shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
-
-
-         
-        }
-
-        private void OnCaseTurnOff()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page_detail.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-            background_scan_page_detail.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialog_meter_replace_one.IsVisible = false;
-
-                #region Check ActionVerify
-
-                if (FormsApp.config.global.ActionVerify)
-                    dialog_turnoff_one.IsVisible = true;
-                else
-                    CallLoadViewTurnOff();
-
-                #endregion
-
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = false;
-                dialog_replacemeter_one.IsVisible = false;
-                background_scan_page.Opacity = 1;
-                background_scan_page_detail.Opacity = 1;
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-             }));
         }
 
         private void CallLoadViewTurnOff()
@@ -1663,65 +2267,6 @@ namespace aclara_meters.view
             Task.Factory.StartNew(TurnOffMethod);
         }
 
-        private void OnCaseAddMTU()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page_detail.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-            background_scan_page_detail.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-              
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialog_turnoff_one.IsVisible = false;
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = false;
-                dialog_replacemeter_one.IsVisible = false;
-                dialog_meter_replace_one.IsVisible = false;
-
-                dialog_AddMTUAddMeter.IsVisible = false;
-                dialog_AddMTUReplaceMeter.IsVisible = false;
-                dialog_ReplaceMTUReplaceMeter.IsVisible = false;
-
-
-                #region Check ActionVerify
-
-                if (FormsApp.config.global.ActionVerify)
-                    dialog_AddMTU.IsVisible = true;
-                else
-                    CallLoadViewAddMtu();
-
-                #endregion
-
-
-          
-                background_scan_page.Opacity = 1;
-                background_scan_page_detail.Opacity = 1;
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
-        }
-
         private void CallLoadViewAddMtu()
         {
             dialog_AddMTU.IsVisible = false;
@@ -1730,47 +2275,18 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread(() =>
             {
+                page_to_controller = "AddMTU";
                 Task.Factory.StartNew(BasicReadThread);
             });
         }
 
-        private void OnCaseReadMTU()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page_detail.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-            background_scan_page_detail.IsEnabled = true;
 
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
 
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                navigationDrawerList.SelectedItem = null;
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
-                background_scan_page.Opacity = 1;
-                background_scan_page_detail.Opacity = 1;
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
-        }
-       
         private void OpenSettingsTapped(object sender, EventArgs e)
         {
-            printer.Suspend();
+
+
+            //printer.Suspend();
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
             background_scan_page.IsEnabled = true;
@@ -1781,12 +2297,27 @@ namespace aclara_meters.view
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
+
+           
 
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
                 try
                 {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        #region New Circular Progress bar Animations    
+
+                        DeviceList.IsRefreshing = false;
+                        backdark_bg.IsVisible = true;
+                        indicator.IsVisible = true;
+                        background_scan_page.IsEnabled = false;
+
+                        #endregion
+
+                    });
+
                     if (FormsApp.ble_interface.IsOpen())
                     {
                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
@@ -1804,6 +2335,22 @@ namespace aclara_meters.view
                         background_scan_page_detail.Opacity = 1;
 
                         shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //   if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            #region New Circular Progress bar Animations    
+
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+
+                            #endregion
+
+
+                        });
+
                         return;
                     }
                     else
@@ -1825,13 +2372,31 @@ namespace aclara_meters.view
                         background_scan_page_detail.Opacity = 1;
 
                         shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false; 
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            #region New Circular Progress bar Animations    
+
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+
+                            #endregion
+
+
+                        });
+
                     }
-                }catch(Exception i2){
+                }
+                catch (Exception i2)
+                {
                     Console.WriteLine(i2.StackTrace);
                 }
             }));
         }
-   
+
         private void SideMenuOpen(object sender, EventArgs e)
         {
             fondo.Opacity = 0;
@@ -1845,7 +2410,7 @@ namespace aclara_meters.view
             background_scan_page.IsEnabled = false;
             background_scan_page_detail.IsEnabled = false;
         }
-    
+
         private void SideMenuClose(object sender, EventArgs e)
         {
             fondo.Opacity = 1;
@@ -1853,8 +2418,8 @@ namespace aclara_meters.view
             shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
-         
-            Task.Delay(200).ContinueWith(t => 
+
+            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
                 ContentNav.Opacity = 0;
@@ -1873,5 +2438,15 @@ namespace aclara_meters.view
             bool value = FormsApp.ble_interface.IsOpen();
             value &= Navigation.NavigationStack.Count >= 3; //  if(Navigation.NavigationStack.Count < 3) Settings.IsLoggedIn = false;
         }
+
+
+        public void PrintToConsole(string printConsole)
+        {
+
+            if (DEBUG_MODE_ON)
+                Console.WriteLine("DEBUG_ACL: " + printConsole);
+        }
+
+
     }
 }

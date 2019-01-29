@@ -87,7 +87,7 @@ namespace aclara_meters.viewmodel
             // Path where the file should be saved once downloaded (locally)
             //string pathLocalFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "User.txt");
             //string[] arr = XDocument.Load(pathLocalFile).Descendants("Users").Select(element => element.Value).ToArray();
-           
+
             /*
 
             XmlSerializer serializer = new XmlSerializer(typeof(XML.XmlElementList.Users));
@@ -103,9 +103,7 @@ namespace aclara_meters.viewmodel
 
                 XML.XmlElementList.Users result = (XML.XmlElementList.Users)serializer.Deserialize(reader);
             }
-
             */
-            //return username == Constants.Username && password == Constants.Password;
             
             Xml.User[] dbUsers = Configuration.GetInstance ().users;
             

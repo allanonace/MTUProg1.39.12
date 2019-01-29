@@ -83,7 +83,26 @@
                                             </Image.GestureRecognizers>       
                                             
                                         </Image>
+                                        
 
+                                        
+                                        
+                                         <Image  x:Name="hamburger_icon_home_detail" IsVisible="false"
+                                                Margin="4,24,0,0"  HeightRequest="56" WidthRequest="1"
+                                                Scale="1" 
+                                                Source="back_menu_puck.png"  
+                                                HorizontalOptions="Start">
+
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer  x:Name="back_button_home_detail"  NumberOfTapsRequired="1" />
+                                            </Image.GestureRecognizers>       
+                                            
+                                        </Image>
+                                        
+                                        
+                                        
+                                        
+                                        
                                   </StackLayout>
                                    
                                  <StackLayout  Margin="-20,34,-20,-44"  Orientation="Horizontal" 
@@ -327,10 +346,24 @@
                                         
                                     </Image>
 
+                                    
+                                                                                
+                                         <Image  x:Name="hamburger_icon_home" IsVisible="false"
+                                                Margin="4,24,0,0"  HeightRequest="56" WidthRequest="1"
+                                                Scale="1" 
+                                                Source="back_menu_puck.png"  
+                                                HorizontalOptions="Start">
 
+                                            <Image.GestureRecognizers>
+                                                <TapGestureRecognizer  x:Name="back_button_home"  NumberOfTapsRequired="1" />
+                                            </Image.GestureRecognizers>       
+                                            
+                                        </Image>
+                                        
                                    </StackLayout>
                                    
                                 
+                                    
 
 
                                     <StackLayout  Margin="-20,34,-20,-44"  Orientation="Horizontal" 
@@ -514,31 +547,6 @@
             
     
     
-     <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" 
-                  IsVisible="true"  WidthRequest="1024" Opacity="0.6">
-
-     </StackLayout> 
-    
-
-     <StackLayout InputTransparent="true"  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
-        RelativeLayout.YConstraint=
-          "{ConstraintExpression Type=RelativeToParent,
-                                 Property=Height,
-                                 Factor=0}"
-        RelativeLayout.HeightConstraint=
-          "{ConstraintExpression Type=RelativeToParent,
-                                 Property=Height,
-                                 Factor=1}"
-        RelativeLayout.WidthConstraint=
-          "{ConstraintExpression Type=RelativeToParent,
-                                 Property=Width,
-                                 Factor=1}">
-
-                              
-        <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2"
-            VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
-
-    </StackLayout>
     
     
         
@@ -854,6 +862,31 @@
        
        
         
+     <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" 
+                  IsVisible="true"  WidthRequest="1024" Opacity="0.6">
+
+     </StackLayout> 
+    
+
+     <StackLayout InputTransparent="true"  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+        RelativeLayout.YConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Height,
+                                 Factor=0}"
+        RelativeLayout.HeightConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Height,
+                                 Factor=1}"
+        RelativeLayout.WidthConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Width,
+                                 Factor=1}">
+
+                              
+        <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2"
+            VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+
+    </StackLayout>
 
 
 
