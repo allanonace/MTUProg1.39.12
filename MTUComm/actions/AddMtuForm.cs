@@ -12,36 +12,43 @@ namespace MTUComm.actions
         public enum FIELD
         {
             MTU_ID_OLD,
-            SERVICE_PORT_ID,
-            SERVICE_PORT_ID2,
-            FIELD_ORDER,
-            FIELD_ORDER2,
+            ACCOUNT_NUMBER,
+            ACCOUNT_NUMBER_2,
+            
+            WORK_ORDER,
+            WORK_ORDER_2,
+            
             METER_NUMBER,
-            METER_NUMBER2,
+            METER_NUMBER_2,
             METER_NUMBER_OLD,
-            METER_NUMBER2_OLD,
-            INITIAL_READING,
-            INITIAL_READING2,
-            INITIAL_READING_OLD,
-            INITIAL_READING2_OLD,
-            SELECTED_METER,
-            SELECTED_METER2,
+            METER_NUMBER_OLD_2,
+            
+            METER_READING,
+            METER_READING_2,
+            METER_READING_OLD,
+            METER_READING_OLD_2,
+            
+            METER_WORKING_OLD,
+            METER_WORKING_OLD_2,
+            REPLACE_METER_REG,
+            REPLACE_METER_REG_2,
+            
+            METER_TYPE,
+            METER_TYPE_2,
+            
             NUMBER_OF_DIALS,
-            NUMBER_OF_DIALS2,
+            NUMBER_OF_DIALS_2,
             DRIVE_DIAL_SIZE,
-            DRIVE_DIAL_SIZE2,
+            DRIVE_DIAL_SIZE_2,
             UNIT_MEASURE,
-            UNIT_MEASURE2,
+            UNIT_MEASURE_2,
+            
             READ_INTERVAL,
-            READ_INTERVAL2,
             SNAP_READS,
-            SNAP_READS2,
             TWO_WAY,
-            TWO_WAY2,
             ALARM,
-            ALARM2,
             DEMAND,
-            DEMAND2,
+            
             GPS_LATITUDE,
             GPS_LONGITUDE,
             GPS_ALTITUDE,
@@ -52,25 +59,25 @@ namespace MTUComm.actions
         public Dictionary<ParameterType,FIELD> IdsAclara =
             new Dictionary<ParameterType,FIELD> ()
             {
-                { ParameterType.OldMtuId,             FIELD.MTU_ID_OLD          },
-                { ParameterType.ActivityLogId,        FIELD.SERVICE_PORT_ID     },
-                { ParameterType.WorkOrder,            FIELD.FIELD_ORDER         },
-                { ParameterType.MeterType,            FIELD.SELECTED_METER      },
-                { ParameterType.NumberOfDials,        FIELD.NUMBER_OF_DIALS     },
-                { ParameterType.DriveDialSize,        FIELD.DRIVE_DIAL_SIZE     },
-                { ParameterType.UnitOfMeasure,        FIELD.UNIT_MEASURE        },
-                { ParameterType.SnapRead,             FIELD.SNAP_READS          },
-                { ParameterType.Custom,               FIELD.OPTIONAL_PARAMS     },
-                { ParameterType.ReadInterval,         FIELD.READ_INTERVAL       },
-                { ParameterType.Alarm,                FIELD.ALARM               },
+                { ParameterType.OldMtuId,             FIELD.MTU_ID_OLD        },
+                { ParameterType.ActivityLogId,        FIELD.ACCOUNT_NUMBER    },
+                { ParameterType.WorkOrder,            FIELD.WORK_ORDER        },
+                { ParameterType.MeterType,            FIELD.METER_TYPE        },
+                { ParameterType.NumberOfDials,        FIELD.NUMBER_OF_DIALS   },
+                { ParameterType.DriveDialSize,        FIELD.DRIVE_DIAL_SIZE   },
+                { ParameterType.UnitOfMeasure,        FIELD.UNIT_MEASURE      },
+                { ParameterType.SnapRead,             FIELD.SNAP_READS        },
+                { ParameterType.Custom,               FIELD.OPTIONAL_PARAMS   },
+                { ParameterType.ReadInterval,         FIELD.READ_INTERVAL     },
+                { ParameterType.Alarm,                FIELD.ALARM             },
                 
-                { ParameterType.MeterSerialNumber,    FIELD.METER_NUMBER        },
-                { ParameterType.NewMeterSerialNumber, FIELD.METER_NUMBER        },
-                { ParameterType.OldMeterSerialNumber, FIELD.METER_NUMBER_OLD    },
+                { ParameterType.MeterSerialNumber,    FIELD.METER_NUMBER      },
+                { ParameterType.NewMeterSerialNumber, FIELD.METER_NUMBER      },
+                { ParameterType.OldMeterSerialNumber, FIELD.METER_NUMBER_OLD  },
                 
-                { ParameterType.MeterReading,         FIELD.INITIAL_READING     },
-                { ParameterType.NewMeterReading,      FIELD.INITIAL_READING     },
-                { ParameterType.OldMeterReading,      FIELD.INITIAL_READING_OLD }
+                { ParameterType.MeterReading,         FIELD.METER_READING     },
+                { ParameterType.NewMeterReading,      FIELD.METER_READING     },
+                { ParameterType.OldMeterReading,      FIELD.METER_READING_OLD }
             };
 
         // Elements array
@@ -82,19 +89,19 @@ namespace MTUComm.actions
             {
                 #region Service Port ID = Account Number = Activity Log ID = Functl Loctn
                 {
-                    FIELD.SERVICE_PORT_ID,
+                    FIELD.ACCOUNT_NUMBER,
                     new string[]
                     {
-                        "ServicePortId",
+                        "AccountNumber",
                         "AccountNumber",
                         "Service Port ID"
                     }
                 },
                 {
-                    FIELD.SERVICE_PORT_ID2,
+                    FIELD.ACCOUNT_NUMBER_2,
                     new string[]
                     {
-                        "ServicePortId2",
+                        "AccountNumber_2",
                         "AccountNumber",
                         "Service Port ID"
                     }
@@ -102,21 +109,21 @@ namespace MTUComm.actions
                 #endregion
                 #region Field Order = Work Order
                 {
-                    FIELD.FIELD_ORDER,
+                    FIELD.WORK_ORDER,
                     new string[]
                     {
-                        "FieldOrder",
                         "WorkOrder",
-                        "Field Order"
+                        "WorkOrder",
+                        "Work Order"
                     }
                 },
                 {
-                    FIELD.FIELD_ORDER2,
+                    FIELD.WORK_ORDER_2,
                     new string[]
                     {
-                        "FieldOrder2",
+                        "WorkOrder_2",
                         "WorkOrder",
-                        "Field Order"
+                        "Work Order"
                     }
                 },
                 #endregion
@@ -131,10 +138,10 @@ namespace MTUComm.actions
                     }
                 },
                 {
-                    FIELD.METER_NUMBER2,
+                    FIELD.METER_NUMBER_2,
                     new string[]
                     {
-                        "MeterNumber2",
+                        "MeterNumber_2",
                         "NewMeterSerialNumber",
                         "New Meter Serial Number"
                     }
@@ -144,61 +151,61 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "MeterNumberOld",
-                        "NewMeterSerialNumberOld",
-                        "New Meter Serial Number Old"
+                        "OldMeterSerialNumber",
+                        "Old Meter Serial Number"
                     }
                 },
                 {
-                    FIELD.METER_NUMBER2_OLD,
+                    FIELD.METER_NUMBER_OLD_2,
                     new string[]
                     {
-                        "MeterNumber2Old",
-                        "NewMeterSerialNumberOld",
-                        "New Meter Serial Number Old"
+                        "MeterNumberOld_2",
+                        "OldMeterSerialNumber",
+                        "Old Meter Serial Number"
                     }
                 },
                 #endregion
                 #region Initial Reading = Meter Reading
                 {
-                    FIELD.INITIAL_READING,
+                    FIELD.METER_READING,
                     new string[]
                     {
-                        "InitialReading",
+                        "MeterReading",
                         "MeterReading",
                         "Meter Reading"
                     }
                 },
                 {
-                    FIELD.INITIAL_READING2,
+                    FIELD.METER_READING_2,
                     new string[]
                     {
-                        "InitialReading2",
+                        "MeterReading_2",
                         "MeterReading",
                         "Meter Reading"
                     }
                 },
                 {
-                    FIELD.INITIAL_READING_OLD,
+                    FIELD.METER_READING_OLD,
                     new string[]
                     {
-                        "InitialReadingOld",
                         "MeterReadingOld",
-                        "Meter Reading Old"
+                        "OldMeterReading",
+                        "Old Meter Reading"
                     }
                 },
                 {
-                    FIELD.INITIAL_READING2_OLD,
+                    FIELD.METER_READING_OLD_2,
                     new string[]
                     {
-                        "InitialReading2Old",
-                        "MeterReadingOld",
-                        "Meter Reading Old"
+                        "MeterReadingOld_2",
+                        "OldMeterReading",
+                        "Old Meter Reading"
                     }
                 },
                 #endregion
-                #region Selected Meter ID
+                #region Meter Type ( Meter ID )
                 {
-                    FIELD.SELECTED_METER,
+                    FIELD.METER_TYPE,
                     new string[]
                     {
                         "Meter",
@@ -207,12 +214,53 @@ namespace MTUComm.actions
                     }
                 },
                 {
-                    FIELD.SELECTED_METER2,
+                    FIELD.METER_TYPE_2,
                     new string[]
                     {
-                        "Meter2",
+                        "Meter_2",
                         "SelectedMeterId2",
                         "Selected Meter ID 2"
+                    }
+                },
+                #endregion
+
+                #region Old Meter Working
+                {
+                    FIELD.METER_WORKING_OLD,
+                    new string[]
+                    {
+                        "OldMeterWorking",
+                        "OldMeterWorking",
+                        "Old Meter Working"
+                    }
+                },
+                {
+                    FIELD.METER_WORKING_OLD_2,
+                    new string[]
+                    {
+                        "OldMeterWorking_2",
+                        "OldMeterWorking",
+                        "Old Meter Working"
+                    }
+                },
+                #endregion
+                #region Replace Meter|Register
+                {
+                    FIELD.REPLACE_METER_REG,
+                    new string[]
+                    {
+                        "ReplaceMeterRegister",
+                        "ReplaceMeterRegister",
+                        "Replace Meter/Register"
+                    }
+                },
+                {
+                    FIELD.REPLACE_METER_REG_2,
+                    new string[]
+                    {
+                        "ReplaceMeterRegister_2",
+                        "ReplaceMeterRegister",
+                        "Replace Meter/Register"
                     }
                 },
                 #endregion
@@ -228,7 +276,7 @@ namespace MTUComm.actions
                     }
                 },
                 {
-                    FIELD.NUMBER_OF_DIALS2,
+                    FIELD.NUMBER_OF_DIALS_2,
                     new string[]
                     {
                         "NumberOfDials2",
@@ -248,7 +296,7 @@ namespace MTUComm.actions
                     }
                 },
                 {
-                    FIELD.DRIVE_DIAL_SIZE2,
+                    FIELD.DRIVE_DIAL_SIZE_2,
                     new string[]
                     {
                         "DriveDialSize2",
@@ -268,7 +316,7 @@ namespace MTUComm.actions
                     }
                 },
                 {
-                    FIELD.UNIT_MEASURE2,
+                    FIELD.UNIT_MEASURE_2,
                     new string[]
                     {
                         "UnitOfMeasure2",
@@ -288,15 +336,6 @@ namespace MTUComm.actions
                         "Read Interval"
                     }
                 },
-                {
-                    FIELD.READ_INTERVAL2,
-                    new string[]
-                    {
-                        "ReadInterval2",
-                        "ReadInterval 2",
-                        "Read Interval 2"
-                    }
-                },
                 #endregion
                 #region Snap Reads
                 {
@@ -306,15 +345,6 @@ namespace MTUComm.actions
                         "SnapReads",
                         "SnapReads",
                         "Snap Reads"
-                    }
-                },
-                {
-                    FIELD.SNAP_READS2,
-                    new string[]
-                    {
-                        "SnapReads2",
-                        "SnapReads2",
-                        "Snap Reads 2"
                     }
                 },
                 #endregion
@@ -328,15 +358,6 @@ namespace MTUComm.actions
                         "Fast Message Config"
                     }
                 },
-                {
-                    FIELD.TWO_WAY2,
-                    new string[]
-                    {
-                        "TwoWay2",
-                        "Fast-2-Way 2",
-                        "Fast Message Config 2"
-                    }
-                },
                 #endregion
                 #region Alarm
                 {
@@ -348,15 +369,6 @@ namespace MTUComm.actions
                         "Alarms"
                     }
                 },
-                {
-                    FIELD.ALARM2,
-                    new string[]
-                    {
-                        "Alarm2",
-                        "Alarms2",
-                        "Alarms 2"
-                    }
-                },
                 #endregion
                 #region Demand
                 {
@@ -366,15 +378,6 @@ namespace MTUComm.actions
                         "Demand",
                         "Demands",
                         "Demands"
-                    }
-                },
-                {
-                    FIELD.DEMAND2,
-                    new string[]
-                    {
-                        "Demand2",
-                        "Demands2",
-                        "Demands 2"
                     }
                 },
                 #endregion
@@ -431,41 +434,7 @@ namespace MTUComm.actions
                 #endregion
             };
 
-        public AddMtuForm ( Mtu mtu ) : base ( mtu )
-        {
-            /*
-            // Two Ports
-            base.conditions.mtu.AddCondition("TwoPorts");
-
-            // Field order (work order)
-            base.conditions.globals.AddCondition("WorkOrderRecording");
-
-            // Meter Number (serial number)
-            base.conditions.globals.AddCondition("UseMeterSerialNumber");
-
-            // Vendor / Model / Name
-            base.conditions.globals.AddCondition("ShowMeterVendor");
-
-            // Read Interval 
-            base.conditions.globals.AddCondition("IndividualReadInterval");
-
-            // Snap Reads
-            base.conditions.globals.AddCondition("AllowDailyReads");
-            base.conditions.globals.AddCondition("IndividualDailyReads");
-            base.conditions.mtu.AddCondition("DailyReads");
-
-            // 2-Way
-            base.conditions.globals.AddCondition("FastMessageConfig");
-            base.conditions.globals.AddCondition("Fast2Way");
-            base.conditions.mtu.AddCondition("FastMessageConfig");
-
-            // Alarms
-            base.conditions.mtu.AddCondition("RequiresAlarmProfile");
-
-            // Demands
-            base.conditions.mtu.AddCondition("MtuDemand");
-            */
-        }
+        public AddMtuForm ( Mtu mtu ) : base ( mtu ) { }
 
         public void AddParameter ( FIELD fieldType, dynamic value )
         {

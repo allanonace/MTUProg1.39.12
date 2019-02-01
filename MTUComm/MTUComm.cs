@@ -591,11 +591,12 @@ namespace MTUComm
 
             try
             {
+                // Recover parameters from script and translante from Aclara nomenclature to our own
                 foreach ( Parameter parameter in addMtuAction.GetParameters () )
                     form.AddParameterTranslatingAclaraXml ( parameter );
 
                 // Auto-detect Meter
-                if ( ! form.ContainsParameter ( AddMtuForm.FIELD.SELECTED_METER  ) &&
+                if ( ! form.ContainsParameter ( AddMtuForm.FIELD.METER_TYPE  ) &&
                        form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS ) &&
                        form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE ) &&
                        form.ContainsParameter ( AddMtuForm.FIELD.UNIT_MEASURE    ) )
@@ -607,7 +608,7 @@ namespace MTUComm
                         mtu.Flow );
 
                     if ( meters.Count > 0 )
-                        form.AddParameter ( AddMtuForm.FIELD.SELECTED_METER, meters[ 0 ].Id.ToString () );
+                        form.AddParameter ( AddMtuForm.FIELD.METER_TYPE, meters[ 0 ].Id.ToString () );
                     else
                     {
                         OnError ( this, new ErrorArgs ( 100,
@@ -673,6 +674,14 @@ namespace MTUComm
 
                 bool useTwoPorts = mtu.TwoPorts;
 
+                #region Account Number
+
+                map.P1MeterId = form.AccountNumber.Value;
+                if ( useTwoPorts )
+                    map.P2MeterId = form.AccountNumber_2.Value;
+
+                #endregion
+
                 #region Meter Type
 
                 Meter selectedMeter  = null;
@@ -686,40 +695,10 @@ namespace MTUComm
                 if ( useTwoPorts )
                 {
                     if ( ! isFromScripting )
-                         selectedMeter2 = (Meter)form.Meter2.Value;
-                    else selectedMeter2 = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter2.Value ) );
+                         selectedMeter2 = (Meter)form.Meter_2.Value;
+                    else selectedMeter2 = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter_2.Value ) );
                     map.P2MeterType = selectedMeter2.Id;
                 }
-
-                #endregion
-
-                #region Service Port = Account Number = Activity Log ID
-
-                map.P1MeterId = form.ServicePortId.Value;
-                if ( useTwoPorts )
-                    map.P2MeterId = form.ServicePortId2.Value;
-
-                #endregion
-
-                #region Reading Interval
-
-                if ( global.IndividualReadInterval )
-                {
-                        // If not present in scripted mode, set default value to one/1 hour
-                    map.ReadIntervalMinutes = ( form.ContainsParameter ( AddMtuForm.FIELD.READ_INTERVAL ) ) ?
-                                                form.ReadInterval.Value : "1 Hr";
-                    if ( useTwoPorts )
-                        map.P2ReadInterval = ( form.ContainsParameter ( AddMtuForm.FIELD.READ_INTERVAL2 ) ) ?
-                                               form.ReadInterval2.Value : "1 Hr";
-                }
-
-                #endregion
-
-                #region Overlap count
-
-                map.MessageOverlapCount = DEFAULT_OVERLAP;
-                if (useTwoPorts)
-                    map.P2MessageOverlapCount = DEFAULT_OVERLAP;
 
                 #endregion
 
@@ -729,18 +708,18 @@ namespace MTUComm
                 string p1readingStr = "0";
                 string p2readingStr = "0";
 
-                if ( form.ContainsParameter ( AddMtuForm.FIELD.INITIAL_READING ) )
+                if ( form.ContainsParameter ( AddMtuForm.FIELD.METER_READING ) )
                 {
                     if ( ! isFromScripting ||
                          string.IsNullOrEmpty ( mask ) ) // No mask
                     {
-                        p1readingStr = form.InitialReading .Value;
-                        p2readingStr = form.InitialReading2.Value;
+                        p1readingStr = form.MeterReading  .Value;
+                        p2readingStr = form.MeterReading_2.Value;
                     }
                     else
                     {
-                        p1readingStr = this.ApplyInitialReadMask ( mask, form.InitialReading .Value, selectedMeter.LiveDigits );
-                        p2readingStr = this.ApplyInitialReadMask ( mask, form.InitialReading2.Value, selectedMeter.LiveDigits );
+                        p1readingStr = this.ApplyMeterReadingMask ( mask, form.MeterReading  .Value, selectedMeter.LiveDigits );
+                        p2readingStr = this.ApplyMeterReadingMask ( mask, form.MeterReading_2.Value, selectedMeter.LiveDigits );
                     }
                 }
 
@@ -750,6 +729,25 @@ namespace MTUComm
                 map.P1Reading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
                 if ( useTwoPorts )
                     map.P2Reading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
+
+                #endregion
+
+                #region Reading Interval
+
+                if ( global.IndividualReadInterval )
+                {
+                    // If not present in scripted mode, set default value to one/1 hour
+                    map.ReadIntervalMinutes = ( form.ContainsParameter ( AddMtuForm.FIELD.READ_INTERVAL ) ) ?
+                                                form.ReadInterval.Value : "1 Hr";
+                }
+
+                #endregion
+
+                #region Overlap count
+
+                map.MessageOverlapCount = DEFAULT_OVERLAP;
+                if (useTwoPorts)
+                    map.P2MessageOverlapCount = DEFAULT_OVERLAP;
 
                 #endregion
 
@@ -794,39 +792,6 @@ namespace MTUComm
                         // Message overlap count
                         // Number of new readings to take before transmit
                         map.MessageOverlapCount = alarms.Overlap;
-
-                        if (useTwoPorts)
-                        {
-                            // Overlap
-                            map.P2MessageOverlapCount = alarms.Overlap;
-
-                            // P2ImmediateAlarm
-                            map.P2ImmediateAlarm = alarms.ImmediateAlarmTransmit;
-
-                            // P2UrgentAlarm
-                            map.P2UrgentAlarm = alarms.DcuUrgentAlarm;
-
-                            // P2MagneticAlarm
-                            if (mtu.MagneticTamper)
-                                map.P2MagneticAlarm = alarms.Magnetic;
-
-                            // P2RegisterCoverAlarm
-                            if (mtu.RegisterCoverTamper)
-                                map.P2RegisterCoverAlarm = alarms.RegisterCover;
-
-                            // P2ReverseFlowAlarm
-                            if (mtu.ReverseFlowTamper)
-                                map.P2ReverseFlowAlarm = alarms.ReverseFlow;
-
-                            // P2TiltAlarm
-                            if (mtu.TiltTamper)
-                                map.P2TiltAlarm = alarms.Tilt;
-
-                            // P2InterfaceAlarm
-                            if (mtu.InterfaceTamper)
-                                map.P2InterfaceAlarm = alarms.InterfaceTamper;
-                        }
-                
                     }
                 }
 
@@ -963,7 +928,7 @@ namespace MTUComm
             }
         }
 
-        private string ApplyInitialReadMask ( string mask, string value, int liveDigits )
+        private string ApplyMeterReadingMask ( string mask, string value, int liveDigits )
         {
             if ( mask != string.Empty )
             {

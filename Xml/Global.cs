@@ -15,7 +15,6 @@ namespace Xml
             this.WorkOrderEnabledAppt       = false; // Enable or disable values after appointment in interactive mode ( Work Order )
             this.MeterSerialEnabledAppt     = false; //  Enable or disable values after appointment in interactive mode ( Meter Old/Serial Number )
             //this.AccountFilled            = NOT PRESENT IN K.CODE
-            this.AccountLabel               = "Account #"; // The account number label
             this.AccountLength              = 7; // Account number length
             this.ActionVerify               = true; // Pop up the Message box after Add MTU
             this.AddressVerify              = false; // Appointment verify address
@@ -115,6 +114,10 @@ namespace Xml
             this.TimeSyncCountRepeat        = 1;
             this.TimeSyncCountDefault       = 63;
 
+            this.AccountLabel               = "Account #"; // The account number label
+            this.WorkOrderLabel             = "Work Order";
+            this.NewMeterLabel              = "New Meter #";
+
             #region Menu options
             
             this.ShowInstallConfirmation    = false; // Whether or nor the Install Confirmation option is displayed
@@ -134,7 +137,7 @@ namespace Xml
             this.MtuIdLength                 = ;
             this.NewMeterCalc                = ;
             this.NewMeterFormat              = ;
-            this.NewMeterLabel               = ;
+            
             this.NewMeterPort2isTheSame      = ;
             this.NewMeterPrefix              = ;
             this.NewMeterValidation          = ;
@@ -199,7 +202,7 @@ namespace Xml
             this.UTCOffset                   = ;
             this.WakeUpCount                 = ;
             this.WorkOrderDualEntry          = ;
-            this.WorkOrderLabel              = ;
+            
             this.WorkOrderLength             = ;
             this.WorkOrderRecording          = ;
             this.WriteDelay                  = ;

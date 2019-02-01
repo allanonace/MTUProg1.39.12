@@ -87,10 +87,6 @@ namespace MTUComm
             dynamic map    = form.map;
             string  temp   = string.Empty;
 
-            Meter meter = ( ! isFromScripting ) ?
-                ( Meter )form.Meter.Value :
-                Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
-
             #region General
 
             logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
@@ -104,27 +100,16 @@ namespace MTUComm
 
             logger.logParameter ( this.addMtuAction, new Parameter ( "MtuId",   "MTU ID",   this.mtuBasicInfo.Id   ) );
             logger.logParameter ( this.addMtuAction, new Parameter ( "MtuType", "MTU Type", this.mtuBasicInfo.Type ) );
+            logger.logParameter ( this.addMtuAction, form.ReadInterval );
 
-            if ( global.IndividualReadInterval )
-                logger.logParameter ( this.addMtuAction, form.ReadInterval );
+            bool   useDailyReads    = ( global.AllowDailyReads && mtu.DailyReads );
+            string dailyReads       = ( useDailyReads ) ? form.SnapReads.Value : "Disable";
+            string dailyGmtHourRead = ( useDailyReads ) ? form.SnapReads.Value : "Disable";
+            logger.logParameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
+            logger.logParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
 
             if ( mtu.FastMessageConfig )
                 logger.logParameter ( this.addMtuAction, form.TwoWay );
-
-            if ( global.AllowDailyReads &&
-                 mtu.DailyReads )
-            {
-                string dailyReads       = "Disable";
-                string dailyGmtHourRead = "Disable";
-
-                if (global.IndividualDailyReads) // TODO: check values
-                {
-                    dailyReads       = form.SnapReads.Value;
-                    dailyGmtHourRead = form.SnapReads.Value;
-                }
-                logger.logParameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
-                logger.logParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
-            }
 
             // Related to F12WAYRegister1XX registers
             string afc = ( mtu.TimeToSync &&
@@ -136,34 +121,56 @@ namespace MTUComm
 
             #region Port 1
 
+            Meter meter = ( ! isFromScripting ) ?
+                ( Meter )form.Meter.Value :
+                Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
+
             XElement port = new XElement("Port");
             logger.addAtrribute(port, "display", "Port 1");
             logger.addAtrribute(port, "number", "1");
 
-            logger.logParameter ( port, form.ServicePortId );
+            logger.logParameter ( port, form.AccountNumber );
 
             if ( global.WorkOrderRecording )
-                logger.logParameter ( port, form.FieldOrder );
+                logger.logParameter ( port, form.WorkOrder );
+
+            if ( form.actionType == ActionType.ReplaceMeter           ||
+                 form.actionType == ActionType.ReplaceMtuReplaceMeter ||
+                 form.actionType == ActionType.AddMtuReplaceMeter )
+            {
+                if ( global.UseMeterSerialNumber )
+                    logger.logParameter ( port, form.MeterNumberOld );
+                
+                if ( global.MeterWorkRecording )
+                    logger.logParameter ( port, form.OldMeterWorking );
+                
+                if ( global.OldReadingRecording )
+                    logger.logParameter ( port, form.MeterReadingOld );
+                
+                if ( global.RegisterRecording )
+                    logger.logParameter ( port, form.ReplaceMeterRegister );
+                
+                if ( global.AutoRegisterRecording )
+                {
+                    temp = ( string.Equals ( form.MeterNumber, form.MeterNumberOld ) ) ?
+                             "Register head change" : "Meter change";
+                    logger.logParameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
+                }
+            }
 
             string meterType = string.Format("({0}) {1}", meter.Id, meter.Display);
             logger.logParameter ( port, new Parameter("MeterType", "Meter Type", meterType));
             logger.logParameter ( port, new Parameter("MeterTypeId", "Meter Type ID", meter.Id.ToString()));
             logger.logParameter ( port, new Parameter("MeterVendor", "Meter Vendor", meter.Vendor));
             logger.logParameter ( port, new Parameter("MeterModel", "Meter Model", meter.Model));
-            logger.logParameter ( port, form.MeterNumber );
-            logger.logParameter ( port, form.InitialReading );
+            
+            if ( global.UseMeterSerialNumber )
+                logger.logParameter ( port, form.MeterNumber );
+            
+            logger.logParameter ( port, form.MeterReading );
+            
             logger.logParameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
             logger.logParameter ( port, new Parameter("PulseLo","Pulse Low Time", meter.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
-
-            if ( global.AutoRegisterRecording &&
-                 ( form.addMode == ActionType.ReplaceMeter ||
-                   form.addMode == ActionType.ReplaceMtuReplaceMeter ||
-                   form.addMode == ActionType.AddMtuReplaceMeter ) )
-            {
-                temp = ( string.Equals ( form.MeterNumber, form.MeterNumberOld ) ) ?
-                         "Register head change" : "Meter change";
-                logger.logParameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
-            }
 
             this.addMtuAction.Add(port);
 
@@ -174,35 +181,52 @@ namespace MTUComm
             if ( mtu.TwoPorts )
             {
                 Meter meter2 = ( ! isFromScripting ) ?
-                    ( Meter )form.Meter2.Value :
-                    Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter2.Value ) );
+                    ( Meter )form.Meter_2.Value :
+                    Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter_2.Value ) );
 
                 port = new XElement ( "Port");
                 logger.addAtrribute ( port, "display", "Port 2" );
                 logger.addAtrribute ( port, "number", "2" );
 
-                logger.logParameter ( port, form.ServicePortId2 );
+                logger.logParameter ( port, form.AccountNumber_2 );
 
                 if ( global.WorkOrderRecording )
-                    logger.logParameter ( port, form.FieldOrder2 );
+                    logger.logParameter ( port, form.WorkOrder_2 );
 
+                if ( form.actionType == ActionType.ReplaceMeter           ||
+                     form.actionType == ActionType.ReplaceMtuReplaceMeter ||
+                     form.actionType == ActionType.AddMtuReplaceMeter )
+                {
+                    if ( global.UseMeterSerialNumber )
+                        logger.logParameter ( port, form.MeterNumberOld_2 );
+
+                    if ( global.MeterWorkRecording )
+                        logger.logParameter ( port, form.OldMeterWorking_2 );
+                    
+                    if ( global.OldReadingRecording )
+                        logger.logParameter ( port, form.MeterReadingOld_2 );
+                    
+                    if ( global.RegisterRecording )
+                        logger.logParameter ( port, form.ReplaceMeterRegister_2 );
+                    
+                    if ( global.AutoRegisterRecording )
+                    {
+                        temp = ( string.Equals ( form.MeterNumber_2, form.MeterNumberOld_2 ) ) ?
+                                 "Register head change" : "Meter change";
+                        logger.logParameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
+                    }
+                }
+                
                 string meterType2 = string.Format("({0}) {1}", meter2.Id, meter2.Display);
                 logger.logParameter ( port, new Parameter("MeterType", "Meter Type", meterType2));
                 logger.logParameter ( port, new Parameter("MeterTypeId", "Meter Type ID", meter2.Id.ToString()));
                 logger.logParameter ( port, new Parameter("MeterVendor", "Meter Vendor", meter2.Vendor));
                 logger.logParameter ( port, new Parameter("MeterModel", "Meter Model", meter2.Model));
-                logger.logParameter ( port, form.MeterNumber2 );
-                logger.logParameter ( port, form.InitialReading2 );
-
-                if ( global.AutoRegisterRecording &&
-                     ( form.addMode == ActionType.ReplaceMeter ||
-                       form.addMode == ActionType.ReplaceMtuReplaceMeter ||
-                       form.addMode == ActionType.AddMtuReplaceMeter ) )
-                {
-                    temp = ( string.Equals ( form.MeterNumber2, form.MeterNumber2Old ) ) ?
-                             "Register head change" : "Meter change";
-                    logger.logParameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
-                }
+                
+                if ( global.UseMeterSerialNumber )
+                    logger.logParameter ( port, form.MeterNumber_2 );
+                    
+                logger.logParameter ( port, form.MeterReading_2 );
 
                 this.addMtuAction.Add(port);
             }

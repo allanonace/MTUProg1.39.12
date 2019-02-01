@@ -200,7 +200,7 @@
   <Overload>
     <Id>P1Status</Id>
     <Description>Status of Port 1</Description>
-	<Type>string</Type>
+	  <Type>string</Type>
     <Registers>
       <Register>P1StatusFlag</Register>
     </Registers>
@@ -209,23 +209,12 @@
   <Overload>
     <Id>P2Status</Id>
     <Description>Status of Port 2</Description>
-	<Type>string</Type>
+	  <Type>string</Type>
     <Registers>
       <Register>P2StatusFlag</Register>
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
-  <Register>
-    <Id>MtuType</Id>
-    <Description>MTU Type</Description>
-    <Type>int</Type>
-    <Address>0</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  
   <Overload>
     <Id>MtuSoftVersion</Id>
     <Description>Mtu software/firmware version</Description>
@@ -247,7 +236,16 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
-  
+  <Register>
+    <Id>MtuType</Id>
+    <Description>MTU Type</Description>
+    <Type>int</Type>
+    <Address>0</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
   <Register>
     <Id>MtuSoftVersionLegacy</Id>
     <Description>MTU software version for legacy handheld tools</Description>
@@ -268,7 +266,6 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  
   <Register>
     <Id>MtuSoftBuildNumber</Id>
     <Description>MTU software build number</Description>
@@ -309,7 +306,6 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  
   <Register>
     <Id>MtuSerialNumber</Id>
     <Description>MTU Id</Description>
@@ -418,16 +414,6 @@
     <Size>1</Size>
     <Write>false</Write>
     <CustomGet>(_val_ / 2) - 130</CustomGet>
-    <CustomSet/>
-  </Register>
-  <Register>
-    <Id>P2ReadInterval</Id>
-    <Description>Read interval port 2</Description>
-    <Type>int</Type>
-    <Address>62</Address>
-    <Size>2</Size>
-    <Write>true</Write>
-    <CustomGet/>
     <CustomSet/>
   </Register>
   <Register>
@@ -598,7 +584,7 @@
     <Size>0</Size>
     <Write>false</Write>
     <CustomGet/>
-	<CustomSet/>
+	  <CustomSet/>
   </Register>  
   <Register>
     <Id>P2StatusFlag</Id>
@@ -608,7 +594,7 @@
     <Size>1</Size>
     <Write>false</Write>
     <CustomGet/>
-	<CustomSet/>
+	  <CustomSet/>
   </Register>  
   <Register>
     <Id>P1MeterType</Id>
@@ -627,7 +613,6 @@
     <Address>49</Address>
     <Size>2</Size>
     <Write>true</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -648,8 +633,8 @@
     <Address>50</Address>
     <Size>6</Size>
     <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
+    <CustomGet>method:BcdToULong</CustomGet>
+    <CustomSet>method:ULongToBcd</CustomSet>
   </Register>
   <Register>
     <Id>P1ReadingErrorCode</Id>
@@ -658,7 +643,6 @@
     <Address>72</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -669,7 +653,6 @@
     <Address>112</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -680,7 +663,6 @@
     <Address>102</Address>
     <Size>2</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -691,7 +673,6 @@
     <Address>110</Address>
     <Size>2</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -702,7 +683,6 @@
     <Address>71</Address>
     <Size>0</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -713,7 +693,6 @@
     <Address>71</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -724,7 +703,6 @@
     <Address>71</Address>
     <Size>4</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -735,7 +713,6 @@
     <Address>71</Address>
     <Size>5</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -746,7 +723,6 @@
     <Address>71</Address>
     <Size>6</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -787,7 +763,6 @@
     <Address>202</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -868,7 +843,6 @@
     <Address>232</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -879,7 +853,6 @@
     <Address>233</Address>
     <Size>4</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -890,7 +863,6 @@
     <Address>237</Address>
     <Size>1</Size>
     <Write>false</Write>
-    <!-- NO SE -->
     <CustomGet/>
     <CustomSet/>
   </Register>
