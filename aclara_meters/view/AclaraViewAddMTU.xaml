@@ -524,7 +524,7 @@
                                     </StackLayout>
 
                                     <!-- ( New ) Meter Reading / Initial Reading -->
-                                    <Label Text="Meter Reading" x:Name="lb_MeterReading" TextColor="Red" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17"/>
+                                    <Label Text="Meter Reading" x:Name="lb_MeterReading" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17"/>
                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
                                         <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                             <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -538,7 +538,7 @@
                                     
                                     <!-- ( New ) Meter Reading / Initial Reading - Dual -->
                                     <StackLayout x:Name="div_MeterReading_Dual" IsVisible="false">
-                                        <Label Text="Meter Reading" x:Name="lb_MeterReading_Dual" TextColor="Red" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17"/>
+                                        <Label Text="Meter Reading" x:Name="lb_MeterReading_Dual" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17"/>
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
                                             <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -850,7 +850,7 @@
                                     </StackLayout>
 
                                     <!-- ( New ) Meter Reading / Initial Reading -->
-                                    <Label Text="Meter Reading" TextColor="Red" Margin="0,4,0,0" x:Name="lb_MeterReading_2" VerticalOptions="Center" Font="Bold,17"/>
+                                    <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_2" VerticalOptions="Center" Font="Bold,17"/>
                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
                                         <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                             <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -864,7 +864,7 @@
                                     
                                     <!-- ( New ) Meter Reading / Initial Reading - Dual -->
                                     <StackLayout x:Name="div_MeterReading_Dual_2">
-                                        <Label Text="Meter Reading" TextColor="Red" Margin="0,4,0,0" x:Name="lb_MeterReading_Dual_2" VerticalOptions="Center" Font="Bold,17"/>
+                                        <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_Dual_2" VerticalOptions="Center" Font="Bold,17"/>
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
                                             <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">

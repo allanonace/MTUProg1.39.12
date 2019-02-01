@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
-
+using ActionType = MTUComm.Action.ActionType;
 
 namespace aclara_meters.Models
 {
@@ -12,7 +11,7 @@ namespace aclara_meters.Models
     {
         public string Title { get; set; }
         public string Icon { get; set; }
-        public string TargetType { get; set; }
+        public ActionType TargetType { get; set; }
     }
 }
 

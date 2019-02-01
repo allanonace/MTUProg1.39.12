@@ -14,14 +14,14 @@ using Xamarin.Forms;
 using Plugin.Settings;
 using Xml;
 using MTUComm;
-
+using ActionType = MTUComm.Action.ActionType;
 using MTUComm.Observer;
 
 namespace aclara_meters.view
 {
     public partial class AclaraViewReadMTU
     {
-        private string page_to_controller;
+        private ActionType actionType;
 
         private List<ReadMTUItem> MTUDataListView { get; set; }
         private List<ReadMTUItem> FinalReadListView { get; set; }
@@ -44,37 +44,36 @@ namespace aclara_meters.view
 
             // Adding menu items to MenuList
 
-            MenuList.Add( new PageItem() {  Title = "Read MTU", Icon = "readmtu_icon.png", TargetType = "ReadMTU" });
+            MenuList.Add(new PageItem() { Title = "Read MTU", Icon = "readmtu_icon.png", TargetType = ActionType.ReadMtu });
 
             if (FormsApp.config.global.ShowTurnOff)
-                MenuList.Add( new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", TargetType = "turnOff" });
+                MenuList.Add(new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", TargetType = ActionType.TurnOffMtu });
 
             if (FormsApp.config.global.ShowAddMTU)
-                MenuList.Add( new PageItem() { Title = "Add MTU", Icon = "addMTU.png", TargetType = "AddMTU" });
+                MenuList.Add(new PageItem() { Title = "Add MTU", Icon = "addMTU.png", TargetType = ActionType.AddMtu });
 
             if (FormsApp.config.global.ShowReplaceMTU)
-                MenuList.Add( new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", TargetType = "replaceMTU" });
+                MenuList.Add(new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", TargetType = ActionType.ReplaceMTU });
 
             if (FormsApp.config.global.ShowReplaceMeter)
-                MenuList.Add( new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", TargetType = "replaceMeter" });
+                MenuList.Add(new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", TargetType = ActionType.ReplaceMeter });
 
             if (FormsApp.config.global.ShowAddMTUMeter)
-                MenuList.Add( new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", TargetType = "AddMTUAddMeter" });
+                MenuList.Add(new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", TargetType = ActionType.AddMtuAddMeter });
 
             if (FormsApp.config.global.ShowAddMTUReplaceMeter)
-                MenuList.Add( new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", TargetType = "AddMTUReplaceMeter" });
+                MenuList.Add(new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", TargetType = ActionType.AddMtuReplaceMeter });
 
             if (FormsApp.config.global.ShowReplaceMTUMeter)
-                MenuList.Add( new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = "ReplaceMTUReplaceMeter" });
+                MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = ActionType.ReplaceMtuReplaceMeter });
 
             if (FormsApp.config.global.ShowInstallConfirmation)
-                MenuList.Add( new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = "InstallConfirm" });
+                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = ActionType.InstallConf });
 
 
-      
             // ListView needs to be at least  elements for UI Purposes, even empty ones
             while (MenuList.Count < 9)
-                MenuList.Add(new PageItem() { Title = "", Icon = "", TargetType = "" });
+                MenuList.Add(new PageItem() { Title = "", Icon = "" });
 
             // Setting our list to be ItemSource for ListView in MainPage.xaml
             navigationDrawerList.ItemsSource = MenuList;
@@ -132,31 +131,6 @@ namespace aclara_meters.view
                     Task.Factory.StartNew(ThreadProcedureMTUCOMMAction);
                 });
 
-                /*long timeout_ms = 20000; // 10s
-                bool timeout_error = false;
-
-                FormsApp.ble_interface.Write(new byte[] { (byte)0x25, (byte)0x80, (byte)0x00, (byte)0xFF, (byte)0x5C }, 0, 5);
-
-                long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + timeout_ms;
-                while (FormsApp.ble_interface.BytesToRead() < 262)
-                {
-                    if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
-                    {
-                        timeout_error = true;
-                        break;
-                    }
-                }
-                if (timeout_error)
-                {
-                    resultMsg = "Timeout";
-                }
-                else
-                {
-                    byte[] rxbuffer = new byte[262];
-                    FormsApp.ble_interface.Read(rxbuffer, 0, 262);
-                }*/
-
-                //LoadMTUValuesToListView("","","","");
             }
         }
 
@@ -317,6 +291,8 @@ namespace aclara_meters.view
         {
             InitializeComponent();
 
+            this.actionType = ActionType.ReadMtu;
+
             Task.Run(() =>
             {
                 Device.BeginInvokeOnMainThread(() =>
@@ -451,6 +427,14 @@ namespace aclara_meters.view
 
         }
 
+        private void DoBasicRead()
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                Task.Factory.StartNew(BasicReadThread);
+            });
+        }
+
 
         private void ReplaceMtuCancelTapped(object sender, EventArgs e)
         {
@@ -464,12 +448,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "replaceMTU";
-                Task.Factory.StartNew(BasicReadThread);
-            });
+            DoBasicRead();
 
         }
 
@@ -487,12 +466,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "replaceMeter";
-                Task.Factory.StartNew(BasicReadThread);
-            });
-
+            DoBasicRead();
 
         }
 
@@ -509,12 +483,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "AddMTUAddMeter";
-                Task.Factory.StartNew(BasicReadThread);
-            });
-
+            DoBasicRead();
 
         }
 
@@ -531,11 +500,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "AddMTUReplaceMeter";
-                Task.Factory.StartNew(BasicReadThread);
-            });
+            DoBasicRead();
 
         }
 
@@ -552,11 +517,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "ReplaceMTUReplaceMeter";
-                Task.Factory.StartNew(BasicReadThread);
-            });
+            DoBasicRead();
 
 
         }
@@ -574,23 +535,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                // TODO: cambiar usuario
-                // TODO: BasicRead no loguea
-                try
-                {
-                    page_to_controller = "AddMTU";
-                    Task.Factory.StartNew(BasicReadThread);
-                }
-                catch (Exception addmtu)
-                {
-                    Console.WriteLine(addmtu.StackTrace);
-                }
-
-            });
-
-            //Bug fix Android UI Animation
+            DoBasicRead();
 
         }
 
@@ -613,7 +558,7 @@ namespace aclara_meters.view
                     Device.BeginInvokeOnMainThread(() =>
                     {
 
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, page_to_controller), false);
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
 
                         #region New Circular Progress bar Animations    
 
@@ -823,60 +768,17 @@ namespace aclara_meters.view
                 try
                 {
                     var item = (PageItem)e.Item;
-                    String page = item.TargetType;
+                    ActionType page = item.TargetType;
                     ((ListView)sender).SelectedItem = null;
 
-                    switch (page)
+                    if (this.actionType != page)
                     {
-                        case "ReadMTU":
-                            //NavigationController("ReadMTU");
-                            //OnCaseReadMTU();
-                            break;
-
-                        case "AddMTU":
-                            NavigationController("AddMTU");
-                            //OnCaseAddMTU();
-                            break;
-
-                        case "turnOff":
-                            NavigationController("turnOff");
-                            //OnCaseTurnOff();
-                            break;
-
-                        case "InstallConfirm":
-                            NavigationController("InstallConfirm");
-                            //OnCaseInstallConfirm();
-                            break;
-
-                        case "replaceMTU":
-                            NavigationController("replaceMTU");
-                            //OnCaseReplaceMTU();
-                            break;
-
-                        case "replaceMeter":
-                            //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
-                            NavigationController("replaceMeter");
-                            //OnCaseReplaceMeter();
-                            break;
-
-                        case "AddMTUAddMeter":
-                            //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
-                            NavigationController("AddMTUAddMeter");
-                            //OnCaseAddMTUAddMeter();
-                            break;
-
-                        case "AddMTUReplaceMeter":
-                            //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
-                            NavigationController("AddMTUReplaceMeter");
-                            //OnCaseAddMTUReplaceMeter();
-                            break;
-
-                        case "ReplaceMTUReplaceMeter":
-                            //Application.Current.MainPage.DisplayAlert("Alert", "Feature not available", "Ok");
-                            NavigationController("ReplaceMTUReplaceMeter");
-                            //OnCaseReplaceMTUReplaceMeter();
-                            break;
+                        this.actionType = page;
+                        NavigationController(page);
                     }
+                  
+
+               
                 }
                 catch (Exception w1)
                 {
@@ -889,11 +791,11 @@ namespace aclara_meters.view
             }
         }
 
-        private void NavigationController(string page)
+        private void NavigationController(ActionType page)
         {
             switch (page)
             {
-                case "ReadMTU":
+                case ActionType.ReadMtu:
 
                     #region Read Mtu Controller
 
@@ -938,7 +840,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case "AddMTU":
+                case ActionType.AddMtu:
 
                     #region Add Mtu Controller
 
@@ -1000,7 +902,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case "turnOff":
+                case ActionType.TurnOffMtu:
 
                     #region Turn Off Controller
 
@@ -1059,7 +961,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case "InstallConfirm":
+                case ActionType.InstallConf:
 
                     #region Install Confirm Controller
 
@@ -1103,7 +1005,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case "replaceMTU":
+                case ActionType.ReplaceMTU:
 
                     #region Replace Mtu Controller
 
@@ -1158,7 +1060,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case "replaceMeter":
+                case ActionType.ReplaceMeter:
 
                     #region Replace Meter Controller
 
@@ -1212,7 +1114,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case "AddMTUAddMeter":
+                case ActionType.AddMtuAddMeter:
 
                     #region Add Mtu | Add Meter Controller
 
@@ -1267,7 +1169,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case "AddMTUReplaceMeter":
+                case ActionType.AddMtuReplaceMeter:
 
                     #region Add Mtu | Replace Meter Controller
 
@@ -1323,7 +1225,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case "ReplaceMTUReplaceMeter":
+                case ActionType.ReplaceMtuReplaceMeter:
 
                     #region Replace Mtu | Replace Meter Controller
 
@@ -1392,11 +1294,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "ReplaceMTUReplaceMeter";
-                Task.Factory.StartNew(BasicReadThread);
-            });
+            DoBasicRead();
 
         }
 
@@ -1406,11 +1304,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "AddMTUReplaceMeter";
-                Task.Factory.StartNew(BasicReadThread);
-            });
+            DoBasicRead();
         }
 
         private void CallLoadViewAddMTUAddMeter()
@@ -1420,11 +1314,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "AddMTUAddMeter";
-                Task.Factory.StartNew(BasicReadThread);
-            });
+            DoBasicRead();
 
         }
 
@@ -1434,11 +1324,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "replaceMeter";
-                Task.Factory.StartNew(BasicReadThread);
-            });
+            DoBasicRead();
         }
 
         private void CallLoadViewReplaceMtu()
@@ -1447,12 +1333,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "replaceMTU";
-                Task.Factory.StartNew(BasicReadThread);
-            });
+            DoBasicRead();
 
         }
 
@@ -1470,11 +1351,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                page_to_controller = "AddMTU";
-                Task.Factory.StartNew(BasicReadThread);
-            });
+            DoBasicRead();
         }
 
         private void OnCaseInstallConfirm()
@@ -1643,7 +1520,7 @@ namespace aclara_meters.view
              Device.BeginInvokeOnMainThread(() =>
              {
                  navigationDrawerList.SelectedItem = null;
-                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, "AddMTU"), false);
+                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, ActionType.AddMtu), false);
                  background_scan_page.Opacity = 1;
                  if (Device.Idiom == TargetIdiom.Tablet)
                  {
