@@ -758,6 +758,9 @@ namespace MTUComm
                     Alarm alarms = (Alarm)form.Alarm.Value;
                     if ( alarms != null )
                     {
+                        try
+                        {
+
                         // Tilt alarm
                         if ( mtu.TiltTamper )
                             map.P1TiltAlarm = alarms.Tilt;
@@ -792,6 +795,12 @@ namespace MTUComm
                         // Message overlap count
                         // Number of new readings to take before transmit
                         map.MessageOverlapCount = alarms.Overlap;
+
+                        }
+                        catch ( Exception e )
+                        {
+
+                        }
                     }
                 }
 
@@ -802,13 +811,23 @@ namespace MTUComm
                 // Only encrypt the key if MTU.SpecialSet tag is true
                 if ( mtu.SpecialSet )
                 {
+                    try
+                    { 
+                        MemoryRegister<string> eKey = map[ "EncryptionKey" ];
+
                     RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
-                    byte[] aesKey = new byte[ map[ "EncryptionKey" ].Size ]; // DEFAULT_LENGTH_AES ];
+                    byte[] aesKey = new byte[ eKey.size ]; // DEFAULT_LENGTH_AES ];
                     rng.GetBytes ( aesKey );
                     map.EncryptionKey = aesKey;
                     for ( int i = 0; i < 15; i++ )
                         if ( aesKey[ i ] != memory[ 256 + i ] )
                             throw new Exception ( "AES key does not match" );
+
+                    }
+                    catch ( Exception e )
+                    {
+
+                    }
 
                     // Encrypted
                     // EncryptionIndex
@@ -1010,7 +1029,7 @@ namespace MTUComm
         public bool WriteMtuBitAndVerify ( uint address, uint bit, bool active, bool verify = true )
         {
             // Read current value
-            byte systemFlags = ( lexi.Read ( 22, 1 ) )[ 0 ];
+            byte systemFlags = ( lexi.Read ( address, 1 ) )[ 0 ];
 
             // Modify bit and write to MTU
             systemFlags = ( byte ) ( systemFlags | ( ( ( active ) ? 1 : 0 ) << ( int )bit ) );

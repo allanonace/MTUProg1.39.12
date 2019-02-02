@@ -374,7 +374,7 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                //Task.Factory.StartNew(SetPort2Buttons);
+                                Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -534,7 +534,7 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                //Task.Factory.StartNew(SetPort2Buttons);
+                                this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -709,7 +709,7 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                //Task.Factory.StartNew(SetPort2Buttons);
+                                this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -884,7 +884,7 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                //Task.Factory.StartNew(SetPort2Buttons);
+                                this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -1064,7 +1064,7 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                //Task.Factory.StartNew(SetPort2Buttons);
+                                this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -1247,7 +1247,7 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                //Task.Factory.StartNew(SetPort2Buttons);
+                                this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -1385,12 +1385,24 @@ namespace aclara_meters.view
 
         private void SetPort2Buttons ()
         {
+            // TODO: Fix Solucionar problema boton btn_EnablePort2 [ ESTA LINEA ES PARA FORZAR LA ACTIVACION DEL PUERTO ]
+            // Aqui funciona pero lo se intenta la lectura dentro de "Device.BeginInvokeOnMainThread" da error I/O de lexi
+            bool ok = this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
+        
             // Port2 form starts visible or hidden depends on bit 1 of byte 28
             this.port2IsActivated = this.add_mtu.comm.ReadMtuBit ( 28, 1 );
 
+            // TODO: Fix Solucionar problema boton btn_EnablePort2 [ ESTAS LINEAS SON PARA FORZAR LA ACTIVACION DEL PUERTO ]
+            Global global = FormsApp.config.global;
+            block_view_port2.IsVisible = this.port2IsActivated;
+            div_EnablePort2.IsVisible  = false;
+            div_EnablePort2.IsEnabled  = false;
+            this.div_CopyPort1To2.IsVisible = this.port2IsActivated && global.NewMeterPort2isTheSame;
+            this.div_CopyPort1To2.IsEnabled = this.port2IsActivated && global.NewMeterPort2isTheSame;
+
             Device.BeginInvokeOnMainThread(() =>
             {
-                Global global = FormsApp.config.global;
+                ////Global global = FormsApp.config.global;
             
                 // Switch On|Off port2 form
                 if ( ! global.Port2DisableNo )
@@ -1402,12 +1414,14 @@ namespace aclara_meters.view
                         }),
                     });
 
+                // TODO: global.NewMeterPort2isTheSame Copia automaticamente los valores del puerto 1 en el 2
+
                 // Copy current values of port1 form controls to port2 form controls
-                if ( this.port2IsActivated &&
-                     global.NewMeterPort2isTheSame )
-                    btn_CopyPort1To2.GestureRecognizers.Add(new TapGestureRecognizer
+                btn_CopyPort1To2.GestureRecognizers.Add(new TapGestureRecognizer
+                {
+                    Command = new Command(() =>
                     {
-                        Command = new Command(() =>
+                        if ( this.port2IsActivated )
                         {
                             this.tbx_AccountNumber_2       .Text          = this.tbx_AccountNumber       .Text;
                             this.tbx_WorkOrder_2           .Text          = this.tbx_WorkOrder           .Text;
@@ -1418,8 +1432,9 @@ namespace aclara_meters.view
                             this.tbx_MeterSerialNumber_2   .Text          = this.tbx_MeterSerialNumber   .Text;
                             this.pck_MeterType_Names_2     .SelectedIndex = this.pck_MeterType_Names     .SelectedIndex;
                             this.tbx_MeterReading_2        .Text          = this.tbx_MeterReading        .Text;
-                        }),
-                    });
+                        }
+                    }),
+                });
 
                 this.OnClick_BtnSwitchPort2 ();
             });
@@ -1933,13 +1948,24 @@ namespace aclara_meters.view
 
             #region Port 2 Buttons
 
+            /*
+            // TODO: Fix Solucionar problema boton btn_EnablePort2 [ CODIGO COMENTADO PARA FORZAR LA ACTIVACION DEL PUERTO2 EN SetPort2Buttons ]
             // Button for enable|disable the second port
-            if ( ( this.div_EnablePort2.IsEnabled = global.Port2DisableNo ) )
+            if ( ! ( this.div_EnablePort2.IsEnabled = global.Port2DisableNo ) )
             {
                 block_view_port2.IsVisible = this.port2IsActivated;
                 btn_EnablePort2.Text       = ( this.port2IsActivated ) ? "Disable Port 2" : "Enable Port 2";
                 btn_EnablePort2.TextColor  = ( this.port2IsActivated ) ? Color.Gold : Color.White;
             }
+            // TODO: Auto-enable second port because Port2DisableNo is true
+            else { }
+            */
+            
+            // TODO: Fix Solucionar problema boton btn_EnablePort2
+            // ARREGLO HASTA QUE SE SOLUCIONE EL PROBLEMA DEL BOTON
+            block_view_port2.IsVisible = this.port2IsActivated;
+            div_EnablePort2.IsVisible  = false;
+            div_EnablePort2.IsEnabled  = false;
             
             // Button for copy port 1 common fields values to port 2
             this.div_CopyPort1To2.IsVisible = this.port2IsActivated && global.NewMeterPort2isTheSame;
@@ -4927,6 +4953,9 @@ namespace aclara_meters.view
 
         private void OnClick_BtnSwitchPort2 ()
         {
+            // TODO: Fix Solucionar problema boton btn_EnablePort2 [ BYPASEO EL METODO PORQUE AL HACER LA ESCRITURA Y LECTURA = ERROR I/O LEXI ]
+            return;
+        
             Global global = FormsApp.config.global;
 
             // Button for enable|disable the second port

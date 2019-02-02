@@ -317,6 +317,16 @@
     <CustomSet/>
   </Register>
   <Register>
+    <Id>P2MessageOverlapCount</Id>
+    <Description>Message overlap count port 2</Description>
+    <Type>int</Type>
+    <Address>61</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
     <Id>ReadIntervalMinutes</Id>
     <Description>Read interval</Description>
     <Type>int</Type>
@@ -352,6 +362,26 @@
     <Type>bool</Type>
     <Address>42</Address>
     <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>P1ImmediateAlarm</Id>
+    <Description>P1 mode - immediate alarm</Description>
+    <Type>bool</Type>
+    <Address>42</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>P1UrgentAlarm</Id>
+    <Description>P1 mode - urgent alarm</Description>
+    <Type>bool</Type>
+    <Address>42</Address>
+    <Size>3</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
@@ -682,6 +712,16 @@
     <Type>bool</Type>
     <Address>65</Address>
     <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>EncryptionKey</Id>
+    <Description>EncryptionKey</Description>
+    <Type>string</Type>
+    <Address>256</Address>
+    <Size>16</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
