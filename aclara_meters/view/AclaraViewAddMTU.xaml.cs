@@ -534,7 +534,9 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
+                                Task.Factory.StartNew(SetPort2Buttons);
+
+                                //this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -709,7 +711,8 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
+                                Task.Factory.StartNew(SetPort2Buttons);
+                                //this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -884,7 +887,8 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
+                                Task.Factory.StartNew(SetPort2Buttons);
+                                //this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -1064,7 +1068,8 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
+                                Task.Factory.StartNew(SetPort2Buttons);
+                                //this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -1247,7 +1252,8 @@ namespace aclara_meters.view
 
                                 #region Port 2 Buttons Listener
 
-                                this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
+                                Task.Factory.StartNew(SetPort2Buttons);
+                                //this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
 
                                 #endregion
 
@@ -1385,12 +1391,21 @@ namespace aclara_meters.view
 
         private void SetPort2Buttons ()
         {
+
+            Console.WriteLine(" He entrado en SetPort2Buttons...");
+
             // TODO: Fix Solucionar problema boton btn_EnablePort2 [ ESTA LINEA ES PARA FORZAR LA ACTIVACION DEL PUERTO ]
             // Aqui funciona pero lo se intenta la lectura dentro de "Device.BeginInvokeOnMainThread" da error I/O de lexi
             bool ok = this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
-        
+
+            Console.WriteLine("El WriteMtuBitAndVerify ha sido realizado");
+
+            Console.WriteLine("Vamos a activar el port 2...");
+
             // Port2 form starts visible or hidden depends on bit 1 of byte 28
             this.port2IsActivated = this.add_mtu.comm.ReadMtuBit ( 28, 1 );
+
+            Console.WriteLine("Port2 Activado!!!");
 
             // TODO: Fix Solucionar problema boton btn_EnablePort2 [ ESTAS LINEAS SON PARA FORZAR LA ACTIVACION DEL PUERTO ]
             Global global = FormsApp.config.global;

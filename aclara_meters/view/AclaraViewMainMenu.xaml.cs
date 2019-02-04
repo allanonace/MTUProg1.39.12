@@ -24,8 +24,6 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewMainMenu
     {
-        private const bool DEBUG_MODE_ON = true;
-
         private bool autoConnect;
         private bool conectarDevice;
 
@@ -46,14 +44,20 @@ namespace aclara_meters.view
             return true;
         }
 
+        private bool GetDebugVar()
+        {
+            return false;
+        }
         public AclaraViewMainMenu()
         {
             InitializeComponent();
         }
 
+
         public AclaraViewMainMenu(IUserDialogs dialogs)
         {
             InitializeComponent();
+
             Settings.IsConnectedBLE = false;
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
             TappedListeners();
@@ -2339,8 +2343,10 @@ namespace aclara_meters.view
         public void PrintToConsole(string printConsole)
         {
 
-            if (DEBUG_MODE_ON)
+            if (GetDebugVar())
+            {
                 Console.WriteLine("DEBUG_ACL: " + printConsole);
+            }
         }
 
 
