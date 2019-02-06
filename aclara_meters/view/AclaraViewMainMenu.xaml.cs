@@ -39,6 +39,8 @@ namespace aclara_meters.view
         private Boolean peripheralManualDisconnection = false;
         private Thread printer;
 
+        private bool IsFirstTime = true;
+
         protected override bool OnBackButtonPressed()
         {
             return true;
@@ -153,22 +155,31 @@ namespace aclara_meters.view
                 if (!GetAutoConnectStatus())
                 {
 
+                    if (conectarDevice)
+                    {
+                        return;
+                    }
+
                     PrintToConsole("ha entrado en la condicion - Interface_background_scan_page");
 
                     PrintToConsole("va a Activar la barra de progreso circular - Interface_background_scan_page");
 
-                    Device.BeginInvokeOnMainThread(() =>
+                    if (IsFirstTime)
                     {
-                        #region New Circular Progress bar Animations    
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            #region New Circular Progress bar Animations    
 
-                        DeviceList.IsRefreshing = false;
-                        backdark_bg.IsVisible = true;
-                        indicator.IsVisible = true;
-                        background_scan_page.IsEnabled = false;
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = true;
+                            indicator.IsVisible = true;
+                            background_scan_page.IsEnabled = false;
 
-                        #endregion
+                            #endregion
 
-                    });
+                        });
+                    }
+                  
                     PrintToConsole("Mostrar barra de progreso - Interface_background_scan_page");
 
                     // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
@@ -193,27 +204,32 @@ namespace aclara_meters.view
 
                     //DeviceList.IsRefreshing = true;
 
-                    employees = new ObservableCollection<DeviceItem>();
-
+                   
                     PrintToConsole("comienza el Escaneo de dispositivos - Interface_background_scan_page");
 
-                    await FormsApp.ble_interface.Scan();
+                    int status = FormsApp.ble_interface.GetConnectionStatus();
 
-                    PrintToConsole("finaliza el Escaneo de dispositivos - Interface_background_scan_page");
-
-                    PrintToConsole("comienza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
-
-                    await ChangeListViewData();
-
-                    PrintToConsole("finaliza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
-
-                    //DeviceList.IsRefreshing = false;
-
-                    if (employees.Count != 0)
+                    if(status != ble_library.BlePort.CONNECTING)
                     {
+                        await FormsApp.ble_interface.Scan();
 
-                        DeviceList.ItemsSource = employees;
+                        PrintToConsole("finaliza el Escaneo de dispositivos - Interface_background_scan_page");
+
+                        PrintToConsole("comienza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
+
+                        await ChangeListViewData();
+
+                        PrintToConsole("finaliza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
+
+                        //DeviceList.IsRefreshing = false;
+
+                        if (employees.Count != 0)
+                        {
+
+                            DeviceList.ItemsSource = employees;
+                        }
                     }
+
 
                 }
 
@@ -226,25 +242,74 @@ namespace aclara_meters.view
 
             var minutes = TimeSpan.FromSeconds(3);
 
+
+            int timeoutCounter = 0;
+
             Device.StartTimer(minutes, () => {
 
                 PrintToConsole("Dentro del bucle (BUCLE REFRESH LIST) - Interface_background_scan_page");
 
                 // call your method to check for notifications here
 
-                if (employees.Count < 1)
+                if (timeoutCounter > 5)
                 {
-                    PrintToConsole("se va lanzar un Refresh Command (BUCLE REFRESH LIST) - Interface_background_scan_page");
+                    if (!IsFirstTime)
+                    {
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            #region New Circular Progress bar Animations    
 
-                    DeviceList.RefreshCommand.Execute(true);
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+
+                            #endregion
+
+                        });
+
+                        timeoutCounter = 0;
+
+                        return true;
+                    }
+                    else
+                    {
+                        IsFirstTime = false;
+
+                        Application.Current.MainPage.DisplayAlert("Alert", "No devices found", "Ok");
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            #region New Circular Progress bar Animations    
+
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+
+                            #endregion
+                        });
+
+                        timeoutCounter = 0;
+
+                        return true;
+
+                    }
+
                 }
 
-                if (employees.Count > 0)
-                {
+                DeviceList.RefreshCommand.Execute(true);
+
+                ObservableCollection<DeviceItem> tempArray = (ObservableCollection < DeviceItem >) DeviceList.ItemsSource;
+
+                if(tempArray != employees)
                     DeviceList.ItemsSource = employees;
-                }
+
+
                 PrintToConsole("un ciclo del bucle (BUCLE REFRESH LIST) - Interface_background_scan_page");
 
+
+                timeoutCounter += 1;
 
                 if (conectarDevice)
                 {
@@ -732,6 +797,10 @@ namespace aclara_meters.view
                         {
                             PrintToConsole("Un Timeout que te llevas - InvokeMethod");
                             Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
+
+                            employees = new ObservableCollection<DeviceItem>();
+                            DeviceList.ItemsSource = employees;
+
                             DeviceList.IsEnabled = true;
                             fondo.Opacity = 1;
                             background_scan_page.Opacity = 1;
@@ -1156,6 +1225,8 @@ namespace aclara_meters.view
 
                             // call your method to check for notifications here
                             FormsApp.ble_interface.Open(FormsApp.peripheral, true);
+
+                            IsFirstTime = false;
                         }
                         else
                         {

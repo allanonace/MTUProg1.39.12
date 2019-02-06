@@ -5,5 +5,6 @@ namespace aclara_meters
 {
     public partial class ViewCellTransparent : ViewCell
     {
+        
     }
 }

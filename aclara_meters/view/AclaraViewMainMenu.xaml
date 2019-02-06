@@ -438,7 +438,7 @@
                               SeparatorVisibility="None"
                               SeparatorColor="#6aa2b8"                
                               BackgroundColor="White"
-
+                              
                               ItemTapped="OnMenuItemSelectedListDevices"
 
                               
