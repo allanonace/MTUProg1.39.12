@@ -100,7 +100,7 @@
                 
 
 
-                 <ListView Margin="0,0,0,-12" x:Name="listaMTUread" IsVisible="false" HasUnevenRows="true" SeparatorVisibility="None" SeparatorColor="#6aa2b8" > 
+                 <ListView Margin="0,0,0,58" x:Name="listaMTUread" IsVisible="false" HasUnevenRows="true" SeparatorVisibility="None" SeparatorColor="#6aa2b8" > 
                   <ListView.ItemTemplate>
                     <DataTemplate>
                       <ViewCell>

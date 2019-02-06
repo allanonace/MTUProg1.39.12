@@ -1431,15 +1431,35 @@ namespace aclara_meters.view
                     {
                         if ( this.port2IsActivated )
                         {
-                            this.tbx_AccountNumber_2       .Text          = this.tbx_AccountNumber       .Text;
-                            this.tbx_WorkOrder_2           .Text          = this.tbx_WorkOrder           .Text;
-                            this.tbx_OldMeterSerialNumber_2.Text          = this.tbx_OldMeterSerialNumber.Text;
-                            this.pck_OldMeterWorking_2     .SelectedIndex = this.pck_OldMeterWorking     .SelectedIndex;
-                            this.tbx_OldMeterReading_2     .Text          = this.tbx_OldMeterReading     .Text;
-                            this.pck_ReplaceMeterRegister_2.SelectedIndex = this.pck_ReplaceMeterRegister.SelectedIndex;
-                            this.tbx_MeterSerialNumber_2   .Text          = this.tbx_MeterSerialNumber   .Text;
-                            this.pck_MeterType_Names_2     .SelectedIndex = this.pck_MeterType_Names     .SelectedIndex;
-                            this.tbx_MeterReading_2        .Text          = this.tbx_MeterReading        .Text;
+
+                            this.tbx_AccountNumber_2             .Text          = this.tbx_AccountNumber               .Text;
+                            this.tbx_AccountNumber_Dual_2        .Text          = this.tbx_AccountNumber_Dual          .Text;
+
+                            this.tbx_WorkOrder_2                 .Text          = this.tbx_WorkOrder                   .Text;
+                            this.tbx_WorkOrder_Dual_2            .Text          = this.tbx_WorkOrder_Dual              .Text;
+
+                            this.tbx_OldMeterSerialNumber_2      .Text          = this.tbx_OldMeterSerialNumber        .Text;
+                            this.tbx_OldMeterSerialNumber_Dual_2 .Text          = this.tbx_OldMeterSerialNumber_Dual   .Text;
+                             
+                            this.pck_OldMeterWorking_2           .SelectedIndex = this.pck_OldMeterWorking             .SelectedIndex;
+
+                            this.tbx_OldMeterReading_2           .Text          = this.tbx_OldMeterReading             .Text;
+                            this.tbx_OldMeterReading_Dual_2      .Text          = this.tbx_OldMeterReading_Dual        .Text;
+
+                            this.pck_ReplaceMeterRegister_2      .SelectedIndex = this.pck_ReplaceMeterRegister        .SelectedIndex;
+
+                            this.tbx_MeterSerialNumber_2         .Text          = this.tbx_MeterSerialNumber           .Text;
+                            this.tbx_MeterSerialNumber_Dual_2    .Text          = this.tbx_MeterSerialNumber_Dual      .Text;
+
+                            this.pck_MeterType_Vendors_2         .SelectedIndex = this.pck_MeterType_Vendors           .SelectedIndex;
+
+                            this.pck_MeterType_Models_2          .SelectedIndex = this.pck_MeterType_Models            .SelectedIndex;
+
+                            this.pck_MeterType_Names_2           .SelectedIndex = this.pck_MeterType_Names             .SelectedIndex;
+
+                            this.tbx_MeterReading_2              .Text          = this.tbx_MeterReading                .Text;
+                            this.tbx_MeterReading_Dual_2         .Text          = this.tbx_MeterReading_Dual           .Text;
+
                         }
                     }),
                 });
@@ -4968,30 +4988,41 @@ namespace aclara_meters.view
            
         }
 
-        private void NewPort2ClickTask()
+        private async void NewPort2ClickTask()
         {
             Global global = FormsApp.config.global;
 
             // Button for enable|disable the second port
             if (!global.Port2DisableNo)
             {
-                bool ok = this.add_mtu.comm.WriteMtuBitAndVerify(28, 1, (this.port2IsActivated = !this.port2IsActivated));
+                bool ok = await this.add_mtu.comm.WriteMtuBitAndVerify(28, 1, (this.port2IsActivated = !this.port2IsActivated));
+
+
                 Console.WriteLine("-> UPDATE PORT 2 STATUS: " + ok + " " + this.port2IsActivated);
 
                 // Bit have not changed -> return to previous state
                 if (ok)
                 {
-                    block_view_port2.IsVisible = this.port2IsActivated;
-                    btn_EnablePort2.Text = (this.port2IsActivated) ? "Disable Port 2" : "Enable Port 2";
-                    btn_EnablePort2.TextColor = (this.port2IsActivated) ? Color.Gold : Color.White;
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+
+                        block_view_port2.IsVisible = this.port2IsActivated;
+                        btn_EnablePort2.Text = (this.port2IsActivated) ? "Disable Port 2" : "Enable Port 2";
+                        btn_EnablePort2.TextColor = (this.port2IsActivated) ? Color.Gold : Color.White;
+                    });
+
                 }
                 else
                     this.port2IsActivated = !this.port2IsActivated;
             }
 
-            // Button for copy port 1 common fields values to port 2
-            this.div_CopyPort1To2.IsVisible = this.port2IsActivated && global.NewMeterPort2isTheSame;
-            this.div_CopyPort1To2.IsEnabled = this.port2IsActivated && global.NewMeterPort2isTheSame;
+            Device.BeginInvokeOnMainThread(() =>
+            {
+
+                // Button for copy port 1 common fields values to port 2
+                this.div_CopyPort1To2.IsVisible = this.port2IsActivated && true; //global.NewMeterPort2isTheSame;
+                this.div_CopyPort1To2.IsEnabled = this.port2IsActivated && true; //global.NewMeterPort2isTheSame;
+            });
         }
 
         #endregion

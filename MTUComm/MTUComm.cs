@@ -1021,12 +1021,12 @@ namespace MTUComm
             return ( ( ( value >> ( int )bit ) & 1 ) == 1 );
         }
 
-        public void WriteMtuBit ( uint address, uint bit, bool active )
+        public async Task WriteMtuBit ( uint address, uint bit, bool active )
         {
             this.WriteMtuBitAndVerify ( address, bit, active, false );
         }
 
-        public bool WriteMtuBitAndVerify ( uint address, uint bit, bool active, bool verify = true )
+        public async Task<bool> WriteMtuBitAndVerify ( uint address, uint bit, bool active, bool verify = true )
         {
             // Read current value
             byte systemFlags = ( lexi.Read ( address, 1 ) )[ 0 ];
