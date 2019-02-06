@@ -1396,41 +1396,34 @@ namespace aclara_meters.view
 
             // TODO: Fix Solucionar problema boton btn_EnablePort2 [ ESTA LINEA ES PARA FORZAR LA ACTIVACION DEL PUERTO ]
             // Aqui funciona pero lo se intenta la lectura dentro de "Device.BeginInvokeOnMainThread" da error I/O de lexi
-            bool ok = this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
-
-            Console.WriteLine("El WriteMtuBitAndVerify ha sido realizado");
-
-            Console.WriteLine("Vamos a activar el port 2...");
+            //bool ok = this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
 
             // Port2 form starts visible or hidden depends on bit 1 of byte 28
             this.port2IsActivated = this.add_mtu.comm.ReadMtuBit ( 28, 1 );
 
-            Console.WriteLine("Port2 Activado!!!");
+            Global global = FormsApp.config.global;
 
             // TODO: Fix Solucionar problema boton btn_EnablePort2 [ ESTAS LINEAS SON PARA FORZAR LA ACTIVACION DEL PUERTO ]
+            /*
             Global global = FormsApp.config.global;
             block_view_port2.IsVisible = this.port2IsActivated;
             div_EnablePort2.IsVisible  = false;
             div_EnablePort2.IsEnabled  = false;
             this.div_CopyPort1To2.IsVisible = this.port2IsActivated && global.NewMeterPort2isTheSame;
             this.div_CopyPort1To2.IsEnabled = this.port2IsActivated && global.NewMeterPort2isTheSame;
+            */
 
             Device.BeginInvokeOnMainThread(() =>
             {
                 ////Global global = FormsApp.config.global;
             
                 // Switch On|Off port2 form
-                if ( ! global.Port2DisableNo )
-                    btn_EnablePort2.GestureRecognizers.Add(new TapGestureRecognizer
-                    {
-                        Command = new Command(() =>
-                        {
-                            this.OnClick_BtnSwitchPort2 ();
-                        }),
-                    });
-
-                // TODO: global.NewMeterPort2isTheSame Copia automaticamente los valores del puerto 1 en el 2
-
+                if ( ! global.Port2DisableNo)
+                {
+                    BtnSwitchPort2.Tapped += OnClick_BtnSwitchPort2;
+                    div_EnablePort2.IsEnabled = true;
+                }
+              
                 // Copy current values of port1 form controls to port2 form controls
                 btn_CopyPort1To2.GestureRecognizers.Add(new TapGestureRecognizer
                 {
@@ -1451,9 +1444,10 @@ namespace aclara_meters.view
                     }),
                 });
 
-                this.OnClick_BtnSwitchPort2 ();
             });
         }
+
+
 
         private void InitializeAddMtuForm ()
         {
@@ -1963,7 +1957,7 @@ namespace aclara_meters.view
 
             #region Port 2 Buttons
 
-            /*
+
             // TODO: Fix Solucionar problema boton btn_EnablePort2 [ CODIGO COMENTADO PARA FORZAR LA ACTIVACION DEL PUERTO2 EN SetPort2Buttons ]
             // Button for enable|disable the second port
             if ( ! ( this.div_EnablePort2.IsEnabled = global.Port2DisableNo ) )
@@ -1974,13 +1968,7 @@ namespace aclara_meters.view
             }
             // TODO: Auto-enable second port because Port2DisableNo is true
             else { }
-            */
-            
-            // TODO: Fix Solucionar problema boton btn_EnablePort2
-            // ARREGLO HASTA QUE SE SOLUCIONE EL PROBLEMA DEL BOTON
-            block_view_port2.IsVisible = this.port2IsActivated;
-            div_EnablePort2.IsVisible  = false;
-            div_EnablePort2.IsEnabled  = false;
+
             
             // Button for copy port 1 common fields values to port 2
             this.div_CopyPort1To2.IsVisible = this.port2IsActivated && global.NewMeterPort2isTheSame;
@@ -4966,30 +4954,41 @@ namespace aclara_meters.view
 
         #region GUI Logic
 
-        private void OnClick_BtnSwitchPort2 ()
+        private void OnClick_BtnSwitchPort2(object sender, EventArgs e)
         {
-            // TODO: Fix Solucionar problema boton btn_EnablePort2 [ BYPASEO EL METODO PORQUE AL HACER LA ESCRITURA Y LECTURA = ERROR I/O LEXI ]
-            return;
-        
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                Task.Factory.StartNew(NewPort2ClickTask);
+
+
+            });
+
+
+           
+        }
+
+        private void NewPort2ClickTask()
+        {
             Global global = FormsApp.config.global;
 
             // Button for enable|disable the second port
-            if ( ! global.Port2DisableNo )
+            if (!global.Port2DisableNo)
             {
-                bool ok = this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
+                bool ok = this.add_mtu.comm.WriteMtuBitAndVerify(28, 1, (this.port2IsActivated = !this.port2IsActivated));
                 Console.WriteLine("-> UPDATE PORT 2 STATUS: " + ok + " " + this.port2IsActivated);
 
                 // Bit have not changed -> return to previous state
-                if ( ok )
+                if (ok)
                 {
                     block_view_port2.IsVisible = this.port2IsActivated;
-                    btn_EnablePort2.Text       = ( this.port2IsActivated ) ? "Disable Port 2" : "Enable Port 2";
-                    btn_EnablePort2.TextColor  = ( this.port2IsActivated ) ? Color.Gold : Color.White;
+                    btn_EnablePort2.Text = (this.port2IsActivated) ? "Disable Port 2" : "Enable Port 2";
+                    btn_EnablePort2.TextColor = (this.port2IsActivated) ? Color.Gold : Color.White;
                 }
                 else
-                    this.port2IsActivated = ! this.port2IsActivated;
+                    this.port2IsActivated = !this.port2IsActivated;
             }
-            
+
             // Button for copy port 1 common fields values to port 2
             this.div_CopyPort1To2.IsVisible = this.port2IsActivated && global.NewMeterPort2isTheSame;
             this.div_CopyPort1To2.IsEnabled = this.port2IsActivated && global.NewMeterPort2isTheSame;
