@@ -1032,7 +1032,10 @@ namespace MTUComm
             byte systemFlags = ( lexi.Read ( address, 1 ) )[ 0 ];
 
             // Modify bit and write to MTU
-            systemFlags = ( byte ) ( systemFlags | ( ( ( active ) ? 1 : 0 ) << ( int )bit ) );
+            if ( active )
+                 systemFlags = ( byte ) ( systemFlags |    1 << ( int )bit   );
+            else systemFlags = ( byte ) ( systemFlags & ~( 1 << ( int )bit ) );
+            
             lexi.Write ( address, new byte[] { systemFlags } );
 
             // Read new written value to verify modification

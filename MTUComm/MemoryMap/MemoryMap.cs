@@ -783,7 +783,9 @@ namespace MTUComm.MemoryMap
             int address,
             int bit_index = MemRegister.DEF_BIT )
         {
-            memory[address] = ( byte ) ( memory[address] | ( ( ( value ) ? 1 : 0 ) << bit_index ) );
+            if ( value )
+                 memory[address] = ( byte ) ( memory[address] |    1 << bit_index   );
+            else memory[address] = ( byte ) ( memory[address] & ~( 1 << bit_index ) );
         }
 
         private void SetCharToMem (
