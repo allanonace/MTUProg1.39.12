@@ -48,6 +48,7 @@ namespace aclara_meters
         }
 
 
+
         public static bool UploadLogFiles()
         {
 
@@ -149,6 +150,18 @@ namespace aclara_meters
                             }
                             long cont = fileStream.Length;
                             fileStream.Close();
+
+                            #region Create copy of deleted files to another dir
+
+                            string url_to_copy = Path.Combine(path, "log_copies");
+
+                            Directory.CreateDirectory(url_to_copy);
+
+                            File.Copy(Path.Combine(path, file.Name), Path.Combine(url_to_copy, file.Name), true);
+
+                  
+                            #endregion
+
                             File.Delete(file.FullName);
                         }
                     }

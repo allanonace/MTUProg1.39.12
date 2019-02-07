@@ -791,7 +791,7 @@ namespace aclara_meters.view
                 {
                     PrintToConsole("Si, es CONNECTING - InvokeMethod");
                     timeout_connecting++;
-                    if (timeout_connecting >= 2 * 10) // 10 seconds
+                    if (timeout_connecting >= 2 * 15) // 10 seconds
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
