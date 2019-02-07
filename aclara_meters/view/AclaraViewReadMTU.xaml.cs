@@ -413,6 +413,16 @@ namespace aclara_meters.view
 
         private void LogOffOkTapped(object sender, EventArgs e)
         {
+
+            if (FormsApp.config.global.UploadPrompt)
+            {
+                #region Show Upload prompt
+
+                GenericUtilsClass.UploadFilesTask();
+
+                #endregion
+            }
+
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;

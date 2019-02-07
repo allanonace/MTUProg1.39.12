@@ -15,7 +15,21 @@
 
 
    <RelativeLayout  IsVisible="true">
+          
+    <ContentView BackgroundColor="White" WidthRequest="1024" x:Name="fondo"
+                 IsVisible="true"
 
+        RelativeLayout.YConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Height,
+                                 Factor=0}"
+        RelativeLayout.HeightConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Height,
+                                 Factor=1}">
+
+    </ContentView>
+        
      
         <ContentView  IsVisible="true" x:Name="background_scan_page"   
             RelativeLayout.XConstraint=
@@ -1146,35 +1160,32 @@
 
        
 
-
-                 <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" 
-                              IsVisible="true"  WidthRequest="1024" Opacity="0.4">
-                
-            </StackLayout> 
-        
-             <StackLayout InputTransparent="true"  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"
-                            RelativeLayout.YConstraint=
-                              "{ConstraintExpression Type=RelativeToParent,
-                                                     Property=Height,
-                                                     Factor=0}"
-                            RelativeLayout.HeightConstraint=
-                              "{ConstraintExpression Type=RelativeToParent,
-                                                     Property=Height,
-                                                     Factor=1}"
-                            RelativeLayout.WidthConstraint=
-                              "{ConstraintExpression Type=RelativeToParent,
-                                                     Property=Width,
-                                                     Factor=1}">
-
-                                  
-   
-                        
-                         <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2"
-                        VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
             
-            
-        </StackLayout>
+     <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" 
+                  IsVisible="true"  WidthRequest="1024" Opacity="0.6">
 
+     </StackLayout> 
+    
+
+     <StackLayout InputTransparent="true"  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+        RelativeLayout.YConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Height,
+                                 Factor=0}"
+        RelativeLayout.HeightConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Height,
+                                 Factor=1}"
+        RelativeLayout.WidthConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Width,
+                                 Factor=1}">
+
+                              
+        <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2"
+            VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+
+    </StackLayout>
 
         
            <!--   DIALOGS   -->
