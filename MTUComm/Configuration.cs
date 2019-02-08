@@ -114,27 +114,26 @@ namespace MTUComm
             return interfaces.GetInterfaceByMtuIdAndAction(mtuid, Action).getUserInterfaces();
         }
 
-        public string GetMemoryMapTypeByMtuId(int mtuid)
+        public string GetMemoryMapTypeByMtuId ( Mtu mtu )
         {
-            return interfaces.GetmemoryMapTypeByMtuId(mtuid);
+            return InterfaceAux.GetmemoryMapTypeByMtuId ( mtu );
         }
 
-        public int GetmemoryMapSizeByMtuId(int mtuid)
+        public int GetmemoryMapSizeByMtuId ( Mtu mtu )
         {
-            return interfaces.GetmemoryMapSizeByMtuId(mtuid);
+            return InterfaceAux.GetmemoryMapSizeByMtuId ( mtu );
         }
 
-        public MemRegister getFamilyRegister(int mtuid, string regsiter_name)
+        public MemRegister getFamilyRegister( Mtu mtu, string regsiter_name)
         {
             try
             {
-                return getFamilyRegister(interfaces.GetmemoryMapTypeByMtuId(mtuid), regsiter_name);
+                return getFamilyRegister ( InterfaceAux.GetmemoryMapTypeByMtuId ( mtu ), regsiter_name);
             }
             catch (Exception e)
             {
                 return null;
             }
-            
         }
 
         public MemRegister getFamilyRegister(string family, string regsiter_name)

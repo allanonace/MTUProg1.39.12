@@ -405,8 +405,8 @@ namespace MTUComm
             {
                 try
                 {
-                    MemRegister regICNotSynced = configuration.getFamilyRegister ( mtuType.Id, "InstallConfirmationNotSynced" );
-                    MemRegister regICRequest   = configuration.getFamilyRegister ( mtuType.Id, "InstallConfirmationRequest"   );
+                    MemRegister regICNotSynced = configuration.getFamilyRegister ( mtuType, "InstallConfirmationNotSynced" );
+                    MemRegister regICRequest   = configuration.getFamilyRegister ( mtuType, "InstallConfirmationRequest"   );
 
                     Console.WriteLine ( "InstallConfirmation trigger start" );
 
@@ -542,8 +542,8 @@ namespace MTUComm
                 if (this.changedMTUSettings || forcedetect)
                     RecoverMeterByMtuType ();
 
-                String memory_map_type = configuration.GetMemoryMapTypeByMtuId(mtuType.Id);
-                int memory_map_size = configuration.GetmemoryMapSizeByMtuId(mtuType.Id);
+                String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtuType );
+                int memory_map_size    = configuration.GetmemoryMapSizeByMtuId ( this.mtuType );
 
                 lexi.Write(64, new byte[] { 1 });
                 Thread.Sleep(1000);
@@ -664,8 +664,8 @@ namespace MTUComm
                 #region Add MTU
 
                 // Prepare memory map
-                String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
-                int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( ( int )MtuForm.mtuBasicInfo.Type );
+                String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtuType ); //( int )MtuForm.mtuBasicInfo.Type );
+                int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( this.mtuType ); //( int )MtuForm.mtuBasicInfo.Type );
 
                 byte[] memory = new byte[ memory_map_size ];
                 dynamic map = new MemoryMap.MemoryMap ( memory, memory_map_type );

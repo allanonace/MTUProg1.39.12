@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
+using System.Collections.Generic;
 
 namespace Xml
 {
@@ -17,6 +18,9 @@ namespace Xml
 
         [XmlElement("MeterMask")]
         public string MeterMask { get; set; }
+
+        [XmlElement("Utility")]
+        public string Utility { get; set; }
 
         [XmlElement("Vendor")]
         public string Vendor { get; set; }
@@ -144,6 +148,5 @@ namespace Xml
         {
             return this.GetType().GetProperty(Name).GetValue(this, null).ToString();
         }
-
     }
 }

@@ -53,6 +53,8 @@ namespace aclara_meters.view
 
         #endregion
 
+        #region Mandatory
+
         public const bool MANDATORY_ACCOUNTNUMBER   = true;
         public const bool MANDATORY_WORKORDER       = true;
         public const bool MANDATORY_OLDMTUID        = true;
@@ -71,6 +73,8 @@ namespace aclara_meters.view
         public const bool MANDATORY_GPS             = false;
         public const bool MANDATORY_MTULOCATION     = false;
         public const bool MANDATORY_CONTRUCTIONTYPE = false;
+
+        #endregion
 
         #region Constants
 
@@ -104,7 +108,9 @@ namespace aclara_meters.view
         public const string CANCEL_SKIP     = "Skip";
         public const string CANCEL_NOTHOME  = "Not Home";
         public const string CANCEL_OTHER    = "Other";
-        
+        public const string SWITCH_P2_ON    = "Enable Port 2";
+        public const string SWITCH_P2_OFF   = "Disable Port 2";
+
         private const string DUAL_PREFIX    = "Repeat ";
         
         private       Color COL_MANDATORY   = Color.FromHex ( "#FF0000" );
@@ -182,17 +188,13 @@ namespace aclara_meters.view
 
         private ActionType actionType;
 
+        private bool waitOnClickLogic;
+
         private bool hasTwoPorts;
         private bool isCancellable;
         private bool snapRead1Status = false;
         private bool snapRead2Status = false;
-        private bool _port2IsActivated;
-        
-        private bool port2IsActivated
-        {
-            get { return _port2IsActivated; }
-            set { _port2IsActivated = value; }
-        }
+        private bool port2IsActivated;
 
         // Conditions - Globals
         private bool WorkOrderRecording;
@@ -1965,8 +1967,8 @@ namespace aclara_meters.view
             if ( ! ( this.div_EnablePort2.IsEnabled = global.Port2DisableNo ) )
             {
                 this.block_view_port2.IsVisible = this.port2IsActivated;
-                this.btn_EnablePort2.Text       = ( this.port2IsActivated ) ? "Disable Port 2" : "Enable Port 2";
-                this.btn_EnablePort2.TextColor  = ( this.port2IsActivated ) ? Color.Gold : Color.White;
+                this.btn_EnablePort2.Text       = ( this.port2IsActivated ) ? SWITCH_P2_OFF : SWITCH_P2_ON;
+                //this.btn_EnablePort2.TextColor  = ( this.port2IsActivated ) ? Color.Gold : Color.White;
             }
             // Auto-enable second port because Port2DisableNo is true
             else
@@ -4971,23 +4973,30 @@ namespace aclara_meters.view
 
         private void OnClick_BtnSwitchPort2 ( object sender, EventArgs e )
         {
-            Task.Factory.StartNew ( NewPort2ClickTask );
+            if ( ! this.waitOnClickLogic )
+            {
+                Console.WriteLine ( "CLICK!" );
+            
+                this.waitOnClickLogic = true;
+                
+                Task.Factory.StartNew ( NewPort2ClickTask );
+            }
         }
 
-        private async void NewPort2ClickTask()
+        private async void NewPort2ClickTask ()
         {
             Global global = FormsApp.config.global;
 
             // Button for enable|disable the second port
             if ( ! global.Port2DisableNo )
             {
-                bool ok = await this.add_mtu.comm.WriteMtuBitAndVerify(28, 1, (this.port2IsActivated = !this.port2IsActivated));
-
-                Console.WriteLine("-> UPDATE PORT 2 STATUS: " + ok + " " + this.port2IsActivated);
+                bool ok = await this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
 
                 // Bit have not changed -> return to previous state
                 if ( ok )
                     this.UpdatePortButtons ();
+                else
+                    this.waitOnClickLogic = false;
             }
         }
         
@@ -5001,17 +5010,18 @@ namespace aclara_meters.view
                 {
                     Device.BeginInvokeOnMainThread(() =>
                     {
-
                         block_view_port2.IsVisible = this.port2IsActivated;
                         btn_EnablePort2.Text = (this.port2IsActivated) ? "Disable Port 2" : "Enable Port 2";
                         btn_EnablePort2.TextColor = (this.port2IsActivated) ? Color.Gold : Color.White;
                     });
-
                 }
             
                 // Button for copy port 1 common fields values to port 2
                 this.div_CopyPort1To2.IsVisible = this.port2IsActivated && global.NewMeterPort2isTheSame;
                 this.div_CopyPort1To2.IsEnabled = this.port2IsActivated && global.NewMeterPort2isTheSame;
+                
+                // Allow click again the button
+                this.waitOnClickLogic = false;
             });
         }
 

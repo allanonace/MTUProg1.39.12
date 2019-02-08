@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Xml.Serialization;
+using System.Collections.Generic;
 
 namespace Xml
 {
@@ -42,6 +43,14 @@ namespace Xml
         public String GetProperty(String Name)
         {
             return this.GetType().GetProperty(Name).GetValue(this, null).ToString();
+        }
+
+        public List<string> GetPortTypes ( out bool isNumeric )
+        {
+            List<string> types;
+            isNumeric = MeterAux.GetPortTypes ( this.Type, out types );
+
+            return types;
         }
     }
 }
