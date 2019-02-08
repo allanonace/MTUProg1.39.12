@@ -119,23 +119,37 @@ namespace MTUComm
             foreach (Xml.Action action in script.Actions)
             {
                 Action new_action = new Action(Configuration.GetInstance(), serial_device, parseType(action.Type), script.UserName, script.LogFile);
+                Type   actionType = action.GetType ();
 
                 foreach (PropertyInfo parameter in action.GetType().GetProperties())
                 {
                     try
                     {
-                        if (action.GetType().GetProperty(parameter.Name).GetValue(action, null).ToString().Contains("ActionParameter"))
+                        var  paramValue = actionType.GetProperty ( parameter.Name ).GetValue ( action, null );
+                        Type valueType  = paramValue.GetType ();
+                    
+                        Console.WriteLine ( "-> " + valueType.Name + " " + valueType.IsArray );
+                    
+                        if ( valueType.Name.ToLower ().Contains ( "actionparameter" ) )
                         {
+                            List<ActionParameter> list = new List<ActionParameter> ();
+                            
+                            if ( ! paramValue.GetType ().IsArray )
+                                 list.Add      ( ( ActionParameter   )paramValue );
+                            else list.AddRange ( ( ActionParameter[] )paramValue );
 
-
-                            String name = parameter.Name;
-                            ActionParameter action_parameter = (ActionParameter)action.GetType().GetProperty(parameter.Name).GetValue(action, null);
-                            new_action.AddParameter(new Parameter(parseParameterType(parameter.Name), action_parameter.Value, action_parameter.Port));
+                            foreach ( ActionParameter aParam in list )
+                                new_action.AddParameter (
+                                    new Parameter (
+                                        parseParameterType ( parameter.Name ),
+                                        aParam.Value,
+                                        aParam.Port ) );
                         }
-
                     }
                     catch (Exception e)
-                    { }
+                    {
+                    
+                    }
                 }
 
                 new_action.order = step;

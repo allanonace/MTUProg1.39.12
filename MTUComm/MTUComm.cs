@@ -599,7 +599,7 @@ namespace MTUComm
                     form.AddParameterTranslatingAclaraXml ( parameter );
 
                 // Auto-detect Meter
-                if ( ! form.ContainsParameter ( AddMtuForm.FIELD.METER_TYPE  ) &&
+                if ( ! form.ContainsParameter ( AddMtuForm.FIELD.METER_TYPE      ) &&
                        form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS ) &&
                        form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE ) &&
                        form.ContainsParameter ( AddMtuForm.FIELD.UNIT_MEASURE    ) )
@@ -618,6 +618,31 @@ namespace MTUComm
                             "Meter.xml file does not exist or does not have selected Meter Type",
                             "Meter.xml file does not exist or does not have selected Meter Type" ) );
                         return;
+                    }
+                    
+                    if ( mtu.TwoPorts )
+                    {
+                        if ( ! form.ContainsParameter ( AddMtuForm.FIELD.METER_TYPE_2      ) &&
+                               form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS_2 ) &&
+                               form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE_2 ) &&
+                               form.ContainsParameter ( AddMtuForm.FIELD.UNIT_MEASURE_2    ) )
+                        {
+                            meters = configuration.meterTypes.FindByDialDescription (
+                                int.Parse ( form.NumberOfDials_2.Value ),
+                                int.Parse ( form.DriveDialSize_2.Value ),
+                                form.UnitOfMeasure_2.Value,
+                                mtu.Flow );
+        
+                            if ( meters.Count > 0 )
+                                form.AddParameter ( AddMtuForm.FIELD.METER_TYPE_2, meters[ 0 ].Id.ToString () );
+                            else
+                            {
+                                OnError ( this, new ErrorArgs ( 100,
+                                    "Meter.xml file does not exist or does not have selected Meter Type",
+                                    "Meter.xml file does not exist or does not have selected Meter Type" ) );
+                                return;
+                            }
+                        }
                     }
                 }
 
@@ -709,16 +734,17 @@ namespace MTUComm
 
                 #region Initial Reading = Meter Reading
 
-                string mask = selectedMeter.MeterMask;
+                string mask1 = selectedMeter .MeterMask;
+                string mask2 = selectedMeter2?.MeterMask;
                 string p1readingStr = "0";
                 string p2readingStr = "0";
 
                 if ( form.ContainsParameter ( FIELD.METER_READING ) )
                 {
                     if ( ! isFromScripting ||
-                         string.IsNullOrEmpty ( mask ) ) // No mask
+                         string.IsNullOrEmpty ( mask1 ) ) // No mask
                          p1readingStr = form.MeterReading.Value;
-                    else p1readingStr = this.ApplyMeterReadingMask ( mask, form.MeterReading  .Value, selectedMeter.LiveDigits );
+                    else p1readingStr = this.ApplyMeterReadingMask ( mask1, form.MeterReading  .Value, selectedMeter.LiveDigits );
                     
                     ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
     
@@ -729,11 +755,11 @@ namespace MTUComm
                      form.ContainsParameter ( FIELD.METER_READING_2 ) )
                 {
                     if ( ! isFromScripting ||
-                         string.IsNullOrEmpty ( mask ) ) // No mask
+                         string.IsNullOrEmpty ( mask2 ) ) // No mask
                          p2readingStr = form.MeterReading_2.Value;
-                    else p2readingStr = this.ApplyMeterReadingMask ( mask, form.MeterReading_2.Value, selectedMeter.LiveDigits );
+                    else p2readingStr = this.ApplyMeterReadingMask ( mask2, form.MeterReading_2.Value, selectedMeter2.LiveDigits );
                     
-                    ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( (  p2readingStr ) ) : 0;
+                    ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( ( p2readingStr ) ) : 0;
     
                     map.P2Reading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
                 }

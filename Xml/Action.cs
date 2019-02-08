@@ -13,16 +13,16 @@ namespace Xml
         public ActionParameter ActivityLogId { get; set; }
 
         [XmlElement("MeterType")]
-        public ActionParameter MeterType { get; set; }
+        public ActionParameter[] MeterType { get; set; }
 
         [XmlElement("UnitOfMeasure")]
-        public ActionParameter UnitOfMeasure { get; set; }
+        public ActionParameter[] UnitOfMeasure { get; set; }
 
         [XmlElement("Port2Disabled")]
         public ActionParameter Port2Disabled { get; set; }
 
         [XmlElement("AccountNumber")]
-        public ActionParameter AccountNumber { get; set; }
+        public ActionParameter[] AccountNumber { get; set; }
 
         [XmlElement("ProvidingHandFactor")]
         public ActionParameter ProvidingHandFactor { get; set; }
@@ -34,7 +34,7 @@ namespace Xml
         public ActionParameter ForceTimeSync { get; set; }
 
         [XmlElement("WorkOrder")]
-        public ActionParameter WorkOrder { get; set; }
+        public ActionParameter[] WorkOrder { get; set; }
 
         [XmlElement("LiveDigits")]
         public ActionParameter LiveDigits { get; set; }
@@ -46,10 +46,10 @@ namespace Xml
         public ActionParameter Alarm { get; set; }
 
         [XmlElement("MeterSerialNumber")]
-        public ActionParameter MeterSerialNumber { get; set; }
+        public ActionParameter[] MeterSerialNumber { get; set; }
 
         [XmlElement("NumberOfDials")]
-        public ActionParameter NumberOfDials { get; set; }
+        public ActionParameter[] NumberOfDials { get; set; }
 
         [XmlElement("TempReadDays")]
         public ActionParameter TempReadDays { get; set; }
@@ -58,10 +58,10 @@ namespace Xml
         public ActionParameter Custom { get; set; }
 
         [XmlElement("MeterReading")]
-        public ActionParameter MeterReading { get; set; }
+        public ActionParameter[] MeterReading { get; set; }
 
         [XmlElement("DriveDialSize")]
-        public ActionParameter DriveDialSize { get; set; }
+        public ActionParameter[] DriveDialSize { get; set; }
 
         [XmlElement("SnapRead")]
         public ActionParameter SnapRead { get; set; }
@@ -70,15 +70,15 @@ namespace Xml
         public ActionParameter OldMtuId { get; set; }
 
         [XmlElement("OldMeterSerialNumber")]
-        public ActionParameter OldMeterSerialNumber { get; set; }
+        public ActionParameter[] OldMeterSerialNumber { get; set; }
 
         [XmlElement("NewMeterSerialNumber")]
-        public ActionParameter NewMeterSerialNumber { get; set; }
+        public ActionParameter[] NewMeterSerialNumber { get; set; }
 
         [XmlElement("OldMeterReading")]
-        public ActionParameter OldMeterReading { get; set; }
+        public ActionParameter[] OldMeterReading { get; set; }
 
         [XmlElement("NewMeterReading")]
-        public ActionParameter NewMeterReading { get; set; }
+        public ActionParameter[] NewMeterReading { get; set; }
     }
 }
