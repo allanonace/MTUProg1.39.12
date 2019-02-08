@@ -200,7 +200,7 @@ namespace aclara_meters.view
             DeviceList.RefreshCommand = new Command(async () =>
             {
 
-                //IsBusy = false;
+                IsBusy = false;
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -210,32 +210,52 @@ namespace aclara_meters.view
                     indicator.IsVisible = true;
                     background_scan_page.IsEnabled = true;
                     #endregion
+
+                    Thread.Sleep(50);
+
                 });
 
-                Thread.Sleep(50);
 
-              
 
-                employees = new ObservableCollection<DeviceItem>();
 
-                await FormsApp.ble_interface.Scan();
+                try
+                {
+                    employees = new ObservableCollection<DeviceItem>();
 
+                    await FormsApp.ble_interface.Scan();
+
+                    if (employees.Count != 0)
+                    {
+                        DeviceList.ItemsSource = employees;
+                    }
+
+                }
+                catch (Exception e)
+                {
+
+                }
+               
       
              
 
 
-                if (employees.Count != 0)
-                {
-                    DeviceList.ItemsSource = employees;
-                }
+              
 
 
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    Thread.Sleep(1000);
+                    try
+                    {
 
-                  
+                        Thread.Sleep(1000);
+                    }
+                    catch (Exception e)
+                    {
+
+                    }
+
+
 
                     #region New Circular Progress bar Animations    
                     DeviceList.IsRefreshing = false;
@@ -371,8 +391,8 @@ namespace aclara_meters.view
                         ContentNav.Opacity = 0;
                         shadoweffect.IsVisible = false;
                         ContentNav.IsVisible = false;
-                        background_scan_page.IsEnabled = true;
-                        background_scan_page_detail.IsEnabled = true;
+                      //  background_scan_page.IsEnabled = true;
+                      //  background_scan_page_detail.IsEnabled = true;
                     }));
 
                     break;
@@ -385,8 +405,9 @@ namespace aclara_meters.view
                     ContentNav.Opacity = 1;
                     ContentNav.TranslateTo(0, 0, 175, Easing.SinIn);
                     shadoweffect.TranslateTo(0, 0, 175, Easing.SinIn);
-                    background_scan_page.IsEnabled = true;
-                    background_scan_page_detail.IsEnabled = true;
+                   //background_scan_page.IsEnabled = true;
+
+                   // background_scan_page_detail.IsEnabled = true;
                     break;
 
             }
@@ -747,7 +768,7 @@ namespace aclara_meters.view
                 {
                     PrintToConsole("Si, es CONNECTING - InvokeMethod");
                     timeout_connecting++;
-                    if (timeout_connecting >= 2 * 10) // 10 seconds
+                    if (timeout_connecting >= 2 * 12) // 10 seconds
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
