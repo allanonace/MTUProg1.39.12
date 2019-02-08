@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xml;
 
+using FIELD = MTUComm.actions.AddMtuForm.FIELD;
 using LogDataType = MTUComm.LogQueryResult.LogDataType;
 using ActionType  = MTUComm.Action.ActionType;
 using System.Globalization;
@@ -591,8 +592,10 @@ namespace MTUComm
 
             try
             {
+                Parameter[] ps = addMtuAction.GetParameters ();
+            
                 // Recover parameters from script and translante from Aclara nomenclature to our own
-                foreach ( Parameter parameter in addMtuAction.GetParameters () )
+                foreach ( Parameter parameter in ps )
                     form.AddParameterTranslatingAclaraXml ( parameter );
 
                 // Auto-detect Meter
@@ -677,7 +680,8 @@ namespace MTUComm
                 #region Account Number
 
                 map.P1MeterId = form.AccountNumber.Value;
-                if ( useTwoPorts )
+                if ( useTwoPorts &&
+                     form.ContainsParameter ( FIELD.ACCOUNT_NUMBER_2 ) )
                     map.P2MeterId = form.AccountNumber_2.Value;
 
                 #endregion
@@ -692,7 +696,8 @@ namespace MTUComm
                 else selectedMeter = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
                 map.P1MeterType = selectedMeter.Id;
 
-                if ( useTwoPorts )
+                if ( useTwoPorts &&
+                     form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
                 {
                     if ( ! isFromScripting )
                          selectedMeter2 = (Meter)form.Meter_2.Value;
@@ -708,27 +713,30 @@ namespace MTUComm
                 string p1readingStr = "0";
                 string p2readingStr = "0";
 
-                if ( form.ContainsParameter ( AddMtuForm.FIELD.METER_READING ) )
+                if ( form.ContainsParameter ( FIELD.METER_READING ) )
                 {
                     if ( ! isFromScripting ||
                          string.IsNullOrEmpty ( mask ) ) // No mask
-                    {
-                        p1readingStr = form.MeterReading  .Value;
-                        p2readingStr = form.MeterReading_2.Value;
-                    }
-                    else
-                    {
-                        p1readingStr = this.ApplyMeterReadingMask ( mask, form.MeterReading  .Value, selectedMeter.LiveDigits );
-                        p2readingStr = this.ApplyMeterReadingMask ( mask, form.MeterReading_2.Value, selectedMeter.LiveDigits );
-                    }
+                         p1readingStr = form.MeterReading.Value;
+                    else p1readingStr = this.ApplyMeterReadingMask ( mask, form.MeterReading  .Value, selectedMeter.LiveDigits );
+                    
+                    ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
+    
+                    map.P1Reading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
                 }
-
-                ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( (  p1readingStr ) ) : 0;
-                ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( (  p1readingStr ) ) : 0;
-
-                map.P1Reading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
-                if ( useTwoPorts )
+                
+                if ( useTwoPorts &&
+                     form.ContainsParameter ( FIELD.METER_READING_2 ) )
+                {
+                    if ( ! isFromScripting ||
+                         string.IsNullOrEmpty ( mask ) ) // No mask
+                         p2readingStr = form.MeterReading_2.Value;
+                    else p2readingStr = this.ApplyMeterReadingMask ( mask, form.MeterReading_2.Value, selectedMeter.LiveDigits );
+                    
+                    ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( (  p2readingStr ) ) : 0;
+    
                     map.P2Reading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
+                }
 
                 #endregion
 

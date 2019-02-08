@@ -56,11 +56,14 @@ namespace MTUComm.actions
             FORCE_TIME_SYNC
         }
 
+        private const string PORT_2_SUFIX = "_2";
+
         public Dictionary<ParameterType,FIELD> IdsAclara =
             new Dictionary<ParameterType,FIELD> ()
             {
                 { ParameterType.OldMtuId,             FIELD.MTU_ID_OLD        },
-                { ParameterType.ActivityLogId,        FIELD.ACCOUNT_NUMBER    },
+                { ParameterType.AccountNumber,        FIELD.ACCOUNT_NUMBER    },
+                //{ ParameterType.ActivityLogId,        FIELD.ACCOUNT_NUMBER    },
                 { ParameterType.WorkOrder,            FIELD.WORK_ORDER        },
                 { ParameterType.MeterType,            FIELD.METER_TYPE        },
                 { ParameterType.NumberOfDials,        FIELD.NUMBER_OF_DIALS   },
@@ -218,8 +221,8 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "Meter_2",
-                        "SelectedMeterId2",
-                        "Selected Meter ID 2"
+                        "SelectedMeterId",
+                        "Selected Meter ID"
                     }
                 },
                 #endregion
@@ -279,9 +282,9 @@ namespace MTUComm.actions
                     FIELD.NUMBER_OF_DIALS_2,
                     new string[]
                     {
-                        "NumberOfDials2",
-                        "NumberOfDials2",
-                        "Number of Dials 2"
+                        "NumberOfDials_2",
+                        "NumberOfDials",
+                        "Number of Dials"
                     }
                 },
                 #endregion
@@ -299,9 +302,9 @@ namespace MTUComm.actions
                     FIELD.DRIVE_DIAL_SIZE_2,
                     new string[]
                     {
-                        "DriveDialSize2",
-                        "DriveDialSize2",
-                        "Drive Dial Size 2"
+                        "DriveDialSize_2",
+                        "DriveDialSize",
+                        "Drive Dial Size"
                     }
                 },
                 #endregion
@@ -319,9 +322,9 @@ namespace MTUComm.actions
                     FIELD.UNIT_MEASURE_2,
                     new string[]
                     {
-                        "UnitOfMeasure2",
-                        "UnitOfMeasure2",
-                        "Unit of Measure 2"
+                        "UnitOfMeasure_2",
+                        "UnitOfMeasure",
+                        "Unit of Measure"
                     }
                 },
                 #endregion
@@ -465,9 +468,9 @@ namespace MTUComm.actions
                 else
                     return;
 
-                // If is for port two, find the correct enum element adding two ( '2' ) as sufix
+                // If is for port two, find the correct enum element adding two ( "_2" ) as sufix
                 if ( parameter.Port == 2 )
-                    Enum.TryParse<FIELD> ( typeOwn.ToString () + "2", out typeOwn );
+                    Enum.TryParse<FIELD> ( typeOwn.ToString () + PORT_2_SUFIX, out typeOwn );
             }
 
             this.AddParameter ( typeOwn, parameter.Value );

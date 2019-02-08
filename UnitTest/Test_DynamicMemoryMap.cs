@@ -34,6 +34,8 @@ namespace UnitTest.Tests
         private const string ERROR_STRING_EMPTY = ERROR + "String parameter is empty";
 
         private const string ERROR_MAP_GLOBAL   = ERROR + "Deserialization of Global XML has failed";
+        
+        private const string ERROR_MAP_SCRIPT   = ERROR + "Deserialization of an Script has failed";
 
         private const string ERROR_MMAP         = ERROR + "Dynamic mapping from XML has failed";
         private const string ERROR_MODIFIED     = ERROR + "The number of modified registers is wrong";
@@ -164,6 +166,24 @@ namespace UnitTest.Tests
                 using (StringReader reader = new StringReader(fileContent))
                 {
                     Assert.True(test(() => { return ( Global )s.Deserialize ( reader ); }), Error ( ERROR_MAP_GLOBAL ) );
+                }
+            }
+        }
+
+        [Fact]
+        public void Test_Script ()
+        {
+            XmlSerializer s = new XmlSerializer(typeof(Script));
+            Func<Func<dynamic>, bool> test = this.TestExpression;
+
+            string path = Path.Combine ( this.GetPath (), "AddMtu3000SOCAL-2Port.xml" );
+
+            using ( StreamReader streamReader = new StreamReader ( path ) )
+            {
+                string fileContent = Config.NormalizeBooleans(streamReader.ReadToEnd());
+                using (StringReader reader = new StringReader(fileContent))
+                {
+                    Script script = ( Script )s.Deserialize ( reader );
                 }
             }
         }
