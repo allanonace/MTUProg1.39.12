@@ -385,8 +385,8 @@ namespace aclara_meters.view
                     ContentNav.Opacity = 1;
                     ContentNav.TranslateTo(0, 0, 175, Easing.SinIn);
                     shadoweffect.TranslateTo(0, 0, 175, Easing.SinIn);
-                    background_scan_page.IsEnabled = false;
-                    background_scan_page_detail.IsEnabled = false;
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
                     break;
 
             }
@@ -1479,7 +1479,7 @@ namespace aclara_meters.view
                 DeviceList.IsRefreshing = false;
                 backdark_bg.IsVisible = true;
                 indicator.IsVisible = true;
-                background_scan_page.IsEnabled = false;
+                background_scan_page.IsEnabled = true;
 
                 #endregion
 
