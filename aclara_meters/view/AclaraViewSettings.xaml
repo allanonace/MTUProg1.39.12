@@ -1166,7 +1166,16 @@
 
      </StackLayout> 
     
-
+    
+        
+           <!--   DIALOGS   -->
+           <Image BackgroundColor="Black"  x:Name="dialog_open_bg" WidthRequest="1024"  IsVisible="false"
+                  HeightRequest="1024" Opacity="0.5">
+                
+            </Image>
+            
+        
+        
      <StackLayout InputTransparent="true"  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
         RelativeLayout.YConstraint=
           "{ConstraintExpression Type=RelativeToParent,
@@ -1188,12 +1197,7 @@
     </StackLayout>
 
         
-           <!--   DIALOGS   -->
-           <Image BackgroundColor="Black"  x:Name="dialog_open_bg" WidthRequest="1024"  IsVisible="false"
-                  HeightRequest="1024" Opacity="0.5">
-                
-            </Image>
-
+        
 
 
 

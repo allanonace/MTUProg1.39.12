@@ -311,6 +311,7 @@
     <BundleResource Include="Resources\rep_mtu_rep_meter_btn.png" />
     <BundleResource Include="Resources\shadow_effect_tablet.png" />
     <BundleResource Include="Resources\back_menu_puck.png" />
+    <BundleResource Include="Resources\refreshsignal.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Acr.Support">

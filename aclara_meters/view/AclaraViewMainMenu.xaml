@@ -389,25 +389,24 @@
 
                                    </StackLayout>
                                     
-                         <StackLayout  Margin="0,24,10,0" Opacity="0" Orientation="Horizontal" HorizontalOptions="EndAndExpand" >
+                         <StackLayout  Margin="0,24,10,0" Opacity="1" Orientation="Horizontal" HorizontalOptions="EndAndExpand" >
                                
-                                    <Image  x:Name="battery_level"   
-                                            Margin="0,4,0,0" 
-                                            HeightRequest="32"
-                                            WidthRequest="32"
-                                            Scale="1" 
-                                            Source="battery_toolbar_high_white.png"  
-                                           >
-                                    </Image>
+                             
 
-                                    <Image  x:Name="rssi_level" 
-                                            Margin="6,4,0,0" 
-                                            HeightRequest="20"
-                                            WidthRequest="20"
+                                    <Image  
+                                            Margin="8,4,0,0" 
+                                            HeightRequest="40"
+                                            WidthRequest="40"
                                             Scale="1" 
-                                            Source="rssi_toolbar_high_white.png"  
+                                            Opacity="0.95"
+                                            Source="refreshsignal.png"  
                                             >
+                                               <Image.GestureRecognizers>
+                                                <TapGestureRecognizer  x:Name="refresh_signal"  NumberOfTapsRequired="1" />
+                                            </Image.GestureRecognizers>    
+                                            
                                     </Image>
+                                        
                                 </StackLayout>
 
 
@@ -432,13 +431,13 @@
 
 
                  <ListView    Opacity="1"
-                 IsPullToRefreshEnabled="true"
+                              IsPullToRefreshEnabled="false"
                               x:Name="DeviceList" 
                               RowHeight="160"
                               SeparatorVisibility="None"
                               SeparatorColor="#6aa2b8"                
                               BackgroundColor="White"
-                              
+                              IsRefreshing="{Binding IsBusy, Mode=OneWay}"
                               ItemTapped="OnMenuItemSelectedListDevices"
 
                               
@@ -547,9 +546,42 @@
             
     
     
-    
-    
+
+     <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Gray" HeightRequest="1024"  Margin="0,92,0,0" 
+                  
+              IsVisible="true"  WidthRequest="1024" Opacity="0.6">
+
+     </StackLayout> 
         
+        
+        
+        <!--   DIALOGS   -->
+           <Image BackgroundColor="Black"  x:Name="dialog_open_bg" WidthRequest="1024"  IsVisible="false"
+                  HeightRequest="1024" Opacity="0.5">
+                
+            </Image>
+            
+        
+        
+     <StackLayout InputTransparent="true"  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+        RelativeLayout.YConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Height,
+                                 Factor=0}"
+        RelativeLayout.HeightConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Height,
+                                 Factor=1}"
+        RelativeLayout.WidthConstraint=
+          "{ConstraintExpression Type=RelativeToParent,
+                                 Property=Width,
+                                 Factor=1}">
+
+                              
+        <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2"
+            VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+
+    </StackLayout>
         
         <!-- Menu desplegable -->
         
@@ -862,39 +894,11 @@
        
        
         
-     <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" 
-                  IsVisible="true"  WidthRequest="1024" Opacity="0.6">
 
-     </StackLayout> 
     
 
-     <StackLayout InputTransparent="true"  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
-        RelativeLayout.YConstraint=
-          "{ConstraintExpression Type=RelativeToParent,
-                                 Property=Height,
-                                 Factor=0}"
-        RelativeLayout.HeightConstraint=
-          "{ConstraintExpression Type=RelativeToParent,
-                                 Property=Height,
-                                 Factor=1}"
-        RelativeLayout.WidthConstraint=
-          "{ConstraintExpression Type=RelativeToParent,
-                                 Property=Width,
-                                 Factor=1}">
-
-                              
-        <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2"
-            VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
-
-    </StackLayout>
 
 
-
-        <!--   DIALOGS   -->
-           <Image BackgroundColor="Black"  x:Name="dialog_open_bg" WidthRequest="1024"  IsVisible="false"
-                  HeightRequest="1024" Opacity="0.5">
-                
-            </Image>
 
 
 

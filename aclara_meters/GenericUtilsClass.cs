@@ -154,8 +154,8 @@ namespace aclara_meters
                             #region Create copy of deleted files to another dir
 
                             string url_to_copy = Path.Combine(path, "log_copies");
-
-                            Directory.CreateDirectory(url_to_copy);
+                            if(!Directory.Exists(url_to_copy))
+                                Directory.CreateDirectory(url_to_copy);
 
                             File.Copy(Path.Combine(path, file.Name), Path.Combine(url_to_copy, file.Name), true);
 
