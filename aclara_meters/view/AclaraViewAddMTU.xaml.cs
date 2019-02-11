@@ -5012,7 +5012,7 @@ namespace aclara_meters.view
                     {
                         block_view_port2.IsVisible = this.port2IsActivated;
                         btn_EnablePort2.Text = (this.port2IsActivated) ? "Disable Port 2" : "Enable Port 2";
-                        btn_EnablePort2.TextColor = (this.port2IsActivated) ? Color.Gold : Color.White;
+                        //btn_EnablePort2.TextColor = (this.port2IsActivated) ? Color.Gold : Color.White;
                     });
                 }
             
@@ -5493,7 +5493,7 @@ namespace aclara_meters.view
 
             #region Set parameters Port 2
 
-            if ( mtu.TwoPorts )
+            if ( ( addMtuForm.usePort2 = mtu.TwoPorts && this.port2IsActivated ) )
             {
                 // Account Number / Service Port ID
                 this.addMtuForm.AddParameter ( FIELD.ACCOUNT_NUMBER_2, value_acn_2 );

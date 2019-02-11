@@ -301,15 +301,32 @@ namespace MTUComm.MemoryMap
         // Use with <CustomGet>method:ULongToBcd</CustomGet>
         public ulong BcdToULong ( MemoryRegister<ulong> MemoryRegister )
         {
-            return this.BcdToULong_Logic ( ( ulong )MemoryRegister.ValueRaw );
+            byte[] bytes  = MemoryRegister.ValueByteArray;
+            string outNum = string.Empty;
+            
+            foreach ( byte b in bytes )
+                outNum += b.ToString ( "X" );
+            outNum = outNum.TrimEnd ( new char[] { 'F' } );
+
+            outNum = outNum
+                .Replace ( "A", "10" )
+                .Replace ( "B", "11" )
+                .Replace ( "C", "12" )
+                .Replace ( "D", "13" )
+                .Replace ( "E", "14" )
+                .Replace ( "F", "15" );
+
+            ulong a = ulong.Parse ( outNum );
+            
+            return a;
         }
 
         // Use with <CustomSet>method:ULongToBcd</CustomSet>
-        public ulong ULongToBcd ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
+        public byte[] ULongToBcd ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
         {
             if ( inputValue is string )
-                return this.ULongToBcd_Logic ( inputValue );
-            return this.ULongToBcd_Logic ( ( ulong )inputValue );
+                return this.ULongToBcd_Logic ( inputValue, MemoryRegister.size );
+            return this.ULongToBcd_Logic ( inputValue.ToString (), MemoryRegister.size );
         }
 
         // Convert hexadecimal number to integer value
@@ -445,6 +462,7 @@ namespace MTUComm.MemoryMap
             return ( status ) ? ENABLED : DISABLED;
         }
 
+        /*
         private ulong BcdToULong_Logic ( ulong valueInBCD )
         {
             // Define powers of 10 for the BCD conversion routines.
@@ -471,15 +489,35 @@ namespace MTUComm.MemoryMap
 
             return outNum;
         }
+        */
 
-        public ulong ULongToBcd_Logic ( string value )
+        public byte[] ULongToBcd_Logic ( string value, int size )
         {
-            return ulong.Parse(value, System.Globalization.NumberStyles.HexNumber);
-        }
+            var convertedBytes = new byte[ size ];
+            var strNumber      = value;
+            var currentNumber  = string.Empty;
 
-        public ulong ULongToBcd_Logic ( ulong value )
-        {
-            return this.ULongToBcd_Logic ( value.ToString () );
+            for ( var i = 0; i < size; i++ )
+                convertedBytes[i] = 0xff;
+
+            for ( var i = 0; i < strNumber.Length; i++ )
+            {
+                currentNumber += strNumber[i];
+
+                if (i == strNumber.Length - 1 && i % 2 == 0)
+                {
+                    convertedBytes[i / 2] = 0xf;
+                    convertedBytes[i / 2] |= (byte)((int.Parse(currentNumber) % 10) << 4);
+                }
+
+                if (i % 2 == 0) continue;
+                var v = int.Parse(currentNumber);
+                convertedBytes[(i - 1) / 2] = (byte) (v % 10);
+                convertedBytes[(i - 1) / 2] |= (byte)((v / 10) << 4);
+                currentNumber = string.Empty;
+            }
+
+            return convertedBytes;
         }
 
         #endregion

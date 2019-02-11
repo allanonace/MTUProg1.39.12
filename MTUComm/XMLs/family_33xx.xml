@@ -450,7 +450,7 @@
     <Id>P2MeterType</Id>
     <Description>P2 meter Type</Description>
     <Type>int</Type>
-    <Address>49</Address>
+    <Address>48</Address>
     <Size>1</Size>
     <Write>true</Write>
     <CustomGet/>

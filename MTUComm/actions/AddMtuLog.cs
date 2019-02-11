@@ -178,7 +178,7 @@ namespace MTUComm
 
             #region Port 2
 
-            if ( mtu.TwoPorts )
+            if ( form.usePort2 )
             {
                 Meter meter2 = ( ! isFromScripting ) ?
                     ( Meter )form.Meter_2.Value :
@@ -227,6 +227,9 @@ namespace MTUComm
                     logger.logParameter ( port, form.MeterNumber_2 );
                     
                 logger.logParameter ( port, form.MeterReading_2 );
+
+                logger.logParameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter2.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
+                logger.logParameter ( port, new Parameter("PulseLo","Pulse Low Time", meter2.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
 
                 this.addMtuAction.Add(port);
             }

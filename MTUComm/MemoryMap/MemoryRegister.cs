@@ -18,6 +18,7 @@ namespace MTUComm.MemoryMap
 
         public Func<T> funcGet;                 // MemoryRegister.Value{get}
         public Func<T> funcGetCustom;           // Only use working dynamically ( IMemoryRegister.Get )
+        public Func<byte[]> funcGetByteArray;   // 
         public Action<T> funcSet;               // MemoryRegister.Value{set}
         public Func<dynamic,dynamic> funcSetCustom;         // MemoryRegister.Value{set}
         public Action<string> funcSetString;    // MemoryRegister.Value{set}
@@ -150,6 +151,12 @@ namespace MTUComm.MemoryMap
         {
             get { return (T)this.funcGet (); }
             set { this.funcSet ( (T)value ); }
+        }
+
+        // Recover bytes without processing data, raw info
+        public byte[] ValueByteArray
+        {
+            get { return this.funcGetByteArray (); }
         }
 
         // Use custom methods if them are registered

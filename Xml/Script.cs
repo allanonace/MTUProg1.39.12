@@ -13,6 +13,6 @@ namespace Xml
         public string LogFile { get; set; }
 
         [XmlElement("action")]
-        public List<Action> Actions { get; set; }
+        public List<ScriptAction> Actions { get; set; }
     }
 }

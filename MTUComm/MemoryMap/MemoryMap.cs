@@ -67,6 +67,7 @@ namespace MTUComm.MemoryMap
         private const string METHODS_SET_PREFIX = "set_";
         private const string METHODS_GET_CUSTOM_PREFIX = "getCustom_";
         private const string METHODS_SET_CUSTOM_PREFIX = "setCustom_";
+        private const string METHODS_GET_BYTE_PREFIX   = METHODS_GET_PREFIX + "byte_";
         private const string METHODS_SET_STRING_PREFIX = METHODS_SET_PREFIX + "string_";
         private const string METHODS_SET_BYTE_PREFIX   = METHODS_SET_PREFIX + "byte_";
 
@@ -169,6 +170,7 @@ namespace MTUComm.MemoryMap
                         //typeof( MemoryMap ).GetMethod("CreateProperty_Get").MakeGenericMethod(SysType).Invoke(null, new object[] { regObj });
                         //typeof( MemoryMap ).GetMethod("CreateProperty_Set").MakeGenericMethod(SysType).Invoke(null, new object[] { regObj });
                         this.CreateProperty_Get ( memoryRegister );
+                        this.CreateProperty_Get_ByteArray ( memoryRegister );
                         if ( xmlRegister.WriteAsBool )
                         {
                             this.CreateProperty_Set ( memoryRegister );
@@ -180,6 +182,7 @@ namespace MTUComm.MemoryMap
                         bool w = memoryRegister.write;
                         dynamic get  =                                               base.registers[ METHODS_GET_PREFIX        + memoryRegister.id ];
                         dynamic getC = ( memoryRegister.HasCustomMethod_Get      ) ? base.registers[ METHODS_GET_CUSTOM_PREFIX + memoryRegister.id ] : null;
+                        dynamic getB =                                               base.registers[ METHODS_GET_BYTE_PREFIX   + memoryRegister.id ];
                         dynamic set  = ( w                                       ) ? base.registers[ METHODS_SET_PREFIX        + memoryRegister.id ] : null;
                         dynamic setC = ( w && memoryRegister.HasCustomMethod_Set ) ? base.registers[ METHODS_SET_CUSTOM_PREFIX + memoryRegister.id ] : null;
                         dynamic setS = ( w                                       ) ? base.registers[ METHODS_SET_STRING_PREFIX + memoryRegister.id ] : null;
@@ -221,7 +224,8 @@ namespace MTUComm.MemoryMap
                         
                         memoryRegister.funcSetCustom = (Func<dynamic,dynamic>)setC;
 
-                        // All register have this two functions
+                        // All register have this three functions
+                        memoryRegister.funcGetByteArray = (Func<byte[]>)getB;
                         memoryRegister.funcSetString    = (Action<string>)setS;
                         memoryRegister.funcSetByteArray = (Action<byte[]>)setB;
 
@@ -440,6 +444,15 @@ namespace MTUComm.MemoryMap
                 }));
         }
 
+        public void CreateProperty_Get_ByteArray<T> ( MemoryRegister<T> memoryRegister )
+        {
+            base.AddMethod ( METHODS_GET_BYTE_PREFIX + memoryRegister.id,
+                new Func<byte[]>(() =>
+                {
+                    return this.GetByteArrayFromMem ( memoryRegister.address, memoryRegister.size );
+                }));
+        }
+
         #endregion
 
         #region Create Property Set
@@ -515,12 +528,12 @@ namespace MTUComm.MemoryMap
                 }));
         }
 
-        public void CreateProperty_Set_ByteArray<T> ( MemoryRegister<T> regObj )
+        public void CreateProperty_Set_ByteArray<T> ( MemoryRegister<T> memoryRegister )
         {
-            base.AddMethod ( METHODS_SET_BYTE_PREFIX + regObj.id,
+            base.AddMethod ( METHODS_SET_BYTE_PREFIX + memoryRegister.id,
                 new Action<byte[]>((_value) =>
                 {
-                    this.SetByteArrayToMem ( _value, regObj.address, regObj.size );
+                    this.SetByteArrayToMem ( _value, memoryRegister.address, memoryRegister.size );
                 }));
         }
 
@@ -676,6 +689,14 @@ namespace MTUComm.MemoryMap
             bytes.Reverse ();
 
             return Encoding.UTF8.GetString ( bytes.ToArray () ).Trim ();
+        }
+
+        private byte[] GetByteArrayFromMem ( int address, int size = MemRegister.DEF_SIZE )
+        {
+            byte[] dataRead = new byte[ size ];
+            Array.Copy ( memory, address, dataRead, 0, size );
+            
+            return dataRead;
         }
 
         #endregion

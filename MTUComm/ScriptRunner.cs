@@ -116,7 +116,7 @@ namespace MTUComm
 
             int step = 0;
 
-            foreach (Xml.Action action in script.Actions)
+            foreach (Xml.ScriptAction action in script.Actions)
             {
                 Action new_action = new Action(Configuration.GetInstance(), serial_device, parseType(action.Type), script.UserName, script.LogFile);
                 Type   actionType = action.GetType ();
@@ -128,12 +128,12 @@ namespace MTUComm
                         var  paramValue = actionType.GetProperty ( parameter.Name ).GetValue ( action, null );
                         Type valueType  = paramValue.GetType ();
                     
-                        Console.WriteLine ( "-> " + valueType.Name + " " + valueType.IsArray );
-                    
                         if ( valueType.Name.ToLower ().Contains ( "actionparameter" ) )
                         {
                             List<ActionParameter> list = new List<ActionParameter> ();
                             
+                            // If the parameter is an Array is a field for
+                            // a port, and if not is a field for the MTU
                             if ( ! paramValue.GetType ().IsArray )
                                  list.Add      ( ( ActionParameter   )paramValue );
                             else list.AddRange ( ( ActionParameter[] )paramValue );

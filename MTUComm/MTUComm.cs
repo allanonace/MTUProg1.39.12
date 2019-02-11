@@ -594,9 +594,18 @@ namespace MTUComm
             {
                 Parameter[] ps = addMtuAction.GetParameters ();
             
+                form.usePort2 = false;
+            
                 // Recover parameters from script and translante from Aclara nomenclature to our own
                 foreach ( Parameter parameter in ps )
+                {
                     form.AddParameterTranslatingAclaraXml ( parameter );
+                    
+                    if ( parameter.Port == 2 )
+                        form.usePort2 = true;
+                }
+
+                form.usePort2 &= mtu.TwoPorts;
 
                 // Auto-detect Meter
                 if ( ! form.ContainsParameter ( AddMtuForm.FIELD.METER_TYPE      ) &&
@@ -700,12 +709,10 @@ namespace MTUComm
                 
                 form.map = map;
 
-                bool useTwoPorts = mtu.TwoPorts;
-
                 #region Account Number
 
                 map.P1MeterId = form.AccountNumber.Value;
-                if ( useTwoPorts &&
+                if ( form.usePort2 &&
                      form.ContainsParameter ( FIELD.ACCOUNT_NUMBER_2 ) )
                     map.P2MeterId = form.AccountNumber_2.Value;
 
@@ -721,7 +728,7 @@ namespace MTUComm
                 else selectedMeter = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
                 map.P1MeterType = selectedMeter.Id;
 
-                if ( useTwoPorts &&
+                if ( form.usePort2 &&
                      form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
                 {
                     if ( ! isFromScripting )
@@ -751,7 +758,7 @@ namespace MTUComm
                     map.P1Reading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
                 }
                 
-                if ( useTwoPorts &&
+                if ( form.usePort2 &&
                      form.ContainsParameter ( FIELD.METER_READING_2 ) )
                 {
                     if ( ! isFromScripting ||
@@ -780,7 +787,7 @@ namespace MTUComm
                 #region Overlap count
 
                 map.MessageOverlapCount = DEFAULT_OVERLAP;
-                if (useTwoPorts)
+                if ( form.usePort2 )
                     map.P2MessageOverlapCount = DEFAULT_OVERLAP;
 
                 #endregion

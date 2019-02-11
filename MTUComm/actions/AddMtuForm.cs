@@ -437,6 +437,8 @@ namespace MTUComm.actions
                 #endregion
             };
 
+        public bool usePort2;
+
         public AddMtuForm ( Mtu mtu ) : base ( mtu ) { }
 
         public void AddParameter ( FIELD fieldType, dynamic value )
