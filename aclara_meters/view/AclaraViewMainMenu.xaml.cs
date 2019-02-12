@@ -1199,11 +1199,11 @@ namespace aclara_meters.view
                                 PrintToConsole("A esperar 100 ms en bucle - NewOpenConnectionWithDevice");
                                 Thread.Sleep(100);
                             }
-
+                            /* MRA
                             while(FormsApp.ble_interface.GetConnectionStatus() != ble_library.BlePort.CONNECTING)
                             {
 
-                            }
+                            }*/
                             // call your method to check for notifications here
                             FormsApp.ble_interface.Open(FormsApp.peripheral, true);
                         }
