@@ -100,15 +100,6 @@ namespace UnitTest.Tests
         }
 
         [Fact]
-        public void Test_Errors ()
-        {
-            Errors errors = new Errors ( this.GetPath () );
-
-            var error = errors.Get ( 112, "VALOR1", "VALOR2" );
-
-        }
-
-        [Fact]
         public void Test_Validations ()
         {
             // TEST: Numerics

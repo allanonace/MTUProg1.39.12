@@ -51,7 +51,8 @@ namespace aclara_meters
             "Global",
             "Interface",
             "Meter",
-            "Mtu"
+            "Mtu",
+            "Error"
         };
 
         #endregion

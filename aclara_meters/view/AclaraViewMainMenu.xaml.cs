@@ -196,10 +196,8 @@ namespace aclara_meters.view
             printer.Start();
             employees = new ObservableCollection<DeviceItem>();
 
-
             DeviceList.RefreshCommand = new Command(async () =>
             {
-
                 IsBusy = false;
 
                 Device.BeginInvokeOnMainThread(() =>
@@ -212,11 +210,7 @@ namespace aclara_meters.view
                     #endregion
 
                     Thread.Sleep(50);
-
                 });
-
-
-
 
                 try
                 {
@@ -225,23 +219,12 @@ namespace aclara_meters.view
                     await FormsApp.ble_interface.Scan();
 
                     if (employees.Count != 0)
-                    {
                         DeviceList.ItemsSource = employees;
-                    }
-
                 }
                 catch (Exception e)
                 {
 
                 }
-               
-      
-             
-
-
-              
-
-
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -255,8 +238,6 @@ namespace aclara_meters.view
 
                     }
 
-
-
                     #region New Circular Progress bar Animations    
                     DeviceList.IsRefreshing = false;
                     backdark_bg.IsVisible = false;
@@ -264,18 +245,7 @@ namespace aclara_meters.view
                     background_scan_page.IsEnabled = true;
                     #endregion
                 });
-
-
-
             });
-
-
-
-
-
-
-
-
 
             PrintToConsole("en 3 segundos comienza un bucle cada 3 segundos (BUCLE REFRESH LIST) - Interface_background_scan_page");
             #region Execute the Refresh List method every 3 seconds if no elements are on list
@@ -312,10 +282,6 @@ namespace aclara_meters.view
                 DeviceList.ItemsSource = employees;
             }
         }
-
-
-
-
 
         public void FirstRefreshSearchPucs()
         {
@@ -368,7 +334,6 @@ namespace aclara_meters.view
 
         }
 
-
         void OnSwiped(object sender, SwipedEventArgs e)
         {
             if (Device.Idiom == TargetIdiom.Tablet)
@@ -412,11 +377,6 @@ namespace aclara_meters.view
 
             }
         }
-
-
-
-
-
 
         private void LoadPreUIGFX()
         {
@@ -518,11 +478,8 @@ namespace aclara_meters.view
             dialog_ReplaceMTUReplaceMeter_ok.Tapped += dialog_ReplaceMTUReplaceMeter_okTapped;
             dialog_ReplaceMTUReplaceMeter_cancel.Tapped += dialog_ReplaceMTUReplaceMeter_cancelTapped;
 
-
             dialog_AddMTU_ok.Tapped += dialog_AddMTU_okTapped;
             dialog_AddMTU_cancel.Tapped += dialog_AddMTU_cancelTapped;
-
-
 
             disconnectDevice.Tapped += BluetoothPeripheralDisconnect;
             back_button.Tapped += SideMenuOpen;
@@ -534,7 +491,6 @@ namespace aclara_meters.view
             logoff_no.Tapped += LogOffNoTapped;
             logoff_ok.Tapped += LogOffOkTapped;
 
-
             if (Device.Idiom == TargetIdiom.Tablet)
             {
                 hamburger_icon_home.IsVisible = true;
@@ -545,16 +501,12 @@ namespace aclara_meters.view
             }
 
             refresh_signal.Tapped += refreshBleData;
-
-
-
         }
 
         private void refreshBleData(object sender, EventArgs e)
         {
             DeviceList.RefreshCommand.Execute(true);
         }
-
 
         /***
          * 
@@ -614,7 +566,6 @@ namespace aclara_meters.view
             }
          *
          ***/
-
 
         private void InvokeMethod()
         {
@@ -1233,7 +1184,6 @@ namespace aclara_meters.view
             //DeviceList.RefreshCommand.Execute ( true );
         }
 
-
         private void LogOffOkTapped(object sender, EventArgs e)
         {
             if (FormsApp.config.global.UploadPrompt)
@@ -1283,9 +1233,6 @@ namespace aclara_meters.view
             DoBasicRead();
 
         }
-
-
-
 
         private void TurnOffMTUCloseTapped(object sender, EventArgs e)
         {

@@ -169,24 +169,39 @@ namespace MTUComm
             doc.Save(uri);
         }
 
-        public string logErrorString(Action ref_action, int id, string e_message)
+        /// <summary>
+        /// Write errors in log file, using Errors singleton class
+        /// that contains all catched errors since the last writting
+        /// <Error>
+        ///   <AppError>
+        ///     <Date></Date>
+        ///     <Message ErrorId="n">...</Message>
+        ///   </AppError>
+        /// </Error>
+        /// </summary>
+        public void LogError ()
         {
-            XDocument doc = XDocument.Parse(getBaseFileHandler());
+            String    uri    = CreateFileIfNotExist ();
+            XDocument doc    = XDocument.Load ( uri );
+            XElement  erNode = doc.Root.Element ( "Error" );
+            string    time   = DateTime.UtcNow.ToString ( "MM/dd/yyyy HH:mm:ss" );
 
-            XElement error = new XElement("AppError");
-
-            logParameter(error, new Parameter("Date", null, DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
-
-            XElement message = new XElement("Message", e_message);
-            if (id >= 0)
+            foreach ( Error e in Errors.GetErrorsToLog () )
             {
-            addAtrribute(message, "ErrorId", id.ToString());
+                XElement error = new XElement ( "AppError" );
+
+                logParameter(error, new Parameter ( "Date", null, time ) );
+            
+                XElement message = new XElement ( "Message", e.Message );
+                if ( Errors.ShowId &&
+                     e.Id > -1 )
+                    addAtrribute ( message, "ErrorId", e.Id.ToString () );
+                error.Add ( message );
+                
+                erNode.Add ( error );
             }
-            error.Add(message);
 
-            doc.Root.Element("Error").Add(error);
-
-            return doc.ToString();
+            doc.Save ( uri );
         }
 
         public string logReadResultString(Action ref_action, ActionResult result)
@@ -411,31 +426,6 @@ namespace MTUComm
             doc.Root.Element("Mtus").Add(action);
             doc.Save(uri);
 
-        }
-
-        public void LogError(String e_message)
-        {
-            LogError(-1, e_message);
-        }
-
-        public void LogError(int id, String e_message)
-        {
-            String uri = CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(uri);
-
-            XElement error = new XElement("AppError");
-
-            logParameter(error, new Parameter("Date", null, DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
-
-            XElement message = new XElement("Message", e_message);
-            if(id >= 0)
-            {
-                addAtrribute(message, "ErrorId", id.ToString());
-            }
-            error.Add(message);
-
-            doc.Root.Element("Error").Add(error);
-            doc.Save(uri);
         }
 
         public void logAction(Action ref_action)

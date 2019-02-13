@@ -539,6 +539,8 @@ namespace MTUComm
         {
             try
             {
+                //throw new System.DivideByZeroException ();
+            
                 //If MTU has changed or critical settings/configuration force detection rutine
                 if (this.changedMTUSettings || forcedetect)
                     RecoverMeterByMtuType ();
@@ -575,8 +577,10 @@ namespace MTUComm
                 ReadMtuArgs args = new ReadMtuArgs( map, mtuType );
                 OnReadMtu(this, args);
             }
-            catch (Exception e)
+            catch ( Exception e )
             {
+                Errors.LogErrorNow ( e );
+            
                 OnError(this, TranslateException(e));
             }
         }

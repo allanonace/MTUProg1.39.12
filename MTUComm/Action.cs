@@ -373,11 +373,6 @@ namespace MTUComm
             }
         }
 
-        public String GetErrorXML ( int status, string message )
-        {
-            return logger.logErrorString ( this, status, message );
-        }
-
         public String GetResultXML ( ActionResult result )
         {
             if (type == ActionType.AddMtu)
@@ -453,10 +448,6 @@ namespace MTUComm
                     case ActionType.BasicRead:
                         comm.OnBasicRead += Comm_OnBasicRead;
                         break;
-
-                    default:
-                        ActionRunSimulator();
-                        break;
                 }
 
                 // Is more easy to control one point of invokation
@@ -489,15 +480,7 @@ namespace MTUComm
 
         private void Comm_OnError(object sender, MTUComm.ErrorArgs e)
         {
-            logger.LogError(e.Status, e.LogMessage);
-            try
-            {
-                OnError(this, new ActionErrorArgs(e.Status, e.Message));
-            }
-            catch (Exception ee)
-            {
-
-            }
+            OnError ( this, new ActionErrorArgs ( e.Status, e.Message ) );
         }
 
         private void Comm_OnReadMtuData(object sender, MTUComm.ReadMtuDataArgs e)
@@ -580,165 +563,6 @@ namespace MTUComm
         #endregion
 
         #region Reads
-
-        private ActionResult ReadPort ( int portnumber, InterfaceParameters[] parameters, dynamic map, Mtu mtu )
-        {
-            ActionResult result = new ActionResult();
-
-            Port PortType = mtu.Ports[portnumber];
-
-            int meterid = map.GetProperty("P" + (portnumber + 1) + "MeterType").Value;
-
-            // Port has installed a Meter
-            if (meterid != 0)
-            {
-                Meter Metertype = configuration.getMeterTypeById(meterid);
-                if (Metertype.Type == "NOTFOUND")
-                {
-                    //logger.LogError("No valid meter types were found for MTU type " + Metertype.Id);
-                }
-
-                foreach (InterfaceParameters parameter in parameters)
-                {
-                    if (parameter.Name.Equals("MeterReading"))
-                    {
-                        if (ValidateCondition(parameter.Conditional, map, mtu, "P" + (portnumber + 1)))
-                        {
-                            string meter_reading_error = map.GetProperty("P" + (portnumber + 1) + "ReadingError").Value.ToString();
-                            if (meter_reading_error.Length < 1)
-                            {
-                                ulong meter_reading = 0;
-                                try
-                                {
-                                    meter_reading = map.GetProperty("P" + (portnumber + 1) + "Reading").Value;
-                                }
-                                catch (Exception e) { }
-
-                                ulong tempReadingVal = 0;
-                                if (mtu.PulseCountOnly)
-                                {
-                                    tempReadingVal = meter_reading * (ulong)Metertype.HiResScaling;
-                                }
-                                else
-                                {
-                                    tempReadingVal = meter_reading;
-                                }
-
-
-                                String tempReading = tempReadingVal.ToString();
-                                if (Metertype.LiveDigits < tempReading.Length)
-                                {
-                                    tempReading = tempReading.Substring(tempReading.Length - Metertype.LiveDigits - (tempReading.IndexOf('.') > -1 ? 1 : 0));
-                                }
-                                else
-                                {
-                                    tempReading = tempReading.PadLeft(Metertype.LiveDigits, '0');
-                                }
-                                if (Metertype.LeadingDummy > 0) // KG 12/08/2008
-                                    tempReading = tempReading.PadLeft(tempReading.Length + Metertype.LeadingDummy, configuration.useDummyDigits() ? 'X' : '0');
-                                if (Metertype.DummyDigits > 0)  // KG 12/08/2008
-                                    tempReading = tempReading.PadRight(tempReading.Length + Metertype.DummyDigits, configuration.useDummyDigits() ? 'X' : '0');
-                                if (Metertype.Scale > 0 && tempReading.IndexOf(".") == -1) // 8.12.2011 KG add for F1 Pulse
-                                    tempReading = tempReading.Insert(tempReading.Length - Metertype.Scale, ".");
-                                if (Metertype.PaintedDigits > 0 && configuration.useDummyDigits()) // KG 12/08/2008
-                                    tempReading = tempReading.PadRight(tempReading.Length + Metertype.PaintedDigits, '0').Insert(tempReading.Length, " - ");
-
-                                if (tempReading == "")
-                                {
-                                    tempReading = "INVALID";
-                                }
-                                result.AddParameter(new Parameter(parameter.Name, parameter.Display, tempReading));
-                            }
-                            else
-                            {
-                                result.AddParameter(new Parameter(parameter.Name, parameter.Display, meter_reading_error));
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        try
-                        {
-                            if (ValidateCondition(parameter.Conditional, map, mtu, "P" + (portnumber + 1)))
-                            {
-                                if (parameter.Source == null)
-                                {
-                                    parameter.Source = "";
-                                }
-                                string val = null;
-                                string property_type = "";
-                                string property_name = "";
-
-                                if (parameter.Source.Contains(".") && parameter.Source.Length >= 3)
-                                {
-                                    property_type = parameter.Source.Split(new char[] { '.' })[0];
-                                    property_name = parameter.Source.Split(new char[] { '.' })[1];
-                                }
-
-                                string name = parameter.Name;
-
-                                switch (property_type)
-                                {
-                                    case "PortType":
-                                        val = PortType.GetProperty(property_name);
-                                        break;
-                                    case "MeterType":
-                                        val = Metertype.GetProperty(property_name);
-                                        break;
-                                    case "MtuType":
-                                        val = mtu.GetProperty(property_name);
-                                        break;
-                                    case "MemoryMap":
-                                        val = map.GetProperty("P" + (portnumber + 1) + property_name).Value.ToString();
-                                        name = property_name;
-                                        break;
-                                    default:
-
-                                        try
-                                        {
-                                            val = map.GetProperty("P" + (portnumber + 1) + parameter.Name).Value.ToString();
-                                        }catch (Exception e)
-                                        {
-                                            val = null;
-                                        }
-
-                                        break;
-
-                                }
-                                if (!string.IsNullOrEmpty(val))
-                                {
-                                    result.AddParameter(new Parameter(name, parameter.Display, val));
-                                }
-
-                            }
-
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
-                        }
-                    }
-
-                }
-
-            }
-            // Port has not installed a Meter
-            else
-            {
-                result.AddParameter(new Parameter("Status", "Status", "Not Installed"));
-                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", "000000000"));
-                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
-                /*
-                result.AddParameter(new Parameter("MeterType", "Meter Type", "Not Installed"));
-                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", meterid.ToString()));
-                result.AddParameter(new Parameter("AcctNumber", "Service Pt. ID", "000000000"));
-                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
-                */
-            }
-
-            return result;
-        }
 
         private ActionResult ReadMTUData ( DateTime start, DateTime end, List<LogDataEntry> Entries, MTUBasicInfo mtuInfo, Mtu mtu )
         {
@@ -894,6 +718,168 @@ namespace MTUComm
             return result;
         }
 
+        private ActionResult ReadPort ( int indexPort, InterfaceParameters[] parameters, dynamic map, Mtu mtu )
+        {
+            ActionResult result   = new ActionResult ();
+            Port         portType = mtu.Ports[ indexPort ];
+
+            // Meter Serial Number
+            int meterId = map.GetProperty ( "P" + ( indexPort + 1 ) + "MeterType" ).Value;
+
+            // Port has installed a Meter
+            if ( meterId != 0 )
+            {
+                Meter Metertype = configuration.getMeterTypeById ( meterId );
+                
+                // Meter type not found in database
+                if ( Metertype.Type == "NOTFOUND" )
+                {
+                    //logger.LogError("No valid meter types were found for MTU type " + Metertype.Id);
+                }
+
+                // Iterate all parameters for this port
+                foreach ( InterfaceParameters parameter in parameters )
+                {
+                    if ( parameter.Name.Equals ( "MeterReading" ) )
+                    {
+                        if (ValidateCondition(parameter.Conditional, map, mtu, "P" + (indexPort + 1)))
+                        {
+                            string meter_reading_error = map.GetProperty("P" + (indexPort + 1) + "ReadingError").Value.ToString();
+                            if (meter_reading_error.Length < 1)
+                            {
+                                ulong meter_reading = 0;
+                                try
+                                {
+                                    meter_reading = map.GetProperty("P" + (indexPort + 1) + "Reading").Value;
+                                }
+                                catch (Exception e) { }
+
+                                ulong tempReadingVal = 0;
+                                if (mtu.PulseCountOnly)
+                                {
+                                    tempReadingVal = meter_reading * (ulong)Metertype.HiResScaling;
+                                }
+                                else
+                                {
+                                    tempReadingVal = meter_reading;
+                                }
+
+
+                                String tempReading = tempReadingVal.ToString();
+                                if (Metertype.LiveDigits < tempReading.Length)
+                                {
+                                    tempReading = tempReading.Substring(tempReading.Length - Metertype.LiveDigits - (tempReading.IndexOf('.') > -1 ? 1 : 0));
+                                }
+                                else
+                                {
+                                    tempReading = tempReading.PadLeft(Metertype.LiveDigits, '0');
+                                }
+                                if (Metertype.LeadingDummy > 0) // KG 12/08/2008
+                                    tempReading = tempReading.PadLeft(tempReading.Length + Metertype.LeadingDummy, configuration.useDummyDigits() ? 'X' : '0');
+                                if (Metertype.DummyDigits > 0)  // KG 12/08/2008
+                                    tempReading = tempReading.PadRight(tempReading.Length + Metertype.DummyDigits, configuration.useDummyDigits() ? 'X' : '0');
+                                if (Metertype.Scale > 0 && tempReading.IndexOf(".") == -1) // 8.12.2011 KG add for F1 Pulse
+                                    tempReading = tempReading.Insert(tempReading.Length - Metertype.Scale, ".");
+                                if (Metertype.PaintedDigits > 0 && configuration.useDummyDigits()) // KG 12/08/2008
+                                    tempReading = tempReading.PadRight(tempReading.Length + Metertype.PaintedDigits, '0').Insert(tempReading.Length, " - ");
+
+                                if (tempReading == "")
+                                {
+                                    tempReading = "INVALID";
+                                }
+                                result.AddParameter(new Parameter(parameter.Name, parameter.Display, tempReading));
+                            }
+                            else
+                            {
+                                result.AddParameter(new Parameter(parameter.Name, parameter.Display, meter_reading_error));
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        try
+                        {
+                            if (ValidateCondition(parameter.Conditional, map, mtu, "P" + (indexPort + 1)))
+                            {
+                                if (parameter.Source == null)
+                                {
+                                    parameter.Source = "";
+                                }
+                                string val = null;
+                                string property_type = "";
+                                string property_name = "";
+
+                                if (parameter.Source.Contains(".") && parameter.Source.Length >= 3)
+                                {
+                                    property_type = parameter.Source.Split(new char[] { '.' })[0];
+                                    property_name = parameter.Source.Split(new char[] { '.' })[1];
+                                }
+
+                                string name = parameter.Name;
+
+                                switch (property_type)
+                                {
+                                    case "PortType":
+                                        val = portType.GetProperty(property_name);
+                                        break;
+                                    case "MeterType":
+                                        val = Metertype.GetProperty(property_name);
+                                        break;
+                                    case "MtuType":
+                                        val = mtu.GetProperty(property_name);
+                                        break;
+                                    case "MemoryMap":
+                                        val = map.GetProperty("P" + (indexPort + 1) + property_name).Value.ToString();
+                                        name = property_name;
+                                        break;
+                                    default:
+
+                                        try
+                                        {
+                                            val = map.GetProperty("P" + (indexPort + 1) + parameter.Name).Value.ToString();
+                                        }catch (Exception e)
+                                        {
+                                            val = null;
+                                        }
+
+                                        break;
+
+                                }
+                                if (!string.IsNullOrEmpty(val))
+                                {
+                                    result.AddParameter(new Parameter(name, parameter.Display, val));
+                                }
+
+                            }
+
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
+                        }
+                    }
+
+                }
+
+            }
+            // Port has not installed a Meter
+            else
+            {
+                result.AddParameter(new Parameter("Status", "Status", "Not Installed"));
+                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", "000000000"));
+                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
+                /*
+                result.AddParameter(new Parameter("MeterType", "Meter Type", "Not Installed"));
+                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", meterid.ToString()));
+                result.AddParameter(new Parameter("AcctNumber", "Service Pt. ID", "000000000"));
+                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
+                */
+            }
+
+            return result;
+        }
+
         private ActionResult getBasciInfoResult()
         {
             ActionResult result = new ActionResult();
@@ -906,40 +892,6 @@ namespace MTUComm
             result.AddParameter(new Parameter("MtuId", "MTU ID", basic.Id));
     
             return result;
-        }
-
-        #endregion
-
-        #region Simulator
-
-        //MOK FUNCTIONS FOR DEV
-        //Simulates Rando Success/Fail writin on MTU
-        private void ActionRunSimulator()
-        {
-            var task = Task.Run(() => {
-                Random random = new Random();
-                Thread.Sleep(random.Next(4000, 5500));
-            });
-            if (task.Wait(TimeSpan.FromSeconds(5)))
-                SuccessAction();
-            else
-                ErrorAction();
-        }
-
-        private void SuccessAction()
-        {
-            logger.logAction(this);
-            ActionFinishArgs args = new ActionFinishArgs(new ActionResult());
-            OnFinish(this, args);
-        }
-
-        private void ErrorAction()
-        {
-
-            ActionErrorArgs args = new ActionErrorArgs(240, "No valid meter types were found for MTU type 152");
-
-            logger.LogError(args.Status, args.Message);
-            OnError(this, args);
         }
 
         #endregion

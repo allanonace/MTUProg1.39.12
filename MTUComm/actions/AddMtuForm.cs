@@ -12,11 +12,14 @@ namespace MTUComm.actions
         public enum FIELD
         {
             MTU_ID_OLD,
+            
             ACCOUNT_NUMBER,
             ACCOUNT_NUMBER_2,
             
             WORK_ORDER,
             WORK_ORDER_2,
+            
+            ACTIVITY_LOG_ID,
             
             METER_NUMBER,
             METER_NUMBER_2,
@@ -63,7 +66,7 @@ namespace MTUComm.actions
             {
                 { ParameterType.OldMtuId,             FIELD.MTU_ID_OLD        },
                 { ParameterType.AccountNumber,        FIELD.ACCOUNT_NUMBER    },
-                //{ ParameterType.ActivityLogId,        FIELD.ACCOUNT_NUMBER    },
+                { ParameterType.ActivityLogId,        FIELD.ACTIVITY_LOG_ID   },
                 { ParameterType.WorkOrder,            FIELD.WORK_ORDER        },
                 { ParameterType.MeterType,            FIELD.METER_TYPE        },
                 { ParameterType.NumberOfDials,        FIELD.NUMBER_OF_DIALS   },
@@ -90,7 +93,7 @@ namespace MTUComm.actions
         public Dictionary<FIELD, string[]> Texts =
             new Dictionary<FIELD, string[]>()
             {
-                #region Service Port ID = Account Number = Activity Log ID = Functl Loctn
+                #region Service Port ID = Account Number = Functl Loctn
                 {
                     FIELD.ACCOUNT_NUMBER,
                     new string[]
@@ -127,6 +130,17 @@ namespace MTUComm.actions
                         "WorkOrder_2",
                         "WorkOrder",
                         "Work Order"
+                    }
+                },
+                #endregion
+                #region Activity Log ID
+                {
+                    FIELD.ACTIVITY_LOG_ID,
+                    new string[]
+                    {
+                        "ActivityLogId",
+                        "ActivityLogID",
+                        "Activity Log ID"
                     }
                 },
                 #endregion
@@ -478,7 +492,7 @@ namespace MTUComm.actions
             this.AddParameter ( typeOwn, parameter.Value );
         }
 
-        public Parameter FindById(FIELD field_type)
+        public Parameter FindById ( FIELD field_type )
         {
             string[] texts = Texts[field_type];
             return base.FindParameterById(texts[0]);

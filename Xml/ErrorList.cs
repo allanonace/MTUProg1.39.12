@@ -6,6 +6,6 @@ namespace Xml
     public class ErrorList
     {
         [XmlElement("Error")]
-        public Error[] Errors { get; set; }
+        public Error[] List { get; set; }
     }
 }

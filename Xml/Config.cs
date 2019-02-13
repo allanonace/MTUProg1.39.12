@@ -8,6 +8,32 @@ namespace Xml
 {
     public class Config
     {
+        public ErrorList GetErrors (string path)
+        {
+            ErrorList errors;
+        
+            try
+            {
+                
+                XmlSerializer s = new XmlSerializer(typeof(ErrorList));
+            
+                using (StreamReader streamReader = new StreamReader(path))
+                {
+                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                    using (StringReader reader = new StringReader(fileContent))
+                    {
+                        errors = (ErrorList)s.Deserialize(reader);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new DemandConfLoadException("Error loading Errors file");
+            }
+ 
+            return errors;
+        }
+    
         public UserList GetUsers (string path)
         {
             UserList users;
@@ -108,8 +134,6 @@ namespace Xml
             return mtuTypes;
         }
 
-
-
         public Memories GetMemory(string path)
         {
             Memories memories;
@@ -146,7 +170,6 @@ namespace Xml
 
             return alarms;
         }
-
 
         public InterfaceConfig GetInterfaces(string path)
         {

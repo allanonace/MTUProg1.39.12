@@ -4,32 +4,44 @@ namespace Xml
 {
     public class Error
     {
-        public const int ERROR_VAL = -1;
+        private const int EMPTY_VAL = -1;
+    
+        public Error ()
+        {
+            this.Id       = EMPTY_VAL;
+            this.DotNetId = EMPTY_VAL;
+        }
+        
+        public Error ( string message )
+        : this ()
+        {
+            this.Message = message;
+        }
+
+        [XmlAttribute("id")]
+        public int Id { get; set; }
 
         [XmlIgnore]
-        public int Status { get; set; }
-
-        [XmlElement("Status")]
-        public string Status_AllowEmptyField
+        public int DotNetId { get; set; }
+        
+        [XmlAttribute("dotnet")]
+        public string DotNetId_AllowEmptyField
         {
-            get { return this.Status.ToString(); }
+            get { return this.DotNetId.ToString(); }
             set
             {
                 if (!string.IsNullOrEmpty(value))
                 {
                     int v;
                     if (int.TryParse(value, out v))
-                         this.Status = v;
-                    else this.Status = ERROR_VAL;
+                         this.DotNetId = v;
+                    else this.DotNetId = EMPTY_VAL;
                 }
-                else this.Status = ERROR_VAL;
+                else this.DotNetId = EMPTY_VAL;
             }
         }
 
-        [XmlElement("Message")]
+        [XmlAttribute("message")]
         public string Message { get; set; }
-
-        [XmlElement("LogMessage")]
-        public string LogMessage { get; set; }
     }
 }
