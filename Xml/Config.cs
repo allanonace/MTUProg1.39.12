@@ -134,19 +134,6 @@ namespace Xml
             return mtuTypes;
         }
 
-        public Memories GetMemory(string path)
-        {
-            Memories memories;
-            XmlSerializer s = new XmlSerializer(typeof(Memories));
-
-            using (StreamReader reader = new StreamReader(path))
-            {
-                memories = (Memories)s.Deserialize(reader);
-            }
-
-            return memories;
-        }
-
         public AlarmList GetAlarms(string path)
         {
             AlarmList alarms;
