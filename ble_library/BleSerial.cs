@@ -220,5 +220,14 @@ namespace ble_library
         public byte[] GetBatteryLevel(){
             return ble_port_serial.GetBatteryLevel();
         }
+        /// <summary>
+        /// Gets the TimeOut in seconds
+        /// </summary>
+        /// <returns>Gets the TimeOut in seconds</returns>
+        /// <remarks></remarks>
+        public void SetTimeOutSeconds(int sec)
+        {
+            ble_port_serial.TimeOutSeconds = sec;
+        }
     }
 }

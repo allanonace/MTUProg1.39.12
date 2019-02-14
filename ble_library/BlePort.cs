@@ -246,7 +246,8 @@ namespace ble_library
             await BluetoothEnable();
             if (adapter.CurrentState.IsEnabledOrEnabling())
             {
-                Task.Factory.StartNew(ScanForBroadcasts);
+                //Task.Factory.StartNew(ScanForBroadcasts);
+                await ScanForBroadcasts();
             }
             else
             {

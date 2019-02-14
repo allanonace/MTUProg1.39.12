@@ -30,11 +30,8 @@
 
     </ContentView>
 
-           <!--  DETAIL  -->
-
-
-        
-      <ContentView  IsVisible="false" x:Name="background_scan_page_detail"   
+    <!--  background_scan_page_detail  --> 
+    <ContentView  IsVisible="false" x:Name="background_scan_page_detail"   
             RelativeLayout.XConstraint=
               "{ConstraintExpression Type=RelativeToParent,
                                      Property=Width,
@@ -191,7 +188,7 @@
                                          HorizontalOptions="Center">
                                     <Image Source="ble_puck_icon.png" />
                                     <Label HorizontalOptions="Center" FontSize="32" Text="Device 1" x:Name="deviceID"  ></Label>
-                                    <Label HorizontalOptions="Center" IsVisible="true" Margin="4,-4,0,0" FontSize="16" 
+                                    <Label HorizontalOptions="Center" IsVisible="true" Margin="4,-4,0,0" FontSize="22" 
                                            Text="34:32:45:76:98"  HorizontalTextAlignment="Center"  x:Name="macAddress" ></Label>
                                     <StackLayout Margin="0,-4,0,0" Orientation="Horizontal" HorizontalOptions="Center">
                                          <Image   Source="battery_toolbar_high"  HeightRequest="34" x:Name="imageBattery" VerticalOptions="Center" />
@@ -286,13 +283,9 @@
             
      </ContentView>
 
-   
 
-
-
-
-        
-        <ContentView  IsVisible="true" x:Name="background_scan_page"
+    <!--  background_scan_page  --> 
+    <ContentView  IsVisible="true" x:Name="background_scan_page"
             RelativeLayout.XConstraint=
               "{ConstraintExpression Type=RelativeToParent,
                                      Property=Width,
@@ -459,7 +452,7 @@
 
                                         <!-- {Binding Name} -->
                                         <Label FontSize="32" Text="{Binding deviceName}"></Label>
-                                        <Label Margin="4,-4,0,0" FontSize="14" Text="{Binding deviceMacAddress}"></Label>
+                                        <Label Margin="4,-4,0,0" FontSize="22" Text="{Binding deviceMacAddress}"></Label>
                                         <StackLayout Margin="0,-4,0,0" Orientation="Horizontal" VerticalOptions="Center">
                                              <Image Source="{Binding deviceBatteryIcon} " HeightRequest="34" VerticalOptions="Center" />
                                             <Label Margin="-2,2,0,-2" Text="{Binding deviceBattery}" FontSize="14" VerticalOptions="Center"></Label>
@@ -533,37 +526,31 @@
             
      </ContentView>
 
-
-
-
      
-  
- 
      <Image Source="shadoweffect" Margin="298,0,0,0" Opacity="0.75" IsVisible="false" 
          WidthRequest="29" HeightRequest="768" x:Name="shadoweffect" >
                  
      </Image>
-            
-    
-    
-
-     <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Gray" HeightRequest="1024"  Margin="0,92,0,0" 
-                  
-              IsVisible="true"  WidthRequest="1024" Opacity="0.6">
-
+     
+    <!--  backdark_bg  -->
+     <StackLayout InputTransparent="true" 
+                  x:Name="backdark_bg" 
+                  BackgroundColor="Gray" 
+                  HeightRequest="1024"  
+                  Margin="0,92,0,0" 
+                  IsVisible="true"  
+                  WidthRequest="1024" 
+                  Opacity="0.6">
      </StackLayout> 
         
         
-        
-        <!--   DIALOGS   -->
-           <Image BackgroundColor="Black"  x:Name="dialog_open_bg" WidthRequest="1024"  IsVisible="false"
+     <Image BackgroundColor="Black"  x:Name="dialog_open_bg" WidthRequest="1024"  IsVisible="false"
                   HeightRequest="1024" Opacity="0.5">
-                
-            </Image>
+     </Image>
             
         
-        
-     <StackLayout InputTransparent="true"  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
+     <!--  indicator -->
+      <StackLayout InputTransparent="true"  VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" 
         RelativeLayout.YConstraint=
           "{ConstraintExpression Type=RelativeToParent,
                                  Property=Height,
@@ -583,7 +570,7 @@
 
     </StackLayout>
         
-        <!-- Menu desplegable -->
+    <!-- Menu desplegable ContentNav   -->
         
     <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" 
                  IsVisible="false"
@@ -600,14 +587,13 @@
 
 
             
-            <RelativeLayout IsVisible="true">
+        <RelativeLayout IsVisible="true">
              
             
-                    <!-- Custom Shadow Effect -->
+        <!-- Custom Shadow Effect -->
                   
                 
-                    <Image  
-                        x:Name="efecto4"
+                    <Image  x:Name="efecto4"
                         Margin="308,0,0,0"
                         Opacity="0.2"
                         WidthRequest="2"
@@ -626,7 +612,7 @@
                         HorizontalOptions="EndAndExpand">
                     </Image>
 
-                      <Image  
+                    <Image  
                         x:Name="efecto2"
                         Margin="312,0,0,0"
                         Opacity="0"
@@ -646,7 +632,7 @@
                         HorizontalOptions="EndAndExpand">
                     </Image>
                 
-                     <Image  
+                    <Image  
                         x:Name="efecto1"
                         Margin="310,0,0,0"
                         Opacity="0"
@@ -657,10 +643,6 @@
                     </Image>
 
                 
-
-
-                
-              
                 <StackLayout VerticalOptions="EndAndExpand" 
                             RelativeLayout.YConstraint=
                       "{ConstraintExpression Type=RelativeToParent,
@@ -673,49 +655,31 @@
                     RelativeLayout.WidthConstraint=
                       "{ConstraintExpression Type=RelativeToParent,
                                              Property=Width,
-                                             Factor=0.99}"
-                              >
+                                             Factor=0.99}">
 
 
 
                                
                      <ContentView  Margin="0,92,0,-20"
-                                       RelativeLayout.YConstraint=
-                      "{ConstraintExpression Type=RelativeToParent,
-                                             Property=Height,
-                                             Factor=0}"
-                    RelativeLayout.HeightConstraint=
-                      "{ConstraintExpression Type=RelativeToParent,
-                                             Property=Height,
-                                             Factor=1}">
-
-
-
-                    
-
-                            
-                 <ListView Margin="-16,0,-2,0" x:Name="navigationDrawerList" Opacity="1"
+                                   RelativeLayout.YConstraint=
+                                            "{ConstraintExpression Type=RelativeToParent,
+                                                                   Property=Height,
+                                                                   Factor=0}"
+                                   RelativeLayout.HeightConstraint=
+                                            "{ConstraintExpression Type=RelativeToParent,
+                                                                   Property=Height,
+                                                                    Factor=1}">
+                                                                    
+                    <ListView Margin="-16,0,-2,0" x:Name="navigationDrawerList" Opacity="1"
                               RowHeight="64"
                               SeparatorVisibility="Default"
-                              SeparatorColor="#6aa2b8"
-                                                  
+                              SeparatorColor="#6aa2b8"                
                               BackgroundColor="White"
-
-
-                            
-
-                               ItemTapped="OnMenuItemSelected"
-
+                              ItemTapped="OnMenuItemSelected">
                               
-                           >
-
-                      
-
-                            
                       <ListView.ItemTemplate >
                         <DataTemplate>
                           <ViewCell  >
-                            
                             <!-- Main design for our menu items -->
                             <StackLayout VerticalOptions="FillAndExpand"
                                          Orientation="Vertical"
@@ -737,98 +701,72 @@
                                          FontSize="22"
                                          VerticalOptions="CenterAndExpand"
                                          TextColor="#6aa2b8"/>
-
-
-                              
-                                 </StackLayout>
-
-                                 <StackLayout  Margin="-40,-12,0,40"  HeightRequest="80" >
+                                         
+                                </StackLayout>
+                                
+                                <StackLayout  Margin="-40,-12,0,40"  HeightRequest="80" >
                                       <Image HeightRequest="2"  BackgroundColor="#6aa2b8" />
-                                  </StackLayout>
+                                </StackLayout>
                             
                              </StackLayout>
-
-
-                                        
-                          </ViewCell>
+                           </ViewCell>
                         </DataTemplate>
                       </ListView.ItemTemplate>
                     </ListView>
-                                            
+            </ContentView>
 
-                        
-        
-                     </ContentView>
+            <Image Margin="0,12,0,0" BackgroundColor="White" HeightRequest="0"></Image>
 
 
-                
-
-
-                             <Image Margin="0,12,0,0" BackgroundColor="White" HeightRequest="0"></Image>
-
-
-                            <StackLayout Orientation="Horizontal" Margin="0,0" Padding="0,12" BackgroundColor="#6aa2b8">
-                                   <Image Margin="12,-4,0,-4" Source="settings_icon.png"
-                                                         WidthRequest="40"
-                                                         HeightRequest="36"
-                                                         Scale="0.95"
-                                                         VerticalOptions="Center" />
+            <StackLayout Orientation="Horizontal" Margin="0,0" Padding="0,12" BackgroundColor="#6aa2b8">
+                     <Image Margin="12,-4,0,-4" Source="settings_icon.png"
+                            WidthRequest="40"
+                            HeightRequest="36"
+                            Scale="0.95"
+                            VerticalOptions="Center" />
                                         
-                                            <Label  VerticalOptions="CenterAndExpand" Margin="4,0,20,0" FontSize="23" Text="Settings" TextColor="White" >
-                                              <Label.GestureRecognizers>
-                                                <TapGestureRecognizer  x:Name="settings_button"  NumberOfTapsRequired="1" />
-                                              </Label.GestureRecognizers>        
-                                        </Label>
-
-
-                                                
-                                    </StackLayout> 
+                     <Label  VerticalOptions="CenterAndExpand" Margin="4,0,20,0" FontSize="23" Text="Settings" TextColor="White" >
+                            <Label.GestureRecognizers>
+                                  <TapGestureRecognizer  x:Name="settings_button"  NumberOfTapsRequired="1" />
+                            </Label.GestureRecognizers>        
+                     </Label>
+             </StackLayout> 
                     
-                             <Image Margin="0,0,0,0" BackgroundColor="White" HeightRequest="2"></Image>
-
-
-                             <StackLayout Orientation="Horizontal"  Margin="0,0" Padding="0,12" BackgroundColor="#6aa2b8">
-                               <Image Margin="12,-4,0,-4" Source="logoff_icon.png"
-                                                         WidthRequest="40"
-                                                         HeightRequest="36"
-                                                         Scale="0.95"
-                                                         VerticalOptions="Center" />
+             <Image Margin="0,0,0,0" BackgroundColor="White" HeightRequest="2"></Image>
+             
+             <StackLayout Orientation="Horizontal"  Margin="0,0" Padding="0,12" BackgroundColor="#6aa2b8">
+                <Image Margin="12,-4,0,-4" Source="logoff_icon.png"
+                       WidthRequest="40"
+                       HeightRequest="36"
+                       Scale="0.95"
+                       VerticalOptions="Center" />
                                         
-                            <Label VerticalOptions="Center" Margin="4,0,20,0" FontSize="23" Text="Log Off" TextColor="White" >
-                              <Label.GestureRecognizers>
-                                <TapGestureRecognizer  x:Name="logout_button"  NumberOfTapsRequired="1" />
-                              </Label.GestureRecognizers>        
-                        </Label>
+                <Label VerticalOptions="Center" Margin="4,0,20,0" FontSize="23" Text="Log Off" TextColor="White" >
+                    <Label.GestureRecognizers>
+                        <TapGestureRecognizer  x:Name="logout_button"  NumberOfTapsRequired="1" />
+                     </Label.GestureRecognizers>        
+                </Label>
 
-                        </StackLayout>
+              </StackLayout>
                            
 
-                    </StackLayout>
+           </StackLayout>
       
 
-                <StackLayout x:Name="Block_upper" IsVisible="true" Margin="-4,0,0,0" Orientation="Vertical"  WidthRequest="310" HorizontalOptions="Center" >
-                 
+           <StackLayout x:Name="Block_upper" IsVisible="true" Margin="-4,0,0,0" Orientation="Vertical"  WidthRequest="310" HorizontalOptions="Center" >
+                <StackLayout    Margin="4,-12,0,0" Orientation="Horizontal">
+                    <Image IsVisible="true"   
+                           x:Name="close_menu_icon"
+                           Margin="0,8,0,0"  HeightRequest="56"
+                           Scale="1" 
+                           Source="back_arrow.png"  
+                           HorizontalOptions="Start">
+                        <Image.GestureRecognizers>
+                               <TapGestureRecognizer  x:Name="back_button_menu"  NumberOfTapsRequired="1" />
+                        </Image.GestureRecognizers>       
+                     </Image>
 
-                   
-
-                       
-                           
-                             <StackLayout    Margin="4,-12,0,0" Orientation="Horizontal">
-                                <Image IsVisible="true"   
-                                x:Name="close_menu_icon"
-                                Margin="0,8,0,0"  HeightRequest="56"
-                                Scale="1" 
-                                Source="back_arrow.png"  
-                                HorizontalOptions="Start">
-
-                                <Image.GestureRecognizers>
-                                    <TapGestureRecognizer  x:Name="back_button_menu"  NumberOfTapsRequired="1" />
-                                </Image.GestureRecognizers>       
-                                
-                           
-                            </Image>
-
-                            <Image  x:Name="logo_tablet_aclara"  TranslationX="18"
+                     <Image  x:Name="logo_tablet_aclara"  TranslationX="18"
                                     WidthRequest="216" 
                                     HeightRequest="128"
                                     IsEnabled="false"
@@ -836,74 +774,55 @@
                                     Scale="1" 
                                     Opacity="1"
                                     Source="aclara_logo_menu.png">
-                            </Image>
+                     </Image>
                       
-                               </StackLayout>
-                      
-
-                        
-                   
-
-                          <StackLayout Margin="0,-40,0,0"  x:Name="tablet_user_view" HorizontalOptions="Center">
-                       
-                        
-                      <Label x:Name="userName" Margin="0,-12,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" 
+                 </StackLayout>
+                 <StackLayout Margin="0,-40,0,0"  x:Name="tablet_user_view" HorizontalOptions="Center">
+                
+                      <Label x:Name="userName" 
+                             Margin="0,-12,0,0" 
+                             TextColor="White" 
+                             HorizontalTextAlignment="Center" 
+                             InputTransparent="true" Text="Username" 
                              FontSize="20"></Label>
                      
-        
-                    
-                </StackLayout>
-
-
-
-          
-                    
-                </StackLayout>
-                <StackLayout VerticalOptions="Start" InputTransparent="true">
-                    <StackLayout.HeightRequest>
+                 </StackLayout>
+      
+           </StackLayout>
+                
+           <StackLayout VerticalOptions="Start" InputTransparent="true">
+                <StackLayout.HeightRequest>
                       <OnPlatform x:TypeArguments="x:Double">
                         <On Platform="iOS" Value="114" />
                         <On Platform="Android" Value="96" />
                      
                       </OnPlatform>
-                    </StackLayout.HeightRequest>
+                </StackLayout.HeightRequest>
                     
-                    <Image Margin="0,0,0,0"  x:Name="backmenu" Source="background_menu"  Opacity="0.1"  InputTransparent="true">
+                <Image Margin="0,0,0,0"  
+                       x:Name="backmenu" 
+                       Source="background_menu"  
+                       Opacity="0.1"  InputTransparent="true">
 
-                    <Image.HeightRequest>
-                      <OnPlatform x:TypeArguments="x:Double">
-                        <On Platform="iOS" Value="94" />
-                        <On Platform="Android" Value="76" />
-                     
-                      </OnPlatform>
+                     <Image.HeightRequest>
+                          <OnPlatform x:TypeArguments="x:Double">
+                            <On Platform="iOS" Value="94" />
+                            <On Platform="Android" Value="76" />
+                          </OnPlatform>
                             
                     </Image.HeightRequest>
                         
-                    </Image>
+                </Image>
 
-                </StackLayout>
+           </StackLayout>
 
                   
-            </RelativeLayout>
+       </RelativeLayout>
       
-
-                
-            
     </ContentView>
 
-       
-       
-        
-
-    
-
-
-
-
-
-
-
-          <ContentView     Scale="1.2" IsVisible="false"
+    <!--  DIALOGOS -->
+    <ContentView     Scale="1.2" IsVisible="false"
                         HeightRequest="200" 
                         x:Name="turnoff_mtu_background" 
                         
@@ -918,16 +837,15 @@
             RelativeLayout.YConstraint=
               "{ConstraintExpression Type=RelativeToParent,
                                      Property=Height,
-                                     Factor=0.4}"
-
-                          
-            >
+                                     Factor=0.4}" >
                 
            
    
-                <Frame  CornerRadius="6"  HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">
-                 <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" > 
-
+        <Frame  CornerRadius="6"  HasShadow="true" 
+                OutlineColor="White" Padding="1, 1, 1, 1" 
+                Opacity="1" BackgroundColor="White">
+             <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" > 
+                     <!--  dialog_logoff-->
                      <StackLayout  x:Name="dialog_logoff" IsVisible="false" 
                                   Margin="0" Opacity="1">
                  
@@ -959,10 +877,8 @@
                           </StackLayout>
                       
                      </StackLayout>
-                    
-
-
-                    
+                  
+                    <!--  dialog_turnoff_one-->
                     <StackLayout  x:Name="dialog_turnoff_one" IsVisible="false" 
                                   Margin="0" Opacity="1">
                  
@@ -998,7 +914,7 @@
                         
                      </StackLayout>
 
-
+                     <!--  dialog_turnoff_two-->
                     <StackLayout  x:Name="dialog_turnoff_two" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
                         
@@ -1019,8 +935,8 @@
                       
                     </StackLayout>
 
-
-                       <StackLayout  x:Name="dialog_turnoff_three" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                     <!--  dialog_turnoff_three-->
+                     <StackLayout  x:Name="dialog_turnoff_three" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
                         
                         <Label x:Name="dialog_turnoff_text" Margin="12,12,12,12" HorizontalTextAlignment="Center" 
@@ -1047,9 +963,7 @@
                         
                      </StackLayout>
 
-
-
-
+                     <!--  dialog_replacemeter_one-->
                      <StackLayout  x:Name="dialog_replacemeter_one" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
                      
@@ -1092,15 +1006,8 @@
 
                         
                      </StackLayout>
-
-
-
-
-
-
-
-
-
+                     
+                     <!--  dialog_meter_replace_one-->
                      <StackLayout  x:Name="dialog_meter_replace_one" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
             
@@ -1137,14 +1044,8 @@
                       
 
                      </StackLayout>
-
-
-
-
-
-
-
-
+                     
+                     <!--  dialog_AddMTUAddMeter-->
                      <StackLayout  x:Name="dialog_AddMTUAddMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
             
@@ -1182,7 +1083,7 @@
 
                      </StackLayout>
 
-                    
+                    <!--  dialog_AddMTUReplaceMeter-->
                       <StackLayout  x:Name="dialog_AddMTUReplaceMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
             
@@ -1220,10 +1121,8 @@
 
                      </StackLayout>
 
-
-
-
-                      <StackLayout  x:Name="dialog_ReplaceMTUReplaceMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                     <!--  dialog_ReplaceMTUReplaceMeter-->
+                     <StackLayout  x:Name="dialog_ReplaceMTUReplaceMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
             
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
@@ -1258,13 +1157,10 @@
                           </StackLayout>
                       
 
-                     </StackLayout>
+                  </StackLayout>
                   
-
-
-
-
-                     <StackLayout  x:Name="dialog_AddMTU" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
+                  <!--  dialog_AddMTU-->
+                  <StackLayout  x:Name="dialog_AddMTU" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand"
                                   Margin="0" Opacity="1" >
             
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
@@ -1302,24 +1198,14 @@
                      </StackLayout>
 
 
-
-
-
-                    
-
-                     </StackLayout>
-
-
-                    
-                </Frame>
-
-
-            </ContentView>
-
-          <!--  END DIALOGS   -->
-
-
+            </StackLayout>
         
+        </Frame>
+
+
+     </ContentView>
+
+       
     </RelativeLayout>
     
 </util:BasePage>
