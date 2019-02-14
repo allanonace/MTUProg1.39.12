@@ -23,7 +23,7 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewScripting
     {
-        private const bool DEBUG_MODE_ON = true;
+        private const bool DEBUG_MODE_ON = false;
 
         private List<ReadMTUItem> MTUDataListView { get; set; }
         private List<PageItem> MenuList { get; set; }
@@ -49,7 +49,7 @@ namespace aclara_meters.view
         public AclaraViewScripting(string url, string callback, string script_name)
         {
 
-            Console.WriteLine($"-------------------------------       AclaraViewScripting, thread: { Thread.CurrentThread.ManagedThreadId}");
+            PrintToConsole($"-------------------------------       AclaraViewScripting, thread: { Thread.CurrentThread.ManagedThreadId}");
             InitializeComponent();
 
             //CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
@@ -135,8 +135,8 @@ namespace aclara_meters.view
         {
             DeviceList.RefreshCommand = new Command(async () =>
             {
-                Console.WriteLine($"----------------------REFRESH command dispositivos encontrados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
-                Console.WriteLine($"-------------------------------        REFRESH command, thread: { Thread.CurrentThread.ManagedThreadId}");
+                PrintToConsole($"----------------------REFRESH command dispositivos encontrados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
+                PrintToConsole($"-------------------------------        REFRESH command, thread: { Thread.CurrentThread.ManagedThreadId}");
 
                 if (!GetAutoConnectStatus())
                 {
@@ -147,7 +147,7 @@ namespace aclara_meters.view
                     {
                         try
                         {
-                            PrintToConsole("hilo -printer- suspendido, arranca -printer- printer.Resume(); -Interface_background_scan_page");
+
                             printer.Resume();
                         }
                         catch (Exception e11)
@@ -168,10 +168,10 @@ namespace aclara_meters.view
 
                     if (FormsApp.ble_interface.GetBlePeripheralList().Count > 0)
                     {
-                        PrintToConsole("comienza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
+
                         //await ChangeListViewData();
                         ChangeListViewData();
-                        PrintToConsole("finaliza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
+
                         //DeviceList.IsRefreshing = false;
                         if (employees.Count != 0)
                         {
@@ -205,7 +205,7 @@ namespace aclara_meters.view
             conectarDevice = false;
             #region Autoconnect to stored device 
 
-            Console.WriteLine($"-----------------------------------va a conectar con : {peripheral.Advertisement.DeviceName}");
+            PrintToConsole($"-----------------------------------va a conectar con : {peripheral.Advertisement.DeviceName}");
             //Task.Factory.StartNew(NewOpenConnectionWithDevice);
             NewOpenConnectionWithDevice();
             #endregion
@@ -248,152 +248,14 @@ namespace aclara_meters.view
 
         private void Interface_ContentView_DeviceList()
         {
-            Console.WriteLine($"-------------------------------    Interface_ContentView_DeviceList, thread: { Thread.CurrentThread.ManagedThreadId}");
+            PrintToConsole($"-------------------------------    Interface_ContentView_DeviceList, thread: { Thread.CurrentThread.ManagedThreadId}");
 
             printer = new Thread(new ThreadStart(InvokeMethod));
 
             printer.Start();
 
             DeviceList.RefreshCommand.Execute(true);
-
-            // employees = new ObservableCollection<DeviceItem>();
-
-            //DeviceList.RefreshCommand = new Command(async () =>
-            //{
-
-            //    PrintToConsole("está ejecutando el RefreshCommand - Interface_ContentView_DeviceList");
-
-            //    PrintToConsole("comprobar si autoConnect es falso - Interface_ContentView_DeviceLis");
-
-
-            //    if (!GetAutoConnectStatus())
-            //    {
-
-            //        PrintToConsole("ha entrado en la condicion - Interface_ContentView_DeviceList");
-
-            //        PrintToConsole("va a Activar la barra de progreso circular - Interface_ContentView_DeviceList");
-
-            //        Device.BeginInvokeOnMainThread(() =>
-            //        {
-            //            #region New Circular Progress bar Animations	
-
-            //            DeviceList.IsRefreshing = false;
-            //            backdark_bg.IsVisible = true;
-            //            indicator.IsVisible = true;
-            //            ContentView_DeviceList.IsEnabled = false;
-
-            //            #endregion
-
-            //        });
-            //        PrintToConsole("Mostrar barra de progreso - Interface_ContentView_DeviceList");
-
-            //        // Hace un resume si se ha hecho un suspend (al pasar a config o logout)
-            //        // Problema: solo se hace si se refresca DeviceList
-            //        // TO-DO: eliminar el hilo o eliminar el suspend
-
-            //        PrintToConsole("comprobar si el hilo -printer- esta suspendido - Interface_ContentView_DeviceList");
-
-            //        if (printer.ThreadState == System.Threading.ThreadState.Suspended)
-            //     {
-            //            try
-            //         {
-            //                PrintToConsole("hilo -printer- suspendido, arranca -printer- printer.Resume(); -Interface_ContentView_DeviceList");
-
-            //                printer.Resume();
-            //         }
-            //         catch (Exception e11)
-            //         {
-            //             Console.WriteLine(e11.StackTrace);
-            //         }
-            //     }
-
-            //     //DeviceList.IsRefreshing = true;
-
-            //     employees = new ObservableCollection<DeviceItem>();
-
-            //        PrintToConsole("comienza el Escaneo de dispositivos - Interface_ContentView_DeviceList");
-
-            //        await FormsApp.ble_interface.Scan();
-
-            //        PrintToConsole("finaliza el Escaneo de dispositivos - Interface_ContentView_DeviceList");
-
-            //        PrintToConsole("comienza la detección de dispositivos almacenados para autoreconectarse - Interface_ContentView_DeviceList");
-
-            //        await ChangeListViewData();
-
-            //        PrintToConsole("finaliza la detección de dispositivos almacenados para autoreconectarse - Interface_ContentView_DeviceList");
-
-            //        //DeviceList.IsRefreshing = false;
-
-            //        if (employees.Count != 0)
-            //     {
-
-            //         DeviceList.ItemsSource = employees;
-            //     }
-
-            //    }
-
-
-            //});
-
-   //         PrintToConsole("en 3 segundos comienza un bucle cada 3 segundos (BUCLE REFRESH LIST) - Interface_ContentView_DeviceList");
-
-   //         #region Execute the Refresh List method every 3 seconds if no elements are on list
-
-   //         var minutes = TimeSpan.FromSeconds(3);
-
-   //         Device.StartTimer(minutes, () => {
-
-   //             PrintToConsole("Dentro del bucle (BUCLE REFRESH LIST) - Interface_ContentView_DeviceList");
-
-   //             // call your method to check for notifications here
-
-   //             if (employees.Count  < 1)
-   //             {
-   //                 PrintToConsole("se va lanzar un Refresh Command (BUCLE REFRESH LIST) - Interface_ContentView_DeviceList");
-
-   //                 DeviceList.RefreshCommand.Execute(true);
-   //             }
-
-   //             if(employees.Count > 0)
-   //             {
-   //                 DeviceList.ItemsSource = employees;
-   //             }
-   //             PrintToConsole("un ciclo del bucle (BUCLE REFRESH LIST) - Interface_ContentView_DeviceList");
-
-
-   //             if (conectarDevice)
-   //             {
-
-
-   //                 PrintToConsole("autoConnect se pone a false - InvokeMethod");
-   //                 autoConnect = false;
-   //                 conectarDevice = false;
-
-   //                 #region Autoconnect to stored device 
-
-   //                 PrintToConsole("Se va a crear una Tarea al de 0.5 segundos (Task.Factory.StartNew(NewOpenConnectionWithDevice);) - InvokeMethod");
-   //                 Task.Factory.StartNew(NewOpenConnectionWithDevice);
-
-   //                 #endregion
-
-
-   //             }
-
-
-
-
-
-   //             // Returning true means you want to repeat this timer
-   //             return true;
-   //         });
-
-			//#endregion
-
-            //if (employees.Count != 0)
-            //{
-            //    DeviceList.ItemsSource = employees;
-            //}
+              
         }
 
         private void InvokeMethod()
@@ -1337,7 +1199,7 @@ namespace aclara_meters.view
         // on user selection in menu ListView
         private void OnMenuItemSelectedListDevices(object sender, ItemTappedEventArgs e)
         {
-            Console.WriteLine($"-------------------------------       OnMenuItemSelectedListDevices, thread: { Thread.CurrentThread.ManagedThreadId}");
+            PrintToConsole($"-------------------------------       OnMenuItemSelectedListDevices, thread: { Thread.CurrentThread.ManagedThreadId}");
             try
             {
                 printer.Resume();
@@ -1409,8 +1271,8 @@ namespace aclara_meters.view
         public void PrintToConsole(string printConsole)
         {
 
-            //if(DEBUG_MODE_ON)
-            //Console.WriteLine("DEBUG_ACL: " + printConsole);
+            if(DEBUG_MODE_ON)
+                Console.WriteLine("DEBUG_ACL: " + printConsole);
         }
 
     }

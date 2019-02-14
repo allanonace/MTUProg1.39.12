@@ -61,7 +61,7 @@ namespace aclara_meters.view
         public AclaraViewMainMenu(IUserDialogs dialogs)
         {
             InitializeComponent();
-            Console.WriteLine($"-------------------------------   AclaraViewMainMenu     , thread: { Thread.CurrentThread.ManagedThreadId}");
+            PrintToConsole($"-------------------------------   AclaraViewMainMenu     , thread: { Thread.CurrentThread.ManagedThreadId}");
             Settings.IsConnectedBLE = false;
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
             TappedListeners();
@@ -127,8 +127,8 @@ namespace aclara_meters.view
         {
             refresh_command = new Command(async () =>
             {
-                Console.WriteLine($"----------------------REFRESH command dispositivos encontrados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
-                Console.WriteLine($"-------------------------------        REFRESH command, thread: { Thread.CurrentThread.ManagedThreadId}");
+                PrintToConsole($"----------------------REFRESH command dispositivos encontrados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
+                PrintToConsole($"-------------------------------        REFRESH command, thread: { Thread.CurrentThread.ManagedThreadId}");
 
                 if (!GetAutoConnectStatus())
                 {
@@ -139,7 +139,7 @@ namespace aclara_meters.view
                     {
                         try
                         {
-                            PrintToConsole("hilo -printer- suspendido, arranca -printer- printer.Resume(); -Interface_background_scan_page");
+                          
                             printer.Resume();
                         }
                         catch (Exception e11)
@@ -149,17 +149,17 @@ namespace aclara_meters.view
                     }
                     //DeviceList.IsRefreshing = true;
                     employees = new ObservableCollection<DeviceItem>();
-                    PrintToConsole("comienza el Escaneo de dispositivos - Interface_background_scan_page");
+
                     FormsApp.ble_interface.SetTimeOutSeconds(TimeOutSeconds);
                     await FormsApp.ble_interface.Scan();
                     TimeOutSeconds = 3; // los siguientes escaneos son de 5 sec
 
                     if (FormsApp.ble_interface.GetBlePeripheralList().Count>0)
                     {
-                        PrintToConsole("comienza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
+
                         //await ChangeListViewData();
                         ChangeListViewData();
-                        PrintToConsole("finaliza la detección de dispositivos almacenados para autoreconectarse - Interface_background_scan_page");
+
                         //DeviceList.IsRefreshing = false;
                         if (employees.Count != 0)
                         {
@@ -189,7 +189,7 @@ namespace aclara_meters.view
             conectarDevice = false;
             #region Autoconnect to stored device 
 
-            Console.WriteLine($"-----------------------------------va a conectar con : {FormsApp.peripheral.Advertisement.DeviceName}");
+            PrintToConsole($"-----------------------------------va a conectar con : {FormsApp.peripheral.Advertisement.DeviceName}");
             //Task.Factory.StartNew(NewOpenConnectionWithDevice);
             NewOpenConnectionWithDevice();
             #endregion
@@ -237,7 +237,7 @@ namespace aclara_meters.view
        
         private void Interface_background_scan_page()
         {
-            Console.WriteLine($"-------------------------------    Interface_background_scan_page, thread: { Thread.CurrentThread.ManagedThreadId}");
+            PrintToConsole($"-------------------------------    Interface_background_scan_page, thread: { Thread.CurrentThread.ManagedThreadId}");
 
             printer = new Thread(new ThreadStart(InvokeMethod));
 
@@ -558,20 +558,19 @@ namespace aclara_meters.view
 
             while (true)
             {
-                PrintToConsole("dentro del bucle (WHILE TRUE) - InvokeMethod");
-              // Console.WriteLine($"---------------------------------Invoke method while ----dispositivos encontados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
-              //  Console.WriteLine($"---------------------------------Invoke method while ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
-                // PrintToConsole("buscamos el estado de la conexion - InvokeMethod");
 
+                PrintToConsole($"---------------------------------Invoke method while ----dispositivos encontados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
+                PrintToConsole($"---------------------------------Invoke method while ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
+              
                 int status = FormsApp.ble_interface.GetConnectionStatus();
 
                 PrintToConsole("se obtiene el estado de la conexion - InvokeMethod");
 
                 if (status != peripheralConnected)
                 {
-                    PrintToConsole($"ha cambiado el estado: {status}");
-                    Console.WriteLine($"---------------------------------Invoke method ----estado : {status} , Perifericoconnected: {peripheralConnected}");
-                    Console.WriteLine($"---------------------------------Invoke method ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
+
+                    PrintToConsole($"---------------------------------Invoke method ----estado : {status} , Perifericoconnected: {peripheralConnected}");
+                    PrintToConsole($"---------------------------------Invoke method ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
                     
                     //PrintToConsole("¿ES NO_CONNECTED? - InvokeMethod");
 
@@ -769,7 +768,7 @@ namespace aclara_meters.view
 
         private void IsConnectedUIChange(bool v)
         {
-            Console.WriteLine($"---------------------------------IsConnectedUIChange param: {v} ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
+            PrintToConsole($"---------------------------------IsConnectedUIChange param: {v} ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
             if (v)
             {
                 try
@@ -907,9 +906,9 @@ namespace aclara_meters.view
         private  void ChangeListViewData()
         {
             //await Task.Factory.StartNew(() =>
-           // {
-                // wait until scan finish
-                Console.WriteLine($"-------------------------------    ChangeListViewData, thread: {Thread.CurrentThread.ManagedThreadId}");
+            // {
+            // wait until scan finish
+            PrintToConsole($"-------------------------------    ChangeListViewData, thread: {Thread.CurrentThread.ManagedThreadId}");
               //  while (FormsApp.ble_interface.IsScanning())
               //  {
                     try

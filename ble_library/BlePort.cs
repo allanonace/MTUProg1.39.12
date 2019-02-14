@@ -958,11 +958,11 @@ namespace ble_library
         private async Task ScanForBroadcasts()
         {
 
-            Console.WriteLine($"--------------------------------------------------------------Empieza el escaneo: {isScanning.ToString()} thread: {Thread.CurrentThread.ManagedThreadId}");
+           // Console.WriteLine($"--------------------------------------------------------------Empieza el escaneo: {isScanning.ToString()} thread: {Thread.CurrentThread.ManagedThreadId}");
             if (!isScanning)
             {
                 //List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
-                Console.WriteLine($"--------------------------------------------------------------Escaneando: thread: {Thread.CurrentThread.ManagedThreadId}");
+               // Console.WriteLine($"--------------------------------------------------------------Escaneando: thread: {Thread.CurrentThread.ManagedThreadId}");
                 BlePeripheralList.Clear();
                 isScanning = true;
                 await adapter.ScanForBroadcasts(
@@ -998,7 +998,7 @@ namespace ble_library
                 //BlePeripheralList = BlePeripheralListAux;
             }
             isScanning = false;
-            Console.WriteLine($"-----------------------------------------------------Escaneado terminado, encontrados: {BlePeripheralList.Count}, thread: {Thread.CurrentThread.ManagedThreadId}");
+          //  Console.WriteLine($"-----------------------------------------------------Escaneado terminado, encontrados: {BlePeripheralList.Count}, thread: {Thread.CurrentThread.ManagedThreadId}");
             // scanning has been stopped when code reached this point
         }
 
