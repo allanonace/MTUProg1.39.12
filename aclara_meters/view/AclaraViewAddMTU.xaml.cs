@@ -293,7 +293,7 @@ namespace aclara_meters.view
                     // Get detected mtu
                     MTUBasicInfo mtuBasicInfo = MtuForm.mtuBasicInfo;
                     this.detectedMtuType = (int)mtuBasicInfo.Type;
-                    currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
+                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
 
                     // Initialize logic-form
                     this.addMtuForm = new AddMtuForm(currentMtu);
@@ -453,7 +453,7 @@ namespace aclara_meters.view
                     // Get detected mtu
                     MTUBasicInfo mtuBasicInfo_replaceMtu = MtuForm.mtuBasicInfo;
                     this.detectedMtuType = (int)mtuBasicInfo_replaceMtu.Type;
-                    currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
+                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
 
                     // Initialize logic-form
                     this.addMtuForm = new AddMtuForm(currentMtu);
@@ -630,7 +630,7 @@ namespace aclara_meters.view
                     // Get detected mtu
                     MTUBasicInfo mtuBasicInfo_replaceMeter= MtuForm.mtuBasicInfo;
                     this.detectedMtuType = (int)mtuBasicInfo_replaceMeter.Type;
-                    currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
+                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
 
                     // Initialize logic-form
                     this.addMtuForm = new AddMtuForm(currentMtu);
@@ -806,7 +806,7 @@ namespace aclara_meters.view
                     // Get detected mtu
                     MTUBasicInfo mtuBasicInfo_addmtuaddmeter = MtuForm.mtuBasicInfo;
                     this.detectedMtuType = (int)mtuBasicInfo_addmtuaddmeter.Type;
-                    currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
+                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
 
                     // Initialize logic-form
                     this.addMtuForm = new AddMtuForm(currentMtu);
@@ -987,7 +987,7 @@ namespace aclara_meters.view
                     // Get detected mtu
                     MTUBasicInfo mtuBasicInfo_addmtureplacemeter = MtuForm.mtuBasicInfo;
                     this.detectedMtuType = (int)mtuBasicInfo_addmtureplacemeter.Type;
-                    currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
+                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
 
                     // Initialize logic-form
                     this.addMtuForm = new AddMtuForm(currentMtu);
@@ -1171,7 +1171,7 @@ namespace aclara_meters.view
                     // Get detected mtu
                     MTUBasicInfo mtuBasicInfo_replacemtureplacemeter = MtuForm.mtuBasicInfo;
                     this.detectedMtuType = (int)mtuBasicInfo_replacemtureplacemeter.Type;
-                    currentMtu = this.config.mtuTypes.FindByMtuId(this.detectedMtuType);
+                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
 
                     // Initialize logic-form
                     this.addMtuForm = new AddMtuForm(currentMtu);

@@ -193,9 +193,14 @@ namespace MTUComm
                 logParameter(error, new Parameter ( "Date", null, time ) );
             
                 XElement message = new XElement ( "Message", e.Message );
+                
                 if ( Errors.ShowId &&
                      e.Id > -1 )
                     addAtrribute ( message, "ErrorId", e.Id.ToString () );
+                    
+                if ( e.Port > 1 )
+                    addAtrribute ( message, "Port", e.Port.ToString () );
+                
                 error.Add ( message );
                 
                 erNode.Add ( error );

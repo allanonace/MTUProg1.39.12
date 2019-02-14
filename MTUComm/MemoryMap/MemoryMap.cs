@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Xml.Serialization;
 using Xml;
+using MTUComm.Exceptions;
 
 /// <summary>
 /// LOGIC:

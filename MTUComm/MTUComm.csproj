@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <Folder Include="Observer\" />
+    <Folder Include="Exceptions\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove=".Configuration.cs.swp" />

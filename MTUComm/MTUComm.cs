@@ -16,6 +16,8 @@ using System.Reflection;
 using System.Resources;
 using System.Collections;
 
+using MTUComm.Exceptions;
+
 namespace MTUComm
 {
     public class MTUComm
@@ -72,38 +74,13 @@ namespace MTUComm
 
         public class ErrorArgs : EventArgs
         {
-            public int Status { get; private set; }
+            public Exception exception { private set; get; }
 
-            public String Message { get; private set; }
+            public ErrorArgs () { }
 
-            public String LogMessage { get; private set; }
-
-            public ErrorArgs(int status, String message, String logMessage)
+            public ErrorArgs ( Exception e )
             {
-                Status = status;
-                Message = message;
-                LogMessage = logMessage;
-            }
-
-            public ErrorArgs(int status, String message)
-            {
-                Status = status;
-                Message = message;
-                LogMessage = message;
-            }
-
-            public ErrorArgs(String message, String logMessage)
-            {
-                Status = -1;
-                Message = message;
-                LogMessage = logMessage;
-            }
-
-            public ErrorArgs(String message)
-            {
-                Status = -1;
-                Message = message;
-                LogMessage = message;
+                this.exception = e;
             }
         }
 
@@ -233,27 +210,13 @@ namespace MTUComm
         private Lexi.Lexi lexi;
         private Configuration configuration;
         private MTUBasicInfo latest_mtu;
-        private Mtu mtuType;
+        private Mtu mtu;
         private Boolean isPulse = false;
-        private Boolean mtu_changed;
+        private Boolean mtuHasChanged;
 
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Gets a value indicating whether latest connected MTU has changed or MTU critical settings/configuration has changed.
-        /// </summary>
-        /// <value>
-        ///   <see langword="true" /> if ; otherwise, <see langword="false" />.</value>
-        /// <remarks>This flag is used to force Meter/Encoders/MemoryMap redetection </remarks>
-        private Boolean changedMTUSettings
-        {
-            get
-            {
-                return mtu_changed;
-            }
-        }
 
         private AddMtuLog addMtuLog;
         
@@ -274,42 +237,20 @@ namespace MTUComm
 
         public async void LaunchActionThread ( ActionType type, params object[] args )
         {
-            //System.Action actionToLaunch = null;
-
             try
             {
-
                 //Gets MTU casci info ( type and id )
                 // TODO: Descubrir porque al hacer un segundo basic read en la accion de AddMtu,
                 // cuando se pulsa el boton, habiendo sido el primero el que se hace nada mas cargar
                 // el formulario, la lectura casca. Ahora mismo esta condicion es para evitar que en
                 // la accion AddMtu se haga una segunda lectura basica en modo interactivo pero si que
                 // se permite hacer la primera en modo scripting
-                if ( type != ActionType.AddMtu || type == ActionType.AddMtu && args.Length == 1 )
-                    LoadMtuBasicInfo ();
-                //if ( ! LoadMtuBasicInfo () )
-                //    return;
-
-                /*
-                switch ( type )
-                {
-                    // NOTE: TaskFactory uses Action without parameters and elegant
-                    // form to be able to do it, is using a lambda expression
-                    case ActionType.ReadMtu   : actionToLaunch = ( () => Task_ReadMtu () ); break;
-                    case ActionType.AddMtu    : actionToLaunch = ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ] ) ); break;
-                    case ActionType.TurnOffMtu: actionToLaunch = ( () => Task_TurnOffMtu () ); break;
-                    case ActionType.TurnOnMtu: actionToLaunch = ( () => Task_TurnOnMtu () ); break;
-                    case ActionType.ReadData: actionToLaunch = ( () => Task_ReadDataMtu((int)args[0])); break;
-                    case ActionType.BasicRead: actionToLaunch = ( () => Task_BasicRead () ); break;
-                    case ActionType.MtuInstallationConfirmation: actionToLaunch = ( () => Task_InstallConfirmation() ); break;
-                    default: break;
-                }
-                */
+                if ( type != ActionType.AddMtu ||
+                     type == ActionType.AddMtu && args.Length == 1 )
+                    this.LoadMtuAndMetersBasicInfo ();
 
                 switch (type)
                 {
-                    // NOTE: TaskFactory uses Action without parameters and elegant
-                    // form to be able to do it, is using a lambda expression
                     case ActionType.AddMtu:
                     case ActionType.AddMtuAddMeter:
                     case ActionType.AddMtuReplaceMeter:
@@ -330,9 +271,12 @@ namespace MTUComm
                     default: break;
                 }
             }
-            catch (Exception e)
+            // MTUComm.Exceptions.MtuTypeIsNotFoundException
+            catch ( Exception e )
             {
-                OnError(this, TranslateException(e));
+                Errors.LogRemainExceptions ( e );
+            
+                OnError ( this, new ErrorArgs ( e ) );
             }
         }
 
@@ -342,12 +286,6 @@ namespace MTUComm
 
         public void Task_ReadDataMtu ( int NumOfDays )
         {
-            //If MTU has changed or critical settings/configuration force detection rutine
-            if (this.changedMTUSettings)
-            {
-                RecoverMeterByMtuType();
-            }
-
             DateTime start = DateTime.UtcNow.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
             DateTime end = DateTime.UtcNow.Date.AddSeconds(86399);
 
@@ -383,7 +321,7 @@ namespace MTUComm
             ErrorArgs errorArgs = this.InstallConfirmation_Logic ();
 
             if ( errorArgs == null )
-                this.Task_ReadMtu ( true );
+                this.Task_ReadMtu ();
             else
                 this.OnError ( this, errorArgs );
         }
@@ -392,22 +330,18 @@ namespace MTUComm
         {
             Global global = this.configuration.global;
         
-            //If MTU has changed or critical settings/configuration force detection rutine
-            if ( this.changedMTUSettings )
-                this.RecoverMeterByMtuType ();
-
             if ( ! force &&
                  this.latest_mtu.Shipbit )
             {
                 string message = "Current MTU ID: " + this.latest_mtu.Id + " type " + this.latest_mtu.Type + " is OFF";
-                return new ErrorArgs ( 112, message, "Installation Confirmation Cancellation - " + message );
+                return new ErrorArgs (); // 112, message, "Installation Confirmation Cancellation - " + message );
             }
             else
             {
                 try
                 {
-                    MemRegister regICNotSynced = configuration.getFamilyRegister ( mtuType, "InstallConfirmationNotSynced" );
-                    MemRegister regICRequest   = configuration.getFamilyRegister ( mtuType, "InstallConfirmationRequest"   );
+                    MemRegister regICNotSynced = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationNotSynced" );
+                    MemRegister regICRequest   = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationRequest"   );
 
                     Console.WriteLine ( "InstallConfirmation trigger start" );
 
@@ -449,7 +383,7 @@ namespace MTUComm
                     if ( ++time >= global.TimeSyncCountRepeat )
                         return this.InstallConfirmation_Logic ( force, time );
                     else
-                        return TranslateException ( e );
+                        return new ErrorArgs (); // TranslateException ( e );
                 }
             }
 
@@ -471,31 +405,62 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                OnError(this, TranslateException(e));
+                OnError(this, new ErrorArgs ( e ) ); //TranslateException(e));
             }
         }
 
-        private void TurnOffMtu_Logic ( int time = 0 )
+        private void TurnOffMtu_Logic (
+            int time = 0 )
         {
-            byte mask = 1;
-            byte systemFlags = (lexi.Read(22, 1))[0];
-            systemFlags |= mask; // set bit 0
-            lexi.Write(22, new byte[] { systemFlags });
-            byte valueWritten = (lexi.Read(22, 1))[0];
-
-            Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
-            Console.WriteLine("TurnOnMtu end");
+            byte systemFlags  = 1;
+            byte valueWritten = 2;
+            bool ok = false;
+        
+            try
+            {
+                byte mask = 1;
+                systemFlags = (lexi.Read(22, 1))[0];
+                systemFlags |= mask; // set bit 0
+                lexi.Write(22, new byte[] { systemFlags });
+                valueWritten = (lexi.Read(22, 1))[0];
+                
+                Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
+                Console.WriteLine("TurnOnMtu end");
+                
+                ok = true;
+            }
+            // System.IO.IOException = Puck is not well placed or is off
+            catch ( Exception e )
+            {
+                this.TurnOffMtu_Fail ( time, new PuckCantComWithMtuTurnOffException () );
+            }
 
             // Fail to turn off MTU
-            if ( systemFlags != valueWritten )
-            {
-                Thread.Sleep ( 500 );
+            if ( ok &&
+                 systemFlags != valueWritten )
+                this.TurnOffMtu_Fail ( time );
+        }
+        
+        private void TurnOffMtu_Fail (
+            int time,
+            Exception e = null )
+        {
+            Thread.Sleep ( 500 );
 
-                // Retry action ( thre times = first plus two replies )
-                if ( time < 2 )
-                    TurnOffMtu_Logic ( ++time );
-                else
-                    throw new Exception ( "TurnOff was not possible" );
+            // Retry action ( thre times = first plus two replies )
+            if ( time < 2 )
+            {
+                Errors.AddError ( new AttemptNotAchievedTurnOffException () );
+            
+                this.TurnOffMtu_Logic ( ++time );
+            }
+            
+            // Allow to continue rising the error
+            else
+            {
+                if ( e != null )
+                     throw e; // PuckCantComWithMtuTurnOffException
+                else throw new ActionNotAchievedTurnOffException ();
             }
         }
 
@@ -514,7 +479,7 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                OnError(this, TranslateException(e));
+                OnError(this, new ErrorArgs ( e ) ); // TranslateException(e));
             }
         }
 
@@ -535,32 +500,30 @@ namespace MTUComm
             }
         }
 
-        public void Task_ReadMtu ( bool forcedetect = false )
+        public void Task_ReadMtu ()
         {
+            String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtu );
+            int memory_map_size    = configuration.GetmemoryMapSizeByMtuId ( this.mtu );
+
+            byte[] buffer = new byte[1024];
+
             try
             {
-                //throw new System.DivideByZeroException ();
-            
-                //If MTU has changed or critical settings/configuration force detection rutine
-                if (this.changedMTUSettings || forcedetect)
-                    RecoverMeterByMtuType ();
-
-                String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtuType );
-                int memory_map_size    = configuration.GetmemoryMapSizeByMtuId ( this.mtuType );
-
                 lexi.Write(64, new byte[] { 1 });
                 Thread.Sleep(1000);
-
-                byte[] buffer = new byte[1024];
-
+    
                 System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
-
+    
+                // Check if the MTU is still the same
+                if ( this.LoadMtuBasicInfo () )
+                    Errors.LogErrorNow ( new MtuHasChangeBeforeFinishActionException () );
+    
                 if (memory_map_size > 255)
                 {
                     System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
                     System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
                 }
-
+    
                 if (memory_map_size > 320)
                 {
                     //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
@@ -568,111 +531,138 @@ namespace MTUComm
                     //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
                     //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
                 }
-
+    
                 if (memory_map_size > 960)
                     System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
-
-                dynamic map = new MemoryMap.MemoryMap ( buffer, memory_map_type );
-
-                ReadMtuArgs args = new ReadMtuArgs( map, mtuType );
-                OnReadMtu(this, args);
             }
+            // MtuHasChangeBeforeFinishActionException
+            // System.IO.IOException = Puck is not well placed or is off
             catch ( Exception e )
             {
-                Errors.LogErrorNow ( e );
-            
-                OnError(this, TranslateException(e));
+                // Is not own exception
+                if ( ! Errors.IsOwnException ( e ) )
+                    Errors.LogErrorNow ( new PuckCantReadFromMtuException () );
+                
+                // Allow to continue rising the error
+                else throw ( e );
             }
+
+            // Generates the memory map with recovered data
+            dynamic map = new MemoryMap.MemoryMap ( buffer, memory_map_type );
+
+            // Finish!
+            OnReadMtu ( this, new ReadMtuArgs ( map, this.mtu ) );
         }
 
         private Action truquitoAction;
 
         private void Task_AddMtu ( Action addMtuAction )
         {
-            truquitoAction = addMtuAction;
-
-            Mtu     mtu  = configuration.mtuTypes.FindByMtuId ( (int)MtuForm.mtuBasicInfo.Type );
-            dynamic form = new AddMtuForm ( mtu );
-
-            try
+            truquitoAction   = addMtuAction;
+            Parameter[] ps   = addMtuAction.GetParameters ();
+            dynamic     form = new AddMtuForm ( this.mtu );
+            form.usePort2 = false;
+            List<Meter> meters;
+        
+            // Recover parameters from script and translante from Aclara nomenclature to our own
+            foreach ( Parameter parameter in ps )
             {
-                Parameter[] ps = addMtuAction.GetParameters ();
-            
-                form.usePort2 = false;
-            
-                // Recover parameters from script and translante from Aclara nomenclature to our own
-                foreach ( Parameter parameter in ps )
-                {
-                    form.AddParameterTranslatingAclaraXml ( parameter );
+                // Launchs exception 'TranslatingParamsScriptException'
+                form.AddParameterTranslatingAclaraXml ( parameter );
+                
+                if ( parameter.Port == 2 )
+                    form.usePort2 = true;
+            }
+
+            form.usePort2 &= this.mtu.TwoPorts;
+
+            // Auto-detect Meter
+            if ( ! form.ContainsParameter ( AddMtuForm.FIELD.METER_TYPE ) )
+            {
+                // Missing tags
+                if ( ! form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS ) )
+                    Errors.AddError ( new NumberOfDialsTagMissingScript () );
+                
+                if ( ! form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE ) )
+                    Errors.AddError ( new DriveDialSizeTagMissingScript () );
                     
-                    if ( parameter.Port == 2 )
-                        form.usePort2 = true;
-                }
-
-                form.usePort2 &= mtu.TwoPorts;
-
-                // Auto-detect Meter
-                if ( ! form.ContainsParameter ( AddMtuForm.FIELD.METER_TYPE      ) &&
-                       form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS ) &&
-                       form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE ) &&
-                       form.ContainsParameter ( AddMtuForm.FIELD.UNIT_MEASURE    ) )
+                if ( ! form.ContainsParameter ( AddMtuForm.FIELD.UNIT_MEASURE ) )
+                    Errors.AddError ( new UnitOfMeasureTagMissingScript () );
+                
+                // Log errors but not finish yet
+                Errors.LogRegisteredErrors ();
+            
+                if ( form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS ) &&
+                     form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE ) &&
+                     form.ContainsParameter ( AddMtuForm.FIELD.UNIT_MEASURE    ) )
                 {
-                    List<Meter> meters = configuration.meterTypes.FindByDialDescription (
+                    meters = configuration.meterTypes.FindByDialDescription (
                         int.Parse ( form.NumberOfDials.Value ),
                         int.Parse ( form.DriveDialSize.Value ),
                         form.UnitOfMeasure.Value,
-                        mtu.Flow );
-
+                        this.mtu.Flow );
+    
+                    // At least one Meter was found
                     if ( meters.Count > 0 )
                         form.AddParameter ( AddMtuForm.FIELD.METER_TYPE, meters[ 0 ].Id.ToString () );
+                    // No meter was found using the selected parameters
                     else
-                    {
-                        OnError ( this, new ErrorArgs ( 100,
-                            "Meter.xml file does not exist or does not have selected Meter Type",
-                            "Meter.xml file does not exist or does not have selected Meter Type" ) );
-                        return;
-                    }
-                    
-                    if ( mtu.TwoPorts )
-                    {
-                        if ( ! form.ContainsParameter ( AddMtuForm.FIELD.METER_TYPE_2      ) &&
-                               form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS_2 ) &&
-                               form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE_2 ) &&
-                               form.ContainsParameter ( AddMtuForm.FIELD.UNIT_MEASURE_2    ) )
-                        {
-                            meters = configuration.meterTypes.FindByDialDescription (
-                                int.Parse ( form.NumberOfDials_2.Value ),
-                                int.Parse ( form.DriveDialSize_2.Value ),
-                                form.UnitOfMeasure_2.Value,
-                                mtu.Flow );
-        
-                            if ( meters.Count > 0 )
-                                form.AddParameter ( AddMtuForm.FIELD.METER_TYPE_2, meters[ 0 ].Id.ToString () );
-                            else
-                            {
-                                OnError ( this, new ErrorArgs ( 100,
-                                    "Meter.xml file does not exist or does not have selected Meter Type",
-                                    "Meter.xml file does not exist or does not have selected Meter Type" ) );
-                                return;
-                            }
-                        }
-                    }
+                        Errors.LogErrorNow ( new ScriptingAutoDetectMeterException () );
                 }
-
-                // Auto-detect scripting Alarm profile
-                List<Alarm> alarms = configuration.alarms.FindByMtuType ( (int)MtuForm.mtuBasicInfo.Type );
-                if ( alarms.Count > 0 )
+                // Script does not contain some of the needed tags ( NumberOfDials,... )
+                else Errors.LogErrorNow ( new ScriptingAutoDetectMeterException () );
+            }
+            
+            if ( this.mtu.TwoPorts )
+            {
+                if ( ! form.ContainsParameter ( AddMtuForm.FIELD.METER_TYPE_2 ) )
                 {
-                    Alarm alarm = alarms.Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
-                    if ( alarm != null &&
-                         form.mtu.RequiresAlarmProfile )
-                        form.AddParameter ( AddMtuForm.FIELD.ALARM, alarm );
+                    // Missing tags
+                    if ( ! form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS_2 ) )
+                        Errors.AddError ( new NumberOfDialsTagMissingScript (), 2 );
+                    
+                    if ( ! form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE_2 ) )
+                        Errors.AddError ( new DriveDialSizeTagMissingScript (), 2 );
+                        
+                    if ( ! form.ContainsParameter ( AddMtuForm.FIELD.UNIT_MEASURE_2 ) )
+                        Errors.AddError ( new UnitOfMeasureTagMissingScript (), 2 );
+                
+                    // Log errors but not finish yet
+                    Errors.LogRegisteredErrors ();
+                
+                    if ( form.ContainsParameter ( AddMtuForm.FIELD.NUMBER_OF_DIALS_2 ) &&
+                         form.ContainsParameter ( AddMtuForm.FIELD.DRIVE_DIAL_SIZE_2 ) &&
+                         form.ContainsParameter ( AddMtuForm.FIELD.UNIT_MEASURE_2    ) )
+                    {
+                        meters = configuration.meterTypes.FindByDialDescription (
+                            int.Parse ( form.NumberOfDials_2.Value ),
+                            int.Parse ( form.DriveDialSize_2.Value ),
+                            form.UnitOfMeasure_2.Value,
+                            this.mtu.Flow );
+                        
+                        // At least one Meter was found
+                        if ( meters.Count > 0 )
+                            form.AddParameter ( AddMtuForm.FIELD.METER_TYPE_2, meters[ 0 ].Id.ToString () );
+                        // No meter was found using the selected parameters
+                        else
+                            Errors.LogErrorNow ( new ScriptingAutoDetectMeterException (), 2 );
+                    }
+                    // Script does not contain some of the needed tags ( NumberOfDials,... )
+                    else Errors.LogErrorNow ( new ScriptingAutoDetectMeterException (), 2 );
                 }
             }
-            catch ( Exception e )
+
+            // Auto-detect scripting Alarm profile
+            List<Alarm> alarms = configuration.alarms.FindByMtuType ( (int)MtuForm.mtuBasicInfo.Type );
+            if ( alarms.Count > 0 )
             {
-                OnError ( this, new ErrorArgs ( 113, "Error in parsing Trigger File", "Error in parsing Trigger File" ) );
-                return;
+                Alarm alarm = alarms.Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
+                if ( alarm != null &&
+                     form.mtu.RequiresAlarmProfile )
+                    form.AddParameter ( AddMtuForm.FIELD.ALARM, alarm );
+                    
+                // For current MTU does not exist "Scripting" profile inside Alarm.xml
+                else Errors.LogErrorNow ( new ScriptingAlarmForCurrentMtuException () );
             }
 
             this.Task_AddMtu ( form, addMtuAction.user, addMtuAction.type, true );
@@ -687,7 +677,7 @@ namespace MTUComm
             Mtu    mtu    = form.mtu;
             Global global = form.global;
         
-            this.mtuType    = mtu;
+            this.mtu    = mtu;
             form.actionType = actionType;
 
             try
@@ -705,8 +695,8 @@ namespace MTUComm
                 #region Add MTU
 
                 // Prepare memory map
-                String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtuType ); //( int )MtuForm.mtuBasicInfo.Type );
-                int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( this.mtuType ); //( int )MtuForm.mtuBasicInfo.Type );
+                String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtu ); //( int )MtuForm.mtuBasicInfo.Type );
+                int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( this.mtu ); //( int )MtuForm.mtuBasicInfo.Type );
 
                 byte[] memory = new byte[ memory_map_size ];
                 dynamic map = new MemoryMap.MemoryMap ( memory, memory_map_type );
@@ -847,6 +837,8 @@ namespace MTUComm
 
                         }
                     }
+                    // No alarm profile was selected before launch the action
+                    else Errors.LogErrorNow ( new SelectedAlarmForCurrentMtuException () );
                 }
 
                 #endregion
@@ -987,8 +979,8 @@ namespace MTUComm
             catch ( Exception e )
             {
                 if ( isFromScripting )
-                     OnError ( this, new ErrorArgs ( 113, "Error in parsing Trigger File", "Error in parsing Trigger File" ) );
-                else OnError ( this, this.TranslateException ( e ) );
+                     OnError ( this, new ErrorArgs () ); // 113, "Error in parsing Trigger File", "Error in parsing Trigger File" ) );
+                else OnError ( this, new ErrorArgs ( e ) ); // this.TranslateException ( e ) );
             }
         }
 
@@ -1120,75 +1112,55 @@ namespace MTUComm
         }
 
         #region AuxiliaryFunctions
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <remarks>Internaly saves internal MTU type and ID used for communication logic</remarks>
-        private void LoadMtuBasicInfo ()
-        {
-            byte[] firstRead  = lexi.Read ( BASIC_READ_1_ADDRESS, BASIC_READ_1_DATA );
-            byte[] secondRead = lexi.Read ( BASIC_READ_2_ADDRESS, BASIC_READ_2_DATA );
-            List<byte> finalRead = new List<byte> ();
-            finalRead.AddRange ( firstRead  );
-            finalRead.AddRange ( secondRead );
         
-            MTUBasicInfo mtu_info = new MTUBasicInfo ( finalRead.ToArray () );
-            mtu_changed = ! ( ( mtu_info.Id == latest_mtu.Id ) && ( mtu_info.Type == latest_mtu.Type ) );
-            latest_mtu = mtu_info;
-
-            MtuForm.SetBasicInfo ( latest_mtu );
-        }
-
-        private void RecoverMeterByMtuType ()
+        private void LoadMtuAndMetersBasicInfo ()
         {
-            this.mtuType = configuration.GetMtuTypeById ( ( int )this.latest_mtu.Type );
-
-            for ( int i = 0; i < mtuType.Ports.Count; i++ )
-                latest_mtu.setPortType ( i, mtuType.Ports[ i ].Type );
-
-            if ( latest_mtu.isEncoder )
+            if ( this.LoadMtuBasicInfo () )
             {
+                MtuForm.SetBasicInfo ( latest_mtu );
+                
+                // Launchs exception 'MtuTypeIsNotFoundException'
+                this.mtu = configuration.GetMtuTypeById ( ( int )this.latest_mtu.Type );
+                
+                if ( this.mtuHasChanged )
+                {
+                    for ( int i = 0; i < this.mtu.Ports.Count; i++ )
+                        latest_mtu.setPortType ( i, this.mtu.Ports[ i ].Type );
+                    
+                    if ( latest_mtu.isEncoder ) { }
+                }
             }
         }
 
-        private ErrorArgs TranslateException ( Exception e )
+        private bool LoadMtuBasicInfo (
+            bool isAfterWriting = false )
         {
-            int    status     = -1;
-            string message    = TranslateExceptionMessage(e, CultureInfo.GetCultureInfo("en-US"));
-            string logmessage = TranslateExceptionMessage(e, CultureInfo.GetCultureInfo("en-US"));
-
-            switch ( e.GetType ().Name )
-            {
-                case ERROR_LOADDEMANDCONF:
-                case ERROR_LOADMETER:
-                case ERROR_LOADMTU:
-                case ERROR_LOADALARM:
-                case ERROR_NOTFOUNDMTU:
-                case ERROR_LOADINTERFACE:
-                case ERROR_LOADGLOBAL:
-                case ERROR_NOTFOUNDMETER:
-                    break;
-            }
-
-            return new ErrorArgs ( status, message, logmessage );
-        }
-
-        public static string TranslateExceptionMessage(Exception E, CultureInfo targetCulture)
-        {
+            List<byte> finalRead = new List<byte> ();
+        
             try
             {
-                Assembly a = E.GetType().Assembly;
-                ResourceManager rm = new ResourceManager(a.GetName().Name, a);
-                ResourceSet rsOriginal = rm.GetResourceSet(Thread.CurrentThread.CurrentUICulture, true, true);
-                ResourceSet rsTranslated = rm.GetResourceSet(targetCulture, true, true);
-                foreach (DictionaryEntry item in rsOriginal)
-                    if (item.Value.ToString() == E.Message.ToString())
-                        return rsTranslated.GetString(item.Key.ToString(), false); // success
-
+                byte[] firstRead  = lexi.Read ( BASIC_READ_1_ADDRESS, BASIC_READ_1_DATA );
+                byte[] secondRead = lexi.Read ( BASIC_READ_2_ADDRESS, BASIC_READ_2_DATA );
+                finalRead.AddRange ( firstRead  );
+                finalRead.AddRange ( secondRead );
             }
-            catch { }
-            return E.Message; // failed (error or cause it's not intelligent enough to locale '{0}'-patterns
+            // System.IO.IOException = Puck is not well placed or is off
+            catch ( Exception e )
+            {
+                if ( ! isAfterWriting )
+                     Errors.LogErrorNow ( new PuckCantReadFromMtuException () );
+                else Errors.LogErrorNow ( new PuckCantReadFromMtuAfterWritingException () );
+            }
+
+            MTUBasicInfo mtu_info = new MTUBasicInfo ( finalRead.ToArray () );
+            this.mtuHasChanged = ( latest_mtu.Id   == 0 ||
+                                   latest_mtu.Type == 0 ||
+                                   mtu_info.Id     != latest_mtu.Id ||
+                                   mtu_info.Type   != latest_mtu.Type );
+            
+            latest_mtu = mtu_info;
+            
+            return this.mtuHasChanged;
         }
 
         public MTUBasicInfo GetBasicInfo ()

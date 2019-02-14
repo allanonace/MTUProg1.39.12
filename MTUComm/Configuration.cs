@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml.Serialization;
 using Xml;
+using MTUComm.Exceptions;
 
 namespace MTUComm
 {
@@ -82,9 +83,14 @@ namespace MTUComm
 
         }
 
-        public Mtu GetMtuTypeById(int mtuId)
+        public Mtu GetMtuTypeById ( int mtuId )
         {
-            return mtuTypes.FindByMtuId(mtuId);
+            Mtu mtu = mtuTypes.FindByMtuId ( mtuId );
+            
+            if ( mtu == null )
+                Errors.LogErrorNow ( new MtuTypeIsNotFoundException () );
+            
+            return mtu;
         }
 
         public Meter[] GetMeterType()

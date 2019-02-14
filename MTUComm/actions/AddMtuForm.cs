@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Xml;
+using MTUComm.Exceptions;
 
 using ParameterType = MTUComm.Parameter.ParameterType;
 
@@ -11,6 +12,8 @@ namespace MTUComm.actions
     {
         public enum FIELD
         {
+            NOTHING,
+        
             MTU_ID_OLD,
             
             ACCOUNT_NUMBER,
@@ -470,13 +473,13 @@ namespace MTUComm.actions
         public void AddParameterTranslatingAclaraXml ( Parameter parameter )
         {
             ParameterType typeAclara;
-            FIELD typeOwn;
+            FIELD typeOwn = FIELD.NOTHING;
 
             string nameTypeAclara = parameter.Type.ToString ();
 
             // Translate aclara tag/id to us
             if ( ! Enum.TryParse<ParameterType> ( nameTypeAclara, out typeAclara ) )
-                return; //throw new Exception ();
+                Errors.LogErrorNow ( new TranslatingParamsScriptException () );
             else
             {
                 if ( IdsAclara.ContainsKey ( typeAclara ) )

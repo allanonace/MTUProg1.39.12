@@ -18,12 +18,7 @@ namespace Xml
 
         public Mtu FindByMtuId(int mtuId)
         {
-            Mtu mtu = Mtus.Find(x => x.Id == mtuId);
-            if (mtu == null)
-            {
-                throw new MtuNotFoundException("Mtu not found");
-            }
-            return mtu;
+            return Mtus.Find ( x => x.Id == mtuId );
         }
     }
 }

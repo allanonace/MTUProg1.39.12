@@ -1,4 +1,5 @@
 ﻿using System;
+using MTUComm.Exceptions;
 
 using RegType       = MTUComm.MemoryMap.MemoryMap.RegType;
 using REGISTER_TYPE = MTUComm.MemoryMap.AMemoryMap.REGISTER_TYPE;

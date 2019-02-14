@@ -155,6 +155,8 @@ namespace MTUComm
 
         public class ActionErrorArgs : EventArgs
         {
+            public ActionErrorArgs () { }
+
             public int Status { get; private set; }
 
             public String Message { get; private set; }
@@ -480,7 +482,9 @@ namespace MTUComm
 
         private void Comm_OnError(object sender, MTUComm.ErrorArgs e)
         {
-            OnError ( this, new ActionErrorArgs ( e.Status, e.Message ) );
+            // ReadMTU: OnError event not do anything with exception info
+            // 
+            OnError ( this, new ActionErrorArgs () ); // e.Status, e.Message ) );
         }
 
         private void Comm_OnReadMtuData(object sender, MTUComm.ReadMtuDataArgs e)
@@ -880,12 +884,10 @@ namespace MTUComm
             return result;
         }
 
-        private ActionResult getBasciInfoResult()
+        private ActionResult getBasciInfoResult ()
         {
-            ActionResult result = new ActionResult();
-
-            MTUBasicInfo basic = comm.GetBasicInfo ();
-
+            ActionResult result = new ActionResult ();
+            MTUBasicInfo basic  = comm.GetBasicInfo ();
             
             result.AddParameter(new Parameter("Date", "Date/Time", GetProperty("Date")));
             result.AddParameter(new Parameter("User", "User", GetProperty("User")));

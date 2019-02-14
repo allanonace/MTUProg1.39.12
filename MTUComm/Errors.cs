@@ -3,11 +3,49 @@ using Xml;
 using System;
 using System.Linq;
 using System.Dynamic;
+using MTUComm.Exceptions;
 
 namespace MTUComm
 {
     public sealed class Errors
     {
+        #region Constants
+
+        private Dictionary<Exception,int> ex2id = 
+        new Dictionary<Exception,int> ()
+        {
+            // Mtu can't be recovered using MTU type
+            { new MtuTypeIsNotFoundException (), 123 },
+            // MTU is not the same as at the beginning of the process
+            { new MtuHasChangeBeforeFinishActionException (), 180 },
+            // Puck can't read from MTU
+            { new PuckCantReadFromMtuException (), 165 },
+            // Puck can't read from MTU after has completed writing process
+            { new PuckCantReadFromMtuAfterWritingException (), 166 },
+            // Puck can't communicate with MTU performing the turn off
+            { new PuckCantComWithMtuTurnOffException (), 163 },
+            // Turn off MTU process has failed trying to activated the Ship Bit
+            { new AttemptNotAchievedTurnOffException (), 162 },
+            // MTU can not be turned off after having tried it several times
+            { new ActionNotAchievedTurnOffException (), 160 },
+            // Alarm profile selected for current MTU is not defined in the Alarm.xml file
+            { new ScriptingAlarmForCurrentMtuException (), 200 },
+            // The  alarm profile "Scripting" for current MTU is not defined in the Alarm.xml file
+            { new SelectedAlarmForCurrentMtuException (), 201 },
+            // The Meter.xml does not contain the Meter type specified with tags NumberOfDials, DriveDialSize and UnitOfMeasure
+            { new ScriptingAutoDetectMeterException (), 100 },
+            // The script does not contain the tag NumberOfDials needed to select the MTU
+            { new NumberOfDialsTagMissingScript (), 101 },
+            // The script does not contain the tag DriveDialSize needed to select the MTU
+            { new DriveDialSizeTagMissingScript (), 102 },
+            // The script does not contain the tag UnitOfMeasure needed to select the MTU
+            { new UnitOfMeasureTagMissingScript (), 103 },
+            // Error translatin parameters from script/trigger file
+            { new TranslatingParamsScriptException (), 113 }
+        };
+
+        #endregion
+
         #region Attributes
 
         private static Errors instance;
@@ -17,6 +55,8 @@ namespace MTUComm
 
         private Dictionary<int,Error> errors;
         private List<Error> errorsToLog;
+        
+        private Exception lastRegistered;
 
         #endregion
 
@@ -88,13 +128,19 @@ namespace MTUComm
         /// </summary>
         /// <returns><c>true</c>, if error was added, <c>false</c> otherwise.</returns>
         /// <param name="id">Error identifier</param>
-        private bool _AddError (
-            int id )
+        private bool AddErrorById (
+            int id,
+            Exception e,
+            int portIndex )
         {
             // Error ID exists and is not registered already
             if ( this[ id ] != null )
             {
-                this.errorsToLog.Add ( this[ id ] );
+                Error error = ( Error )this[ id ].Clone ();
+                error.Port  = portIndex;
+                error.Exception = e;
+            
+                this.errorsToLog.Add ( error );
                 return true;
             }
             return false;
@@ -104,10 +150,30 @@ namespace MTUComm
         /// Register .NET errors trying to found some error that match
         /// </summary>
         /// <param name="e">.NET exception</param>
-        private void _AddError (
-            Exception e )
+        private void AddErrorByException (
+            Exception e,
+            int portIndex )
         {
-            this.errorsToLog.Add ( this.TryToTranslate ( e ) );
+            Type typeExp = e.GetType ();
+            
+            // Own exception
+            if ( this.ex2id.Any ( item => item.Key.GetType () == typeExp ) )
+            {
+                int id = this.ex2id.Single ( item => item.Key.GetType () == typeExp ).Value;
+                
+                this.AddErrorById ( id, e, portIndex );
+            }
+            // .NET exception
+            else
+            {
+                Error error = ( Error )this.TryToTranslateDotNet ( e ).Clone ();
+                error.Port  = portIndex;
+                error.Exception = e;
+            
+                this.errorsToLog.Add ( error );
+            }
+                
+            this.lastRegistered = e;
         }
 
         /// <summary>
@@ -127,7 +193,7 @@ namespace MTUComm
             return errors;
         }
         
-        private Error TryToTranslate (
+        private Error TryToTranslateDotNet (
             Exception e )
         {
             dynamic dynException = new ExpandoObject ();
@@ -158,23 +224,17 @@ namespace MTUComm
             return e.HResult > -1 &&
                    this.errors.Any ( item => item.Value.DotNetId == e.HResult );
         }
-
+        
         /// <summary>
         /// Write an error into the log right now, without have to invoke AddError method
         /// Usually used outside actions logic, for example trying to detect and connect with a puck
         /// </summary>
-        /// <param name="id">Error identifier</param>
+        /// <param name="e">Exception launched</param>
         private void _LogErrorNow (
-            int id )
+            Exception e,
+            int portIndex )
         {
-            if ( this._AddError ( id ) )
-                this.logger.LogError ();
-        }
-        
-        private void _LogErrorNow (
-            Exception e )
-        {
-            this._AddError ( e );
+            this.AddErrorByException ( e, portIndex );
             this.logger.LogError ();
         }
         
@@ -182,10 +242,20 @@ namespace MTUComm
         /// Write errors registered using AddError method
         /// Usually used when performing an action
         /// </summary>
-        private void _LogRegisteredErrors ()
+        private void _LogRegisteredErrors (
+            bool forceException,
+            Exception e )
         {
             if ( this.errorsToLog.Count > 0 )
+            {
+                //Error lastError = ( Error )this.errorsToLog[ this.errorsToLog.Count - 1 ].Clone ();
+                Exception lastException = ( e != null ) ? e : this.errorsToLog[ this.errorsToLog.Count - 1 ].Exception;
+                
                 this.logger.LogError ();
+
+                if ( forceException )
+                    throw lastException;
+            }
         }
 
         /// <summary>
@@ -197,6 +267,21 @@ namespace MTUComm
             this.errorsToLog.Clear ();
         }
 
+        private bool IsLastExceptionUsed (
+            Exception e )
+        {
+            return ( this.lastRegistered != null &&
+                     this.lastRegistered == e );
+        }
+
+        private static void LaunchException (
+            Exception e,
+            bool forceException )
+        {
+            if ( forceException )
+                throw e;
+        }
+
         #endregion
 
         #region Direct Singleton
@@ -206,34 +291,51 @@ namespace MTUComm
         {
             return Errors.GetInstance ()._GetErrorsToLog ( clearList );
         }
-
-        public static void AddError (
-            int id )
-        {
-            Errors.GetInstance ()._AddError ( id );
-        }
         
         public static void AddError (
-            Exception e )
+            Exception e,
+            int portIndex = 1 )
         {
-            Errors.GetInstance ()._AddError ( e );
-        }
-
-        public static void LogErrorNow (
-            int id )
-        {
-            Errors.GetInstance ()._LogErrorNow ( id );
+            Errors.GetInstance ().AddErrorByException ( e, portIndex );
         }
         
         public static void LogErrorNow (
-            Exception e )
+            Exception e,
+            int portIndex = 1,
+            bool forceException = true )
         {
-            Errors.GetInstance ()._LogErrorNow ( e );
+            Errors.GetInstance ()._LogErrorNow ( e, portIndex );
+            Errors.LaunchException ( e, forceException );
         }
         
-        public static void LogRegisteredErrors ()
+        public static void LogRegisteredErrors (
+            bool forceException = false,
+            Exception e = null )
         {
-            Errors.GetInstance ()._LogRegisteredErrors ();
+            Errors.GetInstance ()._LogRegisteredErrors ( forceException, e );
+        }
+
+        /// <summary>
+        /// Both options will log all registered exceptions that remain, but in
+        /// the first case, previously the last exception launched will be added
+        /// </summary>
+        /// <param name="e">Exception</param>
+        public static void LogRemainExceptions (
+            Exception e )
+        {
+            // Last exception was not added yet
+            if ( ! Errors.GetInstance ().IsLastExceptionUsed ( e ) )
+                Errors.LogErrorNow ( e );
+            
+            // Last exception was already added
+            else
+                Errors.LogRegisteredErrors ();
+        }
+        
+        public static bool IsOwnException (
+            Exception e )
+        {
+            return ( e.GetType () == typeof( OwnExceptionsBase ) );
         }
 
         #endregion
