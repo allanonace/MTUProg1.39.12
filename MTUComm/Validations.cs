@@ -75,7 +75,7 @@ namespace MTUComm
                 }
             }
 
-            return false;
+            return ok1;
         }
 
         public static bool NumericBytesLimit<T> ( dynamic value, int numBytes )

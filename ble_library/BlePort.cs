@@ -46,7 +46,7 @@ namespace ble_library
 
         public virtual void OnError(Exception error)
         {
- 
+
         }
 
         public void OnNext(ConnectionState value)
@@ -92,12 +92,12 @@ namespace ble_library
 
         public void OnCompleted()
         {
-          
+
         }
 
         public void OnError(Exception error)
         {
-          
+
         }
 
         public void OnNext(EnabledDisabledState value)
@@ -135,6 +135,8 @@ namespace ble_library
         public const int DYNAMIC_KEY_ERROR = 2;
         public const int NO_DYNAMIC_KEY_ERROR = 3;
 
+        private int timeOutSeconds = 5;
+
         private int isConnected;
         private int connectionError;
         private List<IBlePeripheral> BlePeripheralList;
@@ -148,13 +150,15 @@ namespace ble_library
         private byte[] writeSavedBuffer;
         private int writeSavedOffset;
         private int writeSavedCount;
-        
+
         private ISettings saved_settings;
         private byte[] static_pass = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x2e };
         private byte[] say_hi = { 0x48, 0x69, 0x2c, 0x49, 0x27, 0x6d, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00, 0x00, 0x00 };
 
 
         private byte[] batteryLevel;
+
+        public int TimeOutSeconds { get => timeOutSeconds; set => timeOutSeconds = value; }
 
         /// <summary>
         /// Initizalize Bluetooth LE Serial Port
@@ -237,11 +241,13 @@ namespace ble_library
         /// <summary>
         /// If bluetooth antenna is enabled on device, starts scanning devices. If not, turns it on, and proceeds to scan.
         /// </summary>
-        public async Task StartScan(){
+        public async Task StartScan()
+        {
             await BluetoothEnable();
             if (adapter.CurrentState.IsEnabledOrEnabling())
             {
-                Task.Factory.StartNew(ScanForBroadcasts);
+                //Task.Factory.StartNew(ScanForBroadcasts);
+                await ScanForBroadcasts();
             }
             else
             {
@@ -279,14 +285,14 @@ namespace ble_library
         {
             // TODO: comprobar que existe servicio?
             try
-            {         
+            {
                 // Will also stop listening when gattServer
                 // is disconnected, so if that is acceptable,
                 // you don't need to store this disposable.
                 Listen_Characteristic_Notification_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                    new Guid("00000003-0000-1000-8000-00805f9b34fb"),
-                   UpdateBuffer                 
+                   UpdateBuffer
                 );
             }
             catch (GattException ex)
@@ -314,7 +320,7 @@ namespace ble_library
         /// <summary>
         /// Stops listening to the characteristic notifications of a peripheral
         /// </summary>
-        private  void Stop_Listen_Characteristic_Notification()
+        private void Stop_Listen_Characteristic_Notification()
         {
             if (!adapter.CurrentState.IsDisabledOrDisabling())
             {
@@ -346,7 +352,7 @@ namespace ble_library
                     Console.WriteLine(e3.StackTrace);
                 }
             }
-       
+
         }
 
 
@@ -368,19 +374,20 @@ namespace ble_library
             try
             {
                 byte[] dataToCipher = new byte[16];
-               
-                for (int i = 0; i < count; i++){
+
+                for (int i = 0; i < count; i++)
+                {
                     dataToCipher[i] = buffer[i + offset];
                 }
-         
+
                 byte frameId = 0x02;
-                byte dataCount = (byte) count;
+                byte dataCount = (byte)count;
 
                 ret = new byte[] { frameId, cipheredDataSentCounter, dataCount }.ToArray().
                                         Concat(AES_Encrypt(dataToCipher, dynamicPass)).
                                         Concat(new byte[] { 0x00 }).ToArray();
 
-                cipheredDataSentCounter++; 
+                cipheredDataSentCounter++;
                 if (cipheredDataSentCounter == 0)
                 {
                     cipheredDataSentCounter = 1;
@@ -396,18 +403,18 @@ namespace ble_library
             {
                 Console.WriteLine(ex.ToString());
             }
-           
+
         }
 
         /// <summary>
         /// Updates buffer with the notification data received 
         /// </summary>
-        private void UpdateBuffer(byte[] bytes )
+        private void UpdateBuffer(byte[] bytes)
         {
             byte[] tempArray = new byte[bytes[2]];
 
             Array.Copy(AES_Decrypt(bytes.Skip(3).Take(16).ToArray(), dynamicPass), 0, tempArray, 0, bytes[2]);
-           
+
             for (int i = 0; i < tempArray.Length; i++)
             {
                 buffer_ble_data.Enqueue(tempArray[i]);
@@ -421,61 +428,62 @@ namespace ble_library
         /// <param name="ble_device">The Bluetooth LE peripheral to connect.</param>
         public async Task ConnectoToDevice(IBlePeripheral ble_device, bool isBounded)
         {
-         
-                try
-                {
-                    isConnected = CONNECTING;
-                    connectionError = NO_ERROR;
-                    var connection = await adapter.ConnectToDevice(
-                        // The IBlePeripheral to connect to
-                        ble_device,
-                        // TimeSpan or CancellationToken to stop the
-                        // connection attempt.
-                        // If you omit this argument, it will use
-                        // BluetoothLowEnergyUtils.DefaultConnectionTimeout
-                        TimeSpan.FromSeconds(5),
-                        // Optional IProgress<ConnectionProgress>
-                        progress => {
-        //                    Console.WriteLine(progress);
+
+            try
+            {
+                isConnected = CONNECTING;
+                connectionError = NO_ERROR;
+                var connection = await adapter.ConnectToDevice(
+                    // The IBlePeripheral to connect to
+                    ble_device,
+                    // TimeSpan or CancellationToken to stop the
+                    // connection attempt.
+                    // If you omit this argument, it will use
+                    // BluetoothLowEnergyUtils.DefaultConnectionTimeout
+                    TimeSpan.FromSeconds(TimeOutSeconds),
+                    // Optional IProgress<ConnectionProgress>
+                    progress =>
+                    {
+                            //                    Console.WriteLine(progress);
                             //dialogs.Toast("Progreso: " + progress.ToString());
                         }
-                    );
+                );
 
-                    if (connection.IsSuccessful())
-                    {
-                     
-
-                        gattServer_connection = connection.GattServer;
-        //                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
-                                                                        // the server implements IObservable<ConnectionState> so you can subscribe to its state
-                        gattServer_connection.Subscribe(new ObserverReporter(this));
-
-                        adapter.CurrentState.Subscribe(new BluetoothStatusReporter(this));
-
-
-                        ble_peripheral = ble_device;
-
-                        await AESConnectionVerifyAsync(ble_peripheral, isBounded);
-                    }
-                    else
-                    {
-                     
-                       
-
-                        // Do something to inform user or otherwise handle unsuccessful connection.
-        //                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
-                        // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
-                       
-                    }
-                }
-                catch (GattException ex)
+                if (connection.IsSuccessful())
                 {
-                    Console.WriteLine(ex.ToString());
+
+
+                    gattServer_connection = connection.GattServer;
+                    //                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
+                    // the server implements IObservable<ConnectionState> so you can subscribe to its state
+                    gattServer_connection.Subscribe(new ObserverReporter(this));
+
+                    adapter.CurrentState.Subscribe(new BluetoothStatusReporter(this));
+
+
+                    ble_peripheral = ble_device;
+
+                    await AESConnectionVerifyAsync(ble_peripheral, isBounded);
                 }
-                catch (Exception e)
+                else
                 {
-                    Console.WriteLine(e);
+
+
+
+                    // Do something to inform user or otherwise handle unsuccessful connection.
+                    //                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
+                    // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
+
                 }
+            }
+            catch (GattException ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
 
         }
@@ -506,9 +514,9 @@ namespace ble_library
                     }
                     connectionError = DYNAMIC_KEY_ERROR;
                     DisconnectDevice();
-                   // this.adapter.DisableAdapter();
+                    // this.adapter.DisableAdapter();
 
-                  //  this.adapter.EnableAdapter();
+                    //  this.adapter.EnableAdapter();
                 }
 
                 if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0x11 }))
@@ -519,11 +527,11 @@ namespace ble_library
                     var data = ble_peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
                     saved_settings.AddOrUpdateValue("session_peripheral_DeviceId", System.Convert.ToBase64String(data));
 
-                    if(dynamicPass!=null)
+                    if (dynamicPass != null)
                     {
                         saved_settings.AddOrUpdateValue("session_dynamicpass", System.Convert.ToBase64String(dynamicPass));
                     }
-                                       
+
                     Listen_Characteristic_Notification();
                     try
                     {
@@ -545,7 +553,7 @@ namespace ble_library
         /// </summary>
         private void UpdateACKBuffer(byte[] bytes)
         {
-            if(bytes.Skip(3).Take(1).ToArray().SequenceEqual(new byte[] { 0x01 }))
+            if (bytes.Skip(3).Take(1).ToArray().SequenceEqual(new byte[] { 0x01 }))
             {
                 cipheredDataSentCounter = bytes.Skip(1).Take(1).ToArray()[0];
                 cipheredDataSentCounter++;
@@ -572,7 +580,7 @@ namespace ble_library
                 // Will also stop listening when gattServer
                 // is disconnected, so if that is acceptable,
                 // you don't need to store this disposable.
-                               
+
 
                 //try
                 //{
@@ -602,7 +610,7 @@ namespace ble_library
                 //IEnumerable<Guid> ListAllServices = gattServer_connection.ListAllServices();
                 //gattServer_connection.ListServiceCharacteristics();
                 // TO-DO: comprobar que tiene servicios y caracteristicas de un PUK? consultar Maria.            
-                
+
 
                 /*
                 ArrayList ListAllServices = new ArrayList();
@@ -636,26 +644,29 @@ namespace ble_library
 
                 do
                 {
-                  //  Task.Delay(500).Wait();
-                    try{
+                    //  Task.Delay(500).Wait();
+                    try
+                    {
                         hayServicio = await gattServer_connection.ServiceExists(new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"));
-                    }catch (Exception test){
+                    }
+                    catch (Exception test)
+                    {
                         Console.WriteLine(test.StackTrace); reintentos = 1;
                     }
 
                     reintentos--;
                 }
-                while (!hayServicio && (reintentos>0));
+                while (!hayServicio && (reintentos > 0));
 
 
                 Thread.Sleep(400);
 
-                                
+
                 Listen_aes_conection_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                    new Guid("00000041-0000-1000-8000-00805f9b34fb"),
                    UpdateAESBuffer
-//                   , CosasError
+                //                   , CosasError
                 );
 
                 byte[] PassH_crypt = new byte[] { };
@@ -681,7 +692,7 @@ namespace ble_library
                 );
 
                 bool isOnState = true;
-                for (int i = 0; i < PassH_crypt.Length;i++)
+                for (int i = 0; i < PassH_crypt.Length; i++)
                 {
                     if (PassH_crypt[i] != 0x00)
                     {
@@ -700,7 +711,7 @@ namespace ble_library
                     isBounded = false;
                 }
 
-                if(isBounded)
+                if (isBounded)
                 {
                     // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
                     dynamicPass = System.Convert.FromBase64String(saved_settings.GetValueOrDefault("session_dynamicpass", string.Empty));
@@ -708,14 +719,15 @@ namespace ble_library
 
                     Array.Copy(ticks, 0, say_hi, 12, 4);
                     hi_msg = AES_Encrypt(say_hi, dynamicPass);
-                  
+
                     await gattServer_connection.WriteCharacteristicValue(
                       new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                       new Guid("00000041-0000-1000-8000-00805f9b34fb"),
                       hi_msg
                     );
 
-                }else
+                }
+                else
                 {
                     Thread.Sleep(400);
                     if (isOnState)
@@ -761,7 +773,7 @@ namespace ble_library
 
                     Array.Copy(ticks, 0, say_hi, 12, 4);
                     hi_msg = AES_Encrypt(say_hi, dynamicPass);
-               
+
                     await gattServer_connection.WriteCharacteristicValue(
                       new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                       new Guid("00000041-0000-1000-8000-00805f9b34fb"),
@@ -775,7 +787,7 @@ namespace ble_library
                     new Guid("0000000c-0000-1000-8000-00805f9b34fb"),
                     UpdateBatteryLevel
                  );
-          
+
                 batteryLevel = await gattServer_connection.ReadCharacteristicValue(
                     new Guid("1d632100-dc5a-41ab-bdbb-7cff9901210d"),
                     new Guid("0000000c-0000-1000-8000-00805f9b34fb")
@@ -797,7 +809,7 @@ namespace ble_library
         /// </summary>
         private void UpdateBatteryLevel(byte[] bytes)
         {
-            
+
             batteryLevel = bytes;
         }
 
@@ -818,7 +830,7 @@ namespace ble_library
                     AES.KeySize = 256;
                     AES.BlockSize = 128;
                     AES.Padding = PaddingMode.None;
-                    AES.Key = passwordBytes; 
+                    AES.Key = passwordBytes;
                     AES.Mode = CipherMode.ECB;
 
                     using (var cs = new CryptoStream(ms, AES.CreateDecryptor(), CryptoStreamMode.Write))
@@ -846,7 +858,7 @@ namespace ble_library
                     AES.KeySize = 256;
                     AES.BlockSize = 128;
                     AES.Padding = PaddingMode.None;
-                    AES.Key = passwordBytes; 
+                    AES.Key = passwordBytes;
                     AES.Mode = CipherMode.ECB;
 
                     using (var cs = new CryptoStream(ms, AES.CreateEncryptor(), CryptoStreamMode.Write))
@@ -868,10 +880,10 @@ namespace ble_library
         {
             if (isConnected == CONNECTED)
             {
-                
-                if(!adapter.CurrentState.IsDisabledOrDisabling())
+
+                if (!adapter.CurrentState.IsDisabledOrDisabling())
                 {
-                  
+
                     Stop_Listen_Characteristic_Notification();
                     try
                     {
@@ -904,7 +916,7 @@ namespace ble_library
 
                 }
 
-               
+
 
 
 
@@ -927,11 +939,11 @@ namespace ble_library
                 isConnected = NO_CONNECTED;
                 try
                 {
-                    if(gattServer_connection.State == ConnectionState.Connected)
+                    if (gattServer_connection.State == ConnectionState.Connected)
                     {
                         await gattServer_connection.Disconnect();
                     }
-                   
+
                 }
                 catch (Exception e2)
                 {
@@ -945,8 +957,12 @@ namespace ble_library
         /// </summary>
         private async Task ScanForBroadcasts()
         {
-            if(!isScanning){
+
+           // Console.WriteLine($"--------------------------------------------------------------Empieza el escaneo: {isScanning.ToString()} thread: {Thread.CurrentThread.ManagedThreadId}");
+            if (!isScanning)
+            {
                 //List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
+               // Console.WriteLine($"--------------------------------------------------------------Escaneando: thread: {Thread.CurrentThread.ManagedThreadId}");
                 BlePeripheralList.Clear();
                 isScanning = true;
                 await adapter.ScanForBroadcasts(
@@ -960,30 +976,34 @@ namespace ble_library
                         // read the advertising data...
                         var adv = peripheral.Advertisement;
 
-                        if(adv.DeviceName!=null){
+                        if (adv.DeviceName != null)
+                        {
                             if (adv.DeviceName.Equals("Aclara"))
                             {
-                                if(BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
+                                if (BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
                                 {
                                     BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
-                                }else{
+                                }
+                                else
+                                {
                                     BlePeripheralList.Add(peripheral);
                                 }
-                            } 
+                            }
                         }
                     },
                     // TimeSpan or CancellationToken to stop the scan
                     // If you omit this argument, it will use BluetoothLowEnergyUtils.DefaultScanTimeout
-                    TimeSpan.FromSeconds(5)                    
-                );  
+                    TimeSpan.FromSeconds(timeOutSeconds)
+                );
                 //BlePeripheralList = BlePeripheralListAux;
             }
             isScanning = false;
+          //  Console.WriteLine($"-----------------------------------------------------Escaneado terminado, encontrados: {BlePeripheralList.Count}, thread: {Thread.CurrentThread.ManagedThreadId}");
             // scanning has been stopped when code reached this point
         }
 
 
-        public byte [] GetBatteryLevel()
+        public byte[] GetBatteryLevel()
         {
             //Task.Factory.StartNew(GetBatteryLevelAsync);
             return batteryLevel;
