@@ -779,20 +779,21 @@ namespace aclara_meters.view
         private void TapToHome_Tabletmode(object sender, EventArgs e)
         {
 
-            int contador = Navigation.NavigationStack.Count;
+            Navigation.PopToRootAsync(false);
+            //int contador = Navigation.NavigationStack.Count;
 
-            while (contador > 2)
-            {
-                try
-                {
-                    Navigation.PopAsync(false);
-                }
-                catch (Exception v)
-                {
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
+            //while (contador > 2)
+            //{
+            //    try
+            //    {
+            //        Navigation.PopAsync(false);
+            //    }
+            //    catch (Exception v)
+            //    {
+            //        Console.WriteLine(v.StackTrace);
+            //    }
+            //    contador--;
+            //}
 
 
         }
@@ -1000,9 +1001,11 @@ namespace aclara_meters.view
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
             FormsApp.ble_interface.Close();
+            FormsApp.peripheral = null;
             background_scan_page.IsEnabled = true;
 
-            Navigation.PopToRootAsync(false);
+            Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved, String.Empty));
+            //Navigation.PopToRootAsync(false);
 
 
         }

@@ -1161,6 +1161,7 @@ namespace aclara_meters.view
         {
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
+            FormsApp.peripheral = null;
             int contador = Navigation.NavigationStack.Count;
             while (contador > 0)
             {

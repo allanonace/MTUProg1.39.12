@@ -102,7 +102,10 @@ namespace aclara_meters
             this.dialogs = dialogs;
             this.appVersion = appVersion;
 
-            Task.Factory.StartNew(ThreadProcedure);
+            if (Device.RuntimePlatform == Device.Android)
+                CallToInitApp(adapter, listaDatos, dialogs, appVersion);
+            else
+                Task.Factory.StartNew(ThreadProcedure);
 
         }
 
@@ -329,10 +332,10 @@ namespace aclara_meters
 
             #region Scripting Mode Detection 
 
-            Task.Run(async () =>
-            {
-                await Task.Delay(1100); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
-                {
+            //Task.Run(async () =>
+            //{
+                //await Task.Delay(1100); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
+                //{
 
                     #region Min Date Check
 
@@ -353,7 +356,7 @@ namespace aclara_meters
 
 
                     }
-                    catch (Exception e41)
+                    catch (Exception)
                     {
 
                     }
@@ -366,8 +369,8 @@ namespace aclara_meters
                         {
                             MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
                         });
-                });
-            });
+            //    });
+            //});
 
             #endregion
         }

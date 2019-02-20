@@ -105,9 +105,10 @@ namespace aclara_meters
 
                     foreach (FileInfo file in files)
                     {
-                        Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
+
                         if (file.Name.Contains("Log.xml") || file.Name.Contains("Result"))
                         {
+                            Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
                             bool enc = false;
                             foreach (string fileFtp in saved_array_files)
                             {
@@ -154,33 +155,35 @@ namespace aclara_meters
                             #region Create copy of deleted files to another dir
 
                             string url_to_copy = Path.Combine(path, "log_copies");
-                            if(!Directory.Exists(url_to_copy))
+                            if (!Directory.Exists(url_to_copy))
                                 Directory.CreateDirectory(url_to_copy);
 
                             File.Copy(Path.Combine(path, file.Name), Path.Combine(url_to_copy, file.Name), true);
 
-                  
+
                             #endregion
 
                             File.Delete(file.FullName);
                         }
-                    }
-                    try
-                    {
-                        using (TextWriter tw = new StreamWriter(Path.Combine(path, "SavedLogsList.txt")))
+
+                        try
                         {
-                            foreach (string fileFtp in saved_array_files)
+                            using (TextWriter tw = new StreamWriter(Path.Combine(path, "SavedLogsList.txt")))
                             {
-                                tw.WriteLine(fileFtp);
+                                foreach (string fileFtp in saved_array_files)
+                                {
+                                    tw.WriteLine(fileFtp);
+                                }
+                                foreach (FileInfo s in local_array_files)
+                                    tw.WriteLine(s.Name);
                             }
-                            foreach (FileInfo s in local_array_files)
-                                tw.WriteLine(s.Name);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.StackTrace);
                         }
                     }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.StackTrace);
-                    }
+
 
                     sftp.Disconnect();
 

@@ -36,6 +36,7 @@
     <Compile Remove="view\MyPage.xaml.cs" />
     <Compile Remove="view\testingui.xaml.cs" />
     <Compile Remove="Xml_Files\XmlResources.Designer.cs" />
+    <Compile Remove="EntryLengthValidatorBehavior.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="view\BleGattServicePage.xaml.cs">
@@ -65,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="XML\" />
+    <Folder Include="Behaviors\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="XML\XmlElementList.xml" />

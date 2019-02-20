@@ -135,11 +135,12 @@ namespace aclara_meters.view
                    
                     Esperando();
                    
-                    if (printer.ThreadState == System.Threading.ThreadState.Suspended)
+                    if (printer.ThreadState == ThreadState.Suspended)
                     {
                         try
                         {
-                          
+                            Console.WriteLine("---------------  printer resume");
+                            //printer.Interrupt();
                             printer.Resume();
                         }
                         catch (Exception e11)
@@ -735,11 +736,12 @@ namespace aclara_meters.view
 
                             try
                             {
+                                Console.WriteLine("---------------  printer suspend");
                                 printer.Suspend();
                             }
                             catch (Exception e5)
                             {
-                                Console.WriteLine(e5.StackTrace);
+                                Console.WriteLine($"------ {e5.StackTrace}, {e5.Message}");
                             }
 
 
@@ -876,6 +878,7 @@ namespace aclara_meters.view
                 navigationDrawerList.IsEnabled = true;
                 background_scan_page.IsVisible = true;
                 refresh_command.Execute(true);
+                Navigation.PopToRootAsync();
 
 
             }
@@ -1187,15 +1190,18 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            printer.Suspend();
+            printer.Abort(); //.Suspend();
 
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
+            FormsApp.peripheral = null;
             FormsApp.ble_interface.Close();
 
             background_scan_page.IsEnabled = true;
             background_scan_page_detail.IsEnabled = true;
-            Navigation.PopAsync();
+            
+            Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
+            //Navigation.PopAsync();
 
         }
 

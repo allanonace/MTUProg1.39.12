@@ -365,12 +365,12 @@ namespace aclara_meters.view
                     var item = (PageItem)e.Item;
                     ActionType page = item.TargetType;
                     ((ListView)sender).SelectedItem = null;
-
-                    if (this.actionType != page)
-                    {
+                 // MRA   la pagina de settings tiene como actiontype ReadMtu
+                 //   if (this.actionType != page)
+                 //   {
                         this.actionType = page;
                         NavigationController(page);
-                    }
+                 //   }
                    
                    
 
@@ -1307,21 +1307,21 @@ namespace aclara_meters.view
 
         private void TapToHome_Tabletmode(object sender, EventArgs e)
         {
+            Navigation.PopToRootAsync(false);
+            //int contador = Navigation.NavigationStack.Count;
 
-            int contador = Navigation.NavigationStack.Count;
-
-            while (contador > 2)
-            {
-                try
-                {
-                    Navigation.PopAsync(false);
-                }
-                catch (Exception v)
-                {
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
+            //while (contador > 2)
+            //{
+            //    try
+            //    {
+            //        Navigation.PopAsync(false);
+            //    }
+            //    catch (Exception v)
+            //    {
+            //        Console.WriteLine(v.StackTrace);
+            //    }
+            //    contador--;
+            //}
 
 
         }
@@ -1430,17 +1430,12 @@ namespace aclara_meters.view
 
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
+            FormsApp.peripheral = null;
             FormsApp.ble_interface.Close();
             background_scan_page.IsEnabled = true;
 
-         
-            Navigation.PopToRootAsync(false);
-
-            
-
-
-
-
+            Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
+            //Navigation.PopToRootAsync(false);
 
         }
 
