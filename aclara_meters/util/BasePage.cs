@@ -5,21 +5,27 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using Xamarin.Forms;
+using MTUComm;
 
 namespace aclara_meters.util
 {
    public class BasePage : ContentPage
    {
-      protected override void OnAppearing()
-      {
-         base.OnAppearing();
-         (BindingContext as IBaseViewModel)?.OnAppearing();
-      }
+        public BasePage ()
+        {
+            PageLinker.CurrentPage = Application.Current.MainPage;
+        }
 
-      protected override void OnDisappearing()
-      {
-         base.OnDisappearing();
-         (BindingContext as IBaseViewModel)?.OnDisappearing();
-      }
-   }
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+            (BindingContext as IBaseViewModel)?.OnAppearing();
+        }
+        
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            (BindingContext as IBaseViewModel)?.OnDisappearing();
+        }
+    }
 }

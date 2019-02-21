@@ -11,6 +11,8 @@ namespace MTUComm
     {    
         #region Constants
 
+        private const string ERROR_TITLE = "Controlled Exception";
+
         private Dictionary<Exception,int> ex2id = 
         new Dictionary<Exception,int> ()
         {
@@ -188,7 +190,7 @@ namespace MTUComm
         /// Register .NET errors trying to found some error that match
         /// </summary>
         /// <param name="e">.NET exception</param>
-        private void AddErrorByException (
+        private Error AddErrorByException (
             Exception e,
             int portIndex )
         {
@@ -211,7 +213,7 @@ namespace MTUComm
                 this.errorsToLog.Add ( error );
             }
                 
-            this.lastError = this.errorsToLog.Last ();
+            return ( this.lastError = this.errorsToLog.Last () );
         }
 
         /// <summary>
@@ -272,7 +274,10 @@ namespace MTUComm
             Exception e,
             int portIndex )
         {
-            this.AddErrorByException ( e, portIndex );
+            Error error = this.AddErrorByException ( e, portIndex );
+            
+            PageLinker.ShowAlert ( ERROR_TITLE, error );
+            
             this.logger.LogError ();
         }
         
@@ -288,6 +293,9 @@ namespace MTUComm
             {
                 //Error lastError = ( Error )this.errorsToLog[ this.errorsToLog.Count - 1 ].Clone ();
                 Exception lastException = ( e != null ) ? e : this.errorsToLog[ this.errorsToLog.Count - 1 ].Exception;
+                
+                if ( forceException )
+                    PageLinker.ShowAlert ( ERROR_TITLE, this.lastError );
                 
                 this.logger.LogError ();
 
@@ -367,13 +375,13 @@ namespace MTUComm
             
             // Last exception was already added
             else
-                Errors.LogRegisteredErrors ();
+                Errors.LogRegisteredErrors (); // ! ( e is OwnExceptionsBase ) );
         }
         
         public static bool IsOwnException (
             Exception e )
         {
-            return ( e.GetType () == typeof( OwnExceptionsBase ) );
+            return ( e.GetType ().IsSubclassOf ( typeof( OwnExceptionsBase ) ) );
         }
 
         #endregion

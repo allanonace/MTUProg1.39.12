@@ -185,10 +185,7 @@ namespace aclara_meters
                 {
                     await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
                 }
-                else
-                {
-                    this.MainPage = new NavigationPage(new ErrorInitView("The permisison for bluetooth is necesary"));
-                }
+                
 
                 if (statusStorage != PermissionStatus.Granted)
                 {

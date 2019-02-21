@@ -351,6 +351,7 @@
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_AccountNumber_DualError" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
 
                                     <!-- Work Order / Field Order -->
@@ -389,6 +390,7 @@
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_WorkOrder_DualError" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
 
                                     <!-- Old MTU ID -->
@@ -446,6 +448,7 @@
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_OldMeterSerialNumber_DualError" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
 
                                     <!-- Old Meter Working -->       
@@ -466,7 +469,7 @@
                                     <StackLayout x:Name="div_OldMeterReading" IsVisible="false">
                                         <Label Text="Old Reading" x:Name="lb_OldMeterReading" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17"/>
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
-                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
+                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" x:Name="divSub_OldMeterReading">
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
@@ -475,13 +478,14 @@
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_OldMeterReading_MeterType" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
                                     
                                     <!-- Old Meter Reading / Initial Reading - Dual -->
                                     <StackLayout x:Name="div_OldMeterReading_Dual" IsVisible="false">
                                         <Label Text="Old Reading" x:Name="lb_OldMeterReading_Dual" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17"/>
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
-                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
+                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" x:Name="divSub_OldMeterReading_Dual">
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
@@ -494,6 +498,8 @@
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_OldMeterReading_DualError" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_OldMeterReading_DualMeterType" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
 
                                     <!-- Replace Meter|Register -->
@@ -546,6 +552,7 @@
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterSerialNumber_DualError" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
 
                                     <!-- Meter Type -->
@@ -559,7 +566,7 @@
                                     <!-- ( New ) Meter Reading / Initial Reading -->
                                     <Label Text="Meter Reading" x:Name="lb_MeterReading" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17"/>
                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
-                                        <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
+                                        <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" x:Name="div_MeterReading" >
                                             <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                 <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                     HeightRequest="40"   x:Name="tbx_MeterReading" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
@@ -572,12 +579,13 @@
                                             </StackLayout>
                                         </Frame> 
                                     </Frame>
+                                    <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_MeterType" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     
                                     <!-- ( New ) Meter Reading / Initial Reading - Dual -->
                                     <StackLayout x:Name="div_MeterReading_Dual" IsVisible="false">
                                         <Label Text="Meter Reading" x:Name="lb_MeterReading_Dual" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17"/>
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
-                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
+                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_Dual">
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterReading_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
@@ -590,6 +598,8 @@
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualError" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualMeterType" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
 
                                     <!--  Read Inverval -->
@@ -744,6 +754,7 @@
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_AccountNumber_DualError_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
                                
                                     <!-- Work Order / Field Order -->
@@ -782,6 +793,7 @@
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_WorkOrder_DualError_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
                                     
                                     <!-- Old Meter Serial Number -->     
@@ -820,6 +832,7 @@
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_OldMeterSerialNumber_DualError_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
                                     
                                     <!-- Old Meter Working -->
@@ -840,7 +853,7 @@
                                     <StackLayout x:Name="div_OldMeterReading_2" IsVisible="false">
                                         <Label Text="Old Meter #" x:Name="lb_OldMeterReading_2" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17"/>
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
-                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
+                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" x:Name="divSub_OldMeterReading_2">
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
@@ -853,13 +866,14 @@
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_OldMeterReading_MeterType_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
                                     
                                     <!-- Old Meter Reading / Initial Reading - Dual -->     
                                     <StackLayout x:Name="div_OldMeterReading_Dual_2" IsVisible="false">
                                         <Label Text="Old Meter #" x:Name="lb_OldMeterReading_Dual_2" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17"/>
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
-                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
+                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" x:Name="divSub_OldMeterReading_Dual_2">
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
@@ -872,6 +886,8 @@
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_OldMeterReading_DualError_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_OldMeterReading_DualMeterType_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
                                     
                                     <!-- Replace Meter|Register -->
@@ -924,6 +940,7 @@
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterSerialNumber_DualError_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
                                             
                                     <!-- Meter Type -->
@@ -937,7 +954,7 @@
                                     <!-- ( New ) Meter Reading / Initial Reading -->
                                     <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_2" VerticalOptions="Center" Font="Bold,17"/>
                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
-                                        <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
+                                        <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_2">
                                             <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                 <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                     HeightRequest="40" x:Name="tbx_MeterReading_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
@@ -950,12 +967,13 @@
                                             </StackLayout>
                                         </Frame>
                                     </Frame>
+                                    <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_MeterType_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     
                                     <!-- ( New ) Meter Reading / Initial Reading - Dual -->
                                     <StackLayout x:Name="div_MeterReading_Dual_2">
                                         <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_Dual_2" VerticalOptions="Center" Font="Bold,17"/>
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
-                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
+                                            <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_Dual_2">
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40" x:Name="tbx_MeterReading_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
@@ -968,6 +986,8 @@
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualError_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualMeterType_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                     </StackLayout>
 
                                     <StackLayout Margin="0,4,0,148"/>
@@ -2011,171 +2031,8 @@
                      </StackLayout>
 
 
-
-
-                     
-                     <!--    -->
-
-
-                       <StackLayout  x:Name="dialog_servicePortId" IsVisible="false" HorizontalOptions="CenterAndExpand" 
-                                     VerticalOptions="CenterAndExpand"
-                                  Margin="0" Opacity="1">
-                     
-                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
-                                FontSize="18" Text="Please, re-enter the Service Port ID">
-                            
-                        </Label>
-
-
-                         <Frame CornerRadius="6" HeightRequest="30" Margin="12,4,12,0" BackgroundColor="#7a868c" >
-                              <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
-                                        <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                            
-                                             <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                    HeightRequest="40"   x:Name="serviceCheckEntry" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                    Placeholder="" PlaceholderColor="#7a868c" 
-                                                    FontSize="17" HorizontalTextAlignment="Start"/>
-                                        </StackLayout>
-                                 </Frame> 
-                            
-                        </Frame>
-
-                         <Label   HorizontalTextAlignment="Start" TextColor="Red" x:Name="errorServicePort" IsVisible="false"
-                                FontSize="12" Margin="12,0,0,0" Text="Entered fields are not equal">
-                            
-                        </Label>
-                        
-                 
-                        <StackLayout Margin="8,8,0,0" Orientation="Horizontal" >
-                                
-
-                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
-                                        TextColor="#6aa2b8"
-                                         FontSize="20"  Text="Ok">
-
-                                           <Label.GestureRecognizers>
-                                            <TapGestureRecognizer x:Name="servicePortId_ok"/>
-                                        </Label.GestureRecognizers>
-
-                                
-                                  </Label>
-
-
-
-                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
-                                       TextColor="#6aa2b8"
-                                        FontSize="20" Text="Cancel"> 
-                                
-                                           <Label.GestureRecognizers>
-                                            <TapGestureRecognizer x:Name="servicePortId_cancel"/>
-                                        </Label.GestureRecognizers>
-                                
-
-                                </Label>
-                                
-                          </StackLayout>
-                      
-
-
-                        
-                     </StackLayout>
-
-
-
-
-
-
-
-                    
-                    <!--    -->
-
-
-
-
-                    <!--    -->
-
-
-                       <StackLayout  x:Name="dialog_fieldOrder" IsVisible="false" HorizontalOptions="CenterAndExpand" 
-                                     VerticalOptions="CenterAndExpand"
-                                  Margin="0" Opacity="1">
-                     
-                        <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" 
-                                FontSize="18" Text="Please, re-enter the Field order">
-                            
-                        </Label>
-
-
-                         <Frame CornerRadius="6" HeightRequest="30" Margin="12,4,12,0" BackgroundColor="#7a868c" >
-                              <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
-                                        <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                            
-                                             <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
-                                                    HeightRequest="40"   x:Name="fieldOrderCheckEntry" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                    Placeholder="" PlaceholderColor="#7a868c" 
-                                                    FontSize="17" HorizontalTextAlignment="Start"/>
-                                        </StackLayout>
-                                 </Frame> 
-                            
-                        </Frame>
-
-                         <Label   HorizontalTextAlignment="Start" TextColor="Red" x:Name="errorFieldOrder" IsVisible="false"
-                                FontSize="12" Margin="12,0,0,0" Text="Entered fields are not equal">
-                            
-                        </Label>
-                        
-                 
-                        <StackLayout Margin="8,8,0,0" Orientation="Horizontal" >
-                                
-
-                                  <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" 
-                                        TextColor="#6aa2b8"
-                                         FontSize="20"  Text="Ok">
-
-                                           <Label.GestureRecognizers>
-                                            <TapGestureRecognizer x:Name="fieldOrder_ok"/>
-                                        </Label.GestureRecognizers>
-
-                                
-                                  </Label>
-
-
-
-                                 <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center"
-                                       TextColor="#6aa2b8"
-                                        FontSize="20" Text="Cancel"> 
-                                
-                                           <Label.GestureRecognizers>
-                                            <TapGestureRecognizer x:Name="fieldOrder_cancel"/>
-                                        </Label.GestureRecognizers>
-                                
-
-                                </Label>
-                                
-                          </StackLayout>
-                      
-
-
-                        
-                     </StackLayout>
-
-
-
-
-
-
-
-                    
-                    <!--    -->
-                    
-
-                    
-
-                     </StackLayout>
-
-
-                    
+                 </StackLayout>
                 </Frame>
-
 
             </ContentView>
 

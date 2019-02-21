@@ -383,8 +383,8 @@ namespace MTUComm
                 }
                 catch ( Exception e )
                 {
-                    if ( e is OwnExceptionsBase )
-                         Errors.AddError ( e );
+                    if ( Errors.IsOwnException ( e ) )
+                        Errors.AddError ( e );
                     // Finish
                     else
                     {
@@ -441,8 +441,8 @@ namespace MTUComm
             // System.IO.IOException = Puck is not well placed or is off
             catch ( Exception e )
             {
-                if ( e is OwnExceptionsBase )
-                     Errors.AddError ( e );
+                if ( Errors.IsOwnException ( e ) )
+                    Errors.AddError ( e );
                 // Finish
                 else
                 {

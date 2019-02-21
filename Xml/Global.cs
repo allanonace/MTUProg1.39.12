@@ -117,6 +117,7 @@ namespace Xml
             this.AccountLabel               = "Account #"; // The account number label
             this.WorkOrderLabel             = "Work Order";
             this.NewMeterLabel              = "New Meter #";
+            this.SerialNumLabel             = "Meter #";
 
             #region Menu options
             

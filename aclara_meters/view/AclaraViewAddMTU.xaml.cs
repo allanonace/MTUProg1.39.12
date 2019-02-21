@@ -169,6 +169,13 @@ namespace aclara_meters.view
         private const int   MAX_METERREADING  = 12;
 
         private const string DUAL_PREFIX    = "Repeat ";
+        private const string OLD_PREFIX     = "Old ";
+        private const string TEXT_READING   = "Meter Reading";
+        
+        private const string DUAL_ERROR      = "* Both values ​​must be the same";
+        private const string FIRST_METERTYPE = "* You should select Meter Type before enter readings";
+        private const float  OPACITY_ENABLE  = 1;
+        private const float  OPACITY_DISABLE = 0.8f;
 
         #endregion
 
@@ -318,7 +325,6 @@ namespace aclara_meters.view
             TappedListeners ();
             InitializeLowerbarLabel();
             InitializeAddMtuForm ();
-            RegisterEventHandlers();
 
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
@@ -407,7 +413,7 @@ namespace aclara_meters.view
                     {
                         cbx_SnapReads.Source = "checkbox_off";
                         sld_SnapReads.IsEnabled = false;
-                        divSub_SnapReads.Opacity = 0.8;
+                        divSub_SnapReads.Opacity = OPACITY_DISABLE;
                         snapReadsStatus = false;
                     }
                 }),
@@ -439,7 +445,10 @@ namespace aclara_meters.view
                     {
                         if ( this.port2IsActivated )
                         {
-
+                            this.pck_MeterType_Vendors_2         .SelectedIndex = this.pck_MeterType_Vendors           .SelectedIndex;
+                            this.pck_MeterType_Models_2          .SelectedIndex = this.pck_MeterType_Models            .SelectedIndex;
+                            this.pck_MeterType_Names_2           .SelectedIndex = this.pck_MeterType_Names             .SelectedIndex;
+                        
                             this.tbx_AccountNumber_2             .Text          = this.tbx_AccountNumber               .Text;
                             this.tbx_AccountNumber_Dual_2        .Text          = this.tbx_AccountNumber_Dual          .Text;
 
@@ -448,26 +457,16 @@ namespace aclara_meters.view
 
                             this.tbx_OldMeterSerialNumber_2      .Text          = this.tbx_OldMeterSerialNumber        .Text;
                             this.tbx_OldMeterSerialNumber_Dual_2 .Text          = this.tbx_OldMeterSerialNumber_Dual   .Text;
-                             
-                            this.pck_OldMeterWorking_2           .SelectedIndex = this.pck_OldMeterWorking             .SelectedIndex;
-
-                            this.tbx_OldMeterReading_2           .Text          = this.tbx_OldMeterReading             .Text;
-                            this.tbx_OldMeterReading_Dual_2      .Text          = this.tbx_OldMeterReading_Dual        .Text;
-
-                            this.pck_ReplaceMeterRegister_2      .SelectedIndex = this.pck_ReplaceMeterRegister        .SelectedIndex;
-
                             this.tbx_MeterSerialNumber_2         .Text          = this.tbx_MeterSerialNumber           .Text;
                             this.tbx_MeterSerialNumber_Dual_2    .Text          = this.tbx_MeterSerialNumber_Dual      .Text;
 
-                            this.pck_MeterType_Vendors_2         .SelectedIndex = this.pck_MeterType_Vendors           .SelectedIndex;
-
-                            this.pck_MeterType_Models_2          .SelectedIndex = this.pck_MeterType_Models            .SelectedIndex;
-
-                            this.pck_MeterType_Names_2           .SelectedIndex = this.pck_MeterType_Names             .SelectedIndex;
-
+                            this.tbx_OldMeterReading_2           .Text          = this.tbx_OldMeterReading             .Text;
+                            this.tbx_OldMeterReading_Dual_2      .Text          = this.tbx_OldMeterReading_Dual        .Text;
                             this.tbx_MeterReading_2              .Text          = this.tbx_MeterReading                .Text;
                             this.tbx_MeterReading_Dual_2         .Text          = this.tbx_MeterReading_Dual           .Text;
-
+                            
+                            this.pck_OldMeterWorking_2           .SelectedIndex = this.pck_OldMeterWorking             .SelectedIndex;
+                            this.pck_ReplaceMeterRegister_2      .SelectedIndex = this.pck_ReplaceMeterRegister        .SelectedIndex;
                         }
                     }),
                 });
@@ -640,6 +639,46 @@ namespace aclara_meters.view
             // Port 2
             this.div_ReplaceMeterRegister_2.IsVisible = hasTwoPorts && useReplaceMeterRegister;
             this.div_ReplaceMeterRegister_2.IsEnabled = hasTwoPorts && useReplaceMeterRegister;
+
+            // All readings will be disabled before meter type was selected
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                this.tbx_MeterReading          .IsEnabled = false;
+                this.tbx_MeterReading_2        .IsEnabled = false;
+                this.tbx_MeterReading_Dual     .IsEnabled = false;
+                this.tbx_MeterReading_Dual_2   .IsEnabled = false;
+                this.tbx_OldMeterReading       .IsEnabled = false;
+                this.tbx_OldMeterReading_2     .IsEnabled = false;
+                this.tbx_OldMeterReading_Dual  .IsEnabled = false;
+                this.tbx_OldMeterReading_Dual_2.IsEnabled = false;
+                
+                this.div_MeterReading             .Opacity = OPACITY_DISABLE;
+                this.divSub_MeterReading_Dual     .Opacity = OPACITY_DISABLE;
+                this.divSub_OldMeterReading       .Opacity = OPACITY_DISABLE;
+                this.divSub_OldMeterReading_Dual  .Opacity = OPACITY_DISABLE;
+                this.divSub_MeterReading_2        .Opacity = OPACITY_DISABLE;
+                this.divSub_MeterReading_Dual_2   .Opacity = OPACITY_DISABLE;
+                this.divSub_OldMeterReading_2     .Opacity = OPACITY_DISABLE;
+                this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_DISABLE;
+                
+                this.lb_MeterReading_MeterType         .Text = FIRST_METERTYPE;
+                this.lb_MeterReading_DualMeterType     .Text = FIRST_METERTYPE;
+                this.lb_OldMeterReading_MeterType      .Text = FIRST_METERTYPE;
+                this.lb_OldMeterReading_DualMeterType  .Text = FIRST_METERTYPE;
+                this.lb_MeterReading_MeterType_2       .Text = FIRST_METERTYPE;
+                this.lb_MeterReading_DualMeterType_2   .Text = FIRST_METERTYPE;
+                this.lb_OldMeterReading_MeterType_2    .Text = FIRST_METERTYPE;
+                this.lb_OldMeterReading_DualMeterType_2.Text = FIRST_METERTYPE;
+                
+                this.lb_MeterReading_MeterType         .IsVisible = true;
+                this.lb_MeterReading_DualMeterType     .IsVisible = true;
+                this.lb_OldMeterReading_MeterType      .IsVisible = true;
+                this.lb_OldMeterReading_DualMeterType  .IsVisible = true;
+                this.lb_MeterReading_MeterType_2       .IsVisible = true;
+                this.lb_MeterReading_DualMeterType_2   .IsVisible = true;
+                this.lb_OldMeterReading_MeterType_2    .IsVisible = true;
+                this.lb_OldMeterReading_DualMeterType_2.IsVisible = true;
+            });
 
             #endregion
 
@@ -833,23 +872,55 @@ namespace aclara_meters.view
             #region Labels
 
             // Account Number
-            // Port 1
-            this.lb_AccountNumber     .Text = global.AccountLabel;
-            this.lb_AccountNumber_Dual.Text = DUAL_PREFIX + global.AccountLabel;
-            
-            // Port 2
+            this.lb_AccountNumber       .Text = global.AccountLabel;
+            this.lb_AccountNumber_Dual  .Text = DUAL_PREFIX + global.AccountLabel;
             this.lb_AccountNumber_2     .Text = global.AccountLabel;
             this.lb_AccountNumber_Dual_2.Text = DUAL_PREFIX + global.AccountLabel;
             
             // Work Order
-            this.lb_WorkOrder.Text = global.WorkOrderLabel;
-            this.lb_WorkOrder_2   .Text = global.WorkOrderLabel;
+            this.lb_WorkOrder       .Text = global.WorkOrderLabel;
+            this.lb_WorkOrder_Dual  .Text = DUAL_PREFIX + global.WorkOrderLabel;
+            this.lb_WorkOrder_2     .Text = global.WorkOrderLabel;
+            this.lb_WorkOrder_Dual_2.Text = DUAL_PREFIX + global.WorkOrderLabel;
+            
+            // Meter Reading
+            this.lb_MeterReading       .Text = TEXT_READING;
+            this.lb_MeterReading_Dual  .Text = DUAL_PREFIX + TEXT_READING;
+            this.lb_MeterReading_2     .Text = TEXT_READING;
+            this.lb_MeterReading_Dual_2.Text = DUAL_PREFIX + TEXT_READING;
+            
+            this.lb_OldMeterReading       .Text = OLD_PREFIX + TEXT_READING;
+            this.lb_OldMeterReading_Dual  .Text = DUAL_PREFIX + OLD_PREFIX + TEXT_READING;
+            this.lb_OldMeterReading_2     .Text = OLD_PREFIX + TEXT_READING;
+            this.lb_OldMeterReading_Dual_2.Text = DUAL_PREFIX + OLD_PREFIX + TEXT_READING;
             
             // Meter Serial Number
-            if ( isReplaceMeter && useMeterSerialNumber )
+            if ( useMeterSerialNumber )
             {
-                this.lb_MeterSerialNumber  .Text = global.NewMeterLabel;
-                this.lb_MeterSerialNumber_2.Text = global.NewMeterLabel;
+                if ( isReplaceMeter )
+                {
+                    this.lb_MeterSerialNumber       .Text = global.NewMeterLabel;
+                    this.lb_MeterSerialNumber_Dual  .Text = DUAL_PREFIX + global.NewMeterLabel;
+                    this.lb_MeterSerialNumber_2     .Text = global.NewMeterLabel;
+                    this.lb_MeterSerialNumber_Dual_2.Text = DUAL_PREFIX + global.NewMeterLabel;
+                    
+                    this.lb_OldMeterSerialNumber       .Text = OLD_PREFIX + global.SerialNumLabel;
+                    this.lb_OldMeterSerialNumber_Dual  .Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
+                    this.lb_OldMeterSerialNumber_2     .Text = OLD_PREFIX + global.SerialNumLabel;
+                    this.lb_OldMeterSerialNumber_Dual_2.Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
+                }
+                else
+                {
+                    this.lb_MeterSerialNumber       .Text = global.SerialNumLabel;
+                    this.lb_MeterSerialNumber_Dual  .Text = DUAL_PREFIX + global.SerialNumLabel;
+                    this.lb_MeterSerialNumber_2     .Text = global.SerialNumLabel;
+                    this.lb_MeterSerialNumber_Dual_2.Text = DUAL_PREFIX + global.SerialNumLabel;
+                    
+                    this.lb_OldMeterSerialNumber       .Text = OLD_PREFIX + global.SerialNumLabel;
+                    this.lb_OldMeterSerialNumber_Dual  .Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
+                    this.lb_OldMeterSerialNumber_2     .Text = OLD_PREFIX + global.SerialNumLabel;
+                    this.lb_OldMeterSerialNumber_Dual_2.Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
+                }
             }
 
             #endregion
@@ -1010,7 +1081,129 @@ namespace aclara_meters.view
             {
                 btn_CopyPort1To2.Text = COPY_1_TO_2;
             });
+
+            #endregion
+
+            #region UnFocus events
+
+            // Account Number
+            System.Action valEqAccountNumber = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_AccountNumber,
+                    this.tbx_AccountNumber_Dual,
+                    this.lb_AccountNumber_DualError );
+            System.Action valEqAccountNumber_2 = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_AccountNumber_2,
+                    this.tbx_AccountNumber_Dual_2,
+                    this.lb_AccountNumber_DualError_2 );
             
+            this.tbx_AccountNumber_Dual  .Unfocused += ( s, e ) => { valEqAccountNumber   (); };
+            this.tbx_AccountNumber       .Unfocused += ( s, e ) => { valEqAccountNumber   (); };
+            this.tbx_AccountNumber_2     .Unfocused += ( s, e ) => { valEqAccountNumber_2 (); };
+            this.tbx_AccountNumber_Dual_2.Unfocused += ( s, e ) => { valEqAccountNumber_2 (); };
+            
+            // Work Order
+            System.Action valEqWorkOrder = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_WorkOrder,
+                    this.tbx_WorkOrder_Dual,
+                    this.lb_WorkOrder_DualError );
+            System.Action valEqWorkOrder_2 = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_WorkOrder_2,
+                    this.tbx_WorkOrder_Dual_2,
+                    this.lb_WorkOrder_DualError_2 );
+            
+            this.tbx_WorkOrder       .Unfocused += ( s, e ) => { valEqWorkOrder   (); };
+            this.tbx_WorkOrder_Dual  .Unfocused += ( s, e ) => { valEqWorkOrder   (); };
+            this.tbx_WorkOrder_2     .Unfocused += ( s, e ) => { valEqWorkOrder_2 (); };
+            this.tbx_WorkOrder_Dual_2.Unfocused += ( s, e ) => { valEqWorkOrder_2 (); };
+            
+            // ( New ) Meter Serial Number
+            System.Action valEqMeterSerialNumber = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_MeterSerialNumber,
+                    this.tbx_MeterSerialNumber_Dual,
+                    this.lb_MeterSerialNumber_DualError );
+            System.Action valEqMeterSerialNumber_2 = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_MeterSerialNumber_2,
+                    this.tbx_MeterSerialNumber_Dual_2,
+                    this.lb_MeterSerialNumber_DualError_2 );
+            
+            this.tbx_MeterSerialNumber       .Unfocused += ( s, e ) => { valEqMeterSerialNumber   (); };
+            this.tbx_MeterSerialNumber_Dual  .Unfocused += ( s, e ) => { valEqMeterSerialNumber   (); };
+            this.tbx_MeterSerialNumber_2     .Unfocused += ( s, e ) => { valEqMeterSerialNumber_2 (); };
+            this.tbx_MeterSerialNumber_Dual_2.Unfocused += ( s, e ) => { valEqMeterSerialNumber_2 (); };
+            
+            // Old Meter Serial Number
+            System.Action valEqOldMeterSerialNumber = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_OldMeterSerialNumber,
+                    this.tbx_OldMeterSerialNumber_Dual,
+                    this.lb_OldMeterSerialNumber_DualError );
+            System.Action valEqOldMeterSerialNumber_2 = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_OldMeterSerialNumber_2,
+                    this.tbx_OldMeterSerialNumber_Dual_2,
+                    this.lb_OldMeterSerialNumber_DualError_2 );
+            
+            this.tbx_OldMeterSerialNumber       .Unfocused += ( s, e ) => { valEqOldMeterSerialNumber   (); };
+            this.tbx_OldMeterSerialNumber_Dual  .Unfocused += ( s, e ) => { valEqOldMeterSerialNumber   (); };
+            this.tbx_OldMeterSerialNumber_2     .Unfocused += ( s, e ) => { valEqOldMeterSerialNumber_2 (); };
+            this.tbx_OldMeterSerialNumber_Dual_2.Unfocused += ( s, e ) => { valEqOldMeterSerialNumber_2 (); };
+            
+            // ( New ) Meter Reading
+            System.Action valEqMeterReading = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_MeterReading,
+                    this.tbx_MeterReading_Dual,
+                    this.lb_MeterReading_DualError );
+            System.Action valEqMeterReading_2 = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_MeterReading_2,
+                    this.tbx_MeterReading_Dual_2,
+                    this.lb_MeterReading_DualError_2 );
+            
+            this.tbx_MeterReading       .Unfocused += ( s, e ) => { valEqMeterReading   (); };
+            this.tbx_MeterReading_Dual  .Unfocused += ( s, e ) => { valEqMeterReading   (); };
+            this.tbx_MeterReading       .Unfocused += ( s, e ) => { valEqMeterReading_2 (); };
+            this.tbx_MeterReading_Dual_2.Unfocused += ( s, e ) => { valEqMeterReading_2 (); };
+            
+            // Old Meter Reading
+            System.Action valOldEqMeterReading = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_OldMeterReading,
+                    this.tbx_OldMeterReading_Dual,
+                    this.lb_OldMeterReading_DualError );
+            System.Action valOldEqMeterReading_2 = () =>
+                ValidateEqualityOnFocus (
+                    this.tbx_OldMeterReading_2,
+                    this.tbx_OldMeterReading_Dual_2,
+                    this.lb_OldMeterReading_DualError_2 );
+            
+            this.tbx_OldMeterReading       .Unfocused += ( s, e ) => { valOldEqMeterReading   (); };
+            this.tbx_OldMeterReading_Dual  .Unfocused += ( s, e ) => { valOldEqMeterReading   (); };
+            this.tbx_OldMeterReading       .Unfocused += ( s, e ) => { valOldEqMeterReading_2 (); };
+            this.tbx_OldMeterReading_Dual_2.Unfocused += ( s, e ) => { valOldEqMeterReading_2 (); };
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                this.lb_AccountNumber_DualError         .Text = DUAL_ERROR;
+                this.lb_AccountNumber_DualError_2       .Text = DUAL_ERROR;
+                this.lb_WorkOrder_DualError             .Text = DUAL_ERROR;
+                this.lb_WorkOrder_DualError_2           .Text = DUAL_ERROR;
+                this.lb_MeterSerialNumber_DualError     .Text = DUAL_ERROR;
+                this.lb_MeterSerialNumber_DualError_2   .Text = DUAL_ERROR;
+                this.lb_OldMeterSerialNumber_DualError  .Text = DUAL_ERROR;
+                this.lb_OldMeterSerialNumber_DualError_2.Text = DUAL_ERROR;
+                this.lb_MeterReading_DualError          .Text = DUAL_ERROR;
+                this.lb_MeterReading_DualError_2        .Text = DUAL_ERROR;
+                this.lb_OldMeterReading_DualError       .Text = DUAL_ERROR;
+                this.lb_OldMeterReading_DualError_2     .Text = DUAL_ERROR;
+            });
+
             #endregion
         }
 
@@ -1260,6 +1453,7 @@ namespace aclara_meters.view
             }
         }
 
+        /*
         private void RegisterEventHandlers()
         {
             if ( this.global.AccountDualEntry )
@@ -1280,6 +1474,7 @@ namespace aclara_meters.view
                 fieldOrder_cancel.Tapped += FieldOrder_Cancel_Tapped;
             }
         }
+        */
 
         private void TappedListeners ()
         {
@@ -2070,7 +2265,7 @@ namespace aclara_meters.view
                 else
                 {
                     cancelReasonOtherInput.IsEnabled = false;
-                    cancelReasonOtherInputContainer.Opacity = 0.8;
+                    cancelReasonOtherInputContainer.Opacity = OPACITY_DISABLE;
                 }
             }
         }
@@ -2182,20 +2377,31 @@ namespace aclara_meters.view
 
             selected_MeterType_Name = selectedMeter.Display;
 
-            try
+            Console.WriteLine(selected_MeterType_Name + " Selected");
+
+            Device.BeginInvokeOnMainThread(() =>
             {
                 // Update MeterReading field length to use and validate
                 this.tbx_MeterReading        .MaxLength = selectedMeter.LiveDigits;
                 this.tbx_MeterReading_Dual   .MaxLength = selectedMeter.LiveDigits;
                 this.tbx_OldMeterReading     .MaxLength = selectedMeter.LiveDigits;
                 this.tbx_OldMeterReading_Dual.MaxLength = selectedMeter.LiveDigits;
-            
-                Console.WriteLine(selected_MeterType_Name + " Selected");
-            }
-            catch (Exception n2)
-            {
-                Console.WriteLine(n2.StackTrace);
-            }
+                
+                this.div_MeterReading           .Opacity = OPACITY_ENABLE;
+                this.divSub_MeterReading_Dual   .Opacity = OPACITY_ENABLE;
+                this.divSub_OldMeterReading     .Opacity = OPACITY_ENABLE;
+                this.divSub_OldMeterReading_Dual.Opacity = OPACITY_ENABLE;
+                
+                this.tbx_MeterReading        .IsEnabled = true;
+                this.tbx_MeterReading_Dual   .IsEnabled = true;
+                this.tbx_OldMeterReading     .IsEnabled = true;
+                this.tbx_OldMeterReading_Dual.IsEnabled = true;
+                
+                this.lb_MeterReading_MeterType       .IsVisible = false;
+                this.lb_MeterReading_DualMeterType   .IsVisible = false;
+                this.lb_OldMeterReading_MeterType    .IsVisible = false;
+                this.lb_OldMeterReading_DualMeterType.IsVisible = false;
+            });
         }
 
         private void MeterNames2Picker_SelectedIndexChanged2(object sender, EventArgs e)
@@ -2205,8 +2411,10 @@ namespace aclara_meters.view
             Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
 
             selected_MeterType_Name_2 = selectedMeter.Display;
+            
+            Console.WriteLine(selected_MeterType_Name_2 + " Selected");
 
-            try
+            Device.BeginInvokeOnMainThread(() =>
             {
                 // Update MeterReading field length to use and validate
                 this.tbx_MeterReading_2        .MaxLength = selectedMeter.LiveDigits;
@@ -2214,12 +2422,21 @@ namespace aclara_meters.view
                 this.tbx_OldMeterReading_2     .MaxLength = selectedMeter.LiveDigits;
                 this.tbx_OldMeterReading_Dual_2.MaxLength = selectedMeter.LiveDigits;
             
-                Console.WriteLine(selected_MeterType_Name_2 + " Selected");
-            }
-            catch (Exception n2)
-            {
-                Console.WriteLine(n2.StackTrace);
-            }
+                this.divSub_MeterReading_2        .Opacity = OPACITY_ENABLE;
+                this.divSub_MeterReading_Dual_2   .Opacity = OPACITY_ENABLE;
+                this.divSub_OldMeterReading_2     .Opacity = OPACITY_ENABLE;
+                this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_ENABLE;
+            
+                this.tbx_MeterReading_2        .IsEnabled = true;
+                this.tbx_MeterReading_Dual_2   .IsEnabled = true;
+                this.tbx_OldMeterReading_2     .IsEnabled = true;
+                this.tbx_OldMeterReading_Dual_2.IsEnabled = true;
+                
+                this.lb_MeterReading_MeterType_2       .IsVisible = false;
+                this.lb_MeterReading_DualMeterType_2   .IsVisible = false;
+                this.lb_OldMeterReading_MeterType_2    .IsVisible = false;
+                this.lb_OldMeterReading_DualMeterType_2.IsVisible = false;
+            });
         }
 
         #endregion
@@ -3453,7 +3670,10 @@ namespace aclara_meters.view
 
         private void ServicePortId_Ok_Tapped(object sender, EventArgs e)
         {
-
+            // TODO
+            return;
+            
+            /*
             if (tbx_AccountNumber.Text.Equals(serviceCheckEntry.Text))
             {
                 errorServicePort.IsVisible = false;
@@ -3466,20 +3686,29 @@ namespace aclara_meters.view
             {
                 errorServicePort.IsVisible = true;
             }
+            */
         }
 
         private void ServicePortId_Cancel_Tapped(object sender, EventArgs e)
         {
+            // TODO
+            return;
+        
+            /*
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
             dialog_servicePortId.IsVisible = false;
             errorServicePort.IsVisible = false;
             tbx_AccountNumber.Text = "";
+            */
         }
 
         private void FieldOrder_Ok_Tapped(object sender, EventArgs e)
         {
+            // TODO
+            return;
 
+            /*
             if (tbx_WorkOrder.Text.Equals(fieldOrderCheckEntry.Text))
             {
                 errorFieldOrder.IsVisible = false;
@@ -3492,15 +3721,21 @@ namespace aclara_meters.view
             {
                 errorFieldOrder.IsVisible = true;
             }
+            */
         }
 
         private void FieldOrder_Cancel_Tapped(object sender, EventArgs e)
         {
+            // TODO
+            return;
+        
+            /*
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
             dialog_fieldOrder.IsVisible = false;
             errorFieldOrder.IsVisible = false;
             tbx_WorkOrder.Text = "";
+            */
         }
 
         #endregion
@@ -3672,46 +3907,12 @@ namespace aclara_meters.view
 
         #region Validation
 
-        private void ServicePortId_validate(int v)
+        private void ValidateEqualityOnFocus (
+            BorderlessEntry tbx1,
+            BorderlessEntry tbx2,
+            Label lb )
         {
-            if (!tbx_AccountNumber.Text.Equals(""))
-            {
-                if (v == 1)
-                {
-                    dialog_open_bg.IsVisible = true;
-                    turnoff_mtu_background.IsVisible = true;
-                    dialog_servicePortId.IsVisible = true;
-
-                }
-                else if (v == 2)
-                {
-                    dialog_open_bg.IsVisible = true;
-                    turnoff_mtu_background.IsVisible = true;
-                    dialog_servicePortId.IsVisible = true;
-                }
-            }
-        }
-
-        private void FieldOrder_validate(int v)
-        {
-            if (!tbx_WorkOrder.Text.Equals(""))
-            {
-
-                if (v == 1)
-                {
-                    dialog_open_bg.IsVisible = true;
-                    turnoff_mtu_background.IsVisible = true;
-                    dialog_fieldOrder.IsVisible = true;
-
-                }
-                else if (v == 2)
-                {
-                    dialog_open_bg.IsVisible = true;
-                    turnoff_mtu_background.IsVisible = true;
-                    dialog_fieldOrder.IsVisible = true;
-                }
-            }
-
+            lb.IsVisible = ! tbx1.Text.Equals ( tbx2.Text );
         }
 
         private bool ValidateFields ( ref string msgError )
@@ -3786,12 +3987,12 @@ namespace aclara_meters.view
             bool okAlr = this.div_Alarms               .IsVisible && this.pck_Alarms              .SelectedIndex <= -1;
             bool okDmd = this.div_Demands              .IsVisible && this.pck_Demands             .SelectedIndex <= -1;
 
-            bool okDAc = global.AccountDualEntry      && NoEqNum ( this.tbx_AccountNumber_Dual       .Text, global.AccountLength       );
-            bool okDWr = global.WorkOrderDualEntry    && NoELTxt ( this.tbx_WorkOrder_Dual           .Text, global.WorkOrderLength     );
-            bool okDOs = global.OldSerialNumDualEntry && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual.Text, global.MeterNumberLength   );
-            bool okDMs = global.NewSerialNumDualEntry && NoELTxt ( this.tbx_MeterSerialNumber_Dual   .Text, global.MeterNumberLength   );
-            bool okDOr = global.OldReadingDualEntry   && NoEqNum ( this.tbx_OldMeterReading_Dual     .Text, this.tbx_OldMeterReading_Dual.MaxLength );
-            bool okDMr = global.ReadingDualEntry      && NoEqNum ( this.tbx_MeterReading_Dual        .Text, this.tbx_MeterReading_Dual   .MaxLength );
+            bool okDAc = global.AccountDualEntry      && this.div_AccountNumber_Dual       .IsVisible && NoEqNum ( this.tbx_AccountNumber_Dual       .Text, global.AccountLength     );
+            bool okDWr = global.WorkOrderDualEntry    && this.div_WorkOrder_Dual           .IsVisible && NoELTxt ( this.tbx_WorkOrder_Dual           .Text, global.WorkOrderLength   );
+            bool okDOs = global.OldSerialNumDualEntry && this.div_OldMeterSerialNumber_Dual.IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual.Text, global.MeterNumberLength );
+            bool okDMs = global.NewSerialNumDualEntry && this.div_MeterSerialNumber_Dual   .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_Dual   .Text, global.MeterNumberLength );
+            bool okDOr = global.OldReadingDualEntry   && this.div_OldMeterReading_Dual     .IsVisible && NoEqNum ( this.tbx_OldMeterReading_Dual     .Text, this.tbx_OldMeterReading_Dual.MaxLength );
+            bool okDMr = global.ReadingDualEntry      && this.div_MeterReading_Dual        .IsVisible && NoEqNum ( this.tbx_MeterReading_Dual        .Text, this.tbx_MeterReading_Dual   .MaxLength );
             
             string DUAL_ERROR = " ( Second entry )";
             
@@ -3888,25 +4089,23 @@ namespace aclara_meters.view
                  this.port2IsActivated )
             {
                 // No mandatory fields can be empty
-                noAcn = EmptyNoReq ( this.tbx_AccountNumber       .Text, MANDATORY_ACCOUNTNUMBER   );
-                noWor = EmptyNoReq ( this.tbx_WorkOrder           .Text, MANDATORY_WORKORDER       );
-                noOMt = EmptyNoReq ( this.tbx_OldMtuId            .Text, MANDATORY_OLDMTUID        );
-                noOMs = EmptyNoReq ( this.tbx_OldMeterSerialNumber.Text, MANDATORY_OLDMETERSERIAL  );
-                noMsn = EmptyNoReq ( this.tbx_MeterSerialNumber   .Text, MANDATORY_METERSERIAL     );
-                noSnr = EmptyNoReq ( this.lb_SnapReads            .Text, MANDATORY_SNAPREADS       );
-                noOMr = EmptyNoReq ( this.tbx_OldMeterReading     .Text, MANDATORY_OLDMETERREADING );
-                noMre = EmptyNoReq ( this.tbx_MeterReading        .Text, MANDATORY_METERREADING    );
+                noAcn = EmptyNoReq ( this.tbx_AccountNumber_2       .Text, MANDATORY_ACCOUNTNUMBER   );
+                noWor = EmptyNoReq ( this.tbx_WorkOrder_2           .Text, MANDATORY_WORKORDER       );
+                noOMs = EmptyNoReq ( this.tbx_OldMeterSerialNumber_2.Text, MANDATORY_OLDMETERSERIAL  );
+                noMsn = EmptyNoReq ( this.tbx_MeterSerialNumber_2   .Text, MANDATORY_METERSERIAL     );
+                noOMr = EmptyNoReq ( this.tbx_OldMeterReading_2     .Text, MANDATORY_OLDMETERREADING );
+                noMre = EmptyNoReq ( this.tbx_MeterReading_2        .Text, MANDATORY_METERREADING    );
                 
-                noOMw = NoSelNoReq ( this.pck_OldMeterWorking     .SelectedIndex, MANDATORY_OLDMETERWORKING );
-                noRpc = NoSelNoReq ( this.pck_ReplaceMeterRegister.SelectedIndex, MANDATORY_REPLACEMETER    );
-                noMty = NoSelNoReq ( this.pck_MeterType_Names     .SelectedIndex, MANDATORY_METERTYPE       );
+                noOMw = NoSelNoReq ( this.pck_OldMeterWorking_2     .SelectedIndex, MANDATORY_OLDMETERWORKING );
+                noRpc = NoSelNoReq ( this.pck_ReplaceMeterRegister_2.SelectedIndex, MANDATORY_REPLACEMETER    );
+                noMty = NoSelNoReq ( this.pck_MeterType_Names_2     .SelectedIndex, MANDATORY_METERTYPE       );
     
-                noDAc = EmptyNoReq ( this.tbx_AccountNumber_Dual       .Text, MANDATORY_ACCOUNTNUMBER   );
-                noDWr = EmptyNoReq ( this.tbx_WorkOrder_Dual           .Text, MANDATORY_WORKORDER       );
-                noDOs = EmptyNoReq ( this.tbx_OldMeterSerialNumber_Dual.Text, MANDATORY_OLDMETERSERIAL  );
-                noDMs = EmptyNoReq ( this.tbx_MeterSerialNumber_Dual   .Text, MANDATORY_METERSERIAL     );
-                noDOr = EmptyNoReq ( this.tbx_OldMeterReading_Dual     .Text, MANDATORY_OLDMETERREADING );
-                noDMr = EmptyNoReq ( this.tbx_MeterReading_Dual        .Text, MANDATORY_METERREADING    );
+                noDAc = EmptyNoReq ( this.tbx_AccountNumber_Dual_2       .Text, MANDATORY_ACCOUNTNUMBER   );
+                noDWr = EmptyNoReq ( this.tbx_WorkOrder_Dual_2           .Text, MANDATORY_WORKORDER       );
+                noDOs = EmptyNoReq ( this.tbx_OldMeterSerialNumber_Dual_2.Text, MANDATORY_OLDMETERSERIAL  );
+                noDMs = EmptyNoReq ( this.tbx_MeterSerialNumber_Dual_2   .Text, MANDATORY_METERSERIAL     );
+                noDOr = EmptyNoReq ( this.tbx_OldMeterReading_Dual_2     .Text, MANDATORY_OLDMETERREADING );
+                noDMr = EmptyNoReq ( this.tbx_MeterReading_Dual_2        .Text, MANDATORY_METERREADING    );
     
                 // Correct length
                 okAcn =                                               NoEqNum ( this.tbx_AccountNumber_2       .Text, global.AccountLength                 );
@@ -3920,12 +4119,12 @@ namespace aclara_meters.view
                 okRpc = this.div_ReplaceMeterRegister_2 .IsVisible && this.pck_ReplaceMeterRegister_2.SelectedIndex <= -1;
                 okMty = this.divDyna_MeterType_Vendors_2.IsVisible && this.pck_MeterType_Names_2     .SelectedIndex <= -1;
                 
-                okDAc = global.AccountDualEntry      && NoEqNum ( this.tbx_AccountNumber_Dual_2       .Text, global.AccountLength       );
-                okDWr = global.WorkOrderDualEntry    && NoELTxt ( this.tbx_WorkOrder_Dual_2           .Text, global.WorkOrderLength     );
-                okDOs = global.OldSerialNumDualEntry && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual_2.Text, global.MeterNumberLength   );
-                okDMs = global.NewSerialNumDualEntry && NoELTxt ( this.tbx_MeterSerialNumber_Dual_2   .Text, global.MeterNumberLength   );
-                okDOr = global.OldReadingDualEntry   && NoEqNum ( this.tbx_OldMeterReading_Dual_2     .Text, this.tbx_OldMeterReading_Dual_2.MaxLength );
-                okDMr = global.ReadingDualEntry      && NoEqNum ( this.tbx_MeterReading_Dual_2        .Text, this.tbx_MeterReading_Dual_2   .MaxLength );
+                okDAc = global.AccountDualEntry      && this.div_AccountNumber_Dual_2       .IsVisible && NoEqNum ( this.tbx_AccountNumber_Dual_2       .Text, global.AccountLength     );
+                okDWr = global.WorkOrderDualEntry    && this.div_WorkOrder_Dual_2           .IsVisible && NoELTxt ( this.tbx_WorkOrder_Dual_2           .Text, global.WorkOrderLength   );
+                okDOs = global.OldSerialNumDualEntry && this.div_OldMeterSerialNumber_Dual_2.IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual_2.Text, global.MeterNumberLength );
+                okDMs = global.NewSerialNumDualEntry && this.div_MeterSerialNumber_Dual_2   .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_Dual_2   .Text, global.MeterNumberLength );
+                okDOr = global.OldReadingDualEntry   && this.div_OldMeterReading_Dual_2     .IsVisible && NoEqNum ( this.tbx_OldMeterReading_Dual_2     .Text, this.tbx_OldMeterReading_Dual_2.MaxLength );
+                okDMr = global.ReadingDualEntry      && this.div_MeterReading_Dual_2        .IsVisible && NoEqNum ( this.tbx_MeterReading_Dual_2        .Text, this.tbx_MeterReading_Dual_2   .MaxLength );
                 
                 string PORT2 = "Port2 ";
                 DUAL_ERROR = " ( Second entry )";
@@ -4108,7 +4307,7 @@ namespace aclara_meters.view
             if ( ! DEBUG_AUTO_MODE_ON &&
                  ! this.ValidateFields ( ref msgError ) )
             {
-                DisplayAlert ( "Error", "Mandatory '" + msgError + "' field is incorrectly filled", "OK" );
+                DisplayAlert ( "Error", "Field '" + msgError + "' is incorrectly filled", "OK" );
                 return;
             }
 
