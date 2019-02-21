@@ -14,39 +14,6 @@ namespace aclara_meters.view
             InitializeComponent();
 
 
-            #region Permissions
-
-            Task.Run(async () =>
-            {
-                await Task.Delay(1000); Device.BeginInvokeOnMainThread(async () =>
-                {
-                    try
-                    {
-                        var statusLocation = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
-                        var statusStorage = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
-
-                        if (statusLocation != PermissionStatus.Granted)
-                        {
-                            await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
-                        }
-
-                        if (statusStorage != PermissionStatus.Granted)
-                        {
-                            await CrossPermissions.Current.RequestPermissionsAsync(Permission.Storage);
-                        }
-
-                    }
-                    catch (Exception ex)
-                    {
-
-                    }
-
-                });
-            });
-
-            #endregion
-
-
             //Turn off the Navigation bar
             NavigationPage.SetHasNavigationBar(this, false);
 

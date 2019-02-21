@@ -62,8 +62,7 @@ namespace MTUComm
                 Enum.TryParse<PATHS>(names[i], out ePath);
                 path = GetEnumPath(ePath);
 
-                if ( Directory.Exists ( path ) &&
-                     File.Exists(path + SEARCH_PATH + XML_MTUS ) )
+                if ( Directory.Exists ( path )) //&& File.Exists(path + SEARCH_PATH + XML_MTUS ) )
                 {
                     return path + SEARCH_PATH;
                 }

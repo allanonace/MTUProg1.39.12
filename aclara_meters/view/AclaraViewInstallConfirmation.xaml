@@ -202,38 +202,29 @@
                             <DataTemplate>
                               <ViewCell >
  
-                                 <StackLayout HeightRequest="{Binding Height}" IsVisible="{Binding isDisplayed}" Orientation="Vertical" >
+                               <StackLayout IsVisible="{Binding isDisplayed}" Orientation="Vertical" Margin="0,5,5,0">  <!--HeightRequest="{Binding Height}"-->
 
-                                     <StackLayout  IsVisible="{Binding isMeter}" >
+                                     <StackLayout  IsVisible="{Binding isMeter}" Margin="0,5,5,0">
                                        <Label Text="{Binding Description}" Margin="14,4,0,0" VerticalOptions="Center"  
-                                              Font="Bold,16"/> 
+                                              Font="Bold,20"/> 
                                         <BoxView BackgroundColor="#7a868c" HeightRequest="1" Margin="8,-4,24,0" />
                           
-                                        </StackLayout>
+                                      </StackLayout>
                                    
                                       <StackLayout IsVisible="{Binding isMTU}">       
                                             <Label Text="{Binding Title}" Margin="14,0,0,0" VerticalOptions="Center" 
-                                                   Font="Bold,18" />
-                                            <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="16" 
+                                                   Font="Bold,20" />
+                                            <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" 
                                                    VerticalOptions="Center"/>
-
-                                       </StackLayout>   
-
-
-                                         <StackLayout IsVisible="{Binding isDetailMeter}">       
-                                        <Label Text="{Binding Title}" Margin="36,0,0,0" VerticalOptions="Center" 
-                                               Font="Bold,17" />
-                                        <Label Text="{Binding Description}" Margin="36,-4,0,0" FontSize="16" 
-                                               VerticalOptions="Center"/>
-
-                                        </StackLayout>   
-
-                                                
-                                    
+                                      </StackLayout>   
 
 
-                                            
-                                            
+                                      <StackLayout IsVisible="{Binding isDetailMeter}">       
+                                            <Label Text="{Binding Title}" Margin="36,0,0,0" VerticalOptions="Center" 
+                                                   Font="Bold,19" />
+                                            <Label Text="{Binding Description}" Margin="36,-4,0,0" FontSize="17" 
+                                                   VerticalOptions="Center"/>
+                                       </StackLayout>         
                                  </StackLayout>
 
                                         
@@ -245,27 +236,13 @@
     
                </StackLayout>
                                 
-
-                               
-     
-
-
-                         <!-- LOWER BAR -->
+                <!-- LOWER BAR -->
                         
-                <StackLayout  IsVisible="true"   HeightRequest="108" BackgroundColor="#6aa2b8"  Margin="0,48,0,0"
-                              >
-                             
-                             
-
+                <StackLayout  IsVisible="true"   HeightRequest="108" BackgroundColor="#6aa2b8"  Margin="0,48,0,0" >
 
                                <Label   x:Name="label_read" Margin="17,18,0,0" FontSize="20" TextColor="White"  LineBreakMode="TailTruncation"
                                         Text="Push Button to START" > </Label>
-    
-                              
-
-                    
-               
-                            
+                          
                 </StackLayout>
 
 

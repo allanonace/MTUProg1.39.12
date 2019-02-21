@@ -19,6 +19,8 @@ using System.Web;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using nexus.protocols.ble.scan;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -93,7 +95,7 @@ namespace aclara_meters
            
         }
 
-        public FormsApp( IBluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
+        public FormsApp(IBluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
         {
             InitializeComponent();
 
@@ -102,9 +104,17 @@ namespace aclara_meters
             this.dialogs = dialogs;
             this.appVersion = appVersion;
 
-            Task.Factory.StartNew(ThreadProcedure);
+            if (Device.RuntimePlatform == Device.Android)
+            {
+                Task.Run(async () => { await PermisosLocationAsync(); });
+                CallToInitApp(adapter, listaDatos, dialogs, appVersion);
+            }
+            else
+                Task.Factory.StartNew(ThreadProcedure);
 
         }
+
+ 
 
         #region iPad & iPhone devices have a different behaviour when initializating the app, this sems to fix it
 
@@ -164,6 +174,33 @@ namespace aclara_meters
 
 
         #endregion
+        private async Task PermisosLocationAsync()
+        {
+            try
+            {
+                var statusLocation = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
+                var statusStorage = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
+
+                if (statusLocation != PermissionStatus.Granted)
+                {
+                    await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
+                }
+                else
+                {
+                    this.MainPage = new NavigationPage(new ErrorInitView("The permisison for bluetooth is necesary"));
+                }
+
+                if (statusStorage != PermissionStatus.Granted)
+                {
+                    await CrossPermissions.Current.RequestPermissionsAsync(Permission.Storage);
+                }
+            }
+            catch
+            {
+                this.MainPage = new NavigationPage(new ErrorInitView("There is a problem with permissions"));
+            }
+
+        }
 
         #region Configuration XMLs
 
@@ -329,10 +366,10 @@ namespace aclara_meters
 
             #region Scripting Mode Detection 
 
-            Task.Run(async () =>
-            {
-                await Task.Delay(1100); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
-                {
+            //Task.Run(async () =>
+            //{
+                //await Task.Delay(1100); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
+                //{
 
                     #region Min Date Check
 
@@ -353,7 +390,7 @@ namespace aclara_meters
 
 
                     }
-                    catch (Exception e41)
+                    catch (Exception)
                     {
 
                     }
@@ -366,8 +403,8 @@ namespace aclara_meters
                         {
                             MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
                         });
-                });
-            });
+            //    });
+            //});
 
             #endregion
         }

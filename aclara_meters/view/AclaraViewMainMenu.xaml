@@ -424,7 +424,7 @@
 
 
                  <ListView    Opacity="1"
-                              IsPullToRefreshEnabled="false"
+                              IsPullToRefreshEnabled="true"
                               x:Name="DeviceList" 
                               RowHeight="160"
                               SeparatorVisibility="None"
@@ -432,8 +432,7 @@
                               BackgroundColor="White"
                               IsRefreshing="{Binding IsBusy, Mode=OneWay}"
                               ItemTapped="OnMenuItemSelectedListDevices"
-
-                              
+                             
                            >
 
                       

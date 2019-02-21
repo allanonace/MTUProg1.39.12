@@ -170,26 +170,12 @@
                <StackLayout Orientation="Vertical" 
                             VerticalOptions="FillAndExpand"
                             HorizontalOptions="FillAndExpand">
-
-
-                        
-
-
-
-
-
-
-
-                        
+      
                   <StackLayout Orientation="Horizontal" IsVisible="false"
                                Padding="{StaticResource GridPadding}">
                      <Label Text="Characteristics"
                             FontSize="22" />
                   </StackLayout>
-
-
-
-                         
 
          <Label x:Name="title_text" Margin="16,14,0,0" FontSize="22" TextColor="#6aa2b8" Text="About"  />
 
@@ -200,19 +186,19 @@
                             
                   <StackLayout  HorizontalOptions="CenterAndExpand"  VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0"> 
                       
-            <StackLayout  HorizontalOptions="CenterAndExpand"  VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0"> 
+          
                        
                           <!--  ABOUT -->
                                 
-                          <StackLayout IsVisible="false" Margin="0,0,0,0"  HorizontalOptions="CenterAndExpand" VerticalOptions="Center" 
+                          <StackLayout IsVisible="true" Margin="0,0,0,0"  HorizontalOptions="CenterAndExpand" VerticalOptions="Center" 
                                        x:Name="about_block">  
                              
                                <Image  Source="aclara_settings_logo.png" Margin="24,0,24,-64"  HeightRequest="280" VerticalOptions="Center" HorizontalOptions="Center"  />
            
-                               <Label HorizontalTextAlignment="Center" x:Name="customers_copyr" FontSize="16" WidthRequest="358" HeightRequest="22" Text="Copyright © 2018 Aclara Technologies LLC."></Label>
-                               <Label HorizontalTextAlignment="Center" x:Name="customers_support" FontSize="16" WidthRequest="358"  HeightRequest="22" Text="System tech Support: 1-866-205-5058"></Label>
-                               <Label HorizontalTextAlignment="Center" x:Name="customers_version" FontSize="16" WidthRequest="358" HeightRequest="22"  Text="Application Version: 1.20.0.0"></Label>
-                               <Label HorizontalTextAlignment="Center" x:Name="customers_name" FontSize="16" WidthRequest="358"  HeightRequest="22" Text="Licensed to: ************************"></Label>
+                               <Label HorizontalTextAlignment="Center" x:Name="customers_copyr" FontSize="14" Text="Copyright © 2018 Aclara Technologies LLC."></Label>
+                               <Label HorizontalTextAlignment="Center" x:Name="customers_support" FontSize="14" Text="System tech Support: 1-866-205-5058"></Label>
+                               <Label HorizontalTextAlignment="Center" x:Name="customers_version" FontSize="14" Text="Application Version: 1.20.0.0"></Label>
+                               <Label HorizontalTextAlignment="Center" x:Name="customers_name" FontSize="14" Text="Licensed to: ************************"></Label>
                                         
                           </StackLayout>
 
@@ -377,17 +363,17 @@
 
                              <!--  Sync -->
                                 
-                          <StackLayout IsVisible="false" Margin="-10,0,0,0"  HorizontalOptions="CenterAndExpand" VerticalOptions="Center"  HeightRequest="1024" Scale="0.9"
+                          <StackLayout IsVisible="false" Margin="-10,0,0,0"  HorizontalOptions="CenterAndExpand" VerticalOptions="Center"  Scale="0.9"
                                        x:Name="sync_block">   
 
                                 <StackLayout Margin="0,72,0,0" VerticalOptions="Center" Orientation="Horizontal" >
                                         
                                       <StackLayout Orientation="Horizontal" HorizontalOptions="Start">
-                                        <Label   HorizontalTextAlignment="Start" FontSize="17" Text="Last Sync Date/time:"></Label>
+                                        <Label   HorizontalTextAlignment="Start" FontSize="14" Text="Last Sync Date/time:"></Label>
                                     </StackLayout>
 
                                     <StackLayout   Orientation="Horizontal" HorizontalOptions="EndAndExpand">
-                                          <Label x:Name="date_sync" FontSize="17"  HorizontalTextAlignment="End" Text="06/01/2018 12:13:09"></Label>
+                                          <Label x:Name="date_sync" FontSize="14"  HorizontalTextAlignment="End" Text="06/01/2018 12:13:09"></Label>
                                     </StackLayout>
                                         
                                 </StackLayout>
@@ -396,11 +382,11 @@
                                 <StackLayout Margin="0,12,0,0" Orientation="Horizontal" >
                                         
                                       <StackLayout  Orientation="Horizontal" HorizontalOptions="StartAndExpand">
-                                        <Label   HorizontalTextAlignment="Start" FontSize="17" Text="Total Uploaded Files:"></Label>
+                                        <Label   HorizontalTextAlignment="Start" FontSize="14" Text="Total Uploaded Files:"></Label>
                                     </StackLayout>
 
                                     <StackLayout   Orientation="Horizontal" HorizontalOptions="EndAndExpand">
-                                          <Label x:Name="updated_files"  FontSize="17" HorizontalTextAlignment="End" Text="1456"></Label>
+                                          <Label x:Name="updated_files" FontSize="14"  HorizontalTextAlignment="End" Text="1456"></Label>
                                     </StackLayout>
                                         
                                 </StackLayout>
@@ -409,11 +395,11 @@
                                  <StackLayout Margin="0,12,0,0" Orientation="Horizontal" >
                                         
                                       <StackLayout  Orientation="Horizontal" HorizontalOptions="StartAndExpand">
-                                        <Label   HorizontalTextAlignment="Start" FontSize="17" Text="Uploading Pending Files:"></Label>
+                                        <Label   HorizontalTextAlignment="Start" FontSize="14" Text="Uploading Pending Files:"></Label>
                                     </StackLayout>
 
                                     <StackLayout  Orientation="Horizontal" HorizontalOptions="EndAndExpand">
-                                          <Label x:Name="pending_files" FontSize="17"  HorizontalTextAlignment="End" Text="23"></Label>
+                                          <Label x:Name="pending_files"  FontSize="14" HorizontalTextAlignment="End" Text="23"></Label>
                                     </StackLayout>
 
 
@@ -432,29 +418,12 @@
                                      <Button BackgroundColor="#6aa2b8" WidthRequest="300" HeightRequest="48" BorderColor="Transparent"  CornerRadius="10" BorderRadius="10" 
                                              x:Name="force_sync" Margin="0,48,0,0" FontSize="20" TextColor="White" Text="Force Sync" ></Button>
 
-
-
-
-
-
-
-
-
-
-                                    
+                                                        
                                     </RelativeLayout>
-
-
-                                    
-                                </StackLayout>
-
-                                  
-                                 
+                                         
                                     
                           </StackLayout>
-
-                         
-                            
+                                        
                     </StackLayout>    
           
                     
@@ -468,21 +437,7 @@
             </RelativeLayout>
             
                          
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        
-                    
+             
                   <ListView ItemsSource="{Binding Characteristic}" x:Name="lista" IsVisible="false" 
                             ItemSelected="OnItemSelected"
                             SeparatorVisibility="None"

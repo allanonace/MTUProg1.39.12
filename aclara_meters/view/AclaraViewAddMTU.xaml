@@ -104,39 +104,33 @@
                   <ListView.ItemTemplate>
                     <DataTemplate>
                       <ViewCell>
-                               
+                              
                             
-                         <StackLayout HeightRequest="{Binding Height}" IsVisible="{Binding isDisplayed}" Orientation="Vertical">
+                         <StackLayout IsVisible="{Binding isDisplayed}" Orientation="Vertical" Margin="0,5,5,0">  <!--HeightRequest="{Binding Height}"-->
 
-                             <StackLayout  IsVisible="{Binding isMeter}">
-                           <Label Text="{Binding Description}" Margin="14,4,0,0" VerticalOptions="Center"  
-                                  Font="Bold,20"/> 
-                            <BoxView BackgroundColor="#7a868c" HeightRequest="1" Margin="8,-4,24,0"/>
-              
-                            </StackLayout>
-                       
-                          <StackLayout IsVisible="{Binding isMTU}">       
-                                <Label Text="{Binding Title}" Margin="14,0,0,0" VerticalOptions="Center" 
-                                       Font="Bold,20"/>
-                                <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" 
-                                       VerticalOptions="Center"/>
-
-                           </StackLayout>   
-
-
-                             <StackLayout IsVisible="{Binding isDetailMeter}">       
-                            <Label Text="{Binding Title}" Margin="36,0,0,0" VerticalOptions="Center" 
-                                   Font="Bold,19"/>
-                            <Label Text="{Binding Description}" Margin="36,-4,0,0" FontSize="17" 
-                                   VerticalOptions="Center"/>
-
-                            </StackLayout>    
-                                            
-                         </StackLayout>
+                                     <StackLayout  IsVisible="{Binding isMeter}" Margin="0,5,5,0">
+                                       <Label Text="{Binding Description}" Margin="14,4,0,0" VerticalOptions="Center"  
+                                              Font="Bold,20"/> 
+                                        <BoxView BackgroundColor="#7a868c" HeightRequest="1" Margin="8,-4,24,0" />
+                          
+                                      </StackLayout>
+                                   
+                                      <StackLayout IsVisible="{Binding isMTU}">       
+                                            <Label Text="{Binding Title}" Margin="14,0,0,0" VerticalOptions="Center" 
+                                                   Font="Bold,20" />
+                                            <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" 
+                                                   VerticalOptions="Center"/>
+                                      </StackLayout>   
 
 
+                                      <StackLayout IsVisible="{Binding isDetailMeter}">       
+                                            <Label Text="{Binding Title}" Margin="36,0,0,0" VerticalOptions="Center" 
+                                                   Font="Bold,19" />
+                                            <Label Text="{Binding Description}" Margin="36,-4,0,0" FontSize="17" 
+                                                   VerticalOptions="Center"/>
+                                       </StackLayout>         
+                                 </StackLayout>
 
-                                
                       </ViewCell>
                     </DataTemplate>
                   </ListView.ItemTemplate>
@@ -332,6 +326,9 @@
                                                     HeightRequest="40" x:Name="tbx_AccountNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                     Placeholder="" PlaceholderColor="#7a868c" 
                                                     FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                        <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
                                                 </Controls:BorderlessEntry>
                                             </StackLayout>
                                         </Frame> 
@@ -346,7 +343,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric"
                                                         HeightRequest="40" x:Name="tbx_AccountNumber_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>       
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
@@ -361,7 +362,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_WorkOrder" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -376,7 +381,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_WorkOrder_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -391,7 +400,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMtuId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                    </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -406,7 +419,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterSerialNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>    
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -421,7 +438,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterSerialNumber_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -465,7 +486,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -494,7 +519,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterSerialNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -509,7 +538,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterSerialNumber_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -531,7 +564,11 @@
                                                 <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                     HeightRequest="40"   x:Name="tbx_MeterReading" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                     Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
-                                                    FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    FontSize="17" HorizontalTextAlignment="Start">
+                                                    <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                             </StackLayout>
                                         </Frame> 
                                     </Frame>
@@ -545,7 +582,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterReading_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -677,7 +718,11 @@
                                                 <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric"
                                                     HeightRequest="40"   x:Name="tbx_AccountNumber_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                     Placeholder="" PlaceholderColor="#7a868c" 
-                                                    FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    FontSize="17" HorizontalTextAlignment="Start">
+                                                    <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                             </StackLayout>
                                         </Frame>
                                     </Frame>
@@ -691,7 +736,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric"
                                                         HeightRequest="40"   x:Name="tbx_AccountNumber_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
@@ -706,7 +755,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_WorkOrder_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -721,7 +774,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Text"
                                                         HeightRequest="40"   x:Name="tbx_WorkOrder_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
@@ -736,7 +793,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterSerialNumber_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
@@ -751,7 +812,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterSerialNumber_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
@@ -780,7 +845,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -795,7 +864,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -824,7 +897,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterSerialNumber_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -839,7 +916,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterSerialNumber_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -861,7 +942,11 @@
                                                 <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                     HeightRequest="40" x:Name="tbx_MeterReading_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                     Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
-                                                    FontSize="17" HorizontalTextAlignment="Start"/>
+                                                    FontSize="17" HorizontalTextAlignment="Start">
+                                                    <Controls:BorderlessEntry.Behaviors>
+                                                       <behaviors:EntryValidatorBehavior/>    
+                                                    </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                             </StackLayout>
                                         </Frame>
                                     </Frame>
@@ -875,7 +960,11 @@
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40" x:Name="tbx_MeterReading_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
-                                                        FontSize="17" HorizontalTextAlignment="Start"/>
+                                                        FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior/>    
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                </Controls:BorderlessEntry>
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>

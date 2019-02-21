@@ -1348,20 +1348,21 @@ namespace aclara_meters.view
         private void TapToHome_Tabletmode(object sender, EventArgs e)
         {
 
-            int contador = Navigation.NavigationStack.Count;
+            Navigation.PopToRootAsync(false);
+            //int contador = Navigation.NavigationStack.Count;
 
-            while (contador > 2)
-            {
-                try
-                {
-                    Navigation.PopAsync(false);
-                }
-                catch (Exception v)
-                {
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
+            //while (contador > 2)
+            //{
+            //    try
+            //    {
+            //        Navigation.PopAsync(false);
+            //    }
+            //    catch (Exception v)
+            //    {
+            //        Console.WriteLine(v.StackTrace);
+            //    }
+            //    contador--;
+            //}
 
 
         }
@@ -3559,6 +3560,7 @@ namespace aclara_meters.view
                                 {
                                     FormsApp.credentialsService.DeleteCredentials();
                                     FormsApp.ble_interface.Close();
+                                    FormsApp.peripheral = null;
                                 }
                                 catch (Exception e25)
                                 {
@@ -3566,11 +3568,13 @@ namespace aclara_meters.view
                                 }
                               
                                 background_scan_page.IsEnabled = true;
-                                Navigation.PopToRootAsync(false);
+                                Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
+                                //Navigation.PopToRootAsync(false);
                             }
                             else
                             {
-                                Navigation.PopAsync();
+                                Navigation.PopToRootAsync(false);
+                                //Navigation.PopAsync();
                             }
 
                         }

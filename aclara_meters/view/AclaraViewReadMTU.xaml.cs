@@ -392,20 +392,22 @@ namespace aclara_meters.view
         private void TapToHome_Tabletmode(object sender, EventArgs e)
         {
 
-            int contador = Navigation.NavigationStack.Count;
-
-            while (contador > 2)
-            {
-                try
-                {
-                    Navigation.PopAsync(false);
-                }
-                catch (Exception v)
-                {
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
+            Navigation.PopToRootAsync(false);
+            // MRA
+            //int contador = Navigation.NavigationStack.Count;
+            
+            //while (contador > 2)
+            //{
+            //    try
+            //    {
+            //        Navigation.PopAsync(false);
+            //    }
+            //    catch (Exception v)
+            //    {
+            //        Console.WriteLine(v.StackTrace);
+            //    }
+            //    contador--;
+            //}
 
 
         }
@@ -429,10 +431,12 @@ namespace aclara_meters.view
 
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
+            FormsApp.peripheral = null;
             FormsApp.ble_interface.Close();
             background_scan_page.IsEnabled = true;
 
-            Navigation.PopToRootAsync(false);
+            Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
+            //Navigation.PopToRootAsync(false);
 
 
         }
@@ -727,21 +731,24 @@ namespace aclara_meters.view
         {
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
-            int contador = Navigation.NavigationStack.Count;
-            while(contador>0)
-            {
-                try
-                {
-                    await Navigation.PopAsync(false);
-                }catch(Exception v){
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
+            FormsApp.peripheral = null;
+            FormsApp.ble_interface.Close();
+            //int contador = Navigation.NavigationStack.Count;
+            //while(contador>0)
+            //{
+            //    try
+            //    {
+            //        await Navigation.PopAsync(false);
+            //    }catch(Exception v){
+            //        Console.WriteLine(v.StackTrace);
+            //    }
+            //    contador--;
+            //}
 
             try
             {
-                await Navigation.PopToRootAsync(false);
+                Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
+                //await Navigation.PopToRootAsync(false);
 
             }
             catch (Exception v)

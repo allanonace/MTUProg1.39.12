@@ -150,9 +150,6 @@ namespace aclara_meters.view
                 {
                     loginpage.IsVisible = true;
 
-
-
-
                     /*
                     if(IsLocationAvailable()){
 
@@ -168,7 +165,7 @@ namespace aclara_meters.view
             this.EmailEntry.Focused += (s, e) => 
             {
                 if (Device.Idiom == TargetIdiom.Tablet)
-                    SetLayoutPosition(true, (int) -600);
+                    SetLayoutPosition(true, (int) -120);
                 else
                     SetLayoutPosition(true, (int) -20);
             };
@@ -176,7 +173,7 @@ namespace aclara_meters.view
             this.EmailEntry.Unfocused += (s, e) => 
             {
                 if (Device.Idiom == TargetIdiom.Tablet)
-                    SetLayoutPosition(false, (int) -600);
+                    SetLayoutPosition(false, (int) -120);
                 else
                     SetLayoutPosition(false, (int) -20);
             };
@@ -184,7 +181,7 @@ namespace aclara_meters.view
             this.PasswordEntry.Focused += (s, e) => 
             {
                 if (Device.Idiom == TargetIdiom.Tablet)
-                    SetLayoutPosition(true, (int) -1200);
+                    SetLayoutPosition(true, (int) -240);
                 else
                     SetLayoutPosition(true, (int) -80);
             };
@@ -192,7 +189,7 @@ namespace aclara_meters.view
             this.PasswordEntry.Unfocused += (s, e) => 
             {
                 if (Device.Idiom == TargetIdiom.Tablet)
-                    SetLayoutPosition(false, (int) -1200);
+                    SetLayoutPosition(false, (int) -240);
                 else
                     SetLayoutPosition(false, (int) -80);
             };
@@ -262,9 +259,10 @@ namespace aclara_meters.view
 
                     foreach (FileInfo file in files)
                     { 
-                        Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
+
                         if (file.Name.Contains("Log.xml") || file.Name.Contains("Result") )
                         {
+                            Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
                             bool enc = false;
                             foreach (string fileFtp in saved_array_files)
                             {
@@ -307,26 +305,26 @@ namespace aclara_meters.view
                             }
                             long cont = fileStream.Length;
                             fileStream.Close();
-                            File.Delete(file.FullName);  
+                            File.Delete(file.FullName);
                         }
-                    }
-                    try
-                    {
-                        using (TextWriter tw = new StreamWriter(Path.Combine( path, "SavedLogsList.txt")))
-                        {
-                            foreach (string fileFtp in saved_array_files)
-                            {
-                                tw.WriteLine(fileFtp);
-                            }
-                            foreach (FileInfo s in local_array_files)
-                                tw.WriteLine(s.Name);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.StackTrace);
-                    }
 
+                        try
+                        {
+                            using (TextWriter tw = new StreamWriter(Path.Combine(path, "SavedLogsList.txt")))
+                            {
+                                foreach (string fileFtp in saved_array_files)
+                                {
+                                    tw.WriteLine(fileFtp);
+                                }
+                                foreach (FileInfo s in local_array_files)
+                                    tw.WriteLine(s.Name);
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.StackTrace);
+                        }
+                    }
                     sftp.Disconnect();
                     return true;
                 }
