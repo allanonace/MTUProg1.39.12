@@ -25,7 +25,7 @@ namespace MTUComm
         public delegate void ActionStepFinishHandler(object sender, int step, Action.ActionFinishArgs e);
         public event ActionStepFinishHandler onStepFinish;
 
-        public delegate void ActionErrorHandler(object sender, Action.ActionErrorArgs e);
+        public delegate void ActionErrorHandler ();
         public event ActionErrorHandler OnError;
 
 
@@ -77,7 +77,7 @@ namespace MTUComm
             {
                 //throw new MtuLoadException("Error loading Script file");
 
-                OnError ( this, new Action.ActionErrorArgs ( 113, "Error in parsing Trigger File" ) );
+                this.OnError (); // this, new Action.ActionErrorArgs ( 113, "Error in parsing Trigger File" ) );
 
                 return;
             }
@@ -169,9 +169,9 @@ namespace MTUComm
         }
 
 
-        private void Action_OnError(object sender, Action.ActionErrorArgs e)
+        private void Action_OnError ()
         {
-            OnError(sender, e);
+            this.OnError ();
         }
 
         private void Action_OnProgress(object sender, Action.ActionProgressArgs e)
@@ -191,7 +191,6 @@ namespace MTUComm
             {
                 OnFinish(act, e);
             }
-            
         }
     }
 }

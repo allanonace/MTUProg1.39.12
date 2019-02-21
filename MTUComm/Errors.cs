@@ -8,40 +8,73 @@ using MTUComm.Exceptions;
 namespace MTUComm
 {
     public sealed class Errors
-    {
+    {    
         #region Constants
 
         private Dictionary<Exception,int> ex2id = 
         new Dictionary<Exception,int> ()
         {
-            // Mtu can't be recovered using MTU type
-            { new MtuTypeIsNotFoundException (), 123 },
+            // Dynamic MemoryMap [ 0xx ]
+            //------------------
+            // ...
+        
+            // MTU [ 1xx ]
+            //----
             // MTU is not the same as at the beginning of the process
-            { new MtuHasChangeBeforeFinishActionException (), 180 },
-            // Puck can't read from MTU
-            { new PuckCantReadFromMtuException (), 165 },
+            { new MtuHasChangeBeforeFinishActionException (),   100 },
+            // Puck can't write or read to/from MTU
+            { new PuckCantCommWithMtuException (),              101 },
             // Puck can't read from MTU after has completed writing process
-            { new PuckCantReadFromMtuAfterWritingException (), 166 },
-            // Puck can't communicate with MTU performing the turn off
-            { new PuckCantComWithMtuTurnOffException (), 163 },
-            // Turn off MTU process has failed trying to activated the Ship Bit
-            { new AttemptNotAchievedTurnOffException (), 162 },
-            // MTU can not be turned off after having tried it several times
-            { new ActionNotAchievedTurnOffException (), 160 },
-            // Alarm profile selected for current MTU is not defined in the Alarm.xml file
-            { new ScriptingAlarmForCurrentMtuException (), 200 },
-            // The  alarm profile "Scripting" for current MTU is not defined in the Alarm.xml file
-            { new SelectedAlarmForCurrentMtuException (), 201 },
+            { new PuckCantReadFromMtuAfterWritingException (),  102 },
+        
+            // Meter [ 2xx ]
+            //------
+            // Mtu can't be recovered using MTU type
+            { new MtuTypeIsNotFoundException (),                200 },
+            // The MTU does not support selected Meter
+            { new MtuNotSupportMeterException (),               201 },
             // The Meter.xml does not contain the Meter type specified with tags NumberOfDials, DriveDialSize and UnitOfMeasure
-            { new ScriptingAutoDetectMeterException (), 100 },
+            { new ScriptingAutoDetectMeterException (),         202 },
             // The script does not contain the tag NumberOfDials needed to select the MTU
-            { new NumberOfDialsTagMissingScript (), 101 },
+            { new NumberOfDialsTagMissingScript (),             203 },
             // The script does not contain the tag DriveDialSize needed to select the MTU
-            { new DriveDialSizeTagMissingScript (), 102 },
+            { new DriveDialSizeTagMissingScript (),             204 },
             // The script does not contain the tag UnitOfMeasure needed to select the MTU
-            { new UnitOfMeasureTagMissingScript (), 103 },
-            // Error translatin parameters from script/trigger file
-            { new TranslatingParamsScriptException (), 113 }
+            { new UnitOfMeasureTagMissingScript (),             205 },
+            
+            // Scripting Parameters [ 3xx ]
+            //---------------------
+            // Error translating or validating parameters from script/trigger file
+            { new ProcessingParamsScriptException (),           300 },
+            // Script is only for one port but the MTU has two port and both activated
+            { new ScriptForOnePortButTwoEnabledException (),    301 },
+            // Script is for two ports but the MTU has one port only or second port is disabled
+            { new ScriptForTwoPortsButMtuOnlyOneException (),   302 },
+            
+            // Alarm [ 4xx ]
+            //------
+            // Alarm profile selected for current MTU is not defined in the Alarm.xml file
+            { new ScriptingAlarmForCurrentMtuException (),      400 },
+            // The  alarm profile "Scripting" for current MTU is not defined in the Alarm.xml file
+            { new SelectedAlarmForCurrentMtuException (),       401 },
+            
+            // Turn Off [ 5xx ]
+            //---------
+            // Turn off MTU process has failed trying to activated the Ship Bit
+            { new AttemptNotAchievedTurnOffException (),        500 },
+            // MTU can not be turned off after having tried it several times
+            { new ActionNotAchievedTurnOffException (),         501 },
+            
+            // Install Confirmation [ 6xx ]
+            //---------------------
+            // The MTU has not support for two-way
+            { new MtuIsNotTwowayICException (),                 600 },
+            // The MTU is turned off
+            { new MtuIsAlreadyTurnedOffICException (),          601 },
+            // Installation Confirmation process has failed trying to communicate with the DCU
+            { new AttemptNotAchievedICException (),             602 },
+            // Installation Confirmation can't be performed after having tried it several times
+            { new ActionNotAchievedICException (),              603 },
         };
 
         #endregion
@@ -56,7 +89,7 @@ namespace MTUComm
         private Dictionary<int,Error> errors;
         private List<Error> errorsToLog;
         
-        private Exception lastRegistered;
+        private Error lastError;
 
         #endregion
 
@@ -87,6 +120,11 @@ namespace MTUComm
             {
                 return Errors.GetInstance ().global.ErrorId;
             }
+        }
+
+        public static Error LastError
+        {
+            get { return Errors.GetInstance ().lastError; }
         }
 
         #endregion
@@ -173,7 +211,7 @@ namespace MTUComm
                 this.errorsToLog.Add ( error );
             }
                 
-            this.lastRegistered = e;
+            this.lastError = this.errorsToLog.Last ();
         }
 
         /// <summary>
@@ -270,8 +308,8 @@ namespace MTUComm
         private bool IsLastExceptionUsed (
             Exception e )
         {
-            return ( this.lastRegistered != null &&
-                     this.lastRegistered == e );
+            return ( this.lastError != null &&
+                     this.lastError.Exception == e );
         }
 
         private static void LaunchException (
@@ -307,7 +345,7 @@ namespace MTUComm
             Errors.GetInstance ()._LogErrorNow ( e, portIndex );
             Errors.LaunchException ( e, forceException );
         }
-        
+
         public static void LogRegisteredErrors (
             bool forceException = false,
             Exception e = null )

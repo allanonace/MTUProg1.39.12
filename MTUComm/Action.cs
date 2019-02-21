@@ -115,7 +115,7 @@ namespace MTUComm
         public delegate void ActionFinishHandler(object sender, ActionFinishArgs e);
         public event ActionFinishHandler OnFinish;
 
-        public delegate void ActionErrorHandler(object sender, ActionErrorArgs e);
+        public delegate void ActionErrorHandler ();
         public event ActionErrorHandler OnError;
 
         #endregion
@@ -146,8 +146,9 @@ namespace MTUComm
         public class ActionFinishArgs : EventArgs
         {
             public ActionResult Result { get; private set; }
+            public AddMtuLog FormLog;
 
-            public ActionFinishArgs(ActionResult result)
+            public ActionFinishArgs(ActionResult result )
             {
                 Result = result;
             }
@@ -434,13 +435,13 @@ namespace MTUComm
                         Parameter param = mparameters.Find(x => (x.Type == Parameter.ParameterType.DaysOfRead));
                         if (param == null)
                         {
-                            OnError(this, new ActionErrorArgs("Days Of Read parameter Not Defined or Invalid"));
+                            this.OnError (); //this, new ActionErrorArgs("Days Of Read parameter Not Defined or Invalid"));
                             break;
                         }
                         int DaysOfRead = 0;
                         if (!Int32.TryParse(param.Value, out DaysOfRead) || DaysOfRead <= 0)
                         {
-                            OnError(this, new ActionErrorArgs("Days Of Read parameter Invalid"));
+                            this.OnError (); //this, new ActionErrorArgs("Days Of Read parameter Invalid"));
                             break;
                         }
                         comm.OnReadMtuData += Comm_OnReadMtuData;
@@ -480,11 +481,9 @@ namespace MTUComm
             }
         }
 
-        private void Comm_OnError(object sender, MTUComm.ErrorArgs e)
+        private void Comm_OnError ()
         {
-            // ReadMTU: OnError event not do anything with exception info
-            // 
-            OnError ( this, new ActionErrorArgs () ); // e.Status, e.Message ) );
+            this.OnError ();
         }
 
         private void Comm_OnReadMtuData(object sender, MTUComm.ReadMtuDataArgs e)
@@ -528,7 +527,7 @@ namespace MTUComm
             //ActionResult result = CreateActionResultUsingInterface ( null, mtu, null, e, "TurnOff" );
 
             ActionResult result = getBasciInfoResult();
-            logger.logTurnOffResult ( this, e.MtuId );
+            logger.logTurnOffResult ( this, e.Mtu );
             ActionFinishArgs args = new ActionFinishArgs ( result );
 
             OnFinish ( this, args );
@@ -552,6 +551,8 @@ namespace MTUComm
 
             // Generate xml log file and save on device
             e.AddMtuLog.Save ();
+            
+            args.FormLog = e.AddMtuLog;
 
             OnFinish(this, args);
             return result;

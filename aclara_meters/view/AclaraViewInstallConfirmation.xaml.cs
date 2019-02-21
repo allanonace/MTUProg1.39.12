@@ -489,8 +489,10 @@ namespace aclara_meters.view
                 }));
             });
 
-            add_mtu.OnError += ((s, e) =>
+            add_mtu.OnError += (() =>
             {
+                Error error = Errors.LastError;
+            
                 Console.WriteLine("Action Errror");
                 Console.WriteLine("Press Key to Exit");
                 // Console.WriteLine(s.ToString());
@@ -500,7 +502,7 @@ namespace aclara_meters.view
 
                // extension.ProvideValue("Timeout");
 
-                string resultMsg = e.Message;
+                string resultMsg = error.Message;
 
                 Task.Delay(100).ContinueWith(t =>
                      Device.BeginInvokeOnMainThread(() =>
@@ -938,15 +940,13 @@ namespace aclara_meters.view
                 );
             });
 
-            basicRead.OnError += ((s, e) =>
+            basicRead.OnError += (() =>
             {
                 Task.Delay(100).ContinueWith(t =>
                     Device.BeginInvokeOnMainThread(() =>
                     {
-
                         Device.BeginInvokeOnMainThread(() =>
                         {
-
                             #region New Circular Progress bar Animations    
 
                             backdark_bg.IsVisible = false;
@@ -956,9 +956,7 @@ namespace aclara_meters.view
                             #endregion
 
                             Application.Current.MainPage.DisplayAlert("Alert", "Cannot read device, try again", "Ok");
-
                         });
-
                     })
                 );
             });
@@ -1087,7 +1085,7 @@ namespace aclara_meters.view
                    }));
             });
 
-            turnOffAction.OnError += ((s, args) =>
+            turnOffAction.OnError += (() =>
             {
                 Task.Delay(2000).ContinueWith(t =>
                    Device.BeginInvokeOnMainThread(() =>

@@ -429,6 +429,25 @@ namespace MTUComm
 
             return okTextLength && okNumeric && okEquals;
         }
+        
+        public static bool Text (
+            string value,
+            int maxLength,
+            int minLength = 1,
+            bool maxInclusive = true,
+            bool minInclusive = true,
+            bool equalsLength = true )
+        {
+            if ( value is null )
+                return false;
+                
+            string valueClean = value.ToString ().Trim ();
+                
+            bool okTextLength = TextLength ( valueClean, maxLength, minLength, maxInclusive, minInclusive );
+            bool okEquals     = ( ! equalsLength || valueClean.Length == maxLength );
+
+            return okTextLength && okEquals;
+        }
 
         #endregion
     }

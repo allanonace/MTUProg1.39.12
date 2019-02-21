@@ -70,10 +70,12 @@ namespace MTUComm.actions
 
         #region Parameters
 
-        public void AddParameter (string paramId, string customParameter, string customDisplay, dynamic value)
+        public Parameter AddParameter (string paramId, string customParameter, string customDisplay, dynamic value)
         {
-            this.dictionary[paramId] =
-                new Parameter(customParameter, customDisplay, value);
+            Parameter param = new Parameter ( customParameter, customDisplay, value );
+            this.dictionary[paramId] = param;
+            
+            return param;
         }
 
         public void AddParameter ( Parameter parameter )
@@ -86,7 +88,7 @@ namespace MTUComm.actions
             return GetParameter(paramId);
         }
 
-        public Parameter[] GetParameters()
+        public Parameter[] GetParameters ()
         {
             return new List<Parameter>(this.dictionary.Values).ToArray();
         }
@@ -102,6 +104,12 @@ namespace MTUComm.actions
         public bool ContainsParameter ( string paramId )
         {
             return this.dictionary.ContainsKey ( paramId );
+        }
+        
+        public void RemoveParameter ( string paramId )
+        {
+            if ( this.dictionary.ContainsKey ( paramId ) )
+                this.dictionary.Remove ( paramId );
         }
 
         #endregion

@@ -328,7 +328,7 @@
                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
                                         <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                             <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                <Controls:BorderlessEntry Margin="0,0,0,0" Text="" MaxLength="10"  Keyboard="Numeric"
+                                                <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric"
                                                     HeightRequest="40" x:Name="tbx_AccountNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                     Placeholder="" PlaceholderColor="#7a868c" 
                                                     FontSize="17" HorizontalTextAlignment="Start">
@@ -343,7 +343,7 @@
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" MaxLength="9"  Keyboard="Numeric"
+                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric"
                                                         HeightRequest="40" x:Name="tbx_AccountNumber_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
@@ -360,7 +360,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_WorkOrder" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" MaxLength="20"  Keyboard="Numeric"
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -375,7 +375,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_WorkOrder_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" MaxLength="20"  Keyboard="Numeric"
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -434,8 +434,8 @@
                                             <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessPicker x:Name="pck_OldMeterWorking" Title="" 
-                                                        HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                        SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40"/>
+                                                        HorizontalOptions="FillAndExpand" 
+                                                        SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40"/>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -449,7 +449,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" 
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -464,7 +464,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" 
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -474,12 +474,12 @@
                                     <!-- Replace Meter|Register -->
                                     <StackLayout x:Name="div_ReplaceMeterRegister" IsVisible="false">
                                         <Label Text="Replace Meter / Register" x:Name="lb_ReplaceMeterRegister" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17"/>
-                                        <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
+                                        <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c" >
                                             <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessPicker x:Name="pck_ReplaceMeterRegister" Title="" 
-                                                        HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                        SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40"/>
+                                                        HorizontalOptions="FillAndExpand"
+                                                        SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40"/>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -493,7 +493,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterSerialNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c"  MaxLength="12"  Keyboard="Numeric"
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -508,7 +508,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterSerialNumber_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c"  MaxLength="12"  Keyboard="Numeric"
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -530,7 +530,7 @@
                                             <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                 <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                     HeightRequest="40"   x:Name="tbx_MeterReading" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                    Placeholder="" PlaceholderColor="#7a868c" MaxLength="6"  Keyboard="Numeric"
+                                                    Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
                                                     FontSize="17" HorizontalTextAlignment="Start"/>
                                             </StackLayout>
                                         </Frame> 
@@ -544,7 +544,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterReading_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" MaxLength="6"  Keyboard="Numeric"
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -655,14 +655,14 @@
                                         <Frame CornerRadius="3"  HeightRequest="24"  Margin="-7" BackgroundColor="#6aa2b8">
                                             <Label Text="Enable Port" FontSize="18" HorizontalOptions="CenterAndExpand" Margin="0,0,0,0" x:Name="btn_EnablePort2" TextColor="White">
                                                 <Label.GestureRecognizers>
-                                                    <TapGestureRecognizer  x:Name="BtnSwitchPort2"  NumberOfTapsRequired="1" />
+                                                    <TapGestureRecognizer  x:Name="BtnSwitchPort2" NumberOfTapsRequired="1" />
                                                   </Label.GestureRecognizers>    
                                             </Label>
                                             </Frame>
                                     </Frame>
                                     <Frame CornerRadius="3" HeightRequest="24" Margin="0,12,0,0" BackgroundColor="#7a868c" x:Name="div_CopyPort1To2">
                                         <Frame CornerRadius="3"  HeightRequest="24"  Margin="-7" BackgroundColor="#6aa2b8" >
-                                            <Label Text="Set Port 2 Data" FontSize="18" HorizontalOptions="CenterAndExpand" Margin="0,0,0,0" x:Name="btn_CopyPort1To2" TextColor="White"/>
+                                            <Label FontSize="18" HorizontalOptions="CenterAndExpand" Margin="0,0,0,0" x:Name="btn_CopyPort1To2" TextColor="White"/>
                                         </Frame>
                                     </Frame>
                                 </StackLayout>
@@ -674,7 +674,7 @@
                                     <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c" >
                                         <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                             <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                <Controls:BorderlessEntry Margin="0,0,0,0" Text="" MaxLength="10"  Keyboard="Numeric"
+                                                <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric"
                                                     HeightRequest="40"   x:Name="tbx_AccountNumber_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                     Placeholder="" PlaceholderColor="#7a868c" 
                                                     FontSize="17" HorizontalTextAlignment="Start"/>
@@ -688,7 +688,7 @@
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" MaxLength="9"  Keyboard="Numeric"
+                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric"
                                                         HeightRequest="40"   x:Name="tbx_AccountNumber_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
@@ -705,7 +705,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_WorkOrder_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" MaxLength="20"  Keyboard="Numeric"
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -718,7 +718,7 @@
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" MaxLength="9"  Keyboard="Numeric"
+                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Text"
                                                         HeightRequest="40"   x:Name="tbx_WorkOrder_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
                                                         Placeholder="" PlaceholderColor="#7a868c" 
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
@@ -764,8 +764,8 @@
                                             <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessPicker x:Name="pck_OldMeterWorking_2" Title="" 
-                                                        HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                        SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40" />
+                                                        HorizontalOptions="FillAndExpand"
+                                                        SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" />
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -779,7 +779,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" 
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -794,7 +794,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_OldMeterReading_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" 
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -808,8 +808,8 @@
                                             <Frame CornerRadius="6"  HeightRequest="30"  Margin="-7" BackgroundColor="White" >
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessPicker x:Name="pck_ReplaceMeterRegister_2" Title="" 
-                                                        HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" 
-                                                        SelectedIndexChanged="PickerSelection" FontSize="17" HeightRequest="40"/>
+                                                        HorizontalOptions="FillAndExpand"
+                                                        SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40"/>
                                                 </StackLayout>
                                             </Frame> 
                                         </Frame>
@@ -823,7 +823,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterSerialNumber_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -838,7 +838,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40"   x:Name="tbx_MeterSerialNumber_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame> 
@@ -860,7 +860,7 @@
                                             <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                 <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                     HeightRequest="40" x:Name="tbx_MeterReading_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                    Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
+                                                    Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
                                                     FontSize="17" HorizontalTextAlignment="Start"/>
                                             </StackLayout>
                                         </Frame>
@@ -874,7 +874,7 @@
                                                 <StackLayout Margin="1"  BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text=""
                                                         HeightRequest="40" x:Name="tbx_MeterReading_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand"
-                                                        Placeholder="" PlaceholderColor="#7a868c" MaxLength="12"  Keyboard="Numeric"
+                                                        Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric"
                                                         FontSize="17" HorizontalTextAlignment="Start"/>
                                                 </StackLayout>
                                             </Frame>

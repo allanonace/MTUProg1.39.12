@@ -87,6 +87,12 @@ namespace MTUComm
             dynamic map    = form.map;
             string  temp   = string.Empty;
 
+            bool isReplaceMeter = form.actionType == ActionType.ReplaceMeter           ||
+                                  form.actionType == ActionType.ReplaceMtuReplaceMeter ||
+                                  form.actionType == ActionType.AddMtuReplaceMeter;
+            bool isReplaceMtu   = form.actionType == ActionType.ReplaceMTU ||
+                                  form.actionType == ActionType.ReplaceMtuReplaceMeter;
+
             #region General
 
             logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
@@ -97,6 +103,10 @@ namespace MTUComm
 
             if ( ! string.IsNullOrEmpty ( this.user ) )
                 logger.logParameter(this.addMtuAction, new Parameter("User", "User", this.user ) );
+
+            if ( isReplaceMtu &&
+                 form.ContainsParameter ( FIELD.MTU_ID_OLD ) )
+                logger.logParameter ( this.addMtuAction, form.OldMtuId );
 
             logger.logParameter ( this.addMtuAction, new Parameter ( "MtuId",   "MTU ID",   this.mtuBasicInfo.Id   ) );
             logger.logParameter ( this.addMtuAction, new Parameter ( "MtuType", "MTU Type", this.mtuBasicInfo.Type ) );
@@ -134,9 +144,7 @@ namespace MTUComm
             if ( global.WorkOrderRecording )
                 logger.logParameter ( port, form.WorkOrder );
 
-            if ( form.actionType == ActionType.ReplaceMeter           ||
-                 form.actionType == ActionType.ReplaceMtuReplaceMeter ||
-                 form.actionType == ActionType.AddMtuReplaceMeter )
+            if ( isReplaceMeter )
             {
                 if ( global.UseMeterSerialNumber )
                     logger.logParameter ( port, form.MeterNumberOld );
@@ -193,9 +201,7 @@ namespace MTUComm
                 if ( global.WorkOrderRecording )
                     logger.logParameter ( port, form.WorkOrder_2 );
 
-                if ( form.actionType == ActionType.ReplaceMeter           ||
-                     form.actionType == ActionType.ReplaceMtuReplaceMeter ||
-                     form.actionType == ActionType.AddMtuReplaceMeter )
+                if ( isReplaceMeter )
                 {
                     if ( global.UseMeterSerialNumber )
                         logger.logParameter ( port, form.MeterNumberOld_2 );

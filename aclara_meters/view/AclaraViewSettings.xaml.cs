@@ -25,7 +25,7 @@ namespace aclara_meters.view
     {
         private const string TEXT_COPYR   = "Copyright © 2018 Aclara Technologies LLC.";
         private const string TEXT_SUPPORT = "System tech Support: 1-866-205-5058";
-        private const string TEXT_VERSION = "Application Version: 1.35.1";
+        private const string TEXT_VERSION = "Application Version: 1.35.2";
         private const string TEXT_LICENSE = "Licensed to: ";
 
         private ActionType actionType;
@@ -971,7 +971,7 @@ namespace aclara_meters.view
                 );
             });
 
-            basicRead.OnError += ((s, e) =>
+            basicRead.OnError += (() =>
             {
                 Task.Delay(100).ContinueWith(t =>
                     Device.BeginInvokeOnMainThread(() =>
@@ -1035,7 +1035,7 @@ namespace aclara_meters.view
                    }));
             });
 
-            turnOffAction.OnError += ((s, args) =>
+            turnOffAction.OnError += (() =>
             {
                 Task.Delay(2000).ContinueWith(t =>
                    Device.BeginInvokeOnMainThread(() =>

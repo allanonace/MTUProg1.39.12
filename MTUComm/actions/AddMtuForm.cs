@@ -79,6 +79,7 @@ namespace MTUComm.actions
                 { ParameterType.Custom,               FIELD.OPTIONAL_PARAMS   },
                 { ParameterType.ReadInterval,         FIELD.READ_INTERVAL     },
                 { ParameterType.Alarm,                FIELD.ALARM             },
+                { ParameterType.ForceTimeSync,        FIELD.FORCE_TIME_SYNC   },
                 
                 { ParameterType.MeterSerialNumber,    FIELD.METER_NUMBER      },
                 { ParameterType.NewMeterSerialNumber, FIELD.METER_NUMBER      },
@@ -133,6 +134,17 @@ namespace MTUComm.actions
                         "WorkOrder_2",
                         "WorkOrder",
                         "Work Order"
+                    }
+                },
+                #endregion
+                #region Old MTU ID
+                {
+                    FIELD.MTU_ID_OLD,
+                    new string[]
+                    {
+                        "OldMtuId",
+                        "OldMtuID",
+                        "Old MTU ID"
                     }
                 },
                 #endregion
@@ -455,19 +467,23 @@ namespace MTUComm.actions
             };
 
         public bool usePort2;
+        private Dictionary<FIELD,Parameter> dictionary;
 
-        public AddMtuForm ( Mtu mtu ) : base ( mtu ) { }
+        public Dictionary<FIELD,Parameter> RegisteredParamsByField
+        {
+            get { return this.dictionary; }
+        }
+
+        public AddMtuForm ( Mtu mtu ) : base ( mtu )
+        {
+            this.dictionary = new Dictionary<FIELD,Parameter> ();
+        }
 
         public void AddParameter ( FIELD fieldType, dynamic value )
         {
             string[] texts = Texts[ fieldType ];
-            AddParameter ( texts[ 0 ], texts[ 1 ], texts[ 2 ], value ); // base method
-        }
-
-        public void AddParameters ( FIELD fieldType, Parameter[] parameters )
-        {
-            foreach ( Parameter parameter in parameters )
-                this.AddParameter ( fieldType, parameter );
+            Parameter param = AddParameter ( texts[ 0 ], texts[ 1 ], texts[ 2 ], value ); // base method
+            this.dictionary.Add ( fieldType, param );
         }
 
         public void AddParameterTranslatingAclaraXml ( Parameter parameter )
@@ -479,7 +495,7 @@ namespace MTUComm.actions
 
             // Translate aclara tag/id to us
             if ( ! Enum.TryParse<ParameterType> ( nameTypeAclara, out typeAclara ) )
-                Errors.LogErrorNow ( new TranslatingParamsScriptException () );
+                Errors.LogErrorNow ( new ProcessingParamsScriptException () );
             else
             {
                 if ( IdsAclara.ContainsKey ( typeAclara ) )
@@ -504,6 +520,12 @@ namespace MTUComm.actions
         public bool ContainsParameter ( FIELD fieldType )
         {
             return base.ContainsParameter ( Texts[ fieldType ][ 0 ] );
+        }
+        
+        public void RemoveParameter ( FIELD fieldType )
+        {
+            base.RemoveParameter ( Texts[ fieldType ][ 0 ] );
+            this.dictionary.Remove ( fieldType );
         }
     }
 }

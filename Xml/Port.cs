@@ -52,5 +52,11 @@ namespace Xml
 
             return types;
         }
+        
+        public List<string> GetPortTypes ()
+        {
+            bool isNumeric;
+            return GetPortTypes ( out isNumeric );
+        }
     }
 }

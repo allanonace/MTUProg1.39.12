@@ -28,17 +28,17 @@ namespace aclara_meters.view
         //#elif DEBUG
         //private const bool   DEBUG_AUTO_MODE_ON  = true;
         //#endif
-        private const string DEBUG_ACCOUNTNUMBER = "111111111";
-        private const string DEBUG_WORKORDER     = "11111111111111111111";
-        private const string DEBUG_OLDMETERNUM   = "11111111111111111111";
+        private const string DEBUG_ACCOUNTNUMBER = "123456789"; // 9
+        private const string DEBUG_WORKORDER     = "12345678901234567890"; // 20
+        private const string DEBUG_OLDMETERNUM   = "09876543210987654321"; // 20
         private const int    DEBUG_OLDMETERWORK  = 0;
-        private const string DEBUG_OLDMETERREAD  = "11111111111111111111";
+        private const string DEBUG_OLDMETERREAD  = "444444444444"; //"210987654321"; // 12
         private const int    DEBUG_REPLACEREGIS  = 0;
-        private const string DEBUG_METERNUM      = "111111111111";
+        private const string DEBUG_METERNUM      = "12345678901234567890"; // 20
         private const int    DEBUG_VENDOR_INDEX  = 0; // GENERIC
         private const int    DEBUG_MODEL_INDEX   = 0; // 4D PF2
         private const int    DEBUG_MTRNAME_INDEX = 0; // Pos 4D PF2 CCF
-        private const string DEBUG_INITREADING   = "000020";
+        private const string DEBUG_INITREADING   = "222222222222"; //"123456789012"; // 12
         private const int    DEBUG_ALARM_INDEX   = 0; // All
         private const int    DEBUG_DEMAND_INDEX  = 0;
         private const string DEBUG_READSINTERVAL = "1 Hour";
@@ -95,14 +95,67 @@ namespace aclara_meters.view
             ReadingMtu,
         };
 
-        private enum Names
+        private Dictionary<ActionType,string[]> actionsTexts =
+        new Dictionary<ActionType,string[]> ()
         {
-            Name1 = 0
+            { ActionType.AddMtu,
+                new string[]
+                {
+                   "Add MTU - Port1",
+                   "Add MTU - Port2",
+                   "Add MTU - Miscelanea",
+                   "add_mtu_btn.png"
+                }
+            },
+            { ActionType.ReplaceMTU,
+                new string[]
+                {
+                   "Replace MTU - Port1",
+                   "Replace MTU - Port2",
+                   "Replace MTU - Miscelanea",
+                   "rep_mtu_btn.png"
+                }
+            },
+            { ActionType.ReplaceMeter,
+                new string[]
+                {
+                   "Replace Meter - Port1",
+                   "Replace Meter - Port2",
+                   "Replace Meter - Miscelanea",
+                   "rep_meter_btn.png"
+                }
+            },
+            { ActionType.AddMtuAddMeter,
+                new string[]
+                {
+                   "Add MTU / Add Meter - Port1",
+                   "Add MTU / Add Meter - Port2",
+                   "Add MTU / Add Meter - Miscelanea",
+                   "add_mtu_meter_btn.png"
+                }
+            },
+            { ActionType.AddMtuReplaceMeter,
+                new string[]
+                {
+                   "Add MTU / Replace Meter - Port1",
+                   "Add MTU / Replace Meter - Port2",
+                   "Add MTU / Replace Meter - Miscelanea",
+                   "add_mtu_rep_meter_btn.png"
+                }
+            },
+            { ActionType.ReplaceMtuReplaceMeter,
+                new string[]
+                {
+                   "Replace MTU / Replace Meter - Port1",
+                   "Replace MTU / Replace Meter - Port2",
+                   "Replace MTU / Replace Meter - Miscelanea",
+                   "rep_mtu_rep_meter_btn.png"
+                }
+            },
         };
 
         public const string TWOWAY_FAST     = "Fast";
         public const string TWOWAY_SLOW     = "Slow";
-
         public const string CANCEL_COMPLETE = "Complete";
         public const string CANCEL_CANCEL   = "Cancel";
         public const string CANCEL_SKIP     = "Skip";
@@ -110,12 +163,12 @@ namespace aclara_meters.view
         public const string CANCEL_OTHER    = "Other";
         public const string SWITCH_P2_ON    = "Enable Port 2";
         public const string SWITCH_P2_OFF   = "Disable Port 2";
+        public const string COPY_1_TO_2     = "Copy Port 1";
+        private       Color COL_MANDATORY   = Color.FromHex ( "#FF0000" );
+        private const int   MAX_ACCOUNTNUMBER = 12;
+        private const int   MAX_METERREADING  = 12;
 
         private const string DUAL_PREFIX    = "Repeat ";
-        
-        private       Color COL_MANDATORY   = Color.FromHex ( "#FF0000" );
-        
-        private const int   MAX_READING = 12;
 
         #endregion
 
@@ -159,10 +212,7 @@ namespace aclara_meters.view
         private List<BorderlessEntry>  optionalEntries;
 
         // Snap Reads / Daily Reads
-        private Slider           MeterSnapReadsPort1Slider;
-        private BorderlessPicker MeterTwoWayPort1Picker;
-        private BorderlessPicker MeterAlarmSettingsPort1Picker;
-        private double           snapReadsStep;
+        private double snapReadsStep;
 
         // Alarms
         private List<Alarm> alarmsList  = new List<Alarm>();
@@ -176,64 +226,25 @@ namespace aclara_meters.view
 
         #region Attributes
 
+        private Configuration config;
         private MTUComm.Action add_mtu;
-        //private Global globals;
-        private MtuTypes mtuData;
-        private Mtu currentMtu;
         private AddMtuForm addMtuForm;
         private int detectedMtuType;
-        private Configuration config;
+        private Mtu currentMtu;
+        private Global global;
+        private MTUBasicInfo mtuBasicInfo;
 
         private List<ReadMTUItem> FinalReadListView { get; set; }
 
         private ActionType actionType;
-
-        private bool waitOnClickLogic;
-
         private bool hasTwoPorts;
-        private bool isCancellable;
-        private bool snapRead1Status = false;
-        private bool snapRead2Status = false;
         private bool port2IsActivated;
-
-        // Conditions - Globals
-        private bool WorkOrderRecording;
-        private bool MeterWorkRecording;
-        private bool ApptScreen;
-        private bool AccountDualEntry;
-        private bool WorkOrderDualEntry;
-        private bool OldSerialNumDualEntry;
-        private bool NewSerialNumDualEntry;
-        private bool ReadingDualEntry;
-        private bool OldReadingDualEntry;
-        private bool ReverseReading;
-        private bool IndividualReadInterval;
-        private bool RegisterRecording;
-        private bool UseMeterSerialNumber;
-        private bool OldReadingRecording;
-        private bool ShowAddMtu;
-        private bool ShowAddMtuReplaceMeter;
-        private bool ShowAddMtuMeter;
-        private bool ShowReplaceMtu;
-        private bool ShowReplaceMtuMeter;
-        private bool ShowReplaceMeter;
-
-        // Conditions - Register Snap reads
-        private bool mtuDailyReads;
-        private bool globalsAllowDailyReads;
-        private bool setGlobalSnap;
-        private bool globalsChangeDailyReads;
-        private double globalsDailyReadsDefault;
-        private double dailyReadsMemoryMapValue;
-
-        // Conditions - Alarms
-        private bool mtuRequiresAlarmProfile;
-
-        // GPS
-        private string mtuGeolocationAlt;
-
-        //Logout control
+        private bool waitOnClickLogic;
+        private bool isCancellable;
         private bool isLogout;
+        
+        private bool   snapReadsStatus = false;
+        private string mtuGeolocationAlt;
 
         #endregion
 
@@ -257,1086 +268,96 @@ namespace aclara_meters.view
 
         private void CheckPageByName ()
         {
-            switch ( this.actionType )
+            this.config = Configuration.GetInstance ();
+            this.mtuBasicInfo = MtuForm.mtuBasicInfo;
+
+            this.detectedMtuType = ( int )this.mtuBasicInfo.Type;
+            currentMtu = this.config.GetMtuTypeById ( this.detectedMtuType );
+            
+            this.addMtuForm = new AddMtuForm ( currentMtu );
+            
+            this.add_mtu = new MTUComm.Action (
+                config: FormsApp.config,
+                serial: FormsApp.ble_interface,
+                type  : this.actionType,
+                user  : FormsApp.credentialsService.UserName );
+            
+            isCancellable = false;
+
+            Device.BeginInvokeOnMainThread(() =>
             {
-                #region Add MTU
+                string[] texts = this.actionsTexts[ this.actionType ];
+            
+                name_of_window_port1  .Text   = texts[ 0 ];
+                name_of_window_port2  .Text   = texts[ 1 ];
+                name_of_window_misc   .Text   = texts[ 2 ];
+                bg_read_mtu_button_img.Source = texts[ 3 ];
+                
+                label_read.Opacity    = 1;
+                backdark_bg.IsVisible = false;
+                indicator.IsVisible   = false;
+                
+                if ( Device.Idiom == TargetIdiom.Tablet )
+                     LoadTabletUI ();
+                else LoadPhoneUI ();
+                
+                NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
+                
+                battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
+                rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
+                
+                //Change username textview to Prefs. String
+                if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
+                    userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
+            });
 
-                case ActionType.AddMtu:
+            LoadSideMenuElements ();
 
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
+            _userTapped = false;
+            
+            TappedListeners ();
+            InitializeLowerbarLabel();
+            InitializeAddMtuForm ();
+            RegisterEventHandlers();
 
-                        #region Set Add MTU Info
+            Popup_start.IsVisible = false;
+            Popup_start.IsEnabled = false;
 
-                        name_of_window_port1.Text = "Add MTU";
-                        name_of_window_port2.Text = "Add MTU";
-                        name_of_window_misc.Text = "Add MTU";
+            listaMTUread.IsVisible = false;
 
-                        bg_read_mtu_button_img.Source = "add_mtu_btn.png";
+            Task.Delay(10).ContinueWith(t =>
+              Device.BeginInvokeOnMainThread(() =>
+              {
+                  backdark_bg.IsVisible = true;
+                  indicator.IsVisible = true;
+                  background_scan_page.IsEnabled = false;
 
-              
-                        #endregion
-                    });
-
-                    #region AddMTU Case
-
-                    this.add_mtu = new MTUComm.Action(
-                        config: FormsApp.config,
-                        serial: FormsApp.ble_interface,
-                        type: MTUComm.Action.ActionType.AddMtu,
-                        user: FormsApp.credentialsService.UserName);
-
-                    #region Prepare mtuForm
-
-                    this.config = Configuration.GetInstance();
-
-                    // Get detected mtu
-                    MTUBasicInfo mtuBasicInfo = MtuForm.mtuBasicInfo;
-                    this.detectedMtuType = (int)mtuBasicInfo.Type;
-                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
-
-                    // Initialize logic-form
-                    this.addMtuForm = new AddMtuForm(currentMtu);
-
-                    #endregion
-
-                    isCancellable = false;
-
-                    Task.Run(() =>
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Opacity = 1;
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                        });
-                    });
-
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadTabletUI);
-                        });
-                    }
-                    else
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadPhoneUI);
-                        });
-                    }
-
-                    // Load side menu list
-                    LoadSideMenuElements();
-
-                    NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
+                  Task.Delay(100).ContinueWith(t0 =>
 
                     Device.BeginInvokeOnMainThread(() =>
                     {
                         label_read.Opacity = 1;
-                    });
+                        backdark_bg.IsVisible = false;
+                        indicator.IsVisible = false;
+                        background_scan_page.IsEnabled = true;
+                        label_read.Text = "Press Button to Start";
 
-                    _userTapped = false;
+                        #region Port 2 Buttons Listener
 
-                    //Initialize Tap/Clickable element listeners
-                    TappedListeners();
-
-                    //Change username textview to Prefs. String
-                    if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
-                        userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
-
-                    battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-                    rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
-
-                    InitializeLowerbarLabel();
-
-                    InitializeAddMtuForm ();
-
-                    RegisterEventHandlers();
-
-                    Popup_start.IsVisible = false;
-                    Popup_start.IsEnabled = false;
-
-                    listaMTUread.IsVisible = false;
-
-                    Task.Delay(10).ContinueWith(t =>
-
-                      Device.BeginInvokeOnMainThread(() =>
-                      {
-                          backdark_bg.IsVisible = true;
-                          indicator.IsVisible = true;
-                          background_scan_page.IsEnabled = false;
-
-                          Task.Delay(100).ContinueWith(t0 =>
-
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                label_read.Opacity = 1;
-                                backdark_bg.IsVisible = false;
-                                indicator.IsVisible = false;
-                                background_scan_page.IsEnabled = true;
-                                label_read.Text = "Press Button to Start";
-
-                                #region Port 2 Buttons Listener
-
-                                Task.Factory.StartNew(SetPort2Buttons);
-
-                                #endregion
-
-                                #region Snap Read CheckBox Controller
-
-                                CheckBoxController();
-
-                                #endregion
-
-                            })
-                         );
-                      })
-                    );
-
-                    #endregion
-
-                    break;
-
-                #endregion
-
-                #region Replace MTU
-
-                case ActionType.ReplaceMTU:
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-
-                        #region Set Replace MTU Info
-
-                        name_of_window_port1.Text = "Replace MTU";
-                        name_of_window_port2.Text = "Replace MTU";
-                        name_of_window_misc.Text = "Replace MTU";
-
-                        bg_read_mtu_button_img.Source = "rep_mtu_btn.png";
-
-                        div_OldMtuId.IsVisible = true;
-
-                        div_MeterSerialNumber.IsVisible = false;
-                        div_MeterSerialNumber_2.IsVisible = false;
-
-                        div_MeterSerialNumber.IsVisible = true;
-                        div_MeterSerialNumber_2.IsVisible = true;
-
-
-                        #region NewMeterLabel Validation
-
-                        if (FormsApp.config.global.NewMeterLabel != null)
-                        {
-                            lb_MeterSerialNumber  .Text = FormsApp.config.global.NewMeterLabel;
-                            lb_MeterSerialNumber_2.Text = FormsApp.config.global.NewMeterLabel;
-                        }
+                        Task.Factory.StartNew(SetPort2Buttons);
 
                         #endregion
-                    });
 
-                    #endregion
+                        #region Snap Read CheckBox Controller
 
-                    #region ReplaceMTU Case
-
-                    this.add_mtu = new MTUComm.Action(
-                        config: FormsApp.config,
-                        serial: FormsApp.ble_interface,
-                        type: MTUComm.Action.ActionType.ReplaceMTU,
-                        user: FormsApp.credentialsService.UserName);
-
-                    #region Prepare mtuForm
-
-                    this.config = Configuration.GetInstance();
-
-                    // Get detected mtu
-                    MTUBasicInfo mtuBasicInfo_replaceMtu = MtuForm.mtuBasicInfo;
-                    this.detectedMtuType = (int)mtuBasicInfo_replaceMtu.Type;
-                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
-
-                    // Initialize logic-form
-                    this.addMtuForm = new AddMtuForm(currentMtu);
-
-                    #endregion
-
-                    isCancellable = false;
-
-                    Task.Run(() =>
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Opacity = 1;
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                        });
-                    });
-
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadTabletUI);
-                        });
-                    }
-                    else
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadPhoneUI);
-                        });
-                    }
-
-                    // Load side menu list
-                    LoadSideMenuElements();
-
-                    NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        label_read.Opacity = 1;
-                    });
-
-                    _userTapped = false;
-
-                    //Initialize Tap/Clickable element listeners
-                    TappedListeners();
-
-                    //Change username textview to Prefs. String
-                    if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
-                        userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
-
-                    battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-                    rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
-
-                    InitializeLowerbarLabel();
-
-                    InitializeAddMtuForm ();
-
-                    RegisterEventHandlers();
-
-                    Popup_start.IsVisible = false;
-                    Popup_start.IsEnabled = false;
-
-                    listaMTUread.IsVisible = false;
-
-                    Task.Delay(10).ContinueWith(t =>
-
-                      Device.BeginInvokeOnMainThread(() =>
-                      {
-                          backdark_bg.IsVisible = true;
-                          indicator.IsVisible = true;
-                          background_scan_page.IsEnabled = false;
-
-                          Task.Delay(100).ContinueWith(t0 =>
-
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                label_read.Opacity = 1;
-                                backdark_bg.IsVisible = false;
-                                indicator.IsVisible = false;
-                                background_scan_page.IsEnabled = true;
-                                label_read.Text = "Press Button to Start";
-
-                                #region Port 2 Buttons Listener
-
-                                Task.Factory.StartNew(SetPort2Buttons);
-
-                                //this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
-
-                                #endregion
-
-                                #region Snap Read CheckBox Controller
-
-                                CheckBoxController();
-
-                                #endregion
-
-                            })
-                         );
-                      })
-                    );
-
-                    #endregion
-
-                    break;
-
-                #endregion
-
-                #region Replace Meter
-
-                case ActionType.ReplaceMeter:
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-
-                        #region Set Replace meter Info
-
-                        name_of_window_port1.Text = "Replace Meter";
-                        name_of_window_port2.Text = "Replace Meter";
-                        name_of_window_misc.Text = "Replace Meter";
-
-                        bg_read_mtu_button_img.Source = "rep_meter_btn.png";
-
-                        div_OldMeterSerialNumber.IsVisible = true;
-                        div_OldMeterSerialNumber_2.IsVisible = true;
-
-                        div_OldMeterReading.IsVisible = true;
-                        div_OldMeterReading_2.IsVisible = true;
-
-                        if(FormsApp.config.global.MeterWorkRecording)
-                        {
-                            div_OldMeterWorking.IsVisible = true;
-                            div_OldMeterWorking_2.IsVisible = true;
-                        }
-                      
-                        div_ReplaceMeterRegister.IsVisible = true;
-                        div_ReplaceMeterRegister_2.IsVisible = true;
-
-                        div_MeterSerialNumber.IsVisible = true;
-                        div_MeterSerialNumber_2.IsVisible = true;
-
-
-                        div_MeterSerialNumber.IsVisible = false;
-                        div_MeterSerialNumber_2.IsVisible = false;
-
-                        #endregion
-             
-                        #region NewMeterLabel Validation
-
-                        if(FormsApp.config.global.NewMeterLabel != null)
-                        {
-                            lb_MeterSerialNumber.Text = FormsApp.config.global.NewMeterLabel;
-                            lb_MeterSerialNumber_2.Text = FormsApp.config.global.NewMeterLabel;
-                        }
-
-                        #endregion
-                    });
-
-                    CallToInitNewUIPickers();
-
-                    #region ReplaceMeter Case
-
-                    this.add_mtu = new MTUComm.Action(
-                        config: FormsApp.config,
-                        serial: FormsApp.ble_interface,
-                        type: MTUComm.Action.ActionType.ReplaceMeter,
-                        user: FormsApp.credentialsService.UserName);
-
-                    #region Prepare mtuForm
-
-                    this.config = Configuration.GetInstance();
-
-                    // Get detected mtu
-                    MTUBasicInfo mtuBasicInfo_replaceMeter= MtuForm.mtuBasicInfo;
-                    this.detectedMtuType = (int)mtuBasicInfo_replaceMeter.Type;
-                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
-
-                    // Initialize logic-form
-                    this.addMtuForm = new AddMtuForm(currentMtu);
-
-                    #endregion
-
-                    isCancellable = false;
-
-                    Task.Run(() =>
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Opacity = 1;
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                        });
-                    });
-
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadTabletUI);
-                        });
-                    }
-                    else
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadPhoneUI);
-                        });
-                    }
-
-                    // Load side menu list
-                    LoadSideMenuElements();
-
-                    NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        label_read.Opacity = 1;
-                    });
-
-                    _userTapped = false;
-
-                    //Initialize Tap/Clickable element listeners
-                    TappedListeners();
-
-                    //Change username textview to Prefs. String
-                    if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
-                        userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
-
-                    battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-                    rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
-
-                    InitializeLowerbarLabel();
-
-                    InitializeAddMtuForm ();
-
-                    RegisterEventHandlers();
-
-                    Popup_start.IsVisible = false;
-                    Popup_start.IsEnabled = false;
-
-                    listaMTUread.IsVisible = false;
-
-                    Task.Delay(10).ContinueWith(t =>
-
-                      Device.BeginInvokeOnMainThread(() =>
-                      {
-                          backdark_bg.IsVisible = true;
-                          indicator.IsVisible = true;
-                          background_scan_page.IsEnabled = false;
-
-                          Task.Delay(100).ContinueWith(t0 =>
-
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                label_read.Opacity = 1;
-                                backdark_bg.IsVisible = false;
-                                indicator.IsVisible = false;
-                                background_scan_page.IsEnabled = true;
-                                label_read.Text = "Press Button to Start";
-
-                                #region Port 2 Buttons Listener
-
-                                Task.Factory.StartNew(SetPort2Buttons);
-                                //this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
-
-                                #endregion
-
-                                #region Snap Read CheckBox Controller
-
-                                CheckBoxController();
-
-                                #endregion
-
-                            })
-                         );
-                      })
-                    );
-
-                    #endregion
-
-                    break;
-
-                #endregion
-
-                #region Add MTU / Add Meter
-
-                case ActionType.AddMtuAddMeter:
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        #region Set Add MTU Add Meter Info
-
-                        name_of_window_port1.Text = "Add MTU / Add Meter";
-                        name_of_window_port2.Text = "Add MTU / Add Meter";
-                        name_of_window_misc.Text = "Add MTU / Add Meter";
-
-                        bg_read_mtu_button_img.Source = "add_mtu_meter_btn.png";
+                        CheckBoxController();
 
                         #endregion
 
-
-                        #region Set UI for Add Mtu Add Meter
-
-                        this.div_MeterSerialNumber.IsVisible = false;
-                        this.div_MeterSerialNumber_2.IsVisible = false;
-
-                        if (FormsApp.config.global.MeterWorkRecording)
-                        {
-                            this.div_OldMeterWorking.IsVisible = true;
-                            this.div_OldMeterWorking_2.IsVisible = true;
-                        }
-
-                        this.div_ReplaceMeterRegister.IsVisible = false;
-                        this.div_ReplaceMeterRegister_2.IsVisible = false;
-
-                        this.div_MeterSerialNumber.IsVisible = true;
-                        this.div_MeterSerialNumber_2.IsVisible = true;
-
-                        this.div_MeterSerialNumber.IsVisible = false;
-                        this.div_MeterSerialNumber_2.IsVisible = false;
-
-                        #region NewMeterLabel Validation
-
-                        if (FormsApp.config.global.NewMeterLabel != null)
-                        {
-                            lb_MeterSerialNumber.Text = FormsApp.config.global.NewMeterLabel;
-                            lb_MeterSerialNumber_2.Text = FormsApp.config.global.NewMeterLabel;
-                        }
-
-                        #endregion
-
-                        #endregion
-                    });
-
-                    CallToInitNewUIPickers();
-
-                    #region AddMTU | AddMeter Case
-
-                    this.add_mtu = new MTUComm.Action(
-                        config: FormsApp.config,
-                        serial: FormsApp.ble_interface,
-                        type: MTUComm.Action.ActionType.AddMtuAddMeter,
-                        user: FormsApp.credentialsService.UserName);
-
-                    #region Prepare mtuForm
-
-                    this.config = Configuration.GetInstance();
-
-                    // Get detected mtu
-                    MTUBasicInfo mtuBasicInfo_addmtuaddmeter = MtuForm.mtuBasicInfo;
-                    this.detectedMtuType = (int)mtuBasicInfo_addmtuaddmeter.Type;
-                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
-
-                    // Initialize logic-form
-                    this.addMtuForm = new AddMtuForm(currentMtu);
-
-                    #endregion
-
-                    isCancellable = false;
-
-                    Task.Run(() =>
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Opacity = 1;
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                        });
-                    });
-
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadTabletUI);
-                        });
-                    }
-                    else
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadPhoneUI);
-                        });
-                    }
-
-                    // Load side menu list
-                    LoadSideMenuElements();
-
-                    NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        label_read.Opacity = 1;
-                    });
-
-                    _userTapped = false;
-
-                    //Initialize Tap/Clickable element listeners
-                    TappedListeners();
-
-                    //Change username textview to Prefs. String
-                    if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
-                        userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
-
-                    battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-                    rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
-
-                    InitializeLowerbarLabel();
-
-                    InitializeAddMtuForm ();
-
-                    RegisterEventHandlers();
-
-                    Popup_start.IsVisible = false;
-                    Popup_start.IsEnabled = false;
-
-                    listaMTUread.IsVisible = false;
-
-                    Task.Delay(10).ContinueWith(t =>
-
-                      Device.BeginInvokeOnMainThread(() =>
-                      {
-                          backdark_bg.IsVisible = true;
-                          indicator.IsVisible = true;
-                          background_scan_page.IsEnabled = false;
-
-                          Task.Delay(100).ContinueWith(t0 =>
-
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                label_read.Opacity = 1;
-                                backdark_bg.IsVisible = false;
-                                indicator.IsVisible = false;
-                                background_scan_page.IsEnabled = true;
-                                label_read.Text = "Press Button to Start";
-
-                                #region Port 2 Buttons Listener
-
-                                Task.Factory.StartNew(SetPort2Buttons);
-                                //this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
-
-                                #endregion
-
-                                #region Snap Read CheckBox Controller
-
-                                CheckBoxController();
-
-                                #endregion
-
-                            })
-                         );
-                      })
-                    );
-
-                    #endregion
-
-                    break;
-
-                #endregion
-
-                #region Add MTU / Replace Meter
-
-                case ActionType.AddMtuReplaceMeter:
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        #region Set Add MTU Replace Meter Info
-
-                        name_of_window_port1.Text = "Add MTU / Replace Meter";
-                        name_of_window_port2.Text = "Add MTU / Replace Meter";
-                        name_of_window_misc.Text = "Add MTU / Replace Meter";
-
-                        bg_read_mtu_button_img.Source = "add_mtu_rep_meter_btn.png";
-
-                        #endregion
-
-                        #region Set UI for Add Mtu Replace Meter
-
-                        this.div_MeterSerialNumber.IsVisible = false;
-                        this.div_MeterSerialNumber_2.IsVisible = false;
-
-                        if (FormsApp.config.global.MeterWorkRecording)
-                        {
-                            this.div_OldMeterWorking.IsVisible = true;
-                            this.div_OldMeterWorking_2.IsVisible = true;
-                        }
-
-                        this.div_ReplaceMeterRegister.IsVisible = true;
-                        this.div_ReplaceMeterRegister_2.IsVisible = true;
-
-                        this.div_MeterSerialNumber.IsVisible = true;
-                        this.div_MeterSerialNumber_2.IsVisible = true;
-
-                        this.div_OldMeterSerialNumber.IsVisible = true;
-                        this.div_OldMeterSerialNumber_2.IsVisible = true;
-
-                        this.div_OldMeterReading.IsVisible = true;
-                        this.div_OldMeterReading_2.IsVisible = true;
-
-                        this.div_MeterSerialNumber.IsVisible = false;
-                        this.div_MeterSerialNumber_2.IsVisible = false;
-
-                        #region NewMeterLabel Validation
-
-                        if (FormsApp.config.global.NewMeterLabel != null)
-                        {
-                            lb_MeterSerialNumber.Text = FormsApp.config.global.NewMeterLabel;
-                            lb_MeterSerialNumber_2.Text = FormsApp.config.global.NewMeterLabel;
-                        }
-
-                        #endregion
-
-                        #endregion
-                    });
-
-                    CallToInitNewUIPickers();
-
-                    #region AddMTU | Replace Meter Case
-
-                    this.add_mtu = new MTUComm.Action(
-                        config: FormsApp.config,
-                        serial: FormsApp.ble_interface,
-                        type: MTUComm.Action.ActionType.AddMtuReplaceMeter,
-                        user: FormsApp.credentialsService.UserName);
-
-                    #region Prepare mtuForm
-
-                    this.config = Configuration.GetInstance();
-
-                    // Get detected mtu
-                    MTUBasicInfo mtuBasicInfo_addmtureplacemeter = MtuForm.mtuBasicInfo;
-                    this.detectedMtuType = (int)mtuBasicInfo_addmtureplacemeter.Type;
-                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
-
-                    // Initialize logic-form
-                    this.addMtuForm = new AddMtuForm(currentMtu);
-
-                    #endregion
-
-                    isCancellable = false;
-
-                    Task.Run(() =>
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Opacity = 1;
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                        });
-                    });
-
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadTabletUI);
-                        });
-                    }
-                    else
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadPhoneUI);
-                        });
-                    }
-
-                    // Load side menu list
-                    LoadSideMenuElements();
-
-                    NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        label_read.Opacity = 1;
-                    });
-
-                    _userTapped = false;
-
-                    //Initialize Tap/Clickable element listeners
-                    TappedListeners();
-
-                    //Change username textview to Prefs. String
-                    if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
-                        userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
-
-                    battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-                    rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
-
-                    InitializeLowerbarLabel();
-
-                    InitializeAddMtuForm ();
-
-                    RegisterEventHandlers();
-
-                    Popup_start.IsVisible = false;
-                    Popup_start.IsEnabled = false;
-
-                    listaMTUread.IsVisible = false;
-
-                    Task.Delay(10).ContinueWith(t =>
-
-                      Device.BeginInvokeOnMainThread(() =>
-                      {
-                          backdark_bg.IsVisible = true;
-                          indicator.IsVisible = true;
-                          background_scan_page.IsEnabled = false;
-
-                          Task.Delay(100).ContinueWith(t0 =>
-
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                label_read.Opacity = 1;
-                                backdark_bg.IsVisible = false;
-                                indicator.IsVisible = false;
-                                background_scan_page.IsEnabled = true;
-                                label_read.Text = "Press Button to Start";
-
-                                #region Port 2 Buttons Listener
-
-                                Task.Factory.StartNew(SetPort2Buttons);
-                                //this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
-
-                                #endregion
-
-                                #region Snap Read CheckBox Controller
-
-                                CheckBoxController();
-
-                                #endregion
-
-                            })
-                         );
-                      })
-                    );
-
-                    #endregion
-
-
-                    break;
-
-                #endregion
-
-                #region Replace MTU / Replace Meter
-
-                case ActionType.ReplaceMtuReplaceMeter:
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        #region Set Replace MTU Replace Meter Info
-
-                        name_of_window_port1.Text = "Replace MTU / Replace Meter";
-                        name_of_window_port2.Text = "Replace MTU / Replace Meter";
-                        name_of_window_misc.Text = "Replace MTU / Replace Meter";
-
-                        bg_read_mtu_button_img.Source = "rep_mtu_rep_meter_btn.png";
-
-                        #endregion
-
-                        #region Set UI for Replace Mtu Replace Meter
-
-                        div_MeterSerialNumber.IsVisible = false;
-                        div_MeterSerialNumber_2.IsVisible = false;
-
-                        if (FormsApp.config.global.MeterWorkRecording)
-                        {
-                            div_OldMeterWorking.IsVisible = true;
-                            div_OldMeterWorking_2.IsVisible = true;
-                        }
-
-                        div_ReplaceMeterRegister.IsVisible = true;
-                        div_ReplaceMeterRegister_2.IsVisible = true;
-
-                        div_MeterSerialNumber.IsVisible = true;
-                        div_MeterSerialNumber_2.IsVisible = true;
-
-                        div_OldMeterSerialNumber.IsVisible = true;
-                        div_OldMeterSerialNumber_2.IsVisible = true;
-
-                        div_OldMeterReading.IsVisible = true;
-                        div_OldMeterReading_2.IsVisible = true;
-
-                        div_OldMtuId.IsVisible = true;
-
-                        div_MeterSerialNumber.IsVisible = false;
-                        div_MeterSerialNumber_2.IsVisible = false;
-
-                        #region NewMeterLabel Validation
-
-                        if (FormsApp.config.global.NewMeterLabel != null)
-                        {
-                            lb_MeterSerialNumber.Text = FormsApp.config.global.NewMeterLabel;
-                            lb_MeterSerialNumber_2.Text = FormsApp.config.global.NewMeterLabel;
-                        }
-
-                        #endregion
-
-                        #endregion
-                    });
-
-                    CallToInitNewUIPickers();
-
-                    #region AddMTU | AddMeter Case
-
-                    this.add_mtu = new MTUComm.Action(
-                        config: FormsApp.config,
-                        serial: FormsApp.ble_interface,
-                        type: MTUComm.Action.ActionType.ReplaceMtuReplaceMeter,
-                        user: FormsApp.credentialsService.UserName);
-
-                    #region Prepare mtuForm
-
-                    this.config = Configuration.GetInstance();
-
-                    // Get detected mtu
-                    MTUBasicInfo mtuBasicInfo_replacemtureplacemeter = MtuForm.mtuBasicInfo;
-                    this.detectedMtuType = (int)mtuBasicInfo_replacemtureplacemeter.Type;
-                    currentMtu = this.config.GetMtuTypeById(this.detectedMtuType);
-
-                    // Initialize logic-form
-                    this.addMtuForm = new AddMtuForm(currentMtu);
-
-                    #endregion
-
-                    isCancellable = false;
-
-                    Task.Run(() =>
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Opacity = 1;
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                        });
-                    });
-
-                    if (Device.Idiom == TargetIdiom.Tablet)
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadTabletUI);
-                        });
-                    }
-                    else
-                    {
-                        Task.Run(() =>
-                        {
-                            Device.BeginInvokeOnMainThread(LoadPhoneUI);
-                        });
-                    }
-
-                    // Load side menu list
-                    LoadSideMenuElements();
-
-                    NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        label_read.Opacity = 1;
-                    });
-
-                    _userTapped = false;
-
-                    //Initialize Tap/Clickable element listeners
-                    TappedListeners();
-
-                    //Change username textview to Prefs. String
-                    if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
-                        userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
-
-                    battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-                    rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
-
-                    InitializeLowerbarLabel();
-
-                    InitializeAddMtuForm ();
-
-                    RegisterEventHandlers();
-
-                    Popup_start.IsVisible = false;
-                    Popup_start.IsEnabled = false;
-
-                    listaMTUread.IsVisible = false;
-
-                    Task.Delay(10).ContinueWith(t =>
-
-                      Device.BeginInvokeOnMainThread(() =>
-                      {
-                          backdark_bg.IsVisible = true;
-                          indicator.IsVisible = true;
-                          background_scan_page.IsEnabled = false;
-
-                          Task.Delay(100).ContinueWith(t0 =>
-
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                label_read.Opacity = 1;
-                                backdark_bg.IsVisible = false;
-                                indicator.IsVisible = false;
-                                background_scan_page.IsEnabled = true;
-                                label_read.Text = "Press Button to Start";
-
-                                #region Port 2 Buttons Listener
-
-                                Task.Factory.StartNew(SetPort2Buttons);
-                                //this.SetPort2Buttons (); //Task.Factory.StartNew(SetPort2Buttons);
-
-                                #endregion
-
-                                #region Snap Read CheckBox Controller
-
-                                CheckBoxController();
-
-                                #endregion
-
-                            })
-                         );
-                      })
-                    );
-
-                    #endregion
-
-
-                    break;
-
-                    #endregion
-            }
-        }
-
-        private void CallToInitNewUIPickers()
-        {
-
-            #region HardCoded Picker for Meter working  // Should be global???
-
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList = new ObservableCollection<string>();
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList = new ObservableCollection<PickerItems>
-                    {
-                        new PickerItems { Name = "Yes" },
-                        new PickerItems { Name = "No" },
-                        new PickerItems { Name = "Broken" }
-                    };
-
-            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-            foreach (var item in objClassList)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList.Add(item.Name);
-            }
-            //Now I am given ItemsSorce to the Pickers
-            pck_OldMeterWorking.ItemsSource = objStringList;
-            pck_OldMeterWorking_2.ItemsSource = objStringList;
-
-            #endregion
-
-            #region HardCoded Picker for Replace Metee Register // Should be global???
-
-
-            //This ObservableCollection later we will assign ItemsSource for Picker.
-            ObservableCollection<string> objStringList2 = new ObservableCollection<string>();
-            //Mostly below ObservableCollection Items we will get from server but here Iam mentioned static data.
-            ObservableCollection<PickerItems> objClassList2 = new ObservableCollection<PickerItems>
-                    {
-                        new PickerItems { Name = "Meter" },
-                        new PickerItems { Name = "Register" },
-                        new PickerItems { Name = "Both" }
-                    };
-            /*Here we have to assign service Items to one ObservableCollection<string>() for this purpose
-            I am using foreach and we can add each item to the ObservableCollection<string>(). */
-            foreach (var item in objClassList2)
-            {
-                // Here I am adding each item Name to the ObservableCollection<string>() and below I will assign to the Picker
-                objStringList2.Add(item.Name);
-            }
-
-            //Now I am given ItemsSorce to the Pickers
-            pck_ReplaceMeterRegister.ItemsSource = objStringList2;
-            pck_ReplaceMeterRegister_2.ItemsSource = objStringList2;
-
-            #endregion
-
+                    })
+                 );
+              })
+            );
         }
 
         private void CheckBoxController()
@@ -1375,19 +396,19 @@ namespace aclara_meters.view
             {
                 Command = new Command(() =>
                 {
-                    if (!snapRead1Status)
+                    if (!snapReadsStatus)
                     {
                         cbx_SnapReads.Source = "checkbox_on";
                         sld_SnapReads.IsEnabled = true;
                         divSub_SnapReads.Opacity = 1;
-                        snapRead1Status = true;
+                        snapReadsStatus = true;
                     }
                     else
                     {
                         cbx_SnapReads.Source = "checkbox_off";
                         sld_SnapReads.IsEnabled = false;
                         divSub_SnapReads.Opacity = 0.8;
-                        snapRead1Status = false;
+                        snapReadsStatus = false;
                     }
                 }),
             });
@@ -1459,15 +480,15 @@ namespace aclara_meters.view
         {
             #region Conditions
 
-            Mtu    mtu    = this.addMtuForm.mtu;
-            Global global = this.addMtuForm.global;
-            MTUBasicInfo mtuBasicinfo = MtuForm.mtuBasicInfo;
+            this.global       = this.addMtuForm.global;
+            this.currentMtu   = this.addMtuForm.mtu;
+            this.mtuBasicInfo = MtuForm.mtuBasicInfo;
 
             #endregion
 
             #region Two ports
 
-            this.hasTwoPorts = mtu.TwoPorts;
+            this.hasTwoPorts = this.currentMtu.TwoPorts;
             port2label.IsVisible = this.hasTwoPorts;
 
             #endregion
@@ -1513,6 +534,8 @@ namespace aclara_meters.view
             #endregion
 
             #region Meter Serial Number and Reading ( and OLD fields )
+
+            this.Initialize_OldMeterPickers ();
 
             // ( New ) Meter Seria Number
             bool useMeterSerialNumber = global.UseMeterSerialNumber;
@@ -1649,7 +672,7 @@ namespace aclara_meters.view
 
             #region Read Interval
 
-            this.InitializePicker_ReadInterval ( mtuBasicinfo, mtu, global );
+            this.InitializePicker_ReadInterval ( this.mtuBasicInfo, this.currentMtu, this.global );
             
             // Use IndividualReadInterval tag to enable o disable read interval picker
             if ( ! ( this.pck_ReadInterval.IsEnabled = global.IndividualReadInterval ) )
@@ -1663,7 +686,7 @@ namespace aclara_meters.view
 
             #region Snap Reads / Daily Reads
 
-            bool useDailyReads        = global.AllowDailyReads && mtu.DailyReads;
+            bool useDailyReads        = global.AllowDailyReads && this.currentMtu.DailyReads;
             bool changeableDailyReads = global.IndividualDailyReads;
             int  dailyReadsDefault    = this.config.global.DailyReadsDefault;
             
@@ -1683,7 +706,7 @@ namespace aclara_meters.view
 
             #region 2-Way
 
-            bool useTwoWay = mtu.OnTimeSync;
+            bool useTwoWay = this.currentMtu.OnTimeSync && this.currentMtu.FastMessageConfig;
             
             this.Initialize_TwoWay ();
 
@@ -1701,9 +724,8 @@ namespace aclara_meters.view
             alarmsList  = alarmsList .FindAll ( alarm => ! string.Equals ( alarm.Name.ToLower (), "scripting" ) );
             alarms2List = alarms2List.FindAll ( alarm => ! string.Equals ( alarm.Name.ToLower (), "scripting" ) );
 
-            bool RequiresAlarmProfile = mtu.RequiresAlarmProfile;
+            bool RequiresAlarmProfile = this.currentMtu.RequiresAlarmProfile;
             bool portHasSomeAlarm     = ( RequiresAlarmProfile && alarmsList.Count > 0 );
-            bool port2HasSomeAlarm    = ( hasTwoPorts && RequiresAlarmProfile && alarms2List.Count > 0 );
 
             pck_Alarms.ItemDisplayBinding = new Binding ( "Name" );
 
@@ -1721,7 +743,7 @@ namespace aclara_meters.view
             demandsList  = config.demands.FindByMtuType ( this.detectedMtuType );
             demands2List = ( hasTwoPorts ) ? config.demands.FindByMtuType ( this.detectedMtuType ) : new List<Demand> ();
 
-            bool MtuDemand          = mtu.MtuDemand;
+            bool MtuDemand          = this.currentMtu.MtuDemand;
             bool portHasSomeDemand  = ( MtuDemand && demandsList.Count > 0 );
             bool port2HasSomeDemand = ( hasTwoPorts && MtuDemand && demands2List.Count > 0 );
 
@@ -1773,10 +795,11 @@ namespace aclara_meters.view
             #region Set Max
 
             // Set maximum values from global.xml
-            tbx_AccountNumber              .MaxLength = global.AccountLength;
-            tbx_AccountNumber_2            .MaxLength = global.AccountLength;
-            tbx_AccountNumber_Dual         .MaxLength = global.AccountLength;
-            tbx_AccountNumber_Dual_2       .MaxLength = global.AccountLength;
+            int acnLength = ( global.AccountLength <= MAX_ACCOUNTNUMBER ) ? global.AccountLength : MAX_ACCOUNTNUMBER;
+            tbx_AccountNumber              .MaxLength = acnLength;
+            tbx_AccountNumber_2            .MaxLength = acnLength;
+            tbx_AccountNumber_Dual         .MaxLength = acnLength;
+            tbx_AccountNumber_Dual_2       .MaxLength = acnLength;
             
             tbx_WorkOrder                  .MaxLength = global.WorkOrderLength;
             tbx_WorkOrder_2                .MaxLength = global.WorkOrderLength;
@@ -1795,15 +818,15 @@ namespace aclara_meters.view
             tbx_MeterSerialNumber_Dual     .MaxLength = global.MeterNumberLength;
             tbx_MeterSerialNumber_Dual_2   .MaxLength = global.MeterNumberLength;
             
-            tbx_OldMeterReading            .MaxLength = MAX_READING;
-            tbx_OldMeterReading_2          .MaxLength = MAX_READING;
-            tbx_OldMeterReading_Dual       .MaxLength = MAX_READING;
-            tbx_OldMeterReading_Dual_2     .MaxLength = MAX_READING;
+            tbx_OldMeterReading            .MaxLength = MAX_METERREADING;
+            tbx_OldMeterReading_2          .MaxLength = MAX_METERREADING;
+            tbx_OldMeterReading_Dual       .MaxLength = MAX_METERREADING;
+            tbx_OldMeterReading_Dual_2     .MaxLength = MAX_METERREADING;
             
-            tbx_MeterReading               .MaxLength = MAX_READING;
-            tbx_MeterReading_2             .MaxLength = MAX_READING;
-            tbx_MeterReading_Dual          .MaxLength = MAX_READING;
-            tbx_MeterReading_Dual_2        .MaxLength = MAX_READING;
+            tbx_MeterReading               .MaxLength = MAX_METERREADING;
+            tbx_MeterReading_2             .MaxLength = MAX_METERREADING;
+            tbx_MeterReading_Dual          .MaxLength = MAX_METERREADING;
+            tbx_MeterReading_Dual_2        .MaxLength = MAX_METERREADING;
 
             #endregion
 
@@ -1982,6 +1005,11 @@ namespace aclara_meters.view
             // Button for copy port 1 common fields values to port 2
             this.div_CopyPort1To2.IsVisible = this.port2IsActivated && global.NewMeterPort2isTheSame;
             this.div_CopyPort1To2.IsEnabled = this.port2IsActivated && global.NewMeterPort2isTheSame;
+            
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                btn_CopyPort1To2.Text = COPY_1_TO_2;
+            });
             
             #endregion
         }
@@ -2234,7 +1262,7 @@ namespace aclara_meters.view
 
         private void RegisterEventHandlers()
         {
-            if ( AccountDualEntry )
+            if ( this.global.AccountDualEntry )
             {
                 tbx_AccountNumber.Unfocused += (s, e) => { ServicePortId_validate(1); };
                 this.tbx_AccountNumber_2.Unfocused += (s, e) => { ServicePortId_validate(2); };
@@ -2243,7 +1271,7 @@ namespace aclara_meters.view
                 servicePortId_cancel.Tapped += ServicePortId_Cancel_Tapped;
             }
 
-            if ( WorkOrderDualEntry )
+            if ( this.global.WorkOrderDualEntry )
             {
                 tbx_WorkOrder.Unfocused += (s, e) => { FieldOrder_validate(1); };
                 this.tbx_WorkOrder_2.Unfocused += (s, e) => { FieldOrder_validate(2); };
@@ -2958,6 +1986,30 @@ namespace aclara_meters.view
             pck_TwoWay.ItemsSource = twoWayList;
         }
 
+        private void Initialize_OldMeterPickers ()
+        {
+            List<string> list = new List<string> ()
+            {
+                "Yes",
+                "No",
+                "Broken"
+            };
+            
+            pck_OldMeterWorking.ItemsSource   = list;
+            pck_OldMeterWorking_2.ItemsSource = list;
+
+            list = new List<string> ()
+            {
+                "Meter",
+                "Register",
+                "Both"
+            };
+
+            //Now I am given ItemsSorce to the Pickers
+            pck_ReplaceMeterRegister.ItemsSource   = list;
+            pck_ReplaceMeterRegister_2.ItemsSource = list;
+        }
+
         #region Phone/Tablet
 
         private void LoadPhoneUI()
@@ -3131,13 +2183,18 @@ namespace aclara_meters.view
 
             try
             {
+                // Update MeterReading field length to use and validate
+                this.tbx_MeterReading        .MaxLength = selectedMeter.LiveDigits;
+                this.tbx_MeterReading_Dual   .MaxLength = selectedMeter.LiveDigits;
+                this.tbx_OldMeterReading     .MaxLength = selectedMeter.LiveDigits;
+                this.tbx_OldMeterReading_Dual.MaxLength = selectedMeter.LiveDigits;
+            
                 Console.WriteLine(selected_MeterType_Name + " Selected");
             }
             catch (Exception n2)
             {
                 Console.WriteLine(n2.StackTrace);
             }
-
         }
 
         private void MeterNames2Picker_SelectedIndexChanged2(object sender, EventArgs e)
@@ -3150,6 +2207,12 @@ namespace aclara_meters.view
 
             try
             {
+                // Update MeterReading field length to use and validate
+                this.tbx_MeterReading_2        .MaxLength = selectedMeter.LiveDigits;
+                this.tbx_MeterReading_Dual_2   .MaxLength = selectedMeter.LiveDigits;
+                this.tbx_OldMeterReading_2     .MaxLength = selectedMeter.LiveDigits;
+                this.tbx_OldMeterReading_Dual_2.MaxLength = selectedMeter.LiveDigits;
+            
                 Console.WriteLine(selected_MeterType_Name_2 + " Selected");
             }
             catch (Exception n2)
@@ -3858,7 +2921,7 @@ namespace aclara_meters.view
                 );
             });
 
-            basicRead.OnError += ((s, e) =>
+            basicRead.OnError += (() =>
             {
                 Task.Delay(100).ContinueWith(t =>
                     Device.BeginInvokeOnMainThread(() =>
@@ -4348,7 +3411,7 @@ namespace aclara_meters.view
                    }));
             });
 
-            turnOffAction.OnError += ((s, args) =>
+            turnOffAction.OnError += (() =>
             {
                 Task.Delay(2000).ContinueWith(t =>
                    Device.BeginInvokeOnMainThread(() =>
@@ -4661,12 +3724,18 @@ namespace aclara_meters.view
                                     index <= -1 && ! isMandatory );
 
             // Value equals to maximum length
-            dynamic NoValEq = new Func<string,int,bool> ( ( value, maxLength ) =>
+            dynamic NoEqNum = new Func<string,int,bool> ( ( value, maxLength ) =>
                                 ! Validations.NumericText ( value, maxLength ) );
+                                
+            dynamic NoEqTxt = new Func<string,int,bool> ( ( value, maxLength ) =>
+                                ! Validations.Text ( value, maxLength ) );
 
             // Value equals or lower to maximum length
-            dynamic NoValEL = new Func<string,int,bool> ( ( value, maxLength ) =>
+            dynamic NoELNum = new Func<string,int,bool> ( ( value, maxLength ) =>
                                 ! Validations.NumericText ( value, maxLength, 1, true, true, false ) );
+                                
+            dynamic NoELTxt = new Func<string,int,bool> ( ( value, maxLength ) =>
+                                ! Validations.Text ( value, maxLength, 1, true, true, false ) );
 
             #region Port 1
 
@@ -4696,14 +3765,14 @@ namespace aclara_meters.view
             bool noDMr = EmptyNoReq ( this.tbx_MeterReading_Dual        .Text, MANDATORY_METERREADING    );
 
             // Correct length
-            bool okAcn =                                             NoValEq ( this.tbx_AccountNumber       .Text, global.AccountLength               );
-            bool okWor = this.div_WorkOrder            .IsVisible && NoValEL ( this.tbx_WorkOrder           .Text, global.WorkOrderLength             );
-            bool okOMt = this.div_OldMtuId             .IsVisible && NoValEq ( this.tbx_OldMtuId            .Text, global.MtuIdLength                 );
-            bool okOMs = this.div_OldMeterSerialNumber .IsVisible && NoValEL ( this.tbx_OldMeterSerialNumber.Text, global.MeterNumberLength           );
-            bool okMsn = this.div_MeterSerialNumber    .IsVisible && NoValEL ( this.tbx_MeterSerialNumber   .Text, global.MeterNumberLength           );
-            bool okSnr = this.div_SnapReads            .IsVisible && NoValEL ( this.lb_SnapReads            .Text, (int)this.sld_SnapReads .Maximum   ) && snapRead1Status;
-            bool okOMr = this.div_OldMeterReading      .IsVisible && NoValEq ( this.tbx_OldMeterReading     .Text, this.tbx_OldMeterReading.MaxLength );
-            bool okMre =                                             NoValEq ( this.tbx_MeterReading        .Text, this.tbx_MeterReading   .MaxLength );
+            bool okAcn =                                             NoEqNum ( this.tbx_AccountNumber       .Text, global.AccountLength               );
+            bool okWor = this.div_WorkOrder            .IsVisible && NoELTxt ( this.tbx_WorkOrder           .Text, global.WorkOrderLength             );
+            bool okOMt = this.div_OldMtuId             .IsVisible && NoEqTxt ( this.tbx_OldMtuId            .Text, global.MtuIdLength                 );
+            bool okOMs = this.div_OldMeterSerialNumber .IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber.Text, global.MeterNumberLength           );
+            bool okMsn = this.div_MeterSerialNumber    .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber   .Text, global.MeterNumberLength           );
+            bool okSnr = this.div_SnapReads            .IsVisible && NoELNum ( this.lb_SnapReads            .Text, (int)this.sld_SnapReads .Maximum   ) && snapReadsStatus;
+            bool okOMr = this.div_OldMeterReading      .IsVisible && NoEqNum ( this.tbx_OldMeterReading     .Text, this.tbx_OldMeterReading.MaxLength );
+            bool okMre =                                             NoEqNum ( this.tbx_MeterReading        .Text, this.tbx_MeterReading   .MaxLength );
             
             bool okOMw = this.div_OldMeterWorking      .IsVisible && this.pck_OldMeterWorking     .SelectedIndex <= -1;
             bool okRpc = this.div_ReplaceMeterRegister .IsVisible && this.pck_ReplaceMeterRegister.SelectedIndex <= -1;
@@ -4713,12 +3782,12 @@ namespace aclara_meters.view
             bool okAlr = this.div_Alarms               .IsVisible && this.pck_Alarms              .SelectedIndex <= -1;
             bool okDmd = this.div_Demands              .IsVisible && this.pck_Demands             .SelectedIndex <= -1;
 
-            bool okDAc = global.AccountDualEntry      && NoValEq ( this.tbx_AccountNumber_Dual       .Text, global.AccountLength       );
-            bool okDWr = global.WorkOrderDualEntry    && NoValEL ( this.tbx_WorkOrder_Dual           .Text, global.WorkOrderLength     );
-            bool okDOs = global.OldSerialNumDualEntry && NoValEL ( this.tbx_OldMeterSerialNumber_Dual.Text, global.MeterNumberLength   );
-            bool okDMs = global.NewSerialNumDualEntry && NoValEL ( this.tbx_MeterSerialNumber_Dual   .Text, global.MeterNumberLength   );
-            bool okDOr = global.OldReadingDualEntry   && NoValEq ( this.tbx_OldMeterReading_Dual     .Text, this.tbx_OldMeterReading_Dual.MaxLength );
-            bool okDMr = global.ReadingDualEntry      && NoValEq ( this.tbx_MeterReading_Dual        .Text, this.tbx_MeterReading_Dual   .MaxLength );
+            bool okDAc = global.AccountDualEntry      && NoEqNum ( this.tbx_AccountNumber_Dual       .Text, global.AccountLength       );
+            bool okDWr = global.WorkOrderDualEntry    && NoELTxt ( this.tbx_WorkOrder_Dual           .Text, global.WorkOrderLength     );
+            bool okDOs = global.OldSerialNumDualEntry && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual.Text, global.MeterNumberLength   );
+            bool okDMs = global.NewSerialNumDualEntry && NoELTxt ( this.tbx_MeterSerialNumber_Dual   .Text, global.MeterNumberLength   );
+            bool okDOr = global.OldReadingDualEntry   && NoEqNum ( this.tbx_OldMeterReading_Dual     .Text, this.tbx_OldMeterReading_Dual.MaxLength );
+            bool okDMr = global.ReadingDualEntry      && NoEqNum ( this.tbx_MeterReading_Dual        .Text, this.tbx_MeterReading_Dual   .MaxLength );
             
             string DUAL_ERROR = " ( Second entry )";
             
@@ -4836,23 +3905,23 @@ namespace aclara_meters.view
                 noDMr = EmptyNoReq ( this.tbx_MeterReading_Dual        .Text, MANDATORY_METERREADING    );
     
                 // Correct length
-                okAcn =                                               NoValEq ( this.tbx_AccountNumber_2       .Text, global.AccountLength                 );
-                okWor = this.div_WorkOrder_2            .IsVisible && NoValEL ( this.tbx_WorkOrder_2           .Text, global.WorkOrderLength               );
-                okOMs = this.div_OldMeterSerialNumber_2 .IsVisible && NoValEL ( this.tbx_OldMeterSerialNumber_2.Text, global.MeterNumberLength             );
-                okMsn = this.div_MeterSerialNumber_2    .IsVisible && NoValEL ( this.tbx_MeterSerialNumber_2   .Text, global.MeterNumberLength             );
-                okOMr = this.div_OldMeterReading        .IsVisible && NoValEq ( this.tbx_OldMeterReading       .Text, this.tbx_OldMeterReading_2.MaxLength );
-                okMre =                                               NoValEq ( this.tbx_MeterReading_2        .Text, this.tbx_MeterReading_2   .MaxLength );
+                okAcn =                                               NoEqNum ( this.tbx_AccountNumber_2       .Text, global.AccountLength                 );
+                okWor = this.div_WorkOrder_2            .IsVisible && NoELTxt ( this.tbx_WorkOrder_2           .Text, global.WorkOrderLength               );
+                okOMs = this.div_OldMeterSerialNumber_2 .IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_2.Text, global.MeterNumberLength             );
+                okMsn = this.div_MeterSerialNumber_2    .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_2   .Text, global.MeterNumberLength             );
+                okOMr = this.div_OldMeterReading        .IsVisible && NoEqNum ( this.tbx_OldMeterReading       .Text, this.tbx_OldMeterReading_2.MaxLength );
+                okMre =                                               NoEqNum ( this.tbx_MeterReading_2        .Text, this.tbx_MeterReading_2   .MaxLength );
                 
                 okOMw = this.div_OldMeterWorking_2      .IsVisible && this.pck_OldMeterWorking_2     .SelectedIndex <= -1;
                 okRpc = this.div_ReplaceMeterRegister_2 .IsVisible && this.pck_ReplaceMeterRegister_2.SelectedIndex <= -1;
                 okMty = this.divDyna_MeterType_Vendors_2.IsVisible && this.pck_MeterType_Names_2     .SelectedIndex <= -1;
                 
-                okDAc = global.AccountDualEntry      && NoValEq ( this.tbx_AccountNumber_Dual_2       .Text, global.AccountLength       );
-                okDWr = global.WorkOrderDualEntry    && NoValEL ( this.tbx_WorkOrder_Dual_2           .Text, global.WorkOrderLength     );
-                okDOs = global.OldSerialNumDualEntry && NoValEL ( this.tbx_OldMeterSerialNumber_Dual_2.Text, global.MeterNumberLength   );
-                okDMs = global.NewSerialNumDualEntry && NoValEL ( this.tbx_MeterSerialNumber_Dual_2   .Text, global.MeterNumberLength   );
-                okDOr = global.OldReadingDualEntry   && NoValEq ( this.tbx_OldMeterReading_Dual_2     .Text, this.tbx_OldMeterReading_Dual_2.MaxLength );
-                okDMr = global.ReadingDualEntry      && NoValEq ( this.tbx_MeterReading_Dual_2        .Text, this.tbx_MeterReading_Dual_2   .MaxLength );
+                okDAc = global.AccountDualEntry      && NoEqNum ( this.tbx_AccountNumber_Dual_2       .Text, global.AccountLength       );
+                okDWr = global.WorkOrderDualEntry    && NoELTxt ( this.tbx_WorkOrder_Dual_2           .Text, global.WorkOrderLength     );
+                okDOs = global.OldSerialNumDualEntry && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual_2.Text, global.MeterNumberLength   );
+                okDMs = global.NewSerialNumDualEntry && NoELTxt ( this.tbx_MeterSerialNumber_Dual_2   .Text, global.MeterNumberLength   );
+                okDOr = global.OldReadingDualEntry   && NoEqNum ( this.tbx_OldMeterReading_Dual_2     .Text, this.tbx_OldMeterReading_Dual_2.MaxLength );
+                okDMr = global.ReadingDualEntry      && NoEqNum ( this.tbx_MeterReading_Dual_2        .Text, this.tbx_MeterReading_Dual_2   .MaxLength );
                 
                 string PORT2 = "Port2 ";
                 DUAL_ERROR = " ( Second entry )";
@@ -4983,14 +4052,14 @@ namespace aclara_meters.view
             }
         }
 
-        private async void NewPort2ClickTask ()
+        private void NewPort2ClickTask ()
         {
             Global global = FormsApp.config.global;
 
             // Button for enable|disable the second port
             if ( ! global.Port2DisableNo )
             {
-                bool ok = await this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
+                bool ok = this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
 
                 // Bit have not changed -> return to previous state
                 if ( ok )
@@ -5300,12 +4369,12 @@ namespace aclara_meters.view
             Meter  value_mty_2 = null;
             
             // Only for port 1 ( for MTU itself )
-            string value_omt;              // Old MTU
-            string value_rin;              // Read Interval
-            string value_sre;              // Snap Reads / Daily Reads
-            string value_two;              // Two-Way
-            Alarm  value_alr = null;       // Alarms
-            Demand value_dmd = null;       // Demands
+            string value_omt;                // Old MTU
+            string value_rin;                // Read Interval
+            string value_sre;                // Snap Reads / Daily Reads
+            string value_two = string.Empty; // Two-Way
+            Alarm  value_alr = null;         // Alarms
+            Demand value_dmd = null;         // Demands
             
             // GPS
             string value_lat;              // Latitude
@@ -5351,7 +4420,7 @@ namespace aclara_meters.view
                 value_omt = "";
                 value_rin = DEBUG_READSINTERVAL;
                 value_sre = DEBUG_SNAPSREADS;
-                //value_two = (string)pck_TwoWay.ItemsSource[ 0 ];
+                value_two = (string)pck_TwoWay.ItemsSource[ 0 ];
                 value_alr = (Alarm)this.pck_Alarms.ItemsSource[ DEBUG_ALARM_INDEX   ];
                 //value_dmd = (Demand)pck_Demands.ItemsSource[ DEBUG_DEMAND_INDEX  ];
                 
@@ -5381,7 +4450,7 @@ namespace aclara_meters.view
                         value_omw = this.pck_OldMeterWorking.SelectedItem.ToString ();
                 }
                 
-                if ( mtu.TwoPorts )
+                if ( ( addMtuForm.usePort2 = mtu.TwoPorts && this.port2IsActivated ) )
                 {
                     // Port 2
                     value_acn_2 = this.tbx_AccountNumber_2           .Text;
@@ -5406,7 +4475,12 @@ namespace aclara_meters.view
                 value_omt = this.tbx_OldMtuId    .Text;
                 value_rin = this.pck_ReadInterval.SelectedItem.ToString();
                 value_sre = this.sld_SnapReads   .Value.ToString();
-                //value_two = pck_TwoWay.SelectedItem.ToString();
+                
+                // Is a two-way MTU and forces time sync ( InstallConfirmation )
+                if ( mtu.OnTimeSync &&
+                     mtu.FastMessageConfig )
+                    value_two = this.pck_TwoWay.SelectedItem.ToString ();
+                
                 //value_dmd = ( Demand )pck_Demands.SelectedItem;
                 
                 // GPS
@@ -5456,9 +4530,10 @@ namespace aclara_meters.view
                  mtu.DailyReads )
                 this.addMtuForm.AddParameter ( FIELD.SNAP_READS, value_sre );
 
-            // 2-Way [ SOLO SE LOGEA ¿? ]
-            //if ( mtu.OnTimeSync ) // Is a two-way MTU and forces time sync ( InstallConfirmation )
-            //    this.addMtuForm.AddParameter ( FIELD.TWO_WAY,  );
+            // 2-Way [ Only for family 34XX ]
+            if ( mtu.OnTimeSync && // Is a two-way MTU and forces time sync ( InstallConfirmation )
+                 mtu.FastMessageConfig )
+                this.addMtuForm.AddParameter ( FIELD.TWO_WAY, value_two );
 
             // Alarms
             if ( value_alr != null &&
@@ -5493,7 +4568,7 @@ namespace aclara_meters.view
 
             #region Set parameters Port 2
 
-            if ( ( addMtuForm.usePort2 = mtu.TwoPorts && this.port2IsActivated ) )
+            if ( addMtuForm.usePort2 )
             {
                 // Account Number / Service Port ID
                 this.addMtuForm.AddParameter ( FIELD.ACCOUNT_NUMBER_2, value_acn_2 );
@@ -5617,8 +4692,14 @@ namespace aclara_meters.view
                                 // Port header
                                 if (pParameter.Name.Equals("Description"))
                                 {
-                                    param = ports[i].getParameterByTag(pParameter.Name);
-
+                                    string description;
+                                    param = ports[i].getParameterByTag ( pParameter.Name );
+                                    
+                                    // For Read action when no Meter is installed on readed MTU
+                                    if ( param != null )
+                                         description = param.Value;
+                                    else description = MTUComm.Action.currentMtu.Ports[i].GetProperty ( pParameter.Name );
+                                    
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
                                         Title = "Here lies the Port title...",
@@ -5626,12 +4707,14 @@ namespace aclara_meters.view
                                         Height = "40",
                                         isMTU = "false",
                                         isMeter = "true",
-                                        Description = "Port " + ( i + 1 ) + ": " + param.Value
+                                        Description = "Port " + ( i + 1 ) + ": " + description
+                                        //Description = "Port " + ( i + 1 ) + ": " + ( ( param != null ) ? param.Value : "Not Installed" )
                                     });
                                 }
                                 // Port fields
                                 else
                                 {
+                                    /*
                                     if ( ! string.IsNullOrEmpty ( pParameter.Source ) &&
                                          pParameter.Source.Contains ( "." ) )
                                     {
@@ -5641,6 +4724,27 @@ namespace aclara_meters.view
 
                                     if ( param == null )
                                         param = e.Result.getParameterByTag ( pParameter.Name );
+
+                                    if ( param != null )
+                                        FinalReadListView.Add(new ReadMTUItem()
+                                        {
+                                            Title = param.getLogDisplay() + ":",
+                                            isDisplayed = "true",
+                                            Height = "70",
+                                            isMTU = "false",
+                                            isDetailMeter = "true",
+                                            isMeter = "false",
+                                            Description = param.Value
+                                        });
+                                    */
+                                    string tag = pParameter.Name;
+
+                                    if ( ! string.IsNullOrEmpty ( pParameter.Source ) &&
+                                         pParameter.Source.Contains ( "." ) )
+                                        tag = pParameter.Source.Split(new char[] { '.' })[ 1 ];
+
+                                    if ( ! string.IsNullOrEmpty ( tag ) )
+                                        param = ports[ i ].getParameterByTag ( tag );
 
                                     if ( param != null )
                                         FinalReadListView.Add(new ReadMTUItem()
@@ -5717,15 +4821,15 @@ namespace aclara_meters.view
 
             #region OnError
 
-            this.add_mtu.OnError += ( ( s, e ) =>
+            this.add_mtu.OnError += ( () =>
             {
+                Error error = Errors.LastError;
+            
                 Console.WriteLine("Action Errror");
                 Console.WriteLine("Press Key to Exit");
                 // Console.WriteLine(s.ToString());
 
-                String result = e.Message;
-
-
+                String result = error.Message;
 
                 Task.Delay(100).ContinueWith(t =>
                   Device.BeginInvokeOnMainThread(() =>
@@ -5739,10 +4843,8 @@ namespace aclara_meters.view
                       background_scan_page.IsEnabled = true;
                   }));
 
-
                 DisplayAlert("Error", result, "Ok");
                 Console.WriteLine(result.ToString());
-
             });
 
             #endregion
@@ -5854,18 +4956,6 @@ namespace aclara_meters.view
             }
 
         }
-
-        private void PickerSelection(object sender, EventArgs e)
-        {
-            var picker = (Picker)sender;
-            int selectedIndex = picker.SelectedIndex;
-        }
-        private void PickerSelection2(object sender, EventArgs e)
-        {
-            var picker = (Picker)sender;
-            int selectedIndex = picker.SelectedIndex;
-        }
-
 
         #endregion
     }

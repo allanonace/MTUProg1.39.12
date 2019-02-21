@@ -582,7 +582,7 @@ namespace aclara_meters.view
                 );
             });
 
-            basicRead.OnError += ((s, e) =>
+            basicRead.OnError += (() =>
             {
                 Task.Delay(100).ContinueWith(t =>
                     Device.BeginInvokeOnMainThread(() =>
@@ -706,7 +706,7 @@ namespace aclara_meters.view
                    }));
             });
 
-            turnOffAction.OnError += ((s, args) =>
+            turnOffAction.OnError += (() =>
             {
                 Task.Delay(2000).ContinueWith(t =>
                    Device.BeginInvokeOnMainThread(() =>
@@ -1720,7 +1720,7 @@ namespace aclara_meters.view
                 }));
             });
 
-            add_mtu.OnError += ((s, e) => {
+            add_mtu.OnError += (() => {
                 Console.WriteLine("Action Errror");
                 Console.WriteLine("Press Key to Exit");
                 // Console.WriteLine(s.ToString());

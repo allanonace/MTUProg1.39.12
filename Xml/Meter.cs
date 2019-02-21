@@ -7,6 +7,11 @@ namespace Xml
 {
     public class Meter
     {
+        public bool IsEmpty
+        {
+            get { return this.LiveDigits <= 0; }
+        }
+
         [XmlAttribute("ID")]
         public int Id { get; set; }
 
@@ -75,7 +80,6 @@ namespace Xml
 
         [XmlElement("EncoderType")]
         public int EncoderType { get; set; }
-
 
         [XmlElement("PulseLowTime")]
         public int PulseLowTime { get; set; }
