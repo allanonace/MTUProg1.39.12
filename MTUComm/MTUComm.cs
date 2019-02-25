@@ -338,7 +338,8 @@ namespace MTUComm
                  this.latest_mtu.Shipbit )
                 Errors.LogErrorNow ( new MtuIsAlreadyTurnedOffICException () );
             
-            if ( ! this.mtu.OnTimeSync )
+            if ( ! global.TimeToSync ||
+                 ! this.mtu.TimeToSync )
                 Errors.LogErrorNow ( new MtuIsNotTwowayICException () );
             
             else
@@ -393,7 +394,7 @@ namespace MTUComm
                     }
                 
                     // Retry action ( thre times = first plus two replies )
-                    if ( time <= global.TimeSyncCountRepeat )
+                    if ( time < global.TimeSyncCountRepeat )
                     {
                         Thread.Sleep ( WAIT_BTW_IC );
                         
