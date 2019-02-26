@@ -4,13 +4,14 @@ namespace MTUComm.Exceptions
 {
     public class OwnExceptionsBase : Exception
     {
-        public string Message { private set; get; }
+        private string message;
+        public override string Message { get { return message; }  }
 
         public OwnExceptionsBase () { }
         
         public OwnExceptionsBase ( string message )
         {
-            this.Message = message;
+            this.message = message;
         }
     }
 }

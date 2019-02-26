@@ -52,7 +52,7 @@ namespace MTUComm
             TurnOffMtu,
             TurnOnMtu,
             ReadData,
-            InstallConf,
+            MtuInstallationConfirmation,
             Diagnosis,
             BasicRead
         }
@@ -69,7 +69,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu,"Turn Off MTU" },
             {ActionType.TurnOnMtu,"Turn On MTU" },
             {ActionType.ReadData,"Read Data Log" },
-            {ActionType.InstallConf,"Install Confirmation" },
+            {ActionType.MtuInstallationConfirmation,"Install Confirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -85,7 +85,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu,"TurnOffMtu" },
             {ActionType.TurnOnMtu,"TurnOnMTU" },
             {ActionType.ReadData, "Program MTU" },
-            {ActionType.InstallConf,"InstallConfirmation" },
+            {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -101,7 +101,7 @@ namespace MTUComm
             {ActionType.TurnOffMtu, null },
             {ActionType.TurnOnMtu, null },
             {ActionType.ReadData, "DataRead" },
-            {ActionType.InstallConf,"InstallConfirmation" },
+            {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
             {ActionType.Diagnosis, "" }
         };
 
@@ -426,7 +426,7 @@ namespace MTUComm
                         comm.OnTurnOnMtu += Comm_OnTurnOnMtu;
                         break;
 
-                    case ActionType.InstallConf:
+                    case ActionType.MtuInstallationConfirmation:
                         comm.OnReadMtu += Comm_OnReadMtu;
                         comm.OnProgress += Comm_OnProgress;
                         break;
@@ -522,10 +522,6 @@ namespace MTUComm
 
         private void Comm_OnTurnOffMtu ( object sender, MTUComm.TurnOffMtuArgs e )
         {
-            //Mtu mtu = this.configuration.GetMtuTypeById ( 138 ); // ( int )e.MtuId );
-
-            //ActionResult result = CreateActionResultUsingInterface ( null, mtu, null, e, "TurnOff" );
-
             ActionResult result = getBasciInfoResult();
             logger.logTurnOffResult ( this, e.Mtu );
             ActionFinishArgs args = new ActionFinishArgs ( result );
@@ -536,10 +532,10 @@ namespace MTUComm
         private void Comm_OnTurnOnMtu(object sender, MTUComm.TurnOnMtuArgs e)
         {
             ActionResult result = getBasciInfoResult();
-            logger.logTurnOnResult(this, e.MtuId);
-            ActionFinishArgs args = new ActionFinishArgs(result); // TODO: add turn on result
+            logger.logTurnOffResult ( this, e.Mtu );
+            ActionFinishArgs args = new ActionFinishArgs ( result );
 
-            OnFinish(this, args);
+            OnFinish ( this, args );
         }
 
         private ActionResult Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)

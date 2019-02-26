@@ -98,6 +98,18 @@ namespace MTUComm.Exceptions
         public ScriptForTwoPortsButMtuOnlyOneException ( string message ) : base ( message ) { }
     }
     
+    public class ScriptLogfileInvalidException : OwnExceptionsBase
+    {
+        public ScriptLogfileInvalidException () { }
+        public ScriptLogfileInvalidException ( string message ) : base ( message ) { }
+    }
+    
+    public class ScriptActionTypeInvalidException : OwnExceptionsBase
+    {
+        public ScriptActionTypeInvalidException () { }
+        public ScriptActionTypeInvalidException ( string message ) : base ( message ) { }
+    }
+    
     public class MtuIsNotTwowayICException : OwnExceptionsBase
     {
         public MtuIsNotTwowayICException () { }

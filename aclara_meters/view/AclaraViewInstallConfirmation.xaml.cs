@@ -72,7 +72,7 @@ namespace aclara_meters.view
                 MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = ActionType.ReplaceMtuReplaceMeter });
 
             if (FormsApp.config.global.ShowInstallConfirmation)
-                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = ActionType.InstallConf });
+                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = ActionType.MtuInstallationConfirmation });
 
 
             // ListView needs to be at least  elements for UI Purposes, even empty ones
@@ -269,7 +269,7 @@ namespace aclara_meters.view
             MTUComm.Action add_mtu = new MTUComm.Action(
                 config: FormsApp.config,
                 serial: FormsApp.ble_interface,
-                type: MTUComm.Action.ActionType.InstallConf,
+                type: MTUComm.Action.ActionType.MtuInstallationConfirmation,
                 user: FormsApp.credentialsService.UserName);
 
             //Define finish and error event handler
@@ -685,7 +685,7 @@ namespace aclara_meters.view
         {
             InitializeComponent();
 
-            this.actionType = ActionType.InstallConf;
+            this.actionType = ActionType.MtuInstallationConfirmation;
 
             Task.Run(() =>
             {
@@ -1360,7 +1360,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case ActionType.InstallConf:
+                case ActionType.MtuInstallationConfirmation:
 
                     #region Install Confirm Controller
 

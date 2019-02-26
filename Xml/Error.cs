@@ -43,8 +43,19 @@ namespace Xml
             }
         }
 
+        private string message;
+
         [XmlAttribute("message")]
-        public string Message { get; set; }
+        public string Message
+        {
+            get
+            {
+                if ( this.Exception != null )
+                     return message.Replace ( "_var_", this.Exception.Message );
+                else return message;
+            }
+            set { this.message = value; }
+        }
         
         public int Port;
         public Exception Exception;

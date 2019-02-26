@@ -6,14 +6,15 @@ using System.Text;
 using System.Xml.Serialization;
 using Lexi.Interfaces;
 using Xml;
+using System.Text.RegularExpressions;
+using MTUComm.Exceptions;
+
+using ActionType = MTUComm.Action.ActionType;
 
 namespace MTUComm
 {
     public class ScriptRunner
     {
-
-
-
         private List<Action> actions;
 
         public delegate void ActionFinishHandler(object sender, Action.ActionFinishArgs e);
@@ -27,7 +28,6 @@ namespace MTUComm
 
         public delegate void ActionErrorHandler ();
         public event ActionErrorHandler OnError;
-
 
         public ScriptRunner(String base_path, ISerial serial_device, String script_path)
         {
@@ -85,18 +85,6 @@ namespace MTUComm
             this.Run ();
         }
 
-        private Action.ActionType parseType(string action_type)
-        {
-            try
-            {
-                return (Action.ActionType)Enum.Parse(typeof(Action.ActionType), action_type, true);
-            }
-            catch (Exception e)
-            {
-                return Action.ActionType.ReadMtu;
-            }
-        }
-
         private Parameter.ParameterType parseParameterType(string action_type)
         {
             try
@@ -107,7 +95,6 @@ namespace MTUComm
             {
                 throw e;
             }
-
         }
 
         private void buildScriptActions(String base_path, ISerial serial_device, Script script)
@@ -116,58 +103,71 @@ namespace MTUComm
 
             int step = 0;
 
-            foreach (Xml.ScriptAction action in script.Actions)
+            // Using invalid log file/path
+            if ( string.IsNullOrEmpty ( script.LogFile ) ||
+                 ! Regex.IsMatch ( script.LogFile, @"^[a-zA-Z_][a-zA-Z0-9_-]*.xml$" ) )
+                Errors.LogErrorNow ( new ScriptLogfileInvalidException () );
+            else
             {
-                Action new_action = new Action(Configuration.GetInstance(), serial_device, parseType(action.Type), script.UserName, script.LogFile);
-                Type   actionType = action.GetType ();
-
-                foreach (PropertyInfo parameter in action.GetType().GetProperties())
+                ActionType type;
+                foreach ( Xml.ScriptAction action in script.Actions )
                 {
-                    try
+                    // Action string is not present in ActionType enum
+                    if ( ! Enum.TryParse<ActionType> ( action.Type, out type ) )
                     {
-                        var  paramValue = actionType.GetProperty ( parameter.Name ).GetValue ( action, null );
-                        Type valueType  = paramValue.GetType ();
-                    
-                        if ( valueType.Name.ToLower ().Contains ( "actionparameter" ) )
+                        Errors.LogErrorNow ( new ScriptActionTypeInvalidException ( action.Type ) );
+                        return;
+                    }
+                
+                    Action new_action = new Action ( Configuration.GetInstance(), serial_device, type, script.UserName, script.LogFile );
+                    Type   actionType = action.GetType ();
+    
+                    foreach (PropertyInfo parameter in action.GetType().GetProperties())
+                    {
+                        try
                         {
-                            List<ActionParameter> list = new List<ActionParameter> ();
-                            
-                            // If the parameter is an Array is a field for
-                            // a port, and if not is a field for the MTU
-                            if ( ! paramValue.GetType ().IsArray )
-                                 list.Add      ( ( ActionParameter   )paramValue );
-                            else list.AddRange ( ( ActionParameter[] )paramValue );
-
-                            foreach ( ActionParameter aParam in list )
-                                new_action.AddParameter (
-                                    new Parameter (
-                                        parseParameterType ( parameter.Name ),
-                                        aParam.Value,
-                                        aParam.Port ) );
+                            var  paramValue = actionType.GetProperty ( parameter.Name ).GetValue ( action, null );
+                            Type valueType  = paramValue.GetType ();
+                        
+                            if ( valueType.Name.ToLower ().Contains ( "actionparameter" ) )
+                            {
+                                List<ActionParameter> list = new List<ActionParameter> ();
+                                
+                                // If the parameter is an Array is a field for
+                                // a port, and if not is a field for the MTU
+                                if ( ! paramValue.GetType ().IsArray )
+                                     list.Add      ( ( ActionParameter   )paramValue );
+                                else list.AddRange ( ( ActionParameter[] )paramValue );
+    
+                                foreach ( ActionParameter aParam in list )
+                                    new_action.AddParameter (
+                                        new Parameter (
+                                            parseParameterType ( parameter.Name ),
+                                            aParam.Value,
+                                            aParam.Port ) );
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                        
                         }
                     }
-                    catch (Exception e)
-                    {
-                    
-                    }
+    
+                    new_action.order = step;
+                    new_action.OnProgress += Action_OnProgress;
+                    new_action.OnFinish += Action_OnFinish;
+                    new_action.OnError += Action_OnError;
+    
+                    actions.Add(new_action);
+                    step++;
                 }
-
-                new_action.order = step;
-                new_action.OnProgress += Action_OnProgress;
-                new_action.OnFinish += Action_OnFinish;
-                new_action.OnError += Action_OnError;
-
-                actions.Add(new_action);
-                step++;
             }
         }
-
 
         public void Run()
         {
             actions.ToArray()[0].Run();
         }
-
 
         private void Action_OnError ()
         {

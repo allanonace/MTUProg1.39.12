@@ -636,7 +636,7 @@
                                                             <Slider
                                                                 x:Name="sld_SnapReads"
                                                                 Maximum="23"    
-                                                                Minimum="1"
+                                                                Minimum="0"
                                                                 HeightRequest="40"
                                                                 Value="10"
                                                                 Margin="0,-26,0,0"

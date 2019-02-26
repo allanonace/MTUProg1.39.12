@@ -69,7 +69,7 @@ namespace Xml
             this.CustomerMeterError           = string.Empty; // [1-20] If meter error occurs, this message will appear
             this.CustomerName                 = "Aclara"; // [1-20] Display the tag value in the About sceen
             this.DailyReadingOffset           = 0; // [Byte] Daily Reading Offset for Electric MTU Type 92
-            this.DailyReadsDefault            = 0; // [0-23] Hour (in military time) for daily reads/snap
+            this.DailyReadsDefault            = 13; // [0-23] Hour (in military time) for daily reads/snap
             this.dangerosZone                 = "cache disk"; // PPC W 5.0 and Up volatile area "flash file store"
             this.DefaultF1ReadInterval        = false; // [NOT NEED TO SUPPORT = NOT CONFIRMED] Use [1Hr] Interval for F1 radio. Allows using 2 read intervals for old and new flat packs
             this.DeviceCertSubject            = string.Empty; // Actual certificate subject
@@ -114,7 +114,7 @@ namespace Xml
             this.MtuIdLength                  = 8; // [5-11] Number of digits in the MTU ID, including leading zeros
             this.NewMeterCalc                 = string.Empty; // Prefix of new meter ID
             this.NewMeterFormat               = string.Empty; // Sets guidelines for entering a new meter
-            this.NewMeterLabel                = "NewMeterLabel"; // [1-15] Optional parameter for new meter
+            this.NewMeterLabel                = "New Meter #"; // [1-15] Optional parameter for new meter
             this.NewMeterPort2isTheSame       = false; // Optionally copies Port 1 data to Port 2
             this.NewMeterPrefix               = false; // Enables adding prefix to meter number
             this.NewMeterValidation           = false; // Enable New Meter navigation/validation based on prefix and actual meter
@@ -149,7 +149,7 @@ namespace Xml
             this.SecondNormXmitCondition      = string.Empty; // [Custom] Second transmit interval condition. For F1 MTUs only. Works with old and new MTUs
             this.SecondNormXmitField          = string.Empty; // [Custom] Corresponding Field in Appointment File
             this.SecondNormXmitInterval       = string.Empty; // [Custom] Alternate transmit interval in hours or minutes. Works for F1 only. The same values as regular read interval
-            this.SerialNumLabel               = string.Empty; // [1-20] Labels the Serial Number from Appointment
+            this.SerialNumLabel               = "Meter #"; // [1-20] Labels the Serial Number from Appointment
             this.ShowAddMTU                   = true; // Display or hide the “Add MTU” programming option on the main menu
             this.ShowAddMTUMeter              = true; // Display or hide the “Add MTU and Meter” programming option on the main menu
             this.ShowAddMTUReplaceMeter       = true; // Display or hide the “Add MTU and Replace Meter” programming option on the main menu

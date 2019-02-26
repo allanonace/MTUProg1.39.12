@@ -175,10 +175,10 @@ namespace MTUComm
 
         public class TurnOnMtuArgs : EventArgs
         {
-            public uint MtuId { get; }
-            public TurnOnMtuArgs(uint MtuId)
+            public Mtu Mtu { get; }
+            public TurnOnMtuArgs ( Mtu Mtu )
             {
-                this.MtuId = MtuId;
+                this.Mtu = Mtu;
             }
         }
 
@@ -265,11 +265,11 @@ namespace MTUComm
                         else await Task.Run(() => Task_AddMtu ( (Action)args[0] ) );
                         break;
                     case ActionType.ReadMtu    : await Task.Run(() => Task_ReadMtu()); break;
-                    case ActionType.TurnOffMtu : await Task.Run(() => Task_TurnOffMtu()); break;
-                    case ActionType.TurnOnMtu  : await Task.Run(() => Task_TurnOnMtu()); break;
+                    case ActionType.TurnOffMtu : await Task.Run(() => Task_TurnOnOffMtu ( false ) ); break;
+                    case ActionType.TurnOnMtu  : await Task.Run(() => Task_TurnOnOffMtu ( true  ) ); break;
                     case ActionType.ReadData   : await Task.Run(() => Task_ReadDataMtu((int)args[0])); break;
                     case ActionType.BasicRead  : await Task.Run(() => Task_BasicRead()); break;
-                    case ActionType.InstallConf: await Task.Run(() => Task_InstallConfirmation()); break;
+                    case ActionType.MtuInstallationConfirmation: await Task.Run(() => Task_InstallConfirmation()); break;
                     default: break;
                 }
             }
@@ -334,10 +334,12 @@ namespace MTUComm
             // DEBUG
             //this.WriteMtuBit ( 22, 0, false ); // Turn On MTU
         
+            // MTU is turned off
             if ( ! force &&
                  this.latest_mtu.Shipbit )
                 Errors.LogErrorNow ( new MtuIsAlreadyTurnedOffICException () );
             
+            // MTU does not support two-way or client does not want to perform it
             if ( ! global.TimeToSync ||
                  ! this.mtu.TimeToSync )
                 Errors.LogErrorNow ( new MtuIsNotTwowayICException () );
@@ -400,30 +402,37 @@ namespace MTUComm
                         
                         return this.InstallConfirmation_Logic ( force, ++time );
                     }
-                    // Finish with error
-                    else Errors.LogErrorNow ( new ActionNotAchievedICException () );
                     
+                    // Finish with error
+                    Errors.LogErrorNow ( new ActionNotAchievedICException () );
                     return false;
                 }
-                return true;
             }
-            return false;
+            return true;
         }
 
         #endregion
 
-        #region Turn Off
+        #region Turn On|Off
 
-        public void Task_TurnOffMtu ()
+        public void Task_TurnOnOffMtu (
+            bool on )
         {
-            Console.WriteLine ( "TurnOffMtu start" );
+            if ( on )
+                 Console.WriteLine ( "TurnOffMtu start" );
+            else Console.WriteLine ( "TurnOnMtu start"  );
 
             // Launchs exception 'ActionNotAchievedTurnOffException'
-            if ( this.TurnOffMtu_Logic () )
-                this.OnTurnOffMtu ( this, new TurnOffMtuArgs ( this.mtu ) );
+            if ( this.TurnOnOffMtu_Logic ( on ) )
+            {
+                if ( on )
+                     this.OnTurnOnMtu  ( this, new TurnOnMtuArgs  ( this.mtu ) );
+                else this.OnTurnOffMtu ( this, new TurnOffMtuArgs ( this.mtu ) );
+            }
         }
 
-        private bool TurnOffMtu_Logic (
+        private bool TurnOnOffMtu_Logic (
+            bool on,
             int time = 0 )
         {
             try
@@ -432,11 +441,11 @@ namespace MTUComm
                 uint address = ( uint )regShipbit.Address;
                 uint bit     = ( uint )regShipbit.Size;
             
-                this.WriteMtuBit ( address, bit, true );   // Activate shipbit
+                this.WriteMtuBit ( address, bit, ! on );         // Set state of the shipbit
                 bool shipbit = this.ReadMtuBit ( address, bit ); // Read written value to verify
                 
                 // Fail turning off MTU
-                if ( ! shipbit )
+                if ( shipbit == on )
                     throw new AttemptNotAchievedTurnOffException ();
             }
             // System.IO.IOException = Puck is not well placed or is off
@@ -456,7 +465,7 @@ namespace MTUComm
                 {
                     Thread.Sleep ( WAIT_BTW_TURNOFF );
                     
-                    return this.TurnOffMtu_Logic ( ++time );
+                    return this.TurnOnOffMtu_Logic ( on, ++time );
                 }
                 // Finish with error
                 else Errors.LogErrorNow ( new ActionNotAchievedTurnOffException () );
@@ -466,46 +475,6 @@ namespace MTUComm
             return true;
         }
         
-        #endregion
-
-        #region Turn On
-
-        public void Task_TurnOnMtu ()
-        {
-            try
-            {
-                Console.WriteLine("TurnOnMtu start");
-
-                this.TurnOnMtu_Logic();
-
-                Console.WriteLine("MTU ID: " + latest_mtu.Id);
-
-                TurnOnMtuArgs args = new TurnOnMtuArgs(latest_mtu.Id);
-                OnTurnOnMtu(this, args);
-            }
-            catch ( Exception e )
-            {
-                OnError ();
-            }
-        }
-
-        private void TurnOnMtu_Logic ()
-        {
-            byte mask = 1;
-            byte systemFlags = (lexi.Read(22, 1))[0];
-            systemFlags &= (byte)~mask; // clear bit 0
-            lexi.Write(22, new byte[] { systemFlags });
-            byte valueWritten = (lexi.Read(22, 1))[0];
-
-            Console.WriteLine("Value to write: " + systemFlags.ToString() + " Value written: " + valueWritten.ToString());
-            Console.WriteLine("TurnOffMtu end");
-
-            if (systemFlags != valueWritten)
-            {
-                // TODO: handle error condition
-            }
-        }
-
         #endregion
 
         #region Read MTU
@@ -744,7 +713,7 @@ namespace MTUComm
                                 ! Validations.Text ( value, maxLength, 1, true, true, false ) );
         
             // Validate each parameter and remove those that are not going to be used
-            bool finish = false;
+            string msgError = string.Empty;
             foreach ( KeyValuePair<FIELD,Parameter> item in form.RegisteredParamsByField )
             {
                 FIELD type = item.Key;
@@ -890,6 +859,9 @@ namespace MTUComm
                         });
                     }
                     
+                    value = value.ToLower ()
+                                 .Replace ( "hr", "hour" )
+                                 .Replace ( "h", "H" );
                     fail = Empty ( value ) || ! readIntervalList.Contains ( value );
                     break;
                     
@@ -927,13 +899,17 @@ namespace MTUComm
 
                 if ( fail )
                 {
-                    finish = true;
-                    Errors.AddError ( new ProcessingParamsScriptException () );
+                    fail = false;
+                    
+                    string TEST = ( form.Texts as Dictionary<FIELD,string[]> )[ type ][ 2 ];
+                    
+                    msgError += ( ( ! string.IsNullOrEmpty ( msgError ) ) ? ", " : string.Empty )
+                                + ( form.Texts as Dictionary<FIELD,string[]> )[ type ][ 2 ];
                 }
             }
-            
-            if ( finish )
-                Errors.LogRegisteredErrors ( true );
+
+            if ( ! string.IsNullOrEmpty ( msgError ) )
+                Errors.LogErrorNow ( new ProcessingParamsScriptException ( msgError ) );
 
             #endregion
 
@@ -976,7 +952,7 @@ namespace MTUComm
 
                 #region Turn Off MTU
 
-                this.TurnOffMtu_Logic();
+                this.TurnOnOffMtu_Logic ( false );
                 addMtuLog.LogTurnOff();
 
                 #endregion
@@ -1185,7 +1161,7 @@ namespace MTUComm
 
                 #region Turn On MTU
 
-                this.TurnOnMtu_Logic();
+                this.TurnOnOffMtu_Logic ( true );
                 addMtuLog.LogTurnOn();
 
                 #endregion
@@ -1194,9 +1170,9 @@ namespace MTUComm
 
                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true
-                if ( global.TimeToSync && // Enables TimeSync request
-                     mtu.TimeToSync    && // Enables TimeSync request
-                     mtu.OnTimeSync    && // Force to do a TimeSync
+                if ( global.TimeToSync && // Indicates that is a two-way MTU and enables TimeSync request
+                     mtu.TimeToSync    && // Indicates that is a two-way MTU and enables TimeSync request
+                     mtu.OnTimeSync    && // MTU can be force during installation to perform a TimeSync/IC
                      // If script contains ForceTimeSync, use it but if not use value from Global
                      ( ! form.ContainsParameter ( FIELD.FORCE_TIME_SYNC ) &&
                        global.ForceTimeSync ||

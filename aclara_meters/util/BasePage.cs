@@ -13,7 +13,7 @@ namespace aclara_meters.util
    {
         public BasePage ()
         {
-            PageLinker.CurrentPage = Application.Current.MainPage;
+            PageLinker.CurrentPage = this;
         }
 
         protected override void OnAppearing()

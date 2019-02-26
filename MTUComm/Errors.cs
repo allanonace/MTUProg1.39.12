@@ -52,6 +52,10 @@ namespace MTUComm
             { new ScriptForOnePortButTwoEnabledException (),    301 },
             // Script is for two ports but the MTU has one port only or second port is disabled
             { new ScriptForTwoPortsButMtuOnlyOneException (),   302 },
+            // Logfile element in the script is empty or contains some invalid character
+            { new ScriptLogfileInvalidException (),             303 },
+            // Action type specified in the script is empty or is not one of the available options
+            { new ScriptActionTypeInvalidException (),          304 },
             
             // Alarm [ 4xx ]
             //------

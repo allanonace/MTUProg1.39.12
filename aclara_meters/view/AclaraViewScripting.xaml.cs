@@ -18,6 +18,7 @@ using MTUComm;
 using System.IO;
 using nexus.protocols.ble.scan;
 using System.Collections.ObjectModel;
+using System.Web;
 
 using Error = Xml.Error;
 
@@ -946,11 +947,14 @@ namespace aclara_meters.view
                         _userTapped = false;
                         ContentView_Scripting_label_read.Text = "Script Execution Error";
                     
+                        //var a = HttpUtility.UrlEncode ( error.Message );
+                        //var b = HttpUtility.UrlPathEncode ( error.Message );
+                    
                         Device.OpenUri(new Uri(resultCallback +
                                             "?" +
                                             "status=error" +
                                             "&code= " + error.Id +
-                                            "&message=" + System.Web.HttpUtility.UrlEncode ( error.Message )));
+                                            "&message=" + HttpUtility.UrlEncode ( error.Message )));
 
                         FormsApp.ble_interface.Close();
                     });

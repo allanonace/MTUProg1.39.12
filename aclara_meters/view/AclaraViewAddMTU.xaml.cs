@@ -61,15 +61,15 @@ namespace aclara_meters.view
         public const bool MANDATORY_OLDMETERSERIAL  = true;
         public const bool MANDATORY_OLDMETERWORKING = true;
         public const bool MANDATORY_OLDMETERREADING = true;
-        public const bool MANDATORY_REPLACEMETER    = false;
+        public const bool MANDATORY_REPLACEMETER    = false; // Init with select value
         public const bool MANDATORY_METERSERIAL     = true;
         public const bool MANDATORY_METERTYPE       = true;
         public const bool MANDATORY_METERREADING    = true;
-        public const bool MANDATORY_READINTERVAL    = true;
-        public const bool MANDATORY_SNAPREADS       = false;
+        public const bool MANDATORY_READINTERVAL    = false; // Init with select value
+        public const bool MANDATORY_SNAPREADS       = false; // Init with select value
         public const bool MANDATORY_TWOWAY          = false;
         public const bool MANDATORY_ALARMS          = true;
-        public const bool MANDATORY_DEMANDS         = false;
+        public const bool MANDATORY_DEMANDS         = true;
         public const bool MANDATORY_GPS             = false;
         public const bool MANDATORY_MTULOCATION     = false;
         public const bool MANDATORY_CONTRUCTIONTYPE = false;
@@ -455,15 +455,15 @@ namespace aclara_meters.view
                             this.tbx_WorkOrder_2                 .Text          = this.tbx_WorkOrder                   .Text;
                             this.tbx_WorkOrder_Dual_2            .Text          = this.tbx_WorkOrder_Dual              .Text;
 
-                            this.tbx_OldMeterSerialNumber_2      .Text          = this.tbx_OldMeterSerialNumber        .Text;
-                            this.tbx_OldMeterSerialNumber_Dual_2 .Text          = this.tbx_OldMeterSerialNumber_Dual   .Text;
-                            this.tbx_MeterSerialNumber_2         .Text          = this.tbx_MeterSerialNumber           .Text;
-                            this.tbx_MeterSerialNumber_Dual_2    .Text          = this.tbx_MeterSerialNumber_Dual      .Text;
+                            //this.tbx_OldMeterSerialNumber_2      .Text          = this.tbx_OldMeterSerialNumber        .Text;
+                            //this.tbx_OldMeterSerialNumber_Dual_2 .Text          = this.tbx_OldMeterSerialNumber_Dual   .Text;
+                            //this.tbx_MeterSerialNumber_2         .Text          = this.tbx_MeterSerialNumber           .Text;
+                            //this.tbx_MeterSerialNumber_Dual_2    .Text          = this.tbx_MeterSerialNumber_Dual      .Text;
 
                             this.tbx_OldMeterReading_2           .Text          = this.tbx_OldMeterReading             .Text;
-                            this.tbx_OldMeterReading_Dual_2      .Text          = this.tbx_OldMeterReading_Dual        .Text;
-                            this.tbx_MeterReading_2              .Text          = this.tbx_MeterReading                .Text;
-                            this.tbx_MeterReading_Dual_2         .Text          = this.tbx_MeterReading_Dual           .Text;
+                            //this.tbx_OldMeterReading_Dual_2      .Text          = this.tbx_OldMeterReading_Dual        .Text;
+                            //this.tbx_MeterReading_2              .Text          = this.tbx_MeterReading                .Text;
+                            //this.tbx_MeterReading_Dual_2         .Text          = this.tbx_MeterReading_Dual           .Text;
                             
                             this.pck_OldMeterWorking_2           .SelectedIndex = this.pck_OldMeterWorking             .SelectedIndex;
                             this.pck_ReplaceMeterRegister_2      .SelectedIndex = this.pck_ReplaceMeterRegister        .SelectedIndex;
@@ -529,6 +529,17 @@ namespace aclara_meters.view
             // Port 2
             this.div_WorkOrder_Dual_2.IsVisible = hasTwoPorts && useDualWorkOrder;
             this.div_WorkOrder_Dual_2.IsEnabled = hasTwoPorts && useDualWorkOrder;
+
+            #endregion
+
+            #region Old MTU ID
+
+            bool isReplaceMtu = (
+                this.actionType == ActionType.ReplaceMTU ||
+                this.actionType == ActionType.ReplaceMtuReplaceMeter );
+
+            this.div_OldMtuId.IsVisible = isReplaceMtu;
+            this.div_OldMtuId.IsEnabled = isReplaceMtu;
 
             #endregion
 
@@ -647,37 +658,37 @@ namespace aclara_meters.view
                 this.tbx_MeterReading_2        .IsEnabled = false;
                 this.tbx_MeterReading_Dual     .IsEnabled = false;
                 this.tbx_MeterReading_Dual_2   .IsEnabled = false;
-                this.tbx_OldMeterReading       .IsEnabled = false;
-                this.tbx_OldMeterReading_2     .IsEnabled = false;
-                this.tbx_OldMeterReading_Dual  .IsEnabled = false;
-                this.tbx_OldMeterReading_Dual_2.IsEnabled = false;
+                //this.tbx_OldMeterReading       .IsEnabled = false;
+                //this.tbx_OldMeterReading_2     .IsEnabled = false;
+                //this.tbx_OldMeterReading_Dual  .IsEnabled = false;
+                //this.tbx_OldMeterReading_Dual_2.IsEnabled = false;
                 
                 this.div_MeterReading             .Opacity = OPACITY_DISABLE;
                 this.divSub_MeterReading_Dual     .Opacity = OPACITY_DISABLE;
-                this.divSub_OldMeterReading       .Opacity = OPACITY_DISABLE;
-                this.divSub_OldMeterReading_Dual  .Opacity = OPACITY_DISABLE;
                 this.divSub_MeterReading_2        .Opacity = OPACITY_DISABLE;
                 this.divSub_MeterReading_Dual_2   .Opacity = OPACITY_DISABLE;
-                this.divSub_OldMeterReading_2     .Opacity = OPACITY_DISABLE;
-                this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_DISABLE;
+                //this.divSub_OldMeterReading       .Opacity = OPACITY_DISABLE;
+                //this.divSub_OldMeterReading_Dual  .Opacity = OPACITY_DISABLE;
+                //this.divSub_OldMeterReading_2     .Opacity = OPACITY_DISABLE;
+                //this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_DISABLE;
                 
                 this.lb_MeterReading_MeterType         .Text = FIRST_METERTYPE;
                 this.lb_MeterReading_DualMeterType     .Text = FIRST_METERTYPE;
-                this.lb_OldMeterReading_MeterType      .Text = FIRST_METERTYPE;
-                this.lb_OldMeterReading_DualMeterType  .Text = FIRST_METERTYPE;
                 this.lb_MeterReading_MeterType_2       .Text = FIRST_METERTYPE;
                 this.lb_MeterReading_DualMeterType_2   .Text = FIRST_METERTYPE;
-                this.lb_OldMeterReading_MeterType_2    .Text = FIRST_METERTYPE;
-                this.lb_OldMeterReading_DualMeterType_2.Text = FIRST_METERTYPE;
+                //this.lb_OldMeterReading_MeterType      .Text = FIRST_METERTYPE;
+                //this.lb_OldMeterReading_DualMeterType  .Text = FIRST_METERTYPE;
+                //this.lb_OldMeterReading_MeterType_2    .Text = FIRST_METERTYPE;
+                //this.lb_OldMeterReading_DualMeterType_2.Text = FIRST_METERTYPE;
                 
                 this.lb_MeterReading_MeterType         .IsVisible = true;
                 this.lb_MeterReading_DualMeterType     .IsVisible = true;
-                this.lb_OldMeterReading_MeterType      .IsVisible = true;
-                this.lb_OldMeterReading_DualMeterType  .IsVisible = true;
                 this.lb_MeterReading_MeterType_2       .IsVisible = true;
                 this.lb_MeterReading_DualMeterType_2   .IsVisible = true;
-                this.lb_OldMeterReading_MeterType_2    .IsVisible = true;
-                this.lb_OldMeterReading_DualMeterType_2.IsVisible = true;
+                //this.lb_OldMeterReading_MeterType      .IsVisible = true;
+                //this.lb_OldMeterReading_DualMeterType  .IsVisible = true;
+                //this.lb_OldMeterReading_MeterType_2    .IsVisible = true;
+                //this.lb_OldMeterReading_DualMeterType_2.IsVisible = true;
             });
 
             #endregion
@@ -739,13 +750,13 @@ namespace aclara_meters.view
             if ( useDailyReads )
                 this.sld_SnapReads.ValueChanged += OnSnapReadsSliderValueChanged;
 
-            this.sld_SnapReads.Value = ( dailyReadsDefault > -1 ) ? dailyReadsDefault : 6;
+            this.sld_SnapReads.Value = ( dailyReadsDefault > -1 ) ? dailyReadsDefault : 13;
 
             #endregion
 
             #region 2-Way
 
-            bool useTwoWay = this.currentMtu.OnTimeSync && this.currentMtu.FastMessageConfig;
+            bool useTwoWay = this.currentMtu.TimeToSync && this.currentMtu.FastMessageConfig;
             
             this.Initialize_TwoWay ();
 
@@ -883,11 +894,13 @@ namespace aclara_meters.view
             this.lb_WorkOrder_2     .Text = global.WorkOrderLabel;
             this.lb_WorkOrder_Dual_2.Text = DUAL_PREFIX + global.WorkOrderLabel;
             
+            string NEW_LABEL = ( isReplaceMeter ) ? "New " : string.Empty;
+            
             // Meter Reading
-            this.lb_MeterReading       .Text = TEXT_READING;
-            this.lb_MeterReading_Dual  .Text = DUAL_PREFIX + TEXT_READING;
-            this.lb_MeterReading_2     .Text = TEXT_READING;
-            this.lb_MeterReading_Dual_2.Text = DUAL_PREFIX + TEXT_READING;
+            this.lb_MeterReading       .Text = NEW_LABEL + TEXT_READING;
+            this.lb_MeterReading_Dual  .Text = DUAL_PREFIX + NEW_LABEL + TEXT_READING;
+            this.lb_MeterReading_2     .Text = NEW_LABEL + TEXT_READING;
+            this.lb_MeterReading_Dual_2.Text = DUAL_PREFIX + NEW_LABEL + TEXT_READING;
             
             this.lb_OldMeterReading       .Text = OLD_PREFIX + TEXT_READING;
             this.lb_OldMeterReading_Dual  .Text = DUAL_PREFIX + OLD_PREFIX + TEXT_READING;
@@ -1305,7 +1318,7 @@ namespace aclara_meters.view
                 MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = ActionType.ReplaceMtuReplaceMeter });
 
             if (FormsApp.config.global.ShowInstallConfirmation)
-                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = ActionType.InstallConf });
+                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = ActionType.MtuInstallationConfirmation });
 
 
             // ListView needs to be at least  elements for UI Purposes, even empty ones
@@ -2384,23 +2397,23 @@ namespace aclara_meters.view
                 // Update MeterReading field length to use and validate
                 this.tbx_MeterReading        .MaxLength = selectedMeter.LiveDigits;
                 this.tbx_MeterReading_Dual   .MaxLength = selectedMeter.LiveDigits;
-                this.tbx_OldMeterReading     .MaxLength = selectedMeter.LiveDigits;
-                this.tbx_OldMeterReading_Dual.MaxLength = selectedMeter.LiveDigits;
+                //this.tbx_OldMeterReading     .MaxLength = selectedMeter.LiveDigits;
+                //this.tbx_OldMeterReading_Dual.MaxLength = selectedMeter.LiveDigits;
                 
                 this.div_MeterReading           .Opacity = OPACITY_ENABLE;
                 this.divSub_MeterReading_Dual   .Opacity = OPACITY_ENABLE;
-                this.divSub_OldMeterReading     .Opacity = OPACITY_ENABLE;
-                this.divSub_OldMeterReading_Dual.Opacity = OPACITY_ENABLE;
+                //this.divSub_OldMeterReading     .Opacity = OPACITY_ENABLE;
+                //this.divSub_OldMeterReading_Dual.Opacity = OPACITY_ENABLE;
                 
                 this.tbx_MeterReading        .IsEnabled = true;
                 this.tbx_MeterReading_Dual   .IsEnabled = true;
-                this.tbx_OldMeterReading     .IsEnabled = true;
-                this.tbx_OldMeterReading_Dual.IsEnabled = true;
+                //this.tbx_OldMeterReading     .IsEnabled = true;
+                //this.tbx_OldMeterReading_Dual.IsEnabled = true;
                 
                 this.lb_MeterReading_MeterType       .IsVisible = false;
                 this.lb_MeterReading_DualMeterType   .IsVisible = false;
-                this.lb_OldMeterReading_MeterType    .IsVisible = false;
-                this.lb_OldMeterReading_DualMeterType.IsVisible = false;
+                //this.lb_OldMeterReading_MeterType    .IsVisible = false;
+                //this.lb_OldMeterReading_DualMeterType.IsVisible = false;
             });
         }
 
@@ -2419,23 +2432,23 @@ namespace aclara_meters.view
                 // Update MeterReading field length to use and validate
                 this.tbx_MeterReading_2        .MaxLength = selectedMeter.LiveDigits;
                 this.tbx_MeterReading_Dual_2   .MaxLength = selectedMeter.LiveDigits;
-                this.tbx_OldMeterReading_2     .MaxLength = selectedMeter.LiveDigits;
-                this.tbx_OldMeterReading_Dual_2.MaxLength = selectedMeter.LiveDigits;
+                //this.tbx_OldMeterReading_2     .MaxLength = selectedMeter.LiveDigits;
+                //this.tbx_OldMeterReading_Dual_2.MaxLength = selectedMeter.LiveDigits;
             
                 this.divSub_MeterReading_2        .Opacity = OPACITY_ENABLE;
                 this.divSub_MeterReading_Dual_2   .Opacity = OPACITY_ENABLE;
-                this.divSub_OldMeterReading_2     .Opacity = OPACITY_ENABLE;
-                this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_ENABLE;
+                //this.divSub_OldMeterReading_2     .Opacity = OPACITY_ENABLE;
+                //this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_ENABLE;
             
                 this.tbx_MeterReading_2        .IsEnabled = true;
                 this.tbx_MeterReading_Dual_2   .IsEnabled = true;
-                this.tbx_OldMeterReading_2     .IsEnabled = true;
-                this.tbx_OldMeterReading_Dual_2.IsEnabled = true;
+                //this.tbx_OldMeterReading_2     .IsEnabled = true;
+                //this.tbx_OldMeterReading_Dual_2.IsEnabled = true;
                 
                 this.lb_MeterReading_MeterType_2       .IsVisible = false;
                 this.lb_MeterReading_DualMeterType_2   .IsVisible = false;
-                this.lb_OldMeterReading_MeterType_2    .IsVisible = false;
-                this.lb_OldMeterReading_DualMeterType_2.IsVisible = false;
+                //this.lb_OldMeterReading_MeterType_2    .IsVisible = false;
+                //this.lb_OldMeterReading_DualMeterType_2.IsVisible = false;
             });
         }
 
@@ -2718,7 +2731,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case ActionType.InstallConf:
+                case ActionType.MtuInstallationConfirmation:
 
                     #region Install Confirm Controller
 
@@ -3945,6 +3958,7 @@ namespace aclara_meters.view
             #region Port 1
 
             // No mandatory fields can be empty
+            // TRUE when the field does not need to be validated ( not mandatory and empty/not selected )
             bool noAcn = EmptyNoReq ( this.tbx_AccountNumber       .Text, MANDATORY_ACCOUNTNUMBER   );
             bool noWor = EmptyNoReq ( this.tbx_WorkOrder           .Text, MANDATORY_WORKORDER       );
             bool noOMt = EmptyNoReq ( this.tbx_OldMtuId            .Text, MANDATORY_OLDMTUID        );
@@ -3970,114 +3984,113 @@ namespace aclara_meters.view
             bool noDMr = EmptyNoReq ( this.tbx_MeterReading_Dual        .Text, MANDATORY_METERREADING    );
 
             // Correct length
-            bool okAcn =                                             NoEqNum ( this.tbx_AccountNumber       .Text, global.AccountLength               );
-            bool okWor = this.div_WorkOrder            .IsVisible && NoELTxt ( this.tbx_WorkOrder           .Text, global.WorkOrderLength             );
-            bool okOMt = this.div_OldMtuId             .IsVisible && NoEqTxt ( this.tbx_OldMtuId            .Text, global.MtuIdLength                 );
-            bool okOMs = this.div_OldMeterSerialNumber .IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber.Text, global.MeterNumberLength           );
-            bool okMsn = this.div_MeterSerialNumber    .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber   .Text, global.MeterNumberLength           );
-            bool okSnr = this.div_SnapReads            .IsVisible && NoELNum ( this.lb_SnapReads            .Text, (int)this.sld_SnapReads .Maximum   ) && snapReadsStatus;
-            bool okOMr = this.div_OldMeterReading      .IsVisible && NoEqNum ( this.tbx_OldMeterReading     .Text, this.tbx_OldMeterReading.MaxLength );
-            bool okMre =                                             NoEqNum ( this.tbx_MeterReading        .Text, this.tbx_MeterReading   .MaxLength );
+            // TRUE when the field has not correct length or is not selected yet
+            bool badAcn =                                             NoEqNum ( this.tbx_AccountNumber       .Text, global.AccountLength               );
+            bool badWor = this.div_WorkOrder            .IsVisible && NoELTxt ( this.tbx_WorkOrder           .Text, global.WorkOrderLength             );
+            bool badOMt = this.div_OldMtuId             .IsVisible && NoEqTxt ( this.tbx_OldMtuId            .Text, global.MtuIdLength                 );
+            bool badOMs = this.div_OldMeterSerialNumber .IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber.Text, global.MeterNumberLength           );
+            bool badMsn = this.div_MeterSerialNumber    .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber   .Text, global.MeterNumberLength           );
+            bool badSnr = this.div_SnapReads            .IsVisible && NoELNum ( this.lb_SnapReads            .Text, (int)this.sld_SnapReads .Maximum   ) && snapReadsStatus;
+            bool badOMr = this.div_OldMeterReading      .IsVisible && NoEqNum ( this.tbx_OldMeterReading     .Text, this.tbx_OldMeterReading.MaxLength );
+            bool badMre =                                             NoEqNum ( this.tbx_MeterReading        .Text, this.tbx_MeterReading   .MaxLength );
             
-            bool okOMw = this.div_OldMeterWorking      .IsVisible && this.pck_OldMeterWorking     .SelectedIndex <= -1;
-            bool okRpc = this.div_ReplaceMeterRegister .IsVisible && this.pck_ReplaceMeterRegister.SelectedIndex <= -1;
-            bool okMty = this.divDyna_MeterType_Vendors.IsVisible && this.pck_MeterType_Names     .SelectedIndex <= -1;
-            bool okRin = this.div_ReadInterval         .IsVisible && this.pck_ReadInterval        .SelectedIndex <= -1;
-            bool okTwo = this.div_TwoWay               .IsVisible && this.pck_TwoWay              .SelectedIndex <= -1;
-            bool okAlr = this.div_Alarms               .IsVisible && this.pck_Alarms              .SelectedIndex <= -1;
-            bool okDmd = this.div_Demands              .IsVisible && this.pck_Demands             .SelectedIndex <= -1;
+            bool badOMw = this.div_OldMeterWorking      .IsVisible && this.pck_OldMeterWorking     .SelectedIndex <= -1;
+            bool badRpc = this.div_ReplaceMeterRegister .IsVisible && this.pck_ReplaceMeterRegister.SelectedIndex <= -1;
+            bool badMty = this.divDyna_MeterType_Vendors.IsVisible && this.pck_MeterType_Names     .SelectedIndex <= -1;
+            bool badRin = this.div_ReadInterval         .IsVisible && this.pck_ReadInterval        .SelectedIndex <= -1;
+            bool badTwo = this.div_TwoWay               .IsVisible && this.pck_TwoWay              .SelectedIndex <= -1;
+            bool badAlr = this.div_Alarms               .IsVisible && this.pck_Alarms              .SelectedIndex <= -1;
+            bool badDmd = this.div_Demands              .IsVisible && this.pck_Demands             .SelectedIndex <= -1;
 
-            bool okDAc = global.AccountDualEntry      && this.div_AccountNumber_Dual       .IsVisible && NoEqNum ( this.tbx_AccountNumber_Dual       .Text, global.AccountLength     );
-            bool okDWr = global.WorkOrderDualEntry    && this.div_WorkOrder_Dual           .IsVisible && NoELTxt ( this.tbx_WorkOrder_Dual           .Text, global.WorkOrderLength   );
-            bool okDOs = global.OldSerialNumDualEntry && this.div_OldMeterSerialNumber_Dual.IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual.Text, global.MeterNumberLength );
-            bool okDMs = global.NewSerialNumDualEntry && this.div_MeterSerialNumber_Dual   .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_Dual   .Text, global.MeterNumberLength );
-            bool okDOr = global.OldReadingDualEntry   && this.div_OldMeterReading_Dual     .IsVisible && NoEqNum ( this.tbx_OldMeterReading_Dual     .Text, this.tbx_OldMeterReading_Dual.MaxLength );
-            bool okDMr = global.ReadingDualEntry      && this.div_MeterReading_Dual        .IsVisible && NoEqNum ( this.tbx_MeterReading_Dual        .Text, this.tbx_MeterReading_Dual   .MaxLength );
+            bool badDAc = global.AccountDualEntry      && this.div_AccountNumber_Dual       .IsVisible && NoEqNum ( this.tbx_AccountNumber_Dual       .Text, global.AccountLength     );
+            bool badDWr = global.WorkOrderDualEntry    && this.div_WorkOrder_Dual           .IsVisible && NoELTxt ( this.tbx_WorkOrder_Dual           .Text, global.WorkOrderLength   );
+            bool badDOs = global.OldSerialNumDualEntry && this.div_OldMeterSerialNumber_Dual.IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual.Text, global.MeterNumberLength );
+            bool badDMs = global.NewSerialNumDualEntry && this.div_MeterSerialNumber_Dual   .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_Dual   .Text, global.MeterNumberLength );
+            bool badDOr = global.OldReadingDualEntry   && this.div_OldMeterReading_Dual     .IsVisible && NoEqNum ( this.tbx_OldMeterReading_Dual     .Text, this.tbx_OldMeterReading_Dual.MaxLength );
+            bool badDMr = global.ReadingDualEntry      && this.div_MeterReading_Dual        .IsVisible && NoEqNum ( this.tbx_MeterReading_Dual        .Text, this.tbx_MeterReading_Dual   .MaxLength );
             
+            string FILL_ERROR = "Field '_' is incorrectly filled";
             string DUAL_ERROR = " ( Second entry )";
             
-            if      ( ( okAcn &= ! noAcn ) ) msgError = this.lb_AccountNumber.Text;
-            else if ( ( okDAc &= ! noDAc ) ) msgError = this.lb_AccountNumber.Text + DUAL_ERROR;
-            else if ( ( okWor &= ! noWor ) ) msgError = this.lb_WorkOrder.Text;
-            else if ( ( okDWr &= ! noDWr ) ) msgError = this.lb_WorkOrder.Text + DUAL_ERROR;
-            else if ( ( okOMt &= ! noOMt ) ) msgError = this.lb_OldMtuId.Text;
-            else if ( ( okOMs &= ! noOMs ) ) msgError = this.lb_OldMeterSerialNumber.Text;
-            else if ( ( okDOs &= ! noDOs ) ) msgError = this.lb_OldMeterSerialNumber.Text + DUAL_ERROR;
-            else if ( ( okOMw &= ! noOMw ) ) msgError = this.lb_OldMeterWorking.Text;
-            else if ( ( okOMr &= ! noOMr ) ) msgError = this.lb_OldMeterReading.Text;
-            else if ( ( okDOr &= ! noDOr ) ) msgError = this.lb_OldMeterReading.Text + DUAL_ERROR;
-            else if ( ( okRpc &= ! noRpc ) ) msgError = this.lb_ReplaceMeterRegister.Text;
-            else if ( ( okMsn &= ! noMsn ) ) msgError = this.lb_MeterSerialNumber.Text;
-            else if ( ( okDMs &= ! noDMs ) ) msgError = this.lb_MeterSerialNumber.Text + DUAL_ERROR;
-            else if ( ( okMty &= ! noMty ) ) msgError = "Meter Type";
-            else if ( ( okMre &= ! noMre ) ) msgError = this.lb_MeterReading.Text;
-            else if ( ( okDMr &= ! noDMr ) ) msgError = this.lb_MeterReading.Text + DUAL_ERROR;
-            else if ( ( okRin &= ! noRin ) ) msgError = this.lb_ReadInterval.Text;
-            else if ( ( okSnr &= ! noSnr ) ) msgError = this.lb_SnapReads.Text;
-            else if ( ( okTwo &= ! noTwo ) ) msgError = this.lb_TwoWay.Text;
-            else if ( ( okAlr &= ! noAlr ) ) msgError = this.lb_Alarms.Text;
-            else if ( ( okDmd &= ! noDmd ) ) msgError = this.lb_Demands.Text;
+            if      ( ( badAcn &= ! noAcn ) ) msgError = this.lb_AccountNumber.Text;
+            else if ( ( badDAc &= ! noDAc ) ) msgError = this.lb_AccountNumber.Text + DUAL_ERROR;
+            else if ( ( badWor &= ! noWor ) ) msgError = this.lb_WorkOrder.Text;
+            else if ( ( badDWr &= ! noDWr ) ) msgError = this.lb_WorkOrder.Text + DUAL_ERROR;
+            else if ( ( badOMt &= ! noOMt ) ) msgError = this.lb_OldMtuId.Text;
+            else if ( ( badOMs &= ! noOMs ) ) msgError = this.lb_OldMeterSerialNumber.Text;
+            else if ( ( badDOs &= ! noDOs ) ) msgError = this.lb_OldMeterSerialNumber.Text + DUAL_ERROR;
+            else if ( ( badOMw &= ! noOMw ) ) msgError = this.lb_OldMeterWorking.Text;
+            else if ( ( badOMr &= ! noOMr ) ) msgError = this.lb_OldMeterReading.Text;
+            else if ( ( badDOr &= ! noDOr ) ) msgError = this.lb_OldMeterReading.Text + DUAL_ERROR;
+            else if ( ( badRpc &= ! noRpc ) ) msgError = this.lb_ReplaceMeterRegister.Text;
+            else if ( ( badMsn &= ! noMsn ) ) msgError = this.lb_MeterSerialNumber.Text;
+            else if ( ( badDMs &= ! noDMs ) ) msgError = this.lb_MeterSerialNumber.Text + DUAL_ERROR;
+            else if ( ( badMty &= ! noMty ) ) msgError = "Meter Type";
+            else if ( ( badMre &= ! noMre ) ) msgError = this.lb_MeterReading.Text;
+            else if ( ( badDMr &= ! noDMr ) ) msgError = this.lb_MeterReading.Text + DUAL_ERROR;
+            else if ( ( badRin &= ! noRin ) ) msgError = this.lb_ReadInterval.Text;
+            else if ( ( badSnr &= ! noSnr ) ) msgError = this.lb_SnapReads.Text;
+            else if ( ( badTwo &= ! noTwo ) ) msgError = this.lb_TwoWay.Text;
+            else if ( ( badAlr &= ! noAlr ) ) msgError = this.lb_Alarms.Text;
+            else if ( ( badDmd &= ! noDmd ) ) msgError = this.lb_Demands.Text;
 
-            if ( okAcn || okWor || okOMs || okOMw || okOMr ||
-                 okRpc || okMsn || okMre || okSnr || okRin ||
-                 okMty || okTwo || okAlr || okDmd || okDAc ||
-                 okDWr || okDOs || okDOr || okDMs || okDMr )
+            if ( badAcn || badWor || badOMs || badOMw || badOMr ||
+                 badRpc || badMsn || badMre || badSnr || badRin ||
+                 badMty || badTwo || badAlr || badDmd || badDAc ||
+                 badDWr || badDOs || badDOr || badDMs || badDMr )
+            {
+                msgError = FILL_ERROR.Replace ( "_", msgError );
                 return false;
+            }
 
             // Dual entries
-            DUAL_ERROR = " entries are not the same";
+            DUAL_ERROR = "Field '_' dual entries are not the same";
 
-            if ( MANDATORY_ACCOUNTNUMBER &&
-                 ! noAcn && ! noDAc &&
-                 global.AccountDualEntry &&
+            if ( ! noAcn &&
+                 ! noDAc &&
                  ! string.Equals ( tbx_AccountNumber.Text, tbx_AccountNumber_Dual.Text ) )
             {
-                msgError = this.lb_AccountNumber.Text + DUAL_ERROR;
+                msgError = DUAL_ERROR.Replace ( "_", this.lb_AccountNumber.Text );
                 return false;
             }
             
-            if ( MANDATORY_WORKORDER &&
-                 ! noWor && ! noDWr &&
-                 global.WorkOrderDualEntry &&
+            if ( ! noWor &&
+                 ! noDWr &&
                  ! string.Equals ( tbx_WorkOrder.Text, tbx_WorkOrder_Dual.Text ) )
             {
-                msgError = this.lb_WorkOrder.Text + DUAL_ERROR;
+                msgError = DUAL_ERROR.Replace ( "_", this.lb_WorkOrder.Text );
                 return false;
             }
             
-            if ( MANDATORY_OLDMETERSERIAL &&
-                 ! noOMs && ! noDOs &&
-                 global.OldSerialNumDualEntry &&
+            if ( ! noOMs &&
+                 ! noDOs &&
                  ! string.Equals ( tbx_OldMeterSerialNumber.Text, tbx_OldMeterSerialNumber_Dual.Text ) )
             {
-                msgError = this.lb_OldMeterSerialNumber.Text + DUAL_ERROR;
+                msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterSerialNumber.Text );
                 return false;
             }
             
-            if ( MANDATORY_OLDMETERREADING &&
-                 ! noOMr && ! noDOr &&
-                 global.OldReadingDualEntry &&
+            if ( ! noOMr &&
+                 ! noDOr &&
                  ! string.Equals ( tbx_OldMeterReading.Text, tbx_OldMeterReading_Dual.Text ) )
             {
-                msgError = this.lb_OldMeterReading.Text + DUAL_ERROR;
+                msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterReading.Text );
                 return false;
             }
             
-            if ( MANDATORY_METERSERIAL &&
-                 ! noMsn && ! noDMs &&
-                 global.NewSerialNumDualEntry &&
+            if ( ! noMsn &&
+                 ! noDMs &&
                  ! string.Equals ( tbx_MeterSerialNumber.Text, tbx_MeterSerialNumber_Dual.Text ) )
             {
-                msgError = this.lb_MeterSerialNumber.Text + DUAL_ERROR;
+                msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterSerialNumber.Text );
                 return false;
             }
 
-            if ( MANDATORY_METERREADING &&
-                 ! noMre && ! noDMr &&
-                 global.ReadingDualEntry &&
+            if ( ! noMre &&
+                 ! noDMr &&
                  ! string.Equals ( tbx_MeterReading.Text, tbx_MeterReading_Dual.Text ) )
             {
-                msgError = this.lb_MeterReading.Text + DUAL_ERROR;
+                msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterReading.Text );
                 return false;
             }
 
@@ -4089,6 +4102,7 @@ namespace aclara_meters.view
                  this.port2IsActivated )
             {
                 // No mandatory fields can be empty
+                // TRUE when the field does not need to be validated ( not mandatory and empty/not selected )
                 noAcn = EmptyNoReq ( this.tbx_AccountNumber_2       .Text, MANDATORY_ACCOUNTNUMBER   );
                 noWor = EmptyNoReq ( this.tbx_WorkOrder_2           .Text, MANDATORY_WORKORDER       );
                 noOMs = EmptyNoReq ( this.tbx_OldMeterSerialNumber_2.Text, MANDATORY_OLDMETERSERIAL  );
@@ -4108,105 +4122,100 @@ namespace aclara_meters.view
                 noDMr = EmptyNoReq ( this.tbx_MeterReading_Dual_2        .Text, MANDATORY_METERREADING    );
     
                 // Correct length
-                okAcn =                                               NoEqNum ( this.tbx_AccountNumber_2       .Text, global.AccountLength                 );
-                okWor = this.div_WorkOrder_2            .IsVisible && NoELTxt ( this.tbx_WorkOrder_2           .Text, global.WorkOrderLength               );
-                okOMs = this.div_OldMeterSerialNumber_2 .IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_2.Text, global.MeterNumberLength             );
-                okMsn = this.div_MeterSerialNumber_2    .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_2   .Text, global.MeterNumberLength             );
-                okOMr = this.div_OldMeterReading        .IsVisible && NoEqNum ( this.tbx_OldMeterReading       .Text, this.tbx_OldMeterReading_2.MaxLength );
-                okMre =                                               NoEqNum ( this.tbx_MeterReading_2        .Text, this.tbx_MeterReading_2   .MaxLength );
+                // TRUE when the field has not correct length or is not selected yet
+                badAcn =                                               NoEqNum ( this.tbx_AccountNumber_2       .Text, global.AccountLength                 );
+                badWor = this.div_WorkOrder_2            .IsVisible && NoELTxt ( this.tbx_WorkOrder_2           .Text, global.WorkOrderLength               );
+                badOMs = this.div_OldMeterSerialNumber_2 .IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_2.Text, global.MeterNumberLength             );
+                badMsn = this.div_MeterSerialNumber_2    .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_2   .Text, global.MeterNumberLength             );
+                badOMr = this.div_OldMeterReading        .IsVisible && NoEqNum ( this.tbx_OldMeterReading       .Text, this.tbx_OldMeterReading_2.MaxLength );
+                badMre =                                               NoEqNum ( this.tbx_MeterReading_2        .Text, this.tbx_MeterReading_2   .MaxLength );
                 
-                okOMw = this.div_OldMeterWorking_2      .IsVisible && this.pck_OldMeterWorking_2     .SelectedIndex <= -1;
-                okRpc = this.div_ReplaceMeterRegister_2 .IsVisible && this.pck_ReplaceMeterRegister_2.SelectedIndex <= -1;
-                okMty = this.divDyna_MeterType_Vendors_2.IsVisible && this.pck_MeterType_Names_2     .SelectedIndex <= -1;
+                badOMw = this.div_OldMeterWorking_2      .IsVisible && this.pck_OldMeterWorking_2     .SelectedIndex <= -1;
+                badRpc = this.div_ReplaceMeterRegister_2 .IsVisible && this.pck_ReplaceMeterRegister_2.SelectedIndex <= -1;
+                badMty = this.divDyna_MeterType_Vendors_2.IsVisible && this.pck_MeterType_Names_2     .SelectedIndex <= -1;
                 
-                okDAc = global.AccountDualEntry      && this.div_AccountNumber_Dual_2       .IsVisible && NoEqNum ( this.tbx_AccountNumber_Dual_2       .Text, global.AccountLength     );
-                okDWr = global.WorkOrderDualEntry    && this.div_WorkOrder_Dual_2           .IsVisible && NoELTxt ( this.tbx_WorkOrder_Dual_2           .Text, global.WorkOrderLength   );
-                okDOs = global.OldSerialNumDualEntry && this.div_OldMeterSerialNumber_Dual_2.IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual_2.Text, global.MeterNumberLength );
-                okDMs = global.NewSerialNumDualEntry && this.div_MeterSerialNumber_Dual_2   .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_Dual_2   .Text, global.MeterNumberLength );
-                okDOr = global.OldReadingDualEntry   && this.div_OldMeterReading_Dual_2     .IsVisible && NoEqNum ( this.tbx_OldMeterReading_Dual_2     .Text, this.tbx_OldMeterReading_Dual_2.MaxLength );
-                okDMr = global.ReadingDualEntry      && this.div_MeterReading_Dual_2        .IsVisible && NoEqNum ( this.tbx_MeterReading_Dual_2        .Text, this.tbx_MeterReading_Dual_2   .MaxLength );
+                badDAc = global.AccountDualEntry      && this.div_AccountNumber_Dual_2       .IsVisible && NoEqNum ( this.tbx_AccountNumber_Dual_2       .Text, global.AccountLength     );
+                badDWr = global.WorkOrderDualEntry    && this.div_WorkOrder_Dual_2           .IsVisible && NoELTxt ( this.tbx_WorkOrder_Dual_2           .Text, global.WorkOrderLength   );
+                badDOs = global.OldSerialNumDualEntry && this.div_OldMeterSerialNumber_Dual_2.IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual_2.Text, global.MeterNumberLength );
+                badDMs = global.NewSerialNumDualEntry && this.div_MeterSerialNumber_Dual_2   .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_Dual_2   .Text, global.MeterNumberLength );
+                badDOr = global.OldReadingDualEntry   && this.div_OldMeterReading_Dual_2     .IsVisible && NoEqNum ( this.tbx_OldMeterReading_Dual_2     .Text, this.tbx_OldMeterReading_Dual_2.MaxLength );
+                badDMr = global.ReadingDualEntry      && this.div_MeterReading_Dual_2        .IsVisible && NoEqNum ( this.tbx_MeterReading_Dual_2        .Text, this.tbx_MeterReading_Dual_2   .MaxLength );
                 
-                string PORT2 = "Port2 ";
+                FILL_ERROR = "Field 'Port2 _' is incorrectly filled";
                 DUAL_ERROR = " ( Second entry )";
                 
-                if      ( ( okAcn &= ! noAcn ) ) msgError = this.lb_AccountNumber_2.Text;
-                else if ( ( okDAc &= ! noDAc ) ) msgError = this.lb_AccountNumber_2.Text + DUAL_ERROR;
-                else if ( ( okWor &= ! noWor ) ) msgError = this.lb_WorkOrder_2.Text;
-                else if ( ( okDWr &= ! noDWr ) ) msgError = this.lb_WorkOrder_2.Text + DUAL_ERROR;
-                else if ( ( okOMs &= ! noOMs ) ) msgError = this.lb_OldMeterSerialNumber_2.Text;
-                else if ( ( okDOs &= ! noDOs ) ) msgError = this.lb_OldMeterSerialNumber_2.Text + DUAL_ERROR;
-                else if ( ( okOMw &= ! noOMw ) ) msgError = this.lb_OldMeterWorking_2.Text;
-                else if ( ( okOMr &= ! noOMr ) ) msgError = this.lb_OldMeterReading_2.Text;
-                else if ( ( okDOr &= ! noDOr ) ) msgError = this.lb_OldMeterReading_2.Text + DUAL_ERROR;
-                else if ( ( okRpc &= ! noRpc ) ) msgError = this.lb_ReplaceMeterRegister_2.Text;
-                else if ( ( okMsn &= ! noMsn ) ) msgError = this.lb_MeterSerialNumber_2.Text;
-                else if ( ( okDMs &= ! noDMs ) ) msgError = this.lb_MeterSerialNumber_2.Text + DUAL_ERROR;
-                else if ( ( okMty &= ! noMty ) ) msgError = "Meter Type";
-                else if ( ( okMre &= ! noMre ) ) msgError = this.lb_MeterReading_2.Text;
-                else if ( ( okDMr &= ! noDMr ) ) msgError = this.lb_MeterReading_2.Text + DUAL_ERROR;
+                if      ( ( badAcn &= ! noAcn ) ) msgError = this.lb_AccountNumber_2.Text;
+                else if ( ( badDAc &= ! noDAc ) ) msgError = this.lb_AccountNumber_2.Text + DUAL_ERROR;
+                else if ( ( badWor &= ! noWor ) ) msgError = this.lb_WorkOrder_2.Text;
+                else if ( ( badDWr &= ! noDWr ) ) msgError = this.lb_WorkOrder_2.Text + DUAL_ERROR;
+                else if ( ( badOMs &= ! noOMs ) ) msgError = this.lb_OldMeterSerialNumber_2.Text;
+                else if ( ( badDOs &= ! noDOs ) ) msgError = this.lb_OldMeterSerialNumber_2.Text + DUAL_ERROR;
+                else if ( ( badOMw &= ! noOMw ) ) msgError = this.lb_OldMeterWorking_2.Text;
+                else if ( ( badOMr &= ! noOMr ) ) msgError = this.lb_OldMeterReading_2.Text;
+                else if ( ( badDOr &= ! noDOr ) ) msgError = this.lb_OldMeterReading_2.Text + DUAL_ERROR;
+                else if ( ( badRpc &= ! noRpc ) ) msgError = this.lb_ReplaceMeterRegister_2.Text;
+                else if ( ( badMsn &= ! noMsn ) ) msgError = this.lb_MeterSerialNumber_2.Text;
+                else if ( ( badDMs &= ! noDMs ) ) msgError = this.lb_MeterSerialNumber_2.Text + DUAL_ERROR;
+                else if ( ( badMty &= ! noMty ) ) msgError = "Meter Type";
+                else if ( ( badMre &= ! noMre ) ) msgError = this.lb_MeterReading_2.Text;
+                else if ( ( badDMr &= ! noDMr ) ) msgError = this.lb_MeterReading_2.Text + DUAL_ERROR;
                 
-                if ( okAcn || okWor || okOMs || okOMw || okOMr ||
-                     okRpc || okMsn || okMre || okMty || okDAc ||
-                     okDWr || okDOs || okDOr || okDMs || okDMr )
+                if ( badAcn || badWor || badOMs || badOMw || badOMr ||
+                     badRpc || badMsn || badMre || badMty || badDAc ||
+                     badDWr || badDOs || badDOr || badDMs || badDMr )
                 {
-                    msgError = PORT2 + msgError;
+                    msgError = FILL_ERROR.Replace ( "_", msgError );
                     return false;
                 }
                 
                 // Dual entries
-                DUAL_ERROR = " entries are not the same";
+                DUAL_ERROR = "Field 'Port2 _' dual entries are not the same";
 
-                if ( MANDATORY_ACCOUNTNUMBER &&
-                     ! noAcn && ! noDAc &&
-                     global.AccountDualEntry &&
+                if ( ! noAcn &&
+                     ! noDAc &&
                      ! string.Equals ( tbx_AccountNumber_2.Text, tbx_AccountNumber_Dual_2.Text ) )
                 {
-                    msgError = this.lb_AccountNumber_2.Text + DUAL_ERROR;
+                    msgError = DUAL_ERROR.Replace ( "_", this.lb_AccountNumber_2.Text );
                     return false;
                 }
                 
-                if ( MANDATORY_WORKORDER &&
-                     ! noWor && ! noDWr &&
-                     global.WorkOrderDualEntry &&
+                if ( ! noWor &&
+                     ! noDWr &&
                      ! string.Equals ( tbx_WorkOrder_2.Text, tbx_WorkOrder_Dual_2.Text ) )
                 {
-                    msgError = this.lb_WorkOrder_2.Text + DUAL_ERROR;
+                    msgError = DUAL_ERROR.Replace ( "_", this.lb_WorkOrder_2.Text );
                     return false;
                 }
                 
-                if ( MANDATORY_OLDMETERSERIAL &&
-                     ! noOMs && ! noDOs &&
-                     global.OldSerialNumDualEntry &&
+                if ( ! noOMs &&
+                     ! noDOs &&
                      ! string.Equals ( tbx_OldMeterSerialNumber_2.Text, tbx_OldMeterSerialNumber_Dual_2.Text ) )
                 {
-                    msgError = this.lb_OldMeterSerialNumber_2.Text + DUAL_ERROR;
+                    msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterSerialNumber_2.Text );
                     return false;
                 }
                 
-                if ( MANDATORY_OLDMETERREADING &&
-                     ! noOMr && ! noDOr &&
-                     global.OldReadingDualEntry &&
+                if ( ! noOMr &&
+                     ! noDOr &&
                      ! string.Equals ( tbx_OldMeterReading_2.Text, tbx_OldMeterReading_Dual_2.Text ) )
                 {
-                    msgError = this.lb_OldMeterReading_2.Text + DUAL_ERROR;
+                    msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterReading_2.Text );
                     return false;
                 }
                 
-                if ( MANDATORY_METERSERIAL &&
-                     ! noMsn && ! noDMs &&
-                     global.NewSerialNumDualEntry &&
+                if ( ! noMsn &&
+                     ! noDMs &&
                      ! string.Equals ( tbx_MeterSerialNumber_2.Text, tbx_MeterSerialNumber_Dual_2.Text ) )
                 {
-                    msgError = this.lb_MeterSerialNumber_2.Text + DUAL_ERROR;
+                    msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterSerialNumber_2.Text );
                     return false;
                 }
     
-                if ( MANDATORY_METERREADING &&
-                     ! noMre && ! noDMr &&
-                     global.ReadingDualEntry &&
+                if ( ! noMre &&
+                     ! noDMr &&
                      ! string.Equals ( tbx_MeterReading_2.Text, tbx_MeterReading_Dual_2.Text ) )
                 {
-                    msgError = this.lb_MeterReading_2.Text + DUAL_ERROR;
+                    msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterReading_2.Text );
                     return false;
                 }
             }
@@ -4307,7 +4316,7 @@ namespace aclara_meters.view
             if ( ! DEBUG_AUTO_MODE_ON &&
                  ! this.ValidateFields ( ref msgError ) )
             {
-                DisplayAlert ( "Error", "Field '" + msgError + "' is incorrectly filled", "OK" );
+                DisplayAlert ( "Error", msgError, "OK" );
                 return;
             }
 
@@ -4679,8 +4688,9 @@ namespace aclara_meters.view
                 value_rin = this.pck_ReadInterval.SelectedItem.ToString();
                 value_sre = this.sld_SnapReads   .Value.ToString();
                 
-                // Is a two-way MTU and forces time sync ( InstallConfirmation )
-                if ( mtu.OnTimeSync &&
+                // Is a two-way MTU
+                if ( global.TimeToSync &&
+                     mtu.TimeToSync    &&
                      mtu.FastMessageConfig )
                     value_two = this.pck_TwoWay.SelectedItem.ToString ();
                 
@@ -4733,8 +4743,9 @@ namespace aclara_meters.view
                  mtu.DailyReads )
                 this.addMtuForm.AddParameter ( FIELD.SNAP_READS, value_sre );
 
-            // 2-Way [ Only for family 34XX ]
-            if ( mtu.OnTimeSync && // Is a two-way MTU and forces time sync ( InstallConfirmation )
+            // Is a two-way MTU
+            if ( global.TimeToSync &&
+                 mtu.TimeToSync    &&
                  mtu.FastMessageConfig )
                 this.addMtuForm.AddParameter ( FIELD.TWO_WAY, value_two );
 

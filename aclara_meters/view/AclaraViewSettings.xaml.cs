@@ -25,7 +25,7 @@ namespace aclara_meters.view
     {
         private const string TEXT_COPYR   = "Copyright © 2018 Aclara Technologies LLC.";
         private const string TEXT_SUPPORT = "System tech Support: 1-866-205-5058";
-        private const string TEXT_VERSION = "Application Version: 1.36.0";
+        private const string TEXT_VERSION = "Application Version: 1.36.1";
         private const string TEXT_LICENSE = "Licensed to: ";
 
         private ActionType actionType;
@@ -72,7 +72,7 @@ namespace aclara_meters.view
                 MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", TargetType = ActionType.ReplaceMtuReplaceMeter });
 
             if (FormsApp.config.global.ShowInstallConfirmation)
-                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = ActionType.InstallConf });
+                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", TargetType = ActionType.MtuInstallationConfirmation });
 
 
             // ListView needs to be at least  elements for UI Purposes, even empty ones
@@ -551,7 +551,7 @@ namespace aclara_meters.view
 
                     break;
 
-                case ActionType.InstallConf:
+                case ActionType.MtuInstallationConfirmation:
 
                     #region Install Confirm Controller
 
