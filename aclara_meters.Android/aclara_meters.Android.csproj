@@ -118,6 +118,7 @@
     <None Include="Assets\AboutAssets.txt" />
     <None Include="Properties\AndroidManifest.xml" />
     <None Include="Helpers\TranslateExtension.txt" />
+    <None Include="Resources\refreshsignal.png" />
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\layout\Tabbar.axml" />
@@ -325,6 +326,8 @@
     <AndroidResource Include="Resources\drawable-nodpi\rep_mtu_rep_meter_btn.png" />
     <AndroidResource Include="Resources\drawable\rep_mtu_rep_meter_btn_black.png" />
     <AndroidResource Include="Resources\drawable\rep_mtu_rep_meter_btn.png" />
+    <AndroidResource Include="Resources\drawable\back_menu_puck.png" />
+    <AndroidResource Include="Resources\drawable\refreshsignal.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable-hdpi\" />

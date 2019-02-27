@@ -30,7 +30,7 @@ namespace aclara_meters.view
 
         private ActionType actionType;
         private IUserDialogs dialogsSaved;
-        private CustomSampleViewModel _viewModelread;
+        private TabLogViewModel _viewModelread;
         private List<PageItem> MenuList { get; set; }
 
         public AclaraViewSettings()
@@ -122,7 +122,7 @@ namespace aclara_meters.view
                 await Task.Delay(100); 
                 Device.BeginInvokeOnMainThread(async () =>
                 {
-                    _viewModelread = new CustomSampleViewModel();
+                    _viewModelread = new TabLogViewModel();
                     BindingContext = _viewModelread;
                     await _viewModelread.LoadData();
                 });
@@ -180,7 +180,8 @@ namespace aclara_meters.view
             {
                 await Task.Delay(100); Device.BeginInvokeOnMainThread(() =>
                 {
-                    _viewModelread = new CustomSampleViewModel();
+                    //_viewModelread = new CustomSampleViewModel();
+                    _viewModelread = new TabLogViewModel();
                     BindingContext = _viewModelread;
                     Task.WaitAll(_viewModelread.LoadData());
                 });
