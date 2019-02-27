@@ -357,6 +357,19 @@ namespace MTUComm
             Errors.GetInstance ()._LogErrorNow ( e, portIndex );
             Errors.LaunchException ( e, forceException );
         }
+        
+        /// <summary>
+        /// Only log registered errors and shows error message/pop-up of the last,
+        /// without launching the exception, allowing to continue executing process logic
+        /// </summary>
+        /// <param name="e">Exception that represents the last error happened</param>
+        /// <param name="portindex">Index of MTU port associated to the error</param>
+        public static void LogErrorNowAndContinue (
+            Exception e,
+            int portindex = 1 )
+        {
+            LogErrorNow ( e, portindex, false );
+        }
 
         public static void LogRegisteredErrors (
             bool forceException = false,

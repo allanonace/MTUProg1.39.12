@@ -6,6 +6,8 @@ namespace Xml
 {
     public class Mtu
     {
+        private const int DEF_FLOW = 0;
+    
         public Mtu ()
         {
             this.CutWireDelaySetting  = false;
@@ -45,10 +47,13 @@ namespace Xml
             this.TamperPort1Imm       = false;
             this.TamperPort2Imm       = false;
             this.TiltTamper           = false;
-            //this.TimeToSync         = ¿?
+            this.TimeToSync           = false;
         }
 
         #region Elements
+
+        [XmlAttribute("ID")]
+        public int Id { get; set; }
 
         [XmlElement("DataRead")]
         public bool DataRead { get; set; }
@@ -68,14 +73,28 @@ namespace Xml
         [XmlElement("FastMessageConfig")]
         public bool FastMessageConfig { get; set; }
         
-        [XmlElement("Flow")]
+        [XmlIgnore]
         public int Flow { get; set; }
+        
+        [XmlElement("Flow")]
+        public string Flow_AllowEmptyField
+        {
+            get { return this.Flow.ToString (); }
+            set
+            {
+                if ( ! string.IsNullOrEmpty ( value ) )
+                {
+                    int v;
+                    if ( int.TryParse ( value, out v ) )
+                         this.Flow = v;
+                    else this.Flow = DEF_FLOW;
+                }
+                else this.Flow = DEF_FLOW;
+            }
+        }
 
         [XmlElement("HexNum")]
         public string HexNum { get; set; }
-
-        [XmlAttribute("ID")]
-        public int Id { get; set; }
 
         [XmlElement("IsEcoder")]
         public bool IsEcoder { get; set; }

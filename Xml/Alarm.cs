@@ -5,11 +5,14 @@ namespace Xml
 {
     public class Alarm
     {
+        private const int DEF_CUTWIRE = 0;
+        private const int DEF_OVERLAP = 6;
+    
         public Alarm ()
         {
             this.CutAlarmCable              = false;
             this.CutWireAlarmImm            = false;
-            this.CutWireDelaySetting        = 0;
+            this.CutWireDelaySetting        = DEF_CUTWIRE;
             //this.DcuUrgentAlarm           = ¿?
             this.ECoderDaysNoFlow           = false;
             this.ECoderDaysOfLeak           = false;
@@ -25,7 +28,7 @@ namespace Xml
             this.LastGasp                   = false;
             this.LastGaspImm                = false;
             this.Magnetic                   = true;
-            this.Overlap                    = 6; // [1-11]
+            this.Overlap                    = DEF_OVERLAP; // [1-11]
             this.RegisterCover              = true;
             this.ReverseFlow                = true;
             this.SerialComProblem           = false;
@@ -41,20 +44,54 @@ namespace Xml
 
         #region Elements
 
-        [XmlElement("CutWireDelaySetting")]
-        public byte CutWireDelaySetting { get; set; }
-
-        [XmlElement("IntervalData")]
-        public bool IntervalData { get; set; }
-        
         [XmlAttribute("MTUType")]
         public int MTUType { get; set; }
 
         [XmlAttribute("Name")]
         public string Name { get; set; }
+
+        [XmlElement("IntervalData")]
+        public bool IntervalData { get; set; }
+
+        [XmlIgnore]
+        public byte CutWireDelaySetting { get; set; }
+        
+        [XmlElement("CutWireDelaySetting")]
+        public string CutWireDelaySetting_AllowEmptyField
+        {
+            get { return this.CutWireDelaySetting.ToString (); }
+            set
+            {
+                if ( ! string.IsNullOrEmpty ( value ) )
+                {
+                    byte v;
+                    if ( byte.TryParse ( value, out v ) )
+                         this.CutWireDelaySetting = v;
+                    else this.CutWireDelaySetting = DEF_CUTWIRE;
+                }
+                else this.CutWireDelaySetting = DEF_CUTWIRE;
+            }
+        }
+        
+        [XmlIgnore]
+        public int Overlap { get; set; }
         
         [XmlElement("Overlap")]
-        public int Overlap { get; set; }
+        public string Overlap_AllowEmptyField
+        {
+            get { return this.Overlap.ToString (); }
+            set
+            {
+                if ( ! string.IsNullOrEmpty ( value ) )
+                {
+                    int v;
+                    if ( int.TryParse ( value, out v ) )
+                         this.Overlap = v;
+                    else this.Overlap = DEF_OVERLAP;
+                }
+                else this.Overlap = DEF_OVERLAP;
+            }
+        }
 
         #region Tampers
 

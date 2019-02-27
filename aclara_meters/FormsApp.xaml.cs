@@ -185,7 +185,6 @@ namespace aclara_meters
                 {
                     await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
                 }
-                
 
                 if (statusStorage != PermissionStatus.Granted)
                 {
