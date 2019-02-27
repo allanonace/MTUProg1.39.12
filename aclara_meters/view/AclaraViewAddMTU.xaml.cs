@@ -2217,6 +2217,17 @@ namespace aclara_meters.view
             //Now I am given ItemsSorce to the Pickers
             pck_ReplaceMeterRegister.ItemsSource   = list;
             pck_ReplaceMeterRegister_2.ItemsSource = list;
+            
+            int index;
+            string defvalue = global.RegisterRecordingDefault;
+            if ( ! string.IsNullOrEmpty ( defvalue ) &&
+                 ( index = list.IndexOf (
+                    defvalue.ToUpper ()[ 0 ] +
+                    defvalue.ToLower ().Substring ( 1 ) ) ) > -1 )
+            {
+                pck_ReplaceMeterRegister  .SelectedIndex = index;
+                pck_ReplaceMeterRegister_2.SelectedIndex = index;
+            }
         }
 
         #region Phone/Tablet
@@ -2290,43 +2301,32 @@ namespace aclara_meters.view
 
         private void SetMeterVendor ( int selectedIndex )
         {
-            selected_MeterType_Vendor = list_MeterType_Vendors [ selectedIndex ];
-            list_MeterType_Models = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor);
-            selected_MeterType_Name = "";
-
-            try
+            if ( selectedIndex > -1 )
             {
+                selected_MeterType_Vendor = list_MeterType_Vendors [ selectedIndex ];
+                
+                list_MeterType_Models = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor);
+                selected_MeterType_Name = "";
+    
                 pck_MeterType_Models.ItemsSource = list_MeterType_Models;
                 divDyna_MeterType_Models.IsVisible = true;
-                divDyna_MeterType_Names.IsVisible = false;
-            }
-            catch ( Exception e )
-            {
-                pck_MeterType_Models.ItemsSource = null;
-                divDyna_MeterType_Models.IsVisible = false;
                 divDyna_MeterType_Names.IsVisible = false;
             }
         }
 
         private void MeterVendors2Picker_SelectedIndexChanged2(object sender, EventArgs e)
         {
-            int j = ((BorderlessPicker)sender).SelectedIndex;
+            int selectedIndex = ((BorderlessPicker)sender).SelectedIndex;
 
-            selected_MeterType_Vendor_2 = list_MeterType_Vendors_2[j];
-
-            list_MeterType_Models_2 = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2);
-            selected_MeterType_Name_2 = "";
-
-            try
+            if ( selectedIndex > -1 )
             {
+                selected_MeterType_Vendor_2 = list_MeterType_Vendors_2[ selectedIndex ];
+    
+                list_MeterType_Models_2 = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2);
+                selected_MeterType_Name_2 = "";
+    
                 pck_MeterType_Models_2.ItemsSource = list_MeterType_Models_2;
                 divDyna_MeterType_Models_2.IsVisible = true;
-                divDyna_MeterType_Names_2.IsVisible = false;
-            }
-            catch (Exception e3)
-            {
-                pck_MeterType_Models_2.ItemsSource = null;
-                divDyna_MeterType_Models_2.IsVisible = false;
                 divDyna_MeterType_Names_2.IsVisible = false;
             }
         }
@@ -2338,118 +2338,108 @@ namespace aclara_meters.view
 
         private void SetMeterModel ( int selectedIndex )
         {
-            pck_MeterType_Names.ItemDisplayBinding = new Binding("Display");
-
-            selected_MeterType_Model = list_MeterType_Models[ selectedIndex ];
-
-            List<Meter> meterlist = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor, selected_MeterType_Model);
-
-            try
+            if ( selectedIndex > -1 )
             {
+                pck_MeterType_Names.ItemDisplayBinding = new Binding("Display");
+    
+                selected_MeterType_Model = list_MeterType_Models[ selectedIndex ];
+    
+                List<Meter> meterlist = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor, selected_MeterType_Model);
+    
                 pck_MeterType_Names.ItemsSource = meterlist;
                 divDyna_MeterType_Models.IsVisible = true;
                 divDyna_MeterType_Names.IsVisible = true;
-            }
-            catch ( Exception e )
-            {
-                pck_MeterType_Names.ItemsSource = null;
-                divDyna_MeterType_Models.IsVisible = false;
-                divDyna_MeterType_Names.IsVisible = false;
             }
         }
 
         private void MeterModels2Picker_SelectedIndexChanged2(object sender, EventArgs e)
         {
-            int i = ((BorderlessPicker)sender).SelectedIndex;
+            int selectedIndex = ((BorderlessPicker)sender).SelectedIndex;
 
-            pck_MeterType_Names_2.ItemDisplayBinding = new Binding("Display");
-
-            selected_MeterType_Model_2 = list_MeterType_Models_2[i];
-
-            List<Meter> meterlist2 = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2, selected_MeterType_Model_2);
-
-            try
+            if ( selectedIndex > -1 )
             {
+                pck_MeterType_Names_2.ItemDisplayBinding = new Binding("Display");
+    
+                selected_MeterType_Model_2 = list_MeterType_Models_2[ selectedIndex ];
+    
+                List<Meter> meterlist2 = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2, selected_MeterType_Model_2);
+    
                 pck_MeterType_Names_2.ItemsSource = meterlist2;
                 divDyna_MeterType_Models_2.IsVisible = true;
                 divDyna_MeterType_Names_2.IsVisible = true;
-            }
-            catch (Exception e3)
-            {
-                pck_MeterType_Names_2.ItemsSource = null;
-                divDyna_MeterType_Models_2.IsVisible = false;
-                divDyna_MeterType_Names_2.IsVisible = false;
             }
         }
 
         private void MeterNamesPicker_SelectedIndexChanged(object sender, EventArgs e)
         {
-            int j = ((BorderlessPicker)sender).SelectedIndex;
-
-            Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
-
-            selected_MeterType_Name = selectedMeter.Display;
-
-            Console.WriteLine(selected_MeterType_Name + " Selected");
-
-            Device.BeginInvokeOnMainThread(() =>
+            if ( ( ( BorderlessPicker )sender ).SelectedIndex > -1 )
             {
-                // Update MeterReading field length to use and validate
-                this.tbx_MeterReading        .MaxLength = selectedMeter.LiveDigits;
-                this.tbx_MeterReading_Dual   .MaxLength = selectedMeter.LiveDigits;
-                //this.tbx_OldMeterReading     .MaxLength = selectedMeter.LiveDigits;
-                //this.tbx_OldMeterReading_Dual.MaxLength = selectedMeter.LiveDigits;
-                
-                this.div_MeterReading           .Opacity = OPACITY_ENABLE;
-                this.divSub_MeterReading_Dual   .Opacity = OPACITY_ENABLE;
-                //this.divSub_OldMeterReading     .Opacity = OPACITY_ENABLE;
-                //this.divSub_OldMeterReading_Dual.Opacity = OPACITY_ENABLE;
-                
-                this.tbx_MeterReading        .IsEnabled = true;
-                this.tbx_MeterReading_Dual   .IsEnabled = true;
-                //this.tbx_OldMeterReading     .IsEnabled = true;
-                //this.tbx_OldMeterReading_Dual.IsEnabled = true;
-                
-                this.lb_MeterReading_MeterType       .IsVisible = false;
-                this.lb_MeterReading_DualMeterType   .IsVisible = false;
-                //this.lb_OldMeterReading_MeterType    .IsVisible = false;
-                //this.lb_OldMeterReading_DualMeterType.IsVisible = false;
-            });
+                Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
+    
+                selected_MeterType_Name = selectedMeter.Display;
+    
+                Console.WriteLine(selected_MeterType_Name + " Selected");
+    
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    // Update MeterReading field length to use and validate
+                    this.tbx_MeterReading        .MaxLength = selectedMeter.LiveDigits;
+                    this.tbx_MeterReading_Dual   .MaxLength = selectedMeter.LiveDigits;
+                    //this.tbx_OldMeterReading     .MaxLength = selectedMeter.LiveDigits;
+                    //this.tbx_OldMeterReading_Dual.MaxLength = selectedMeter.LiveDigits;
+                    
+                    this.div_MeterReading           .Opacity = OPACITY_ENABLE;
+                    this.divSub_MeterReading_Dual   .Opacity = OPACITY_ENABLE;
+                    //this.divSub_OldMeterReading     .Opacity = OPACITY_ENABLE;
+                    //this.divSub_OldMeterReading_Dual.Opacity = OPACITY_ENABLE;
+                    
+                    this.tbx_MeterReading        .IsEnabled = true;
+                    this.tbx_MeterReading_Dual   .IsEnabled = true;
+                    //this.tbx_OldMeterReading     .IsEnabled = true;
+                    //this.tbx_OldMeterReading_Dual.IsEnabled = true;
+                    
+                    this.lb_MeterReading_MeterType       .IsVisible = false;
+                    this.lb_MeterReading_DualMeterType   .IsVisible = false;
+                    //this.lb_OldMeterReading_MeterType    .IsVisible = false;
+                    //this.lb_OldMeterReading_DualMeterType.IsVisible = false;
+                });
+            }
         }
 
         private void MeterNames2Picker_SelectedIndexChanged2(object sender, EventArgs e)
         {
-            int j = ((BorderlessPicker)sender).SelectedIndex;
-
-            Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
-
-            selected_MeterType_Name_2 = selectedMeter.Display;
-            
-            Console.WriteLine(selected_MeterType_Name_2 + " Selected");
-
-            Device.BeginInvokeOnMainThread(() =>
+            if ( ( ( BorderlessPicker )sender ).SelectedIndex > -1 )
             {
-                // Update MeterReading field length to use and validate
-                this.tbx_MeterReading_2        .MaxLength = selectedMeter.LiveDigits;
-                this.tbx_MeterReading_Dual_2   .MaxLength = selectedMeter.LiveDigits;
-                //this.tbx_OldMeterReading_2     .MaxLength = selectedMeter.LiveDigits;
-                //this.tbx_OldMeterReading_Dual_2.MaxLength = selectedMeter.LiveDigits;
-            
-                this.divSub_MeterReading_2        .Opacity = OPACITY_ENABLE;
-                this.divSub_MeterReading_Dual_2   .Opacity = OPACITY_ENABLE;
-                //this.divSub_OldMeterReading_2     .Opacity = OPACITY_ENABLE;
-                //this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_ENABLE;
-            
-                this.tbx_MeterReading_2        .IsEnabled = true;
-                this.tbx_MeterReading_Dual_2   .IsEnabled = true;
-                //this.tbx_OldMeterReading_2     .IsEnabled = true;
-                //this.tbx_OldMeterReading_Dual_2.IsEnabled = true;
+                Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
+    
+                selected_MeterType_Name_2 = selectedMeter.Display;
                 
-                this.lb_MeterReading_MeterType_2       .IsVisible = false;
-                this.lb_MeterReading_DualMeterType_2   .IsVisible = false;
-                //this.lb_OldMeterReading_MeterType_2    .IsVisible = false;
-                //this.lb_OldMeterReading_DualMeterType_2.IsVisible = false;
-            });
+                Console.WriteLine(selected_MeterType_Name_2 + " Selected");
+    
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    // Update MeterReading field length to use and validate
+                    this.tbx_MeterReading_2        .MaxLength = selectedMeter.LiveDigits;
+                    this.tbx_MeterReading_Dual_2   .MaxLength = selectedMeter.LiveDigits;
+                    //this.tbx_OldMeterReading_2     .MaxLength = selectedMeter.LiveDigits;
+                    //this.tbx_OldMeterReading_Dual_2.MaxLength = selectedMeter.LiveDigits;
+                
+                    this.divSub_MeterReading_2        .Opacity = OPACITY_ENABLE;
+                    this.divSub_MeterReading_Dual_2   .Opacity = OPACITY_ENABLE;
+                    //this.divSub_OldMeterReading_2     .Opacity = OPACITY_ENABLE;
+                    //this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_ENABLE;
+                
+                    this.tbx_MeterReading_2        .IsEnabled = true;
+                    this.tbx_MeterReading_Dual_2   .IsEnabled = true;
+                    //this.tbx_OldMeterReading_2     .IsEnabled = true;
+                    //this.tbx_OldMeterReading_Dual_2.IsEnabled = true;
+                    
+                    this.lb_MeterReading_MeterType_2       .IsVisible = false;
+                    this.lb_MeterReading_DualMeterType_2   .IsVisible = false;
+                    //this.lb_OldMeterReading_MeterType_2    .IsVisible = false;
+                    //this.lb_OldMeterReading_DualMeterType_2.IsVisible = false;
+                });
+            }
         }
 
         #endregion
@@ -3983,6 +3973,17 @@ namespace aclara_meters.view
             bool noDOr = EmptyNoReq ( this.tbx_OldMeterReading_Dual     .Text, MANDATORY_OLDMETERREADING );
             bool noDMr = EmptyNoReq ( this.tbx_MeterReading_Dual        .Text, MANDATORY_METERREADING    );
 
+            // Numeric fields
+            // - AccountNumber
+            // - SnapReads/DailyReads
+            // - OldMeterReading
+            // - MeterReading
+            
+            // Alphanumeric fields
+            // - WorkOrder
+            // - OldMeterSerialNumber
+            // - MeterSerialNumber
+
             // Correct length
             // TRUE when the field has not correct length or is not selected yet
             bool badAcn =                                             NoEqNum ( this.tbx_AccountNumber       .Text, global.AccountLength               );
@@ -3991,7 +3992,7 @@ namespace aclara_meters.view
             bool badOMs = this.div_OldMeterSerialNumber .IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber.Text, global.MeterNumberLength           );
             bool badMsn = this.div_MeterSerialNumber    .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber   .Text, global.MeterNumberLength           );
             bool badSnr = this.div_SnapReads            .IsVisible && NoELNum ( this.lb_SnapReads            .Text, (int)this.sld_SnapReads .Maximum   ) && snapReadsStatus;
-            bool badOMr = this.div_OldMeterReading      .IsVisible && NoEqNum ( this.tbx_OldMeterReading     .Text, this.tbx_OldMeterReading.MaxLength );
+            bool badOMr = this.div_OldMeterReading      .IsVisible && NoELNum ( this.tbx_OldMeterReading     .Text, this.tbx_OldMeterReading.MaxLength );
             bool badMre =                                             NoEqNum ( this.tbx_MeterReading        .Text, this.tbx_MeterReading   .MaxLength );
             
             bool badOMw = this.div_OldMeterWorking      .IsVisible && this.pck_OldMeterWorking     .SelectedIndex <= -1;
@@ -4006,7 +4007,7 @@ namespace aclara_meters.view
             bool badDWr = global.WorkOrderDualEntry    && this.div_WorkOrder_Dual           .IsVisible && NoELTxt ( this.tbx_WorkOrder_Dual           .Text, global.WorkOrderLength   );
             bool badDOs = global.OldSerialNumDualEntry && this.div_OldMeterSerialNumber_Dual.IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual.Text, global.MeterNumberLength );
             bool badDMs = global.NewSerialNumDualEntry && this.div_MeterSerialNumber_Dual   .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_Dual   .Text, global.MeterNumberLength );
-            bool badDOr = global.OldReadingDualEntry   && this.div_OldMeterReading_Dual     .IsVisible && NoEqNum ( this.tbx_OldMeterReading_Dual     .Text, this.tbx_OldMeterReading_Dual.MaxLength );
+            bool badDOr = global.OldReadingDualEntry   && this.div_OldMeterReading_Dual     .IsVisible && NoELNum ( this.tbx_OldMeterReading_Dual     .Text, this.tbx_OldMeterReading_Dual.MaxLength );
             bool badDMr = global.ReadingDualEntry      && this.div_MeterReading_Dual        .IsVisible && NoEqNum ( this.tbx_MeterReading_Dual        .Text, this.tbx_MeterReading_Dual   .MaxLength );
             
             string FILL_ERROR = "Field '_' is incorrectly filled";
@@ -4656,10 +4657,10 @@ namespace aclara_meters.view
                 if ( isReplaceMeter )
                 {
                     if ( global.MeterWorkRecording )
-                        value_rpl = this.pck_ReplaceMeterRegister.SelectedItem.ToString ();
-                    
-                    if ( global.RegisterRecording )
                         value_omw = this.pck_OldMeterWorking.SelectedItem.ToString ();
+                        
+                    if ( global.RegisterRecording )
+                        value_rpl = this.pck_ReplaceMeterRegister.SelectedItem.ToString ();
                 }
                 
                 if ( ( addMtuForm.usePort2 = mtu.TwoPorts && this.port2IsActivated ) )
@@ -4676,10 +4677,10 @@ namespace aclara_meters.view
                     if ( isReplaceMeter )
                     {
                         if ( global.MeterWorkRecording )
-                            value_rpl = this.pck_ReplaceMeterRegister_2.SelectedItem.ToString ();
+                            value_omw = this.pck_OldMeterWorking_2.SelectedItem.ToString ();
                         
                         if ( global.RegisterRecording )
-                            value_omw = this.pck_OldMeterWorking_2.SelectedItem.ToString ();
+                            value_rpl = this.pck_ReplaceMeterRegister_2.SelectedItem.ToString ();
                     }
                 }
                 

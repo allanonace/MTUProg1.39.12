@@ -47,7 +47,7 @@ namespace Xml
             this.AutoRegisterRecording        = false; // Records Register selection in Activity Log based on the old meter serial number and new serial number
             this.AutoRFCheck                  = false; // NOT PRESENT IN THE PDF NORE KG.CODE // It will be used for 34XX series MTUs
             this.ByPassAutoDetect             = false; // Bypass F1 Ecoder/Encoder Autodetect
-            this.Cancel                       = new List<string> (); // [Custom] Cancel options
+            //this.Cancel                     = [Custom] Cancel options
             this.CertPair                     = false; // Whether a certificate pair (i.e. Public and Private) is installed ( PC only )
             this.CertPath                     = string.Empty; // Key Store Path for certificate ( PC Only )
             this.CertPswd                     = string.Empty; // Digital Certificate Password if Full certificate stored
@@ -123,7 +123,7 @@ namespace Xml
             this.OldReadingDualEntry          = true; // F1 Flatpack 2000/3000 series up to version 2.1.1 and firmware up to 15
             this.OldReadingRecording          = true; // Enables or disables dual entry of the old meter reading during programming
             this.OldSerialNumDualEntry        = true; // Enables or disables entry of old meter reading
-            this.Options                      = new List<Option> (); // [Custom] Misc Fields. Needs new section to describe
+            //this.Options                    = [Custom] Misc Fields. Needs new section to describe
             this.OtherCancelCode              = string.Empty; // [1-15] Use a special code for other cancel option
             this.OverWriteAutoDetect          = false; // To show overwrite button on the sceen
             this.PasswordMaxLength            = 10; // [1-10] Sets the maximum logon user password length in characters
@@ -188,6 +188,60 @@ namespace Xml
             this.WriteDelay                   = 0; // [0-5000] Additional delay in milliseconds after write to MTU
             this.WriteF1SystemTime            = false; // F1 write MTU system time from handheld or PC
             this.XmitTimer                    = 0; // [UInt] Transmit Timer
+        
+            this.Cancel = new List<string> ()
+            {
+                "Not Home",
+                "Meter Missing",
+                "Bored",
+                "On Strike",
+                "Quit"
+            };
+            
+            this.Options = new List<Option> ()
+            {
+                new Option ()
+                {
+                    Name     = "LocationInfo",
+                    Display  = "MTU Location",
+                    Type     = "list",
+                    Required = true,
+                    OptionList = new List<string> ()
+                    {
+                        "Outside",
+                        "Inside",
+                        "Basement"
+                    }
+                },
+                new Option ()
+                {
+                    Name     = "LocationInfo",
+                    Display  = "Meter Location",
+                    Type     = "list",
+                    Required = true,
+                    OptionList = new List<string> ()
+                    {
+                        "Outside",
+                        "Inside",
+                        "Basement"
+                    }
+                },
+                new Option ()
+                {
+                    Name     = "Construction",
+                    Display  = "Construction",
+                    Type     = "list",
+                    Required = false,
+                    OptionList = new List<string> ()
+                    {
+                        "Vinyl",
+                        "Wood",
+                        "Brick",
+                        "Aluminum",
+                        "Other"
+                    }
+                }
+            };
         }
 
         [XmlElement("AccountDualEntry")]

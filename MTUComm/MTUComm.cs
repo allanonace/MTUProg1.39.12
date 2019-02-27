@@ -322,9 +322,8 @@ namespace MTUComm
 
         public void Task_InstallConfirmation ()
         {
-            // Launchs exception 'ActionNotAchievedICException'
-            if ( this.InstallConfirmation_Logic () )
-                this.Task_ReadMtu ();
+            this.InstallConfirmation_Logic ();
+            this.Task_ReadMtu ();
         }
 
         private bool InstallConfirmation_Logic ( bool force = false, int time = 0 )
@@ -337,12 +336,12 @@ namespace MTUComm
             // MTU is turned off
             if ( ! force &&
                  this.latest_mtu.Shipbit )
-                Errors.LogErrorNow ( new MtuIsAlreadyTurnedOffICException () );
+                Errors.LogErrorNowAndContinue ( new MtuIsAlreadyTurnedOffICException () );
             
             // MTU does not support two-way or client does not want to perform it
             if ( ! global.TimeToSync ||
                  ! this.mtu.TimeToSync )
-                Errors.LogErrorNow ( new MtuIsNotTwowayICException () );
+                Errors.LogErrorNowAndContinue ( new MtuIsNotTwowayICException () );
             
             else
             {
@@ -391,7 +390,7 @@ namespace MTUComm
                     // Finish
                     else
                     {
-                        Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
+                        Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                         return false;
                     }
                 
@@ -404,7 +403,7 @@ namespace MTUComm
                     }
                     
                     // Finish with error
-                    Errors.LogErrorNow ( new ActionNotAchievedICException () );
+                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException () );
                     return false;
                 }
             }
@@ -572,8 +571,9 @@ namespace MTUComm
             #region Auto-detect Meters
 
             // Script is for one port but MTU has two and second is enabled
-            if ( ! scriptUseP2 &&
-                 port2IsActivated )
+            if ( ! scriptUseP2    &&
+                 port2IsActivated && // Return true in a one port 138 MTU
+                 this.mtu.TwoPorts ) // and for that reason I have to check also this
                 Errors.LogErrorNow ( new ScriptForOnePortButTwoEnabledException () );
             
             // Script is for two ports but MTU has not second port or is disabled
@@ -799,11 +799,14 @@ namespace MTUComm
                     
                     case FIELD.METER_READING:
                     case FIELD.METER_READING_2:
-                    case FIELD.METER_READING_OLD:
-                    case FIELD.METER_READING_OLD_2:
                     if ( parameter.Port == 0 )
                          fail = NoEqNum ( value, meterPort1.LiveDigits );
                     else fail = NoEqNum ( value, meterPort2.LiveDigits );
+                    break;
+                    
+                    case FIELD.METER_READING_OLD:
+                    case FIELD.METER_READING_OLD_2:
+                    fail = NoELNum ( value, 12 );
                     
                     // Do not use
                     if ( ! fail &&
@@ -901,15 +904,23 @@ namespace MTUComm
                 {
                     fail = false;
                     
-                    string TEST = ( form.Texts as Dictionary<FIELD,string[]> )[ type ][ 2 ];
+                    string typeStr = ( form.Texts as Dictionary<FIELD,string[]> )[ type ][ 2 ];
                     
-                    msgError += ( ( ! string.IsNullOrEmpty ( msgError ) ) ? ", " : string.Empty )
-                                + ( form.Texts as Dictionary<FIELD,string[]> )[ type ][ 2 ];
+                    if ( ! msgError.Contains ( typeStr ) )
+                        msgError += ( ( ! string.IsNullOrEmpty ( msgError ) ) ? ", " : string.Empty ) + typeStr;
                 }
             }
 
             if ( ! string.IsNullOrEmpty ( msgError ) )
+            {
+                int index;
+                if ( ( index = msgError.LastIndexOf ( ',' ) ) > -1 )
+                    msgError = msgError.Substring ( 0, index ) +
+                               " and" +
+                               msgError.Substring ( index + 1 );
+
                 Errors.LogErrorNow ( new ProcessingParamsScriptException ( msgError ) );
+            }
 
             #endregion
 
@@ -1058,49 +1069,104 @@ namespace MTUComm
                     Alarm alarms = (Alarm)form.Alarm.Value;
                     if ( alarms != null )
                     {
+                        /*
                         try
                         {
+                        if ( mtu.CutWireDelaySetting )
+                            map.xxx = alarms.CutWireDelaySetting;
 
-                        // Tilt alarm
+                        if ( mtu.GasCutWireAlarm )
+                            map.xxx = alarms.LastGasp;
+
+                        if ( mtu.GasCutWireAlarmImm )
+                            map.xxx = alarms.LastGaspImm;
+                            
+                        if ( mtu.InsufficentMemory )
+                            map.xxx = alarms.InsufficientMemory;
+                            
+                        if ( mtu.InsufficentMemoryImm )
+                            map.xxx = alarms.InsufficientMemoryImm;
+                            
+                        if ( mtu.InterfaceTamper )
+                            map.P1InterfaceAlarm = alarms.InterfaceTamper;
+
+                        if ( mtu.InterfaceTamperImm )
+                            map.xxx = alarms.InterfaceTamperImm;
+                            
+                        if ( mtu.LastGasp )
+                            map.xxx = alarms.LastGasp;
+
+                        if ( mtu.LastGaspImm )
+                            map.xxx = alarms.LastGaspImm;
+                        
+                        if ( mtu.MagneticTamper )
+                            map.P1MagneticAlarm = alarms.Magnetic;
+                            
+                        if ( mtu.RegisterCoverTamper )
+                            map.P1RegisterCoverAlarm = alarms.RegisterCover;
+                            
+                        if ( mtu.ReverseFlowTamper )
+                            map.P1ReverseFlowAlarm = alarms.ReverseFlow;
+                            
+                        if ( mtu.SerialComProblem )
+                            map.xxx = alarms.SerialComProblem;
+                            
+                        if ( mtu.SerialComProblemImm )
+                            map.xxx = alarms.SerialComProblemImm;
+                            
+                        if ( mtu.SerialCutWire )
+                            map.xxx = alarms.SerialCutWire;
+                            
+                        if ( mtu.SerialCutWireImm )
+                            map.xxx = alarms.SerialCutWireImm;
+                            
+                        if ( mtu.TamperPort1 )
+                            map.xxx = alarms.TamperPort1;
+                            
+                        if ( mtu.TamperPort2 )
+                            map.xxx = alarms.TamperPort2;
+                        
+                        if ( mtu.TamperPort1Imm )
+                            map.xxx = alarms.TamperPort1Imm;
+                        
+                        if ( mtu.TamperPort2Imm )
+                            map.xxx = alarms.TamperPort2Imm;
+                            
                         if ( mtu.TiltTamper )
                             map.P1TiltAlarm = alarms.Tilt;
-                    
-                        // P1MagneticAlarm
-                        if ( mtu.MagneticTamper)
-                            map.P1MagneticAlarm = alarms.Magnetic;
+
+    
                     
                         // P1ImmediateAlarm
                         map.P1ImmediateAlarm = alarms.ImmediateAlarmTransmit;
                     
                         // P1UrgentAlarm
                         map.P1UrgentAlarm = alarms.DcuUrgentAlarm;
-                    
-                        // PCI/Coil interface alarm
-                        if ( mtu.InterfaceTamper )
-                            map.P1InterfaceAlarm = alarms.InterfaceTamper;
-                    
-                        // P1RegisterCoverAlarm
-                        if ( mtu.RegisterCoverTamper )
-                            map.P1RegisterCoverAlarm = alarms.RegisterCover;
-                    
-                        // Reverse flow alarm
-                        if ( mtu.ReverseFlowTamper )
-                            map.P1ReverseFlowAlarm = alarms.ReverseFlow;
+                        
+                        // Escribir directamente
+                        // - DcuAlarm
+                        // - ImmediateAlarm
                     
                         // Cut wire alarm
                         // Only for MTU Types: 144, 146, 148 and 154
                         if ( mtu.GasCutWireAlarm )
                             map.P1CutWireAlarm = alarms.LastGasp;
                     
+                        
+                        
                         // Message overlap count
                         // Number of new readings to take before transmit
                         map.MessageOverlapCount = alarms.Overlap;
+                        
+                        // 
+                        map.xxx = alarms.CutWireDelaySetting;
 
                         }
                         catch ( Exception e )
                         {
 
                         }
+                        */
                     }
                     // No alarm profile was selected before launch the action
                     else Errors.LogErrorNow ( new SelectedAlarmForCurrentMtuException () );
