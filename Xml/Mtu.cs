@@ -6,137 +6,160 @@ namespace Xml
 {
     public class Mtu
     {
-        [XmlAttribute("ID")]
-        public int Id { get; set; }
+        public Mtu ()
+        {
+            this.CutWireDelaySetting  = false;
+            this.DataRead             = false;
+            this.DailyReads           = true;
+            // this.Description       = SET BY ACLARA
+            this.DigitsToDrop         = false;
+            this.Ecoder               = false;
+            this.FastMessageConfig    = false;
+            //this.Flow               = SET BY ACLARA [0,1]
+            this.GasCutWireAlarm      = false;
+            this.GasCutWireAlarmImm   = false;
+            this.InsufficentMemory    = false;
+            this.InsufficentMemoryImm = false;
+            this.InterfaceTamper      = true;
+            this.InterfaceTamperImm   = false;
+            this.IsEcoder             = false;
+            this.LastGasp             = false;
+            this.LastGaspImm          = false;
+            //this.MagneticTamper     = ¿?
+            //this.Model              = SET BY ACLARA
+            this.MtuDemand            = false;
+            this.NodeDiscovery        = false;
+            this.OnTimeSync           = false;
+            this.PulseCountOnly       = false;
+            this.RegisterCoverTamper  = false;
+            this.RequiresAlarmProfile = false;
+            this.ReverseFlowTamper    = false;
+            this.SerialComProblem     = false;
+            this.SerialComProblemImm  = false;
+            this.SerialCutWire        = false;
+            this.SerialCutWireImm     = false;
+            this.STAREncryptionType   = "AES256"; // [None,AES128,AES256]
+            this.SpecialSet           = false;
+            this.TamperPort1          = false;
+            this.TamperPort2          = false;
+            this.TamperPort1Imm       = false;
+            this.TamperPort2Imm       = false;
+            this.TiltTamper           = false;
+            //this.TimeToSync         = ¿?
+        }
 
-        [XmlElement("Model")]
-        public string Model { get; set; }
+        #region Elements
 
-        [XmlElement("Version")]
-        public string Version { get; set; }
+        [XmlElement("DataRead")]
+        public bool DataRead { get; set; }
+    
+        [XmlElement("DailyReads")]
+        public bool DailyReads { get; set; }
 
-        [XmlElement("FastMessageConfig")]
-        public bool FastMessageConfig { get; set; }
-
-        [XmlElement("CutWireDelaySetting")]
-        public bool CutWireDelaySetting { get; set; }
+        [XmlElement("Description")]
+        public string Description { get; set; }
 
         [XmlElement("DigitsToDrop")]
         public bool DigitsToDrop { get; set; }
 
-        [XmlElement("Port")]
-        public List<Port> Ports { get; set; }
+        [XmlElement("Ecoder")]
+        public bool Ecoder { get; set; }
 
-        [XmlElement("IsTables")]
-        public int IsTablesSerialize { get; set; }
-
-        [XmlIgnore]
-        public bool IsTables
-        {
-            get
-            {
-                bool isTables = false;
-                if (IsTablesSerialize.Equals("1"))
-                {
-                    isTables = true;
-                }
-                return isTables;
-            }
-        }
-
-        [XmlElement("IsEcoder")]
-        public bool IsEcoder { get; set; }
+        [XmlElement("FastMessageConfig")]
+        public bool FastMessageConfig { get; set; }
+        
+        [XmlElement("Flow")]
+        public int Flow { get; set; }
 
         [XmlElement("HexNum")]
         public string HexNum { get; set; }
 
+        [XmlAttribute("ID")]
+        public int Id { get; set; }
+
+        [XmlElement("IsEcoder")]
+        public bool IsEcoder { get; set; }
+
+        [XmlElement("Model")]
+        public string Model { get; set; }
+
         [XmlElement("MtuDemand")]
         public bool MtuDemand { get; set; }
-
-        [XmlElement("RequiresAlarmProfile")]
-        public bool RequiresAlarmProfile { get; set; }
-
-        [XmlElement("TimeToSync")]
-        public bool TimeToSync { get; set; }
-
-        [XmlElement("MagneticTamper")]
-        public bool MagneticTamper { get; set; }
-
-        [XmlElement("RegisterCoverTamper")]
-        public bool RegisterCoverTamper { get; set; }
-
-        [XmlElement("ReverseFlowTamper")]
-        public bool ReverseFlowTamper { get; set; }
-
-        [XmlElement("TiltTamper")]
-        public bool TiltTamper { get; set; }
-
-        [XmlElement("InterfaceTamper")]
-        public bool InterfaceTamper { get; set; }
-
-        [XmlElement("DailyReads")]
-        public bool DailyReads { get; set; }
+        
+        [XmlElement("NodeDiscovery")]
+        public bool NodeDiscovery { get; set; }
 
         [XmlElement("OnTimeSync")]
         public bool OnTimeSync { get; set; }
 
+        [XmlElement("Port")]
+        public List<Port> Ports { get; set; }
+        
         [XmlElement("PulseCountOnly")]
         public bool PulseCountOnly { get; set; }
-
-        [XmlElement("DDConfig")]
-        public bool DDConfig { get; set; }
-
-        [XmlElement("Ecoder")]
-        public bool Ecoder { get; set; }
-
+        
+        [XmlElement("RequiresAlarmProfile")]
+        public bool RequiresAlarmProfile { get; set; }
+        
+        [XmlElement("STAREncryptionType")]
+        public string STAREncryptionType { get; set; }
+        
         [XmlElement("SpecialSet")]
         public bool SpecialSet { get; set; }
 
+        [XmlElement("TimeToSync")]
+        public bool TimeToSync { get; set; }
+        
+        #region Tampers
+        
+        [XmlElement("CutWireDelaySetting")]
+        public bool CutWireDelaySetting { get; set; }
+        
         [XmlElement("GasCutWireAlarm")]
         public bool GasCutWireAlarm { get; set; }
+        
+        [XmlElement("GasCutWireAlarmImm")]
+        public bool GasCutWireAlarmImm { get; set; }
+        
+        [XmlElement("InsufficentMemory")]
+        public bool InsufficentMemory { get; set; }
 
-        [XmlElement("Flow")]
-        public int Flow { get; set; }
-
-        [XmlElement("MeterId")]
-        public string MeterId { get; set; }
-
-        [XmlElement("CombinePorts")]
-        public bool CombinePorts { get; set; }
-
-        [XmlElement("Corrector")]
-        public bool Corrector { get; set; }
-
-        [XmlElement("SerialComProblem")]
-        public bool SerialComProblem { get; set; }
-
+        [XmlElement("InsufficentMemoryImm")]
+        public bool InsufficentMemoryImm { get; set; }
+        
+        [XmlElement("InterfaceTamper")]
+        public bool InterfaceTamper { get; set; }
+        
+        [XmlElement("InterfaceTamperImm")]
+        public bool InterfaceTamperImm { get; set; }
+        
         [XmlElement("LastGasp")]
         public bool LastGasp { get; set; }
-
+        
+        [XmlElement("LastGaspImm")]
+        public bool LastGaspImm { get; set; }
+        
+        [XmlElement("MagneticTamper")]
+        public bool MagneticTamper { get; set; }
+        
+        [XmlElement("RegisterCoverTamper")]
+        public bool RegisterCoverTamper { get; set; }
+        
+        [XmlElement("ReverseFlowTamper")]
+        public bool ReverseFlowTamper { get; set; }
+        
+        [XmlElement("SerialComProblem")]
+        public bool SerialComProblem { get; set; }
+        
+        [XmlElement("SerialComProblemImm")]
+        public bool SerialComProblemImm { get; set; }
+        
         [XmlElement("SerialCutWire")]
         public bool SerialCutWire { get; set; }
 
         [XmlElement("SerialCutWireImm")]
         public bool SerialCutWireImm { get; set; }
-
-        [XmlElement("LastGaspImm")]
-        public bool LastGaspImm { get; set; }
-
-        [XmlElement("SerialComProblemImm")]
-        public bool SerialComProblemImm { get; set; }
-
-        [XmlElement("InterfaceTamperImm")]
-        public bool InterfaceTamperImm { get; set; }
-
-        [XmlElement("GasCutWireAlarmImm")]
-        public bool GasCutWireAlarmImm { get; set; }
-
-        [XmlElement("InsufficentMemoryImm")]
-        public bool InsufficentMemoryImm { get; set; }
-
-        [XmlElement("InsufficentMemory")]
-        public bool InsufficentMemory { get; set; }
-
+        
         [XmlElement("TamperPort1")]
         public bool TamperPort1 { get; set; }
 
@@ -148,22 +171,19 @@ namespace Xml
 
         [XmlElement("TamperPort2Imm")]
         public bool TamperPort2Imm { get; set; }
+        
+        [XmlElement("TiltTamper")]
+        public bool TiltTamper { get; set; }
 
-        [XmlElement("ECoderLeakDetectionCurrent")]
-        public bool ECoderLeakDetectionCurrent { get; set; }
+        #endregion
 
-        [XmlElement("ECoderDaysNoFlow")]
-        public bool ECoderDaysNoFlow { get; set; }
+        #endregion
 
-        [XmlElement("ECoderDaysOfLeak")]
-        public bool ECoderDaysOfLeak { get; set; }
+        #region Logic
 
-        [XmlElement("ECoderReverseFlow")]
-        public bool ECoderReverseFlow { get; set; }
-
-        public String GetProperty(String Name)
+        public String GetProperty ( String Name )
         {
-            return this.GetType().GetProperty(Name).GetValue(this, null).ToString();
+            return this.GetType ().GetProperty ( Name ).GetValue ( this, null ).ToString ();
         }
 
         [XmlIgnore]
@@ -171,8 +191,10 @@ namespace Xml
         {
             get
             {
-                return (this.Ports.Count > 1);
+                return ( this.Ports.Count > 1 );
             }
         }
+
+        #endregion
     }
 }

@@ -1058,49 +1058,104 @@ namespace MTUComm
                     Alarm alarms = (Alarm)form.Alarm.Value;
                     if ( alarms != null )
                     {
+                        /*
                         try
                         {
+                        if ( mtu.CutWireDelaySetting )
+                            map.xxx = alarms.CutWireDelaySetting;
 
-                        // Tilt alarm
+                        if ( mtu.GasCutWireAlarm )
+                            map.xxx = alarms.LastGasp;
+
+                        if ( mtu.GasCutWireAlarmImm )
+                            map.xxx = alarms.LastGaspImm;
+                            
+                        if ( mtu.InsufficentMemory )
+                            map.xxx = alarms.InsufficientMemory;
+                            
+                        if ( mtu.InsufficentMemoryImm )
+                            map.xxx = alarms.InsufficientMemoryImm;
+                            
+                        if ( mtu.InterfaceTamper )
+                            map.P1InterfaceAlarm = alarms.InterfaceTamper;
+
+                        if ( mtu.InterfaceTamperImm )
+                            map.xxx = alarms.InterfaceTamperImm;
+                            
+                        if ( mtu.LastGasp )
+                            map.xxx = alarms.LastGasp;
+
+                        if ( mtu.LastGaspImm )
+                            map.xxx = alarms.LastGaspImm;
+                        
+                        if ( mtu.MagneticTamper )
+                            map.P1MagneticAlarm = alarms.Magnetic;
+                            
+                        if ( mtu.RegisterCoverTamper )
+                            map.P1RegisterCoverAlarm = alarms.RegisterCover;
+                            
+                        if ( mtu.ReverseFlowTamper )
+                            map.P1ReverseFlowAlarm = alarms.ReverseFlow;
+                            
+                        if ( mtu.SerialComProblem )
+                            map.xxx = alarms.SerialComProblem;
+                            
+                        if ( mtu.SerialComProblemImm )
+                            map.xxx = alarms.SerialComProblemImm;
+                            
+                        if ( mtu.SerialCutWire )
+                            map.xxx = alarms.SerialCutWire;
+                            
+                        if ( mtu.SerialCutWireImm )
+                            map.xxx = alarms.SerialCutWireImm;
+                            
+                        if ( mtu.TamperPort1 )
+                            map.xxx = alarms.TamperPort1;
+                            
+                        if ( mtu.TamperPort2 )
+                            map.xxx = alarms.TamperPort2;
+                        
+                        if ( mtu.TamperPort1Imm )
+                            map.xxx = alarms.TamperPort1Imm;
+                        
+                        if ( mtu.TamperPort2Imm )
+                            map.xxx = alarms.TamperPort2Imm;
+                            
                         if ( mtu.TiltTamper )
                             map.P1TiltAlarm = alarms.Tilt;
-                    
-                        // P1MagneticAlarm
-                        if ( mtu.MagneticTamper)
-                            map.P1MagneticAlarm = alarms.Magnetic;
+
+    
                     
                         // P1ImmediateAlarm
                         map.P1ImmediateAlarm = alarms.ImmediateAlarmTransmit;
                     
                         // P1UrgentAlarm
                         map.P1UrgentAlarm = alarms.DcuUrgentAlarm;
-                    
-                        // PCI/Coil interface alarm
-                        if ( mtu.InterfaceTamper )
-                            map.P1InterfaceAlarm = alarms.InterfaceTamper;
-                    
-                        // P1RegisterCoverAlarm
-                        if ( mtu.RegisterCoverTamper )
-                            map.P1RegisterCoverAlarm = alarms.RegisterCover;
-                    
-                        // Reverse flow alarm
-                        if ( mtu.ReverseFlowTamper )
-                            map.P1ReverseFlowAlarm = alarms.ReverseFlow;
+                        
+                        // Escribir directamente
+                        // - DcuAlarm
+                        // - ImmediateAlarm
                     
                         // Cut wire alarm
                         // Only for MTU Types: 144, 146, 148 and 154
                         if ( mtu.GasCutWireAlarm )
                             map.P1CutWireAlarm = alarms.LastGasp;
                     
+                        
+                        
                         // Message overlap count
                         // Number of new readings to take before transmit
                         map.MessageOverlapCount = alarms.Overlap;
+                        
+                        // 
+                        map.xxx = alarms.CutWireDelaySetting;
 
                         }
                         catch ( Exception e )
                         {
 
                         }
+                        */
                     }
                     // No alarm profile was selected before launch the action
                     else Errors.LogErrorNow ( new SelectedAlarmForCurrentMtuException () );
