@@ -15,6 +15,7 @@ namespace aclara.ViewModels
     public class TabLogViewModel:BaseViewModel
     {
         public ObservableRangeCollection<ItemsLog> ItemsLog { get; } = new ObservableRangeCollection<ItemsLog>();
+
         public async Task LoadData(bool isReloading = false)
         {
             Stream stream=null;

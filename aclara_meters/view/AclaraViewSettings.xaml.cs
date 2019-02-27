@@ -120,13 +120,13 @@ namespace aclara_meters.view
             Task.Run(async () =>
             {
                 await Task.Delay(100); 
-                Device.BeginInvokeOnMainThread(async () =>
+                Device.BeginInvokeOnMainThread(() =>
                 {
                     _viewModelread = new TabLogViewModel();
                     BindingContext = _viewModelread;
-                    await _viewModelread.LoadData();
+                    Task.WaitAll(_viewModelread.LoadData());
                 });
-            });
+           });
 
             ButtonListeners();
             InitLayout(1); 
@@ -178,9 +178,9 @@ namespace aclara_meters.view
             // portrait
             Task.Run(async () =>
             {
-                await Task.Delay(100); Device.BeginInvokeOnMainThread(() =>
+                await Task.Delay(100); 
+                Device.BeginInvokeOnMainThread(() =>
                 {
-                    //_viewModelread = new CustomSampleViewModel();
                     _viewModelread = new TabLogViewModel();
                     BindingContext = _viewModelread;
                     Task.WaitAll(_viewModelread.LoadData());

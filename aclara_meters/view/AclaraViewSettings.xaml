@@ -64,6 +64,7 @@
                                 </StackLayout>
                                 <!--  LOGS -->
                                 <ScrollView IsVisible="true" Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" x:Name="logs_block">
+                                    <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Margin="0,0,0,0">
                                     <accordion:AccordionRepeaterView x:Name="Acordeon" Spacing="0" KeepOnlyOneItemOpen="True" ItemsSource="{Binding ItemsLog}">
                                         <accordion:AccordionRepeaterView.AccordionItemTemplate>
                                             <DataTemplate>
@@ -72,18 +73,19 @@
                                                     <accordion:AccordionItemView.ItemContent>
                                                         <StackLayout BackgroundColor="#6aa2b8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
                                                             <ListView x:Name="Lista" 
+                                                                      SeparatorVisibility="None"
                                                                       IsVisible="{Binding HayLista}" 
                                                                       Margin="0,10,0,10" 
                                                                       HasUnevenRows="True" 
                                                                       ItemsSource="{Binding .ListaDatos}" 
-                                                                      HeightRequest="150" 
+                                                                      HeightRequest="90" 
                                                                       BackgroundColor="#6aa2b8">
                                                                 <ListView.ItemTemplate>
                                                                     <DataTemplate>
                                                                         <ViewCell>
                                                                             <StackLayout Margin="24,0,0,4" Orientation="Horizontal">
-                                                                                <Label Text="{Binding Descripcion}" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
-                                                                                <Label Text="{Binding Valor}" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
+                                                                                <Label Text="{Binding Descripcion}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
+                                                                                <Label Text="{Binding Valor}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                             </StackLayout>
                                                                         </ViewCell>
                                                                     </DataTemplate>
@@ -97,17 +99,18 @@
                                                                             <accordion:AccordionItemView.ItemContent>
                                                                                 <StackLayout BackgroundColor="#6aa2b8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
                                                                                     <ListView x:Name="Lista" 
+                                                                                              SeparatorVisibility="None"
                                                                                               Margin="0,10,0,10" 
                                                                                               HasUnevenRows="True" 
                                                                                               ItemsSource="{Binding .ListaDatos}" 
-                                                                                              HeightRequest="150" 
+                                                                                              HeightRequest="90" 
                                                                                               BackgroundColor="#6aa2b8">
                                                                                         <ListView.ItemTemplate>
                                                                                             <DataTemplate>
                                                                                                 <ViewCell>
                                                                                                     <StackLayout Margin="24,0,0,4" Orientation="Horizontal">
-                                                                                                        <Label Text="{Binding Descripcion}" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
-                                                                                                        <Label Text="{Binding Valor}" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
+                                                                                                        <Label Text="{Binding Descripcion}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
+                                                                                                        <Label Text="{Binding Valor}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                                                     </StackLayout>
                                                                                                 </ViewCell>
                                                                                             </DataTemplate>
@@ -125,6 +128,7 @@
                                             </DataTemplate>
                                         </accordion:AccordionRepeaterView.AccordionItemTemplate>
                                     </accordion:AccordionRepeaterView>
+                                  </StackLayout>
                                 </ScrollView>
                                 <!--  Sync -->
                                 <StackLayout IsVisible="false" Margin="-10,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" Scale="0.9" x:Name="sync_block">

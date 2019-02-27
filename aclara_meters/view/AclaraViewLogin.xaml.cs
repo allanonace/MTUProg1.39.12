@@ -61,13 +61,13 @@ namespace aclara_meters.view
 
                     if ( Mobile.IsNetAvailable () )
                     {
-                        if ( this.UploadingLogFiles () )
-                        {
-                            //base.DisplayAlert ( "Information", "All Log files uploaded!", "Ok" );
+                        //if ( this.UploadingLogFiles () )
+                        //{
+                        //    //base.DisplayAlert ( "Information", "All Log files uploaded!", "Ok" );
 
-                            //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
-                        }
-                        else base.DisplayAlert ( "Error", "Error Uploading files", "Ok" );
+                        //    //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
+                        //}
+                        //else base.DisplayAlert ( "Error", "Error Uploading files", "Ok" );
                     }
                     else base.DisplayAlert ( "Warning", "No connection available. Log files will not be uploaded till you get internet connection", "Ok" );
 
