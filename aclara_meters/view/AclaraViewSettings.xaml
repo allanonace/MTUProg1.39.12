@@ -78,7 +78,7 @@
                                     </Label>
                                 </StackLayout>
                                 <!--  LOGS -->
-                                <StackLayout IsVisible="false" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0" x:Name="logs_block">
+                                <StackLayout IsVisible="true" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0" x:Name="logs_block">
                                   <ScrollView IsVisible="true" Margin="0,0,0,0" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="Center">
                                      
                                     <accordion:AccordionRepeaterView x:Name="Acordeon" Spacing="0" KeepOnlyOneItemOpen="True" ItemsSource="{Binding ItemsLog}">

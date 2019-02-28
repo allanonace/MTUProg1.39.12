@@ -1236,7 +1236,7 @@ namespace MTUComm
 
                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true
-                if ( 1>1 && global.TimeToSync && // Indicates that is a two-way MTU and enables TimeSync request
+                if ( global.TimeToSync && // Indicates that is a two-way MTU and enables TimeSync request
                      mtu.TimeToSync    && // Indicates that is a two-way MTU and enables TimeSync request
                      mtu.OnTimeSync    && // MTU can be force during installation to perform a TimeSync/IC
                      // If script contains ForceTimeSync, use it but if not use value from Global

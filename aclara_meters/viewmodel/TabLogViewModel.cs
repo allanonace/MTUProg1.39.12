@@ -30,7 +30,7 @@ namespace aclara.ViewModels
             // Path where the file should be saved once downloaded (locally)
             string path = Mobile.GetPath();
             DirectoryInfo info = new DirectoryInfo(path);
-            FileInfo[] files = info.GetFiles().OrderBy(p => p.LastWriteTimeUtc).ToArray();
+            FileInfo[] files = info.GetFiles().OrderByDescending(p => p.LastWriteTimeUtc).ToArray();
 
             foreach (FileInfo file in files)
             {
