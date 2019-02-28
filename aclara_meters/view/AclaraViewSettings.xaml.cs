@@ -1306,6 +1306,7 @@ namespace aclara_meters.view
 
         }
 
+
         private void TapToHome_Tabletmode(object sender, EventArgs e)
         {
             Navigation.PopToRootAsync(false);

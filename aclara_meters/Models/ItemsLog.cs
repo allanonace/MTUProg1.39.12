@@ -19,7 +19,8 @@ namespace aclara_meters.Models
         public List<ItemsLog> SubItemsLog { get; set; }
 
         public Boolean HayLista { get; set; }
-       
+        public Boolean HayAcciones { get { return SubItemsLog == null ? false: true; } }
+
     }
     public class DatosAccion
     {

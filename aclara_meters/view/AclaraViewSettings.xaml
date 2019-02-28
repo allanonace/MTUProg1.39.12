@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <util:BasePage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" Title="{Binding PageTitle}" NavigationPage.HasBackButton="false" xmlns:accordion="clr-namespace:Xamarin.CustomControls;assembly=Xamarin.CustomControls.AccordionView" xmlns:local="clr-namespace:aclara_meters;assembly=aclara_meters" xmlns:Controls="clr-namespace:aclara_meters" xmlns:behaviors="clr-namespace:aclara_meters.Behaviors" x:Class="aclara_meters.view.AclaraViewSettings">
     <RelativeLayout IsVisible="true">
-        <ContentView BackgroundColor="White" WidthRequest="1024" x:Name="fondo" IsVisible="true" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=1}">
+        <ContentView BackgroundColor="White" WidthRequest="1024" x:Name="fondo" IsVisible="true" 
+                     RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Height,
+            Factor=0}" 
+                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Height,
+            Factor=1}">
         </ContentView>
-        <ContentView IsVisible="true" x:Name="background_scan_page" RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=0}" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=1}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Height,&#xA;                                     Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Height,&#xA;                                     Factor=1}">
+        <ContentView IsVisible="true" x:Name="background_scan_page" 
+                     RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Width,
+            Factor=0}" 
+                     RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Width,
+            Factor=1}" 
+                     RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Height,
+            Factor=0}" 
+                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Height,
+            Factor=1}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
@@ -43,13 +61,10 @@
                         </StackLayout>
                     </StackLayout>
                     <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-                        <StackLayout Orientation="Horizontal" IsVisible="false" Padding="{StaticResource GridPadding}">
-                            <Label Text="Characteristics" FontSize="22" />
-                        </StackLayout>
                         <Label x:Name="title_text" Margin="16,14,0,0" FontSize="22" TextColor="#6aa2b8" Text="About" />
                         <Image Margin="-16,4,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
-                        <RelativeLayout HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand">
-                            <StackLayout HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0">
+                        <StackLayout Orientation="Vertical"   HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand">
+                            <StackLayout Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0">
                                 <!--  ABOUT -->
                                 <StackLayout IsVisible="false" Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" x:Name="about_block">
                                     <Image Source="aclara_settings_logo.png" Margin="24,0,24,-64" HeightRequest="280" VerticalOptions="Center" HorizontalOptions="Center" />
@@ -63,8 +78,9 @@
                                     </Label>
                                 </StackLayout>
                                 <!--  LOGS -->
-                                <ScrollView IsVisible="true" Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" x:Name="logs_block">
-                                    <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" Margin="0,0,0,0">
+                                <StackLayout IsVisible="false" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0" x:Name="logs_block">
+                                  <ScrollView IsVisible="true" Margin="0,0,0,0" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="Center">
+                                     
                                     <accordion:AccordionRepeaterView x:Name="Acordeon" Spacing="0" KeepOnlyOneItemOpen="True" ItemsSource="{Binding ItemsLog}">
                                         <accordion:AccordionRepeaterView.AccordionItemTemplate>
                                             <DataTemplate>
@@ -78,12 +94,12 @@
                                                                       Margin="0,10,0,10" 
                                                                       HasUnevenRows="True" 
                                                                       ItemsSource="{Binding .ListaDatos}" 
-                                                                      HeightRequest="90" 
+                                                                      HeightRequest="100" 
                                                                       BackgroundColor="#6aa2b8">
                                                                 <ListView.ItemTemplate>
                                                                     <DataTemplate>
                                                                         <ViewCell>
-                                                                            <StackLayout Margin="24,0,0,4" Orientation="Horizontal">
+                                                                            <StackLayout Margin="24,0,4,0" Orientation="Horizontal">
                                                                                 <Label Text="{Binding Descripcion}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                                 <Label Text="{Binding Valor}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                             </StackLayout>
@@ -91,24 +107,24 @@
                                                                     </DataTemplate>
                                                                 </ListView.ItemTemplate>
                                                             </ListView>
-                                                            <accordion:AccordionRepeaterView x:Name="Acordeon" Spacing="0" Margin="0,10,10,10" KeepOnlyOneItemOpen="True" ItemsSource="{Binding .SubItemsLog}">
+                                                            <accordion:AccordionRepeaterView IsVisible="{Binding HayAcciones}" x:Name="Acordeon" Spacing="0" Margin="0,10,10,10" KeepOnlyOneItemOpen="True" ItemsSource="{Binding .SubItemsLog}">
                                                                 <accordion:AccordionRepeaterView.AccordionItemTemplate>
                                                                     <DataTemplate>
                                                                         <accordion:AccordionItemView ActiveLeftImage="{Binding Icon}" ActiveBorderColor="Transparent" Margin="10,0,0,0" Text="{Binding Accion}" FontSize="18" ActiveTextColor="#7a868c" TextColor="#7a868c" ButtonBackgroundColor="White" BorderColor="Transparent" ButtonActiveBackgroundColor="White"
                                                                             TextPosition="Left" LeftImage="{Binding Icon}">
                                                                             <accordion:AccordionItemView.ItemContent>
                                                                                 <StackLayout BackgroundColor="#6aa2b8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-                                                                                    <ListView x:Name="Lista" 
+                                                                                    <ListView x:Name="Lista1" 
                                                                                               SeparatorVisibility="None"
                                                                                               Margin="0,10,0,10" 
                                                                                               HasUnevenRows="True" 
                                                                                               ItemsSource="{Binding .ListaDatos}" 
-                                                                                              HeightRequest="90" 
+                                                                                              HeightRequest="100" 
                                                                                               BackgroundColor="#6aa2b8">
                                                                                         <ListView.ItemTemplate>
                                                                                             <DataTemplate>
                                                                                                 <ViewCell>
-                                                                                                    <StackLayout Margin="24,0,0,4" Orientation="Horizontal">
+                                                                                                    <StackLayout Margin="24,0,4,0" Orientation="Horizontal">
                                                                                                         <Label Text="{Binding Descripcion}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                                                         <Label Text="{Binding Valor}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                                                     </StackLayout>
@@ -128,8 +144,9 @@
                                             </DataTemplate>
                                         </accordion:AccordionRepeaterView.AccordionItemTemplate>
                                     </accordion:AccordionRepeaterView>
-                                  </StackLayout>
-                                </ScrollView>
+                                 
+                                  </ScrollView>
+                                </StackLayout>
                                 <!--  Sync -->
                                 <StackLayout IsVisible="false" Margin="-10,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" Scale="0.9" x:Name="sync_block">
                                     <StackLayout Margin="0,72,0,0" VerticalOptions="Center" Orientation="Horizontal">
@@ -174,92 +191,25 @@
                                     </StackLayout>
                                 </StackLayout>
                             </StackLayout>
-                        </RelativeLayout>
-                        <ListView ItemsSource="{Binding Characteristic}" x:Name="lista" IsVisible="false" ItemSelected="OnItemSelected" SeparatorVisibility="None" HasUnevenRows="True" SeparatorColor="#aaaaaa">
-                            <x:Arguments>
-                                <ListViewCachingStrategy>RecycleElement</ListViewCachingStrategy>
-                            </x:Arguments>
-                            <ListView.RowHeight>
-                                <OnPlatform x:TypeArguments="x:Int32" iOS="200" />
-                            </ListView.RowHeight>
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <ViewCell>
-                                        <Frame Padding="{StaticResource GridPadding}" Margin="{StaticResource GridPadding}" VerticalOptions="FillAndExpand" HorizontalOptions="CenterAndExpand">
-                                            <StackLayout Orientation="Vertical" HorizontalOptions="StartAndExpand" VerticalOptions="CenterAndExpand" Padding="{StaticResource GridPadding}">
-                                                <Label Text="{Binding Name}" HorizontalOptions="StartAndExpand" VerticalOptions="Start" />
-                                                <Label Text="{Binding Id}" HorizontalOptions="StartAndExpand" VerticalOptions="Start" />
-                                                <Grid HorizontalOptions="FillAndExpand" VerticalOptions="CenterAndExpand">
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition />
-                                                        <ColumnDefinition />
-                                                        <ColumnDefinition />
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackLayout Grid.Column="0" Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Start">
-                                                        <Button Command="{Binding RefreshValueCommand}" IsEnabled="{Binding CanRead}" Text="Read" />
-                                                    </StackLayout>
-                                                    <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="Center" Grid.Column="1">
-                                                        <Label IsEnabled="{Binding CanNotify}" VerticalTextAlignment="Center" VerticalOptions="CenterAndExpand" Text="Notify:" />
-                                                        <Switch IsToggled="{Binding Path=NotifyEnabled, Mode=TwoWay}" VerticalOptions="Center" IsEnabled="{Binding CanNotify}" />
-                                                    </StackLayout>
-                                                    <StackLayout Orientation="Horizontal" Margin="0,12,0,0" VerticalOptions="Center" HorizontalOptions="Center" Grid.Column="1">
-                                                        <Label IsEnabled="{Binding CanIndicate}" VerticalTextAlignment="Center" VerticalOptions="CenterAndExpand" Text="Indicate:" />
-                                                        <Switch IsToggled="{Binding Path=NotifyEnabled, Mode=TwoWay}" VerticalOptions="Center" IsEnabled="{Binding CanIndicate}" />
-                                                    </StackLayout>
-                                                    <StackLayout Orientation="Horizontal" VerticalOptions="Center" HorizontalOptions="EndAndExpand" Grid.Column="2">
-                                                        <Entry HorizontalOptions="StartAndExpand" Placeholder="Write Value" Text="{Binding WriteValue}" />
-                                                        <Button Command="{Binding WriteBytesCommand}" Margin="-24,10,0,0" IsEnabled="{Binding CanWrite}" Text="Write" />
-                                                    </StackLayout>
-                                                </Grid>
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="Auto" />
-                                                        <ColumnDefinition Width="*" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="Auto" />
-                                                    </Grid.RowDefinitions>
-                                                    <Label Grid.Column="0" Grid.Row="0" Text="Hex:" FontAttributes="Bold" />
-                                                    <Label Grid.Column="1" Grid.Row="0" Text="{Binding ValueAsHex}" HorizontalOptions="StartAndExpand" />
-                                                    <Label Grid.Column="0" Grid.Row="1" Text="UTF8:" FontAttributes="Bold" />
-                                                    <Label Grid.Column="1" Grid.Row="1" Text="{Binding ValueAsString}" HorizontalOptions="StartAndExpand" />
-                                                </Grid>
-                                            </StackLayout>
-                                        </Frame>
-                                    </ViewCell>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
-                    </StackLayout>
-                    <!-- NOT IMPORTANT  -->
-                    <!-- NOT IMPORTANT  -->
-                    <!-- NOT IMPORTANT  -->
-                    <StackLayout IsVisible="false">
-                        <Button Text="Start Scan" IsVisible="false" Command="{Binding ScanForDevicesCommand}" HorizontalOptions="Start" />
-                        <StackLayout Orientation="Horizontal" Padding="{StaticResource GridPadding}">
-                            <StackLayout HorizontalOptions="Start" Orientation="Horizontal">
-                                <Label Text="Scanning" IsVisible="{Binding IsScanning}" VerticalOptions="Center" />
-                                <AbsoluteLayout IsVisible="{Binding IsScanning}">
-                                    <ActivityIndicator IsRunning="{Binding IsScanning}">
-                                        <ActivityIndicator.WidthRequest>
-                                            <OnPlatform x:TypeArguments="x:Double" Android="40" iOS="40" WinPhone="100" />
-                                        </ActivityIndicator.WidthRequest>
-                                    </ActivityIndicator>
-                                    <Label AbsoluteLayout.LayoutBounds=".5,.5,-1,-1" AbsoluteLayout.LayoutFlags="PositionProportional" Text="{Binding ScanTimeRemaining}" />
-                                </AbsoluteLayout>
-                                <Button Text="Start Scan" IsVisible="{Binding IsScanning, Converter={StaticResource InvertBoolean}}" Command="{Binding ScanForDevicesCommand}" HorizontalOptions="Start" />
-                            </StackLayout>
                         </StackLayout>
                     </StackLayout>
-                    <!-- NOT IMPORTANT  -->
-                    <!-- NOT IMPORTANT  -->
-                    <!-- NOT IMPORTANT  -->
                 </StackLayout>
             </Grid>
         </ContentView>
         <!-- LOWER BAR -->
-        <StackLayout VerticalOptions="EndAndExpand" IsVisible="true" BackgroundColor="#6aa2b8" HeightRequest="75" x:Name="lowerbar" RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=0}" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=1}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Height,&#xA;                                     Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Height,&#xA;                                     Factor=1}">
+        <StackLayout VerticalOptions="EndAndExpand" IsVisible="true" BackgroundColor="#6aa2b8" HeightRequest="75" x:Name="lowerbar" 
+                     RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Width,
+            Factor=0}" 
+                     RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Width,
+            Factor=1}" 
+                     RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Height,
+            Factor=0}" 
+                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Height,
+            Factor=1}">
             <Grid Margin="0,0,0,0" BackgroundColor="#6aa2b8" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2">
                 <!-- LOWER NAV BAR -->
                 <StackLayout Scale="0.65" IsVisible="true" Margin="-80,12,-80,0" HeightRequest="95" BackgroundColor="#6aa2b8">
