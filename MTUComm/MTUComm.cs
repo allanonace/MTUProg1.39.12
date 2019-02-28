@@ -336,12 +336,18 @@ namespace MTUComm
             // MTU is turned off
             if ( ! force &&
                  this.latest_mtu.Shipbit )
+            {
                 Errors.LogErrorNowAndContinue ( new MtuIsAlreadyTurnedOffICException () );
+                return false;
+            }
             
             // MTU does not support two-way or client does not want to perform it
             if ( ! global.TimeToSync ||
                  ! this.mtu.TimeToSync )
+            {
                 Errors.LogErrorNowAndContinue ( new MtuIsNotTwowayICException () );
+                return false;
+            }
             
             else
             {
@@ -370,7 +376,7 @@ namespace MTUComm
                     {
                         // Update interface text to look the progress
                         int progress = ( int )Math.Round ( ( decimal )( ( count * 100.0 ) / max ) );
-                        OnProgress ( this, new ProgressArgs ( count, max, "Checking Install Confirmation... "+ progress.ToString() + "%" ) );
+                        OnProgress ( this, new ProgressArgs ( count, max, "Checking IC... "+ progress.ToString() + "%" ) );
                         
                         Thread.Sleep ( wait * 1000 );
                         
@@ -403,7 +409,7 @@ namespace MTUComm
                     }
                     
                     // Finish with error
-                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException () );
+                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat + 1 ) + "" ) );
                     return false;
                 }
             }
@@ -455,7 +461,7 @@ namespace MTUComm
                 // Finish
                 else
                 {
-                    Errors.LogErrorNow ( new PuckCantCommWithMtuException () ); // Finish
+                    Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
                     return false;
                 }
                 
@@ -467,7 +473,7 @@ namespace MTUComm
                     return this.TurnOnOffMtu_Logic ( on, ++time );
                 }
                 // Finish with error
-                else Errors.LogErrorNow ( new ActionNotAchievedTurnOffException () );
+                else Errors.LogErrorNow ( new ActionNotAchievedTurnOffException ( "3" ) );
                 
                 return false;
             }
@@ -582,6 +588,7 @@ namespace MTUComm
                 Errors.LogErrorNow ( new ScriptForTwoPortsButMtuOnlyOneException () );
 
             // Auto-detect Meter
+            bool isAutodetectMeter = false;
             if ( ! form.ContainsParameter ( FIELD.METER_TYPE ) )
             {
                 // Missing tags
@@ -601,6 +608,8 @@ namespace MTUComm
                      form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE ) &&
                      form.ContainsParameter ( FIELD.UNIT_MEASURE    ) )
                 {
+                    isAutodetectMeter = true;
+                
                     meters = configuration.meterTypes.FindByDialDescription (
                         int.Parse ( form.NumberOfDials.Value ),
                         int.Parse ( form.DriveDialSize.Value ),
@@ -799,6 +808,39 @@ namespace MTUComm
                     
                     case FIELD.METER_READING:
                     case FIELD.METER_READING_2:
+                    if ( ! isAutodetectMeter )
+                    {
+                        // If necessary fill left to 0's up to LiveDigits
+                        if ( parameter.Port == 0 )
+                             value = meterPort1.FillLeftLiveDigits ( value );
+                        else value = meterPort2.FillLeftLiveDigits ( value );
+                    }
+                    else
+                    {
+                        if ( parameter.Port == 0 )
+                        {
+                            if ( ! ( fail = meterPort1.NumberOfDials <= -1 || 
+                                            NoELNum ( value, meterPort1.NumberOfDials ) ) )
+                            {
+                                // Apply mask and fill left to 0's up to LiveDigits
+                                value = meterPort1.FillLeftNumberOfDials ( value );
+                                value = meterPort1.ApplyReadingMask ( value );
+                            }
+                            else break;
+                        }
+                        else
+                        {
+                            if ( ! ( fail = meterPort2.NumberOfDials <= -1 ||
+                                            NoELNum ( value, meterPort2.NumberOfDials ) ) )
+                            {
+                                // Apply mask and fill left to 0's up to LiveDigits
+                                value = meterPort2.FillLeftNumberOfDials ( value );
+                                value = meterPort2.ApplyReadingMask ( value );
+                            }
+                            else break;
+                        }
+                    }
+                    
                     if ( parameter.Port == 0 )
                          fail = NoEqNum ( value, meterPort1.LiveDigits );
                     else fail = NoEqNum ( value, meterPort2.LiveDigits );
@@ -1011,17 +1053,14 @@ namespace MTUComm
 
                 #region Initial Reading = Meter Reading
 
-                string mask1 = selectedMeter .MeterMask;
-                string mask2 = selectedMeter2?.MeterMask;
                 string p1readingStr = "0";
                 string p2readingStr = "0";
 
                 if ( form.ContainsParameter ( FIELD.METER_READING ) )
                 {
-                    if ( ! isFromScripting ||
-                         string.IsNullOrEmpty ( mask1 ) ) // No mask
+                    if ( ! isFromScripting ) // No mask
                          p1readingStr = form.MeterReading.Value;
-                    else p1readingStr = this.ApplyMeterReadingMask ( mask1, form.MeterReading  .Value, selectedMeter.LiveDigits );
+                    else p1readingStr = selectedMeter.FillLeftLiveDigits ( form.MeterReading.Value );
                     
                     ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
     
@@ -1031,10 +1070,9 @@ namespace MTUComm
                 if ( form.usePort2 &&
                      form.ContainsParameter ( FIELD.METER_READING_2 ) )
                 {
-                    if ( ! isFromScripting ||
-                         string.IsNullOrEmpty ( mask2 ) ) // No mask
+                    if ( ! isFromScripting ) // No mask
                          p2readingStr = form.MeterReading_2.Value;
-                    else p2readingStr = this.ApplyMeterReadingMask ( mask2, form.MeterReading_2.Value, selectedMeter2.LiveDigits );
+                    else p2readingStr = selectedMeter2.FillLeftLiveDigits ( form.MeterReading_2.Value );
                     
                     ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( ( p2readingStr ) ) : 0;
     
@@ -1312,24 +1350,6 @@ namespace MTUComm
         }
 
         #endregion
-
-        private string ApplyMeterReadingMask ( string mask, string value, int liveDigits )
-        {
-            if ( mask != string.Empty )
-            {
-                if (mask.IndexOfAny(new Char[] { 'X', 'x' }) >= 0)
-                {
-                    string leadingRead = mask.Substring(0, mask.IndexOfAny(new Char[] { 'X', 'x' }));
-                    string trailingRead = mask.Substring(mask.IndexOfAny(new Char[] { 'X', 'x' }) + 1);
-                    value = leadingRead + value + trailingRead; // por tanto seria ""+Port1Reading+"00"
-
-                    if ( liveDigits < value.Length )
-                        value = value.Substring ( value.Length - liveDigits );
-                }
-            }
-
-            return value;
-        }
 
         public string GetResultXML ()
         {

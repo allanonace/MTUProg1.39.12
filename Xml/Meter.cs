@@ -100,22 +100,22 @@ namespace Xml
         public int Flow { get; set; }
 
         [XmlIgnore]
-        public string NumberOfDials {
-            get {
-                Match match = Regex.Match(this.Display,
+        public int NumberOfDials {
+            get
+            {
+                Match match = Regex.Match ( this.Display,
                                @"(\w+) (\d+)D PF(\d+) (\w+)",
                                RegexOptions.IgnoreCase | RegexOptions.Singleline |
-                               RegexOptions.CultureInvariant | RegexOptions.Compiled);
-                if (match.Success)
-                {
-                    return match.Groups[2].Value;
-                }
-                return string.Empty;
+                               RegexOptions.CultureInvariant | RegexOptions.Compiled );
+                               
+                if ( match.Success )
+                    return int.Parse ( match.Groups[2].Value );
+                return -1;
             }
         }
 
         [XmlIgnore]
-        public string DriveDialSize
+        public int DriveDialSize
         {
             get
             {
@@ -125,9 +125,9 @@ namespace Xml
                                RegexOptions.CultureInvariant | RegexOptions.Compiled);
                 if (match.Success)
                 {
-                    return match.Groups[3].Value;
+                    return int.Parse ( match.Groups[3].Value );
                 }
-                return string.Empty;
+                return -1;
             }
         }
 
@@ -151,6 +151,37 @@ namespace Xml
         public String GetProperty(String Name)
         {
             return this.GetType().GetProperty(Name).GetValue(this, null).ToString();
+        }
+        
+        public string ApplyReadingMask (
+            string value )
+        {
+            if ( ! string.IsNullOrEmpty ( this.MeterMask ) &&
+                 value.Length < this.LiveDigits )
+            {
+                string mask  = this.MeterMask.ToLower ();
+                int    index = mask.IndexOfAny ( new Char[] { 'x' } );
+                if ( index >= 0 )
+                {
+                    string leadingRead  = mask.Substring ( 0, index );
+                    string trailingRead = mask.Substring ( index + 1 );
+                    value = leadingRead + value + trailingRead;
+                }
+            }
+            
+            return value;
+        }
+
+        public string FillLeftLiveDigits (
+            string value )
+        {
+            return value.PadLeft ( this.LiveDigits, '0' );
+        }
+        
+        public string FillLeftNumberOfDials (
+            string value )
+        {
+            return value.PadLeft ( this.NumberOfDials, '0' );
         }
     }
 }

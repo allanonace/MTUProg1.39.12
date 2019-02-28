@@ -56,6 +56,10 @@ namespace MTUComm
             { new ScriptLogfileInvalidException (),             303 },
             // Action type specified in the script is empty or is not one of the available options
             { new ScriptActionTypeInvalidException (),          304 },
+            // The script file used has not valid structure or format
+            { new ScriptWrongStructureException (),             305 },
+            // The script file used is empty
+            { new ScriptEmptyException (),                      306 },
             
             // Alarm [ 4xx ]
             //------

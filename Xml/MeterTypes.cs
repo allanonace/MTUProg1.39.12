@@ -49,8 +49,8 @@ namespace Xml
             int    flow )
         {
             List<Meter> meters = Meters.FindAll ( x => (
-                x.NumberOfDials.Equals ( NumberOfDials.ToString () ) &&
-                x.DriveDialSize.Equals ( DriveDialSize.ToString () ) &&
+                x.NumberOfDials == NumberOfDials &&
+                x.DriveDialSize == DriveDialSize &&
                 x.UnitOfMeasure.Equals ( UnitOfMeasure ) &&
                 x.Flow == flow
             ));

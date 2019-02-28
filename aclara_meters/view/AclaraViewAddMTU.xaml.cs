@@ -61,13 +61,13 @@ namespace aclara_meters.view
         public const bool MANDATORY_OLDMETERSERIAL  = true;
         public const bool MANDATORY_OLDMETERWORKING = true;
         public const bool MANDATORY_OLDMETERREADING = true;
-        public const bool MANDATORY_REPLACEMETER    = false; // Init with select value
+        public const bool MANDATORY_REPLACEMETER    = true; // Init with select value
         public const bool MANDATORY_METERSERIAL     = true;
         public const bool MANDATORY_METERTYPE       = true;
         public const bool MANDATORY_METERREADING    = true;
-        public const bool MANDATORY_READINTERVAL    = false; // Init with select value
-        public const bool MANDATORY_SNAPREADS       = false; // Init with select value
-        public const bool MANDATORY_TWOWAY          = false;
+        public const bool MANDATORY_READINTERVAL    = true; // Init with select value
+        public const bool MANDATORY_SNAPREADS       = true; // Init with select value
+        public const bool MANDATORY_TWOWAY          = true;
         public const bool MANDATORY_ALARMS          = true;
         public const bool MANDATORY_DEMANDS         = true;
         public const bool MANDATORY_GPS             = false;
@@ -101,54 +101,54 @@ namespace aclara_meters.view
             { ActionType.AddMtu,
                 new string[]
                 {
-                   "Add MTU - Port1",
-                   "Add MTU - Port2",
-                   "Add MTU - Miscelanea",
+                   "Add MTU",
+                   "Add MTU",
+                   "Add MTU",
                    "add_mtu_btn.png"
                 }
             },
             { ActionType.ReplaceMTU,
                 new string[]
                 {
-                   "Replace MTU - Port1",
-                   "Replace MTU - Port2",
-                   "Replace MTU - Miscelanea",
+                   "Replace MTU",
+                   "Replace MTU",
+                   "Replace MTU",
                    "rep_mtu_btn.png"
                 }
             },
             { ActionType.ReplaceMeter,
                 new string[]
                 {
-                   "Replace Meter - Port1",
-                   "Replace Meter - Port2",
-                   "Replace Meter - Miscelanea",
+                   "Replace Meter",
+                   "Replace Meter",
+                   "Replace Meter",
                    "rep_meter_btn.png"
                 }
             },
             { ActionType.AddMtuAddMeter,
                 new string[]
                 {
-                   "Add MTU / Add Meter - Port1",
-                   "Add MTU / Add Meter - Port2",
-                   "Add MTU / Add Meter - Miscelanea",
+                   "Add MTU / Add Meter",
+                   "Add MTU / Add Meter",
+                   "Add MTU / Add Meter",
                    "add_mtu_meter_btn.png"
                 }
             },
             { ActionType.AddMtuReplaceMeter,
                 new string[]
                 {
-                   "Add MTU / Replace Meter - Port1",
-                   "Add MTU / Replace Meter - Port2",
-                   "Add MTU / Replace Meter - Miscelanea",
+                   "Add MTU / Replace Meter",
+                   "Add MTU / Replace Meter",
+                   "Add MTU / Replace Meter",
                    "add_mtu_rep_meter_btn.png"
                 }
             },
             { ActionType.ReplaceMtuReplaceMeter,
                 new string[]
                 {
-                   "Replace MTU / Replace Meter - Port1",
-                   "Replace MTU / Replace Meter - Port2",
-                   "Replace MTU / Replace Meter - Miscelanea",
+                   "Replace MTU / Replace Meter",
+                   "Replace MTU / Replace Meter",
+                   "Replace MTU / Replace Meter",
                    "rep_mtu_rep_meter_btn.png"
                 }
             },
@@ -176,6 +176,10 @@ namespace aclara_meters.view
         private const string FIRST_METERTYPE = "* You should select Meter Type before enter readings";
         private const float  OPACITY_ENABLE  = 1;
         private const float  OPACITY_DISABLE = 0.8f;
+        
+        private const string LB_PORT1 = "Port 1";
+        private const string LB_PORT2 = "Port 2";
+        private const string LB_MISC  = "Miscellaneous";
 
         #endregion
 
@@ -295,9 +299,9 @@ namespace aclara_meters.view
             {
                 string[] texts = this.actionsTexts[ this.actionType ];
             
-                name_of_window_port1  .Text   = texts[ 0 ];
-                name_of_window_port2  .Text   = texts[ 1 ];
-                name_of_window_misc   .Text   = texts[ 2 ];
+                name_of_window_port1  .Text   = texts[ 0 ] + " - " + LB_PORT1;
+                name_of_window_port2  .Text   = texts[ 1 ] + " - " + LB_PORT2;
+                name_of_window_misc   .Text   = texts[ 2 ] + " - " + LB_MISC;
                 bg_read_mtu_button_img.Source = texts[ 3 ];
                 
                 label_read.Opacity    = 1;
@@ -1041,11 +1045,13 @@ namespace aclara_meters.view
                     }
                     
                     // Read Interval
-                    if ( MANDATORY_READINTERVAL )
+                    if ( MANDATORY_READINTERVAL &&
+                         global.IndividualReadInterval )
                         this.lb_ReadInterval.TextColor = COL_MANDATORY;
                    
                     // Snap Reads
-                    if ( MANDATORY_SNAPREADS )
+                    if ( MANDATORY_SNAPREADS &&
+                         global.IndividualDailyReads )
                         this.lb_SnapReads.TextColor = COL_MANDATORY;
                     
                     // Two-Way
@@ -1217,6 +1223,14 @@ namespace aclara_meters.view
                 this.lb_OldMeterReading_DualError_2     .Text = DUAL_ERROR;
             });
 
+            #endregion
+            
+            #region Labels
+            
+            this.port1label.Text = LB_PORT1;
+            this.port2label.Text = LB_PORT2;
+            this.misclabel .Text = LB_MISC;
+                        
             #endregion
         }
 
@@ -4128,7 +4142,7 @@ namespace aclara_meters.view
                 badWor = this.div_WorkOrder_2            .IsVisible && NoELTxt ( this.tbx_WorkOrder_2           .Text, global.WorkOrderLength               );
                 badOMs = this.div_OldMeterSerialNumber_2 .IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_2.Text, global.MeterNumberLength             );
                 badMsn = this.div_MeterSerialNumber_2    .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_2   .Text, global.MeterNumberLength             );
-                badOMr = this.div_OldMeterReading        .IsVisible && NoEqNum ( this.tbx_OldMeterReading       .Text, this.tbx_OldMeterReading_2.MaxLength );
+                badOMr = this.div_OldMeterReading        .IsVisible && NoELNum ( this.tbx_OldMeterReading       .Text, this.tbx_OldMeterReading_2.MaxLength );
                 badMre =                                               NoEqNum ( this.tbx_MeterReading_2        .Text, this.tbx_MeterReading_2   .MaxLength );
                 
                 badOMw = this.div_OldMeterWorking_2      .IsVisible && this.pck_OldMeterWorking_2     .SelectedIndex <= -1;
@@ -4139,7 +4153,7 @@ namespace aclara_meters.view
                 badDWr = global.WorkOrderDualEntry    && this.div_WorkOrder_Dual_2           .IsVisible && NoELTxt ( this.tbx_WorkOrder_Dual_2           .Text, global.WorkOrderLength   );
                 badDOs = global.OldSerialNumDualEntry && this.div_OldMeterSerialNumber_Dual_2.IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber_Dual_2.Text, global.MeterNumberLength );
                 badDMs = global.NewSerialNumDualEntry && this.div_MeterSerialNumber_Dual_2   .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber_Dual_2   .Text, global.MeterNumberLength );
-                badDOr = global.OldReadingDualEntry   && this.div_OldMeterReading_Dual_2     .IsVisible && NoEqNum ( this.tbx_OldMeterReading_Dual_2     .Text, this.tbx_OldMeterReading_Dual_2.MaxLength );
+                badDOr = global.OldReadingDualEntry   && this.div_OldMeterReading_Dual_2     .IsVisible && NoELNum ( this.tbx_OldMeterReading_Dual_2     .Text, this.tbx_OldMeterReading_Dual_2.MaxLength );
                 badDMr = global.ReadingDualEntry      && this.div_MeterReading_Dual_2        .IsVisible && NoEqNum ( this.tbx_MeterReading_Dual_2        .Text, this.tbx_MeterReading_Dual_2   .MaxLength );
                 
                 FILL_ERROR = "Field 'Port2 _' is incorrectly filled";

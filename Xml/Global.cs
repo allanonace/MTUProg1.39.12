@@ -355,9 +355,20 @@ namespace Xml
         [XmlElement("ByPassAutoDetect")]
         public bool ByPassAutoDetect { get; set; }
 
+        [XmlIgnore]
+        public List<string> Cancel;
+
         [XmlArray("Cancel")]
         [XmlArrayItem("option")]
-        public List<string> Cancel { get; set; }
+        public List<string> Cancel_AvoidDuplicateInitValues
+        {
+            get { return this.Cancel; }
+            set
+            {
+                this.Cancel.Clear ();
+                this.Cancel = value;
+            }
+        }
 
         [XmlElement("CertPair")]
         public bool CertPair { get; set; }
@@ -802,9 +813,20 @@ namespace Xml
         [XmlElement("XmitTimer")]
         public int XmitTimer { get; set; }
 
+        [XmlIgnore]
+        public List<Option> Options;
+
         [XmlArray("Options")]
         [XmlArrayItem("option")]
-        public List<Option> Options { get; set; }
+        public List<Option> Options_AvoidDuplicateInitValues
+        {
+            get { return this.Options; }
+            set
+            {
+                this.Options.Clear ();
+                this.Options = value;
+            }
+        }
 
         [XmlElement("FastMessageConfig")]
         public bool FastMessageConfig { get; set; }

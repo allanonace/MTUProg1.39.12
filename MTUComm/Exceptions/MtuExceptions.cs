@@ -110,6 +110,18 @@ namespace MTUComm.Exceptions
         public ScriptActionTypeInvalidException ( string message ) : base ( message ) { }
     }
     
+    public class ScriptEmptyException : OwnExceptionsBase
+    {
+        public ScriptEmptyException () { }
+        public ScriptEmptyException ( string message ) : base ( message ) { }
+    }
+    
+    public class ScriptWrongStructureException : OwnExceptionsBase
+    {
+        public ScriptWrongStructureException () { }
+        public ScriptWrongStructureException ( string message ) : base ( message ) { }
+    }
+    
     public class MtuIsNotTwowayICException : OwnExceptionsBase
     {
         public MtuIsNotTwowayICException () { }

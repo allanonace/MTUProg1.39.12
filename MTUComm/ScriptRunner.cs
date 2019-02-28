@@ -60,8 +60,17 @@ namespace MTUComm
         {
         }
 
-        public void ParseScriptAndRun ( String base_path, ISerial serial_device, String script_stream, int stream_size)
+        public void ParseScriptAndRun ( String base_path, ISerial serial_device, String script_stream, int stream_size )
         {
+            // Script file is empty
+            if ( string.IsNullOrEmpty ( script_stream.Trim () ) )
+            {
+                Errors.LogErrorNowAndContinue ( new ScriptEmptyException () );
+                this.OnError ();
+                
+                return;
+            }
+        
             Script script = new Script();
             XmlSerializer s = new XmlSerializer(typeof(Script));
 
@@ -75,10 +84,10 @@ namespace MTUComm
             }
             catch (Exception e)
             {
-                //throw new MtuLoadException("Error loading Script file");
-
-                this.OnError (); // this, new Action.ActionErrorArgs ( 113, "Error in parsing Trigger File" ) );
-
+                // Script file has invalid format or structure
+                Errors.LogErrorNowAndContinue ( new ScriptWrongStructureException () );
+                this.OnError ();
+                
                 return;
             }
 
