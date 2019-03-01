@@ -679,12 +679,14 @@ namespace aclara_meters.view
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         private void TurnOffMTUNoTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
