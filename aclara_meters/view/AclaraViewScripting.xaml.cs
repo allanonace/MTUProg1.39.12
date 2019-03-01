@@ -185,9 +185,7 @@ namespace aclara_meters.view
                             PairWithKnowDevice();
                         }
                         else
-                        {
                             ContentView_DeviceList.IsVisible = true;
-                        }
                     }
                     //else
                     //{
@@ -220,10 +218,11 @@ namespace aclara_meters.view
             {
                 #region New Circular Progress bar Animations    
                 DeviceList.IsRefreshing = false;
-                backdark_bg.IsVisible = true;
+                backdark_bg.IsVisible = false;
                 indicator.IsVisible = true;
+                txtBuscando.IsVisible = true;
                 ContentView_DeviceList.IsEnabled = false;
-                ContentView_DeviceList.IsVisible = false;
+                ContentView_DeviceList.IsVisible = true;
                 #endregion
             });
         }
@@ -236,7 +235,8 @@ namespace aclara_meters.view
 
                 backdark_bg.IsVisible = false;
                 indicator.IsVisible = false;
-               
+                txtBuscando.IsVisible = false;
+
 
                 //DeviceList.IsEnabled = true;
                 //fondo.Opacity = 1;
