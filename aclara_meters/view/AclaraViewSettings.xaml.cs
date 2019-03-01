@@ -220,7 +220,7 @@ namespace aclara_meters.view
             ContentNav.IsVisible = true;
             background_scan_page.Opacity = 1;
             close_menu_icon.Opacity = 0;
-            hamburger_icon.IsVisible = false;
+            hamburger_icon.IsVisible = true;
             background_scan_page.Margin = new Thickness(310, 0, 0, 0);
             sync_block.Scale = 1;
             logs_block.Scale = 1;
@@ -339,7 +339,7 @@ namespace aclara_meters.view
 
         private void ReturnToMainView(object sender, EventArgs e)
         {
-            Application.Current.MainPage.Navigation.PopAsync(false);
+            Navigation.PopToRootAsync(false);
         }
 
         private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
@@ -1294,16 +1294,6 @@ namespace aclara_meters.view
             dialog_AddMTU_ok.Tapped += dialog_AddMTU_okTapped;
             dialog_AddMTU_cancel.Tapped += dialog_AddMTU_cancelTapped;
 
-
-
-
-            if (Device.Idiom == TargetIdiom.Tablet)
-            {
-                hamburger_icon_home.IsVisible = true;
-                back_button_home.Tapped += TapToHome_Tabletmode;
-            }
-
-
         }
 
 
@@ -1351,6 +1341,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_AddMTUAddMeter.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+
         }
 
         void dialog_AddMTUAddMeter_okTapped(object sender, EventArgs e)

@@ -22,6 +22,7 @@ namespace aclara_meters.view
     public partial class AclaraViewReadMTU
     {
         private ActionType actionType;
+        private ActionType actionTypeNew;
 
         private List<ReadMTUItem> MTUDataListView { get; set; }
         private List<ReadMTUItem> FinalReadListView { get; set; }
@@ -380,11 +381,11 @@ namespace aclara_meters.view
             dialog_AddMTU_cancel.Tapped += dialog_AddMTU_cancelTapped;
 
 
-            if (Device.Idiom == TargetIdiom.Tablet)
-            {
-                hamburger_icon_home.IsVisible = true;
-                back_button_home.Tapped += TapToHome_Tabletmode;
-            }
+            //if (Device.Idiom == TargetIdiom.Tablet)
+            //{
+            //    hamburger_icon_home.IsVisible = true;
+            //    back_button_home.Tapped += TapToHome_Tabletmode;
+            //}
 
 
         }
@@ -454,6 +455,7 @@ namespace aclara_meters.view
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false); 
         }
 
         private void ReplaceMtuOkTapped(object sender, EventArgs e)
@@ -461,7 +463,7 @@ namespace aclara_meters.view
             dialog_replacemeter_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-
+            this.actionType = this.actionTypeNew;
             DoBasicRead();
 
         }
@@ -472,6 +474,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_meter_replace_one.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         void MeterOkTapped(object sender, EventArgs e)
@@ -479,7 +482,7 @@ namespace aclara_meters.view
             dialog_meter_replace_one.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-
+            this.actionType = this.actionTypeNew;
             DoBasicRead();
 
         }
@@ -489,6 +492,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_AddMTUAddMeter.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         void dialog_AddMTUAddMeter_okTapped(object sender, EventArgs e)
@@ -496,7 +500,7 @@ namespace aclara_meters.view
             dialog_AddMTUAddMeter.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-
+            this.actionType =this.actionTypeNew;
             DoBasicRead();
 
         }
@@ -506,6 +510,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_AddMTUReplaceMeter.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         void dialog_AddMTUReplaceMeter_okTapped(object sender, EventArgs e)
@@ -513,7 +518,7 @@ namespace aclara_meters.view
             dialog_AddMTUReplaceMeter.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-
+            this.actionType = this.actionTypeNew;
             DoBasicRead();
 
         }
@@ -523,6 +528,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_ReplaceMTUReplaceMeter.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         void dialog_ReplaceMTUReplaceMeter_okTapped(object sender, EventArgs e)
@@ -530,7 +536,7 @@ namespace aclara_meters.view
             dialog_ReplaceMTUReplaceMeter.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-
+            this.actionType = this.actionTypeNew;
             DoBasicRead();
 
 
@@ -541,6 +547,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_AddMTU.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         void dialog_AddMTU_okTapped(object sender, EventArgs e)
@@ -548,7 +555,7 @@ namespace aclara_meters.view
             dialog_AddMTU.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-
+            this.actionType = this.actionTypeNew;
             DoBasicRead();
 
         }
@@ -636,6 +643,7 @@ namespace aclara_meters.view
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
 
@@ -654,7 +662,7 @@ namespace aclara_meters.view
             ContentNav.IsVisible = true;
             background_scan_page.Opacity = 1;
             close_menu_icon.Opacity = 0;
-            hamburger_icon.IsVisible = false;
+            hamburger_icon.IsVisible = true;
             background_scan_page.Margin = new Thickness(310, 0, 0, 0);
             tablet_user_view.TranslationY = -22;
             tablet_user_view.Scale = 1.2;
@@ -759,7 +767,8 @@ namespace aclara_meters.view
 
         private void ReturnToMainView(object sender, EventArgs e)
         {
-            Application.Current.MainPage.Navigation.PopAsync(false); 
+            Navigation.PopToRootAsync(false);
+            //Application.Current.MainPage.Navigation.PopAsync(false); 
         }
 
         private void OnItemSelected( Object sender, SelectedItemChangedEventArgs e )
@@ -790,7 +799,7 @@ namespace aclara_meters.view
 
                     if (this.actionType != page)
                     {
-                        this.actionType = page;
+                        //this.actionType = page;
                         NavigationController(page);
                     }
                   
@@ -810,6 +819,7 @@ namespace aclara_meters.view
 
         private void NavigationController(ActionType page)
         {
+            this.actionTypeNew = page;
             switch (page)
             {
                 case ActionType.ReadMtu:
@@ -820,7 +830,8 @@ namespace aclara_meters.view
                  
 
                     background_scan_page.IsEnabled = true;
-              
+
+                    this.actionType = this.actionTypeNew;
 
                     if (Device.Idiom == TargetIdiom.Phone)
                     {
@@ -893,8 +904,10 @@ namespace aclara_meters.view
                             if (FormsApp.config.global.ActionVerify)
                                 dialog_AddMTU.IsVisible = true;
                             else
+                            {
+                                this.actionType = page;
                                 CallLoadViewAddMtu();
-
+                            }
                             #endregion
 
                             background_scan_page.Opacity = 1;
@@ -948,8 +961,10 @@ namespace aclara_meters.view
                             if (FormsApp.config.global.ActionVerify)
                                 dialog_turnoff_one.IsVisible = true;
                             else
+                            {
+                                this.actionType = page;
                                 CallLoadViewTurnOff();
-
+                            }
                             #endregion
 
                             dialog_turnoff_two.IsVisible = false;
@@ -993,7 +1008,7 @@ namespace aclara_meters.view
                         ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                         shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
                     }
-
+                    this.actionType = page;
                     Task.Delay(200).ContinueWith(t =>
 
                         Device.BeginInvokeOnMainThread(() =>
@@ -1052,8 +1067,10 @@ namespace aclara_meters.view
                             if (FormsApp.config.global.ActionVerify)
                                 dialog_replacemeter_one.IsVisible = true;
                             else
+                            {
+                                this.actionType = page;
                                 CallLoadViewReplaceMtu();
-
+                            }
                             #endregion
 
                             background_scan_page.Opacity = 1;
@@ -1107,8 +1124,10 @@ namespace aclara_meters.view
                             if (FormsApp.config.global.ActionVerify)
                                 dialog_meter_replace_one.IsVisible = true;
                             else
+                            {
+                                this.actionType = page;
                                 CallLoadViewReplaceMeter();
-
+                            }
                             #endregion
 
                             background_scan_page.Opacity = 1;
@@ -1162,8 +1181,10 @@ namespace aclara_meters.view
                             if (FormsApp.config.global.ActionVerify)
                                 dialog_AddMTUAddMeter.IsVisible = true;
                             else
+                            {
+                                this.actionType = page;
                                 CallLoadViewAddMTUAddMeter();
-
+                            }
                             #endregion
 
                             background_scan_page.Opacity = 1;
@@ -1218,8 +1239,10 @@ namespace aclara_meters.view
                             if (FormsApp.config.global.ActionVerify)
                                 dialog_AddMTUReplaceMeter.IsVisible = true;
                             else
+                            {
+                                this.actionType = page;
                                 CallLoadViewAddMTUReplaceMeter();
-
+                            }
                             #endregion
 
                             background_scan_page.Opacity = 1;
@@ -1275,8 +1298,10 @@ namespace aclara_meters.view
                             if (FormsApp.config.global.ActionVerify)
                                 dialog_ReplaceMTUReplaceMeter.IsVisible = true;
                             else
+                            {
+                                this.actionType = page;
                                 CallLoadViewReplaceMTUReplaceMeter();
-
+                            }
                             #endregion
 
 
