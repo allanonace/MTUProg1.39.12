@@ -189,7 +189,8 @@ namespace Xml
             this.WriteF1SystemTime            = false; // F1 write MTU system time from handheld or PC
             this.XmitTimer                    = 0; // [UInt] Transmit Timer
         
-            this.Cancel = new List<string> ()
+            this.Cancel_Deserialized = new List<string> ();
+            this.Cancel_Default      = new List<string> ()
             {
                 "Not Home",
                 "Meter Missing",
@@ -198,7 +199,8 @@ namespace Xml
                 "Quit"
             };
             
-            this.Options = new List<Option> ()
+            this.Options_Deserialized = new List<Option> ();
+            this.Options_Default      = new List<Option> ()
             {
                 new Option ()
                 {
@@ -354,21 +356,6 @@ namespace Xml
 
         [XmlElement("ByPassAutoDetect")]
         public bool ByPassAutoDetect { get; set; }
-
-        [XmlIgnore]
-        public List<string> Cancel;
-
-        [XmlArray("Cancel")]
-        [XmlArrayItem("option")]
-        public List<string> Cancel_AvoidDuplicateInitValues
-        {
-            get { return this.Cancel; }
-            set
-            {
-                this.Cancel.Clear ();
-                this.Cancel = value;
-            }
-        }
 
         [XmlElement("CertPair")]
         public bool CertPair { get; set; }
@@ -813,25 +800,46 @@ namespace Xml
         [XmlElement("XmitTimer")]
         public int XmitTimer { get; set; }
 
-        [XmlIgnore]
-        public List<Option> Options;
-
-        [XmlArray("Options")]
-        [XmlArrayItem("option")]
-        public List<Option> Options_AvoidDuplicateInitValues
-        {
-            get { return this.Options; }
-            set
-            {
-                this.Options.Clear ();
-                this.Options = value;
-            }
-        }
-
         [XmlElement("FastMessageConfig")]
         public bool FastMessageConfig { get; set; }
 
         [XmlElement("Fast-2-Way")]
         public bool Fast2Way { get; set; }
+        
+        [XmlIgnore]
+        public List<Option> Options_Default;
+
+        [XmlArray("Options")]
+        [XmlArrayItem("option")]
+        public List<Option> Options_Deserialized;
+        
+        [XmlIgnore]
+        public List<Option> Options
+        {
+            get
+            {
+                if ( this.Options_Deserialized.Count <= 0 )
+                    return this.Options_Default;
+                return this.Options_Deserialized;
+            }
+        }
+        
+        [XmlIgnore]
+        public List<string> Cancel_Default;
+        
+        [XmlArray("Cancel")]
+        [XmlArrayItem("option")]
+        public List<string> Cancel_Deserialized;
+
+        [XmlIgnore]
+        public List<string> Cancel
+        {
+            get
+            {
+                if ( this.Cancel_Deserialized.Count <= 0 )
+                    return this.Cancel_Default;
+                return this.Cancel_Deserialized;
+            }
+        }
     }
 }

@@ -466,7 +466,7 @@ namespace aclara_meters.view
                             //this.tbx_MeterSerialNumber_2         .Text          = this.tbx_MeterSerialNumber           .Text;
                             //this.tbx_MeterSerialNumber_Dual_2    .Text          = this.tbx_MeterSerialNumber_Dual      .Text;
 
-                            this.tbx_OldMeterReading_2           .Text          = this.tbx_OldMeterReading             .Text;
+                            //this.tbx_OldMeterReading_2           .Text          = this.tbx_OldMeterReading             .Text;
                             //this.tbx_OldMeterReading_Dual_2      .Text          = this.tbx_OldMeterReading_Dual        .Text;
                             //this.tbx_MeterReading_2              .Text          = this.tbx_MeterReading                .Text;
                             //this.tbx_MeterReading_Dual_2         .Text          = this.tbx_MeterReading_Dual           .Text;

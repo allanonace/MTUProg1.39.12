@@ -30,6 +30,8 @@ namespace MTUComm
         
         private const int WAIT_BTW_TURNOFF     = 500;
         private const int WAIT_BTW_IC          = 1000;
+        
+        private const int TIMES_TURNOFF = 3;
 
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
         private const string ERROR_LOADMETER = "MeterLoadException";
@@ -332,87 +334,88 @@ namespace MTUComm
         
             // DEBUG
             //this.WriteMtuBit ( 22, 0, false ); // Turn On MTU
-        
-            // MTU is turned off
-            if ( ! force &&
-                 this.latest_mtu.Shipbit )
-            {
-                Errors.LogErrorNowAndContinue ( new MtuIsAlreadyTurnedOffICException () );
-                return false;
-            }
             
-            // MTU does not support two-way or client does not want to perform it
-            if ( ! global.TimeToSync ||
-                 ! this.mtu.TimeToSync )
+            bool wasNotAboutPuck = false;
+            try
             {
-                Errors.LogErrorNowAndContinue ( new MtuIsNotTwowayICException () );
-                return false;
-            }
-            
-            else
-            {
-                try
+                MemRegister regICNotSynced = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationNotSynced" );
+                MemRegister regICRequest   = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationRequest"   );
+
+                Console.WriteLine ( "InstallConfirmation trigger start" );
+
+                // Reset to fail state the Install Confirmation result
+                // Set bit to true/one, because loop detection will continue while it doesn't change to false/zero
+                uint addressNotSynced = ( uint )regICNotSynced.Address;
+                uint bitSynced        = ( uint )regICNotSynced.Size;
+                this.WriteMtuBit ( addressNotSynced, bitSynced, true );
+
+                // MTU is turned off
+                if ( ! force &&
+                     this.latest_mtu.Shipbit )
                 {
-                    MemRegister regICNotSynced = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationNotSynced" );
-                    MemRegister regICRequest   = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationRequest"   );
-
-                    Console.WriteLine ( "InstallConfirmation trigger start" );
-
-                    // Reset to fail state the Install Confirmation result
-                    // Set bit to true/one, because loop detection will continue while it doesn't change to false/zero
-                    uint addressNotSynced = ( uint )regICNotSynced.Address;
-                    uint bitSynced        = ( uint )regICNotSynced.Size;
-                    this.WriteMtuBit ( addressNotSynced, bitSynced, true );
-
-                    // Set to true/one this flag to request a time sync
-                    this.WriteMtuBit ( ( uint )regICRequest.Address, ( uint )regICRequest.Size, true );
-
-                    bool fail;
-                    int  count = 1;
-                    int  wait  = 5;
-                    int  max   = ( int )( global.TimeSyncCountDefault / wait ); // Seconds / Seconds = Rounded max number of iterations
-                    
-                    do
-                    {
-                        // Update interface text to look the progress
-                        int progress = ( int )Math.Round ( ( decimal )( ( count * 100.0 ) / max ) );
-                        OnProgress ( this, new ProgressArgs ( count, max, "Checking IC... "+ progress.ToString() + "%" ) );
-                        
-                        Thread.Sleep ( wait * 1000 );
-                        
-                        fail = this.ReadMtuBit ( addressNotSynced, bitSynced );
-                    }
-                    // is MTU not synced with DCU yet?
-                    while ( fail &&
-                            ++count <= max );
-                    
-                    if ( fail )
-                        throw new AttemptNotAchievedICException ();
+                    wasNotAboutPuck = true;
+                    throw new MtuIsAlreadyTurnedOffICException ();
                 }
-                catch ( Exception e )
-                {
-                    if ( Errors.IsOwnException ( e ) )
-                        Errors.AddError ( e );
-                    // Finish
-                    else
-                    {
-                        Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
-                        return false;
-                    }
                 
-                    // Retry action ( thre times = first plus two replies )
-                    if ( time < global.TimeSyncCountRepeat )
-                    {
-                        Thread.Sleep ( WAIT_BTW_IC );
-                        
-                        return this.InstallConfirmation_Logic ( force, ++time );
-                    }
+                // MTU does not support two-way or client does not want to perform it
+                if ( ! global.TimeToSync ||
+                     ! this.mtu.TimeToSync )
+                {
+                    wasNotAboutPuck = true;
+                    throw new MtuIsNotTwowayICException ();
+                }
+
+                // Set to true/one this flag to request a time sync
+                this.WriteMtuBit ( ( uint )regICRequest.Address, ( uint )regICRequest.Size, true );
+
+                bool fail;
+                int  count = 1;
+                int  wait  = 5;
+                int  max   = ( int )( global.TimeSyncCountDefault / wait ); // Seconds / Seconds = Rounded max number of iterations
+                
+                do
+                {
+                    // Update interface text to look the progress
+                    int progress = ( int )Math.Round ( ( decimal )( ( count * 100.0 ) / max ) );
+                    OnProgress ( this, new ProgressArgs ( count, max, "Checking IC... "+ progress.ToString() + "%" ) );
                     
-                    // Finish with error
-                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat + 1 ) + "" ) );
+                    Thread.Sleep ( wait * 1000 );
+                    
+                    fail = this.ReadMtuBit ( addressNotSynced, bitSynced );
+                }
+                // is MTU not synced with DCU yet?
+                while ( fail &&
+                        ++count <= max );
+                
+                if ( fail )
+                    throw new AttemptNotAchievedICException ();
+            }
+            catch ( Exception e )
+            {
+                if ( e is AttemptNotAchievedICException )
+                    Errors.AddError ( e );
+                // Finish
+                else
+                {
+                    if ( ! wasNotAboutPuck )
+                         Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                    else Errors.LogErrorNowAndContinue ( e );
                     return false;
                 }
+            
+                // Retry action ( thre times = first plus two replies )
+                if ( ++time < global.TimeSyncCountRepeat )
+                {
+                    Thread.Sleep ( WAIT_BTW_IC );
+                    
+                    return this.InstallConfirmation_Logic ( force, time );
+                }
+                
+                // Finish with error
+                Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat + 1 ) + "" ) );
+                return false;
             }
+            
             return true;
         }
 
@@ -466,14 +469,14 @@ namespace MTUComm
                 }
                 
                 // Retry action ( thre times = first plus two replies )
-                if ( time < 2 )
+                if ( ++time < TIMES_TURNOFF )
                 {
                     Thread.Sleep ( WAIT_BTW_TURNOFF );
                     
-                    return this.TurnOnOffMtu_Logic ( on, ++time );
+                    return this.TurnOnOffMtu_Logic ( on, time );
                 }
                 // Finish with error
-                else Errors.LogErrorNow ( new ActionNotAchievedTurnOffException ( "3" ) );
+                else Errors.LogErrorNow ( new ActionNotAchievedTurnOffException ( TIMES_TURNOFF + "" ) );
                 
                 return false;
             }
@@ -822,8 +825,11 @@ namespace MTUComm
                             if ( ! ( fail = meterPort1.NumberOfDials <= -1 || 
                                             NoELNum ( value, meterPort1.NumberOfDials ) ) )
                             {
-                                // Apply mask and fill left to 0's up to LiveDigits
-                                value = meterPort1.FillLeftNumberOfDials ( value );
+                                // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
+                                if ( ! NoEqNum ( value, meterPort1.NumberOfDials ) )
+                                    value = meterPort1.FillLeftNumberOfDials ( value );
+                                
+                                // Apply Meter mask
                                 value = meterPort1.ApplyReadingMask ( value );
                             }
                             else break;
@@ -833,8 +839,11 @@ namespace MTUComm
                             if ( ! ( fail = meterPort2.NumberOfDials <= -1 ||
                                             NoELNum ( value, meterPort2.NumberOfDials ) ) )
                             {
-                                // Apply mask and fill left to 0's up to LiveDigits
-                                value = meterPort2.FillLeftNumberOfDials ( value );
+                                // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
+                                if ( ! NoEqNum ( value, meterPort2.NumberOfDials ) )
+                                    value = meterPort2.FillLeftNumberOfDials ( value );
+                                
+                                // Apply Meter mask
                                 value = meterPort2.ApplyReadingMask ( value );
                             }
                             else break;

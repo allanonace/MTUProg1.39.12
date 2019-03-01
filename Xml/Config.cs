@@ -196,6 +196,14 @@ namespace Xml
                     using (StringReader reader = new StringReader(fileContent))
                     {
                         global = (Global)s.Deserialize(reader);
+                        
+                        var cancel = global.Cancel;
+                        var cancel_def = global.Cancel_Default;
+                        var cancel_des = global.Cancel_Deserialized;
+                        
+                        var o = global.Options;
+                        var odef = global.Options_Default;
+                        var odes = global.Options_Deserialized;
                     }
                 }
             }
