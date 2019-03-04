@@ -826,7 +826,7 @@ namespace MTUComm
                                             NoELNum ( value, meterPort1.NumberOfDials ) ) )
                             {
                                 // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
-                                if ( ! NoEqNum ( value, meterPort1.NumberOfDials ) )
+                                if ( NoEqNum ( value, meterPort1.NumberOfDials ) )
                                     value = meterPort1.FillLeftNumberOfDials ( value );
                                 
                                 // Apply Meter mask
@@ -840,7 +840,7 @@ namespace MTUComm
                                             NoELNum ( value, meterPort2.NumberOfDials ) ) )
                             {
                                 // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
-                                if ( ! NoEqNum ( value, meterPort2.NumberOfDials ) )
+                                if ( NoEqNum ( value, meterPort2.NumberOfDials ) )
                                     value = meterPort2.FillLeftNumberOfDials ( value );
                                 
                                 // Apply Meter mask
@@ -960,6 +960,8 @@ namespace MTUComm
                     if ( ! msgError.Contains ( typeStr ) )
                         msgError += ( ( ! string.IsNullOrEmpty ( msgError ) ) ? ", " : string.Empty ) + typeStr;
                 }
+                else
+                    parameter.Value = value;
             }
 
             if ( ! string.IsNullOrEmpty ( msgError ) )

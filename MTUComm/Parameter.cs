@@ -221,6 +221,10 @@ namespace MTUComm
 
                 return mValue;
             }
+            set
+            {
+                mValue = value;
+            }
         }
 
         public override string ToString()
