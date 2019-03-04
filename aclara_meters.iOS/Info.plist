@@ -81,9 +81,9 @@
 	<key>CFBundleName</key>
 	<string>aclara-mtu-programmer</string>
 	<key>CFBundleVersion</key>
-	<string>0.0.5</string>
+	<string>0.0.6</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.36.3</string>
+	<string>1.36.4</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
