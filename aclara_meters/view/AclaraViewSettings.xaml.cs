@@ -250,6 +250,7 @@ namespace aclara_meters.view
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         private void ReplaceMtuOkTapped(object sender, EventArgs e)
@@ -267,12 +268,14 @@ namespace aclara_meters.view
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         private void TurnOffMTUNoTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         private void TurnOffMTUOKTapped(object sender, EventArgs e)
@@ -1324,6 +1327,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_meter_replace_one.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         void MeterOkTapped(object sender, EventArgs e)
@@ -1341,7 +1345,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_AddMTUAddMeter.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-
+            Navigation.PopToRootAsync(false);
         }
 
         void dialog_AddMTUAddMeter_okTapped(object sender, EventArgs e)
@@ -1359,6 +1363,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_AddMTUReplaceMeter.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         void dialog_AddMTUReplaceMeter_okTapped(object sender, EventArgs e)
@@ -1376,6 +1381,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_ReplaceMTUReplaceMeter.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         void dialog_ReplaceMTUReplaceMeter_okTapped(object sender, EventArgs e)
@@ -1393,6 +1399,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             dialog_AddMTU.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
         }
 
         void dialog_AddMTU_okTapped(object sender, EventArgs e)
