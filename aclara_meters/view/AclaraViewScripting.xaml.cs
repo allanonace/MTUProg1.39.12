@@ -108,8 +108,11 @@ namespace aclara_meters.view
 
             resultDataXml = File.ReadAllText(url);
 
+           
+
             ContentView_Scripting_textScript.Text = "Processing ...";
             ContentView_Scripting_fieldpath_script.Text = url;
+
 
 
             #region New Scripting method is called
@@ -123,6 +126,31 @@ namespace aclara_meters.view
             //    Task.Factory.StartNew(Interface_ContentView_DeviceList);
 
             //});
+            if (resultDataXml.Contains("UploadXML") & Mobile.IsNetAvailable())
+            {
+                // GenericUtilsClass.UploadFilesTaskSettings();
+                this.txtBuscando.Text = "Uploading files...";
+
+                Task.Run(async() => {
+                    Boolean bUpload = await GenericUtilsClass.UploadFilesTaskScripting();
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        String sMessage = String.Empty;
+                        if (bUpload) sMessage = "UPLOAD FILES OK";
+                        else
+                            sMessage = "ERROR WHILE UPLOAD FILES TO FTP";
+                        //Application.Current.MainPage.DisplayAlert("Alert", "Log files successfully uploaded", "Ok");
+                        Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
+                                                             "status=success" +
+                                                             "&output_filename=&output_data=" + System.Web.HttpUtility.UrlEncode(
+                                                                Base64Encode(sMessage))));
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    });
+                });
+
+               
+                return;
+            }
             InitRefreshCommand();
 
             Interface_ContentView_DeviceList();

@@ -38,15 +38,19 @@ namespace aclara_meters
         
             if (GenericUtilsClass.UploadLogFiles())
             {
-                Application.Current.MainPage.DisplayAlert("Alert", "Log files successfully uploaded", "Ok");
+                await Application.Current.MainPage.DisplayAlert("Alert", "Log files successfully uploaded", "Ok");
             }
             else
             {
-                Application.Current.MainPage.DisplayAlert("Error", "Log files could not be uploaded", "Ok");
+                await Application.Current.MainPage.DisplayAlert("Error", "Log files could not be uploaded", "Ok");
             }
             
         }
+        public static async Task<Boolean> UploadFilesTaskScripting()
+        {
+            return GenericUtilsClass.UploadLogFiles();
 
+        }
 
 
         public static bool UploadLogFiles()

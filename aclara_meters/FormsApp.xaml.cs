@@ -498,6 +498,7 @@ namespace aclara_meters
                         //credentialsService.DeleteCredentials ();
 
                         MainPage = new NavigationPage(new AclaraViewScripting ( path, callback, script_name ) );
+
                         await MainPage.Navigation.PopToRootAsync ( true );
                     });
                 });

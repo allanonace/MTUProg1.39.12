@@ -57,7 +57,7 @@ namespace MTUComm
             BasicRead
         }
 
-        private Dictionary<ActionType, String> displays = new Dictionary<ActionType, String>()
+        public static Dictionary<ActionType, String> displays = new Dictionary<ActionType, String>()
         {
             {ActionType.ReadMtu,"Read MTU" },
             {ActionType.AddMtu,"Add MTU" },
@@ -73,7 +73,7 @@ namespace MTUComm
             {ActionType.Diagnosis, "" }
         };
 
-        private Dictionary<ActionType, String> tag_types = new Dictionary<ActionType, String>()
+        public static Dictionary<ActionType, String> tag_types = new Dictionary<ActionType, String>()
         {
             {ActionType.ReadMtu,"ReadMTU" },
             {ActionType.AddMtu,"Program MTU" },
@@ -89,7 +89,7 @@ namespace MTUComm
             {ActionType.Diagnosis, "" }
         };
 
-        private Dictionary<ActionType, String> tag_reasons = new Dictionary<ActionType, String>()
+        public static Dictionary<ActionType, String> tag_reasons = new Dictionary<ActionType, String>()
         {
             {ActionType.ReadMtu,null },
             {ActionType.AddMtu,"AddMtu" },
@@ -198,7 +198,7 @@ namespace MTUComm
 
         public String DisplayText
         {
-            get { return displays[this.type]; }
+            get { return displays[type]; }
         }
 
         public String LogText

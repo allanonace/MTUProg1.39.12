@@ -95,9 +95,12 @@ namespace MTUComm
 
             #region General
 
-            logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
-            logger.addAtrribute ( this.addMtuAction, "type",    addMtuType    );
-            logger.addAtrribute ( this.addMtuAction, "reason",  addMtuReason  );
+           //logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
+           // logger.addAtrribute ( this.addMtuAction, "type",    addMtuType    );
+           // logger.addAtrribute ( this.addMtuAction, "reason",  addMtuReason  );
+            logger.addAtrribute(this.addMtuAction, "display", Action.displays[(ActionType)form.actionType]);
+            logger.addAtrribute(this.addMtuAction, "type", Action.tag_types[(ActionType)form.actionType]);
+            logger.addAtrribute(this.addMtuAction, "reason", Action.tag_reasons[(ActionType)form.actionType]);
 
             logger.logParameter ( this.addMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
