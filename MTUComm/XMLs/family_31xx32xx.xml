@@ -230,6 +230,7 @@
     <Description>Mtu software version</Description>
     <Type>string</Type>
     <Registers>
+      <Register>MtuSoftVersion</Register>
       <Register>MtuSoftRevYear</Register>
       <Register>MtuSoftRevMonth</Register>
       <Register>MtuSoftBuildNumber</Register>
@@ -418,7 +419,7 @@
   </Register>
   <Register>
     <Id>MtuMiliVoltageBattery</Id>
-    <Description>battery voltage (AD value) | battery volt = ADvalue * 9.766mV*2 + 250</Description>
+    <Description>battery voltage (AD value) | battery volt = ADvalue * 9.766mV * 2 + 250</Description>
     <Type>int</Type>
     <Address>113</Address>
     <Size>1</Size>
@@ -767,8 +768,8 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>P1Reading</Id>
-    <Description>P1Reading</Description>
+    <Id>P1MeterReading</Id>
+    <Description>P1 Meter Reading</Description>
     <Type>ulong</Type>
     <Address>96</Address>
     <Size>6</Size>
@@ -777,8 +778,8 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>P2Reading</Id>
-    <Description>P2Reading</Description>
+    <Id>P2MeterReading</Id>
+    <Description>P2 Meter Reading</Description>
     <Type>ulong</Type>
     <Address>104</Address>
     <Size>6</Size>
@@ -812,6 +813,7 @@
     <Type>string</Type>
     <Address>256</Address>
     <Size>16</Size>
+    <SizeGet>32</SizeGet>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>

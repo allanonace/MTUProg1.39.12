@@ -221,6 +221,8 @@ namespace aclara_meters.view
         // Miscelanea
         private List<BorderlessPicker> optionalPickers;
         private List<BorderlessEntry>  optionalEntries;
+        private List<Tuple<BorderlessPicker,Label>> optionalMandatoryPickers;
+        private List<Tuple<BorderlessEntry,Label>> optionalMandatoryEntries;
 
         // Snap Reads / Daily Reads
         private double snapReadsStep;
@@ -1348,12 +1350,12 @@ namespace aclara_meters.view
 
         private void InitializeOptionalFields()
         {
-            List<Option> optionalFields = this.config.global.Options;
-
             optionalPickers = new List<BorderlessPicker>();
             optionalEntries = new List<BorderlessEntry>();
+            optionalMandatoryPickers = new List<Tuple<BorderlessPicker,Label>> ();
+            optionalMandatoryEntries = new List<Tuple<BorderlessEntry,Label>> ();
 
-            foreach (Option optionalField in optionalFields)
+            foreach ( Option optionalField in this.config.global.Options )
             {
                 Frame optionalContainerB = new Frame()
                 {
@@ -1391,10 +1393,13 @@ namespace aclara_meters.view
                     Margin = new Thickness(0, 4, 0, 0)
                 };
 
-                if (optionalField.Type.Equals("list"))
+                BorderlessPicker optionalPicker = null;
+                BorderlessEntry  optionalEntry  = null;
+                bool isList = optionalField.Type.Equals("list");
+                if ( isList )
                 {
                     List<string> optionalFieldOptions = optionalField.OptionList;
-                    BorderlessPicker optionalPicker = new BorderlessPicker()
+                    optionalPicker = new BorderlessPicker()
                     {
                         HorizontalOptions = LayoutOptions.FillAndExpand,
                         HeightRequest = 40,
@@ -1406,7 +1411,6 @@ namespace aclara_meters.view
 
                     optionalPicker.SelectedIndexChanged += GenericPicker_SelectedIndexChanged;
 
-
                     optionalPickers.Add(optionalPicker);
 
                     optionalContainerD.Children.Add(optionalPicker);
@@ -1417,7 +1421,7 @@ namespace aclara_meters.view
 
                     this.optionalFields.Children.Add(optionalContainerA);
                 }
-                else if (optionalField.Type.Equals("text"))
+                else // Text
                 {
                     string format = optionalField.Format;
                     int maxLen = optionalField.Len;
@@ -1425,32 +1429,12 @@ namespace aclara_meters.view
                     bool required = optionalField.Required;
 
                     Keyboard keyboard = Keyboard.Default;
+                    //if      ( format.Equals ( "alpha"        ) ) keyboard = Keyboard.Default;
+                    //else if ( format.Equals ( "date"         ) ) keyboard = Keyboard.Default;
+                    if      ( format.Equals ( "alphanumeric" ) ) keyboard = Keyboard.Numeric;
+                    else if ( format.Equals ( "time"         ) ) keyboard = Keyboard.Numeric;
 
-                    try
-                    {
-                        if (format.Equals("alpha"))
-                        {
-                            keyboard = Keyboard.Default;
-                        }
-                        else if (format.Equals("alphanumeric"))
-                        {
-                            keyboard = Keyboard.Numeric;
-                        }
-                        else if (format.Equals("date"))
-                        {
-                            keyboard = Keyboard.Default;
-                        }
-                        else if (format.Equals("time"))
-                        {
-                            keyboard = Keyboard.Numeric;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.StackTrace);
-                    }
-
-                    BorderlessEntry optionalEntry = new BorderlessEntry()
+                    optionalEntry = new BorderlessEntry()
                     {
                         HorizontalOptions = LayoutOptions.FillAndExpand,
                         HeightRequest = 40,
@@ -1475,9 +1459,19 @@ namespace aclara_meters.view
 
                     this.optionalFields.Children.Add(optionalContainerA);
                 }
-                else
+                
+                // Mandatory fields
+                if ( optionalField.Required )
                 {
-                    // do nothing
+                    if ( isList )
+                         this.optionalMandatoryPickers.Add ( new Tuple<BorderlessPicker,Label> ( optionalPicker, optionalLabel ) );
+                    else this.optionalMandatoryEntries.Add ( new Tuple<BorderlessEntry,Label>  ( optionalEntry,  optionalLabel ) );
+                    
+                    if ( global.ColorEntry )
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            optionalLabel.TextColor = COL_MANDATORY;
+                        });
                 }
             }
         }
@@ -4291,17 +4285,25 @@ namespace aclara_meters.view
             if ( NoValNOrEmpty ( this.tbx_MtuGeolocationLat .Text ) ||
                  NoValNOrEmpty ( this.tbx_MtuGeolocationLong.Text ) )
             {
-                msgError = "GPS Coordinates";
+                msgError = "Field 'GPS Coordinates' are incorrectly filled";
                 return false;
             }
 
-            //foreach ( BorderlessPicker picker in optionalPickers )
-            //    if ( picker.SelectedIndex <= -1 )
-            //        return false;
+            FILL_ERROR = "Miscellaneous field '_' is incorrectly filled";
 
-            //foreach ( BorderlessEntry entry in optionalEntries )
-            //    if ( string.IsNullOrEmpty ( entry.Text ) )
-            //        return false;
+            foreach ( Tuple<BorderlessPicker,Label> tuple in optionalMandatoryPickers )
+                if ( tuple.Item1.SelectedIndex <= -1 )
+                {
+                    msgError = FILL_ERROR.Replace ( "_", tuple.Item2.Text );
+                    return false;
+                }
+
+            foreach ( Tuple<BorderlessEntry,Label> tuple in optionalMandatoryEntries )
+                if ( string.IsNullOrEmpty ( tuple.Item1.Text ) )
+                {
+                    msgError = FILL_ERROR.Replace ( "_", tuple.Item2.Text );
+                    return false;
+                }
 
             #endregion
 
@@ -4948,7 +4950,7 @@ namespace aclara_meters.view
                         mtu_type = Int32.Parse(p.Value.ToString());
                 }
 
-                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, "ReadMTU");
+                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, ActionType.ReadMtu );
 
                 foreach (InterfaceParameters iParameter in interfacesParams)
                 {

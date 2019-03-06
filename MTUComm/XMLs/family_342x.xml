@@ -486,7 +486,7 @@
     <CustomSet>method:ULongToBcd</CustomSet>
   </Register>
   <Register>
-    <Id>P1Reading</Id>
+    <Id>P1MeterReading</Id>
     <Description>P1 Reading</Description>
     <Type>ulong</Type>
     <Address>80</Address>
@@ -496,7 +496,7 @@
 	  <CustomSet/>
   </Register>
   <Register>
-    <Id>P2Reading</Id>
+    <Id>P2MeterReading</Id>
     <Description>P2 Reading</Description>
     <Type>ulong</Type>
     <Address>88</Address>

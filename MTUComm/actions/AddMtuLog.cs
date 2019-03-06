@@ -14,25 +14,9 @@ namespace MTUComm
         public  Logger logger;
         private string user;
         private dynamic form;
+        private ActionType actionType;
         private MTUBasicInfo mtuBasicInfo;
         private string logUri;
-        //private Mtu mtu;
-
-        private const string ENABLE  = "Enable";
-        private const string DISABLE = "Disable";
-
-        private const string addMtuDisplay = "Add MTU";
-        private const string addMtuType = "Program MTU";
-        private const string addMtuReason = "AddMtu";
-
-        private const string turnOffDisplay = "Turn Off MTU";
-        private const string turnOffType = "TurnOffType";
-
-        private const string turnOnDisplay = "Turn On MTU";
-        private const string turnOnType = "TurnOnType";
-
-        private const string readMtuDisplay = "Read MTU";
-        private const string readMtuType = "ReadMTU";
 
         private XDocument doc;
         private XElement  addMtuAction;
@@ -44,6 +28,7 @@ namespace MTUComm
         {
             this.logger = logger;
             this.form = form;
+            this.actionType = (ActionType)form.actionType;
             this.user = user;
             this.mtuBasicInfo = MtuForm.mtuBasicInfo;
             this.logUri = this.logger.CreateFileIfNotExist ( ! isFromScripting );
@@ -56,8 +41,8 @@ namespace MTUComm
 
         public void LogTurnOff ()
         {
-            logger.addAtrribute(this.turnOffAction, "display", turnOffDisplay);
-            logger.addAtrribute(this.turnOffAction, "type", turnOffType);
+            logger.addAtrribute(this.turnOffAction, "display", Action.displays[ActionType.TurnOffMtu]);
+            logger.addAtrribute(this.turnOffAction, "type", Action.tag_types[ActionType.TurnOffMtu]);
 
             logger.logParameter(this.turnOffAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
@@ -69,8 +54,8 @@ namespace MTUComm
 
         public void LogTurnOn ()
         {
-            logger.addAtrribute(this.turnOnAction, "display", turnOnDisplay);
-            logger.addAtrribute(this.turnOnAction, "type", turnOnType);
+            logger.addAtrribute(this.turnOnAction, "display", Action.displays[ActionType.TurnOnMtu]);
+            logger.addAtrribute(this.turnOnAction, "type", Action.tag_types[ActionType.TurnOnMtu]);
 
             logger.logParameter(this.turnOnAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
@@ -86,6 +71,8 @@ namespace MTUComm
             Global  global = form.global;
             dynamic map    = form.map;
             string  temp   = string.Empty;
+            string  DISABLED = MemoryMap.MemoryMap.DISABLED;
+            string  ENABLED  = MemoryMap.MemoryMap.ENABLED;
 
             bool isReplaceMeter = form.actionType == ActionType.ReplaceMeter           ||
                                   form.actionType == ActionType.ReplaceMtuReplaceMeter ||
@@ -95,12 +82,12 @@ namespace MTUComm
 
             #region General
 
-           //logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
-           // logger.addAtrribute ( this.addMtuAction, "type",    addMtuType    );
-           // logger.addAtrribute ( this.addMtuAction, "reason",  addMtuReason  );
-            logger.addAtrribute(this.addMtuAction, "display", Action.displays[(ActionType)form.actionType]);
-            logger.addAtrribute(this.addMtuAction, "type", Action.tag_types[(ActionType)form.actionType]);
-            logger.addAtrribute(this.addMtuAction, "reason", Action.tag_reasons[(ActionType)form.actionType]);
+            //logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
+            // logger.addAtrribute ( this.addMtuAction, "type",    addMtuType    );
+            // logger.addAtrribute ( this.addMtuAction, "reason",  addMtuReason  );
+            logger.addAtrribute(this.addMtuAction, "display", Action.displays[this.actionType]);
+            logger.addAtrribute(this.addMtuAction, "type", Action.tag_types[this.actionType]);
+            logger.addAtrribute(this.addMtuAction, "reason", Action.tag_reasons[this.actionType]);
 
             logger.logParameter ( this.addMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
@@ -116,10 +103,12 @@ namespace MTUComm
             logger.logParameter ( this.addMtuAction, form.ReadInterval );
 
             bool   useDailyReads    = ( global.AllowDailyReads && mtu.DailyReads );
-            string dailyReads       = ( useDailyReads ) ? form.SnapReads.Value : "Disable";
-            string dailyGmtHourRead = ( useDailyReads ) ? form.SnapReads.Value : "Disable";
+            string dailyReads       = ( useDailyReads ) ? form.SnapReads.Value : DISABLED;
+            string dailyGmtHourRead = ( useDailyReads ) ? form.SnapReads.Value : DISABLED;
             logger.logParameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
-            logger.logParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
+            
+            if ( ! dailyGmtHourRead.Equals ( DISABLED ) )
+                logger.logParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
 
             if ( mtu.FastMessageConfig )
                 logger.logParameter ( this.addMtuAction, form.TwoWay );
@@ -258,45 +247,32 @@ namespace MTUComm
                     string alarmConfiguration = alarms.Name;
                     logger.logParameter(alarmSelection, new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
 
-                    string immediateAlarmTransmit = "False";
-                    if (alarms.ImmediateAlarmTransmit)
-                    {
-                        immediateAlarmTransmit = "True";
-                    }
+                    string immediateAlarmTransmit = ( alarms.ImmediateAlarmTransmit ) ? "True" : "False";
                     logger.logParameter(alarmSelection, new Parameter("ImmediateAlarm", "Immediate Alarm Transmit", immediateAlarmTransmit));
 
-                    string urgentAlarm = "False";
-                    if (alarms.DcuUrgentAlarm)
-                    {
-                        urgentAlarm = "True";
-                    }
+                    string urgentAlarm = ( alarms.DcuUrgentAlarm ) ? "True" : "False";
                     logger.logParameter(alarmSelection, new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
 
                     string overlap = alarms.Overlap.ToString();
                     logger.logParameter(alarmSelection, new Parameter("Overlap", "Message Overlap", overlap));
 
                     if ( mtu.MagneticTamper )
-                        logger.logParameter ( alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper",
-                                              ( alarms.Magnetic ) ? ENABLE : DISABLE ));
+                        logger.logParameter ( alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper", map.MagneticTamperStatus ));
 
                     if ( mtu.RegisterCoverTamper )
-                        logger.logParameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Register Cover Tamper",
-                                              ( alarms.RegisterCover ) ? ENABLE : DISABLE ));
+                        logger.logParameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Reg. Cover Tamper", map.RegisterCoverTamperStatus ));
 
                     if ( mtu.TiltTamper )
-                        logger.logParameter( alarmSelection, new Parameter("TiltTamper", "Tilt Tamper",
-                                             ( alarms.Tilt ) ? ENABLE : DISABLE ));
+                        logger.logParameter( alarmSelection, new Parameter("TiltTamper", "Tilt Tamper", map.TiltTamperStatus ));
 
                     if ( mtu.ReverseFlowTamper )
                     {
-                        logger.logParameter ( alarmSelection, new Parameter("ReverseFlow", "Reverse Flow Tamper",
-                                              ( alarms.ReverseFlow ) ? ENABLE : DISABLE ));
+                        logger.logParameter ( alarmSelection, new Parameter("ReverseFlow", "Rev. Flow Tamper", map.ReverseFlowTamperStatus ));
                         logger.logParameter(alarmSelection, new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
                     }
 
                     if ( mtu.InterfaceTamper)
-                        logger.logParameter ( alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper",
-                                              ( alarms.InterfaceTamper ) ? ENABLE : DISABLE ));
+                        logger.logParameter ( alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper", map.InterfaceTamperStatus ));
 
                     this.addMtuAction.Add(alarmSelection);
                 }
@@ -352,8 +328,8 @@ namespace MTUComm
 
         public void LogReadMtu(ActionResult result)
         {
-            logger.addAtrribute(this.readMtuAction, "display", readMtuDisplay);
-            logger.addAtrribute(this.readMtuAction, "type", readMtuType);
+            logger.addAtrribute(this.readMtuAction, "display", Action.displays[ActionType.ReadMtu]);
+            logger.addAtrribute(this.readMtuAction, "type", Action.tag_types[ActionType.ReadMtu]);
 
             /*logger.logParameter(this.readMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
@@ -362,21 +338,17 @@ namespace MTUComm
                 logger.logParameter(this.readMtuAction, new Parameter("User", "User", this.user));
             }*/
 
-            InterfaceParameters[] parameters = Configuration.GetInstance().getLogInterfaceFields( form.mtu.Id, "ReadMTU");
+            InterfaceParameters[] parameters = Configuration.GetInstance().getLogInterfaceFields( form.mtu.Id, ActionType.ReadMtu );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name == "Port")
                 {
                     ActionResult[] ports = result.getPorts();
                     for (int i = 0; i < ports.Length; i++)
-                    {
                         logger.logPort(i, this.readMtuAction, ports[i], parameter.Parameters.ToArray());
-                    }
                 }
                 else
-                {
                     logger.logComplexParameter(this.readMtuAction, result, parameter);
-                }
             }
         }
 

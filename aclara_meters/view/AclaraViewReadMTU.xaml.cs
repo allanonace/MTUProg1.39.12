@@ -1631,7 +1631,7 @@ namespace aclara_meters.view
             {
                 FinalReadListView = new List<ReadMTUItem>();
 
-                Parameter[] paramResult = e.Result.getParameters();
+                Parameter[] paramResult = e.Result.getParameters ();
 
                 int mtu_type = 0;
 
@@ -1646,7 +1646,7 @@ namespace aclara_meters.view
                     }
                 }
 
-                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, "ReadMTU");
+                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, ActionType.ReadMtu );
 
                 foreach (InterfaceParameters iParameter in interfacesParams)
                 {

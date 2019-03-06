@@ -319,7 +319,7 @@ namespace aclara_meters.view
                         Console.WriteLine(e5.StackTrace);
                     }
 
-                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, "ReadMTU");
+                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, ActionType.ReadMtu );
                 foreach (InterfaceParameters parameter in interfacesParams)
                 {
                     if (parameter.Name.Equals("Port"))

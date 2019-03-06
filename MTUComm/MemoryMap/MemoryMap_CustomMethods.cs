@@ -40,9 +40,9 @@ namespace MTUComm.MemoryMap
         private const int    INDEX_STATE = 2;
         private const int    PAD_LEFT    = 8;
 
-        private const string ENABLED     = "Enabled";
-        private const string DISABLED    = "Disabled";
-        private const string TRIGGERED   = "Triggered";
+        public  const string ENABLED     = "Enabled";
+        public  const string DISABLED    = "Disabled";
+        public  const string TRIGGERED   = "Triggered";
 
         private const string NTCONFIRMED = "NOT CONFIRMED";
         private const string CONFIRMED   = "CONFIRMED";
@@ -103,7 +103,7 @@ namespace MTUComm.MemoryMap
             else if ( curTime == 12 ) return NOON;
             else if ( curTime >  12 &&
                       curTime <  24 ) return ( curTime - 12 ) + PM;
-            else return OFF;
+            else return DISABLED;
         }
 
         public string MtuStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
@@ -149,7 +149,7 @@ namespace MTUComm.MemoryMap
 
         public string MtuVoltageBattery_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return ((MemoryRegisters.MtuMiliVoltageBattery.Value * 1.0) / 1000).ToString( MTUVLFORMAT );
+            return ( ( ( float )MemoryRegisters.MtuMiliVoltageBattery.Value ) / 1000 ).ToString ( MTUVLFORMAT );
         }
 
         public string P1ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
@@ -164,27 +164,27 @@ namespace MTUComm.MemoryMap
 
         public string InterfaceTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetTemperStatus(MemoryRegisters.P1InterfaceAlarm.Value, MemoryRegisters.ProgrammingCoilInterfaceTamper.Value);
+            return GetTamperStatus(MemoryRegisters.P1InterfaceAlarm.Value, MemoryRegisters.ProgrammingCoilInterfaceTamper.Value);
         }
 
         public string TiltTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetTemperStatus(MemoryRegisters.P1TiltAlarm.Value, MemoryRegisters.TiltTamper.Value);
+            return GetTamperStatus(MemoryRegisters.P1TiltAlarm.Value, MemoryRegisters.TiltTamper.Value);
         }
 
         public string MagneticTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetTemperStatus(MemoryRegisters.P1MagneticAlarm.Value, MemoryRegisters.MagneticTamper.Value);
+            return GetTamperStatus(MemoryRegisters.P1MagneticAlarm.Value, MemoryRegisters.MagneticTamper.Value);
         }
 
         public string RegisterCoverTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetTemperStatus(MemoryRegisters.P1RegisterCoverAlarm.Value, MemoryRegisters.RegisterCoverTamper.Value);
+            return GetTamperStatus(MemoryRegisters.P1RegisterCoverAlarm.Value, MemoryRegisters.RegisterCoverTamper.Value);
         }
 
         public string ReverseFlowTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetTemperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
+            return GetTamperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
         }
 
         public string FastMessagingMode_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
@@ -450,10 +450,10 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        private string GetTemperStatus (bool alarm, bool temper)
+        private string GetTamperStatus ( bool alarm, bool tamper )
         {
             if ( alarm )
-                return ( temper ) ? TRIGGERED : ENABLED;
+                return ( tamper ) ? TRIGGERED : ENABLED;
             return DISABLED;
         }
 

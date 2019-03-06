@@ -210,8 +210,8 @@ namespace UnitTest.Tests
                 return;
 
             // TEST: Recover only modified registers
-            map.P1Reading        = 26;      // ulong
-            map.P2Reading        = "41";    // ulong
+            map.P1MeterReading   = 26;      // ulong
+            map.P2MeterReading   = "41";    // ulong
             map.EncryptionKey    = "k e y"; // string
             map.P2UrgentAlarm    = true;    // bool
             map.P2InterfaceAlarm = false;   // bool
@@ -220,8 +220,8 @@ namespace UnitTest.Tests
             Assert.True ( mods.Count == 6, ERROR_MODIFIED );
 
             // TEST: Validate previous set actions
-            Assert.True ( map.P1Reading        == 26,      ERROR_CORRECT_SET + " [ ulong ]"  );
-            Assert.True ( map.P2Reading        == 41,      ERROR_CORRECT_SET + " [ ulong ]"  );
+            Assert.True ( map.P1MeterReading   == 26,      ERROR_CORRECT_SET + " [ ulong ]"  );
+            Assert.True ( map.P2MeterReading   == 41,      ERROR_CORRECT_SET + " [ ulong ]"  );
             Assert.True ( map.EncryptionKey    == "k e y", ERROR_CORRECT_SET + " [ String ]" );
             Assert.True ( map.P2UrgentAlarm    == true,    ERROR_CORRECT_SET + " [ Bool ]"   );
             Assert.True ( map.P2InterfaceAlarm == false,   ERROR_CORRECT_SET + " [ Bool ]"   );

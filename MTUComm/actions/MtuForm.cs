@@ -93,12 +93,12 @@ namespace MTUComm.actions
             return new List<Parameter>(this.dictionary.Values).ToArray();
         }
 
-        public Parameter GetParameter(string paramId)
+        public Parameter GetParameter ( string paramId )
         {
-            if (this.dictionary.ContainsKey(paramId))
-                return this.dictionary[paramId];
+            if ( this.dictionary.ContainsKey ( paramId ) )
+                return this.dictionary[ paramId ];
             
-            throw new Exception();
+            return null;
         }
 
         public bool ContainsParameter ( string paramId )

@@ -1075,7 +1075,7 @@ namespace MTUComm
                     
                     ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
     
-                    map.P1Reading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
+                    map.P1MeterReading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
                 }
                 
                 if ( form.usePort2 &&
@@ -1087,7 +1087,7 @@ namespace MTUComm
                     
                     ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( ( p2readingStr ) ) : 0;
     
-                    map.P2Reading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
+                    map.P2MeterReading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
                 }
 
                 #endregion
@@ -1228,26 +1228,60 @@ namespace MTUComm
                 // Only encrypt the key if MTU.SpecialSet tag is true
                 if ( mtu.SpecialSet )
                 {
+                    MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
+                    MemoryRegister<bool>   regEncrypted  = map[ "Encrypted"       ];
+                    MemoryRegister<int>    regEncryIndex = map[ "EncryptionIndex" ];
+                
+                    byte[] aesKey = new byte[ regAesKey.size ]; // 16 bytes
+                
                     try
-                    { 
-                        MemoryRegister<string> eKey = map[ "EncryptionKey" ];
+                    {
+                        // Generate random key
+                        RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
+                        rng.GetBytes ( aesKey );
+                     
+                        // Calculate SHA for the new random key
+                        byte[] sha = new byte[ regAesKey.sizeGet ]; // 32 bytes
+                        using ( SHA256 mySHA256 = SHA256.Create () )
+                        {
+                            sha = mySHA256.ComputeHash ( aesKey );
+                        }
 
-                    RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
-                    byte[] aesKey = new byte[ eKey.size ]; // DEFAULT_LENGTH_AES ];
-                    rng.GetBytes ( aesKey );
-                    map.EncryptionKey = aesKey;
-                    for ( int i = 0; i < 15; i++ )
-                        if ( aesKey[ i ] != memory[ 256 + i ] )
-                            throw new Exception ( "AES key does not match" );
-
+                        // Try to write and validate AES encryption key up to five times
+                        for ( int i = 0; i < 5; i++ )
+                        {
+                            // Write key in the MTU
+                            regAesKey.ValueWriteToMtu ( lexi, aesKey );
+                            Thread.Sleep ( 1000 );
+                            
+                            // Verify if the MTU is encrypted
+                            bool encrypted   = ( bool )regEncrypted.ValueReadFromMtu ( lexi );
+                            int  encrypIndex = ( int )regEncryIndex.ValueReadFromMtu ( lexi );
+                            if ( ! encrypted || encrypIndex <= -1 )
+                            {
+                                continue; // Error
+                            }
+                            else
+                            {
+                                byte[] mtuSha = ( byte[] )regAesKey.ValueReadFromMtu ( lexi, true, regAesKey.sizeGet ); // 32 bytes
+                                Thread.Sleep ( 100 );
+                                
+                                // Compare local sha and sha generate reading key from MTU
+                                if ( ! Array.Equals ( sha, mtuSha ) )
+                                     continue; // Error
+                                else break;
+                            }
+                        }
                     }
                     catch ( Exception e )
                     {
 
                     }
-
-                    // Encrypted
-                    // EncryptionIndex
+                    finally
+                    {
+                        // Always clear generated key from app memory
+                        Array.Clear ( aesKey, 0, aesKey.Length );
+                    }
                 }
 
                 #endregion
@@ -1375,7 +1409,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Write to MTU
+        #region Read|Write from|to MTU
 
         public void WriteMtuModifiedRegisters ( MemoryMap.MemoryMap map )
         {
@@ -1409,6 +1443,11 @@ namespace MTUComm
             byte value = ( lexi.Read ( address, length ) )[ 0 ];
 
             return ( T )( object )value;
+        }
+        
+        public byte[] ReadMtuRegister ( uint address, uint length )
+        {
+            return ( lexi.Read ( address, length ) );
         }
 
         public bool ReadMtuBit ( uint address, uint bit )

@@ -4,6 +4,8 @@ using System.IO;
 using System.Xml.Linq;
 using Xml;
 
+using ActionType = MTUComm.Action.ActionType;
+
 namespace MTUComm
 {
     public class Logger
@@ -265,7 +267,7 @@ namespace MTUComm
             addAtrribute(action, "type", ref_action.LogText);
             addAtrribute(action, "reason", ref_action.Reason);
 
-            InterfaceParameters[] parameters = config.getLogInterfaceFields(mtu_type_id, "DataRead");
+            InterfaceParameters[] parameters = config.getLogInterfaceFields(mtu_type_id, ActionType.ReadData );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name == "Port")
@@ -295,7 +297,7 @@ namespace MTUComm
             addAtrribute(action, "type", ref_action.LogText);
             addAtrribute(action, "reason", ref_action.Reason);
 
-            InterfaceParameters[] parameters = config.getLogInterfaceFields(mtu_type_id, "ReadMTU");
+            InterfaceParameters[] parameters = config.getLogInterfaceFields(mtu_type_id, ActionType.ReadMtu );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if(parameter.Name == "Port") {
@@ -365,7 +367,7 @@ namespace MTUComm
             XElement action = new XElement("Action");
 
             addAtrribute(action, "display", display);
-            addAtrribute(action, "type", type);
+            addAtrribute(action, "type", type );
 
             logParameter(action, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 

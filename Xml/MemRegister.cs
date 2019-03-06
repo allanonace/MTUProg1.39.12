@@ -69,6 +69,26 @@ namespace Xml
                 else this.Size = ERROR_VAL; //( string.Equals ( this.Type, STR_BOOL ) ) ? DEF_BIT : DEF_SIZE;
             }
         }
+        
+        [XmlIgnore]
+        public int SizeGet { get; set; }
+
+        [XmlElement("SizeGet")]
+        public string SizeGet_AllowEmptyField
+        {
+            get { return this.SizeGet.ToString(); }
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    int v;
+                    if (int.TryParse(value, out v))
+                         this.SizeGet = v;
+                    else this.SizeGet = 0;
+                }
+                else this.SizeGet = 0;
+            }
+        }
 
         // To can validate this element is mandatory to use some type of data that
         // allows to set more than two values, using one of them to marks the element

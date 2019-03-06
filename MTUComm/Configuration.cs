@@ -5,6 +5,8 @@ using System.Xml.Serialization;
 using Xml;
 using MTUComm.Exceptions;
 
+using ActionType = MTUComm.Action.ActionType;
+
 namespace MTUComm
 {
     public class Configuration
@@ -108,19 +110,19 @@ namespace MTUComm
             return meterTypes.FindByMterId(meterId);
         }
 
-        public InterfaceParameters[] getAllInterfaceFields(int mtuid, string Action)
+        public InterfaceParameters[] getAllInterfaceFields ( int mtuid, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction(mtuid, Action).getAllInterfaces();
+            return interfaces.GetInterfaceByMtuIdAndAction ( mtuid, actionType.ToString () ).getAllInterfaces ();
         }
 
-        public InterfaceParameters[] getLogInterfaceFields(int mtuid, string Action)
+        public InterfaceParameters[] getLogInterfaceFields ( int mtuid, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction(mtuid, Action).getLogInterfaces();
+            return interfaces.GetInterfaceByMtuIdAndAction ( mtuid, actionType.ToString () ).getLogInterfaces ();
         }
 
-        public InterfaceParameters[] getUserInterfaceFields(int mtuid, string Action)
+        public InterfaceParameters[] getUserInterfaceFields ( int mtuid, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction(mtuid, Action).getUserInterfaces();
+            return interfaces.GetInterfaceByMtuIdAndAction ( mtuid, actionType.ToString () ).getUserInterfaces ();
         }
 
         public string GetMemoryMapTypeByMtuId ( Mtu mtu )

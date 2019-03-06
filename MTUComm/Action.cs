@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using Lexi.Interfaces;
 using MTUComm.actions;
 using Xml;
@@ -22,9 +20,9 @@ namespace MTUComm
 
             public ConditionObjet ( string condition, string key, string value )
             {
-                if ( ! condition.Equals ( "&" ) &&
-                     ! condition.Equals ( "|" ) )
-                     Condition = "|";
+                if ( ! condition.Equals ( IFACE_AND ) &&
+                     ! condition.Equals ( IFACE_OR ) )
+                     Condition = IFACE_OR;
                 else Condition = condition;
 
                 Key   = key;
@@ -37,9 +35,21 @@ namespace MTUComm
         #region Constants
 
         private const string NET_IDS   = @"[@_a-zA-Z][_a-zA-Z0-9]+";
-        private const string REGEX_IFS = @"([&|]?)((" + NET_IDS + @"." + NET_IDS + @")=(" + NET_IDS + @"))";
-        //@"([&|]?)(([^&|=]+)=([^&|=#]*))"
+        private const string REGEX_IFS = @"([+|]?)(" + NET_IDS + @"(?:." + NET_IDS + @")?)=(" + NET_IDS + @")";
 
+        private const string IFACE_AND       = "+";
+        private const string IFACE_OR        = "|";
+        private const string PORT_PREFIX     = "P";
+        private const string IFACE_PORT      = "Port";
+        private const string IFACE_ACTION    = "Action";
+        private const string IFACE_METER     = "Meter";
+        private const string IFACE_MTU       = "Mtu";
+        private const string IFACE_GLOBAL    = "Global";
+        private const string IFACE_MEMORYMAP = "MemoryMap";
+        private const string IFACE_FORM      = "Form";
+        private const string IFACE_MREADING  = "MeterReading";
+        private const string IFACE_READERROR = "ReadingError";
+        
         public enum ActionType
         {
             ReadMtu,
@@ -70,39 +80,39 @@ namespace MTUComm
             {ActionType.TurnOnMtu,"Turn On MTU" },
             {ActionType.ReadData,"Read Data Log" },
             {ActionType.MtuInstallationConfirmation,"Install Confirmation" },
-            {ActionType.Diagnosis, "" }
+            {ActionType.Diagnosis, string.Empty }
         };
 
         public static Dictionary<ActionType, String> tag_types = new Dictionary<ActionType, String>()
         {
             {ActionType.ReadMtu,"ReadMTU" },
-            {ActionType.AddMtu,"Program MTU" },
-            {ActionType.ReplaceMTU,"Program MTU" },
-            {ActionType.AddMtuAddMeter,"Program MTU" },
-            {ActionType.AddMtuReplaceMeter,"Program MTU" },
-            {ActionType.ReplaceMtuReplaceMeter,"Program MTU" },
-            {ActionType.ReplaceMeter,"Program MTU" },
+            {ActionType.AddMtu,"ProgramMtu" },
+            {ActionType.ReplaceMTU,"ProgramMtu" },
+            {ActionType.AddMtuAddMeter,"ProgramMtu" },
+            {ActionType.AddMtuReplaceMeter,"ProgramMtu" },
+            {ActionType.ReplaceMtuReplaceMeter,"ProgramMtu" },
+            {ActionType.ReplaceMeter,"ProgramMtu" },
             {ActionType.TurnOffMtu,"TurnOffMtu" },
-            {ActionType.TurnOnMtu,"TurnOnMTU" },
-            {ActionType.ReadData, "Program MTU" },
+            {ActionType.TurnOnMtu,"TurnOnMtu" },
+            {ActionType.ReadData, "ReadDataLog" },
             {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
-            {ActionType.Diagnosis, "" }
+            {ActionType.Diagnosis, string.Empty }
         };
 
         public static Dictionary<ActionType, String> tag_reasons = new Dictionary<ActionType, String>()
         {
-            {ActionType.ReadMtu,null },
+            {ActionType.ReadMtu, string.Empty },
             {ActionType.AddMtu,"AddMtu" },
             {ActionType.ReplaceMTU,"ReplaceMtu" },
             {ActionType.AddMtuAddMeter,"AddMtuAddMeter" },
             {ActionType.AddMtuReplaceMeter,"AddMtuReplaceMeter" },
             {ActionType.ReplaceMtuReplaceMeter,"ReplaceMtuReplaceMeter" },
             {ActionType.ReplaceMeter,"ReplaceMeter" },
-            {ActionType.TurnOffMtu, null },
-            {ActionType.TurnOnMtu, null },
+            {ActionType.TurnOffMtu, string.Empty },
+            {ActionType.TurnOnMtu, string.Empty },
             {ActionType.ReadData, "DataRead" },
             {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
-            {ActionType.Diagnosis, "" }
+            {ActionType.Diagnosis, string.Empty }
         };
 
         #endregion
@@ -266,99 +276,6 @@ namespace MTUComm
         public Action[] GetSubActions()
         {
             return sub_actions.ToArray();
-        }
-
-        #endregion
-
-        #region Validation
-
-        private bool ValidateCondition ( string condition, dynamic map, Mtu mtu, String port = "", dynamic actionParams = null )
-        {
-            if ( condition == null )
-                return true;
-
-            try
-            {
-                List<ConditionObjet> conditions = new List<ConditionObjet> ();
-
-                MatchCollection matches = Regex.Matches ( condition, REGEX_IFS, RegexOptions.Compiled );
-                foreach ( Match m in matches.Cast<Match> ().ToList () )
-                    conditions.Add (
-                        new ConditionObjet (
-                            Uri.UnescapeDataString ( m.Groups[ 1 ].Value ),     // & or |
-                            Uri.UnescapeDataString ( m.Groups[ 3 ].Value ),     // Class.Property
-                            Uri.UnescapeDataString ( m.Groups[ 4 ].Value ) ) ); // Value
-
-                int finalResult = 0;
-
-                Global global = Configuration.GetInstance ().GetGlobal ();
-
-                foreach ( ConditionObjet item in conditions )
-                {
-                    string value  = string.Empty;
-                    int    result = 0;
-
-                    string[] member   = item.Key.Split ( new char[]{ '.' } ); // Class.Property
-                    string   property = member[ 1 ];
-
-                    switch ( member[ 0 ] )
-                    {
-                        case "Port":
-                            // P1 or P2
-                            value = port;
-                            break;
-                        case "Action":
-                            // User, Date or Type
-                            value = GetProperty ( property );
-                            break;
-                        case "MeterType":
-                            break;
-                        case "MtuType":
-                            // Reflection over Mtu class
-                            value = mtu.GetProperty ( property );
-                            break;
-                        case "ActionParams":
-                            value = actionParams.GetType().GetProperty ( member[ 0 ] )
-                                .GetValue ( actionParams, null ).ToString();
-                            break;
-                        case "Global":
-                            value = global.GetType ().GetProperty ( member[ 0 ] )
-                                .GetValue ( global, null ).ToString();
-                            break;
-                        default: // MemoryMap
-                            // Recover register from MTU memory map
-                            // Some registers have port sufix but other not
-                            if ( ! string.IsNullOrEmpty ( port ) &&
-                                 map.ContainsMember ( port + property ) )
-                                value = map.GetProperty ( port + property ).Value.ToString ();
-                            // Try to recover register without port prefix
-                            else if ( map.ContainsMember ( property ) )
-                                value = map.GetProperty ( property ).Value.ToString ();
-                            break;
-                    }
-
-                    // Compare property value with condition value
-                    if ( ! string.IsNullOrEmpty ( value ) &&
-                         value.ToLower ().Equals ( item.Value.ToLower () ))
-                        result = 1;
-
-                    // Concatenate conditions results
-                    // If one validate, pass
-                    if ( item.Condition.Equals ( "|" ) )
-                        finalResult = finalResult + result;
-                    // All conditions have to validate
-                    else if ( item.Condition.Equals ( "&" ) )
-                        finalResult = finalResult * result;
-                }
-
-                return ( finalResult > 0 );
-            }
-            catch ( Exception e )
-            {
-                Console.WriteLine ( e.Message + "\r\n" + e.StackTrace );
-            }
-
-            return true;
         }
 
         #endregion
@@ -540,17 +457,17 @@ namespace MTUComm
 
         private ActionResult Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)
         {
-            ActionResult result = CreateActionResultUsingInterface(e.MemoryMap, e.MtuType, e.Form );
-            ActionFinishArgs args = new ActionFinishArgs(result);
+            ActionResult result = CreateActionResultUsingInterface ( e.MemoryMap, e.MtuType, e.Form );
+            ActionFinishArgs args = new ActionFinishArgs ( result );
 
-            e.AddMtuLog.LogReadMtu(result);
+            e.AddMtuLog.LogReadMtu ( result );
 
             // Generate xml log file and save on device
             e.AddMtuLog.Save ();
             
             args.FormLog = e.AddMtuLog;
 
-            OnFinish(this, args);
+            OnFinish ( this, args );
             return result;
         }
 
@@ -571,7 +488,7 @@ namespace MTUComm
 
             string log_path = logger.logReadDataResultEntries(mtuInfo.Id.ToString("d15"), start, end, Entries);
 
-            InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtu.Id, "DataRead");
+            InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtu.Id, ActionType.ReadData );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name.Equals("Port"))
@@ -623,246 +540,202 @@ namespace MTUComm
             return result;
         }
 
-        private ActionResult CreateActionResultUsingInterface (
-            dynamic map = null,
-            Mtu mtutype = null,
-            MtuForm form = null,
-            dynamic actionParams = null,
-            string actionType = "ReadMTU" )
+        private ActionResult getBasciInfoResult ()
         {
-            InterfaceParameters[] parameters = configuration.getAllInterfaceFields ( mtutype.Id, actionType );
-
             ActionResult result = new ActionResult ();
+            MTUBasicInfo basic  = comm.GetBasicInfo ();
+            
+            result.AddParameter(new Parameter("Date", "Date/Time", GetProperty("Date")));
+            result.AddParameter(new Parameter("User", "User", GetProperty("User")));
+            result.AddParameter(new Parameter("MtuId", "MTU ID", basic.Id));
+    
+            return result;
+        }
+
+        #endregion
+
+        #region Interface
+
+        private ActionResult CreateActionResultUsingInterface (
+            dynamic map  = null,
+            Mtu     mtu  = null,
+            MtuForm form = null,
+            ActionType actionType = ActionType.ReadMtu )
+        {
+            Parameter paramToAdd;
+            ActionResult result = new ActionResult ();
+            InterfaceParameters[] parameters = configuration.getAllInterfaceFields ( mtu.Id, actionType );
             foreach ( InterfaceParameters parameter in parameters )
             {
-                if ( parameter.Name.Equals ( "MtuVoltageBattery" ) )
+                if ( parameter.Name.Equals ( "Frequency" ) )
                 {
 
                 }
 
-                if ( parameter.Name.Equals ( "Port" ) )
-                    for ( int i = 0; i < mtutype.Ports.Count; i++ )
-                        result.addPort ( ReadPort ( i, parameter.Parameters.ToArray (), map, mtutype ) );
+                if ( parameter.Name.Equals ( IFACE_PORT ) )
+                    for ( int i = 0; i < mtu.Ports.Count; i++ )
+                        result.addPort ( ReadPort ( i + 1, parameter.Parameters.ToArray (), map, mtu ) );
                 else
                 {
                     try
                     {
-                        if ( ValidateCondition ( parameter.Conditional, map, mtutype, "", actionParams ) )
+                        if ( ValidateCondition ( parameter.Conditional, map, mtu ) )
                         {
-                            //if ( parameter.Source == null )
-                            //    parameter.Source = "";
-
+                            string value          = string.Empty;
                             string sourceWhere    = string.Empty;
-                            string sourceProperty = string.Empty;
+                            string sourceProperty = parameter.Name;
 
-                            if ( ! string.IsNullOrEmpty ( parameter.Source ) )
+                            if ( ! string.IsNullOrEmpty ( parameter.Source ) &&
+                                 Regex.IsMatch ( parameter.Source, NET_IDS + "." + NET_IDS ) )
                             {
                                 string[] sources = parameter.Source.Split(new char[] { '.' });
                                 sourceWhere      = sources[ 0 ];
                                 sourceProperty   = sources[ 1 ];
                             }
 
-                            Parameter paramToAdd = null;
+                            paramToAdd = null;
                             switch ( sourceWhere )
                             {
-                                case "Action":
-                                    string action_property_value = GetProperty ( sourceProperty );
-                                    if ( action_property_value != null )
-                                        paramToAdd = new Parameter ( parameter.Name, parameter.Display, action_property_value );
-                                    break;
-                                case "MeterType":
-                                    break;
-                                case "MtuType":
-                                    paramToAdd = new Parameter ( parameter.Name, parameter.Display, mtutype.GetProperty( sourceProperty ));
-                                    break;
-                                case "MemoryMap":
-                                    paramToAdd = new Parameter ( sourceProperty, parameter.Display, map.GetProperty( sourceProperty ).Value.ToString());
-                                    break;
-                                case "Form":
-                                    if ( form.ContainsParameter ( sourceProperty ) )
-                                        paramToAdd = form.GetParameter ( sourceProperty );
-                                    break;
-                                case "ActionParams":
-                                    paramToAdd = new Parameter ( parameter.Name, parameter.Display,
-                                                                 actionParams.GetType().GetProperty ( sourceProperty )
-                                                                    .GetValue ( actionParams, null ).ToString() );
-                                    break;
-                                default:
-                                    try
-                                    {
-                                        paramToAdd = new Parameter(parameter.Name, parameter.Display, map.GetProperty(parameter.Name).Value.ToString());
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        paramToAdd = null;
-                                    }
-                                   
-                                    break;
+                                case IFACE_ACTION   : value      = this.GetProperty  ( sourceProperty ); break;
+                                case IFACE_MTU      : value      = this.GetProperty  ( sourceProperty ); break;
+                                case IFACE_FORM     : paramToAdd = form.GetParameter ( sourceProperty ); break;
+                                //case IFACE_MEMORYMAP: value      = map .GetProperty  ( sourceProperty ).Value.ToString (); break; // MemoryMap.SourceProperty
+                                default             : value      = map .GetProperty  ( sourceProperty ).Value.ToString (); break; // MemoryMap.ParameterName
                             }
-
+                            
+                            if ( sourceWhere != IFACE_FORM &&
+                                 ! string.IsNullOrEmpty ( value ) )
+                                paramToAdd = new Parameter ( sourceProperty, parameter.Display, value );
+                            
                             if ( paramToAdd != null )
                                 result.AddParameter ( paramToAdd );
-                            else
-                            {
-
-                            }
                         }
-
                     }
-                    catch (Exception e)
+                    catch ( Exception e )
                     {
-                        Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
+                        //...
                     }
                 }
-
             }
             return result;
         }
 
-        private ActionResult ReadPort ( int indexPort, InterfaceParameters[] parameters, dynamic map, Mtu mtu )
+        private ActionResult ReadPort (
+            int indexPort,
+            InterfaceParameters[] parameters,
+            dynamic map,
+            Mtu mtu )
         {
             ActionResult result   = new ActionResult ();
-            Port         portType = mtu.Ports[ indexPort ];
+            Port         portType = mtu.Ports[ indexPort - 1 ];
 
             // Meter Serial Number
-            int meterId = map.GetProperty ( "P" + ( indexPort + 1 ) + "MeterType" ).Value;
+            int meterId = map.GetProperty ( PORT_PREFIX + indexPort + "MeterType" ).Value;
 
             // Port has installed a Meter
-            if ( meterId != 0 )
+            if ( meterId > 0 )
             {
-                Meter Metertype = configuration.getMeterTypeById ( meterId );
+                Meter meter = configuration.getMeterTypeById ( meterId );
                 
                 // Meter type not found in database
-                if ( Metertype.Type == "NOTFOUND" )
+                if ( meter.Type.Equals ( "NOTFOUND" ) )
                 {
                     //logger.LogError("No valid meter types were found for MTU type " + Metertype.Id);
+                    
+                    return null;
                 }
 
                 // Iterate all parameters for this port
                 foreach ( InterfaceParameters parameter in parameters )
                 {
-                    if ( parameter.Name.Equals ( "MeterReading" ) )
+                    // Meter readings are treated in a special way
+                    if ( parameter.Name.Equals ( IFACE_MREADING ) )
                     {
-                        if (ValidateCondition(parameter.Conditional, map, mtu, "P" + (indexPort + 1)))
+                        if ( ValidateCondition ( parameter.Conditional, map, mtu, indexPort ) )
                         {
-                            string meter_reading_error = map.GetProperty("P" + (indexPort + 1) + "ReadingError").Value.ToString();
-                            if (meter_reading_error.Length < 1)
+                            try
                             {
-                                ulong meter_reading = 0;
-                                try
+                                string meter_reading_error = map.GetProperty ( PORT_PREFIX + indexPort + IFACE_READERROR ).Value.ToString ();
+                                if ( meter_reading_error.Length < 1 )
                                 {
-                                    meter_reading = map.GetProperty("P" + (indexPort + 1) + "Reading").Value;
-                                }
-                                catch (Exception e) { }
-
-                                ulong tempReadingVal = 0;
-                                if (mtu.PulseCountOnly)
-                                {
-                                    tempReadingVal = meter_reading * (ulong)Metertype.HiResScaling;
+                                    ulong meter_reading  = map.GetProperty ( PORT_PREFIX + indexPort + IFACE_MREADING ).Value;
+                                    ulong tempReadingVal = ( ! mtu.PulseCountOnly ) ? meter_reading : meter_reading * ( ulong )meter.HiResScaling;
+                                    
+                                    String tempReading = tempReadingVal.ToString ();
+                                    if ( meter.LiveDigits < tempReading.Length )
+                                         tempReading = tempReading.Substring ( tempReading.Length - meter.LiveDigits - ( tempReading.IndexOf ('.') > -1 ? 1 : 0 ) );
+                                    else tempReading = tempReading.PadLeft ( meter.LiveDigits, '0' );
+                                    
+                                    if ( meter.LeadingDummy > 0 )
+                                        tempReading = tempReading.PadLeft (
+                                            tempReading.Length + meter.LeadingDummy,
+                                            configuration.useDummyDigits() ? 'X' : '0' );
+                                        
+                                    if ( meter.DummyDigits > 0 )
+                                        tempReading = tempReading.PadRight (
+                                            tempReading.Length + meter.DummyDigits,
+                                            configuration.useDummyDigits() ? 'X' : '0' );
+                                        
+                                    if ( meter.Scale > 0 &&
+                                         tempReading.IndexOf(".") == -1 )
+                                        tempReading = tempReading.Insert ( tempReading.Length - meter.Scale, "." );
+                                        
+                                    if ( meter.PaintedDigits > 0 &&
+                                         configuration.useDummyDigits () )
+                                        tempReading = tempReading.PadRight (
+                                            tempReading.Length + meter.PaintedDigits, '0' ).Insert ( tempReading.Length, " - " );
+    
+                                    if ( string.IsNullOrEmpty ( tempReading ) )
+                                        tempReading = "INVALID";
+                                    
+                                    result.AddParameter ( new Parameter ( parameter.Name, parameter.Display, tempReading ) );
                                 }
                                 else
-                                {
-                                    tempReadingVal = meter_reading;
-                                }
-
-
-                                String tempReading = tempReadingVal.ToString();
-                                if (Metertype.LiveDigits < tempReading.Length)
-                                {
-                                    tempReading = tempReading.Substring(tempReading.Length - Metertype.LiveDigits - (tempReading.IndexOf('.') > -1 ? 1 : 0));
-                                }
-                                else
-                                {
-                                    tempReading = tempReading.PadLeft(Metertype.LiveDigits, '0');
-                                }
-                                if (Metertype.LeadingDummy > 0) // KG 12/08/2008
-                                    tempReading = tempReading.PadLeft(tempReading.Length + Metertype.LeadingDummy, configuration.useDummyDigits() ? 'X' : '0');
-                                if (Metertype.DummyDigits > 0)  // KG 12/08/2008
-                                    tempReading = tempReading.PadRight(tempReading.Length + Metertype.DummyDigits, configuration.useDummyDigits() ? 'X' : '0');
-                                if (Metertype.Scale > 0 && tempReading.IndexOf(".") == -1) // 8.12.2011 KG add for F1 Pulse
-                                    tempReading = tempReading.Insert(tempReading.Length - Metertype.Scale, ".");
-                                if (Metertype.PaintedDigits > 0 && configuration.useDummyDigits()) // KG 12/08/2008
-                                    tempReading = tempReading.PadRight(tempReading.Length + Metertype.PaintedDigits, '0').Insert(tempReading.Length, " - ");
-
-                                if (tempReading == "")
-                                {
-                                    tempReading = "INVALID";
-                                }
-                                result.AddParameter(new Parameter(parameter.Name, parameter.Display, tempReading));
+                                    result.AddParameter ( new Parameter ( parameter.Name, parameter.Display, meter_reading_error ) );
                             }
-                            else
+                            catch ( Exception e )
                             {
-                                result.AddParameter(new Parameter(parameter.Name, parameter.Display, meter_reading_error));
+                                //...
                             }
                         }
-
                     }
                     else
                     {
                         try
                         {
-                            if (ValidateCondition(parameter.Conditional, map, mtu, "P" + (indexPort + 1)))
+                            if ( ValidateCondition ( parameter.Conditional, map, mtu, indexPort ) )
                             {
-                                if (parameter.Source == null)
-                                {
-                                    parameter.Source = "";
-                                }
-                                string val = null;
-                                string property_type = "";
-                                string property_name = "";
+                                string value          = string.Empty;
+                                string sourceWhere    = string.Empty;
+                                string sourceProperty = parameter.Name;
 
-                                if (parameter.Source.Contains(".") && parameter.Source.Length >= 3)
+                                if ( ! string.IsNullOrEmpty ( parameter.Source ) &&
+                                     Regex.IsMatch ( parameter.Source, NET_IDS + "." + NET_IDS ) )
                                 {
-                                    property_type = parameter.Source.Split(new char[] { '.' })[0];
-                                    property_name = parameter.Source.Split(new char[] { '.' })[1];
+                                    string[] sources = parameter.Source.Split(new char[] { '.' });
+                                    sourceWhere      = sources[ 0 ];
+                                    sourceProperty   = sources[ 1 ];
                                 }
 
-                                string name = parameter.Name;
-
-                                switch (property_type)
+                                switch ( sourceWhere )
                                 {
-                                    case "PortType":
-                                        val = portType.GetProperty(property_name);
-                                        break;
-                                    case "MeterType":
-                                        val = Metertype.GetProperty(property_name);
-                                        break;
-                                    case "MtuType":
-                                        val = mtu.GetProperty(property_name);
-                                        break;
-                                    case "MemoryMap":
-                                        val = map.GetProperty("P" + (indexPort + 1) + property_name).Value.ToString();
-                                        name = property_name;
-                                        break;
-                                    default:
-
-                                        try
-                                        {
-                                            val = map.GetProperty("P" + (indexPort + 1) + parameter.Name).Value.ToString();
-                                        }catch (Exception e)
-                                        {
-                                            val = null;
-                                        }
-
-                                        break;
-
+                                    case IFACE_PORT     : value = portType .GetProperty ( sourceProperty ); break;
+                                    case IFACE_MTU      : value = mtu      .GetProperty ( sourceProperty ); break;
+                                    case IFACE_METER    : value = meter    .GetProperty ( sourceProperty ); break;
+                                    //case IFACE_MEMORYMAP: value = map.GetProperty ( PORT_PREFIX + indexPort + sourceProperty ).Value.ToString (); break; // MemoryMap.SourceProperty
+                                    default             : value = map.GetProperty ( PORT_PREFIX + indexPort + sourceProperty ).Value.ToString (); break; // MemoryMap.ParameterName
                                 }
-                                if (!string.IsNullOrEmpty(val))
-                                {
-                                    result.AddParameter(new Parameter(name, parameter.Display, val));
-                                }
-
+                                
+                                if ( ! string.IsNullOrEmpty ( value ) )
+                                    result.AddParameter ( new Parameter ( sourceProperty, parameter.Display, value ) );
                             }
-
                         }
-                        catch (Exception e)
+                        catch ( Exception e )
                         {
-                            Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
+                            //...
                         }
                     }
-
                 }
-
             }
             // Port has not installed a Meter
             else
@@ -881,16 +754,82 @@ namespace MTUComm
             return result;
         }
 
-        private ActionResult getBasciInfoResult ()
+        private bool ValidateCondition (
+            string conditionStr,
+            dynamic map,
+            Mtu mtu,
+            int portIndex = 1 )
         {
-            ActionResult result = new ActionResult ();
-            MTUBasicInfo basic  = comm.GetBasicInfo ();
-            
-            result.AddParameter(new Parameter("Date", "Date/Time", GetProperty("Date")));
-            result.AddParameter(new Parameter("User", "User", GetProperty("User")));
-            result.AddParameter(new Parameter("MtuId", "MTU ID", basic.Id));
-    
-            return result;
+            if ( string.IsNullOrEmpty ( conditionStr ) )
+                return true;
+
+            try
+            {
+                List<ConditionObjet> conditions = new List<ConditionObjet> ();
+
+                string test = conditionStr.Trim ().Replace ( " ", string.Empty );
+
+                MatchCollection matches = Regex.Matches ( conditionStr.Trim ().Replace ( " ", string.Empty ), REGEX_IFS, RegexOptions.Compiled );
+                foreach ( Match m in matches.Cast<Match> ().ToList () )
+                    conditions.Add (
+                        new ConditionObjet (
+                            Uri.UnescapeDataString ( m.Groups[ 1 ].Value ),     // + or |
+                            Uri.UnescapeDataString ( m.Groups[ 2 ].Value ),     // Type/Class.Property
+                            Uri.UnescapeDataString ( m.Groups[ 3 ].Value ) ) ); // Value
+
+                int    finalResult = 0;
+                string port   = PORT_PREFIX + portIndex;
+                Global global = Configuration.GetInstance ().GetGlobal ();
+                Type   gType  = global.GetType ();
+                
+                foreach ( ConditionObjet condition in conditions )
+                {
+                    int      result       = 0;
+                    string   currentValue = string.Empty;
+                    string[] condMembers  = condition.Key.Split ( new char[]{ '.' } ); // Class.Property
+                    string   condProperty = ( condMembers.Length > 1 ) ? condMembers[ 1 ] : condMembers[ 0 ]; // Property
+
+                    // Class or Type
+                    switch ( condMembers[ 0 ] )
+                    {
+                        case IFACE_PORT  : currentValue = port; break; // P1 or P2
+                        case IFACE_ACTION: currentValue = GetProperty ( condProperty ); break; // User, Date or Type
+                        case IFACE_METER : break;
+                        case IFACE_MTU   : currentValue = mtu.GetProperty ( condProperty ); break; // Mtu class
+                        case IFACE_GLOBAL: currentValue = gType.GetProperty ( condProperty ).GetValue ( global, null ).ToString(); break; // Global class
+                        default: // Dynamic MemoryMap
+                            // Recover register from MTU memory map
+                            // Some registers have port sufix but other not
+                            if ( map.ContainsMember ( port + condProperty ) )
+                                currentValue = map.GetProperty ( port + condProperty ).Value.ToString ();
+                            else if ( map.ContainsMember ( condProperty ) )
+                                currentValue = map.GetProperty ( condProperty ).Value.ToString ();
+                            break;
+                    }
+
+                    // Compare property value with condition value
+                    if ( ! string.IsNullOrEmpty ( currentValue ) &&
+                         currentValue.ToLower ().Equals ( condition.Value.ToLower () ) )
+                        result = 1; // Ok
+
+                    // Concatenate conditions results
+                    if      ( condition.Condition.Equals ( IFACE_OR  ) ) finalResult = finalResult + result; // If one condition validate, pass
+                    else if ( condition.Condition.Equals ( IFACE_AND ) ) finalResult = finalResult * result; // All conditions have to validate
+                }
+
+                if ( finalResult <= 0 )
+                {
+
+                }
+
+                return ( finalResult > 0 );
+            }
+            catch ( Exception e )
+            {
+                //...
+            }
+
+            return false;
         }
 
         #endregion

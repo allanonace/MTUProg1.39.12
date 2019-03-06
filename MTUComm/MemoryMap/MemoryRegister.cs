@@ -1,5 +1,6 @@
 ﻿using System;
 using Xml;
+using Lexi;
 
 using REGISTER_TYPE = MTUComm.MemoryMap.AMemoryMap.REGISTER_TYPE;
 using RegType       = MTUComm.MemoryMap.MemoryMap.RegType;
@@ -27,7 +28,8 @@ namespace MTUComm.MemoryMap
         public string description { get; }
         public RegType valueType { get; }
         public int address { get; }
-        public int size { get; }
+        public int size { get; }    // By default size and sizeGet are equal but in some cases ( e.g. EncryptionKey )
+        public int sizeGet { get; } // the size writing is different from the size used reading
         public bool write { get; }
         private string custom_Get { get; }
         private string custom_Set { get; }
@@ -158,6 +160,35 @@ namespace MTUComm.MemoryMap
         {
             get { return this.funcGetByteArray (); }
         }
+        
+        public dynamic ValueReadFromMtu (
+            Lexi.Lexi lexi,
+            bool returnByteArray = false,
+            int  customSize = 0 )
+        {
+            // Read actual value from MTU
+            uint size = ( customSize <= 0 ) ? ( ( ( uint )this.size <= 0 ) ? 1 : ( uint )this.size ) : ( uint )customSize;
+            byte[] value = lexi.Read ( ( uint )this.address, size );
+            
+            // Set value in temporary memory map
+            this.funcSetByteArray ( value );
+            
+            // Return value in desired format
+            if ( ! returnByteArray )
+                return this.Value;
+            return this.ValueByteArray;
+        }
+        
+        public void ValueWriteToMtu (
+            Lexi.Lexi lexi,
+            dynamic value )
+        {
+            // Set value in temporary memory map
+            this.Value = value;
+            
+            // Recover just set value but in byte[] format
+            lexi.Write ( ( uint )this.address, this.ValueByteArray );
+        }
 
         // Use custom methods if them are registered
         public dynamic Value
@@ -237,6 +268,7 @@ namespace MTUComm.MemoryMap
             string description,
             int address,
             int size = MemRegister.DEF_SIZE,
+            int sizeGet = MemRegister.DEF_SIZE,
             bool write = MemRegister.DEF_WRITE,
             string custom_Get = "",
             string custom_Set = "" )
@@ -246,6 +278,7 @@ namespace MTUComm.MemoryMap
             this.description  = description;
             this.address      = address;
             this.size         = size;
+            this.sizeGet      = ( sizeGet > 0 ) ? sizeGet : size;
             this.write        = write;
             this.custom_Get   = custom_Get.Replace ( " ", string.Empty );
             this.custom_Set   = custom_Set.Replace ( " ", string.Empty );
