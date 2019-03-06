@@ -11,6 +11,7 @@ namespace aclara_meters.Models
     {
         public string Title { get; set; }
         public string Icon { get; set; }
+        public string Color { get; set; }
         public ActionType TargetType { get; set; }
     }
 }

@@ -261,7 +261,13 @@
         <Image Source="shadoweffect" Margin="298,0,0,0" Opacity="0.75" IsVisible="false" WidthRequest="29" HeightRequest="768" x:Name="shadoweffect">
         </Image>
         <!-- Menu desplegable -->
-        <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" IsVisible="false" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=1}">
+        <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" IsVisible="false" 
+                     RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Height,
+            Factor=0}"
+                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
+            Property=Height,
+            Factor=1}">
             <RelativeLayout IsVisible="true">
                 <!-- Custom Shadow Effect -->
                 <Image x:Name="efecto4" Margin="308,0,0,0" Opacity="0.2" WidthRequest="2" HeightRequest="2048" BackgroundColor="#6aa2b8" HorizontalOptions="EndAndExpand">
@@ -274,15 +280,30 @@
                 </Image>
                 <Image x:Name="efecto1" Margin="310,0,0,0" Opacity="0" WidthRequest="1" HeightRequest="2048" BackgroundColor="Black" HorizontalOptions="EndAndExpand">
                 </Image>
-                <StackLayout VerticalOptions="EndAndExpand" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                             Property=Height,&#xA;                                             Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                             Property=Height,&#xA;                                             Factor=1}" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                             Property=Width,&#xA;                                             Factor=0.99}">
-                    <ContentView Margin="0,92,0,-20" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                             Property=Height,&#xA;                                             Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                             Property=Height,&#xA;                                             Factor=1}">
+                <StackLayout VerticalOptions="EndAndExpand" 
+                             RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,
+                    Property=Height,
+                    Factor=0}" 
+                             RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
+                    Property=Height,
+                    Factor=1}" 
+                             RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,
+                    Property=Width,
+                    Factor=0.99}">
+                    <ContentView Margin="0,92,0,-20" 
+                                 RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,
+                        Property=Height,
+                        Factor=0}" 
+                                 RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
+                        Property=Height,
+                        Factor=1}">
                         <ListView Margin="-16,0,-2,0" x:Name="navigationDrawerList" Opacity="1" RowHeight="64" SeparatorVisibility="Default" SeparatorColor="#6aa2b8" BackgroundColor="White" ItemTapped="OnMenuItemSelected">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <ViewCell>
                                         <!-- Main design for our menu items -->
-                                        <StackLayout VerticalOptions="FillAndExpand" Orientation="Vertical" Padding="24,10,0,10" Spacing="20">
-                                            <StackLayout Opacity="1" Orientation="Horizontal">
+                                        <StackLayout VerticalOptions="FillAndExpand" Orientation="Vertical" Padding="24,10,0,10" Spacing="20" BackgroundColor="{Binding Color}">
+                                            <StackLayout Opacity="1" Orientation="Horizontal" BackgroundColor="{Binding Color}">
                                                 <Image Source="{Binding Icon}" Margin="3,4,0,0" WidthRequest="40" HeightRequest="40" Scale="1.1" VerticalOptions="CenterAndExpand" />
                                                 <Label Text="{Binding Title}" x:Name="textListColor" Margin="4,6,0,0" FontSize="22" VerticalOptions="CenterAndExpand" TextColor="#6aa2b8" />
                                             </StackLayout>
@@ -295,7 +316,7 @@
                             </ListView.ItemTemplate>
                         </ListView>
                     </ContentView>
-                    <Image Margin="0,12,0,0" BackgroundColor="White" HeightRequest="0">
+                    <Image Margin="0,12,0,0" BackgroundColor="White" HeightRequest="2">
                     </Image>
                     <StackLayout Orientation="Horizontal" Margin="0,0" Padding="0,12" BackgroundColor="#6aa2b8">
                         <Image Margin="12,-4,0,-4" Source="settings_icon.png" WidthRequest="40" HeightRequest="36" Scale="0.95" VerticalOptions="Center" />
