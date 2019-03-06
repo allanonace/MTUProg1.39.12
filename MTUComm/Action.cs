@@ -15,18 +15,29 @@ namespace MTUComm
         private class ConditionObjet
         {
             public String Condition { get; private set; }
-            public String Key       { get; private set; }
+            public String Operator  { get; private set; }
+            public String Key       { get; private set; } // Can be Id or Id.Property
             public String Value     { get; private set; }
 
-            public ConditionObjet ( string condition, string key, string value )
+            public bool IsEqual   { get { return this.Operator.Equals ( "=" ); } }
+            public bool IsLower   { get { return this.Operator.Equals ( "lt" ); } }
+            public bool IsGreater { get { return this.Operator.Equals ( "gt" ); } }
+            public bool IsNot     { get { return this.Operator.Equals ( "!" ); } }
+
+            public ConditionObjet (
+                string condition,
+                string key,
+                string conditionOperator,
+                string value )
             {
                 if ( ! condition.Equals ( IFACE_AND ) &&
                      ! condition.Equals ( IFACE_OR ) )
                      Condition = IFACE_OR;
                 else Condition = condition;
 
-                Key   = key;
-                Value = value;
+                this.Operator = conditionOperator;
+                this.Key      = key;
+                this.Value    = value;
             }
         }
 
@@ -34,8 +45,10 @@ namespace MTUComm
 
         #region Constants
 
-        private const string NET_IDS   = @"[@_a-zA-Z][_a-zA-Z0-9]+";
-        private const string REGEX_IFS = @"([+|]?)(" + NET_IDS + @"(?:." + NET_IDS + @")?)=(" + NET_IDS + @")";
+        private const string NET_IDS   = @"[_a-zA-Z][_a-zA-Z0-9]+";
+
+        // [ + or | ] Type/Class[.Property] +|<|>|! Value -> e.g. MemoryMap.ShipBit=false|Mtu.InterfaceTamper=true
+        private const string REGEX_IFS = @"(\+|\|)?(" + NET_IDS + @"(?:." + NET_IDS + @")?)(=|lt|gt|!)(-?[0-9]+|[_a-zA-Z0-9]+)";
 
         private const string IFACE_AND       = "+";
         private const string IFACE_OR        = "|";
@@ -774,8 +787,9 @@ namespace MTUComm
                     conditions.Add (
                         new ConditionObjet (
                             Uri.UnescapeDataString ( m.Groups[ 1 ].Value ),     // + or |
-                            Uri.UnescapeDataString ( m.Groups[ 2 ].Value ),     // Type/Class.Property
-                            Uri.UnescapeDataString ( m.Groups[ 3 ].Value ) ) ); // Value
+                            Uri.UnescapeDataString ( m.Groups[ 2 ].Value ),     // Type/Class[.Property]
+                            Uri.UnescapeDataString ( m.Groups[ 3 ].Value ),     // = , < , > or !
+                            Uri.UnescapeDataString ( m.Groups[ 4 ].Value ) ) ); // Value
 
                 int    finalResult = 0;
                 string port   = PORT_PREFIX + portIndex;
@@ -808,13 +822,22 @@ namespace MTUComm
                     }
 
                     // Compare property value with condition value
-                    if ( ! string.IsNullOrEmpty ( currentValue ) &&
-                         currentValue.ToLower ().Equals ( condition.Value.ToLower () ) )
-                        result = 1; // Ok
+                    if ( ! string.IsNullOrEmpty ( currentValue ) )
+                    {
+                        if ( condition.IsEqual &&
+                             currentValue.ToLower ().Equals ( condition.Value.ToLower () ) ||
+                             condition.IsNot &&
+                             ! currentValue.ToLower ().Equals ( condition.Value.ToLower () ) ||
+                             condition.IsLower &&
+                             float.Parse ( currentValue ) < float.Parse ( condition.Value ) ||
+                             condition.IsGreater &&
+                             float.Parse ( currentValue ) > float.Parse ( condition.Value ) )
+                            result = 1; // Ok
+                    }
 
-                    // Concatenate conditions results
-                    if      ( condition.Condition.Equals ( IFACE_OR  ) ) finalResult = finalResult + result; // If one condition validate, pass
-                    else if ( condition.Condition.Equals ( IFACE_AND ) ) finalResult = finalResult * result; // All conditions have to validate
+                    // Concatenate results
+                    if      ( condition.Condition.Equals ( IFACE_OR  ) ) finalResult += result; // If one condition validate, pass
+                    else if ( condition.Condition.Equals ( IFACE_AND ) ) finalResult *= result; // All conditions have to validate
                 }
 
                 if ( finalResult <= 0 )

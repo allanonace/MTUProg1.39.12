@@ -394,7 +394,8 @@
     <Write>false</Write>
     <CustomGet/>
 	  <CustomSet/>
-  </Register>  
+  </Register>
+
   <Register>
     <Id>P1TiltAlarm</Id>
     <Description> P1 mode - Tilt alarm</Description>
@@ -416,7 +417,7 @@
 	  <CustomSet/>
   </Register>
   <Register>
-    <Id>P1InterfaceAlarm</Id>
+    <Id>P1InterfaceAlarm</Id> <!-- PCI Alarm -->
     <Description>P1 mode - PCI alarm</Description>
     <Type>bool</Type>
     <Address>42</Address>
@@ -445,6 +446,88 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
+
+  <Register>
+    <Id>TiltTamper</Id>
+    <Description>Tamper memory - Tilt tamper</Description>
+    <Type>bool</Type>
+    <Address>193</Address>
+    <Size>0</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>MagneticTamper</Id>
+    <Description>Tamper memory - Magnetic tamper</Description>
+    <Type>bool</Type>
+    <Address>193</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>LastGaspTamper</Id>
+    <Description>LastGasp Tamper</Description>
+    <Type>bool</Type>
+    <Address>108</Address>
+    <Size>7</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>InsufficentMemoryTamper</Id>
+    <Description>Insufficent Memory Tamper</Description>
+    <Type>bool</Type>
+    <Address>108</Address>
+    <Size>1</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>Cut1WireTamper</Id>
+    <Description>Cut1 Wire Tamper</Description>
+    <Type>bool</Type>
+    <Address>109</Address>
+    <Size>7</Size>
+    <Write>false</Write> <!-- NO SE -->
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>ProgrammingCoilInterfaceTamper</Id>
+    <Description>Tamper memory - Programming coil interface tamper</Description>
+    <Type>bool</Type>
+    <Address>193</Address>
+    <Size>4</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>RegisterCoverTamper</Id>
+    <Description>Tamper memory - Register cover tamper</Description>
+    <Type>bool</Type>
+    <Address>193</Address>
+    <Size>5</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>ReverseFlowTamper</Id>
+    <Description>Tamper memory - Reverse flow tamper</Description>
+    <Type>bool</Type>
+    <Address>193</Address>
+    <Size>6</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+
   <Register>
     <Id>P1MeterType</Id>
     <Description>P1 meter Type</Description>
@@ -561,86 +644,6 @@
     <Type>int</Type>
     <Address>110</Address>
     <Size>2</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>TiltTamper</Id>
-    <Description>Tamper memory - Tilt tamper</Description>
-    <Type>bool</Type>
-    <Address>193</Address>
-    <Size>0</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>MagneticTamper</Id>
-    <Description>Tamper memory - Magnetic tamper</Description>
-    <Type>bool</Type>
-    <Address>193</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>LastGaspTamper</Id>
-    <Description>LastGasp Tamper</Description>
-    <Type>bool</Type>
-    <Address>108</Address>
-    <Size>7</Size>
-    <Write>false</Write> <!-- NO SE -->
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>InsufficentMemoryTamper</Id>
-    <Description>Insufficent Memory Tamper</Description>
-    <Type>bool</Type>
-    <Address>108</Address>
-    <Size>1</Size>
-    <Write>false</Write> <!-- NO SE -->
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>Cut1WireTamper</Id>
-    <Description>Cut1 Wire Tamper</Description>
-    <Type>bool</Type>
-    <Address>109</Address>
-    <Size>7</Size>
-    <Write>false</Write> <!-- NO SE -->
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>ProgrammingCoilInterfaceTamper</Id>
-    <Description>Tamper memory - Programming coil interface tamper</Description>
-    <Type>bool</Type>
-    <Address>193</Address>
-    <Size>4</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>RegisterCoverTamper</Id>
-    <Description>Tamper memory - Register cover tamper</Description>
-    <Type>bool</Type>
-    <Address>193</Address>
-    <Size>5</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>ReverseFlowTamper</Id>
-    <Description>Tamper memory - Reverse flow tamper</Description>
-    <Type>bool</Type>
-    <Address>193</Address>
-    <Size>6</Size>
     <Write>false</Write>
     <CustomGet/>
 	  <CustomSet/>

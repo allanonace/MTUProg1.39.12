@@ -346,6 +346,7 @@
     <CustomGet>(_val_ * 9.766 * 2) + 250</CustomGet>
 	  <CustomSet/>
   </Register>
+
   <Register>
     <Id>P1TiltAlarm</Id>
     <Description> P1 mode - Tilt alarm</Description>
@@ -387,7 +388,7 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>P1InterfaceAlarm</Id>
+    <Id>P1InterfaceAlarm</Id> <!-- PCI Alarm -->
     <Description>P1 mode - PCI alarm</Description>
     <Type>bool</Type>
     <Address>42</Address>
@@ -416,6 +417,68 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
+
+  <Register>
+    <Id>TiltTamper</Id>
+    <Description>Tamper memory - Tilt tamper</Description>
+    <Type>bool</Type>
+    <Address>71</Address>
+    <Size>0</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>MagneticTamper</Id>
+    <Description>Tamper memory - Magnetic tamper</Description>
+    <Type>bool</Type>
+    <Address>71</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>DcuUrgentTamper</Id>
+    <Description>Tamper memory - Port2 Alarm</Description>
+    <Type>bool</Type>
+    <Address>71</Address>
+    <Size>3</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>ProgrammingCoilInterfaceTamper</Id>
+    <Description>Tamper memory - Programming coil interface tamper</Description>
+    <Type>bool</Type>
+    <Address>71</Address>
+    <Size>4</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>RegisterCoverTamper</Id>
+    <Description>Tamper memory - Register cover tamper</Description>
+    <Type>bool</Type>
+    <Address>71</Address>
+    <Size>5</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>ReverseFlowTamper</Id>
+    <Description>Tamper memory - Reverse flow tamper</Description>
+    <Type>bool</Type>
+    <Address>71</Address>
+    <Size>6</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+
   <Register>
     <Id>P1StatusFlag</Id>
     <Description>Raw P1 Status</Description>
@@ -425,7 +488,7 @@
     <Write>false</Write>
     <CustomGet/>
 	  <CustomSet/>
-  </Register>  
+  </Register>
   <Register>
     <Id>P2StatusFlag</Id>
     <Description>Raw P2 Status</Description>
@@ -552,56 +615,6 @@
     <Type>int</Type>
     <Address>110</Address>
     <Size>2</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register>
-    <Id>TiltTamper</Id>
-    <Description>Tamper memory - Tilt tamper</Description>
-    <Type>bool</Type>
-    <Address>71</Address>
-    <Size>0</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register>
-    <Id>MagneticTamper</Id>
-    <Description>Tamper memory - Magnetic tamper</Description>
-    <Type>bool</Type>
-    <Address>71</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register>
-    <Id>ProgrammingCoilInterfaceTamper</Id>
-    <Description>Tamper memory - Programming coil interface tamper</Description>
-    <Type>bool</Type>
-    <Address>71</Address>
-    <Size>4</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register>
-    <Id>RegisterCoverTamper</Id>
-    <Description>Tamper memory - Register cover tamper</Description>
-    <Type>bool</Type>
-    <Address>71</Address>
-    <Size>5</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register>
-    <Id>ReverseFlowTamper</Id>
-    <Description>Tamper memory - Reverse flow tamper</Description>
-    <Type>bool</Type>
-    <Address>71</Address>
-    <Size>6</Size>
     <Write>false</Write>
     <CustomGet/>
     <CustomSet/>
