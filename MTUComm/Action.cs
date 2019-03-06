@@ -99,12 +99,12 @@ namespace MTUComm
         public static Dictionary<ActionType, String> tag_types = new Dictionary<ActionType, String>()
         {
             {ActionType.ReadMtu,"ReadMTU" },
-            {ActionType.AddMtu,"ProgramMtu" },
-            {ActionType.ReplaceMTU,"ProgramMtu" },
-            {ActionType.AddMtuAddMeter,"ProgramMtu" },
-            {ActionType.AddMtuReplaceMeter,"ProgramMtu" },
-            {ActionType.ReplaceMtuReplaceMeter,"ProgramMtu" },
-            {ActionType.ReplaceMeter,"ProgramMtu" },
+            {ActionType.AddMtu,"Program MTU" },
+            {ActionType.ReplaceMTU,"Program MTU" },
+            {ActionType.AddMtuAddMeter,"Program MTU" },
+            {ActionType.AddMtuReplaceMeter,"Program MTU" },
+            {ActionType.ReplaceMtuReplaceMeter,"Program MTU" },
+            {ActionType.ReplaceMeter,"Program MTU" },
             {ActionType.TurnOffMtu,"TurnOffMtu" },
             {ActionType.TurnOnMtu,"TurnOnMtu" },
             {ActionType.ReadData, "ReadDataLog" },
