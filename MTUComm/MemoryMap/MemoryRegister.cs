@@ -166,17 +166,25 @@ namespace MTUComm.MemoryMap
             bool returnByteArray = false,
             int  customSize = 0 )
         {
+            bool useCustomSize = ( customSize > 0 );
+        
             // Read actual value from MTU
-            uint size = ( customSize <= 0 ) ? ( ( ( uint )this.size <= 0 ) ? 1 : ( uint )this.size ) : ( uint )customSize;
+            uint size = ( useCustomSize ) ? ( uint )customSize : ( ( ( ( uint )this.size <= 0 ) ? 1 : ( uint )this.size ) );
             byte[] value = lexi.Read ( ( uint )this.address, size );
             
-            // Set value in temporary memory map
-            this.funcSetByteArray ( value );
-            
-            // Return value in desired format
-            if ( ! returnByteArray )
-                return this.Value;
-            return this.ValueByteArray;
+            // Set value in temporary memory map only if not using CustomSize,
+            // because is not possible to read X bytes and write Y ( different size )
+            // and customSize will be only for specific cases
+            if ( ! useCustomSize )
+            {
+                this.funcSetByteArray ( value );
+                
+                // Return value in desired format
+                if ( ! returnByteArray )
+                    return this.Value;
+                return this.ValueByteArray;
+            }
+            return value;
         }
         
         public void ValueWriteToMtu (
@@ -187,7 +195,9 @@ namespace MTUComm.MemoryMap
             this.Value = value;
             
             // Recover just set value but in byte[] format
-            lexi.Write ( ( uint )this.address, this.ValueByteArray );
+            if ( value is Array )
+                 lexi.Write ( ( uint )this.address, value );
+            else lexi.Write ( ( uint )this.address, this.ValueByteArray );
         }
 
         // Use custom methods if them are registered
