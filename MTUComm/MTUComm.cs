@@ -426,6 +426,28 @@ namespace MTUComm
         public void Task_TurnOnOffMtu (
             bool on )
         {
+            // TEST>>>
+            
+            /*
+            byte[] aesKey = new byte[ 16 ];
+            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
+            rng.GetBytes ( aesKey );
+         
+            // Calculate SHA for the new random key
+            byte[] sha = new byte[ 32 ];
+            using ( SHA256 mySHA256 = SHA256.Create () )
+            {
+                sha = mySHA256.ComputeHash ( aesKey );
+            }
+            
+            MtuSha256 mySHA = new MtuSha256 ();
+            byte[] sha2 = new byte[ 32 ];
+            // calculate
+            mySHA.GenerateSHAHash ( aesKey, out sha2 );
+            */
+            
+            // <<<TEST
+        
             if ( on )
                  Console.WriteLine ( "TurnOffMtu start" );
             else Console.WriteLine ( "TurnOnMtu start"  );
@@ -1121,13 +1143,13 @@ namespace MTUComm
                         try
                         {
                             //if ( mtu.CutWireDelaySetting  ) map.xxx = alarms.CutWireDelaySetting;
-                            if ( mtu.GasCutWireAlarm      ) map.P1CutWireAlarm = alarms.LastGasp;
+                            //if ( mtu.GasCutWireAlarm      ) map.P1CutWireAlarm = alarms.LastGasp;
                             //if ( mtu.GasCutWireAlarmImm   ) map.xxx = alarms.LastGaspImm;
                             //if ( mtu.InsufficentMemory    ) map.xxx = alarms.InsufficientMemory;
                             //if ( mtu.InsufficentMemoryImm ) map.xxx = alarms.InsufficientMemoryImm;
                             if ( mtu.InterfaceTamper      ) map.P1InterfaceAlarm = alarms.InterfaceTamper;
                             //if ( mtu.InterfaceTamperImm   ) map.xxx = alarms.InterfaceTamperImm;
-                            if ( mtu.LastGasp             ) map.P1CutWireAlarm = alarms.LastGasp;
+                            //if ( mtu.LastGasp             ) map.P1CutWireAlarm = alarms.LastGasp;
                             //if ( mtu.LastGaspImm          ) map.xxx = alarms.LastGaspImm;
                             if ( mtu.MagneticTamper       ) map.P1MagneticAlarm = alarms.Magnetic;
                             if ( mtu.RegisterCoverTamper  ) map.P1RegisterCoverAlarm = alarms.RegisterCover;
@@ -1182,10 +1204,18 @@ namespace MTUComm
                      
                         // Calculate SHA for the new random key
                         byte[] sha = new byte[ regAesKey.sizeGet ]; // 32 bytes
+                        
+                        // Using .Net API
+                        /*
                         using ( SHA256 mySHA256 = SHA256.Create () )
                         {
                             sha = mySHA256.ComputeHash ( aesKey );
                         }
+                        */
+                        
+                        // Using Aclara/StarProgrammer class
+                        MtuSha256 mySHA = new MtuSha256 ();
+                        mySHA.GenerateSHAHash ( aesKey, out sha );
 
                         // Try to write and validate AES encryption key up to five times
                         for ( int i = 0; i < 5; i++ )
@@ -1255,6 +1285,23 @@ namespace MTUComm
 
                 #endregion
 
+                #region Alarm #2
+
+                if ( mtu.RequiresAlarmProfile )
+                {
+                    Alarm alarms = ( Alarm )form.Alarm.Value;
+                    if ( alarms != null )
+                    {
+                        // PCI Alarm needs to be set after MTU is turned on, just before the read MTU
+                        // The Status will show enabled during install and actual status (triggered) during the read
+                        if ( mtu.InterfaceTamper ) map.P1InterfaceAlarm = alarms.InterfaceTamper;
+                    }
+                    // No alarm profile was selected before launch the action
+                    else Errors.LogErrorNow ( new SelectedAlarmForCurrentMtuException () );
+                }
+
+                #endregion
+
                 #region Install Confirmation
 
                 // After TurnOn has to be performed an InstallConfirmation
@@ -1270,7 +1317,12 @@ namespace MTUComm
                 {
                     // Force to execute Install Confirmation avoiding problems
                     // with MTU shipbit, because MTU is just turned on
-                    this.InstallConfirmation_Logic ( true );
+                    if ( ! this.InstallConfirmation_Logic ( true ) )
+                    {
+                        // If IC fails by any reason, add 4 seconds delay before
+                        // reading MTU Tamper Memory settings for Tilt Alarm
+                        Thread.Sleep ( 40000 );
+                    }
                 }
 
                 #endregion
