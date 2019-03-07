@@ -2,9 +2,14 @@
 using System.Xml.Serialization;
 
 namespace Xml
-{
+{ 
     public class Option
     {
+        public Option()
+        {
+            Format = "alphanumeric";
+        }
+
         [XmlAttribute("name")]
         public string Name { get; set; }
 
