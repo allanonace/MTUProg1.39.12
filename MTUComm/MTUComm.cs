@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1235,9 +1236,9 @@ namespace MTUComm
                             {
                                 byte[] mtuSha = ( byte[] )regAesKey.ValueReadFromMtu ( lexi, true, regAesKey.sizeGet ); // 32 bytes
                                 Thread.Sleep ( 100 );
-                                
+
                                 // Compare local sha and sha generate reading key from MTU
-                                if ( ! Array.Equals ( sha, mtuSha ) )
+                                if ( ! sha.SequenceEqual (mtuSha ) )
                                      continue; // Error
                                 else break;
                             }

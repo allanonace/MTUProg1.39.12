@@ -4100,48 +4100,42 @@ namespace aclara_meters.view
             // Dual entries
             DUAL_ERROR = "Field '_' dual entries are not the same";
 
-            if ( ! noAcn &&
-                 ! noDAc &&
+            if (global.AccountDualEntry &&
                  ! string.Equals ( tbx_AccountNumber.Text, tbx_AccountNumber_Dual.Text ) )
             {
                 msgError = DUAL_ERROR.Replace ( "_", this.lb_AccountNumber.Text );
                 return false;
             }
             
-            if ( ! noWor &&
-                 ! noDWr &&
+            if (global.WorkOrderDualEntry &&
                  ! string.Equals ( tbx_WorkOrder.Text, tbx_WorkOrder_Dual.Text ) )
             {
                 msgError = DUAL_ERROR.Replace ( "_", this.lb_WorkOrder.Text );
                 return false;
             }
             
-            if ( ! noOMs &&
-                 ! noDOs &&
+            if (global.OldSerialNumDualEntry &&
                  ! string.Equals ( tbx_OldMeterSerialNumber.Text, tbx_OldMeterSerialNumber_Dual.Text ) )
             {
                 msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterSerialNumber.Text );
                 return false;
             }
             
-            if ( ! noOMr &&
-                 ! noDOr &&
+            if (global.OldReadingDualEntry &&
                  ! string.Equals ( tbx_OldMeterReading.Text, tbx_OldMeterReading_Dual.Text ) )
             {
                 msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterReading.Text );
                 return false;
             }
             
-            if ( ! noMsn &&
-                 ! noDMs &&
+            if (global.NewSerialNumDualEntry &&
                  ! string.Equals ( tbx_MeterSerialNumber.Text, tbx_MeterSerialNumber_Dual.Text ) )
             {
                 msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterSerialNumber.Text );
                 return false;
             }
 
-            if ( ! noMre &&
-                 ! noDMr &&
+            if (global.ReadingDualEntry &&
                  ! string.Equals ( tbx_MeterReading.Text, tbx_MeterReading_Dual.Text ) )
             {
                 msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterReading.Text );
@@ -4225,48 +4219,42 @@ namespace aclara_meters.view
                 // Dual entries
                 DUAL_ERROR = "Field 'Port2 _' dual entries are not the same";
 
-                if ( ! noAcn &&
-                     ! noDAc &&
+                if (global.AccountDualEntry &&
                      ! string.Equals ( tbx_AccountNumber_2.Text, tbx_AccountNumber_Dual_2.Text ) )
                 {
                     msgError = DUAL_ERROR.Replace ( "_", this.lb_AccountNumber_2.Text );
                     return false;
                 }
                 
-                if ( ! noWor &&
-                     ! noDWr &&
+                if (global.WorkOrderDualEntry &&
                      ! string.Equals ( tbx_WorkOrder_2.Text, tbx_WorkOrder_Dual_2.Text ) )
                 {
                     msgError = DUAL_ERROR.Replace ( "_", this.lb_WorkOrder_2.Text );
                     return false;
                 }
                 
-                if ( ! noOMs &&
-                     ! noDOs &&
+                if (global.OldSerialNumDualEntry &&
                      ! string.Equals ( tbx_OldMeterSerialNumber_2.Text, tbx_OldMeterSerialNumber_Dual_2.Text ) )
                 {
                     msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterSerialNumber_2.Text );
                     return false;
                 }
                 
-                if ( ! noOMr &&
-                     ! noDOr &&
+                if (global.OldReadingDualEntry &&
                      ! string.Equals ( tbx_OldMeterReading_2.Text, tbx_OldMeterReading_Dual_2.Text ) )
                 {
                     msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterReading_2.Text );
                     return false;
                 }
                 
-                if ( ! noMsn &&
-                     ! noDMs &&
+                if (global.NewSerialNumDualEntry &&
                      ! string.Equals ( tbx_MeterSerialNumber_2.Text, tbx_MeterSerialNumber_Dual_2.Text ) )
                 {
                     msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterSerialNumber_2.Text );
                     return false;
                 }
     
-                if ( ! noMre &&
-                     ! noDMr &&
+                if (global.ReadingDualEntry &&
                      ! string.Equals ( tbx_MeterReading_2.Text, tbx_MeterReading_Dual_2.Text ) )
                 {
                     msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterReading_2.Text );
