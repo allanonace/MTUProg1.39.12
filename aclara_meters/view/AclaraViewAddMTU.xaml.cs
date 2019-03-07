@@ -222,10 +222,12 @@ namespace aclara_meters.view
         private List<BorderlessPicker> optionalPickers;
         private List<BorderlessEntry>  optionalEntries;
         private List<BorderlessDatePicker> optionalDates;
+        private List<BorderlessTimePicker> optionalTimes;
         private List<Tuple<BorderlessPicker,Label>> optionalMandatoryPickers;
         private List<Tuple<BorderlessEntry,Label>> optionalMandatoryEntries;
         private List<Tuple<BorderlessDatePicker, Label>> optionalMandatoryDates;
-        
+        private List<Tuple<BorderlessTimePicker, Label>> optionalMandatoryTimes;
+
         // Snap Reads / Daily Reads
         private double snapReadsStep;
 
@@ -817,7 +819,8 @@ namespace aclara_meters.view
 
             #region Misc
 
-            InitializeOptionalFields ();
+            if (this.config.global.Options.Count>0)
+                InitializeOptionalFields ();
 
             #endregion
 
@@ -1355,9 +1358,11 @@ namespace aclara_meters.view
             optionalPickers = new List<BorderlessPicker>();
             optionalEntries = new List<BorderlessEntry>();
             optionalDates = new List<BorderlessDatePicker>();
+            optionalTimes = new List<BorderlessTimePicker>();
             optionalMandatoryPickers = new List<Tuple<BorderlessPicker,Label>> ();
             optionalMandatoryEntries = new List<Tuple<BorderlessEntry,Label>> ();
             optionalMandatoryDates = new List<Tuple<BorderlessDatePicker, Label>>();
+            optionalMandatoryTimes = new List<Tuple<BorderlessTimePicker, Label>>();
             foreach ( Option optionalField in this.config.global.Options )
             {
                 Frame optionalContainerB = new Frame()
@@ -1399,6 +1404,7 @@ namespace aclara_meters.view
                 BorderlessPicker optionalPicker = null;
                 BorderlessEntry  optionalEntry  = null;
                 BorderlessDatePicker optionalDate = null;
+                BorderlessTimePicker optionalTime = null;
 
                 bool isList = optionalField.Type.Equals("list");
                 if ( isList )
@@ -1446,9 +1452,61 @@ namespace aclara_meters.view
                     optionalDates.Add(optionalDate);
 
                     optionalContainerD.Children.Add(optionalDate);
-                    optionalContainerC.HeightRequest = 50;
                     optionalContainerC.Content = optionalContainerD;
-                    optionalContainerB.HeightRequest = 50;
+                    optionalContainerB.Content = optionalContainerC;
+                    optionalContainerA.Children.Add(optionalLabel);
+                    optionalContainerA.Children.Add(optionalContainerB);
+
+                    this.optionalFields.Children.Add(optionalContainerA);
+                }
+                else if (optionalField.Format == "time")
+                {
+                    bool required = optionalField.Required;
+                    optionalTime = new BorderlessTimePicker()
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        // HeightRequest = 70,
+                        FontSize = 17
+                    };
+                    optionalTime.Name = optionalField.Name.Replace(" ", "_");
+                    optionalTime.Display = optionalField.Display;
+
+                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
+                    //behavior.MaxLength = optionalField.Len;
+
+                    //optionalEntry.Behaviors.Add(behavior);
+
+                    optionalTimes.Add(optionalTime);
+
+                    optionalContainerD.Children.Add(optionalTime);
+                    optionalContainerC.Content = optionalContainerD;
+                    optionalContainerB.Content = optionalContainerC;
+                    optionalContainerA.Children.Add(optionalLabel);
+                    optionalContainerA.Children.Add(optionalContainerB);
+
+                    this.optionalFields.Children.Add(optionalContainerA);
+                }
+                else if (optionalField.Format == "time")
+                {
+                    bool required = optionalField.Required;
+                    optionalDate = new BorderlessDatePicker()
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        // HeightRequest = 70,
+                        FontSize = 17
+                    };
+                    optionalDate.Name = optionalField.Name.Replace(" ", "_");
+                    optionalDate.Display = optionalField.Display;
+
+                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
+                    //behavior.MaxLength = optionalField.Len;
+
+                    //optionalEntry.Behaviors.Add(behavior);
+
+                    optionalDates.Add(optionalDate);
+
+                    optionalContainerD.Children.Add(optionalDate);
+                    optionalContainerC.Content = optionalContainerD;
                     optionalContainerB.Content = optionalContainerC;
                     optionalContainerA.Children.Add(optionalLabel);
                     optionalContainerA.Children.Add(optionalContainerB);
@@ -1501,6 +1559,8 @@ namespace aclara_meters.view
                          this.optionalMandatoryPickers.Add ( new Tuple<BorderlessPicker,Label> ( optionalPicker, optionalLabel ) );
                     else if (optionalField.Format=="date")
                         this.optionalMandatoryDates.Add(new Tuple<BorderlessDatePicker, Label>(optionalDate, optionalLabel));
+                    else if (optionalField.Format == "time")
+                        this.optionalMandatoryTimes.Add(new Tuple<BorderlessTimePicker, Label>(optionalTime, optionalLabel));
                     else this.optionalMandatoryEntries.Add ( new Tuple<BorderlessEntry,Label>  ( optionalEntry,  optionalLabel ) );
                     
                     if ( global.ColorEntry )
@@ -4944,7 +5004,11 @@ namespace aclara_meters.view
 
             foreach (BorderlessDatePicker d in optionalDates)
                 if (!string.IsNullOrEmpty(d.Date.ToShortDateString()))
-                    optionalParams.Add(new Parameter(d.Name, d.Display, d.Date.ToShortDateString(), true));
+                    optionalParams.Add(new Parameter(d.Name, d.Display,$"{d.Date.ToShortDateString()} 12:00:00", true));
+
+            foreach (BorderlessTimePicker t in optionalTimes)
+                if (!string.IsNullOrEmpty(t.Time.ToString()))
+                    optionalParams.Add(new Parameter(t.Name, t.Display,$"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}", true));
 
             if ( optionalParams.Count > 0 )
                 this.addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );

@@ -6,17 +6,17 @@ using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using Android.Graphics.Drawables;
 
-[assembly: ExportRenderer(typeof(BorderlessDatePicker), typeof(BorderlessDatePickerRenderer))]
+[assembly: ExportRenderer(typeof(BorderlessTimePicker), typeof(BorderlessTimePickerRenderer))]
 namespace aclara_meters.Droid
 {
-    public class BorderlessDatePickerRenderer : DatePickerRenderer
+    public class BorderlessTimePickerRenderer : TimePickerRenderer
     {
 
-        public BorderlessDatePickerRenderer(Context context) : base(context)
+        public BorderlessTimePickerRenderer(Context context) : base(context)
         {
         }
 
-        protected override void OnElementChanged(ElementChangedEventArgs<DatePicker> e)
+        protected override void OnElementChanged(ElementChangedEventArgs<TimePicker> e)
         {
             base.OnElementChanged(e);
             if (Control != null)
