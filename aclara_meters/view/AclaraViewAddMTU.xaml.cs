@@ -328,6 +328,22 @@ namespace aclara_meters.view
                 //Change username textview to Prefs. String
                 if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
                     userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
+
+                this.cancelReasonOtherInput.Focused += (s, e) =>
+                {
+                    if (Device.Idiom == TargetIdiom.Tablet)
+                        SetLayoutPosition(true, (int)-120);
+                    else
+                        SetLayoutPosition(true, (int)-20);
+                };
+
+                this.cancelReasonOtherInput.Unfocused += (s, e) =>
+                {
+                    if (Device.Idiom == TargetIdiom.Tablet)
+                        SetLayoutPosition(false, (int)-120);
+                    else
+                        SetLayoutPosition(false, (int)-20);
+                };
             });
 
             LoadSideMenuElements ();
@@ -340,6 +356,8 @@ namespace aclara_meters.view
 
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
+
+
 
             //listaMTUread.IsVisible = false;
 
@@ -1774,6 +1792,10 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
+            this.cancelReasonOtherInput.Text = String.Empty;
+            this.cancelReasonPicker.SelectedIndex = 0;
+            this.cancelReasonOtherInput.BackgroundColor = Color.White;
+            this.cancelReasonOtherInputContainer.BackgroundColor = Color.White;
             //Navigation.PopToRootAsync(false);
         }
 
@@ -1796,10 +1818,13 @@ namespace aclara_meters.view
             Device.BeginInvokeOnMainThread(() =>
             {
                 //REASON
-                isLogout = true;
-                dialog_open_bg.IsVisible = true;
-                Popup_start.IsVisible = true;
-                Popup_start.IsEnabled = true;
+                if (!isCancellable)
+                {
+                    isLogout = true;
+                    dialog_open_bg.IsVisible = true;
+                    Popup_start.IsVisible = true;
+                    Popup_start.IsEnabled = true;
+                }
             });
            
         }
@@ -1809,7 +1834,7 @@ namespace aclara_meters.view
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            Navigation.PopToRootAsync(false);
+            //Navigation.PopToRootAsync(false);
         }
 
 
@@ -2401,6 +2426,8 @@ namespace aclara_meters.view
                 {
                     cancelReasonOtherInput.IsEnabled = false;
                     cancelReasonOtherInputContainer.Opacity = OPACITY_DISABLE;
+                    cancelReasonOtherInput.BackgroundColor = Color.White;
+                    cancelReasonOtherInput.BackgroundColor = Color.White;
                 }
             }
         }
@@ -3898,11 +3925,21 @@ namespace aclara_meters.view
         private void submit_send(object sender, EventArgs e3)
         {
             int selectedCancelReasonIndex = cancelReasonPicker.SelectedIndex;
-            string selectedCancelReason = "Other";
+            string selectedCancelReason = String.Empty;
 
             if ( selectedCancelReasonIndex > -1 )
                 selectedCancelReason = cancelReasonPicker.Items[cancelReasonPicker.SelectedIndex];
-
+            if (selectedCancelReason == "Other")
+            {
+                if (String.IsNullOrEmpty(cancelReasonOtherInput.Text))
+                {
+                    this.cancelReasonOtherInput.BackgroundColor = Color.Gray;
+                    this.cancelReasonOtherInputContainer.BackgroundColor = Color.Gray;
+                    return;
+                }
+                else
+                    selectedCancelReason = cancelReasonOtherInput.Text;
+            }
             this.add_mtu.Cancel ( selectedCancelReason );
 
             dialog_open_bg.IsVisible = false;
@@ -3957,7 +3994,7 @@ namespace aclara_meters.view
                             {
                                 Navigation.PopToRootAsync(false);
                                 isReturn = false;
-                                isSettings =false;
+                                isSettings = false;
 
                                 //Navigation.PopAsync();
                             }
@@ -5294,6 +5331,32 @@ namespace aclara_meters.view
         #endregion
 
         #region Other methods
+
+        void SetLayoutPosition(bool onFocus, int value)
+        {
+            if (onFocus)
+            {
+                if (Device.RuntimePlatform == Device.iOS)
+                {
+                    this.Popup_start.TranslateTo(0, value, 50);
+                }
+                else if (Device.RuntimePlatform == Device.Android)
+                {
+                    this.Popup_start.TranslateTo(0, value, 50);
+                }
+            }
+            else
+            {
+                if (Device.RuntimePlatform == Device.iOS)
+                {
+                    this.Popup_start.TranslateTo(0, 0, 50);
+                }
+                else if (Device.RuntimePlatform == Device.Android)
+                {
+                    this.Popup_start.TranslateTo(0, 0, 50);
+                }
+            }
+        }
 
         private void ChangeLowerButtonImage(bool v)
         {

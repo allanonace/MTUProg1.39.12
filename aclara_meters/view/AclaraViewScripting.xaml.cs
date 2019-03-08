@@ -31,7 +31,7 @@ namespace aclara_meters.view
         private List<ReadMTUItem> MTUDataListView { get; set; }
         private List<PageItem> MenuList { get; set; }
         private bool _userTapped;
-        private IUserDialogs dialogsSaved;
+     //   private IUserDialogs dialogsSaved;
         private Thread printer;
         private ObservableCollection<DeviceItem> employees;
         private String username;
@@ -147,8 +147,7 @@ namespace aclara_meters.view
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
                     });
                 });
-
-               
+                     
                 return;
             }
             InitRefreshCommand();
@@ -1013,25 +1012,25 @@ namespace aclara_meters.view
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    if ( e.FormLog == null )
+                    if (e.FormLog == null)
                     {
                         ContentView_Scripting_textScript.Text = "";
                         Parameter[] allParams = e.Result.getParameters();
-    
+
                         for (int k = 0; k < allParams.Length; k++)
                         {
                             String res = allParams[k].getLogDisplay() + ": " + allParams[k].Value;
                             String val = ContentView_Scripting_textScript.Text;
                             ContentView_Scripting_textScript.Text = val + res + "\r\n";
                         }
-    
+
                         ActionResult[] allports = e.Result.getPorts();
-    
+
                         for (int i = 0; i < allports.Length; i++)
                         {
                             ActionResult actionResult = allports[i];
                             Parameter[] portParams = actionResult.getParameters();
-    
+
                             for (int j = 0; j < portParams.Length; j++)
                             {
                                 String res = portParams[j].getLogDisplay() + ": " + portParams[j].Value;
@@ -1041,12 +1040,20 @@ namespace aclara_meters.view
                         }
                     }
                     else
-                        ContentView_Scripting_textScript.Text = e.FormLog.ToString ();
+                        ContentView_Scripting_textScript.Text = e.FormLog.ToString();
 
                     String xmlResultTocallback = string.Empty;
-                    if ( e.FormLog == null )
-                         xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(e.Result);
+                    if (e.FormLog == null)
+                        xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(e.Result);
                     else xmlResultTocallback = ContentView_Scripting_textScript.Text;
+
+                    // TODO: ScriptOnly -> if true log in activity log the actions of scripts
+                    //Configuration.GetInstance().GetGlobal().ScriptOnly;
+                    bool bScriptOnly = Configuration.GetInstance().GetGlobal().ScriptOnly;
+                    if (bScriptOnly)
+                    {
+                        Console.Write($"-------------------------------------    ScriptOnly: {bScriptOnly.ToString()}");
+                    }
 
                     Device.BeginInvokeOnMainThread(() =>
                     {
