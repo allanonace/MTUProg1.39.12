@@ -37,6 +37,7 @@
     <Compile Remove="view\testingui.xaml.cs" />
     <Compile Remove="Xml_Files\XmlResources.Designer.cs" />
     <Compile Remove="EntryLengthValidatorBehavior.cs" />
+    <Compile Remove="Constants.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="view\BleGattServicePage.xaml.cs">

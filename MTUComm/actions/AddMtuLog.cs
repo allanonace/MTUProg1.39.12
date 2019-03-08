@@ -121,6 +121,39 @@ namespace MTUComm
 
             #endregion
 
+            #region Certificate
+
+            /*
+              - Log certificate info
+                - All ? -> CertSubject, CertPath, CertPair, CertUpdate, CertValid and CertRecord
+              - Some other thing to write in the activity log ?
+            */
+
+            // Some other info/data about encryption, in addition to Encrypted and Encryption Index parameters, must be log/shown in the screen?
+            // Which certificate attributes should we log and with what tags ( name and display )? and only in activity log or also in "visual" log?
+            
+            Mobile.ConfigData data = Mobile.configData;
+
+            // Avoid try to log encryption info when not it has not been performed
+            if ( data.isMtuEncrypted )
+            {
+                // Using certificate with public key
+                if ( data.certificate != null )
+                {
+                    logger.logParameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaEncryptedInBase64 ) );
+                    logger.logParameter ( this.addMtuAction, new Parameter ( "HeadendCertThumb",     "HeadendCertThumb",      data.certificate.Thumbprint ) );
+                    logger.logParameter ( this.addMtuAction, new Parameter ( "HeadendCertValidTill", "HeadendCertExpiration", data.certificate.NotAfter   ) );
+                    logger.logParameter ( this.addMtuAction, new Parameter ( "DeviceCertSubject",    "DeviceCertSubject",     data.certificate.Subject    ) );
+                }
+                // No certificate present
+                else
+                {
+                    logger.logParameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaInBase64 ) );
+                }
+            }
+
+            #endregion
+
             #region Port 1
 
             Meter meter = ( ! isFromScripting ) ?

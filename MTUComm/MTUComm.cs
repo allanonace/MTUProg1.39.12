@@ -498,9 +498,9 @@ namespace MTUComm
                     
                     return this.TurnOnOffMtu_Logic ( on, time );
                 }
+                
                 // Finish with error
                 else Errors.LogErrorNow ( new ActionNotAchievedTurnOffException ( TIMES_TURNOFF + "" ) );
-                
                 return false;
             }
             return true;
@@ -606,12 +606,18 @@ namespace MTUComm
             if ( ! scriptUseP2    &&
                  port2IsActivated && // Return true in a one port 138 MTU
                  this.mtu.TwoPorts ) // and for that reason I have to check also this
+            {
                 Errors.LogErrorNow ( new ScriptForOnePortButTwoEnabledException () );
+                return;
+            }
             
             // Script is for two ports but MTU has not second port or is disabled
             else if ( scriptUseP2 &&
                       ! port2IsActivated )
+            {
                 Errors.LogErrorNow ( new ScriptForTwoPortsButMtuOnlyOneException () );
+                return;
+            }
 
             // Auto-detect Meter
             bool isAutodetectMeter = false;
@@ -647,10 +653,17 @@ namespace MTUComm
                         form.AddParameter ( FIELD.METER_TYPE, ( meterPort1 = meters[ 0 ] ).Id.ToString () );
                     // No meter was found using the selected parameters
                     else
+                    {
                         Errors.LogErrorNow ( new ScriptingAutoDetectMeterException () );
+                        return;
+                    }
                 }
                 // Script does not contain some of the needed tags ( NumberOfDials,... )
-                else Errors.LogErrorNow ( new ScriptingAutoDetectMeterException () );
+                else
+                {
+                    Errors.LogErrorNow ( new ScriptingAutoDetectMeterException () );
+                    return;
+                }
             }
             // Check if the selected Meter exists and current MTU support it
             else
@@ -660,12 +673,18 @@ namespace MTUComm
                 
                 // Is not valid Meter ID
                 if ( meterPort1.IsEmpty )
+                {
                     Errors.LogErrorNow ( new MtuTypeIsNotFoundException () );
+                    return;
+                }
                 
                 // Current MTU does not support selected Meter
                 else if ( ! portTypes.Contains ( form.Meter.Value ) && // By Meter Id = Numeric
                           ! portTypes.Contains ( meterPort1.Type ) )   // By Type = Chars
+                {
                     Errors.LogErrorNow ( new MtuNotSupportMeterException () );
+                    return;
+                }
             }
 
             if ( this.mtu.TwoPorts &&
@@ -701,10 +720,17 @@ namespace MTUComm
                             form.AddParameter ( FIELD.METER_TYPE_2, ( meterPort2 = meters[ 0 ] ).Id.ToString () );
                         // No meter was found using the selected parameters
                         else
+                        {
                             Errors.LogErrorNow ( new ScriptingAutoDetectMeterException (), 2 );
+                            return;
+                        }
                     }
                     // Script does not contain some of the needed tags ( NumberOfDials,... )
-                    else Errors.LogErrorNow ( new ScriptingAutoDetectMeterException (), 2 );
+                    else
+                    {
+                        Errors.LogErrorNow ( new ScriptingAutoDetectMeterException (), 2 );
+                        return;
+                    }
                 }
                 // Check if the selected Meter exists and current MTU support it
                 else
@@ -714,12 +740,18 @@ namespace MTUComm
                     
                     // Is not valid Meter ID
                     if ( meterPort2.IsEmpty )
+                    {
                         Errors.LogErrorNow ( new MtuTypeIsNotFoundException (), 2 );
+                        return;
+                    }
                     
                     // Current MTU does not support selected Meter
                     else if ( ! portTypes.Contains ( form.Meter_2.Value ) && // By Meter Id = Numeric
                               ! portTypes.Contains ( meterPort2.Type ) )     // By Type = Chars
+                    {
                         Errors.LogErrorNow ( new MtuNotSupportMeterException (), 2 );
+                        return;
+                    }
                 }
             }
 
@@ -996,6 +1028,7 @@ namespace MTUComm
                                msgError.Substring ( index + 1 );
 
                 Errors.LogErrorNow ( new ProcessingParamsScriptException ( msgError ) );
+                return;
             }
 
             #endregion
@@ -1012,7 +1045,11 @@ namespace MTUComm
                     form.AddParameter ( FIELD.ALARM, alarm );
                     
                 // For current MTU does not exist "Scripting" profile inside Alarm.xml
-                else Errors.LogErrorNow ( new ScriptingAlarmForCurrentMtuException () );
+                else
+                {
+                    Errors.LogErrorNow ( new ScriptingAlarmForCurrentMtuException () );
+                    return;
+                }
             }
 
             #endregion
@@ -1188,14 +1225,16 @@ namespace MTUComm
 
                 #region Encryption
 
-                // Only encrypt the key if MTU.SpecialSet tag is true
+                // Only encrypt MTUs with SpecialSet set
                 if ( mtu.SpecialSet )
                 {
                     MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
                     MemoryRegister<bool>   regEncrypted  = map[ "Encrypted"       ];
                     MemoryRegister<int>    regEncryIndex = map[ "EncryptionIndex" ];
                 
-                    byte[] aesKey = new byte[ regAesKey.size ]; // 16 bytes
+                    bool   ok     = true;
+                    byte[] aesKey = new byte[ regAesKey.size    ]; // 16 bytes
+                    byte[] sha    = new byte[ regAesKey.sizeGet ]; // 32 bytes
                 
                     try
                     {
@@ -1204,8 +1243,6 @@ namespace MTUComm
                         rng.GetBytes ( aesKey );
                      
                         // Calculate SHA for the new random key
-                        byte[] sha = new byte[ regAesKey.sizeGet ]; // 32 bytes
-                        
                         // Using .Net API
                         /*
                         using ( SHA256 mySHA256 = SHA256.Create () )
@@ -1213,10 +1250,10 @@ namespace MTUComm
                             sha = mySHA256.ComputeHash ( aesKey );
                         }
                         */
-                        
                         // Using Aclara/StarProgrammer class
-                        MtuSha256 mySHA = new MtuSha256 ();
-                        mySHA.GenerateSHAHash ( aesKey, out sha );
+                        // Note: Generates different result than using .Net SHA256 class
+                        MtuSha256 crypto = new MtuSha256 ();
+                        crypto.GenerateSHAHash ( aesKey, out sha );
 
                         // Try to write and validate AES encryption key up to five times
                         for ( int i = 0; i < 5; i++ )
@@ -1246,13 +1283,31 @@ namespace MTUComm
                     }
                     catch ( Exception e )
                     {
-
+                        ok = false;
                     }
                     finally
                     {
-                        // Always clear generated key from app memory
+                        if ( ok )
+                        {
+                            Mobile.ConfigData data = Mobile.configData;
+                            
+                            data.lastRandomKey    = new byte[ aesKey.Length ];
+                            data.lastRandomKeySha = new byte[ sha   .Length ];
+                        
+                            // Save data to log
+                            Array.Copy ( aesKey, data.lastRandomKey,    aesKey.Length );
+                            Array.Copy ( sha,    data.lastRandomKeySha, sha.Length    );
+                        }
+                        
+                        // Always clear temporary random key from memory, and then after generate the
+                        // activity log also will be cleared random key and its sha save in Mobile.configData
                         Array.Clear ( aesKey, 0, aesKey.Length );
+                        Array.Clear ( sha,    0, sha.Length    );
                     }
+                    
+                    // MTU encryption has failed
+                    if ( ! ( Mobile.configData.isMtuEncrypted = ok ) )
+                        Errors.LogErrorNow ( new ActionNotAchievedEncryptionException ( "5" ) );
                 }
 
                 #endregion
@@ -1383,7 +1438,12 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                this.OnError ();
+                // Is not own exception
+                if ( ! Errors.IsOwnException ( e ) )
+                    Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
+                
+                // Allow to continue rising the error
+                else throw ( e );
             }
         }
 
@@ -1542,6 +1602,8 @@ namespace MTUComm
                 if ( ! isAfterWriting )
                      Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNow ( new PuckCantReadFromMtuAfterWritingException () );
+                
+                return false;
             }
 
             MTUBasicInfo mtu_info = new MTUBasicInfo ( finalRead.ToArray () );

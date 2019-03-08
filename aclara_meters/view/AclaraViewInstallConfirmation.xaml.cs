@@ -1009,7 +1009,7 @@ namespace aclara_meters.view
             FormsApp.peripheral = null;
             background_scan_page.IsEnabled = true;
 
-            Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved, String.Empty));
+            Application.Current.MainPage = new NavigationPage(new AclaraViewLogin ( dialogsSaved ));
             //Navigation.PopToRootAsync(false);
 
 

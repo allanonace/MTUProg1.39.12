@@ -37,8 +37,7 @@ namespace aclara_meters.view
         }
 
         public AclaraViewLogin (
-            IUserDialogs dialogs,
-            string data )
+            IUserDialogs dialogs )
             : this ()
         {
 
@@ -57,7 +56,6 @@ namespace aclara_meters.view
                 Device.BeginInvokeOnMainThread ( () =>
                 {
                     loginpage.IsVisible = true;
-                    Console.WriteLine ( "Data: " + data );
 
                     if ( Mobile.IsNetAvailable () )
                     {
@@ -131,7 +129,7 @@ namespace aclara_meters.view
         }
 
         
-
+        /*
         public AclaraViewLogin ( IUserDialogs dialogs )
         {
             InitializeComponent();
@@ -156,7 +154,7 @@ namespace aclara_meters.view
                         Task.Run(async () => { await StartListening(); });
                         //ListSFTPDataFiles();
                     }
-                    */
+                    /
 
                 });
             });
@@ -200,9 +198,8 @@ namespace aclara_meters.view
             //EmailEntry.MaxLength = FormsApp.config.global.UserIdMinLength;
 
             PasswordEntry.MaxLength = FormsApp.config.global.PasswordMaxLength;
-
-
         }
+        */
 
         private bool UploadingLogFiles ()
         {

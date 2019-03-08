@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 
+using System.Security.Cryptography.X509Certificates;
+
 namespace MTUComm
 {
     public class MtuSha256
@@ -257,6 +259,20 @@ namespace MTUComm
 
             // Import Public Key
             rsaProvider.ImportCspBlob(publicKeyInfo);
+            
+            // Encrypt using PKCS#1 v1.5 padding
+            return rsaProvider.Encrypt(bytesToEncrypt, false);
+        }
+        
+        public byte[] encryptBytes(byte[] bytesToEncrypt, X509Certificate2 cert )
+        {
+            // Create RSA Provider
+            RSACryptoServiceProvider rsaProvider = new RSACryptoServiceProvider();
+
+            // Import Public Key
+            //rsaProvider.ImportCspBlob(publicKeyInfo);
+            
+            rsaProvider = cert.GetRSAPublicKey () as RSACryptoServiceProvider;
             
             // Encrypt using PKCS#1 v1.5 padding
             return rsaProvider.Encrypt(bytesToEncrypt, false);

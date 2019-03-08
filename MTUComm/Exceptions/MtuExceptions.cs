@@ -145,4 +145,12 @@ namespace MTUComm.Exceptions
         public AttemptNotAchievedICException () { }
         public AttemptNotAchievedICException ( string message ) : base ( message ) { }
     }
+    
+    // Encryption [ 7xx ]
+    
+    public class ActionNotAchievedEncryptionException : OwnExceptionsBase
+    {
+        public ActionNotAchievedEncryptionException () { }
+        public ActionNotAchievedEncryptionException ( string message ) : base ( message ) { }
+    }
 }

@@ -142,7 +142,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
-    <MtouchArch>ARMv7, ARMv7s, ARM64</MtouchArch>
+    <MtouchArch>ARM64</MtouchArch>
     <BuildIpa>true</BuildIpa>
     <IpaIncludeArtwork>false</IpaIncludeArtwork>
     <CodesignProvision>External TestFlight</CodesignProvision>
@@ -151,7 +151,6 @@
     <DeviceSpecificBuild>true</DeviceSpecificBuild>
     <MtouchLink>SdkOnly</MtouchLink>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
-    <OptimizePNGs>false</OptimizePNGs>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
     <DebugType>none</DebugType>
@@ -180,6 +179,7 @@
     <Compile Include="BorderlessEntryRenderer.cs" />
     <Compile Include="BorderlessPickerRenderer.cs" />
     <Compile Include="ViewCellTransparent.cs" />
+    <Compile Include="Online.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
@@ -219,6 +219,10 @@
       <IsAppExtension>true</IsAppExtension>
       <Project>{884ACC36-012A-4AFC-AAAC-1A85B0D17616}</Project>
       <Name>AclaraMetersShareExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\MTUComm\MTUComm.csproj">
+      <Project>{20113951-5BD8-473F-BC70-7AF5F875C305}</Project>
+      <Name>MTUComm</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -356,6 +360,9 @@
     </PackageReference>
     <PackageReference Include="Xamarin.Forms">
       <Version>3.4.0.1029999</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Intune.MAM.Xamarin.iOS">
+      <Version>8.1.1.2</Version>
     </PackageReference>
   </ItemGroup>
   <Target Name="_CompileITunesMetadata" DependsOnTargets="_DetectSdkLocations;_DetectAppManifest;_GenerateBundleName;_CompileAppManifest">

@@ -29,10 +29,10 @@ namespace aclara_meters
     {
         #region Initial FTP - Default Config data
 
-        string host = "159.89.29.176";
-        string username = "aclara";
-        string password = "aclara1234";
-        string pathRemoteFile = "/home/aclara";
+        //string host = "159.89.29.176";
+        //string username = "aclara";
+        //string password = "aclara1234";
+        //string pathRemoteFile = "/home/aclara";
 
         #endregion
 
@@ -71,7 +71,6 @@ namespace aclara_meters
         public static IBlePeripheral peripheral;
 
         private IBluetoothLowEnergyAdapter adapter;
-        private List<string> listaDatos;
         private IUserDialogs dialogs;
         private string appVersion;
 
@@ -91,40 +90,39 @@ namespace aclara_meters
         public FormsApp ()
         {
             InitializeComponent ();
-
-           
         }
 
-        public FormsApp(IBluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
+        public FormsApp (
+            IBluetoothLowEnergyAdapter adapter,
+            IUserDialogs dialogs,
+            string appVersion )
         {
             InitializeComponent();
 
             this.adapter = adapter;
-            this.listaDatos = listaDatos;
             this.dialogs = dialogs;
             this.appVersion = appVersion;
 
             if (Device.RuntimePlatform == Device.Android)
             {
                 Task.Run(async () => { await PermisosLocationAsync(); });
-                CallToInitApp(adapter, listaDatos, dialogs, appVersion);
+                CallToInitApp ( adapter, dialogs, appVersion );
             }
             else
                 Task.Factory.StartNew(ThreadProcedure);
-
         }
-
- 
 
         #region iPad & iPhone devices have a different behaviour when initializating the app, this sems to fix it
 
-        private void ThreadProcedure()
+        private void ThreadProcedure ()
         {
-            CallToInitApp(adapter, listaDatos, dialogs, appVersion);
+            CallToInitApp ( adapter, dialogs, appVersion );
         }
 
-
-        private void CallToInitApp(IBluetoothLowEnergyAdapter adapter, List<string> listaDatos, IUserDialogs dialogs, string appVersion)
+        private void CallToInitApp (
+            IBluetoothLowEnergyAdapter adapter,
+            IUserDialogs dialogs,
+            string appVersion )
         {
             appVersion_str = appVersion;
 
@@ -136,44 +134,24 @@ namespace aclara_meters
             // Initializes Bluetooth
             ble_interface = new BleSerial(adapter);
 
-            string data = string.Empty;
-
-            if (listaDatos.Count != 0 ||
-                 listaDatos != null)
-                for (int i = 0; i < listaDatos.Count; i++)
-                    data = data + listaDatos[i] + "\r\n";
-
-            string base64CertificateString = "";
-
-            try
-            {
-                base64CertificateString = listaDatos[2].Replace("cert_file: ", "");
-                byte[] bytes = Convert.FromBase64String(base64CertificateString);
-                X509Certificate2 x509certificate = new X509Certificate2(bytes);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.StackTrace);
-            }
-
             AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
 
             // Force to not download server XML files
             if ( DEBUG_MODE_ON )
-                this.LoadXmlsAndCreateContainer ( dialogs, data );
+                this.LoadXmlsAndCreateContainer ( dialogs );
             else
             {
                 // Downloads, if necesary, and loads configuration from XML files
                 if ( this.HasDeviceAllXmls () )
-                     this.LoadXmlsAndCreateContainer ( dialogs, data );
-                else this.DownloadXmlsIfNecessary ( dialogs, data );
+                     this.LoadXmlsAndCreateContainer ( dialogs );
+                else this.DownloadXmlsIfNecessary ( dialogs );
             }
         }
 
         #endregion
 
-
         #endregion
+        
         private async Task PermisosLocationAsync()
         {
             try
@@ -221,10 +199,10 @@ namespace aclara_meters
                 foreach ( string filePath in filesLocal )
                 {
                     string compareStr = fileNeeded + XML_EXT;
-                    compareStr = compareStr.Replace ( path, "" ).Replace("/", "");
+                    compareStr = compareStr.Replace ( path, string.Empty ).Replace("/", string.Empty);
 
                     string fileStr = filePath.ToString ();
-                    fileStr = fileStr.Replace ( path, "" ).Replace("/","");
+                    fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty);
 
                     if ( fileStr.Equals ( compareStr ) )
                     {
@@ -264,8 +242,7 @@ namespace aclara_meters
         }
 
         private void DownloadXmlsIfNecessary (
-            IUserDialogs dialogs,
-            string data )
+            IUserDialogs dialogs )
         {
             // Checks network channels
             if (Mobile.IsNetAvailable())
@@ -273,7 +250,7 @@ namespace aclara_meters
                 // Donwloads all configuracion XML files
                 if (this.DownloadXmls())
                 {
-                    this.LoadXmlsAndCreateContainer(dialogs, data);
+                    this.LoadXmlsAndCreateContainer ( dialogs );
                 }
                 else
                 {
@@ -289,7 +266,6 @@ namespace aclara_meters
                 {
                     this.MainPage = new NavigationPage(new ErrorInitView());
                 });
-
             }
         }
 
@@ -297,54 +273,46 @@ namespace aclara_meters
         {
             try
             {
-                using (SftpClient sftp = new SftpClient(host, 22, username, password))
+                Mobile.ConfigData data = Mobile.configData;
+                using (SftpClient sftp = new SftpClient ( data.ftpHost, data.ftpPort, data.ftpUser, data.ftpPass ) )
                 {
                     try
                     {
+                        sftp.Connect ();
 
-                        sftp.Connect();
-
-
-                        /*--------------------------------------------------*/
                         // List all posible files in the documents directory 
                         // Check if file's lastwritetime is the lastest 
-                        /*--------------------------------------------------*/
                         List<SftpFile> ftp_array_files = new List<SftpFile>();
 
                         // Remote FTP File directory
-                        var ftp_files = sftp.ListDirectory(pathRemoteFile);
+                        var ftp_files = sftp.ListDirectory ( data.ftpPath );
                         foreach (var file in ftp_files)
-                        {
-
-                            if (file.Name.Contains(".xml"))
-                            {
-                                ftp_array_files.Add(file);
-                            }
-
-                        }
+                            if ( file.Name.Contains ( ".xml" ) )
+                                ftp_array_files.Add ( file );
 
                         string path = Mobile.GetPath ();
-
                         foreach ( var file in ftp_array_files )
                         {
                             string remoteFileName = file.Name;
 
-                            using (Stream file1 = File.OpenWrite(Path.Combine( path, remoteFileName)))
+                            using ( Stream file1 = File.OpenWrite ( Path.Combine ( path, remoteFileName ) ) )
                             {
-                                sftp.DownloadFile(Path.Combine(pathRemoteFile, remoteFileName), file1);
+                                sftp.DownloadFile(Path.Combine ( data.ftpPath, remoteFileName ), file1 );
                             }
                         }
 
                         sftp.Disconnect ();
-
-                        return true;
                     }
-                    catch (Exception e)
+                    catch ( Exception e )
                     {
                         Console.WriteLine("An exception has been caught " + e.ToString());
+                        
+                        return false;
                     }
-
-                    return false;
+                    
+                    Console.WriteLine ( "Configuration files correctly downloaded" );
+                    
+                    return true;
                 }
             }
             catch (Exception e)
@@ -355,7 +323,7 @@ namespace aclara_meters
             return false;
         }
 
-        private void LoadXmlsAndCreateContainer ( IUserDialogs dialogs, string data )
+        private void LoadXmlsAndCreateContainer ( IUserDialogs dialogs )
         {
             // Load configuration from XML files
             this.LoadXmls ();
@@ -397,7 +365,7 @@ namespace aclara_meters
                     if ( ! ScriptingMode )
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            MainPage = new NavigationPage(new AclaraViewLogin(dialogs, data));
+                            MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
                         });
             //    });
             //});
@@ -449,8 +417,6 @@ namespace aclara_meters
         }
 
         #endregion
-
-
 
         public void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
         {
@@ -522,8 +488,5 @@ namespace aclara_meters
         }
 
         #endregion
-
-
- 
     }
 }

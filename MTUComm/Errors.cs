@@ -85,6 +85,11 @@ namespace MTUComm
             { new AttemptNotAchievedICException (),             602 },
             // Installation Confirmation can't be performed after having tried it several times
             { new ActionNotAchievedICException (),              603 },
+
+            // Encryption [ 7xx ]
+            //-----------
+            // The MTU encryption process can't be performed after having tried it several times
+            { new ActionNotAchievedEncryptionException (),      700 },
         };
 
         #endregion
