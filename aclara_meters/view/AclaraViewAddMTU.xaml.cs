@@ -221,8 +221,12 @@ namespace aclara_meters.view
         // Miscelanea
         private List<BorderlessPicker> optionalPickers;
         private List<BorderlessEntry>  optionalEntries;
+        private List<BorderlessDatePicker> optionalDates;
+        private List<BorderlessTimePicker> optionalTimes;
         private List<Tuple<BorderlessPicker,Label>> optionalMandatoryPickers;
         private List<Tuple<BorderlessEntry,Label>> optionalMandatoryEntries;
+        private List<Tuple<BorderlessDatePicker, Label>> optionalMandatoryDates;
+        private List<Tuple<BorderlessTimePicker, Label>> optionalMandatoryTimes;
 
         // Snap Reads / Daily Reads
         private double snapReadsStep;
@@ -324,6 +328,22 @@ namespace aclara_meters.view
                 //Change username textview to Prefs. String
                 if (!string.IsNullOrEmpty(FormsApp.credentialsService.UserName))
                     userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
+
+                this.cancelReasonOtherInput.Focused += (s, e) =>
+                {
+                    if (Device.Idiom == TargetIdiom.Tablet)
+                        SetLayoutPosition(true, (int)-120);
+                    else
+                        SetLayoutPosition(true, (int)-20);
+                };
+
+                this.cancelReasonOtherInput.Unfocused += (s, e) =>
+                {
+                    if (Device.Idiom == TargetIdiom.Tablet)
+                        SetLayoutPosition(false, (int)-120);
+                    else
+                        SetLayoutPosition(false, (int)-20);
+                };
             });
 
             LoadSideMenuElements ();
@@ -336,6 +356,8 @@ namespace aclara_meters.view
 
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
+
+
 
             //listaMTUread.IsVisible = false;
 
@@ -815,7 +837,8 @@ namespace aclara_meters.view
 
             #region Misc
 
-            InitializeOptionalFields ();
+            if (this.config.global.Options.Count>0)
+                InitializeOptionalFields ();
 
             #endregion
 
@@ -1352,9 +1375,12 @@ namespace aclara_meters.view
         {
             optionalPickers = new List<BorderlessPicker>();
             optionalEntries = new List<BorderlessEntry>();
+            optionalDates = new List<BorderlessDatePicker>();
+            optionalTimes = new List<BorderlessTimePicker>();
             optionalMandatoryPickers = new List<Tuple<BorderlessPicker,Label>> ();
             optionalMandatoryEntries = new List<Tuple<BorderlessEntry,Label>> ();
-
+            optionalMandatoryDates = new List<Tuple<BorderlessDatePicker, Label>>();
+            optionalMandatoryTimes = new List<Tuple<BorderlessTimePicker, Label>>();
             foreach ( Option optionalField in this.config.global.Options )
             {
                 Frame optionalContainerB = new Frame()
@@ -1395,6 +1421,9 @@ namespace aclara_meters.view
 
                 BorderlessPicker optionalPicker = null;
                 BorderlessEntry  optionalEntry  = null;
+                BorderlessDatePicker optionalDate = null;
+                BorderlessTimePicker optionalTime = null;
+
                 bool isList = optionalField.Type.Equals("list");
                 if ( isList )
                 {
@@ -1414,6 +1443,87 @@ namespace aclara_meters.view
                     optionalPickers.Add(optionalPicker);
 
                     optionalContainerD.Children.Add(optionalPicker);
+                    optionalContainerC.Content = optionalContainerD;
+                    optionalContainerB.Content = optionalContainerC;
+                    optionalContainerA.Children.Add(optionalLabel);
+                    optionalContainerA.Children.Add(optionalContainerB);
+
+                    this.optionalFields.Children.Add(optionalContainerA);
+                }
+                else if(optionalField.Format=="date")
+                {
+                    bool required = optionalField.Required;
+                    optionalDate = new BorderlessDatePicker()
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                       // HeightRequest = 70,
+                        FontSize = 17
+                    };
+                    optionalDate.Name = optionalField.Name.Replace(" ", "_");
+                    optionalDate.Display = optionalField.Display;
+
+                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
+                    //behavior.MaxLength = optionalField.Len;
+
+                    //optionalEntry.Behaviors.Add(behavior);
+
+                    optionalDates.Add(optionalDate);
+
+                    optionalContainerD.Children.Add(optionalDate);
+                    optionalContainerC.Content = optionalContainerD;
+                    optionalContainerB.Content = optionalContainerC;
+                    optionalContainerA.Children.Add(optionalLabel);
+                    optionalContainerA.Children.Add(optionalContainerB);
+
+                    this.optionalFields.Children.Add(optionalContainerA);
+                }
+                else if (optionalField.Format == "time")
+                {
+                    bool required = optionalField.Required;
+                    optionalTime = new BorderlessTimePicker()
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        // HeightRequest = 70,
+                        FontSize = 17
+                    };
+                    optionalTime.Name = optionalField.Name.Replace(" ", "_");
+                    optionalTime.Display = optionalField.Display;
+
+                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
+                    //behavior.MaxLength = optionalField.Len;
+
+                    //optionalEntry.Behaviors.Add(behavior);
+
+                    optionalTimes.Add(optionalTime);
+
+                    optionalContainerD.Children.Add(optionalTime);
+                    optionalContainerC.Content = optionalContainerD;
+                    optionalContainerB.Content = optionalContainerC;
+                    optionalContainerA.Children.Add(optionalLabel);
+                    optionalContainerA.Children.Add(optionalContainerB);
+
+                    this.optionalFields.Children.Add(optionalContainerA);
+                }
+                else if (optionalField.Format == "time")
+                {
+                    bool required = optionalField.Required;
+                    optionalDate = new BorderlessDatePicker()
+                    {
+                        HorizontalOptions = LayoutOptions.FillAndExpand,
+                        // HeightRequest = 70,
+                        FontSize = 17
+                    };
+                    optionalDate.Name = optionalField.Name.Replace(" ", "_");
+                    optionalDate.Display = optionalField.Display;
+
+                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
+                    //behavior.MaxLength = optionalField.Len;
+
+                    //optionalEntry.Behaviors.Add(behavior);
+
+                    optionalDates.Add(optionalDate);
+
+                    optionalContainerD.Children.Add(optionalDate);
                     optionalContainerC.Content = optionalContainerD;
                     optionalContainerB.Content = optionalContainerC;
                     optionalContainerA.Children.Add(optionalLabel);
@@ -1465,6 +1575,10 @@ namespace aclara_meters.view
                 {
                     if ( isList )
                          this.optionalMandatoryPickers.Add ( new Tuple<BorderlessPicker,Label> ( optionalPicker, optionalLabel ) );
+                    else if (optionalField.Format=="date")
+                        this.optionalMandatoryDates.Add(new Tuple<BorderlessDatePicker, Label>(optionalDate, optionalLabel));
+                    else if (optionalField.Format == "time")
+                        this.optionalMandatoryTimes.Add(new Tuple<BorderlessTimePicker, Label>(optionalTime, optionalLabel));
                     else this.optionalMandatoryEntries.Add ( new Tuple<BorderlessEntry,Label>  ( optionalEntry,  optionalLabel ) );
                     
                     if ( global.ColorEntry )
@@ -1678,6 +1792,10 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
+            this.cancelReasonOtherInput.Text = String.Empty;
+            this.cancelReasonPicker.SelectedIndex = 0;
+            this.cancelReasonOtherInput.BackgroundColor = Color.White;
+            this.cancelReasonOtherInputContainer.BackgroundColor = Color.White;
             //Navigation.PopToRootAsync(false);
         }
 
@@ -1700,10 +1818,13 @@ namespace aclara_meters.view
             Device.BeginInvokeOnMainThread(() =>
             {
                 //REASON
-                isLogout = true;
-                dialog_open_bg.IsVisible = true;
-                Popup_start.IsVisible = true;
-                Popup_start.IsEnabled = true;
+                if (!isCancellable)
+                {
+                    isLogout = true;
+                    dialog_open_bg.IsVisible = true;
+                    Popup_start.IsVisible = true;
+                    Popup_start.IsEnabled = true;
+                }
             });
            
         }
@@ -1713,7 +1834,7 @@ namespace aclara_meters.view
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            Navigation.PopToRootAsync(false);
+            //Navigation.PopToRootAsync(false);
         }
 
 
@@ -2305,6 +2426,8 @@ namespace aclara_meters.view
                 {
                     cancelReasonOtherInput.IsEnabled = false;
                     cancelReasonOtherInputContainer.Opacity = OPACITY_DISABLE;
+                    cancelReasonOtherInput.BackgroundColor = Color.White;
+                    cancelReasonOtherInput.BackgroundColor = Color.White;
                 }
             }
         }
@@ -3802,11 +3925,21 @@ namespace aclara_meters.view
         private void submit_send(object sender, EventArgs e3)
         {
             int selectedCancelReasonIndex = cancelReasonPicker.SelectedIndex;
-            string selectedCancelReason = "Other";
+            string selectedCancelReason = String.Empty;
 
             if ( selectedCancelReasonIndex > -1 )
                 selectedCancelReason = cancelReasonPicker.Items[cancelReasonPicker.SelectedIndex];
-
+            if (selectedCancelReason == "Other")
+            {
+                if (String.IsNullOrEmpty(cancelReasonOtherInput.Text))
+                {
+                    this.cancelReasonOtherInput.BackgroundColor = Color.Gray;
+                    this.cancelReasonOtherInputContainer.BackgroundColor = Color.Gray;
+                    return;
+                }
+                else
+                    selectedCancelReason = cancelReasonOtherInput.Text;
+            }
             this.add_mtu.Cancel ( selectedCancelReason );
 
             dialog_open_bg.IsVisible = false;
@@ -3861,7 +3994,7 @@ namespace aclara_meters.view
                             {
                                 Navigation.PopToRootAsync(false);
                                 isReturn = false;
-                                isSettings =false;
+                                isSettings = false;
 
                                 //Navigation.PopAsync();
                             }
@@ -4293,6 +4426,12 @@ namespace aclara_meters.view
                     return false;
                 }
 
+            foreach (Tuple<BorderlessDatePicker, Label> tuple in optionalMandatoryDates)
+                if (string.IsNullOrEmpty(tuple.Item1.Date.ToShortDateString()))
+                {
+                    msgError = FILL_ERROR.Replace("_", tuple.Item2.Text);
+                    return false;
+                }
             #endregion
 
             return true;
@@ -4900,6 +5039,14 @@ namespace aclara_meters.view
                 if ( ! string.IsNullOrEmpty ( e.Text ) )
                     optionalParams.Add ( new Parameter ( e.Name, e.Display, e.Text, true ) );
 
+            foreach (BorderlessDatePicker d in optionalDates)
+                if (!string.IsNullOrEmpty(d.Date.ToShortDateString()))
+                    optionalParams.Add(new Parameter(d.Name, d.Display,$"{d.Date.ToShortDateString()} 12:00:00", true));
+
+            foreach (BorderlessTimePicker t in optionalTimes)
+                if (!string.IsNullOrEmpty(t.Time.ToString()))
+                    optionalParams.Add(new Parameter(t.Name, t.Display,$"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}", true));
+
             if ( optionalParams.Count > 0 )
                 this.addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );
 
@@ -5184,6 +5331,32 @@ namespace aclara_meters.view
         #endregion
 
         #region Other methods
+
+        void SetLayoutPosition(bool onFocus, int value)
+        {
+            if (onFocus)
+            {
+                if (Device.RuntimePlatform == Device.iOS)
+                {
+                    this.Popup_start.TranslateTo(0, value, 50);
+                }
+                else if (Device.RuntimePlatform == Device.Android)
+                {
+                    this.Popup_start.TranslateTo(0, value, 50);
+                }
+            }
+            else
+            {
+                if (Device.RuntimePlatform == Device.iOS)
+                {
+                    this.Popup_start.TranslateTo(0, 0, 50);
+                }
+                else if (Device.RuntimePlatform == Device.Android)
+                {
+                    this.Popup_start.TranslateTo(0, 0, 50);
+                }
+            }
+        }
 
         private void ChangeLowerButtonImage(bool v)
         {

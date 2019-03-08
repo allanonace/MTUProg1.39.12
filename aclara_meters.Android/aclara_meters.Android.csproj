@@ -112,6 +112,8 @@
     <Compile Include="BorderlessEntryRenderer.cs" />
     <Compile Include="BorderlessPickerRenderer.cs" />
     <Compile Include="ViewCellTransparent.cs" />
+    <Compile Include="BorderlessDatePickerRenderer.cs" />
+    <Compile Include="BorderlessTimePickerRenderer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />

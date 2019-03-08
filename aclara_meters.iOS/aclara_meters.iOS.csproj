@@ -179,7 +179,12 @@
     <Compile Include="BorderlessEntryRenderer.cs" />
     <Compile Include="BorderlessPickerRenderer.cs" />
     <Compile Include="ViewCellTransparent.cs" />
+<<<<<<< HEAD
     <Compile Include="Online.cs" />
+=======
+    <Compile Include="BorderlessDatePickerRenderer.cs" />
+    <Compile Include="BorderlessTimePickerRenderer.cs" />
+>>>>>>> feature/version_36_ui
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
