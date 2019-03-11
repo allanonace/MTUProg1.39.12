@@ -34,6 +34,12 @@ namespace MTUComm
             {
                 this.lastRandomKey    = new byte[ 0 ];
                 this.lastRandomKeySha = new byte[ 0 ];
+                
+                this.ftpUser = "aclara";
+                this.ftpPass = "aclara1234";
+                this.ftpHost = "159.89.29.176";
+                this.ftpPort = 22;
+                this.ftpPath = "/home/aclara";
             }
 
             private string GetRandomKeyAndShaConverted (

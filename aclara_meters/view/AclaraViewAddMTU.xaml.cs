@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using aclara_meters.Behaviors;
 using aclara_meters.Helpers;
@@ -15,7 +14,7 @@ using Xamarin.Forms;
 using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
-using FIELD      = MTUComm.actions.AddMtuForm.FIELD;
+using FIELD = MTUComm.actions.AddMtuForm.FIELD;
 
 namespace aclara_meters.view
 {
@@ -59,9 +58,9 @@ namespace aclara_meters.view
         public const bool MANDATORY_WORKORDER       = true;
         public const bool MANDATORY_OLDMTUID        = true;
         public const bool MANDATORY_OLDMETERSERIAL  = true;
-        public const bool MANDATORY_OLDMETERWORKING = true;
+        //public const bool MANDATORY_OLDMETERWORKING >> global.MeterWorkRecording
         public const bool MANDATORY_OLDMETERREADING = true;
-        public const bool MANDATORY_REPLACEMETER    = true; // Init with select value
+        //public const bool MANDATORY_REPLACEMETER >> global.RegisterRecordingReq
         public const bool MANDATORY_METERSERIAL     = true;
         public const bool MANDATORY_METERTYPE       = true;
         public const bool MANDATORY_METERREADING    = true;
@@ -71,8 +70,6 @@ namespace aclara_meters.view
         public const bool MANDATORY_ALARMS          = true;
         public const bool MANDATORY_DEMANDS         = true;
         public const bool MANDATORY_GPS             = false;
-        public const bool MANDATORY_MTULOCATION     = false;
-        public const bool MANDATORY_CONTRUCTIONTYPE = false;
 
         #endregion
 
@@ -681,44 +678,42 @@ namespace aclara_meters.view
             this.div_ReplaceMeterRegister_2.IsVisible = hasTwoPorts && useReplaceMeterRegister;
             this.div_ReplaceMeterRegister_2.IsEnabled = hasTwoPorts && useReplaceMeterRegister;
 
-            // All readings will be disabled before meter type was selected
+            
             Device.BeginInvokeOnMainThread(() =>
             {
-                this.tbx_MeterReading          .IsEnabled = false;
-                this.tbx_MeterReading_2        .IsEnabled = false;
-                this.tbx_MeterReading_Dual     .IsEnabled = false;
-                this.tbx_MeterReading_Dual_2   .IsEnabled = false;
-                //this.tbx_OldMeterReading       .IsEnabled = false;
-                //this.tbx_OldMeterReading_2     .IsEnabled = false;
-                //this.tbx_OldMeterReading_Dual  .IsEnabled = false;
-                //this.tbx_OldMeterReading_Dual_2.IsEnabled = false;
+                // Introduce values from right to left, but finish with the same number
+                // e.g. 1 _ _ -> 1 2 _ -> 1 2 3
+                //      _ _ 3 -> _ 2 3 -> 1 2 3
+                FlowDirection flow = ( global.ReverseReading ) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
+                this.tbx_MeterReading          .FlowDirection = flow;
+                this.tbx_MeterReading_2        .FlowDirection = flow;
+                this.tbx_MeterReading_Dual     .FlowDirection = flow;
+                this.tbx_MeterReading_Dual_2   .FlowDirection = flow;
+                this.tbx_OldMeterReading       .FlowDirection = flow;
+                this.tbx_OldMeterReading_2     .FlowDirection = flow;
+                this.tbx_OldMeterReading_Dual  .FlowDirection = flow;
+                this.tbx_OldMeterReading_Dual_2.FlowDirection = flow;
                 
-                this.div_MeterReading             .Opacity = OPACITY_DISABLE;
-                this.divSub_MeterReading_Dual     .Opacity = OPACITY_DISABLE;
-                this.divSub_MeterReading_2        .Opacity = OPACITY_DISABLE;
-                this.divSub_MeterReading_Dual_2   .Opacity = OPACITY_DISABLE;
-                //this.divSub_OldMeterReading       .Opacity = OPACITY_DISABLE;
-                //this.divSub_OldMeterReading_Dual  .Opacity = OPACITY_DISABLE;
-                //this.divSub_OldMeterReading_2     .Opacity = OPACITY_DISABLE;
-                //this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_DISABLE;
+                // New Meter readings will be disabled before meter type was selected
+                this.tbx_MeterReading       .IsEnabled = false;
+                this.tbx_MeterReading_2     .IsEnabled = false;
+                this.tbx_MeterReading_Dual  .IsEnabled = false;
+                this.tbx_MeterReading_Dual_2.IsEnabled = false;
                 
-                this.lb_MeterReading_MeterType         .Text = FIRST_METERTYPE;
-                this.lb_MeterReading_DualMeterType     .Text = FIRST_METERTYPE;
-                this.lb_MeterReading_MeterType_2       .Text = FIRST_METERTYPE;
-                this.lb_MeterReading_DualMeterType_2   .Text = FIRST_METERTYPE;
-                //this.lb_OldMeterReading_MeterType      .Text = FIRST_METERTYPE;
-                //this.lb_OldMeterReading_DualMeterType  .Text = FIRST_METERTYPE;
-                //this.lb_OldMeterReading_MeterType_2    .Text = FIRST_METERTYPE;
-                //this.lb_OldMeterReading_DualMeterType_2.Text = FIRST_METERTYPE;
+                this.div_MeterReading          .Opacity = OPACITY_DISABLE;
+                this.divSub_MeterReading_Dual  .Opacity = OPACITY_DISABLE;
+                this.divSub_MeterReading_2     .Opacity = OPACITY_DISABLE;
+                this.divSub_MeterReading_Dual_2.Opacity = OPACITY_DISABLE;
                 
-                this.lb_MeterReading_MeterType         .IsVisible = true;
-                this.lb_MeterReading_DualMeterType     .IsVisible = true;
-                this.lb_MeterReading_MeterType_2       .IsVisible = true;
-                this.lb_MeterReading_DualMeterType_2   .IsVisible = true;
-                //this.lb_OldMeterReading_MeterType      .IsVisible = true;
-                //this.lb_OldMeterReading_DualMeterType  .IsVisible = true;
-                //this.lb_OldMeterReading_MeterType_2    .IsVisible = true;
-                //this.lb_OldMeterReading_DualMeterType_2.IsVisible = true;
+                this.lb_MeterReading_MeterType      .Text = FIRST_METERTYPE;
+                this.lb_MeterReading_DualMeterType  .Text = FIRST_METERTYPE;
+                this.lb_MeterReading_MeterType_2    .Text = FIRST_METERTYPE;
+                this.lb_MeterReading_DualMeterType_2.Text = FIRST_METERTYPE;
+                
+                this.lb_MeterReading_MeterType      .IsVisible = true;
+                this.lb_MeterReading_DualMeterType  .IsVisible = true;
+                this.lb_MeterReading_MeterType_2    .IsVisible = true;
+                this.lb_MeterReading_DualMeterType_2.IsVisible = true;
             });
 
             #endregion
@@ -1016,7 +1011,7 @@ namespace aclara_meters.view
                     }
                     
                     // Old Meter Working
-                    if ( MANDATORY_OLDMETERWORKING )
+                    if ( global.MeterWorkRecording )
                     {
                         // Port 1
                         this.lb_OldMeterWorking.TextColor = COL_MANDATORY;
@@ -1038,7 +1033,7 @@ namespace aclara_meters.view
                     }
                     
                     // Replace Meter|Register
-                    if ( MANDATORY_REPLACEMETER )
+                    if ( global.RegisterRecordingReq )
                     {
                         // Port 1
                         this.lb_ReplaceMeterRegister.TextColor = COL_MANDATORY;
@@ -2341,12 +2336,21 @@ namespace aclara_meters.view
             pck_OldMeterWorking.ItemsSource   = list;
             pck_OldMeterWorking_2.ItemsSource = list;
 
-            list = new List<string> ()
+            list = new List<string> ();
+            string regRecordingItems = global.RegisterRecordingItems;
+            string[] values = new string[] { "Meter", "Register", "Both" };
+            
+            if ( ! string.IsNullOrEmpty ( regRecordingItems ) &&
+                 regRecordingItems.Contains ( "1" ) )
             {
-                "Meter",
-                "Register",
-                "Both"
-            };
+                char[] chars = regRecordingItems.ToCharArray ();
+                
+                int i = 0;
+                foreach ( char c in chars )
+                    if ( c.Equals ( '1' ) )
+                        list.Add ( values[ i++ ] );
+            }
+            else list.AddRange ( values );
 
             //Now I am given ItemsSorce to the Pickers
             pck_ReplaceMeterRegister.ItemsSource   = list;
@@ -4140,8 +4144,8 @@ namespace aclara_meters.view
             bool noOMr = EmptyNoReq ( this.tbx_OldMeterReading     .Text, MANDATORY_OLDMETERREADING );
             bool noMre = EmptyNoReq ( this.tbx_MeterReading        .Text, MANDATORY_METERREADING    );
             
-            bool noOMw = NoSelNoReq ( this.pck_OldMeterWorking     .SelectedIndex, MANDATORY_OLDMETERWORKING );
-            bool noRpc = NoSelNoReq ( this.pck_ReplaceMeterRegister.SelectedIndex, MANDATORY_REPLACEMETER    );
+            bool noOMw = NoSelNoReq ( this.pck_OldMeterWorking     .SelectedIndex, global.MeterWorkRecording   );
+            bool noRpc = NoSelNoReq ( this.pck_ReplaceMeterRegister.SelectedIndex, global.RegisterRecordingReq );
             bool noMty = NoSelNoReq ( this.pck_MeterType_Names     .SelectedIndex, MANDATORY_METERTYPE       );
             bool noRin = NoSelNoReq ( this.pck_ReadInterval        .SelectedIndex, MANDATORY_READINTERVAL    );
             bool noTwo = NoSelNoReq ( this.pck_TwoWay              .SelectedIndex, MANDATORY_TWOWAY          );
@@ -4287,8 +4291,8 @@ namespace aclara_meters.view
                 noOMr = EmptyNoReq ( this.tbx_OldMeterReading_2     .Text, MANDATORY_OLDMETERREADING );
                 noMre = EmptyNoReq ( this.tbx_MeterReading_2        .Text, MANDATORY_METERREADING    );
                 
-                noOMw = NoSelNoReq ( this.pck_OldMeterWorking_2     .SelectedIndex, MANDATORY_OLDMETERWORKING );
-                noRpc = NoSelNoReq ( this.pck_ReplaceMeterRegister_2.SelectedIndex, MANDATORY_REPLACEMETER    );
+                noOMw = NoSelNoReq ( this.pck_OldMeterWorking_2     .SelectedIndex, global.MeterWorkRecording   );
+                noRpc = NoSelNoReq ( this.pck_ReplaceMeterRegister_2.SelectedIndex, global.RegisterRecordingReq );
                 noMty = NoSelNoReq ( this.pck_MeterType_Names_2     .SelectedIndex, MANDATORY_METERTYPE       );
     
                 noDAc = EmptyNoReq ( this.tbx_AccountNumber_Dual_2       .Text, MANDATORY_ACCOUNTNUMBER   );

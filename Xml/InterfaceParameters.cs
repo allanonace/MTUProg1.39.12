@@ -21,9 +21,6 @@ namespace Xml
         [XmlAttribute("index")]
         public int Index{ get; set; }
         
-        [XmlAttribute("global")]
-        public string Global { get; set; }
-
         [XmlAttribute("conditional")]
         public string Conditional { get; set; }
 

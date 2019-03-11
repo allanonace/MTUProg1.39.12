@@ -576,15 +576,13 @@ namespace MTUComm
             ActionType actionType = ActionType.ReadMtu )
         {
             Parameter paramToAdd;
+            Global       global = Configuration.GetInstance ().GetGlobal ();
+            Type         gType  = global.GetType ();
             ActionResult result = new ActionResult ();
             InterfaceParameters[] parameters = configuration.getAllInterfaceFields ( mtu.Id, actionType );
+            
             foreach ( InterfaceParameters parameter in parameters )
             {
-                if ( parameter.Name.Equals ( "Frequency" ) )
-                {
-
-                }
-
                 if ( parameter.Name.Equals ( IFACE_PORT ) )
                     for ( int i = 0; i < mtu.Ports.Count; i++ )
                         result.addPort ( ReadPort ( i + 1, parameter.Parameters.ToArray (), map, mtu ) );
@@ -610,15 +608,21 @@ namespace MTUComm
                             switch ( sourceWhere )
                             {
                                 case IFACE_ACTION   : value      = this.GetProperty  ( sourceProperty ); break;
-                                case IFACE_MTU      : value      = this.GetProperty  ( sourceProperty ); break;
+                                case IFACE_MTU      : value      = mtu .GetProperty  ( sourceProperty ); break;
                                 case IFACE_FORM     : paramToAdd = form.GetParameter ( sourceProperty ); break;
                                 //case IFACE_MEMORYMAP: value      = map .GetProperty  ( sourceProperty ).Value.ToString (); break; // MemoryMap.SourceProperty
                                 default             : value      = map .GetProperty  ( sourceProperty ).Value.ToString (); break; // MemoryMap.ParameterName
                             }
                             
-                            if ( sourceWhere != IFACE_FORM &&
+                            if ( ! sourceWhere.Equals ( IFACE_FORM ) &&
                                  ! string.IsNullOrEmpty ( value ) )
-                                paramToAdd = new Parameter ( sourceProperty, parameter.Display, value );
+                            {
+                                string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
+                                                   gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
+                                                   parameter.Display;
+                                
+                                paramToAdd = new Parameter ( sourceProperty, display, value );
+                            }
                             
                             if ( paramToAdd != null )
                                 result.AddParameter ( paramToAdd );
@@ -641,6 +645,8 @@ namespace MTUComm
         {
             ActionResult result   = new ActionResult ();
             Port         portType = mtu.Ports[ indexPort - 1 ];
+            Global       global   = Configuration.GetInstance ().GetGlobal ();
+            Type         gType    = global.GetType ();
 
             // Meter Serial Number
             int meterId = map.GetProperty ( PORT_PREFIX + indexPort + "MeterType" ).Value;
@@ -740,7 +746,12 @@ namespace MTUComm
                                 }
                                 
                                 if ( ! string.IsNullOrEmpty ( value ) )
-                                    result.AddParameter ( new Parameter ( sourceProperty, parameter.Display, value ) );
+                                {
+                                    string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
+                                                       gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
+                                                       parameter.Display;
+                                    result.AddParameter ( new Parameter ( sourceProperty, display, value ) );
+                                }
                             }
                         }
                         catch ( Exception e )

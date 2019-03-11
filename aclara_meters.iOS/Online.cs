@@ -22,7 +22,7 @@ namespace aclara_meters.iOS
                 NSDictionary paramsGroups    = dictionary.GetDictionaryOfValuesFromKeys ( keys );
                 NSObject     paramsGroup     = paramsGroups.ElementAt ( 0 ).Value;
 
-                var data = new Mobile.ConfigData ();
+                var data = Mobile.configData = new Mobile.ConfigData ();
 
                 // Convert parameters to string and regenerate the certificate
                 data.ftpUser =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_USER    ) ).ToString ();
@@ -34,8 +34,6 @@ namespace aclara_meters.iOS
                 
                 Console.WriteLine ( "FTP: " + data.ftpHost + ":" + data.ftpPort + " - " + data.ftpUser + " [ " + data.ftpPass + " ]" );
                 Console.WriteLine ( "Certificate: " + data.certificate.FriendlyName + " [ " + data.certificate.NotAfter + " ]" );
-                
-                Mobile.configData = data;
                 
                 // Free memory
                 paramsGroup .Dispose ();
