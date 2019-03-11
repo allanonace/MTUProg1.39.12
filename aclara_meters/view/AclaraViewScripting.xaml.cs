@@ -1053,6 +1053,10 @@ namespace aclara_meters.view
                     if (bScriptOnly)
                     {
                         Console.Write($"-------------------------------------    ScriptOnly: {bScriptOnly.ToString()}");
+                        Logger logActivity = new Logger(Configuration.GetInstance());
+                        string Uri=logActivity.CreateFileIfNotExist(true);
+
+
                     }
 
                     Device.BeginInvokeOnMainThread(() =>

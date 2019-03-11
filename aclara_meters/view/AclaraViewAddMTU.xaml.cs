@@ -1794,8 +1794,6 @@ namespace aclara_meters.view
             Popup_start.IsEnabled = false;
             this.cancelReasonOtherInput.Text = String.Empty;
             this.cancelReasonPicker.SelectedIndex = 0;
-            this.cancelReasonOtherInput.BackgroundColor = Color.White;
-            this.cancelReasonOtherInputContainer.BackgroundColor = Color.White;
             //Navigation.PopToRootAsync(false);
         }
 
@@ -2426,8 +2424,7 @@ namespace aclara_meters.view
                 {
                     cancelReasonOtherInput.IsEnabled = false;
                     cancelReasonOtherInputContainer.Opacity = OPACITY_DISABLE;
-                    cancelReasonOtherInput.BackgroundColor = Color.White;
-                    cancelReasonOtherInput.BackgroundColor = Color.White;
+
                 }
             }
         }
@@ -3933,8 +3930,7 @@ namespace aclara_meters.view
             {
                 if (String.IsNullOrEmpty(cancelReasonOtherInput.Text))
                 {
-                    this.cancelReasonOtherInput.BackgroundColor = Color.Gray;
-                    this.cancelReasonOtherInputContainer.BackgroundColor = Color.Gray;
+                    this.cancelReasonOtherInput.Placeholder = "Please, enter the reason for the cancellation";
                     return;
                 }
                 else

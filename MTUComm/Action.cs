@@ -453,7 +453,7 @@ namespace MTUComm
         private void Comm_OnTurnOffMtu ( object sender, MTUComm.TurnOffMtuArgs e )
         {
             ActionResult result = getBasciInfoResult();
-            logger.logTurnOffResult ( this, e.Mtu );
+            logger.logTurnOffResult(this, result.getParameters()[2].Value);//logger.logTurnOffResult ( this, e.Mtu );
             ActionFinishArgs args = new ActionFinishArgs ( result );
 
             OnFinish ( this, args );
@@ -462,7 +462,7 @@ namespace MTUComm
         private void Comm_OnTurnOnMtu(object sender, MTUComm.TurnOnMtuArgs e)
         {
             ActionResult result = getBasciInfoResult();
-            logger.logTurnOffResult ( this, e.Mtu );
+            logger.logTurnOffResult(this, result.getParameters()[2].Value);//logger.logTurnOffResult ( this, e.Mtu );
             ActionFinishArgs args = new ActionFinishArgs ( result );
 
             OnFinish ( this, args );

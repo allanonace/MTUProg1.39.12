@@ -353,12 +353,12 @@ namespace MTUComm
             parent.Add(port);
         }
 
-        public void logTurnOffResult(Action ref_action, Mtu Mtu )
+        public void logTurnOffResult(Action ref_action, uint MtuId )
         {
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
 
-            logTurnOffResult(doc.Root.Element("Mtus"), ref_action.DisplayText, ref_action.LogText, ref_action.user, ( uint )Mtu.Id );
+            logTurnOffResult(doc.Root.Element("Mtus"), ref_action.DisplayText, ref_action.LogText, ref_action.user, MtuId );
             doc.Save(uri);
         }
 
