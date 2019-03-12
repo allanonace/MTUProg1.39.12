@@ -138,8 +138,10 @@ namespace MTUComm
             if ( data.isMtuEncrypted )
             {
                 // Using certificate with public key
-                if ( data.certificate != null )
+                if ( data.IsCertLoaded )
                 {
+                    Console.WriteLine ( "Using certificate creating activity log" );
+                
                     logger.logParameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaEncryptedInBase64 ) );
                     logger.logParameter ( this.addMtuAction, new Parameter ( "HeadendCertThumb",     "HeadendCertThumb",      data.certificate.Thumbprint ) );
                     logger.logParameter ( this.addMtuAction, new Parameter ( "HeadendCertValidTill", "HeadendCertExpiration", data.certificate.NotAfter.ToString ( "mm/dd/yy hh:mm:ss tt" ) ) );
@@ -148,6 +150,8 @@ namespace MTUComm
                 // No certificate present
                 else
                 {
+                    Console.WriteLine ( "Not using certificate creating activity log" );
+                
                     logger.logParameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaInBase64 ) );
                 }
             }

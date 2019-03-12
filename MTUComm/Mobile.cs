@@ -3,6 +3,7 @@ using System.IO;
 using Xamarin.Essentials;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace MTUComm
 {
@@ -10,6 +11,9 @@ namespace MTUComm
     {
         public sealed class ConfigData
         {
+            private const string CER_HEADER = "-----BEGIN CERTIFICATE-----\n";
+            private const string CER_FOOTER = "\n-----END CERTIFICATE-----";
+        
             public string ftpUser;
             public string ftpPass;
             public string ftpHost;
@@ -19,7 +23,7 @@ namespace MTUComm
             public byte[] lastRandomKey;
             public byte[] lastRandomKeySha;
             public bool   isMtuEncrypted;
-            
+
             public string RandomKeyAndShaEncryptedInBase64
             {
                 get { return this.GetRandomKeyAndShaConverted (); }
@@ -30,6 +34,11 @@ namespace MTUComm
                 get { return this.GetRandomKeyAndShaConverted ( false ); }
             }
             
+            public bool IsCertLoaded
+            {
+                get { return this.certificate != null; }
+            }
+
             public ConfigData ()
             {
                 this.lastRandomKey    = new byte[ 0 ];
@@ -40,6 +49,38 @@ namespace MTUComm
                 this.ftpHost = "159.89.29.176";
                 this.ftpPort = 22;
                 this.ftpPath = "/home/aclara";
+            }
+
+            private string Base64Encode(string plainText)
+            {
+                var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
+                return System.Convert.ToBase64String(plainTextBytes);
+            }
+
+            public void GenerateCert (
+                string base64cert )
+            {
+                // NOTE: Full certificate file should be converted to base64 and not only the data that appear when
+                // open the file with some text editor. The resulting string will be without header and footer strings
+                // and seems that always starting with "MII..."
+                // e.g. Aclara certificate in base64
+                // base64cert = "MIICxDCCAaygAwIBAgIQV5fB/SvFm4VDwxNIjmx3LzANBgkqhkiG9w0BAQUFADAeMRwwGgYDVQQDExNOZXctVGVzdC1EZXYtQWNsYXJhMB4XDTE1MDQxNTA0MDAwMFoXDTI1MDQyMjA0MDAwMFowHjEcMBoGA1UEAxMTTmV3LVRlc3QtRGV2LUFjbGFyYTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANOISmTy1kRTeOPqajIm+y27q676LFKodBpgrm0M3imYpwnVd+aTnVdk7+NT5vSA1c9dB5PSojh/UfGg2kWDe5gNj2ZA+KaemXFqvl8YI/D6XjoNz3JqoqocjF4/hJnrUdwqOoUL6WPtbWEhCnzin/cVkKx5qxMrOh9qAzp+qYAqyJ26Aocr+nlM7oHRtBUmYRKZbpkNAnpiIV/Q6quSR5Qzsf4XrhvkPDkf2ZX8DvcJmAbXEAaBVa2ORsY9qA86jIphui5kwI9JPcw9hTZy1QxvNcZAijtPyC6AKDuRyEv0Awa1gcSBBRsf0HbeCSD91U/O51+alP3hLhA9tcxddx0CAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAGuTqwTvEgaTl/E2jdG9RUD3zN9MhRCijJIpjv9NdkkH13LK5Sn9up1+DraaccA5h2El9kiXDHYWPA/qRMq1auhNcmTFVYjeQSNW0tyuTqbQiG/8fwZiAZrGn6UmOU/vzzhkyv05x5KzVAEwp94fU/J+kOIJVH0ff5jnMeYHARc1sY6JgXgJKoJbdS4Q4wG2RHj5yFAixv/zwS1XBy2GWtsz03aucNQzBIbk1uTIv2eyYqFMhSGT36vkfJFidRcR3H4FWnvInWoWmxlGcs0MS3bNOAv5ij55h0rREGJ9WdJmI/gw84aA4itFwwUuG6kKdF9AF/rljtVCFVH6T9PFI2Q==";
+
+                // /Library/Frameworks/Xamarin.iOS.framework/Versions/12.2.1.13/src/Xamarin.iOS/mcs/class/Mono.Security/Mono.Security.X509/X509Certificate.cs
+                // NOTE: Method PEM needs to find the header and footer strings previous to start with certificate
+                // parsing/generation, and these both const should be concatenated with the cert in base64
+                // e.g. -----BEGIN CERTIFICATE----- + base64cert + -----END CERTIFICATE----- // Each part converted to byte array
+
+                byte[] bytes       = Encoding.ASCII.GetBytes ( base64cert );
+                byte[] bytesHeader = Encoding.ASCII.GetBytes ( CER_HEADER );
+                byte[] bytesFooter = Encoding.ASCII.GetBytes ( CER_FOOTER );
+                
+                byte[] all = new byte[ bytes.Length + bytesHeader.Length + bytesFooter.Length ];
+                Array.Copy( bytesHeader, 0, all, 0,                                 bytesHeader.Length );
+                Array.Copy( bytes,       0, all, bytesHeader.Length,                bytes.Length       );
+                Array.Copy( bytesFooter, 0, all, bytesHeader.Length + bytes.Length, bytesFooter.Length );
+                
+                this.certificate = new X509Certificate2 ( all );
             }
 
             private string GetRandomKeyAndShaConverted (
@@ -67,14 +108,6 @@ namespace MTUComm
                 this.isMtuEncrypted = false;
                 
                 return Convert.ToBase64String ( keyAndSha );
-            }
-
-            public void GenerateCert (
-                string base64cert )
-            {
-                base64cert   = base64cert.Replace ( "cert_file: ", string.Empty );
-                byte[] bytes = Convert.FromBase64String ( base64cert );
-                this.certificate = new X509Certificate2 ( bytes );
             }
         }
 
