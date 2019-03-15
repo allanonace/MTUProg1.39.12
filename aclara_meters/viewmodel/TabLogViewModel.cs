@@ -28,13 +28,12 @@ namespace aclara.ViewModels
             //c = assembly.GetManifestResourceStream("PruebasUI.Files.0221201911Log.xml");
             // List<Monkey> monkeys;
             // Path where the file should be saved once downloaded (locally)
-            string path = Mobile.GetPath();
+            string path = Mobile.GetPathConfig (); //Logs ();
             DirectoryInfo info = new DirectoryInfo(path);
             FileInfo[] files = info.GetFiles().OrderByDescending(p => p.LastWriteTimeUtc).ToArray();
 
             foreach (FileInfo file in files)
             {
-
                 if (file.Name.Contains("Log.xml") || file.Name.Contains("Result"))
                 {
                     Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
@@ -45,7 +44,6 @@ namespace aclara.ViewModels
                     break;
                 }
             }
-                
         }
 
         private void OtroRead(Stream stream)

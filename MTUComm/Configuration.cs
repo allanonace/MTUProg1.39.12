@@ -38,19 +38,22 @@ namespace MTUComm
 
         private Configuration ( string path = "" )
         {
-            mbase_path = ( string.IsNullOrEmpty ( path ) ) ? Mobile.GetPath () : path;
+            //mbase_path = ( string.IsNullOrEmpty ( path ) ) ? Mobile.GetPathLogs () : path;
+            mbase_path = ( string.IsNullOrEmpty ( path ) ) ? Mobile.GetPathConfig () : path;
+            
+            string configPath = Mobile.GetPathConfig ();
 
             device = "PC";
             Config config = new Config ();
 
-            mtuTypes   = config.GetMtu        ( Path.Combine(mbase_path, XML_MTUS      ) );
-            meterTypes = config.GetMeters     ( Path.Combine(mbase_path, XML_METERS    ) );
-            global     = config.GetGlobal     ( Path.Combine(mbase_path, XML_GLOBAL    ) );
-            interfaces = config.GetInterfaces ( Path.Combine(mbase_path, XML_INTERFACE ) );
-            alarms     = config.GetAlarms     ( Path.Combine(mbase_path, XML_ALARMS    ) );
-            demands    = config.GetDemandConf ( Path.Combine(mbase_path, XML_DEMANDS   ) );
-            users      = config.GetUsers      ( Path.Combine(mbase_path, XML_USERS     ) ).List;
-            errors     = config.GetErrors     ( Path.Combine(mbase_path, XML_ERRORS    ) ).List;
+            mtuTypes   = config.GetMtu        ( Path.Combine(configPath, XML_MTUS      ) );
+            meterTypes = config.GetMeters     ( Path.Combine(configPath, XML_METERS    ) );
+            global     = config.GetGlobal     ( Path.Combine(configPath, XML_GLOBAL    ) );
+            interfaces = config.GetInterfaces ( Path.Combine(configPath, XML_INTERFACE ) );
+            alarms     = config.GetAlarms     ( Path.Combine(configPath, XML_ALARMS    ) );
+            demands    = config.GetDemandConf ( Path.Combine(configPath, XML_DEMANDS   ) );
+            users      = config.GetUsers      ( Path.Combine(configPath, XML_USERS     ) ).List;
+            errors     = config.GetErrors     ( Path.Combine(configPath, XML_ERRORS    ) ).List;
         }
 
         public static Configuration GetInstance ( string path = "" )

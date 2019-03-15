@@ -112,6 +112,11 @@ namespace MTUComm.actions
                 this.dictionary.Remove ( paramId );
         }
 
+        public void RemoveParameters ()
+        {
+            this.dictionary.Clear ();
+        }
+
         #endregion
     }
 }

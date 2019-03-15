@@ -44,6 +44,8 @@ namespace aclara_meters
         private const string SO_IOS     = "iOS";
         private const string SO_UNKNOWN = "Unknown";
         private const string XML_EXT    = ".xml";
+        private const string XML_CER    = ".cer";
+        private const string CER_TXT    = "certificate.txt";
         public static bool ScriptingMode = false;
 
         private string[] filesToCheck =
@@ -141,6 +143,12 @@ namespace aclara_meters
                 this.LoadXmlsAndCreateContainer ( dialogs );
             else
             {
+                /*
+                this.DownloadConfigFiles ();
+                this.LoadXmlsAndCreateContainer ( dialogs );
+                return;
+                */
+            
                 // Downloads, if necesary, and loads configuration from XML files
                 if ( this.HasDeviceAllXmls () )
                      this.LoadXmlsAndCreateContainer ( dialogs );
@@ -176,11 +184,11 @@ namespace aclara_meters
 
         }
 
-        #region Configuration XMLs
+        #region Configuration files
 
         private bool HasDeviceAllXmls ()
         {
-            string path = Mobile.GetPath ();
+            string path = Mobile.GetPathConfig ();
 
             // Directory could exist but is empty
             if ( string.IsNullOrEmpty ( path ) )
@@ -189,9 +197,6 @@ namespace aclara_meters
             // Directory exists and is not empty
             string[] filesLocal = Directory.GetFiles ( path );
 
-            //if ( ! filesLocal.Any () )
-            //    return false;
-            
             int count = 0;
 
             foreach ( string fileNeeded in filesToCheck )
@@ -209,7 +214,6 @@ namespace aclara_meters
                         count++;
                         break;
                     }
-
                 }
             }
 
@@ -217,28 +221,6 @@ namespace aclara_meters
                 return true;
 
             return false;
-
-            /*
-
-            foreach ( string filePath in filesLocal )
-            {
-                foreach ( string fileNeeded in filesToCheck )
-                {
-                    string compareStr = fileNeeded + XML_EXT;
-                    compareStr = compareStr.Replace ( path, "" );
-
-                    string fileStr = filePath.ToString ();
-                    fileStr = fileStr.Replace ( path, "" );
-                    
-                    if ( fileStr.Equals ( compareStr ) &&
-                         ++count >= filesToCheck.Length )
-                        return true;
-                }
-            }
-
-            return false;
-
-            */
         }
 
         private void DownloadXmlsIfNecessary (
@@ -248,7 +230,7 @@ namespace aclara_meters
             if (Mobile.IsNetAvailable())
             {
                 // Donwloads all configuracion XML files
-                if (this.DownloadXmls())
+                if (this.DownloadConfigFiles())
                 {
                     this.LoadXmlsAndCreateContainer ( dialogs );
                 }
@@ -269,7 +251,7 @@ namespace aclara_meters
             }
         }
 
-        private bool DownloadXmls ()
+        private bool DownloadConfigFiles ()
         {
             try
             {
@@ -285,19 +267,29 @@ namespace aclara_meters
                         List<SftpFile> ftp_array_files = new List<SftpFile>();
 
                         // Remote FTP File directory
-                        var ftp_files = sftp.ListDirectory ( data.ftpPath );
-                        foreach (var file in ftp_files)
-                            if ( file.Name.Contains ( ".xml" ) )
-                                ftp_array_files.Add ( file );
-
-                        string path = Mobile.GetPath ();
-                        foreach ( var file in ftp_array_files )
+                        bool isCertificate;
+                        string configPath = Mobile.GetPathConfig ();
+                        foreach ( SftpFile file in sftp.ListDirectory ( data.ftpPath ) )
                         {
-                            string remoteFileName = file.Name;
-
-                            using ( Stream file1 = File.OpenWrite ( Path.Combine ( path, remoteFileName ) ) )
+                            string name = file.Name;
+                        
+                            if ( ( isCertificate = name.Contains ( XML_CER ) ) ||
+                                 name.Contains ( XML_EXT ) )
                             {
-                                sftp.DownloadFile(Path.Combine ( data.ftpPath, remoteFileName ), file1 );
+                                using ( Stream stream = File.OpenWrite ( Path.Combine ( configPath, name ) ) )
+                                {
+                                    sftp.DownloadFile(Path.Combine ( data.ftpPath, name ), stream );
+                                }
+
+                                // Convert certificate to base64 string                                
+                                if ( isCertificate )
+                                {
+                                    string pathCer   = Path.Combine ( configPath, name );  // Path to .cer in Library
+                                    byte[] bytes     = File.ReadAllBytes ( pathCer );      // Read .cer full bytes
+                                    string strBase64 = Convert.ToBase64String ( bytes );   // Convert bytes to base64 string
+                                    File.WriteAllText ( Path.Combine ( configPath, CER_TXT ), strBase64 );
+                                    File.Delete ( pathCer ); // Create new {name}.txt file with base64 string and delete .cer
+                                }
                             }
                         }
 
@@ -326,54 +318,42 @@ namespace aclara_meters
         private void LoadXmlsAndCreateContainer ( IUserDialogs dialogs )
         {
             // Load configuration from XML files
-            this.LoadXmls ();
+            this.LoadConfiguration ();
 
-            #region Scripting Mode Detection 
-
-            //Task.Run(async () =>
-            //{
-                //await Task.Delay(1100); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
-                //{
-
-                    #region Min Date Check
-
-                    try
+            #region Min Date Check
+            
+            try
+            {
+                string datenow = DateTime.Now.ToString("MM/dd/yyyy");
+                string mindate = FormsApp.config.global.MinDate;
+                
+                if (DateTime.ParseExact(datenow, "MM/dd/yyyy", null) < DateTime.ParseExact(mindate, "MM/dd/yyyy", null))
+                {
+                    Device.BeginInvokeOnMainThread(() =>
                     {
-                        string datenow = DateTime.Now.ToString("MM/dd/yyyy");
-                        string mindate = FormsApp.config.global.MinDate;
-
-                  
-
-                        if (DateTime.ParseExact(datenow, "MM/dd/yyyy", null) < DateTime.ParseExact(mindate, "MM/dd/yyyy", null))
-                        {
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                MainPage = new NavigationPage(new ErrorInitView("System is not ahead or equals to Minimum expected Date!"));
-                            });
-                        }
-
-
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-
-                    #endregion
-
-                    // Load pages container ( ContentPage )
-                    if ( ! ScriptingMode )
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
-                        });
-            //    });
-            //});
+                        MainPage = new NavigationPage(new ErrorInitView("System is not ahead or equals to Minimum expected Date!"));
+                    });
+                }
+            }
+            catch (Exception)
+            {
+            
+            }
+            
+            #endregion
+            
+            #region Scripting Mode Detection
+            
+            if ( ! ScriptingMode )
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
+                });
 
             #endregion
         }
 
-        private void LoadXmls ()
+        private void LoadConfiguration ()
         {
             config  = Configuration.GetInstance ();
             loggger = new Logger ( config );

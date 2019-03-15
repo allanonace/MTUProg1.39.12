@@ -122,15 +122,6 @@ namespace MTUComm
             #endregion
 
             #region Certificate
-
-            /*
-              - Log certificate info
-                - All ? -> CertSubject, CertPath, CertPair, CertUpdate, CertValid and CertRecord
-              - Some other thing to write in the activity log ?
-            */
-
-            // Some other info/data about encryption, in addition to Encrypted and Encryption Index parameters, must be log/shown in the screen?
-            // Which certificate attributes should we log and with what tags ( name and display )? and only in activity log or also in "visual" log?
             
             Mobile.ConfigData data = Mobile.configData;
 
@@ -368,24 +359,24 @@ namespace MTUComm
             logger.addAtrribute(this.readMtuAction, "display", Action.displays[ActionType.ReadMtu]);
             logger.addAtrribute(this.readMtuAction, "type", Action.tag_types[ActionType.ReadMtu]);
 
-            /*logger.logParameter(this.readMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
-
-            if (!string.IsNullOrEmpty(this.user))
-            {
-                logger.logParameter(this.readMtuAction, new Parameter("User", "User", this.user));
-            }*/
-
             InterfaceParameters[] parameters = Configuration.GetInstance().getLogInterfaceFields( form.mtu.Id, ActionType.ReadMtu );
             foreach (InterfaceParameters parameter in parameters)
             {
-                if (parameter.Name == "Port")
+                try
                 {
-                    ActionResult[] ports = result.getPorts();
-                    for (int i = 0; i < ports.Length; i++)
-                        logger.logPort(i, this.readMtuAction, ports[i], parameter.Parameters.ToArray());
+                    if (parameter.Name == "Port")
+                    {
+                        ActionResult[] ports = result.getPorts();
+                        for (int i = 0; i < ports.Length; i++)
+                            logger.logPort(i, this.readMtuAction, ports[i], parameter.Parameters.ToArray());
+                    }
+                    else
+                        logger.logComplexParameter(this.readMtuAction, result, parameter);
                 }
-                else
-                    logger.logComplexParameter(this.readMtuAction, result, parameter);
+                catch ( Exception e )
+                {
+                    
+                }
             }
         }
 

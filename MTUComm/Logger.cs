@@ -18,7 +18,7 @@ namespace MTUComm
         {
             this.config = config;
             fixed_name = outFileName;
-            abs_path = config.GetBasePath();
+            abs_path = config.GetBasePath ();
         }
 
         private Boolean isFixedName()

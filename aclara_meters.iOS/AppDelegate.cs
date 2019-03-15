@@ -28,9 +28,10 @@ namespace aclara_meters.iOS
             global::Xamarin.Forms.Forms.Init();
             //Distribute.DontCheckForUpdatesInDebug();
 
-            // Download configuration parameters from Intune
-            Online.DownloadIntuneParameters ();
-
+            // Prepare configuration parameters
+            //Online.DownloadIntuneParameters ();
+            Parameters.PrepareFromLocal ();
+            
             var AppVersion = NSBundle.MainBundle.InfoDictionary[ "CFBundleVersion" ];
 
             IBluetoothLowEnergyAdapter bluetoothLowEnergyAdapter = BluetoothLowEnergyAdapter.ObtainDefaultAdapter();
