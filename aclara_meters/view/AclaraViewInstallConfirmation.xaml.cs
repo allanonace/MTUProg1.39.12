@@ -1132,7 +1132,7 @@ namespace aclara_meters.view
 
         private void ReturnToMainView(object sender, EventArgs e)
         {
-            Application.Current.MainPage.Navigation.PopAsync(false);
+            Application.Current.MainPage.Navigation.PopToRootAsync(false);
         }
 
         private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)

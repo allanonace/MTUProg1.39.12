@@ -54,7 +54,11 @@ namespace aclara_meters
             "Interface",
             "Meter",
             "Mtu",
-            "Error"
+            "Error",
+            "User",
+            "family_31xx32xx",
+            "family_33xx",
+            "family_342x"
         };
 
         #endregion
@@ -97,19 +101,26 @@ namespace aclara_meters
             IUserDialogs dialogs,
             string appVersion )
         {
-            InitializeComponent();
-
-            this.adapter = adapter;
-            this.dialogs = dialogs;
-            this.appVersion = appVersion;
-
-            if (Device.RuntimePlatform == Device.Android)
+            try
             {
-                Task.Run(async () => { await PermisosLocationAsync(); });
-                CallToInitApp ( adapter, dialogs, appVersion );
+                InitializeComponent();
+
+                this.adapter = adapter;
+                this.dialogs = dialogs;
+                this.appVersion = appVersion;
+
+                if (Device.RuntimePlatform == Device.Android)
+                {
+                    Task.Run(async () => { await PermisosLocationAsync(); });
+                    CallToInitApp(adapter, dialogs, appVersion);
+                }
+                else
+                    Task.Factory.StartNew(ThreadProcedure);
             }
-            else
-                Task.Factory.StartNew(ThreadProcedure);
+            catch (Exception e)
+            {
+                
+            }
         }
 
         #region iPad & iPhone devices have a different behaviour when initializating the app, this sems to fix it
@@ -485,6 +496,13 @@ namespace aclara_meters
 
         protected override void OnResume()
         {
+            if(ScriptingMode)
+            {
+                MainPage = new NavigationPage(new AclaraViewScripting(path, callback, script_name));
+
+                await MainPage.Navigation.PopToRootAsync(true);
+            }
+            Console.Write("-------------- resume app {ScriptingMode}");
         }
 
         #endregion
