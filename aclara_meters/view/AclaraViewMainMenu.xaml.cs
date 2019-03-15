@@ -846,7 +846,7 @@ namespace aclara_meters.view
 
                     byte[] battery_ui = FormsApp.peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
 
-                    if (battery_ui[0] < 101 && battery_ui[0] > 1)
+                    if (battery_ui[0] <  1 && battery_ui[0] > 1)
                     {
                         batteryLevel.Text = battery_ui[0].ToString() + " %";
 
