@@ -18,9 +18,7 @@ namespace MTUComm
         private const string XML_ALARMS    = "Alarm.xml";
         private const string XML_DEMANDS   = "DemandConf.xml";
         private const string XML_USERS     = "User.xml";
-        private const string XML_ERRORS    = "Error.xml";
 
-        private String mbase_path;
         public MtuTypes mtuTypes;
         public MeterTypes meterTypes;
         public Global global;
@@ -28,7 +26,6 @@ namespace MTUComm
         public AlarmList alarms;
         public DemandConf demands;
         public User[] users;
-        public Error[] errors;
         
         private string device;
         private string deviceUUID;
@@ -38,22 +35,32 @@ namespace MTUComm
 
         private Configuration ( string path = "" )
         {
-            //mbase_path = ( string.IsNullOrEmpty ( path ) ) ? Mobile.GetPathLogs () : path;
-            mbase_path = ( string.IsNullOrEmpty ( path ) ) ? Mobile.GetPathConfig () : path;
-            
             string configPath = Mobile.GetPathConfig ();
 
             device = "PC";
             Config config = new Config ();
 
-            mtuTypes   = config.GetMtu        ( Path.Combine(configPath, XML_MTUS      ) );
-            meterTypes = config.GetMeters     ( Path.Combine(configPath, XML_METERS    ) );
-            global     = config.GetGlobal     ( Path.Combine(configPath, XML_GLOBAL    ) );
-            interfaces = config.GetInterfaces ( Path.Combine(configPath, XML_INTERFACE ) );
-            alarms     = config.GetAlarms     ( Path.Combine(configPath, XML_ALARMS    ) );
-            demands    = config.GetDemandConf ( Path.Combine(configPath, XML_DEMANDS   ) );
-            users      = config.GetUsers      ( Path.Combine(configPath, XML_USERS     ) ).List;
-            errors     = config.GetErrors     ( Path.Combine(configPath, XML_ERRORS    ) ).List;
+            /* TEST - Override configuration file to force parsing error
+            string PRIVATE = Environment.GetFolderPath ( Environment.SpecialFolder.Resources );
+            File.WriteAllText ( Path.Combine ( PRIVATE, ".Config/Mtu.xml" ), "TEST" );
+            */
+
+            try
+            {
+                mtuTypes   = config.GetMtu        ( Path.Combine ( configPath, XML_MTUS      ) );
+                meterTypes = config.GetMeters     ( Path.Combine ( configPath, XML_METERS    ) );
+                global     = config.GetGlobal     ( Path.Combine ( configPath, XML_GLOBAL    ) );
+                interfaces = config.GetInterfaces ( Path.Combine ( configPath, XML_INTERFACE ) );
+                alarms     = config.GetAlarms     ( Path.Combine ( configPath, XML_ALARMS    ) );
+                demands    = config.GetDemandConf ( Path.Combine ( configPath, XML_DEMANDS   ) );
+                users      = config.GetUsers      ( Path.Combine ( configPath, XML_USERS     ) ).List;
+            }
+            catch ( Exception e )
+            {
+                if ( e is FileNotFoundException )
+                     throw new ConfigurationFilesNotFoundException ();
+                else throw new ConfigurationFilesCorruptedException ();
+            }
         }
 
         public static Configuration GetInstance ( string path = "" )
@@ -69,11 +76,6 @@ namespace MTUComm
         public static void SetInstance ( Configuration configuration )
         {
             instance = configuration;
-        }
-
-        public String GetBasePath()
-        {
-            return mbase_path;
         }
 
         public Global GetGlobal()
@@ -155,7 +157,7 @@ namespace MTUComm
             try
             {
                 XmlSerializer serializer = new XmlSerializer(typeof(MemRegisterList));
-                using (TextReader reader = new StreamReader(Path.Combine(mbase_path, "family_" + family + ".xml")))
+                using (TextReader reader = new StreamReader ( Path.Combine ( Mobile.GetPathConfig (), "family_" + family + ".xml")))
                 {
                     MemRegisterList list = serializer.Deserialize(reader) as MemRegisterList;
                     if (list.Registers != null)

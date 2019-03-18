@@ -4,6 +4,8 @@ using System;
 using System.Linq;
 using System.Dynamic;
 using MTUComm.Exceptions;
+using System.Xml.Serialization;
+using System.IO;
 
 namespace MTUComm
 {
@@ -90,6 +92,27 @@ namespace MTUComm
             //-----------
             // The MTU encryption process can't be performed after having tried it several times
             { new ActionNotAchievedEncryptionException (),      700 },
+            
+            // Configuration Files and System [ 7xx ]
+            //-------------------------------
+            // Download or install the necessary configuration files, because all are not present on the device
+            { new ConfigurationFilesNotFoundException (),       800 },
+            // Download or install the necessary configuration files, because some of them are corrupted and can not be used
+            { new ConfigurationFilesCorruptedException (),      801 },
+            // The certificate that you tried to install is not a valid certificate file ( *.cer )
+            { new CertificateFileNotValidException (),          802 },
+            // Download or install again the certificate, because is impossible to regenerate the one currently installed
+            { new CertificateInstalledNotValidException (),     803 },
+            // Download or install a new certificate because the one that is currently used has expired
+            { new CertificateInstalledExpiredException (),      804 },
+            // All the necessary permissions have not been granted
+            { new AndroidPermissionsException (),               805 },
+            // Error downloading configuration files from the FTP
+            { new FtpDownloadException (),                      806 },
+            // The Device has not internet connection
+            { new NoInternetException (),                       807 },
+            // The current date of the device is lower than allowed
+            { new DeviceMinDateAllowedException (),             808 },
         };
 
         #endregion
@@ -98,13 +121,16 @@ namespace MTUComm
 
         private static Errors instance;
         
-        private Global global;
-        private Logger logger;
+        //private Global global;
+        //private Logger logger;
 
+        private Logger logger;
         private Dictionary<int,Error> errors;
         private List<Error> errorsToLog;
-        
         private Error lastError;
+        private Error[] xmlErrors;
+
+        public static Error configError;
 
         #endregion
 
@@ -133,7 +159,7 @@ namespace MTUComm
         {
             get
             {
-                return Errors.GetInstance ().global.ErrorId;
+                return Configuration.GetInstance ().global.ErrorId;
             }
         }
 
@@ -148,22 +174,16 @@ namespace MTUComm
 
         private Errors ()
         {
-            Configuration config = Configuration.GetInstance ();
-        
-            this.global      = config.global;
-            this.logger      = new Logger ( config );
+            this.logger      = new Logger ();
             this.errors      = new Dictionary<int,Error> ();
             this.errorsToLog = new List<Error> ();
-        
-            Error[] errorsXml = config.errors;
+            this.xmlErrors   = this.GetErrors ().List;
 
-            if ( errorsXml != null )
-                foreach ( Error errorXml in errorsXml )
+            if ( this.xmlErrors != null )
+                foreach ( Error errorXml in this.xmlErrors )
                     this.errors.Add ( errorXml.Id, errorXml );
-                    
-            config = null;
         }
-        
+
         private static Errors GetInstance ()
         {
             if ( Errors.instance == null )
@@ -172,9 +192,68 @@ namespace MTUComm
             return Errors.instance;
         }
 
+        private ErrorList GetErrors ()
+        {
+            ErrorList errors = null;
+            XmlSerializer s = new XmlSerializer ( typeof ( ErrorList ) );
+        
+            using ( StreamReader streamReader = Mobile.GetResourcePath ( "Error.xml" ) )
+            {
+                string fileContent = Config.NormalizeBooleans ( streamReader.ReadToEnd () );
+                using ( StringReader reader = new StringReader ( fileContent ) )
+                {
+                    errors = ( ErrorList )s.Deserialize(reader);
+                }
+            }
+ 
+            return errors;
+        }
+
         #endregion
 
         #region Logic
+
+        private Error GetErrorById (
+            int id,
+            Exception e,
+            int portIndex = 1 )
+        {
+            Error error = null;
+        
+            if ( this[ id ] != null )
+            {
+                error           = ( Error )this[ id ].Clone ();
+                error.Port      = portIndex;
+                error.Exception = e;
+            }
+            
+            return error;
+        }
+
+        private Error GetErrorByException (
+            Exception e,
+            int portIndex = 1 )
+        {
+            Type  typeExp = e.GetType ();
+            Error error   = null;
+            
+            // Own exception
+            if ( this.ex2id.Any ( item => item.Key.GetType () == typeExp ) )
+            {
+                int id = this.ex2id.Single ( item => item.Key.GetType () == typeExp ).Value;
+                
+                error = this.GetErrorById ( id, e, portIndex );
+            }
+            // .NET exception
+            else
+            {
+                error = ( Error )this.TryToTranslateDotNet ( e ).Clone ();
+                error.Port  = portIndex;
+                error.Exception = e;
+            }
+            
+            return error;
+        }
 
         /// <summary>
         /// Register a new error to be written into the log after be recovered using GetErrorsToLog
@@ -184,16 +263,14 @@ namespace MTUComm
         private bool AddErrorById (
             int id,
             Exception e,
-            int portIndex )
+            int portIndex = 1 )
         {
             // Error ID exists and is not registered already
             if ( this[ id ] != null )
             {
-                Error error = ( Error )this[ id ].Clone ();
-                error.Port  = portIndex;
-                error.Exception = e;
-            
+                Error error = this.GetErrorById ( id, e, portIndex );
                 this.errorsToLog.Add ( error );
+                
                 return true;
             }
             return false;
@@ -205,27 +282,11 @@ namespace MTUComm
         /// <param name="e">.NET exception</param>
         private Error AddErrorByException (
             Exception e,
-            int portIndex )
+            int portIndex = 1 )
         {
-            Type typeExp = e.GetType ();
+            Error error = this.GetErrorByException ( e, portIndex );
+            this.errorsToLog.Add ( error );
             
-            // Own exception
-            if ( this.ex2id.Any ( item => item.Key.GetType () == typeExp ) )
-            {
-                int id = this.ex2id.Single ( item => item.Key.GetType () == typeExp ).Value;
-                
-                this.AddErrorById ( id, e, portIndex );
-            }
-            // .NET exception
-            else
-            {
-                Error error = ( Error )this.TryToTranslateDotNet ( e ).Clone ();
-                error.Port  = portIndex;
-                error.Exception = e;
-            
-                this.errorsToLog.Add ( error );
-            }
-                
             return ( this.lastError = this.errorsToLog.Last () );
         }
 
@@ -288,7 +349,6 @@ namespace MTUComm
             int portIndex )
         {
             Error error = this.AddErrorByException ( e, portIndex );
-            
             PageLinker.ShowAlert ( ERROR_TITLE, error );
             
             this.logger.LogError ();
@@ -315,6 +375,14 @@ namespace MTUComm
                 if ( forceException )
                     throw lastException;
             }
+        }
+
+        private void _ShowErrorAndKill (
+            Exception e,
+            int portIndex = 1 )
+        {
+            Error error = this.GetErrorByException ( e, portIndex );
+            PageLinker.ShowAlert ( ERROR_TITLE, error, true );
         }
 
         /// <summary>
@@ -411,6 +479,12 @@ namespace MTUComm
             Exception e )
         {
             return ( e.GetType ().IsSubclassOf ( typeof( OwnExceptionsBase ) ) );
+        }
+
+        public static void ShowErrorAndKill (
+            Exception e )
+        {
+            Errors.GetInstance ()._ShowErrorAndKill ( e );
         }
 
         #endregion

@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Errors>
+    <!-- MTU -->
+    <Error id="100" message="MTU is not the same as at the beginning of the process" />
+    <Error id="101" message="Puck can not communicate with MTU" />
+    <Error id="102" message="Puck can not communicate with MTU after has completed writing process" />
+
+    <!-- Meter -->
+    <Error id="200" message="The Meter.xml file does not contain the Meter ID specified" />
+    <Error id="201" message="The MTU does not support selected Meter" />
+    <Error id="202" message="The Meter.xml file does not contain the Meter type specified with NumberOfDials, DriveDialSize and UnitOfMeasure" />
+    <Error id="203" message="The script does not contain the tag NumberOfDials needed to select the MTU" />
+    <Error id="204" message="The script does not contain the tag DriveDialSize needed to select the MTU" />
+    <Error id="205" message="The script does not contain the tag UnitOfMeasure needed to select the MTU" />
+    
+    <!-- Scripting parameters -->
+    <Error id="300" message="Error translating or validating parameters _var_ from script file" />
+    <Error id="301" message="Script is for one port only but the MTU has two port and both activated" />
+    <Error id="302" message="Script is for two ports but the MTU has one port only or second port is disabled" />
+    <Error id="303" message="Logfile element in the script is empty or contains some invalid character" />
+    <Error id="304" message="Action type _var_ in the script is not one of the available options" />
+    <Error id="305" message="The script file used has not valid structure or format" />
+    <Error id="306" message="The script file used is empty" />
+    
+    <!-- Alarm -->
+    <Error id="400" message="The alarm profile selected for current MTU is not defined in the Alarm.xml file" />
+    <Error id="401" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" />
+    
+    <!-- Turn Off -->
+    <Error id="500" message="Turn off MTU process has failed trying to activated the Ship Bit" />
+    <Error id="501" message="MTU can not be turned off after having tried it _var_ times" />
+    
+    <!-- Install Confirmation -->    
+    <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Globa.xml" />
+    <Error id="601" message="The MTU is turned off" />
+    <Error id="602" message="Installation Confirmation process has failed trying to communicate with the DCU" />
+    <Error id="603" message="Installation Confirmation can not be performed after having tried it _var_ times" />
+
+    <!-- Encryption -->
+    <Error id="700" message="The MTU encryption process can't be performed after having tried it _var_ times" />
+
+    <!-- Configuration Files -->
+    <Error id="800" message="Download or install the necessary configuration files, because all are not present on the device" />
+    <Error id="801" message="Download or install the necessary configuration files, because some of them are corrupted and can not be used" />
+    <Error id="802" message="The certificate that you tried to install is not a valid certificate file ( *.cer )" />
+    <Error id="803" message="Download or install again the certificate, because is impossible to regenerate the one currently installed" />
+    <Error id="804" message="Download or install a new certificate because the one that is currently used has expired" />
+
+    <!--<Error id="" message="" />-->
+    <!--<Error id="100" message="Mensaje de prueba de error propio" />-->
+    <!--<Error id="101" dotnet="80020012" message="Mensaje de prueba de error de .Net traducido" />-->
+</Errors>

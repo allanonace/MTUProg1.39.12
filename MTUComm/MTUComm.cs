@@ -1015,6 +1015,8 @@ namespace MTUComm
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
                 else Errors.LogErrorNow ( e );
+                
+                return;
             }
 
             this.Task_AddMtu ( form, addMtuAction.user, addMtuAction.type, true );
@@ -1034,7 +1036,7 @@ namespace MTUComm
 
             try
             {
-                Logger logger = ( ! isFromScripting ) ? new Logger ( this.configuration ) : truquitoAction.logger;
+                Logger logger = ( ! isFromScripting ) ? new Logger () : truquitoAction.logger;
                 addMtuLog = new AddMtuLog ( logger, form, user, isFromScripting );
 
                 #region Turn Off MTU

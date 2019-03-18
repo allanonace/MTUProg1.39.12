@@ -679,7 +679,7 @@ namespace aclara_meters.view
             runner.onStepFinish += onStepFinish;
             runner.OnError      += OnError;
 
-            runner.ParseScriptAndRun ( FormsApp.config.GetBasePath(), FormsApp.ble_interface, resultDataXml, resultDataXml.Length );
+            runner.ParseScriptAndRun ( FormsApp.ble_interface, resultDataXml, resultDataXml.Length );
         }
 
         //private async Task ChangeListViewData()
@@ -1053,7 +1053,7 @@ namespace aclara_meters.view
                     if (bScriptOnly)
                     {
                         Console.Write($"-------------------------------------    ScriptOnly: {bScriptOnly.ToString()}");
-                        Logger logActivity = new Logger(Configuration.GetInstance());
+                        Logger logActivity = new Logger();
                         string Uri=logActivity.CreateFileIfNotExist(true);
 
 

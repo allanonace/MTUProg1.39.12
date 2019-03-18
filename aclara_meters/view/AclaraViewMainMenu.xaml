@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:BasePage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" NavigationPage.HasBackButton="false" BackgroundColor="Black" xmlns:Controls="clr-namespace:aclara_meters" x:Class="aclara_meters.view.AclaraViewMainMenu">
+<util:BasePage xmlns="http://xamarin.com/schemas/2014/forms"
+xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters"
+NavigationPage.HasBackButton="false" BackgroundColor="Black"
+xmlns:Controls="clr-namespace:aclara_meters"
+x:Class="aclara_meters.view.AclaraViewMainMenu">
     <RelativeLayout IsVisible="true">
         <RelativeLayout.GestureRecognizers>
             <SwipeGestureRecognizer Direction="Left" Swiped="OnSwiped" />
