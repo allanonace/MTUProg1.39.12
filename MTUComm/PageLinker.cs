@@ -1,5 +1,6 @@
 ﻿using Xamarin.Forms;
 using Xml;
+using System.Threading.Tasks;
 
 namespace MTUComm
 {
@@ -9,6 +10,7 @@ namespace MTUComm
     
         private static PageLinker instance;
         private static Page currentPage;
+        public static Page mainPage;
     
         public static Page CurrentPage
         {
@@ -26,16 +28,20 @@ namespace MTUComm
             return instance;
         }
 
-        private void _ShowAlert (
+        private async void _ShowAlert (
             string title,
             string message,
-            string btnText )
+            string btnText,
+            bool   kill = false )
         {
             if ( currentPage != null )
             {
-                Device.BeginInvokeOnMainThread(() =>
+                Device.BeginInvokeOnMainThread ( async () =>
                 {
-                    currentPage.DisplayAlert ( title, message, btnText );
+                    await currentPage.DisplayAlert ( title, message, btnText );
+                    
+                    if ( kill )
+                        System.Diagnostics.Process.GetCurrentProcess ().Kill ();
                 });
             }
         }
@@ -43,7 +49,8 @@ namespace MTUComm
         public static void ShowAlert (
             string title,
             string message,
-            string btnText )
+            string btnText,
+            bool   kill = false )
         {
             GetInstance ()._ShowAlert ( title, message, btnText );
         }
@@ -51,14 +58,15 @@ namespace MTUComm
         public static void ShowAlert (
             string title,
             Error  error,
+            bool   kill    = false,
             string btnText = BTN_TXT )
         {
             if ( error.Id > -1 )
                 GetInstance ()._ShowAlert (
-                    title, "Error " + error.Id + ": " + error.Message, btnText );
+                    title, "Error " + error.Id + ": " + error.Message, btnText, kill );
             else
                 GetInstance ()._ShowAlert (
-                    title, error.Message, btnText );
+                    title, error.Message, btnText, kill );
         }
     }
 }

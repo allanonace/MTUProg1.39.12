@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="ASCII"?>
-<MtuScript>
-	<userName>3000</userName>
-    <logFile>AddResult_Error.xml</logFile>
-    <action type="AddMtu">
-        
-	</action>
-</MtuScript>

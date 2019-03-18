@@ -30,12 +30,25 @@
   <ItemGroup>
     <Folder Include="Observer\" />
     <Folder Include="Exceptions\" />
+    <Folder Include="Resource\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove=".Configuration.cs.swp" />
     <None Remove="XMLs\Interface.xml" />
+    <None Remove="XMLs\family_31xx32xx.xml" />
+    <None Remove="XMLs\AddMtu.xml" />
+    <None Remove="XMLs\AddMtu_InitRead.xml" />
+    <None Remove="XMLs\AddMtu_Meter.xml" />
+    <None Remove="XMLs\AddMtu_Meter_Error.xml" />
+    <None Remove="XMLs\AddMtu_Meter_Error2.xml" />
+    <None Remove="XMLs\AddMtu_Meter_NoReadInterval.xml" />
+    <None Remove="XMLs\TurnOffMtu.xml" />
+    <None Remove="Resource\Error.xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="TaskExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\Error.xml" />
   </ItemGroup>
 </Project>

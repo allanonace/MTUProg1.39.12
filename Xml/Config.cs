@@ -8,53 +8,18 @@ namespace Xml
 {
     public class Config
     {
-        public ErrorList GetErrors (string path)
-        {
-            ErrorList errors;
-        
-            try
-            {
-                
-                XmlSerializer s = new XmlSerializer(typeof(ErrorList));
-            
-                using (StreamReader streamReader = new StreamReader(path))
-                {
-                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
-                    using (StringReader reader = new StringReader(fileContent))
-                    {
-                        errors = (ErrorList)s.Deserialize(reader);
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                throw new DemandConfLoadException("Error loading Errors file");
-            }
- 
-            return errors;
-        }
-    
         public UserList GetUsers (string path)
         {
             UserList users;
+            XmlSerializer s = new XmlSerializer(typeof(UserList));
         
-            try
+            using (StreamReader streamReader = new StreamReader(path))
             {
-                
-                XmlSerializer s = new XmlSerializer(typeof(UserList));
-            
-                using (StreamReader streamReader = new StreamReader(path))
+                string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                using (StringReader reader = new StringReader(fileContent))
                 {
-                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
-                    using (StringReader reader = new StringReader(fileContent))
-                    {
-                        users = (UserList)s.Deserialize(reader);
-                    }
+                    users = (UserList)s.Deserialize(reader);
                 }
-            }
-            catch (Exception e)
-            {
-                throw new DemandConfLoadException("Error loading Users file");
             }
  
             return users;
@@ -65,20 +30,13 @@ namespace Xml
             DemandConf demandConf;
             XmlSerializer s = new XmlSerializer(typeof(DemandConf));
 
-            try
+            using (StreamReader streamReader = new StreamReader(path))
             {
-                using (StreamReader streamReader = new StreamReader(path))
+                string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                using (StringReader reader = new StringReader(fileContent))
                 {
-                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
-                    using (StringReader reader = new StringReader(fileContent))
-                    {
-                        demandConf = (DemandConf)s.Deserialize(reader);
-                    }
+                    demandConf = (DemandConf)s.Deserialize(reader);
                 }
-            }
-            catch (Exception e)
-            {
-                throw new DemandConfLoadException("Error loading DemandConf file");
             }
  
             return demandConf;
@@ -89,20 +47,13 @@ namespace Xml
             MeterTypes meterTypes;
             XmlSerializer s = new XmlSerializer(typeof(MeterTypes));
 
-            try
+            using (StreamReader streamReader = new StreamReader(path))
             {
-                using (StreamReader streamReader = new StreamReader(path))
+                string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                using (StringReader reader = new StringReader(fileContent))
                 {
-                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
-                    using (StringReader reader = new StringReader(fileContent))
-                    {
-                        meterTypes = (MeterTypes)s.Deserialize(reader);
-                    }
+                    meterTypes = (MeterTypes)s.Deserialize(reader);
                 }
-            }
-            catch (Exception e)
-            {
-                throw new MeterLoadException("Error loading Meter file");
             }
 
             return meterTypes;
@@ -111,24 +62,15 @@ namespace Xml
         public MtuTypes GetMtu(string path)
         {
             MtuTypes mtuTypes = new MtuTypes();
-
             XmlSerializer s = new XmlSerializer(typeof(MtuTypes));
 
-            try
+            using (StreamReader streamReader = new StreamReader(path))
             {
-                using (StreamReader streamReader = new StreamReader(path))
+                string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                using (StringReader reader = new StringReader(fileContent))
                 {
-                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
-                    using (StringReader reader = new StringReader(fileContent))
-                    {
-                        mtuTypes = (MtuTypes)s.Deserialize(reader);
-                    }
+                    mtuTypes = (MtuTypes)s.Deserialize(reader);
                 }
-            }
-            
-            catch (Exception e ) 
-            {
-                throw new MtuLoadException("Error loading Mtu file: " + e.Message );
             }
 
             return mtuTypes;
@@ -139,20 +81,13 @@ namespace Xml
             AlarmList alarms;
             XmlSerializer s = new XmlSerializer(typeof(AlarmList));
 
-            try
+            using (StreamReader streamReader = new StreamReader(path))
             {
-                using (StreamReader streamReader = new StreamReader(path))
+                string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                using (StringReader reader = new StringReader(fileContent))
                 {
-                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
-                    using (StringReader reader = new StringReader(fileContent))
-                    {
-                        alarms = (AlarmList)s.Deserialize(reader);
-                    }
+                    alarms = (AlarmList)s.Deserialize(reader);
                 }
-            }
-            catch (Exception e)
-            {
-                throw new AlarmLoadException("Error loading Alarm file");
             }
 
             return alarms;
@@ -163,21 +98,13 @@ namespace Xml
             InterfaceConfig interfaces;
             XmlSerializer s = new XmlSerializer(typeof(InterfaceConfig));
 
-            try
+            using (StreamReader streamReader = new StreamReader(path))
             {
-                using (StreamReader streamReader = new StreamReader(path))
+                string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                using (StringReader reader = new StringReader(fileContent))
                 {
-                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
-                    using (StringReader reader = new StringReader(fileContent))
-                    {
-                        interfaces = (InterfaceConfig)s.Deserialize(reader);
-                    }
+                    interfaces = (InterfaceConfig)s.Deserialize(reader);
                 }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.StackTrace);
-                throw new InterfaceLoadException("Error loading Interfaces file");
             }
 
             return interfaces;
@@ -188,28 +115,21 @@ namespace Xml
             Global global;
             XmlSerializer s = new XmlSerializer(typeof(Global));
 
-            try
+            using (StreamReader streamReader = new StreamReader(path))
             {
-                using (StreamReader streamReader = new StreamReader(path))
+                string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
+                using (StringReader reader = new StringReader(fileContent))
                 {
-                    string fileContent = NormalizeBooleans(streamReader.ReadToEnd());
-                    using (StringReader reader = new StringReader(fileContent))
-                    {
-                        global = (Global)s.Deserialize(reader);
-                        
-                        var cancel = global.Cancel;
-                        var cancel_def = global.Cancel_Default;
-                        var cancel_des = global.Cancel_Deserialized;
-                        
-                        var o = global.Options;
-                        var odef = global.Options_Default;
-                        var odes = global.Options_Deserialized;
-                    }
+                    global = (Global)s.Deserialize(reader);
+                    
+                    var cancel = global.Cancel;
+                    var cancel_def = global.Cancel_Default;
+                    var cancel_des = global.Cancel_Deserialized;
+                    
+                    var o = global.Options;
+                    var odef = global.Options_Default;
+                    var odes = global.Options_Deserialized;
                 }
-            }
-            catch (Exception e )
-            {
-                throw new GlobalLoadException("Error loading Global file");
             }
 
             return global;

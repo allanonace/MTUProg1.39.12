@@ -244,7 +244,7 @@ namespace MTUComm
             // System.IO.Path.GetFileName(outputfile)); // NO
 
             configuration = config;
-            logger = new Logger(config, outputfile.Substring(outputfile.LastIndexOf('\\') + 1) ); 
+            logger = new Logger(outputfile.Substring(outputfile.LastIndexOf('\\') + 1) ); 
             comm = new MTUComm(serial, config);
             this.type = type;
             this.user = user;

@@ -29,7 +29,7 @@ namespace MTUComm
         public delegate void ActionErrorHandler ();
         public event ActionErrorHandler OnError;
 
-        public ScriptRunner(String base_path, ISerial serial_device, String script_path)
+        public ScriptRunner ( ISerial serial_device, String script_path)
         {
             Script script = new Script();
 
@@ -47,7 +47,7 @@ namespace MTUComm
                 }
 
 
-                buildScriptActions(base_path, serial_device, script);
+                buildScriptActions ( serial_device, script );
             }
 
             catch (Exception e)
@@ -60,7 +60,7 @@ namespace MTUComm
         {
         }
 
-        public void ParseScriptAndRun ( String base_path, ISerial serial_device, String script_stream, int stream_size )
+        public void ParseScriptAndRun ( ISerial serial_device, String script_stream, int stream_size )
         {
             // Script file is empty
             if ( string.IsNullOrEmpty ( script_stream.Trim () ) )
@@ -80,7 +80,7 @@ namespace MTUComm
                 {
                     script = (Script)s.Deserialize(reader);
                 }
-                buildScriptActions(base_path, serial_device, script); 
+                buildScriptActions ( serial_device, script );
             }
             catch (Exception e)
             {
@@ -106,7 +106,7 @@ namespace MTUComm
             }
         }
 
-        private void buildScriptActions(String base_path, ISerial serial_device, Script script)
+        private void buildScriptActions ( ISerial serial_device, Script script )
         {
             actions = new List<Action>();
 
