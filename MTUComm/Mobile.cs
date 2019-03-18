@@ -255,5 +255,22 @@ namespace MTUComm
                      ( profiles.Contains ( ConnectionProfile.WiFi     ) ||
                        profiles.Contains ( ConnectionProfile.Cellular ) ) );
         }
+        
+        public static StreamReader GetResourcePath (
+            string fileName )
+        {
+            Stream path = typeof ( MTUComm ).Assembly.GetManifestResourceStream ( "MTUComm.Resource." + fileName );
+            return new StreamReader ( path );
+
+            /*
+            string xml = string.Empty;
+            using (var reader = new StreamReader(stream))
+            {
+                xml = reader.ReadToEnd();
+            }
+            
+            return xml;
+            */
+        }
     }
 }

@@ -10,15 +10,11 @@ namespace MTUComm
 {
     public class Logger
     {
-        private String abs_path = "";
         public  String fixed_name = "";
-        private Configuration config;
 
-        public Logger(Configuration config, string outFileName = "" )
+        public Logger ( string outFileName = "" )
         {
-            this.config = config;
             fixed_name = outFileName;
-            abs_path = config.GetBasePath ();
         }
 
         private Boolean isFixedName()
@@ -44,6 +40,8 @@ namespace MTUComm
 
         private string getBaseFileHandler()
         {
+            Configuration config = Configuration.GetInstance ();
+        
             string base_stream = "<?xml version=\"1.0\" encoding=\"ASCII\"?>";
             base_stream += "<StarSystem>";
             base_stream += "    <AppInfo>";
@@ -59,6 +57,9 @@ namespace MTUComm
             base_stream += "    <Warning />";
             base_stream += "    <Error />";
             base_stream += "</StarSystem>";
+            
+            config = null;
+            
             return base_stream;
         }
 
@@ -68,20 +69,15 @@ namespace MTUComm
             String filename_clean = Path.GetFileName(file_name);
             String rel_path = file_name.Replace(filename_clean, "");
 
-            if (rel_path.Length > 1 && rel_path.StartsWith("/"))
-            {
-                rel_path = rel_path.Substring(1);
-            }
+            if ( rel_path.Length > 1 && rel_path.StartsWith ( "/" ) )
+                rel_path = rel_path.Substring ( 1 );
 
-            string full_new_path = Path.Combine(abs_path, rel_path);
+            string full_new_path = Path.Combine ( Mobile.GetPathLogs (), rel_path );
 
-            if (!Directory.Exists(full_new_path))
-            {
-                Directory.CreateDirectory(full_new_path);
-            }
-                    
+            if ( ! Directory.Exists ( full_new_path ) )
+                Directory.CreateDirectory ( full_new_path );
 
-            string uri = Path.Combine(full_new_path, filename_clean);
+            string uri = Path.Combine ( full_new_path, filename_clean );
 
             if ( ! File.Exists ( uri ) )
             { 
@@ -127,15 +123,13 @@ namespace MTUComm
         public string CreateEventFileIfNotExist ( string mtu_id )
         {
             string file_name = "MTUID"+ mtu_id+ "-" + System.DateTime.Now.ToString("MMddyyyyHH") + "-" + DateTime.Now.Ticks.ToString() + "DataLog.xml"; 
-            string uri = Path.Combine(abs_path, file_name);
+            string uri = Path.Combine ( Mobile.GetPathLogs (), file_name );
 
             if (!File.Exists(uri))
-            {
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, true))
                 {
                     file.WriteLine(getEventBaseFileHandler());
                 }
-            }
 
             return uri;
         }
@@ -267,7 +261,7 @@ namespace MTUComm
             addAtrribute(action, "type", ref_action.LogText);
             addAtrribute(action, "reason", ref_action.Reason);
 
-            InterfaceParameters[] parameters = config.getLogInterfaceFields(mtu_type_id, ActionType.ReadData );
+            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields(mtu_type_id, ActionType.ReadData );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name == "Port")
@@ -297,7 +291,7 @@ namespace MTUComm
             addAtrribute(action, "type", ref_action.LogText);
             addAtrribute(action, "reason", ref_action.Reason);
 
-            InterfaceParameters[] parameters = config.getLogInterfaceFields(mtu_type_id, ActionType.ReadMtu );
+            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields(mtu_type_id, ActionType.ReadMtu );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if(parameter.Name == "Port") {

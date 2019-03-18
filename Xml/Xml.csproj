@@ -19,4 +19,7 @@
   <ItemGroup>
     <Compile Remove="Memories.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="XMLs\Error.xml" />
+  </ItemGroup>
 </Project>

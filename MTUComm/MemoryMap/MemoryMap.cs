@@ -121,7 +121,7 @@ namespace MTUComm.MemoryMap
 
             // Parameter "family" when testing is full path to use
             string path = ( ! isUnityTest ) ?
-                Path.Combine ( config.GetBasePath (), XML_PREFIX + family + XML_EXTENSION ) :
+                Path.Combine ( Mobile.GetPathConfig (), XML_PREFIX + family + XML_EXTENSION ) :
                 Path.Combine ( pathUnityTest, family + XML_EXTENSION );
 
             using ( TextReader reader = new StreamReader ( path ) )

@@ -1,26 +1,24 @@
-using aclara_meters.Helpers;
-using aclara_meters.view;
+using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
+using System.Threading.Tasks;
+using System.Web;
+using aclara_meters.view;
 using Acr.UserDialogs;
 using ble_library;
 using MTUComm;
 using nexus.protocols.ble;
+using nexus.protocols.ble.scan;
 using Plugin.DeviceInfo;
 using Plugin.Multilingual;
-using Renci.SshNet;
-using Renci.SshNet.Sftp;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using System.Web;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
-using nexus.protocols.ble.scan;
 using Plugin.Permissions;
 using Plugin.Permissions.Abstractions;
+using Renci.SshNet;
+using Renci.SshNet.Sftp;
+using Xamarin.Forms;
+using Xamarin.Forms.Xaml;
+using MTUComm.Exceptions;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -50,14 +48,13 @@ namespace aclara_meters
 
         private string[] filesToCheck =
         {
-            "Alarm",
-            "DemandConf",
-            "Global",
-            "Interface",
-            "Meter",
-            "Mtu",
-            "Error",
-            "User",
+            "alarm",
+            "demandconf",
+            "global",
+            "interface",
+            "meter",
+            "mtu",
+            "user",
             "family_31xx32xx",
             "family_33xx",
             "family_342x"
@@ -79,6 +76,8 @@ namespace aclara_meters
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
         private string appVersion;
+        
+        private bool errorCreatingConfig;
 
         #endregion
 
@@ -190,9 +189,8 @@ namespace aclara_meters
             }
             catch
             {
-                this.MainPage = new NavigationPage(new ErrorInitView("There is a problem with permissions"));
+                this.ShowErrorAndKill ( new AndroidPermissionsException () );
             }
-
         }
 
         #region Configuration files
@@ -217,7 +215,7 @@ namespace aclara_meters
                     string compareStr = fileNeeded + XML_EXT;
                     compareStr = compareStr.Replace ( path, string.Empty ).Replace("/", string.Empty);
 
-                    string fileStr = filePath.ToString ();
+                    string fileStr = filePath.ToString ().ToLower ();
                     fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty);
 
                     if ( fileStr.Equals ( compareStr ) )
@@ -241,25 +239,13 @@ namespace aclara_meters
             if (Mobile.IsNetAvailable())
             {
                 // Donwloads all configuracion XML files
-                if (this.DownloadConfigFiles())
-                {
+                if ( this.DownloadConfigFiles () )
                     this.LoadXmlsAndCreateContainer ( dialogs );
-                }
                 else
-                {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        this.MainPage = new NavigationPage(new ErrorInitView("Error Downloading files"));
-                    });
-                }
+                    this.ShowErrorAndKill ( new FtpDownloadException () );
             }
             else 
-            {
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    this.MainPage = new NavigationPage(new ErrorInitView());
-                });
-            }
+               this.ShowErrorAndKill ( new NoInternetException () );
         }
 
         private bool DownloadConfigFiles ()
@@ -331,43 +317,49 @@ namespace aclara_meters
             // Load configuration from XML files
             this.LoadConfiguration ();
 
-            #region Min Date Check
-            
+            // Min Date Check
             try
             {
                 string datenow = DateTime.Now.ToString("MM/dd/yyyy");
                 string mindate = FormsApp.config.global.MinDate;
                 
-                if (DateTime.ParseExact(datenow, "MM/dd/yyyy", null) < DateTime.ParseExact(mindate, "MM/dd/yyyy", null))
+                if ( ! string.IsNullOrEmpty ( mindate ) &&
+                     DateTime.ParseExact(datenow, "MM/dd/yyyy", null) < DateTime.ParseExact(mindate, "MM/dd/yyyy", null))
                 {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        MainPage = new NavigationPage(new ErrorInitView("System is not ahead or equals to Minimum expected Date!"));
-                    });
+                    throw new DeviceMinDateAllowedException ();
                 }
             }
-            catch (Exception)
+            catch ( Exception e )
             {
-            
+                this.ShowErrorAndKill ( e );
+                
+                return;
             }
             
-            #endregion
-            
-            #region Scripting Mode Detection
-            
-            if ( ! ScriptingMode )
+            if ( ! ScriptingMode &&
+                 ! this.errorCreatingConfig )
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
                 });
-
-            #endregion
         }
 
         private void LoadConfiguration ()
         {
-            config  = Configuration.GetInstance ();
-            loggger = new Logger ( config );
+            try
+            {
+                config  = Configuration.GetInstance ();
+            }
+            catch ( Exception e )
+            {
+                // Avoid starting the creation of the login window
+                this.errorCreatingConfig = true;
+                this.ShowErrorAndKill ( e );
+               
+                return;
+            }
+
+            loggger = new Logger ();
 
             switch ( Device.RuntimePlatform )
             {
@@ -476,15 +468,17 @@ namespace aclara_meters
 
         protected override void OnResume()
         {
-            if(ScriptingMode)
-            {
-                MainPage = new NavigationPage(new AclaraViewScripting(path, callback, script_name));
-
-                await MainPage.Navigation.PopToRootAsync(true);
-            }
-            Console.Write("-------------- resume app {ScriptingMode}");
         }
 
         #endregion
+        
+        private void ShowErrorAndKill (
+            Exception e )
+        {
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                this.MainPage = new NavigationPage ( new ErrorInitView ( e ) );
+            });
+        }
     }
 }

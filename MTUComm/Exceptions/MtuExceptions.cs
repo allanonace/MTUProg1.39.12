@@ -1,156 +1,195 @@
-﻿using System;
-
-namespace MTUComm.Exceptions
+﻿namespace MTUComm.Exceptions
 {
-    public class MtuTypeIsNotFoundException : OwnExceptionsBase
-    {
-        public MtuTypeIsNotFoundException () { }
-        public MtuTypeIsNotFoundException ( string message, int port = 1 ) : base ( message, port ) { }
-    }
-    
-    public class MtuNotSupportMeterException : OwnExceptionsBase
-    {
-        public MtuNotSupportMeterException () { }
-        public MtuNotSupportMeterException ( string message, int port = 1 ) : base ( message, port ) { }
-    }
-    
+    // MTU [ 1xx ]
+    //----
     public class MtuHasChangeBeforeFinishActionException : OwnExceptionsBase
     {
-        public MtuHasChangeBeforeFinishActionException () { }
-        public MtuHasChangeBeforeFinishActionException ( string message, int port = 1 ) : base ( message, port ) { }
+        public MtuHasChangeBeforeFinishActionException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class PuckCantCommWithMtuException : OwnExceptionsBase
     {
-        public PuckCantCommWithMtuException () { }
-        public PuckCantCommWithMtuException ( string message, int port = 1 ) : base ( message, port ) { }
+        public PuckCantCommWithMtuException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class PuckCantReadFromMtuAfterWritingException : OwnExceptionsBase
     {
-        public PuckCantReadFromMtuAfterWritingException () { }
-        public PuckCantReadFromMtuAfterWritingException ( string message, int port = 1 ) : base ( message, port ) { }
+        public PuckCantReadFromMtuAfterWritingException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
-    public class AttemptNotAchievedTurnOffException : OwnExceptionsBase
+    // Meter [ 2xx ]
+    //------
+
+    public class MtuTypeIsNotFoundException : OwnExceptionsBase
     {
-        public AttemptNotAchievedTurnOffException () { }
-        public AttemptNotAchievedTurnOffException ( string message, int port = 1 ) : base ( message, port ) { }
+        public MtuTypeIsNotFoundException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
-    public class ActionNotAchievedTurnOffException : OwnExceptionsBase
+    public class MtuNotSupportMeterException : OwnExceptionsBase
     {
-        public ActionNotAchievedTurnOffException () { }
-        public ActionNotAchievedTurnOffException ( string message, int port = 1 ) : base ( message, port ) { }
-    }
-    
-    public class ScriptingAlarmForCurrentMtuException : OwnExceptionsBase
-    {
-        public ScriptingAlarmForCurrentMtuException () { }
-        public ScriptingAlarmForCurrentMtuException ( string message, int port = 1 ) : base ( message, port ) { }
-    }
-    
-    public class SelectedAlarmForCurrentMtuException : OwnExceptionsBase
-    {
-        public SelectedAlarmForCurrentMtuException () { }
-        public SelectedAlarmForCurrentMtuException ( string message, int port = 1 ) : base ( message, port ) { }
-    }
-    
-    public class NumberOfDialsTagMissingScript : OwnExceptionsBase
-    {
-        public NumberOfDialsTagMissingScript () { }
-        public NumberOfDialsTagMissingScript ( string message, int port = 1 ) : base ( message, port ) { }
-    }
-    
-    public class DriveDialSizeTagMissingScript : OwnExceptionsBase
-    {
-        public DriveDialSizeTagMissingScript () { }
-        public DriveDialSizeTagMissingScript ( string message, int port = 1 ) : base ( message, port ) { }
-    }
-    
-    public class UnitOfMeasureTagMissingScript : OwnExceptionsBase
-    {
-        public UnitOfMeasureTagMissingScript () { }
-        public UnitOfMeasureTagMissingScript ( string message, int port = 1 ) : base ( message, port ) { }
+        public MtuNotSupportMeterException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class ScriptingAutoDetectMeterException : OwnExceptionsBase
     {
-        public ScriptingAutoDetectMeterException () { }
-        public ScriptingAutoDetectMeterException ( string message, int port = 1 ) : base ( message, port ) { }
+        public ScriptingAutoDetectMeterException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
+    
+    public class NumberOfDialsTagMissingScript : OwnExceptionsBase
+    {
+        public NumberOfDialsTagMissingScript ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class DriveDialSizeTagMissingScript : OwnExceptionsBase
+    {
+        public DriveDialSizeTagMissingScript ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class UnitOfMeasureTagMissingScript : OwnExceptionsBase
+    {
+        public UnitOfMeasureTagMissingScript ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    // Scripting Parameters [ 3xx ]
+    //---------------------
     
     public class ProcessingParamsScriptException : OwnExceptionsBase
     {
-        public ProcessingParamsScriptException () { }
-        public ProcessingParamsScriptException ( string message, int port = 1 ) : base ( message, port ) { }
+        public ProcessingParamsScriptException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class ScriptForOnePortButTwoEnabledException : OwnExceptionsBase
     {
-        public ScriptForOnePortButTwoEnabledException () { }
-        public ScriptForOnePortButTwoEnabledException ( string message, int port = 1 ) : base ( message, port ) { }
+        public ScriptForOnePortButTwoEnabledException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class ScriptForTwoPortsButMtuOnlyOneException : OwnExceptionsBase
     {
-        public ScriptForTwoPortsButMtuOnlyOneException () { }
-        public ScriptForTwoPortsButMtuOnlyOneException ( string message, int port = 1 ) : base ( message, port ) { }
+        public ScriptForTwoPortsButMtuOnlyOneException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class ScriptLogfileInvalidException : OwnExceptionsBase
     {
-        public ScriptLogfileInvalidException () { }
-        public ScriptLogfileInvalidException ( string message, int port = 1 ) : base ( message, port ) { }
+        public ScriptLogfileInvalidException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class ScriptActionTypeInvalidException : OwnExceptionsBase
     {
-        public ScriptActionTypeInvalidException () { }
-        public ScriptActionTypeInvalidException ( string message, int port = 1 ) : base ( message, port ) { }
-    }
-    
-    public class ScriptEmptyException : OwnExceptionsBase
-    {
-        public ScriptEmptyException () { }
-        public ScriptEmptyException ( string message, int port = 1 ) : base ( message, port ) { }
+        public ScriptActionTypeInvalidException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class ScriptWrongStructureException : OwnExceptionsBase
     {
-        public ScriptWrongStructureException () { }
-        public ScriptWrongStructureException ( string message, int port = 1 ) : base ( message, port ) { }
+        public ScriptWrongStructureException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
+    
+    public class ScriptEmptyException : OwnExceptionsBase
+    {
+        public ScriptEmptyException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    // Alarm [ 4xx ]
+    //------
+    
+    public class ScriptingAlarmForCurrentMtuException : OwnExceptionsBase
+    {
+        public ScriptingAlarmForCurrentMtuException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class SelectedAlarmForCurrentMtuException : OwnExceptionsBase
+    {
+        public SelectedAlarmForCurrentMtuException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    // Turn Off [ 5xx ]
+    //---------
+    
+    public class AttemptNotAchievedTurnOffException : OwnExceptionsBase
+    {
+        public AttemptNotAchievedTurnOffException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class ActionNotAchievedTurnOffException : OwnExceptionsBase
+    {
+        public ActionNotAchievedTurnOffException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    // Install Confirmation [ 6xx ]
+    //---------------------
     
     public class MtuIsNotTwowayICException : OwnExceptionsBase
     {
-        public MtuIsNotTwowayICException () { }
-        public MtuIsNotTwowayICException ( string message, int port = 1 ) : base ( message, port ) { }
+        public MtuIsNotTwowayICException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class MtuIsAlreadyTurnedOffICException : OwnExceptionsBase
     {
-        public MtuIsAlreadyTurnedOffICException () { }
-        public MtuIsAlreadyTurnedOffICException ( string message, int port = 1 ) : base ( message, port ) { }
-    }
-    
-    public class ActionNotAchievedICException : OwnExceptionsBase
-    {
-        public ActionNotAchievedICException () { }
-        public ActionNotAchievedICException ( string message, int port = 1 ) : base ( message, port ) { }
+        public MtuIsAlreadyTurnedOffICException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class AttemptNotAchievedICException : OwnExceptionsBase
     {
-        public AttemptNotAchievedICException () { }
-        public AttemptNotAchievedICException ( string message, int port = 1 ) : base ( message, port ) { }
+        public AttemptNotAchievedICException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class ActionNotAchievedICException : OwnExceptionsBase
+    {
+        public ActionNotAchievedICException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     // Encryption [ 7xx ]
+    //-----------
     
     public class ActionNotAchievedEncryptionException : OwnExceptionsBase
     {
-        public ActionNotAchievedEncryptionException () { }
-        public ActionNotAchievedEncryptionException ( string message, int port = 1 ) : base ( message, port ) { }
+        public ActionNotAchievedEncryptionException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    // Configuration Files and System [ 8xx ]
+    //-------------------------------
+    
+    public class ConfigurationFilesNotFoundException : OwnExceptionsBase
+    {
+        public ConfigurationFilesNotFoundException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class ConfigurationFilesCorruptedException : OwnExceptionsBase
+    {
+        public ConfigurationFilesCorruptedException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class CertificateFileNotValidException : OwnExceptionsBase
+    {
+        public CertificateFileNotValidException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class CertificateInstalledNotValidException : OwnExceptionsBase
+    {
+        public CertificateInstalledNotValidException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class CertificateInstalledExpiredException : OwnExceptionsBase
+    {
+        public CertificateInstalledExpiredException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class AndroidPermissionsException : OwnExceptionsBase
+    {
+        public AndroidPermissionsException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class FtpDownloadException : OwnExceptionsBase
+    {
+        public FtpDownloadException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class NoInternetException : OwnExceptionsBase
+    {
+        public NoInternetException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class DeviceMinDateAllowedException : OwnExceptionsBase
+    {
+        public DeviceMinDateAllowedException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
 }
