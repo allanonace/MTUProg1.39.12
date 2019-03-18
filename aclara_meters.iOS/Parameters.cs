@@ -4,12 +4,13 @@ using System.Linq;
 using Foundation;
 using Microsoft.Intune.MAM;
 using MTUComm;
+using System.IO;
 
 namespace aclara_meters.iOS
 {
-    public sealed class Online
+    public sealed class Parameters
     {
-        public static bool DownloadIntuneParameters ()
+        public static bool PrepareFromIntune ()
         {
             List <string> listaDatos = new List<string> ();
 
@@ -22,7 +23,7 @@ namespace aclara_meters.iOS
                 NSDictionary paramsGroups    = dictionary.GetDictionaryOfValuesFromKeys ( keys );
                 NSObject     paramsGroup     = paramsGroups.ElementAt ( 0 ).Value;
 
-                var data = Mobile.configData = new Mobile.ConfigData ();
+                var data = Mobile.configData;
 
                 // Convert parameters to string and regenerate the certificate
                 data.ftpUser =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_USER    ) ).ToString ();
@@ -46,6 +47,31 @@ namespace aclara_meters.iOS
                 keys         = null;
                 dictionary   = null;
                 value        = null;
+            }
+            catch ( Exception e )
+            {
+                return false;
+            }
+            return true;
+        }
+        
+        public static bool PrepareFromLocal ()
+        {
+            try
+            {
+                string path = Path.Combine ( Mobile.GetPathConfig (), "certificate.txt" );
+                
+                if ( File.Exists ( path ) )
+                {
+                    var data = Mobile.configData;
+                    data.GenerateCert ( File.ReadAllText ( path ) );
+                    
+                    Console.WriteLine ( "Local parameters loaded.." );
+                    Console.WriteLine ( "FTP: " + data.ftpHost + ":" + data.ftpPort + " - " + data.ftpUser + " [ " + data.ftpPass + " ]" );
+                    Console.WriteLine ( "Certificate: " + data.certificate.FriendlyName + " [ " + data.certificate.NotAfter + " ]" );
+                    
+                    data = null;
+                }
             }
             catch ( Exception e )
             {

@@ -179,7 +179,7 @@
     <Compile Include="BorderlessEntryRenderer.cs" />
     <Compile Include="BorderlessPickerRenderer.cs" />
     <Compile Include="ViewCellTransparent.cs" />
-    <Compile Include="Online.cs" />
+    <Compile Include="Parameters.cs" />
     <Compile Include="BorderlessDatePickerRenderer.cs" />
     <Compile Include="BorderlessTimePickerRenderer.cs" />
   </ItemGroup>

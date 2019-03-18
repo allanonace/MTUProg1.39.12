@@ -6,12 +6,21 @@ namespace MTUComm.Exceptions
     {
         private string message;
         public override string Message { get { return message; }  }
-
-        public OwnExceptionsBase () { }
         
-        public OwnExceptionsBase ( string message )
+        public int Port { private set; get; }
+
+        public OwnExceptionsBase ()
+        {
+            this.message = string.Empty;
+            this.Port    = 1;
+        }
+        
+        public OwnExceptionsBase (
+            string message,
+            int    port )
         {
             this.message = message;
+            this.Port    = port;
         }
     }
 }

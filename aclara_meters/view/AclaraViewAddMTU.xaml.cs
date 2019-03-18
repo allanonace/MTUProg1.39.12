@@ -279,11 +279,6 @@ namespace aclara_meters.view
 
             dialogsSaved = dialogs;
 
-            CheckPageByName();
-        }
-
-        private void CheckPageByName ()
-        {
             this.config = Configuration.GetInstance ();
             this.mtuBasicInfo = MtuForm.mtuBasicInfo;
 
@@ -410,7 +405,7 @@ namespace aclara_meters.view
             int snapReadsFromMem = 6;
 
             snapReadsStep = 1.0;
-            sld_SnapReads.ValueChanged += OnSnapReadsSliderValueChanged;
+            sld_SnapReads.ValueChanged += OnSnapReadsSlider_ValueChanged;
 
             if (snapReadsDefault > -1)
             {
@@ -773,7 +768,7 @@ namespace aclara_meters.view
             this.snapReadsStep  = 1.0;
 
             if ( useDailyReads )
-                this.sld_SnapReads.ValueChanged += OnSnapReadsSliderValueChanged;
+                this.sld_SnapReads.ValueChanged += OnSnapReadsSlider_ValueChanged;
 
             this.sld_SnapReads.Value = ( dailyReadsDefault > -1 ) ? dailyReadsDefault : 13;
 
@@ -1433,8 +1428,6 @@ namespace aclara_meters.view
                     optionalPicker.Name = optionalField.Name.Replace(" ", "_");
                     optionalPicker.Display = optionalField.Display;
 
-                    optionalPicker.SelectedIndexChanged += GenericPicker_SelectedIndexChanged;
-
                     optionalPickers.Add(optionalPicker);
 
                     optionalContainerD.Children.Add(optionalPicker);
@@ -1585,29 +1578,6 @@ namespace aclara_meters.view
             }
         }
 
-        /*
-        private void RegisterEventHandlers()
-        {
-            if ( this.global.AccountDualEntry )
-            {
-                tbx_AccountNumber.Unfocused += (s, e) => { ServicePortId_validate(1); };
-                this.tbx_AccountNumber_2.Unfocused += (s, e) => { ServicePortId_validate(2); };
-                
-                servicePortId_ok.Tapped += ServicePortId_Ok_Tapped;
-                servicePortId_cancel.Tapped += ServicePortId_Cancel_Tapped;
-            }
-
-            if ( this.global.WorkOrderDualEntry )
-            {
-                tbx_WorkOrder.Unfocused += (s, e) => { FieldOrder_validate(1); };
-                this.tbx_WorkOrder_2.Unfocused += (s, e) => { FieldOrder_validate(2); };
-                
-                fieldOrder_ok.Tapped += FieldOrder_Ok_Tapped;
-                fieldOrder_cancel.Tapped += FieldOrder_Cancel_Tapped;
-            }
-        }
-        */
-
         private void TappedListeners ()
         {
             logout_button.Tapped += LogoutTapped;
@@ -1623,8 +1593,8 @@ namespace aclara_meters.view
             replacemeter_ok.Tapped += ReplaceMtuOkTapped;
             replacemeter_cancel.Tapped += ReplaceMtuCancelTapped;
 
-            meter_ok.Tapped += MeterOkTapped;
-            meter_cancel.Tapped += MeterCancelTapped;
+            meter_ok.Tapped += Confirm_Yes_ReplaceMeter;
+            meter_cancel.Tapped += Confirm_No_ReplaceMeter;
 
             port1label.GestureRecognizers.Add(new TapGestureRecognizer
             {
@@ -1641,148 +1611,44 @@ namespace aclara_meters.view
 
             gps_icon_button.Tapped += GpsUpdateButton;
 
-
-            logoff_no.Tapped += LogOffNoTapped;
-            logoff_ok.Tapped += LogOffOkTapped;
+            logoff_no.Tapped += Confirm_Yes_LogOut;
+            logoff_ok.Tapped += Confirm_No_LogOut;
 
             submit_dialog.Clicked += submit_send;
-            cancel_dialog.Clicked += CancelTapped;
+            cancel_dialog.Clicked += Cancel_No;
 
+            dialog_AddMTUAddMeter_ok.Tapped += Confirm_Yes_AddMtuAddMeter;
+            dialog_AddMTUAddMeter_cancel.Tapped += Confirm_No_AddMtuAddMeter;
 
-            dialog_AddMTUAddMeter_ok.Tapped += dialog_AddMTUAddMeter_okTapped;
-            dialog_AddMTUAddMeter_cancel.Tapped += dialog_AddMTUAddMeter_cancelTapped;
+            dialog_AddMTUReplaceMeter_ok.Tapped += Confirm_Yes_AddMtuReplaceMeter;
+            dialog_AddMTUReplaceMeter_cancel.Tapped += Confirm_No_AddMtuReplaceMeter;
 
-            dialog_AddMTUReplaceMeter_ok.Tapped += dialog_AddMTUReplaceMeter_okTapped;
-            dialog_AddMTUReplaceMeter_cancel.Tapped += dialog_AddMTUReplaceMeter_cancelTapped;
+            dialog_ReplaceMTUReplaceMeter_ok.Tapped += Confirm_Yes_ReplaceMtuReplaceMeter;
+            dialog_ReplaceMTUReplaceMeter_cancel.Tapped += Confirm_No_ReplaceMtuReplaceMeter;
 
-            dialog_ReplaceMTUReplaceMeter_ok.Tapped += dialog_ReplaceMTUReplaceMeter_okTapped;
-            dialog_ReplaceMTUReplaceMeter_cancel.Tapped += dialog_ReplaceMTUReplaceMeter_cancelTapped;
-
-
-            dialog_AddMTU_ok.Tapped += dialog_AddMTU_okTapped;
-            dialog_AddMTU_cancel.Tapped += dialog_AddMTU_cancelTapped;
-
-            //if (Device.Idiom == TargetIdiom.Tablet)
-            //{
-            //    hamburger_icon_home.IsVisible = true;
-            //    back_button_home.Tapped += TapToHome_Tabletmode;
-            //}
-
-
-        }
-
-        private void TapToHome_Tabletmode(object sender, EventArgs e)
-        {
-
-            Navigation.PopToRootAsync(false);
-            //int contador = Navigation.NavigationStack.Count;
-
-            //while (contador > 2)
-            //{
-            //    try
-            //    {
-            //        Navigation.PopAsync(false);
-            //    }
-            //    catch (Exception v)
-            //    {
-            //        Console.WriteLine(v.StackTrace);
-            //    }
-            //    contador--;
-            //}
-
-
+            dialog_AddMTU_ok.Tapped += Confirm_Yes_AddMtu;
+            dialog_AddMTU_cancel.Tapped += Confirm_No_AddMtu;
         }
 
         #region Dialogs
 
-        private void DoBasicRead()
+        private void ChangeAction ()
         {
             Device.BeginInvokeOnMainThread(() =>
             {
-                Task.Factory.StartNew(BasicReadThread);
+                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, this.actionType ), false);
+
+                #region New Circular Progress bar Animations    
+
+                backdark_bg.IsVisible = false;
+                indicator.IsVisible = false;
+                background_scan_page.IsEnabled = true;
+
+                #endregion
             });
         }
 
-        void dialog_AddMTUAddMeter_cancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_AddMTUAddMeter.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            Navigation.PopToRootAsync(false);
-        }
-
-        void dialog_AddMTUAddMeter_okTapped(object sender, EventArgs e)
-        {
-            dialog_AddMTUAddMeter.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            this.actionType = this.actionTypeNew;
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                Task.Factory.StartNew(BasicReadThread);
-            });
-
-
-        }
-
-        void dialog_AddMTUReplaceMeter_cancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_AddMTUReplaceMeter.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            Navigation.PopToRootAsync(false);
-        }
-
-        void dialog_AddMTUReplaceMeter_okTapped(object sender, EventArgs e)
-        {
-            dialog_AddMTUReplaceMeter.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            this.actionType = this.actionTypeNew;
-            DoBasicRead();
-
-        }
-
-        void dialog_ReplaceMTUReplaceMeter_cancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            Navigation.PopToRootAsync(false);
-        }
-
-        void dialog_ReplaceMTUReplaceMeter_okTapped(object sender, EventArgs e)
-        {
-            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            this.actionType = this.actionTypeNew;
-            DoBasicRead();
-
-
-        }
-
-        void dialog_AddMTU_cancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_AddMTU.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            Navigation.PopToRootAsync(false);
-        }
-
-        void dialog_AddMTU_okTapped(object sender, EventArgs e)
-        {
-            dialog_AddMTU.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            this.actionType = this.actionTypeNew;
-            DoBasicRead();
-
-        }
-
-        #endregion
-
-        private void CancelTapped(object sender, EventArgs e)
+        private void Cancel_No ( object sender, EventArgs e )
         {
             dialog_open_bg.IsVisible = false;
             Popup_start.IsVisible = false;
@@ -1792,7 +1658,92 @@ namespace aclara_meters.view
             //Navigation.PopToRootAsync(false);
         }
 
-        private void LogOffOkTapped(object sender, EventArgs e)
+        private void Confirm_No_AddMtu (object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_AddMTU.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
+        }
+
+        private void Confirm_Yes_AddMtu (object sender, EventArgs e)
+        {
+            dialog_AddMTU.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            this.actionType = this.actionTypeNew;
+            this.ChangeAction ();
+        }
+
+        private void Confirm_No_AddMtuAddMeter (object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_AddMTUAddMeter.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
+        }
+
+        private void Confirm_Yes_AddMtuAddMeter (object sender, EventArgs e)
+        {
+            dialog_AddMTUAddMeter.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            this.actionType = this.actionTypeNew;
+            this.ChangeAction ();
+        }
+
+        private void Confirm_No_AddMtuReplaceMeter (object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_AddMTUReplaceMeter.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
+        }
+
+        private void Confirm_Yes_AddMtuReplaceMeter (object sender, EventArgs e)
+        {
+            dialog_AddMTUReplaceMeter.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            this.actionType = this.actionTypeNew;
+            this.ChangeAction ();
+        }
+
+        private void Confirm_No_ReplaceMeter ( object sender, EventArgs e )
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_meter_replace_one.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
+        }
+
+        private void Confirm_Yes_ReplaceMeter ( object sender, EventArgs e )
+        {
+            dialog_meter_replace_one.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            this.actionType = this.actionTypeNew;
+            this.ChangeAction ();
+        }
+
+        private void Confirm_No_ReplaceMtuReplaceMeter (object sender, EventArgs e)
+        {
+            dialog_open_bg.IsVisible = false;
+            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            Navigation.PopToRootAsync(false);
+        }
+
+        private void Confirm_Yes_ReplaceMtuReplaceMeter (object sender, EventArgs e)
+        {
+            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            this.actionType = this.actionTypeNew;
+            this.ChangeAction ();
+        }
+
+        private void Confirm_No_LogOut ( object sender, EventArgs e )
         {
 
             if (FormsApp.config.global.UploadPrompt)
@@ -1822,7 +1773,7 @@ namespace aclara_meters.view
            
         }
 
-        private void LogOffNoTapped(object sender, EventArgs e)
+        private void Confirm_Yes_LogOut ( object sender, EventArgs e )
         {
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
@@ -1830,6 +1781,7 @@ namespace aclara_meters.view
             //Navigation.PopToRootAsync(false);
         }
 
+        #endregion
 
         private void InitializeLowerbarLabel ()
         {
@@ -2080,7 +2032,7 @@ namespace aclara_meters.view
                 ItemsSource = list_MeterType_Vendors_2
             };
 
-            pck_MeterType_Vendors_2.SelectedIndexChanged += MeterVendors2Picker_SelectedIndexChanged2;
+            pck_MeterType_Vendors_2.SelectedIndexChanged += MeterVendors2Picker_SelectedIndexChanged;
 
             divDyna_MeterType_Vendors_2 = new StackLayout()
             {
@@ -2146,7 +2098,7 @@ namespace aclara_meters.view
                 StyleId = "pickerModelos2"
             };
 
-            pck_MeterType_Models_2.SelectedIndexChanged += MeterModels2Picker_SelectedIndexChanged2;
+            pck_MeterType_Models_2.SelectedIndexChanged += MeterModels2Picker_SelectedIndexChanged;
 
             divDyna_MeterType_Models_2 = new StackLayout()
             {
@@ -2213,7 +2165,7 @@ namespace aclara_meters.view
                 StyleId = "pickerName2"
             };
 
-            pck_MeterType_Names_2.SelectedIndexChanged += MeterNames2Picker_SelectedIndexChanged2;
+            pck_MeterType_Names_2.SelectedIndexChanged += MeterNames2Picker_SelectedIndexChanged;
 
             divDyna_MeterType_Names_2 = new StackLayout()
             {
@@ -2405,13 +2357,7 @@ namespace aclara_meters.view
 
         #region Pickers
 
-        private void GenericPicker_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            var picker = (Picker)sender;
-            int selectedIndex = picker.SelectedIndex;
-        }
-
-        private void CancelReasonPicker_SelectedIndexChanged(object sender, EventArgs e)
+        private void CancelReasonPicker_SelectedIndexChanged ( object sender, EventArgs e )
         {
             var picker = (Picker)sender;
             int selectedCancelReasonIndex = picker.SelectedIndex;
@@ -2433,11 +2379,6 @@ namespace aclara_meters.view
             }
         }
 
-        private void MeterVendorsPicker_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            this.SetMeterVendor ( ((BorderlessPicker)sender).SelectedIndex );
-        }
-
         private void SetMeterVendor ( int selectedIndex )
         {
             if ( selectedIndex > -1 )
@@ -2453,7 +2394,12 @@ namespace aclara_meters.view
             }
         }
 
-        private void MeterVendors2Picker_SelectedIndexChanged2(object sender, EventArgs e)
+        private void MeterVendorsPicker_SelectedIndexChanged ( object sender, EventArgs e )
+        {
+            this.SetMeterVendor ( ((BorderlessPicker)sender).SelectedIndex );
+        }
+
+        private void MeterVendors2Picker_SelectedIndexChanged ( object sender, EventArgs e )
         {
             int selectedIndex = ((BorderlessPicker)sender).SelectedIndex;
 
@@ -2468,11 +2414,6 @@ namespace aclara_meters.view
                 divDyna_MeterType_Models_2.IsVisible = true;
                 divDyna_MeterType_Names_2.IsVisible = false;
             }
-        }
-
-        private void MeterModelsPicker_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            this.SetMeterModel ( ((BorderlessPicker)sender).SelectedIndex );
         }
 
         private void SetMeterModel ( int selectedIndex )
@@ -2491,7 +2432,12 @@ namespace aclara_meters.view
             }
         }
 
-        private void MeterModels2Picker_SelectedIndexChanged2(object sender, EventArgs e)
+        private void MeterModelsPicker_SelectedIndexChanged ( object sender, EventArgs e )
+        {
+            this.SetMeterModel ( ((BorderlessPicker)sender).SelectedIndex );
+        }
+
+        private void MeterModels2Picker_SelectedIndexChanged ( object sender, EventArgs e )
         {
             int selectedIndex = ((BorderlessPicker)sender).SelectedIndex;
 
@@ -2509,7 +2455,7 @@ namespace aclara_meters.view
             }
         }
 
-        private void MeterNamesPicker_SelectedIndexChanged(object sender, EventArgs e)
+        private void MeterNamesPicker_SelectedIndexChanged ( object sender, EventArgs e )
         {
             if ( ( ( BorderlessPicker )sender ).SelectedIndex > -1 )
             {
@@ -2545,7 +2491,7 @@ namespace aclara_meters.view
             }
         }
 
-        private void MeterNames2Picker_SelectedIndexChanged2(object sender, EventArgs e)
+        private void MeterNames2Picker_SelectedIndexChanged ( object sender, EventArgs e )
         {
             if ( ( ( BorderlessPicker )sender ).SelectedIndex > -1 )
             {
@@ -2585,7 +2531,7 @@ namespace aclara_meters.view
 
         #region Sliders
 
-        void OnSnapReadsSliderValueChanged(object sender, ValueChangedEventArgs e)
+        void OnSnapReadsSlider_ValueChanged ( object sender, ValueChangedEventArgs e )
         {
             var newStep = Math.Round(e.NewValue / snapReadsStep);
 
@@ -2600,7 +2546,7 @@ namespace aclara_meters.view
         object menu_sender;
         ItemTappedEventArgs menu_tappedevents;
 
-        private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
+        private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e )
         {
             ((ListView)sender).SelectedItem = null;
         }
@@ -2662,11 +2608,8 @@ namespace aclara_meters.view
             }
         }
 
-
         private void NavigationController(ActionType page)
         {
-           
-
             if (!isCancellable)
             {
                 //REASON
@@ -2681,7 +2624,6 @@ namespace aclara_meters.view
 
         private void SwitchToControler(ActionType page)
         {
-
             this.actionTypeNew = page; 
 
             switch ( page )
@@ -3207,7 +3149,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            DoBasicRead();
+            this.ChangeAction ();
         }
 
         private void CallLoadViewAddMTUReplaceMeter()
@@ -3216,7 +3158,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            DoBasicRead();
+            this.ChangeAction ();
         }
 
         private void CallLoadViewAddMTUAddMeter()
@@ -3226,8 +3168,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            DoBasicRead();
-
+            this.ChangeAction ();
         }
 
         private void CallLoadViewReplaceMeter()
@@ -3236,7 +3177,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            DoBasicRead();
+            this.ChangeAction ();
         }
 
         private void CallLoadViewReplaceMtu()
@@ -3245,8 +3186,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            DoBasicRead();
-
+            this.ChangeAction ();
         }
 
         private void CallLoadViewTurnOff()
@@ -3263,303 +3203,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            DoBasicRead();
-
-        }
-
-        void BasicReadThread()
-        {
-            MTUComm.Action basicRead = new MTUComm.Action(
-               config: FormsApp.config,
-               serial: FormsApp.ble_interface,
-               type: MTUComm.Action.ActionType.BasicRead,
-               user: FormsApp.credentialsService.UserName);
-
-            /*
-            basicRead.OnFinish += ((s, args) =>
-            { });
-            */
-
-            basicRead.OnFinish += ((s, e) =>
-            {
-                Task.Delay(100).ContinueWith(t =>
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, this.actionType ), false);
-
-                        #region New Circular Progress bar Animations    
-
-                        backdark_bg.IsVisible = false;
-                        indicator.IsVisible = false;
-                        background_scan_page.IsEnabled = true;
-
-                        #endregion
-
-                    })
-                );
-            });
-
-            basicRead.OnError += (() =>
-            {
-                Task.Delay(100).ContinueWith(t =>
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-
-                            #region New Circular Progress bar Animations    
-
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                            background_scan_page.IsEnabled = true;
-
-                            #endregion
-
-                            Application.Current.MainPage.DisplayAlert("Alert", "Cannot read device, try again", "Ok");
-
-                        });
-
-                    })
-                );
-            });
-
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                #region New Circular Progress bar Animations    
-
-                backdark_bg.IsVisible = true;
-                indicator.IsVisible = true;
-                background_scan_page.IsEnabled = false;
-
-                #endregion
-
-            });
-
-            basicRead.Run();
-
-
-
-        }
-
-
-        private void OnCaseInstallConfirm()
-        {
-            background_scan_page.Opacity = 1;
-            //background_scan_page_detail.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-            //background_scan_page_detail.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                navigationDrawerList.SelectedItem = null;
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewInstallConfirmation(dialogsSaved), false);
-                background_scan_page.Opacity = 1;
-                //background_scan_page_detail.Opacity = 1;
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
-
-        }
-
-        private void OnMenuCaseReplaceMeter()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-             Device.BeginInvokeOnMainThread(() =>
-             {
-                 dialog_open_bg.IsVisible = true;
-                 turnoff_mtu_background.IsVisible = true;
-                 dialog_turnoff_one.IsVisible = false;
-                 dialog_turnoff_two.IsVisible = false;
-                 dialog_turnoff_three.IsVisible = false;
-                 dialog_replacemeter_one.IsVisible = false;
-                 dialog_meter_replace_one.IsVisible = true;
-                 background_scan_page.Opacity = 1;
-
-                 if (Device.Idiom == TargetIdiom.Tablet)
-                 {
-                     ContentNav.Opacity = 1;
-                     ContentNav.IsVisible = true;
-                 }
-                 else
-                 {
-                     ContentNav.Opacity = 0;
-                     ContentNav.IsVisible = false;
-                 }
-
-                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-             }));
-        }
-
-        private void OnMenuCaseReplaceMTU()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-             Device.BeginInvokeOnMainThread(() =>
-             {
-                 dialog_open_bg.IsVisible = true;
-                 turnoff_mtu_background.IsVisible = true;
-                 dialog_meter_replace_one.IsVisible = false;
-                 dialog_turnoff_one.IsVisible = false;
-                 dialog_turnoff_two.IsVisible = false;
-                 dialog_turnoff_three.IsVisible = false;
-                 dialog_replacemeter_one.IsVisible = true;
-                 background_scan_page.Opacity = 1;
-
-                 if (Device.Idiom == TargetIdiom.Tablet)
-                 {
-                     ContentNav.Opacity = 1;
-                     ContentNav.IsVisible = true;
-                 }
-                 else
-                 {
-                     ContentNav.Opacity = 0;
-                     ContentNav.IsVisible = false;
-                 }
-
-                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if(Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-             }));
-
-        }
-
-        private void OnMenuCaseTurnOFF()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-             Device.BeginInvokeOnMainThread(() =>
-             {
-                 dialog_open_bg.IsVisible = true;
-                 turnoff_mtu_background.IsVisible = true;
-                 dialog_meter_replace_one.IsVisible = false;
-                 dialog_turnoff_one.IsVisible = true;
-                 dialog_turnoff_two.IsVisible = false;
-                 dialog_turnoff_three.IsVisible = false;
-                 dialog_replacemeter_one.IsVisible = false;
-                 background_scan_page.Opacity = 1;
-
-                 if (Device.Idiom == TargetIdiom.Tablet)
-                 {
-                     ContentNav.Opacity = 1;
-                     ContentNav.IsVisible = true;
-                 }
-                 else
-                 {
-                     ContentNav.Opacity = 0;
-                     ContentNav.IsVisible = false;
-                 }
-
-                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-             }));
-
-        }
-
-        private void OnMenuCaseAddMTU()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-
-            Task.Delay(200).ContinueWith(t =>
-             Device.BeginInvokeOnMainThread(() =>
-             {
-                 navigationDrawerList.SelectedItem = null;
-                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, ActionType.AddMtu), false);
-                 background_scan_page.Opacity = 1;
-
-                 if (Device.Idiom == TargetIdiom.Tablet)
-                 {
-                     ContentNav.Opacity = 1;
-                     ContentNav.IsVisible = true;
-                 }
-                 else
-                 {
-                     ContentNav.Opacity = 0;
-                     ContentNav.IsVisible = false;
-                 }
-
-                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-             }));
-        }
-
-        private void OnMenuCaseReadMTU()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-
-            Task.Delay(200).ContinueWith(t =>
-             Device.BeginInvokeOnMainThread(() =>
-             {
-                 navigationDrawerList.SelectedItem = null;
-                 Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
-                 background_scan_page.Opacity = 1;
-
-                 if (Device.Idiom == TargetIdiom.Tablet)
-                 {
-                     ContentNav.Opacity = 1;
-                     ContentNav.IsVisible = true;
-                 }
-                 else
-                 {
-                     ContentNav.Opacity = 0;
-                     ContentNav.IsVisible = false;
-                 }
-
-                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-             }));
+            this.ChangeAction ();
         }
 
         private void OpenSettingsCallAsync(object sender, EventArgs e)
@@ -3584,8 +3228,6 @@ namespace aclara_meters.view
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
-
-
 
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
@@ -3625,7 +3267,6 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-
                             #region New Circular Progress bar Animations    
 
                             backdark_bg.IsVisible = false;
@@ -3633,8 +3274,6 @@ namespace aclara_meters.view
                             background_scan_page.IsEnabled = true;
 
                             #endregion
-
-
                         });
 
                         return;
@@ -3661,7 +3300,6 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-
                             #region New Circular Progress bar Animations    
 
                           
@@ -3670,10 +3308,7 @@ namespace aclara_meters.view
                             background_scan_page.IsEnabled = true;
 
                             #endregion
-
-
                         });
-
                     }
                 }
                 catch (Exception i2)
@@ -3682,7 +3317,6 @@ namespace aclara_meters.view
                 }
             }));
         }
-
 
         private async void LogoutTapped(object sender, EventArgs e)
         {
@@ -3701,41 +3335,9 @@ namespace aclara_meters.view
                 dialog_open_bg.IsVisible = true;
                 turnoff_mtu_background.IsVisible = true;
             });
-            
 
             #endregion
-
-
-            /*
-            Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
-
-            int contador = Navigation.NavigationStack.Count;
-            while (contador > 0)
-            {
-                try
-                {
-                    await Navigation.PopAsync(false);
-                }
-                catch (Exception v)
-                {
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
-
-            try
-            {
-                await Navigation.PopToRootAsync(false);
-            }
-            catch (Exception v1)
-            {
-                Console.WriteLine(v1.StackTrace);
-            }
-            */
-
         }
-
 
         private void ReplaceMtuCancelTapped(object sender, EventArgs e)
         {
@@ -3751,10 +3353,8 @@ namespace aclara_meters.view
             turnoff_mtu_background.IsVisible = false;
 
             this.actionType = this.actionTypeNew;
-            DoBasicRead();
-
+            this.ChangeAction ();
         }
-
 
         private void TurnOffMTUCloseTapped(object sender, EventArgs e)
         {
@@ -3779,7 +3379,7 @@ namespace aclara_meters.view
             Task.Factory.StartNew(TurnOffMethod);
         }
 
-        private void TurnOffMethod()
+        private void TurnOffMethod ()
         {
             MTUComm.Action turnOffAction = new MTUComm.Action(
                 config: FormsApp.config,
@@ -3814,101 +3414,6 @@ namespace aclara_meters.view
             });
 
             turnOffAction.Run();
-        }
-
-
-        void MeterCancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_meter_replace_one.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            Navigation.PopToRootAsync(false);
-        }
-
-        void MeterOkTapped(object sender, EventArgs e)
-        {
-            dialog_meter_replace_one.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            this.actionType = this.actionTypeNew;
-            DoBasicRead();
-
-
-        }
-
-
-        #endregion
-
-        #region Confirmation dialogs
-
-        private void ServicePortId_Ok_Tapped(object sender, EventArgs e)
-        {
-            // TODO
-            return;
-            
-            /*
-            if (tbx_AccountNumber.Text.Equals(serviceCheckEntry.Text))
-            {
-                errorServicePort.IsVisible = false;
-                dialog_open_bg.IsVisible = false;
-                turnoff_mtu_background.IsVisible = false;
-                dialog_servicePortId.IsVisible = false;
-                serviceCheckEntry.Text = "";
-            }
-            else
-            {
-                errorServicePort.IsVisible = true;
-            }
-            */
-        }
-
-        private void ServicePortId_Cancel_Tapped(object sender, EventArgs e)
-        {
-            // TODO
-            return;
-        
-            /*
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            dialog_servicePortId.IsVisible = false;
-            errorServicePort.IsVisible = false;
-            tbx_AccountNumber.Text = "";
-            */
-        }
-
-        private void FieldOrder_Ok_Tapped(object sender, EventArgs e)
-        {
-            // TODO
-            return;
-
-            /*
-            if (tbx_WorkOrder.Text.Equals(fieldOrderCheckEntry.Text))
-            {
-                errorFieldOrder.IsVisible = false;
-                dialog_open_bg.IsVisible = false;
-                turnoff_mtu_background.IsVisible = false;
-                dialog_fieldOrder.IsVisible = false;
-                fieldOrderCheckEntry.Text = "";
-            }
-            else
-            {
-                errorFieldOrder.IsVisible = true;
-            }
-            */
-        }
-
-        private void FieldOrder_Cancel_Tapped(object sender, EventArgs e)
-        {
-            // TODO
-            return;
-        
-            /*
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            dialog_fieldOrder.IsVisible = false;
-            errorFieldOrder.IsVisible = false;
-            tbx_WorkOrder.Text = "";
-            */
         }
 
         #endregion
@@ -4530,210 +4035,7 @@ namespace aclara_meters.view
                     background_scan_page.IsEnabled = false;
                     ChangeLowerButtonImage(true);
 
-                    #region comment
-                    //}));
-                    /*Task.Delay(100).ContinueWith(t =>
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        backdark_bg.IsVisible = true;
-                        indicator.IsVisible = true;
-                        _userTapped = true;
-                        background_scan_page.IsEnabled = false;
-                        ChangeLowerButtonImage(true);
-
-
-                        Task.Delay(1000).ContinueWith(t0 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtuShortTime, 5);
-                        }));
-
-                        Task.Delay(2000).ContinueWith(t1 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtuShortTime, 4);
-                        }));
-
-                        Task.Delay(3000).ContinueWith(t2 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtuShortTime, 3);
-                        }));
-
-                        Task.Delay(4000).ContinueWith(t3 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtuShortTime, 2);
-                        }));
-
-                        Task.Delay(5000).ContinueWith(t4 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtuShortTime, 1);
-                        }));
-
-                        Task.Delay(6000).ContinueWith(t5 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.PreparingToProgram, 0);
-                        }));
-
-                        Task.Delay(7000).ContinueWith(t6 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.TurningOffMtu, 0);
-                        }));
-
-                        Task.Delay(8000).ContinueWith(t7 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.ReadingMtuAgain, 0);
-                        }));
-
-                        Task.Delay(9000).ContinueWith(t8 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 20);
-                        }));
-
-                        Task.Delay(10000).ContinueWith(t9 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 19);
-                        }));
-
-                        Task.Delay(11000).ContinueWith(t10 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 18);
-                        }));
-
-                        Task.Delay(12000).ContinueWith(t11 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 17);
-                        }));
-
-                        Task.Delay(13000).ContinueWith(t12 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.ProgramingMtu, 0);
-                        }));
-
-                        Task.Delay(14000).ContinueWith(t13 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.VerifyingMtuData, 0);
-                        }));
-
-
-                        Task.Delay(15000).ContinueWith(t14 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 20);
-                        }));
-
-                        Task.Delay(16000).ContinueWith(t15 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 19);
-                        }));
-
-                        Task.Delay(17000).ContinueWith(t16 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 18);
-                        }));
-
-                        Task.Delay(18000).ContinueWith(t17 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            label_read.Text = GetStringFromMTUStatus(MTUStatus.CheckingEnconderShortTime, 17);
-                        }));
-
-                        Task.Delay(19000).ContinueWith(t18 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.TurningOnMtu, 0);
-                        }));
-
-                        Task.Delay(20000).ContinueWith(t17 =>
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                             label_read.Text = GetStringFromMTUStatus(MTUStatus.ReadingMtu, 0);
-
-                             //ThreadProcedureMTUCOMMAction();
-                             FinalReadListView = new List<ReadMTUItem>();
-
-
-                             FinalReadListView.Add(new ReadMTUItem()
-                             {
-                                 Title = "Param Field" + ":",
-                                 isDisplayed = "true",
-                                 Height = "64",
-                                 isMTU = "true",
-                                 isMeter = "false",
-                                 Description = "99" //parameter.Value
-                             });
-
-                             FinalReadListView.Add(new ReadMTUItem()
-                             {
-                                 Title = "Here lies the Port title...",
-                                 isDisplayed = "true",
-                                 Height = "40",
-                                 isMTU = "false",
-                                 isMeter = "true",
-                                 Description = "Port " + "99" + ": " + " PlaceHolder"
-                             });
-
-                             FinalReadListView.Add(new ReadMTUItem()
-                             {
-                                 Title = "\t\t" + "Param Field" + ":",
-                                 isDisplayed = "true",
-                                 Height = "64",
-                                 isMTU = "true",
-                                 isMeter = "false",
-                                 Description = "\t\t" + "99"//parameter.Value
-                             });
-
-
-                             FinalReadListView.Add(new ReadMTUItem()
-                             {
-                                 Title = "Another Param Field" + ":",
-                                 isDisplayed = "true",
-                                 Height = "64",
-                                 isMTU = "true",
-                                 isMeter = "false",
-                                 Description = "99" //parameter.Value
-                             });
-
-
-                             ReadMTUChangeView.IsVisible = false;
-                             listaMTUread.IsVisible = true;
-                             listaMTUread.ItemsSource = FinalReadListView;
-
-                             Task.Run(() =>
-                             {
-                                 Device.BeginInvokeOnMainThread(() =>
-                                 {
-                                     label_read.Opacity = 1;
-                                     backdark_bg.IsVisible = false;
-                                     indicator.IsVisible = false;
-                                     _userTapped = false;
-                                     ChangeLowerButtonImage(false);
-                                     background_scan_page.IsEnabled = true;
-                                 });
-                             });
-                        }));
-                    }));*/
-                    //    Device.BeginInvokeOnMainThread(() =>
-                    //{
-                    #endregion
-
                     Task.Factory.StartNew(AddMtu_Action);
-                    //Task.Run ( async () => await AddMtu_Action () );
-                    //AddMtu_Action();
                 });
             }
         }
@@ -4897,6 +4199,9 @@ namespace aclara_meters.view
                     value_alr = ( Alarm )this.pck_Alarms.SelectedItem;
             }
 
+            // Reset needed when same actions is launched more than one time ( Exception/error )
+            this.addMtuForm.RemoveParameters ();
+
             #endregion
 
             #region Set parameters Port 1
@@ -5052,216 +4357,216 @@ namespace aclara_meters.view
 
             #endregion
 
-            #region OnProgress
+            #region Events
 
-            this.add_mtu.OnProgress += ( ( s, e ) =>
-            {
-                string mensaje = e.Message;
+            this.add_mtu.OnProgress -= OnProgress;
+            this.add_mtu.OnProgress += OnProgress;
 
-                Device.BeginInvokeOnMainThread ( () =>
-                {
-                    if ( ! string.IsNullOrEmpty ( mensaje ) )
-                        label_read.Text = mensaje;
-                });
-            });
+            this.add_mtu.OnFinish -= OnFinish;
+            this.add_mtu.OnFinish += OnFinish;
 
-            #endregion
-
-            #region OnFinish
-
-            this.add_mtu.OnFinish += ( ( s, e ) =>
-            {
-                FinalReadListView = new List<ReadMTUItem>();
-
-                Parameter[] paramResult = e.Result.getParameters();
-
-                int mtu_type = 0;
-
-                // Get MtuType = MtuID
-                foreach ( Parameter p in paramResult)
-                {
-                    if ( ! string.IsNullOrEmpty ( p.CustomParameter ) &&
-                         p.CustomParameter.Equals ( "MtuType" ) )
-                        mtu_type = Int32.Parse(p.Value.ToString());
-                }
-
-                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, ActionType.ReadMtu );
-
-                foreach (InterfaceParameters iParameter in interfacesParams)
-                {
-                    // Port 1 or 2 log section
-                    if (iParameter.Name.Equals("Port"))
-                    {
-                        ActionResult[] ports = e.Result.getPorts ();
-
-                        for ( int i = 0; i < ports.Length; i++ )
-                        {
-                            foreach ( InterfaceParameters pParameter in iParameter.Parameters )
-                            {
-                                Parameter param = null;
-
-                                // Port header
-                                if (pParameter.Name.Equals("Description"))
-                                {
-                                    string description;
-                                    param = ports[i].getParameterByTag ( pParameter.Name );
-                                    
-                                    // For Read action when no Meter is installed on readed MTU
-                                    if ( param != null )
-                                         description = param.Value;
-                                    else description = MTUComm.Action.currentMtu.Ports[i].GetProperty ( pParameter.Name );
-                                    
-                                    FinalReadListView.Add(new ReadMTUItem()
-                                    {
-                                        Title = "Here lies the Port title...",
-                                        isDisplayed = "true",
-                                        Height = "40",
-                                        isMTU = "false",
-                                        isMeter = "true",
-                                        Description = "Port " + ( i + 1 ) + ": " + description
-                                        //Description = "Port " + ( i + 1 ) + ": " + ( ( param != null ) ? param.Value : "Not Installed" )
-                                    });
-                                }
-                                // Port fields
-                                else
-                                {
-                                    /*
-                                    if ( ! string.IsNullOrEmpty ( pParameter.Source ) &&
-                                         pParameter.Source.Contains ( "." ) )
-                                    {
-                                        string tag = pParameter.Source.Split(new char[] { '.' })[ 1 ];
-                                        param = ports[ i ].getParameterByTag ( tag );
-                                    }
-
-                                    if ( param == null )
-                                        param = e.Result.getParameterByTag ( pParameter.Name );
-
-                                    if ( param != null )
-                                        FinalReadListView.Add(new ReadMTUItem()
-                                        {
-                                            Title = param.getLogDisplay() + ":",
-                                            isDisplayed = "true",
-                                            Height = "70",
-                                            isMTU = "false",
-                                            isDetailMeter = "true",
-                                            isMeter = "false",
-                                            Description = param.Value
-                                        });
-                                    */
-                                    string tag = pParameter.Name;
-
-                                    if ( ! string.IsNullOrEmpty ( pParameter.Source ) &&
-                                         pParameter.Source.Contains ( "." ) )
-                                        tag = pParameter.Source.Split(new char[] { '.' })[ 1 ];
-
-                                    if ( ! string.IsNullOrEmpty ( tag ) )
-                                        param = ports[ i ].getParameterByTag ( tag );
-
-                                    if ( param != null )
-                                        FinalReadListView.Add(new ReadMTUItem()
-                                        {
-                                            Title = param.getLogDisplay() + ":",
-                                            isDisplayed = "true",
-                                            Height = "70",
-                                            isMTU = "false",
-                                            isDetailMeter = "true",
-                                            isMeter = "false",
-                                            Description = param.Value
-                                        });
-                                }
-                            }
-                        }
-                    }
-
-                    // Root log fields
-                    else
-                    {
-                        Parameter param = null;
-                       
-                        if ( ! string.IsNullOrEmpty ( iParameter.Source ) &&
-                             iParameter.Source.Contains ( "." ) )
-                        {
-                            string tag = iParameter.Source.Split(new char[] { '.' })[ 1 ];
-                            param = e.Result.getParameterByTag ( tag );
-                        }
-
-                        if ( param == null )
-                            param = e.Result.getParameterByTag ( iParameter.Name );
-
-                        if (param != null)
-                        {
-                            FinalReadListView.Add(new ReadMTUItem()
-                            {
-                                Title = param.getLogDisplay() + ":",
-                                isDisplayed = "true",
-                                Height = "64",
-                                isMTU = "true",
-                                isMeter = "false",
-                                Description = param.Value
-                            });
-                        }
-                    }
-                }
-
-                Task.Delay(100).ContinueWith(t =>
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    _userTapped = false;
-                    bg_read_mtu_button.NumberOfTapsRequired = 1;
-                    ChangeLowerButtonImage(false);
-                    backdark_bg.IsVisible = false;
-                    indicator.IsVisible = false;
-                    label_read.Text = "Successful MTU write";
-                    background_scan_page.IsEnabled = true;
-                    ReadMTUChangeView.IsVisible = false;
-                    listaMTUread.IsVisible = true;
-                    listaMTUread.ItemsSource = FinalReadListView;
-
-                   #region Hide button
-
-                    bg_read_mtu_button_img.IsEnabled = false;
-                    bg_read_mtu_button_img.Opacity = 0;
-
-                    #endregion
-
-
-                }));
-            });
-
-            #endregion
-
-            #region OnError
-
-            this.add_mtu.OnError += ( () =>
-            {
-                Error error = Errors.LastError;
-            
-                Console.WriteLine("Action Errror");
-                Console.WriteLine("Press Key to Exit");
-                // Console.WriteLine(s.ToString());
-
-                String result = error.Message;
-
-                Task.Delay(100).ContinueWith(t =>
-                  Device.BeginInvokeOnMainThread(() =>
-                  {
-                      _userTapped = false;
-                      bg_read_mtu_button.NumberOfTapsRequired = 1;
-                      ChangeLowerButtonImage(false);
-                      backdark_bg.IsVisible = false;
-                      indicator.IsVisible = false;
-                      label_read.Text = result;
-                      background_scan_page.IsEnabled = true;
-                  }));
-
-                DisplayAlert("Error", result, "Ok");
-                Console.WriteLine(result.ToString());
-            });
+            this.add_mtu.OnError -= OnError;
+            this.add_mtu.OnError += OnError;
 
             #endregion
 
             // Launch action!
             add_mtu.Run ( this.addMtuForm );
+        }
+
+        private void OnProgress ( object sender, MTUComm.Action.ActionProgressArgs e )
+        {
+            string mensaje = e.Message;
+
+            Device.BeginInvokeOnMainThread ( () =>
+            {
+                if ( ! string.IsNullOrEmpty ( mensaje ) )
+                    label_read.Text = mensaje;
+            });
+        }
+        
+        private void OnFinish ( object sender, MTUComm.Action.ActionFinishArgs e )
+        {
+            FinalReadListView = new List<ReadMTUItem>();
+
+            Parameter[] paramResult = e.Result.getParameters();
+
+            int mtu_type = 0;
+
+            // Get MtuType = MtuID
+            foreach ( Parameter p in paramResult)
+            {
+                if ( ! string.IsNullOrEmpty ( p.CustomParameter ) &&
+                     p.CustomParameter.Equals ( "MtuType" ) )
+                    mtu_type = Int32.Parse(p.Value.ToString());
+            }
+
+            InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, ActionType.ReadMtu );
+
+            foreach (InterfaceParameters iParameter in interfacesParams)
+            {
+                // Port 1 or 2 log section
+                if (iParameter.Name.Equals("Port"))
+                {
+                    ActionResult[] ports = e.Result.getPorts ();
+
+                    for ( int i = 0; i < ports.Length; i++ )
+                    {
+                        foreach ( InterfaceParameters pParameter in iParameter.Parameters )
+                        {
+                            Parameter param = null;
+
+                            // Port header
+                            if (pParameter.Name.Equals("Description"))
+                            {
+                                string description;
+                                param = ports[i].getParameterByTag ( pParameter.Name );
+                                
+                                // For Read action when no Meter is installed on readed MTU
+                                if ( param != null )
+                                     description = param.Value;
+                                else description = MTUComm.Action.currentMtu.Ports[i].GetProperty ( pParameter.Name );
+                                
+                                FinalReadListView.Add(new ReadMTUItem()
+                                {
+                                    Title = "Here lies the Port title...",
+                                    isDisplayed = "true",
+                                    Height = "40",
+                                    isMTU = "false",
+                                    isMeter = "true",
+                                    Description = "Port " + ( i + 1 ) + ": " + description
+                                    //Description = "Port " + ( i + 1 ) + ": " + ( ( param != null ) ? param.Value : "Not Installed" )
+                                });
+                            }
+                            // Port fields
+                            else
+                            {
+                                /*
+                                if ( ! string.IsNullOrEmpty ( pParameter.Source ) &&
+                                     pParameter.Source.Contains ( "." ) )
+                                {
+                                    string tag = pParameter.Source.Split(new char[] { '.' })[ 1 ];
+                                    param = ports[ i ].getParameterByTag ( tag );
+                                }
+
+                                if ( param == null )
+                                    param = e.Result.getParameterByTag ( pParameter.Name );
+
+                                if ( param != null )
+                                    FinalReadListView.Add(new ReadMTUItem()
+                                    {
+                                        Title = param.getLogDisplay() + ":",
+                                        isDisplayed = "true",
+                                        Height = "70",
+                                        isMTU = "false",
+                                        isDetailMeter = "true",
+                                        isMeter = "false",
+                                        Description = param.Value
+                                    });
+                                */
+                                string tag = pParameter.Name;
+
+                                if ( ! string.IsNullOrEmpty ( pParameter.Source ) &&
+                                     pParameter.Source.Contains ( "." ) )
+                                    tag = pParameter.Source.Split(new char[] { '.' })[ 1 ];
+
+                                if ( ! string.IsNullOrEmpty ( tag ) )
+                                    param = ports[ i ].getParameterByTag ( tag );
+
+                                if ( param != null )
+                                    FinalReadListView.Add(new ReadMTUItem()
+                                    {
+                                        Title = param.getLogDisplay() + ":",
+                                        isDisplayed = "true",
+                                        Height = "70",
+                                        isMTU = "false",
+                                        isDetailMeter = "true",
+                                        isMeter = "false",
+                                        Description = param.Value
+                                    });
+                            }
+                        }
+                    }
+                }
+
+                // Root log fields
+                else
+                {
+                    Parameter param = null;
+                   
+                    if ( ! string.IsNullOrEmpty ( iParameter.Source ) &&
+                         iParameter.Source.Contains ( "." ) )
+                    {
+                        string tag = iParameter.Source.Split(new char[] { '.' })[ 1 ];
+                        param = e.Result.getParameterByTag ( tag );
+                    }
+
+                    if ( param == null )
+                        param = e.Result.getParameterByTag ( iParameter.Name );
+
+                    if (param != null)
+                    {
+                        FinalReadListView.Add(new ReadMTUItem()
+                        {
+                            Title = param.getLogDisplay() + ":",
+                            isDisplayed = "true",
+                            Height = "64",
+                            isMTU = "true",
+                            isMeter = "false",
+                            Description = param.Value
+                        });
+                    }
+                }
+            }
+
+            Task.Delay(100).ContinueWith(t =>
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                _userTapped = false;
+                bg_read_mtu_button.NumberOfTapsRequired = 1;
+                ChangeLowerButtonImage(false);
+                backdark_bg.IsVisible = false;
+                indicator.IsVisible = false;
+                label_read.Text = "Successful MTU write";
+                background_scan_page.IsEnabled = true;
+                ReadMTUChangeView.IsVisible = false;
+                listaMTUread.IsVisible = true;
+                listaMTUread.ItemsSource = FinalReadListView;
+
+               #region Hide button
+
+                bg_read_mtu_button_img.IsEnabled = false;
+                bg_read_mtu_button_img.Opacity = 0;
+
+                #endregion
+
+
+            }));
+        }
+
+        private void OnError ()
+        {
+            Error error = Errors.LastError;
+            
+            Console.WriteLine("Action Errror");
+            Console.WriteLine("Press Key to Exit");
+            // Console.WriteLine(s.ToString());
+
+            String result = error.Message;
+
+            Task.Delay(100).ContinueWith(t =>
+              Device.BeginInvokeOnMainThread(() =>
+              {
+                  _userTapped = false;
+                  bg_read_mtu_button.NumberOfTapsRequired = 1;
+                  ChangeLowerButtonImage(false);
+                  backdark_bg.IsVisible = false;
+                  indicator.IsVisible = false;
+                  label_read.Text = result;
+                  background_scan_page.IsEnabled = true;
+              }));
+
+            Console.WriteLine(result.ToString());
         }
 
         #endregion

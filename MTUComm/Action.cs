@@ -331,6 +331,7 @@ namespace MTUComm
                 switch (type)
                 {
                     case ActionType.ReadMtu:
+                        comm.OnReadMtu -= Comm_OnReadMtu;
                         comm.OnReadMtu += Comm_OnReadMtu;
                         break;
 
@@ -340,6 +341,8 @@ namespace MTUComm
                     case ActionType.ReplaceMTU:
                     case ActionType.ReplaceMeter:
                     case ActionType.ReplaceMtuReplaceMeter:
+                        comm.OnAddMtu   -= Comm_OnAddMtu;
+                        comm.OnProgress -= Comm_OnProgress;
                         comm.OnAddMtu   += Comm_OnAddMtu;
                         comm.OnProgress += Comm_OnProgress;
                         // Interactive and Scripting
@@ -349,15 +352,19 @@ namespace MTUComm
                         break;
 
                     case ActionType.TurnOffMtu:
+                        comm.OnTurnOffMtu -= Comm_OnTurnOffMtu;
                         comm.OnTurnOffMtu += Comm_OnTurnOffMtu;
                         break;
 
                     case ActionType.TurnOnMtu:
+                        comm.OnTurnOnMtu -= Comm_OnTurnOnMtu;
                         comm.OnTurnOnMtu += Comm_OnTurnOnMtu;
                         break;
 
                     case ActionType.MtuInstallationConfirmation:
-                        comm.OnReadMtu += Comm_OnReadMtu;
+                        comm.OnReadMtu  -= Comm_OnReadMtu;
+                        comm.OnProgress -= Comm_OnProgress;
+                        comm.OnReadMtu  += Comm_OnReadMtu;
                         comm.OnProgress += Comm_OnProgress;
                         break;
 
@@ -374,11 +381,13 @@ namespace MTUComm
                             this.OnError (); //this, new ActionErrorArgs("Days Of Read parameter Invalid"));
                             break;
                         }
+                        comm.OnReadMtuData -= Comm_OnReadMtuData;
                         comm.OnReadMtuData += Comm_OnReadMtuData;
                         parameters.Add(DaysOfRead);
                         break;
 
                     case ActionType.BasicRead:
+                        comm.OnBasicRead -= Comm_OnBasicRead;
                         comm.OnBasicRead += Comm_OnBasicRead;
                         break;
                 }
@@ -767,12 +776,6 @@ namespace MTUComm
                 result.AddParameter(new Parameter("Status", "Status", "Not Installed"));
                 result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", "000000000"));
                 result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
-                /*
-                result.AddParameter(new Parameter("MeterType", "Meter Type", "Not Installed"));
-                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", meterid.ToString()));
-                result.AddParameter(new Parameter("AcctNumber", "Service Pt. ID", "000000000"));
-                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
-                */
             }
 
             return result;

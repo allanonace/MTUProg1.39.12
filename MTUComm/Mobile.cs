@@ -51,18 +51,13 @@ namespace MTUComm
                 this.ftpPath = "/home/aclara";
             }
 
-            private string Base64Encode(string plainText)
-            {
-                var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
-                return System.Convert.ToBase64String(plainTextBytes);
-            }
-
             public void GenerateCert (
                 string base64cert )
             {
                 // NOTE: Full certificate file should be converted to base64 and not only the data that appear when
                 // open the file with some text editor. The resulting string will be without header and footer strings
                 // and seems that always starting with "MII..."
+                // https://www.base64encode.org
                 // e.g. Aclara certificate in base64
                 // base64cert = "MIICxDCCAaygAwIBAgIQV5fB/SvFm4VDwxNIjmx3LzANBgkqhkiG9w0BAQUFADAeMRwwGgYDVQQDExNOZXctVGVzdC1EZXYtQWNsYXJhMB4XDTE1MDQxNTA0MDAwMFoXDTI1MDQyMjA0MDAwMFowHjEcMBoGA1UEAxMTTmV3LVRlc3QtRGV2LUFjbGFyYTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANOISmTy1kRTeOPqajIm+y27q676LFKodBpgrm0M3imYpwnVd+aTnVdk7+NT5vSA1c9dB5PSojh/UfGg2kWDe5gNj2ZA+KaemXFqvl8YI/D6XjoNz3JqoqocjF4/hJnrUdwqOoUL6WPtbWEhCnzin/cVkKx5qxMrOh9qAzp+qYAqyJ26Aocr+nlM7oHRtBUmYRKZbpkNAnpiIV/Q6quSR5Qzsf4XrhvkPDkf2ZX8DvcJmAbXEAaBVa2ORsY9qA86jIphui5kwI9JPcw9hTZy1QxvNcZAijtPyC6AKDuRyEv0Awa1gcSBBRsf0HbeCSD91U/O51+alP3hLhA9tcxddx0CAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAGuTqwTvEgaTl/E2jdG9RUD3zN9MhRCijJIpjv9NdkkH13LK5Sn9up1+DraaccA5h2El9kiXDHYWPA/qRMq1auhNcmTFVYjeQSNW0tyuTqbQiG/8fwZiAZrGn6UmOU/vzzhkyv05x5KzVAEwp94fU/J+kOIJVH0ff5jnMeYHARc1sY6JgXgJKoJbdS4Q4wG2RHj5yFAixv/zwS1XBy2GWtsz03aucNQzBIbk1uTIv2eyYqFMhSGT36vkfJFidRcR3H4FWnvInWoWmxlGcs0MS3bNOAv5ij55h0rREGJ9WdJmI/gw84aA4itFwwUuG6kKdF9AF/rljtVCFVH6T9PFI2Q==";
 
@@ -70,17 +65,7 @@ namespace MTUComm
                 // NOTE: Method PEM needs to find the header and footer strings previous to start with certificate
                 // parsing/generation, and these both const should be concatenated with the cert in base64
                 // e.g. -----BEGIN CERTIFICATE----- + base64cert + -----END CERTIFICATE----- // Each part converted to byte array
-
-                byte[] bytes       = Encoding.ASCII.GetBytes ( base64cert );
-                byte[] bytesHeader = Encoding.ASCII.GetBytes ( CER_HEADER );
-                byte[] bytesFooter = Encoding.ASCII.GetBytes ( CER_FOOTER );
-                
-                byte[] all = new byte[ bytes.Length + bytesHeader.Length + bytesFooter.Length ];
-                Array.Copy( bytesHeader, 0, all, 0,                                 bytesHeader.Length );
-                Array.Copy( bytes,       0, all, bytesHeader.Length,                bytes.Length       );
-                Array.Copy( bytesFooter, 0, all, bytesHeader.Length + bytes.Length, bytesFooter.Length );
-                
-                this.certificate = new X509Certificate2 ( all );
+                this.certificate = new X509Certificate2 ( Encoding.ASCII.GetBytes ( CER_HEADER + base64cert + CER_FOOTER ) );
             }
 
             private string GetRandomKeyAndShaConverted (
@@ -118,6 +103,9 @@ namespace MTUComm
         public  const string ID_FTP_PASS    = "ftpPass";
         public  const string ID_FTP_PATH    = "ftpPath";
         public  const string ID_CERTIFICATE = "certificate";
+        
+        private const string PATH_CONFIG    = ".Config";
+        private const string PATH_LOGS      = ".Logs";
 
         private const string APP_SUBF       = "com.aclara.mtu.programmer/files/";
         private const string PREFAB_PATH    = "/data/data/" + APP_SUBF;
@@ -152,6 +140,13 @@ namespace MTUComm
 
         public  static ConfigData configData;
         private static string     pathCache;
+        private static string     pathCacheConfig;
+        private static string     pathCacheLogs;
+
+        static Mobile ()
+        {
+            configData = new ConfigData ();
+        }
 
         private static string GetEnumPath ( PATHS ePath )
         {
@@ -176,9 +171,7 @@ namespace MTUComm
                 path = GetEnumPath(ePath);
 
                 if ( Directory.Exists ( path )) //&& File.Exists(path + SEARCH_PATH + XML_MTUS ) )
-                {
                     return path + SEARCH_PATH;
-                }
             }
 
             return null;
@@ -190,6 +183,13 @@ namespace MTUComm
             if ( ! string.IsNullOrEmpty ( pathCache ) )
                 return pathCache;
         
+            /*
+            string PRIVATE = Environment.GetFolderPath ( Environment.SpecialFolder.Resources );
+            Directory.CreateDirectory ( Path.Combine ( PRIVATE, ".Config" ) );
+            File.Create ( Path.Combine ( PRIVATE, ".Config/Test.txt" ) );
+            RecurReadFolders ( PRIVATE );
+            */
+        
             // Try to recover new valid path for the current connected device
             string path = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
 
@@ -200,6 +200,49 @@ namespace MTUComm
             }
 
             return ( pathCache = path );
+        }
+        
+        public static string GetPathConfig ()
+        {
+            if ( ! string.IsNullOrEmpty ( pathCacheConfig ) )
+                return pathCacheConfig;
+        
+            string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Resources ), PATH_CONFIG );
+        
+            if ( ! Directory.Exists ( path ) )
+                Directory.CreateDirectory ( path );
+        
+            return ( pathCacheConfig = path );
+        }
+        
+        public static string GetPathLogs ()
+        {
+            if ( ! string.IsNullOrEmpty ( pathCacheLogs ) )
+                return pathCacheLogs;
+        
+            string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Resources ), PATH_LOGS );
+        
+            if ( ! Directory.Exists ( path ) )
+                Directory.CreateDirectory ( path );
+        
+            return ( pathCache = path );
+        }
+        
+        private static void RecurReadFolders ( string PATH, int numLevel = 0 )
+        {
+            string space = string.Empty.PadLeft ( numLevel * 4, ' ' );
+            
+            Console.WriteLine ( space + "FOLDER: " + PATH );
+            
+            if ( Directory.GetFiles ( PATH ).Length > 0 )
+            {
+                Console.WriteLine ( space + "· FILES.." );
+                foreach ( string file in Directory.EnumerateFiles ( PATH ) )
+                    Console.WriteLine ( space + "  · " + file );
+            }
+        
+            foreach ( string folder in Directory.EnumerateDirectories ( PATH ) )
+                RecurReadFolders ( folder, numLevel + 1 );
         }
 
         public static bool IsNetAvailable ()

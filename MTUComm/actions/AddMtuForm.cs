@@ -469,9 +469,9 @@ namespace MTUComm.actions
         public bool usePort2;
         private Dictionary<FIELD,Parameter> dictionary;
 
-        public Dictionary<FIELD,Parameter> RegisteredParamsByField
+        public int NumOfParamRegistered
         {
-            get { return this.dictionary; }
+            get { return this.dictionary.Count; }
         }
 
         public AddMtuForm ( Mtu mtu ) : base ( mtu )
@@ -526,6 +526,12 @@ namespace MTUComm.actions
         {
             base.RemoveParameter ( Texts[ fieldType ][ 0 ] );
             this.dictionary.Remove ( fieldType );
+        }
+        
+        public void RemoveParameters ()
+        {
+            base.RemoveParameters ();
+            this.dictionary.Clear ();
         }
     }
 }

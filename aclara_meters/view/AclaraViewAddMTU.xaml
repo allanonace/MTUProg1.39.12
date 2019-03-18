@@ -262,7 +262,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessPicker x:Name="pck_OldMeterWorking" Title="" HorizontalOptions="FillAndExpand" SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" />
+                                                        <Controls:BorderlessPicker x:Name="pck_OldMeterWorking" Title="" HorizontalOptions="FillAndExpand" FontSize="17" HeightRequest="40" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -304,7 +304,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessPicker x:Name="pck_ReplaceMeterRegister" Title="" HorizontalOptions="FillAndExpand" SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" />
+                                                        <Controls:BorderlessPicker x:Name="pck_ReplaceMeterRegister" Title="" HorizontalOptions="FillAndExpand" FontSize="17" HeightRequest="40" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -385,7 +385,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" x:Name="div_ReadInterval" Opacity="1" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessPicker x:Name="pck_ReadInterval" Title="" HorizontalOptions="FillAndExpand" SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" />
+                                                        <Controls:BorderlessPicker x:Name="pck_ReadInterval" Title="" HorizontalOptions="FillAndExpand" FontSize="17" HeightRequest="40" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -413,7 +413,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessPicker x:Name="pck_TwoWay" Title="" HorizontalOptions="FillAndExpand" SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" />
+                                                        <Controls:BorderlessPicker x:Name="pck_TwoWay" Title="" HorizontalOptions="FillAndExpand" FontSize="17" HeightRequest="40" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -424,7 +424,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessPicker x:Name="pck_Alarms" Title="" HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" />
+                                                        <Controls:BorderlessPicker x:Name="pck_Alarms" Title="" HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" FontSize="17" HeightRequest="40" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -435,7 +435,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessPicker x:Name="pck_Demands" Title="" HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" />
+                                                        <Controls:BorderlessPicker x:Name="pck_Demands" Title="" HorizontalOptions="FillAndExpand" SelectedItem="{Binding Name}" FontSize="17" HeightRequest="40" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -566,7 +566,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessPicker x:Name="pck_OldMeterWorking_2" Title="" HorizontalOptions="FillAndExpand" SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" />
+                                                        <Controls:BorderlessPicker x:Name="pck_OldMeterWorking_2" Title="" HorizontalOptions="FillAndExpand" FontSize="17" HeightRequest="40" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -612,7 +612,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessPicker x:Name="pck_ReplaceMeterRegister_2" Title="" HorizontalOptions="FillAndExpand" SelectedIndexChanged="GenericPicker_SelectedIndexChanged" FontSize="17" HeightRequest="40" />
+                                                        <Controls:BorderlessPicker x:Name="pck_ReplaceMeterRegister_2" Title="" HorizontalOptions="FillAndExpand" FontSize="17" HeightRequest="40" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -887,7 +887,7 @@
                         <Frame CornerRadius="6" HeightRequest="30" Margin="12" BackgroundColor="#7a868c">
                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                    <Controls:BorderlessPicker Margin="0,0,0,0" x:Name="cancelReasonPicker" Title="" HorizontalOptions="FillAndExpand" FontSize="16" SelectedIndexChanged="GenericPicker_SelectedIndexChanged" HeightRequest="30" TextColor="Black" />
+                                    <Controls:BorderlessPicker Margin="0,0,0,0" x:Name="cancelReasonPicker" Title="" HorizontalOptions="FillAndExpand" FontSize="16" HeightRequest="30" TextColor="Black" />
                                 </StackLayout>
                             </Frame>
                         </Frame>

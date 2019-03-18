@@ -360,10 +360,13 @@ namespace MTUComm
         
         public static void LogErrorNow (
             Exception e,
-            int portIndex = 1,
+            int portIndex = -1,
             bool forceException = true )
         {
-            Errors.GetInstance ()._LogErrorNow ( e, portIndex );
+            if ( ! IsOwnException ( e ) )
+                 Errors.GetInstance ()._LogErrorNow ( e, portIndex );
+            else Errors.GetInstance ()._LogErrorNow ( e, ( ( portIndex > -1 ) ? portIndex : ( ( OwnExceptionsBase )e ).Port ) );
+            
             Errors.LaunchException ( e, forceException );
         }
         
@@ -375,7 +378,7 @@ namespace MTUComm
         /// <param name="portindex">Index of MTU port associated to the error</param>
         public static void LogErrorNowAndContinue (
             Exception e,
-            int portindex = 1 )
+            int portindex = -1 )
         {
             LogErrorNow ( e, portindex, false );
         }

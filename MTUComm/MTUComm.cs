@@ -28,7 +28,8 @@ namespace MTUComm
         private const int BASIC_READ_2_DATA    = 1;
         private const int DEFAULT_OVERLAP      = 6;
         private const int DEFAULT_LENGTH_AES   = 16;
-        
+        private const int SAME_MTU_ADDRESS     = 0;
+        private const int SAME_MTU_DATA        = 10;
         private const int WAIT_BTW_TURNOFF     = 500;
         private const int WAIT_BTW_IC          = 1000;
         
@@ -214,17 +215,22 @@ namespace MTUComm
 
         private Lexi.Lexi lexi;
         private Configuration configuration;
-        private MTUBasicInfo latest_mtu;
+        private MTUBasicInfo _latest_mtu;
         private Mtu mtu;
         private Boolean isPulse = false;
         private Boolean mtuHasChanged;
-
-        #endregion
-
-        #region Properties
-
+        private bool basicInfoLoaded = false;
         private AddMtuLog addMtuLog;
         
+        private MTUBasicInfo latest_mtu
+        {
+            get { return _latest_mtu; }
+            set
+            {
+                _latest_mtu = value;
+            }
+        }
+
         #endregion
 
         #region Initialization
@@ -244,14 +250,11 @@ namespace MTUComm
         {
             try
             {
-                //Gets MTU casci info ( type and id )
-                // TODO: Descubrir porque al hacer un segundo basic read en la accion de AddMtu,
-                // cuando se pulsa el boton, habiendo sido el primero el que se hace nada mas cargar
-                // el formulario, la lectura casca. Ahora mismo esta condicion es para evitar que en
-                // la accion AddMtu se haga una segunda lectura basica en modo interactivo pero si que
-                // se permite hacer la primera en modo scripting
-                if ( type != ActionType.AddMtu ||
-                     type == ActionType.AddMtu && args.Length == 1 )
+                // Avoid to load more than one time the basic info for the same action,
+                // because an action can be launched multiple times because of exceptions
+                // that cancel the action but not move to the main menu and could be happen
+                // that perform the basic read with a different MTU
+                if ( ! this.basicInfoLoaded )
                     this.LoadMtuAndMetersBasicInfo ();
 
                 switch (type)
@@ -280,7 +283,6 @@ namespace MTUComm
             catch ( Exception e )
             {
                 Errors.LogRemainExceptions ( e );
-            
                 this.OnError ();
             }
         }
@@ -329,7 +331,9 @@ namespace MTUComm
             this.Task_ReadMtu ();
         }
 
-        private bool InstallConfirmation_Logic ( bool force = false, int time = 0 )
+        private bool InstallConfirmation_Logic (
+            bool force   = false,
+            int  time    = 0 )
         {
             Global global = this.configuration.global;
         
@@ -426,29 +430,7 @@ namespace MTUComm
 
         public void Task_TurnOnOffMtu (
             bool on )
-        {
-            // TEST>>>
-            
-            /*
-            byte[] aesKey = new byte[ 16 ];
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
-            rng.GetBytes ( aesKey );
-         
-            // Calculate SHA for the new random key
-            byte[] sha = new byte[ 32 ];
-            using ( SHA256 mySHA256 = SHA256.Create () )
-            {
-                sha = mySHA256.ComputeHash ( aesKey );
-            }
-            
-            MtuSha256 mySHA = new MtuSha256 ();
-            byte[] sha2 = new byte[ 32 ];
-            // calculate
-            mySHA.GenerateSHAHash ( aesKey, out sha2 );
-            */
-            
-            // <<<TEST
-        
+        {        
             if ( on )
                  Console.WriteLine ( "TurnOffMtu start" );
             else Console.WriteLine ( "TurnOnMtu start"  );
@@ -464,7 +446,8 @@ namespace MTUComm
 
         private bool TurnOnOffMtu_Logic (
             bool on,
-            int time = 0 )
+            bool fromAdd = false,
+            int  time = 0 )
         {
             try
             {
@@ -487,7 +470,9 @@ namespace MTUComm
                 // Finish
                 else
                 {
-                    Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
+                    if ( ! fromAdd )
+                         Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
+                    else throw new PuckCantCommWithMtuException ();
                     return false;
                 }
                 
@@ -496,11 +481,16 @@ namespace MTUComm
                 {
                     Thread.Sleep ( WAIT_BTW_TURNOFF );
                     
-                    return this.TurnOnOffMtu_Logic ( on, time );
+                    return this.TurnOnOffMtu_Logic ( on, fromAdd, time );
                 }
                 
                 // Finish with error
-                else Errors.LogErrorNow ( new ActionNotAchievedTurnOffException ( TIMES_TURNOFF + "" ) );
+                else
+                {
+                    if ( ! fromAdd )
+                         Errors.LogErrorNow ( new ActionNotAchievedTurnOffException ( TIMES_TURNOFF + "" ) );
+                    else throw new ActionNotAchievedTurnOffException ( TIMES_TURNOFF + "" );
+                }
                 return false;
             }
             return true;
@@ -525,8 +515,8 @@ namespace MTUComm
                 System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
     
                 // Check if the MTU is still the same
-                if ( this.LoadMtuBasicInfo () )
-                    Errors.LogErrorNow ( new MtuHasChangeBeforeFinishActionException () );
+                if ( ! this.IsSameMtu () )
+                    throw new MtuHasChangeBeforeFinishActionException ();
     
                 if (memory_map_size > 255)
                 {
@@ -544,6 +534,12 @@ namespace MTUComm
     
                 if (memory_map_size > 960)
                     System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
+                    
+                // Generates the memory map with recovered data
+                dynamic map = new MemoryMap.MemoryMap ( buffer, memory_map_type );
+    
+                // Finish!
+                OnReadMtu ( this, new ReadMtuArgs ( map, this.mtu ) );
             }
             // MtuHasChangeBeforeFinishActionException
             // System.IO.IOException = Puck is not well placed or is off
@@ -556,12 +552,6 @@ namespace MTUComm
                 // Allow to continue rising the error
                 else throw ( e );
             }
-
-            // Generates the memory map with recovered data
-            dynamic map = new MemoryMap.MemoryMap ( buffer, memory_map_type );
-
-            // Finish!
-            OnReadMtu ( this, new ReadMtuArgs ( map, this.mtu ) );
         }
 
         #endregion
@@ -584,475 +574,448 @@ namespace MTUComm
             Meter meterPort1 = null;
             Meter meterPort2 = null;
             
-            MemRegister regP2Status = configuration.getFamilyRegister ( this.mtu, "P2StatusFlag" );
-            bool port2IsActivated = ReadMtuBit ( ( uint )regP2Status.Address, ( uint )regP2Status.Size );
-
-            // Recover parameters from script and translante from Aclara nomenclature to our own
-            foreach ( Parameter parameter in ps )
+            try
             {
-                // Launchs exception 'TranslatingParamsScriptException'
-                form.AddParameterTranslatingAclaraXml ( parameter );
-                
-                if ( parameter.Port == 2 )
-                    form.usePort2 = true;
-            }
-
-            scriptUseP2    = form.usePort2;
-            form.usePort2 &= this.mtu.TwoPorts;
-
-            #region Auto-detect Meters
-
-            // Script is for one port but MTU has two and second is enabled
-            if ( ! scriptUseP2    &&
-                 port2IsActivated && // Return true in a one port 138 MTU
-                 this.mtu.TwoPorts ) // and for that reason I have to check also this
-            {
-                Errors.LogErrorNow ( new ScriptForOnePortButTwoEnabledException () );
-                return;
-            }
-            
-            // Script is for two ports but MTU has not second port or is disabled
-            else if ( scriptUseP2 &&
-                      ! port2IsActivated )
-            {
-                Errors.LogErrorNow ( new ScriptForTwoPortsButMtuOnlyOneException () );
-                return;
-            }
-
-            // Auto-detect Meter
-            bool isAutodetectMeter = false;
-            if ( ! form.ContainsParameter ( FIELD.METER_TYPE ) )
-            {
-                // Missing tags
-                if ( ! form.ContainsParameter ( FIELD.NUMBER_OF_DIALS ) )
-                    Errors.AddError ( new NumberOfDialsTagMissingScript () );
-                
-                if ( ! form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE ) )
-                    Errors.AddError ( new DriveDialSizeTagMissingScript () );
-                    
-                if ( ! form.ContainsParameter ( FIELD.UNIT_MEASURE ) )
-                    Errors.AddError ( new UnitOfMeasureTagMissingScript () );
-                
-                // Log errors but not finish yet
-                Errors.LogRegisteredErrors ();
-            
-                if ( form.ContainsParameter ( FIELD.NUMBER_OF_DIALS ) &&
-                     form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE ) &&
-                     form.ContainsParameter ( FIELD.UNIT_MEASURE    ) )
-                {
-                    isAutodetectMeter = true;
-                
-                    meters = configuration.meterTypes.FindByDialDescription (
-                        int.Parse ( form.NumberOfDials.Value ),
-                        int.Parse ( form.DriveDialSize.Value ),
-                        form.UnitOfMeasure.Value,
-                        this.mtu.Flow );
+                MemRegister regP2Status = configuration.getFamilyRegister ( this.mtu, "P2StatusFlag" );
+                bool port2IsActivated = ReadMtuBit ( ( uint )regP2Status.Address, ( uint )regP2Status.Size );
     
-                    // At least one Meter was found
-                    if ( meters.Count > 0 )
-                        form.AddParameter ( FIELD.METER_TYPE, ( meterPort1 = meters[ 0 ] ).Id.ToString () );
-                    // No meter was found using the selected parameters
-                    else
-                    {
-                        Errors.LogErrorNow ( new ScriptingAutoDetectMeterException () );
-                        return;
-                    }
-                }
-                // Script does not contain some of the needed tags ( NumberOfDials,... )
-                else
+                // Recover parameters from script and translante from Aclara nomenclature to our own
+                foreach ( Parameter parameter in ps )
                 {
-                    Errors.LogErrorNow ( new ScriptingAutoDetectMeterException () );
-                    return;
+                    // Launchs exception 'TranslatingParamsScriptException'
+                    form.AddParameterTranslatingAclaraXml ( parameter );
+                    
+                    if ( parameter.Port == 2 )
+                        form.usePort2 = true;
                 }
-            }
-            // Check if the selected Meter exists and current MTU support it
-            else
-            {
-                meterPort1 = configuration.getMeterTypeById ( int.Parse ( form.Meter.Value ) );
-                portTypes  = this.mtu.Ports[ 0 ].GetPortTypes ();
+    
+                scriptUseP2    = form.usePort2;
+                form.usePort2 &= this.mtu.TwoPorts;
+    
+                #region Auto-detect Meters
+    
+                // Script is for one port but MTU has two and second is enabled
+                if ( ! scriptUseP2    &&
+                     port2IsActivated && // Return true in a one port 138 MTU
+                     this.mtu.TwoPorts ) // and for that reason I have to check also this
+                    throw new ScriptForOnePortButTwoEnabledException ();
                 
-                // Is not valid Meter ID
-                if ( meterPort1.IsEmpty )
-                {
-                    Errors.LogErrorNow ( new MtuTypeIsNotFoundException () );
-                    return;
-                }
-                
-                // Current MTU does not support selected Meter
-                else if ( ! portTypes.Contains ( form.Meter.Value ) && // By Meter Id = Numeric
-                          ! portTypes.Contains ( meterPort1.Type ) )   // By Type = Chars
-                {
-                    Errors.LogErrorNow ( new MtuNotSupportMeterException () );
-                    return;
-                }
-            }
-
-            if ( this.mtu.TwoPorts &&
-                 port2IsActivated )
-            {
-                if ( ! form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
+                // Script is for two ports but MTU has not second port or is disabled
+                else if ( scriptUseP2 &&
+                          ! port2IsActivated )
+                    throw new ScriptForTwoPortsButMtuOnlyOneException ();
+    
+                bool isAutodetectMeter = false;
+    
+                // Port 1
+                if ( ! form.ContainsParameter ( FIELD.METER_TYPE ) )
                 {
                     // Missing tags
-                    if ( ! form.ContainsParameter ( FIELD.NUMBER_OF_DIALS_2 ) )
-                        Errors.AddError ( new NumberOfDialsTagMissingScript (), 2 );
+                    if ( ! form.ContainsParameter ( FIELD.NUMBER_OF_DIALS ) )
+                        Errors.AddError ( new NumberOfDialsTagMissingScript () );
                     
-                    if ( ! form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE_2 ) )
-                        Errors.AddError ( new DriveDialSizeTagMissingScript (), 2 );
+                    if ( ! form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE ) )
+                        Errors.AddError ( new DriveDialSizeTagMissingScript () );
                         
-                    if ( ! form.ContainsParameter ( FIELD.UNIT_MEASURE_2 ) )
-                        Errors.AddError ( new UnitOfMeasureTagMissingScript (), 2 );
-                
+                    if ( ! form.ContainsParameter ( FIELD.UNIT_MEASURE ) )
+                        Errors.AddError ( new UnitOfMeasureTagMissingScript () );
+                    
                     // Log errors but not finish yet
-                    Errors.LogRegisteredErrors ();
+                    //Errors.LogRegisteredErrors ();
                 
-                    if ( form.ContainsParameter ( FIELD.NUMBER_OF_DIALS_2 ) &&
-                         form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE_2 ) &&
-                         form.ContainsParameter ( FIELD.UNIT_MEASURE_2    ) )
+                    if ( form.ContainsParameter ( FIELD.NUMBER_OF_DIALS ) &&
+                         form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE ) &&
+                         form.ContainsParameter ( FIELD.UNIT_MEASURE    ) )
                     {
+                        isAutodetectMeter = true;
+                    
                         meters = configuration.meterTypes.FindByDialDescription (
-                            int.Parse ( form.NumberOfDials_2.Value ),
-                            int.Parse ( form.DriveDialSize_2.Value ),
-                            form.UnitOfMeasure_2.Value,
+                            int.Parse ( form.NumberOfDials.Value ),
+                            int.Parse ( form.DriveDialSize.Value ),
+                            form.UnitOfMeasure.Value,
                             this.mtu.Flow );
-                        
+        
                         // At least one Meter was found
                         if ( meters.Count > 0 )
-                            form.AddParameter ( FIELD.METER_TYPE_2, ( meterPort2 = meters[ 0 ] ).Id.ToString () );
+                            form.AddParameter ( FIELD.METER_TYPE, ( meterPort1 = meters[ 0 ] ).Id.ToString () );
                         // No meter was found using the selected parameters
-                        else
-                        {
-                            Errors.LogErrorNow ( new ScriptingAutoDetectMeterException (), 2 );
-                            return;
-                        }
+                        else throw new ScriptingAutoDetectMeterException ();
                     }
                     // Script does not contain some of the needed tags ( NumberOfDials,... )
-                    else
-                    {
-                        Errors.LogErrorNow ( new ScriptingAutoDetectMeterException (), 2 );
-                        return;
-                    }
+                    else throw new ScriptingAutoDetectMeterException ();
                 }
                 // Check if the selected Meter exists and current MTU support it
                 else
                 {
-                    meterPort2 = configuration.getMeterTypeById ( int.Parse ( form.Meter_2.Value ) );
-                    portTypes  = this.mtu.Ports[ 1 ].GetPortTypes ();
+                    meterPort1 = configuration.getMeterTypeById ( int.Parse ( form.Meter.Value ) );
+                    portTypes  = this.mtu.Ports[ 0 ].GetPortTypes ();
                     
                     // Is not valid Meter ID
-                    if ( meterPort2.IsEmpty )
-                    {
-                        Errors.LogErrorNow ( new MtuTypeIsNotFoundException (), 2 );
-                        return;
-                    }
+                    if ( meterPort1.IsEmpty )
+                        throw new MtuTypeIsNotFoundException ();
                     
                     // Current MTU does not support selected Meter
-                    else if ( ! portTypes.Contains ( form.Meter_2.Value ) && // By Meter Id = Numeric
-                              ! portTypes.Contains ( meterPort2.Type ) )     // By Type = Chars
+                    else if ( ! portTypes.Contains ( form.Meter.Value ) && // By Meter Id = Numeric
+                              ! portTypes.Contains ( meterPort1.Type ) )   // By Type = Chars
+                        throw new MtuNotSupportMeterException ();
+                }
+    
+                // Port 2
+                if ( this.mtu.TwoPorts &&
+                     port2IsActivated )
+                {
+                    if ( ! form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
                     {
-                        Errors.LogErrorNow ( new MtuNotSupportMeterException (), 2 );
-                        return;
+                        // Missing tags
+                        if ( ! form.ContainsParameter ( FIELD.NUMBER_OF_DIALS_2 ) )
+                            Errors.AddError ( new NumberOfDialsTagMissingScript ( string.Empty, 2 ) );
+                        
+                        if ( ! form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE_2 ) )
+                            Errors.AddError ( new DriveDialSizeTagMissingScript ( string.Empty, 2 ) );
+                            
+                        if ( ! form.ContainsParameter ( FIELD.UNIT_MEASURE_2 ) )
+                            Errors.AddError ( new UnitOfMeasureTagMissingScript ( string.Empty, 2 ) );
+                    
+                        // Log errors but not finish yet
+                        //Errors.LogRegisteredErrors ();
+                    
+                        if ( form.ContainsParameter ( FIELD.NUMBER_OF_DIALS_2 ) &&
+                             form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE_2 ) &&
+                             form.ContainsParameter ( FIELD.UNIT_MEASURE_2    ) )
+                        {
+                            meters = configuration.meterTypes.FindByDialDescription (
+                                int.Parse ( form.NumberOfDials_2.Value ),
+                                int.Parse ( form.DriveDialSize_2.Value ),
+                                form.UnitOfMeasure_2.Value,
+                                this.mtu.Flow );
+                            
+                            // At least one Meter was found
+                            if ( meters.Count > 0 )
+                                form.AddParameter ( FIELD.METER_TYPE_2, ( meterPort2 = meters[ 0 ] ).Id.ToString () );
+                            // No meter was found using the selected parameters
+                            else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
+                        }
+                        // Script does not contain some of the needed tags ( NumberOfDials,... )
+                        else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
+                    }
+                    // Check if the selected Meter exists and current MTU support it
+                    else
+                    {
+                        meterPort2 = configuration.getMeterTypeById ( int.Parse ( form.Meter_2.Value ) );
+                        portTypes  = this.mtu.Ports[ 1 ].GetPortTypes ();
+                        
+                        // Is not valid Meter ID
+                        if ( meterPort2.IsEmpty )
+                            throw new MtuTypeIsNotFoundException ( string.Empty, 2 );
+                        
+                        // Current MTU does not support selected Meter
+                        else if ( ! portTypes.Contains ( form.Meter_2.Value ) && // By Meter Id = Numeric
+                                  ! portTypes.Contains ( meterPort2.Type ) )     // By Type = Chars
+                            throw new MtuNotSupportMeterException ( string.Empty, 2 );
                     }
                 }
-            }
 
-            #endregion
-
-            #region Validation
-
-            dynamic Empty = new Func<string,bool> ( ( value ) =>
-                                    string.IsNullOrEmpty ( value ) );
-
-            dynamic EmptyNum = new Func<string,bool> ( ( value ) =>
-                                    string.IsNullOrEmpty ( value ) || ! Validations.IsNumeric ( value ) );
-
-            // Value equals to maximum length
-            dynamic NoEqNum = new Func<string,int,bool> ( ( value, maxLength ) =>
-                                ! Validations.NumericText ( value, maxLength ) );
-                                
-            dynamic NoEqTxt = new Func<string,int,bool> ( ( value, maxLength ) =>
-                                ! Validations.Text ( value, maxLength ) );
-
-            // Value equals or lower to maximum length
-            dynamic NoELNum = new Func<string,int,bool> ( ( value, maxLength ) =>
-                                ! Validations.NumericText ( value, maxLength, 1, true, true, false ) );
-                                
-            dynamic NoELTxt = new Func<string,int,bool> ( ( value, maxLength ) =>
-                                ! Validations.Text ( value, maxLength, 1, true, true, false ) );
-        
-            // Validate each parameter and remove those that are not going to be used
-            string msgError = string.Empty;
-            foreach ( KeyValuePair<FIELD,Parameter> item in form.RegisteredParamsByField )
-            {
-                FIELD type = item.Key;
-                Parameter parameter = item.Value;
+                #endregion
+    
+                #region Validation
+    
+                dynamic Empty = new Func<string,bool> ( ( value ) =>
+                                        string.IsNullOrEmpty ( value ) );
+    
+                dynamic EmptyNum = new Func<string,bool> ( ( value ) =>
+                                        string.IsNullOrEmpty ( value ) || ! Validations.IsNumeric ( value ) );
+    
+                // Value equals to maximum length
+                dynamic NoEqNum = new Func<string,int,bool> ( ( value, maxLength ) =>
+                                    ! Validations.NumericText ( value, maxLength ) );
+                                    
+                dynamic NoEqTxt = new Func<string,int,bool> ( ( value, maxLength ) =>
+                                    ! Validations.Text ( value, maxLength ) );
+    
+                // Value equals or lower to maximum length
+                dynamic NoELNum = new Func<string,int,bool> ( ( value, maxLength ) =>
+                                    ! Validations.NumericText ( value, maxLength, 1, true, true, false ) );
+                                    
+                dynamic NoELTxt = new Func<string,int,bool> ( ( value, maxLength ) =>
+                                    ! Validations.Text ( value, maxLength, 1, true, true, false ) );
             
-                bool   fail  = false;
-                string value = parameter.Value.ToString ();
-            
-                // Validates each parameter before continue with the action
-                switch ( type )
+                // Validate each parameter and remove those that are not going to be used
+                string msgError = string.Empty;
+                foreach ( KeyValuePair<FIELD,Parameter> item in form.RegisteredParamsByField )
                 {
-                    case FIELD.ACTIVITY_LOG_ID:
-                    fail = EmptyNum ( value );
-                    break;
+                    FIELD type = item.Key;
+                    Parameter parameter = item.Value;
                 
-                    case FIELD.ACCOUNT_NUMBER:
-                    case FIELD.ACCOUNT_NUMBER_2:
-                    fail = NoEqNum ( value, global.AccountLength );
-                    break;
-                    
-                    case FIELD.WORK_ORDER:
-                    case FIELD.WORK_ORDER_2:
-                    fail = NoELTxt ( value, global.WorkOrderLength );
-                    
-                    // Do not use
-                    if ( ! fail &&
-                         ! global.WorkOrderRecording )
-                        if ( parameter.Port == 0 )
-                             form.RemoveParameter ( FIELD.WORK_ORDER   );
-                        else form.RemoveParameter ( FIELD.WORK_ORDER_2 );
-                    break;
-                    
-                    case FIELD.MTU_ID_OLD:
-                    fail = NoEqNum ( value, global.MtuIdLength );
-                    
-                    // Do not use
-                    if ( ! fail &&
-                         addMtuAction.type != ActionType.ReplaceMTU &&
-                         addMtuAction.type != ActionType.ReplaceMtuReplaceMeter )
-                        form.RemoveParameter ( FIELD.MTU_ID_OLD );
-                    break;
-                    
-                    case FIELD.METER_NUMBER:
-                    case FIELD.METER_NUMBER_2:
-                    case FIELD.METER_NUMBER_OLD:
-                    case FIELD.METER_NUMBER_OLD_2:
-                    fail = NoELTxt ( value, global.MeterNumberLength );
-                    
-                    // Do not use
-                    if ( ! fail &&
-                         ! global.UseMeterSerialNumber )
+                    bool   fail  = false;
+                    string value = parameter.Value.ToString ();
+                
+                    // Validates each parameter before continue with the action
+                    switch ( type )
                     {
-                        if ( parameter.Port == 0 )
+                        case FIELD.ACTIVITY_LOG_ID:
+                        fail = EmptyNum ( value );
+                        break;
+                    
+                        case FIELD.ACCOUNT_NUMBER:
+                        case FIELD.ACCOUNT_NUMBER_2:
+                        fail = NoEqNum ( value, global.AccountLength );
+                        break;
+                        
+                        case FIELD.WORK_ORDER:
+                        case FIELD.WORK_ORDER_2:
+                        fail = NoELTxt ( value, global.WorkOrderLength );
+                        
+                        // Do not use
+                        if ( ! fail &&
+                             ! global.WorkOrderRecording )
+                            if ( parameter.Port == 0 )
+                                 form.RemoveParameter ( FIELD.WORK_ORDER   );
+                            else form.RemoveParameter ( FIELD.WORK_ORDER_2 );
+                        break;
+                        
+                        case FIELD.MTU_ID_OLD:
+                        fail = NoEqNum ( value, global.MtuIdLength );
+                        
+                        // Do not use
+                        if ( ! fail &&
+                             addMtuAction.type != ActionType.ReplaceMTU &&
+                             addMtuAction.type != ActionType.ReplaceMtuReplaceMeter )
+                            form.RemoveParameter ( FIELD.MTU_ID_OLD );
+                        break;
+                        
+                        case FIELD.METER_NUMBER:
+                        case FIELD.METER_NUMBER_2:
+                        case FIELD.METER_NUMBER_OLD:
+                        case FIELD.METER_NUMBER_OLD_2:
+                        fail = NoELTxt ( value, global.MeterNumberLength );
+                        
+                        // Do not use
+                        if ( ! fail &&
+                             ! global.UseMeterSerialNumber )
                         {
-                            switch ( parameter.Type )
+                            if ( parameter.Port == 0 )
                             {
-                                case ParameterType.MeterSerialNumber:
-                                case ParameterType.NewMeterSerialNumber:
-                                form.RemoveParameter ( FIELD.METER_NUMBER );
-                                break;
-                                
-                                case ParameterType.OldMeterSerialNumber:
-                                form.RemoveParameter ( FIELD.METER_NUMBER_OLD );
-                                break;
+                                switch ( parameter.Type )
+                                {
+                                    case ParameterType.MeterSerialNumber:
+                                    case ParameterType.NewMeterSerialNumber:
+                                    form.RemoveParameter ( FIELD.METER_NUMBER );
+                                    break;
+                                    
+                                    case ParameterType.OldMeterSerialNumber:
+                                    form.RemoveParameter ( FIELD.METER_NUMBER_OLD );
+                                    break;
+                                }
                             }
+                            else
+                            {
+                                switch ( parameter.Type )
+                                {
+                                    case ParameterType.MeterSerialNumber:
+                                    case ParameterType.NewMeterSerialNumber:
+                                    form.RemoveParameter ( FIELD.METER_NUMBER_2 );
+                                    break;
+                                    
+                                    case ParameterType.OldMeterSerialNumber:
+                                    form.RemoveParameter ( FIELD.METER_NUMBER_OLD_2 );
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                        
+                        case FIELD.METER_READING:
+                        case FIELD.METER_READING_2:
+                        if ( ! isAutodetectMeter )
+                        {
+                            // If necessary fill left to 0's up to LiveDigits
+                            if ( parameter.Port == 0 )
+                                 value = meterPort1.FillLeftLiveDigits ( value );
+                            else value = meterPort2.FillLeftLiveDigits ( value );
                         }
                         else
                         {
-                            switch ( parameter.Type )
+                            if ( parameter.Port == 0 )
                             {
-                                case ParameterType.MeterSerialNumber:
-                                case ParameterType.NewMeterSerialNumber:
-                                form.RemoveParameter ( FIELD.METER_NUMBER_2 );
-                                break;
-                                
-                                case ParameterType.OldMeterSerialNumber:
-                                form.RemoveParameter ( FIELD.METER_NUMBER_OLD_2 );
-                                break;
+                                if ( ! ( fail = meterPort1.NumberOfDials <= -1 || 
+                                                NoELNum ( value, meterPort1.NumberOfDials ) ) )
+                                {
+                                    // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
+                                    if ( NoEqNum ( value, meterPort1.NumberOfDials ) )
+                                        value = meterPort1.FillLeftNumberOfDials ( value );
+                                    
+                                    // Apply Meter mask
+                                    value = meterPort1.ApplyReadingMask ( value );
+                                }
+                                else break;
+                            }
+                            else
+                            {
+                                if ( ! ( fail = meterPort2.NumberOfDials <= -1 ||
+                                                NoELNum ( value, meterPort2.NumberOfDials ) ) )
+                                {
+                                    // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
+                                    if ( NoEqNum ( value, meterPort2.NumberOfDials ) )
+                                        value = meterPort2.FillLeftNumberOfDials ( value );
+                                    
+                                    // Apply Meter mask
+                                    value = meterPort2.ApplyReadingMask ( value );
+                                }
+                                else break;
                             }
                         }
-                    }
-                    break;
-                    
-                    case FIELD.METER_READING:
-                    case FIELD.METER_READING_2:
-                    if ( ! isAutodetectMeter )
-                    {
-                        // If necessary fill left to 0's up to LiveDigits
+                        
                         if ( parameter.Port == 0 )
-                             value = meterPort1.FillLeftLiveDigits ( value );
-                        else value = meterPort2.FillLeftLiveDigits ( value );
-                    }
-                    else
-                    {
-                        if ( parameter.Port == 0 )
+                             fail = NoEqNum ( value, meterPort1.LiveDigits );
+                        else fail = NoEqNum ( value, meterPort2.LiveDigits );
+                        break;
+                        
+                        case FIELD.METER_READING_OLD:
+                        case FIELD.METER_READING_OLD_2:
+                        fail = NoELNum ( value, 12 );
+                        
+                        // Do not use
+                        if ( ! fail &&
+                             ! global.OldReadingRecording )
                         {
-                            if ( ! ( fail = meterPort1.NumberOfDials <= -1 || 
-                                            NoELNum ( value, meterPort1.NumberOfDials ) ) )
+                            if ( parameter.Port == 0 )
+                                 form.RemoveParameter ( FIELD.METER_READING_OLD   );
+                            else form.RemoveParameter ( FIELD.METER_READING_OLD_2 );
+                        }
+                        break;
+                        
+                        case FIELD.METER_TYPE:
+                        case FIELD.METER_TYPE_2:
+                        fail = Empty ( value );
+                        break;
+                        
+                        case FIELD.READ_INTERVAL:
+                        List<string> readIntervalList;
+                        if ( MtuForm.mtuBasicInfo.version >= global.LatestVersion )
+                        {
+                            readIntervalList = new List<string>()
                             {
-                                // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
-                                if ( NoEqNum ( value, meterPort1.NumberOfDials ) )
-                                    value = meterPort1.FillLeftNumberOfDials ( value );
-                                
-                                // Apply Meter mask
-                                value = meterPort1.ApplyReadingMask ( value );
-                            }
-                            else break;
+                                "24 Hours",
+                                "12 Hours",
+                                "8 Hours",
+                                "6 Hours",
+                                "4 Hours",
+                                "3 Hours",
+                                "2 Hours",
+                                "1 Hour",
+                                "30 Min",
+                                "20 Min",
+                                "15 Min"
+                            };
                         }
                         else
                         {
-                            if ( ! ( fail = meterPort2.NumberOfDials <= -1 ||
-                                            NoELNum ( value, meterPort2.NumberOfDials ) ) )
+                            readIntervalList = new List<string>()
                             {
-                                // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
-                                if ( NoEqNum ( value, meterPort2.NumberOfDials ) )
-                                    value = meterPort2.FillLeftNumberOfDials ( value );
-                                
-                                // Apply Meter mask
-                                value = meterPort2.ApplyReadingMask ( value );
-                            }
-                            else break;
+                                "1 Hour",
+                                "30 Min",
+                                "20 Min",
+                                "15 Min"
+                            };
                         }
-                    }
-                    
-                    if ( parameter.Port == 0 )
-                         fail = NoEqNum ( value, meterPort1.LiveDigits );
-                    else fail = NoEqNum ( value, meterPort2.LiveDigits );
-                    break;
-                    
-                    case FIELD.METER_READING_OLD:
-                    case FIELD.METER_READING_OLD_2:
-                    fail = NoELNum ( value, 12 );
-                    
-                    // Do not use
-                    if ( ! fail &&
-                         ! global.OldReadingRecording )
-                    {
-                        if ( parameter.Port == 0 )
-                             form.RemoveParameter ( FIELD.METER_READING_OLD   );
-                        else form.RemoveParameter ( FIELD.METER_READING_OLD_2 );
-                    }
-                    break;
-                    
-                    case FIELD.METER_TYPE:
-                    case FIELD.METER_TYPE_2:
-                    fail = Empty ( value );
-                    break;
-                    
-                    case FIELD.READ_INTERVAL:
-                    List<string> readIntervalList;
-                    if ( MtuForm.mtuBasicInfo.version >= global.LatestVersion )
-                    {
-                        readIntervalList = new List<string>()
+                        
+                        // TwoWay MTU reading interval cannot be less than 15 minutes
+                        if ( ! this.mtu.TimeToSync )
                         {
-                            "24 Hours",
-                            "12 Hours",
-                            "8 Hours",
-                            "6 Hours",
-                            "4 Hours",
-                            "3 Hours",
-                            "2 Hours",
-                            "1 Hour",
-                            "30 Min",
-                            "20 Min",
-                            "15 Min"
-                        };
+                            readIntervalList.AddRange ( new string[]{
+                                "10 Min",
+                                "5 Min"
+                            });
+                        }
+                        
+                        value = value.ToLower ()
+                                     .Replace ( "hr", "hour" )
+                                     .Replace ( "h", "H" );
+                        fail = Empty ( value ) || ! readIntervalList.Contains ( value );
+                        break;
+                        
+                        case FIELD.SNAP_READS:
+                        fail = EmptyNum ( value );
+                        
+                        // Do not use
+                        if ( ! fail &&
+                             ( ! global.AllowDailyReads ||
+                               ! mtu.DailyReads ) )
+                            form.RemoveParameter ( FIELD.SNAP_READS );
+                        break;
+                        
+                        //case FIELD.LIVE_DIGITS:
+                        //fail = NoELNum ( value, 10 );
+                        //break;
+                        
+                        case FIELD.NUMBER_OF_DIALS:
+                        case FIELD.NUMBER_OF_DIALS_2:
+                        case FIELD.DRIVE_DIAL_SIZE:
+                        case FIELD.DRIVE_DIAL_SIZE_2:
+                        fail = EmptyNum ( value );
+                        break;
+                        
+                        case FIELD.UNIT_MEASURE:
+                        case FIELD.UNIT_MEASURE_2:
+                        fail = Empty ( value );
+                        break;
+                        
+                        case FIELD.FORCE_TIME_SYNC:
+                        bool.TryParse ( value, out fail );
+                        fail = ! fail;
+                        break;
+                    }
+    
+                    if ( fail )
+                    {
+                        fail = false;
+                        
+                        string typeStr = ( form.Texts as Dictionary<FIELD,string[]> )[ type ][ 2 ];
+                        
+                        if ( ! msgError.Contains ( typeStr ) )
+                            msgError += ( ( ! string.IsNullOrEmpty ( msgError ) ) ? ", " : string.Empty ) + typeStr;
                     }
                     else
-                    {
-                        readIntervalList = new List<string>()
-                        {
-                            "1 Hour",
-                            "30 Min",
-                            "20 Min",
-                            "15 Min"
-                        };
-                    }
-                    
-                    // TwoWay MTU reading interval cannot be less than 15 minutes
-                    if ( ! this.mtu.TimeToSync )
-                    {
-                        readIntervalList.AddRange ( new string[]{
-                            "10 Min",
-                            "5 Min"
-                        });
-                    }
-                    
-                    value = value.ToLower ()
-                                 .Replace ( "hr", "hour" )
-                                 .Replace ( "h", "H" );
-                    fail = Empty ( value ) || ! readIntervalList.Contains ( value );
-                    break;
-                    
-                    case FIELD.SNAP_READS:
-                    fail = EmptyNum ( value );
-                    
-                    // Do not use
-                    if ( ! fail &&
-                         ( ! global.AllowDailyReads ||
-                           ! mtu.DailyReads ) )
-                        form.RemoveParameter ( FIELD.SNAP_READS );
-                    break;
-                    
-                    //case FIELD.LIVE_DIGITS:
-                    //fail = NoELNum ( value, 10 );
-                    //break;
-                    
-                    case FIELD.NUMBER_OF_DIALS:
-                    case FIELD.NUMBER_OF_DIALS_2:
-                    case FIELD.DRIVE_DIAL_SIZE:
-                    case FIELD.DRIVE_DIAL_SIZE_2:
-                    fail = EmptyNum ( value );
-                    break;
-                    
-                    case FIELD.UNIT_MEASURE:
-                    case FIELD.UNIT_MEASURE_2:
-                    fail = Empty ( value );
-                    break;
-                    
-                    case FIELD.FORCE_TIME_SYNC:
-                    bool.TryParse ( value, out fail );
-                    fail = ! fail;
-                    break;
+                        parameter.Value = value;
                 }
-
-                if ( fail )
+    
+                if ( ! string.IsNullOrEmpty ( msgError ) )
                 {
-                    fail = false;
-                    
-                    string typeStr = ( form.Texts as Dictionary<FIELD,string[]> )[ type ][ 2 ];
-                    
-                    if ( ! msgError.Contains ( typeStr ) )
-                        msgError += ( ( ! string.IsNullOrEmpty ( msgError ) ) ? ", " : string.Empty ) + typeStr;
+                    int index;
+                    if ( ( index = msgError.LastIndexOf ( ',' ) ) > -1 )
+                        msgError = msgError.Substring ( 0, index ) +
+                                   " and" +
+                                   msgError.Substring ( index + 1 );
+    
+                    throw new ProcessingParamsScriptException ( msgError );
                 }
-                else
-                    parameter.Value = value;
-            }
-
-            if ( ! string.IsNullOrEmpty ( msgError ) )
-            {
-                int index;
-                if ( ( index = msgError.LastIndexOf ( ',' ) ) > -1 )
-                    msgError = msgError.Substring ( 0, index ) +
-                               " and" +
-                               msgError.Substring ( index + 1 );
-
-                Errors.LogErrorNow ( new ProcessingParamsScriptException ( msgError ) );
-                return;
-            }
-
-            #endregion
-
-            #region Auto-detect Alarm
-
-            // Auto-detect scripting Alarm profile
-            List<Alarm> alarms = configuration.alarms.FindByMtuType ( (int)MtuForm.mtuBasicInfo.Type );
-            if ( alarms.Count > 0 )
-            {
-                Alarm alarm = alarms.Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
-                if ( alarm != null &&
-                     form.mtu.RequiresAlarmProfile )
-                    form.AddParameter ( FIELD.ALARM, alarm );
-                    
-                // For current MTU does not exist "Scripting" profile inside Alarm.xml
-                else
+    
+                #endregion
+    
+                #region Auto-detect Alarm
+    
+                // Auto-detect scripting Alarm profile
+                List<Alarm> alarms = configuration.alarms.FindByMtuType ( (int)MtuForm.mtuBasicInfo.Type );
+                if ( alarms.Count > 0 )
                 {
-                    Errors.LogErrorNow ( new ScriptingAlarmForCurrentMtuException () );
-                    return;
+                    Alarm alarm = alarms.Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
+                    if ( alarm != null &&
+                         form.mtu.RequiresAlarmProfile )
+                        form.AddParameter ( FIELD.ALARM, alarm );
+                        
+                    // For current MTU does not exist "Scripting" profile inside Alarm.xml
+                    else throw new ScriptingAlarmForCurrentMtuException ();
                 }
-            }
 
-            #endregion
+                #endregion
+            }
+            catch ( Exception e )
+            {
+                // Is not own exception
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNow ( e );
+            }
 
             this.Task_AddMtu ( form, addMtuAction.user, addMtuAction.type, true );
         }
@@ -1066,7 +1029,7 @@ namespace MTUComm
             Mtu    mtu    = form.mtu;
             Global global = form.global;
         
-            this.mtu    = mtu;
+            this.mtu = mtu;
             form.actionType = actionType;
 
             try
@@ -1076,8 +1039,8 @@ namespace MTUComm
 
                 #region Turn Off MTU
 
-                this.TurnOnOffMtu_Logic ( false );
-                addMtuLog.LogTurnOff();
+                this.TurnOnOffMtu_Logic ( false, true );
+                addMtuLog.LogTurnOff ();
 
                 #endregion
 
@@ -1218,10 +1181,27 @@ namespace MTUComm
                         }
                     }
                     // No alarm profile was selected before launch the action
-                    else Errors.LogErrorNow ( new SelectedAlarmForCurrentMtuException () );
+                    else throw new SelectedAlarmForCurrentMtuException ();
                 }
 
                 #endregion
+
+                #region Frequencies
+
+                if ( mtu.TimeToSync &&
+                     global.AFC &&
+                     map.MtuSoftVersion >= 19 )
+                {
+                    map.F12WAYRegister1Int  = global.F12WAYRegister1;
+                    map.F12WAYRegister10Int = global.F12WAYRegister10;
+                    map.F12WAYRegister14Int = global.F12WAYRegister14;
+                }
+
+                #endregion
+
+                // Check if the MTU is still the same
+                if ( ! this.IsSameMtu () )
+                    throw new MtuHasChangeBeforeFinishActionException ();
 
                 #region Encryption
 
@@ -1264,7 +1244,7 @@ namespace MTUComm
                             
                             // Verify if the MTU is encrypted
                             bool encrypted   = ( bool )regEncrypted.ValueReadFromMtu ( lexi );
-                            int  encrypIndex = ( int )regEncryIndex.ValueReadFromMtu ( lexi );
+                            int  encrypIndex = ( int  )regEncryIndex.ValueReadFromMtu ( lexi );
                             if ( ! encrypted || encrypIndex <= -1 )
                             {
                                 continue; // Error
@@ -1307,37 +1287,25 @@ namespace MTUComm
                     
                     // MTU encryption has failed
                     if ( ! ( Mobile.configData.isMtuEncrypted = ok ) )
-                        Errors.LogErrorNow ( new ActionNotAchievedEncryptionException ( "5" ) );
+                        throw new ActionNotAchievedEncryptionException ( "5" );
+                    
+                    // Check if the MTU is still the same
+                    if ( ! this.IsSameMtu () )
+                        throw new MtuHasChangeBeforeFinishActionException ();
                 }
 
                 #endregion
-
-                #region Frequencies
-
-                if ( mtu.TimeToSync &&
-                     global.AFC &&
-                     map.MtuSoftVersion >= 19 )
-                {
-                    map.F12WAYRegister1Int  = global.F12WAYRegister1;
-                    map.F12WAYRegister10Int = global.F12WAYRegister10;
-                    map.F12WAYRegister14Int = global.F12WAYRegister14;
-                }
-
-                #endregion
-
-                // fast message (not in pulse)
-                // encoder digits to drop (not in pulse)
 
                 // Write changes into MTU
-                WriteMtuModifiedRegisters( map );
+                this.WriteMtuModifiedRegisters ( map );
                 addMtuLog.LogAddMtu ( isFromScripting );
 
                 #endregion
 
                 #region Turn On MTU
 
-                this.TurnOnOffMtu_Logic ( true );
-                addMtuLog.LogTurnOn();
+                this.TurnOnOffMtu_Logic ( true, true );
+                addMtuLog.LogTurnOn ();
 
                 #endregion
 
@@ -1346,14 +1314,10 @@ namespace MTUComm
                 if ( mtu.RequiresAlarmProfile )
                 {
                     Alarm alarms = ( Alarm )form.Alarm.Value;
-                    if ( alarms != null )
-                    {
-                        // PCI Alarm needs to be set after MTU is turned on, just before the read MTU
-                        // The Status will show enabled during install and actual status (triggered) during the read
-                        if ( mtu.InterfaceTamper ) map.P1InterfaceAlarm = alarms.InterfaceTamper;
-                    }
-                    // No alarm profile was selected before launch the action
-                    else Errors.LogErrorNow ( new SelectedAlarmForCurrentMtuException () );
+                    
+                    // PCI Alarm needs to be set after MTU is turned on, just before the read MTU
+                    // The Status will show enabled during install and actual status (triggered) during the read
+                    if ( mtu.InterfaceTamper ) map.P1InterfaceAlarm = alarms.InterfaceTamper;
                 }
 
                 #endregion
@@ -1379,6 +1343,10 @@ namespace MTUComm
                         // reading MTU Tamper Memory settings for Tilt Alarm
                         Thread.Sleep ( 40000 );
                     }
+                    
+                    // Check if the MTU is still the same
+                    if ( ! this.IsSameMtu () )
+                        throw new MtuHasChangeBeforeFinishActionException ();
                 }
 
                 #endregion
@@ -1391,6 +1359,10 @@ namespace MTUComm
                 byte[] buffer = new byte[1024];
 
                 System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
+                
+                // Check if the MTU is still the same
+                if ( ! this.IsSameMtu () )
+                    throw new MtuHasChangeBeforeFinishActionException ();
                
                 if (memory_map_size > 255)
                 {
@@ -1409,6 +1381,10 @@ namespace MTUComm
                     System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
                 }
 
+                // Check if the MTU is still the same
+                if ( ! this.IsSameMtu () )
+                    throw new MtuHasChangeBeforeFinishActionException ();
+
                 MemoryMap.MemoryMap readMemoryMap = new MemoryMap.MemoryMap(buffer, memory_map_type);
 
                 List<string> diff = new List<string>(map.GetModifiedRegistersDifferences(readMemoryMap));
@@ -1421,29 +1397,18 @@ namespace MTUComm
                     // OK
                 }
 
-                //if ( ! isFromScripting )
-                    //form.logger.fixed_name = "";
-
                 #endregion
 
                 // Generate log to show on device screen
                 AddMtuArgs addMtuArgs = new AddMtuArgs ( readMemoryMap, mtu, form, addMtuLog );
                 this.OnAddMtu ( this, addMtuArgs );
-
-                //ActionResult result = this.OnAddMtu ( this, addMtuArgs );
-                //addMtuLog.LogReadMtu(result);
-
-                // Generate xml log file and save on device
-                //addMtuLog.Save ();
             }
             catch ( Exception e )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
-                    Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
-                
-                // Allow to continue rising the error
-                else throw ( e );
+                     Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNow ( e );
             }
         }
 
@@ -1569,6 +1534,8 @@ namespace MTUComm
         {
             if ( this.LoadMtuBasicInfo () )
             {
+                this.basicInfoLoaded = true;
+            
                 MtuForm.SetBasicInfo ( latest_mtu );
                 
                 // Launchs exception 'MtuTypeIsNotFoundException'
@@ -1615,6 +1582,29 @@ namespace MTUComm
             latest_mtu = mtu_info;
             
             return this.mtuHasChanged;
+        }
+
+        private bool IsSameMtu ()
+        {
+            byte[] read;
+            try
+            {
+                read = lexi.Read ( SAME_MTU_ADDRESS, SAME_MTU_DATA );
+            }
+            catch ( Exception e )
+            {
+                Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
+                return false;
+            }
+
+            uint mtuType = read[ 0 ];
+
+            byte[] id_stream = new byte[ 4 ];
+            Array.Copy ( read, 6, id_stream, 0, 4 );
+            uint mtuId = BitConverter.ToUInt32 ( id_stream, 0 );
+
+            return mtuType == latest_mtu.Type &&
+                   mtuId   == latest_mtu.Id;
         }
 
         public MTUBasicInfo GetBasicInfo ()
