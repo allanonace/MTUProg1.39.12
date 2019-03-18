@@ -45,6 +45,10 @@
     <Error id="802" message="The certificate that you tried to install is not a valid certificate file ( *.cer )" />
     <Error id="803" message="Download or install again the certificate, because is impossible to regenerate the one currently installed" />
     <Error id="804" message="Download or install a new certificate because the one that is currently used has expired" />
+    <Error id="805" message="All the necessary permissions have not been granted" />
+    <Error id="806" message="Error downloading configuration files from the FTP" />
+    <Error id="807" message="The Device has not internet connection" />
+    <Error id="808" message="The current date of the device is lower than allowed" />
 
     <!--<Error id="" message="" />-->
     <!--<Error id="100" message="Mensaje de prueba de error propio" />-->
