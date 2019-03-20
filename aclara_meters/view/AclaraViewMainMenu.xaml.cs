@@ -63,6 +63,7 @@ namespace aclara_meters.view
         public AclaraViewMainMenu(IUserDialogs dialogs)
         {
             InitializeComponent();
+            
             PrintToConsole($"-------------------------------   AclaraViewMainMenu     , thread: { Thread.CurrentThread.ManagedThreadId}");
             Settings.IsConnectedBLE = false;
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar

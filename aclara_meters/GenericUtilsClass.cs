@@ -72,7 +72,7 @@ namespace aclara_meters
             string pathRemoteFile = "/home/aclara" + FormsApp.config.global.ftpRemotePath + CrossDeviceInfo.Current.Id + "/"; // prueba_archivo.xml";
 
             // Path where the file should be saved once downloaded (locally)
-            string path = Mobile.GetPath();
+            string path = Mobile.GetPathPublic();
 
             //string name = "ReadMtuResult.xml";
             //string filename = Path.Combine(xml_documents, name);

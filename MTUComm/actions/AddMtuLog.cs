@@ -4,6 +4,8 @@ using System.Xml.Linq;
 using MTUComm.actions;
 using Xml;
 
+using System.IO;
+
 using FIELD = MTUComm.actions.AddMtuForm.FIELD;
 using ActionType = MTUComm.Action.ActionType;
 
@@ -393,6 +395,11 @@ namespace MTUComm
             string resultStr = doc.ToString ();
 
             doc.Save ( logUri );
+            
+            #if DEBUG
+            string path = Path.Combine ( Mobile.GetPathPublic (), "Logs_uni/" + this.actionType + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) );
+            doc.Save ( Path.Combine ( Mobile.GetPathPublic (), "Logs_uni/" + this.actionType + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) ) );
+            #endif
         }
 
         public override string ToString ()

@@ -76,7 +76,11 @@ namespace MTUComm
                         
                         Console.WriteLine ( "Local parameters loaded.." );
                         Console.WriteLine ( "FTP: " + this.ftpHost + ":" + this.ftpPort + " - " + this.ftpUser + " [ " + this.ftpPass + " ]" );
-                        Console.WriteLine ( "Certificate: " + this.certificate.FriendlyName + " [ " + this.certificate.NotAfter + " ]" );
+                        Console.WriteLine ( "Certificate: " + this.certificate.Subject + " [ " + this.certificate.NotAfter + " ]" );
+                        
+                        Console.WriteLine ( "Public Key: " + Convert.ToBase64String ( this.certificate.GetPublicKey () ) );
+                        Console.WriteLine ( "Devices Cert Subject: " + this.certificate.Subject + " " + this.certificate.SubjectName.Name );
+                        Console.WriteLine ( "Cert Thumbprint: " + this.certificate.Thumbprint );
                         
                         // Check if certificate is not valid/has expired
                         if ( DateTime.Compare ( this.certificate.NotAfter, DateTime.Today ) < 0 )
@@ -127,8 +131,8 @@ namespace MTUComm
         public  const string ID_FTP_PATH    = "ftpPath";
         public  const string ID_CERTIFICATE = "certificate";
         
-        private const string PATH_CONFIG    = ".Config";
-        private const string PATH_LOGS      = ".Logs";
+        private const string PATH_CONFIG    = "Config";
+        private const string PATH_LOGS      = "Logs";
 
         private const string APP_SUBF       = "com.aclara.mtu.programmer/files/";
         private const string PREFAB_PATH    = "/data/data/" + APP_SUBF;
@@ -162,7 +166,7 @@ namespace MTUComm
         };
 
         public  static ConfigData configData;
-        private static string     pathCache;
+        private static string     pathCachePublic;
         private static string     pathCacheConfig;
         private static string     pathCacheLogs;
 
@@ -200,11 +204,11 @@ namespace MTUComm
             return null;
         }
 
-        public static string GetPath ()
+        public static string GetPathPublic ()
         {
             // Use cached path
-            if ( ! string.IsNullOrEmpty ( pathCache ) )
-                return pathCache;
+            if ( ! string.IsNullOrEmpty ( pathCachePublic ) )
+                return pathCachePublic;
         
             /*
             string PRIVATE = Environment.GetFolderPath ( Environment.SpecialFolder.Resources );
@@ -222,7 +226,7 @@ namespace MTUComm
                     return string.Empty;
             }
 
-            return ( pathCache = path );
+            return ( pathCachePublic = path );
         }
         
         public static string GetPathConfig ()
@@ -230,7 +234,8 @@ namespace MTUComm
             if ( ! string.IsNullOrEmpty ( pathCacheConfig ) )
                 return pathCacheConfig;
         
-            string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Resources ), PATH_CONFIG );
+            string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments ), PATH_CONFIG );
+            //string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Resources ), "." + PATH_CONFIG );
         
             if ( ! Directory.Exists ( path ) )
                 Directory.CreateDirectory ( path );
@@ -243,12 +248,13 @@ namespace MTUComm
             if ( ! string.IsNullOrEmpty ( pathCacheLogs ) )
                 return pathCacheLogs;
         
-            string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Resources ), PATH_LOGS );
+            string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments ), PATH_LOGS );
+            //string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Resources ), "." + PATH_LOGS );
         
             if ( ! Directory.Exists ( path ) )
                 Directory.CreateDirectory ( path );
         
-            return ( pathCache = path );
+            return ( pathCacheLogs = path );
         }
         
         private static void RecurReadFolders ( string PATH, int numLevel = 0 )

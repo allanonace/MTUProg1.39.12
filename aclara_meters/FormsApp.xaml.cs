@@ -400,7 +400,7 @@ namespace aclara_meters
 
             if ( url != null )
             {
-                string path = Mobile.GetPath ();
+                string path = Mobile.GetPathPublic ();
                 NameValueCollection query = HttpUtility.ParseQueryString ( url.Query );
 
                 var script_name = query.Get ( "script_name" );
