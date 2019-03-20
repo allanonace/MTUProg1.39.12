@@ -397,8 +397,7 @@ namespace MTUComm
             doc.Save ( logUri );
             
             #if DEBUG
-            string path = Path.Combine ( Mobile.GetPathPublic (), "Logs_uni/" + this.actionType + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
-            doc.Save ( Path.Combine ( Mobile.GetPathPublic (), "Logs_uni/" + this.actionType + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" ) );
+            doc.Save ( Path.Combine ( Mobile.GetPathLogsUni (), "Logs_uni/" + this.actionType + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" ) );
             #endif
         }
 

@@ -133,6 +133,7 @@ namespace MTUComm
         
         private const string PATH_CONFIG    = "Config";
         private const string PATH_LOGS      = "Logs";
+        private const string PATH_LOGSUNI   = "LogsUni";
 
         private const string APP_SUBF       = "com.aclara.mtu.programmer/files/";
         private const string PREFAB_PATH    = "/data/data/" + APP_SUBF;
@@ -169,6 +170,7 @@ namespace MTUComm
         private static string     pathCachePublic;
         private static string     pathCacheConfig;
         private static string     pathCacheLogs;
+        private static string     pathCacheLogsUni;
 
         static Mobile ()
         {
@@ -255,6 +257,19 @@ namespace MTUComm
                 Directory.CreateDirectory ( path );
         
             return ( pathCacheLogs = path );
+        }
+        
+        public static string GetPathLogsUni ()
+        {
+            if ( ! string.IsNullOrEmpty ( pathCacheLogsUni ) )
+                return pathCacheLogsUni;
+        
+            string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments ), PATH_LOGSUNI );
+        
+            if ( ! Directory.Exists ( path ) )
+                Directory.CreateDirectory ( path );
+        
+            return ( pathCacheLogsUni = path );
         }
         
         private static void RecurReadFolders ( string PATH, int numLevel = 0 )
