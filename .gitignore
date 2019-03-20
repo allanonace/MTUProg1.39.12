@@ -16,6 +16,7 @@ Backup/
 gulp-tsc-tmp*
 Resource.Designer.cs
 
+*.DS_Store
 *.tmp.txt
 *.userprefs
 *.db
