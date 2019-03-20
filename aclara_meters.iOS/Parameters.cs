@@ -5,6 +5,7 @@ using Foundation;
 using Microsoft.Intune.MAM;
 using MTUComm;
 using System.IO;
+using MTUComm.Exceptions;
 
 namespace aclara_meters.iOS
 {
@@ -31,7 +32,7 @@ namespace aclara_meters.iOS
                 data.ftpHost =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_HOST    ) ).ToString ();
                 data.ftpPort = int.Parse ( paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PORT    ) ).ToString () );
                 data.ftpPath =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PATH    ) ).ToString ();
-                data.GenerateCert        ( paramsGroup.ValueForKey ( new NSString ( Mobile.ID_CERTIFICATE ) ).ToString () );
+                //data.GenerateCert        ( paramsGroup.ValueForKey ( new NSString ( Mobile.ID_CERTIFICATE ) ).ToString () );
                 
                 Console.WriteLine ( "Intune parameters loaded.." );
                 Console.WriteLine ( "FTP: " + data.ftpHost + ":" + data.ftpPort + " - " + data.ftpUser + " [ " + data.ftpPass + " ]" );
@@ -47,31 +48,6 @@ namespace aclara_meters.iOS
                 keys         = null;
                 dictionary   = null;
                 value        = null;
-            }
-            catch ( Exception e )
-            {
-                return false;
-            }
-            return true;
-        }
-        
-        public static bool PrepareFromLocal ()
-        {
-            try
-            {
-                string path = Path.Combine ( Mobile.GetPathConfig (), "certificate.txt" );
-                
-                if ( File.Exists ( path ) )
-                {
-                    var data = Mobile.configData;
-                    data.GenerateCert ( File.ReadAllText ( path ) );
-                    
-                    Console.WriteLine ( "Local parameters loaded.." );
-                    Console.WriteLine ( "FTP: " + data.ftpHost + ":" + data.ftpPort + " - " + data.ftpUser + " [ " + data.ftpPass + " ]" );
-                    Console.WriteLine ( "Certificate: " + data.certificate.FriendlyName + " [ " + data.certificate.NotAfter + " ]" );
-                    
-                    data = null;
-                }
             }
             catch ( Exception e )
             {

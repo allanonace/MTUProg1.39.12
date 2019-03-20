@@ -95,19 +95,19 @@ namespace MTUComm
             
             // Configuration Files and System [ 7xx ]
             //-------------------------------
-            // Download or install the necessary configuration files, because all are not present on the device
+            // There is a problem with the configuration files. Contact your IT administrator
             { new ConfigurationFilesNotFoundException (),       800 },
-            // Download or install the necessary configuration files, because some of them are corrupted and can not be used
+            // There is a problem with the configuration files and some of them are corrupted. Contact your IT administrator
             { new ConfigurationFilesCorruptedException (),      801 },
             // The certificate that you tried to install is not a valid certificate file ( *.cer )
             { new CertificateFileNotValidException (),          802 },
-            // Download or install again the certificate, because is impossible to regenerate the one currently installed
+            // It is not possible to use the currently installed certificate. Contact your IT administrator
             { new CertificateInstalledNotValidException (),     803 },
             // Download or install a new certificate because the one that is currently used has expired
             { new CertificateInstalledExpiredException (),      804 },
-            // All the necessary permissions have not been granted
+            // Not all necessary permissions have been granted on the Android device.
             { new AndroidPermissionsException (),               805 },
-            // Error downloading configuration files from the FTP
+            // There is a problem with the FTP and configuration files could not be downloaded. Contact your IT administrator
             { new FtpDownloadException (),                      806 },
             // The Device has not internet connection
             { new NoInternetException (),                       807 },
@@ -177,7 +177,7 @@ namespace MTUComm
             this.logger      = new Logger ();
             this.errors      = new Dictionary<int,Error> ();
             this.errorsToLog = new List<Error> ();
-            this.xmlErrors   = this.GetErrors ().List;
+            this.xmlErrors   = Aux.DeserializeXml<ErrorList> ( "Error.xml", true ).List;
 
             if ( this.xmlErrors != null )
                 foreach ( Error errorXml in this.xmlErrors )
@@ -190,23 +190,6 @@ namespace MTUComm
                 Errors.instance = new Errors ();
             
             return Errors.instance;
-        }
-
-        private ErrorList GetErrors ()
-        {
-            ErrorList errors = null;
-            XmlSerializer s = new XmlSerializer ( typeof ( ErrorList ) );
-        
-            using ( StreamReader streamReader = Mobile.GetResourcePath ( "Error.xml" ) )
-            {
-                string fileContent = Config.NormalizeBooleans ( streamReader.ReadToEnd () );
-                using ( StringReader reader = new StringReader ( fileContent ) )
-                {
-                    errors = ( ErrorList )s.Deserialize(reader);
-                }
-            }
- 
-            return errors;
         }
 
         #endregion

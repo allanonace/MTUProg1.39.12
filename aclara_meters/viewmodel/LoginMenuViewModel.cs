@@ -6,6 +6,7 @@ using aclara_meters.Helpers;
 using aclara_meters.view;
 using Acr.UserDialogs;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
 using MTUComm;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace aclara_meters.viewmodel
 {
     public class LoginMenuViewModel : ViewModelBase
     {
+        private const string AES_KEY = "SOLONROCKSACLARA";
+    
         #region Commands
         public INavigation Navigation { get; set; }
         public ICommand LoginCommand { get; set; }
@@ -60,52 +63,15 @@ namespace aclara_meters.viewmodel
         {
             if (FormsApp.credentialsService.DoCredentialsExist())
             {
-
                 FormsApp.loggger.logLogin(FormsApp.credentialsService.UserName);
-                //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewMainMenu(dialogs_save),false);
                 Application.Current.MainPage=new NavigationPage(new AclaraViewMainMenu(dialogs_save));
-                //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewGlobalUIController(), false);
             }   
         }
 
-        bool AreCredentialsCorrect(string username, string password)
+        private bool AreCredentialsCorrect (
+            string username,
+            string password )
         {
-            /*
-            string testData = @"<Users Encrypted=""true""> <user> <name>INSTALL1</name> <pass>6A6C60B602D435E7</pass> </user> <user> <name>INSTALL2</name> <pass>6A6C60B602D435E7</pass> </user> <user> <name>Bob</name> <pass>9BFA1831B2529666F9DF84C0136247AD</pass> </user> <user> <name>test</name> <pass>test</pass> </user> </Users>";
-
-            XmlSerializer serializer = new XmlSerializer(typeof(XML.XmlElementList.Users));
-            // testData is your xml string
-            using (TextReader reader = new StringReader(testData))
-            {
-                //Configuration result = (Configuration)serializer.Deserialize(reader);
-
-                XML.XmlElementList.Users result =  (XML.XmlElementList.Users)serializer.Deserialize(reader);
-            }
-
-            */
-
-            // string[] arr = XDocument.Load(@"User.xml").Descendants("Users").Select(element => element.Value).ToArray();
-            // Path where the file should be saved once downloaded (locally)
-            //string pathLocalFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "User.txt");
-            //string[] arr = XDocument.Load(pathLocalFile).Descendants("Users").Select(element => element.Value).ToArray();
-
-            /*
-
-            XmlSerializer serializer = new XmlSerializer(typeof(XML.XmlElementList.Users));
-            
-            // testData is your xml string
-            using (TextReader reader = new StringReader(XDocument.Load(pathLocalFile).ToString()))
-            {
-                //Configuration result = (Configuration)serializer.Deserialize(reader);
-                XDocument xd = XDocument.Load(reader);
-                String jsonresp = xd.Root;
-                XML.XmlElementList.Users users = JsonConvert.DeserializeObject<XML.XmlElementList.Users>
-
-
-                XML.XmlElementList.Users result = (XML.XmlElementList.Users)serializer.Deserialize(reader);
-            }
-            */
-            
             Xml.User[] dbUsers = Configuration.GetInstance ().users;
             
             IEnumerable<Xml.User> coincidences = dbUsers.Where ( user => user.Name.Equals ( username ) );
@@ -113,15 +79,9 @@ namespace aclara_meters.viewmodel
             {
                 Xml.User dbUser = coincidences.ToList<Xml.User> ()[ 0 ];
                 
-                string dbPassword = dbUser.Pass;
-                
                 if ( dbUser.Encrypted )
-                {
-                    // DESENCRIPTAR LA CONTRASEÑA
-                    // dbPassword = ...
-                }
-                
-                return string.Equals ( dbPassword, password );
+                    return Aux.EncryptStringToBase64_Aes ( password, AES_KEY ).Equals ( dbUser.Pass );
+                return password.Equals ( dbUser.Pass );
             }
             
             return false;

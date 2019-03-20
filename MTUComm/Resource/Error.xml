@@ -40,14 +40,14 @@
     <Error id="700" message="The MTU encryption process can't be performed after having tried it _var_ times" />
 
     <!-- Configuration Files -->
-    <Error id="800" message="Download or install the necessary configuration files, because all are not present on the device" />
-    <Error id="801" message="Download or install the necessary configuration files, because some of them are corrupted and can not be used" />
+    <Error id="800" message="There is a problem with the configuration files. Contact your IT administrator" />
+    <Error id="801" message="There is a problem with the configuration files and some of them are corrupted. Contact your IT administrator" />
     <Error id="802" message="The certificate that you tried to install is not a valid certificate file ( *.cer )" />
-    <Error id="803" message="Download or install again the certificate, because is impossible to regenerate the one currently installed" />
+    <Error id="803" message="It is not possible to use the currently installed certificate. Contact your IT administrator" />
     <Error id="804" message="Download or install a new certificate because the one that is currently used has expired" />
-    <Error id="805" message="All the necessary permissions have not been granted" />
-    <Error id="806" message="Error downloading configuration files from the FTP" />
-    <Error id="807" message="The Device has not internet connection" />
+    <Error id="805" message="Not all necessary permissions have been granted on the Android device" />
+    <Error id="806" message="There is a problem with the FTP and configuration files could not be downloaded. Contact your IT administrator" />
+    <Error id="807" message="The device has not internet connection" />
     <Error id="808" message="The current date of the device is lower than allowed" />
 
     <!--<Error id="" message="" />-->

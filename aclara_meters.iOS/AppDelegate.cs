@@ -28,9 +28,8 @@ namespace aclara_meters.iOS
             global::Xamarin.Forms.Forms.Init();
             //Distribute.DontCheckForUpdatesInDebug();
 
-            // Prepare configuration parameters
+            // Get Intun Parameters
             //Online.DownloadIntuneParameters ();
-            Parameters.PrepareFromLocal ();
             
             var AppVersion = NSBundle.MainBundle.InfoDictionary[ "CFBundleVersion" ];
 

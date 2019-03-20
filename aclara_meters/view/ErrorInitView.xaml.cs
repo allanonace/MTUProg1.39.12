@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Plugin.Permissions;
-using Plugin.Permissions.Abstractions;
-using Xamarin.Forms;
 using MTUComm;
+using Xamarin.Forms;
 
 namespace aclara_meters.view
 {

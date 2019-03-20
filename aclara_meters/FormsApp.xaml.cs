@@ -8,6 +8,7 @@ using aclara_meters.view;
 using Acr.UserDialogs;
 using ble_library;
 using MTUComm;
+using MTUComm.Exceptions;
 using nexus.protocols.ble;
 using nexus.protocols.ble.scan;
 using Plugin.DeviceInfo;
@@ -18,7 +19,6 @@ using Renci.SshNet;
 using Renci.SshNet.Sftp;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-using MTUComm.Exceptions;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -124,8 +124,6 @@ namespace aclara_meters
             }
         }
 
-        #region iPad & iPhone devices have a different behaviour when initializating the app, this sems to fix it
-
         private void ThreadProcedure ()
         {
             CallToInitApp ( adapter, dialogs, appVersion );
@@ -165,8 +163,6 @@ namespace aclara_meters
                 else this.DownloadXmlsIfNecessary ( dialogs );
             }
         }
-
-        #endregion
 
         #endregion
         
@@ -215,8 +211,8 @@ namespace aclara_meters
                     string compareStr = fileNeeded + XML_EXT;
                     compareStr = compareStr.Replace ( path, string.Empty ).Replace("/", string.Empty);
 
-                    string fileStr = filePath.ToString ().ToLower ();
-                    fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty);
+                    string fileStr = filePath.ToString ();
+                    fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty).ToLower ();
 
                     if ( fileStr.Equals ( compareStr ) )
                     {
@@ -317,25 +313,6 @@ namespace aclara_meters
             // Load configuration from XML files
             this.LoadConfiguration ();
 
-            // Min Date Check
-            try
-            {
-                string datenow = DateTime.Now.ToString("MM/dd/yyyy");
-                string mindate = FormsApp.config.global.MinDate;
-                
-                if ( ! string.IsNullOrEmpty ( mindate ) &&
-                     DateTime.ParseExact(datenow, "MM/dd/yyyy", null) < DateTime.ParseExact(mindate, "MM/dd/yyyy", null))
-                {
-                    throw new DeviceMinDateAllowedException ();
-                }
-            }
-            catch ( Exception e )
-            {
-                this.ShowErrorAndKill ( e );
-                
-                return;
-            }
-            
             if ( ! ScriptingMode &&
                  ! this.errorCreatingConfig )
                 Device.BeginInvokeOnMainThread(() =>

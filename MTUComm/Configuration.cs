@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Xml.Serialization;
 using Xml;
 using MTUComm.Exceptions;
+using System.Xml.Serialization;
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -38,26 +38,46 @@ namespace MTUComm
             string configPath = Mobile.GetPathConfig ();
 
             device = "PC";
-            Config config = new Config ();
 
-            /* TEST - Override configuration file to force parsing error
-            string PRIVATE = Environment.GetFolderPath ( Environment.SpecialFolder.Resources );
-            File.WriteAllText ( Path.Combine ( PRIVATE, ".Config/Mtu.xml" ), "TEST" );
-            */
+            //TEST - Override configuration file to force parsing error
+            //File.WriteAllText ( Path.Combine ( Mobile.GetPathConfig (), "certificate.txt" ), "TEST" );
 
             try
             {
-                mtuTypes   = config.GetMtu        ( Path.Combine ( configPath, XML_MTUS      ) );
-                meterTypes = config.GetMeters     ( Path.Combine ( configPath, XML_METERS    ) );
-                global     = config.GetGlobal     ( Path.Combine ( configPath, XML_GLOBAL    ) );
-                interfaces = config.GetInterfaces ( Path.Combine ( configPath, XML_INTERFACE ) );
-                alarms     = config.GetAlarms     ( Path.Combine ( configPath, XML_ALARMS    ) );
-                demands    = config.GetDemandConf ( Path.Combine ( configPath, XML_DEMANDS   ) );
-                users      = config.GetUsers      ( Path.Combine ( configPath, XML_USERS     ) ).List;
+                // Load configuration files ( xml's )
+                mtuTypes   = Aux.DeserializeXml<MtuTypes>        ( Path.Combine ( configPath, XML_MTUS      ) );
+                meterTypes = Aux.DeserializeXml<MeterTypes>      ( Path.Combine ( configPath, XML_METERS    ) );
+                global     = Aux.DeserializeXml<Global>          ( Path.Combine ( configPath, XML_GLOBAL    ) );
+                interfaces = Aux.DeserializeXml<InterfaceConfig> ( Path.Combine ( configPath, XML_INTERFACE ) );
+                alarms     = Aux.DeserializeXml<AlarmList>       ( Path.Combine ( configPath, XML_ALARMS    ) );
+                demands    = Aux.DeserializeXml<DemandConf>      ( Path.Combine ( configPath, XML_DEMANDS   ) );
+                users      = Aux.DeserializeXml<UserList>        ( Path.Combine ( configPath, XML_USERS     ) ).List;
+                
+                // Regenerate certificate from base64 string
+                Mobile.configData.GenerateCert ();
+                
+                // Check global min date allowed
+                if ( ! string.IsNullOrEmpty ( global.MinDate ) &&
+                     DateTime.Compare ( DateTime.ParseExact ( global.MinDate, "MM/dd/yyyy", null ), DateTime.Today ) < 0 )
+                    throw new DeviceMinDateAllowedException ();
             }
             catch ( Exception e )
             {
-                if ( e is FileNotFoundException )
+                Console.WriteLine ( "Remove Config.Files.." );
+                Console.WriteLine ( "Num [ before ]: " + Directory.GetFiles ( Mobile.GetPathConfig () ).Length );
+
+                // For the moment, the approach is to delete the configuration files if an exception occurs
+                foreach ( string filePath in Directory.GetFiles ( Mobile.GetPathConfig () ) )
+                {
+                    File.Delete ( filePath );
+                    Console.WriteLine ( "- " + filePath + ": " + File.Exists ( filePath ) );
+                }
+                
+                Console.WriteLine ( "Num [ after ]: " + Directory.GetFiles ( Mobile.GetPathConfig () ).Length );
+
+                if ( Errors.IsOwnException ( e ) )
+                    throw e;
+                else if ( e is FileNotFoundException )
                      throw new ConfigurationFilesNotFoundException ();
                 else throw new ConfigurationFilesCorruptedException ();
             }

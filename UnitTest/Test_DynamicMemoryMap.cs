@@ -153,7 +153,7 @@ namespace UnitTest.Tests
 
             using ( StreamReader streamReader = new StreamReader ( path ) )
             {
-                string fileContent = Config.NormalizeBooleans(streamReader.ReadToEnd());
+                string fileContent = Aux.NormalizeBooleans(streamReader.ReadToEnd());
                 using (StringReader reader = new StringReader(fileContent))
                 {
                     Assert.True(test(() => { return ( Global )s.Deserialize ( reader ); }), Error ( ERROR_MAP_GLOBAL ) );
@@ -171,7 +171,7 @@ namespace UnitTest.Tests
 
             using ( StreamReader streamReader = new StreamReader ( path ) )
             {
-                string fileContent = Config.NormalizeBooleans(streamReader.ReadToEnd());
+                string fileContent = Aux.NormalizeBooleans(streamReader.ReadToEnd());
                 using (StringReader reader = new StringReader(fileContent))
                 {
                     Script script = ( Script )s.Deserialize ( reader );
