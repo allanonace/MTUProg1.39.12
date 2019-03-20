@@ -400,7 +400,7 @@ namespace MTUComm
             this.logger.CreateFileIfNotExist ( false, uniUri );
             
             XDocument uniDoc = XDocument.Load ( uniUri );
-            XElement uniMtus = doc.Root.Element ( "Mtus" );
+            XElement uniMtus = uniDoc.Root.Element ( "Mtus" );
             uniMtus.Add ( this.addMtuAction );
             
             uniDoc.Save ( uniUri );
