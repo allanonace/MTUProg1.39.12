@@ -396,7 +396,7 @@ namespace MTUComm
             
             #if DEBUG
             
-            string uniUri = Path.Combine ( Mobile.GetPathLogsUni (), this.actionType + "-" + DateTime.Today.ToString ( "MM_dd_yyyy-hh:mm" ) + ".xml" );
+            string uniUri = Path.Combine ( Mobile.GetPathLogsUni (), this.mtuBasicInfo.Type + "-" + this.actionType + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.logger.CreateFileIfNotExist ( false, uniUri );
             
             XDocument uniDoc = XDocument.Load ( uniUri );
