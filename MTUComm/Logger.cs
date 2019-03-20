@@ -63,21 +63,28 @@ namespace MTUComm
             return base_stream;
         }
 
-        public string CreateFileIfNotExist ( bool append = true )
+        public string CreateFileIfNotExist (
+            bool   append     = true,
+            string customPath = "" )
         {
-            string file_name = getFileName();
-            String filename_clean = Path.GetFileName(file_name);
-            String rel_path = file_name.Replace(filename_clean, "");
-
-            if ( rel_path.Length > 1 && rel_path.StartsWith ( "/" ) )
-                rel_path = rel_path.Substring ( 1 );
-
-            string full_new_path = Path.Combine ( Mobile.GetPathLogs (), rel_path );
-
-            if ( ! Directory.Exists ( full_new_path ) )
-                Directory.CreateDirectory ( full_new_path );
-
-            string uri = Path.Combine ( full_new_path, filename_clean );
+            string uri = customPath;
+        
+            if ( string.IsNullOrEmpty ( customPath ) )
+            {
+                string file_name = getFileName();
+                String filename_clean = Path.GetFileName(file_name);
+                String rel_path = file_name.Replace(filename_clean, "");
+    
+                if ( rel_path.Length > 1 && rel_path.StartsWith ( "/" ) )
+                    rel_path = rel_path.Substring ( 1 );
+    
+                string full_new_path = Path.Combine ( Mobile.GetPathLogs (), rel_path );
+    
+                if ( ! Directory.Exists ( full_new_path ) )
+                    Directory.CreateDirectory ( full_new_path );
+    
+                uri = Path.Combine ( full_new_path, filename_clean );
+            }
 
             if ( ! File.Exists ( uri ) )
             { 

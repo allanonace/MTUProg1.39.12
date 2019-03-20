@@ -392,12 +392,19 @@ namespace MTUComm
             XElement mtus = doc.Root.Element ( "Mtus" );
             mtus.Add ( this.addMtuAction );
 
-            string resultStr = doc.ToString ();
-
             doc.Save ( logUri );
             
             #if DEBUG
-            doc.Save ( Path.Combine ( Mobile.GetPathLogsUni (), this.actionType + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" ) );
+            
+            string uniUri = Path.Combine ( Mobile.GetPathLogsUni (), this.actionType + "-" + DateTime.Today.ToString ( "MM_dd_yyyy-hh:mm" ) + ".xml" );
+            this.logger.CreateFileIfNotExist ( false, uniUri );
+            
+            XDocument uniDoc = XDocument.Load ( uniUri );
+            XElement uniMtus = doc.Root.Element ( "Mtus" );
+            uniMtus.Add ( this.addMtuAction );
+            
+            uniDoc.Save ( uniUri );
+            
             #endif
         }
 
