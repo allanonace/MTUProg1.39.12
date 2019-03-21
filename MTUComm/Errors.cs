@@ -95,7 +95,7 @@ namespace MTUComm
             
             // Configuration Files and System [ 7xx ]
             //-------------------------------
-            // There is a problem with the configuration files. Contact your IT administrator
+            // Some of the configuration files are not present in the root folder. Contact your IT administrator
             { new ConfigurationFilesNotFoundException (),       800 },
             // There is a problem with the configuration files and some of them are corrupted. Contact your IT administrator
             { new ConfigurationFilesCorruptedException (),      801 },

@@ -1470,7 +1470,7 @@ namespace aclara_meters.view
 
             customers_copyr  .Text = TEXT_COPYR;
             customers_support.Text = TEXT_SUPPORT;
-            customers_version.Text = TEXT_VERSION + ( ( Mobile.configData.IsCertLoaded ) ? TEXT_INTUNE : string.Empty );
+            customers_version.Text = TEXT_VERSION; // + ( ( Mobile.configData.IsCertLoaded ) ? TEXT_INTUNE : string.Empty );
             /*
             #if __IOS__
             customers_version.Text = TEXT_VERSION + NSBundle.MainBundle

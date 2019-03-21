@@ -69,15 +69,13 @@ namespace aclara_meters
         
         public static ICredentialsService credentialsService { get; private set; }
         public static BleSerial ble_interface;
-        public static Logger loggger;
+        public static Logger logger;
         public static Configuration config;
         public static IBlePeripheral peripheral;
 
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
         private string appVersion;
-        
-        private bool errorCreatingConfig;
 
         #endregion
 
@@ -148,7 +146,7 @@ namespace aclara_meters
 
             // Force to not download server XML files
             if ( DEBUG_MODE_ON )
-                this.LoadXmlsAndCreateContainer ( dialogs );
+                this.LoadConfigurationAndOpenScene ( dialogs );
             else
             {
                 /*
@@ -158,171 +156,44 @@ namespace aclara_meters
                 */
             
                 // Downloads, if necesary, and loads configuration from XML files
+                /*
                 if ( this.HasDeviceAllXmls () )
-                     this.LoadXmlsAndCreateContainer ( dialogs );
+                     this.LoadConfigurationAndOpenScene ( dialogs );
                 else this.DownloadXmlsIfNecessary ( dialogs );
+                */
+            
+                this.LoadConfigurationAndOpenScene ( dialogs );   
             }
         }
 
         #endregion
-        
-        private async Task PermisosLocationAsync()
+
+        #region Configuration files and System
+
+        private void LoadConfigurationAndOpenScene ( IUserDialogs dialogs )
         {
-            try
+            // Only download configuration files from FTP when all are not installed
+            if ( Mobile.IsNetAvailable () &&
+                 ! this.HasDeviceAllXmls () )
+                this.DownloadConfigFiles ();
+            
+            // Check if all configuration files are available
+            if ( ! this.HasDeviceAllXmls () )
             {
-                var statusLocation = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
-                var statusStorage = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
+                this.ShowErrorAndKill ( new ConfigurationFilesNotFoundException () );
 
-                if (statusLocation != PermissionStatus.Granted)
-                {
-                    await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
-                }
-
-                if (statusStorage != PermissionStatus.Granted)
-                {
-                    await CrossPermissions.Current.RequestPermissionsAsync(Permission.Storage);
-                }
-            }
-            catch
-            {
-                this.ShowErrorAndKill ( new AndroidPermissionsException () );
-            }
-        }
-
-        #region Configuration files
-
-        private bool HasDeviceAllXmls ()
-        {
-            string path = Mobile.GetPathConfig ();
-
-            // Directory could exist but is empty
-            if ( string.IsNullOrEmpty ( path ) )
-                return false;
-
-            // Directory exists and is not empty
-            string[] filesLocal = Directory.GetFiles ( path );
-
-            int count = 0;
-
-            foreach ( string fileNeeded in filesToCheck )
-            {
-                foreach ( string filePath in filesLocal )
-                {
-                    string compareStr = fileNeeded + XML_EXT;
-                    compareStr = compareStr.Replace ( path, string.Empty ).Replace("/", string.Empty);
-
-                    string fileStr = filePath.ToString ();
-                    fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty).ToLower ();
-
-                    if ( fileStr.Equals ( compareStr ) )
-                    {
-                        count++;
-                        break;
-                    }
-                }
+                return;
             }
 
-            if(count == filesToCheck.Length)
-                return true;
-
-            return false;
-        }
-
-        private void DownloadXmlsIfNecessary (
-            IUserDialogs dialogs )
-        {
-            // Checks network channels
-            if (Mobile.IsNetAvailable())
+            // Install certificate if needed ( Convert from .cer to base64 string / .txt )
+            if ( ! this.GenerateBase64Certificate () )
             {
-                // Donwloads all configuracion XML files
-                if ( this.DownloadConfigFiles () )
-                    this.LoadXmlsAndCreateContainer ( dialogs );
-                else
-                    this.ShowErrorAndKill ( new FtpDownloadException () );
-            }
-            else 
-               this.ShowErrorAndKill ( new NoInternetException () );
-        }
-
-        private bool DownloadConfigFiles ()
-        {
-            try
-            {
-                Mobile.ConfigData data = Mobile.configData;
-                using (SftpClient sftp = new SftpClient ( data.ftpHost, data.ftpPort, data.ftpUser, data.ftpPass ) )
-                {
-                    try
-                    {
-                        sftp.Connect ();
-
-                        // List all posible files in the documents directory 
-                        // Check if file's lastwritetime is the lastest 
-                        List<SftpFile> ftp_array_files = new List<SftpFile>();
-
-                        // Remote FTP File directory
-                        bool isCertificate;
-                        string configPath = Mobile.GetPathConfig ();
-                        foreach ( SftpFile file in sftp.ListDirectory ( data.ftpPath ) )
-                        {
-                            string name = file.Name;
-                        
-                            if ( ( isCertificate = name.Contains ( XML_CER ) ) ||
-                                 name.Contains ( XML_EXT ) )
-                            {
-                                using ( Stream stream = File.OpenWrite ( Path.Combine ( configPath, name ) ) )
-                                {
-                                    sftp.DownloadFile(Path.Combine ( data.ftpPath, name ), stream );
-                                }
-
-                                // Convert certificate to base64 string                                
-                                if ( isCertificate )
-                                {
-                                    string pathCer   = Path.Combine ( configPath, name );  // Path to .cer in Library
-                                    byte[] bytes     = File.ReadAllBytes ( pathCer );      // Read .cer full bytes
-                                    string strBase64 = Convert.ToBase64String ( bytes );   // Convert bytes to base64 string
-                                    File.WriteAllText ( Path.Combine ( configPath, CER_TXT ), strBase64 );
-                                    File.Delete ( pathCer ); // Create new {name}.txt file with base64 string and delete .cer
-                                }
-                            }
-                        }
-
-                        sftp.Disconnect ();
-                    }
-                    catch ( Exception e )
-                    {
-                        Console.WriteLine("An exception has been caught " + e.ToString());
-                        
-                        return false;
-                    }
-                    
-                    Console.WriteLine ( "Configuration files correctly downloaded" );
-                    
-                    return true;
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("An exception has been caught " + e.ToString());
+                this.ShowErrorAndKill ( new CertificateFileNotValidException () );
+            
+                return;
             }
 
-            return false;
-        }
-
-        private void LoadXmlsAndCreateContainer ( IUserDialogs dialogs )
-        {
-            // Load configuration from XML files
-            this.LoadConfiguration ();
-
-            if ( ! ScriptingMode &&
-                 ! this.errorCreatingConfig )
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
-                });
-        }
-
-        private void LoadConfiguration ()
-        {
+            // Load configuration files
             try
             {
                 config  = Configuration.GetInstance ();
@@ -330,13 +201,12 @@ namespace aclara_meters
             catch ( Exception e )
             {
                 // Avoid starting the creation of the login window
-                this.errorCreatingConfig = true;
                 this.ShowErrorAndKill ( e );
                
                 return;
             }
 
-            loggger = new Logger ();
+            logger = new Logger ();
 
             switch ( Device.RuntimePlatform )
             {
@@ -358,6 +228,167 @@ namespace aclara_meters
             }
 
             Configuration.SetInstance ( config );
+            
+            if ( ! ScriptingMode )
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
+                });
+        }
+
+        /*
+        private void DownloadXmlsIfNecessary (
+            IUserDialogs dialogs )
+        {
+            // Checks network channels
+            if ( Mobile.IsNetAvailable () )
+            {
+                // Donwloads all configuracion XML files
+                if ( this.DownloadConfigFiles () )
+                    this.LoadConfigurationAndOpenScene ( dialogs );
+                else
+                    this.ShowErrorAndKill ( new FtpDownloadException () );
+            }
+            else 
+               this.ShowErrorAndKill ( new NoInternetException () );
+        }
+        */
+
+        private bool DownloadConfigFiles ()
+        {
+            bool ok = true;
+        
+            try
+            {
+                Mobile.ConfigData data = Mobile.configData;
+                using (SftpClient sftp = new SftpClient ( data.ftpHost, data.ftpPort, data.ftpUser, data.ftpPass ) )
+                {
+                    sftp.Connect ();
+
+                    // List all posible files in the documents directory 
+                    // Check if file's lastwritetime is the lastest 
+                    List<SftpFile> ftp_array_files = new List<SftpFile>();
+
+                    // Remote FTP File directory
+                    bool isCertificate;
+                    string configPath = Mobile.GetPathConfig ();
+                    foreach ( SftpFile file in sftp.ListDirectory ( data.ftpPath ) )
+                    {
+                        string name = file.Name;
+                    
+                        if ( ( isCertificate = name.Contains ( XML_CER ) ) ||
+                             name.Contains ( XML_EXT ) )
+                        {
+                            using ( Stream stream = File.OpenWrite ( Path.Combine ( configPath, name ) ) )
+                            {
+                                sftp.DownloadFile(Path.Combine ( data.ftpPath, name ), stream );
+                            }
+                        }
+                    }
+
+                    sftp.Disconnect ();
+                }
+            }
+            catch ( Exception e )
+            {
+                ok = false;
+            }
+
+            Console.WriteLine ( "Download config.files from FTP: " + ( ( ok ) ? "OK" : "NO" ) );
+
+            return ok;
+        }
+
+        private bool HasDeviceAllXmls ()
+        {
+            bool ok = true;
+        
+            string path = Mobile.GetPathConfig ();
+
+            // Directory could exist but is empty
+            if ( string.IsNullOrEmpty ( path ) )
+                ok = false;
+
+            // Directory exists and is not empty
+            string[] filesLocal = Directory.GetFiles ( path );
+
+            int count = 0;
+            foreach ( string fileNeeded in filesToCheck )
+                foreach ( string filePath in filesLocal )
+                {
+                    string compareStr = fileNeeded + XML_EXT;
+                    compareStr = compareStr.Replace ( path, string.Empty ).Replace("/", string.Empty);
+
+                    string fileStr = filePath.ToString ();
+                    fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty).ToLower ();
+
+                    if ( fileStr.Equals ( compareStr ) )
+                    {
+                        count++;
+                        break;
+                    }
+                }
+
+            ok = ( count == filesToCheck.Length );
+
+            Console.WriteLine ( "Are all config.files installed? " + ( ( ok ) ? "OK" : "NO" ) );
+            
+            return ok;
+        }
+
+        private bool GenerateBase64Certificate ()
+        {
+            bool   ok         = true;
+            string configPath = Mobile.GetPathConfig ();
+            string txtPath    = Path.Combine ( configPath, CER_TXT );
+        
+            try
+            {
+                
+                foreach ( string filePath in Directory.GetFiles ( configPath ) )
+                {
+                    if ( filePath.Contains ( XML_CER ) )
+                    {
+                        // Convert certificate to base64 string                                
+                        string pathCer   = Path.Combine ( configPath, filePath );  // Path to .cer in Library
+                        byte[] bytes     = File.ReadAllBytes ( pathCer );          // Read .cer full bytes
+                        string strBase64 = Convert.ToBase64String ( bytes );       // Convert bytes to base64 string
+                        File.WriteAllText ( txtPath, strBase64 );                  // Create new {name}.txt file with base64 string and delete .cer
+                        File.Delete ( pathCer );
+                        
+                        break;
+                    }
+                }
+            }
+            catch ( Exception e )
+            {
+                ok = false;
+            }
+
+            if ( File.Exists ( txtPath ) )
+                 Console.WriteLine ( "Is the certificate installed correctly? " + ( ( ok ) ? "OK" : "NO" ) );
+            else Console.WriteLine ( "No certificate is being used" );
+
+            return ok;
+        }
+
+        private async Task PermisosLocationAsync()
+        {
+            try
+            {
+                var statusLocation = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
+                var statusStorage = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Storage);
+
+                if ( statusLocation != PermissionStatus.Granted )
+                    await CrossPermissions.Current.RequestPermissionsAsync ( Permission.Location );
+
+                if ( statusStorage != PermissionStatus.Granted )
+                    await CrossPermissions.Current.RequestPermissionsAsync ( Permission.Storage );
+            }
+            catch
+            {
+                this.ShowErrorAndKill ( new AndroidPermissionsException () );
+            }
         }
 
         #endregion
@@ -377,6 +408,8 @@ namespace aclara_meters
         }
 
         #endregion
+
+        #region Scripting
 
         public void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
         {
@@ -430,8 +463,10 @@ namespace aclara_meters
                 });
             }
         }
+        
+        #endregion
 
-        #region OnEvent
+        #region Events
 
         protected override void OnStart()
         {

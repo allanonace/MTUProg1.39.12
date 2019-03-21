@@ -39,8 +39,8 @@
     <Folder Include="Observer\" />
     <Folder Include="Exceptions\" />
     <Folder Include="Resource\" />
-    <Folder Include="Resource\Config\" />
-    <Folder Include="Resource\Logs\" />
+    <Folder Include="Resource\Configsss\Folder_Copy.xml">
+    </Folder>
   </ItemGroup>
   <ItemGroup>
     <None Remove=".Configuration.cs.swp" />
@@ -55,16 +55,14 @@
     <None Remove="XMLs\TurnOffMtu.xml" />
     <None Remove="Resource\Error.xml" />
     <None Remove="Resource\Config\DownloadFTP.xml" />
+    <None Remove="Resource\Config\test.xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="TaskExtensions.cs" />
+    <Compile Remove="Resource\Configsss\iiiii.cs" />
+    <Compile Remove="Resource\Configsss\pppp.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resource\Error.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resource\Config\DownloadFTP.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 </Project>

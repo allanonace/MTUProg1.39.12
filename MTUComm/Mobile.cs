@@ -236,7 +236,8 @@ namespace MTUComm
             if ( ! string.IsNullOrEmpty ( pathCacheConfig ) )
                 return pathCacheConfig;
         
-            string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments ), PATH_CONFIG );
+            string path = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments ); 
+            //string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments ), PATH_CONFIG );
             //string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Resources ), "." + PATH_CONFIG );
         
             if ( ! Directory.Exists ( path ) )

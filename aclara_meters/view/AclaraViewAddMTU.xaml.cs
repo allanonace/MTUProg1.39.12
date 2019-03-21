@@ -438,6 +438,12 @@ namespace aclara_meters.view
                         divSub_SnapReads.Opacity = OPACITY_DISABLE;
                         snapReadsStatus = false;
                     }
+                    
+                    if ( MANDATORY_SNAPREADS &&
+                         global.IndividualDailyReads &&
+                         snapReadsStatus )
+                         this.lb_SnapReads.TextColor = COL_MANDATORY;
+                    else this.lb_SnapReads.TextColor = Color.Black;
                 }),
             });
 
@@ -1068,7 +1074,8 @@ namespace aclara_meters.view
                    
                     // Snap Reads
                     if ( MANDATORY_SNAPREADS &&
-                         global.IndividualDailyReads )
+                         global.IndividualDailyReads &&
+                         snapReadsStatus )
                         this.lb_SnapReads.TextColor = COL_MANDATORY;
                     
                     // Two-Way
@@ -2535,8 +2542,8 @@ namespace aclara_meters.view
         {
             var newStep = Math.Round(e.NewValue / snapReadsStep);
 
-            sld_SnapReads.Value = newStep * snapReadsStep;
-            lb_SnapReads .Text  = sld_SnapReads.Value.ToString ();
+            sld_SnapReads.Value   = newStep * snapReadsStep;
+            lb_SnapReads_Num.Text = sld_SnapReads.Value.ToString ();
         }
 
         #endregion
@@ -3645,7 +3652,7 @@ namespace aclara_meters.view
             bool noOMt = EmptyNoReq ( this.tbx_OldMtuId            .Text, MANDATORY_OLDMTUID        );
             bool noOMs = EmptyNoReq ( this.tbx_OldMeterSerialNumber.Text, MANDATORY_OLDMETERSERIAL  );
             bool noMsn = EmptyNoReq ( this.tbx_MeterSerialNumber   .Text, MANDATORY_METERSERIAL     );
-            bool noSnr = EmptyNoReq ( this.lb_SnapReads            .Text, MANDATORY_SNAPREADS       );
+            bool noSnr = EmptyNoReq ( this.lb_SnapReads_Num        .Text, MANDATORY_SNAPREADS       );
             bool noOMr = EmptyNoReq ( this.tbx_OldMeterReading     .Text, MANDATORY_OLDMETERREADING );
             bool noMre = EmptyNoReq ( this.tbx_MeterReading        .Text, MANDATORY_METERREADING    );
             
@@ -3682,7 +3689,7 @@ namespace aclara_meters.view
             bool badOMt = this.div_OldMtuId             .IsVisible && NoEqTxt ( this.tbx_OldMtuId            .Text, global.MtuIdLength                 );
             bool badOMs = this.div_OldMeterSerialNumber .IsVisible && NoELTxt ( this.tbx_OldMeterSerialNumber.Text, global.MeterNumberLength           );
             bool badMsn = this.div_MeterSerialNumber    .IsVisible && NoELTxt ( this.tbx_MeterSerialNumber   .Text, global.MeterNumberLength           );
-            bool badSnr = this.div_SnapReads            .IsVisible && NoELNum ( this.lb_SnapReads            .Text, (int)this.sld_SnapReads .Maximum   ) && snapReadsStatus;
+            bool badSnr = this.div_SnapReads            .IsVisible && NoELNum ( this.lb_SnapReads_Num        .Text, (int)this.sld_SnapReads .Maximum   ) && snapReadsStatus;
             bool badOMr = this.div_OldMeterReading      .IsVisible && NoELNum ( this.tbx_OldMeterReading     .Text, this.tbx_OldMeterReading.MaxLength );
             bool badMre =                                             NoEqNum ( this.tbx_MeterReading        .Text, this.tbx_MeterReading   .MaxLength );
             

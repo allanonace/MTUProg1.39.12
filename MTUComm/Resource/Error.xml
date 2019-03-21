@@ -40,7 +40,7 @@
     <Error id="700" message="The MTU encryption process can't be performed after having tried it _var_ times" />
 
     <!-- Configuration Files -->
-    <Error id="800" message="There is a problem with the configuration files. Contact your IT administrator" />
+    <Error id="800" message="Some of the configuration files are not present in the root folder. Contact your IT administrator" />
     <Error id="801" message="There is a problem with the configuration files and some of them are corrupted. Contact your IT administrator" />
     <Error id="802" message="The certificate that you tried to install is not a valid certificate file ( *.cer )" />
     <Error id="803" message="It is not possible to use the currently installed certificate. Contact your IT administrator" />

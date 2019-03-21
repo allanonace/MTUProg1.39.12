@@ -63,6 +63,7 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
+                /*
                 Console.WriteLine ( "Remove Config.Files.." );
                 Console.WriteLine ( "Num [ before ]: " + Directory.GetFiles ( Mobile.GetPathConfig () ).Length );
 
@@ -74,6 +75,7 @@ namespace MTUComm
                 }
                 
                 Console.WriteLine ( "Num [ after ]: " + Directory.GetFiles ( Mobile.GetPathConfig () ).Length );
+                */
 
                 if ( Errors.IsOwnException ( e ) )
                     throw e;
