@@ -33,7 +33,7 @@ namespace MTUComm
             this.actionType = (ActionType)form.actionType;
             this.user = user;
             this.mtuBasicInfo = MtuForm.mtuBasicInfo;
-            this.logUri = this.logger.CreateFileIfNotExist ( ! isFromScripting );
+            this.logUri = this.logger.CreateFileIfNotExist ();
 
             this.addMtuAction  = new XElement("Action");
             this.turnOffAction = new XElement("Action");
