@@ -6,7 +6,6 @@ namespace MTUComm
 {
     public class MTUBasicInfo
     {
-
         private uint mtu_type;
         private uint mtu_id;
 

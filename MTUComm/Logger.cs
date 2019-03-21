@@ -190,19 +190,20 @@ namespace MTUComm
             PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, result, mtu.Id);
             doc.Save(uri);
             
-            #if DEBUG
-            
+            // Launching multiple times scripts with the same output path, concatenates the actions logs,
+            // but the log send to the explorer should be only the last action performed
             string uniUri = Path.Combine ( Mobile.GetPathLogsUni (),
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( false, uniUri );
             
             XDocument uniDoc = XDocument.Load ( uniUri );
             PrepareLog_ReadMTU ( uniDoc.Root.Element("Mtus"), action, result, mtu.Id );
-            uniDoc.Save ( uniUri );
             
+            #if DEBUG
+            uniDoc.Save ( uniUri );
             #endif
             
-            return doc.ToString ();
+            return uniDoc.ToString ();
         }
 
         private void PrepareLog_ReadMTU ( XElement parent, Action action, ActionResult result, int mtuId )

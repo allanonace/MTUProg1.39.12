@@ -116,8 +116,9 @@ namespace MTUComm
         {
             Mtu mtu = mtuTypes.FindByMtuId ( mtuId );
             
+            // Is not valid MTU ID ( not present in Mtu.xml )
             if ( mtu == null )
-                Errors.LogErrorNow ( new MtuTypeIsNotFoundException () );
+                Errors.LogErrorNow ( new MtuMissingException () );
             
             return mtu;
         }

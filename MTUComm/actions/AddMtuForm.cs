@@ -59,7 +59,9 @@ namespace MTUComm.actions
             GPS_LONGITUDE,
             GPS_ALTITUDE,
             OPTIONAL_PARAMS,
-            FORCE_TIME_SYNC
+            FORCE_TIME_SYNC,
+            
+            TEST
         }
 
         private const string PORT_2_SUFIX = "_2";
@@ -462,7 +464,19 @@ namespace MTUComm.actions
                         "ForceTimeSync",
                         "Force TimeSync"
                     }
-                }
+                },
+                #endregion
+                
+                #region TEST
+                {
+                    FIELD.TEST,
+                    new string[]
+                    {
+                        "Test",
+                        "Test",
+                        "Test"
+                    }
+                },
                 #endregion
             };
 
@@ -472,6 +486,11 @@ namespace MTUComm.actions
         public int NumOfParamRegistered
         {
             get { return this.dictionary.Count; }
+        }
+
+        public Dictionary<FIELD,Parameter> RegisteredParamsByField
+        {
+            get { return this.dictionary; }
         }
 
         public AddMtuForm ( Mtu mtu ) : base ( mtu )

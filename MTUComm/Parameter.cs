@@ -227,6 +227,16 @@ namespace MTUComm
             }
         }
 
+        public string GetValueOrDefault<T> (
+            int numCharacters )
+        {
+            char val = ( typeof ( T ) == typeof ( string ) ) ? ' ' : '0';
+        
+            if ( mValue is null )
+                return "".PadRight ( numCharacters, val );
+            return mValue;
+        }
+
         public override string ToString()
         {
             return CustomParameter + ": " + Value;

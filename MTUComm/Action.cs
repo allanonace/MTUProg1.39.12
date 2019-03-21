@@ -202,7 +202,15 @@ namespace MTUComm
 
         #region Attributes
 
-        public static Mtu currentMtu;
+        public static Mtu currentMtu { private set; get; }
+        
+        public static void SetCurrentMtu (
+            MTUBasicInfo mtuBasic )
+        {
+            currentMtu = Configuration.GetInstance ().GetMtuTypeById ( ( int )mtuBasic.Type );
+        }
+        
+        private string lastLogCreated;
 
         public MTUComm comm { get; private set; }
         public ActionType type { get; }
@@ -310,7 +318,7 @@ namespace MTUComm
         {
             if ( type == ActionType.AddMtu )
                  return comm.GetResultXML ();
-            else return logger.ReadMTU ( this, result, currentMtu ); 
+            else return this.lastLogCreated;
         }
 
         #endregion
@@ -446,7 +454,7 @@ namespace MTUComm
         private void Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
         {
             ActionResult result = CreateActionResultUsingInterface ( e.MemoryMap, e.Mtu );
-            logger.ReadMTU ( this, result, e.Mtu );
+            this.lastLogCreated = logger.ReadMTU ( this, result, e.Mtu );
             ActionFinishArgs args = new ActionFinishArgs ( result );
 
             OnFinish ( this, args );

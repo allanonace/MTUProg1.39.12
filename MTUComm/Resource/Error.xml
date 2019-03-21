@@ -4,14 +4,16 @@
     <Error id="100" message="MTU is not the same as at the beginning of the process" />
     <Error id="101" message="Puck can not communicate with MTU" />
     <Error id="102" message="Puck can not communicate with MTU after has completed writing process" />
+    <Error id="103" message="The Mtu.xml file does no contain the MTU ID specified" />
 
     <!-- Meter -->
     <Error id="200" message="The Meter.xml file does not contain the Meter ID specified" />
-    <Error id="201" message="The MTU does not support selected Meter" />
-    <Error id="202" message="The Meter.xml file does not contain the Meter type specified with NumberOfDials, DriveDialSize and UnitOfMeasure" />
+    <Error id="201" message="Selected Meter is not supported for current MTU" />
+    <Error id="202" message="The Meter.xml file does not contain the Meter type specified with the tags NumberOfDials, DriveDialSize and UnitOfMeasure" />
     <Error id="203" message="The script does not contain the tag NumberOfDials needed to select the MTU" />
     <Error id="204" message="The script does not contain the tag DriveDialSize needed to select the MTU" />
     <Error id="205" message="The script does not contain the tag UnitOfMeasure needed to select the MTU" />
+    <Error id="206" message="Some of the necessary parameters for Meter autodetection are missing in the script" />
     
     <!-- Scripting parameters -->
     <Error id="300" message="Error translating or validating parameters _var_ from script file" />
@@ -23,8 +25,8 @@
     <Error id="306" message="The script file used is empty" />
     
     <!-- Alarm -->
-    <Error id="400" message="The alarm profile selected for current MTU is not defined in the Alarm.xml file" />
-    <Error id="401" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" />
+    <Error id="400" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" />
+    <Error id="401" message="No alarm was selected but the MTU entry in Mtu.xml requires using an alarm" />
     
     <!-- Turn Off -->
     <Error id="500" message="Turn off MTU process has failed trying to activated the Ship Bit" />

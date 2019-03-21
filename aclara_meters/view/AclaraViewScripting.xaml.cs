@@ -1013,6 +1013,9 @@ namespace aclara_meters.view
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
+                
+                try
+                {
                     if (e.FormLog == null)
                     {
                         ContentView_Scripting_textScript.Text = "";
@@ -1077,6 +1080,13 @@ namespace aclara_meters.view
                         
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
                     });
+
+                }
+                catch ( Exception ex )
+                {
+                    
+                }
+
                 });
             });
         }

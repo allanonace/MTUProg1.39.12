@@ -17,17 +17,22 @@
         public PuckCantReadFromMtuAfterWritingException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
+    public class MtuMissingException : OwnExceptionsBase
+    {
+        public MtuMissingException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
     // Meter [ 2xx ]
     //------
 
-    public class MtuTypeIsNotFoundException : OwnExceptionsBase
+    public class ScriptingAutoDetectMeterMissing : OwnExceptionsBase
     {
-        public MtuTypeIsNotFoundException ( string message = "", int port = 1 ) : base ( message, port ) { }
+        public ScriptingAutoDetectMeterMissing ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
-    public class MtuNotSupportMeterException : OwnExceptionsBase
+    public class ScriptingAutoDetectNotSupportedException : OwnExceptionsBase
     {
-        public MtuNotSupportMeterException ( string message = "", int port = 1 ) : base ( message, port ) { }
+        public ScriptingAutoDetectNotSupportedException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     public class ScriptingAutoDetectMeterException : OwnExceptionsBase
@@ -48,6 +53,11 @@
     public class UnitOfMeasureTagMissingScript : OwnExceptionsBase
     {
         public UnitOfMeasureTagMissingScript ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
+    public class ScriptingAutoDetectTagsMissingScript : OwnExceptionsBase
+    {
+        public ScriptingAutoDetectTagsMissingScript ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
     // Scripting Parameters [ 3xx ]

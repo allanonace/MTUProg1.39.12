@@ -30,14 +30,16 @@ namespace MTUComm
             { new PuckCantCommWithMtuException (),              101 },
             // Puck can't read from MTU after has completed writing process
             { new PuckCantReadFromMtuAfterWritingException (),  102 },
+            // The Mtu.xml file does no contain the MTU ID specified
+            { new MtuMissingException (),                       103 },
         
             // Meter [ 2xx ]
             //------
-            // Mtu can't be recovered using MTU type
-            { new MtuTypeIsNotFoundException (),                200 },
-            // The MTU does not support selected Meter
-            { new MtuNotSupportMeterException (),               201 },
-            // The Meter.xml does not contain the Meter type specified with tags NumberOfDials, DriveDialSize and UnitOfMeasure
+            // The Meter.xml file does not contain the Meter ID specified
+            { new ScriptingAutoDetectMeterMissing (),           200 },
+            // Selected Meter is not supported for current MTU
+            { new ScriptingAutoDetectNotSupportedException (),  201 },
+            // The Meter.xml file does not contain the Meter type specified with the tags NumberOfDials, DriveDialSize and UnitOfMeasure
             { new ScriptingAutoDetectMeterException (),         202 },
             // The script does not contain the tag NumberOfDials needed to select the MTU
             { new NumberOfDialsTagMissingScript (),             203 },
@@ -45,6 +47,8 @@ namespace MTUComm
             { new DriveDialSizeTagMissingScript (),             204 },
             // The script does not contain the tag UnitOfMeasure needed to select the MTU
             { new UnitOfMeasureTagMissingScript (),             205 },
+            // Some of the necessary parameters for Meter autodetection are missing in the script
+            { new ScriptingAutoDetectTagsMissingScript (),      206 },
             
             // Scripting Parameters [ 3xx ]
             //---------------------
@@ -65,9 +69,9 @@ namespace MTUComm
             
             // Alarm [ 4xx ]
             //------
-            // Alarm profile selected for current MTU is not defined in the Alarm.xml file
+            // The alarm profile Scripting for current MTU is not defined in the Alarm.xml file
             { new ScriptingAlarmForCurrentMtuException (),      400 },
-            // The  alarm profile "Scripting" for current MTU is not defined in the Alarm.xml file
+            // No alarm was selected but the MTU entry in Mtu.xml requires using an alarm
             { new SelectedAlarmForCurrentMtuException (),       401 },
             
             // Turn Off [ 5xx ]

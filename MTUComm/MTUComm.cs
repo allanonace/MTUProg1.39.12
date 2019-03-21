@@ -256,6 +256,8 @@ namespace MTUComm
                 // that perform the basic read with a different MTU
                 if ( ! this.basicInfoLoaded )
                     this.LoadMtuAndMetersBasicInfo ();
+                
+                Action.SetCurrentMtu ( this.latest_mtu );
 
                 switch (type)
                 {
@@ -620,9 +622,6 @@ namespace MTUComm
                     if ( ! form.ContainsParameter ( FIELD.UNIT_MEASURE ) )
                         Errors.AddError ( new UnitOfMeasureTagMissingScript () );
                     
-                    // Log errors but not finish yet
-                    //Errors.LogRegisteredErrors ();
-                
                     if ( form.ContainsParameter ( FIELD.NUMBER_OF_DIALS ) &&
                          form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE ) &&
                          form.ContainsParameter ( FIELD.UNIT_MEASURE    ) )
@@ -642,7 +641,7 @@ namespace MTUComm
                         else throw new ScriptingAutoDetectMeterException ();
                     }
                     // Script does not contain some of the needed tags ( NumberOfDials,... )
-                    else throw new ScriptingAutoDetectMeterException ();
+                    else throw new ScriptingAutoDetectTagsMissingScript ();
                 }
                 // Check if the selected Meter exists and current MTU support it
                 else
@@ -650,14 +649,14 @@ namespace MTUComm
                     meterPort1 = configuration.getMeterTypeById ( int.Parse ( form.Meter.Value ) );
                     portTypes  = this.mtu.Ports[ 0 ].GetPortTypes ();
                     
-                    // Is not valid Meter ID
+                    // Is not valid Meter ID ( not present in Meter.xml )
                     if ( meterPort1.IsEmpty )
-                        throw new MtuTypeIsNotFoundException ();
+                        throw new ScriptingAutoDetectMeterMissing ();
                     
                     // Current MTU does not support selected Meter
                     else if ( ! portTypes.Contains ( form.Meter.Value ) && // By Meter Id = Numeric
                               ! portTypes.Contains ( meterPort1.Type ) )   // By Type = Chars
-                        throw new MtuNotSupportMeterException ();
+                        throw new ScriptingAutoDetectNotSupportedException ();
                 }
     
                 // Port 2
@@ -676,9 +675,6 @@ namespace MTUComm
                         if ( ! form.ContainsParameter ( FIELD.UNIT_MEASURE_2 ) )
                             Errors.AddError ( new UnitOfMeasureTagMissingScript ( string.Empty, 2 ) );
                     
-                        // Log errors but not finish yet
-                        //Errors.LogRegisteredErrors ();
-                    
                         if ( form.ContainsParameter ( FIELD.NUMBER_OF_DIALS_2 ) &&
                              form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE_2 ) &&
                              form.ContainsParameter ( FIELD.UNIT_MEASURE_2    ) )
@@ -696,7 +692,7 @@ namespace MTUComm
                             else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
                         }
                         // Script does not contain some of the needed tags ( NumberOfDials,... )
-                        else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
+                        else throw new ScriptingAutoDetectTagsMissingScript ( string.Empty, 2 );
                     }
                     // Check if the selected Meter exists and current MTU support it
                     else
@@ -704,14 +700,14 @@ namespace MTUComm
                         meterPort2 = configuration.getMeterTypeById ( int.Parse ( form.Meter_2.Value ) );
                         portTypes  = this.mtu.Ports[ 1 ].GetPortTypes ();
                         
-                        // Is not valid Meter ID
+                        // Is not valid Meter ID ( not present in Meter.xml )
                         if ( meterPort2.IsEmpty )
-                            throw new MtuTypeIsNotFoundException ( string.Empty, 2 );
+                            throw new ScriptingAutoDetectMeterMissing ( string.Empty, 2 );
                         
                         // Current MTU does not support selected Meter
                         else if ( ! portTypes.Contains ( form.Meter_2.Value ) && // By Meter Id = Numeric
                                   ! portTypes.Contains ( meterPort2.Type ) )     // By Type = Chars
-                            throw new MtuNotSupportMeterException ( string.Empty, 2 );
+                            throw new ScriptingAutoDetectNotSupportedException ( string.Empty, 2 );
                     }
                 }
 
@@ -1059,10 +1055,11 @@ namespace MTUComm
 
                 #region Account Number
 
-                map.P1MeterId = form.AccountNumber.Value;
+                // Uses default value fill to zeros if parameter is missing in scripting
+                map.P1MeterId = form.AccountNumber.GetValueOrDefault<ulong> ( global.AccountLength );
                 if ( form.usePort2 &&
                      form.ContainsParameter ( FIELD.ACCOUNT_NUMBER_2 ) )
-                    map.P2MeterId = form.AccountNumber_2.Value;
+                    map.P2MeterId = form.AccountNumber_2.GetValueOrDefault<ulong> ( global.AccountLength );
 
                 #endregion
 
@@ -1096,7 +1093,8 @@ namespace MTUComm
                 {
                     if ( ! isFromScripting ) // No mask
                          p1readingStr = form.MeterReading.Value;
-                    else p1readingStr = selectedMeter.FillLeftLiveDigits ( form.MeterReading.Value );
+                    else p1readingStr = selectedMeter.FillLeftLiveDigits ( form.MeterReading.GetValueOrDefault<ulong> ( selectedMeter.LiveDigits ) );
+                    // Uses default value fill to zeros if parameter is missing in scripting
                     
                     ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
     
@@ -1108,7 +1106,8 @@ namespace MTUComm
                 {
                     if ( ! isFromScripting ) // No mask
                          p2readingStr = form.MeterReading_2.Value;
-                    else p2readingStr = selectedMeter2.FillLeftLiveDigits ( form.MeterReading_2.Value );
+                    else p2readingStr = selectedMeter2.FillLeftLiveDigits ( form.MeterReading_2.GetValueOrDefault<ulong> ( selectedMeter2.LiveDigits ) );
+                    // Uses default value fill to zeros if parameter is missing in scripting
                     
                     ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( ( p2readingStr ) ) : 0;
     
