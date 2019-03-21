@@ -308,10 +308,9 @@ namespace MTUComm
 
         public String GetResultXML ( ActionResult result )
         {
-            if (type == ActionType.AddMtu)
-                return comm.GetResultXML();
-            else
-                return logger.logReadResultString(this, result);
+            if ( type == ActionType.AddMtu )
+                 return comm.GetResultXML ();
+            else return logger.ReadMTU ( this, result, currentMtu ); 
         }
 
         #endregion
@@ -352,13 +351,9 @@ namespace MTUComm
                         break;
 
                     case ActionType.TurnOffMtu:
-                        comm.OnTurnOffMtu -= Comm_OnTurnOffMtu;
-                        comm.OnTurnOffMtu += Comm_OnTurnOffMtu;
-                        break;
-
                     case ActionType.TurnOnMtu:
-                        comm.OnTurnOnMtu -= Comm_OnTurnOnMtu;
-                        comm.OnTurnOnMtu += Comm_OnTurnOnMtu;
+                        comm.OnTurnOffMtu -= Comm_OnTurnOnOffMtu;
+                        comm.OnTurnOffMtu += Comm_OnTurnOnOffMtu;
                         break;
 
                     case ActionType.MtuInstallationConfirmation:
@@ -401,7 +396,7 @@ namespace MTUComm
         public void Cancel(string cancelReason = "410 DR Defective Register")
         {
             canceled = true;
-            logger.logCancel ( this, "User Cancelled", cancelReason );
+            logger.Cancel ( this, "User Cancelled", cancelReason );
         }
 
         #endregion
@@ -441,7 +436,7 @@ namespace MTUComm
                 case LogQueryResult.LogDataType.LastPacket:
                     Mtu mtu_type = configuration.GetMtuTypeById((int)e.MtuType.Type);
                     ActionResult result = ReadMTUData(e.Start, e.End, e.Entries, e.MtuType, mtu_type);
-                    logger.logReadDataResult(this, result, mtu_type);
+                    logger.ReadData(this, result, mtu_type);
                     ActionFinishArgs f_args = new ActionFinishArgs(null);
                     OnFinish(this, f_args);
                     break;
@@ -450,28 +445,17 @@ namespace MTUComm
 
         private void Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
         {
-            currentMtu = e.MtuType;
-        
-            ActionResult result = CreateActionResultUsingInterface ( e.MemoryMap, e.MtuType );
-            logger.logReadResult ( this, result, e.MtuType );
+            ActionResult result = CreateActionResultUsingInterface ( e.MemoryMap, e.Mtu );
+            logger.ReadMTU ( this, result, e.Mtu );
             ActionFinishArgs args = new ActionFinishArgs ( result );
 
             OnFinish ( this, args );
         }
 
-        private void Comm_OnTurnOffMtu ( object sender, MTUComm.TurnOffMtuArgs e )
+        private void Comm_OnTurnOnOffMtu ( object sender, MTUComm.TurnOffMtuArgs e )
         {
-            ActionResult result = getBasciInfoResult();
-            logger.logTurnOffResult(this, result.getParameters()[2].Value);//logger.logTurnOffResult ( this, e.Mtu );
-            ActionFinishArgs args = new ActionFinishArgs ( result );
-
-            OnFinish ( this, args );
-        }
-
-        private void Comm_OnTurnOnMtu(object sender, MTUComm.TurnOnMtuArgs e)
-        {
-            ActionResult result = getBasciInfoResult();
-            logger.logTurnOffResult(this, result.getParameters()[2].Value);//logger.logTurnOffResult ( this, e.Mtu );
+            ActionResult result = getBasciInfoResult ();
+            logger.TurnOnOff ( this, e.Mtu, result.getParameters()[2].Value );
             ActionFinishArgs args = new ActionFinishArgs ( result );
 
             OnFinish ( this, args );
@@ -508,7 +492,7 @@ namespace MTUComm
         {
             ActionResult result = new ActionResult();
 
-            string log_path = logger.logReadDataResultEntries(mtuInfo.Id.ToString("d15"), start, end, Entries);
+            string log_path = logger.ReadDataEntries(mtuInfo.Id.ToString("d15"), start, end, Entries);
 
             InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtu.Id, ActionType.ReadData );
             foreach (InterfaceParameters parameter in parameters)

@@ -94,12 +94,12 @@ namespace MTUComm
         {
             public AMemoryMap MemoryMap { get; private set; }
 
-            public Mtu MtuType { get; private set; }
+            public Mtu Mtu { get; private set; }
 
             public ReadMtuArgs(AMemoryMap memorymap, Mtu mtype)
             {
                 MemoryMap = memorymap;
-                MtuType = mtype;
+                Mtu = mtype;
             }
         }
 

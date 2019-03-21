@@ -4,6 +4,14 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType></DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;RELEASE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="Xamarin.Essentials" Version="1.0.1" />
@@ -31,6 +39,8 @@
     <Folder Include="Observer\" />
     <Folder Include="Exceptions\" />
     <Folder Include="Resource\" />
+    <Folder Include="Resource\Config\" />
+    <Folder Include="Resource\Logs\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove=".Configuration.cs.swp" />
@@ -44,11 +54,17 @@
     <None Remove="XMLs\AddMtu_Meter_NoReadInterval.xml" />
     <None Remove="XMLs\TurnOffMtu.xml" />
     <None Remove="Resource\Error.xml" />
+    <None Remove="Resource\Config\DownloadFTP.xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="TaskExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resource\Error.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resource\Config\DownloadFTP.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 </Project>

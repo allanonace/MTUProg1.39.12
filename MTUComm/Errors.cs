@@ -334,7 +334,7 @@ namespace MTUComm
             Error error = this.AddErrorByException ( e, portIndex );
             PageLinker.ShowAlert ( ERROR_TITLE, error );
             
-            this.logger.LogError ();
+            this.logger.Error ();
         }
         
         /// <summary>
@@ -353,7 +353,7 @@ namespace MTUComm
                 if ( forceException )
                     PageLinker.ShowAlert ( ERROR_TITLE, this.lastError );
                 
-                this.logger.LogError ();
+                this.logger.Error ();
 
                 if ( forceException )
                     throw lastException;

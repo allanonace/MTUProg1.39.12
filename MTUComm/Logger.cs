@@ -10,35 +10,19 @@ namespace MTUComm
 {
     public class Logger
     {
-        public  String fixed_name = "";
+        private String fixed_name = String.Empty;
 
         public Logger ( string outFileName = "" )
         {
-            fixed_name = outFileName;
+            this.fixed_name = outFileName;
         }
 
-        private Boolean isFixedName()
+        private Boolean IsFixedName ()
         {
-            if(fixed_name.Length > 0)
-            {
-                return true;
-            }
-            return false;
+            return ! string.IsNullOrEmpty ( fixed_name.Trim () );
         }
 
-        private String getFileName()
-        {
-            if (isFixedName())
-            {
-                return fixed_name;
-            }
-            else
-            {
-                return DateTime.Now.ToString("MMddyyyyHH")+"Log.xml";
-            }
-        }
-
-        private string getBaseFileHandler()
+        private string CreateBasicStructure ()
         {
             Configuration config = Configuration.GetInstance ();
         
@@ -50,7 +34,7 @@ namespace MTUComm
             base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
             base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
             base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
-            base_stream += "        <AppType>" + (isFixedName() ? "Scripting" : "Interactive") + "</AppType>";
+            base_stream += "        <AppType>" + (IsFixedName() ? "Scripting" : "Interactive") + "</AppType>";
             base_stream += "    </AppInfo>";
             base_stream += "    <Message />";
             base_stream += "    <Mtus />";
@@ -71,7 +55,7 @@ namespace MTUComm
         
             if ( string.IsNullOrEmpty ( customPath ) )
             {
-                string file_name = getFileName();
+                string file_name = ( IsFixedName () ) ? fixed_name : DateTime.Now.ToString("MMddyyyyHH")+"Log.xml";
                 String filename_clean = Path.GetFileName(file_name);
                 String rel_path = file_name.Replace(filename_clean, "");
     
@@ -90,14 +74,14 @@ namespace MTUComm
             { 
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, append ))
                 {
-                    file.WriteLine(getBaseFileHandler());
+                    file.WriteLine(CreateBasicStructure());
                 }
             }
             else if ( ! append )
             {
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, false ))
                 {
-                    file.WriteLine(getBaseFileHandler());
+                    file.WriteLine(CreateBasicStructure());
                 }
             }
             else
@@ -110,21 +94,12 @@ namespace MTUComm
                 {
                     using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, false ))
                     {
-                        file.WriteLine(getBaseFileHandler());
+                        file.WriteLine(CreateBasicStructure());
                     }
                 }
             }
 
             return uri;
-        }
-
-        private string getEventBaseFileHandler()
-        {
-            string base_stream = "<?xml version=\"1.0\" encoding=\"ASCII\"?>";
-            base_stream += "<Log>";
-            base_stream += "    <Transfer/>";
-            base_stream += "</Log>";
-            return base_stream;
         }
 
         public string CreateEventFileIfNotExist ( string mtu_id )
@@ -135,40 +110,36 @@ namespace MTUComm
             if (!File.Exists(uri))
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, true))
                 {
-                    file.WriteLine(getEventBaseFileHandler());
+                    string base_stream = "<?xml version=\"1.0\" encoding=\"ASCII\"?>";
+                    base_stream += "<Log>";
+                    base_stream += "    <Transfer/>";
+                    base_stream += "</Log>";
+                
+                    file.WriteLine ( base_stream );
                 }
 
             return uri;
         }
 
-        private XElement getRootElement()
-        {
-            String uri = CreateFileIfNotExist();
-            XDocument doc =  XDocument.Load(uri);
-            XElement root = new XElement("StarSystem");
-
-            return root;
-        }
-
-        public void addAtrribute(XElement node, String attname, String att_value)
+        public void AddAtrribute ( XElement node, String attname, String att_value )
         {
             if ( att_value != null && att_value.Length > 0 )
                 node.Add(new XAttribute(attname, att_value));
         }
 
-        public void logLogin(String username)
+        public void Login ( String username )
         {
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
 
-            XElement error = new XElement("AppMessage");
+            XElement element = new XElement("AppMessage");
 
-            logParameter(error, new Parameter("Date", null, DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            Parameter(element, new Parameter("Date", null, DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
             XElement message = new XElement("Message", "User Login: "+ username);
-            error.Add(message);
+            element.Add(message);
 
-            doc.Root.Element("Message").Add(error);
+            doc.Root.Element("Message").Add(element);
             doc.Save(uri);
         }
 
@@ -182,309 +153,236 @@ namespace MTUComm
         ///   </AppError>
         /// </Error>
         /// </summary>
-        public void LogError ()
+        public void Error ()
         {
             String    uri    = CreateFileIfNotExist ();
             XDocument doc    = XDocument.Load ( uri );
-            XElement  erNode = doc.Root.Element ( "Error" );
+            XElement  element = doc.Root.Element ( "Error" );
             string    time   = DateTime.UtcNow.ToString ( "MM/dd/yyyy HH:mm:ss" );
 
             foreach ( Error e in Errors.GetErrorsToLog () )
             {
                 XElement error = new XElement ( "AppError" );
 
-                logParameter(error, new Parameter ( "Date", null, time ) );
+                Parameter(error, new Parameter ( "Date", null, time ) );
             
                 XElement message = new XElement ( "Message", e.Message );
                 
                 if ( Errors.ShowId &&
                      e.Id > -1 )
-                    addAtrribute ( message, "ErrorId", e.Id.ToString () );
+                    AddAtrribute ( message, "ErrorId", e.Id.ToString () );
                     
                 if ( e.Port > 1 )
-                    addAtrribute ( message, "Port", e.Port.ToString () );
+                    AddAtrribute ( message, "Port", e.Port.ToString () );
                 
                 error.Add ( message );
                 
-                erNode.Add ( error );
+                element.Add ( error );
             }
 
             doc.Save ( uri );
         }
 
-        public string logReadResultString(Action ref_action, ActionResult result)
+        public string ReadMTU ( Action action, ActionResult result, Mtu mtu )
         {
-            XDocument doc = XDocument.Parse(getBaseFileHandler());
-            try
-            {
-                logReadResult(doc.Root.Element("Mtus"), ref_action, result, Int32.Parse(result.getParameterByTag("MtuType").Value));
-            }
-            catch ( Exception e )
-            {
-                logFullResult ( doc.Root.Element ( "Mtus" ), ref_action, result );
-            }
-            return doc.ToString();
+            String uri = CreateFileIfNotExist();
+            XDocument doc = XDocument.Load(uri);
+            PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, result, mtu.Id);
+            doc.Save(uri);
+            
+            #if DEBUG
+            
+            string uniUri = Path.Combine ( Mobile.GetPathLogsUni (),
+                mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
+            this.CreateFileIfNotExist ( false, uniUri );
+            
+            XDocument uniDoc = XDocument.Load ( uniUri );
+            PrepareLog_ReadMTU ( uniDoc.Root.Element("Mtus"), action, result, mtu.Id );
+            uniDoc.Save ( uniUri );
+            
+            #endif
+            
+            return doc.ToString ();
         }
 
-        public void logFullResult(XElement parent, Action ref_action, ActionResult result)
+        private void PrepareLog_ReadMTU ( XElement parent, Action action, ActionResult result, int mtuId )
         {
-            XElement action = new XElement("Action");
+            XElement element = new XElement("Action");
 
-            addAtrribute(action, "display", ref_action.DisplayText);
-            addAtrribute(action, "type", ref_action.LogText);
-            addAtrribute(action, "reason", ref_action.Reason);
+            AddAtrribute(element, "display", action.DisplayText);
+            AddAtrribute(element, "type", action.LogText);
+            AddAtrribute(element, "reason", action.Reason);
 
-            foreach (Parameter parameter in result.getParameters())
+            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields(mtuId, ActionType.ReadMtu );
+            foreach ( InterfaceParameters parameter in parameters )
             {
-                logParameter(action, parameter, parameter.getLogTag());
+                if ( parameter.Name == "Port" )
+                {
+                    ActionResult[] ports = result.getPorts();
+                    for ( int i = 0; i < ports.Length; i++ )
+                        Port(i, element, ports[i], parameter.Parameters.ToArray());
+                }
+                else ComplexParameter(element, result, parameter);
             }
-
-            parent.Add(action);
+            parent.Add(element);
         }
 
-        public void logReadResult(Action ref_action, ActionResult result, Mtu mtuType)
+        public void ReadData ( Action action, ActionResult result, Mtu mtu )
         {
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
 
-            logReadResult(doc.Root.Element("Mtus"), ref_action, result, mtuType.Id);
+            PrepareLog_ReadData(doc.Root.Element("Mtus"), action, result, mtu.Id);
             doc.Save(uri);
         }
 
-        public void logReadDataResult(Action ref_action, ActionResult result, Mtu mtuType)
+        private void PrepareLog_ReadData ( XElement parent, Action action, ActionResult result, int mtuId )
         {
-            String uri = CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(uri);
+            XElement element = new XElement("Action");
 
-            logReadDataResult(doc.Root.Element("Mtus"), ref_action, result, mtuType.Id);
-            doc.Save(uri);
-        }
+            AddAtrribute(element, "display", action.DisplayText);
+            AddAtrribute(element, "type", action.LogText);
+            AddAtrribute(element, "reason", action.Reason);
 
-        public void logReadDataResult(XElement parent, Action ref_action, ActionResult result, int mtu_type_id)
-        {
-            XElement action = new XElement("Action");
-
-            addAtrribute(action, "display", ref_action.DisplayText);
-            addAtrribute(action, "type", ref_action.LogText);
-            addAtrribute(action, "reason", ref_action.Reason);
-
-            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields(mtu_type_id, ActionType.ReadData );
+            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields ( mtuId, ActionType.ReadData );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name == "Port")
                 {
-
                     ActionResult[] ports = result.getPorts();
                     for (int i = 0; i < ports.Length; i++)
-                    {
-                        logPort(i, action, ports[i], parameter.Parameters.ToArray());
-                    }
+                        Port(i, element, ports[i], parameter.Parameters.ToArray());
                 }
-                else
-                {
-                    logComplexParameter(action, result, parameter);
-                }
-
+                else ComplexParameter(element, result, parameter);
             }
 
-            parent.Add(action);
+            parent.Add(element);
         }
 
-        public void logReadResult(XElement parent, Action ref_action, ActionResult result, int mtu_type_id)
+        public void Port ( int portnumber, XElement parent, ActionResult result, InterfaceParameters[] parameters )
         {
-            XElement action = new XElement("Action");
+            XElement element = new XElement("Port");
 
-            addAtrribute(action, "display", ref_action.DisplayText);
-            addAtrribute(action, "type", ref_action.LogText);
-            addAtrribute(action, "reason", ref_action.Reason);
-
-            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields(mtu_type_id, ActionType.ReadMtu );
-            foreach (InterfaceParameters parameter in parameters)
-            {
-                if(parameter.Name == "Port") {
-
-                    ActionResult[] ports = result.getPorts();
-                    for (int i = 0; i < ports.Length; i++)
-                    {
-                        logPort(i, action, ports[i], parameter.Parameters.ToArray());
-                    }
-                }
-                else
-                {
-                    logComplexParameter(action, result, parameter);
-                }
-                
-            }
-
-                /*logParameter(action, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
-
-                if (ref_action.getUser() != null)
-                {
-
-                    logParameter(action, new Parameter("User", "User", ref_action.getUser()));
-                }
-
-                foreach(Parameter parameter in result.getParameters())
-                {
-                    logParameter(action, parameter);
-                }
-
-                ActionResult[] ports = result.getPorts();
-                for (int i= 0; i < ports.Length; i++)
-                {
-                    logPort(i, action, ports[i]);
-                }
-                */
-
-                parent.Add(action);
-        }
-
-        public void logPort(int portnumber, XElement parent, ActionResult result, InterfaceParameters[] parameters)
-        {
-            XElement port = new XElement("Port");
-
-            addAtrribute(port, "display", "Port "+ (portnumber+1).ToString());
-            addAtrribute(port, "number", (portnumber + 1).ToString());
+            AddAtrribute(element, "display", "Port "+ (portnumber+1).ToString());
+            AddAtrribute(element, "number", (portnumber + 1).ToString());
 
             foreach (InterfaceParameters parameter in parameters)
-            {
-                logComplexParameter(port, result, parameter);
-            }
+                ComplexParameter(element, result, parameter);
 
-            parent.Add(port);
+            parent.Add(element);
         }
 
-        public void logTurnOffResult(Action ref_action, uint MtuId )
+        public void TurnOnOff ( Action action, Mtu mtu, uint mtuId )
         {
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
 
-            logTurnOffResult(doc.Root.Element("Mtus"), ref_action.DisplayText, ref_action.LogText, ref_action.user, MtuId );
+            PrepareLog_TurnOff(doc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, mtuId );
             doc.Save(uri);
+            
+            #if DEBUG
+            
+            string uniUri = Path.Combine ( Mobile.GetPathLogsUni (),
+                mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
+            this.CreateFileIfNotExist ( false, uniUri );
+            
+            XDocument uniDoc = XDocument.Load ( uniUri );
+            PrepareLog_TurnOff ( uniDoc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, mtuId );
+            uniDoc.Save ( uniUri );
+            
+            #endif
         }
 
-        public void logTurnOffResult(XElement parent, string display, string type, string user, uint MtuId)
+        private void PrepareLog_TurnOff (XElement parent, string display, string type, string user, uint MtuId )
         {
-            XElement action = new XElement("Action");
+            XElement element = new XElement("Action");
 
-            addAtrribute(action, "display", display);
-            addAtrribute(action, "type", type );
+            AddAtrribute(element, "display", display);
+            AddAtrribute(element, "type", type );
 
-            logParameter(action, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            Parameter(element, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
             if (user != null)
-            {
+                Parameter(element, new Parameter("User", "User", user));
 
-                logParameter(action, new Parameter("User", "User", user));
-            }
+            Parameter(element, new Parameter("MtuId", "MTU ID", MtuId.ToString()));
 
-            logParameter(action, new Parameter("MtuId", "MTU ID", MtuId.ToString()));
-
-            parent.Add(action);
+            parent.Add(element);
         }
 
-        public void logTurnOnResult(Action ref_action, uint MtuId)
+        public void TurnOn ( Action action, uint MtuId )
         {
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
             
-            logTurnOnResult(doc.Root.Element("Mtus"), ref_action.DisplayText, ref_action.LogText, ref_action.user, MtuId);
+            PrepareLog_TurnOn(doc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, MtuId);
             doc.Save(uri);
         }
 
-        public void logTurnOnResult(XElement parent, string display, string type, string user, uint MtuId)
+        private void PrepareLog_TurnOn ( XElement parent, string display, string type, string user, uint MtuId )
         {
-            XElement action = new XElement("Action");
+            XElement element = new XElement("Action");
 
-            addAtrribute(action, "display", display);
-            addAtrribute(action, "type", type);
+            AddAtrribute(element, "display", display);
+            AddAtrribute(element, "type", type);
 
-            logParameter(action, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            Parameter(element, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
             if (user != null)
-            {
+                Parameter(element, new Parameter("User", "User", user));
 
-                logParameter(action, new Parameter("User", "User", user));
-            }
+            Parameter(element, new Parameter("MtuId", "MTU ID", MtuId.ToString()));
 
-            logParameter(action, new Parameter("MtuId", "MTU ID", MtuId.ToString()));
-
-            parent.Add(action);
+            parent.Add(element);
         }
 
-        public void logCancel(Action ref_action, String cancel, String reason)
+        public void Cancel ( Action action, String cancel, String reason )
         {
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
 
-            XElement action = new XElement("Action");
+            XElement element = new XElement("Action");
 
-            addAtrribute(action, "display", ref_action.DisplayText);
-            addAtrribute(action, "type", ref_action.LogText);
-            addAtrribute(action, "reason", ref_action.Reason);
+            AddAtrribute(element, "display", action.DisplayText);
+            AddAtrribute(element, "type", action.LogText);
+            AddAtrribute(element, "reason", action.Reason);
 
-            logParameter(action, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
-            logParameter(action, new Parameter("User", "User", ref_action.user));
+            Parameter(element, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            Parameter(element, new Parameter("User", "User", action.user));
 
-            logParameter(action, new Parameter("Cancel", "Cancel Action", cancel));
-            logParameter(action, new Parameter("Reason", "Cancel Reason", reason));
+            Parameter(element, new Parameter("Cancel", "Cancel Action", cancel));
+            Parameter(element, new Parameter("Reason", "Cancel Reason", reason));
 
-            doc.Root.Element("Mtus").Add(action);
+            doc.Root.Element("Mtus").Add(element);
             doc.Save(uri);
-
         }
 
-        public void logAction(Action ref_action)
+        public string ReadDataEntries ( string mtu_id, DateTime start, DateTime end, List<LogDataEntry> Entries )
         {
-            String uri = CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(uri);
+            String    path     = CreateEventFileIfNotExist(mtu_id);
+            XDocument doc      = XDocument.Load(path);
+            XElement  transfer = doc.Root.Element("Transfer");
+            XElement  events   = new XElement("Events");
 
-            logAction(doc.Root.Element("Mtus"), ref_action);
-            doc.Save(uri);
-    
+            AddAtrribute(events, "FilterMode", "Match");
+            AddAtrribute(events, "FilterValue", "MeterRead");
+            AddAtrribute(events, "RangeStart", start.ToString("yyyy-MM-dd HH:mm:ss"));
+            AddAtrribute(events, "RangeStop", end.ToString("yyyy-MM-dd HH:mm:ss"));
+
+            foreach (LogDataEntry entry in Entries)
+                PrepareLog_ReadDataEntries(events, entry);
+
+            transfer.Add(events);
+            doc.Save(path);
+
+            return path;
         }
-
-        public void logAction(XElement parent, Action ref_action)
-        {
-
-            XElement action = new XElement("Action");
-
-            addAtrribute(action, "display", ref_action.DisplayText);
-            addAtrribute(action, "type", ref_action.LogText);
-            addAtrribute(action, "reason", ref_action.Reason);
-
-
-            if(ref_action.user != null)
-            {
-                logParameter(action, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
-                logParameter(action, new Parameter("User", "User", ref_action.user));
-            }
-
-            Parameter[] parameters = ref_action.GetParameters();
-            foreach (Parameter parameter in parameters)
-            {
-                if (parameter.doesGenerateLog()) {
-                    logParameter(action, parameter);
-                }
-                
-            }
-
-
-            Action[] sub_actions = ref_action.GetSubActions();
-            foreach(Action subaction in sub_actions)
-            {
-                logAction(action, subaction);
-            }
-
-            parent.Add(action);
-
-        }
-
-        private void logDataResultEntry(XElement events, LogDataEntry entry)
+        
+        private void PrepareLog_ReadDataEntries ( XElement events, LogDataEntry entry )
         {
             XElement read_event = new XElement("MeterReadEvent");
 
-            addAtrribute(read_event, "FormatVersion", entry.FormatVersion.ToString());
+            AddAtrribute(read_event, "FormatVersion", entry.FormatVersion.ToString());
 
             read_event.Add(new XElement("TimeStamp", entry.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss")));
             read_event.Add(new XElement("MeterRead", entry.MeterRead.ToString()));
@@ -496,38 +394,10 @@ namespace MTUComm
             read_event.Add(new XElement("ReadReason", entry.ReasonForRead.ToString()));
             read_event.Add(new XElement("IsSynchronized", entry.IsSynchronized.ToString()));
 
-
             events.Add(read_event);
         }
 
-        public string logReadDataResultEntries(string mtu_id, DateTime start, DateTime end, List<LogDataEntry> Entries)
-        {
-            String path = CreateEventFileIfNotExist(mtu_id);
-            XDocument doc = XDocument.Load(path);
-
-            XElement transfer  = doc.Root.Element("Transfer");
-
-
-            XElement events = new XElement("Events");
-
-            addAtrribute(events, "FilterMode", "Match");
-            addAtrribute(events, "FilterValue", "MeterRead");
-            addAtrribute(events, "RangeStart", start.ToString("yyyy-MM-dd HH:mm:ss"));
-            addAtrribute(events, "RangeStop", end.ToString("yyyy-MM-dd HH:mm:ss"));
-
-            foreach (LogDataEntry entry in Entries)
-            {
-                logDataResultEntry(events, entry);
-            }
-
-            transfer.Add(events);
-
-            doc.Save(path);
-
-            return path;
-        }
-
-        public void logComplexParameter(XElement parent, ActionResult result, InterfaceParameters parameter)
+        public void ComplexParameter ( XElement parent, ActionResult result, InterfaceParameters parameter )
         {
             Parameter param = null;
 
@@ -541,30 +411,21 @@ namespace MTUComm
 
             }
             if (param == null)
-            {
                 param = result.getParameterByTag(parameter.Name);
-            }
 
             if (param != null)
-            {
-                logParameter(parent, param, parameter.Name);
-            }
+                Parameter ( parent, param );
         }
 
-        public void logParameter(XElement parent, Parameter parameter)
+        public void Parameter ( XElement parent, Parameter parameter )
         {
-            logParameter(parent, parameter, parameter.getLogTag());
-        }
-
-        public void logParameter(XElement parent, Parameter parameter, string TagName)
-        {
-            XElement xml_parameter = new XElement(TagName, parameter.Value );
-            addAtrribute(xml_parameter, "display", parameter.getLogDisplay());
-            if (parameter.Optional)
-            {
-                addAtrribute(xml_parameter, "option", "1");
-            }
-            parent.Add(xml_parameter);
+            XElement xml_parameter = new XElement ( parameter.getLogTag(), parameter.Value );
+            AddAtrribute(xml_parameter, "display", parameter.getLogDisplay());
+            
+            if ( parameter.Optional )
+                AddAtrribute(xml_parameter, "option", "1");
+                
+            parent.Add ( xml_parameter );
         }
     }
 }

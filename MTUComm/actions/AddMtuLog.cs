@@ -43,28 +43,28 @@ namespace MTUComm
 
         public void LogTurnOff ()
         {
-            logger.addAtrribute(this.turnOffAction, "display", Action.displays[ActionType.TurnOffMtu]);
-            logger.addAtrribute(this.turnOffAction, "type", Action.tag_types[ActionType.TurnOffMtu]);
+            logger.AddAtrribute(this.turnOffAction, "display", Action.displays[ActionType.TurnOffMtu]);
+            logger.AddAtrribute(this.turnOffAction, "type", Action.tag_types[ActionType.TurnOffMtu]);
 
-            logger.logParameter(this.turnOffAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            logger.Parameter(this.turnOffAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
             if (!string.IsNullOrEmpty(this.user))
-                logger.logParameter(this.turnOffAction, new Parameter("User", "User", this.user));
+                logger.Parameter(this.turnOffAction, new Parameter("User", "User", this.user));
 
-            logger.logParameter(this.turnOffAction, new Parameter("MtuId", "MTU ID", this.mtuBasicInfo.Id));
+            logger.Parameter(this.turnOffAction, new Parameter("MtuId", "MTU ID", this.mtuBasicInfo.Id));
         }
 
         public void LogTurnOn ()
         {
-            logger.addAtrribute(this.turnOnAction, "display", Action.displays[ActionType.TurnOnMtu]);
-            logger.addAtrribute(this.turnOnAction, "type", Action.tag_types[ActionType.TurnOnMtu]);
+            logger.AddAtrribute(this.turnOnAction, "display", Action.displays[ActionType.TurnOnMtu]);
+            logger.AddAtrribute(this.turnOnAction, "type", Action.tag_types[ActionType.TurnOnMtu]);
 
-            logger.logParameter(this.turnOnAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            logger.Parameter(this.turnOnAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
             if (!string.IsNullOrEmpty(this.user))
-                logger.logParameter(this.turnOnAction, new Parameter("User", "User", this.user));
+                logger.Parameter(this.turnOnAction, new Parameter("User", "User", this.user));
 
-            logger.logParameter(this.turnOnAction, new Parameter("MtuId", "MTU ID", this.mtuBasicInfo.Id));
+            logger.Parameter(this.turnOnAction, new Parameter("MtuId", "MTU ID", this.mtuBasicInfo.Id));
         }
 
         public void LogAddMtu ( bool isFromScripting = false )
@@ -87,39 +87,39 @@ namespace MTUComm
             //logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
             // logger.addAtrribute ( this.addMtuAction, "type",    addMtuType    );
             // logger.addAtrribute ( this.addMtuAction, "reason",  addMtuReason  );
-            logger.addAtrribute(this.addMtuAction, "display", Action.displays[this.actionType]);
-            logger.addAtrribute(this.addMtuAction, "type", Action.tag_types[this.actionType]);
-            logger.addAtrribute(this.addMtuAction, "reason", Action.tag_reasons[this.actionType]);
+            logger.AddAtrribute(this.addMtuAction, "display", Action.displays[this.actionType]);
+            logger.AddAtrribute(this.addMtuAction, "type", Action.tag_types[this.actionType]);
+            logger.AddAtrribute(this.addMtuAction, "reason", Action.tag_reasons[this.actionType]);
 
-            logger.logParameter ( this.addMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            logger.Parameter ( this.addMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
             if ( ! string.IsNullOrEmpty ( this.user ) )
-                logger.logParameter(this.addMtuAction, new Parameter("User", "User", this.user ) );
+                logger.Parameter(this.addMtuAction, new Parameter("User", "User", this.user ) );
 
             if ( isReplaceMtu &&
                  form.ContainsParameter ( FIELD.MTU_ID_OLD ) )
-                logger.logParameter ( this.addMtuAction, form.OldMtuId );
+                logger.Parameter ( this.addMtuAction, form.OldMtuId );
 
-            logger.logParameter ( this.addMtuAction, new Parameter ( "MtuId",   "MTU ID",   this.mtuBasicInfo.Id   ) );
-            logger.logParameter ( this.addMtuAction, new Parameter ( "MtuType", "MTU Type", this.mtuBasicInfo.Type ) );
-            logger.logParameter ( this.addMtuAction, form.ReadInterval );
+            logger.Parameter ( this.addMtuAction, new Parameter ( "MtuId",   "MTU ID",   this.mtuBasicInfo.Id   ) );
+            logger.Parameter ( this.addMtuAction, new Parameter ( "MtuType", "MTU Type", this.mtuBasicInfo.Type ) );
+            logger.Parameter ( this.addMtuAction, form.ReadInterval );
 
             bool   useDailyReads    = ( global.AllowDailyReads && mtu.DailyReads );
             string dailyReads       = ( useDailyReads ) ? form.SnapReads.Value : DISABLED;
             string dailyGmtHourRead = ( useDailyReads ) ? form.SnapReads.Value : DISABLED;
-            logger.logParameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
+            logger.Parameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
             
             if ( ! dailyGmtHourRead.Equals ( DISABLED ) )
-                logger.logParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
+                logger.Parameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
 
             if ( mtu.FastMessageConfig )
-                logger.logParameter ( this.addMtuAction, form.TwoWay );
+                logger.Parameter ( this.addMtuAction, form.TwoWay );
 
             // Related to F12WAYRegister1XX registers
             string afc = ( mtu.TimeToSync &&
                            global.AFC &&
                            map.MtuSoftVersion >= 19 ) ? "Set" : "Off";
-            logger.logParameter ( this.addMtuAction, new Parameter ( "AFC", "AFC", afc ) );
+            logger.Parameter ( this.addMtuAction, new Parameter ( "AFC", "AFC", afc ) );
 
             #endregion
 
@@ -135,17 +135,17 @@ namespace MTUComm
                 {
                     Console.WriteLine ( "Using certificate creating activity log" );
                 
-                    logger.logParameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaEncryptedInBase64 ) );
-                    logger.logParameter ( this.addMtuAction, new Parameter ( "HeadendCertThumb",     "HeadendCertThumb",      data.certificate.Thumbprint ) );
-                    logger.logParameter ( this.addMtuAction, new Parameter ( "HeadendCertValidTill", "HeadendCertExpiration", data.certificate.NotAfter.ToString ( "mm/dd/yy hh:mm:ss tt" ) ) );
-                    logger.logParameter ( this.addMtuAction, new Parameter ( "DeviceCertSubject",    "DeviceCertSubject",     data.certificate.Subject    ) );
+                    logger.Parameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaEncryptedInBase64 ) );
+                    logger.Parameter ( this.addMtuAction, new Parameter ( "HeadendCertThumb",     "HeadendCertThumb",      data.certificate.Thumbprint ) );
+                    logger.Parameter ( this.addMtuAction, new Parameter ( "HeadendCertValidTill", "HeadendCertExpiration", data.certificate.NotAfter.ToString ( "mm/dd/yy hh:mm:ss tt" ) ) );
+                    logger.Parameter ( this.addMtuAction, new Parameter ( "DeviceCertSubject",    "DeviceCertSubject",     data.certificate.Subject    ) );
                 }
                 // No certificate present
                 else
                 {
                     Console.WriteLine ( "Not using certificate creating activity log" );
                 
-                    logger.logParameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaInBase64 ) );
+                    logger.Parameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaInBase64 ) );
                 }
             }
 
@@ -158,49 +158,49 @@ namespace MTUComm
                 Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
 
             XElement port = new XElement("Port");
-            logger.addAtrribute(port, "display", "Port 1");
-            logger.addAtrribute(port, "number", "1");
+            logger.AddAtrribute(port, "display", "Port 1");
+            logger.AddAtrribute(port, "number", "1");
 
-            logger.logParameter ( port, form.AccountNumber );
+            logger.Parameter ( port, form.AccountNumber );
 
             if ( global.WorkOrderRecording )
-                logger.logParameter ( port, form.WorkOrder );
+                logger.Parameter ( port, form.WorkOrder );
 
             if ( isReplaceMeter )
             {
                 if ( global.UseMeterSerialNumber )
-                    logger.logParameter ( port, form.MeterNumberOld );
+                    logger.Parameter ( port, form.MeterNumberOld );
                 
                 if ( global.MeterWorkRecording )
-                    logger.logParameter ( port, form.OldMeterWorking );
+                    logger.Parameter ( port, form.OldMeterWorking );
                 
                 if ( global.OldReadingRecording )
-                    logger.logParameter ( port, form.MeterReadingOld );
+                    logger.Parameter ( port, form.MeterReadingOld );
                 
                 if ( global.RegisterRecording )
-                    logger.logParameter ( port, form.ReplaceMeterRegister );
+                    logger.Parameter ( port, form.ReplaceMeterRegister );
                 
                 if ( global.AutoRegisterRecording )
                 {
                     temp = ( string.Equals ( form.MeterNumber, form.MeterNumberOld ) ) ?
                              "Register head change" : "Meter change";
-                    logger.logParameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
+                    logger.Parameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
                 }
             }
 
             string meterType = string.Format("({0}) {1}", meter.Id, meter.Display);
-            logger.logParameter ( port, new Parameter("MeterType", "Meter Type", meterType));
-            logger.logParameter ( port, new Parameter("MeterTypeId", "Meter Type ID", meter.Id.ToString()));
-            logger.logParameter ( port, new Parameter("MeterVendor", "Meter Vendor", meter.Vendor));
-            logger.logParameter ( port, new Parameter("MeterModel", "Meter Model", meter.Model));
+            logger.Parameter ( port, new Parameter("MeterType", "Meter Type", meterType));
+            logger.Parameter ( port, new Parameter("MeterTypeId", "Meter Type ID", meter.Id.ToString()));
+            logger.Parameter ( port, new Parameter("MeterVendor", "Meter Vendor", meter.Vendor));
+            logger.Parameter ( port, new Parameter("MeterModel", "Meter Model", meter.Model));
             
             if ( global.UseMeterSerialNumber )
-                logger.logParameter ( port, form.MeterNumber );
+                logger.Parameter ( port, form.MeterNumber );
             
-            logger.logParameter ( port, form.MeterReading );
+            logger.Parameter ( port, form.MeterReading );
             
-            logger.logParameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
-            logger.logParameter ( port, new Parameter("PulseLo","Pulse Low Time", meter.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
+            logger.Parameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
+            logger.Parameter ( port, new Parameter("PulseLo","Pulse Low Time", meter.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
 
             this.addMtuAction.Add(port);
 
@@ -215,49 +215,49 @@ namespace MTUComm
                     Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter_2.Value ) );
 
                 port = new XElement ( "Port");
-                logger.addAtrribute ( port, "display", "Port 2" );
-                logger.addAtrribute ( port, "number", "2" );
+                logger.AddAtrribute ( port, "display", "Port 2" );
+                logger.AddAtrribute ( port, "number", "2" );
 
-                logger.logParameter ( port, form.AccountNumber_2 );
+                logger.Parameter ( port, form.AccountNumber_2 );
 
                 if ( global.WorkOrderRecording )
-                    logger.logParameter ( port, form.WorkOrder_2 );
+                    logger.Parameter ( port, form.WorkOrder_2 );
 
                 if ( isReplaceMeter )
                 {
                     if ( global.UseMeterSerialNumber )
-                        logger.logParameter ( port, form.MeterNumberOld_2 );
+                        logger.Parameter ( port, form.MeterNumberOld_2 );
 
                     if ( global.MeterWorkRecording )
-                        logger.logParameter ( port, form.OldMeterWorking_2 );
+                        logger.Parameter ( port, form.OldMeterWorking_2 );
                     
                     if ( global.OldReadingRecording )
-                        logger.logParameter ( port, form.MeterReadingOld_2 );
+                        logger.Parameter ( port, form.MeterReadingOld_2 );
                     
                     if ( global.RegisterRecording )
-                        logger.logParameter ( port, form.ReplaceMeterRegister_2 );
+                        logger.Parameter ( port, form.ReplaceMeterRegister_2 );
                     
                     if ( global.AutoRegisterRecording )
                     {
                         temp = ( string.Equals ( form.MeterNumber_2, form.MeterNumberOld_2 ) ) ?
                                  "Register head change" : "Meter change";
-                        logger.logParameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
+                        logger.Parameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
                     }
                 }
                 
                 string meterType2 = string.Format("({0}) {1}", meter2.Id, meter2.Display);
-                logger.logParameter ( port, new Parameter("MeterType", "Meter Type", meterType2));
-                logger.logParameter ( port, new Parameter("MeterTypeId", "Meter Type ID", meter2.Id.ToString()));
-                logger.logParameter ( port, new Parameter("MeterVendor", "Meter Vendor", meter2.Vendor));
-                logger.logParameter ( port, new Parameter("MeterModel", "Meter Model", meter2.Model));
+                logger.Parameter ( port, new Parameter("MeterType", "Meter Type", meterType2));
+                logger.Parameter ( port, new Parameter("MeterTypeId", "Meter Type ID", meter2.Id.ToString()));
+                logger.Parameter ( port, new Parameter("MeterVendor", "Meter Vendor", meter2.Vendor));
+                logger.Parameter ( port, new Parameter("MeterModel", "Meter Model", meter2.Model));
                 
                 if ( global.UseMeterSerialNumber )
-                    logger.logParameter ( port, form.MeterNumber_2 );
+                    logger.Parameter ( port, form.MeterNumber_2 );
                     
-                logger.logParameter ( port, form.MeterReading_2 );
+                logger.Parameter ( port, form.MeterReading_2 );
 
-                logger.logParameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter2.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
-                logger.logParameter ( port, new Parameter("PulseLo","Pulse Low Time", meter2.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
+                logger.Parameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter2.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
+                logger.Parameter ( port, new Parameter("PulseLo","Pulse Low Time", meter2.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
 
                 this.addMtuAction.Add(port);
             }
@@ -272,37 +272,37 @@ namespace MTUComm
                 if ( alarms != null )
                 {
                     XElement alarmSelection = new XElement("AlarmSelection");
-                    logger.addAtrribute(alarmSelection, "display", "Alarm Selection");
+                    logger.AddAtrribute(alarmSelection, "display", "Alarm Selection");
 
                     string alarmConfiguration = alarms.Name;
-                    logger.logParameter(alarmSelection, new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
+                    logger.Parameter(alarmSelection, new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
 
                     string immediateAlarmTransmit = ( alarms.ImmediateAlarmTransmit ) ? "True" : "False";
-                    logger.logParameter(alarmSelection, new Parameter("ImmediateAlarm", "Immediate Alarm Transmit", immediateAlarmTransmit));
+                    logger.Parameter(alarmSelection, new Parameter("ImmediateAlarm", "Immediate Alarm Transmit", immediateAlarmTransmit));
 
                     string urgentAlarm = ( alarms.DcuUrgentAlarm ) ? "True" : "False";
-                    logger.logParameter(alarmSelection, new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
+                    logger.Parameter(alarmSelection, new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
 
                     string overlap = alarms.Overlap.ToString();
-                    logger.logParameter(alarmSelection, new Parameter("Overlap", "Message Overlap", overlap));
+                    logger.Parameter(alarmSelection, new Parameter("Overlap", "Message Overlap", overlap));
 
                     if ( mtu.MagneticTamper )
-                        logger.logParameter ( alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper", map.MagneticTamperStatus ));
+                        logger.Parameter ( alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper", map.MagneticTamperStatus ));
 
                     if ( mtu.RegisterCoverTamper )
-                        logger.logParameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Reg. Cover Tamper", map.RegisterCoverTamperStatus ));
+                        logger.Parameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Reg. Cover Tamper", map.RegisterCoverTamperStatus ));
 
                     if ( mtu.TiltTamper )
-                        logger.logParameter( alarmSelection, new Parameter("TiltTamper", "Tilt Tamper", map.TiltTamperStatus ));
+                        logger.Parameter( alarmSelection, new Parameter("TiltTamper", "Tilt Tamper", map.TiltTamperStatus ));
 
                     if ( mtu.ReverseFlowTamper )
                     {
-                        logger.logParameter ( alarmSelection, new Parameter("ReverseFlow", "Rev. Flow Tamper", map.ReverseFlowTamperStatus ));
-                        logger.logParameter(alarmSelection, new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
+                        logger.Parameter ( alarmSelection, new Parameter("ReverseFlow", "Rev. Flow Tamper", map.ReverseFlowTamperStatus ));
+                        logger.Parameter(alarmSelection, new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
                     }
 
                     if ( mtu.InterfaceTamper)
-                        logger.logParameter ( alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper", map.InterfaceTamperStatus ));
+                        logger.Parameter ( alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper", map.InterfaceTamperStatus ));
 
                     this.addMtuAction.Add(alarmSelection);
                 }
@@ -316,14 +316,14 @@ namespace MTUComm
             if ( mtu.MtuDemand )
             {
                 XElement demandConf = new XElement("DemandConfiguration");
-                logger.addAtrribute(demandConf, "display", "Demand Configuration");
-                logger.logParameter(demandConf, new Parameter("ConfigurationName", "Configuration Name", "Default")); // TODO: replace real value
-                logger.logParameter(demandConf, new Parameter("MtuNumLowPriorityMsg", "Mtu Num Low Priority Msg", "2")); // TODO: replace real value
-                logger.logParameter(demandConf, new Parameter("MtuPrimaryWindowInterval", "Mtu Primary WindowInterval", "180")); // TODO: replace real value
-                logger.logParameter(demandConf, new Parameter("MtuWindowAStart", "Mtu Window A Start", "0")); // TODO: replace real value
-                logger.logParameter(demandConf, new Parameter("MtuWindowBStart", "Mtu Window B Start", "0")); // TODO: replace real value
-                logger.logParameter(demandConf, new Parameter("MtuPrimaryWindowIntervalB", "Mtu Primary WindowInterval B", "3600")); // TODO: replace real value
-                logger.logParameter(demandConf, new Parameter("MtuPrimaryWindowOffset", "Mtu Primary Window Offset", "51")); // TODO: replace real value
+                logger.AddAtrribute(demandConf, "display", "Demand Configuration");
+                logger.Parameter(demandConf, new Parameter("ConfigurationName", "Configuration Name", "Default")); // TODO: replace real value
+                logger.Parameter(demandConf, new Parameter("MtuNumLowPriorityMsg", "Mtu Num Low Priority Msg", "2")); // TODO: replace real value
+                logger.Parameter(demandConf, new Parameter("MtuPrimaryWindowInterval", "Mtu Primary WindowInterval", "180")); // TODO: replace real value
+                logger.Parameter(demandConf, new Parameter("MtuWindowAStart", "Mtu Window A Start", "0")); // TODO: replace real value
+                logger.Parameter(demandConf, new Parameter("MtuWindowBStart", "Mtu Window B Start", "0")); // TODO: replace real value
+                logger.Parameter(demandConf, new Parameter("MtuPrimaryWindowIntervalB", "Mtu Primary WindowInterval B", "3600")); // TODO: replace real value
+                logger.Parameter(demandConf, new Parameter("MtuPrimaryWindowOffset", "Mtu Primary Window Offset", "51")); // TODO: replace real value
                 this.addMtuAction.Add(demandConf);
             }
 
@@ -339,9 +339,9 @@ namespace MTUComm
                 //logger.logParameter ( this.addMtuAction, form.GPS_LONGITUDE );
                 //logger.logParameter ( this.addMtuAction, form.GPS_ALTITUDE  );
 
-                logger.logParameter(this.addMtuAction, new Parameter("GPS_Y", "Lat", form.GPSLat.Value ));
-                logger.logParameter(this.addMtuAction, new Parameter("GPS_X", "Long", form.GPSLon.Value ));
-                logger.logParameter(this.addMtuAction, new Parameter("Altitude", "Elevation", form.GPSAlt.Value ));
+                logger.Parameter(this.addMtuAction, new Parameter("GPS_Y", "Lat", form.GPSLat.Value ));
+                logger.Parameter(this.addMtuAction, new Parameter("GPS_X", "Long", form.GPSLon.Value ));
+                logger.Parameter(this.addMtuAction, new Parameter("Altitude", "Elevation", form.GPSAlt.Value ));
             }
 
             if ( ! ( form.OptionalParams.Value is string ) )
@@ -350,7 +350,7 @@ namespace MTUComm
 
                 if (optionalParams != null)
                     foreach (Parameter p in optionalParams)
-                        logger.logParameter(this.addMtuAction, p);
+                        logger.Parameter(this.addMtuAction, p);
             }
 
             #endregion
@@ -358,8 +358,8 @@ namespace MTUComm
 
         public void LogReadMtu(ActionResult result)
         {
-            logger.addAtrribute(this.readMtuAction, "display", Action.displays[ActionType.ReadMtu]);
-            logger.addAtrribute(this.readMtuAction, "type", Action.tag_types[ActionType.ReadMtu]);
+            logger.AddAtrribute(this.readMtuAction, "display", Action.displays[ActionType.ReadMtu]);
+            logger.AddAtrribute(this.readMtuAction, "type", Action.tag_types[ActionType.ReadMtu]);
 
             InterfaceParameters[] parameters = Configuration.GetInstance().getLogInterfaceFields( form.mtu.Id, ActionType.ReadMtu );
             foreach (InterfaceParameters parameter in parameters)
@@ -370,10 +370,10 @@ namespace MTUComm
                     {
                         ActionResult[] ports = result.getPorts();
                         for (int i = 0; i < ports.Length; i++)
-                            logger.logPort(i, this.readMtuAction, ports[i], parameter.Parameters.ToArray());
+                            logger.Port(i, this.readMtuAction, ports[i], parameter.Parameters.ToArray());
                     }
                     else
-                        logger.logComplexParameter(this.readMtuAction, result, parameter);
+                        logger.ComplexParameter(this.readMtuAction, result, parameter);
                 }
                 catch ( Exception e )
                 {
@@ -396,7 +396,8 @@ namespace MTUComm
             
             #if DEBUG
             
-            string uniUri = Path.Combine ( Mobile.GetPathLogsUni (), this.mtuBasicInfo.Type + "-" + this.actionType + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
+            string uniUri = Path.Combine ( Mobile.GetPathLogsUni (),
+                this.mtuBasicInfo.Type + "-" + this.actionType + ( ( form.mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.logger.CreateFileIfNotExist ( false, uniUri );
             
             XDocument uniDoc = XDocument.Load ( uniUri );
