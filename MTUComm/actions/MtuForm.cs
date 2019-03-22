@@ -16,7 +16,7 @@ namespace MTUComm.actions
         public Global global { get; }
         public Mtu mtu { get; }
         public dynamic map;
-        public ActionType actionType;
+        public Action action;
 
         #endregion
 

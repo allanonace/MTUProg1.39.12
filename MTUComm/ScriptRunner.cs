@@ -128,7 +128,7 @@ namespace MTUComm
                         return;
                     }
                 
-                    Action new_action = new Action ( Configuration.GetInstance(), serial_device, type, script.UserName, script.LogFile );
+                    Action new_action = new Action ( Configuration.GetInstance(), serial_device, type, script.UserName, script.LogFile, true );
                     Type   actionType = action.GetType ();
     
                     foreach (PropertyInfo parameter in action.GetType().GetProperties())

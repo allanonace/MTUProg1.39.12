@@ -16,7 +16,7 @@ namespace MTUComm
         public  Logger logger;
         private string user;
         private dynamic form;
-        private ActionType actionType;
+        private Action action;
         private MTUBasicInfo mtuBasicInfo;
         private string logUri;
 
@@ -25,12 +25,14 @@ namespace MTUComm
         private XElement  turnOffAction;
         private XElement  turnOnAction;
         private XElement  readMtuAction;
+        
+        private string uniLog;
 
         public AddMtuLog(Logger logger, dynamic form, string user, bool isFromScripting )
         {
             this.logger = logger;
             this.form = form;
-            this.actionType = (ActionType)form.actionType;
+            this.action = (Action)form.action;
             this.user = user;
             this.mtuBasicInfo = MtuForm.mtuBasicInfo;
             this.logUri = this.logger.CreateFileIfNotExist ();
@@ -76,20 +78,22 @@ namespace MTUComm
             string  DISABLED = MemoryMap.MemoryMap.DISABLED;
             string  ENABLED  = MemoryMap.MemoryMap.ENABLED;
 
-            bool isReplaceMeter = form.actionType == ActionType.ReplaceMeter           ||
-                                  form.actionType == ActionType.ReplaceMtuReplaceMeter ||
-                                  form.actionType == ActionType.AddMtuReplaceMeter;
-            bool isReplaceMtu   = form.actionType == ActionType.ReplaceMTU ||
-                                  form.actionType == ActionType.ReplaceMtuReplaceMeter;
+            ActionType actionType = form.action.type;
+
+            bool isReplaceMeter = actionType == ActionType.ReplaceMeter           ||
+                                  actionType == ActionType.ReplaceMtuReplaceMeter ||
+                                  actionType == ActionType.AddMtuReplaceMeter;
+            bool isReplaceMtu   = actionType == ActionType.ReplaceMTU ||
+                                  actionType == ActionType.ReplaceMtuReplaceMeter;
 
             #region General
 
             //logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
             // logger.addAtrribute ( this.addMtuAction, "type",    addMtuType    );
             // logger.addAtrribute ( this.addMtuAction, "reason",  addMtuReason  );
-            logger.AddAtrribute(this.addMtuAction, "display", Action.displays[this.actionType]);
-            logger.AddAtrribute(this.addMtuAction, "type", Action.tag_types[this.actionType]);
-            logger.AddAtrribute(this.addMtuAction, "reason", Action.tag_reasons[this.actionType]);
+            logger.AddAtrribute(this.addMtuAction, "display", Action.displays[this.action.type]);
+            logger.AddAtrribute(this.addMtuAction, "type", Action.tag_types[this.action.type]);
+            logger.AddAtrribute(this.addMtuAction, "reason", Action.tag_reasons[this.action.type]);
 
             logger.Parameter ( this.addMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
@@ -382,7 +386,7 @@ namespace MTUComm
             }
         }
 
-        public void Save ()
+        public string Save ()
         {
             this.addMtuAction.Add ( this.turnOffAction );
             this.addMtuAction.Add ( this.turnOnAction  );
@@ -391,30 +395,39 @@ namespace MTUComm
             this.doc = XDocument.Load ( logUri );
             XElement mtus = doc.Root.Element ( "Mtus" );
             mtus.Add ( this.addMtuAction );
-
             doc.Save ( logUri );
             
-            #if DEBUG
-            
+            // Launching multiple times scripts with the same output path, concatenates the actions logs,
+            // but the log send to the explorer should be only the last action performed
             string uniUri = Path.Combine ( Mobile.GetPathLogsUni (),
-                this.mtuBasicInfo.Type + "-" + this.actionType + ( ( form.mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
+                this.mtuBasicInfo.Type + "-" + this.action.type + ( ( form.mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.logger.CreateFileIfNotExist ( false, uniUri );
             
             XDocument uniDoc = XDocument.Load ( uniUri );
             XElement uniMtus = uniDoc.Root.Element ( "Mtus" );
             uniMtus.Add ( this.addMtuAction );
             
+            #if DEBUG
+            
             uniDoc.Save ( uniUri );
             
             #endif
-        }
-
-        public override string ToString ()
-        {
-            if ( this.doc == null )
-                this.Save ();
-
-            return doc.ToString ();         
+            
+            // Write in ActivityLog
+            if ( this.action.IsFromScripting &&
+                 ! Configuration.GetInstance ().global.ScriptOnly )
+            {
+                // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist
+                this.logger.ResetFixedName ();
+                
+                String uri = this.logger.CreateFileIfNotExist ();
+                doc  = XDocument.Load ( uri );
+                mtus = doc.Root.Element ( "Mtus" );
+                mtus.Add ( this.addMtuAction );
+                doc.Save(uri);
+            }
+            
+            return uniDoc.ToString ();
         }
     }
 }

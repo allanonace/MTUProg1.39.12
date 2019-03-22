@@ -222,6 +222,8 @@ namespace MTUComm
         private List<Action> sub_actions = new List<Action>();
         public  int order = 0;
         //public Func<object, object, object> OnFinish;
+        
+        public bool IsFromScripting { private set; get; }
 
         #endregion
 
@@ -246,7 +248,7 @@ namespace MTUComm
 
         #region Initialization
 
-        public Action(Configuration config, ISerial serial, ActionType type, String user = "", String outputfile = "")
+        public Action(Configuration config, ISerial serial, ActionType type, String user = "", String outputfile = "", bool isFromScripting = false )
         {
             // outputfile = new FileInfo ( outputfile ).Name; // NO
             // System.IO.Path.GetFileName(outputfile)); // NO
@@ -257,6 +259,7 @@ namespace MTUComm
             this.type = type;
             this.user = user;
             comm.OnError += Comm_OnError;
+            this.IsFromScripting = isFromScripting;
         }
 
         #endregion
@@ -316,9 +319,7 @@ namespace MTUComm
 
         public String GetResultXML ( ActionResult result )
         {
-            if ( type == ActionType.AddMtu )
-                 return comm.GetResultXML ();
-            else return this.lastLogCreated;
+            return this.lastLogCreated;
         }
 
         #endregion
@@ -354,7 +355,7 @@ namespace MTUComm
                         comm.OnProgress += Comm_OnProgress;
                         // Interactive and Scripting
                         if (mtuForm != null)
-                             parameters.AddRange(new object[] { (AddMtuForm)mtuForm, this.user, type });
+                             parameters.AddRange(new object[] { (AddMtuForm)mtuForm, this.user, this });
                         else parameters.Add(this);
                         break;
 
@@ -463,7 +464,7 @@ namespace MTUComm
         private void Comm_OnTurnOnOffMtu ( object sender, MTUComm.TurnOffMtuArgs e )
         {
             ActionResult result = getBasciInfoResult ();
-            logger.TurnOnOff ( this, e.Mtu, result.getParameters()[2].Value );
+            this.lastLogCreated = logger.TurnOnOff ( this, e.Mtu, result.getParameters()[2].Value );
             ActionFinishArgs args = new ActionFinishArgs ( result );
 
             OnFinish ( this, args );
@@ -473,11 +474,8 @@ namespace MTUComm
         {
             ActionResult result = CreateActionResultUsingInterface ( e.MemoryMap, e.MtuType, e.Form );
             ActionFinishArgs args = new ActionFinishArgs ( result );
-
             e.AddMtuLog.LogReadMtu ( result );
-
-            // Generate xml log file and save on device
-            e.AddMtuLog.Save ();
+            this.lastLogCreated = e.AddMtuLog.Save ();
             
             args.FormLog = e.AddMtuLog;
 

@@ -269,7 +269,7 @@ namespace MTUComm
                     case ActionType.ReplaceMtuReplaceMeter:
                         // Interactive and Scripting
                         if ( args.Length > 1 )
-                             await Task.Run(() => Task_AddMtu ( (AddMtuForm)args[0], (string)args[1], (ActionType)args[2] ) );
+                             await Task.Run(() => Task_AddMtu ( (AddMtuForm)args[0], (string)args[1], (Action)args[2] ) );
                         else await Task.Run(() => Task_AddMtu ( (Action)args[0] ) );
                         break;
                     case ActionType.ReadMtu    : await Task.Run(() => Task_ReadMtu()); break;
@@ -926,7 +926,8 @@ namespace MTUComm
                         
                         value = value.ToLower ()
                                      .Replace ( "hr", "hour" )
-                                     .Replace ( "h", "H" );
+                                     .Replace ( "h", "H" )
+                                     .Replace ( "m", "M" );
                         fail = Empty ( value ) || ! readIntervalList.Contains ( value );
                         break;
                         
@@ -1015,20 +1016,20 @@ namespace MTUComm
                 return;
             }
 
-            this.Task_AddMtu ( form, addMtuAction.user, addMtuAction.type, true );
+            this.Task_AddMtu ( form, addMtuAction.user, addMtuAction, true );
         }
 
         private void Task_AddMtu (
             dynamic form,
             string user,
-            ActionType actionType = ActionType.AddMtu,
+            Action action,
             bool isFromScripting = false )
         {
             Mtu    mtu    = form.mtu;
             Global global = form.global;
         
             this.mtu = mtu;
-            form.actionType = actionType;
+            form.action = action;
 
             try
             {
@@ -1414,11 +1415,6 @@ namespace MTUComm
         }
 
         #endregion
-
-        public string GetResultXML ()
-        {
-            return addMtuLog.ToString ();
-        }
 
         public void Task_BasicRead ()
         {

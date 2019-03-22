@@ -12,6 +12,11 @@ namespace MTUComm
     {
         private String fixed_name = String.Empty;
 
+        public void ResetFixedName ()
+        {
+            this.fixed_name = string.Empty;
+        }
+
         public Logger ( string outFileName = "" )
         {
             this.fixed_name = outFileName;
@@ -200,9 +205,24 @@ namespace MTUComm
             PrepareLog_ReadMTU ( uniDoc.Root.Element("Mtus"), action, result, mtu.Id );
             
             #if DEBUG
+            
             uniDoc.Save ( uniUri );
+            
             #endif
             
+            // Write in ActivityLog
+            if ( action.IsFromScripting &&
+                 ! Configuration.GetInstance ().global.ScriptOnly )
+            {
+                // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist
+                this.ResetFixedName ();
+                
+                uri = CreateFileIfNotExist ();
+                doc = XDocument.Load( uri );
+                PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, result, mtu.Id);
+                doc.Save(uri);
+            }
+
             return uniDoc.ToString ();
         }
 
@@ -273,25 +293,42 @@ namespace MTUComm
             parent.Add(element);
         }
 
-        public void TurnOnOff ( Action action, Mtu mtu, uint mtuId )
+        public string TurnOnOff ( Action action, Mtu mtu, uint mtuId )
         {
-            String uri = CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(uri);
-
+            String uri = CreateFileIfNotExist ();
+            XDocument doc = XDocument.Load ( uri );
             PrepareLog_TurnOff(doc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, mtuId );
             doc.Save(uri);
             
-            #if DEBUG
-            
+            // Launching multiple times scripts with the same output path, concatenates the actions logs,
+            // but the log send to the explorer should be only the last action performed
             string uniUri = Path.Combine ( Mobile.GetPathLogsUni (),
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( false, uniUri );
             
             XDocument uniDoc = XDocument.Load ( uniUri );
             PrepareLog_TurnOff ( uniDoc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, mtuId );
+            
+            #if DEBUG
+            
             uniDoc.Save ( uniUri );
             
             #endif
+            
+            // Write in ActivityLog
+            if ( action.IsFromScripting &&
+                 ! Configuration.GetInstance ().global.ScriptOnly )
+            {
+                // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist
+                this.ResetFixedName ();
+                
+                uri = CreateFileIfNotExist ();
+                doc = XDocument.Load ( uri );
+                PrepareLog_TurnOff(doc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, mtuId );
+                doc.Save(uri);
+            }
+            
+            return uniDoc.ToString ();;
         }
 
         private void PrepareLog_TurnOff (XElement parent, string display, string type, string user, uint MtuId )

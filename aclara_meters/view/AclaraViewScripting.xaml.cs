@@ -1016,8 +1016,8 @@ namespace aclara_meters.view
                 
                 try
                 {
-                    if (e.FormLog == null)
-                    {
+                    //if (e.FormLog == null)
+                    //{
                         ContentView_Scripting_textScript.Text = "";
                         Parameter[] allParams = e.Result.getParameters();
 
@@ -1042,14 +1042,14 @@ namespace aclara_meters.view
                                 ContentView_Scripting_textScript.Text = val + res + "\r\n";
                             }
                         }
-                    }
-                    else
-                        ContentView_Scripting_textScript.Text = e.FormLog.ToString();
+                    //}
+                    //else
+                    //    ContentView_Scripting_textScript.Text = e.FormLog.ToString();
 
                     String xmlResultTocallback = string.Empty;
-                    if (e.FormLog == null)
+                    //if (e.FormLog == null)
                         xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(e.Result);
-                    else xmlResultTocallback = ContentView_Scripting_textScript.Text;
+                    //else xmlResultTocallback = ContentView_Scripting_textScript.Text;
 
                     // TODO: ScriptOnly -> if true log in activity log the actions of scripts
                     //Configuration.GetInstance().GetGlobal().ScriptOnly;
