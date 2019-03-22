@@ -244,7 +244,7 @@ namespace MTUComm
         {
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
-            PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, result, mtu.Id);
+            PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, result, mtu );
             doc.Save(uri);
             
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
@@ -254,7 +254,7 @@ namespace MTUComm
             this.CreateFileIfNotExist ( false, uniUri );
             
             XDocument uniDoc = XDocument.Load ( uniUri );
-            PrepareLog_ReadMTU ( uniDoc.Root.Element("Mtus"), action, result, mtu.Id );
+            PrepareLog_ReadMTU ( uniDoc.Root.Element("Mtus"), action, result, mtu );
             
             #if DEBUG
             
@@ -271,33 +271,51 @@ namespace MTUComm
                 
                 uri = CreateFileIfNotExist ();
                 doc = XDocument.Load( uri );
-                PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, result, mtu.Id);
+                PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, result, mtu );
                 doc.Save(uri);
             }
 
             return uniDoc.ToString ();
         }
 
-        private void PrepareLog_ReadMTU ( XElement parent, Action action, ActionResult result, int mtuId )
+        private void PrepareLog_ReadMTU ( XElement parent, Action action, ActionResult result, Mtu mtu )
         {
+            try
+            {
+            
             XElement element = new XElement("Action");
 
             AddAtrribute(element, "display", action.DisplayText);
             AddAtrribute(element, "type", action.LogText);
             AddAtrribute(element, "reason", action.Reason);
 
-            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields(mtuId, ActionType.ReadMtu );
+            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields( mtu, ActionType.ReadMtu );
             foreach ( InterfaceParameters parameter in parameters )
             {
+                try
+                {
+            
                 if ( parameter.Name == "Port" )
                 {
                     ActionResult[] ports = result.getPorts();
                     for ( int i = 0; i < ports.Length; i++ )
                         Port(i, element, ports[i], parameter.Parameters.ToArray());
                 }
-                else ComplexParameter(element, result, parameter);
+                else this.ComplexParameter(element, result, parameter);
+                
+                }
+                catch ( Exception ex )
+                {
+                
+                }
             }
             parent.Add(element);
+
+            }
+            catch ( Exception ex )
+            {
+
+            }
         }
 
         public void ReadData ( Action action, ActionResult result, Mtu mtu )
@@ -305,11 +323,11 @@ namespace MTUComm
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
 
-            PrepareLog_ReadData(doc.Root.Element("Mtus"), action, result, mtu.Id);
+            PrepareLog_ReadData(doc.Root.Element("Mtus"), action, result, mtu );
             doc.Save(uri);
         }
 
-        private void PrepareLog_ReadData ( XElement parent, Action action, ActionResult result, int mtuId )
+        private void PrepareLog_ReadData ( XElement parent, Action action, ActionResult result, Mtu mtu )
         {
             XElement element = new XElement("Action");
 
@@ -317,7 +335,7 @@ namespace MTUComm
             AddAtrribute(element, "type", action.LogText);
             AddAtrribute(element, "reason", action.Reason);
 
-            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields ( mtuId, ActionType.ReadData );
+            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields ( mtu, ActionType.ReadData );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name == "Port")
@@ -326,7 +344,7 @@ namespace MTUComm
                     for (int i = 0; i < ports.Length; i++)
                         Port(i, element, ports[i], parameter.Parameters.ToArray());
                 }
-                else ComplexParameter(element, result, parameter);
+                else this.ComplexParameter(element, result, parameter);
             }
 
             parent.Add(element);
@@ -340,7 +358,7 @@ namespace MTUComm
             AddAtrribute(element, "number", (portnumber + 1).ToString());
 
             foreach (InterfaceParameters parameter in parameters)
-                ComplexParameter(element, result, parameter);
+                this.ComplexParameter(element, result, parameter, portnumber );
 
             parent.Add(element);
         }
@@ -487,21 +505,25 @@ namespace MTUComm
             events.Add(read_event);
         }
 
-        public void ComplexParameter ( XElement parent, ActionResult result, InterfaceParameters parameter )
+        public void ComplexParameter ( XElement parent, ActionResult result, InterfaceParameters parameter, int portNumber = 0 )
         {
-            Parameter param = null;
+            Parameter param = result.getParameterByTag ( parameter.Name, parameter.Source, portNumber );
 
-            if (parameter.Source != null)
+            /*
+            if ( ! string.IsNullOrEmpty ( parameter.Source ) )
             {
                 try
                 {
-                    param = result.getParameterByTag(parameter.Source.Split(new char[] { '.' })[1]);
+                    param = result.getParameterByTag ( parameter.Source.Split(new char[] { '.' })[1], parameter.Source, 0 );
                 }
-                catch (Exception e) { }
-
+                catch (Exception e)
+                {
+                
+                }
             }
             if (param == null)
-                param = result.getParameterByTag(parameter.Name);
+                param = result.getParameterByTag ( parameter.Name, parameter.Source, 0 );
+            */
 
             if (param != null)
                 Parameter ( parent, param );

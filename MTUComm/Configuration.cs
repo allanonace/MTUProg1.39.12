@@ -138,19 +138,19 @@ namespace MTUComm
             return meterTypes.FindByMterId(meterId);
         }
 
-        public InterfaceParameters[] getAllInterfaceFields ( int mtuid, ActionType actionType )
+        public InterfaceParameters[] getAllInterfaceFields ( Mtu mtu, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction ( mtuid, actionType.ToString () ).getAllInterfaces ();
+            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getAllInterfaces ();
         }
 
-        public InterfaceParameters[] getLogInterfaceFields ( int mtuid, ActionType actionType )
+        public InterfaceParameters[] getLogInterfaceFields ( Mtu mtu, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction ( mtuid, actionType.ToString () ).getLogInterfaces ();
+            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getLogInterfaces ();
         }
 
-        public InterfaceParameters[] getUserInterfaceFields ( int mtuid, ActionType actionType )
+        public InterfaceParameters[] getUserInterfaceFields ( Mtu mtu, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction ( mtuid, actionType.ToString () ).getUserInterfaces ();
+            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getUserInterfaces ();
         }
 
         public string GetMemoryMapTypeByMtuId ( Mtu mtu )

@@ -7,19 +7,17 @@ namespace Xml
     [XmlRoot("InterfaceConfig")]
     public class InterfaceConfig
     {
+        public static int currentIndexType;
+    
         [XmlElement("MtuInterface")]
         public List<MtuInterface> MtuInterfaces { get; set; }
 
         [XmlElement("Interface")]
         public List<Interface> Interfaces { get; set; }
 
-        public ActionInterface GetInterfaceByMtuIdAndAction ( int mtuid, string actionType )
+        public ActionInterface GetInterfaceByMtuIdAndAction ( Mtu mtu, string actionType )
         {
-            MtuInterface mtu = MtuInterfaces.Find(x => x.Id == mtuid);
-            if (mtu == null)
-                throw new MtuNotFoundException("Mtu not found");
-
-            Interface mtu_interface = Interfaces.Find(x => x.Id == mtu.Interface);
+            Interface mtu_interface = Interfaces.Find ( x => x.Id == currentIndexType );
             if (mtu_interface == null)
                 throw new InterfaceNotFoundException("Meter not found");
 

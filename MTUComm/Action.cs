@@ -504,7 +504,7 @@ namespace MTUComm
 
             string log_path = logger.ReadDataEntries(mtuInfo.Id.ToString("d15"), start, end, Entries);
 
-            InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtu.Id, ActionType.ReadData );
+            InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtu, ActionType.ReadData );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name.Equals("Port"))
@@ -582,7 +582,7 @@ namespace MTUComm
             Global       global = Configuration.GetInstance ().GetGlobal ();
             Type         gType  = global.GetType ();
             ActionResult result = new ActionResult ();
-            InterfaceParameters[] parameters = configuration.getAllInterfaceFields ( mtu.Id, actionType );
+            InterfaceParameters[] parameters = configuration.getAllInterfaceFields ( mtu, actionType );
             
             foreach ( InterfaceParameters parameter in parameters )
             {
@@ -624,10 +624,14 @@ namespace MTUComm
                                                    gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
                                                    parameter.Display;
                                 
-                                paramToAdd = new Parameter ( parameter.Name, display, value );
+                                paramToAdd = new Parameter ( parameter.Name, display, value, parameter.Source );
                             }
                             // To change "name" attribute to show in IFACE_FORM case
-                            else paramToAdd.CustomParameter = parameter.Name;
+                            else
+                            {
+                                paramToAdd.CustomParameter = parameter.Name;
+                                paramToAdd.source          = parameter.Source;
+                            }
                             
                             if ( paramToAdd != null )
                                 result.AddParameter ( paramToAdd );
@@ -649,6 +653,11 @@ namespace MTUComm
             Mtu mtu )
         {
             ActionResult result   = new ActionResult ();
+        
+            try
+            {
+        
+            
             Port         portType = mtu.Ports[ indexPort - 1 ];
             Global       global   = Configuration.GetInstance ().GetGlobal ();
             Type         gType    = global.GetType ();
@@ -712,10 +721,10 @@ namespace MTUComm
                                     if ( string.IsNullOrEmpty ( tempReading ) )
                                         tempReading = "INVALID";
                                     
-                                    result.AddParameter ( new Parameter ( parameter.Name, parameter.Display, tempReading ) );
+                                    result.AddParameter ( new Parameter ( parameter.Name, parameter.Display, tempReading, parameter.Source, indexPort - 1 ) );
                                 }
                                 else
-                                    result.AddParameter ( new Parameter ( parameter.Name, parameter.Display, meter_reading_error ) );
+                                    result.AddParameter ( new Parameter ( parameter.Name, parameter.Display, meter_reading_error, parameter.Source, indexPort - 1 ) );
                             }
                             catch ( Exception e )
                             {
@@ -755,7 +764,7 @@ namespace MTUComm
                                     string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
                                                        gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
                                                        parameter.Display;
-                                    result.AddParameter ( new Parameter ( parameter.Name, display, value ) );
+                                    result.AddParameter ( new Parameter ( parameter.Name, display, value, parameter.Source, indexPort - 1 ) );
                                 }
                             }
                         }
@@ -773,7 +782,15 @@ namespace MTUComm
                 result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", "000000000"));
                 result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
             }
+            
+            
 
+            }
+            catch ( Exception ex )
+            {
+
+            }
+            
             return result;
         }
 

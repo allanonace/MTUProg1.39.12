@@ -319,7 +319,9 @@ namespace aclara_meters.view
                         Console.WriteLine(e5.StackTrace);
                     }
 
-                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, ActionType.ReadMtu );
+                Mtu mtu = Configuration.GetInstance ().GetMtuTypeById ( mtu_type );
+
+                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields ( mtu, ActionType.ReadMtu );
                 foreach (InterfaceParameters parameter in interfacesParams)
                 {
                     if (parameter.Name.Equals("Port"))
@@ -330,12 +332,10 @@ namespace aclara_meters.view
                         {
                             foreach (InterfaceParameters port_parameter in parameter.Parameters)
                             {
-                                Parameter param = null;
+                                Parameter param = ports[i].getParameterByTag ( port_parameter.Name, port_parameter.Source, i );
 
                                 if (port_parameter.Name.Equals("Description"))
                                 {
-                                    param = ports[i].getParameterByTag(port_parameter.Name);
-
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
                                         Title = "Here lies the Port title...",
@@ -348,22 +348,6 @@ namespace aclara_meters.view
                                 }
                                 else
                                 {
-                                    if (port_parameter.Source != null)
-                                    {
-                                        try
-                                        {
-                                            param = ports[i].getParameterByTag(port_parameter.Source.Split(new char[] { '.' })[1]);
-                                        }
-                                        catch (Exception e2)
-                                        {
-                                            Console.WriteLine(e2.StackTrace);
-                                        }
-
-                                    }
-
-                                    if (param == null)
-                                        param = ports[i].getParameterByTag(port_parameter.Name);
-
                                     if (param != null)
                                     {
                                         FinalReadListView.Add(new ReadMTUItem()
@@ -379,63 +363,11 @@ namespace aclara_meters.view
                                     }
                                 }
                             }
-
-                            /*
-                            paramPort = ports[i].getParameters();
-
-
-                            if (paramPort != null)
-                            {
-
-                                FinalReadListView.Add(new ReadMTUItem()
-                                {
-                                    Title = "Here lies the Port title...",
-                                    isDisplayed = "true",
-                                    Height = "40",
-                                    isMTU = "false",
-                                    isMeter = "true",
-                                    Description = "Port " + i + ": " + paramPort[i].getValue() //parameter.Value
-                                });
-
-
-                                for (int i2 = 1; i2 < paramPort.Length; i2++)
-                                {
-
-
-                                    FinalReadListView.Add(new ReadMTUItem()
-                                    {
-                                        Title = "\t\t\t\t\t" + paramPort[i2].getLogDisplay() + ":",
-                                        isDisplayed = "true",
-                                        Height = "64",
-                                        isMTU = "true",
-                                        isMeter = "false",
-                                        Description = "\t\t\t\t\t" + paramPort[i2].getValue() //parameter.Value
-                                    });
-                                }
-
-
-                            }*/
-
                         }
                     }
                     else
                     {
-                        Parameter param = null;
-
-                        if (parameter.Source != null)
-                        {
-                            try
-                            {
-                                param = e.Result.getParameterByTag(parameter.Source.Split(new char[] { '.' })[1]);
-                            }
-                            catch (Exception e3)
-                            {
-                                Console.WriteLine(e3.StackTrace); //{System.IndexOutOfRangeException: Index was outside the bounds of the array.t aclara_meters.view.AclaraViewReadMTU.< ThreadProcedureMTUCOMMAction > b__19_0(System.Object s, MTUComm.Action + ActionFinishArgs e)[0x0031d] in / Users / ma.jimenez / Desktop / Proyectos / proyecto_aclara / aclara_meters / view / AclaraViewReadMTU.xaml.cs:385 }
-                            }
-                        }
-
-                        if (param == null)
-                            param = e.Result.getParameterByTag(parameter.Name);
+                        Parameter param = e.Result.getParameterByTag ( parameter.Name, parameter.Source, 0 );
 
                         if (param != null)
                             FinalReadListView.Add(new ReadMTUItem()
@@ -445,16 +377,10 @@ namespace aclara_meters.view
                                 Height = "64",
                                 isMTU = "true",
                                 isMeter = "false",
-                                Description = param.Value //parameter.Value
+                                Description = param.Value
                             });
                     }
                 }
-
-                //List <Interface> list = FormsApp.config.interfaces.Interfaces;
-
-                //ActionInterface action = FormsApp.config.interfaces.GetInterfaceByMtuIdAndAction(mtu_type,"ReadMTU");
-
-                //List<InterfaceParameters> para = action.Parameters;
 
                 bool ok = false;
                 foreach ( Parameter parameter in paramResult )

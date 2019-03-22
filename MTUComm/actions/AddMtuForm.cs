@@ -523,7 +523,7 @@ namespace MTUComm.actions
                     return;
 
                 // If is for port two, find the correct enum element adding two ( "_2" ) as sufix
-                if ( parameter.Port == 2 )
+                if ( parameter.Port == 1 )
                     Enum.TryParse<FIELD> ( typeOwn.ToString () + PORT_2_SUFIX, out typeOwn );
             }
 

@@ -4345,19 +4345,19 @@ namespace aclara_meters.view
 
             foreach ( BorderlessPicker p in optionalPickers )
                 if ( p.SelectedItem != null )
-                    optionalParams.Add ( new Parameter ( p.Name, p.Display, p.SelectedItem, true ) );
+                    optionalParams.Add ( new Parameter ( p.Name, p.Display, p.SelectedItem, string.Empty, 0, true ) );
 
             foreach ( BorderlessEntry e in optionalEntries )
                 if ( ! string.IsNullOrEmpty ( e.Text ) )
-                    optionalParams.Add ( new Parameter ( e.Name, e.Display, e.Text, true ) );
+                    optionalParams.Add ( new Parameter ( e.Name, e.Display, e.Text, string.Empty, 0, true ) );
 
             foreach (BorderlessDatePicker d in optionalDates)
                 if (!string.IsNullOrEmpty(d.Date.ToShortDateString()))
-                    optionalParams.Add(new Parameter(d.Name, d.Display,$"{d.Date.ToShortDateString()} 12:00:00", true));
+                    optionalParams.Add(new Parameter(d.Name, d.Display,$"{d.Date.ToShortDateString()} 12:00:00", string.Empty, 0, true));
 
             foreach (BorderlessTimePicker t in optionalTimes)
                 if (!string.IsNullOrEmpty(t.Time.ToString()))
-                    optionalParams.Add(new Parameter(t.Name, t.Display,$"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}", true));
+                    optionalParams.Add(new Parameter(t.Name, t.Display,$"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}", string.Empty, 0, true));
 
             if ( optionalParams.Count > 0 )
                 this.addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );
@@ -4408,7 +4408,9 @@ namespace aclara_meters.view
                     mtu_type = Int32.Parse(p.Value.ToString());
             }
 
-            InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, ActionType.ReadMtu );
+            Mtu mtu = Configuration.GetInstance ().GetMtuTypeById ( mtu_type );
+
+            InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields ( mtu, ActionType.ReadMtu );
 
             foreach (InterfaceParameters iParameter in interfacesParams)
             {
@@ -4421,13 +4423,12 @@ namespace aclara_meters.view
                     {
                         foreach ( InterfaceParameters pParameter in iParameter.Parameters )
                         {
-                            Parameter param = null;
+                            Parameter param = ports[i].getParameterByTag ( pParameter.Name, pParameter.Source, i );
 
                             // Port header
                             if (pParameter.Name.Equals("Description"))
                             {
                                 string description;
-                                param = ports[i].getParameterByTag ( pParameter.Name );
                                 
                                 // For Read action when no Meter is installed on readed MTU
                                 if ( param != null )
@@ -4442,44 +4443,11 @@ namespace aclara_meters.view
                                     isMTU = "false",
                                     isMeter = "true",
                                     Description = "Port " + ( i + 1 ) + ": " + description
-                                    //Description = "Port " + ( i + 1 ) + ": " + ( ( param != null ) ? param.Value : "Not Installed" )
                                 });
                             }
                             // Port fields
                             else
                             {
-                                /*
-                                if ( ! string.IsNullOrEmpty ( pParameter.Source ) &&
-                                     pParameter.Source.Contains ( "." ) )
-                                {
-                                    string tag = pParameter.Source.Split(new char[] { '.' })[ 1 ];
-                                    param = ports[ i ].getParameterByTag ( tag );
-                                }
-
-                                if ( param == null )
-                                    param = e.Result.getParameterByTag ( pParameter.Name );
-
-                                if ( param != null )
-                                    FinalReadListView.Add(new ReadMTUItem()
-                                    {
-                                        Title = param.getLogDisplay() + ":",
-                                        isDisplayed = "true",
-                                        Height = "70",
-                                        isMTU = "false",
-                                        isDetailMeter = "true",
-                                        isMeter = "false",
-                                        Description = param.Value
-                                    });
-                                */
-                                string tag = pParameter.Name;
-
-                                if ( ! string.IsNullOrEmpty ( pParameter.Source ) &&
-                                     pParameter.Source.Contains ( "." ) )
-                                    tag = pParameter.Source.Split(new char[] { '.' })[ 1 ];
-
-                                if ( ! string.IsNullOrEmpty ( tag ) )
-                                    param = ports[ i ].getParameterByTag ( tag );
-
                                 if ( param != null )
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
@@ -4499,17 +4467,7 @@ namespace aclara_meters.view
                 // Root log fields
                 else
                 {
-                    Parameter param = null;
-                   
-                    if ( ! string.IsNullOrEmpty ( iParameter.Source ) &&
-                         iParameter.Source.Contains ( "." ) )
-                    {
-                        string tag = iParameter.Source.Split(new char[] { '.' })[ 1 ];
-                        param = e.Result.getParameterByTag ( tag );
-                    }
-
-                    if ( param == null )
-                        param = e.Result.getParameterByTag ( iParameter.Name );
+                    Parameter param = e.Result.getParameterByTag ( iParameter.Name, iParameter.Source, 0 );
 
                     if (param != null)
                     {

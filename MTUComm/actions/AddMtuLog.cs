@@ -48,7 +48,7 @@ namespace MTUComm
             logger.AddAtrribute(this.turnOffAction, "display", Action.displays[ActionType.TurnOffMtu]);
             logger.AddAtrribute(this.turnOffAction, "type", Action.tag_types[ActionType.TurnOffMtu]);
 
-            logger.Parameter(this.turnOffAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            logger.Parameter(this.turnOffAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") ));
 
             if (!string.IsNullOrEmpty(this.user))
                 logger.Parameter(this.turnOffAction, new Parameter("User", "User", this.user));
@@ -365,7 +365,7 @@ namespace MTUComm
             logger.AddAtrribute(this.readMtuAction, "display", Action.displays[ActionType.ReadMtu]);
             logger.AddAtrribute(this.readMtuAction, "type", Action.tag_types[ActionType.ReadMtu]);
 
-            InterfaceParameters[] parameters = Configuration.GetInstance().getLogInterfaceFields( form.mtu.Id, ActionType.ReadMtu );
+            InterfaceParameters[] parameters = Configuration.GetInstance().getLogInterfaceFields( form.mtu, ActionType.ReadMtu );
             foreach (InterfaceParameters parameter in parameters)
             {
                 try

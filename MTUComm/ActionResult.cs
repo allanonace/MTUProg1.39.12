@@ -38,13 +38,13 @@ namespace MTUComm
             return ports.ToArray();
         }
 
-        public Parameter getParameterByTag(string tag)
+        public Parameter getParameterByTag ( string tag, string source, int port = 0 )
         {
             // The first element that matches the conditions defined by the specified predicate,
             // if found, returns the default value for type T
-            return parameters.Find(x => x.getLogTag().Equals(tag));
+            return parameters.Find ( param => param.CustomParameter.Equals ( tag ) &&
+                                     ( param.source.Equals ( source ) || string.IsNullOrEmpty ( source ) ) &&
+                                     param.Port == port );
         }
-
-
     }
 }

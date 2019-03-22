@@ -6,6 +6,11 @@ namespace Xml
 {
     public class InterfaceParameters
     {
+        public InterfaceParameters ()
+        {
+            this.Source = string.Empty;
+        }
+
         [XmlAttribute("name")]
         public string Name { get; set; }
 

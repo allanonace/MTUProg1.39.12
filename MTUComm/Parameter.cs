@@ -84,7 +84,7 @@ namespace MTUComm
 
 
         private Boolean has_port = false;
-        private int port = 1;
+        private int port = 0;
 
         private String mCustomParameter;
         private String mCustomDisplay = null;
@@ -94,6 +94,8 @@ namespace MTUComm
         private dynamic mValue;
 
         private bool optional = false;
+        
+        public string source;
 
         public Parameter ()
         {
@@ -117,13 +119,15 @@ namespace MTUComm
             setPort(port);
         }
 
-        public Parameter(String custom_parameter, String custom_display, dynamic value, bool optional = false )
+        public Parameter(String custom_parameter, String custom_display, dynamic value, string source = "", int port = 0, bool optional = false )
         {
             mParameterType   = ParameterType.Custom;
             mCustomParameter = custom_parameter;
             mCustomDisplay   = custom_display;
+            this.source      = source;
             mValue           = value;
             this.optional    = optional;
+            this.setPort ( port );
         }
 
         public ParameterType Type

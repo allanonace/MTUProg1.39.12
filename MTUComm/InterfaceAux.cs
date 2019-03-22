@@ -51,6 +51,8 @@ namespace MTUComm
             if ( iInfo == null )
                 throw new InterfaceNotFoundException("Meter not found");
             
+            InterfaceConfig.currentIndexType = interfaceIndex;
+            
             return iInfo;
         }
     }

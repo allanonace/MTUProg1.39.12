@@ -1646,7 +1646,9 @@ namespace aclara_meters.view
                     }
                 }
 
-                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields(mtu_type, ActionType.ReadMtu );
+                Mtu mtu = Configuration.GetInstance ().GetMtuTypeById ( mtu_type );
+
+                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields( mtu, ActionType.ReadMtu );
 
                 foreach (InterfaceParameters iParameter in interfacesParams)
                 {
@@ -1659,13 +1661,12 @@ namespace aclara_meters.view
                         {
                             foreach ( InterfaceParameters pParameter in iParameter.Parameters )
                             {
-                                Parameter param = null;
+                                Parameter param = ports[i].getParameterByTag ( pParameter.Name, pParameter.Source, i );
 
                                 // Port header
                                 if (pParameter.Name.Equals("Description"))
                                 {
                                     string description;
-                                    param = ports[i].getParameterByTag ( pParameter.Name );
                                     
                                     // For Read action when no Meter is installed on readed MTU
                                     if ( param != null )
@@ -1680,21 +1681,11 @@ namespace aclara_meters.view
                                         isMTU = "false",
                                         isMeter = "true",
                                         Description = "Port " + ( i + 1 ) + ": " + description
-                                        //Description = "Port " + ( i + 1 ) + ": " + ( ( param != null ) ? param.Value : "Not Installed" )
                                     });
                                 }
                                 // Port fields
                                 else
                                 {
-                                    string tag = pParameter.Name;
-
-                                    if ( ! string.IsNullOrEmpty ( pParameter.Source ) &&
-                                         pParameter.Source.Contains ( "." ) )
-                                        tag = pParameter.Source.Split(new char[] { '.' })[ 1 ];
-
-                                    if ( ! string.IsNullOrEmpty ( tag ) )
-                                        param = ports[ i ].getParameterByTag ( tag );
-
                                     if ( param != null )
                                         FinalReadListView.Add(new ReadMTUItem()
                                         {
@@ -1714,15 +1705,7 @@ namespace aclara_meters.view
                     // Root log fields
                     else
                     {
-                        Parameter param = null;
-                        string tag = iParameter.Name;
-
-                        if ( ! string.IsNullOrEmpty ( iParameter.Source ) &&
-                             iParameter.Source.Contains ( "." ) )
-                            tag = iParameter.Source.Split(new char[] { '.' })[ 1 ];
-
-                        if ( ! string.IsNullOrEmpty ( tag ) )
-                            param = e.Result.getParameterByTag ( tag );
+                        Parameter param = e.Result.getParameterByTag ( iParameter.Name, iParameter.Source, 0 );
 
                         if (param != null)
                         {

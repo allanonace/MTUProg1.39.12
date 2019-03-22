@@ -587,7 +587,7 @@ namespace MTUComm
                     // Launchs exception 'TranslatingParamsScriptException'
                     form.AddParameterTranslatingAclaraXml ( parameter );
                     
-                    if ( parameter.Port == 2 )
+                    if ( parameter.Port == 1 )
                         form.usePort2 = true;
                 }
     

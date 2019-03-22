@@ -262,7 +262,6 @@
     <BundleResource Include="Resources\logs_button.png" />
     <BundleResource Include="Resources\about_button.png" />
     <BundleResource Include="Resources\icon_detail_ble.png" />
-    <BundleResource Include="Resources\battery_toolbar.png" />
     <BundleResource Include="Resources\rssi_toolbar.png" />
     <BundleResource Include="Resources\ble_icon_device.png" />
     <BundleResource Include="Resources\user_menu_icon.png" />
@@ -277,7 +276,6 @@
     <BundleResource Include="Resources\aclara_key_black.png" />
     <BundleResource Include="Resources\box_input_progress_settings.png" />
     <BundleResource Include="Resources\back_arrow.png" />
-    <BundleResource Include="Resources\activity_icon.png" />
     <BundleResource Include="Resources\error_icon.png" />
     <BundleResource Include="Resources\checkbox_off.png" />
     <BundleResource Include="Resources\checkbox_on.png" />
@@ -286,7 +284,6 @@
     <BundleResource Include="Resources\read_mtu_btn.png" />
     <BundleResource Include="Resources\box_input_progress.png" />
     <BundleResource Include="Resources\icon_button_ble_detail.png" />
-    <BundleResource Include="Resources\battery_icon.png" />
     <BundleResource Include="Resources\rssi_icon.png" />
     <BundleResource Include="Resources\contacts.png" />
     <BundleResource Include="Resources\hamburger.png" />
@@ -312,7 +309,6 @@
     <BundleResource Include="Resources\add_mtu_rep_meter_btn_black.png" />
     <BundleResource Include="Resources\add_mtu_rep_meter_btn.png" />
     <BundleResource Include="Resources\logs_file_button.png" />
-    <BundleResource Include="Resources\add_mtu_btn_bw.png" />
     <BundleResource Include="Resources\read_mtu_btn_bw.png" />
     <BundleResource Include="Resources\rep_meter_btn_bw.png" />
     <BundleResource Include="Resources\rep_mtu_btn_bw.png" />
