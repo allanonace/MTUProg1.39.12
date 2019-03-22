@@ -39,7 +39,7 @@ namespace MTUComm
             base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
             base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
             base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
-            base_stream += "        <AppType>" + ( Action.currentAction.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
+            base_stream += "        <AppType>" + ( Action.currentAction != null && Action.currentAction.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
             base_stream += "    </AppInfo>";
             base_stream += "    <Message />";
             base_stream += "    <Mtus />";
