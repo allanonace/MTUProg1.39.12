@@ -751,7 +751,7 @@ namespace MTUComm
                         case FIELD.ACTIVITY_LOG_ID:
                         fail = EmptyNum ( value );
                         break;
-                    
+                        
                         case FIELD.ACCOUNT_NUMBER:
                         case FIELD.ACCOUNT_NUMBER_2:
                         fail = NoEqNum ( value, global.AccountLength );

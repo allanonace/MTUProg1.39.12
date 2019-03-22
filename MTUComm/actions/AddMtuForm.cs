@@ -490,7 +490,7 @@ namespace MTUComm.actions
 
         public Dictionary<FIELD,Parameter> RegisteredParamsByField
         {
-            get { return this.dictionary; }
+            get { return new Dictionary<FIELD,Parameter> ( this.dictionary ); }
         }
 
         public AddMtuForm ( Mtu mtu ) : base ( mtu )
