@@ -135,6 +135,8 @@ namespace MTUComm
         private Error[] xmlErrors;
 
         public static Error configError;
+        
+        public static string lastErrorLogGenerated;
 
         #endregion
 
@@ -178,7 +180,7 @@ namespace MTUComm
 
         private Errors ()
         {
-            this.logger      = new Logger ();
+            this.logger      = Action.currentAction.logger;
             this.errors      = new Dictionary<int,Error> ();
             this.errorsToLog = new List<Error> ();
             this.xmlErrors   = Aux.DeserializeXml<ErrorList> ( "Error.xml", true ).List;
@@ -338,7 +340,7 @@ namespace MTUComm
             Error error = this.AddErrorByException ( e, portIndex );
             PageLinker.ShowAlert ( ERROR_TITLE, error );
             
-            this.logger.Error ();
+            lastErrorLogGenerated = this.logger.Error ();
         }
         
         /// <summary>
@@ -357,7 +359,7 @@ namespace MTUComm
                 if ( forceException )
                     PageLinker.ShowAlert ( ERROR_TITLE, this.lastError );
                 
-                this.logger.Error ();
+                lastErrorLogGenerated = this.logger.Error ();
 
                 if ( forceException )
                     throw lastException;

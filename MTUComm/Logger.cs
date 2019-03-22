@@ -10,16 +10,16 @@ namespace MTUComm
 {
     public class Logger
     {
-        private String fixed_name = String.Empty;
+        public static string fixed_name = String.Empty;
 
         public void ResetFixedName ()
         {
-            this.fixed_name = string.Empty;
+            fixed_name = string.Empty;
         }
 
         public Logger ( string outFileName = "" )
         {
-            this.fixed_name = outFileName;
+            fixed_name = outFileName;
         }
 
         private Boolean IsFixedName ()
@@ -39,7 +39,7 @@ namespace MTUComm
             base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
             base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
             base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
-            base_stream += "        <AppType>" + (IsFixedName() ? "Scripting" : "Interactive") + "</AppType>";
+            base_stream += "        <AppType>" + ( Action.currentAction.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
             base_stream += "    </AppInfo>";
             base_stream += "    <Message />";
             base_stream += "    <Mtus />";
@@ -50,6 +50,37 @@ namespace MTUComm
             config = null;
             
             return base_stream;
+        }
+        
+        private string CreateLogBase_Scripting_Error ()
+        {
+            Configuration config = Configuration.GetInstance ();
+        
+            string base_stream = "<?xml version=\"1.0\" encoding=\"ASCII\"?>";
+            base_stream += "<StarSystem>";
+            base_stream += "    <AppInfo>";
+            base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
+            base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
+            base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
+            base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+            base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
+            base_stream += "        <AppType>Scripted</AppType>";
+            base_stream += "    </AppInfo>";
+            base_stream += "    <Action display=\"" + Action.displays[ Action.currentAction.type ] + "\" type=\"" + Action.tag_types[ Action.currentAction.type ] + "\" reason=\"" + Action.tag_reasons[ Action.currentAction.type ] + "\">";
+            base_stream += "        <Date display=\"Date/Time\">" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
+            base_stream += "        <User display=\"User\">" + Action.currentAction.user + "</User>";
+            base_stream += "    </Action>";
+            base_stream += "</StarSystem>";
+            
+            config = null;
+            
+            string uri = Path.Combine ( Mobile.GetPathConfig (), "___tmp.xml" );
+            using ( System.IO.StreamWriter file = new System.IO.StreamWriter ( uri, false ) )
+            {
+                file.WriteLine ( base_stream );
+            }
+            
+            return uri;
         }
 
         public string CreateFileIfNotExist (
@@ -106,7 +137,7 @@ namespace MTUComm
 
             return uri;
         }
-
+        
         public string CreateEventFileIfNotExist ( string mtu_id )
         {
             string file_name = "MTUID"+ mtu_id+ "-" + System.DateTime.Now.ToString("MMddyyyyHH") + "-" + DateTime.Now.Ticks.ToString() + "DataLog.xml"; 
@@ -158,20 +189,26 @@ namespace MTUComm
         ///   </AppError>
         /// </Error>
         /// </summary>
-        public void Error ()
+        public string Error ()
         {
-            String    uri    = CreateFileIfNotExist ();
-            XDocument doc    = XDocument.Load ( uri );
+            String    uri     = CreateFileIfNotExist ();
+            XDocument doc     = XDocument.Load ( uri );
             XElement  element = doc.Root.Element ( "Error" );
-            string    time   = DateTime.UtcNow.ToString ( "MM/dd/yyyy HH:mm:ss" );
+            string    time    = DateTime.UtcNow.ToString ( "MM/dd/yyyy HH:mm:ss" );
 
+            // The log send to the explorer should be only the last error performed, not full current activity log
+            string    uriLog  = this.CreateLogBase_Scripting_Error ();
+            XDocument docLog  = XDocument.Load ( uriLog );
+
+            XElement error;
+            XElement message;
             foreach ( Error e in Errors.GetErrorsToLog () )
             {
-                XElement error = new XElement ( "AppError" );
+                error = new XElement ( "AppError" );
 
-                Parameter(error, new Parameter ( "Date", null, time ) );
+                Parameter ( error, new Parameter ( "Date", null, time ) );
             
-                XElement message = new XElement ( "Message", e.Message );
+                message = new XElement ( "Message", e.Message );
                 
                 if ( Errors.ShowId &&
                      e.Id > -1 )
@@ -182,10 +219,25 @@ namespace MTUComm
                 
                 error.Add ( message );
                 
-                element.Add ( error );
+                element.Add ( error );     // Activity log
+                docLog.Root.Add ( error ); // Result ( send to explorer )
             }
-
+            
             doc.Save ( uri );
+            
+            // Only for the result log
+            element = new XElement("AppMessage");
+            Parameter ( element, new Parameter ( "Date", null, time ) );
+            message = new XElement ( "Message" );
+            element.Add ( message );
+            docLog.Root.Add ( element );
+            
+            string docLogText = docLog.ToString ();
+            
+            if ( File.Exists ( uriLog ) )
+                File.Delete ( uriLog );
+            
+            return docLogText;
         }
 
         public string ReadMTU ( Action action, ActionResult result, Mtu mtu )

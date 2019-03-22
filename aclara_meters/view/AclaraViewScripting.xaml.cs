@@ -978,11 +978,17 @@ namespace aclara_meters.view
                         //var a = HttpUtility.UrlEncode ( error.Message );
                         //var b = HttpUtility.UrlPathEncode ( error.Message );
                     
+                        /*
                         Device.OpenUri(new Uri(resultCallback +
                                             "?" +
                                             "status=error" +
                                             "&code= " + error.Id +
-                                            "&message=" + HttpUtility.UrlEncode ( error.Message )));
+                                            "&message=" + HttpUtility.UrlEncode ( "Error code " + error.Id + " - " + error.Message ))); */
+                                            
+                        Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
+                                                "status=success" +
+                                                "&output_filename=" + resultScriptName +
+                                                "&output_data=" + System.Web.HttpUtility.UrlEncode ( Base64Encode( Errors.lastErrorLogGenerated ) ) ));
 
                         FormsApp.ble_interface.Close();
                     });
@@ -1016,52 +1022,32 @@ namespace aclara_meters.view
                 
                 try
                 {
-                    //if (e.FormLog == null)
-                    //{
-                        ContentView_Scripting_textScript.Text = "";
-                        Parameter[] allParams = e.Result.getParameters();
+                    ContentView_Scripting_textScript.Text = "";
+                    Parameter[] allParams = e.Result.getParameters();
 
-                        for (int k = 0; k < allParams.Length; k++)
+                    for (int k = 0; k < allParams.Length; k++)
+                    {
+                        String res = allParams[k].getLogDisplay() + ": " + allParams[k].Value;
+                        String val = ContentView_Scripting_textScript.Text;
+                        ContentView_Scripting_textScript.Text = val + res + "\r\n";
+                    }
+
+                    ActionResult[] allports = e.Result.getPorts();
+
+                    for (int i = 0; i < allports.Length; i++)
+                    {
+                        ActionResult actionResult = allports[i];
+                        Parameter[] portParams = actionResult.getParameters();
+
+                        for (int j = 0; j < portParams.Length; j++)
                         {
-                            String res = allParams[k].getLogDisplay() + ": " + allParams[k].Value;
+                            String res = portParams[j].getLogDisplay() + ": " + portParams[j].Value;
                             String val = ContentView_Scripting_textScript.Text;
                             ContentView_Scripting_textScript.Text = val + res + "\r\n";
                         }
-
-                        ActionResult[] allports = e.Result.getPorts();
-
-                        for (int i = 0; i < allports.Length; i++)
-                        {
-                            ActionResult actionResult = allports[i];
-                            Parameter[] portParams = actionResult.getParameters();
-
-                            for (int j = 0; j < portParams.Length; j++)
-                            {
-                                String res = portParams[j].getLogDisplay() + ": " + portParams[j].Value;
-                                String val = ContentView_Scripting_textScript.Text;
-                                ContentView_Scripting_textScript.Text = val + res + "\r\n";
-                            }
-                        }
-                    //}
-                    //else
-                    //    ContentView_Scripting_textScript.Text = e.FormLog.ToString();
-
-                    String xmlResultTocallback = string.Empty;
-                    //if (e.FormLog == null)
-                        xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(e.Result);
-                    //else xmlResultTocallback = ContentView_Scripting_textScript.Text;
-
-                    // TODO: ScriptOnly -> if true log in activity log the actions of scripts
-                    //Configuration.GetInstance().GetGlobal().ScriptOnly;
-                    bool bScriptOnly = Configuration.GetInstance().GetGlobal().ScriptOnly;
-                    if (bScriptOnly)
-                    {
-                        Console.Write($"-------------------------------------    ScriptOnly: {bScriptOnly.ToString()}");
-                        Logger logActivity = new Logger();
-                        string Uri=logActivity.CreateFileIfNotExist(true);
-
-
                     }
+
+                    string xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(e.Result);
 
                     Device.BeginInvokeOnMainThread(() =>
                     {
@@ -1074,8 +1060,7 @@ namespace aclara_meters.view
                         Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
                                                              "status=success" +
                                                              "&output_filename="+resultScriptName +
-                                                             "&output_data=" + System.Web.HttpUtility.UrlEncode(
-                                                                Base64Encode( xmlResultTocallback ) ) ));
+                                                             "&output_data=" + System.Web.HttpUtility.UrlEncode ( Base64Encode( xmlResultTocallback ) ) ));
                         FormsApp.ble_interface.Close();
                         
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
@@ -1318,13 +1303,10 @@ namespace aclara_meters.view
             */
         }
 
-
         public void PrintToConsole(string printConsole)
         {
-
             if(DEBUG_MODE_ON)
                 Console.WriteLine("DEBUG_ACL: " + printConsole);
         }
-
     }
 }

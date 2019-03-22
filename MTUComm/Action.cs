@@ -224,6 +224,8 @@ namespace MTUComm
         //public Func<object, object, object> OnFinish;
         
         public bool IsFromScripting { private set; get; }
+        
+        public static Action currentAction;
 
         #endregion
 
@@ -260,6 +262,8 @@ namespace MTUComm
             this.user = user;
             comm.OnError += Comm_OnError;
             this.IsFromScripting = isFromScripting;
+            
+            currentAction = this;
         }
 
         #endregion

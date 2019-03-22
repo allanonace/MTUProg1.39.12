@@ -173,9 +173,9 @@ namespace aclara_meters
         private void LoadConfigurationAndOpenScene ( IUserDialogs dialogs )
         {
             // Only download configuration files from FTP when all are not installed
-            if ( Mobile.IsNetAvailable () &&
-                 ! this.HasDeviceAllXmls () )
-                this.DownloadConfigFiles ();
+            //if ( Mobile.IsNetAvailable () &&
+            //     ! this.HasDeviceAllXmls () )
+            //    this.DownloadConfigFiles ();
             
             // Check if all configuration files are available
             if ( ! this.HasDeviceAllXmls () )
