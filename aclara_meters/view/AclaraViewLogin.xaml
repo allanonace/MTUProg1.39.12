@@ -21,8 +21,8 @@
                                                      Scale="1"
                                                      VerticalOptions="Center" />
                              <Controls:BorderlessEntry   Margin="8,0,0,0" BackgroundColor="White"  HeightRequest="45"  Text="{Binding User.Email, Mode=TwoWay}" 
-                         x:Name="EmailEntry" TextColor="Gray" Placeholder="Email" PlaceholderColor="Gray" 
-                         Keyboard="Email" HorizontalOptions="FillAndExpand" FontSize="18"  HorizontalTextAlignment="Start"/>
+                         x:Name="EmailEntry" TextColor="Gray" Placeholder="User" PlaceholderColor="Gray" 
+                         Keyboard="Default" HorizontalOptions="FillAndExpand" FontSize="18"  HorizontalTextAlignment="Start"/>
 
                         </StackLayout>
                  </Frame> 
