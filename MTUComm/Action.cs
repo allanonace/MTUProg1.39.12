@@ -624,8 +624,10 @@ namespace MTUComm
                                                    gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
                                                    parameter.Display;
                                 
-                                paramToAdd = new Parameter ( sourceProperty, display, value );
+                                paramToAdd = new Parameter ( parameter.Name, display, value );
                             }
+                            // To change "name" attribute to show in IFACE_FORM case
+                            else paramToAdd.CustomParameter = parameter.Name;
                             
                             if ( paramToAdd != null )
                                 result.AddParameter ( paramToAdd );
@@ -753,7 +755,7 @@ namespace MTUComm
                                     string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
                                                        gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
                                                        parameter.Display;
-                                    result.AddParameter ( new Parameter ( sourceProperty, display, value ) );
+                                    result.AddParameter ( new Parameter ( parameter.Name, display, value ) );
                                 }
                             }
                         }

@@ -201,6 +201,10 @@ namespace MTUComm
             {
                 return mCustomParameter;
             }
+            set
+            {
+                mCustomParameter = value;
+            }
         }
 
         public string CustomDisplay
