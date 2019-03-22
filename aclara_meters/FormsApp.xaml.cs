@@ -441,7 +441,7 @@ namespace aclara_meters
                 var callback    = query.Get ( "callback"    );
 
                 if ( script_name != null )
-                    path = Path.Combine ( path, script_name.ToString () );
+                    path = Path.Combine ( path, "___" + script_name.ToString () );
 
                 if ( script_data != null )
                     File.WriteAllText ( path, Base64Decode ( script_data ) );

@@ -39,7 +39,7 @@ namespace aclara_meters.view
         private string resultCallback;
         private string resultScriptName;
 
-        private string resultDataXml;
+        private string scriptToLaunchData;
         private bool autoConnect;
 
         private bool conectarDevice;
@@ -105,15 +105,13 @@ namespace aclara_meters.view
                 });
             });
 
+            scriptToLaunchData = File.ReadAllText(url);
 
-            resultDataXml = File.ReadAllText(url);
-
-           
+            // Remove temporary script file on root of the public folder
+            File.Delete ( url );
 
             ContentView_Scripting_textScript.Text = "Processing ...";
             ContentView_Scripting_fieldpath_script.Text = url;
-
-
 
             #region New Scripting method is called
 
@@ -126,7 +124,7 @@ namespace aclara_meters.view
             //    Task.Factory.StartNew(Interface_ContentView_DeviceList);
 
             //});
-            if (resultDataXml.Contains("UploadXML") & Mobile.IsNetAvailable())
+            if (scriptToLaunchData.Contains("UploadXML") & Mobile.IsNetAvailable())
             {
                 // GenericUtilsClass.UploadFilesTaskSettings();
                 this.txtBuscando.Text = "Uploading files...";
@@ -680,7 +678,7 @@ namespace aclara_meters.view
             runner.onStepFinish += onStepFinish;
             runner.OnError      += OnError;
 
-            runner.ParseScriptAndRun ( FormsApp.ble_interface, resultDataXml, resultDataXml.Length );
+            runner.ParseScriptAndRun ( FormsApp.ble_interface, scriptToLaunchData, scriptToLaunchData.Length );
         }
 
         //private async Task ChangeListViewData()
