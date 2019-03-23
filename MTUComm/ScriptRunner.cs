@@ -94,18 +94,6 @@ namespace MTUComm
             this.Run ();
         }
 
-        private Parameter.ParameterType parseParameterType(string action_type)
-        {
-            try
-            {
-                return (Parameter.ParameterType)Enum.Parse(typeof(Parameter.ParameterType), action_type, true);
-            }
-            catch (Exception e)
-            {
-                throw e;
-            }
-        }
-
         private void buildScriptActions ( ISerial serial_device, Script script )
         {
             actions = new List<Action>();
@@ -131,34 +119,36 @@ namespace MTUComm
                     Action new_action = new Action ( Configuration.GetInstance(), serial_device, type, script.UserName, script.LogFile, true );
                     Type   actionType = action.GetType ();
     
-                    foreach (PropertyInfo parameter in action.GetType().GetProperties())
+                    Parameter.ParameterType paramTypeToAdd;
+                    foreach ( PropertyInfo parameter in action.GetType().GetProperties () )
                     {
-                        try
-                        {
-                            var  paramValue = actionType.GetProperty ( parameter.Name ).GetValue ( action, null );
-                            Type valueType  = paramValue.GetType ();
+                        var paramValue = actionType.GetProperty ( parameter.Name ).GetValue ( action, null );
+                        if ( paramValue is null )
+                            continue;
                         
-                            if ( valueType.Name.ToLower ().Contains ( "actionparameter" ) )
-                            {
-                                List<ActionParameter> list = new List<ActionParameter> ();
-                                
-                                // If the parameter is an Array is a field for
-                                // a port, and if not is a field for the MTU
-                                if ( ! paramValue.GetType ().IsArray )
-                                     list.Add      ( ( ActionParameter   )paramValue );
-                                else list.AddRange ( ( ActionParameter[] )paramValue );
-    
-                                foreach ( ActionParameter aParam in list )
-                                    new_action.AddParameter (
-                                        new Parameter (
-                                            parseParameterType ( parameter.Name ),
-                                            aParam.Value,
-                                            aParam.Port ) );
-                            }
-                        }
-                        catch (Exception e)
+                        Type valueType  = paramValue.GetType ();
+                    
+                        if ( valueType.Name.ToLower ().Contains ( "actionparameter" ) )
                         {
+                            // The parameter name is not listed in the ParameterType enumeration
+                            // NOTE: This also is useful to ignore automaticaly created properties ( xxx_deserialize )
+                            if ( ! Enum.TryParse<Parameter.ParameterType> ( parameter.Name, out paramTypeToAdd ) )
+                                continue;
                         
+                            List<ActionParameter> list = new List<ActionParameter> ();
+                            
+                            // If the parameter is an Array is a field for
+                            // a port, and if not is a field for the MTU
+                            if ( ! paramValue.GetType ().IsArray )
+                                 list.Add      ( ( ActionParameter   )paramValue );
+                            else list.AddRange ( ( ActionParameter[] )paramValue );
+
+                            foreach ( ActionParameter aParam in list )
+                                new_action.AddParameter (
+                                    new Parameter (
+                                        paramTypeToAdd,
+                                        aParam.Value,
+                                        aParam.Port ) );
                         }
                     }
     

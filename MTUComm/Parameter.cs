@@ -108,17 +108,18 @@ namespace MTUComm
             mValue = value;
         }
 
-        public Parameter(ParameterType type, String value, int port)
+        // From scrimpting, with port in base 1
+        public Parameter ( ParameterType type, String value, int port )
         {
-            if(port == 0)
-            {
-                port++;
-            }
             mParameterType = type;
             mValue = value;
-            setPort(port);
+            
+            if ( port == 2 )
+                 setPort ( 1 );
+            else setPort ( 0 );
         }
 
+        // Port in base zero
         public Parameter(String custom_parameter, String custom_display, dynamic value, string source = "", int port = 0, bool optional = false )
         {
             mParameterType   = ParameterType.Custom;
@@ -127,6 +128,7 @@ namespace MTUComm
             this.source      = source;
             mValue           = value;
             this.optional    = optional;
+            
             this.setPort ( port );
         }
 

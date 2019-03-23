@@ -110,7 +110,7 @@
     <ConsolePause>false</ConsolePause>
     <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
-    <CodesignProvision>PublicAclaraProg</CodesignProvision>
+    <CodesignProvision>Internal</CodesignProvision>
     <MtouchLink>SdkOnly</MtouchLink>
     <OptimizePNGs>
     </OptimizePNGs>
@@ -148,7 +148,7 @@
     <MtouchArch>ARM64</MtouchArch>
     <BuildIpa>true</BuildIpa>
     <IpaIncludeArtwork>false</IpaIncludeArtwork>
-    <CodesignProvision>PublicAclaraProg</CodesignProvision>
+    <CodesignProvision>Internal</CodesignProvision>
     <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <DeviceSpecificBuild>true</DeviceSpecificBuild>

@@ -342,19 +342,19 @@ namespace MTUComm
             // DEBUG
             //this.WriteMtuBit ( 22, 0, false ); // Turn On MTU
             
+            MemRegister regICNotSynced = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationNotSynced" );
+            MemRegister regICRequest   = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationRequest"   );
+            
+            // Reset to fail state the Install Confirmation result
+            // Set bit to true/one, because loop detection will continue while it doesn't change to false/zero
+            uint addressNotSynced = ( uint )regICNotSynced.Address;
+            uint bitSynced        = ( uint )regICNotSynced.Size;
+            this.WriteMtuBit ( addressNotSynced, bitSynced, true );
+            
             bool wasNotAboutPuck = false;
             try
             {
-                MemRegister regICNotSynced = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationNotSynced" );
-                MemRegister regICRequest   = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationRequest"   );
-
                 Console.WriteLine ( "InstallConfirmation trigger start" );
-
-                // Reset to fail state the Install Confirmation result
-                // Set bit to true/one, because loop detection will continue while it doesn't change to false/zero
-                uint addressNotSynced = ( uint )regICNotSynced.Address;
-                uint bitSynced        = ( uint )regICNotSynced.Size;
-                this.WriteMtuBit ( addressNotSynced, bitSynced, true );
 
                 // MTU is turned off
                 if ( ! force &&
@@ -390,7 +390,7 @@ namespace MTUComm
                     
                     fail = this.ReadMtuBit ( addressNotSynced, bitSynced );
                 }
-                // is MTU not synced with DCU yet?
+                // Is MTU not synced with DCU yet?
                 while ( fail &&
                         ++count <= max );
                 
@@ -399,6 +399,10 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
+                // Action finished ok but launched a rare CRC exception = False negative
+                if ( ! this.ReadMtuBit ( addressNotSynced, bitSynced ) )
+                    return true;
+                
                 if ( e is AttemptNotAchievedICException )
                     Errors.AddError ( e );
                 // Finish
@@ -507,14 +511,16 @@ namespace MTUComm
             String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtu );
             int memory_map_size    = configuration.GetmemoryMapSizeByMtuId ( this.mtu );
 
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[ memory_map_size ];
 
             try
             {
-                lexi.Write(64, new byte[] { 1 });
-                Thread.Sleep(1000);
+                // Activates flag to read Meter -> ¿¿¿ is correct, no ???
+                lexi.Write ( 64, new byte[] { 1 } );
+                Thread.Sleep ( 1000 );
     
-                System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
+                // Just until the previous byte to the AES encryption key
+                System.Buffer.BlockCopy ( lexi.Read ( 0, 255 ), 0, buffer, 0, 255 );
     
                 // Check if the MTU is still the same
                 if ( ! this.IsSameMtu () )
@@ -539,6 +545,9 @@ namespace MTUComm
                     
                 // Generates the memory map with recovered data
                 dynamic map = new MemoryMap.MemoryMap ( buffer, memory_map_type );
+    
+                bool InstallConfirmationNotSynced = map.InstallConfirmationNotSynced;
+                string InstallConfirmationStatus = map.InstallConfirmationStatus;
     
                 // Finish!
                 OnReadMtu ( this, new ReadMtuArgs ( map, this.mtu ) );
@@ -590,7 +599,7 @@ namespace MTUComm
                     if ( parameter.Port == 1 )
                         form.usePort2 = true;
                 }
-    
+   
                 scriptUseP2    = form.usePort2;
                 form.usePort2 &= this.mtu.TwoPorts;
     

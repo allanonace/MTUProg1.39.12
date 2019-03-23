@@ -294,21 +294,13 @@ namespace aclara_meters.view
 
                 // MTUDataListView = new List<ReadMTUItem>();  // Saves all the fields data from MTUComm - DEBUG
                 FinalReadListView = new List<ReadMTUItem>(); // Saves the data to view
-                /*
-                for (int i = 0; i < 31; i++){
-                    FinalReadListView.Add(new ReadMTUItem()
-                    {
-                        isDisplayed = "false",
-                        Height = "0"
-                    });
-                }
-                */
 
                 Parameter[] paramResult = e.Result.getParameters();
 
                 int mtu_type = 0;
 
                 foreach (Parameter p in paramResult)
+                {
                     try
                     {
                         if (p.CustomParameter.Equals("MtuType"))
@@ -318,6 +310,7 @@ namespace aclara_meters.view
                     {
                         Console.WriteLine(e5.StackTrace);
                     }
+                }
 
                 Mtu mtu = Configuration.GetInstance ().GetMtuTypeById ( mtu_type );
 
@@ -385,13 +378,13 @@ namespace aclara_meters.view
                 bool ok = false;
                 foreach ( Parameter parameter in paramResult )
                 {
-                    if ( parameter.getLogTag ().Equals ( "InstallConfirmationStatus" ) )
+                    if ( parameter.getLogTag ().Equals ( "InstallationConfirmationStatus" ) )
                     {
                         string name = parameter.getLogTag ();
                         dynamic value = parameter.Value;
                     }
 
-                    if ( parameter.getLogTag ().Equals ( "InstallConfirmationStatus" ) &&
+                    if ( parameter.getLogTag ().Equals ( "InstallationConfirmationStatus" ) &&
                          ! string.IsNullOrEmpty ( parameter.Value ) &&
                          ! string.Equals ( parameter.Value.ToUpper (), "NOT CONFIRMED" ) )
                     {
@@ -399,7 +392,7 @@ namespace aclara_meters.view
                         break;
                     }
                 }
-               
+                
                 string resultMsg = ( ! ok ) ? "Unsuccessful Installation" : "Successful Installation";
                 
                 Task.Delay(100).ContinueWith(t =>

@@ -13,8 +13,8 @@ namespace MTUComm.MemoryMap
         private const string PM          = " PM";
         private const string OFF         = "Off";
 
-        private const string STATE_ON    = "ON";
-        private const string STATE_OFF   = "OFF";
+        private const string STATE_ON    = "On";
+        private const string STATE_OFF   = "Off";
 
         private const string YES         = "Yes";
         private const string NO          = "No";
@@ -90,6 +90,11 @@ namespace MTUComm.MemoryMap
 
         #region Overloads
 
+        public string RSSIStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        {
+            return string.Format ( "{0} dBm", MemoryRegisters.RSSI.Value ).Replace ( "-", "- " );
+        }
+
         public string DailySnap_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             int timeDiff = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).Hours;
@@ -149,7 +154,7 @@ namespace MTUComm.MemoryMap
 
         public string MtuVoltageBattery_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return ( ( ( float )MemoryRegisters.MtuMiliVoltageBattery.Value ) / 1000 ).ToString ( MTUVLFORMAT );
+            return ( ( ( float )MemoryRegisters.MtuMiliVoltageBattery.Value ) / 1000 ).ToString ( MTUVLFORMAT ).Replace ( ".", "," );
         }
 
         public string P1ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
