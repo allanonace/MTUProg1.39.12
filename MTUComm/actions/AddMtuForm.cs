@@ -93,9 +93,9 @@ namespace MTUComm.actions
             };
 
         // Elements array
-        // 0. Parameter ID
-        // 1. Custom parameter
-        // 2. Custom display
+        // 0. Parameter ID     = dynamicMap.id
+        // 1. Custom parameter = <name>
+        // 2. Custom display   = <display>
         public Dictionary<FIELD, string[]> Texts =
             new Dictionary<FIELD, string[]>()
             {
@@ -106,7 +106,7 @@ namespace MTUComm.actions
                     {
                         "AccountNumber",
                         "AccountNumber",
-                        "Service Port ID"
+                        "Service Pt. ID"
                     }
                 },
                 {
@@ -115,7 +115,7 @@ namespace MTUComm.actions
                     {
                         "AccountNumber_2",
                         "AccountNumber",
-                        "Service Port ID"
+                        "Service Pt. ID"
                     }
                 },
                 #endregion
@@ -205,8 +205,8 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "MeterReading",
-                        "MeterReading",
-                        "Meter Reading"
+                        "NewMeterReading",
+                        "New Meter Reading"
                     }
                 },
                 {
@@ -214,8 +214,8 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "MeterReading_2",
-                        "MeterReading",
-                        "Meter Reading"
+                        "NewMeterReading",
+                        "New Meter Reading"
                     }
                 },
                 {
@@ -284,8 +284,8 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "ReplaceMeterRegister",
-                        "ReplaceMeterRegister",
-                        "Replace Meter/Register"
+                        "MeterRegisterStatus",
+                        "Meter Register Status"
                     }
                 },
                 {
@@ -293,8 +293,8 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "ReplaceMeterRegister_2",
-                        "ReplaceMeterRegister",
-                        "Replace Meter/Register"
+                        "MeterRegisterStatus",
+                        "Meter Register Status"
                     }
                 },
                 #endregion
@@ -498,10 +498,10 @@ namespace MTUComm.actions
             this.dictionary = new Dictionary<FIELD,Parameter> ();
         }
 
-        public void AddParameter ( FIELD fieldType, dynamic value )
+        public void AddParameter ( FIELD fieldType, dynamic value, int port = 0 )
         {
             string[] texts = Texts[ fieldType ];
-            Parameter param = AddParameter ( texts[ 0 ], texts[ 1 ], texts[ 2 ], value ); // base method
+            Parameter param = AddParameter ( texts[ 0 ], texts[ 1 ], texts[ 2 ], value, port ); // base method
             this.dictionary.Add ( fieldType, param );
         }
 
@@ -527,7 +527,7 @@ namespace MTUComm.actions
                     Enum.TryParse<FIELD> ( typeOwn.ToString () + PORT_2_SUFIX, out typeOwn );
             }
 
-            this.AddParameter ( typeOwn, parameter.Value );
+            this.AddParameter ( typeOwn, parameter.Value, parameter.Port );
         }
 
         public Parameter FindById ( FIELD field_type )

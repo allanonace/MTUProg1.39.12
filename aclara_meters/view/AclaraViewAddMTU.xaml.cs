@@ -4286,40 +4286,40 @@ namespace aclara_meters.view
             if ( addMtuForm.usePort2 )
             {
                 // Account Number / Service Port ID
-                this.addMtuForm.AddParameter ( FIELD.ACCOUNT_NUMBER_2, value_acn_2 );
+                this.addMtuForm.AddParameter ( FIELD.ACCOUNT_NUMBER_2, value_acn_2, 1 );
 
                 // Work Order / Field Order
                 if ( global.WorkOrderRecording )
-                    this.addMtuForm.AddParameter ( FIELD.WORK_ORDER_2, value_wor_2 );
+                    this.addMtuForm.AddParameter ( FIELD.WORK_ORDER_2, value_wor_2, 1 );
 
                 // ( New ) Meter Serial Number
                 if ( global.UseMeterSerialNumber )
-                    this.addMtuForm.AddParameter ( FIELD.METER_NUMBER_2, value_msn_2 );
+                    this.addMtuForm.AddParameter ( FIELD.METER_NUMBER_2, value_msn_2, 1 );
 
                 // ( New ) Meter Reading / Initial Reading
-                this.addMtuForm.AddParameter ( FIELD.METER_READING_2, value_mre_2 );
+                this.addMtuForm.AddParameter ( FIELD.METER_READING_2, value_mre_2, 1 );
 
                 // Meter Type
-                this.addMtuForm.AddParameter ( FIELD.METER_TYPE_2, value_mty_2 );
+                this.addMtuForm.AddParameter ( FIELD.METER_TYPE_2, value_mty_2, 1 );
                 
                 // Action is about Replace Meter
                 if ( isReplaceMeter )
                 {
                     // Old Meter Serial Number
                     if ( global.UseMeterSerialNumber )
-                        this.addMtuForm.AddParameter ( FIELD.METER_NUMBER_OLD_2, value_oms_2 );
+                        this.addMtuForm.AddParameter ( FIELD.METER_NUMBER_OLD_2, value_oms_2, 1 );
                 
                     // Old Meter Working
                     if ( global.MeterWorkRecording )
-                        this.addMtuForm.AddParameter ( FIELD.METER_WORKING_OLD_2, value_omw_2 );
+                        this.addMtuForm.AddParameter ( FIELD.METER_WORKING_OLD_2, value_omw_2, 1 );
                 
                     // Old Meter Reading / Initial Reading
                     if ( global.OldReadingRecording )
-                        this.addMtuForm.AddParameter ( FIELD.METER_READING_OLD_2, value_omr_2 );
+                        this.addMtuForm.AddParameter ( FIELD.METER_READING_OLD_2, value_omr_2, 1 );
                         
                     // Replace Meter|Register
                     if ( global.RegisterRecording )
-                        this.addMtuForm.AddParameter ( FIELD.REPLACE_METER_REG_2, value_rpl_2 );
+                        this.addMtuForm.AddParameter ( FIELD.REPLACE_METER_REG_2, value_rpl_2, 1 );
                 }
             }
 

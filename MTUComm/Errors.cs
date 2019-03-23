@@ -180,7 +180,7 @@ namespace MTUComm
 
         private Errors ()
         {
-            this.logger      = Action.currentAction.logger;
+            this.logger      = ( Action.currentAction != null ) ? Action.currentAction.logger : new Logger ();
             this.errors      = new Dictionary<int,Error> ();
             this.errorsToLog = new List<Error> ();
             this.xmlErrors   = Aux.DeserializeXml<ErrorList> ( "Error.xml", true ).List;

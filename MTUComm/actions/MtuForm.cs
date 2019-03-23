@@ -70,9 +70,9 @@ namespace MTUComm.actions
 
         #region Parameters
 
-        public Parameter AddParameter (string paramId, string customParameter, string customDisplay, dynamic value, string source = "" )
+        public Parameter AddParameter (string paramId, string customParameter, string customDisplay, dynamic value, int port, string source = "" )
         {
-            Parameter param = new Parameter ( customParameter, customDisplay, value, source );
+            Parameter param = new Parameter ( customParameter, customDisplay, value, source, port );
             this.dictionary[paramId] = param;
             
             return param;

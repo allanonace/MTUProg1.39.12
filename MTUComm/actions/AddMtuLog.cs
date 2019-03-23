@@ -294,14 +294,14 @@ namespace MTUComm
                         logger.Parameter ( alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper", map.MagneticTamperStatus ));
 
                     if ( mtu.RegisterCoverTamper )
-                        logger.Parameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Reg. Cover Tamper", map.RegisterCoverTamperStatus ));
+                        logger.Parameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Register Cover Tamper", map.RegisterCoverTamperStatus ));
 
                     if ( mtu.TiltTamper )
                         logger.Parameter( alarmSelection, new Parameter("TiltTamper", "Tilt Tamper", map.TiltTamperStatus ));
 
                     if ( mtu.ReverseFlowTamper )
                     {
-                        logger.Parameter ( alarmSelection, new Parameter("ReverseFlow", "Rev. Flow Tamper", map.ReverseFlowTamperStatus ));
+                        logger.Parameter ( alarmSelection, new Parameter("ReverseFlow", "Reverse Flow Tamper", map.ReverseFlowTamperStatus ));
                         logger.Parameter(alarmSelection, new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
                     }
 
