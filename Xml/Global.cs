@@ -13,7 +13,7 @@ namespace Xml
             this.AccountDualEntry             = true; // Enables or disables dual entry for AccountNumber
             this.AccountEnabledAppt           = false; // [LOW PRIORITY = NOT CONFIRMED] Enable or disable values after appointment in interactive mode ( Account Number )
             this.AccountFilled                = false; // Allows AccountNumber to be filled with MTU ID automatically
-            this.AccountLabel                 = "Account #"; // [1-15] Label for AccountNumber field
+            this.AccountLabel                 = "Service Pt. ID"; // [1-15] Label for AccountNumber field
             this.AccountLength                = 7; // [1-20] Number of digits to use in AccountNumber field
             this.ActionVerify                 = true; // Display popup to confirm that user wants to perform the action
             this.Address1Len                  = 100; // Length of appointment address line 1 field
@@ -182,7 +182,7 @@ namespace Xml
             this.WakeUpCount                  = 32; // Number of wake up messages to initially send. Old FlatPack only
             this.WorkOrderDualEntry           = true; // Enables or disables dual entry of the work order number during programming
             this.WorkOrderEnabledAppt         = false; // Enable or disable values after appointment in interactive mode ( Work Order )
-            this.WorkOrderLabel               = "Work Order"; // [1-15] The label for the Work Order Number field
+            this.WorkOrderLabel               = "Field Order"; // [1-15] The label for the Work Order Number field
             this.WorkOrderLength              = 15; // [1-20] Maximum length in characters of the Work Order Number field
             this.WorkOrderRecording           = true; // Enables or disables work order number recording during MTU programming
             this.WriteDelay                   = 0; // [0-5000] Additional delay in milliseconds after write to MTU

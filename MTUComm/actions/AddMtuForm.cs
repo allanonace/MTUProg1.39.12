@@ -126,7 +126,7 @@ namespace MTUComm.actions
                     {
                         "WorkOrder",
                         "WorkOrder",
-                        "Work Order"
+                        "Field Order"
                     }
                 },
                 {
@@ -135,7 +135,7 @@ namespace MTUComm.actions
                     {
                         "WorkOrder_2",
                         "WorkOrder",
-                        "Work Order"
+                        "Field Order"
                     }
                 },
                 #endregion
