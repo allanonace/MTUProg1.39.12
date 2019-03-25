@@ -48,6 +48,12 @@ namespace MTUComm
             return new StreamReader ( path );
         }
         
+        public static StreamReader GetStreamReader (
+            string fileName )
+        {
+            return new StreamReader ( fileName );
+        }
+
         public static string EncryptStringToBase64_Aes (
             string text,
             string key,

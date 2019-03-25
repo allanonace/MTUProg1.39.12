@@ -165,7 +165,8 @@ namespace MTUComm
         {
             get
             {
-                return Configuration.GetInstance ().global.ErrorId;
+                Configuration config = Configuration.GetInstance ();
+                return ( config.global != null ) ? config.global.ErrorId : true;
             }
         }
 

@@ -51,13 +51,9 @@ namespace aclara_meters
             "alarm",
             "demandconf",
             "global",
-            "interface",
             "meter",
             "mtu",
             "user",
-            "family_31xx32xx",
-            "family_33xx",
-            "family_342x"
         };
 
         #endregion
@@ -76,6 +72,8 @@ namespace aclara_meters
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
         private string appVersion;
+        
+        private bool abortMission;
 
         #endregion
 
@@ -178,7 +176,15 @@ namespace aclara_meters
             //    this.DownloadConfigFiles ();
             
             // Check if all configuration files are available
-            if ( ! this.HasDeviceAllXmls () )
+            this.abortMission = ! this.HasDeviceAllXmls ();
+            
+            // Load configuration files
+            // If some configuration file is not present, Configuration.cs initialization should avoid
+            // launch exception when try to parse xmls, to be able to use generating the log error
+            if ( ! this.InitializeConfiguration () )
+                return;
+            
+            if ( this.abortMission )
             {
                 this.ShowErrorAndKill ( new ConfigurationFilesNotFoundException () );
 
@@ -192,42 +198,6 @@ namespace aclara_meters
             
                 return;
             }
-
-            // Load configuration files
-            try
-            {
-                config  = Configuration.GetInstance ();
-            }
-            catch ( Exception e )
-            {
-                // Avoid starting the creation of the login window
-                this.ShowErrorAndKill ( e );
-               
-                return;
-            }
-
-            logger = new Logger ();
-
-            switch ( Device.RuntimePlatform )
-            {
-                case Device.Android:
-                    config.setPlatform   ( SO_ANDROID );
-                    config.setAppName    ( AppName    );
-                    config.setVersion    ( appVersion_str);
-                    config.setDeviceUUID ( deviceId   );
-                    break;
-                case Device.iOS:
-                    config.setPlatform   ( SO_IOS     );
-                    config.setAppName    ( AppName    );
-                    config.setVersion    ( appVersion_str);
-                    config.setDeviceUUID ( deviceId   );
-                    break;
-                default:
-                    config.setPlatform   ( SO_UNKNOWN );
-                    break;
-            }
-
-            Configuration.SetInstance ( config );
             
             if ( ! ScriptingMode )
                 Device.BeginInvokeOnMainThread(() =>
@@ -235,24 +205,45 @@ namespace aclara_meters
                     MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
                 });
         }
-
-        /*
-        private void DownloadXmlsIfNecessary (
-            IUserDialogs dialogs )
+        
+        private bool InitializeConfiguration ()
         {
-            // Checks network channels
-            if ( Mobile.IsNetAvailable () )
+            try
             {
-                // Donwloads all configuracion XML files
-                if ( this.DownloadConfigFiles () )
-                    this.LoadConfigurationAndOpenScene ( dialogs );
-                else
-                    this.ShowErrorAndKill ( new FtpDownloadException () );
+                config = Configuration.GetInstance ( "", this.abortMission );
+                logger = new Logger ();
+    
+                switch ( Device.RuntimePlatform )
+                {
+                    case Device.Android:
+                        config.setPlatform   ( SO_ANDROID );
+                        config.setAppName    ( AppName    );
+                        config.setVersion    ( appVersion_str);
+                        config.setDeviceUUID ( deviceId   );
+                        break;
+                    case Device.iOS:
+                        config.setPlatform   ( SO_IOS     );
+                        config.setAppName    ( AppName    );
+                        config.setVersion    ( appVersion_str);
+                        config.setDeviceUUID ( deviceId   );
+                        break;
+                    default:
+                        config.setPlatform   ( SO_UNKNOWN );
+                        break;
+                }
+                
+                Configuration.SetInstance ( config );
             }
-            else 
-               this.ShowErrorAndKill ( new NoInternetException () );
+            catch ( Exception e )
+            {
+                // Avoid starting the creation of the login window
+                this.ShowErrorAndKill ( e );
+               
+                return false;
+            }
+            
+            return true;
         }
-        */
 
         private bool DownloadConfigFiles ()
         {
@@ -413,6 +404,9 @@ namespace aclara_meters
 
         public void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
         {
+            if ( this.abortMission )
+                return;
+        
             try
             {
                 ScriptingMode = true; 
@@ -487,6 +481,8 @@ namespace aclara_meters
         private void ShowErrorAndKill (
             Exception e )
         {
+            this.abortMission = true;
+        
             Device.BeginInvokeOnMainThread(() =>
             {
                 this.MainPage = new NavigationPage ( new ErrorInitView ( e ) );

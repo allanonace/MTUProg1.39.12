@@ -66,10 +66,15 @@ namespace MTUComm
             base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
             base_stream += "        <AppType>Scripted</AppType>";
             base_stream += "    </AppInfo>";
+            
+            if ( Action.currentAction != null )
+            {
             base_stream += "    <Action display=\"" + Action.displays[ Action.currentAction.type ] + "\" type=\"" + Action.tag_types[ Action.currentAction.type ] + "\" reason=\"" + Action.tag_reasons[ Action.currentAction.type ] + "\">";
             base_stream += "        <Date display=\"Date/Time\">" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
             base_stream += "        <User display=\"User\">" + Action.currentAction.user + "</User>";
             base_stream += "    </Action>";
+            }
+            
             base_stream += "</StarSystem>";
             
             config = null;
@@ -110,14 +115,14 @@ namespace MTUComm
             { 
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, append ))
                 {
-                    file.WriteLine(CreateBasicStructure());
+                    file.WriteLine ( CreateBasicStructure (  ) );
                 }
             }
             else if ( ! append )
             {
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, false ))
                 {
-                    file.WriteLine(CreateBasicStructure());
+                    file.WriteLine ( CreateBasicStructure () );
                 }
             }
             else
@@ -130,7 +135,7 @@ namespace MTUComm
                 {
                     using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, false ))
                     {
-                        file.WriteLine(CreateBasicStructure());
+                        file.WriteLine ( CreateBasicStructure () );
                     }
                 }
             }
@@ -191,7 +196,7 @@ namespace MTUComm
         /// </summary>
         public string Error ()
         {
-            String    uri     = CreateFileIfNotExist ();
+            String    uri     = CreateFileIfNotExist (); // Avoid errors if is necessary instantiate Configuration.cs
             XDocument doc     = XDocument.Load ( uri );
             XElement  element = doc.Root.Element ( "Error" );
             string    time    = DateTime.UtcNow.ToString ( "MM/dd/yyyy HH:mm:ss" );

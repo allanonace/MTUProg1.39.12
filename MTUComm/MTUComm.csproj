@@ -56,6 +56,10 @@
     <None Remove="Resource\Error.xml" />
     <None Remove="Resource\Config\DownloadFTP.xml" />
     <None Remove="Resource\Config\test.xml" />
+    <None Remove="Resource\Interface.xml" />
+    <None Remove="Resource\family_33xx.xml" />
+    <None Remove="Resource\family_342x.xml" />
+    <None Remove="Resource\family_31xx32xx.xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="TaskExtensions.cs" />
@@ -64,5 +68,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resource\Error.xml" />
+    <EmbeddedResource Include="Resource\Interface.xml" />
+    <EmbeddedResource Include="Resource\family_33xx.xml" />
+    <EmbeddedResource Include="Resource\family_342x.xml" />
+    <EmbeddedResource Include="Resource\family_31xx32xx.xml" />
   </ItemGroup>
 </Project>

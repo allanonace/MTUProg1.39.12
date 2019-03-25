@@ -120,11 +120,11 @@ namespace MTUComm.MemoryMap
             XmlSerializer serializer = new XmlSerializer ( typeof ( MemRegisterList ) );
 
             // Parameter "family" when testing is full path to use
-            string path = ( ! isUnityTest ) ?
-                Path.Combine ( Mobile.GetPathConfig (), XML_PREFIX + family + XML_EXTENSION ) :
-                Path.Combine ( pathUnityTest, family + XML_EXTENSION );
+            TextReader reader = ( ! isUnityTest ) ?
+                Aux.GetResourceStreamReader ( XML_PREFIX + family + XML_EXTENSION ) :
+                Aux.GetStreamReader ( Path.Combine ( pathUnityTest, family + XML_EXTENSION ) );
 
-            using ( TextReader reader = new StreamReader ( path ) )
+            using ( reader )
             {
                 MemRegisterList list = Validations.DeserializeXml<MemRegisterList> ( reader );
 

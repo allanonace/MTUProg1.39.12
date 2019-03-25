@@ -33,7 +33,7 @@ namespace MTUComm
         private string appName;
         private static Configuration instance;
 
-        private Configuration ( string path = "" )
+        private Configuration ( string path = "", bool avoidXmlError = false )
         {
             string configPath = Mobile.GetPathConfig ();
 
@@ -48,10 +48,10 @@ namespace MTUComm
                 mtuTypes   = Aux.DeserializeXml<MtuTypes>        ( Path.Combine ( configPath, XML_MTUS      ) );
                 meterTypes = Aux.DeserializeXml<MeterTypes>      ( Path.Combine ( configPath, XML_METERS    ) );
                 global     = Aux.DeserializeXml<Global>          ( Path.Combine ( configPath, XML_GLOBAL    ) );
-                interfaces = Aux.DeserializeXml<InterfaceConfig> ( Path.Combine ( configPath, XML_INTERFACE ) );
                 alarms     = Aux.DeserializeXml<AlarmList>       ( Path.Combine ( configPath, XML_ALARMS    ) );
                 demands    = Aux.DeserializeXml<DemandConf>      ( Path.Combine ( configPath, XML_DEMANDS   ) );
                 users      = Aux.DeserializeXml<UserList>        ( Path.Combine ( configPath, XML_USERS     ) ).List;
+                interfaces = Aux.DeserializeXml<InterfaceConfig> ( XML_INTERFACE, true ); // From resources
                 
                 // Regenerate certificate from base64 string
                 Mobile.configData.GenerateCert ();
@@ -77,21 +77,22 @@ namespace MTUComm
                 Console.WriteLine ( "Num [ after ]: " + Directory.GetFiles ( Mobile.GetPathConfig () ).Length );
                 */
 
-                if ( Errors.IsOwnException ( e ) )
-                    throw e;
-                else if ( e is FileNotFoundException )
-                     throw new ConfigurationFilesNotFoundException ();
-                else throw new ConfigurationFilesCorruptedException ();
+                if ( ! avoidXmlError )
+                {
+                    if ( Errors.IsOwnException ( e ) )
+                        throw e;
+                    else if ( e is FileNotFoundException )
+                         throw new ConfigurationFilesNotFoundException ();
+                    else throw new ConfigurationFilesCorruptedException ();
+                }
             }
         }
 
-        public static Configuration GetInstance ( string path = "" )
+        public static Configuration GetInstance ( string path = "", bool avoidXmlError = false )
         {
             if ( instance == null )
-            {
-                instance = new Configuration ( path );
-                //instance = new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\run_basepath");// @"C: \Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog");
-            }
+                instance = new Configuration ( path, avoidXmlError );
+
             return instance;
         }
 
@@ -179,8 +180,9 @@ namespace MTUComm
         {
             try
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(MemRegisterList));
-                using (TextReader reader = new StreamReader ( Path.Combine ( Mobile.GetPathConfig (), "family_" + family + ".xml")))
+                XmlSerializer serializer = new XmlSerializer ( typeof ( MemRegisterList ) );
+                
+                using ( TextReader reader = Aux.GetResourceStreamReader ( "family_" + family + ".xml" ) )
                 {
                     MemRegisterList list = serializer.Deserialize(reader) as MemRegisterList;
                     if (list.Registers != null)
