@@ -39,6 +39,8 @@ namespace MTUComm.MemoryMap
         private CUSTOM_TYPE customType_Set;
         public bool used;
         public REGISTER_TYPE registerType { get; }
+        
+        private dynamic tempValue;
 
         #endregion
 
@@ -148,6 +150,11 @@ namespace MTUComm.MemoryMap
 
         #endregion
 
+        public dynamic TempValue
+        {
+            get { return this.tempValue; }
+        }
+
         // Read and write without processing data, raw info
         public dynamic ValueRaw
         {
@@ -237,8 +244,15 @@ namespace MTUComm.MemoryMap
                     // If XML custom field is a math expression ( e.g. _val_ * 2 / 5 )
                     else
                         this.ValueRaw = value;
+                    
+                    // Reset temporary value
+                    this.tempValue = null;
                 }
 
+                else
+                    this.tempValue = value;
+
+                /*
                 // Register is readonly
                 else
                 {
@@ -247,6 +261,7 @@ namespace MTUComm.MemoryMap
                     if ( ! MemoryMap.isUnityTest )
                         throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
                 }
+                */
             }
         }
 

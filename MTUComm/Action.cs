@@ -223,7 +223,7 @@ namespace MTUComm
         public  int order = 0;
         //public Func<object, object, object> OnFinish;
         
-        public bool IsFromScripting { private set; get; }
+        public static bool IsFromScripting;
         
         public static Action currentAction;
 
@@ -261,7 +261,6 @@ namespace MTUComm
             this.type = type;
             this.user = user;
             comm.OnError += Comm_OnError;
-            this.IsFromScripting = isFromScripting;
             
             currentAction = this;
         }

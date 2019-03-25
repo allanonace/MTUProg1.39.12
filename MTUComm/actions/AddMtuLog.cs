@@ -134,11 +134,13 @@ namespace MTUComm
             // Avoid try to log encryption info when not it has not been performed
             if ( data.isMtuEncrypted )
             {
+                logger.Parameter ( this.addMtuAction, new Parameter ( "EncryptionIndex", "Encryption Index", map["EncryptionIndex"].TempValue ) );
+            
                 // Using certificate with public key
                 if ( data.IsCertLoaded )
                 {
                     Console.WriteLine ( "Using certificate creating activity log" );
-                
+                    
                     logger.Parameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaEncryptedInBase64 ) );
                     logger.Parameter ( this.addMtuAction, new Parameter ( "HeadendCertThumb",     "HeadendCertThumb",      data.certificate.Thumbprint ) );
                     logger.Parameter ( this.addMtuAction, new Parameter ( "HeadendCertValidTill", "HeadendCertExpiration", data.certificate.NotAfter.ToString ( "mm/dd/yy hh:mm:ss tt" ) ) );
@@ -414,7 +416,7 @@ namespace MTUComm
             #endif
             
             // Write in ActivityLog
-            if ( this.action.IsFromScripting &&
+            if ( Action.IsFromScripting &&
                  ! Configuration.GetInstance ().global.ScriptOnly )
             {
                 // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist

@@ -130,6 +130,10 @@ namespace aclara_meters
             IUserDialogs dialogs,
             string appVersion )
         {
+            MTUComm.Action.IsFromScripting = false;
+            
+            Console.WriteLine ( "FormsApp: Interactive [ " + MTUComm.Action.IsFromScripting + " ]" );
+        
             appVersion_str = appVersion;
 
             deviceId = CrossDeviceInfo.Current.Id;
@@ -404,6 +408,10 @@ namespace aclara_meters
 
         public void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
         {
+            MTUComm.Action.IsFromScripting = true;
+            
+            Console.WriteLine ( "FormsApp: Scripting [ " + MTUComm.Action.IsFromScripting + " ]" );
+        
             if ( this.abortMission )
                 return;
         

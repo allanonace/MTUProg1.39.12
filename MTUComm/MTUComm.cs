@@ -1303,6 +1303,9 @@ namespace MTUComm
                     // Check if the MTU is still the same
                     if ( ! this.IsSameMtu () )
                         throw new MtuHasChangeBeforeFinishActionException ();
+                        
+                    // Load value in the memory map
+                    map.EncryptionIndex = ( int )regEncryIndex.ValueReadFromMtu ( lexi );
                 }
 
                 #endregion
@@ -1439,7 +1442,16 @@ namespace MTUComm
         {
             List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
             foreach ( dynamic r in modifiedRegisters )
-                this.WriteMtuRegister ( ( uint )r.address, map.memory, ( uint )r.size );
+            {
+                try
+                {
+                    this.WriteMtuRegister ( ( uint )r.address, map.memory, ( uint )r.size );
+                }
+                catch ( Exception e )
+                {
+
+                }
+            }
 
             modifiedRegisters.Clear ();
             modifiedRegisters = null;

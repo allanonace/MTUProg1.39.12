@@ -39,7 +39,7 @@ namespace MTUComm
             base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
             base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
             base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
-            base_stream += "        <AppType>" + ( Action.currentAction != null && Action.currentAction.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
+            base_stream += "        <AppType>" + ( Action.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
             base_stream += "    </AppInfo>";
             base_stream += "    <Message />";
             base_stream += "    <Mtus />";
@@ -196,7 +196,7 @@ namespace MTUComm
         /// </summary>
         public string Error ()
         {
-            String    uri     = CreateFileIfNotExist (); // Avoid errors if is necessary instantiate Configuration.cs
+            String    uri     = CreateFileIfNotExist ();
             XDocument doc     = XDocument.Load ( uri );
             XElement  element = doc.Root.Element ( "Error" );
             string    time    = DateTime.UtcNow.ToString ( "MM/dd/yyyy HH:mm:ss" );
@@ -268,7 +268,7 @@ namespace MTUComm
             #endif
             
             // Write in ActivityLog
-            if ( action.IsFromScripting &&
+            if ( Action.IsFromScripting &&
                  ! Configuration.GetInstance ().global.ScriptOnly )
             {
                 // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist
@@ -391,7 +391,7 @@ namespace MTUComm
             #endif
             
             // Write in ActivityLog
-            if ( action.IsFromScripting &&
+            if ( Action.IsFromScripting &&
                  ! Configuration.GetInstance ().global.ScriptOnly )
             {
                 // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist

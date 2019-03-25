@@ -154,7 +154,7 @@ namespace MTUComm.MemoryMap
 
         public string MtuVoltageBattery_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return ( ( ( float )MemoryRegisters.MtuMiliVoltageBattery.Value ) / 1000 ).ToString ( MTUVLFORMAT ).Replace ( ".", "," );
+            return ( ( ( float )MemoryRegisters.MtuMiliVoltageBattery.Value ) / 1000 ).ToString ( MTUVLFORMAT ).Replace ( ",", "." );
         }
 
         public string P1ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
