@@ -68,39 +68,21 @@ namespace Xml
         [XmlElement("OldMeterReading")]
         public ActionParameter[] OldMeterReading { get; set; }
 
-        [XmlIgnore]
+        [XmlElement("MeterSerialNumber")]
         public ActionParameter[] MeterSerialNumber { get; set; }
 
+
         [XmlElement("NewMeterSerialNumber")]
-        public ActionParameter[] NewMeterSerialNumber_Deserialize
-        {
-            get { return this.MeterSerialNumber;  }
-            set { this.MeterSerialNumber = value; }
-        }
+        public ActionParameter[] NewMeterSerialNumber { get; set; }
 
-        [XmlElement("MeterSerialNumber")]
-        public ActionParameter[] MeterSerialNumber_Deserialize
-        {
-            get { return this.MeterSerialNumber;  }
-            set { this.MeterSerialNumber = value; }
-        }
-
-        [XmlIgnore]
-        public ActionParameter[] MeterReading { get; set; }
-
+     
         [XmlElement("NewMeterReading")]
-        public ActionParameter[] NewMeterReading_Deserialize
-        {
-            get { return this.MeterReading;  }
-            set { this.MeterReading = value; }
-        }
+        public ActionParameter[] NewMeterReading { get; set; }
+       
         
         [XmlElement("MeterReading")]
-        public ActionParameter[] MeterReading_Deserialize
-        {
-            get { return this.MeterReading;  }
-            set { this.MeterReading = value; }
-        }
+        public ActionParameter[] MeterReading { get; set; }
+
         
         [XmlElement("MeterType")]
         public ActionParameter[] MeterType { get; set; }
