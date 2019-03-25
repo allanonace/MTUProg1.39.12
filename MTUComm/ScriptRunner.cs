@@ -29,44 +29,13 @@ namespace MTUComm
         public delegate void ActionErrorHandler ();
         public event ActionErrorHandler OnError;
 
-        public ScriptRunner ( ISerial serial_device, String script_path)
-        {
-            Script script = new Script();
-
-            XmlSerializer s = new XmlSerializer(typeof(Script));
-
-            try
-            {
-                using (StreamReader streamReader = new StreamReader(script_path))
-                {
-                    string fileContent = streamReader.ReadToEnd();
-                    using (StringReader reader = new StringReader(fileContent))
-                    {
-                        script = (Script)s.Deserialize(reader);
-                    }
-                }
-
-
-                buildScriptActions ( serial_device, script );
-            }
-
-            catch (Exception e)
-            {
-                throw new MtuLoadException("Error loading Script file");
-            }
-        }
-
-        public ScriptRunner()
-        {
-        }
-
         public void ParseScriptAndRun ( ISerial serial_device, String script_stream, int stream_size )
         {
             // Script file is empty
             if ( string.IsNullOrEmpty ( script_stream.Trim () ) )
             {
-                Errors.LogErrorNowAndContinue ( new ScriptEmptyException () );
-                this.OnError ();
+                Errors.ShowErrorAndKill ( new ScriptEmptyException () );
+                //this.OnError ();
                 
                 return;
             }
@@ -84,9 +53,11 @@ namespace MTUComm
             }
             catch (Exception e)
             {
-                // Script file has invalid format or structure
-                Errors.LogErrorNowAndContinue ( new ScriptWrongStructureException () );
-                this.OnError ();
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.ShowErrorAndKill ( new ScriptWrongStructureException () ); // Script file has invalid format or structure
+                else Errors.ShowErrorAndKill ( e ); // ScriptLogfileInvalidException, ScriptActionTypeInvalidException
+                
+                //this.OnError ();
                 
                 return;
             }
@@ -103,7 +74,8 @@ namespace MTUComm
             // Using invalid log file/path
             if ( string.IsNullOrEmpty ( script.LogFile ) ||
                  ! Regex.IsMatch ( script.LogFile, @"^[a-zA-Z_][a-zA-Z0-9_-]*.xml$" ) )
-                Errors.LogErrorNow ( new ScriptLogfileInvalidException () );
+                throw new ScriptLogfileInvalidException ();
+
             else
             {
                 ActionType type;
@@ -111,10 +83,7 @@ namespace MTUComm
                 {
                     // Action string is not present in ActionType enum
                     if ( ! Enum.TryParse<ActionType> ( action.Type, out type ) )
-                    {
-                        Errors.LogErrorNow ( new ScriptActionTypeInvalidException ( action.Type ) );
-                        return;
-                    }
+                        throw new ScriptActionTypeInvalidException ( action.Type );
                 
                     Action new_action = new Action ( Configuration.GetInstance(), serial_device, type, script.UserName, script.LogFile, true );
                     Type   actionType = action.GetType ();

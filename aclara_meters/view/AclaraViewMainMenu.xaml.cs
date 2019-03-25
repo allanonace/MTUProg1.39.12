@@ -126,6 +126,22 @@ namespace aclara_meters.view
             //BluetoothPeripheralDisconnect ( null, null );
         }
 
+        public string GZipCompress ( string input )
+        {
+            using ( var outStream = new System.IO.MemoryStream () )
+            {
+                using ( var gzipStream = new System.IO.Compression.GZipStream ( outStream, System.IO.Compression.CompressionMode.Compress ) )
+                {
+                    using (var ms = new System.IO.MemoryStream ( System.Text.Encoding.UTF8.GetBytes ( input ) ) )
+                    {
+                        ms.CopyTo ( gzipStream );
+                    }
+                }
+    
+                return System.Text.Encoding.UTF8.GetString ( outStream.ToArray() );
+            }
+        }
+
         private void InitRefreshCommand()
         {
             refresh_command = new Command(async () =>

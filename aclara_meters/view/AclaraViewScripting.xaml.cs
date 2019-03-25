@@ -19,6 +19,8 @@ using System.IO;
 using nexus.protocols.ble.scan;
 using System.Collections.ObjectModel;
 using System.Web;
+using System.IO.Compression;
+using System.Text;
 
 using Error = Xml.Error;
 
@@ -133,19 +135,18 @@ namespace aclara_meters.view
                     Boolean bUpload = await GenericUtilsClass.UploadFilesTaskScripting();
                     Device.BeginInvokeOnMainThread(() =>
                     {
-                        String sMessage = String.Empty;
-                        if (bUpload) sMessage = "UPLOAD FILES OK";
-                        else
-                            sMessage = "ERROR WHILE UPLOAD FILES TO FTP";
-                        //Application.Current.MainPage.DisplayAlert("Alert", "Log files successfully uploaded", "Ok");
-                        Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
-                                                             "status=success" +
-                                                             "&output_filename=&output_data=" + System.Web.HttpUtility.UrlEncode(
-                                                                Base64Encode(sMessage))));
+                        String sMessage = ( bUpload ) ? "Files uploaded successfully" : "Error while uploading files to the FTP server";
+                        
+                        Device.OpenUri ( new Uri ( resultCallback + "?" +
+                                                   "status=success" +
+                                                   "&compress=deflate" +
+                                                   "&output_filename=UploadingFiles" +
+                                                   "&output_data=" + Compression.CompressToUrl ( sMessage ) ) );
+                                                   
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
                     });
                 });
-                     
+                
                 return;
             }
             InitRefreshCommand();
@@ -154,7 +155,6 @@ namespace aclara_meters.view
             #endregion
 
         }
-
 
         /*--------------------------------------------------*/
         /*          Device List Interface Contenview
@@ -238,6 +238,7 @@ namespace aclara_meters.view
             #endregion
 
         }
+
         private void Esperando()
         {
             Device.BeginInvokeOnMainThread(() =>
@@ -271,9 +272,6 @@ namespace aclara_meters.view
                 #endregion
             });
         }
-
-
-
 
         private void Interface_ContentView_DeviceList()
         {
@@ -972,26 +970,34 @@ namespace aclara_meters.view
                         ContentView_Scripting.IsEnabled = true;
                         _userTapped = false;
                         ContentView_Scripting_label_read.Text = "Script Execution Error";
-                    
-                        //var a = HttpUtility.UrlEncode ( error.Message );
-                        //var b = HttpUtility.UrlPathEncode ( error.Message );
-                    
-                        /*
-                        Device.OpenUri(new Uri(resultCallback +
-                                            "?" +
-                                            "status=error" +
-                                            "&code= " + error.Id +
-                                            "&message=" + HttpUtility.UrlEncode ( "Error code " + error.Id + " - " + error.Message ))); */
                                             
-                        Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
-                                                "status=success" +
-                                                "&output_filename=" + resultScriptName +
-                                                "&output_data=" + System.Web.HttpUtility.UrlEncode ( Base64Encode( Errors.lastErrorLogGenerated ) ) ));
+                        Device.OpenUri ( new Uri ( resultCallback + "?" +
+                                                   "status=error" +
+                                                   "&compress=deflate" +
+                                                   "&message=" + Compression.CompressToUrl ( "Error code: " + error.Id + "\n" + error.Message ) +
+                                                   "&output_filename=" + resultScriptName +
+                                                   "&output_data=" + Compression.CompressToUrl ( Errors.lastErrorLogGenerated ) ) );
 
                         FormsApp.ble_interface.Close();
                     });
                 });
             });
+        }
+
+        public string GZipCompress ( string input )
+        {
+            using ( var outStream = new MemoryStream () )
+            {
+                using ( var gzipStream = new GZipStream ( outStream, CompressionMode.Compress ) )
+                {
+                    using (var ms = new MemoryStream ( Encoding.UTF8.GetBytes ( input ) ) )
+                    {
+                        ms.CopyTo ( gzipStream );
+                    }
+                }
+    
+                return Encoding.UTF8.GetString ( outStream.ToArray() );
+            }
         }
 
         private void onStepFinish(object sender, int step, MTUComm.Action.ActionFinishArgs e)
@@ -1055,10 +1061,12 @@ namespace aclara_meters.view
                         _userTapped = false;
                         ContentView_Scripting_label_read.Text = "Successful Script Execution";
 
-                        Xamarin.Forms.Device.OpenUri(new Uri(resultCallback + "?" +
-                                                             "status=success" +
-                                                             "&output_filename="+resultScriptName +
-                                                             "&output_data=" + System.Web.HttpUtility.UrlEncode ( Base64Encode( xmlResultTocallback ) ) ));
+                        Device.OpenUri ( new Uri ( resultCallback + "?" +
+                                                   "status=success" +
+                                                   "&compress=deflate" +
+                                                   "&output_filename=" + resultScriptName +
+                                                   "&output_data=" + Compression.CompressToUrl ( xmlResultTocallback ) ) );
+                        
                         FormsApp.ble_interface.Close();
                         
                         System.Diagnostics.Process.GetCurrentProcess().Kill();

@@ -370,8 +370,10 @@ namespace MTUComm
             Exception e,
             int portIndex = 1 )
         {
-            Error error = this.GetErrorByException ( e, portIndex );
+            Error error = this.AddErrorByException ( e, portIndex );
             PageLinker.ShowAlert ( ERROR_TITLE, error, true );
+        
+            lastErrorLogGenerated = this.logger.Error ();
         }
 
         /// <summary>
