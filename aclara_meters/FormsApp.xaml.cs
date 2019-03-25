@@ -130,8 +130,6 @@ namespace aclara_meters
             IUserDialogs dialogs,
             string appVersion )
         {
-            MTUComm.Action.IsFromScripting = false;
-            
             Console.WriteLine ( "FormsApp: Interactive [ " + MTUComm.Action.IsFromScripting + " ]" );
         
             appVersion_str = appVersion;
