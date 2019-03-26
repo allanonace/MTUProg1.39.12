@@ -319,6 +319,7 @@
     <BundleResource Include="Resources\shadow_effect_tablet.png" />
     <BundleResource Include="Resources\back_menu_puck.png" />
     <BundleResource Include="Resources\refreshsignal.png" />
+    <BundleResource Include="Resources\installConfirm_btn.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Acr.Support">

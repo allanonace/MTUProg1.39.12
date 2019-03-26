@@ -201,11 +201,11 @@ namespace aclara_meters.view
         {
             if (v)
             {
-                bg_read_mtu_button_img.Source = "read_mtu_btn_black.png";
+                img_btn_ic.Source = "read_mtu_btn_black.png";
             }
             else
             {
-                bg_read_mtu_button_img.Source = "read_mtu_btn.png";
+                img_btn_ic.Source = "read_mtu_btn.png";
             }
         }
 
@@ -401,7 +401,7 @@ namespace aclara_meters.view
                     listaMTUread.ItemsSource = FinalReadListView;
                     label_read.Text = resultMsg;
                     _userTapped = false;
-                    bg_read_mtu_button.NumberOfTapsRequired = 1;
+                    btn_ic.NumberOfTapsRequired = 1;
                     ChangeLowerButtonImage(false);
                     backdark_bg.IsVisible = false;
                     indicator.IsVisible = false;
@@ -435,7 +435,7 @@ namespace aclara_meters.view
 
                          label_read.Text = resultMsg;
                          _userTapped = false;
-                         bg_read_mtu_button.NumberOfTapsRequired = 1;
+                         btn_ic.NumberOfTapsRequired = 1;
                          ChangeLowerButtonImage(false);
                          backdark_bg.IsVisible = false;
                          indicator.IsVisible = false;
@@ -659,7 +659,7 @@ namespace aclara_meters.view
         private void TappedListeners()
         {
             back_button.Tapped += ReturnToMainView;
-            bg_read_mtu_button.Tapped += ReadMTU;
+            btn_ic.Tapped += ReadMTU;
             turnoffmtu_ok.Tapped += TurnOffMTUOkTapped;
             turnoffmtu_no.Tapped += TurnOffMTUNoTapped;
             turnoffmtu_ok_close.Tapped += TurnOffMTUCloseTapped;

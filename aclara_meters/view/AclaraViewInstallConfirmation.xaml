@@ -81,9 +81,10 @@
                         </Label>
                     </StackLayout>
                     <StackLayout Margin="0,-174,0,20" HorizontalOptions="End">
-                        <Image IsVisible="true" IsEnabled="true" InputTransparent="false" x:Name="bg_read_mtu_button_img" HeightRequest="96" Margin="0,-10,20,40" Scale="1" Source="read_mtu_btn.png" HorizontalOptions="End">
+                        <Image IsVisible="true" IsEnabled="true" InputTransparent="false" x:Name="img_btn_ic" HeightRequest="96"
+                            Margin="0,-10,20,40" Scale="1" Source="installConfirm_btn.png" HorizontalOptions="End">
                             <Image.GestureRecognizers>
-                                <TapGestureRecognizer x:Name="bg_read_mtu_button" NumberOfTapsRequired="1" />
+                                <TapGestureRecognizer x:Name="btn_ic" NumberOfTapsRequired="1" />
                             </Image.GestureRecognizers>
                         </Image>
                     </StackLayout>
