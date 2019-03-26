@@ -4,7 +4,7 @@ using System.Xml.Serialization;
 
 namespace Xml
 {
-    public class InterfaceParameters
+    public class InterfaceParameters// : ICloneable
     {
         public InterfaceParameters ()
         {
@@ -23,9 +23,6 @@ namespace Xml
         [XmlAttribute("interface")]
         public bool Interface { get; set; }
 
-        [XmlAttribute("index")]
-        public int Index{ get; set; }
-        
         [XmlAttribute("conditional")]
         public string Conditional { get; set; }
 
@@ -37,5 +34,16 @@ namespace Xml
 
         [XmlElement("Parameter")]
         public List<InterfaceParameters> Parameters { get; set; }
+
+        public object Clone ()
+        {
+            InterfaceParameters copy = this.MemberwiseClone () as InterfaceParameters;
+            copy.Parameters = new List<InterfaceParameters> ();
+            
+            foreach ( InterfaceParameters child in this.Parameters )
+                copy.Parameters.Add ( child.Clone () as InterfaceParameters );
+            
+            return copy;
+        }
     }
 }

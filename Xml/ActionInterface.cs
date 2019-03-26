@@ -12,39 +12,32 @@ namespace Xml
         [XmlElement("Parameter")]
         public List<InterfaceParameters> Parameters { get; set; }
 
-
         public InterfaceParameters[] getLogInterfaces()
         {
-            List<InterfaceParameters> parameters = Parameters.FindAll(x => x.Log );
+            List<InterfaceParameters> copyParameters = new List<InterfaceParameters> ();
             
-            List<InterfaceParameters> portParams;
-            foreach ( InterfaceParameters iParam in parameters )
-            {
-                portParams = iParam.Parameters;
+            // Copy filtered parents
+            Parameters.FindAll ( x => x.Log ).ForEach ( iParam => copyParameters.Add ( iParam.Clone () as InterfaceParameters ) );
             
-                for ( int i = portParams.Count - 1; i >= 0; i-- )
-                    if ( ! portParams[ i ].Log )
-                        portParams.RemoveAt ( i );
-            }
+            // Copy filtered childs
+            foreach ( InterfaceParameters copyParameter in copyParameters )
+                copyParameter.Parameters.RemoveAll ( x => ! x.Log );
             
-            return parameters.ToArray();
+            return copyParameters.ToArray ();
         }
 
         public InterfaceParameters[] getUserInterfaces()
         {
-            List<InterfaceParameters> parameters = Parameters.FindAll(x => x.Interface );
+            List<InterfaceParameters> copyParameters = new List<InterfaceParameters> ();
             
-            List<InterfaceParameters> portParams;
-            foreach ( InterfaceParameters iParam in parameters )
-            {
-                portParams = iParam.Parameters;
+            // Copy filtered parents
+            Parameters.FindAll ( x => x.Interface ).ForEach ( iParam => copyParameters.Add ( iParam.Clone () as InterfaceParameters ) );
             
-                for ( int i = portParams.Count - 1; i >= 0; i-- )
-                    if ( ! portParams[ i ].Interface )
-                        portParams.RemoveAt ( i );
-            }
+            // Copy filtered childs
+            foreach ( InterfaceParameters copyParameter in copyParameters )
+                copyParameter.Parameters.RemoveAll ( x => ! x.Interface );
             
-            return parameters.ToArray();
+            return copyParameters.ToArray ();
         }
 
         public InterfaceParameters[] getAllInterfaces()
