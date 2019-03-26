@@ -108,7 +108,10 @@ namespace MTUComm
             logger.Parameter ( this.addMtuAction, new Parameter ( "MtuType", "MTU Type", this.mtuBasicInfo.Type ) );
             logger.Parameter ( this.addMtuAction, form.ReadInterval );
 
-            bool   useDailyReads    = ( global.AllowDailyReads && mtu.DailyReads );
+            bool   useDailyReads    = ( global.AllowDailyReads && 
+                                        mtu.DailyReads &&
+                                        form.ContainsParameter ( FIELD.SNAP_READS ) );
+
             string dailyReads       = ( useDailyReads ) ? form.SnapReads.Value : DISABLED;
             string dailyGmtHourRead = ( useDailyReads ) ? form.SnapReads.Value : DISABLED;
             logger.Parameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
