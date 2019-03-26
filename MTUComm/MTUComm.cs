@@ -1139,6 +1139,15 @@ namespace MTUComm
 
                 #endregion
 
+                #region Snap Reads
+
+                if ( global.AllowDailyReads && mtu.DailyReads )
+                {
+                    map.DailyGMTHourRead = form.SnapReads.Value;
+                }
+
+                #endregion
+
                 #region Overlap count
 
                 map.MessageOverlapCount = DEFAULT_OVERLAP;
