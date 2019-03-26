@@ -1141,7 +1141,7 @@ namespace MTUComm
 
                 #region Snap Reads
 
-                if ( global.AllowDailyReads && mtu.DailyReads )
+                if ( global.AllowDailyReads && mtu.DailyReads && form.ContainsParameter ( FIELD.SNAP_READS ) )
                 {
                     map.DailyGMTHourRead = form.SnapReads.Value;
                 }
