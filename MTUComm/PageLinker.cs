@@ -34,6 +34,9 @@ namespace MTUComm
             string btnText,
             bool   kill = false )
         {
+            if ( ! kill )
+                return;
+        
             if ( currentPage != null )
             {
                 Device.BeginInvokeOnMainThread ( async () =>
