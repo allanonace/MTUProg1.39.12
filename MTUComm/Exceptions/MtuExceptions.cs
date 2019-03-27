@@ -98,6 +98,11 @@
         public ScriptEmptyException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
     
+    public class MandatoryMeterSerialHiddenScriptException : OwnExceptionsBase
+    {
+        public MandatoryMeterSerialHiddenScriptException ( string message = "", int port = 1 ) : base ( message, port ) { }
+    }
+    
     // Alarm [ 4xx ]
     //------
     

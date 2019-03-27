@@ -571,10 +571,10 @@ namespace MTUComm
 
         private Action truquitoAction;
 
-        private void Task_AddMtu ( Action addMtuAction )
+        private void Task_AddMtu ( Action action )
         {
-            truquitoAction     = addMtuAction;
-            Parameter[] ps     = addMtuAction.GetParameters ();
+            truquitoAction     = action;
+            Parameter[] ps     = action.GetParameters ();
             dynamic     form   = new AddMtuForm ( this.mtu );
             Global      global = form.global;
             form.usePort2      = false;
@@ -602,9 +602,34 @@ namespace MTUComm
    
                 scriptUseP2    = form.usePort2;
                 form.usePort2 &= this.mtu.TwoPorts;
-    
+
+                #region Mandatory Meter Serial Number [ DEACTIVATED ]
+
+                /*
+                // The parameters MeterSerialNumber and NewMeterSerialNumber are mapped to FIELD.METER_NUMBER
+                // NOTE: In scripted mode does not should be used global.UseMeterSerialNumber, doing MeterSerialNumber mandatory
+                if ( ! form.ContainsParameter ( FIELD.METER_NUMBER ) )
+                    throw new MandatoryMeterSerialHiddenScriptException ();
+                
+                if ( action.IsReplace &&
+                     ! form.ContainsParameter ( FIELD.METER_NUMBER_OLD ) )
+                    throw new MandatoryMeterSerialHiddenScriptException ();
+                
+                if ( scriptUseP2 )
+                {
+                    if ( ! form.ContainsParameter ( FIELD.METER_NUMBER_2 ) )
+                        throw new MandatoryMeterSerialHiddenScriptException ();
+                    
+                    if ( action.IsReplace &&
+                         ! form.ContainsParameter ( FIELD.METER_NUMBER_OLD_2 ) )
+                        throw new MandatoryMeterSerialHiddenScriptException ();
+                }
+                */
+
+                #endregion
+
                 #region Auto-detect Meters
-    
+
                 // Script is for one port but MTU has two and second is enabled
                 if ( ! scriptUseP2    &&
                      port2IsActivated && // Return true in a one port 138 MTU
@@ -783,8 +808,8 @@ namespace MTUComm
                         
                         // Do not use
                         if ( ! fail &&
-                             addMtuAction.type != ActionType.ReplaceMTU &&
-                             addMtuAction.type != ActionType.ReplaceMtuReplaceMeter )
+                             action.type != ActionType.ReplaceMTU &&
+                             action.type != ActionType.ReplaceMtuReplaceMeter )
                             form.RemoveParameter ( FIELD.MTU_ID_OLD );
                         break;
                         
@@ -1014,8 +1039,6 @@ namespace MTUComm
                 }
 
                 #endregion
-
-
             }
             catch ( Exception e )
             {
@@ -1027,7 +1050,7 @@ namespace MTUComm
                 return;
             }
 
-            this.Task_AddMtu ( form, addMtuAction.user, addMtuAction, true );
+            this.Task_AddMtu ( form, action.user, action, true );
         }
 
         private void Task_AddMtu (

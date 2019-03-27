@@ -23,6 +23,7 @@
     <Error id="304" message="Action type _var_ in the script is not one of the available options" />
     <Error id="305" message="The script file used has not valid structure or format" />
     <Error id="306" message="The script file used is empty" />
+    <Error id="307" message="The script does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions" />
     
     <!-- Alarm -->
     <Error id="400" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" />

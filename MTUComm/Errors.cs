@@ -66,6 +66,8 @@ namespace MTUComm
             { new ScriptWrongStructureException (),             305 },
             // The script file used is empty
             { new ScriptEmptyException (),                      306 },
+            // The script does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions
+            { new MandatoryMeterSerialHiddenScriptException (), 307 },
             
             // Alarm [ 4xx ]
             //------
