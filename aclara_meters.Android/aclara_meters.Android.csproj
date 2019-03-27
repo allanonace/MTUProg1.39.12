@@ -329,6 +329,9 @@
     <AndroidResource Include="Resources\drawable\rep_mtu_rep_meter_btn.png" />
     <AndroidResource Include="Resources\drawable\back_menu_puck.png" />
     <AndroidResource Include="Resources\drawable\refreshsignal.png" />
+    <AndroidResource Include="Resources\drawable\installConfirm_btn.png" />
+    <AndroidResource Include="Resources\drawable\LaunchScreen.storyboard" />
+    <AndroidResource Include="Resources\drawable\shadow_effect_tablet.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable-hdpi\" />
