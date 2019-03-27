@@ -1,6 +1,5 @@
 ﻿using System;
 using Xml;
-using Lexi;
 
 using REGISTER_TYPE = MTUComm.MemoryMap.AMemoryMap.REGISTER_TYPE;
 using RegType       = MTUComm.MemoryMap.MemoryMap.RegType;
@@ -17,6 +16,7 @@ namespace MTUComm.MemoryMap
 
         #region Attributes
 
+        private Lexi.Lexi lexi;
         public Func<T> funcGet;                 // MemoryRegister.Value{get}
         public Func<T> funcGetCustom;           // Only use working dynamically ( IMemoryRegister.Get )
         public Func<byte[]> funcGetByteArray;   // 
@@ -37,8 +37,9 @@ namespace MTUComm.MemoryMap
         public string methodId_Set { get; }
         private CUSTOM_TYPE customType_Get;
         private CUSTOM_TYPE customType_Set;
-        public bool used;
         public REGISTER_TYPE registerType { get; }
+        public bool readed;
+        public bool used;
         
         private dynamic tempValue;
 

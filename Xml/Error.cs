@@ -44,6 +44,7 @@ namespace Xml
         }
 
         private string message;
+        private string messagePopup;
 
         [XmlAttribute("message")]
         public string Message
@@ -57,6 +58,18 @@ namespace Xml
             set { this.message = value; }
         }
         
+        [XmlIgnore]
+        public string MessagePopup
+        {
+            get
+            {
+                if ( this.Exception != null )
+                     return messagePopup.Replace ( "_var_", this.Exception.Message );
+                else return messagePopup;
+            }
+            set { this.messagePopup = value; }
+        }
+
         public int Port;
         public Exception Exception;
 

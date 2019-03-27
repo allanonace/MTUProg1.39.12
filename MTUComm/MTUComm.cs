@@ -10,6 +10,7 @@ using MTUComm.actions;
 using MTUComm.Exceptions;
 using MTUComm.MemoryMap;
 using Xml;
+using System.Text;
 
 using ActionType  = MTUComm.Action.ActionType;
 using FIELD       = MTUComm.actions.AddMtuForm.FIELD;
@@ -594,6 +595,7 @@ namespace MTUComm
                 foreach ( Parameter parameter in ps )
                 {
                     // Launchs exception 'TranslatingParamsScriptException'
+                    // Launchs exception 'SameParameterRepeatScriptException'
                     form.AddParameterTranslatingAclaraXml ( parameter );
                     
                     if ( parameter.Port == 1 )
@@ -749,252 +751,274 @@ namespace MTUComm
     
                 #region Validation
     
-                dynamic Empty = new Func<string,bool> ( ( value ) =>
-                                        string.IsNullOrEmpty ( value ) );
+                dynamic Empty = new Func<string,bool> ( ( v ) =>
+                                        string.IsNullOrEmpty ( v ) );
     
-                dynamic EmptyNum = new Func<string,bool> ( ( value ) =>
-                                        string.IsNullOrEmpty ( value ) || ! Validations.IsNumeric ( value ) );
+                dynamic EmptyNum = new Func<string,bool> ( ( v ) =>
+                                        string.IsNullOrEmpty ( v ) || ! Validations.IsNumeric ( v ) );
     
                 // Value equals to maximum length
-                dynamic NoEqNum = new Func<string,int,bool> ( ( value, maxLength ) =>
-                                    ! Validations.NumericText ( value, maxLength ) );
+                dynamic NoEqNum = new Func<string,int,bool> ( ( v, maxLength ) =>
+                                    ! Validations.NumericText ( v, maxLength ) );
                                     
-                dynamic NoEqTxt = new Func<string,int,bool> ( ( value, maxLength ) =>
-                                    ! Validations.Text ( value, maxLength ) );
+                dynamic NoEqTxt = new Func<string,int,bool> ( ( v, maxLength ) =>
+                                    ! Validations.Text ( v, maxLength ) );
     
                 // Value equals or lower to maximum length
-                dynamic NoELNum = new Func<string,int,bool> ( ( value, maxLength ) =>
-                                    ! Validations.NumericText ( value, maxLength, 1, true, true, false ) );
+                dynamic NoELNum = new Func<string,int,bool> ( ( v, maxLength ) =>
+                                    ! Validations.NumericText ( v, maxLength, 1, true, true, false ) );
                                     
-                dynamic NoELTxt = new Func<string,int,bool> ( ( value, maxLength ) =>
-                                    ! Validations.Text ( value, maxLength, 1, true, true, false ) );
+                dynamic NoELTxt = new Func<string,int,bool> ( ( v, maxLength ) =>
+                                    ! Validations.Text ( v, maxLength, 1, true, true, false ) );
             
                 // Validate each parameter and remove those that are not going to be used
-                string msgError = string.Empty;
+                
+                string value = string.Empty;
+                string msgDescription  = string.Empty;
+                StringBuilder msgError = new StringBuilder ();
+                StringBuilder msgErrorPopup = new StringBuilder ();
                 foreach ( KeyValuePair<FIELD,Parameter> item in form.RegisteredParamsByField )
                 {
                     FIELD type = item.Key;
                     Parameter parameter = item.Value;
                 
-                    bool   fail  = false;
-                    string value = parameter.Value.ToString ();
-                
-                    // Validates each parameter before continue with the action
-                    switch ( type )
+                    bool fail = false;
+                    
+                    if ( fail = Empty ( parameter.Value ) )
+                        msgDescription = "cannot be empty";
+                    else
                     {
-                        case FIELD.ACTIVITY_LOG_ID:
-                        fail = EmptyNum ( value );
-                        break;
-                        
-                        case FIELD.ACCOUNT_NUMBER:
-                        case FIELD.ACCOUNT_NUMBER_2:
-                        fail = NoEqNum ( value, global.AccountLength );
-                        break;
-                        
-                        case FIELD.WORK_ORDER:
-                        case FIELD.WORK_ORDER_2:
-                        fail = NoELTxt ( value, global.WorkOrderLength );
-                        
-                        // Do not use
-                        if ( ! fail &&
-                             ! global.WorkOrderRecording )
-                            if ( parameter.Port == 0 )
-                                 form.RemoveParameter ( FIELD.WORK_ORDER   );
-                            else form.RemoveParameter ( FIELD.WORK_ORDER_2 );
-                        break;
-                        
-                        case FIELD.MTU_ID_OLD:
-                        fail = NoEqNum ( value, global.MtuIdLength );
-                        
-                        // Do not use
-                        if ( ! fail &&
-                             action.type != ActionType.ReplaceMTU &&
-                             action.type != ActionType.ReplaceMtuReplaceMeter )
-                            form.RemoveParameter ( FIELD.MTU_ID_OLD );
-                        break;
-                        
-                        case FIELD.METER_NUMBER:
-                        case FIELD.METER_NUMBER_2:
-                        case FIELD.METER_NUMBER_OLD:
-                        case FIELD.METER_NUMBER_OLD_2:
-                        fail = NoELTxt ( value, global.MeterNumberLength );
-                        
-                        // Do not use
-                        if ( ! fail &&
-                             ! global.UseMeterSerialNumber )
+                        value = parameter.Value.ToString ();
+                    
+                        // Validates each parameter before continue with the action
+                        switch ( type )
                         {
-                            if ( parameter.Port == 0 )
+                            case FIELD.ACTIVITY_LOG_ID:
+                            if ( fail = EmptyNum ( value ) )
+                                msgDescription = "should be a valid numeric value";
+                            break;
+                            
+                            case FIELD.ACCOUNT_NUMBER:
+                            case FIELD.ACCOUNT_NUMBER_2:
+                            if ( fail = NoEqNum ( value, global.AccountLength ) )
+                                msgDescription = "should be equal to global.AccountLength (" + global.AccountLength + ")";
+                            break;
+                            
+                            case FIELD.WORK_ORDER:
+                            case FIELD.WORK_ORDER_2:
+                            if ( fail = NoELTxt ( value, global.WorkOrderLength ) )
+                                msgDescription = "should be equal to or less than global.WorkOrderLength (" + global.WorkOrderLength + ")";
+                            
+                            // Do not use
+                            if ( ! fail &&
+                                 ! global.WorkOrderRecording )
+                                if ( parameter.Port == 0 )
+                                     form.RemoveParameter ( FIELD.WORK_ORDER   );
+                                else form.RemoveParameter ( FIELD.WORK_ORDER_2 );
+                            break;
+                            
+                            case FIELD.MTU_ID_OLD:
+                            if ( fail = NoEqNum ( value, global.MtuIdLength ) )
+                                msgDescription = "should be equal to global.MtuIdLength (" + global.MtuIdLength + ")";
+                            
+                            // Do not use
+                            if ( ! fail &&
+                                 action.type != ActionType.ReplaceMTU &&
+                                 action.type != ActionType.ReplaceMtuReplaceMeter )
+                                form.RemoveParameter ( FIELD.MTU_ID_OLD );
+                            break;
+                            
+                            case FIELD.METER_NUMBER:
+                            case FIELD.METER_NUMBER_2:
+                            case FIELD.METER_NUMBER_OLD:
+                            case FIELD.METER_NUMBER_OLD_2:
+                            if ( fail = NoELTxt ( value, global.MeterNumberLength ) )
+                                msgDescription = "should be equal to or less than global.MeterNumberLength (" + global.MeterNumberLength + ")";
+                            
+                            // Do not use
+                            if ( ! fail &&
+                                 ! global.UseMeterSerialNumber )
                             {
-                                switch ( parameter.Type )
+                                if ( parameter.Port == 0 )
                                 {
-                                    case ParameterType.MeterSerialNumber:
-                                    case ParameterType.NewMeterSerialNumber:
-                                    form.RemoveParameter ( FIELD.METER_NUMBER );
-                                    break;
-                                    
-                                    case ParameterType.OldMeterSerialNumber:
-                                    form.RemoveParameter ( FIELD.METER_NUMBER_OLD );
-                                    break;
+                                    switch ( parameter.Type )
+                                    {
+                                        case ParameterType.MeterSerialNumber:
+                                        case ParameterType.NewMeterSerialNumber:
+                                        form.RemoveParameter ( FIELD.METER_NUMBER );
+                                        break;
+                                        
+                                        case ParameterType.OldMeterSerialNumber:
+                                        form.RemoveParameter ( FIELD.METER_NUMBER_OLD );
+                                        break;
+                                    }
                                 }
+                                else
+                                {
+                                    switch ( parameter.Type )
+                                    {
+                                        case ParameterType.MeterSerialNumber:
+                                        case ParameterType.NewMeterSerialNumber:
+                                        form.RemoveParameter ( FIELD.METER_NUMBER_2 );
+                                        break;
+                                        
+                                        case ParameterType.OldMeterSerialNumber:
+                                        form.RemoveParameter ( FIELD.METER_NUMBER_OLD_2 );
+                                        break;
+                                    }
+                                }
+                            }
+                            break;
+                            
+                            case FIELD.METER_READING:
+                            case FIELD.METER_READING_2:
+                            if ( ! isAutodetectMeter )
+                            {
+                                // If necessary fill left to 0's up to LiveDigits
+                                if ( parameter.Port == 0 )
+                                     value = meterPort1.FillLeftLiveDigits ( value );
+                                else value = meterPort2.FillLeftLiveDigits ( value );
                             }
                             else
                             {
-                                switch ( parameter.Type )
+                                if ( parameter.Port == 0 )
                                 {
-                                    case ParameterType.MeterSerialNumber:
-                                    case ParameterType.NewMeterSerialNumber:
-                                    form.RemoveParameter ( FIELD.METER_NUMBER_2 );
-                                    break;
-                                    
-                                    case ParameterType.OldMeterSerialNumber:
-                                    form.RemoveParameter ( FIELD.METER_NUMBER_OLD_2 );
-                                    break;
+                                    if ( ! ( fail = meterPort1.NumberOfDials <= -1 || 
+                                                    NoELNum ( value, meterPort1.NumberOfDials ) ) )
+                                    {
+                                        // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
+                                        if ( NoEqNum ( value, meterPort1.NumberOfDials ) )
+                                            value = meterPort1.FillLeftNumberOfDials ( value );
+                                        
+                                        // Apply Meter mask
+                                        value = meterPort1.ApplyReadingMask ( value );
+                                    }
+                                    else break;
+                                }
+                                else
+                                {
+                                    if ( ! ( fail = meterPort2.NumberOfDials <= -1 ||
+                                                    NoELNum ( value, meterPort2.NumberOfDials ) ) )
+                                    {
+                                        // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
+                                        if ( NoEqNum ( value, meterPort2.NumberOfDials ) )
+                                            value = meterPort2.FillLeftNumberOfDials ( value );
+                                        
+                                        // Apply Meter mask
+                                        value = meterPort2.ApplyReadingMask ( value );
+                                    }
+                                    else break;
                                 }
                             }
-                        }
-                        break;
-                        
-                        case FIELD.METER_READING:
-                        case FIELD.METER_READING_2:
-                        if ( ! isAutodetectMeter )
-                        {
-                            // If necessary fill left to 0's up to LiveDigits
-                            if ( parameter.Port == 0 )
-                                 value = meterPort1.FillLeftLiveDigits ( value );
-                            else value = meterPort2.FillLeftLiveDigits ( value );
-                        }
-                        else
-                        {
-                            if ( parameter.Port == 0 )
+                            
+                            Meter meter = ( parameter.Port == 0 ) ? meterPort1 : meterPort2;
+                            fail = NoEqNum ( value, meter.LiveDigits );
+                            
+                            if ( fail )
                             {
-                                if ( ! ( fail = meterPort1.NumberOfDials <= -1 || 
-                                                NoELNum ( value, meterPort1.NumberOfDials ) ) )
+                                if ( ! isAutodetectMeter )
+                                     msgDescription = "should be equal to or less than Meter.LiveDigits (" + meter.LiveDigits + ")";
+                                else msgDescription = "should be equal to or less than Meter.NumberOfDials (" + meter.NumberOfDials + ")";
+                            }
+                            break;
+                            
+                            case FIELD.METER_READING_OLD:
+                            case FIELD.METER_READING_OLD_2:
+                            if ( fail = NoELNum ( value, 12 ) )
+                                msgDescription = "should be equal to or less than 12";
+                            
+                            // Do not use
+                            if ( ! fail &&
+                                 ! global.OldReadingRecording )
+                            {
+                                if ( parameter.Port == 0 )
+                                     form.RemoveParameter ( FIELD.METER_READING_OLD   );
+                                else form.RemoveParameter ( FIELD.METER_READING_OLD_2 );
+                            }
+                            break;
+                            
+                            case FIELD.METER_TYPE:
+                            case FIELD.METER_TYPE_2:
+                            //...
+                            break;
+                            
+                            case FIELD.READ_INTERVAL:
+                            List<string> readIntervalList;
+                            if ( MtuForm.mtuBasicInfo.version >= global.LatestVersion )
+                            {
+                                readIntervalList = new List<string>()
                                 {
-                                    // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
-                                    if ( NoEqNum ( value, meterPort1.NumberOfDials ) )
-                                        value = meterPort1.FillLeftNumberOfDials ( value );
-                                    
-                                    // Apply Meter mask
-                                    value = meterPort1.ApplyReadingMask ( value );
-                                }
-                                else break;
+                                    "24 Hours",
+                                    "12 Hours",
+                                    "8 Hours",
+                                    "6 Hours",
+                                    "4 Hours",
+                                    "3 Hours",
+                                    "2 Hours",
+                                    "1 Hour",
+                                    "30 Min",
+                                    "20 Min",
+                                    "15 Min"
+                                };
                             }
                             else
                             {
-                                if ( ! ( fail = meterPort2.NumberOfDials <= -1 ||
-                                                NoELNum ( value, meterPort2.NumberOfDials ) ) )
+                                readIntervalList = new List<string>()
                                 {
-                                    // If value is lower than NumberOfDials, fill left to 0's up to NumberOfDials
-                                    if ( NoEqNum ( value, meterPort2.NumberOfDials ) )
-                                        value = meterPort2.FillLeftNumberOfDials ( value );
-                                    
-                                    // Apply Meter mask
-                                    value = meterPort2.ApplyReadingMask ( value );
-                                }
-                                else break;
+                                    "1 Hour",
+                                    "30 Min",
+                                    "20 Min",
+                                    "15 Min"
+                                };
                             }
-                        }
-                        
-                        if ( parameter.Port == 0 )
-                             fail = NoEqNum ( value, meterPort1.LiveDigits );
-                        else fail = NoEqNum ( value, meterPort2.LiveDigits );
-                        break;
-                        
-                        case FIELD.METER_READING_OLD:
-                        case FIELD.METER_READING_OLD_2:
-                        fail = NoELNum ( value, 12 );
-                        
-                        // Do not use
-                        if ( ! fail &&
-                             ! global.OldReadingRecording )
-                        {
-                            if ( parameter.Port == 0 )
-                                 form.RemoveParameter ( FIELD.METER_READING_OLD   );
-                            else form.RemoveParameter ( FIELD.METER_READING_OLD_2 );
-                        }
-                        break;
-                        
-                        case FIELD.METER_TYPE:
-                        case FIELD.METER_TYPE_2:
-                        fail = Empty ( value );
-                        break;
-                        
-                        case FIELD.READ_INTERVAL:
-                        List<string> readIntervalList;
-                        if ( MtuForm.mtuBasicInfo.version >= global.LatestVersion )
-                        {
-                            readIntervalList = new List<string>()
+                            
+                            // TwoWay MTU reading interval cannot be less than 15 minutes
+                            if ( ! this.mtu.TimeToSync )
                             {
-                                "24 Hours",
-                                "12 Hours",
-                                "8 Hours",
-                                "6 Hours",
-                                "4 Hours",
-                                "3 Hours",
-                                "2 Hours",
-                                "1 Hour",
-                                "30 Min",
-                                "20 Min",
-                                "15 Min"
-                            };
+                                readIntervalList.AddRange ( new string[]{
+                                    "10 Min",
+                                    "5 Min"
+                                });
+                            }
+                            
+                            value = value.ToLower ()
+                                         .Replace ( "hr", "hour" )
+                                         .Replace ( "h", "H" )
+                                         .Replace ( "m", "M" );
+                            if ( fail = Empty ( value ) || ! readIntervalList.Contains ( value ) )
+                                msgDescription = "should be one of the possible values and using Hr/s or Min";
+                            break;
+                            
+                            case FIELD.SNAP_READS:
+                            if ( fail = EmptyNum ( value ) )
+                                msgDescription = "should be a valid numeric value";
+                            
+                            // Do not use
+                            if ( ! fail &&
+                                 ( ! global.AllowDailyReads ||
+                                   ! mtu.DailyReads ) )
+                                form.RemoveParameter ( FIELD.SNAP_READS );
+                            break;
+                            
+                            case FIELD.NUMBER_OF_DIALS:
+                            case FIELD.NUMBER_OF_DIALS_2:
+                            case FIELD.DRIVE_DIAL_SIZE:
+                            case FIELD.DRIVE_DIAL_SIZE_2:
+                            if ( fail = EmptyNum ( value ) )
+                                msgDescription = "should be a valid numeric value";
+                            break;
+                            
+                            case FIELD.UNIT_MEASURE:
+                            case FIELD.UNIT_MEASURE_2:
+                            //...
+                            break;
+                            
+                            case FIELD.FORCE_TIME_SYNC:
+                            bool.TryParse ( value, out fail );
+                            if ( fail = ! fail )
+                                msgDescription = "should be 'true' or 'false'";
+                            break;
                         }
-                        else
-                        {
-                            readIntervalList = new List<string>()
-                            {
-                                "1 Hour",
-                                "30 Min",
-                                "20 Min",
-                                "15 Min"
-                            };
-                        }
-                        
-                        // TwoWay MTU reading interval cannot be less than 15 minutes
-                        if ( ! this.mtu.TimeToSync )
-                        {
-                            readIntervalList.AddRange ( new string[]{
-                                "10 Min",
-                                "5 Min"
-                            });
-                        }
-                        
-                        value = value.ToLower ()
-                                     .Replace ( "hr", "hour" )
-                                     .Replace ( "h", "H" )
-                                     .Replace ( "m", "M" );
-                        fail = Empty ( value ) || ! readIntervalList.Contains ( value );
-                        break;
-                        
-                        case FIELD.SNAP_READS:
-                        fail = EmptyNum ( value );
-                        
-                        // Do not use
-                        if ( ! fail &&
-                             ( ! global.AllowDailyReads ||
-                               ! mtu.DailyReads ) )
-                            form.RemoveParameter ( FIELD.SNAP_READS );
-                        break;
-                        
-                        //case FIELD.LIVE_DIGITS:
-                        //fail = NoELNum ( value, 10 );
-                        //break;
-                        
-                        case FIELD.NUMBER_OF_DIALS:
-                        case FIELD.NUMBER_OF_DIALS_2:
-                        case FIELD.DRIVE_DIAL_SIZE:
-                        case FIELD.DRIVE_DIAL_SIZE_2:
-                        fail = EmptyNum ( value );
-                        break;
-                        
-                        case FIELD.UNIT_MEASURE:
-                        case FIELD.UNIT_MEASURE_2:
-                        fail = Empty ( value );
-                        break;
-                        
-                        case FIELD.FORCE_TIME_SYNC:
-                        bool.TryParse ( value, out fail );
-                        fail = ! fail;
-                        break;
                     }
     
                     if ( fail )
@@ -1003,22 +1027,39 @@ namespace MTUComm
                         
                         string typeStr = ( form.Texts as Dictionary<FIELD,string[]> )[ type ][ 2 ];
                         
-                        if ( ! msgError.Contains ( typeStr ) )
-                            msgError += ( ( ! string.IsNullOrEmpty ( msgError ) ) ? ", " : string.Empty ) + typeStr;
+                        msgErrorPopup.Append ( ( ( msgError.Length > 0 ) ? ", " : string.Empty ) +
+                                               typeStr + " " + msgDescription );
+
+                        msgError.Append ( ( ( msgError.Length > 0 ) ? ", " : string.Empty ) +
+                                          typeStr );
                     }
                     else
                         parameter.Value = value;
                 }
-    
-                if ( ! string.IsNullOrEmpty ( msgError ) )
+
+                if ( msgError.Length > 0 )
                 {
+                    string msgErrorStr      = msgError     .ToString ();
+                    string msgErrorPopupStr = msgErrorPopup.ToString ();
+                    msgError     .Clear ();
+                    msgErrorPopup.Clear ();
+                    msgError      = null;
+                    msgErrorPopup = null;
+                
                     int index;
-                    if ( ( index = msgError.LastIndexOf ( ',' ) ) > -1 )
-                        msgError = msgError.Substring ( 0, index ) +
-                                   " and" +
-                                   msgError.Substring ( index + 1 );
+                    if ( ( index = msgErrorStr.LastIndexOf ( ',' ) ) > -1 )
+                    {
+                        msgErrorStr = msgErrorStr.Substring ( 0, index ) +
+                                      " and" +
+                                      msgErrorStr.Substring ( index + 1 );
+                        
+                        index = msgErrorPopupStr.LastIndexOf ( ',' );
+                        msgErrorPopupStr = msgErrorPopupStr.Substring ( 0, index ) +
+                                           " and" +
+                                           msgErrorPopupStr.Substring ( index + 1 );
+                    }
     
-                    throw new ProcessingParamsScriptException ( msgError );
+                    throw new ProcessingParamsScriptException ( msgErrorStr, 1, msgErrorPopupStr );
                 }
     
                 #endregion

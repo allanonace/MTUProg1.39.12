@@ -974,9 +974,12 @@ namespace aclara_meters.view
                         Device.OpenUri ( new Uri ( resultCallback + "?" +
                                                    "status=error" +
                                                    "&compress=deflate" +
-                                                   "&message=" + Compression.CompressToUrl ( "Error code: " + error.Id + "\n" + error.Message ) +
+                                                   "&message=" + Compression.CompressToUrl ( "Error code: " + error.Id + "\n" + error.MessagePopup ) +
                                                    "&output_filename=" + resultScriptName +
                                                    "&output_data=" + Compression.CompressToUrl ( Errors.lastErrorLogGenerated ) ) );
+
+                        //string TEST  = Convert.ToBase64String ( Encoding.UTF8.GetBytes ( Errors.lastErrorLogGenerated ) );
+                        //string TEST2 = Encoding.UTF8.GetString ( Convert.FromBase64String ( TEST ) );
 
                         FormsApp.ble_interface.Close();
                     });

@@ -17,13 +17,14 @@
     
     <!-- Scripting parameters -->
     <Error id="300" message="Error translating or validating parameters _var_ from script file" />
-    <Error id="301" message="Script is for one port only but the MTU has two port and both activated" />
-    <Error id="302" message="Script is for two ports but the MTU has one port only or second port is disabled" />
+    <Error id="301" message="The script is for one port only but the MTU has two port and both activated" />
+    <Error id="302" message="The script is for two ports but the MTU has one port only or second port is disabled" />
     <Error id="303" message="Logfile element in the script is empty or contains some invalid character" />
     <Error id="304" message="Action type _var_ in the script is not one of the available options" />
     <Error id="305" message="The script file used has not valid structure or format" />
     <Error id="306" message="The script file used is empty" />
     <Error id="307" message="The script does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions" />
+    <Error id="308" message="The script contains the same parameter more than once" />
     
     <!-- Alarm -->
     <Error id="400" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" />
