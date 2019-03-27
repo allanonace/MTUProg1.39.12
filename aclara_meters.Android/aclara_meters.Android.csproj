@@ -332,6 +332,11 @@
     <AndroidResource Include="Resources\drawable\installConfirm_btn.png" />
     <AndroidResource Include="Resources\drawable\LaunchScreen.storyboard" />
     <AndroidResource Include="Resources\drawable\shadow_effect_tablet.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\back_menu_puck.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\installConfirm_btn.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\LaunchScreen.storyboard" />
+    <AndroidResource Include="Resources\drawable-nodpi\refreshsignal.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\shadow_effect_tablet.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable-hdpi\" />
