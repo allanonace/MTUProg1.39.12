@@ -79,7 +79,7 @@ namespace MTUComm
             
             config = null;
             
-            string uri = Path.Combine ( Mobile.GetPathConfig (), "___tmp.xml" );
+            string uri = Path.Combine ( Mobile.ConfigPath, "___tmp.xml" );
             using ( System.IO.StreamWriter file = new System.IO.StreamWriter ( uri, false ) )
             {
                 file.WriteLine ( base_stream );
@@ -103,7 +103,7 @@ namespace MTUComm
                 if ( rel_path.Length > 1 && rel_path.StartsWith ( "/" ) )
                     rel_path = rel_path.Substring ( 1 );
     
-                string full_new_path = Path.Combine ( Mobile.GetPathLogs (), rel_path );
+                string full_new_path = Path.Combine ( Mobile.LogPath, rel_path );
     
                 if ( ! Directory.Exists ( full_new_path ) )
                     Directory.CreateDirectory ( full_new_path );
@@ -146,7 +146,7 @@ namespace MTUComm
         public string CreateEventFileIfNotExist ( string mtu_id )
         {
             string file_name = "MTUID"+ mtu_id+ "-" + System.DateTime.Now.ToString("MMddyyyyHH") + "-" + DateTime.Now.Ticks.ToString() + "DataLog.xml"; 
-            string uri = Path.Combine ( Mobile.GetPathLogs (), file_name );
+            string uri = Path.Combine ( Mobile.LogPath, file_name );
 
             if (!File.Exists(uri))
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, true))
@@ -254,7 +254,7 @@ namespace MTUComm
             
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
-            string uniUri = Path.Combine ( Mobile.GetPathLogsUni (),
+            string uniUri = Path.Combine ( Mobile.LogUniPath,
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( false, uniUri );
             
@@ -377,7 +377,7 @@ namespace MTUComm
             
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
-            string uniUri = Path.Combine ( Mobile.GetPathLogsUni (),
+            string uniUri = Path.Combine ( Mobile.LogUniPath,
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( false, uniUri );
             

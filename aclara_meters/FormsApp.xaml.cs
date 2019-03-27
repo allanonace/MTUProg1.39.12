@@ -170,13 +170,31 @@ namespace aclara_meters
 
         #region Configuration files and System
 
+        private void ConfigPaths()
+        {
+            string sPath = String.Empty;
+            if (Device.RuntimePlatform == Device.Android)
+            {
+                sPath = DependencyService.Get<IPathService>().PrivateExternalFolder;
+            }
+            else
+            {
+                sPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            }
+            Mobile.ConfigPath = sPath;
+            Mobile.LogPath = sPath;
+            Mobile.LogUniPath = sPath;
+        }
+
         private void LoadConfigurationAndOpenScene ( IUserDialogs dialogs )
         {
+            ConfigPaths();
+
             // Only download configuration files from FTP when all are not installed
-            //if ( Mobile.IsNetAvailable () &&
-            //     ! this.HasDeviceAllXmls () )
-            //    this.DownloadConfigFiles ();
-            
+            //if (Mobile.IsNetAvailable() &&
+            //     !this.HasDeviceAllXmls())
+            //    this.DownloadConfigFiles();
+
             // Check if all configuration files are available
             this.abortMission = ! this.HasDeviceAllXmls ();
             
@@ -264,7 +282,8 @@ namespace aclara_meters
 
                     // Remote FTP File directory
                     bool isCertificate;
-                    string configPath = Mobile.GetPathConfig ();
+                    string configPath = Mobile.ConfigPath;
+                    
                     foreach ( SftpFile file in sftp.ListDirectory ( data.ftpPath ) )
                     {
                         string name = file.Name;
@@ -295,11 +314,12 @@ namespace aclara_meters
         private bool HasDeviceAllXmls ()
         {
             bool ok = true;
-        
-            string path = Mobile.GetPathConfig ();
 
-            // Directory could exist but is empty
-            if ( string.IsNullOrEmpty ( path ) )
+            string path = Mobile.ConfigPath;
+        
+
+                // Directory could exist but is empty
+                if ( string.IsNullOrEmpty ( path ) )
                 ok = false;
 
             // Directory exists and is not empty
@@ -332,7 +352,8 @@ namespace aclara_meters
         private bool GenerateBase64Certificate ()
         {
             bool   ok         = true;
-            string configPath = Mobile.GetPathConfig ();
+            string configPath = Mobile.ConfigPath;
+  
             string txtPath    = Path.Combine ( configPath, CER_TXT );
         
             try
@@ -433,7 +454,7 @@ namespace aclara_meters
 
             if ( url != null )
             {
-                string path = Mobile.GetPathPublic ();
+                string path = Mobile.ConfigPath;
                 NameValueCollection query = HttpUtility.ParseQueryString ( url.Query );
 
                 var script_name = query.Get ( "script_name" );

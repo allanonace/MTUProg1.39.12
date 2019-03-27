@@ -129,3 +129,34 @@ De repente ha dejado de funcionar el planteamiento anterior en el ZTE, que no se
 y ha pasado a funcionar usar el path "/data/data/com.aclara.mtu.programmer/files/", lo cual antes no servía
 
 El mismo path que devuelven: Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments|Personal|UserProfile );
+
+*************************************************************************************************
+Xamarin.Android
+
+var _path = GetExternalFilesDirs(null);
+    string Datapath;
+    int foo, bar;
+    foreach (var spath in _path)
+    {
+        if (spath == null) //just loop on if there is no card inserted
+            continue;
+        Datapath = spath.AbsolutePath.ToString();
+        libraryPath = Datapath;
+        foo = Datapath.IndexOf("emulated");
+        if (foo >= 0)
+        { //emulated path, use this if nothing else is available
+            bar = Datapath.IndexOf("/", foo, StringComparison.CurrentCulture);
+            foo = bar + 1;
+            bar = Datapath.IndexOf("/", foo, StringComparison.CurrentCulture);
+            DataLoc = Datapath.Substring(0, bar + 1);
+        }
+        else
+        { //external SD card, break out after we find first one
+            foo = 1;
+            bar = Datapath.IndexOf("/", foo, StringComparison.CurrentCulture);
+            foo = bar + 1;
+            bar = Datapath.IndexOf("/", foo, StringComparison.CurrentCulture);
+            DataLoc = Datapath.Substring(0, bar + 1);
+            break;
+        }
+    }

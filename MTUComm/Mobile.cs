@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using MTUComm.Exceptions;
+using Xamarin.Forms;
+
 
 namespace MTUComm
 {
@@ -56,7 +58,7 @@ namespace MTUComm
             {
                 try
                 {
-                    string path = Path.Combine ( Mobile.GetPathConfig (), "certificate.txt" );
+                    string path = Path.Combine ( Mobile.ConfigPath, "certificate.txt" );
                     
                     if ( File.Exists ( path ) )
                     {
@@ -172,6 +174,49 @@ namespace MTUComm
         private static string     pathCacheLogs;
         private static string     pathCacheLogsUni;
 
+        public static string ConfigPath
+        {
+            get
+            {
+                return pathCacheConfig;
+            }
+            set
+            {
+                if (!Directory.Exists(value))
+                    Directory.CreateDirectory(value);
+                pathCacheConfig = value;
+            }
+        }
+
+        public static string LogPath
+        {
+            get
+            {
+                return pathCacheLogs;
+            }
+            set
+            {
+                string path = Path.Combine(value, PATH_LOGS);
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+                pathCacheLogs = path;
+            }
+        }
+
+        public static string LogUniPath
+        {
+            get
+            {
+                return pathCacheLogsUni;
+            }
+            set
+            {
+                string path = Path.Combine(value, PATH_LOGSUNI);
+                if (!Directory.Exists(path))
+                    Directory.CreateDirectory(path);
+                pathCacheLogsUni = path;
+            }
+        }
         static Mobile ()
         {
             configData = new ConfigData ();
@@ -204,73 +249,6 @@ namespace MTUComm
             }
 
             return null;
-        }
-
-        public static string GetPathPublic ()
-        {
-            // Use cached path
-            if ( ! string.IsNullOrEmpty ( pathCachePublic ) )
-                return pathCachePublic;
-        
-            /*
-            string PRIVATE = Environment.GetFolderPath ( Environment.SpecialFolder.Resources );
-            Directory.CreateDirectory ( Path.Combine ( PRIVATE, ".Config" ) );
-            File.Create ( Path.Combine ( PRIVATE, ".Config/Test.txt" ) );
-            RecurReadFolders ( PRIVATE );
-            */
-        
-            // Try to recover new valid path for the current connected device
-            string path = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
-
-            if ( Xamarin.Forms.Device.RuntimePlatform == Xamarin.Forms.Device.Android )
-            {
-                if ( string.IsNullOrEmpty ( ( path = Mobile.GetPathForAndroid () ) ) )
-                    return string.Empty;
-            }
-
-            return ( pathCachePublic = path );
-        }
-        
-        public static string GetPathConfig ()
-        {
-            if ( ! string.IsNullOrEmpty ( pathCacheConfig ) )
-                return pathCacheConfig;
-        
-            string path = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments ); 
-            //string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments ), PATH_CONFIG );
-            //string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Resources ), "." + PATH_CONFIG );
-        
-            if ( ! Directory.Exists ( path ) )
-                Directory.CreateDirectory ( path );
-        
-            return ( pathCacheConfig = path );
-        }
-        
-        public static string GetPathLogs ()
-        {
-            if ( ! string.IsNullOrEmpty ( pathCacheLogs ) )
-                return pathCacheLogs;
-        
-            string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments ), PATH_LOGS );
-            //string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Resources ), "." + PATH_LOGS );
-        
-            if ( ! Directory.Exists ( path ) )
-                Directory.CreateDirectory ( path );
-        
-            return ( pathCacheLogs = path );
-        }
-        
-        public static string GetPathLogsUni ()
-        {
-            if ( ! string.IsNullOrEmpty ( pathCacheLogsUni ) )
-                return pathCacheLogsUni;
-        
-            string path = Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments ), PATH_LOGSUNI );
-        
-            if ( ! Directory.Exists ( path ) )
-                Directory.CreateDirectory ( path );
-        
-            return ( pathCacheLogsUni = path );
         }
         
         private static void RecurReadFolders ( string PATH, int numLevel = 0 )

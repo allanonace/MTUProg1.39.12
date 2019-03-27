@@ -35,7 +35,7 @@ namespace MTUComm
 
         private Configuration ( string path = "", bool avoidXmlError = false )
         {
-            string configPath = Mobile.GetPathConfig ();
+            string configPath = Mobile.ConfigPath;
 
             device = "PC";
 

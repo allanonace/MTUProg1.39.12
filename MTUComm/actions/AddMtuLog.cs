@@ -404,7 +404,7 @@ namespace MTUComm
             
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
-            string uniUri = Path.Combine ( Mobile.GetPathLogsUni (),
+            string uniUri = Path.Combine ( Mobile.LogUniPath,
                 this.mtuBasicInfo.Type + "-" + this.action.type + ( ( form.mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.logger.CreateFileIfNotExist ( false, uniUri );
             

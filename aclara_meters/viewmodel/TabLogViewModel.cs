@@ -28,7 +28,7 @@ namespace aclara.ViewModels
             //c = assembly.GetManifestResourceStream("PruebasUI.Files.0221201911Log.xml");
             // List<Monkey> monkeys;
             // Path where the file should be saved once downloaded (locally)
-            string path = Mobile.GetPathLogs ();
+            string path = Mobile.LogPath;
             DirectoryInfo info = new DirectoryInfo(path);
             FileInfo[] files = info.GetFiles().OrderByDescending(p => p.LastWriteTimeUtc).ToArray();
 
