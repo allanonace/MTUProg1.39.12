@@ -424,7 +424,7 @@ namespace MTUComm
                 }
                 
                 // Finish with error
-                Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat + 1 ) + "" ) );
+                Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat ) + "" ) );
                 return false;
             }
             
