@@ -143,7 +143,7 @@ x:Class="aclara_meters.view.AclaraViewMainMenu">
                                         </Image>
                                     </StackLayout>
                                     <StackLayout Margin="0,24,10,0" Opacity="1" Orientation="Horizontal" HorizontalOptions="EndAndExpand">
-                                        <Image Margin="8,4,0,0" HeightRequest="40" WidthRequest="40" Scale="1" Opacity="0.95" Source="refreshsignal.png">
+                                        <Image Margin="8,4,0,0" HeightRequest="56" Scale="1" Opacity="0.95" Source="refreshsignal.png">
                                             <Image.GestureRecognizers>
                                                 <TapGestureRecognizer x:Name="refresh_signal" NumberOfTapsRequired="1" />
                                             </Image.GestureRecognizers>

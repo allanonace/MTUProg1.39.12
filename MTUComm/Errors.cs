@@ -117,6 +117,8 @@ namespace MTUComm
             { new NoInternetException (),                       807 },
             // The current date of the device is lower than allowed
             { new DeviceMinDateAllowedException (),             808 },
+             // Missing credentials for SFTP in global.xml
+            { new FtpCredentialsMissingException (),             809 },
         };
 
         #endregion

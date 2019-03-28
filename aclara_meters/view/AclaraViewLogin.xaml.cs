@@ -13,6 +13,7 @@ using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
 using Renci.SshNet;
 using Xamarin.Forms;
+using MTUComm.Exceptions;
 
 namespace aclara_meters.view
 {
@@ -58,7 +59,7 @@ namespace aclara_meters.view
 
                             //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
                         }
-                        else base.DisplayAlert ( "Error", "Error Uploading files", "Ok" );
+                        //else base.DisplayAlert ( "Error", "Error Uploading files", "Ok" );
                     }
                     else base.DisplayAlert ( "Warning", "No connection available. Log files will not be uploaded till you get internet connection", "Ok" );
 
@@ -123,15 +124,16 @@ namespace aclara_meters.view
         
         private bool UploadingLogFiles ()
         {
-            string ftp_username = FormsApp.config.global.ftpUserName;
-            string ftp_password = FormsApp.config.global.ftpPassword;
-            string ftp_remoteHost = FormsApp.config.global.ftpRemoteHost;
-            string ftp_remotePath = FormsApp.config.global.ftpRemotePath; //For the logs...
-
 
             string host = FormsApp.config.global.ftpRemoteHost;
             string username = FormsApp.config.global.ftpUserName;
             string password = FormsApp.config.global.ftpPassword;
+
+            if (String.IsNullOrEmpty(host) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) )
+            {
+                Errors.ShowErrorAndKill (new FtpCredentialsMissingException());
+                return false;
+            }
 
             //string pathRemoteFile = "/home/aclara/"; // prueba_archivo.xml";
 

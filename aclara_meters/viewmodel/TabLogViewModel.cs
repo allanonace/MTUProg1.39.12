@@ -165,18 +165,6 @@ namespace aclara.ViewModels
                                 }
                                 else if(xReader.Depth==3)
                                 {
-                                    //if (!String.IsNullOrEmpty(sAccion))
-                                    //{
-                                    //    ItemsLog Item1 = new ItemsLog
-                                    //    {
-                                    //        Accion = sAccion,
-                                    //        Icon = sIcon
-                                    //    };
-
-                                    //    Item1.ListaDatos = ListaDatos;
-                                    //    ItemsLog.Add(Item1);
-                                    //    sAccion = String.Empty;
-                                    //}
                                     ItemsLog Item = new ItemsLog
                                     {
                                         Accion = sSubAccion,
@@ -214,6 +202,13 @@ namespace aclara.ViewModels
                     }
                 }
             }
+            ItemsLog ItemNull = new ItemsLog
+            {
+                Accion = String.Empty,
+                Icon = String.Empty
+            };
+            ItemsLog.Add(ItemNull);
+            ItemsLog.Add(ItemNull);
             //  Application.Current.MainPage.DisplayAlert("XML", sResultado,"OK");
         }
 

@@ -202,4 +202,9 @@
     {
         public DeviceMinDateAllowedException ( string message = "", int port = 1 ) : base ( message, port ) { }
     }
+
+    public class FtpCredentialsMissingException : OwnExceptionsBase
+    {
+        public FtpCredentialsMissingException ( string message = "", int port = 1) : base(message, port) { }
+    }
 }
