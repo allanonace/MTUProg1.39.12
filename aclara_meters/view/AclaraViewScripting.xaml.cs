@@ -974,7 +974,7 @@ namespace aclara_meters.view
                         Device.OpenUri ( new Uri ( resultCallback + "?" +
                                                    "status=error" +
                                                    "&compress=deflate" +
-                                                   "&message=" + Compression.CompressToUrl ( "Error code: " + error.Id + "\n" + error.Message ) +
+                                                   "&message=" + Compression.CompressToUrl ( "Error code: " + error.Id + "\n" + error.MessagePopup ) +
                                                    "&output_filename=" + resultScriptName +
                                                    "&output_data=" + Compression.CompressToUrl ( Errors.lastErrorLogGenerated ) ) );
 

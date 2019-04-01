@@ -46,13 +46,13 @@ namespace Xml
             int    NumberOfDials,
             int    DriveDialSize,
             string UnitOfMeasure,
-            int    flow )
+            int    mtuFlow )
         {
             List<Meter> meters = Meters.FindAll ( x => (
                 x.NumberOfDials == NumberOfDials &&
                 x.DriveDialSize == DriveDialSize &&
                 x.UnitOfMeasure.Equals ( UnitOfMeasure ) &&
-                x.Flow == flow
+                x.MeterTypeFlow == ( ( mtuFlow == 1 ) ? "Neg" : "Pos" )
             ));
 
             if ( meters == null )

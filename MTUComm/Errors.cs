@@ -54,9 +54,9 @@ namespace MTUComm
             //---------------------
             // Error translating or validating parameters from script/trigger file
             { new ProcessingParamsScriptException (),           300 },
-            // Script is only for one port but the MTU has two port and both activated
+            // The script is only for one port but the MTU has two port and both activated
             { new ScriptForOnePortButTwoEnabledException (),    301 },
-            // Script is for two ports but the MTU has one port only or second port is disabled
+            // The script is for two ports but the MTU has one port only or second port is disabled
             { new ScriptForTwoPortsButMtuOnlyOneException (),   302 },
             // Logfile element in the script is empty or contains some invalid character
             { new ScriptLogfileInvalidException (),             303 },
@@ -66,6 +66,10 @@ namespace MTUComm
             { new ScriptWrongStructureException (),             305 },
             // The script file used is empty
             { new ScriptEmptyException (),                      306 },
+            // The script does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions
+            { new MandatoryMeterSerialHiddenScriptException (), 307 },
+            // The script contains the same parameter more than once
+            { new SameParameterRepeatScriptException (),        308 },
             
             // Alarm [ 4xx ]
             //------
@@ -235,13 +239,16 @@ namespace MTUComm
                 int id = this.ex2id.Single ( item => item.Key.GetType () == typeExp ).Value;
                 
                 error = this.GetErrorById ( id, e, portIndex );
+                error.MessagePopup = ( ( OwnExceptionsBase )e ).MessagePopup;
             }
             // .NET exception
             else
             {
                 error = ( Error )this.TryToTranslateDotNet ( e ).Clone ();
-                error.Port  = portIndex;
+                error.Port      = portIndex;
                 error.Exception = e;
+                error.Message   = e.Message;
+                error.MessagePopup = e.Message;
             }
             
             return error;

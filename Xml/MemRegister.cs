@@ -21,6 +21,11 @@ namespace Xml
         public  const int    DEF_SIZE    = 1;
         public  const int    DEF_BIT     = 0;
 
+        public MemRegister ()
+        {
+            this.SizeGet = 1;
+        }
+
         [XmlElement("Id")]
         public string Id { get; set; }
 
@@ -84,9 +89,9 @@ namespace Xml
                     int v;
                     if (int.TryParse(value, out v))
                          this.SizeGet = v;
-                    else this.SizeGet = 0;
+                    else this.SizeGet = 1;
                 }
-                else this.SizeGet = 0;
+                else this.SizeGet = 1;
             }
         }
 

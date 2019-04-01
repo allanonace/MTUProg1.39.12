@@ -246,6 +246,55 @@ namespace MTUComm
             get { return tag_reasons[this.type]; }
         }
 
+        public bool IsWrite
+        {
+            get
+            {
+                return this.type == ActionType.AddMtu             ||
+                       this.type == ActionType.AddMtuAddMeter     ||
+                       this.type == ActionType.AddMtuReplaceMeter ||
+                       this.type == ActionType.ReplaceMTU         ||
+                       this.type == ActionType.ReplaceMeter       ||
+                       this.type == ActionType.ReplaceMtuReplaceMeter;
+            }
+        }
+        
+        public bool IsReplace
+        {
+            get
+            {
+                return this.type == ActionType.AddMtuReplaceMeter ||
+                       this.type == ActionType.ReplaceMTU         ||
+                       this.type == ActionType.ReplaceMeter       ||
+                       this.type == ActionType.ReplaceMtuReplaceMeter;
+            }
+        }
+        
+        public bool IsInstallConfirmation
+        {
+            get
+            {
+                return this.type == ActionType.MtuInstallationConfirmation;
+            }
+        }
+        
+        public bool IsRead
+        {
+            get
+            {
+                return this.type == ActionType.ReadMtu;
+            }
+        }
+        
+        public bool IsTurnOnOff
+        {
+            get
+            {
+                return this.type == ActionType.TurnOnMtu ||
+                       this.type == ActionType.TurnOffMtu;
+            }
+        }
+
         #endregion
 
         #region Initialization

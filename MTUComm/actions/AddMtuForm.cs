@@ -502,7 +502,11 @@ namespace MTUComm.actions
         {
             string[] texts = Texts[ fieldType ];
             Parameter param = AddParameter ( texts[ 0 ], texts[ 1 ], texts[ 2 ], value, port ); // base method
-            this.dictionary.Add ( fieldType, param );
+            
+            if ( ! this.dictionary.ContainsKey ( fieldType ) )
+                this.dictionary.Add ( fieldType, param );
+            else
+                throw new SameParameterRepeatScriptException ();
         }
 
         public void AddParameterTranslatingAclaraXml ( Parameter parameter )

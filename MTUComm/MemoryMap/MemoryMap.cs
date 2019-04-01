@@ -71,6 +71,7 @@ namespace MTUComm.MemoryMap
         private const string METHODS_GET_BYTE_PREFIX   = METHODS_GET_PREFIX + "byte_";
         private const string METHODS_SET_STRING_PREFIX = METHODS_SET_PREFIX + "string_";
         private const string METHODS_SET_BYTE_PREFIX   = METHODS_SET_PREFIX + "byte_";
+        private const string METHODS_SET_MTU_PREFIX    = METHODS_SET_PREFIX + "mtu_";
 
         public  const string METHOD              = "method";
         public  const string METHOD_KEY          = METHOD + ":";
@@ -103,13 +104,21 @@ namespace MTUComm.MemoryMap
 
         public byte[] memory { private set; get; }
         private Dictionary<string,dynamic> registersObjs;
+        private Lexi.Lexi lexi;
+        private bool updateFromMtu;
 
         #endregion
 
         #region Initialization
 
-        public MemoryMap ( byte[] memory, string family, string pathUnityTest = "" )
+        public MemoryMap ( byte[] memory, string family, bool updateFromMtu = true, string pathUnityTest = "" )
         {
+            this.lexi = Singleton.Get.Lexi;
+            
+            // The third argument is used because is impossible to know if a byte
+            // in the memory argument was read from the MTU or is only an empty byte
+            this.updateFromMtu = updateFromMtu;
+        
             this.memory = memory;
             this.registersObjs = new Dictionary<string,dynamic>();
 
@@ -180,7 +189,7 @@ namespace MTUComm.MemoryMap
                                 this.CreateProperty_Set ( memoryRegister );
                                 this.CreateProperty_Set_String ( memoryRegister );
                             }
-    
+
                             // References to write/set and get methods
                             bool w = memoryRegister.write;
                             dynamic get  =                                               base.registers[ METHODS_GET_PREFIX        + memoryRegister.id ];
@@ -190,38 +199,45 @@ namespace MTUComm.MemoryMap
                             dynamic setC = ( w && memoryRegister.HasCustomMethod_Set ) ? base.registers[ METHODS_SET_CUSTOM_PREFIX + memoryRegister.id ] : null;
                             dynamic setS = ( w                                       ) ? base.registers[ METHODS_SET_STRING_PREFIX + memoryRegister.id ] : null;
                             dynamic setB =                                               base.registers[ METHODS_SET_BYTE_PREFIX   + memoryRegister.id ];
+                            dynamic setM =                                               base.registers[ METHODS_SET_MTU_PREFIX    + memoryRegister.id ];
                             TypeCode tc  = Type.GetTypeCode(SysType.GetType());
                             switch (type)
                             {
                                 case RegType.INT:
-                                    memoryRegister.funcGet       = (Func<int>)get;
-                                    memoryRegister.funcSet       = (Action<int>)set;
-                                    memoryRegister.funcGetCustom = (Func<int>)getC;
+                                    memoryRegister.funcGet        = (Func<int>)get;
+                                    memoryRegister.funcSet        = (Action<int>)set;
+                                    memoryRegister.funcGetCustom  = (Func<int>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<int>)setM;
                                     break;
                                 case RegType.UINT:
-                                    memoryRegister.funcGet       = (Func<uint>)get;
-                                    memoryRegister.funcSet       = (Action<uint>)set;
-                                    memoryRegister.funcGetCustom = (Func<uint>)getC;
+                                    memoryRegister.funcGet        = (Func<uint>)get;
+                                    memoryRegister.funcSet        = (Action<uint>)set;
+                                    memoryRegister.funcGetCustom  = (Func<uint>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<uint>)setM;
                                     break;
                                 case RegType.ULONG:
-                                    memoryRegister.funcGet       = (Func<ulong>)get;
-                                    memoryRegister.funcSet       = (Action<ulong>)set;
-                                    memoryRegister.funcGetCustom = (Func<ulong>)getC;
+                                    memoryRegister.funcGet        = (Func<ulong>)get;
+                                    memoryRegister.funcSet        = (Action<ulong>)set;
+                                    memoryRegister.funcGetCustom  = (Func<ulong>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<ulong>)setM;
                                     break;
                                 case RegType.BOOL:
-                                    memoryRegister.funcGet       = (Func<bool>)get;
-                                    memoryRegister.funcSet       = (Action<bool>)set;
-                                    memoryRegister.funcGetCustom = (Func<bool>)getC;
+                                    memoryRegister.funcGet        = (Func<bool>)get;
+                                    memoryRegister.funcSet        = (Action<bool>)set;
+                                    memoryRegister.funcGetCustom  = (Func<bool>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<bool>)setM;
                                     break;
                                 case RegType.CHAR:
-                                    memoryRegister.funcGet       = (Func<char>)get;
-                                    memoryRegister.funcSet       = (Action<char>)set;
-                                    memoryRegister.funcGetCustom = (Func<char>)getC;
+                                    memoryRegister.funcGet        = (Func<char>)get;
+                                    memoryRegister.funcSet        = (Action<char>)set;
+                                    memoryRegister.funcGetCustom  = (Func<char>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<char>)setM;
                                     break;
                                 case RegType.STRING:
-                                    memoryRegister.funcGet       = (Func<string>)get;
-                                    memoryRegister.funcSet       = (Action<string>)set;
-                                    memoryRegister.funcGetCustom = (Func<string>)getC;
+                                    memoryRegister.funcGet        = (Func<string>)get;
+                                    memoryRegister.funcSet        = (Action<string>)set;
+                                    memoryRegister.funcGetCustom  = (Func<string>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<string>)setM;
                                     break;
                             }
                             
@@ -322,27 +338,65 @@ namespace MTUComm.MemoryMap
             base.AddMethod ( METHODS_GET_PREFIX + memoryRegister.id,
                 new Func<T>(() =>
                 {
-                    object result = default ( T );
-                    switch (Type.GetTypeCode(typeof(T)))
+                    // The register has not be loaded yet from the MTU or is a
+                    // readonly registers that in any moment could change their value
+                    if ( this.updateFromMtu &&
+                         ( ! memoryRegister.readedFromMtu ||
+                           ! memoryRegister.write ) )
+                        return ( T )memoryRegister.funcGetFromMtu ();
+                    
+                    // Get value from local memory map ( not using/reading the MTU )
+                    return ( T )this.PropertyGet_Logic ( memoryRegister );
+                }));
+
+            #endregion
+
+            #region Get ( and set ) From MTU
+
+            // Read from the MTU and update local memory map previous to return the value
+            base.AddMethod ( METHODS_SET_MTU_PREFIX + memoryRegister.id,
+                new Func<T>(() =>
+                {
+                    // Read current value from the MTU
+                    byte[] read = lexi.Read ( ( uint )memoryRegister.address, ( uint )memoryRegister.sizeGet );
+                    
+                    Console.WriteLine ( "Read from MTU: " + memoryRegister.id +
+                                        " | dir: " + memoryRegister.address +
+                                        " | Size Get: " + memoryRegister.sizeGet +
+                                        " | Size Set: " + memoryRegister.size +
+                                        " -> " + ( ( ! memoryRegister.write ) ? "Readonly" : "Not loaded" ) );
+                    
+                    // Convert byte array to desired format
+                    object value = default ( T );
+                    switch ( Type.GetTypeCode ( typeof( T ) ) )
                     {
-                        case TypeCode.Int32  : result = ( object )this.GetIntFromMem    ( memoryRegister.address, memoryRegister.sizeGet ); break;
-                        case TypeCode.UInt32 : result = ( object )this.GetUIntFromMem   ( memoryRegister.address, memoryRegister.sizeGet ); break;
-                        case TypeCode.UInt64 : result = ( object )this.GetULongFromMem  ( memoryRegister.address, memoryRegister.sizeGet ); break;
-                        case TypeCode.Boolean: result = ( object )this.GetBoolFromMem   ( memoryRegister.address, memoryRegister.bit     ); break;
-                        case TypeCode.Char   : result = ( object )this.GetCharFromMem   ( memoryRegister.address );                         break;
-                        case TypeCode.String : result = ( object )this.GetStringFromMem ( memoryRegister.address, memoryRegister.sizeGet ); break;
+                        case TypeCode.Int32  : value = ( object )this.GetIntFromMem_Logic    ( read ); break;
+                        case TypeCode.UInt32 : value = ( object )this.GetUIntFromMem_Logic   ( read ); break;
+                        case TypeCode.UInt64 : value = ( object )this.GetULongFromMem_Logic  ( read ); break;
+                        case TypeCode.Boolean: value = ( object )this.GetBoolFromMem_Logic   ( read[ 0 ], memoryRegister.bit ); break;
+                        case TypeCode.Char   : value = ( object )this.GetCharFromMem_Logic   ( read[ 0 ] ); break;
+                        case TypeCode.String : value = ( object )this.GetStringFromMem_Logic ( read ); break;
                     }
-
-                    // Numeric field with operation to evaluate
-                    if ( memoryRegister.HasCustomOperation_Get )
-                        return this.ExecuteOperation<T> ( memoryRegister.mathExpression_Get, result );
-
-                    // String field with format to apply
-                    else if ( memoryRegister.HasCustomFormat_Get )
-                        return ( T )( object )this.ApplyFormat ( ( string )result, memoryRegister.format_Get );
-
-                    // Only return readed value
-                    return ( T )result;
+                    
+                    Console.WriteLine ( "Converted value: " + value );
+                    
+                    // Write converted value in the memory map
+                    switch ( Type.GetTypeCode( typeof( T ) ) )
+                    {
+                        case TypeCode.Int32  : this.SetIntToMem   ( ( int   )( object )value, memoryRegister.address, memoryRegister.size ); break;
+                        case TypeCode.UInt32 : this.SetUIntToMem  ( ( uint  )( object )value, memoryRegister.address, memoryRegister.size ); break;
+                        case TypeCode.UInt64 : this.SetULongToMem ( ( ulong )( object )value, memoryRegister.address, memoryRegister.size ); break;
+                        case TypeCode.Boolean: this.SetBoolToMem  ( ( bool  )( object )value, memoryRegister.address, memoryRegister.size ); break;
+                        case TypeCode.Char   : this.SetCharToMem  ( ( char  )( object )value, memoryRegister.address ); break;
+                        case TypeCode.String : this.SetStringToMem<String> ( ( string )( object )value, memoryRegister.address, memoryRegister.size ); break;
+                    }
+                
+                    // Set flag to know that at least the register read one time its value from the MTU
+                    memoryRegister.readedFromMtu = true;
+                
+                    Console.WriteLine ( "Read from map: " + ( T )this.PropertyGet_Logic ( memoryRegister ) );
+                
+                    return ( T )this.PropertyGet_Logic ( memoryRegister );
                 }));
 
             #endregion
@@ -356,7 +410,7 @@ namespace MTUComm.MemoryMap
                     memoryRegister.methodId_Get,
                     new Type[] { typeof( MemoryRegister<T> ) } );
 
-                // Method is not present in MTU family class
+                // Method is not present in the MemoryMap_CustomMethods class
                 if ( customMethod == null )
                 {
                     string strError = EXCEP_REGI_METHOD.Replace ( "#", memoryRegister.methodId_Get );
@@ -373,6 +427,31 @@ namespace MTUComm.MemoryMap
             }
 
             #endregion
+        }
+
+        private T PropertyGet_Logic<T> ( MemoryRegister<T> memoryRegister )
+        {
+            object result = default ( T );
+            switch (Type.GetTypeCode(typeof(T)))
+            {
+                case TypeCode.Int32  : result = ( object )this.GetIntFromMem    ( memoryRegister.address, memoryRegister.sizeGet ); break;
+                case TypeCode.UInt32 : result = ( object )this.GetUIntFromMem   ( memoryRegister.address, memoryRegister.sizeGet ); break;
+                case TypeCode.UInt64 : result = ( object )this.GetULongFromMem  ( memoryRegister.address, memoryRegister.sizeGet ); break;
+                case TypeCode.Boolean: result = ( object )this.GetBoolFromMem   ( memoryRegister.address, memoryRegister.bit     ); break;
+                case TypeCode.Char   : result = ( object )this.GetCharFromMem   ( memoryRegister.address );                         break;
+                case TypeCode.String : result = ( object )this.GetStringFromMem ( memoryRegister.address, memoryRegister.sizeGet ); break;
+            }
+
+            // Numeric field with operation to evaluate
+            if ( memoryRegister.HasCustomOperation_Get )
+                return this.ExecuteOperation<T> ( memoryRegister.mathExpression_Get, result );
+
+            // String field with format to apply
+            else if ( memoryRegister.HasCustomFormat_Get )
+                return ( T )( object )this.ApplyFormat ( ( string )result, memoryRegister.format_Get );
+
+            // Only return readed value
+            return ( T )result;
         }
 
         // Custom header format 1: public T RegisterId_Get|CustomId ( MemoryOverload<T> MemoryOverload, dynamic MemoryRegisters ) -> ExpandoObject
@@ -466,19 +545,7 @@ namespace MTUComm.MemoryMap
             base.AddMethod ( METHODS_SET_PREFIX + memoryRegister.id,
                 new Action<T>((_value) =>
                 {
-                    // Numeric field with operation to evaluate
-                    if ( memoryRegister.HasCustomOperation_Set )
-                        _value = this.ExecuteOperation<T> ( memoryRegister.mathExpression_Set, _value );
-
-                    switch ( Type.GetTypeCode( typeof(T)) )
-                    {
-                        case TypeCode.Int32  : this.SetIntToMem   ((int  )(object)_value, memoryRegister.address, memoryRegister.size); break;
-                        case TypeCode.UInt32 : this.SetUIntToMem  ((uint )(object)_value, memoryRegister.address, memoryRegister.size); break;
-                        case TypeCode.UInt64 : this.SetULongToMem ((ulong)(object)_value, memoryRegister.address, memoryRegister.size); break;
-                        case TypeCode.Boolean: this.SetBoolToMem  ((bool )(object)_value, memoryRegister.address, memoryRegister.size); break;
-                        case TypeCode.Char   : this.SetCharToMem  ((char )(object)_value, memoryRegister.address); break;
-                        //case TypeCode.String : this.SetStringToMem(TypeCode.String, (string)(object)_value, regObj.address); break;
-                    }
+                    this.PropertySet_Logic ( memoryRegister, _value );
                 }));
 
             #endregion
@@ -513,6 +580,23 @@ namespace MTUComm.MemoryMap
             }
 
             #endregion
+        }
+
+        private void PropertySet_Logic<T> ( MemoryRegister<T> memoryRegister, dynamic value )
+        {
+            // Numeric field with operation to evaluate
+            if ( memoryRegister.HasCustomOperation_Set )
+                value = this.ExecuteOperation<T> ( memoryRegister.mathExpression_Set, value );
+
+            switch ( Type.GetTypeCode( typeof(T)) )
+            {
+                case TypeCode.Int32  : this.SetIntToMem   ((int  )(object)value, memoryRegister.address, memoryRegister.size); break;
+                case TypeCode.UInt32 : this.SetUIntToMem  ((uint )(object)value, memoryRegister.address, memoryRegister.size); break;
+                case TypeCode.UInt64 : this.SetULongToMem ((ulong)(object)value, memoryRegister.address, memoryRegister.size); break;
+                case TypeCode.Boolean: this.SetBoolToMem  ((bool )(object)value, memoryRegister.address, memoryRegister.size); break;
+                case TypeCode.Char   : this.SetCharToMem  ((char )(object)value, memoryRegister.address); break;
+                //case TypeCode.String : this.SetStringToMem(TypeCode.String, (string)(object)_value, regObj.address); break;
+            }
         }
 
         public void CreateProperty_Set_String<T> ( MemoryRegister<T> memoryRegister )
@@ -634,59 +718,98 @@ namespace MTUComm.MemoryMap
 
         #region Get value
 
-        private int GetIntFromMem(int address, int size = MemRegister.DEF_SIZE)
+        private int GetIntFromMem ( int address, int size = MemRegister.DEF_SIZE )
+        {
+            byte[] data = new byte[ size ];
+            Array.Copy ( this.memory, address, data, 0, size );
+
+            return this.GetIntFromMem_Logic ( data );
+        }
+
+        private uint GetUIntFromMem ( int address, int size = MemRegister.DEF_SIZE )
+        {
+            byte[] data = new byte[ size ];
+            Array.Copy ( this.memory, address, data, 0, size );
+        
+            return this.GetUIntFromMem_Logic ( data );
+        }
+
+        private ulong GetULongFromMem ( int address, int size = MemRegister.DEF_SIZE )
+        {
+            byte[] data = new byte[ size ];
+            Array.Copy ( this.memory, address, data, 0, size );
+            
+            return this.GetULongFromMem_Logic ( data );
+        }
+
+        private bool GetBoolFromMem ( int address, int bit_index = MemRegister.DEF_BIT )
+        {
+            return this.GetBoolFromMem_Logic ( this.memory[ address ], bit_index );
+        }
+
+        private char GetCharFromMem ( int address )
+        {
+            return this.GetCharFromMem_Logic ( this.memory[ address ] );
+        }
+
+        private string GetStringFromMem ( int address, int size = MemRegister.DEF_SIZE )
+        {
+            byte[] data = new byte[ size ];
+            Array.Copy ( this.memory, address, data, 0, size );
+
+            return this.GetStringFromMem_Logic ( data );
+        }
+
+        private int GetIntFromMem_Logic ( byte[] data )
         {
             int value = 0;
-            for (int b = 0; b < size; b++)
-                value += memory[address + b] << (b * 8);
-
+            for ( int i = 0; i < data.Length; i++ )
+                value += data[ i ] << ( i * 8 );
+            
             return value;
         }
-
-        private uint GetUIntFromMem(int address, int size = MemRegister.DEF_SIZE)
+        
+        private uint GetUIntFromMem_Logic ( byte[] data )
         {
             uint value = 0;
-            for (int b = 0; b < size; b++)
-                value += (uint)(memory[address + b] << (b * 8));
+            for ( int i = 0; i < data.Length; i++ )
+                value += ( uint )( data[ i ] << ( i * 8 ) );
 
             return value;
         }
-
-        private ulong GetULongFromMem(int address, int size = MemRegister.DEF_SIZE)
+        
+        private ulong GetULongFromMem_Logic ( byte[] data )
         {
             ulong value = 0;
-            for (int b = 0; b < size; b++)
-                value += (ulong)memory[address + b] << (b * 8);
+            for ( int i = 0; i < data.Length; i++ )
+                value += ( ulong )data[ i ] << ( i * 8 );
 
             return value;
         }
-
-        private bool GetBoolFromMem(int address, int bit_index = MemRegister.DEF_BIT)
+        
+        private bool GetBoolFromMem_Logic ( int data, int bit_index )
         {
-            return (((memory[address] >> bit_index) & 1) == 1);
+            return ( ( ( data >> bit_index ) & 1 ) == 1 );
         }
 
-        private char GetCharFromMem(int address)
+        private char GetCharFromMem_Logic ( int data )
         {
-            return Convert.ToChar(memory[address]);
+            return Convert.ToChar ( data );
         }
 
-        private string GetStringFromMem(int address, int size = MemRegister.DEF_SIZE)
+        private string GetStringFromMem_Logic ( byte[] data )
         {
-            byte[] dataRead = new byte[size];
-            Array.Copy ( memory, address, dataRead, 0, size );
-
             bool trimRight = true;
             List<byte> bytes = new List<byte> ();
-            for ( int i = dataRead.Length - 1; i >= 0; i-- )
+            for ( int i = data.Length - 1; i >= 0; i-- )
             {
-                if ( trimRight && dataRead[ i ] == 0 )
+                if ( trimRight && data[ i ] == 0 )
                     continue;
 
                 // Only removes consecutive empty bytes on the right
                 trimRight = false;
 
-                bytes.Add ( dataRead[ i ] );
+                bytes.Add ( data[ i ] );
             }
             bytes.Reverse ();
 
@@ -711,8 +834,7 @@ namespace MTUComm.MemoryMap
             int size = MemRegister.DEF_SIZE )
         {
             if ( this.ValidateNumeric<int> ( value, size ) )
-                for (int b = 0; b < size; b++)
-                    this.memory[address + b] = (byte)(value >> (b * 8));
+                this.SetNumToMem_Logic ( value, address, size );
             else
                 throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " +
                     value + " -> Address: " + address + " + Bytes: " + size );
@@ -729,8 +851,7 @@ namespace MTUComm.MemoryMap
             else
             {
                 if ( this.ValidateNumeric<int> ( value, size ) )
-                    for (int b = 0; b < size; b++)
-                        this.memory[address + b] = (byte)(vCasted >> (b * 8));
+                    this.SetNumToMem_Logic ( vCasted, address, size );
                 else
                     throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " +
                         value + " -> Address: " + address + " + Bytes: " + size );
@@ -743,8 +864,7 @@ namespace MTUComm.MemoryMap
             int size = MemRegister.DEF_SIZE )
         {
             if ( this.ValidateNumeric<uint> ( value, size ) )
-                for (int b = 0; b < size; b++)
-                    this.memory[address + b] = (byte)(value >> (b * 8));
+                this.SetNumToMem_Logic ( value, address, size );
             else
                 throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " +
                     value + " -> Address: " + address + " + Bytes: " + size );
@@ -761,8 +881,7 @@ namespace MTUComm.MemoryMap
             else
             {
                 if ( this.ValidateNumeric<uint> ( value, size ) )
-                    for (int b = 0; b < size; b++)
-                        this.memory[address + b] = (byte)(vCasted >> (b * 8));
+                    this.SetNumToMem_Logic ( vCasted, address, size );
                 else
                     throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " +
                         value + " -> Address: " + address + " + Bytes: " + size );
@@ -775,8 +894,7 @@ namespace MTUComm.MemoryMap
             int size = MemRegister.DEF_SIZE )
         {
             if ( this.ValidateNumeric<ulong> ( value, size ) )
-                for (int b = 0; b < size; b++)
-                    this.memory[address + b] = (byte)(value >> (b * 8));
+                this.SetNumToMem_Logic ( value, address, size );
             else
                 throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " +
                     value + " -> Address: " + address + " + Bytes: " + size );
@@ -793,8 +911,7 @@ namespace MTUComm.MemoryMap
             else
             {
                 if ( this.ValidateNumeric<ulong> ( value, size ) )
-                    for (int b = 0; b < size; b++)
-                        this.memory[address + b] = (byte)(vCasted >> (b * 8));
+                    this.SetNumToMem_Logic ( vCasted, address, size );
                 else
                     throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " +
                         value + " -> Address: " + address + " + Bytes: " + size );
@@ -807,8 +924,8 @@ namespace MTUComm.MemoryMap
             int bit_index = MemRegister.DEF_BIT )
         {
             if ( value )
-                 memory[address] = ( byte ) ( memory[address] |    1 << bit_index   );
-            else memory[address] = ( byte ) ( memory[address] & ~( 1 << bit_index ) );
+                 this.memory[address] = ( byte ) ( this.memory[address] |    1 << bit_index   );
+            else this.memory[address] = ( byte ) ( this.memory[address] & ~( 1 << bit_index ) );
         }
 
         private void SetCharToMem (
@@ -849,8 +966,19 @@ namespace MTUComm.MemoryMap
             int address,
             int size = MemRegister.DEF_SIZE )
         {
+            Console.WriteLine ( "Memory: size " + this.memory.Length + " | from: " + address + " to " + ( address + size ) );
+        
             for ( int i = 0; i < size; i++ )
                 this.memory[ address + i ] = value[ i ];
+        }
+
+        private void SetNumToMem_Logic (
+            dynamic value,
+            int address,
+            int size = MemRegister.DEF_SIZE )
+        {
+            for ( int b = 0; b < size; b++ )
+                this.memory[ address + b ] = ( byte )( value >> ( b * 8 ) );
         }
 
         #endregion
@@ -914,22 +1042,6 @@ namespace MTUComm.MemoryMap
 
         #region Used
 
-        public void SetRegisterModified ( string id )
-        {
-            if ( this.registersObjs.ContainsKey ( id ) )
-                this.registersObjs[ id ].used = true;
-
-            throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + " [ Set Modified ]: " + id );
-        }
-
-        public void SetRegisterNotModified ( string id )
-        {
-            if ( this.registersObjs.ContainsKey ( id ) )
-                this.registersObjs[ id ].used = false;
-
-            throw new MemoryRegisterNotExistException ( EXCEP_SET_USED + " [ Set Not Modified ]: " + id );
-        }
-
         public MemoryRegisterDictionary GetModifiedRegisters ()
         {
             MemoryRegisterDictionary changes = new MemoryRegisterDictionary ();
@@ -984,12 +1096,6 @@ namespace MTUComm.MemoryMap
                         break;
                 }
             }
-
-            /*
-            return this.registersObjs.Where(reg => reg.Value.used)
-                .ToDictionary(reg => reg.Key, reg => reg.Value)
-                .Values.ToArray<RegisterObj> ();
-            */
         }
 
         #endregion

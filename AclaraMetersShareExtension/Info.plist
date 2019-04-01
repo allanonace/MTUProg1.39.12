@@ -36,8 +36,8 @@
 		<string>com.apple.share-services</string>
 	</dict>
 	<key>CFBundleShortVersionString</key>
-	<string>1.36.11</string>
+	<string>1.36.13</string>
 	<key>CFBundleVersion</key>
-	<string>0.0.17</string>
+	<string>0.0.19</string>
 </dict>
 </plist>

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
-using System.Collections.Generic;
 
 namespace Xml
 {
@@ -98,6 +97,21 @@ namespace Xml
 
         [XmlElement("Flow")]
         public int Flow { get; set; }
+
+        [XmlIgnore]
+        public string MeterTypeFlow {
+            get
+            {
+                Match match = Regex.Match ( this.Display,
+                               @"(\w+) (\d+)D PF(\d+) (\w+)",
+                               RegexOptions.IgnoreCase | RegexOptions.Singleline |
+                               RegexOptions.CultureInvariant | RegexOptions.Compiled );
+                               
+                if ( match.Success )
+                    return match.Groups[1].Value;
+                return string.Empty;
+            }
+        }
 
         [XmlIgnore]
         public int NumberOfDials {
