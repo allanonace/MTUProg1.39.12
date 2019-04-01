@@ -49,6 +49,43 @@ namespace MTUComm
             return result;
         }
         
+        /*
+        · Simular la web php: http://sandbox.onlinephpfunctions.com
+            <?php
+            if (function_exists("gzinflate"))
+                 echo "gzinflate OK \n";
+            else echo "gzinflate NO";
+            
+            $a = gzinflate(base64_decode("cy0qyi9SyC2tBOOC1KJ8hcLSVCAHCCoV0osSy1IB"));
+            echo $a;
+            ?>
+        · Simular la logica del app: https://dotnetfiddle.net
+            using System;
+            using System.IO;
+            using System.IO.Compression;
+            using System.Text;
+            
+            public class Program
+            {
+                public static void Main()
+                {
+                    using ( var outStream = new MemoryStream () )
+                    {
+                        string input = "Error muy muy pero que muuuuy grave";
+                        
+                        using ( DeflateStream stream = new DeflateStream ( outStream, CompressionMode.Compress ) )
+                            using (var ms = new MemoryStream ( Encoding.UTF8.GetBytes ( input ) ) )
+                                ms.CopyTo ( stream );
+            
+                        string converted = Convert.ToBase64String ( outStream.ToArray() );
+                        
+                        Console.WriteLine ( converted );
+                    }
+                }
+            }
+        · Convertir a url: https://www.url-encode-decode.com
+        */
+        
         private static string Compress_Logic ( string input, ALGORITHM algorithm )
         {
             using ( var outStream = new MemoryStream () )

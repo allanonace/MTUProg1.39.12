@@ -24,6 +24,7 @@ namespace MTUComm.MemoryMap
         public Func<dynamic,dynamic> funcSetCustom;         // MemoryRegister.Value{set}
         public Action<string> funcSetString;    // MemoryRegister.Value{set}
         public Action<byte[]> funcSetByteArray; // MemoryRegister.Value{set}
+        public Func<T> funcGetFromMtu;
         public string id { get; }
         public string description { get; }
         public RegType valueType { get; }
@@ -38,10 +39,8 @@ namespace MTUComm.MemoryMap
         private CUSTOM_TYPE customType_Get;
         private CUSTOM_TYPE customType_Set;
         public REGISTER_TYPE registerType { get; }
-        public bool readed;
-        public bool used;
-        
-        private dynamic tempValue;
+        public bool used;   // Flag is used to know what registers should be written in the MTU
+        public bool readedFromMtu; // Loaded at least one time reading from the MTU
 
         #endregion
 
@@ -151,11 +150,6 @@ namespace MTUComm.MemoryMap
 
         #endregion
 
-        public dynamic TempValue
-        {
-            get { return this.tempValue; }
-        }
-
         // Read and write without processing data, raw info
         public dynamic ValueRaw
         {
@@ -246,23 +240,17 @@ namespace MTUComm.MemoryMap
                     else
                         this.ValueRaw = value;
                     
-                    // Reset temporary value
-                    this.tempValue = null;
+                    // Flag is used to know what registers should be written in the MTU
+                    this.used = true;
                 }
-
-                else
-                    this.tempValue = value;
-
-                /*
                 // Register is readonly
                 else
                 {
-                    Console.WriteLine ( "Set " + id + ": Error - Can't write to this register" );
+                    Console.WriteLine ( "Set " + id + ": Error - Can't write to this register because is readonly" );
 
                     if ( ! MemoryMap.isUnityTest )
                         throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
                 }
-                */
             }
         }
 
@@ -304,7 +292,7 @@ namespace MTUComm.MemoryMap
             this.description  = description;
             this.address      = address;
             this.size         = size;
-            this.sizeGet      = ( sizeGet > 0 ) ? sizeGet : size;
+            this.sizeGet      = ( sizeGet > 1 || type == RegType.BOOL ) ? sizeGet : size; // sizeGet by default is 1
             this.write        = write;
             this.custom_Get   = custom_Get.Replace ( " ", string.Empty );
             this.custom_Set   = custom_Set.Replace ( " ", string.Empty );

@@ -96,9 +96,6 @@ namespace MTUComm.MemoryMap
                     throw new MemoryOverloadsAreReadOnly ( MemoryMap.EXCEP_OVE_READONLY + ": " + id );
 
                 this.dictionary[id].Value = value;
-                
-                if ( this.dictionary[id].TempValue == null )
-                    this.dictionary[id].used = true;
 
                 return true;
             }

@@ -241,6 +241,8 @@ namespace MTUComm
             this.configuration = configuration;
             latest_mtu = new MTUBasicInfo(new byte[BASIC_READ_1_DATA + BASIC_READ_2_DATA]);
             lexi = new Lexi.Lexi(serial, 10000);
+            
+            Singleton.Set = lexi;
         }
 
         #endregion
@@ -545,7 +547,7 @@ namespace MTUComm
                     System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
                     
                 // Generates the memory map with recovered data
-                dynamic map = new MemoryMap.MemoryMap ( buffer, memory_map_type );
+                dynamic map = new MemoryMap.MemoryMap ( buffer, memory_map_type, false );
     
                 bool InstallConfirmationNotSynced = map.InstallConfirmationNotSynced;
                 string InstallConfirmationStatus = map.InstallConfirmationStatus;
@@ -1378,9 +1380,6 @@ namespace MTUComm
                     // Check if the MTU is still the same
                     if ( ! this.IsSameMtu () )
                         throw new MtuHasChangeBeforeFinishActionException ();
-                        
-                    // Load value in the memory map
-                    map.EncryptionIndex = ( int )regEncryIndex.ValueReadFromMtu ( lexi );
                 }
 
                 #endregion
@@ -1474,7 +1473,8 @@ namespace MTUComm
                 if ( ! this.IsSameMtu () )
                     throw new MtuHasChangeBeforeFinishActionException ();
 
-                MemoryMap.MemoryMap readMemoryMap = new MemoryMap.MemoryMap(buffer, memory_map_type);
+                // Third parameter ( false ) is for avoiding update/read values from the MTU
+                MemoryMap.MemoryMap readMemoryMap = new MemoryMap.MemoryMap ( buffer, memory_map_type, false );
 
                 List<string> diff = new List<string>(map.GetModifiedRegistersDifferences(readMemoryMap));
                 if (diff.Count > 1 || (diff.Count == 1 && !diff.Contains("EncryptionKey")))
