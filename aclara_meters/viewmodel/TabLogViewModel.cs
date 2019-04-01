@@ -19,34 +19,26 @@ namespace aclara.ViewModels
         public async Task LoadData(bool isReloading = false)
         {
             Stream stream=null;
-            //var assembly = IntrospectionExtensions.GetTypeInfo(typeof(MainPage)).Assembly;
-
-            //foreach (var res in assembly.GetManifestResourceNames())
-            //{
-            //    Console.Write("found resource: " + res);
-            //}
-            //c = assembly.GetManifestResourceStream("PruebasUI.Files.0221201911Log.xml");
-            // List<Monkey> monkeys;
-            // Path where the file should be saved once downloaded (locally)
-            string path = Mobile.LogPath;
+          
+            string path = Mobile.LogUserPath;
             DirectoryInfo info = new DirectoryInfo(path);
             FileInfo[] files = info.GetFiles().OrderByDescending(p => p.LastWriteTimeUtc).ToArray();
 
             foreach (FileInfo file in files)
             {
-                if (file.Name.Contains("Log.xml") || file.Name.Contains("Result"))
+                if ( file.Name.Contains("Log.xml") )
                 {
                     Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
 
                     var fileStream = new FileStream(file.FullName, FileMode.Open);
                     stream = fileStream;
-                    OtroRead(stream);
+                    ReadLogXML(stream);
                     break;
                 }
             }
         }
 
-        private void OtroRead(Stream stream)
+        private void ReadLogXML(Stream stream)
         {
             String sPort = String.Empty;
             String sName = String.Empty;

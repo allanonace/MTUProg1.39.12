@@ -1752,15 +1752,12 @@ namespace aclara_meters.view
 
         private void Confirm_No_LogOut ( object sender, EventArgs e )
         {
+         
+           #region Show Upload prompt
 
-            if (FormsApp.config.global.UploadPrompt)
-            {
-                #region Show Upload prompt
+           GenericUtilsClass.UploadFilesTask(FormsApp.config.global.UploadPrompt);
 
-                GenericUtilsClass.UploadFilesTask();
-
-                #endregion
-            }
+           #endregion   
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
@@ -4039,6 +4036,7 @@ namespace aclara_meters.view
                     backdark_bg.IsVisible = true;
                     indicator.IsVisible = true;
                     _userTapped = true;
+                    ContentNav.IsEnabled = false;
                     background_scan_page.IsEnabled = false;
                     ChangeLowerButtonImage(true);
 
@@ -4493,6 +4491,7 @@ namespace aclara_meters.view
                 backdark_bg.IsVisible = false;
                 indicator.IsVisible = false;
                 label_read.Text = "Successful MTU write";
+                ContentNav.IsEnabled = true;
                 background_scan_page.IsEnabled = true;
                 ReadMTUChangeView.IsVisible = false;
                 listaMTUread.IsVisible = true;

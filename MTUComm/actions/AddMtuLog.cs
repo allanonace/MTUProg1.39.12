@@ -401,9 +401,11 @@ namespace MTUComm
             XElement mtus = doc.Root.Element ( "Mtus" );
             mtus.Add ( this.addMtuAction );
             doc.Save ( logUri );
-            
+
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
+            #if DEBUG
+
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 this.mtuBasicInfo.Type + "-" + this.action.type + ( ( form.mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.logger.CreateFileIfNotExist ( false, uniUri );
@@ -411,8 +413,6 @@ namespace MTUComm
             XDocument uniDoc = XDocument.Load ( uniUri );
             XElement uniMtus = uniDoc.Root.Element ( "Mtus" );
             uniMtus.Add ( this.addMtuAction );
-            
-            #if DEBUG
             
             uniDoc.Save ( uniUri );
             

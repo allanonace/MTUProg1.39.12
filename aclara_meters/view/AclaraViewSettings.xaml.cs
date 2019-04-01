@@ -18,6 +18,7 @@ using MTUComm;
 using Xamarin.Essentials;
 
 using ActionType = MTUComm.Action.ActionType;
+using System.IO;
 
 namespace aclara_meters.view
 {
@@ -116,7 +117,7 @@ namespace aclara_meters.view
             {
                 userName.Text = FormsApp.credentialsService.UserName;
             }
-
+            //List<FileInfo> ListFiles = GenericUtilsClass.LogFilesToUpload(Mobile.LogPath, true);
             // portrait
             Task.Run(async () =>
             {
@@ -1239,24 +1240,23 @@ namespace aclara_meters.view
             force_sync.IsEnabled = false;
             backdark_bg.IsVisible = true;
             indicator.IsVisible = true;
+            ContentNav.IsEnabled = false;
 
-            if (FormsApp.config.global.UploadPrompt)
-            {
-                #region Show Upload prompt
+            #region Show Upload prompt
 
-                GenericUtilsClass.UploadFilesTaskSettings();
+            GenericUtilsClass.UploadFilesTask(FormsApp.config.global.UploadPrompt);
 
-                #endregion
-            }
+            #endregion
 
             Task.Delay(100).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
                 String myDate = DateTime.Now.ToString();
                 date_sync.Text = myDate;
-                updated_files.Text = "1456";
-                pending_files.Text = "23";
+                updated_files.Text = GenericUtilsClass.NumFilesUpload.ToString();
+                pending_files.Text = (GenericUtilsClass.NumFiles-GenericUtilsClass.NumFilesUpload).ToString();
                 force_sync.IsEnabled = true;
+                ContentNav.IsEnabled = true;
                 backdark_bg.IsVisible = false;
                 indicator.IsVisible = false;
             }));
@@ -1415,15 +1415,8 @@ namespace aclara_meters.view
 
         private void LogOffOkTapped(object sender, EventArgs e)
         {
-
-            if (FormsApp.config.global.UploadPrompt)
-            {
-                #region Show Upload prompt
-
-                GenericUtilsClass.UploadFilesTask();
-
-                #endregion
-            }
+                     
+            GenericUtilsClass.UploadFilesTask (FormsApp.config.global.UploadPrompt);
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
@@ -1532,6 +1525,10 @@ namespace aclara_meters.view
                     logs_button_text.Opacity = 0.5; logs_button.Opacity = 0.5;
                     sync_button_text.Opacity = 1; sync_button.Opacity = 1;
                     title_text.Text = "File Syncronization";
+                    date_sync.Text = DateTime.Now.ToString();
+                    updated_files.Text = GenericUtilsClass.NumFilesUpload.ToString();
+                    List<FileInfo> ListFiles = GenericUtilsClass.LogFilesToUpload(Mobile.LogPath, true);
+                    pending_files.Text = ListFiles.Count.ToString();
 
                     sync_block.FadeTo(1, 200);
 

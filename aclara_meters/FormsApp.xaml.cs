@@ -183,7 +183,9 @@ namespace aclara_meters
             }
             Mobile.ConfigPath = sPath;
             Mobile.LogPath = sPath;
+            #if DEBUG
             Mobile.LogUniPath = sPath;
+            #endif
         }
 
         private void LoadConfigurationAndOpenScene ( IUserDialogs dialogs )

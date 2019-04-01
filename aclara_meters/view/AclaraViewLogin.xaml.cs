@@ -53,12 +53,12 @@ namespace aclara_meters.view
 
                     if ( Mobile.IsNetAvailable () )
                     {
-                        if ( this.UploadingLogFiles () )
-                        {
-                            //base.DisplayAlert ( "Information", "All Log files uploaded!", "Ok" );
+                        //if ( this.UploadingLogFiles () )
+                        //{
+                        //    //base.DisplayAlert ( "Information", "All Log files uploaded!", "Ok" );
 
-                            //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
-                        }
+                        //    //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
+                        //}
                         //else base.DisplayAlert ( "Error", "Error Uploading files", "Ok" );
                     }
                     else base.DisplayAlert ( "Warning", "No connection available. Log files will not be uploaded till you get internet connection", "Ok" );
@@ -120,139 +120,6 @@ namespace aclara_meters.view
         {
             // This prevents a user from being able to hit the back button and leave the login page.
             return true;
-        }
-        
-        private bool UploadingLogFiles ()
-        {
-
-            string host = FormsApp.config.global.ftpRemoteHost;
-            string username = FormsApp.config.global.ftpUserName;
-            string password = FormsApp.config.global.ftpPassword;
-
-            if (String.IsNullOrEmpty(host) || string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) )
-            {
-                Errors.ShowErrorAndKill (new FtpCredentialsMissingException());
-                return false;
-            }
-
-            //string pathRemoteFile = "/home/aclara/"; // prueba_archivo.xml";
-
-            //TODO: UUID MOVIL EN PATH REMOTE FILE
-            string pathRemoteFile = "/home/aclara"+ FormsApp.config.global.ftpRemotePath + CrossDeviceInfo.Current.Id + "/"; // prueba_archivo.xml";
-
-            // Path where the file should be saved once downloaded (locally)
-            string path = Mobile.LogPath;
-            
-            //string name = "ReadMtuResult.xml";
-            //string filename = Path.Combine(xml_documents, name);
-            using (SftpClient sftp = new SftpClient(host, username, password))
-            {
-                try
-                {
-                    sftp.Connect();
-
-                    if(!sftp.Exists(pathRemoteFile)){
-                        sftp.CreateDirectory(pathRemoteFile);
-                    }
-                    //TODO
-
-                    List<string> saved_array_files = new List<string>();
-
-                    try
-                    {
-                        var lines = File.ReadAllLines(Path.Combine( path, "SavedLogsList.txt"));
-                        foreach (var line in lines)
-                        {
-                            saved_array_files.Add(line);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.StackTrace);
-                    }
-
-                    List<FileInfo> local_array_files = new List<FileInfo>();
-                    DirectoryInfo info = new DirectoryInfo( path );
-                    FileInfo[] files = info.GetFiles().OrderBy(p => p.LastWriteTimeUtc).ToArray();
-
-                    foreach (FileInfo file in files)
-                    { 
-
-                        if (file.Name.Contains("Log.xml") || file.Name.Contains("Result") )
-                        {
-                            Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
-                            bool enc = false;
-                            foreach (string fileFtp in saved_array_files)
-                            {
-                                if (fileFtp.Equals(file.Name))
-                                {
-                                    enc = true;
-                                }
-                            }
-
-                            if (!enc)
-                            {
-
-                                if( file.Name.Contains("Result") )
-                                {
-                                    local_array_files.Add(file);
-                                }
-                                else
-                                {
-                                    string dayfix = file.Name.Split('.')[0].Replace("Log", "");
-                                    DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
-                                    TimeSpan diff = date - DateTime.UtcNow;
-                                    int hours = (int)diff.TotalHours;
-                                    if (hours < 0)
-                                    {
-                                        local_array_files.Add(file);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (local_array_files.Count > 0)
-                    {
-                        foreach (FileInfo file in local_array_files)
-                        {
-                            var fileStream = new FileStream(file.FullName, FileMode.Open);
-                            if (fileStream != null)
-                            {
-                                sftp.UploadFile(fileStream, Path.Combine(pathRemoteFile, file.Name), null);
-                            }
-                            long cont = fileStream.Length;
-                            fileStream.Close();
-                            File.Delete(file.FullName);
-                        }
-
-                        try
-                        {
-                            using (TextWriter tw = new StreamWriter(Path.Combine(path, "SavedLogsList.txt")))
-                            {
-                                foreach (string fileFtp in saved_array_files)
-                                {
-                                    tw.WriteLine(fileFtp);
-                                }
-                                foreach (FileInfo s in local_array_files)
-                                    tw.WriteLine(s.Name);
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.StackTrace);
-                        }
-                    }
-                    sftp.Disconnect();
-                    return true;
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("An exception has been caught " + e.ToString());
-                }
-            }
-
-            return false;
         }
         
         void SetLayoutPosition(bool onFocus, int value)

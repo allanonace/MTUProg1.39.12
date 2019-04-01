@@ -168,11 +168,18 @@ namespace MTUComm
             //"/data/"
         };
 
+        public static void CreateIfNotExist(string path)
+        {
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+        }
+
         public  static ConfigData configData;
         private static string     pathCachePublic;
         private static string     pathCacheConfig;
         private static string     pathCacheLogs;
         private static string     pathCacheLogsUni;
+        private static string     pathCacheLogsUser;
 
         public static string ConfigPath
         {
@@ -182,8 +189,7 @@ namespace MTUComm
             }
             set
             {
-                if (!Directory.Exists(value))
-                    Directory.CreateDirectory(value);
+                CreateIfNotExist(value);
                 pathCacheConfig = value;
             }
         }
@@ -197,8 +203,7 @@ namespace MTUComm
             set
             {
                 string path = Path.Combine(value, PATH_LOGS);
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
+                CreateIfNotExist(path);
                 pathCacheLogs = path;
             }
         }
@@ -207,16 +212,31 @@ namespace MTUComm
         {
             get
             {
+                CreateIfNotExist(pathCacheLogsUni);
                 return pathCacheLogsUni;
             }
             set
             {
                 string path = Path.Combine(value, PATH_LOGSUNI);
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
+                CreateIfNotExist(path);
                 pathCacheLogsUni = path;
             }
         }
+
+        public static string LogUserPath
+        {
+            get
+            {
+                return pathCacheLogsUser;
+            }
+            set
+            {
+                string path = Path.Combine(LogPath, value);
+                CreateIfNotExist(path);
+                pathCacheLogsUser = path;
+            }
+        }
+
         static Mobile ()
         {
             configData = new ConfigData ();

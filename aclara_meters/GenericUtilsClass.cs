@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MTUComm;
+using MTUComm.Exceptions;
 using Plugin.DeviceInfo;
 using Renci.SshNet;
 using Xamarin.Forms;
@@ -13,181 +14,114 @@ namespace aclara_meters
 {
     public class GenericUtilsClass
     {
+        public static int NumFilesUpload;
+        public static int NumFiles;
 
-        public static async Task UploadFilesTask()
+        public static async Task UploadFilesTask(Boolean UploadPrompt)
         {
+            var resp = false;
 
-            var res = await Application.Current.MainPage.DisplayAlert("Alert", "Detected pending log files. Do you want to Upload them?", "Ok", "Cancel");
+            if (UploadPrompt)
+                resp = await Application.Current.MainPage.DisplayAlert("Alert", "Detected pending log files. Do you want to Upload them?", "Ok", "Cancel");
+            else
+                resp = !UploadPrompt;
 
-            if (res)
+            if (resp)
             {
-                if( GenericUtilsClass.UploadLogFiles() )
+                if (GenericUtilsClass.UploadLogFiles(true))
                 {
-                    Application.Current.MainPage.DisplayAlert("Alert", "Log files successfully uploaded", "Ok");
+                    await Application.Current.MainPage.DisplayAlert("Alert", "Log files successfully uploaded", "Ok");
                 }
                 else
                 {
-                    Application.Current.MainPage.DisplayAlert("Error", "Log files could not be uploaded", "Ok");
+                    await Application.Current.MainPage.DisplayAlert("Error", "Log files could not be uploaded", "Ok");
                 }
             }
         }
 
 
-        public static async Task UploadFilesTaskSettings()
-        {
-        
-            if (GenericUtilsClass.UploadLogFiles())
-            {
-                await Application.Current.MainPage.DisplayAlert("Alert", "Log files successfully uploaded", "Ok");
-            }
-            else
-            {
-                await Application.Current.MainPage.DisplayAlert("Error", "Log files could not be uploaded", "Ok");
-            }
-            
-        }
+
         public static async Task<Boolean> UploadFilesTaskScripting()
         {
-            return GenericUtilsClass.UploadLogFiles();
+            return GenericUtilsClass.UploadLogFiles(true);
 
         }
 
 
-        public static bool UploadLogFiles()
+        public static bool UploadLogFiles(Boolean AllLogs)
         {
-
-            string ftp_username = FormsApp.config.global.ftpUserName;
-            string ftp_password = FormsApp.config.global.ftpPassword;
-            string ftp_remoteHost = FormsApp.config.global.ftpRemoteHost;
-            string ftp_remotePath = FormsApp.config.global.ftpRemotePath; //For the logs...
-
 
             string host = FormsApp.config.global.ftpRemoteHost;
             string username = FormsApp.config.global.ftpUserName;
             string password = FormsApp.config.global.ftpPassword;
+            string remotepath = FormsApp.config.global.ftpRemotePath;
 
+            if (String.IsNullOrEmpty(host) || string.IsNullOrEmpty(username)
+                    || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(remotepath))
+            {
+                Errors.ShowErrorAndKill(new FtpCredentialsMissingException());
+                return false;
+            }
             //string pathRemoteFile = "/home/aclara/"; // prueba_archivo.xml";
-
+            NumFilesUpload = 0;
+            NumFiles = 0;
             //TODO: UUID MOVIL EN PATH REMOTE FILE
-            string pathRemoteFile = "/home/aclara" + FormsApp.config.global.ftpRemotePath + CrossDeviceInfo.Current.Id + "/"; // prueba_archivo.xml";
+            //string pathRemoteFile = FormsApp.config.global.ftpRemotePath + CrossDeviceInfo.Current.Id + "/"; // prueba_archivo.xml";
+            string pathRemoteFile = FormsApp.config.global.ftpRemotePath + FormsApp.credentialsService.UserName + "/";
 
             // Path where the file should be saved once downloaded (locally)
-            string path = Mobile.LogPath;
+            string path;
+            if (AllLogs)
+                path = Mobile.LogPath;
+            else
+                path = Mobile.LogUserPath;
 
             //string name = "ReadMtuResult.xml";
             //string filename = Path.Combine(xml_documents, name);
+            List<FileInfo> local_array_files = new List<FileInfo>();
+
+            local_array_files = LogFilesToUpload(path, false);
+            NumFiles = local_array_files.Count;
+            if (NumFiles == 0) return true;
+
             using (SftpClient sftp = new SftpClient(host, username, password))
             {
                 try
                 {
                     sftp.Connect();
-
-                    if (!sftp.Exists(pathRemoteFile))
+  
+                    foreach (FileInfo file in local_array_files)
                     {
-                        sftp.CreateDirectory(pathRemoteFile);
-                    }
-                    //TODO
+                        var fileStream = new FileStream(file.FullName, FileMode.Open);
 
-                    List<string> saved_array_files = new List<string>();
-
-                    try
-                    {
-                        var lines = File.ReadAllLines(Path.Combine(path, "SavedLogsList.txt"));
-                        foreach (var line in lines)
+                        string sDir = file.Directory.Name;
+                        pathRemoteFile = FormsApp.config.global.ftpRemotePath + sDir; //+ "/";
+                        if (!sftp.Exists(pathRemoteFile))
                         {
-                            saved_array_files.Add(line);
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.StackTrace);
-                    }
-
-                    List<FileInfo> local_array_files = new List<FileInfo>();
-                    DirectoryInfo info = new DirectoryInfo(path);
-                    FileInfo[] files = info.GetFiles().OrderBy(p => p.LastWriteTimeUtc).ToArray();
-
-                    foreach (FileInfo file in files)
-                    {
-
-                        if (file.Name.Contains("Log.xml") || file.Name.Contains("Result"))
-                        {
-                            Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
-                            bool enc = false;
-                            foreach (string fileFtp in saved_array_files)
-                            {
-                                if (fileFtp.Equals(file.Name))
-                                {
-                                    enc = true;
-                                }
-                            }
-
-                            if (!enc)
-                            {
-
-                                if (file.Name.Contains("Result"))
-                                {
-                                    local_array_files.Add(file);
-                                }
-                                else
-                                {
-                                    string dayfix = file.Name.Split('.')[0].Replace("Log", "");
-                                    DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
-                                    TimeSpan diff = date - DateTime.UtcNow;
-                                    int hours = (int)diff.TotalHours;
-                                    if (hours < 0)
-                                    {
-                                        local_array_files.Add(file);
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (local_array_files.Count > 0)
-                    {
-                        foreach (FileInfo file in local_array_files)
-                        {
-                            var fileStream = new FileStream(file.FullName, FileMode.Open);
-                            if (fileStream != null)
-                            {
-                                sftp.UploadFile(fileStream, Path.Combine(pathRemoteFile, file.Name), null);
-                            }
-                            long cont = fileStream.Length;
-                            fileStream.Close();
-
-                            #region Create copy of deleted files to another dir
-
-                            string url_to_copy = Path.Combine(path, "log_copies");
-                            if (!Directory.Exists(url_to_copy))
-                                Directory.CreateDirectory(url_to_copy);
-
-                            File.Copy(Path.Combine(path, file.Name), Path.Combine(url_to_copy, file.Name), true);
-
-
-                            #endregion
-
-                            File.Delete(file.FullName);
+                            sftp.CreateDirectory(pathRemoteFile);
                         }
 
-                        try
+                        if (fileStream != null)
                         {
-                            using (TextWriter tw = new StreamWriter(Path.Combine(path, "SavedLogsList.txt")))
-                            {
-                                foreach (string fileFtp in saved_array_files)
-                                {
-                                    tw.WriteLine(fileFtp);
-                                }
-                                foreach (FileInfo s in local_array_files)
-                                    tw.WriteLine(s.Name);
-                            }
+                            NumFilesUpload += 1;
+                            sftp.UploadFile(fileStream, Path.Combine(pathRemoteFile, file.Name), null);
                         }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.StackTrace);
-                        }
-                    }
+                        long cont = fileStream.Length;
+                        fileStream.Close();
 
+                        #region Create copy of deleted files to another dir
+
+                        string url_to_copy = Path.Combine(file.Directory.FullName, "backup");
+                        if (!Directory.Exists(url_to_copy))
+                            Directory.CreateDirectory(url_to_copy);
+
+                        File.Copy(file.FullName, Path.Combine(url_to_copy, file.Name), true);
+
+
+                        #endregion
+
+                        File.Delete(file.FullName);
+                    }
 
                     sftp.Disconnect();
 
@@ -202,6 +136,39 @@ namespace aclara_meters
             return false;
         }
 
+        public static List<FileInfo> LogFilesToUpload(string path,bool bAll)
+        {
+            List<FileInfo> local_array_files = new List<FileInfo>();
 
+            DirectoryInfo info = new DirectoryInfo(path);
+
+            FileInfo[] files = info.GetFiles("*.xml", SearchOption.AllDirectories).OrderBy(p => p.LastWriteTimeUtc).ToArray();
+
+            NumFiles = files.Length;
+            foreach (FileInfo file in files)
+            {
+                if (file.Directory.Name == "backup") continue;
+                if (file.Name.Contains("Result"))
+                {
+                    local_array_files.Add(file);
+                }
+                else
+                {
+                    if (!bAll)
+                    {
+                        string dayfix = file.Name.Split('.')[0].Replace("Log", "");
+                        DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
+                        TimeSpan diff = date - DateTime.UtcNow;
+                        int hours = (int)diff.TotalHours;
+                        if (hours < 0)
+                        {
+                            local_array_files.Add(file);
+                        }
+                    }
+                    else local_array_files.Add(file);
+                }
+            }
+            return local_array_files;
+        }
     }
 }

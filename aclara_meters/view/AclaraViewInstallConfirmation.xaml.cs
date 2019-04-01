@@ -218,6 +218,7 @@ namespace aclara_meters.view
                     backdark_bg.IsVisible = true;
                     indicator.IsVisible = true;
                     background_scan_page.IsEnabled = false;
+                    ContentNav.IsEnabled = false;
                     ChangeLowerButtonImage(true);
                     _userTapped = true;
                     label_read.Text = "Reading from MTU ... ";
@@ -403,6 +404,7 @@ namespace aclara_meters.view
                     _userTapped = false;
                     btn_ic.NumberOfTapsRequired = 1;
                     ChangeLowerButtonImage(false);
+                    ContentNav.IsEnabled = true;
                     backdark_bg.IsVisible = false;
                     indicator.IsVisible = false;
                     background_scan_page.IsEnabled = true;
@@ -909,14 +911,7 @@ namespace aclara_meters.view
 
         private void LogOffOkTapped(object sender, EventArgs e)
         {
-            if (FormsApp.config.global.UploadPrompt)
-            {
-                #region Show Upload prompt
-
-                GenericUtilsClass.UploadFilesTask();
-
-                #endregion
-            }
+            GenericUtilsClass.UploadFilesTask(FormsApp.config.global.UploadPrompt);
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;

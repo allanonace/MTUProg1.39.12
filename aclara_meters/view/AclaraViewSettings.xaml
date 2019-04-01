@@ -151,7 +151,7 @@
                                 <StackLayout IsVisible="false" Margin="-10,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" Scale="0.9" x:Name="sync_block">
                                     <StackLayout Margin="0,72,0,0" VerticalOptions="Center" Orientation="Horizontal">
                                         <StackLayout Orientation="Horizontal" HorizontalOptions="Start">
-                                            <Label HorizontalTextAlignment="Start" FontSize="14" Text="Last Sync Date/time:">
+                                            <Label HorizontalTextAlignment="Start" FontSize="14" Text="Date/time:">
                                             </Label>
                                         </StackLayout>
                                         <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand">
@@ -161,7 +161,7 @@
                                     </StackLayout>
                                     <StackLayout Margin="0,12,0,0" Orientation="Horizontal">
                                         <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
-                                            <Label HorizontalTextAlignment="Start" FontSize="14" Text="Total Uploaded Files:">
+                                            <Label HorizontalTextAlignment="Start" FontSize="14" Text="Last Uploaded Files:">
                                             </Label>
                                         </StackLayout>
                                         <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand">
@@ -171,7 +171,7 @@
                                     </StackLayout>
                                     <StackLayout Margin="0,12,0,0" Orientation="Horizontal">
                                         <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
-                                            <Label HorizontalTextAlignment="Start" FontSize="14" Text="Uploading Pending Files:">
+                                            <Label HorizontalTextAlignment="Start" FontSize="14" Text="Pending files to upload:">
                                             </Label>
                                         </StackLayout>
                                         <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand">
