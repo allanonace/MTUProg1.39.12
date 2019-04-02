@@ -44,6 +44,7 @@ namespace Xml
         }
 
         private string message;
+        private string messageFooter;
         private string messagePopup;
 
         [XmlAttribute("message")]
@@ -56,6 +57,16 @@ namespace Xml
                 else return message;
             }
             set { this.message = value; }
+        }
+        
+        [XmlAttribute("footer")]
+        public string MessageFooter
+        {
+            get
+            {
+                return "Error " + this.Id + ": " + this.messageFooter;
+            }
+            set { this.messageFooter = value; }
         }
         
         [XmlIgnore]

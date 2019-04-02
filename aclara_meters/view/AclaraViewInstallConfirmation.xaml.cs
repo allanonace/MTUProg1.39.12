@@ -414,35 +414,22 @@ namespace aclara_meters.view
             add_mtu.OnError += (() =>
             {
                 Error error = Errors.LastError;
-            
-                Console.WriteLine("Action Errror");
-                Console.WriteLine("Press Key to Exit");
-                // Console.WriteLine(s.ToString());
-
-                // String result = e.Message;
-                //Console.WriteLine(result.ToString());
-
-               // extension.ProvideValue("Timeout");
-
-                string resultMsg = error.Message;
 
                 Task.Delay(100).ContinueWith(t =>
-                     Device.BeginInvokeOnMainThread(() =>
-                     {
-                         MTUDataListView = new List<ReadMTUItem> { };
-
-                         FinalReadListView = new List<ReadMTUItem> { };
-
-                         listaMTUread.ItemsSource = FinalReadListView;
-
-                         label_read.Text = resultMsg;
-                         _userTapped = false;
-                         btn_ic.NumberOfTapsRequired = 1;
-                         ChangeLowerButtonImage(false);
-                         backdark_bg.IsVisible = false;
-                         indicator.IsVisible = false;
-                         background_scan_page.IsEnabled = true;
-                     }));
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        MTUDataListView = new List<ReadMTUItem> { };
+                        FinalReadListView = new List<ReadMTUItem> { };
+                        listaMTUread.ItemsSource = FinalReadListView;
+                        label_read.Text = error.MessageFooter;
+                        _userTapped = false;
+                        btn_ic.NumberOfTapsRequired = 1;
+                        ChangeLowerButtonImage(false);
+                        backdark_bg.IsVisible = false;
+                        indicator.IsVisible = false;
+                        background_scan_page.IsEnabled = true;
+                    })
+                );
             });
 
             add_mtu.Run();

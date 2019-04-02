@@ -4510,26 +4510,19 @@ namespace aclara_meters.view
         private void OnError ()
         {
             Error error = Errors.LastError;
-            
-            Console.WriteLine("Action Errror");
-            Console.WriteLine("Press Key to Exit");
-            // Console.WriteLine(s.ToString());
-
-            String result = error.Message;
 
             Task.Delay(100).ContinueWith(t =>
-              Device.BeginInvokeOnMainThread(() =>
-              {
-                  _userTapped = false;
-                  bg_read_mtu_button.NumberOfTapsRequired = 1;
-                  ChangeLowerButtonImage(false);
-                  backdark_bg.IsVisible = false;
-                  indicator.IsVisible = false;
-                  label_read.Text = result;
-                  background_scan_page.IsEnabled = true;
-              }));
-
-            Console.WriteLine(result.ToString());
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    _userTapped = false;
+                    bg_read_mtu_button.NumberOfTapsRequired = 1;
+                    ChangeLowerButtonImage(false);
+                    backdark_bg.IsVisible = false;
+                    indicator.IsVisible = false;
+                    label_read.Text = error.MessageFooter;
+                    background_scan_page.IsEnabled = true;
+                })
+            );
         }
 
         #endregion

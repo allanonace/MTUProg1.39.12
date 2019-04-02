@@ -128,7 +128,6 @@ namespace aclara_meters.view
                     background_scan_page.IsEnabled = false;
                     ChangeLowerButtonImage(true);
                     _userTapped = true;
-                    label_read.Text = "Reading from MTU ... ";
 
                     Task.Factory.StartNew(ThreadProcedureMTUCOMMAction);
                 });
@@ -1621,6 +1620,17 @@ namespace aclara_meters.view
             //add_mtu.OnFinish += Add_mtu_OnFinish;
             //add_mtu.OnError += Add_mtu_OnError;
 
+            add_mtu.OnProgress += ((s, e) =>
+            {
+                string mensaje = e.Message;
+    
+                Device.BeginInvokeOnMainThread ( () =>
+                {
+                    if ( ! string.IsNullOrEmpty ( mensaje ) )
+                        label_read.Text = mensaje;
+                });
+            });
+
             add_mtu.OnFinish += ((s, e) =>
             {
                 FinalReadListView = new List<ReadMTUItem>();
@@ -1732,27 +1742,17 @@ namespace aclara_meters.view
                 }));
             });
 
-            add_mtu.OnError += (() => {
-                Console.WriteLine("Action Errror");
-                Console.WriteLine("Press Key to Exit");
-                // Console.WriteLine(s.ToString());
-
-                // String result = e.Message;
-                //Console.WriteLine(result.ToString());
-
-
-                string resultMsg = "Timeout";
+            add_mtu.OnError += (() =>
+            {
+                Error error = Errors.LastError;
+            
                 Task.Delay(100).ContinueWith(t =>
                      Device.BeginInvokeOnMainThread(() =>
                      {
-
                          MTUDataListView = new List<ReadMTUItem> { };
-
                          FinalReadListView = new List<ReadMTUItem> { };
-
                          listaMTUread.ItemsSource = FinalReadListView;
-
-                         label_read.Text = resultMsg;
+                         label_read.Text = error.MessageFooter;
                          _userTapped = false;
                          bg_read_mtu_button.NumberOfTapsRequired = 1;
                          ChangeLowerButtonImage(false);
