@@ -1,50 +1,51 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Errors>
     <!-- MTU -->
-    <Error id="100" message="MTU is not the same as at the beginning of the process" />
-    <Error id="101" message="Puck cannot communicate with MTU" />
-    <Error id="102" message="Puck cannot communicate with MTU after has completed writing process" />
-    <Error id="103" message="The Mtu.xml file does no contain the MTU ID specified" />
+    <Error id="100" message="MTU is not the same as at the beginning of the process" footer="Different MTU" />
+    <Error id="101" message="Puck cannot communicate with MTU" footer="Puck communication" />
+    <Error id="102" message="Puck cannot communicate with MTU after has completed writing process" footer="Puck communication after writing" />
+    <Error id="103" message="The Mtu.xml file does no contain the MTU ID specified" footer="MTU not listed in Mtu.xml" />
 
     <!-- Meter -->
-    <Error id="200" message="The Meter.xml file does not contain the Meter ID specified" />
-    <Error id="201" message="Selected Meter is not supported for current MTU" />
-    <Error id="202" message="The Meter.xml file does not contain the Meter type specified with the tags NumberOfDials, DriveDialSize and UnitOfMeasure" />
-    <Error id="203" message="The script does not contain the tag NumberOfDials needed to select the MTU" />
-    <Error id="204" message="The script does not contain the tag DriveDialSize needed to select the MTU" />
-    <Error id="205" message="The script does not contain the tag UnitOfMeasure needed to select the MTU" />
-    <Error id="206" message="Some of the necessary parameters for Meter autodetection are missing in the script" />
+    <Error id="200" message="The Meter.xml file does not contain the Meter ID specified" footer="Meter not listed in Meter.xml" />
+    <Error id="201" message="Selected Meter is not supported for current MTU" footer="Meter not supported" />
+    <Error id="202" message="The Meter.xml file does not contain the Meter type specified with the tags NumberOfDials, DriveDialSize and UnitOfMeasure" footer="Meter auto-detection failed" />
+    <Error id="203" message="The script does not contain the tag NumberOfDials needed to select the MTU" /> <!-- footer not necessary -->
+    <Error id="204" message="The script does not contain the tag DriveDialSize needed to select the MTU" /> <!-- footer not necessary -->
+    <Error id="205" message="The script does not contain the tag UnitOfMeasure needed to select the MTU" /> <!-- footer not necessary -->
+    <Error id="206" message="Some of the necessary parameters for Meter autodetection are missing in the script" footer="Missing Meter auto-detection params" />
     
     <!-- Scripting parameters -->
-    <Error id="300" message="Error translating or validating parameters _var_ from script file" />
-    <Error id="301" message="The script is for one port only but the MTU has two port and both activated" />
-    <Error id="302" message="The script is for two ports but the MTU has one port only or second port is disabled" />
-    <Error id="303" message="Logfile element in the script is empty or contains some invalid character" />
-    <Error id="304" message="Action type _var_ in the script is not one of the available options" />
-    <Error id="305" message="The script file used has not valid structure or format" />
-    <Error id="306" message="The script file used is empty" />
-    <Error id="307" message="The script does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions" />
-    <Error id="308" message="The script contains the same parameter more than once" />
-    <Error id="309" message="User name missing in the script file" />
+    <Error id="300" message="Error translating or validating parameters _var_ from script file" footer="Translating script params" />
+    <Error id="301" message="The script is for one port only but the MTU has two port and both activated" footer="Script for one port only" />
+    <Error id="302" message="The script is for two ports but the MTU has one port only or second port is disabled" footer="Script for two ports" />
+    <Error id="303" message="Logfile element in the script is empty or contains some invalid character" footer="Invalid logfile" />
+    <Error id="304" message="Action type _var_ in the script is not one of the available options" footer="Action not supported" />
+    <Error id="305" message="The script file used has not valid structure or format" footer="Invalid XML structure" />
+    <Error id="306" message="The script file used is empty" footer="Empty script file" />
+    <Error id="307" message="The script does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions" footer="Missing Meter serial number" />
+    <Error id="308" message="The script contains the same parameter more than once" footer="Repeated params" />
+    <Error id="309" message="User name missing in the script file" footer="Missing username" />
     
     <!-- Alarm -->
-    <Error id="400" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" />
-    <Error id="401" message="No alarm was selected but the MTU entry in Mtu.xml requires using an alarm" />
+    <Error id="400" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" /> <!-- footer not necessary -->
+    <Error id="401" message="No alarm was selected but the MTU entry in Mtu.xml requires using an alarm" footer="No alarm selected" />
     
     <!-- Turn Off -->
-    <Error id="500" message="Turn off MTU process has failed trying to activated the Ship Bit" />
-    <Error id="501" message="MTU cannot be turned off after having tried it _var_ times" />
+    <Error id="500" message="Turn off MTU process has failed trying to activated the Ship Bit" footer="MTU already turned off" />
+    <Error id="501" message="MTU cannot be turned off after having tried it _var_ times" footer="Turn off not achieved" />
     
     <!-- Install Confirmation -->    
-    <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Globa.xml" />
-    <Error id="601" message="The MTU is turned off" />
-    <Error id="602" message="Installation Confirmation process has failed trying to communicate with the DCU" />
-    <Error id="603" message="Installation Confirmation cannot be performed after having tried it _var_ times" />
+    <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Globa.xml" footer="MTU not support two-way" />
+    <Error id="601" message="The MTU is turned off" footer="MTU turned off" />
+    <Error id="602" message="Installation Confirmation process has failed trying to communicate with the DCU" /> <!-- footer not necessary -->
+    <Error id="603" message="Installation Confirmation cannot be performed after having tried it _var_ times" footer="IC not achieved" />
 
     <!-- Encryption -->
-    <Error id="700" message="The MTU encryption process can't be performed after having tried it _var_ times" />
+    <Error id="700" message="The MTU encryption process can't be performed after having tried it _var_ times" footer="Encryption not achieved" />
 
     <!-- Configuration Files -->
+    <!-- footer not necessary -->
     <Error id="800" message="Some of the configuration files are not present in the root folder. Contact your IT administrator" />
     <Error id="801" message="There is a problem with the configuration files and some of them are corrupted. Contact your IT administrator" />
     <Error id="802" message="The certificate that you tried to install is not a valid certificate file ( *.cer )" />
@@ -55,6 +56,7 @@
     <Error id="807" message="The device has not internet connection" />
     <Error id="808" message="The current date of the device is lower than allowed" />
     <Error id="809" message="Missing credentials for SFTP in global.xml" />
+    
     <!--<Error id="" message="" />-->
     <!--<Error id="100" message="Mensaje de prueba de error propio" />-->
     <!--<Error id="101" dotnet="80020012" message="Mensaje de prueba de error de .Net traducido" />-->

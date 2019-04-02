@@ -44,6 +44,10 @@ namespace MTUComm
         private const string ERROR_LOADINTERFACE = "InterfaceLoadException";
         private const string ERROR_LOADGLOBAL = "GlobalLoadException";
         private const string ERROR_NOTFOUNDMETER = "MeterNotFoundException";
+        
+        private const int RESULT_OK           = 0;
+        private const int RESULT_NOT_ACHIEVED = 1;
+        private const int RESULT_EXCEPTION    = 2;
 
         #endregion
 
@@ -332,11 +336,19 @@ namespace MTUComm
 
         public void Task_InstallConfirmation ()
         {
-            this.InstallConfirmation_Logic ();
-            this.Task_ReadMtu ();
+            if ( this.InstallConfirmation_Logic () < RESULT_EXCEPTION )
+                this.Task_ReadMtu ();
+            else
+                this.OnError ();
         }
 
-        private bool InstallConfirmation_Logic (
+        /// <summary>
+        /// Installs the confirmation logic.
+        /// </summary>
+        /// <returns>0 OK, 1 Not achieved, 2 Error</returns>
+        /// <param name="force">If set to <c>true</c> force.</param>
+        /// <param name="time">Time.</param>
+        private int InstallConfirmation_Logic (
             bool force   = false,
             int  time    = 0 )
         {
@@ -352,12 +364,13 @@ namespace MTUComm
             // Set bit to true/one, because loop detection will continue while it doesn't change to false/zero
             uint addressNotSynced = ( uint )regICNotSynced.Address;
             uint bitSynced        = ( uint )regICNotSynced.Size;
-            this.WriteMtuBit ( addressNotSynced, bitSynced, true );
             
             bool wasNotAboutPuck = false;
             try
             {
                 Console.WriteLine ( "InstallConfirmation trigger start" );
+                
+                this.WriteMtuBit ( addressNotSynced, bitSynced, true );
 
                 // MTU is turned off
                 if ( ! force &&
@@ -402,11 +415,15 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
+                /*
                 // Action finished ok but launched a rare CRC exception = False negative
-                if ( ! this.ReadMtuBit ( addressNotSynced, bitSynced ) )
+                if ( Errors.IsOwnException ( e ) &&
+                     ! this.ReadMtuBit ( addressNotSynced, bitSynced ) )
                     return true;
+                */
                 
-                if ( e is AttemptNotAchievedICException )
+                if ( ! ( e is PuckCantCommWithMtuException ) &&
+                     e is AttemptNotAchievedICException )
                     Errors.AddError ( e );
                 // Finish
                 else
@@ -414,7 +431,7 @@ namespace MTUComm
                     if ( ! wasNotAboutPuck )
                          Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                     else Errors.LogErrorNowAndContinue ( e );
-                    return false;
+                    return RESULT_EXCEPTION;
                 }
             
                 // Retry action ( thre times = first plus two replies )
@@ -427,10 +444,10 @@ namespace MTUComm
                 
                 // Finish with error
                 Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat ) + "" ) );
-                return false;
+                return RESULT_NOT_ACHIEVED;
             }
             
-            return true;
+            return RESULT_OK;
         }
 
         #endregion
@@ -511,6 +528,8 @@ namespace MTUComm
 
         public void Task_ReadMtu ()
         {
+            OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
+        
             String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtu );
             int memory_map_size    = configuration.GetmemoryMapSizeByMtuId ( this.mtu );
 
@@ -1433,7 +1452,7 @@ namespace MTUComm
                 {
                     // Force to execute Install Confirmation avoiding problems
                     // with MTU shipbit, because MTU is just turned on
-                    if ( ! this.InstallConfirmation_Logic ( true ) )
+                    if ( this.InstallConfirmation_Logic ( true ) > RESULT_OK )
                     {
                         // If IC fails by any reason, add 4 seconds delay before
                         // reading MTU Tamper Memory settings for Tilt Alarm
@@ -1449,7 +1468,7 @@ namespace MTUComm
 
                 #region Read MTU
 
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Read from MTU..." ) );
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
 
                 lexi.Write(64, new byte[] { 1 });
                 Thread.Sleep(1000);

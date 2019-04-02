@@ -391,8 +391,10 @@ namespace MTUComm
                 switch (type)
                 {
                     case ActionType.ReadMtu:
-                        comm.OnReadMtu -= Comm_OnReadMtu;
-                        comm.OnReadMtu += Comm_OnReadMtu;
+                        comm.OnReadMtu  -= Comm_OnReadMtu;
+                        comm.OnReadMtu  += Comm_OnReadMtu;
+                        comm.OnProgress -= Comm_OnProgress;
+                        comm.OnProgress += Comm_OnProgress;
                         break;
 
                     case ActionType.AddMtu:

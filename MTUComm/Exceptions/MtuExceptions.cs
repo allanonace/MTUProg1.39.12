@@ -221,6 +221,6 @@
 
     public class FtpCredentialsMissingException : OwnExceptionsBase
     {
-        public FtpCredentialsMissingException ( string message = "", int port = 1) : base(message, port) { }
+        public FtpCredentialsMissingException ( string message = "", int port = 1, string messagePopup = "" ) : base( message, port, messagePopup ) { }
     }
 }
