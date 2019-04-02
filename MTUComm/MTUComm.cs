@@ -302,8 +302,8 @@ namespace MTUComm
 
         public void Task_ReadDataMtu ( int NumOfDays )
         {
-            DateTime start = DateTime.UtcNow.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
-            DateTime end = DateTime.UtcNow.Date.AddSeconds(86399);
+            DateTime start = DateTime.Now.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
+            DateTime end = DateTime.Now.Date.AddSeconds(86399);
 
             lexi.TriggerReadEventLogs(start, end);
 

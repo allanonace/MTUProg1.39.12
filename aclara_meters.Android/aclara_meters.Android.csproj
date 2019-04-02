@@ -338,6 +338,10 @@
     <AndroidResource Include="Resources\drawable-nodpi\LaunchScreen.storyboard" />
     <AndroidResource Include="Resources\drawable-nodpi\refreshsignal.png" />
     <AndroidResource Include="Resources\drawable-nodpi\shadow_effect_tablet.png" />
+    <AndroidResource Include="Resources\drawable\next_icon.png" />
+    <AndroidResource Include="Resources\drawable\prev_icon.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\next_icon.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\prev_icon.png" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable-hdpi\" />

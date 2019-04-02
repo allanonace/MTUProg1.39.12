@@ -32,7 +32,7 @@ namespace aclara_meters.view
 
         private ActionType actionType;
         private IUserDialogs dialogsSaved;
-        private TabLogViewModel _viewModelread;
+        private TabLogViewModel viewModelTabLog;
         private List<PageItem> MenuList { get; set; }
 
         public AclaraViewSettings()
@@ -89,8 +89,13 @@ namespace aclara_meters.view
 
         public AclaraViewSettings(bool notConnected)
         {
-            this.notConnected = notConnected;
             InitializeComponent();
+
+            viewModelTabLog  = new TabLogViewModel();
+            BindingContext = viewModelTabLog;
+
+            this.notConnected = notConnected;
+
             //Settings.IsNotConnectedInSettings = true;
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -123,10 +128,10 @@ namespace aclara_meters.view
             {
                 await Task.Delay(100); 
                 Device.BeginInvokeOnMainThread(() =>
-                {
-                    _viewModelread = new TabLogViewModel();
-                    BindingContext = _viewModelread;
-                    Task.WaitAll(_viewModelread.LoadData());
+                { 
+                    Task.WaitAll(viewModelTabLog.LoadData(viewModelTabLog.IndexFile));
+                    btnNext.IsVisible = false;
+                    file_name.Text = $"Activity Log: {viewModelTabLog.FileDateTime}";
                 });
            });
 
@@ -149,6 +154,10 @@ namespace aclara_meters.view
         public AclaraViewSettings(IUserDialogs dialogs)
         {
             InitializeComponent();
+
+            viewModelTabLog = new TabLogViewModel();
+            BindingContext = viewModelTabLog;
+
             if (Device.Idiom == TargetIdiom.Tablet)
             {
                 Task.Run(() =>
@@ -183,9 +192,9 @@ namespace aclara_meters.view
                 await Task.Delay(100); 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    _viewModelread = new TabLogViewModel();
-                    BindingContext = _viewModelread;
-                    Task.WaitAll(_viewModelread.LoadData());
+                    Task.WaitAll(viewModelTabLog.LoadData(viewModelTabLog.IndexFile));
+                    btnNext.IsVisible = false;
+                    file_name.Text = $"Activity Log: {viewModelTabLog.FileDateTime}";
                 });
             });
 
@@ -312,35 +321,8 @@ namespace aclara_meters.view
                 turnoff_mtu_background.IsVisible = true;
             });
 
-            /*
-            Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
-
-            int contador = Navigation.NavigationStack.Count;
-            while (contador > 0)
-            {
-                try
-                {
-                    await Navigation.PopAsync(false);
-                }
-                catch (Exception v)
-                {
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
-
-            try
-            {
-                await Navigation.PopToRootAsync(false);
-            }
-            catch (Exception v1)
-            {
-                Console.WriteLine(v1.StackTrace);
-            }
-            */
-
         }
+    
 
         private void ReturnToMainView(object sender, EventArgs e)
         {
@@ -1056,7 +1038,7 @@ namespace aclara_meters.view
             turnOffAction.Run();
         }
 
-
+        /*
         private void OnMenuCaseReplaceMeter()
         {
             background_scan_page.Opacity = 1;
@@ -1234,7 +1216,7 @@ namespace aclara_meters.view
             }));
 
         }
-
+        */
         private void ForceSyncButtonTapped(object sender, EventArgs e)
         {
             force_sync.IsEnabled = false;
@@ -1256,11 +1238,10 @@ namespace aclara_meters.view
                 updated_files.Text = GenericUtilsClass.NumFilesUploaded.ToString();
                 pending_files.Text = GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath).ToString();
                 backup_files.Text = GenericUtilsClass.NumBackupFiles().ToString();
-                Color colorText;
+                Color colorText = pending_files.TextColor;
                 if (int.Parse(backup_files.Text) >= 100)
                     colorText = Color.Red;
-                else
-                    colorText = Color.Default;
+
                 lbl_backup.TextColor = colorText;
                 force_sync.IsEnabled = true;
                 ContentNav.IsEnabled = true;
@@ -1497,6 +1478,8 @@ namespace aclara_meters.view
                     logs_button_text.Opacity = 0.5; logs_button.Opacity = 0.5;
                     sync_button_text.Opacity = 0.5; sync_button.Opacity = 0.5;
                     title_text.Text = "About";
+                    title_text.IsVisible = true;
+                    img_barra.IsVisible = true;
 
                     about_block.FadeTo(1, 200);
 
@@ -1515,6 +1498,8 @@ namespace aclara_meters.view
                     logs_button_text.Opacity = 1; logs_button.Opacity = 1;
                     sync_button_text.Opacity = 0.5; sync_button.Opacity = 0.5;
                     title_text.Text = "Activity Logs";
+                    title_text.IsVisible = false;
+                    img_barra.IsVisible = false;
 
                     logs_block.FadeTo(1, 200);
 
@@ -1532,21 +1517,50 @@ namespace aclara_meters.view
                     logs_button_text.Opacity = 0.5; logs_button.Opacity = 0.5;
                     sync_button_text.Opacity = 1; sync_button.Opacity = 1;
                     title_text.Text = "File Syncronization";
+                    title_text.IsVisible = true;
+                    img_barra.IsVisible = true;
+
                     date_sync.Text = DateTime.Now.ToString();
                     updated_files.Text = GenericUtilsClass.NumFilesUploaded.ToString();
                    
                     pending_files.Text = GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath).ToString();
                     backup_files.Text = GenericUtilsClass.NumBackupFiles().ToString();
-                    Color colorText;
+                    Color colorText = pending_files.TextColor;
                     if (int.Parse(backup_files.Text) >= 100)
                         colorText = Color.Red;
-                    else
-                        colorText = Color.Default;
+                  
                     lbl_backup.TextColor = colorText;
                     sync_block.FadeTo(1, 200);
 
                     break;
             }
+        }
+
+        void Previous_Clicked(object sender, System.EventArgs e)
+        {
+            Wait(true);
+            Task.WaitAll(viewModelTabLog.LoadData(viewModelTabLog.IndexFile - 1));
+            if (viewModelTabLog.IndexFile == 0) btnPrevious.IsVisible = false;
+            btnNext.IsVisible = true;
+            file_name.Text = $"Activity Log: {viewModelTabLog.FileDateTime}";
+            Wait(false);
+        }
+
+        void Next_Clicked(object sender, System.EventArgs e)
+        {
+            Wait(true);
+            Task.WaitAll(viewModelTabLog.LoadData(viewModelTabLog.IndexFile + 1));
+            if (viewModelTabLog.IndexFile == viewModelTabLog.TotalFiles) btnNext.IsVisible = false;
+            btnPrevious.IsVisible = true;
+            file_name.Text = $"Activity Log: {viewModelTabLog.FileDateTime}";
+            Wait(false);
+        }
+
+        private void Wait(bool state)
+        {
+            backdark_bg.IsVisible = state;
+            indicator.IsVisible = state;
+            ContentNav.IsEnabled = state;
         }
     }
 }
