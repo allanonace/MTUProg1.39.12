@@ -34,7 +34,7 @@ namespace MTUComm
             // Script file is empty
             if ( string.IsNullOrEmpty ( script_stream.Trim () ) )
             {
-                Errors.ShowErrorAndKill ( new ScriptEmptyException () );
+                Errors.LogErrorNowAndKill ( new ScriptEmptyException () );
                 //this.OnError ();
                 
                 return;
@@ -54,8 +54,8 @@ namespace MTUComm
             catch (Exception e)
             {
                 if ( ! Errors.IsOwnException ( e ) )
-                     Errors.ShowErrorAndKill ( new ScriptWrongStructureException () ); // Script file has invalid format or structure
-                else Errors.ShowErrorAndKill ( e ); // ScriptLogfileInvalidException, ScriptActionTypeInvalidException
+                     Errors.LogErrorNowAndKill ( new ScriptWrongStructureException () ); // Script file has invalid format or structure
+                else Errors.LogErrorNowAndKill ( e ); // ScriptLogfileInvalidException, ScriptActionTypeInvalidException
                 
                 //this.OnError ();
                 

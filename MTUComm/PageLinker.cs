@@ -1,6 +1,9 @@
 ﻿using Xamarin.Forms;
 using Xml;
 using System.Threading.Tasks;
+using System;
+
+using Acr.UserDialogs;
 
 namespace MTUComm
 {
@@ -11,6 +14,7 @@ namespace MTUComm
         private static PageLinker instance;
         private static Page currentPage;
         public static Page mainPage;
+        public static IDisposable popup;
     
         public static Page CurrentPage
         {
@@ -34,30 +38,28 @@ namespace MTUComm
             string btnText,
             bool   kill = false )
         {
-            if ( ! kill )
-                return;
-        
             if ( currentPage != null )
             {
                 Device.BeginInvokeOnMainThread ( async () =>
                 {
-                    await currentPage.DisplayAlert ( title, message, btnText );
+                    // NOTE: Xamarin DisplayAlert dialog cannot be closed/disposed from code
+                    //await currentPage.DisplayAlert ( title, message, btnText );
+                    
+                    popup = UserDialogs.Instance.Alert ( message, title, btnText );
                     
                     if ( kill )
+                    {
+                        // Wait four seconds and kill the popup
+                        await Task.Delay ( TimeSpan.FromSeconds ( 4 ) );
+                        popup.Dispose ();
+                        
+                        // Close the app
                         System.Diagnostics.Process.GetCurrentProcess ().Kill ();
+                    }
                 });
             }
         }
 
-        public static void ShowAlert (
-            string title,
-            string message,
-            string btnText,
-            bool   kill = false )
-        {
-            GetInstance ()._ShowAlert ( title, message, btnText );
-        }
-        
         public static void ShowAlert (
             string title,
             Error  error,

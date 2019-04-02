@@ -1115,12 +1115,16 @@ namespace MTUComm
 
                 #region Turn Off MTU
 
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Turning Off..." ) );
+
                 this.TurnOnOffMtu_Logic ( false, true );
                 addMtuLog.LogTurnOff ();
 
                 #endregion
 
                 #region Add MTU
+
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Writing..." ) );
 
                 // Prepare memory map
                 String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtu ); //( int )MtuForm.mtuBasicInfo.Type );
@@ -1296,6 +1300,8 @@ namespace MTUComm
                 // Only encrypt MTUs with SpecialSet set
                 if ( mtu.SpecialSet )
                 {
+                    OnProgress ( this, new ProgressArgs ( 0, 0, "Encrypting..." ) );
+                
                     MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
                     MemoryRegister<bool>   regEncrypted  = map[ "Encrypted"       ];
                     MemoryRegister<int>    regEncryIndex = map[ "EncryptionIndex" ];
@@ -1392,6 +1398,8 @@ namespace MTUComm
 
                 #region Turn On MTU
 
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Turning On..." ) );
+
                 this.TurnOnOffMtu_Logic ( true, true );
                 addMtuLog.LogTurnOn ();
 
@@ -1429,7 +1437,7 @@ namespace MTUComm
                     {
                         // If IC fails by any reason, add 4 seconds delay before
                         // reading MTU Tamper Memory settings for Tilt Alarm
-                        Thread.Sleep ( 40000 );
+                        Thread.Sleep ( 4000 );
                     }
                     
                     // Check if the MTU is still the same
@@ -1440,6 +1448,8 @@ namespace MTUComm
                 #endregion
 
                 #region Read MTU
+
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Read from MTU..." ) );
 
                 lexi.Write(64, new byte[] { 1 });
                 Thread.Sleep(1000);

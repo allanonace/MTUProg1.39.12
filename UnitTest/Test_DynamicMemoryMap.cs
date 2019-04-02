@@ -191,7 +191,7 @@ namespace UnitTest.Tests
             Func<Func<dynamic>,bool> test = this.TestExpression;
 
             // Dynamic memory map generation
-            Assert.True(test(() => { return new MemoryMap ( new byte[ 400 ], xmlName, this.GetPath () ); }), Error ( ERROR_MMAP ) );
+            Assert.True(test(() => { return new MemoryMap ( new byte[ 400 ], xmlName, false, this.GetPath () ); }), Error ( ERROR_MMAP ) );
         }
 
         [Theory]
@@ -203,7 +203,7 @@ namespace UnitTest.Tests
             // Dynamic memory map generation
             byte[] memory = new byte[400];
             dynamic map   = null;
-            Assert.True ( test(() => { return map = new MemoryMap ( memory, xmlName, this.GetPath () ); }), Error ( ERROR_MMAP ) );
+            Assert.True ( test(() => { return map = new MemoryMap ( memory, xmlName, false, this.GetPath () ); }), Error ( ERROR_MMAP ) );
 
             // If memory map can't be created, test finishes
             if ( map == null )
@@ -309,7 +309,7 @@ namespace UnitTest.Tests
             // Dynamic memory map generation
             byte[] memory = new byte[400];
             dynamic map   = null;
-            Assert.True ( test(() => { return map = new MemoryMap ( memory, xmlName, this.GetPath () ); }), Error ( ERROR_MMAP ) );
+            Assert.True ( test(() => { return map = new MemoryMap ( memory, xmlName, false, this.GetPath () ); }), Error ( ERROR_MMAP ) );
 
             // If memory map can't be created, test finishes
             if ( map == null )
@@ -317,7 +317,7 @@ namespace UnitTest.Tests
 
             byte[] memory2 = new byte[400];
             dynamic map2   = null;
-            Assert.True ( test(() => { return map2 = new MemoryMap ( memory2, xmlName, this.GetPath () ); }), Error ( ERROR_MMAP ) );
+            Assert.True ( test(() => { return map2 = new MemoryMap ( memory2, xmlName, false, this.GetPath () ); }), Error ( ERROR_MMAP ) );
 
             map.Shipbit              = true;
             map.MessageOverlapCount  = 200;

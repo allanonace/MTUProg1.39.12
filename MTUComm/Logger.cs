@@ -257,7 +257,7 @@ namespace MTUComm
             
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
-            #if DEBUG
+            
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( false, uniUri );
@@ -265,7 +265,15 @@ namespace MTUComm
             XDocument uniDoc = XDocument.Load ( uniUri );
             PrepareLog_ReadMTU ( uniDoc.Root.Element("Mtus"), action, result, mtu );
 
+            string xmlToReturn = uniDoc.ToString ();
+
+            #if DEBUG
+
             uniDoc.Save ( uniUri );
+            
+            #else
+            
+            File.Delete ( uniUri );
             
             #endif
             
@@ -282,7 +290,7 @@ namespace MTUComm
                 doc.Save(uri);
             }
 
-            return uniDoc.ToString ();
+            return xmlToReturn;
         }
 
         private void PrepareLog_ReadMTU ( XElement parent, Action action, ActionResult result, Mtu mtu )
@@ -379,7 +387,7 @@ namespace MTUComm
             
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
-            #if DEBUG
+            
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( false, uniUri );
@@ -387,7 +395,15 @@ namespace MTUComm
             XDocument uniDoc = XDocument.Load ( uniUri );
             PrepareLog_TurnOff ( uniDoc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, mtuId );
             
+            string xmlToReturn = uniDoc.ToString ();
+            
+            #if DEBUG
+            
             uniDoc.Save ( uniUri );
+            
+            #else
+            
+            File.Delete ( uniUri );
             
             #endif
             
@@ -404,7 +420,7 @@ namespace MTUComm
                 doc.Save(uri);
             }
             
-            return uniDoc.ToString ();;
+            return xmlToReturn;
         }
 
         private void PrepareLog_TurnOff (XElement parent, string display, string type, string user, uint MtuId )

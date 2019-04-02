@@ -33,6 +33,11 @@ namespace MTUComm
         private string appName;
         private static Configuration instance;
 
+        public static bool HasInstance
+        {
+            get { return instance != null; }
+        }
+
         private Configuration ( string path = "", bool avoidXmlError = false )
         {
             string configPath = Mobile.ConfigPath;

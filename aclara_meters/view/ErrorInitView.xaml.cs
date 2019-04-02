@@ -14,7 +14,7 @@ namespace aclara_meters.view
             //Turn off the Navigation bar
             NavigationPage.SetHasNavigationBar(this, false);
             
-            Errors.ShowErrorAndKill ( e );
+            Errors.LogErrorNowAndKill ( e );
         }
     }
 }

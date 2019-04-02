@@ -130,19 +130,13 @@ namespace MTUComm
         #region Attributes
 
         private static Errors instance;
-        
-        //private Global global;
-        //private Logger logger;
+        public  static string lastErrorLogGenerated { get; private set; }
 
         private Logger logger;
         private Dictionary<int,Error> errors;
         private List<Error> errorsToLog;
         private Error lastError;
         private Error[] xmlErrors;
-
-        public static Error configError;
-        
-        public static string lastErrorLogGenerated;
 
         #endregion
 
@@ -209,6 +203,8 @@ namespace MTUComm
 
         #region Logic
 
+        #region Get Error
+
         private Error GetErrorById (
             int id,
             Exception e,
@@ -253,42 +249,7 @@ namespace MTUComm
             
             return error;
         }
-
-        /// <summary>
-        /// Register a new error to be written into the log after be recovered using GetErrorsToLog
-        /// </summary>
-        /// <returns><c>true</c>, if error was added, <c>false</c> otherwise.</returns>
-        /// <param name="id">Error identifier</param>
-        private bool AddErrorById (
-            int id,
-            Exception e,
-            int portIndex = 1 )
-        {
-            // Error ID exists and is not registered already
-            if ( this[ id ] != null )
-            {
-                Error error = this.GetErrorById ( id, e, portIndex );
-                this.errorsToLog.Add ( error );
-                
-                return true;
-            }
-            return false;
-        }
         
-        /// <summary>
-        /// Register .NET errors trying to found some error that match
-        /// </summary>
-        /// <param name="e">.NET exception</param>
-        private Error AddErrorByException (
-            Exception e,
-            int portIndex = 1 )
-        {
-            Error error = this.GetErrorByException ( e, portIndex );
-            this.errorsToLog.Add ( error );
-            
-            return ( this.lastError = this.errorsToLog.Last () );
-        }
-
         /// <summary>
         /// Returns all registered errors and by default clear list after that
         /// </summary>
@@ -301,10 +262,21 @@ namespace MTUComm
             Array.Copy ( this.errorsToLog.ToArray (), errors, this.errorsToLog.Count );
             
             if ( clearList )
-                this._ClearList ();
+                this.errorsToLog.Clear ();
             
             return errors;
         }
+        
+        private bool IsLastExceptionUsed (
+            Exception e )
+        {
+            return ( this.lastError != null &&
+                     this.lastError.Exception == e );
+        }
+
+        #endregion
+
+        #region Translate .NET Errors
         
         private Error TryToTranslateDotNet (
             Exception e )
@@ -337,89 +309,114 @@ namespace MTUComm
             return e.HResult > -1 &&
                    this.errors.Any ( item => item.Value.DotNetId == e.HResult );
         }
+
+        #endregion
+
+        #region Register Error
+
+        /// <summary>
+        /// Register a new error to be written into the log after be recovered using GetErrorsToLog
+        /// </summary>
+        /// <returns>Exception that represents the last error happened</returns>
+        /// <param name="id">Error identifier</param>
+        /// <param name="portIndex">MTU port index related</param>
+        private Error AddErrorById (
+            int id,
+            Exception e,
+            int portIndex = 1 )
+        {
+            // Error ID exists and is not registered yet
+            if ( this[ id ] != null )
+            {
+                Error error = this.GetErrorById ( id, e, portIndex );
+                this.errorsToLog.Add ( error );
+                
+                return ( this.lastError = this.errorsToLog.Last () );
+            }
+            return null;
+        }
         
+        /// <summary>
+        /// Register .NET errors trying to found some error that match
+        /// </summary>
+        /// <param name="e">Exception that represents the last error happened</param>
+        /// <param name="portIndex">MTU port index related</param>
+        private Error AddErrorByException (
+            Exception e,
+            int portIndex = 1 )
+        {
+            Error error = this.GetErrorByException ( e, portIndex );
+            this.errorsToLog.Add ( error );
+            
+            return ( this.lastError = this.errorsToLog.Last () );
+        }
+
+        #endregion
+
+        #region Log and Alert
+
         /// <summary>
         /// Write an error into the log right now, without have to invoke AddError method
         /// Usually used outside actions logic, for example trying to detect and connect with a puck
         /// </summary>
-        /// <param name="e">Exception launched</param>
+        /// <param name="e">Exception that represents the last error happened</param>
         private void _LogErrorNow (
             Exception e,
-            int portIndex )
+            int portIndex,
+            bool forceException,
+            bool kill = false )
         {
             Error error = this.AddErrorByException ( e, portIndex );
-            PageLinker.ShowAlert ( ERROR_TITLE, error );
+            PageLinker.ShowAlert ( ERROR_TITLE, error, kill );
             
-            lastErrorLogGenerated = this.logger.Error ();
+            // Method can be invoked when Configuration is not instantiated yet
+            if ( Configuration.HasInstance )
+                lastErrorLogGenerated = this.logger.Error ();
+            
+            if ( forceException )
+                throw this.errorsToLog[ this.errorsToLog.Count - 1 ].Exception;
         }
-        
+
         /// <summary>
-        /// Write errors registered using AddError method
-        /// Usually used when performing an action
+        /// Writes the errors registered with AddError method. It is almost the same as
+        /// the _LogErrorNow method but using the last registered error for the alert pop-up
         /// </summary>
         private void _LogRegisteredErrors (
-            bool forceException,
-            Exception e )
+            bool forceException )
         {
             if ( this.errorsToLog.Count > 0 )
             {
-                //Error lastError = ( Error )this.errorsToLog[ this.errorsToLog.Count - 1 ].Clone ();
-                Exception lastException = ( e != null ) ? e : this.errorsToLog[ this.errorsToLog.Count - 1 ].Exception;
-                
-                if ( forceException )
-                    PageLinker.ShowAlert ( ERROR_TITLE, this.lastError );
+                PageLinker.ShowAlert ( ERROR_TITLE, this.lastError );
                 
                 lastErrorLogGenerated = this.logger.Error ();
 
                 if ( forceException )
-                    throw lastException;
+                    throw this.errorsToLog[ this.errorsToLog.Count - 1 ].Exception;
             }
         }
 
-        private void _ShowErrorAndKill (
-            Exception e,
-            int portIndex = 1 )
-        {
-            Error error = this.AddErrorByException ( e, portIndex );
-            PageLinker.ShowAlert ( ERROR_TITLE, error, true );
-        
-            lastErrorLogGenerated = this.logger.Error ();
-        }
-
-        /// <summary>
-        /// Clears the list of registered errors
-        /// Usually no need to use this method because is already used by default for GetErrorsToLog
-        /// </summary>
-        private void _ClearList ()
-        {
-            this.errorsToLog.Clear ();
-        }
-
-        private bool IsLastExceptionUsed (
-            Exception e )
-        {
-            return ( this.lastError != null &&
-                     this.lastError.Exception == e );
-        }
-
-        private static void LaunchException (
-            Exception e,
-            bool forceException )
-        {
-            if ( forceException )
-                throw e;
-        }
+        #endregion
 
         #endregion
 
         #region Direct Singleton
 
+        /// <summary>
+        /// Gets all errors registered to log, used from class Logger
+        /// </summary>
+        /// <returns>Array of registered errors</returns>
+        /// <param name="clearList">Clear list of registered errors after being returned</param>
         public static Error[] GetErrorsToLog (
             bool clearList = true )
         {
             return Errors.GetInstance ()._GetErrorsToLog ( clearList );
         }
         
+        /// <summary>
+        /// Registers a new error based on an ( own or .Net ) exception
+        /// </summary>
+        /// <param name="e">Exception that represents the last error happened</param>
+        /// <param name="portIndex">MTU port index related</param>
         public static void AddError (
             Exception e,
             int portIndex = 1 )
@@ -427,21 +424,26 @@ namespace MTUComm
             Errors.GetInstance ().AddErrorByException ( e, portIndex );
         }
         
+        /// <summary>
+        /// Registers a new error based on an exception, shows an popup alert using
+        /// this last error and also registers in the ( activity or result ) log file
+        /// </summary>
+        /// <param name="e">Exception that represents the last error happened</param>
+        /// <param name="portIndex">Index of MTU port associated to the error</param>
+        /// <param name="forceException">Forces to launch/throw the exception</param>
         public static void LogErrorNow (
             Exception e,
             int portIndex = -1,
             bool forceException = true )
         {
             if ( ! IsOwnException ( e ) )
-                 Errors.GetInstance ()._LogErrorNow ( e, portIndex );
-            else Errors.GetInstance ()._LogErrorNow ( e, ( ( portIndex > -1 ) ? portIndex : ( ( OwnExceptionsBase )e ).Port ) );
-            
-            Errors.LaunchException ( e, forceException );
+                 Errors.GetInstance ()._LogErrorNow ( e, portIndex, forceException );
+            else Errors.GetInstance ()._LogErrorNow ( e, ( ( portIndex > -1 ) ? portIndex : ( ( OwnExceptionsBase )e ).Port ), forceException );
         }
         
         /// <summary>
-        /// Only log registered errors and shows error message/pop-up of the last,
-        /// without launching the exception, allowing to continue executing process logic
+        /// Registers a new error based on an exception and shows an popup alert using
+        /// this last error, but does not register in the ( activity or result ) log file
         /// </summary>
         /// <param name="e">Exception that represents the last error happened</param>
         /// <param name="portindex">Index of MTU port associated to the error</param>
@@ -452,18 +454,22 @@ namespace MTUComm
             LogErrorNow ( e, portindex, false );
         }
 
-        public static void LogRegisteredErrors (
-            bool forceException = false,
-            Exception e = null )
+        /// <summary>
+        /// Used during the initialization process, when the app
+        /// is not loaded yet and the error forces to close the app
+        /// </summary>
+        /// <param name="e">Exception that represents the last error happened</param>
+        public static void LogErrorNowAndKill (
+            Exception e )
         {
-            Errors.GetInstance ()._LogRegisteredErrors ( forceException, e );
+            Errors.GetInstance ()._LogErrorNow ( e, 1, false, true ); // Port index has not importance in this case
         }
 
         /// <summary>
         /// Both options will log all registered exceptions that remain, but in
-        /// the first case, previously the last exception launched will be added
+        /// the first case previously the last exception launched will be added
         /// </summary>
-        /// <param name="e">Exception</param>
+        /// <param name="e">Exception that represents the last error happened</param>
         public static void LogRemainExceptions (
             Exception e )
         {
@@ -473,19 +479,24 @@ namespace MTUComm
             
             // Last exception was already added
             else
-                Errors.LogRegisteredErrors (); // ! ( e is OwnExceptionsBase ) );
+                Errors.LogRegisteredErrors ();
         }
         
+        public static void LogRegisteredErrors (
+            bool forceException = false )
+        {
+            Errors.GetInstance ()._LogRegisteredErrors ( forceException );
+        }
+        
+        /// <summary>
+        /// Launched exception is an own exception or is from .Net framework
+        /// </summary>
+        /// <returns><c>true</c>, if own exception was ised, <c>false</c> otherwise.</returns>
+        /// <param name="e">Exception that represents the last error happened</param>
         public static bool IsOwnException (
             Exception e )
         {
             return ( e.GetType ().IsSubclassOf ( typeof( OwnExceptionsBase ) ) );
-        }
-
-        public static void ShowErrorAndKill (
-            Exception e )
-        {
-            Errors.GetInstance ()._ShowErrorAndKill ( e );
         }
 
         #endregion

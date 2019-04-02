@@ -59,7 +59,7 @@ namespace aclara_meters
             if (String.IsNullOrEmpty(host) || string.IsNullOrEmpty(username)
                     || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(remotepath))
             {
-                Errors.ShowErrorAndKill(new FtpCredentialsMissingException());
+                Errors.LogErrorNowAndKill(new FtpCredentialsMissingException());
                 return false;
             }
             //string pathRemoteFile = "/home/aclara/"; // prueba_archivo.xml";

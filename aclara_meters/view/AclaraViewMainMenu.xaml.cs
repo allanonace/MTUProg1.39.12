@@ -124,6 +124,8 @@ namespace aclara_meters.view
             #endregion
 
             //BluetoothPeripheralDisconnect ( null, null );
+            
+            //MTUComm.Files.CheckCorrectUpload ( Mobile.LogUniPath, "testmd5" );
         }
 
         public string GZipCompress ( string input )
