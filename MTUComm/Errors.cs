@@ -70,6 +70,9 @@ namespace MTUComm
             { new MandatoryMeterSerialHiddenScriptException (), 307 },
             // The script contains the same parameter more than once
             { new SameParameterRepeatScriptException (),        308 },
+            // User name missing in the script file
+            { new ScriptUserNameMissingException (),            309 },
+
             
             // Alarm [ 4xx ]
             //------

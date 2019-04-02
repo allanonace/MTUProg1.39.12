@@ -107,10 +107,16 @@
     {
         public SameParameterRepeatScriptException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
-    
+
+    public class ScriptUserNameMissingException : OwnExceptionsBase
+    {
+        public ScriptUserNameMissingException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+    }
+
+
     // Alarm [ 4xx ]
     //------
-    
+
     public class ScriptingAlarmForCurrentMtuException : OwnExceptionsBase
     {
         public ScriptingAlarmForCurrentMtuException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
