@@ -14,7 +14,7 @@ namespace aclara_meters
 {
     public class GenericUtilsClass
     {
-        public static int NumFilesUpload;
+        public static int NumFilesUploaded;
         public static int NumFiles;
 
         public static async Task UploadFilesTask(Boolean UploadPrompt)
@@ -30,7 +30,7 @@ namespace aclara_meters
             {
                 if (GenericUtilsClass.UploadLogFiles(true))
                 {
-                    await Application.Current.MainPage.DisplayAlert("Alert", "Log files successfully uploaded", "Ok");
+                    //await Application.Current.MainPage.DisplayAlert("Alert", "Log files successfully uploaded", "Ok");
                 }
                 else
                 {
@@ -44,9 +44,7 @@ namespace aclara_meters
         public static async Task<Boolean> UploadFilesTaskScripting()
         {
             return GenericUtilsClass.UploadLogFiles(true);
-
         }
-
 
         public static bool UploadLogFiles(Boolean AllLogs)
         {
@@ -63,11 +61,11 @@ namespace aclara_meters
                 return false;
             }
             //string pathRemoteFile = "/home/aclara/"; // prueba_archivo.xml";
-            NumFilesUpload = 0;
+            NumFilesUploaded = 0;
             NumFiles = 0;
             //TODO: UUID MOVIL EN PATH REMOTE FILE
             //string pathRemoteFile = FormsApp.config.global.ftpRemotePath + CrossDeviceInfo.Current.Id + "/"; // prueba_archivo.xml";
-            string pathRemoteFile = FormsApp.config.global.ftpRemotePath + FormsApp.credentialsService.UserName + "/";
+            string pathRemoteFile = FormsApp.config.global.ftpRemotePath;// + FormsApp.credentialsService.UserName + "/";
 
             // Path where the file should be saved once downloaded (locally)
             string path;
@@ -80,7 +78,7 @@ namespace aclara_meters
             //string filename = Path.Combine(xml_documents, name);
             List<FileInfo> local_array_files = new List<FileInfo>();
 
-            local_array_files = LogFilesToUpload(path, false);
+            local_array_files = LogFilesToUpload(path);
             NumFiles = local_array_files.Count;
             if (NumFiles == 0) return true;
 
@@ -89,7 +87,12 @@ namespace aclara_meters
                 try
                 {
                     sftp.Connect();
-  
+                    // if not exist create the remote path from global.xml
+                    if (!sftp.Exists(pathRemoteFile))
+                    {
+                        sftp.CreateDirectory(pathRemoteFile);
+                    }
+
                     foreach (FileInfo file in local_array_files)
                     {
                         var fileStream = new FileStream(file.FullName, FileMode.Open);
@@ -103,7 +106,7 @@ namespace aclara_meters
 
                         if (fileStream != null)
                         {
-                            NumFilesUpload += 1;
+                            NumFilesUploaded += 1;
                             sftp.UploadFile(fileStream, Path.Combine(pathRemoteFile, file.Name), null);
                         }
                         long cont = fileStream.Length;
@@ -136,7 +139,17 @@ namespace aclara_meters
             return false;
         }
 
-        public static List<FileInfo> LogFilesToUpload(string path,bool bAll)
+        public static int NumLogFilesToUpload(string path) 
+        {
+            return LogFilesToUpload(path).Count;
+        }
+
+        public static int NumBackupFiles()
+        {
+            return BackupFiles().Count;
+        }
+
+        public static List<FileInfo> LogFilesToUpload(string path)
         {
             List<FileInfo> local_array_files = new List<FileInfo>();
 
@@ -147,26 +160,42 @@ namespace aclara_meters
             NumFiles = files.Length;
             foreach (FileInfo file in files)
             {
-                if (file.Directory.Name == "backup") continue;
+                if (file.Directory.Name == "backup" || file.Directory.Name == "Logs") continue;
                 if (file.Name.Contains("Result"))
                 {
                     local_array_files.Add(file);
                 }
                 else
                 {
-                    if (!bAll)
+                    string dayfix = file.Name.Split('.')[0].Replace("Log", "");
+                    DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
+                    TimeSpan diff = date - DateTime.UtcNow;
+                    int hours = (int)diff.TotalHours;
+                    if (hours < 0)
                     {
-                        string dayfix = file.Name.Split('.')[0].Replace("Log", "");
-                        DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
-                        TimeSpan diff = date - DateTime.UtcNow;
-                        int hours = (int)diff.TotalHours;
-                        if (hours < 0)
-                        {
-                            local_array_files.Add(file);
-                        }
+                        local_array_files.Add(file);
                     }
-                    else local_array_files.Add(file);
+
                 }
+            }
+            return local_array_files;
+        }
+
+        public static List<FileInfo> BackupFiles()
+        {
+            List<FileInfo> local_array_files = new List<FileInfo>();
+
+            DirectoryInfo info = new DirectoryInfo(Mobile.LogPath);
+
+            FileInfo[] files = info.GetFiles("*.xml", SearchOption.AllDirectories).OrderBy(p => p.LastWriteTimeUtc).ToArray();
+
+            NumFiles = files.Length;
+            foreach (FileInfo file in files)
+            {
+                if (file.Directory.Name != "backup") continue;
+
+                local_array_files.Add(file);
+
             }
             return local_array_files;
         }

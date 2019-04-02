@@ -1752,12 +1752,11 @@ namespace aclara_meters.view
 
         private void Confirm_No_LogOut ( object sender, EventArgs e )
         {
-         
-           #region Show Upload prompt
+            #region Show Upload prompt
+            if ( GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath)>0 && Mobile.IsNetAvailable())
+                GenericUtilsClass.UploadFilesTask(FormsApp.config.global.UploadPrompt);
 
-           GenericUtilsClass.UploadFilesTask(FormsApp.config.global.UploadPrompt);
-
-           #endregion   
+            #endregion   
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
