@@ -377,7 +377,7 @@ namespace MTUComm
                 lastErrorLogGenerated = this.logger.Error ();
             
             if ( forceException )
-                throw this.errorsToLog[ this.errorsToLog.Count - 1 ].Exception;
+                throw error.Exception;
         }
 
         /// <summary>
@@ -389,12 +389,13 @@ namespace MTUComm
         {
             if ( this.errorsToLog.Count > 0 )
             {
+                Error error = this.errorsToLog[ this.errorsToLog.Count - 1 ];
                 PageLinker.ShowAlert ( ERROR_TITLE, this.lastError );
                 
                 lastErrorLogGenerated = this.logger.Error ();
 
                 if ( forceException )
-                    throw this.errorsToLog[ this.errorsToLog.Count - 1 ].Exception;
+                    throw error.Exception;
             }
         }
 
