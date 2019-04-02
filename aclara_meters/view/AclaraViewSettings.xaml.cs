@@ -1243,8 +1243,8 @@ namespace aclara_meters.view
             ContentNav.IsEnabled = false;
 
             #region Show Upload prompt
-
-            GenericUtilsClass.UploadFilesTask(FormsApp.config.global.UploadPrompt);
+            if (pending_files.Text != "0" && Mobile.IsNetAvailable() )
+                GenericUtilsClass.UploadFilesTask(FormsApp.config.global.UploadPrompt);
 
             #endregion
 
@@ -1253,8 +1253,15 @@ namespace aclara_meters.view
             {
                 String myDate = DateTime.Now.ToString();
                 date_sync.Text = myDate;
-                updated_files.Text = GenericUtilsClass.NumFilesUpload.ToString();
-                pending_files.Text = (GenericUtilsClass.NumFiles-GenericUtilsClass.NumFilesUpload).ToString();
+                updated_files.Text = GenericUtilsClass.NumFilesUploaded.ToString();
+                pending_files.Text = GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath).ToString();
+                backup_files.Text = GenericUtilsClass.NumBackupFiles().ToString();
+                Color colorText;
+                if (int.Parse(backup_files.Text) >= 100)
+                    colorText = Color.Red;
+                else
+                    colorText = Color.Default;
+                lbl_backup.TextColor = colorText;
                 force_sync.IsEnabled = true;
                 ContentNav.IsEnabled = true;
                 backdark_bg.IsVisible = false;
@@ -1415,8 +1422,8 @@ namespace aclara_meters.view
 
         private void LogOffOkTapped(object sender, EventArgs e)
         {
-                     
-            GenericUtilsClass.UploadFilesTask (FormsApp.config.global.UploadPrompt);
+            if (GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath) > 0 && Mobile.IsNetAvailable())
+                GenericUtilsClass.UploadFilesTask (FormsApp.config.global.UploadPrompt);
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
@@ -1526,10 +1533,16 @@ namespace aclara_meters.view
                     sync_button_text.Opacity = 1; sync_button.Opacity = 1;
                     title_text.Text = "File Syncronization";
                     date_sync.Text = DateTime.Now.ToString();
-                    updated_files.Text = GenericUtilsClass.NumFilesUpload.ToString();
-                    List<FileInfo> ListFiles = GenericUtilsClass.LogFilesToUpload(Mobile.LogPath, true);
-                    pending_files.Text = ListFiles.Count.ToString();
-
+                    updated_files.Text = GenericUtilsClass.NumFilesUploaded.ToString();
+                   
+                    pending_files.Text = GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath).ToString();
+                    backup_files.Text = GenericUtilsClass.NumBackupFiles().ToString();
+                    Color colorText;
+                    if (int.Parse(backup_files.Text) >= 100)
+                        colorText = Color.Red;
+                    else
+                        colorText = Color.Default;
+                    lbl_backup.TextColor = colorText;
                     sync_block.FadeTo(1, 200);
 
                     break;

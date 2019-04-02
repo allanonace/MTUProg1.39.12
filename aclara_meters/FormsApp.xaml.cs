@@ -145,25 +145,9 @@ namespace aclara_meters
             AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
 
             // Force to not download server XML files
-            if ( DEBUG_MODE_ON )
-                this.LoadConfigurationAndOpenScene ( dialogs );
-            else
-            {
-                /*
-                this.DownloadConfigFiles ();
-                this.LoadXmlsAndCreateContainer ( dialogs );
-                return;
-                */
-            
-                // Downloads, if necesary, and loads configuration from XML files
-                /*
-                if ( this.HasDeviceAllXmls () )
-                     this.LoadConfigurationAndOpenScene ( dialogs );
-                else this.DownloadXmlsIfNecessary ( dialogs );
-                */
-            
-                this.LoadConfigurationAndOpenScene ( dialogs );   
-            }
+           
+            this.LoadConfigurationAndOpenScene ( dialogs );   
+
         }
 
         #endregion

@@ -8,6 +8,7 @@ using System.IO;
 
 using FIELD = MTUComm.actions.AddMtuForm.FIELD;
 using ActionType = MTUComm.Action.ActionType;
+using System.Text;
 
 namespace MTUComm
 {
@@ -404,27 +405,18 @@ namespace MTUComm
 
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
-            
-
+            byte[] byteArray = Encoding.UTF8.GetBytes(logger.CreateBasicStructure());
+            Stream BasicStruct = new MemoryStream(byteArray);
+            XDocument uniDoc = XDocument.Load(BasicStruct);
+            XElement uniMtus = uniDoc.Root.Element("Mtus");
+            uniMtus.Add(this.addMtuAction);
+#if DEBUG
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 this.mtuBasicInfo.Type + "-" + this.action.type + ( ( form.mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.logger.CreateFileIfNotExist ( false, uniUri );
-            
-            XDocument uniDoc = XDocument.Load ( uniUri );
-            XElement uniMtus = uniDoc.Root.Element ( "Mtus" );
-            uniMtus.Add ( this.addMtuAction );
-            
-            string xmlToReturn = uniDoc.ToString ();
-            
-            #if DEBUG
-            
-            uniDoc.Save ( uniUri );
-            
-            #else
-            
-            File.Delete ( uniUri );
-            
-            #endif
+
+            uniDoc.Save ( uniUri );           
+#endif
             
             // Write in ActivityLog
             if ( Action.IsFromScripting &&
@@ -440,7 +432,7 @@ namespace MTUComm
                 doc.Save(uri);
             }
             
-            return xmlToReturn;
+            return uniDoc.ToString ();
         }
     }
 }

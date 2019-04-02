@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<util:BasePage xmlns="http://xamarin.com/schemas/2014/forms" xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" Title="{Binding PageTitle}" NavigationPage.HasBackButton="false" xmlns:accordion="clr-namespace:Xamarin.CustomControls;assembly=Xamarin.CustomControls.AccordionView" xmlns:local="clr-namespace:aclara_meters;assembly=aclara_meters" xmlns:Controls="clr-namespace:aclara_meters" xmlns:behaviors="clr-namespace:aclara_meters.Behaviors" x:Class="aclara_meters.view.AclaraViewSettings">
+<util:BasePage xmlns="http://xamarin.com/schemas/2014/forms" 
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+               xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" 
+               Title="{Binding PageTitle}" 
+               NavigationPage.HasBackButton="false" 
+               xmlns:accordion="clr-namespace:Xamarin.CustomControls;assembly=Xamarin.CustomControls.AccordionView" 
+               xmlns:local="clr-namespace:aclara_meters;assembly=aclara_meters" 
+               xmlns:Controls="clr-namespace:aclara_meters" 
+               xmlns:behaviors="clr-namespace:aclara_meters.Behaviors" 
+               x:Class="aclara_meters.view.AclaraViewSettings">
     <RelativeLayout IsVisible="true">
         <ContentView BackgroundColor="White" WidthRequest="1024" x:Name="fondo" IsVisible="true" 
                      RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,
@@ -179,6 +188,16 @@
                                             </Label>
                                         </StackLayout>
                                     </StackLayout>
+                                    <StackLayout Margin="0,12,0,0" Orientation="Horizontal">
+                                        <StackLayout Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                            <Label x:Name="lbl_backup" HorizontalTextAlignment="Start" FontSize="14" Text="Backup files:">
+                                            </Label>
+                                        </StackLayout>
+                                        <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand">
+                                            <Label x:Name="backup_files" FontSize="14" HorizontalTextAlignment="End" Text="23">
+                                            </Label>
+                                        </StackLayout>
+                                    </StackLayout>                                    
                                     <StackLayout HorizontalOptions="CenterAndExpand" Orientation="Horizontal">
                                         <RelativeLayout Margin="0,0,0,0" HorizontalOptions="Center" VerticalOptions="Center">
                                             <Button BackgroundColor="#6aa2b8" CornerRadius="10" HeightRequest="48" BorderColor="Transparent" BorderRadius="10" IsEnabled="false" WidthRequest="300" BorderWidth="0" Margin="0,48,0,0" FontSize="20"

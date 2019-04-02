@@ -258,6 +258,27 @@ namespace MTUComm
 
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
+<<<<<<< HEAD
+            
+            string uniUri = Path.Combine ( Mobile.LogUniPath,
+                mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
+            this.CreateFileIfNotExist ( false, uniUri );
+            
+            XDocument uniDoc = XDocument.Load ( uniUri );
+            PrepareLog_ReadMTU ( uniDoc.Root.Element("Mtus"), action, result, mtu );
+
+            string xmlToReturn = uniDoc.ToString ();
+
+            #if DEBUG
+
+            uniDoc.Save ( uniUri );
+            
+            #else
+            
+            File.Delete ( uniUri );
+            
+            #endif
+=======
             byte[] byteArray = Encoding.UTF8.GetBytes(CreateBasicStructure());
             Stream BasicStruct = new MemoryStream(byteArray);
             XDocument uniDoc = XDocument.Load(BasicStruct);
@@ -269,6 +290,7 @@ namespace MTUComm
  
             uniDoc.Save ( uniUri );
 #endif
+>>>>>>> feature/version_36_ui
             
             // Write in ActivityLog
             if ( Action.IsFromScripting &&
@@ -283,7 +305,7 @@ namespace MTUComm
                 doc.Save(uri);
             }
 
-            return uniDoc.ToString ();
+            return xmlToReturn;
         }
 
         private void PrepareLog_ReadMTU ( XElement parent, Action action, ActionResult result, Mtu mtu )
@@ -380,6 +402,27 @@ namespace MTUComm
 
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
+<<<<<<< HEAD
+            
+            string uniUri = Path.Combine ( Mobile.LogUniPath,
+                mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
+            this.CreateFileIfNotExist ( false, uniUri );
+            
+            XDocument uniDoc = XDocument.Load ( uniUri );
+            PrepareLog_TurnOff ( uniDoc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, mtuId );
+            
+            string xmlToReturn = uniDoc.ToString ();
+            
+            #if DEBUG
+            
+            uniDoc.Save ( uniUri );
+            
+            #else
+            
+            File.Delete ( uniUri );
+            
+            #endif
+=======
             // but the log send to the explorer should be only the last action performed
             byte[] byteArray = Encoding.UTF8.GetBytes(CreateBasicStructure());
             Stream BasicStruct = new MemoryStream(byteArray);
@@ -392,6 +435,7 @@ namespace MTUComm
              
             uniDoc.Save ( uniUri );          
 #endif
+>>>>>>> feature/version_36_ui
             
             // Write in ActivityLog
             if ( Action.IsFromScripting &&
@@ -406,7 +450,11 @@ namespace MTUComm
                 doc.Save(uri);
             }
             
+<<<<<<< HEAD
+            return xmlToReturn;
+=======
             return uniDoc.ToString ();
+>>>>>>> feature/version_36_ui
         }
 
         private void PrepareLog_TurnOff (XElement parent, string display, string type, string user, uint MtuId )

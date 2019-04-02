@@ -71,6 +71,11 @@ namespace MTUComm
 
             int step = 0;
 
+            if (string.IsNullOrEmpty(script.UserName))
+                throw new ScriptUserNameMissingException();
+
+            Mobile.LogUserPath = script.UserName;
+
             // Using invalid log file/path
             if ( string.IsNullOrEmpty ( script.LogFile ) ||
                  ! Regex.IsMatch ( script.LogFile, @"^[a-zA-Z_][a-zA-Z0-9_-]*.xml$" ) )
