@@ -30,13 +30,15 @@ namespace aclara_meters
             List<FileInfo> filesToUpload = LogFilesToUpload ( path );
             
             var upload = false;
-            if ( global.UploadPrompt &&
-                 filesToUpload.Count > 0 )
-                upload = await Application.Current.MainPage.DisplayAlert (
-                        "Uploading logs",
-                        "Do you want to upload pending files?",
-                        "Ok", "Cancel" );
-        
+
+            if (global.UploadPrompt &&
+                 filesToUpload.Count > 0)
+                upload = await Application.Current.MainPage.DisplayAlert(
+                        "Pending log files",
+                        "Do you want to Upload them?",
+                        "Ok", "Cancel");
+            else if (filesToUpload.Count > 0) upload = true;
+            
             if ( ! upload )
                 return false;
         
@@ -102,9 +104,11 @@ namespace aclara_meters
                                     
                                     if ( ! sftp.Exists ( remotePath ) )
                                         sftp.CreateDirectory ( remotePath );
-                                    
+
                                     // File path
-                                    remotePath = Path.Combine ( remotePath, file.Name );
+                                    string sTick = DateTime.Now.Ticks.ToString();
+                                    string sName = file.Name.Substring(0, 10) + "-" + sTick + "Log.xml";
+                                    remotePath = Path.Combine ( remotePath, sName );
                                 
                                     sftp.UploadFile ( fileStream, remotePath, null );
                                 }
@@ -187,15 +191,16 @@ namespace aclara_meters
                     local_array_files.Add ( file );
                 else
                 {
-                    if (!AllFiles)
+
+	                if (!AllFiles)
                     {
-                        string dayfix = file.Name.ToLower ().Substring ( 0, 10 ); // date
+                        string dayfix = file.Name.ToLower().Substring(0, 10);
                         DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
-                        TimeSpan diff = date - DateTime.UtcNow;
-                        
+                        TimeSpan diff = date - DateTime.Now;
+                    
                         int hours = ( int )diff.TotalHours;
                         if ( hours < 0 )
-                        local_array_files.Add(file);
+                           local_array_files.Add(file);
                     }
                     else local_array_files.Add(file);
                 }

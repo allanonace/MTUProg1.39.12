@@ -129,7 +129,7 @@ namespace aclara_meters.view
                 await Task.Delay(100); 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    ChangeLogFile(viewModelTabLog.TotalFiles, false);
+                     ChangeLogFile(viewModelTabLog.TotalFiles, false);
                 });
            });
 
@@ -1041,9 +1041,7 @@ namespace aclara_meters.view
             viewModelTabLog.RefreshList();
             ChangeLogFile(viewModelTabLog.TotalFiles,false);
 
-            Task.Delay(100).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
+          
                 String myDate = DateTime.Now.ToString();
                 date_sync.Text = myDate;
                 updated_files.Text = GenericUtilsClass.NumFilesUploaded.ToString();
@@ -1058,8 +1056,7 @@ namespace aclara_meters.view
                 ContentNav.IsEnabled = true;
                 backdark_bg.IsVisible = false;
                 indicator.IsVisible = false;
-            }));
-                
+           
         }
 
         private void ButtonListeners()
@@ -1348,6 +1345,14 @@ namespace aclara_meters.view
 
         private void ChangeLogFile(int index, bool bUI)
         {
+            if (index < 0)
+            {
+                btnPrevious.IsVisible = false;
+                btnNext.IsVisible = false;
+                return;
+            }
+              
+
             if (bUI) Wait(true);
             Task.WaitAll(viewModelTabLog.LoadData(index));
 
