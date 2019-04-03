@@ -896,10 +896,10 @@ namespace aclara_meters.view
         }
 
 
-        private void LogOffOkTapped(object sender, EventArgs e)
+        private async void LogOffOkTapped(object sender, EventArgs e)
         {
-            if (GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath) > 0 && Mobile.IsNetAvailable())
-                GenericUtilsClass.UploadFilesTask ();
+            // Upload log files
+            await GenericUtilsClass.UploadFiles ();
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;

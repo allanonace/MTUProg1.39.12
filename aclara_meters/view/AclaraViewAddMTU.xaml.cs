@@ -1750,13 +1750,10 @@ namespace aclara_meters.view
             this.ChangeAction ();
         }
 
-        private void Confirm_No_LogOut ( object sender, EventArgs e )
+        private async void Confirm_No_LogOut ( object sender, EventArgs e )
         {
-            #region Show Upload prompt
-            if ( GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath)>0 && Mobile.IsNetAvailable())
-                GenericUtilsClass.UploadFilesTask ();
-
-            #endregion   
+            // Upload log files
+            await GenericUtilsClass.UploadFiles ();
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;

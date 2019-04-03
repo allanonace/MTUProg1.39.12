@@ -132,7 +132,7 @@ namespace aclara_meters.view
                 this.txtBuscando.Text = "Uploading files...";
 
                 Task.Run(async() => {
-                    bool bUpload = await GenericUtilsClass.UploadFilesTaskScripting();
+                    bool bUpload = await GenericUtilsClass.UploadFiles ();
                     Device.BeginInvokeOnMainThread(() =>
                     {
                         String sMessage = ( bUpload ) ? "Files uploaded successfully" : "Error while uploading files to the FTP server";

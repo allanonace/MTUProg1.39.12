@@ -9,7 +9,8 @@ namespace MTUComm
 {
     public class PageLinker
     {
-        private const string BTN_TXT = "Ok";
+        private const string BTN_OK     = "Ok";
+        private const string BTN_CANCEL = "Cancel";
     
         private static PageLinker instance;
         private static Page currentPage;
@@ -36,7 +37,7 @@ namespace MTUComm
             string title,
             string message,
             string btnText,
-            bool   kill = false )
+            bool   kill )
         {
             if ( currentPage != null )
             {
@@ -63,17 +64,17 @@ namespace MTUComm
         public static void ShowAlert (
             string title,
             string message,
-            string btnText = BTN_TXT,
+            string btnText = BTN_OK,
             bool   kill    = false )
         {
-            GetInstance ()._ShowAlert ( title, message, btnText );
+            GetInstance ()._ShowAlert ( title, message, btnText, kill );
         }
 
         public static void ShowAlert (
             string title,
             Error  error,
             bool   kill    = false,
-            string btnText = BTN_TXT )
+            string btnText = BTN_OK )
         {
             if ( error.Id > -1 )
                 GetInstance ()._ShowAlert (

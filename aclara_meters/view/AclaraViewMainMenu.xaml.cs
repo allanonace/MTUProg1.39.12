@@ -103,27 +103,18 @@ namespace aclara_meters.view
 
             }
 
+            // Upload log files and then start pucks detection
+            this.UpdateFiles ();
+        }
+
+        public async void UpdateFiles ()
+        {
+            // Upload log files
+            await GenericUtilsClass.UploadFiles ();
+            
+            // Init pucks detection
             InitRefreshCommand();
-
-            #region New Scripting method is called
-
-            //Device.BeginInvokeOnMainThread(() =>
-            //{
-            //    PrintToConsole("Se va a empezar el flujo");
-
-            //    PrintToConsole("Se va a lanzar una Tarea. Task.Factory.StartNew(Init_Scripting_Method)");
-
-            //    Task.Factory.StartNew(Interface_background_scan_page);
-
-            //});
-
-            //Task.Factory.StartNew(Interface_background_scan_page);
-
-             Interface_background_scan_page();
-
-            #endregion
-
-            //BluetoothPeripheralDisconnect ( null, null );
+            Interface_background_scan_page();
         }
 
         public string GZipCompress ( string input )
@@ -1251,11 +1242,10 @@ namespace aclara_meters.view
             //DeviceList.RefreshCommand.Execute ( true );
         }
 
-
-        private void LogOffOkTapped(object sender, EventArgs e)
+        private async void LogOffOkTapped(object sender, EventArgs e)
         {
-            if (GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath) > 0 && Mobile.IsNetAvailable())
-                GenericUtilsClass.UploadFilesTask ();
+            // Upload log files
+            await GenericUtilsClass.UploadFiles ();
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;

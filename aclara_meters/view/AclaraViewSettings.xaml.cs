@@ -1034,22 +1034,18 @@ namespace aclara_meters.view
             turnOffAction.Run();
         }
 
-        private void ForceSyncButtonTapped(object sender, EventArgs e)
+        private async void ForceSyncButtonTapped(object sender, EventArgs e)
         {
             force_sync.IsEnabled = false;
             backdark_bg.IsVisible = true;
             indicator.IsVisible = true;
             ContentNav.IsEnabled = false;
 
-            #region Show Upload prompt
-            if (pending_files.Text != "0" && Mobile.IsNetAvailable())
-            {
-                GenericUtilsClass.UploadFilesTask();
-                viewModelTabLog.RefreshList();
-                ChangeLogFile(viewModelTabLog.TotalFiles,false);
-
-            }
-            #endregion
+            // Upload log files
+            await GenericUtilsClass.UploadFiles ();
+            
+            viewModelTabLog.RefreshList();
+            ChangeLogFile(viewModelTabLog.TotalFiles,false);
 
             Task.Delay(100).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
@@ -1206,11 +1202,10 @@ namespace aclara_meters.view
             DoBasicRead();
         }
 
-
-        private void LogOffOkTapped(object sender, EventArgs e)
+        private async void LogOffOkTapped(object sender, EventArgs e)
         {
-            if (GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath) > 0 && Mobile.IsNetAvailable())
-                GenericUtilsClass.UploadFilesTask ();
+            // Upload log files
+            await GenericUtilsClass.UploadFiles ();
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;

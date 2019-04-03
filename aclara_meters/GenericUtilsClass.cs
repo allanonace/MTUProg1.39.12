@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
+using Acr.UserDialogs;
 using MTUComm;
 using MTUComm.Exceptions;
-using Plugin.DeviceInfo;
 using Renci.SshNet;
 using Xamarin.Forms;
 using Xml;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace aclara_meters
 {
@@ -19,17 +19,7 @@ namespace aclara_meters
     {
         public static int NumFilesUploaded;
 
-        public static async Task<bool> UploadFilesTask ()
-        {
-            return await UploadLogFiles ( true );
-        }
-
-        public static async Task<bool> UploadFilesTaskScripting ()
-        {
-            return await UploadLogFiles ( true );
-        }
-
-        public async static Task<bool> UploadLogFiles ( Boolean AllLogs )
+        public async static Task<bool> UploadFiles ( Boolean AllLogs = true )
         {
             Global global = FormsApp.config.global;
         
@@ -43,8 +33,8 @@ namespace aclara_meters
             if ( global.UploadPrompt &&
                  filesToUpload.Count > 0 )
                 upload = await Application.Current.MainPage.DisplayAlert (
-                        "Pending log files",
-                        "Do you want to Upload them?",
+                        "Uploading logs",
+                        "Do you want to upload pending files?",
                         "Ok", "Cancel" );
         
             if ( ! upload )
@@ -57,83 +47,115 @@ namespace aclara_meters
                 return false;
             }
             
-            NumFilesUploaded = 0;
-            
-            SftpClient sftp = null;
-
-            try
+            // Has the devices internet connection
+            if ( ! Mobile.IsNetAvailable () )
             {
-                string remotePath = global.ftpRemotePath;
-                using ( sftp = new SftpClient ( global.ftpRemoteHost, 22, global.ftpUserName, global.ftpPassword ) )
-                {
-                    sftp.Connect();
-                    
-                    // If not exist create the remote path from global.xml
-                    if ( ! sftp.Exists ( remotePath ) )
-                        sftp.CreateDirectory ( remotePath );
+                Errors.LogErrorNowAndKill ( new NoInternetException () );
+                return false;
+            }
+            
+            // Cancel action
+            bool cancelled = false;
+            System.Action OnCancel = () =>
+            {
+                cancelled = true;
+            };
 
-                    using ( MD5 md5Hash = MD5.Create () )
-                    {
-                        byte[] md5Local;
-                        byte[] md5Remote;
-                        foreach ( FileInfo file in filesToUpload )
-                        {
-                            // Upload local file to the FTP server
-                            using ( FileStream fileStream = new FileStream ( file.FullName, FileMode.Open ) )
-                            {
-                                // Folder path
-                                remotePath = global.ftpRemotePath + file.Directory.Name; // Logs + User folder
-                                
-                                if ( ! sftp.Exists ( remotePath ) )
-                                    sftp.CreateDirectory ( remotePath );
-                                
-                                // File path
-                                remotePath = Path.Combine ( remotePath, file.Name );
-                            
-                                sftp.UploadFile ( fileStream, remotePath, null );
-                            }
+            // Progress bar
+            using ( Acr.UserDialogs.IProgressDialog progress = UserDialogs.Instance.Progress ( "Uploading", OnCancel, "Cancel" ) )
+            {
+                // Is necessary for appear the progress bar right now
+                await Task.Delay ( 10 );
+            
+                NumFilesUploaded = 0;
+                
+                SftpClient sftp = null;
     
-                            // Compare local and remote files
-                            using ( StreamReader stream = new StreamReader ( file.FullName ) )
-                                md5Local = md5Hash.ComputeHash ( Encoding.UTF8.GetBytes ( stream.ReadToEnd () ) );
-                            
-                            md5Remote = md5Hash.ComputeHash ( Encoding.UTF8.GetBytes ( sftp.ReadAllText ( remotePath ) ) );
-
-                            // If both files are equal, move local file to backup folder
-                            if ( Enumerable.SequenceEqual ( md5Local, md5Remote ) )
+                try
+                {
+                    string remotePath = global.ftpRemotePath;
+                    using ( sftp = new SftpClient ( global.ftpRemoteHost, 22, global.ftpUserName, global.ftpPassword ) )
+                    {
+                        sftp.Connect();
+                        
+                        // If not exist create the remote path from global.xml
+                        if ( ! sftp.Exists ( remotePath ) )
+                            sftp.CreateDirectory ( remotePath );
+    
+                        using ( MD5 md5Hash = MD5.Create () )
+                        {
+                            byte[] md5Local;
+                            byte[] md5Remote;
+                            foreach ( FileInfo file in filesToUpload )
                             {
-                                string url_to_copy = Path.Combine ( file.Directory.FullName, Mobile.PATH_BACKUP );
-                                if ( ! Directory.Exists ( url_to_copy ) )
-                                    Directory.CreateDirectory ( url_to_copy );
-        
-                                File.Copy ( file.FullName, Path.Combine ( url_to_copy, file.Name ), true );
-                                File.Delete ( file.FullName );
+                                if ( cancelled )
+                                    throw new Exception ();
+                            
+                                // Is necessary for update the progress bar
+                                await Task.Delay ( 10 );
+                            
+                                // Upload local file to the FTP server
+                                using ( FileStream fileStream = new FileStream ( file.FullName, FileMode.Open ) )
+                                {
+                                    // Folder path
+                                    remotePath = global.ftpRemotePath + file.Directory.Name; // Logs + User folder
+                                    
+                                    if ( ! sftp.Exists ( remotePath ) )
+                                        sftp.CreateDirectory ( remotePath );
+                                    
+                                    // File path
+                                    remotePath = Path.Combine ( remotePath, file.Name );
                                 
-                                NumFilesUploaded += 1;
+                                    sftp.UploadFile ( fileStream, remotePath, null );
+                                }
+        
+                                // Compare local and remote files
+                                using ( StreamReader stream = new StreamReader ( file.FullName ) )
+                                    md5Local = md5Hash.ComputeHash ( Encoding.UTF8.GetBytes ( stream.ReadToEnd () ) );
+                                
+                                md5Remote = md5Hash.ComputeHash ( Encoding.UTF8.GetBytes ( sftp.ReadAllText ( remotePath ) ) );
+    
+                                // If both files are equal, move local file to backup folder
+                                if ( Enumerable.SequenceEqual ( md5Local, md5Remote ) )
+                                {
+                                    string url_to_copy = Path.Combine ( file.Directory.FullName, Mobile.PATH_BACKUP );
+                                    if ( ! Directory.Exists ( url_to_copy ) )
+                                        Directory.CreateDirectory ( url_to_copy );
+            
+                                    File.Copy ( file.FullName, Path.Combine ( url_to_copy, file.Name ), true );
+                                    File.Delete ( file.FullName );
+                                    
+                                    NumFilesUploaded += 1;
+                                    
+                                    progress.PercentComplete = ( int )( NumFilesUploaded * 100 / filesToUpload.Count );
+                                }
                             }
                         }
+    
+                        sftp.Disconnect ();
                     }
-
-                    sftp.Disconnect ();
                 }
-            }
-            catch ( Exception e )
-            {
-                // Catch all exceptions and then always show the number of
-                // files uploaded using the exception FtpUpdateLogsException
-            }
-            finally
-            {
-                if ( sftp != null )
-                    sftp.Dispose ();
-                
-                sftp = null;
+                catch ( Exception e )
+                {
+                    // Catch all exceptions and then always show the number of
+                    // files uploaded using the exception FtpUpdateLogsException
+                }
+                finally
+                {
+                    if ( sftp != null )
+                        sftp.Dispose ();
+                    
+                    sftp = null;
+                }
             }
 
             if ( NumFilesUploaded == filesToUpload.Count )
                 return true;
             
-            Errors.LogErrorNow ( new FtpUpdateLogsException ( NumFilesUploaded + "/" + filesToUpload.Count ) );
+            if ( ! cancelled )
+                 Errors.LogErrorNow ( new FtpUpdateLogsException ( NumFilesUploaded + "/" + filesToUpload.Count ) );
+            else PageLinker.ShowAlert ( "Uploading canceled", "Only uploaded " + NumFilesUploaded + " / " + filesToUpload.Count + " log files" );
+            
             return false;
         }
 
@@ -165,18 +187,17 @@ namespace aclara_meters
                     local_array_files.Add ( file );
                 else
                 {
-		if (!AllFiles)
+                    if (!AllFiles)
                     {
-                    string dayfix = file.Name.ToLower ().Split('.')[0].Replace ( "log", "" );
-                    DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
-                    TimeSpan diff = date - DateTime.UtcNow;
-                    
-                    int hours = ( int )diff.TotalHours;
-                    if ( hours < 0 )
+                        string dayfix = file.Name.ToLower ().Substring ( 0, 10 ); // date
+                        DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
+                        TimeSpan diff = date - DateTime.UtcNow;
+                        
+                        int hours = ( int )diff.TotalHours;
+                        if ( hours < 0 )
                         local_array_files.Add(file);
                     }
                     else local_array_files.Add(file);
-
                 }
             }
             return local_array_files;
