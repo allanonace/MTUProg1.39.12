@@ -1143,7 +1143,7 @@ namespace MTUComm
 
                 #region Add MTU
 
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Writing..." ) );
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Preparing MemoryMap..." ) );
 
                 // Prepare memory map
                 String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtu ); //( int )MtuForm.mtuBasicInfo.Type );
@@ -1325,7 +1325,7 @@ namespace MTUComm
                     MemoryRegister<bool>   regEncrypted  = map[ "Encrypted"       ];
                     MemoryRegister<int>    regEncryIndex = map[ "EncryptionIndex" ];
                 
-                    bool   ok     = true;
+                    bool   ok     = false;
                     byte[] aesKey = new byte[ regAesKey.size    ]; // 16 bytes
                     byte[] sha    = new byte[ regAesKey.sizeGet ]; // 32 bytes
                 
@@ -1370,13 +1370,17 @@ namespace MTUComm
                                 // Compare local sha and sha generate reading key from MTU
                                 if ( ! sha.SequenceEqual (mtuSha ) )
                                      continue; // Error
-                                else break;
+                                else
+                                {
+                                    ok = true;
+                                    break;
+                                }
                             }
                         }
                     }
                     catch ( Exception e )
                     {
-                        ok = false;
+                        //...
                     }
                     finally
                     {
@@ -1408,6 +1412,8 @@ namespace MTUComm
                 }
 
                 #endregion
+
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Writing MemoryMap to MTU..." ) );
 
                 // Write changes into MTU
                 this.WriteMtuModifiedRegisters ( map );
@@ -1450,6 +1456,8 @@ namespace MTUComm
                        form.ContainsParameter ( FIELD.FORCE_TIME_SYNC ) &&
                        form.ForceTimeSync ) )
                 {
+                    OnProgress ( this, new ProgressArgs ( 0, 0, "Install Confirmation..." ) );
+                
                     // Force to execute Install Confirmation avoiding problems
                     // with MTU shipbit, because MTU is just turned on
                     if ( this.InstallConfirmation_Logic ( true ) > RESULT_OK )

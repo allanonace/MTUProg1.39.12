@@ -6,6 +6,7 @@ using System.Dynamic;
 using MTUComm.Exceptions;
 using System.Xml.Serialization;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace MTUComm
 {
@@ -14,6 +15,7 @@ namespace MTUComm
         #region Constants
 
         private const string ERROR_TITLE = "Controlled Exception";
+        private const string ERROR_INFO  = "Information";
 
         private Dictionary<Exception,int> ex2id = 
         new Dictionary<Exception,int> ()
@@ -402,6 +404,15 @@ namespace MTUComm
                     throw error.Exception;
             }
         }
+        
+        private async Task _ShowAlert (
+            Exception e )
+        {
+            Error error = this.GetErrorByException ( e );
+            error.Id = -1;
+            
+            await PageLinker.ShowAlert ( ERROR_INFO, error );
+        }
 
         #endregion
 
@@ -496,6 +507,12 @@ namespace MTUComm
             Errors.GetInstance ()._LogRegisteredErrors ( forceException );
         }
         
+        public async static Task ShowAlert (
+            Exception e )
+        {
+            await Errors.GetInstance ()._ShowAlert ( e );
+        }
+
         /// <summary>
         /// Launched exception is an own exception or is from .Net framework
         /// </summary>

@@ -15,7 +15,7 @@ namespace MTUComm
         private static PageLinker instance;
         private static Page currentPage;
         public static Page mainPage;
-        public static IDisposable popup;
+        //private IDisposable popup;
     
         public static Page CurrentPage
         {
@@ -33,32 +33,32 @@ namespace MTUComm
             return instance;
         }
 
-        private async void _ShowAlert (
+        private async Task _ShowAlert (
             string title,
             string message,
             string btnText,
             bool   kill )
         {
-            if ( currentPage != null )
-            {
-                Device.BeginInvokeOnMainThread ( async () =>
-                {
+            //if ( currentPage != null )
+            //{
+                //Device.BeginInvokeOnMainThread ( async () =>
+                //{
                     // NOTE: Xamarin DisplayAlert dialog cannot be closed/disposed from code
                     //await currentPage.DisplayAlert ( title, message, btnText );
                     
-                    popup = UserDialogs.Instance.Alert ( message, title, btnText );
+                    await UserDialogs.Instance.AlertAsync ( message, title, btnText );
                     
                     if ( kill )
                     {
                         // Wait four seconds and kill the popup
-                        await Task.Delay ( TimeSpan.FromSeconds ( 10 ) );
-                        popup.Dispose ();
+                        //await Task.Delay ( TimeSpan.FromSeconds ( 6 ) );
+                        //popup.Dispose ();
                         
                         // Close the app
                         System.Diagnostics.Process.GetCurrentProcess ().Kill ();
                     }
-                });
-            }
+                //});
+            //}
         }
 
         public static void ShowAlert (
@@ -70,17 +70,17 @@ namespace MTUComm
             GetInstance ()._ShowAlert ( title, message, btnText, kill );
         }
 
-        public static void ShowAlert (
+        public async static Task ShowAlert (
             string title,
             Error  error,
             bool   kill    = false,
             string btnText = BTN_OK )
         {
             if ( error.Id > -1 )
-                GetInstance ()._ShowAlert (
+                await GetInstance ()._ShowAlert (
                     title, "Error " + error.Id + ": " + error.Message, btnText, kill );
             else
-                GetInstance ()._ShowAlert (
+                await GetInstance ()._ShowAlert (
                     title, error.Message, btnText, kill );
         }
     }
