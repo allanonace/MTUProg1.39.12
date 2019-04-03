@@ -24,10 +24,15 @@ namespace aclara.ViewModels
 
         public TabLogViewModel()
         {
+            RefreshList();
+                     
+        }
+
+        public void RefreshList()
+        {
             FileList = GenericUtilsClass.LogFilesToUpload(Mobile.LogUserPath,true);
             IndexFile = FileList.Count-1;
             TotalFiles = FileList.Count-1;
-            //LoadData(IndexFile);
         }
 
         public async Task LoadData(int ind)
@@ -39,6 +44,7 @@ namespace aclara.ViewModels
             var fileStream = new FileStream(file.FullName, FileMode.Open);
             stream = fileStream;
             ReadLogXML(stream);
+            fileStream.Close();
             IndexFile = ind;
             FileName = file.Name;
             FileDateTime = file.CreationTime.ToString("MM/dd/yyyy HH:00");

@@ -354,6 +354,7 @@
     <BundleResource Include="Resources\installConfirm_btn.png" />
     <BundleResource Include="Resources\next_icon.png" />
     <BundleResource Include="Resources\prev_icon.png" />
+    <BundleResource Include="Resources\ftp_button.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Acr.Support">
