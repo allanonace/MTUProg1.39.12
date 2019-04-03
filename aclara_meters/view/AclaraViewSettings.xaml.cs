@@ -960,10 +960,8 @@ namespace aclara_meters.view
                 Task.Delay(100).ContinueWith(t =>
                     Device.BeginInvokeOnMainThread(() =>
                     {
-
                         Device.BeginInvokeOnMainThread(() =>
                         {
-
                             #region New Circular Progress bar Animations    
 
                             backdark_bg.IsVisible = false;
@@ -971,11 +969,7 @@ namespace aclara_meters.view
                             background_scan_page.IsEnabled = true;
 
                             #endregion
-
-                            Application.Current.MainPage.DisplayAlert("Alert", "Cannot read device, try again", "Ok");
-
                         });
-
                     })
                 );
             });

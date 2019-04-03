@@ -82,6 +82,7 @@ namespace MTUComm
 
         public static Dictionary<ActionType, String> displays = new Dictionary<ActionType, String>()
         {
+            {ActionType.BasicRead,"Basic Read" },
             {ActionType.ReadMtu,"Read MTU" },
             {ActionType.AddMtu,"Add MTU" },
             {ActionType.ReplaceMTU,"Replace MTU" },
@@ -98,6 +99,7 @@ namespace MTUComm
 
         public static Dictionary<ActionType, String> tag_types = new Dictionary<ActionType, String>()
         {
+            {ActionType.BasicRead,"BasicRead" },
             {ActionType.ReadMtu,"ReadMTU" },
             {ActionType.AddMtu,"Program MTU" },
             {ActionType.ReplaceMTU,"Program MTU" },
@@ -114,15 +116,16 @@ namespace MTUComm
 
         public static Dictionary<ActionType, String> tag_reasons = new Dictionary<ActionType, String>()
         {
-            {ActionType.ReadMtu, string.Empty },
+            {ActionType.BasicRead, "BasicRead" },
+            {ActionType.ReadMtu, "ReadMtu" },
             {ActionType.AddMtu,"AddMtu" },
             {ActionType.ReplaceMTU,"ReplaceMtu" },
             {ActionType.AddMtuAddMeter,"AddMtuAddMeter" },
             {ActionType.AddMtuReplaceMeter,"AddMtuReplaceMeter" },
             {ActionType.ReplaceMtuReplaceMeter,"ReplaceMtuReplaceMeter" },
             {ActionType.ReplaceMeter,"ReplaceMeter" },
-            {ActionType.TurnOffMtu, string.Empty },
-            {ActionType.TurnOnMtu, string.Empty },
+            {ActionType.TurnOffMtu, "TurnOffMtu" },
+            {ActionType.TurnOnMtu, "TurnOnMtu" },
             {ActionType.ReadData, "DataRead" },
             {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
             {ActionType.Diagnosis, string.Empty }
