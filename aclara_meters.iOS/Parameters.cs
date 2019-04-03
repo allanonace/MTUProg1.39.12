@@ -27,15 +27,15 @@ namespace aclara_meters.iOS
                 var data = Mobile.configData;
 
                 // Convert parameters to string and regenerate the certificate
-                data.ftpUser =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_USER    ) ).ToString ();
-                data.ftpPass =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PASS    ) ).ToString ();
-                data.ftpHost =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_HOST    ) ).ToString ();
-                data.ftpPort = int.Parse ( paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PORT    ) ).ToString () );
-                data.ftpPath =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PATH    ) ).ToString ();
+                data.ftpDownload_User =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_USER    ) ).ToString ();
+                data.ftpDownload_Pass =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PASS    ) ).ToString ();
+                data.ftpDownload_Host =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_HOST    ) ).ToString ();
+                data.ftpDownload_Port = int.Parse ( paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PORT    ) ).ToString () );
+                data.ftpDownload_Path =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PATH    ) ).ToString ();
                 //data.GenerateCert        ( paramsGroup.ValueForKey ( new NSString ( Mobile.ID_CERTIFICATE ) ).ToString () );
                 
                 Console.WriteLine ( "Intune parameters loaded.." );
-                Console.WriteLine ( "FTP: " + data.ftpHost + ":" + data.ftpPort + " - " + data.ftpUser + " [ " + data.ftpPass + " ]" );
+                Console.WriteLine ( "FTP: " + data.ftpDownload_Host + ":" + data.ftpDownload_Port + " - " + data.ftpDownload_User + " [ " + data.ftpDownload_Pass + " ]" );
                 Console.WriteLine ( "Certificate: " + data.certificate.FriendlyName + " [ " + data.certificate.NotAfter + " ]" );
                 
                 // Free memory

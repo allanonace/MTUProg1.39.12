@@ -124,8 +124,12 @@ namespace MTUComm
             { new NoInternetException (),                       807 },
             // The current date of the device is lower than allowed
             { new DeviceMinDateAllowedException (),             808 },
-             // Missing credentials for SFTP in global.xml
-            { new FtpCredentialsMissingException (),             809 },
+            // Missing credentials for SFTP in global.xml
+            { new FtpCredentialsMissingException (),            809 },
+            // App cannot comunnicate with the FTP
+            { new FtpConnectionException (),                    810 },
+            // Sending activity logs to the FTP has failed, only _var_ files have been uploaded
+            { new FtpUpdateLogsException (),                    811 },
         };
 
         #endregion

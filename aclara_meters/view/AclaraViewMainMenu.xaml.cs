@@ -124,8 +124,6 @@ namespace aclara_meters.view
             #endregion
 
             //BluetoothPeripheralDisconnect ( null, null );
-            
-            //MTUComm.Files.CheckCorrectUpload ( Mobile.LogUniPath, "testmd5" );
         }
 
         public string GZipCompress ( string input )
@@ -1257,7 +1255,7 @@ namespace aclara_meters.view
         private void LogOffOkTapped(object sender, EventArgs e)
         {
             if (GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath) > 0 && Mobile.IsNetAvailable())
-                GenericUtilsClass.UploadFilesTask(FormsApp.config.global.UploadPrompt);
+                GenericUtilsClass.UploadFilesTask ();
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;

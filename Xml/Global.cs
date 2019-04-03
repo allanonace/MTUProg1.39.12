@@ -246,6 +246,18 @@ namespace Xml
             };
         }
 
+        public bool IsFtpUploadSet
+        {
+            get
+            {
+                return ! string.IsNullOrEmpty ( this.ftpRemoteHost ) &&
+                       ! string.IsNullOrEmpty ( this.ftpRemotePath ) &&
+                       ! string.IsNullOrEmpty ( this.ftpUserName   ) &&
+                       ! string.IsNullOrEmpty ( this.ftpPassword   ) &&
+                       ! string.IsNullOrEmpty ( this.ftpRemoteHost );
+            }
+        }
+
         [XmlElement("AccountDualEntry")]
         public bool AccountDualEntry { get; set; }
 

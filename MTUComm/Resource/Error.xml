@@ -56,6 +56,8 @@
     <Error id="807" message="The device has not internet connection" />
     <Error id="808" message="The current date of the device is lower than allowed" />
     <Error id="809" message="Missing credentials for SFTP in global.xml" />
+    <Error id="810" message="App cannot comunnicate with the FTP" />
+    <Error id="811" message="Sending activity logs to the FTP has failed, only _var_ files have been uploaded" />
     
     <!--<Error id="" message="" />-->
     <!--<Error id="100" message="Mensaje de prueba de error propio" />-->

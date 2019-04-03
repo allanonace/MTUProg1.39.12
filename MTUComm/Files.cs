@@ -5,24 +5,28 @@ using System.Text;
 using System.Linq;
 using Renci.SshNet.Sftp;
 using Renci.SshNet;
+using MTUComm.Exceptions;
+using System.Collections.Generic;
 
 namespace MTUComm
 {
     public class Files
     {
-        public static bool CheckCorrectUpload (
-            string localBasePath,   // Logs and inside a folder per user
-            string remoteBasePath ) // The same structure but in the FTP
+        public static int CheckCorrectUpload (
+            string localBasePath,  // Logs and inside a folder per user
+            string remoteBasePath, // The same structure but in the FTP
+            out List<string> filesUploadedOk ) 
         {
             byte[] md5Local;
             byte[] md5Remote;
-            bool   ok = true;
+            int    filesNotUploaded = 0;
             SftpClient sftp = null;
+            filesUploadedOk = new List<string> ();
         
             try
             {
                 Mobile.ConfigData data = Mobile.configData;
-                using ( sftp = new SftpClient ( data.ftpHost, data.ftpPort, data.ftpUser, data.ftpPass ) )
+                using ( sftp = new SftpClient ( data.ftpDownload_Host, data.ftpDownload_Port, data.ftpDownload_User, data.ftpDownload_Pass ) )
                 {
                     sftp.Connect ();
             
@@ -39,42 +43,41 @@ namespace MTUComm
                                 int    lastIndex = ( filePath.LastIndexOf ( '\\' ) > -1 ) ? filePath.LastIndexOf ( '\\' ) : filePath.LastIndexOf ( '/' );
                                 string fileName = filePath.Substring ( lastIndex + 1 );
                                 
-                                if ( sftp.Exists ( Path.Combine ( data.ftpPath, remoteBasePath, fileName ) ) )
+                                string remoteFullPath = Path.Combine ( data.ftpDownload_Path, remoteBasePath, fileName );
+                                
+                                // File is present in the FTP
+                                if ( sftp.Exists ( remoteFullPath ) )
                                 {
-                                    using ( StreamReader stream = new StreamReader ( localBasePath ) )
+                                    using ( StreamReader stream = new StreamReader ( filePath ) )
                                         md5Local = md5Hash.ComputeHash ( Encoding.UTF8.GetBytes ( stream.ReadToEnd () ) );
-                                        
-                                    md5Remote = sftp.ReadAllBytes ( remoteBasePath );
                                     
-                                    if ( ! ( ok = Enumerable.SequenceEqual ( md5Local, md5Remote ) ) )
-                                        break;
+                                    md5Remote = md5Hash.ComputeHash ( Encoding.UTF8.GetBytes ( sftp.ReadAllText ( remoteFullPath ) ) );
+                                    
+                                    // Compare local and remote files
+                                    if ( Enumerable.SequenceEqual ( md5Local, md5Remote ) )
+                                        filesUploadedOk.Add ( fileName );
+                                    else
+                                        filesNotUploaded++; // Remote file is corrupted/modified
                                 }
-                                // File not present in the FTP/not uploaded to the FTP
-                                else
-                                {
-        
-                                }
+                                else filesNotUploaded++; // File not uploaded to the FTP
                             }
                         }
-                    }
-                    // Some file is not the same in remote than in local/device
-                    if ( ! ok )
-                    {
-                        
                     }
                 }
             }
             catch ( Exception e )
             {
-                ok = false;
+                throw new FtpConnectionException ();
             }
             finally
             {
                 if ( sftp != null )
-                    sftp.Disconnect ();
+                    sftp.Dispose ();
+                
+                sftp = null;
             }
 
-            return ok;
+            return filesNotUploaded;
         }
     }
 }

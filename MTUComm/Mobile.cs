@@ -17,11 +17,11 @@ namespace MTUComm
             private const string CER_HEADER = "-----BEGIN CERTIFICATE-----\n";
             private const string CER_FOOTER = "\n-----END CERTIFICATE-----";
         
-            public string ftpUser;
-            public string ftpPass;
-            public string ftpHost;
-            public int    ftpPort;
-            public string ftpPath;
+            public string ftpDownload_User;
+            public string ftpDownload_Pass;
+            public string ftpDownload_Host;
+            public int    ftpDownload_Port;
+            public string ftpDownload_Path;
             public X509Certificate2 certificate { private set; get; }
             public byte[] lastRandomKey;
             public byte[] lastRandomKeySha;
@@ -47,11 +47,11 @@ namespace MTUComm
                 this.lastRandomKey    = new byte[ 0 ];
                 this.lastRandomKeySha = new byte[ 0 ];
                 
-                this.ftpUser = "aclara";
-                this.ftpPass = "aclara1234";
-                this.ftpHost = "159.89.29.176";
-                this.ftpPort = 22;
-                this.ftpPath = "/home/aclara";
+                this.ftpDownload_User = "aclara";
+                this.ftpDownload_Pass = "aclara1234";
+                this.ftpDownload_Host = "159.89.29.176";
+                this.ftpDownload_Port = 22;
+                this.ftpDownload_Path = "/home/aclara";
             }
 
             public void GenerateCert ()
@@ -77,7 +77,7 @@ namespace MTUComm
                         this.certificate = new X509Certificate2 ( Encoding.ASCII.GetBytes ( CER_HEADER + content + CER_FOOTER ) );
                         
                         Console.WriteLine ( "Local parameters loaded.." );
-                        Console.WriteLine ( "FTP: " + this.ftpHost + ":" + this.ftpPort + " - " + this.ftpUser + " [ " + this.ftpPass + " ]" );
+                        Console.WriteLine ( "FTP: " + this.ftpDownload_Host + ":" + this.ftpDownload_Port + " - " + this.ftpDownload_User + " [ " + this.ftpDownload_Pass + " ]" );
                         Console.WriteLine ( "Certificate: " + this.certificate.Subject + " [ " + this.certificate.NotAfter + " ]" );
                         
                         Console.WriteLine ( "Public Key: " + Convert.ToBase64String ( this.certificate.GetPublicKey () ) );
@@ -134,8 +134,9 @@ namespace MTUComm
         public  const string ID_CERTIFICATE = "certificate";
         
         private const string PATH_CONFIG    = "Config";
-        private const string PATH_LOGS      = "Logs";
+        public  const string PATH_LOGS      = "Logs";
         private const string PATH_LOGSUNI   = "LogsUni";
+        public  const string PATH_BACKUP    = "Backup";
 
         private const string APP_SUBF       = "com.aclara.mtu.programmer/files/";
         private const string PREFAB_PATH    = "/data/data/" + APP_SUBF;

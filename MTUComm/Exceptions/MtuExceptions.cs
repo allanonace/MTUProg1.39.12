@@ -223,4 +223,14 @@
     {
         public FtpCredentialsMissingException ( string message = "", int port = 1, string messagePopup = "" ) : base( message, port, messagePopup ) { }
     }
+    
+    public class FtpConnectionException : OwnExceptionsBase
+    {
+        public FtpConnectionException ( string message = "", int port = 1, string messagePopup = "" ) : base( message, port, messagePopup ) { }
+    }
+    
+    public class FtpUpdateLogsException : OwnExceptionsBase
+    {
+        public FtpUpdateLogsException ( string message = "", int port = 1, string messagePopup = "" ) : base( message, port, messagePopup ) { }
+    }
 }

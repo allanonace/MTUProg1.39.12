@@ -50,7 +50,7 @@ namespace MTUComm
                     if ( kill )
                     {
                         // Wait four seconds and kill the popup
-                        await Task.Delay ( TimeSpan.FromSeconds ( 4 ) );
+                        await Task.Delay ( TimeSpan.FromSeconds ( 10 ) );
                         popup.Dispose ();
                         
                         // Close the app
@@ -58,6 +58,15 @@ namespace MTUComm
                     }
                 });
             }
+        }
+
+        public static void ShowAlert (
+            string title,
+            string message,
+            string btnText = BTN_TXT,
+            bool   kill    = false )
+        {
+            GetInstance ()._ShowAlert ( title, message, btnText );
         }
 
         public static void ShowAlert (

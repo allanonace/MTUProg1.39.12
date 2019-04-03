@@ -184,6 +184,14 @@ namespace aclara_meters
             // Check if all configuration files are available
             this.abortMission = ! this.HasDeviceAllXmls ();
             
+            // Install certificate if needed ( Convert from .cer to base64 string / .txt )
+            if ( ! this.GenerateBase64Certificate () )
+            {
+                this.ShowErrorAndKill ( new CertificateFileNotValidException () );
+            
+                return;
+            }
+            
             // Load configuration files
             // If some configuration file is not present, Configuration.cs initialization should avoid
             // launch exception when try to parse xmls, to be able to use generating the log error
@@ -194,14 +202,6 @@ namespace aclara_meters
             {
                 this.ShowErrorAndKill ( new ConfigurationFilesNotFoundException () );
 
-                return;
-            }
-
-            // Install certificate if needed ( Convert from .cer to base64 string / .txt )
-            if ( ! this.GenerateBase64Certificate () )
-            {
-                this.ShowErrorAndKill ( new CertificateFileNotValidException () );
-            
                 return;
             }
             
@@ -258,7 +258,7 @@ namespace aclara_meters
             try
             {
                 Mobile.ConfigData data = Mobile.configData;
-                using (SftpClient sftp = new SftpClient ( data.ftpHost, data.ftpPort, data.ftpUser, data.ftpPass ) )
+                using (SftpClient sftp = new SftpClient ( data.ftpDownload_Host, data.ftpDownload_Port, data.ftpDownload_User, data.ftpDownload_Pass ) )
                 {
                     sftp.Connect ();
 
@@ -270,7 +270,7 @@ namespace aclara_meters
                     bool isCertificate;
                     string configPath = Mobile.ConfigPath;
                     
-                    foreach ( SftpFile file in sftp.ListDirectory ( data.ftpPath ) )
+                    foreach ( SftpFile file in sftp.ListDirectory ( data.ftpDownload_Path ) )
                     {
                         string name = file.Name;
                     
@@ -279,7 +279,7 @@ namespace aclara_meters
                         {
                             using ( Stream stream = File.OpenWrite ( Path.Combine ( configPath, name ) ) )
                             {
-                                sftp.DownloadFile(Path.Combine ( data.ftpPath, name ), stream );
+                                sftp.DownloadFile(Path.Combine ( data.ftpDownload_Path, name ), stream );
                             }
                         }
                     }

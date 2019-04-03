@@ -1754,7 +1754,7 @@ namespace aclara_meters.view
         {
             #region Show Upload prompt
             if ( GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath)>0 && Mobile.IsNetAvailable())
-                GenericUtilsClass.UploadFilesTask(FormsApp.config.global.UploadPrompt);
+                GenericUtilsClass.UploadFilesTask ();
 
             #endregion   
 
