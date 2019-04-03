@@ -9,33 +9,46 @@ using MvvmHelpers;
 using System.Threading.Tasks;
 using aclara_meters.Models;
 using MTUComm;
+using aclara_meters;
 
 namespace aclara.ViewModels
 {
     public class TabLogViewModel:BaseViewModel
     {
         public ObservableRangeCollection<ItemsLog> ItemsLog { get; } = new ObservableRangeCollection<ItemsLog>();
+        private List<FileInfo> FileList = new List<FileInfo>();
+        public string FileName { get; set; }
+        public string FileDateTime { get; set;}
+        public int IndexFile { get; set; }
+        public int TotalFiles { get; set; }
 
-        public async Task LoadData(bool isReloading = false)
+        public TabLogViewModel()
+        {
+            RefreshList();
+                     
+        }
+
+        public void RefreshList()
+        {
+            FileList = GenericUtilsClass.LogFilesToUpload(Mobile.LogUserPath,true);
+            IndexFile = FileList.Count-1;
+            TotalFiles = FileList.Count-1;
+        }
+
+        public async Task LoadData(int ind)
         {
             Stream stream=null;
-          
-            string path = Mobile.LogUserPath;
-            DirectoryInfo info = new DirectoryInfo(path);
-            FileInfo[] files = info.GetFiles().OrderByDescending(p => p.LastWriteTimeUtc).ToArray();
+            FileInfo file = FileList[ind];
 
-            foreach (FileInfo file in files)
-            {
-                if ( file.Name.Contains("Log.xml") )
-                {
-                    Console.WriteLine(file.Name + " Last Write time: " + file.LastWriteTimeUtc.ToString());
+            ItemsLog.Clear();
+            var fileStream = new FileStream(file.FullName, FileMode.Open);
+            stream = fileStream;
+            ReadLogXML(stream);
+            fileStream.Close();
+            IndexFile = ind;
+            FileName = file.Name;
+            FileDateTime = file.CreationTime.ToString("MM/dd/yyyy HH:00");
 
-                    var fileStream = new FileStream(file.FullName, FileMode.Open);
-                    stream = fileStream;
-                    ReadLogXML(stream);
-                    break;
-                }
-            }
         }
 
         private void ReadLogXML(Stream stream)

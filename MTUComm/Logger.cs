@@ -62,7 +62,7 @@ namespace MTUComm
             base_stream += "    <AppInfo>";
             base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
             base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
-            base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
+            base_stream += "        <Date>" + DateTime.Now.ToString("MM/dd/yyyy HH:mm") + "</Date>";
             base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
             base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
             base_stream += "        <AppType>Scripted</AppType>";
@@ -71,7 +71,7 @@ namespace MTUComm
             if ( Action.currentAction != null )
             {
             base_stream += "    <Action display=\"" + Action.displays[ Action.currentAction.type ] + "\" type=\"" + Action.tag_types[ Action.currentAction.type ] + "\" reason=\"" + Action.tag_reasons[ Action.currentAction.type ] + "\">";
-            base_stream += "        <Date display=\"Date/Time\">" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
+            base_stream += "        <Date display=\"Date/Time\">" + DateTime.Now.ToString("MM/dd/yyyy HH:mm") + "</Date>";
             base_stream += "        <User display=\"User\">" + Action.currentAction.user + "</User>";
             base_stream += "    </Action>";
             }
@@ -179,7 +179,7 @@ namespace MTUComm
 
             XElement element = new XElement("AppMessage");
 
-            Parameter(element, new Parameter("Date", null, DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            Parameter(element, new Parameter("Date", null, DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
 
             XElement message = new XElement("Message", "User Login: "+ username);
             element.Add(message);
@@ -203,7 +203,7 @@ namespace MTUComm
             String    uri     = CreateFileIfNotExist ();
             XDocument doc     = XDocument.Load ( uri );
             XElement  element = doc.Root.Element ( "Error" );
-            string    time    = DateTime.UtcNow.ToString ( "MM/dd/yyyy HH:mm:ss" );
+            string    time    = DateTime.Now.ToString ( "MM/dd/yyyy HH:mm:ss" );
 
             // The log send to the explorer should be only the last error performed, not full current activity log
             string    uriLog  = this.CreateLogBase_Scripting_Error ();
@@ -416,7 +416,7 @@ namespace MTUComm
             AddAtrribute(element, "display", display);
             AddAtrribute(element, "type", type );
 
-            Parameter(element, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            Parameter(element, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
 
             if (user != null)
                 Parameter(element, new Parameter("User", "User", user));
@@ -442,7 +442,7 @@ namespace MTUComm
             AddAtrribute(element, "display", display);
             AddAtrribute(element, "type", type);
 
-            Parameter(element, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            Parameter(element, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
 
             if (user != null)
                 Parameter(element, new Parameter("User", "User", user));
@@ -463,7 +463,7 @@ namespace MTUComm
             AddAtrribute(element, "type", action.LogText);
             AddAtrribute(element, "reason", action.Reason);
 
-            Parameter(element, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
+            Parameter(element, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
             Parameter(element, new Parameter("User", "User", action.user));
 
             Parameter(element, new Parameter("Cancel", "Cancel Action", cancel));

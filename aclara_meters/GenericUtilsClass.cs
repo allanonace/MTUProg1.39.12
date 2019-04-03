@@ -147,7 +147,7 @@ namespace aclara_meters
             return BackupFiles().Count;
         }
 
-        public static List<FileInfo> LogFilesToUpload(string path)
+        public static List<FileInfo> LogFilesToUpload(string path, bool AllFiles = false )
         {
             List<FileInfo> local_array_files = new List<FileInfo>();
 
@@ -165,6 +165,8 @@ namespace aclara_meters
                     local_array_files.Add ( file );
                 else
                 {
+		if (!AllFiles)
+                    {
                     string dayfix = file.Name.ToLower ().Split('.')[0].Replace ( "log", "" );
                     DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
                     TimeSpan diff = date - DateTime.UtcNow;
@@ -172,6 +174,9 @@ namespace aclara_meters
                     int hours = ( int )diff.TotalHours;
                     if ( hours < 0 )
                         local_array_files.Add(file);
+                    }
+                    else local_array_files.Add(file);
+
                 }
             }
             return local_array_files;

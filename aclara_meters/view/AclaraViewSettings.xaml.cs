@@ -32,7 +32,7 @@ namespace aclara_meters.view
 
         private ActionType actionType;
         private IUserDialogs dialogsSaved;
-        private TabLogViewModel _viewModelread;
+        private TabLogViewModel viewModelTabLog;
         private List<PageItem> MenuList { get; set; }
 
         public AclaraViewSettings()
@@ -89,8 +89,13 @@ namespace aclara_meters.view
 
         public AclaraViewSettings(bool notConnected)
         {
-            this.notConnected = notConnected;
             InitializeComponent();
+
+            viewModelTabLog  = new TabLogViewModel();
+            BindingContext = viewModelTabLog;
+
+            this.notConnected = notConnected;
+
             //Settings.IsNotConnectedInSettings = true;
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -124,9 +129,7 @@ namespace aclara_meters.view
                 await Task.Delay(100); 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    _viewModelread = new TabLogViewModel();
-                    BindingContext = _viewModelread;
-                    Task.WaitAll(_viewModelread.LoadData());
+                    ChangeLogFile(viewModelTabLog.TotalFiles, false);
                 });
            });
 
@@ -149,6 +152,10 @@ namespace aclara_meters.view
         public AclaraViewSettings(IUserDialogs dialogs)
         {
             InitializeComponent();
+
+            viewModelTabLog = new TabLogViewModel();
+            BindingContext = viewModelTabLog;
+
             if (Device.Idiom == TargetIdiom.Tablet)
             {
                 Task.Run(() =>
@@ -183,9 +190,7 @@ namespace aclara_meters.view
                 await Task.Delay(100); 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    _viewModelread = new TabLogViewModel();
-                    BindingContext = _viewModelread;
-                    Task.WaitAll(_viewModelread.LoadData());
+                    ChangeLogFile(viewModelTabLog.TotalFiles, false);
                 });
             });
 
@@ -312,35 +317,8 @@ namespace aclara_meters.view
                 turnoff_mtu_background.IsVisible = true;
             });
 
-            /*
-            Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
-
-            int contador = Navigation.NavigationStack.Count;
-            while (contador > 0)
-            {
-                try
-                {
-                    await Navigation.PopAsync(false);
-                }
-                catch (Exception v)
-                {
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
-
-            try
-            {
-                await Navigation.PopToRootAsync(false);
-            }
-            catch (Exception v1)
-            {
-                Console.WriteLine(v1.StackTrace);
-            }
-            */
-
         }
+    
 
         private void ReturnToMainView(object sender, EventArgs e)
         {
@@ -1056,185 +1034,6 @@ namespace aclara_meters.view
             turnOffAction.Run();
         }
 
-
-        private void OnMenuCaseReplaceMeter()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialog_turnoff_one.IsVisible = false;
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = false;
-                dialog_replacemeter_one.IsVisible = false;
-                dialog_meter_replace_one.IsVisible = true;
-                background_scan_page.Opacity = 1;
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
-        }
-
-        private void OnMenuCaseReplaceMTU()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialog_meter_replace_one.IsVisible = false;
-                dialog_turnoff_one.IsVisible = false;
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = false;
-                dialog_replacemeter_one.IsVisible = true;
-                background_scan_page.Opacity = 1;
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
-        }
-
-        private void OnMenuCaseTurnOff()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialog_meter_replace_one.IsVisible = false;
-                dialog_turnoff_one.IsVisible = true;
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = false;
-                dialog_replacemeter_one.IsVisible = false;
-                background_scan_page.Opacity = 1;
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-
-
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
-        }
-
-        private void OnMenuCaseAddMTU()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                navigationDrawerList.SelectedItem = null;
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, ActionType.AddMtu), false);
-                background_scan_page.Opacity = 1;
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
-        }
-
-        private void OnMenuCaseReadMTU()
-        {
-            background_scan_page.Opacity = 1;
-            background_scan_page.IsEnabled = true;
-
-            if (Device.Idiom == TargetIdiom.Phone)
-            {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-            }
-
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                navigationDrawerList.SelectedItem = null;
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
-                background_scan_page.Opacity = 1;
-
-                if (Device.Idiom == TargetIdiom.Tablet)
-                {
-                    ContentNav.Opacity = 1;
-                    ContentNav.IsVisible = true;
-                }
-                else
-                {
-                    ContentNav.Opacity = 0;
-                    ContentNav.IsVisible = false;
-                }
-                shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
-            }));
-
-        }
-
         private void ForceSyncButtonTapped(object sender, EventArgs e)
         {
             force_sync.IsEnabled = false;
@@ -1243,9 +1042,13 @@ namespace aclara_meters.view
             ContentNav.IsEnabled = false;
 
             #region Show Upload prompt
-            if (pending_files.Text != "0" && Mobile.IsNetAvailable() )
-                GenericUtilsClass.UploadFilesTask ();
+            if (pending_files.Text != "0" && Mobile.IsNetAvailable())
+            {
+                GenericUtilsClass.UploadFilesTask();
+                viewModelTabLog.RefreshList();
+                ChangeLogFile(viewModelTabLog.TotalFiles,false);
 
+            }
             #endregion
 
             Task.Delay(100).ContinueWith(t =>
@@ -1256,19 +1059,17 @@ namespace aclara_meters.view
                 updated_files.Text = GenericUtilsClass.NumFilesUploaded.ToString();
                 pending_files.Text = GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath).ToString();
                 backup_files.Text = GenericUtilsClass.NumBackupFiles().ToString();
-                Color colorText;
+                Color colorText = pending_files.TextColor;
                 if (int.Parse(backup_files.Text) >= 100)
                     colorText = Color.Red;
-                else
-                    colorText = Color.Default;
+
                 lbl_backup.TextColor = colorText;
                 force_sync.IsEnabled = true;
                 ContentNav.IsEnabled = true;
                 backdark_bg.IsVisible = false;
                 indicator.IsVisible = false;
             }));
-
-                                 
+                
         }
 
         private void ButtonListeners()
@@ -1276,6 +1077,7 @@ namespace aclara_meters.view
             about_button_pressed.Tapped += AboutButtonTapped;
             logs_button_pressed.Tapped += LogsButtonTapped;
             sync_button_pressed.Tapped += SyncButtonTapped;
+            ftp_button_pressed.Tapped += FtpButtonTapped;
             force_sync.Clicked += ForceSyncButtonTapped;
             back_button.Tapped += ReturnToMainView;
             logout_button.Tapped += LogoutTapped;
@@ -1311,21 +1113,6 @@ namespace aclara_meters.view
         private void TapToHome_Tabletmode(object sender, EventArgs e)
         {
             Navigation.PopToRootAsync(false);
-            //int contador = Navigation.NavigationStack.Count;
-
-            //while (contador > 2)
-            //{
-            //    try
-            //    {
-            //        Navigation.PopAsync(false);
-            //    }
-            //    catch (Exception v)
-            //    {
-            //        Console.WriteLine(v.StackTrace);
-            //    }
-            //    contador--;
-            //}
-
 
         }
 
@@ -1464,6 +1251,11 @@ namespace aclara_meters.view
             InitLayout(3);
         }
 
+        private void FtpButtonTapped(object sender, EventArgs e)
+        {
+            InitLayout(4);
+        }
+
         private void InitLayout(int valor)
         {
             #region Customer name
@@ -1483,20 +1275,23 @@ namespace aclara_meters.view
             customers_name   .Text = TEXT_LICENSE + FormsApp.config.global.CustomerName;
 
             #endregion
+            about_block.Opacity = 0;
+            logs_block.Opacity = 0;
+            sync_block.Opacity = 0;
+            ftp_block.Opacity = 0;
 
             switch (valor)
             {
                 case 1:
-                    about_block.Opacity = 0;
-                    logs_block.Opacity = 0;
-                    sync_block.Opacity = 0;
-
-                    about_block.IsVisible = true; logs_block.IsVisible = false; sync_block.IsVisible = false;
-                    about_block.IsEnabled = true; logs_block.IsEnabled = false; sync_block.IsEnabled = false;
+                    about_block.IsVisible = true; logs_block.IsVisible = false; sync_block.IsVisible = false; ftp_block.IsVisible = false;
+                    about_block.IsEnabled = true; logs_block.IsEnabled = false; sync_block.IsEnabled = false; ftp_block.IsEnabled = false;
                     about_button_text.Opacity = 1; about_button.Opacity = 1;
                     logs_button_text.Opacity = 0.5; logs_button.Opacity = 0.5;
                     sync_button_text.Opacity = 0.5; sync_button.Opacity = 0.5;
+                    ftp_button_text.Opacity = 0.5; ftp_button.Opacity = 0.5;
                     title_text.Text = "About";
+                    title_text.IsVisible = true;
+                    img_barra.IsVisible = true;
 
                     about_block.FadeTo(1, 200);
 
@@ -1504,17 +1299,15 @@ namespace aclara_meters.view
 
                 case 2:
 
-                    about_block.Opacity = 0;
-                    logs_block.Opacity = 0;
-                    sync_block.Opacity = 0;
-
-
-                    about_block.IsVisible = false; logs_block.IsVisible = true; sync_block.IsVisible = false;
-                    about_block.IsEnabled = false; logs_block.IsEnabled = true; sync_block.IsEnabled = false;
+                    about_block.IsVisible = false; logs_block.IsVisible = true; sync_block.IsVisible = false; ftp_block.IsVisible = false;
+                    about_block.IsEnabled = false; logs_block.IsEnabled = true; sync_block.IsEnabled = false; ftp_block.IsEnabled = false;
                     about_button_text.Opacity = 0.5; about_button.Opacity = 0.5;
                     logs_button_text.Opacity = 1; logs_button.Opacity = 1;
                     sync_button_text.Opacity = 0.5; sync_button.Opacity = 0.5;
+                    ftp_button_text.Opacity = 0.5; ftp_button.Opacity = 0.5;
                     title_text.Text = "Activity Logs";
+                    title_text.IsVisible = false;
+                    img_barra.IsVisible = false;
 
                     logs_block.FadeTo(1, 200);
 
@@ -1522,31 +1315,78 @@ namespace aclara_meters.view
 
                 case 3:
 
-                    about_block.Opacity = 0;
-                    logs_block.Opacity = 0;
-                    sync_block.Opacity = 0;
-
-                    about_block.IsVisible = false; logs_block.IsVisible = false; sync_block.IsVisible = true;
-                    about_block.IsEnabled = false; logs_block.IsEnabled = false; sync_block.IsEnabled = true;
+                    about_block.IsVisible = false; logs_block.IsVisible = false; sync_block.IsVisible = true; ftp_block.IsVisible = false;
+                    about_block.IsEnabled = false; logs_block.IsEnabled = false; sync_block.IsEnabled = true; ftp_block.IsEnabled = false;
                     about_button_text.Opacity = 0.5; about_button.Opacity = 0.5;
                     logs_button_text.Opacity = 0.5; logs_button.Opacity = 0.5;
                     sync_button_text.Opacity = 1; sync_button.Opacity = 1;
+                    ftp_button_text.Opacity = 0.5; ftp_button.Opacity = 0.5;
                     title_text.Text = "File Syncronization";
+                    title_text.IsVisible = true;
+                    img_barra.IsVisible = true;
+
                     date_sync.Text = DateTime.Now.ToString();
                     updated_files.Text = GenericUtilsClass.NumFilesUploaded.ToString();
                    
                     pending_files.Text = GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath).ToString();
                     backup_files.Text = GenericUtilsClass.NumBackupFiles().ToString();
-                    Color colorText;
+                    Color colorText = pending_files.TextColor;
                     if (int.Parse(backup_files.Text) >= 100)
                         colorText = Color.Red;
-                    else
-                        colorText = Color.Default;
+                  
                     lbl_backup.TextColor = colorText;
                     sync_block.FadeTo(1, 200);
 
                     break;
+
+                case 4:
+
+                    about_block.IsVisible = false; logs_block.IsVisible = false; sync_block.IsVisible = false; ftp_block.IsVisible = true;
+                    about_block.IsEnabled = false; logs_block.IsEnabled = false; sync_block.IsEnabled = false; ftp_block.IsEnabled = true;
+                    about_button_text.Opacity = 0.5; about_button.Opacity = 0.5;
+                    logs_button_text.Opacity = 0.5; logs_button.Opacity = 0.5;
+                    sync_button_text.Opacity = 0.5; sync_button.Opacity = 0.5;
+                    ftp_button_text.Opacity = 1; ftp_button.Opacity = 1;
+                    title_text.Text = "FTP Settings";
+                    title_text.IsVisible = true;
+                    img_barra.IsVisible = true;
+
+                    ftp_block.FadeTo(1, 200);
+
+                    break;
             }
+        }
+
+        private void ChangeLogFile(int index, bool bUI)
+        {
+            if (bUI) Wait(true);
+            Task.WaitAll(viewModelTabLog.LoadData(index));
+
+            if (viewModelTabLog.IndexFile == 0) btnPrevious.IsVisible = false;
+            else btnPrevious.IsVisible = true;
+
+            if (viewModelTabLog.IndexFile == viewModelTabLog.TotalFiles) btnNext.IsVisible = false;
+            else btnNext.IsVisible = true;
+
+            file_name.Text = $"Activity Log: {viewModelTabLog.FileDateTime}";
+            if (bUI)  Wait(false);
+        }
+
+        void Previous_Clicked(object sender, System.EventArgs e)
+        {
+            ChangeLogFile(viewModelTabLog.IndexFile - 1,true);
+        }
+
+        void Next_Clicked(object sender, System.EventArgs e)
+        {
+            ChangeLogFile(viewModelTabLog.IndexFile + 1,true);
+        }
+
+        private void Wait(bool state)
+        {
+            backdark_bg.IsVisible = state;
+            indicator.IsVisible = state;
+            ContentNav.IsEnabled = !state;
         }
     }
 }

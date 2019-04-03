@@ -71,7 +71,7 @@
                     </StackLayout>
                     <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
                         <Label x:Name="title_text" Margin="16,14,0,0" FontSize="22" TextColor="#6aa2b8" Text="About" />
-                        <Image Margin="-16,4,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
+                        <Image x:Name="img_barra" Margin="-16,4,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
                         <StackLayout Orientation="Vertical"   HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand">
                             <StackLayout Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0">
                                 <!--  ABOUT -->
@@ -88,7 +88,26 @@
                                 </StackLayout>
                                 <!--  LOGS -->
                                 <StackLayout IsVisible="true" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0" x:Name="logs_block">
-                                  <ScrollView IsVisible="true" Margin="0,0,0,0" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="Center">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="45" /> 
+                                            </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Button x:Name="btnPrevious"  Image="prev_icon.png"
+                                                Clicked="Previous_Clicked" Grid.Row="0" Grid.Column="0" HorizontalOptions="Start" 
+                                                Margin="0,0,0,0"  TextColor="#6aa2b8" Text="" />
+                                        <Label x:Name="file_name" Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" 
+                                               Margin="0,14,0,0" FontSize="22" TextColor="#6aa2b8" Text="Activity Log:" />
+                                        <Button x:Name="btnNext"  Image="next_icon.png"  
+                                                Clicked="Next_Clicked" Grid.Row="0" Grid.Column="2" HorizontalOptions="End" 
+                                                Margin="0,0,0,0"  TextColor="#6aa2b8" Text="" />
+                                    </Grid>
+                                    <Image Margin="-16,4,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
+                                    <ScrollView IsVisible="true" Margin="0,0,0,0" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="Center">
                                      
                                     <accordion:AccordionRepeaterView x:Name="Acordeon" Spacing="0" KeepOnlyOneItemOpen="True" ItemsSource="{Binding ItemsLog}">
                                         <accordion:AccordionRepeaterView.AccordionItemTemplate>
@@ -209,6 +228,19 @@
                                         </RelativeLayout>
                                     </StackLayout>
                                 </StackLayout>
+                                <!-- FTP settings-->
+                                <StackLayout IsVisible="false" Margin="-10,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" Scale="0.9" x:Name="ftp_block">
+                                    <StackLayout Margin="0,72,0,0" VerticalOptions="Center" Orientation="Horizontal">
+                                        <StackLayout Orientation="Horizontal" HorizontalOptions="Start">
+                                            <Label HorizontalTextAlignment="Start" FontSize="14" Text="Date/time:">
+                                            </Label>
+                                        </StackLayout>
+                                        <StackLayout Orientation="Horizontal" HorizontalOptions="EndAndExpand">
+                                            <Label x:Name="ftp_sync" FontSize="14" HorizontalTextAlignment="End" Text="06/01/2018 12:13:09">
+                                            </Label>
+                                        </StackLayout>
+                                    </StackLayout>
+                                </StackLayout>
                             </StackLayout>
                         </StackLayout>
                     </StackLayout>
@@ -239,6 +271,7 @@
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="1*" />
                             <ColumnDefinition Width="1*" />
+                            <ColumnDefinition Width="1*" />
                         </Grid.ColumnDefinitions>
                         <Grid Margin="-20,-24,0,-10" HorizontalOptions="Center" Scale="1.15" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="1">
                             <Label x:Name="about_button_text" HorizontalOptions="Center" TextColor="White" FontSize="23" Margin="0,54,0,0" Text="About">
@@ -254,7 +287,8 @@
                         <Grid Margin="12,-24,0,-10" HorizontalOptions="Center" Scale="1.15" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="1">
                             <Label x:Name="logs_button_text" HorizontalOptions="Center" TextColor="White" FontSize="23" Margin="0,54,0,0" Text="Logs">
                             </Label>
-                            <Image HeightRequest="40" WidthRequest="72" x:Name="logs_button" Margin="0,-24,0,4" InputTransparent="true" HorizontalOptions="Center" VerticalOptions="Center" Scale="1" Source="logs_button">
+                            <Image HeightRequest="40" WidthRequest="72" x:Name="logs_button" Margin="0,-24,0,4" 
+                                   InputTransparent="true" HorizontalOptions="Center" VerticalOptions="Center" Scale="1" Source="logs_button">
                             </Image>
                             <Image HeightRequest="120" WidthRequest="120" Margin="0,-24,0,4" HorizontalOptions="Center" VerticalOptions="Center" Scale="1">
                                 <Image.GestureRecognizers>
@@ -265,11 +299,24 @@
                         <Grid Margin="56,-24,0,-10" HorizontalOptions="Center" Scale="1.15" Grid.Row="0" Grid.Column="2">
                             <Label x:Name="sync_button_text" HorizontalOptions="Center" TextColor="White" FontSize="23" Margin="0,54,0,0" Text="Sync">
                             </Label>
-                            <Image HeightRequest="40" WidthRequest="72" x:Name="sync_button" Margin="0,-24,0,4" InputTransparent="true" HorizontalOptions="Center" VerticalOptions="Center" Scale="0.725" Source="sync_button">
+                            <Image HeightRequest="40" WidthRequest="72" x:Name="sync_button" Margin="0,-24,0,4" 
+                                   InputTransparent="true" HorizontalOptions="Center" VerticalOptions="Center" Scale="0.725" Source="sync_button">
                             </Image>
                             <Image HeightRequest="120" WidthRequest="120" Margin="0,-24,0,4" HorizontalOptions="Center" VerticalOptions="Center" Scale="0.725">
                                 <Image.GestureRecognizers>
                                     <TapGestureRecognizer x:Name="sync_button_pressed" NumberOfTapsRequired="1" />
+                                </Image.GestureRecognizers>
+                            </Image>
+                        </Grid>
+                        <Grid Margin="56,-24,0,-10" HorizontalOptions="Center" Scale="1.15" Grid.Row="0" Grid.Column="3">
+                            <Label x:Name="ftp_button_text" HorizontalOptions="Center" TextColor="White" FontSize="23" Margin="0,54,0,0" Text="Ftp">
+                            </Label>
+                            <Image HeightRequest="40" WidthRequest="72" x:Name="ftp_button" Margin="0,-24,0,4" InputTransparent="true" 
+                                   HorizontalOptions="Center" VerticalOptions="Center" Scale="1" Source="ftp_button">
+                            </Image>
+                            <Image HeightRequest="120" WidthRequest="120" Margin="0,-24,0,4" HorizontalOptions="Center" VerticalOptions="Center" Scale="1">
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer x:Name="ftp_button_pressed" NumberOfTapsRequired="1" />
                                 </Image.GestureRecognizers>
                             </Image>
                         </Grid>
