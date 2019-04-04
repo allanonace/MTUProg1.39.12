@@ -188,6 +188,14 @@ namespace Xml
             this.WriteDelay                   = 0; // [0-5000] Additional delay in milliseconds after write to MTU
             this.WriteF1SystemTime            = false; // F1 write MTU system time from handheld or PC
             this.XmitTimer                    = 0; // [UInt] Transmit Timer
+            
+            // New parameters/tags
+            
+            // gzip is simply deflate plus a checksum and header/footer. Deflate is faster and smaller
+            // So naturally, no checksum is faster but then you also can't detect corrupt streams
+            this.Compression                  = string.Empty; // "", "gzip" and "deflate"
+        
+            // Lists
         
             this.Cancel_Deserialized = new List<string> ();
             this.Cancel_Default      = new List<string> ()
@@ -853,5 +861,10 @@ namespace Xml
                 return this.Cancel_Deserialized;
             }
         }
+        
+        // New parameters/tags
+        
+        [XmlElement("Compression")]
+        public string Compression { get; set; }
     }
 }

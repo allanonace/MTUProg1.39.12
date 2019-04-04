@@ -139,9 +139,9 @@ namespace aclara_meters.view
                         
                         Device.OpenUri ( new Uri ( resultCallback + "?" +
                                                    "status=success" +
-                                                   "&compress=deflate" +
+                                                   Compression.GetUriParameter () +
                                                    "&output_filename=UploadingFiles" +
-                                                   "&output_data=" + Compression.CompressToUrl ( sMessage ) ) );
+                                                   "&output_data=" + Compression.CompressToUrlUsingGlobal ( sMessage ) ) );
                                                    
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
                     });
@@ -973,10 +973,10 @@ namespace aclara_meters.view
                                             
                         Device.OpenUri ( new Uri ( resultCallback + "?" +
                                                    "status=error" +
-                                                   "&compress=deflate" +
-                                                   "&message=" + Compression.CompressToUrl ( "Error code: " + error.Id + "\n" + error.MessagePopup ) +
+                                                   Compression.GetUriParameter () +
+                                                   "&message=" + Compression.CompressToUrlUsingGlobal ( "Error code: " + error.Id + "\n" + error.MessagePopup ) +
                                                    "&output_filename=" + resultScriptName +
-                                                   "&output_data=" + Compression.CompressToUrl ( Errors.lastErrorLogGenerated ) ) );
+                                                   "&output_data=" + Compression.CompressToUrlUsingGlobal ( Errors.lastErrorLogGenerated ) ) );
 
                         FormsApp.ble_interface.Close();
                     });
@@ -1063,9 +1063,9 @@ namespace aclara_meters.view
 
                         Device.OpenUri ( new Uri ( resultCallback + "?" +
                                                    "status=success" +
-                                                   "&compress=deflate" +
+                                                   Compression.GetUriParameter () +
                                                    "&output_filename=" + resultScriptName +
-                                                   "&output_data=" + Compression.CompressToUrl ( xmlResultTocallback ) ) );
+                                                   "&output_data=" + Compression.CompressToUrlUsingGlobal ( xmlResultTocallback ) ) );
                         
                         FormsApp.ble_interface.Close();
                         

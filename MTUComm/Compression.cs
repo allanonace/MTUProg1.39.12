@@ -4,6 +4,7 @@ using System.IO.Compression;
 using System.Text;
 using System.Linq;
 using System.Web;
+using Xml;
 
 namespace MTUComm
 {
@@ -13,9 +14,13 @@ namespace MTUComm
         // So naturally, no checksum is faster but then you also can't detect corrupt streams
         public enum ALGORITHM
         {
+            NOTHING,
             DEFLATE,
             GZIP
         }
+        
+        private const string DEFLATE = "deflate";
+        private const string GZIP    = "gzip";
 
         public static string RandomString ( int length )
         {
@@ -24,6 +29,35 @@ namespace MTUComm
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
             return new string(Enumerable.Repeat(chars, length)
               .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+        
+        public static string GetUriParameter ()
+        {
+            string paramGlobal = Configuration.GetInstance ().global.Compression.ToLower ();
+            
+            string param = "&compress=";
+            switch ( paramGlobal )
+            {
+                case DEFLATE:
+                case GZIP   : param += paramGlobal; break;
+                default     : param = string.Empty; break;
+            }
+
+            return param;
+        }
+
+        public static string CompressToUrlUsingGlobal ( string input, int times = 1 )
+        {
+            string paramGlobal = Configuration.GetInstance ().global.Compression.ToLower ();
+        
+            ALGORITHM algorithm = ALGORITHM.NOTHING;
+            switch ( paramGlobal )
+            {
+                case DEFLATE: algorithm = ALGORITHM.DEFLATE; break;
+                case GZIP   : algorithm = ALGORITHM.GZIP;    break;
+            }
+            
+            return HttpUtility.UrlEncode ( Compress ( input, algorithm, times ) );
         }
         
         public static string CompressToUrl ( string input, ALGORITHM algorithm = ALGORITHM.DEFLATE, int times = 1 )
@@ -88,6 +122,9 @@ namespace MTUComm
         
         private static string Compress_Logic ( string input, ALGORITHM algorithm )
         {
+            if ( algorithm == ALGORITHM.NOTHING )
+                return Convert.ToBase64String ( Encoding.UTF8.GetBytes ( input ) );
+        
             using ( var outStream = new MemoryStream () )
             {
                 dynamic stream = null;
@@ -111,6 +148,9 @@ namespace MTUComm
     
         private static string Decompress_Logic ( string input, ALGORITHM algorithm )
         {
+            if ( algorithm == ALGORITHM.NOTHING )
+                return Encoding.UTF8.GetString ( Convert.FromBase64String ( input ) );
+        
             using ( var inStream = new MemoryStream ( Convert.FromBase64String ( input ) ) )
             {
                 dynamic stream = null;
