@@ -61,13 +61,13 @@ namespace MTUComm
             //}
         }
 
-        public static void ShowAlert (
+        public async static Task ShowAlert (
             string title,
             string message,
             string btnText = BTN_OK,
             bool   kill    = false )
         {
-            GetInstance ()._ShowAlert ( title, message, btnText, kill );
+            await GetInstance ()._ShowAlert ( title, message, btnText, kill );
         }
 
         public async static Task ShowAlert (

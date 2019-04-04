@@ -1662,6 +1662,8 @@ namespace MTUComm
         
         private void LoadMtuAndMetersBasicInfo ()
         {
+            OnProgress ( this, new ProgressArgs ( 0, 0, "Initial Reading..." ) );
+        
             if ( this.LoadMtuBasicInfo () )
             {
                 this.basicInfoLoaded = true;

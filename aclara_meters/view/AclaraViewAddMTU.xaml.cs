@@ -4499,8 +4499,6 @@ namespace aclara_meters.view
                 bg_read_mtu_button_img.Opacity = 0;
 
                 #endregion
-
-
             }));
         }
 
@@ -4518,6 +4516,7 @@ namespace aclara_meters.view
                     indicator.IsVisible = false;
                     label_read.Text = error.MessageFooter;
                     background_scan_page.IsEnabled = true;
+                    ContentNav.IsEnabled = true;
                 })
             );
         }
