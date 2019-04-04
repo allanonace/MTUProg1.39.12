@@ -1723,16 +1723,8 @@ namespace aclara_meters.view
                 Task.Delay(100).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    _userTapped = false;
-                    bg_read_mtu_button.NumberOfTapsRequired = 1;
-                    ChangeLowerButtonImage(false);
-                    backdark_bg.IsVisible = false;
-                    ContentNav.IsEnabled = true;
-                    indicator.IsVisible = false;
                     label_read.Text = "Successful MTU read";
-                    background_scan_page.IsEnabled = true;
-                    listaMTUread.IsVisible = true;
-                    listaMTUread.ItemsSource = FinalReadListView;
+                    this.EnableInteraction ();
                 }));
             });
 
@@ -1743,21 +1735,28 @@ namespace aclara_meters.view
                 Task.Delay(100).ContinueWith(t =>
                      Device.BeginInvokeOnMainThread(() =>
                      {
-                         MTUDataListView = new List<ReadMTUItem> { };
-                         FinalReadListView = new List<ReadMTUItem> { };
+                         MTUDataListView          = new List<ReadMTUItem> { };
+                         FinalReadListView        = new List<ReadMTUItem> { };
+                         label_read.Text          = error.MessageFooter;
                          listaMTUread.ItemsSource = FinalReadListView;
-                         label_read.Text = error.MessageFooter;
-                         _userTapped = false;
-                         bg_read_mtu_button.NumberOfTapsRequired = 1;
-                         ChangeLowerButtonImage(false);
-                         backdark_bg.IsVisible = false;
-                         indicator.IsVisible = false;
-                         background_scan_page.IsEnabled = true;
-
+                         this.EnableInteraction ();
                      }));
             });
 
             add_mtu.Run();
+        }
+        
+        private void EnableInteraction ()
+        {
+            ChangeLowerButtonImage ( false );
+            background_scan_page.IsEnabled = true;
+            bg_read_mtu_button.NumberOfTapsRequired = 1;
+            listaMTUread.ItemsSource = FinalReadListView;
+            _userTapped            = false;
+            backdark_bg.IsVisible  = false;
+            ContentNav.IsEnabled   = true;
+            indicator.IsVisible    = false;
+            listaMTUread.IsVisible = true;
         }
     }
 }
