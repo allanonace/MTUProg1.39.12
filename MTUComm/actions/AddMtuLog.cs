@@ -138,6 +138,7 @@ namespace MTUComm
             // Avoid try to log encryption info when not it has not been performed
             if ( data.isMtuEncrypted )
             {
+                //logger.Parameter ( this.addMtuAction, new Parameter ( "Encryption", "Encrypted", map.Encryption ) );
                 logger.Parameter ( this.addMtuAction, new Parameter ( "EncryptionIndex", "Encryption Index", map.EncryptionIndex ) );
             
                 // Using certificate with public key

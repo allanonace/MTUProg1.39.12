@@ -534,7 +534,7 @@ namespace MTUComm
             e.AddMtuLog.LogReadMtu ( result );
             this.lastLogCreated = e.AddMtuLog.Save ();
             
-            args.FormLog = e.AddMtuLog;
+            //args.FormLog = e.AddMtuLog;
 
             OnFinish ( this, args );
             return result;
