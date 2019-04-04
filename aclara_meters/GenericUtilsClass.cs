@@ -45,14 +45,14 @@ namespace aclara_meters
             // The FTP credentiales are not present in Global.xml
             if ( ! global.IsFtpUploadSet )
             {
-                Errors.LogErrorNowAndKill ( new FtpCredentialsMissingException () );
+                Errors.LogErrorNowAndContinue( new FtpCredentialsMissingException () );
                 return false;
             }
             
             // Has the devices internet connection
             if ( ! Mobile.IsNetAvailable () )
             {
-                Errors.LogErrorNowAndKill ( new NoInternetException () );
+                Errors.LogErrorNowAndContinue( new NoInternetException () );
                 return false;
             }
             
@@ -157,7 +157,7 @@ namespace aclara_meters
                 return true;
             
             if ( ! cancelled )
-                 Errors.LogErrorNow ( new FtpUpdateLogsException ( NumFilesUploaded + "/" + filesToUpload.Count ) );
+                 Errors.LogErrorNowAndContinue( new FtpUpdateLogsException ( NumFilesUploaded + "/" + filesToUpload.Count ) );
             else PageLinker.ShowAlert ( "Uploading canceled", "Only uploaded " + NumFilesUploaded + " / " + filesToUpload.Count + " log files" );
             
             return false;

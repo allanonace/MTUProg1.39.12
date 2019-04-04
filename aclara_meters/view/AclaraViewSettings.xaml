@@ -117,18 +117,17 @@
                                                     <accordion:AccordionItemView.ItemContent>
                                                         <StackLayout BackgroundColor="#6aa2b8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
                                                             <ListView x:Name="Lista" 
-                                                                      VerticalScrollBarVisibility="Always"
                                                                       SeparatorVisibility="None"
                                                                       IsVisible="{Binding HayLista}" 
                                                                       Margin="0,10,0,10" 
-                                                                      HasUnevenRows="True" 
+                                                                      HasUnevenRows="true"
                                                                       ItemsSource="{Binding .ListaDatos}" 
-                                                                      HeightRequest="100" 
+                                                                      HeightRequest="{Binding HeightList}" 
                                                                       BackgroundColor="#6aa2b8">
                                                                 <ListView.ItemTemplate>
                                                                     <DataTemplate>
                                                                         <ViewCell>
-                                                                            <StackLayout Margin="24,0,4,0" Orientation="Horizontal">
+                                                                            <StackLayout Margin="15,0,4,0" Orientation="Horizontal">
                                                                                 <Label Text="{Binding Descripcion}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                                 <Label Text="{Binding Valor}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                             </StackLayout>
@@ -144,17 +143,16 @@
                                                                             <accordion:AccordionItemView.ItemContent>
                                                                                 <StackLayout BackgroundColor="#6aa2b8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
                                                                                     <ListView x:Name="Lista1" 
-                                                                                              VerticalScrollBarVisibility="Always"
                                                                                               SeparatorVisibility="None"
                                                                                               Margin="0,10,0,10" 
-                                                                                              HasUnevenRows="True" 
+                                                                                              HasUnevenRows="true"
                                                                                               ItemsSource="{Binding .ListaDatos}" 
-                                                                                              HeightRequest="100" 
+                                                                                              HeightRequest="{Binding HeightList}" 
                                                                                               BackgroundColor="#6aa2b8">
                                                                                         <ListView.ItemTemplate>
                                                                                             <DataTemplate>
                                                                                                 <ViewCell>
-                                                                                                    <StackLayout Margin="24,0,4,0" Orientation="Horizontal">
+                                                                                                    <StackLayout Margin="15,0,4,0" Orientation="Horizontal">
                                                                                                         <Label Text="{Binding Descripcion}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                                                         <Label Text="{Binding Valor}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                                                     </StackLayout>

@@ -220,6 +220,7 @@ namespace aclara_meters.view
             tablet_user_view.TranslationY = 0;
             tablet_user_view.Scale = 1;
             logo_tablet_aclara.Opacity = 1;
+            file_name.FontSize = 20;
         }
 
         private void LoadTabletUIConnected()
@@ -1362,7 +1363,11 @@ namespace aclara_meters.view
             if (viewModelTabLog.IndexFile == viewModelTabLog.TotalFiles) btnNext.IsVisible = false;
             else btnNext.IsVisible = true;
 
-            file_name.Text = $"Activity Log: {viewModelTabLog.FileDateTime}";
+            if (Device.Idiom == TargetIdiom.Tablet)
+                file_name.Text = $"Activity Log: {viewModelTabLog.FileDateTime}";
+            else
+                file_name.Text = viewModelTabLog.FileDateTime;
+
             if (bUI)  Wait(false);
         }
 
