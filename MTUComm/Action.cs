@@ -391,13 +391,14 @@ namespace MTUComm
             {
                 List<object> parameters = new List<object>();
 
+                comm.OnProgress -= Comm_OnProgress;
+                comm.OnProgress += Comm_OnProgress;
+
                 switch (type)
                 {
                     case ActionType.ReadMtu:
-                        comm.OnReadMtu  -= Comm_OnReadMtu;
-                        comm.OnReadMtu  += Comm_OnReadMtu;
-                        comm.OnProgress -= Comm_OnProgress;
-                        comm.OnProgress += Comm_OnProgress;
+                        comm.OnReadMtu -= Comm_OnReadMtu;
+                        comm.OnReadMtu += Comm_OnReadMtu;
                         break;
 
                     case ActionType.AddMtu:
@@ -406,10 +407,8 @@ namespace MTUComm
                     case ActionType.ReplaceMTU:
                     case ActionType.ReplaceMeter:
                     case ActionType.ReplaceMtuReplaceMeter:
-                        comm.OnAddMtu   -= Comm_OnAddMtu;
-                        comm.OnProgress -= Comm_OnProgress;
-                        comm.OnAddMtu   += Comm_OnAddMtu;
-                        comm.OnProgress += Comm_OnProgress;
+                        comm.OnAddMtu -= Comm_OnAddMtu;
+                        comm.OnAddMtu += Comm_OnAddMtu;
                         // Interactive and Scripting
                         if (mtuForm != null)
                              parameters.AddRange(new object[] { (AddMtuForm)mtuForm, this.user, this });
@@ -423,10 +422,8 @@ namespace MTUComm
                         break;
 
                     case ActionType.MtuInstallationConfirmation:
-                        comm.OnReadMtu  -= Comm_OnReadMtu;
-                        comm.OnProgress -= Comm_OnProgress;
-                        comm.OnReadMtu  += Comm_OnReadMtu;
-                        comm.OnProgress += Comm_OnProgress;
+                        comm.OnReadMtu -= Comm_OnReadMtu;
+                        comm.OnReadMtu += Comm_OnReadMtu;
                         break;
 
                     case ActionType.ReadData:
