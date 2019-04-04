@@ -75,6 +75,8 @@ namespace aclara_meters
         
         private bool abortMission;
 
+        private TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+
         #endregion
 
         #region Properties
@@ -204,12 +206,14 @@ namespace aclara_meters
 
                 return;
             }
-            
-            if ( ! ScriptingMode )
+
+            if (!ScriptingMode)
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
                 });
+            else
+                tcs.SetResult(true);
         }
         
         private bool InitializeConfiguration ()
@@ -411,8 +415,9 @@ namespace aclara_meters
 
         #region Scripting
 
-        public void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
+        public async void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
         {
+           
             MTUComm.Action.IsFromScripting = true;
             
             Console.WriteLine ( "FormsApp: Scripting [ " + MTUComm.Action.IsFromScripting + " ]" );
@@ -427,8 +432,8 @@ namespace aclara_meters
 
                 #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
 
-                adapter.DisableAdapter();
-                adapter.EnableAdapter(); //Android shows a window to allow bluetooth
+                await adapter.DisableAdapter();
+                await adapter.EnableAdapter(); //Android shows a window to allow bluetooth
 
                 #endregion
 
@@ -440,6 +445,8 @@ namespace aclara_meters
 
             if ( url != null )
             {
+                //string path = Mobile.ConfigPath;
+                //ConfigPaths();
                 string path = Mobile.ConfigPath;
                 NameValueCollection query = HttpUtility.ParseQueryString ( url.Query );
 
@@ -455,8 +462,9 @@ namespace aclara_meters
 
                 if ( callback != null ) { /* ... */ }
 
-            
-                Task.Run(async () =>
+                bool result = await tcs.Task;
+
+                await Task.Run(async () =>
                 {
                     await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread ( async () =>
                     {

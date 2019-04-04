@@ -212,7 +212,7 @@ namespace aclara_meters
                     {
                         string dayfix = file.Name.ToLower().Substring(0, 10);
                         DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
-                        TimeSpan diff = date - DateTime.Now;
+                        TimeSpan diff = date - DateTime.UtcNow;
                     
                         int hours = ( int )diff.TotalHours;
                         if ( hours < 0 )

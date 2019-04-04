@@ -131,35 +131,47 @@ namespace aclara_meters.view
                 // GenericUtilsClass.UploadFilesTaskSettings();
                 this.txtBuscando.Text = "Uploading files...";
 
-                Task.Run(async() => {
-                    bool bUpload = await GenericUtilsClass.UploadFiles ();
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        String sMessage = ( bUpload ) ? "Files uploaded successfully" : "Error while uploading files to the FTP server";
-                        
-                        Device.OpenUri ( new Uri ( resultCallback + "?" +
-                                                   "status=success" +
-                                                   Compression.GetUriParameter () +
-                                                   "&output_filename=UploadingFiles" +
-                                                   "&output_data=" + Compression.CompressToUrlUsingGlobal ( sMessage ) ) );
-                                                   
-                        System.Diagnostics.Process.GetCurrentProcess().Kill();
-                    });
-                });
-                
+                this.UpdateFiles();
+
+               
                 return;
             }
-            InitRefreshCommand();
+            else
+            {
+                InitRefreshCommand();
 
-            Interface_ContentView_DeviceList();
+                Interface_ContentView_DeviceList();
+            }
             #endregion
 
         }
+        public async void UpdateFiles()
+        {
+            String sMessage;
+            // Upload log files
+            if (GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath) > 0)
+            {
+                bool bUpload = await GenericUtilsClass.UploadFiles();
+                int numFiles = GenericUtilsClass.NumFilesUploaded;
 
-        /*--------------------------------------------------*/
-        /*          Device List Interface Contenview
-        /---------------------------------------------------*/
-        private void InitRefreshCommand()
+                sMessage = (bUpload) ? $" ** {numFiles.ToString()} Files uploaded successfully ** " : "Error while uploading files to the FTP server";
+            }
+            else
+                sMessage = "There are not log files to upload";
+
+            Device.OpenUri(new Uri(resultCallback + "?" +
+                                           "status=success" +
+                                           Compression.GetUriParameter() +
+                                           "&output_filename=UploadingFiles" +
+                                           "&output_data=" + Compression.CompressToUrlUsingGlobal(sMessage)));
+
+            System.Diagnostics.Process.GetCurrentProcess().Kill();
+            return;
+        }
+            /*--------------------------------------------------*/
+            /*          Device List Interface Contenview
+            /---------------------------------------------------*/
+            private void InitRefreshCommand()
         {
             DeviceList.RefreshCommand = new Command(async () =>
             {
@@ -1099,26 +1111,26 @@ namespace aclara_meters.view
             ContentView_Scripting_bg_read_mtu_button_img.Scale = 0;
         }
 
-        private async void PickFilesCommandHandler()
-        {
-            string resultMsg = "Successful MTU read";
+        //private async void PickFilesCommandHandler()
+        //{
+        //    string resultMsg = "Successful MTU read";
 
 
-            Task.Delay(100).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                ContentView_Scripting_label_read.Text = resultMsg;
-                _userTapped = false;
-                ContentView_Scripting_bg_read_mtu_button.NumberOfTapsRequired = 1;
-                backdark_bg.IsVisible = false;
-                indicator.IsVisible = false;
-                ContentView_Scripting.IsEnabled = true;
+        //    Task.Delay(100).ContinueWith(t =>
+        //    Device.BeginInvokeOnMainThread(() =>
+        //    {
+        //        ContentView_Scripting_label_read.Text = resultMsg;
+        //        _userTapped = false;
+        //        ContentView_Scripting_bg_read_mtu_button.NumberOfTapsRequired = 1;
+        //        backdark_bg.IsVisible = false;
+        //        indicator.IsVisible = false;
+        //        ContentView_Scripting.IsEnabled = true;
 
 
-            }));
+        //    }));
 
 
-        }
+        //}
 
         private void LoadPhoneUI()
         {
@@ -1141,98 +1153,8 @@ namespace aclara_meters.view
             ContentView_Scripting_aclara_logo.TranslationX = 42;
             ContentView_Scripting_hamburger_icon.TranslationX = 42;
         }
-
-        private void ReplaceMeterCancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        private void ReplaceMeterOkTapped(object sender, EventArgs e)
-        {
-            dialog_replacemeter_one.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMTU(dialogsSaved), false);
-        }
-
-        private void TurnOffMTUCloseTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        private void TurnOffMTUNoTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        private void TurnOffMTUOkTapped(object sender, EventArgs e)
-        {
-            dialog_turnoff_one.IsVisible = false;
-            dialog_turnoff_two.IsVisible = true;
-
-            Task.Run(async () =>
-            {
-                await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
-                {
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = true;
-                });
-            });
-        }
-
-        private void MeterCancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_meter_replace_one.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        private void MeterOkTapped(object sender, EventArgs e)
-        {
-            dialog_meter_replace_one.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            ////Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReplaceMeter(dialogsSaved), false);
-        }
-
-        private async void LogoutAsync(object sender, EventArgs e)
-        {
-            Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
-            FormsApp.peripheral = null;
-            int contador = Navigation.NavigationStack.Count;
-            while (contador > 0)
-            {
-                try
-                {
-                    await Navigation.PopAsync(false);
-                }
-                catch (Exception v)
-                {
-                    Console.WriteLine(v.StackTrace);
-                }
-                contador--;
-            }
-
-            try
-            {
-                await Navigation.PopToRootAsync(false);
-
-            }
-            catch (Exception v)
-            {
-                Console.WriteLine(v.StackTrace);
-            }
-        }
-
-        private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
-        {
-            ((ListView)sender).SelectedItem = null;
-        }
-
+         
+ 
         private IBlePeripheral peripheral = null;
         private int peripheralConnected = ble_library.BlePort.NO_CONNECTED;
         private Boolean peripheralManualDisconnection = false;
@@ -1288,25 +1210,6 @@ namespace aclara_meters.view
             });
 
 
-            /*
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                try
-                {
-                    deviceID.Text = item.deviceName;
-                    macAddress.Text = item.deviceMacAddress;
-                    imageBattery.Source = item.deviceBatteryIcon;
-                    imageRssi.Source = item.deviceRssiIcon;
-                    batteryLevel.Text = item.deviceBattery;
-                    rssiLevel.Text = item.deviceRssi;
-                }
-                catch (Exception e4)
-                {
-                    Console.WriteLine(e4.StackTrace);
-                }
-            });
-
-            */
         }
 
         public void PrintToConsole(string printConsole)
