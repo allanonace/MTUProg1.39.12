@@ -1250,6 +1250,11 @@ namespace aclara_meters.view
             customers_copyr  .Text = TEXT_COPYR;
             customers_support.Text = TEXT_SUPPORT;
             customers_version.Text = TEXT_VERSION; // + ( ( Mobile.configData.IsCertLoaded ) ? TEXT_INTUNE : string.Empty );
+            if (Mobile.configData.IsCertLoaded)
+            {
+                certificate_name.Text = $"Certificate: {Mobile.configData.certificate.Subject}";
+                certificate_exp.Text = $"Expiration date: {Mobile.configData.certificate.NotAfter.ToString("MM/dd/yyyy hh:mm:ss")}";
+            }
             /*
             #if __IOS__
             customers_version.Text = TEXT_VERSION + NSBundle.MainBundle

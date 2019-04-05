@@ -85,6 +85,10 @@
                                     </Label>
                                     <Label HorizontalTextAlignment="Center" x:Name="customers_name" FontSize="14" Text="Licensed to: **************">
                                     </Label>
+                                    <Label HorizontalTextAlignment="Center" x:Name="certificate_name" FontSize="14" Text="Certificate: **************">
+                                    </Label>
+                                    <Label HorizontalTextAlignment="Center" x:Name="certificate_exp" FontSize="14" Text="Certificate date: **************">
+                                    </Label>
                                 </StackLayout>
                                 <!--  LOGS -->
                                 <StackLayout IsVisible="true" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0" x:Name="logs_block">
@@ -229,7 +233,7 @@
                                     </StackLayout>
                                 </StackLayout>
                                 <!-- FTP settings-->
-                                <StackLayout IsVisible="false" Margin="-10,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" Scale="0.9" x:Name="ftp_block">
+                                <StackLayout IsVisible="false" Margin="-10,0,0,0" HorizontalOptions="FillAndExpand" VerticalOptions="Center" Scale="0.9" x:Name="ftp_block">
                                     <StackLayout Orientation="Vertical" x:Name="ftp_upload" IsVisible="true" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
                                      
                                             <Label Text="Remote Host" Margin="0,4,0,0" x:Name="lb_remote_host" VerticalOptions="Center" Font="Bold,17" />
