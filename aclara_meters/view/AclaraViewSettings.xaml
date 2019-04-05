@@ -72,8 +72,8 @@
                     <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
                         <Label x:Name="title_text" Margin="16,14,0,0" FontSize="22" TextColor="#6aa2b8" Text="About" />
                         <Image x:Name="img_barra" Margin="-16,4,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
-                        <StackLayout Orientation="Vertical"   HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand">
-                            <StackLayout Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0">
+                        <StackLayout Orientation="Vertical"    VerticalOptions="StartAndExpand">
+                            <StackLayout Orientation="Vertical"  VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0">
                                 <!--  ABOUT -->
                                 <StackLayout IsVisible="false" Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="Center" x:Name="about_block">
                                     <Image Source="aclara_settings_logo.png" Margin="24,0,24,-64" HeightRequest="280" VerticalOptions="Center" HorizontalOptions="Center" />
@@ -233,16 +233,16 @@
                                     </StackLayout>
                                 </StackLayout>
                                 <!-- FTP settings-->
-                                <StackLayout IsVisible="false" Margin="-10,0,0,0" HorizontalOptions="FillAndExpand" VerticalOptions="Center" Scale="0.9" x:Name="ftp_block">
-                                    <StackLayout Orientation="Vertical" x:Name="ftp_upload" IsVisible="true" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
-                                     
-                                            <Label Text="Remote Host" Margin="0,4,0,0" x:Name="lb_remote_host" VerticalOptions="Center" Font="Bold,17" />
+                                <StackLayout IsVisible="false" Margin="-10,0,0,0" Scale="0.9" x:Name="ftp_block" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >
+                                    <StackLayout  VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >                                         
+                                            <Label Text="Remote Host" Margin="0,4,0,0" x:Name="lb_remote_host" Font="Bold,17" HorizontalOptions="Start" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
-                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_remote_host" 
-                                                                                  VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" 
-                                                                                  Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" >
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" 
+                                                                                  HorizontalOptions="FillAndExpand"
+                                                                                  Text="" HeightRequest="40" x:Name="tbx_remote_host" 
+                                                                                  Keyboard="Text" FontSize="17"
                                                                                   HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
@@ -251,8 +251,25 @@
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
-                            
                                     </StackLayout>
+                                    <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >                                             
+                                            <Label Text="Remote Host" Margin="0,4,0,0" x:Name="lb_remote_path" Font="Bold,17" HorizontalOptions="Start" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" >
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" 
+                                                                                  HorizontalOptions="FillAndExpand"
+                                                                                  Text="" HeightRequest="40" x:Name="tbx_remote_path" 
+                                                                                  Keyboard="Text" FontSize="17"
+                                                                                  HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                    </StackLayout>                                 
                                 </StackLayout>
                             </StackLayout>
                         </StackLayout>
