@@ -598,6 +598,7 @@ namespace aclara_meters.view
                             backdark_bg.IsVisible = false;
                             indicator.IsVisible = false;
                             background_scan_page.IsEnabled = true;
+                            this.actionType = ActionType.ReadMtu;
 
                             #endregion
                         });
