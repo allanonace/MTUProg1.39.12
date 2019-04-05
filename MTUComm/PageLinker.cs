@@ -1,9 +1,7 @@
-﻿using Xamarin.Forms;
-using Xml;
-using System.Threading.Tasks;
-using System;
-
+﻿using System.Threading.Tasks;
 using Acr.UserDialogs;
+using Xamarin.Forms;
+using Xml;
 
 namespace MTUComm
 {

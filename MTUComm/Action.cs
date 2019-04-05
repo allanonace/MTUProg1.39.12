@@ -6,6 +6,8 @@ using Lexi.Interfaces;
 using MTUComm.actions;
 using Xml;
 
+using System.Threading;
+
 namespace MTUComm
 {
     public class Action

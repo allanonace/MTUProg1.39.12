@@ -7,6 +7,9 @@ using Microsoft.Intune.MAM;
 using nexus.protocols.ble;
 using UIKit;
 
+using System.Threading.Tasks;
+using System.IO;
+
 namespace aclara_meters.iOS
 {
     // The UIApplicationDelegate for the application. This class is responsible for launching the 
@@ -42,6 +45,24 @@ namespace aclara_meters.iOS
             //appSave = new FormsApp(bluetoothLowEnergyAdapter);
 
             base.LoadApplication ( appSave );
+
+            /*
+            try
+            {
+            AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
+            {
+            
+            };
+            TaskScheduler.UnobservedTaskException += async (sender, e) =>
+            {
+            
+            };
+            }
+            catch ( Exception e )
+            {
+
+            }
+            */
 
             return base.FinishedLaunching ( app, options );
         }

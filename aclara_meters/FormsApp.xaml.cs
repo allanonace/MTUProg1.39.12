@@ -20,6 +20,9 @@ using Renci.SshNet.Sftp;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 
+using System.Text;
+using Xml;
+
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
 {
@@ -130,6 +133,10 @@ namespace aclara_meters
             IUserDialogs dialogs,
             string appVersion )
         {
+            // Catch unhandled exceptions
+            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+        
             Console.WriteLine ( "FormsApp: Interactive [ " + MTUComm.Action.IsFromScripting + " ]" );
         
             appVersion_str = appVersion;
@@ -487,6 +494,81 @@ namespace aclara_meters
 
         protected override void OnResume()
         {
+        }
+
+        private static void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs unobservedTaskExceptionEventArgs)
+        {
+            var e = new Exception("TaskSchedulerOnUnobservedTaskException", unobservedTaskExceptionEventArgs.Exception);
+            LogUnhandledException( e );
+        }
+    
+        private static void CurrentDomainOnUnhandledException(object sender, UnhandledExceptionEventArgs unhandledExceptionEventArgs)
+        {
+            var e = new Exception("CurrentDomainOnUnhandledException", unhandledExceptionEventArgs.ExceptionObject as Exception);
+            LogUnhandledException( e );
+        }
+
+        internal static void LogUnhandledException(Exception exception)
+        {
+            try
+            {
+                StringBuilder str = new StringBuilder ();
+
+                // MTU info
+                Mtu mtu = MTUComm.Action.currentMtu;
+                
+                str.AppendLine ( DateTime.Now.ToString () );
+                str.AppendLine ( "Unhandled Exception" );
+                
+                str.AppendLine ( "" );
+                str.AppendLine ( "MTU" );
+                str.AppendLine ( "---" );
+                str.AppendLine ( string.Format ( "{0,-50} : {1}", "MTU",        mtu.Id          ) );
+                str.AppendLine ( string.Format ( "{0,-50} : {1}", "SpecialSet", mtu.SpecialSet  ) );
+                str.AppendLine ( string.Format ( "{0,-50} : {1}", "HexNumber",  mtu.HexNum      ) );
+                str.AppendLine ( string.Format ( "{0,-50} : {1}", "Num.Ports",  mtu.Ports.Count ) );
+                
+                // Action info
+                MTUComm.Action action = MTUComm.Action.currentAction;
+                str.AppendLine ( "" );
+                str.AppendLine ( "Action" );
+                str.AppendLine ( "------" );
+                str.AppendLine ( string.Format ( "{0,-50} : {1}", "Type", action.type ) );
+                str.AppendLine ( string.Format ( "{0,-50} : {1}", "User", action.user ) );
+                
+                // Add current values in Global.xml
+                str.AppendLine ( "" );
+                str.AppendLine ( "Global.XML" );
+                str.AppendLine ( "----------" );
+                Global global = Configuration.GetInstance ().global;
+                foreach ( var property in global.GetType ().GetProperties () )
+                {
+                    if ( ! property.GetType ().IsArray &&
+                         property.CanRead )
+                    {
+                        var value = property.GetValue ( global );
+                        if ( ! ( value is null ) )
+                            str.AppendLine ( string.Format ( "{0,-50} : {1}", property.Name, value ) );
+                    }
+                }
+
+                str.AppendLine ( "" );
+                str.AppendLine ( "Exception" );
+                str.AppendLine ( "---------" );
+                str.AppendLine ( exception.ToString () );
+                
+                string errorFileName = string.Format ( "{0}_{1}_{2}.log", "Exception", action.type, DateTime.Now.ToString ( "MM-dd-yyyy_HH:mm" ) );
+                var libraryPath      = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
+                var errorFilePath    = Path.Combine ( libraryPath, errorFileName );
+                File.WriteAllText ( errorFilePath, str.ToString () );
+        
+                str.Clear ();
+                str = null;
+            }
+            catch
+            {
+                // just suppress any error logging exceptions
+            }
         }
 
         #endregion
