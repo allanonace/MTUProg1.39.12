@@ -151,7 +151,7 @@ namespace aclara_meters.view
             // Upload log files
             if (GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath) > 0)
             {
-                bool bUpload = await GenericUtilsClass.UploadFiles();
+                bool bUpload = await GenericUtilsClass.UploadFiles(false);
                 int numFiles = GenericUtilsClass.NumFilesUploaded;
 
                 sMessage = (bUpload) ? $" ** {numFiles.ToString()} Files uploaded successfully ** " : "Error while uploading files to the FTP server";

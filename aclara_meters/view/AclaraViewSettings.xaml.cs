@@ -19,6 +19,10 @@ using Xamarin.Essentials;
 
 using ActionType = MTUComm.Action.ActionType;
 using System.IO;
+using Renci.SshNet;
+using Xml;
+using System.Xml.Linq;
+using MTUComm.Exceptions;
 
 namespace aclara_meters.view
 {
@@ -34,6 +38,8 @@ namespace aclara_meters.view
         private IUserDialogs dialogsSaved;
         private TabLogViewModel viewModelTabLog;
         private List<PageItem> MenuList { get; set; }
+
+        Global global;
 
         public AclaraViewSettings()
         {
@@ -96,6 +102,7 @@ namespace aclara_meters.view
 
             this.notConnected = notConnected;
 
+            global = FormsApp.config.global;
             //Settings.IsNotConnectedInSettings = true;
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -155,6 +162,8 @@ namespace aclara_meters.view
 
             viewModelTabLog = new TabLogViewModel();
             BindingContext = viewModelTabLog;
+
+            global = FormsApp.config.global;
 
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -1037,7 +1046,7 @@ namespace aclara_meters.view
             ContentNav.IsEnabled = false;
 
             // Upload log files
-            await GenericUtilsClass.UploadFiles ();
+            await GenericUtilsClass.UploadFiles (false);
             
             viewModelTabLog.RefreshList();
             ChangeLogFile(viewModelTabLog.TotalFiles,false);
@@ -1077,6 +1086,9 @@ namespace aclara_meters.view
             meter_ok.Tapped += MeterOkTapped;
             meter_cancel.Tapped += MeterCancelTapped;
 
+            btn_Test.Clicked += Btn_Test_Clicked;
+            btn_Save.Clicked += Btn_Save_Clicked;
+            btn_Cancel.Clicked += Btn_Cancel_Clicked;
 
             logoff_no.Tapped += LogOffNoTapped;
             logoff_ok.Tapped += LogOffOkTapped;
@@ -1095,6 +1107,95 @@ namespace aclara_meters.view
             dialog_AddMTU_ok.Tapped += dialog_AddMTU_okTapped;
             dialog_AddMTU_cancel.Tapped += dialog_AddMTU_cancelTapped;
 
+        }
+
+        void Btn_Cancel_Clicked(object sender, EventArgs e)
+        {
+            tbx_user_name.Text = string.Empty;
+            tbx_user_pass.Text = string.Empty;
+            tbx_remote_host.Text = string.Empty;
+            tbx_remote_path.Text = string.Empty;
+        }
+
+
+        void Btn_Save_Clicked(object sender, EventArgs e)
+        {
+            if (!TestFtpCredentials())
+            {
+                DisplayAlert("Infomation", "Can't connect with the FTP, please check the entered data", "OK");
+            }
+            else
+                SaveFTPCredentials();
+        }
+
+        private void SaveFTPCredentials()
+        {
+            //Save FTP in global.xml and in global data
+            try
+            {
+                global.ftpPassword = tbx_user_pass.Text;
+                global.ftpUserName = tbx_user_name.Text;
+                global.ftpRemoteHost = tbx_remote_host.Text;
+                global.ftpRemotePath = tbx_remote_path.Text;
+
+
+                String uri = Path.Combine(Mobile.ConfigPath, "Global.xml");
+
+                XDocument doc = XDocument.Load(uri);
+
+                doc.Root.SetElementValue("ftpRemotePath", tbx_remote_path.Text);
+                doc.Root.SetElementValue("ftpRemoteHost", tbx_remote_host.Text);
+                doc.Root.SetElementValue("ftpUserName", tbx_user_name.Text);
+                doc.Root.SetElementValue("ftpPassword", tbx_user_pass.Text);
+
+
+                doc.Save(uri);
+            }
+            catch (Exception e)
+            {
+                Errors.ShowAlert(new FtpConnectionException());
+                
+            }
+        }
+
+        private void Btn_Test_Clicked(object sender, EventArgs e)
+        {
+            if (TestFtpCredentials())
+            {
+               DisplayAlert("Information", "Connect to FTP succesfully", "OK");
+            }
+            else
+            {
+                Errors.ShowAlert(new FtpConnectionException());
+            }
+        }
+
+        private bool TestFtpCredentials()
+        {
+            bool ok = true;
+
+            try
+            {
+               
+                using (SftpClient sftp = new SftpClient(tbx_remote_host.Text, 22, tbx_user_name.Text, tbx_user_pass.Text))
+                {
+                    sftp.Connect();
+
+                    if (!sftp.Exists(tbx_remote_path.Text))
+                        ok = false;
+
+
+                    sftp.Disconnect();
+                }
+            }
+            catch ( Exception e)
+            {
+                ok = false;
+            }
+            
+            //Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
+
+            return ok;
         }
 
 
@@ -1197,7 +1298,8 @@ namespace aclara_meters.view
         private async void LogOffOkTapped(object sender, EventArgs e)
         {
             // Upload log files
-            await GenericUtilsClass.UploadFiles ();
+            if (FormsApp.config.global.UploadPrompt)
+                await GenericUtilsClass.UploadFiles ();
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
@@ -1240,7 +1342,7 @@ namespace aclara_meters.view
 
         private void FtpButtonTapped(object sender, EventArgs e)
         {
-            InitLayout(4);
+          // InitLayout(4);
         }
 
         private void InitLayout(int valor)
@@ -1255,6 +1357,7 @@ namespace aclara_meters.view
                 certificate_name.Text = $"Certificate: {Mobile.configData.certificate.Subject}";
                 certificate_exp.Text = $"Expiration date: {Mobile.configData.certificate.NotAfter.ToString("MM/dd/yyyy hh:mm:ss")}";
             }
+
             /*
             #if __IOS__
             customers_version.Text = TEXT_VERSION + NSBundle.MainBundle
@@ -1332,6 +1435,12 @@ namespace aclara_meters.view
                     break;
 
                 case 4:
+                
+
+                    tbx_user_pass.Text = global.ftpPassword;
+                    tbx_user_name.Text = global.ftpUserName;
+                    tbx_remote_host.Text = global.ftpRemoteHost;
+                    tbx_remote_path.Text = global.ftpRemotePath;
 
                     about_block.IsVisible = false; logs_block.IsVisible = false; sync_block.IsVisible = false; ftp_block.IsVisible = true;
                     about_block.IsEnabled = false; logs_block.IsEnabled = false; sync_block.IsEnabled = false; ftp_block.IsEnabled = true;
@@ -1339,10 +1448,12 @@ namespace aclara_meters.view
                     logs_button_text.Opacity = 0.5; logs_button.Opacity = 0.5;
                     sync_button_text.Opacity = 0.5; sync_button.Opacity = 0.5;
                     ftp_button_text.Opacity = 1; ftp_button.Opacity = 1;
-                    title_text.Text = "FTP Settings";
+                    title_text.Text = "Upload FTP Settings";
                     title_text.IsVisible = true;
                     img_barra.IsVisible = true;
-
+                    bool bHasInt = Mobile.IsNetAvailable();
+                    btn_Save.IsEnabled = bHasInt;
+                    btn_Test.IsEnabled = bHasInt;
                     ftp_block.FadeTo(1, 200);
 
                     break;

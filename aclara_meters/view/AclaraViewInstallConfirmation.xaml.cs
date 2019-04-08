@@ -898,7 +898,8 @@ namespace aclara_meters.view
         private async void LogOffOkTapped(object sender, EventArgs e)
         {
             // Upload log files
-            await GenericUtilsClass.UploadFiles ();
+            if (FormsApp.config.global.UploadPrompt)
+                await GenericUtilsClass.UploadFiles ();
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;

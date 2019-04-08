@@ -85,9 +85,9 @@
                                     </Label>
                                     <Label HorizontalTextAlignment="Center" x:Name="customers_name" FontSize="14" Text="Licensed to: **************">
                                     </Label>
-                                    <Label HorizontalTextAlignment="Center" x:Name="certificate_name" FontSize="14" Text="Certificate: **************">
+                                    <Label HorizontalTextAlignment="Center" x:Name="certificate_name" FontSize="14" Text="Certificate: none">
                                     </Label>
-                                    <Label HorizontalTextAlignment="Center" x:Name="certificate_exp" FontSize="14" Text="Certificate date: **************">
+                                    <Label HorizontalTextAlignment="Center" x:Name="certificate_exp" FontSize="14" Text="Certificate date: ">
                                     </Label>
                                 </StackLayout>
                                 <!--  LOGS -->
@@ -223,11 +223,15 @@
                                     </StackLayout>                                    
                                     <StackLayout HorizontalOptions="CenterAndExpand" Orientation="Horizontal">
                                         <RelativeLayout Margin="0,0,0,0" HorizontalOptions="Center" VerticalOptions="Center">
-                                            <Button BackgroundColor="#6aa2b8" CornerRadius="10" HeightRequest="48" BorderColor="Transparent" BorderRadius="10" IsEnabled="false" WidthRequest="300" BorderWidth="0" Margin="0,48,0,0" FontSize="20"
-                                                TextColor="White" Text="Force Sync">
+                                            <Button BackgroundColor="#6aa2b8" 
+                                                    CornerRadius="10" HeightRequest="48" BorderColor="Transparent" 
+                                                    BorderRadius="10" IsEnabled="false" WidthRequest="300" BorderWidth="0" Margin="0,48,0,0" FontSize="20"
+                                                    TextColor="White" Text="Force Sync">
                                             </Button>
-                                            <Button BackgroundColor="#6aa2b8" WidthRequest="300" HeightRequest="48" BorderColor="Transparent" CornerRadius="10" BorderRadius="10" x:Name="force_sync" Margin="0,48,0,0" FontSize="20" TextColor="White"
-                                                Text="Force Sync">
+                                            <Button BackgroundColor="#6aa2b8" 
+                                                    WidthRequest="300" HeightRequest="48" BorderColor="Transparent" 
+                                                    CornerRadius="10" BorderRadius="10" x:Name="force_sync" Margin="0,48,0,0" FontSize="20" 
+                                                    TextColor="White" Text="Force Sync">
                                             </Button>
                                         </RelativeLayout>
                                     </StackLayout>
@@ -244,16 +248,13 @@
                                                                                   Text="" HeightRequest="40" x:Name="tbx_remote_host" 
                                                                                   Keyboard="Text" FontSize="17"
                                                                                   HorizontalTextAlignment="Start">
-                                                            <Controls:BorderlessEntry.Behaviors>
-                                                                <behaviors:EntryValidatorBehavior />
-                                                            </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
                                     </StackLayout>
                                     <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >                                             
-                                            <Label Text="Remote Host" Margin="0,4,0,0" x:Name="lb_remote_path" Font="Bold,17" HorizontalOptions="Start" />
+                                            <Label Text="Remote Path" Margin="0,4,0,0" x:Name="lb_remote_path" Font="Bold,17" HorizontalOptions="Start" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" >
@@ -262,14 +263,59 @@
                                                                                   Text="" HeightRequest="40" x:Name="tbx_remote_path" 
                                                                                   Keyboard="Text" FontSize="17"
                                                                                   HorizontalTextAlignment="Start">
-                                                            <Controls:BorderlessEntry.Behaviors>
-                                                                <behaviors:EntryValidatorBehavior />
-                                                            </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
-                                    </StackLayout>                                 
+                                    </StackLayout>   
+                                    <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >                                             
+                                            <Label Text="User Name" Margin="0,4,0,0" x:Name="lb_user_name" Font="Bold,17" HorizontalOptions="Start" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" >
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" 
+                                                                                  HorizontalOptions="FillAndExpand"
+                                                                                  Text="" HeightRequest="40" x:Name="tbx_user_name" 
+                                                                                  Keyboard="Text" FontSize="17"
+                                                                                  HorizontalTextAlignment="Start">
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                    </StackLayout>        
+                                    <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >                                             
+                                            <Label Text="User password" Margin="0,4,0,0" x:Name="lb_user_pass" Font="Bold,17" HorizontalOptions="Start" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" >
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0"  
+                                                                                  HorizontalOptions="FillAndExpand"
+                                                                                  Text="" HeightRequest="40" x:Name="tbx_user_pass" 
+                                                                                  Keyboard="Text" FontSize="17"
+                                                                                  HorizontalTextAlignment="Start">
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                    </StackLayout> 
+                                    <StackLayout Orientation="Horizontal" Margin="0,10,0,0" HorizontalOptions="FillAndExpand">
+                                            <Button BackgroundColor="#6aa2b8" HorizontalOptions="FillAndExpand" 
+                                                    HeightRequest="48" BorderColor="Transparent" 
+                                                    CornerRadius="10" BorderRadius="10" x:Name="btn_Test" Margin="0,0,0,0" FontSize="20" 
+                                                    TextColor="White" Text="Test FTP Connection">
+                                            </Button>
+                                            <Button BackgroundColor="#6aa2b8" HorizontalOptions="FillAndExpand" 
+                                                    HeightRequest="48" BorderColor="Transparent" 
+                                                    CornerRadius="10" BorderRadius="10" x:Name="btn_Save" Margin="0,0,0,0" FontSize="20" 
+                                                    TextColor="White" Text="Save">
+                                            </Button>
+                                            <Button BackgroundColor="#6aa2b8" HorizontalOptions="FillAndExpand" 
+                                                    HeightRequest="48" BorderColor="Transparent" 
+                                                    CornerRadius="10" BorderRadius="10" x:Name="btn_Cancel" Margin="0,0,0,0" FontSize="20" 
+                                                    TextColor="White" Text="Cancel">
+                                            </Button>
+                                        
+                                    </StackLayout>
                                 </StackLayout>
                             </StackLayout>
                         </StackLayout>

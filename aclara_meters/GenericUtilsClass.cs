@@ -12,7 +12,6 @@ using MTUComm.Exceptions;
 using Renci.SshNet;
 using Xamarin.Forms;
 using Xml;
-using System.Threading.Tasks;
 
 namespace aclara_meters
 {
@@ -20,7 +19,7 @@ namespace aclara_meters
     {
         public static int NumFilesUploaded;
 
-        public async static Task<bool> UploadFiles ( Boolean AllLogs = true )
+        public async static Task<bool> UploadFiles (Boolean UploadPrompt = true, Boolean AllLogs = true )
         {
             Global global = FormsApp.config.global;
         
@@ -31,14 +30,16 @@ namespace aclara_meters
             List<FileInfo> filesToUpload = LogFilesToUpload ( path );
             
             var upload = false;
+            if (filesToUpload.Count > 0) upload = true;
 
-            if (global.UploadPrompt &&
+            if (UploadPrompt &&
                  filesToUpload.Count > 0)
                 upload = await Application.Current.MainPage.DisplayAlert(
                         "Pending log files",
                         "Do you want to Upload them?",
                         "Ok", "Cancel");
-            else if (filesToUpload.Count > 0) upload = true;
+  //          else upload = false;
+            
             
             if ( ! upload )
                 return false;
