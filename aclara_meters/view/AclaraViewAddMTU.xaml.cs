@@ -1618,8 +1618,8 @@ namespace aclara_meters.view
 
             gps_icon_button.Tapped += GpsUpdateButton;
 
-            logoff_no.Tapped += Confirm_Yes_LogOut;
-            logoff_ok.Tapped += Confirm_No_LogOut;
+            logoff_ok.Tapped += Confirm_Yes_LogOut;
+            logoff_no.Tapped += Confirm_No_LogOut;
 
             submit_dialog.Clicked += submit_send;
             cancel_dialog.Clicked += Cancel_No;
@@ -1750,10 +1750,11 @@ namespace aclara_meters.view
             this.ChangeAction ();
         }
 
-        private async void Confirm_No_LogOut ( object sender, EventArgs e )
+        private async void Confirm_Yes_LogOut ( object sender, EventArgs e )
         {
             // Upload log files
-            await GenericUtilsClass.UploadFiles ();
+            if (global.UploadPrompt)
+                await GenericUtilsClass.UploadFiles ();
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
@@ -1769,11 +1770,12 @@ namespace aclara_meters.view
                     Popup_start.IsVisible = true;
                     Popup_start.IsEnabled = true;
                 }
+                else DoLogoff();
             });
            
         }
 
-        private void Confirm_Yes_LogOut ( object sender, EventArgs e )
+        private void Confirm_No_LogOut ( object sender, EventArgs e )
         {
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
@@ -3478,22 +3480,7 @@ namespace aclara_meters.view
                         {
                             if (isLogout)
                             {
-                                Settings.IsLoggedIn = false;
-
-                                try
-                                {
-                                    FormsApp.credentialsService.DeleteCredentials();
-                                    FormsApp.ble_interface.Close();
-                                    FormsApp.peripheral = null;
-                                }
-                                catch (Exception e25)
-                                {
-                                    Console.WriteLine(e25.StackTrace);
-                                }
-                              
-                                background_scan_page.IsEnabled = true;
-                                Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
-                                //Navigation.PopToRootAsync(false);
+                                DoLogoff();
                             }
                             else
                             {
@@ -3511,6 +3498,25 @@ namespace aclara_meters.view
 
             #endregion
 
+        }
+        private void DoLogoff()
+        {
+            Settings.IsLoggedIn = false;
+
+            try
+            {
+                FormsApp.credentialsService.DeleteCredentials();
+                FormsApp.ble_interface.Close();
+                FormsApp.peripheral = null;
+            }
+            catch (Exception e25)
+            {
+                Console.WriteLine(e25.StackTrace);
+            }
+
+            background_scan_page.IsEnabled = true;
+            Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
+            //Navigation.PopToRootAsync(false);
         }
 
         private void misc_command()

@@ -110,7 +110,8 @@ namespace aclara_meters.view
         public async void UpdateFiles ()
         {
             // Upload log files
-            await GenericUtilsClass.UploadFiles ();
+            if (FormsApp.config.global.UploadPrompt)
+                await GenericUtilsClass.UploadFiles ();
             
             // Init pucks detection
             InitRefreshCommand();
@@ -630,7 +631,10 @@ namespace aclara_meters.view
 
                 PrintToConsole($"---------------------------------Invoke method while ----dispositivos encontados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
                 PrintToConsole($"---------------------------------Invoke method while ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
-              
+
+                if (Settings.IsLoggedIn == false) 
+                    break;
+
                 int status = FormsApp.ble_interface.GetConnectionStatus();
 
                 PrintToConsole("se obtiene el estado de la conexion - InvokeMethod");
@@ -1245,7 +1249,8 @@ namespace aclara_meters.view
         private async void LogOffOkTapped(object sender, EventArgs e)
         {
             // Upload log files
-            await GenericUtilsClass.UploadFiles ();
+            if (FormsApp.config.global.UploadPrompt)
+                await GenericUtilsClass.UploadFiles ();
 
             dialog_logoff.IsVisible = false;
             dialog_open_bg.IsVisible = false;
