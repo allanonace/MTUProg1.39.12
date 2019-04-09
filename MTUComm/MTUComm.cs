@@ -528,6 +528,8 @@ namespace MTUComm
 
         public void Task_ReadMtu ()
         {
+            //throw new Exception ();
+        
             OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
         
             String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtu );

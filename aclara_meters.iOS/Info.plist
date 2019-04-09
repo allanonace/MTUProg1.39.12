@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>aclara-mtu-programmer</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.36.14</string>
+	<string>1.36.15</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -27,7 +27,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0.0.21</string>
+	<string>0.0.22</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>MainStoryboardFile</key>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Web;
@@ -19,6 +20,8 @@ using Renci.SshNet;
 using Renci.SshNet.Sftp;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+
+using System.Reflection;
 
 using System.Text;
 using Xml;
@@ -563,9 +566,23 @@ namespace aclara_meters
                 str.AppendLine ( "" );
                 str.AppendLine ( "Exception" );
                 str.AppendLine ( "---------" );
-                str.AppendLine ( exception.ToString () );
                 
-                string errorFileName = string.Format ( "{0}_{1}_{2}.log", "Exception", action.type, DateTime.Now.ToString ( "MM-dd-yyyy_HH:mm" ) );
+                StackTrace traces = new StackTrace ( exception.InnerException, true );
+                
+                var capturedTraces = typeof ( StackTrace ).GetField ( "captured_traces", BindingFlags.Instance | BindingFlags.NonPublic)
+                  .GetValue ( traces ) as StackTrace[];
+                
+                string traces2 = exception.InnerException.StackTrace;
+                foreach ( StackTrace trace in capturedTraces )
+                    foreach ( StackFrame frame in trace.GetFrames () )
+                        str.AppendLine ( frame.GetFileName () + ".." + Environment.NewLine +
+                            frame.GetMethod () + " at line " + frame.GetFileLineNumber () + ", column " + frame.GetFileColumnNumber () );
+                
+                str.AppendLine ( "" );
+                str.AppendLine ( "---------" );
+                str.AppendLine ( exception.InnerException.ToString () );
+                
+                string errorFileName = string.Format ( "{0}_{1}_{2}.txt", "Exception", action.type, DateTime.Now.ToString ( "MM-dd-yyyy_HH-mm" ) );
                 var libraryPath      = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
                 var errorFilePath    = Path.Combine ( libraryPath, errorFileName );
                 File.WriteAllText ( errorFilePath, str.ToString () );
