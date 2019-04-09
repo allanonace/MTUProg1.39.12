@@ -128,11 +128,15 @@ namespace aclara_meters
                                     // If both files are equal, move local file to backup folder
                                     if ( Enumerable.SequenceEqual ( md5Local, md5Remote ) )
                                     {
-                                        string url_to_copy = Path.Combine ( file.Directory.FullName, Mobile.PATH_BACKUP );
-                                        if ( ! Directory.Exists ( url_to_copy ) )
-                                            Directory.CreateDirectory ( url_to_copy );
-                
-                                        File.Copy ( file.FullName, Path.Combine ( url_to_copy, file.Name ), true );
+                                        // Only create backup file ( "moving" log to backup folder ) in interactive mode
+                                        if ( ! MTUComm.Action.IsFromScripting )
+                                        {
+                                            string url_to_copy = Path.Combine ( file.Directory.FullName, Mobile.PATH_BACKUP );
+                                            if ( ! Directory.Exists ( url_to_copy ) )
+                                                Directory.CreateDirectory ( url_to_copy );
+                    
+                                            File.Copy ( file.FullName, Path.Combine ( url_to_copy, file.Name ), true );
+                                        }
                                         File.Delete ( file.FullName );
                                         
                                         NumFilesUploaded += 1;
