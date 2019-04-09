@@ -30,7 +30,7 @@ namespace aclara_meters.view
     {
         private const string TEXT_COPYR   = "Copyright © 2018 Aclara Technologies LLC.";
         private const string TEXT_SUPPORT = "System tech Support: 1-866-205-5058";
-        private const string TEXT_VERSION = "Application Version: 1.36.15";
+        private const string TEXT_VERSION = "Application Version: ";
         //private const string TEXT_INTUNE  = " [ using Intune ]";
         private const string TEXT_LICENSE = "Licensed to: ";
 
@@ -1351,11 +1351,17 @@ namespace aclara_meters.view
 
             customers_copyr  .Text = TEXT_COPYR;
             customers_support.Text = TEXT_SUPPORT;
-            customers_version.Text = TEXT_VERSION; // + ( ( Mobile.configData.IsCertLoaded ) ? TEXT_INTUNE : string.Empty );
-            if (Mobile.configData.IsCertLoaded)
+            customers_version.Text = TEXT_VERSION + Configuration.GetInstance ().GetApplicationVersion (); //( ( Mobile.configData.IsCertLoaded ) ? TEXT_INTUNE : string.Empty );
+            
+            if ( Mobile.configData.IsCertLoaded )
             {
                 certificate_name.Text = $"Certificate: {Mobile.configData.certificate.Subject}";
-                certificate_exp.Text = $"Expiration date: {Mobile.configData.certificate.NotAfter.ToString("MM/dd/yyyy hh:mm:ss")}";
+                certificate_exp .Text = $"Expiration date: {Mobile.configData.certificate.NotAfter.ToString("MM/dd/yyyy hh:mm:ss")}";
+            }
+            else
+            {
+                certificate_name.Text = string.Empty;
+                certificate_exp .Text = string.Empty;
             }
 
             /*
@@ -1365,7 +1371,7 @@ namespace aclara_meters.view
             #elif __ANDROID__
             customers_version.Text = TEXT_VERSION + NSBundle.MainBundle
                                      .ObjectForInfoDictionary ( "CFBundleShortVersionString" ).ToString ();
-            #endif
+           ndif
             */
             customers_name   .Text = TEXT_LICENSE + FormsApp.config.global.CustomerName;
 

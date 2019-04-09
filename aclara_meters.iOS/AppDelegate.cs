@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using Acr.UserDialogs;
 using Foundation;
 using Microsoft.Intune.MAM;
 using nexus.protocols.ble;
 using UIKit;
-
-using System.Threading.Tasks;
-using System.IO;
 
 namespace aclara_meters.iOS
 {
@@ -34,35 +29,18 @@ namespace aclara_meters.iOS
             // Get Intun Parameters
             //Online.DownloadIntuneParameters ();
             
-            var AppVersion = NSBundle.MainBundle.InfoDictionary[ "CFBundleVersion" ];
+            // Core Foundation Keys:
+            // https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+            var appVersion = NSBundle.MainBundle.InfoDictionary[ "CFBundleShortVersionString" ];
+            var appBuild   = NSBundle.MainBundle.InfoDictionary[ "CFBundleVersion" ];
 
             IBluetoothLowEnergyAdapter bluetoothLowEnergyAdapter = BluetoothLowEnergyAdapter.ObtainDefaultAdapter();
             IUserDialogs userDialogs = UserDialogs.Instance;
-            NSString appversion = (Foundation.NSString) AppVersion.Description;
+            string appversion = appVersion.Description + " ( " + appBuild.Description + " )";
 
             appSave = new FormsApp ( bluetoothLowEnergyAdapter, userDialogs, appversion);
 
-            //appSave = new FormsApp(bluetoothLowEnergyAdapter);
-
             base.LoadApplication ( appSave );
-
-            /*
-            try
-            {
-            AppDomain.CurrentDomain.UnhandledException += async (sender, e) =>
-            {
-            
-            };
-            TaskScheduler.UnobservedTaskException += async (sender, e) =>
-            {
-            
-            };
-            }
-            catch ( Exception e )
-            {
-
-            }
-            */
 
             return base.FinishedLaunching ( app, options );
         }

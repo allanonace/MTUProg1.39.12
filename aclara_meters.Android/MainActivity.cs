@@ -5,27 +5,20 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
-using System.Reflection;
-using Android.App;
-using Android.Content.PM;
-using Android.Runtime;
-using Android.Views;
-using Android.Widget;
-using Android.OS;
 using Acr.UserDialogs;
+using Android.App;
+using Android.Content;
+using Android.Content.PM;
+using Android.OS;
+using Android.Runtime;
 using nexus.protocols.ble;
+using Plugin.CurrentActivity;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using Application = Android.App.Application;
-using Android.Content;
-
-using Plugin.CurrentActivity;
-using System.Collections.Generic;
 
 namespace aclara_meters.Droid
 {
-     
-    // [Activity(Theme = "@style/MainTheme", MainLauncher = true, NoHistory = true)]
     [Activity(Theme = "@style/MainTheme",  MainLauncher = true, NoHistory = true, Name = "com.aclara.mtu.programmer.urlentryclass")]
     public class urlentryclass : FormsApplicationActivity
     {
@@ -40,7 +33,6 @@ namespace aclara_meters.Droid
             BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
         }
 
-
         protected override void OnCreate(Bundle bundle)
         {
             //TabLayoutResource = Resource.Layout.Tabbar;
@@ -48,12 +40,8 @@ namespace aclara_meters.Droid
 
             base.OnCreate(bundle);
 
-
             UserDialogs.Init(this);
             global::Xamarin.Forms.Forms.Init(this, bundle);
-
-       
-
 
             try
             {
@@ -70,51 +58,35 @@ namespace aclara_meters.Droid
             // need to support devices with multiple Bluetooth adapters)
             var bluetooth = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
 
+            if ( Xamarin.Forms.Device.Idiom == TargetIdiom.Phone )
+                 RequestedOrientation = ScreenOrientation.Portrait;
+            else RequestedOrientation = ScreenOrientation.Landscape;
 
-            if (Xamarin.Forms.Device.Idiom == TargetIdiom.Phone)
-            {
-                RequestedOrientation = ScreenOrientation.Portrait;
-            }
-            else
-            {
-                RequestedOrientation = ScreenOrientation.Landscape;
-            }
+            CrossCurrentActivity.Current.Init ( this, bundle );
 
-            CrossCurrentActivity.Current.Init(this, bundle);
-
-            var context = Android.App.Application.Context;
-            var info = context.PackageManager.GetPackageInfo(context.PackageName, 0);
-
-            string value = info.VersionName.ToString();
-
-            Intent outsideIntent = Intent;
-           
             var data = Intent.Data;
 
             // check if this intent is started via custom scheme link
             if (data != null)
             {
-                var scheme = data.Scheme;
-                if (scheme == "aclara-mtu-programmer")
+                if ( data.Scheme == "aclara-mtu-programmer" )
                 {
                     //accessCodeTextbox.Text = data.Host;
                 }
             }
 
             // Set our view from the "main" layout resource
-
             //SetContentView(Resource.Layout.SplashScreen);
 
-          
+            Context     context    = Application.Context;
+            PackageInfo info       = context.PackageManager.GetPackageInfo ( context.PackageName, 0 );
+            string      appversion = info.VersionName + " ( " + info.VersionCode + " )";
 
-
-            FormsApp app =  new FormsApp(bluetooth, UserDialogs.Instance, value);
+            FormsApp app = new FormsApp ( bluetooth, UserDialogs.Instance, appversion );
 
             LoadApplication(app);
 
-
             app.HandleUrl(new System.Uri(data.ToString()), bluetooth); 
-                           
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
@@ -122,16 +94,13 @@ namespace aclara_meters.Droid
             Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-
     }
-
 
     [Application(AllowBackup = true, AllowClearUserData = true)]
     public class MyApplication : Application
     {
-
         protected MyApplication(IntPtr javaReference, JniHandleOwnership transfer)
-         : base(javaReference, transfer)
+        : base(javaReference, transfer)
         {
         }
 
@@ -140,8 +109,6 @@ namespace aclara_meters.Droid
             
         }
     }
-
-
 
     [Activity(
         Label = "aclara_meters", 
@@ -152,10 +119,8 @@ namespace aclara_meters.Droid
         ScreenOrientation = ScreenOrientation.Unspecified
     )]
 
-
     public class MainActivity : FormsApplicationActivity
     {
-
         /// <remarks>
         /// This must be implemented if you want to Subscribe() to IBluetoothLowEnergyAdapter.State to be notified when the
         /// bluetooth adapter state changes (i.e., it is enabled or disabled). If you don't care about that in your use-case, then
@@ -167,7 +132,6 @@ namespace aclara_meters.Droid
             BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
         }
 
-
         protected override void OnCreate(Bundle bundle)
         {
             //TabLayoutResource = Resource.Layout.Tabbar;
@@ -177,7 +141,6 @@ namespace aclara_meters.Droid
 
             UserDialogs.Init(this);
             global::Xamarin.Forms.Forms.Init(this, bundle);
-
            
             try
             {

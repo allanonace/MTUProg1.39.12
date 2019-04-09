@@ -371,6 +371,8 @@ namespace MTUComm
             parent.Add(element);
         }
 
+        #region TurnOnOff
+
         public string TurnOnOff ( Action action, Mtu mtu, uint mtuId )
         {
             String uri = CreateFileIfNotExist ();
@@ -451,6 +453,8 @@ namespace MTUComm
 
             parent.Add(element);
         }
+
+        #endregion
 
         public void Cancel ( Action action, String cancel, String reason )
         {
