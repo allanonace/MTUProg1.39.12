@@ -73,7 +73,6 @@ namespace aclara_meters
         public static BleSerial ble_interface;
         public static Logger logger;
         public static Configuration config;
-        public static IBlePeripheral peripheral;
 
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
@@ -109,6 +108,8 @@ namespace aclara_meters
             try
             {
                 InitializeComponent();
+
+                //Singleton.Set = new Puck ();
 
                 this.adapter = adapter;
                 this.dialogs = dialogs;

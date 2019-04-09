@@ -15,7 +15,7 @@ namespace MTUComm
         {
             this.dictionary = new Dictionary<string,dynamic> ();
         }
-                
+        
         public override bool TrySetMember ( SetMemberBinder binder, object value )
         {
             this.AddClass ( binder.Name, value );
@@ -38,7 +38,16 @@ namespace MTUComm
                 return true;
             }
 
-            throw new Exception ();
+            result = null;
+            return false;
+        }
+        
+        public static bool Has<T> ()
+        where T : class
+        {
+            Singleton s = Get;
+            
+            return s.dictionary.ContainsKey ( typeof ( T ).Name );
         }
         
         public static dynamic Get
@@ -51,7 +60,7 @@ namespace MTUComm
                 return instance;
             }
         }
-        
+
         public static dynamic Set
         {
             set
@@ -63,6 +72,23 @@ namespace MTUComm
                    .GetMethod ( "AddClass", BindingFlags.NonPublic | BindingFlags.Instance )
                    .Invoke ( s, new object[] { value.GetType ().Name, value } );
             }
+        }
+        
+        public static bool Remove<T> (
+            string customName = "" )
+        where T : class
+        {
+            Singleton s = Get;
+            
+            if ( string.IsNullOrEmpty ( customName ) )
+                customName = typeof ( T ).Name;
+            
+            if ( s.dictionary.ContainsKey ( customName ) )
+            {
+                s.dictionary.Remove ( customName );
+                return true;
+            }
+            return false;
         }
         
         public static void SetCustom ( string name, object value )

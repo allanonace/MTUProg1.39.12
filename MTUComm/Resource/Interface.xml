@@ -48,6 +48,8 @@
 			<Parameter name="User" display="User" log="true" source="Action.User" interface="false"/>
 			<Parameter name="MtuStatus" display="MTU Status" log="true" interface="true"/>
 			<Parameter name="MtuSerialNumber" display="MTU Ser No" log="true" interface="true"/>
+            <Parameter name="PuckSerialNumber" display="Puck Ser No" log="true" interface="false" source="Puck.SerialNumber" />
+            <Parameter name="PuckBattery" display="Puck Battery" log="true" interface="false" source="Puck.BatteryLevel" />
 			<Parameter name="Frequency" display="1 Way Tx Freq" log="true" source="MemoryMap.Frequency1Way" interface="true" conditional="Global.ShowFreq=true"/>
 			<Parameter name="Frequency" display="2 Way Tx Freq" log="true" source="MemoryMap.Frequency2WayTx" interface="true" conditional="Global.ShowFreq=true"/>
 			<Parameter name="Frequency" display="2 Way Rx Freq" log="true" source="MemoryMap.Frequency2WayRx" interface="true" conditional="Global.ShowFreq=true"/>
@@ -95,6 +97,8 @@
 			<Parameter name="User" display="User" log="true" source="Action.User" interface="false"/>
 			<Parameter name="MtuStatus" display="MTU Status" log="true" interface="true"/>
 			<Parameter name="MtuSerialNumber" display="MTU Ser No" log="true" interface="true"/>
+            <Parameter name="PuckSerialNumber" display="Puck Ser No" log="true" interface="false" source="Puck.SerialNumber" />
+            <Parameter name="PuckBattery" display="Puck Battery" log="true" interface="false" source="Puck.BatteryLevel" />
       		<Parameter name="Frequency" display="1 Way Tx Freq" log="true" source="MemoryMap.Frequency1Way" interface="true" conditional="Global.ShowFreq=true"/>
       		<Parameter name="Frequency" display="2 Way Tx Freq" log="true" source="MemoryMap.Frequency2WayTx" interface="true" conditional="Global.ShowFreq=true"/>
       		<Parameter name="Frequency" display="2 Way Rx Freq" log="true" source="MemoryMap.Frequency2WayRx" interface="true" conditional="Global.ShowFreq=true"/>

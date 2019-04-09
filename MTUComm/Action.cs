@@ -59,6 +59,7 @@ namespace MTUComm
         private const string IFACE_ACTION    = "Action";
         private const string IFACE_METER     = "Meter";
         private const string IFACE_MTU       = "Mtu";
+        private const string IFACE_PUCK      = "Puck";
         private const string IFACE_GLOBAL    = "Global";
         private const string IFACE_MEMORYMAP = "MemoryMap";
         private const string IFACE_FORM      = "Form";
@@ -632,6 +633,7 @@ namespace MTUComm
         {
             Parameter paramToAdd;
             Global       global = Configuration.GetInstance ().GetGlobal ();
+            Puck         puck   = Singleton.Get.Puck;
             Type         gType  = global.GetType ();
             ActionResult result = new ActionResult ();
             InterfaceParameters[] parameters = configuration.getAllInterfaceFields ( mtu, actionType );
@@ -662,11 +664,11 @@ namespace MTUComm
                             paramToAdd = null;
                             switch ( sourceWhere )
                             {
-                                case IFACE_ACTION   : value      = this.GetProperty  ( sourceProperty ); break;
-                                case IFACE_MTU      : value      = mtu .GetProperty  ( sourceProperty ); break;
-                                case IFACE_FORM     : paramToAdd = form.GetParameter ( sourceProperty ); break;
-                                //case IFACE_MEMORYMAP: value      = map .GetProperty  ( sourceProperty ).Value.ToString (); break; // MemoryMap.SourceProperty
-                                default             : value      = map .GetProperty  ( sourceProperty ).Value.ToString (); break; // MemoryMap.ParameterName
+                                case IFACE_ACTION: value      = this.GetProperty  ( sourceProperty ); break;
+                                case IFACE_MTU   : value      = mtu .GetProperty  ( sourceProperty ); break;
+                                case IFACE_PUCK  : value      = puck.GetProperty  ( sourceProperty ); break;
+                                case IFACE_FORM  : paramToAdd = form.GetParameter ( sourceProperty ); break;
+                                default          : value      = map .GetProperty  ( sourceProperty ).Value.ToString (); break; // MemoryMap.ParameterName
                             }
                             
                             if ( ! sourceWhere.Equals ( IFACE_FORM ) &&
@@ -804,11 +806,10 @@ namespace MTUComm
 
                                 switch ( sourceWhere )
                                 {
-                                    case IFACE_PORT     : value = portType .GetProperty ( sourceProperty ); break;
-                                    case IFACE_MTU      : value = mtu      .GetProperty ( sourceProperty ); break;
-                                    case IFACE_METER    : value = meter    .GetProperty ( sourceProperty ); break;
-                                    //case IFACE_MEMORYMAP: value = map.GetProperty ( PORT_PREFIX + indexPort + sourceProperty ).Value.ToString (); break; // MemoryMap.SourceProperty
-                                    default             : value = map.GetProperty ( PORT_PREFIX + indexPort + sourceProperty ).Value.ToString (); break; // MemoryMap.ParameterName
+                                    case IFACE_PORT : value = portType .GetProperty ( sourceProperty ); break;
+                                    case IFACE_MTU  : value = mtu      .GetProperty ( sourceProperty ); break;
+                                    case IFACE_METER: value = meter    .GetProperty ( sourceProperty ); break;
+                                    default         : value = map.GetProperty ( PORT_PREFIX + indexPort + sourceProperty ).Value.ToString (); break; // MemoryMap.ParameterName
                                 }
                                 
                                 if ( ! string.IsNullOrEmpty ( value ) )

@@ -254,12 +254,11 @@ namespace aclara_meters.view
 
         private void PairWithKnowDevice()
         {
-           
             autoConnect = false;
             conectarDevice = false;
             #region Autoconnect to stored device 
 
-            PrintToConsole($"-----------------------------------va a conectar con : {FormsApp.peripheral.Advertisement.DeviceName}");
+            PrintToConsole($"-----------------------------------va a conectar con : { Singleton.Get.Puck.Name }");
             //Task.Factory.StartNew(NewOpenConnectionWithDevice);
             NewOpenConnectionWithDevice();
             #endregion
@@ -733,7 +732,7 @@ namespace aclara_meters.view
 
                             });
                             peripheralConnected = status;
-                            FormsApp.peripheral = null;
+                            Singleton.Remove<Puck> ();
                         }
                         else // status == ble_library.BlePort.CONNECTED
                         {
@@ -759,7 +758,7 @@ namespace aclara_meters.view
                         DeviceList.IsEnabled = true;
                        
                         peripheralConnected = status;
-                        FormsApp.peripheral = null;
+                        Singleton.Remove<Puck> ();
                         Device.BeginInvokeOnMainThread(() =>
                         {
                             fondo.Opacity = 1;
@@ -847,72 +846,23 @@ namespace aclara_meters.view
             {
                 try
                 {
-                    // TODO: la siguente linea siempre da error xq peripheral es null
-                    deviceID.Text = FormsApp.peripheral.Advertisement.DeviceName;
-                    macAddress.Text = DecodeId(FormsApp.peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray());
+                    Puck puck = Singleton.Get.Puck;
+                
+                    deviceID  .Text = puck.Name;
+                    macAddress.Text = puck.SerialNumber;
 
-                    //imageBattery.Source = "battery_toolbar_high";
-                    // imageRssi.Source = "rssi_toolbar_high";
-                    // batteryLevel.Text = "100%";
-                    // rssiLevel.Text = peripheral.Rssi.ToString() + " dBm";
+                    int    battery     = puck.BatteryLevel;
+                    string batteryIcon = puck.BatteryLevelIcon;
+                    int    rssi        = puck.RSSI;
+                    string rssiIcon    = puck.RSSIIcon;
 
-                    byte[] battery_ui = FormsApp.peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
+                    batteryLevel.Text = battery.ToString() + " %";
 
-                   //if (battery_ui[0] <  1 && battery_ui[0] > 1)
-                   // {
-                        batteryLevel.Text = battery_ui[0].ToString() + " %";
+                    imageBattery.Source = batteryIcon;
+                    battery_level_detail.Source = batteryIcon + "_white";
 
-                        if (battery_ui[0] >= 75)
-                        {
-                            imageBattery.Source = "battery_toolbar_high";
-                           
-                            battery_level_detail.Source = "battery_toolbar_high_white";
-                        }
-                        else if (battery_ui[0] >= 45 && battery_ui[0] < 75)
-                        {
-                            imageBattery.Source = "battery_toolbar_mid";
-                 
-                            battery_level_detail.Source = "battery_toolbar_mid_white";
-                        }
-                        else if (battery_ui[0] >= 15 && battery_ui[0] < 45)
-                        {
-                            imageBattery.Source = "battery_toolbar_low";
-
-                            battery_level_detail.Source = "battery_toolbar_low_white";
-                        }
-                        else // battery_ui[0] < 15
-                        {
-                            imageBattery.Source = "battery_toolbar_empty";
-                           
-                            battery_level_detail.Source = "battery_toolbar_empty_white";
-                        }
-                   // }
-
-                    /*** RSSI ICONS UPDATE ***/
-                    if (FormsApp.peripheral.Rssi <= -90)
-                    {
-                        imageRssi.Source = "rssi_toolbar_empty";
-                       
-                        rssi_level_detail.Source = "rssi_toolbar_empty_white";
-                    }
-                    else if (FormsApp.peripheral.Rssi <= -80 && FormsApp.peripheral.Rssi > -90)
-                    {
-                        imageRssi.Source = "rssi_toolbar_low";
-                       
-                        rssi_level_detail.Source = "rssi_toolbar_low_white";
-                    }
-                    else if (FormsApp.peripheral.Rssi <= -60 && FormsApp.peripheral.Rssi > -80)
-                    {
-                        imageRssi.Source = "rssi_toolbar_mid";
-
-                        rssi_level_detail.Source = "rssi_toolbar_mid_white";
-                    }
-                    else // (peripheral.Rssi > -60) 
-                    {
-                        imageRssi.Source = "rssi_toolbar_high";
-                       
-                        rssi_level_detail.Source = "rssi_toolbar_high_white";
-                    }
+                    imageRssi.Source = rssiIcon;
+                    rssi_level_detail.Source = rssiIcon + "_white";
 
                     //Save Battery & Rssi info for the next windows
                     CrossSettings.Current.AddOrUpdateValue("battery_icon_topbar", battery_level_detail.Source.ToString().Substring(6));
@@ -956,27 +906,6 @@ namespace aclara_meters.view
             }
         }
 
-        private string DecodeId(byte[] id)
-        {
-            string s;
-            try
-            {
-                s = System.Text.Encoding.ASCII.GetString(id.Take(2).ToArray());
-                byte[] byte_aux = new byte[4];
-                byte_aux[0] = id[3];
-                byte_aux[1] = id[2];
-                byte_aux[2] = 0;
-                byte_aux[3] = 0;
-                int num= BitConverter.ToInt32(byte_aux, 0);
-                s += num.ToString("0000");
-            }
-            catch (Exception)
-            {
-                s = BitConverter.ToString(id);
-            }
-            return s;
-        }
-
         //private async Task ChangeListViewData()
         private  void ChangeListViewData()
         {
@@ -1005,75 +934,37 @@ namespace aclara_meters.view
                             {
                                 if (blePeripherals[i] != null)
                                 {
-                                    byte_now = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray();
+                                    Puck puck = new Puck ( blePeripherals[ i ] );
+
+									byte_now = puck.ManofacturerData;
 
                                     bool enc = false;
                                     int sizeListTemp = employees.Count;
 
                                     for (int j = 0; j < sizeListTemp; j++)
                                     {
-                                        if (employees[j].Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual
-                                        (blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))
+                                        if ( employees[j].Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
+                                                .SequenceEqual ( puck.ManofacturerData ) )
                                             enc = true;
                                     }
 
-                                    string icono_bateria;
-
-                                    byte[] bateria;
-
                                     if (!enc)
                                     {
-                                        bateria = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
+                                        int    bateria     = puck.BatteryLevel;
+                                        string iconBattery = puck.BatteryLevelIcon;
 
-                                        icono_bateria = "battery_toolbar_high";
-
-                                        if (bateria[0] >= 75)
-                                        {
-                                            icono_bateria = "battery_toolbar_high";
-                                        }
-                                        else if (bateria[0] >= 45 && bateria[0] < 75)
-                                        {
-                                            icono_bateria = "battery_toolbar_mid";
-                                        }
-                                        else if (bateria[0] >= 15 && bateria[0] < 45)
-                                        {
-                                            icono_bateria = "battery_toolbar_low";
-                                        }
-                                        else // bateria[0] < 15
-                                        {
-                                            icono_bateria = "battery_toolbar_empty";
-                                        }
-
-                                        string rssiIcono = "rssi_toolbar_high";
-
-                                        /*** RSSI ICONS UPDATE ***/
-
-                                        if (blePeripherals[i].Rssi <= -90)
-                                        {
-                                            rssiIcono = "rssi_toolbar_empty";
-                                        }
-                                        else if (blePeripherals[i].Rssi <= -80 && blePeripherals[i].Rssi > -90)
-                                        {
-                                            rssiIcono = "rssi_toolbar_low";
-                                        }
-                                        else if (blePeripherals[i].Rssi <= -60 && blePeripherals[i].Rssi > -80)
-                                        {
-                                            rssiIcono = "rssi_toolbar_mid";
-                                        }
-                                        else // (blePeripherals[i].Rssi > -60) 
-                                        {
-                                            rssiIcono = "rssi_toolbar_high";
-                                        }
+                                        int    rssi     = puck.RSSI;
+                                        string iconRSSI = puck.RSSIIcon;
 
                                         DeviceItem device = new DeviceItem
                                         {
-                                            deviceMacAddress = DecodeId(byte_now),
-                                            deviceName = blePeripherals[i].Advertisement.DeviceName,
-                                            deviceBattery = bateria[0].ToString() + "%",
-                                            deviceRssi = blePeripherals[i].Rssi.ToString() + " dBm",
-                                            deviceBatteryIcon = icono_bateria,
-                                            deviceRssiIcon = rssiIcono,
-                                            Peripheral = blePeripherals[i]
+                                            deviceMacAddress  = puck.SerialNumber,
+                                            deviceName        = puck.Name,
+                                            deviceBattery     = bateria + "%",
+                                            deviceRssi        = rssi + " dBm",
+                                            deviceBatteryIcon = iconBattery,
+                                            deviceRssiIcon    = iconRSSI,
+                                            Peripheral        = puck.Device
                                         };
 
                                         employees.Add(device);
@@ -1082,18 +973,19 @@ namespace aclara_meters.view
                                         if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
                                             FormsApp.credentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
                                             bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
-                                            blePeripherals[i].Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
-                                            !peripheralManualDisconnection &&
-                                            FormsApp.peripheral == null)
+                                            puck.Name.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
+                                            ! peripheralManualDisconnection &&
+                                            ! Singleton.Has<Puck>() )
                                         {
                                             if (!FormsApp.ble_interface.IsOpen())
                                             {
                                                 try
                                                 {
-                                                    FormsApp.peripheral = blePeripherals[i];
+                                                    Singleton.Set = new Puck ();
+                                                    Singleton.Get.Puck.Device = blePeripherals[ i ];
+                                                    
                                                     peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                                                     peripheralManualDisconnection = false;
-
 
                                                     #region Autoconnect to stored device 
 
@@ -1102,9 +994,6 @@ namespace aclara_meters.view
                                                     autoConnect = true;
 
                                                     #endregion
-
-
-
                                                 }
                                                 catch (Exception e)
                                                 {
@@ -1114,10 +1003,8 @@ namespace aclara_meters.view
                                             }
                                             else
                                             {
-
                                                 if (autoConnect)
                                                 {
-
                                                     Device.BeginInvokeOnMainThread(() =>
                                                     {
                                                         #region Disable Circular Progress bar Animations when done
@@ -1128,17 +1015,11 @@ namespace aclara_meters.view
 
                                                         #endregion
                                                     });
-
                                                 }
-
                                             }
-
-
                                         }
-
                                         else
                                         {
-
                                             // if (autoConnect)
                                             //  {
 
@@ -1218,7 +1099,7 @@ namespace aclara_meters.view
 
                             }*/
                             // call your method to check for notifications here
-                            FormsApp.ble_interface.Open(FormsApp.peripheral, true);
+                            FormsApp.ble_interface.Open ( Singleton.Get.Puck.Device, true );
                         }
                         else
                         {
@@ -1260,7 +1141,7 @@ namespace aclara_meters.view
 
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
-            FormsApp.peripheral = null;
+            Singleton.Remove<Puck> ();
             FormsApp.ble_interface.Close();
 
             background_scan_page.IsEnabled = true;
@@ -1550,7 +1431,7 @@ namespace aclara_meters.view
         {
             try
             {
-                FormsApp.ble_interface.Open(FormsApp.peripheral, reassociate);
+                FormsApp.ble_interface.Open ( Singleton.Get.Puck.Device, reassociate );
             }
             catch (Exception e5)
             {
@@ -1580,7 +1461,8 @@ namespace aclara_meters.view
 
             if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
                 FormsApp.credentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
-                System.Convert.ToBase64String(item.Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()).Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty)) &&
+                System.Convert.ToBase64String(item.Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())
+                    .Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty)) &&
                 item.Peripheral.Advertisement.DeviceName.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)))
             {
                 reassociate = true;
@@ -1590,8 +1472,8 @@ namespace aclara_meters.view
 
             try
             {
-
-                FormsApp.peripheral = item.Peripheral;
+                Singleton.Set = new Puck ();
+                Singleton.Get.Puck.Device = item.Peripheral;
 
                 externalReconnect(reassociate);
 

@@ -3497,8 +3497,8 @@ namespace aclara_meters.view
             }
 
             #endregion
-
         }
+
         private void DoLogoff()
         {
             Settings.IsLoggedIn = false;
@@ -3507,7 +3507,7 @@ namespace aclara_meters.view
             {
                 FormsApp.credentialsService.DeleteCredentials();
                 FormsApp.ble_interface.Close();
-                FormsApp.peripheral = null;
+                Singleton.Remove<Puck> ();
             }
             catch (Exception e25)
             {

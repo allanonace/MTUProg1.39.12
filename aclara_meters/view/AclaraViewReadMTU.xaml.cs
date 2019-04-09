@@ -426,7 +426,7 @@ namespace aclara_meters.view
 
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
-            FormsApp.peripheral = null;
+            Singleton.Remove<Puck> ();
             FormsApp.ble_interface.Close();
             background_scan_page.IsEnabled = true;
 
@@ -730,7 +730,7 @@ namespace aclara_meters.view
         {
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
-            FormsApp.peripheral = null;
+            Singleton.Remove<Puck> ();
             FormsApp.ble_interface.Close();
             //int contador = Navigation.NavigationStack.Count;
             //while(contador>0)

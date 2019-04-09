@@ -908,7 +908,7 @@ namespace aclara_meters.view
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
             FormsApp.ble_interface.Close();
-            FormsApp.peripheral = null;
+            Singleton.Remove<Puck> ();
             background_scan_page.IsEnabled = true;
 
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin ( dialogsSaved ));

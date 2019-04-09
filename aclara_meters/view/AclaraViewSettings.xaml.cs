@@ -1307,7 +1307,7 @@ namespace aclara_meters.view
 
             Settings.IsLoggedIn = false;
             FormsApp.credentialsService.DeleteCredentials();
-            FormsApp.peripheral = null;
+            Singleton.Remove<Puck> ();
             FormsApp.ble_interface.Close();
             background_scan_page.IsEnabled = true;
 
@@ -1371,7 +1371,7 @@ namespace aclara_meters.view
             #elif __ANDROID__
             customers_version.Text = TEXT_VERSION + NSBundle.MainBundle
                                      .ObjectForInfoDictionary ( "CFBundleShortVersionString" ).ToString ();
-           ndif
+            #endif
             */
             customers_name   .Text = TEXT_LICENSE + FormsApp.config.global.CustomerName;
 
