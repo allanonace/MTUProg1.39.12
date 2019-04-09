@@ -65,6 +65,7 @@ namespace aclara_meters.viewmodel
                 string user = FormsApp.credentialsService.UserName;
                 Mobile.LogUserPath = user;
                 FormsApp.logger.Login(user);
+                Settings.IsLoggedIn = true;
                 Application.Current.MainPage=new NavigationPage(new AclaraViewMainMenu(dialogs_save));
             }   
         }
