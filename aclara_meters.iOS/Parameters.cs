@@ -6,6 +6,7 @@ using Microsoft.Intune.MAM;
 using MTUComm;
 using System.IO;
 using MTUComm.Exceptions;
+using Xamarin.Essentials;
 
 namespace aclara_meters.iOS
 {
@@ -32,7 +33,8 @@ namespace aclara_meters.iOS
                 data.ftpDownload_Host =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_HOST    ) ).ToString ();
                 data.ftpDownload_Port = int.Parse ( paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PORT    ) ).ToString () );
                 data.ftpDownload_Path =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PATH    ) ).ToString ();
-                //data.GenerateCert        ( paramsGroup.ValueForKey ( new NSString ( Mobile.ID_CERTIFICATE ) ).ToString () );
+                data.GenerateCert        ( paramsGroup.ValueForKey ( new NSString ( Mobile.ID_CERTIFICATE ) ).ToString () );
+                data.HasIntune = true;
                 
                 Console.WriteLine ( "Intune parameters loaded.." );
                 Console.WriteLine ( "FTP: " + data.ftpDownload_Host + ":" + data.ftpDownload_Port + " - " + data.ftpDownload_User + " [ " + data.ftpDownload_Pass + " ]" );
@@ -55,5 +57,7 @@ namespace aclara_meters.iOS
             }
             return true;
         }
+
+
     }
 }

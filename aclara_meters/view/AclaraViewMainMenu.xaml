@@ -323,7 +323,16 @@ x:Class="aclara_meters.view.AclaraViewMainMenu">
         <!--  DIALOGOS -->
         <Image BackgroundColor="Black" x:Name="dialog_open_bg" WidthRequest="1024" IsVisible="false" HeightRequest="1024" Opacity="0.5">
         </Image>
-        <ContentView Scale="1.2" IsVisible="false" HeightRequest="200" x:Name="turnoff_mtu_background" RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=0.19}" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=0.620}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Height,&#xA;                                     Factor=0.4}">
+        <ContentView Scale="1.2" IsVisible="false" HeightRequest="200" x:Name="turnoff_mtu_background" 
+                     RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     
+            Property=Width,&#xA;                                     
+            Factor=0.19}" 
+                     RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     
+            Property=Width,&#xA;                                     
+            Factor=0.620}" 
+                     RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                    
+            Property=Height,&#xA;                                     
+            Factor=0.4}">
             <Frame CornerRadius="6" HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">
                 <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
                     <!--  dialog_logoff-->

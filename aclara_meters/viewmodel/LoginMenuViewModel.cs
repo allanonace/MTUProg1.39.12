@@ -58,12 +58,28 @@ namespace aclara_meters.viewmodel
             });
         }
 
+        private void PathsLogs(string user)
+        {
+            Mobile.LogPath = Mobile.ConfigPublicPath;//public folder
+            Mobile.LogUserBackupPath = user;  //public folder
+            if (FormsApp.config.global.LogsPublicDir)
+                Mobile.LogUserPath = user;
+            else
+            {
+                Mobile.LogPath = Mobile.ConfigPath;  // private folder
+                Mobile.LogUserPath = user;
+            }
+        }
+
         public void Load()
         {
             if (FormsApp.credentialsService.DoCredentialsExist())
             {
                 string user = FormsApp.credentialsService.UserName;
-                Mobile.LogUserPath = user;
+                //Mobile.LogUserPath = user;
+
+                PathsLogs(user);
+
                 FormsApp.logger.Login(user);
                 Settings.IsLoggedIn = true;
                 Application.Current.MainPage=new NavigationPage(new AclaraViewMainMenu(dialogs_save));
@@ -132,7 +148,9 @@ namespace aclara_meters.viewmodel
                             }
                             Settings.IsLoggedIn = true;
                             Settings.SavedUserName = User.Email;
-                            Mobile.LogUserPath = userName;
+
+                            PathsLogs(userName);
+
                             FormsApp.logger.Login(userName);
                             //await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewMainMenu(dialogs_save), false);
                             Application.Current.MainPage = new NavigationPage(new AclaraViewMainMenu(dialogs_save));

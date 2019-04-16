@@ -7,7 +7,7 @@
 	<key>CFBundleName</key>
 	<string>Aclara MTU Programmer</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.aclara.mtu.programmer.AclaraMetersShareExtension</string>
+	<string>com.aclara.programmer.extension</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -38,6 +38,6 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.36.15</string>
 	<key>CFBundleVersion</key>
-	<string>0.0.22</string>
+	<string>0.0.25</string>
 </dict>
 </plist>

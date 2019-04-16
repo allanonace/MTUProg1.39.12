@@ -473,9 +473,9 @@ namespace aclara_meters.view
                     {
                         if ( this.port2IsActivated )
                         {
-                            this.pck_MeterType_Vendors_2         .SelectedIndex = this.pck_MeterType_Vendors           .SelectedIndex;
-                            this.pck_MeterType_Models_2          .SelectedIndex = this.pck_MeterType_Models            .SelectedIndex;
-                            this.pck_MeterType_Names_2           .SelectedIndex = this.pck_MeterType_Names             .SelectedIndex;
+                            //this.pck_MeterType_Vendors_2         .SelectedIndex = this.pck_MeterType_Vendors           .SelectedIndex;
+                            //this.pck_MeterType_Models_2          .SelectedIndex = this.pck_MeterType_Models            .SelectedIndex;
+                            //this.pck_MeterType_Names_2           .SelectedIndex = this.pck_MeterType_Names             .SelectedIndex;
                         
                             this.tbx_AccountNumber_2             .Text          = this.tbx_AccountNumber               .Text;
                             this.tbx_AccountNumber_Dual_2        .Text          = this.tbx_AccountNumber_Dual          .Text;

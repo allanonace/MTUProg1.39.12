@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<util:BasePage xmlns="http://xamarin.com/schemas/2014/forms" 
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+               xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" 
+               NavigationPage.HasBackButton="false" BackgroundColor="Transparent" 
+               xmlns:Controls="clr-namespace:aclara_meters" 
+               x:Class="aclara_meters.view.FtpDownloadSettings">
+    
+    <AbsoluteLayout BackgroundColor="#22000000" Margin="0,0,0,0" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" IsVisible="true">
+        <AbsoluteLayout AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All" Scale="1" IsVisible="true" x:Name="dialog_FTP" HorizontalOptions="Center" VerticalOptions="Center">
+            <Frame CornerRadius="6" HasShadow="true" OutlineColor="White" Margin="30" Padding="10" Opacity="1" BackgroundColor="White">
+                <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                    <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="FTP Settings to download configuration files">
+                    </Label>
+                    <StackLayout IsVisible="true" Margin="-10,0,0,0" Scale="0.9" x:Name="ftp_block" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
+                        <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Remote Host" Margin="0,4,0,0" x:Name="lb_remote_host" Font="Bold,17" HorizontalOptions="Start" />
+                                <Label Text="Port" Margin="0,4,0,0" x:Name="lb_remote_port" Font="Bold,17" HorizontalOptions="End" HorizontalTextAlignment="End" />
+                            </StackLayout>
+                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal">
+                                        <Controls:BorderlessEntry Margin="0,0,2,0" HorizontalOptions="FillAndExpand" Text="" HeightRequest="40" x:Name="tbx_remote_host" Keyboard="Text" FontSize="17" HorizontalTextAlignment="Start">
+                                        </Controls:BorderlessEntry>
+                                        <Controls:BorderlessEntry Margin="2,0,0,0" HorizontalOptions="FillAndExpand" Text="" HeightRequest="40" x:Name="tbx_remote_port" Keyboard="Text" FontSize="17" HorizontalTextAlignment="End">
+                                        </Controls:BorderlessEntry>
+                                    </StackLayout>
+                                </Frame>
+                            </Frame>
+                        </StackLayout>
+                        <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
+                            <Label Text="Remote Path" Margin="0,4,0,0" x:Name="lb_remote_path" Font="Bold,17" HorizontalOptions="Start" />
+                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal">
+                                        <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text="" HeightRequest="40" x:Name="tbx_remote_path" Keyboard="Text" FontSize="17" HorizontalTextAlignment="Start">
+                                        </Controls:BorderlessEntry>
+                                    </StackLayout>
+                                </Frame>
+                            </Frame>
+                        </StackLayout>
+                        <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
+                            <Label Text="User Name" Margin="0,4,0,0" x:Name="lb_user_name" Font="Bold,17" HorizontalOptions="Start" />
+                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal">
+                                        <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text="" HeightRequest="40" x:Name="tbx_user_name" Keyboard="Text" FontSize="17" HorizontalTextAlignment="Start">
+                                        </Controls:BorderlessEntry>
+                                    </StackLayout>
+                                </Frame>
+                            </Frame>
+                        </StackLayout>
+                        <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
+                            <Label Text="User password" Margin="0,4,0,0" x:Name="lb_user_pass" Font="Bold,17" HorizontalOptions="Start" />
+                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal">
+                                        <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text="" HeightRequest="40" x:Name="tbx_user_pass" Keyboard="Text" FontSize="17" HorizontalTextAlignment="Start">
+                                        </Controls:BorderlessEntry>
+                                    </StackLayout>
+                                </Frame>
+                            </Frame>
+                        </StackLayout>
+                    </StackLayout>
+                    <StackLayout Margin="0,12,0,0" Orientation="Horizontal">
+                        <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" TextColor="#6aa2b8" FontSize="20" Text="Yes">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer x:Name="btn_ok" Tapped="OK_Clicked" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                        <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" TextColor="#6aa2b8" FontSize="20" Text="No">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer x:Name="btn_cancel" Tapped="Cancel_Clicked" />
+                            </Label.GestureRecognizers>
+                        </Label>
+                    </StackLayout>
+                    <Label Margin="12,12,12,12" x:Name="lb_Error" TextColor="Red" HorizontalTextAlignment="Center" FontSize="20" Text="">
+                    </Label>
+                </StackLayout>
+            </Frame>
+        </AbsoluteLayout>
+        <!--  indicator -->
+        <AbsoluteLayout Opacity="0.9" InputTransparent="true" x:Name="indicator" BackgroundColor="#22000000" AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All" IsVisible="true">
+            <ActivityIndicator x:Name="indicator1" Color="#6aa2b8" AbsoluteLayout.LayoutBounds="0.5,0.5,1,1" AbsoluteLayout.LayoutFlags="All"
+                               Opacity="1" IsVisible="true" IsRunning="true" Scale="3" />
+        </AbsoluteLayout>
+   </AbsoluteLayout>
+
+</util:BasePage>

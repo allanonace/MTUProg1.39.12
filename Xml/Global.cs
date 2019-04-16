@@ -66,6 +66,7 @@ namespace Xml
             this.ColorEntry                   = false; // Uses a color screen for newer model handhelds
             this.ComPort                      = string.Empty; // [COM1-COM9] Default COM port to use if the CF ( compact flash ) interface card is not found
             this.ConfigLocation               = string.Empty; // Specifies an alternate location for the permanent configuration log file ( PC Only )
+            this.ConfigPublicDir              = false;  // Specifies if the config files remains in the public folder or not, after copy the files in private folder
             this.CustomerMeterError           = string.Empty; // [1-20] If meter error occurs, this message will appear
             this.CustomerName                 = "Aclara"; // [1-20] Display the tag value in the About sceen
             this.DailyReadingOffset           = 0; // [Byte] Daily Reading Offset for Electric MTU Type 92
@@ -107,6 +108,7 @@ namespace Xml
             this.LiveDigitsOnly               = true; // If true it will show X for Dummy Digits. False it will show 0
             this.LoadOptions                  = false; // Load options screen through appointments
             this.LogLocation                  = string.Empty; // Specifies an alternate location for the Activity Log file ( PC Only )
+            this.LogsPublicDir                = false; //specifies if the logs files are in the public folder or in the privte folder
             this.MeterNumberLength            = 12; // [1-20] Maximum length of the meter serial number
             this.MeterSerialEnabledAppt       = false; // Enable or disable values after appointment in interactive mode ( Meter Old/Serial Number )
             this.MeterWorkRecording           = true; // Enables or disables the "Old Meter Working" dialog box during MTU programming
@@ -431,6 +433,9 @@ namespace Xml
         [XmlElement("ConfigLocation")]
         public string ConfigLocation { get; set; }
 
+        [XmlElement("ConfigPublicDir")]
+        public bool ConfigPublicDir { get; set; }
+
         [XmlElement("CustomerMeterError")]
         public string CustomerMeterError { get; set; }
 
@@ -569,6 +574,9 @@ namespace Xml
 
         [XmlElement("LogLocation")]
         public string LogLocation { get; set; }
+
+        [XmlElement("LogsPublicDir")]
+        public bool LogsPublicDir { get; set; }
 
         [XmlElement("MeterNumberLength")]
         public int MeterNumberLength { get; set; }

@@ -31,7 +31,7 @@ namespace aclara_meters.view
         private const string TEXT_COPYR   = "Copyright © 2018 Aclara Technologies LLC.";
         private const string TEXT_SUPPORT = "System tech Support: 1-866-205-5058";
         private const string TEXT_VERSION = "Application Version: ";
-        //private const string TEXT_INTUNE  = " [ using Intune ]";
+        private const string TEXT_INTUNE  = " [ using Intune ]";
         private const string TEXT_LICENSE = "Licensed to: ";
 
         private ActionType actionType;
@@ -1041,9 +1041,7 @@ namespace aclara_meters.view
         private async void ForceSyncButtonTapped(object sender, EventArgs e)
         {
             force_sync.IsEnabled = false;
-            backdark_bg.IsVisible = true;
-            indicator.IsVisible = true;
-            ContentNav.IsEnabled = false;
+            Wait(true);
 
             // Upload log files
             await GenericUtilsClass.UploadFiles (false);
@@ -1063,9 +1061,7 @@ namespace aclara_meters.view
 
                 lbl_backup.TextColor = colorText;
                 force_sync.IsEnabled = true;
-                ContentNav.IsEnabled = true;
-                backdark_bg.IsVisible = false;
-                indicator.IsVisible = false;
+                Wait(false);
            
         }
 
@@ -1120,16 +1116,20 @@ namespace aclara_meters.view
 
         void Btn_Save_Clicked(object sender, EventArgs e)
         {
-            if (!TestFtpCredentials())
+
+            Wait(true);
+            if (!GenericUtilsClass.TestFtpCredentials(tbx_remote_host.Text, tbx_user_name.Text, tbx_user_pass.Text, tbx_remote_path.Text))
             {
                 DisplayAlert("Infomation", "Can't connect with the FTP, please check the entered data", "OK");
             }
             else
                 SaveFTPCredentials();
+            Wait(false);
         }
 
         private void SaveFTPCredentials()
         {
+            Wait(true);
             //Save FTP in global.xml and in global data
             try
             {
@@ -1156,11 +1156,13 @@ namespace aclara_meters.view
                 Errors.ShowAlert(new FtpConnectionException());
                 
             }
+            Wait(false);
         }
 
         private void Btn_Test_Clicked(object sender, EventArgs e)
         {
-            if (TestFtpCredentials())
+            Wait(true);
+            if (GenericUtilsClass.TestFtpCredentials(tbx_remote_host.Text, tbx_user_name.Text, tbx_user_pass.Text, tbx_remote_path.Text))
             {
                DisplayAlert("Information", "Connect to FTP succesfully", "OK");
             }
@@ -1168,34 +1170,7 @@ namespace aclara_meters.view
             {
                 Errors.ShowAlert(new FtpConnectionException());
             }
-        }
-
-        private bool TestFtpCredentials()
-        {
-            bool ok = true;
-
-            try
-            {
-               
-                using (SftpClient sftp = new SftpClient(tbx_remote_host.Text, 22, tbx_user_name.Text, tbx_user_pass.Text))
-                {
-                    sftp.Connect();
-
-                    if (!sftp.Exists(tbx_remote_path.Text))
-                        ok = false;
-
-
-                    sftp.Disconnect();
-                }
-            }
-            catch ( Exception e)
-            {
-                ok = false;
-            }
-            
-            //Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
-
-            return ok;
+            Wait(false);
         }
 
 
@@ -1305,10 +1280,8 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
-            Singleton.Remove<Puck> ();
-            FormsApp.ble_interface.Close();
+            FormsApp.DoLogOff();
+
             background_scan_page.IsEnabled = true;
 
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
@@ -1342,7 +1315,7 @@ namespace aclara_meters.view
 
         private void FtpButtonTapped(object sender, EventArgs e)
         {
-          // InitLayout(4);
+            InitLayout(4);
         }
 
         private void InitLayout(int valor)
@@ -1351,7 +1324,7 @@ namespace aclara_meters.view
 
             customers_copyr  .Text = TEXT_COPYR;
             customers_support.Text = TEXT_SUPPORT;
-            customers_version.Text = TEXT_VERSION + Configuration.GetInstance ().GetApplicationVersion (); //( ( Mobile.configData.IsCertLoaded ) ? TEXT_INTUNE : string.Empty );
+            customers_version.Text = TEXT_VERSION + Configuration.GetInstance ().GetApplicationVersion () + ( ( Mobile.configData.HasIntune ) ? TEXT_INTUNE : string.Empty );
             
             if ( Mobile.configData.IsCertLoaded )
             {

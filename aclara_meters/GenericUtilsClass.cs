@@ -10,6 +10,8 @@ using Acr.UserDialogs;
 using MTUComm;
 using MTUComm.Exceptions;
 using Renci.SshNet;
+using Renci.SshNet.Sftp;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xml;
 
@@ -131,7 +133,7 @@ namespace aclara_meters
                                         // Only create backup file ( "moving" log to backup folder ) in interactive mode
                                         if ( ! MTUComm.Action.IsFromScripting )
                                         {
-                                            string url_to_copy = Path.Combine ( file.Directory.FullName, Mobile.PATH_BACKUP );
+                                            string url_to_copy = Mobile.LogUserBackupPath;// Path.Combine ( file.Directory.FullName, Mobile.PATH_BACKUP );
                                             if ( ! Directory.Exists ( url_to_copy ) )
                                                 Directory.CreateDirectory ( url_to_copy );
                     
@@ -199,6 +201,7 @@ namespace aclara_meters
             List<FileInfo> local_array_files = new List<FileInfo>();
 
             DirectoryInfo info = new DirectoryInfo(path);
+            info = new DirectoryInfo(info.FullName);
 
             FileInfo[] files = info.GetFiles("*.xml", SearchOption.AllDirectories).OrderBy(p => p.LastWriteTimeUtc).ToArray();
 
@@ -233,7 +236,7 @@ namespace aclara_meters
         {
             List<FileInfo> local_array_files = new List<FileInfo>();
 
-            DirectoryInfo info = new DirectoryInfo(Mobile.LogPath);
+            DirectoryInfo info = new DirectoryInfo(Path.Combine(Mobile.LogUserBackupPath,".."));
 
             FileInfo[] files = info.GetFiles("*.xml", SearchOption.AllDirectories).OrderBy(p => p.LastWriteTimeUtc).ToArray();
 
@@ -245,6 +248,97 @@ namespace aclara_meters
                 local_array_files.Add(file);
             }
             return local_array_files;
+        }
+
+        public static bool TestFtpCredentials(string host,string user,string pass,string path, int port = 22)
+        {
+            bool ok = true;
+
+            try
+            {
+
+                using (SftpClient sftp = new SftpClient(host, port, user, pass))
+                {
+                    sftp.Connect();
+
+                    if (!sftp.Exists(path))
+                        ok = false;
+
+
+                    sftp.Disconnect();
+                }
+            }
+            catch (Exception)
+            {
+                ok = false;
+            }
+
+            //Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
+
+            return ok;
+        }
+
+        public static bool CheckFTPDownload()
+        {
+            var Host = SecureStorage.GetAsync("ftpDownload_Host");
+            if (!String.IsNullOrEmpty(Host.Result))
+            {
+                var data = Mobile.configData;
+                data.ftpDownload_Host = Host.Result;
+                data.ftpDownload_Path = SecureStorage.GetAsync("ftpDownload_Path").Result;
+                data.ftpDownload_User = SecureStorage.GetAsync("ftpDownload_User").Result;
+                data.ftpDownload_Port = int.Parse(SecureStorage.GetAsync("ftpDownload_Port").Result);
+                data.HasFTP = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool DownloadConfigFiles()
+        {
+            bool ok = true;
+
+            try
+            {
+                Mobile.ConfigData data = Mobile.configData;
+                using (SftpClient sftp = new SftpClient(data.ftpDownload_Host, data.ftpDownload_Port, data.ftpDownload_User, data.ftpDownload_Pass))
+                {
+                    sftp.Connect();
+
+                    // List all posible files in the documents directory 
+                    // Check if file's lastwritetime is the lastest 
+                    List<SftpFile> ftp_array_files = new List<SftpFile>();
+
+                    // Remote FTP File directory
+                    bool isCertificate;
+                    string configPath = Mobile.ConfigPath;
+
+                    foreach (SftpFile file in sftp.ListDirectory(data.ftpDownload_Path))
+                    {
+                        string name = file.Name;
+
+                        if ((isCertificate = name.Contains(FormsApp.XML_CER)) ||
+                             name.Contains(FormsApp.XML_EXT))
+                        {
+                            using (Stream stream = File.OpenWrite(Path.Combine(configPath, name)))
+                            {
+                               sftp.DownloadFile(Path.Combine(data.ftpDownload_Path, name), stream);
+                            }
+                        }
+                    }
+
+                    sftp.Disconnect();
+                }
+            }
+            catch (Exception e)
+            {
+                ok = false;
+            }
+
+            Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
+
+            return ok;
         }
     }
 }

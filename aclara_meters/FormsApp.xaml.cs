@@ -20,11 +20,15 @@ using Renci.SshNet;
 using Renci.SshNet.Sftp;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
+using Rg.Plugins.Popup.Services;
 
 using System.Reflection;
 
 using System.Text;
 using Xml;
+using System.Xml.Linq;
+using aclara_meters.Helpers;
+using System.Threading;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -47,8 +51,8 @@ namespace aclara_meters
         private const string SO_ANDROID = "Android";
         private const string SO_IOS     = "iOS";
         private const string SO_UNKNOWN = "Unknown";
-        private const string XML_EXT    = ".xml";
-        private const string XML_CER    = ".cer";
+        public const string XML_EXT    = ".xml";
+        public const string XML_CER    = ".cer";
         private const string CER_TXT    = "certificate.txt";
         public static bool ScriptingMode = false;
 
@@ -77,10 +81,10 @@ namespace aclara_meters
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
         private string appVersion;
-        
+
         private bool abortMission;
 
-        private TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+        public static TaskCompletionSource<bool> tcs;
 
         #endregion
 
@@ -117,9 +121,10 @@ namespace aclara_meters
 
                 if (Device.RuntimePlatform == Device.Android)
                 {
-                    Task.Run(async () => { await PermisosLocationAsync(); });
-                    CallToInitApp(adapter, dialogs, appVersion);
-                }
+                    Task.Run(async () => { await PermisosLocationAsync(); 
+                    await CallToInitApp(adapter, dialogs, appVersion);
+                });
+            }
                 else
                     Task.Factory.StartNew(ThreadProcedure);
             }
@@ -129,12 +134,12 @@ namespace aclara_meters
             }
         }
 
-        private void ThreadProcedure ()
+        private async void ThreadProcedure ()
         {
-            CallToInitApp ( adapter, dialogs, appVersion );
+            await CallToInitApp ( adapter, dialogs, appVersion );
         }
 
-        private void CallToInitApp (
+        private async Task CallToInitApp (
             IBluetoothLowEnergyAdapter adapter,
             IUserDialogs dialogs,
             string appVersion )
@@ -159,7 +164,7 @@ namespace aclara_meters
 
             // Force to not download server XML files
            
-            this.LoadConfigurationAndOpenScene ( dialogs );   
+            await this.LoadConfigurationAndOpenScene ( dialogs );   
 
         }
 
@@ -170,22 +175,92 @@ namespace aclara_meters
         private void ConfigPaths()
         {
             string sPath = String.Empty;
+            string sPathPrivate = String.Empty;
             if (Device.RuntimePlatform == Device.Android)
             {
                 sPath = DependencyService.Get<IPathService>().PrivateExternalFolder;
+                sPathPrivate = DependencyService.Get<IPathService>().InternalFolder;
             }
             else
             {
                 sPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                sPathPrivate = Path.Combine(sPath, "..", "Library");
             }
-            Mobile.ConfigPath = sPath;
+            Mobile.ConfigPublicPath = sPath;
+            Mobile.ConfigPath = sPathPrivate;
             Mobile.LogPath = sPath;
             #if DEBUG
             Mobile.LogUniPath = sPath;
             #endif
+
+
         }
 
-        private void LoadConfigurationAndOpenScene ( IUserDialogs dialogs )
+        private async Task<bool> InitialConfigProcess()
+        {
+            if (Mobile.configData.HasIntune)
+            {
+                if (Mobile.IsNetAvailable())
+                    GenericUtilsClass.DownloadConfigFiles();
+                else
+                    await MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
+                return true;
+            }
+            else
+            {
+                // Check if all configuration files are available in public folder
+                bool HasPublicFiles = this.HasDeviceAllXmls(Mobile.ConfigPublicPath);
+                //this.abortMission = !this.HasDeviceAllXmls(Mobile.ConfigPublicPath);
+                if (HasPublicFiles)
+                {
+                    // Install certificate if needed ( Convert from .cer to base64 string / .txt )
+                    if (!this.GenerateBase64Certificate(Mobile.ConfigPublicPath))
+                    {
+                        this.ShowErrorAndKill(new CertificateFileNotValidException());
+
+                        return false;
+                    }
+                    //File.Copy(file.FullName, Path.Combine(url_to_copy, file.Name), true);
+                    bool CPD = false;
+                    if (TagGlobal("ConfigPublicDir", out dynamic value))
+                    {
+                        if (value != null) CPD = (bool)value;
+                    }
+                    CopyConfigFilesToPrivate(!CPD);
+
+                }
+                else
+                {
+
+                    //Mobile.configData.HasFTP = false;
+                    //Configure download FTP
+                    if (Mobile.IsNetAvailable())
+                    {
+                        bool result =false;
+                        tcs = new TaskCompletionSource<bool>();
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+
+                            MainPage = new NavigationPage(new FtpDownloadSettings());
+                            //await PopupNavigation.Instance.PushAsync(new FtpDownloadSettings())
+                            //result = await tcs.Task;
+                        });
+                        result = await tcs.Task;
+
+                        if (!result)
+                            return false;
+                    }
+                    else
+                    {
+                        this.abortMission = true;
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+
+        private  async Task LoadConfigurationAndOpenScene ( IUserDialogs dialogs )
         {
             ConfigPaths();
 
@@ -194,17 +269,11 @@ namespace aclara_meters
             //     !this.HasDeviceAllXmls())
             //    this.DownloadConfigFiles();
 
-            // Check if all configuration files are available
-            this.abortMission = ! this.HasDeviceAllXmls ();
-            
-            // Install certificate if needed ( Convert from .cer to base64 string / .txt )
-            if ( ! this.GenerateBase64Certificate () )
+            if (!this.HasDeviceAllXmls(Mobile.ConfigPath))
             {
-                this.ShowErrorAndKill ( new CertificateFileNotValidException () );
-            
-                return;
+                await InitialConfigProcess();
             }
-            
+
             // Load configuration files
             // If some configuration file is not present, Configuration.cs initialization should avoid
             // launch exception when try to parse xmls, to be able to use generating the log error
@@ -218,6 +287,8 @@ namespace aclara_meters
                 return;
             }
 
+
+
             if (!ScriptingMode)
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -226,7 +297,46 @@ namespace aclara_meters
             else
                 tcs.SetResult(true);
         }
-        
+
+        private void CopyConfigFilesToPrivate(bool bRemove)
+        {
+            try
+            {
+                DirectoryInfo info = new DirectoryInfo(Mobile.ConfigPublicPath);
+                FileInfo[] files = info.GetFiles();
+
+                foreach (FileInfo file in files)
+                {
+                    string fileCopy = Path.Combine(Mobile.ConfigPath, file.Name);
+                    file.CopyTo(fileCopy);
+                    if (bRemove) file.Delete();
+                }
+            }
+            catch (Exception e)
+            {
+                this.ShowErrorAndKill(e);
+                return;
+            }
+        }
+
+        private bool TagGlobal(string sTag , out dynamic value) 
+        {
+            string sVal = String.Empty;
+            string uri = Path.Combine(Mobile.ConfigPublicPath, "Global.xml");
+
+            XDocument doc = XDocument.Load(uri);
+            foreach (XElement xElement in doc.Root.Elements())
+            {
+                if (xElement.Name == sTag)
+                {
+                    value = xElement.Value;
+                    return true;
+                }
+            }
+            value = null;
+            return false;
+        }
+
         private bool InitializeConfiguration ()
         {
             try
@@ -266,57 +376,11 @@ namespace aclara_meters
             return true;
         }
 
-        private bool DownloadConfigFiles ()
-        {
-            bool ok = true;
-        
-            try
-            {
-                Mobile.ConfigData data = Mobile.configData;
-                using (SftpClient sftp = new SftpClient ( data.ftpDownload_Host, data.ftpDownload_Port, data.ftpDownload_User, data.ftpDownload_Pass ) )
-                {
-                    sftp.Connect ();
-
-                    // List all posible files in the documents directory 
-                    // Check if file's lastwritetime is the lastest 
-                    List<SftpFile> ftp_array_files = new List<SftpFile>();
-
-                    // Remote FTP File directory
-                    bool isCertificate;
-                    string configPath = Mobile.ConfigPath;
-                    
-                    foreach ( SftpFile file in sftp.ListDirectory ( data.ftpDownload_Path ) )
-                    {
-                        string name = file.Name;
-                    
-                        if ( ( isCertificate = name.Contains ( XML_CER ) ) ||
-                             name.Contains ( XML_EXT ) )
-                        {
-                            using ( Stream stream = File.OpenWrite ( Path.Combine ( configPath, name ) ) )
-                            {
-                                sftp.DownloadFile(Path.Combine ( data.ftpDownload_Path, name ), stream );
-                            }
-                        }
-                    }
-
-                    sftp.Disconnect ();
-                }
-            }
-            catch ( Exception e )
-            {
-                ok = false;
-            }
-
-            Console.WriteLine ( "Download config.files from FTP: " + ( ( ok ) ? "OK" : "NO" ) );
-
-            return ok;
-        }
-
-        private bool HasDeviceAllXmls ()
+        private bool HasDeviceAllXmls (string path)
         {
             bool ok = true;
 
-            string path = Mobile.ConfigPath;
+            //string path = Mobile.ConfigPath;
         
 
                 // Directory could exist but is empty
@@ -350,10 +414,10 @@ namespace aclara_meters
             return ok;
         }
 
-        private bool GenerateBase64Certificate ()
+        private bool GenerateBase64Certificate (string configPath)
         {
             bool   ok         = true;
-            string configPath = Mobile.ConfigPath;
+            //string configPath = Mobile.ConfigPath;
   
             string txtPath    = Path.Combine ( configPath, CER_TXT );
         
@@ -472,7 +536,7 @@ namespace aclara_meters
                     File.WriteAllText ( path, Base64Decode ( script_data ) );
 
                 if ( callback != null ) { /* ... */ }
-
+                tcs = new TaskCompletionSource<bool>(); 
                 bool result = await tcs.Task;
 
                 await Task.Run(async () =>
@@ -608,6 +672,15 @@ namespace aclara_meters
             {
                 this.MainPage = new NavigationPage ( new ErrorInitView ( e ) );
             });
+        }
+
+        public static void DoLogOff()
+        {
+            Settings.IsLoggedIn = false;
+            FormsApp.credentialsService.DeleteCredentials();
+            Singleton.Remove<Puck>();
+            Mobile.LogPath = Mobile.ConfigPublicPath;
+            FormsApp.ble_interface.Close();
         }
     }
 }

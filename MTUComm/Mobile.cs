@@ -22,6 +22,8 @@ namespace MTUComm
             public string ftpDownload_Host;
             public int    ftpDownload_Port;
             public string ftpDownload_Path;
+            public bool HasIntune;
+            public bool HasFTP;
             public X509Certificate2 certificate { private set; get; }
             public byte[] lastRandomKey;
             public byte[] lastRandomKeySha;
@@ -47,20 +49,23 @@ namespace MTUComm
                 this.lastRandomKey    = new byte[ 0 ];
                 this.lastRandomKeySha = new byte[ 0 ];
                 
-                this.ftpDownload_User = "aclara";
-                this.ftpDownload_Pass = "aclara1234";
-                this.ftpDownload_Host = "159.89.29.176";
+                this.ftpDownload_User = string.Empty;
+                this.ftpDownload_Pass = string.Empty;
+                this.ftpDownload_Host = string.Empty;
                 this.ftpDownload_Port = 22;
-                this.ftpDownload_Path = "/home/aclara";
+                this.ftpDownload_Path = string.Empty;
+                this.HasIntune = false;
+                this.HasFTP = false;
             }
 
-            public void GenerateCert ()
+            public void GenerateCert (string sCertificate = null)
             {
+                string content;
                 try
                 {
                     string path = Path.Combine ( Mobile.ConfigPath, "certificate.txt" );
-                    
-                    if ( File.Exists ( path ) )
+
+                    if (File.Exists(path))
                     {
                         // NOTE: Full certificate file should be converted to base64 and not only the data that appear when
                         // open the file with some text editor. The resulting string will be without header and footer strings
@@ -68,26 +73,33 @@ namespace MTUComm
                         // https://www.base64encode.org
                         // e.g. Aclara certificate in base64
                         // base64cert = "MIICxDCCAaygAwIBAgIQV5fB/SvFm4VDwxNIjmx3LzANBgkqhkiG9w0BAQUFADAeMRwwGgYDVQQDExNOZXctVGVzdC1EZXYtQWNsYXJhMB4XDTE1MDQxNTA0MDAwMFoXDTI1MDQyMjA0MDAwMFowHjEcMBoGA1UEAxMTTmV3LVRlc3QtRGV2LUFjbGFyYTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANOISmTy1kRTeOPqajIm+y27q676LFKodBpgrm0M3imYpwnVd+aTnVdk7+NT5vSA1c9dB5PSojh/UfGg2kWDe5gNj2ZA+KaemXFqvl8YI/D6XjoNz3JqoqocjF4/hJnrUdwqOoUL6WPtbWEhCnzin/cVkKx5qxMrOh9qAzp+qYAqyJ26Aocr+nlM7oHRtBUmYRKZbpkNAnpiIV/Q6quSR5Qzsf4XrhvkPDkf2ZX8DvcJmAbXEAaBVa2ORsY9qA86jIphui5kwI9JPcw9hTZy1QxvNcZAijtPyC6AKDuRyEv0Awa1gcSBBRsf0HbeCSD91U/O51+alP3hLhA9tcxddx0CAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAGuTqwTvEgaTl/E2jdG9RUD3zN9MhRCijJIpjv9NdkkH13LK5Sn9up1+DraaccA5h2El9kiXDHYWPA/qRMq1auhNcmTFVYjeQSNW0tyuTqbQiG/8fwZiAZrGn6UmOU/vzzhkyv05x5KzVAEwp94fU/J+kOIJVH0ff5jnMeYHARc1sY6JgXgJKoJbdS4Q4wG2RHj5yFAixv/zwS1XBy2GWtsz03aucNQzBIbk1uTIv2eyYqFMhSGT36vkfJFidRcR3H4FWnvInWoWmxlGcs0MS3bNOAv5ij55h0rREGJ9WdJmI/gw84aA4itFwwUuG6kKdF9AF/rljtVCFVH6T9PFI2Q==";
-        
+
                         // /Library/Frameworks/Xamarin.iOS.framework/Versions/12.2.1.13/src/Xamarin.iOS/mcs/class/Mono.Security/Mono.Security.X509/X509Certificate.cs
                         // NOTE: Method PEM needs to find the header and footer strings previous to start with certificate
                         // parsing/generation, and these both const should be concatenated with the cert in base64
                         // e.g. -----BEGIN CERTIFICATE----- + base64cert + -----END CERTIFICATE----- // Each part converted to byte array
-                        string content   = File.ReadAllText ( path );
-                        this.certificate = new X509Certificate2 ( Encoding.ASCII.GetBytes ( CER_HEADER + content + CER_FOOTER ) );
-                        
-                        Console.WriteLine ( "Local parameters loaded.." );
-                        Console.WriteLine ( "FTP: " + this.ftpDownload_Host + ":" + this.ftpDownload_Port + " - " + this.ftpDownload_User + " [ " + this.ftpDownload_Pass + " ]" );
-                        Console.WriteLine ( "Certificate: " + this.certificate.Subject + " [ " + this.certificate.NotAfter + " ]" );
-                        
-                        Console.WriteLine ( "Public Key: " + Convert.ToBase64String ( this.certificate.GetPublicKey () ) );
-                        Console.WriteLine ( "Devices Cert Subject: " + this.certificate.Subject + " " + this.certificate.SubjectName.Name );
-                        Console.WriteLine ( "Cert Thumbprint: " + this.certificate.Thumbprint );
-                        
-                        // Check if certificate is not valid/has expired
-                        if ( DateTime.Compare ( this.certificate.NotAfter, DateTime.Today ) < 0 )
-                            throw new CertificateInstalledExpiredException ();
+                        content = File.ReadAllText(path);
+
                     }
+                    else if (!String.IsNullOrEmpty(sCertificate)) //intune
+                    {
+                        content = sCertificate;
+                    }
+                    else return;
+
+                    this.certificate = new X509Certificate2(Encoding.ASCII.GetBytes(CER_HEADER + content + CER_FOOTER));
+
+                    Console.WriteLine("Local parameters loaded..");
+                    Console.WriteLine("FTP: " + this.ftpDownload_Host + ":" + this.ftpDownload_Port + " - " + this.ftpDownload_User + " [ " + this.ftpDownload_Pass + " ]");
+                    Console.WriteLine("Certificate: " + this.certificate.Subject + " [ " + this.certificate.NotAfter + " ]");
+
+                    Console.WriteLine("Public Key: " + Convert.ToBase64String(this.certificate.GetPublicKey()));
+                    Console.WriteLine("Devices Cert Subject: " + this.certificate.Subject + " " + this.certificate.SubjectName.Name);
+                    Console.WriteLine("Cert Thumbprint: " + this.certificate.Thumbprint);
+
+                    // Check if certificate is not valid/has expired
+                    if (DateTime.Compare(this.certificate.NotAfter, DateTime.Today) < 0)
+                        throw new CertificateInstalledExpiredException();
                 }
                 catch ( Exception e )
                 {
@@ -181,7 +193,20 @@ namespace MTUComm
         private static string     pathCacheLogs;
         private static string     pathCacheLogsUni;
         private static string     pathCacheLogsUser;
+        private static string     pathCacheLogsUserBackup;
 
+        public static string ConfigPublicPath
+        {
+            get
+            {
+                return pathCachePublic;
+            }
+            set
+            {
+                CreateIfNotExist(value);
+                pathCachePublic = value;
+            }
+        }
         public static string ConfigPath
         {
             get
@@ -235,6 +260,22 @@ namespace MTUComm
                 string path = Path.Combine(LogPath, value);
                 CreateIfNotExist(path);
                 pathCacheLogsUser = path;
+            }
+        }
+
+        public static string LogUserBackupPath
+        {
+            get
+            {
+                return pathCacheLogsUserBackup;
+            }
+            set
+            {
+                string path = Path.Combine(LogPath, value);
+                CreateIfNotExist(path);
+                path = Path.Combine(path, PATH_BACKUP);
+                CreateIfNotExist(path);
+                pathCacheLogsUserBackup = path;
             }
         }
 

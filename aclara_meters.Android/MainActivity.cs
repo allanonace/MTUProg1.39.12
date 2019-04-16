@@ -81,6 +81,7 @@ namespace aclara_meters.Droid
             Context     context    = Application.Context;
             PackageInfo info       = context.PackageManager.GetPackageInfo ( context.PackageName, 0 );
             string      appversion = info.VersionName + " ( " + info.VersionCode + " )";
+            Rg.Plugins.Popup.Popup.Init(this, bundle);
 
             FormsApp app = new FormsApp ( bluetooth, UserDialogs.Instance, appversion );
 

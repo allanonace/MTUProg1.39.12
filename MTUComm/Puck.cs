@@ -2,6 +2,8 @@
 using nexus.protocols.ble.scan;
 using System.Linq;
 using System.Collections.Generic;
+using ble_library;
+
 
 namespace MTUComm
 {
@@ -24,7 +26,13 @@ namespace MTUComm
         };
     
         private IBlePeripheral puck;
-        
+        private BleSerial blSerial;
+
+        public BleSerial BlInterfaz
+        {
+            set { this.blSerial = value; }
+        }
+
         public Puck () { }
 
         public Puck (
@@ -43,18 +51,55 @@ namespace MTUComm
         {
             this.puck = null;
         }
-
+        public int BatteryLevelFix
+        {
+            get
+            {
+                int batt= this.puck.
+                        Advertisement.
+                        ManufacturerSpecificData.
+                        ElementAt(0).Data.Skip(4).Take(1).ToArray()[0];
+                Console.Write($"******************* Fix Serial number: {SerialNumber} - Bateria: {batt.ToString()}" + Environment.NewLine);
+                return BatteryRound(batt);
+            }
+        }
         public int BatteryLevel
         {
             get
             {
-                return this.puck.
-                            Advertisement.
-                            ManufacturerSpecificData.
-                            ElementAt ( 0 ).Data.Skip ( 4 ).Take ( 1 ).ToArray ()[ 0 ];
+                int batt = this.puck.
+                        Advertisement.
+                        ManufacturerSpecificData.
+                        ElementAt(0).Data.Skip(4).Take(1).ToArray()[0];
+
+                int battSerial = this.blSerial == null?-1:this.blSerial.GetBatteryLevel().
+                        Take(1).ToArray()[0];
+                if (battSerial >= 0 && battSerial <= 100 && battSerial <= batt)
+                    batt = battSerial;
+                Console.Write($"******************* Refresh Serial number: {SerialNumber} - Bateria: {batt.ToString()}" + Environment.NewLine);
+
+                return BatteryRound(batt);
             }
         }
-        
+
+        private int BatteryRound(int batt)
+        {
+
+            if (batt >= 91) batt = 100;
+            else if (batt >= 81) batt = 90;
+            else if (batt >= 71) batt = 80;
+            else if (batt >= 61) batt = 70;
+            else if (batt >= 51) batt = 60;
+            else if (batt >= 41) batt = 50;
+            else if (batt >= 31) batt = 40;
+            else if (batt >= 21) batt = 30;
+            else if (batt >= 11) batt = 20;
+            else batt = 10;
+
+            Console.Write($"******************* ***************************** - Bateria: {batt.ToString()}" + Environment.NewLine);
+
+            return batt;
+        }
         public int RSSI
         {
             get { return this.puck.Rssi; }
@@ -77,7 +122,18 @@ namespace MTUComm
                 return this.DecodeId ( this.ManofacturerData );
             }
         }
-        
+        public string BatteryLevelIconFix
+        {
+            get
+            {
+                int b = this.BatteryLevelFix;
+
+                if (b >= 75) return this.iconsBattery[0]; // High
+                else if (b >= 45) return this.iconsBattery[1]; // Mid
+                else if (b >= 15) return this.iconsBattery[2]; // Low
+                else return this.iconsBattery[3]; // Empty
+            }
+        }
         public string BatteryLevelIcon
         {
             get
