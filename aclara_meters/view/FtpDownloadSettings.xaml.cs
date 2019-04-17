@@ -5,21 +5,27 @@ using Rg.Plugins.Popup.Services;
 using Xamarin.Essentials;
 using Acr.UserDialogs;
 using System.Threading;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace aclara_meters.view
 {
-    public partial class FtpDownloadSettings //: Rg.Plugins.Popup.Pages.PopupPage
+    public partial class FtpDownloadSettings: INotifyPropertyChanged//: Rg.Plugins.Popup.Pages.PopupPage
     {
         MTUComm.Mobile.ConfigData config = MTUComm.Mobile.configData;
         public FtpDownloadSettings()
         {
             InitializeComponent();
 
+            BindingContext = this;
             //CloseWhenBackgroundIsClicked = false;
+
             //Findicator.IsVisible = false;
             // dialog_FTP.IsVisible = true;
-            indicator.IsVisible = false;
-            indicator1.IsVisible = true;
+            //indicator.IsVisible = false;
+            Executing(false);
+                      
           
             if (config.HasFTP)
             {
@@ -32,34 +38,41 @@ namespace aclara_meters.view
             return;
 
         }
-        private void OK_Clicked(object sender, EventArgs e)
+        private void Executing (bool bExec)
         {
-            lb_Error.Text = "";
-
-            indicator.IsVisible = true;
-            indicator1.IsRunning = true;
-            dialog_FTP.IsVisible = false;
             
+                lb_Error.Text = bExec ? "" : lb_Error.Text;
 
-            if (!ProcessFtp())
+                Loading = bExec;
+     
+        }
+        private async void OK_Clicked(object sender, EventArgs e)
+        {
+        
+            Executing(true);
+
+            bool res=false;
+            await Task.Run(async () => { res = ProcessFtp(); });
+
+            if (!res)
             {
-                indicator.IsVisible = false;
-                dialog_FTP.IsVisible = true;
-
-                lb_Error.Text = "Error downloading configuration files," + Environment.NewLine + "please check connection data or try it later";
+                lb_Error.Text = "Error dowloading configuration files," + Environment.NewLine + "please check connection data or try it later";
+                Executing(false);
 
                 return;
             }
             try
             {
-                Navigation.PopAsync();
-               //await PopupNavigation.Instance.PopAsync();
+                FormsApp.tcs.SetResult(true);
+                await Navigation.PopAsync();
+                //await PopupNavigation.Instance.PopAsync();
+
             }
             catch (Exception exc)
             {
 
             }
-            FormsApp.tcs.SetResult(true);
+          
             return;
 
         }
@@ -105,6 +118,19 @@ namespace aclara_meters.view
             //await PopupNavigation.Instance.PopAsync();
             FormsApp.tcs.SetResult(false);
         }
+
+        private bool isLoading;
+        public bool Loading
+        {
+            get => isLoading;
+            set
+            {
+                isLoading = value;
+                OnPropertyChanged();
+            }
+        }
+
+             
 
     }
 }

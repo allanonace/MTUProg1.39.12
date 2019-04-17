@@ -85,7 +85,7 @@ namespace aclara_meters
         private bool abortMission;
 
         public static TaskCompletionSource<bool> tcs;
-
+        public static TaskCompletionSource<bool> tcs1;
         #endregion
 
         #region Properties
@@ -112,7 +112,7 @@ namespace aclara_meters
             try
             {
                 InitializeComponent();
-
+                
                 //Singleton.Set = new Puck ();
 
                 this.adapter = adapter;
@@ -121,10 +121,13 @@ namespace aclara_meters
 
                 if (Device.RuntimePlatform == Device.Android)
                 {
-                    Task.Run(async () => { await PermisosLocationAsync(); 
-                    await CallToInitApp(adapter, dialogs, appVersion);
-                });
-            }
+                    Task.Run(async () =>
+                    {
+                        await PermisosLocationAsync();
+                    });
+                    CallToInitApp(adapter, dialogs, appVersion);
+                 
+                }
                 else
                     Task.Factory.StartNew(ThreadProcedure);
             }
@@ -134,22 +137,22 @@ namespace aclara_meters
             }
         }
 
-        private async void ThreadProcedure ()
+        private void ThreadProcedure ()
         {
-            await CallToInitApp ( adapter, dialogs, appVersion );
+            CallToInitApp ( adapter, dialogs, appVersion );
         }
 
-        private async Task CallToInitApp (
+        private void CallToInitApp(
             IBluetoothLowEnergyAdapter adapter,
             IUserDialogs dialogs,
-            string appVersion )
+            string appVersion)
         {
             // Catch unhandled exceptions
-            AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
-            TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
-        
-            Console.WriteLine ( "FormsApp: Interactive [ " + MTUComm.Action.IsFromScripting + " ]" );
-        
+            //AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
+            //TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
+
+            Console.WriteLine("FormsApp: Interactive [ " + MTUComm.Action.IsFromScripting + " ]");
+
             appVersion_str = appVersion;
 
             deviceId = CrossDeviceInfo.Current.Id;
@@ -163,9 +166,9 @@ namespace aclara_meters
             AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
 
             // Force to not download server XML files
-           
-            await this.LoadConfigurationAndOpenScene ( dialogs );   
-
+  
+            this.LoadConfigurationAndOpenScene(dialogs);
+  
         }
 
         #endregion
@@ -196,14 +199,14 @@ namespace aclara_meters
 
         }
 
-        private async Task<bool> InitialConfigProcess()
+        private bool InitialConfigProcess()
         {
             if (Mobile.configData.HasIntune)
             {
                 if (Mobile.IsNetAvailable())
                     GenericUtilsClass.DownloadConfigFiles();
                 else
-                    await MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
+                    MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
                 return true;
             }
             else
@@ -236,19 +239,39 @@ namespace aclara_meters
                     //Configure download FTP
                     if (Mobile.IsNetAvailable())
                     {
-                        bool result =false;
-                        tcs = new TaskCompletionSource<bool>();
-                        Device.BeginInvokeOnMainThread(() =>
+                         bool result =false;
+                         tcs = new TaskCompletionSource<bool>();
+                        // Console.WriteLine($"------------------------------------FTP  Thread: {Thread.CurrentThread.ManagedThreadId}");
+                        Device.BeginInvokeOnMainThread(async () =>
                         {
-
+                            //await MainPage.DisplayAlert("Attention", "Desea utilizar FTP?", "OK");
+                            Console.WriteLine($"------------------------------------Beginmain  Thread: {Thread.CurrentThread.ManagedThreadId}");
+                           
+                            //await MainPage.Navigation.PushModalAsync(new FtpDownloadSettings());
                             MainPage = new NavigationPage(new FtpDownloadSettings());
-                            //await PopupNavigation.Instance.PushAsync(new FtpDownloadSettings())
-                            //result = await tcs.Task;
-                        });
-                        result = await tcs.Task;
+                            //PopupNavigation.Instance.PushAsync(new FtpDownloadSettings());
 
-                        if (!result)
-                            return false;
+                            result = await tcs.Task;
+
+                            if (!this.InitializeConfiguration())
+                                return;
+
+                            if (this.abortMission)
+                            {
+                                this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
+
+                                return;
+                            }
+                            if (!ScriptingMode)
+                            {
+                                Console.WriteLine($"------------------------------------Login  Thread: {Thread.CurrentThread.ManagedThreadId}");
+                                Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
+                            }
+                            else
+                                tcs1.SetResult(true);
+                        });
+                            //result = tcs.Task;
+                        return false;
                     }
                     else
                     {
@@ -260,7 +283,7 @@ namespace aclara_meters
             }
         }
 
-        private  async Task LoadConfigurationAndOpenScene ( IUserDialogs dialogs )
+        private void  LoadConfigurationAndOpenScene(IUserDialogs dialogs)
         {
             ConfigPaths();
 
@@ -268,34 +291,36 @@ namespace aclara_meters
             //if (Mobile.IsNetAvailable() &&
             //     !this.HasDeviceAllXmls())
             //    this.DownloadConfigFiles();
-
+            bool Result = true;
             if (!this.HasDeviceAllXmls(Mobile.ConfigPath))
             {
-                await InitialConfigProcess();
+                Result = InitialConfigProcess();
             }
 
-            // Load configuration files
-            // If some configuration file is not present, Configuration.cs initialization should avoid
-            // launch exception when try to parse xmls, to be able to use generating the log error
-            if ( ! this.InitializeConfiguration () )
-                return;
-            
-            if ( this.abortMission )
+            if (Result)
             {
-                this.ShowErrorAndKill ( new ConfigurationFilesNotFoundException () );
+                // Load configuration files
+                // If some configuration file is not present, Configuration.cs initialization should avoid
+                // launch exception when try to parse xmls, to be able to use generating the log error
+                if (!this.InitializeConfiguration())
+                    return;
 
-                return;
-            }
-
-
-
-            if (!ScriptingMode)
-                Device.BeginInvokeOnMainThread(() =>
+                if (this.abortMission)
                 {
-                    MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
-                });
-            else
-                tcs.SetResult(true);
+                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
+
+                    return;
+                }
+                if (!ScriptingMode)
+                    Device.BeginInvokeOnMainThread(async() =>
+                    {
+                       Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
+                       // await MainPage.Navigation.PopToRootAsync(true);
+                    });
+                else
+                    tcs1.SetResult(true);
+            }
+                  
         }
 
         private void CopyConfigFilesToPrivate(bool bRemove)
@@ -337,7 +362,7 @@ namespace aclara_meters
             return false;
         }
 
-        private bool InitializeConfiguration ()
+        public bool InitializeConfiguration ()
         {
             try
             {
@@ -536,8 +561,8 @@ namespace aclara_meters
                     File.WriteAllText ( path, Base64Decode ( script_data ) );
 
                 if ( callback != null ) { /* ... */ }
-                tcs = new TaskCompletionSource<bool>(); 
-                bool result = await tcs.Task;
+                tcs1 = new TaskCompletionSource<bool>(); 
+                bool result = await tcs1.Task;
 
                 await Task.Run(async () =>
                 {
