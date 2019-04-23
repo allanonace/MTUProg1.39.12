@@ -17,7 +17,9 @@ using Library;
 using MTUComm;
 using nexus.protocols.ble.scan;
 using Plugin.Settings;
-using Xamarin.Forms;
+using System.Linq;
+using MTUComm;
+using System.Security.Cryptography.X509Certificates;
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -58,6 +60,10 @@ namespace aclara_meters.view
             InitializeComponent();
         }
 
+        protected override void OnAppearing()
+        {
+            RefreshPuckData();
+        }
 
         public AclaraViewMainMenu(IUserDialogs dialogs)
         {
@@ -185,66 +191,6 @@ namespace aclara_meters.view
                     {
                         DeviceList.ItemsSource = null;
                         Application.Current.MainPage.DisplayAlert("Alert", "No device found, please, press the button to turn on the device and refresh", "Ok");
-                        
-                        
-                        // >>>> TEST
-                        /*
-                        
-                        string certMA  = "MIICxDCCAaygAwIBAgIQV5fB/SvFm4VDwxNIjmx3LzANBgkqhkiG9w0BAQUFADAeMRwwGgYDVQQDExNOZXctVGVzdC1EZXYtQWNsYXJhMB4XDTE1MDQxNTA0MDAwMFoXDTI1MDQyMjA0MDAwMFowHjEcMBoGA1UEAxMTTmV3LVRlc3QtRGV2LUFjbGFyYTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANOISmTy1kRTeOPqajIm+y27q676LFKodBpgrm0M3imYpwnVd+aTnVdk7+NT5vSA1c9dB5PSojh/UfGg2kWDe5gNj2ZA+KaemXFqvl8YI/D6XjoNz3JqoqocjF4/hJnrUdwqOoUL6WPtbWEhCnzin/cVkKx5qxMrOh9qAzp+qYAqyJ26Aocr+nlM7oHRtBUmYRKZbpkNAnpiIV/Q6quSR5Qzsf4XrhvkPDkf2ZX8DvcJmAbXEAaBVa2ORsY9qA86jIphui5kwI9JPcw9hTZy1QxvNcZAijtPyC6AKDuRyEv0Awa1gcSBBRsf0HbeCSD91U/O51+alP3hLhA9tcxddx0CAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAGuTqwTvEgaTl/E2jdG9RUD3zN9MhRCijJIpjv9NdkkH13LK5Sn9up1+DraaccA5h2El9kiXDHYWPA/qRMq1auhNcmTFVYjeQSNW0tyuTqbQiG/8fwZiAZrGn6UmOU/vzzhkyv05x5KzVAEwp94fU/J+kOIJVH0ff5jnMeYHARc1sY6JgXgJKoJbdS4Q4wG2RHj5yFAixv/zwS1XBy2GWtsz03aucNQzBIbk1uTIv2eyYqFMhSGT36vkfJFidRcR3H4FWnvInWoWmxlGcs0MS3bNOAv5ij55h0rREGJ9WdJmI/gw84aA4itFwwUuG6kKdF9AF/rljtVCFVH6T9PFI2Q==";
-                        string certACL = "MIIJ4TCCB8mgAwIBAgITawAAECmasWiDzymynwAAAAAQKTANBgkqhkiG9w0BAQsFADCBjTETMBEGCgmSJomT8ixkARkWA2NvbTEWMBQGCgmSJomT8ixkARkWBnNlbXByYTESMBAGCgmSJomT8ixkARkWAlNFMRQwEgYKCZImiZPyLGQBGRYEY29ycDE0MDIGA1UEAxMrU2VtcHJhIEVuZXJneSBVdGlsaXRpZXMgRW50ZXJwcmlzZSBTSEEyIENBMzAeFw0xOTAyMjExODU2MzdaFw0yMTAyMjAxODU2MzdaMIGcMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEUMBIGA1UEBxMLTG9zIEFuZ2VsZXMxIDAeBgNVBAoTF1NlbXByYSBFbmVyZ3kgVXRpbGl0aWVzMQswCQYDVQQLEwJJVDEzMDEGA1UEAxMqU3RhclN5c3RlbUhlYWRFbmQtQUxQLW5vbnByb2Quc29jYWxnYXMuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmPMTtj/fmkNGCCxBsG836n41LDm+Wo6FZ0OdgqlQ52v8Xp0EBiBPsZI646dTtrVHJm/grB6H7Mts9O257Qfj4TqMKgXBO0X6982yvh+Kibj15ODBfolKGhXcJy/bLk7NHj5GRwtOyGDpcv84/BVdSi9a2NGDJPHe/viaaOQYN8sz5ZVYN88To8gMGTcZphriMQJKdnA5F86oRQQl94UGxM/9aKwXLqDuJhovJhuIoNUQ1PKvuS1WBEmkhnNhEmlzK2aXHDuYx8QnX06rEsypzBT1NhN9De7vKCVRWa5l5mhUB8TJqvuCnJZmtJ1dbheowoSFwD4RJ2R1fHjJdZMi+QIDAQABo4IFJzCCBSMwggKBBgNVHREEggJ4MIICdIIeQVBXQU1IRUQwMTEuY29ycC5zZS5zZW1wcmEuY29tgh5BUFdBTUhFRDAyMS5jb3JwLnNlLnNlbXByYS5jb22CHkFQV0FNSEVEMDMxLmNvcnAuc2Uuc2VtcHJhLmNvbYIeQVBXQU1IRUkwMDEuY29ycC5zZS5zZW1wcmEuY29tgh5BUFdBTUhFSTAyMS5jb3JwLnNlLnNlbXByYS5jb22CHkFQV0FNSEVRMDAxLmNvcnAuc2Uuc2VtcHJhLmNvbYIeQVBXQU1IRVEwMDIuY29ycC5zZS5zZW1wcmEuY29tgh5BUFdBTUhFUTAwMy5jb3JwLnNlLnNlbXByYS5jb22CHkFQV0FNSEVRMDIxLmNvcnAuc2Uuc2VtcHJhLmNvbYIeQVBXQU1IRVEwMzEuY29ycC5zZS5zZW1wcmEuY29tgh5BUFdBTUhFUTAzMi5jb3JwLnNlLnNlbXByYS5jb22CHkFQV0FNSEVGMDAxLmNvcnAuc2Uuc2VtcHJhLmNvbYIeQVBXQU1IRUYwMDIuY29ycC5zZS5zZW1wcmEuY29tgh5BUFdBTUhFRjAwMy5jb3JwLnNlLnNlbXByYS5jb22CKlN0YXJTeXN0ZW1IZWFkRW5kLUFMUC1ub25wcm9kLnNvY2FsZ2FzLmNvbYIgQVBXQU1VVElMRDAwMS5jb3JwLnNlLnNlbXByYS5jb22CIEFQV0FNVVRJTEYwMDEuY29ycC5zZS5zZW1wcmEuY29tgiBBUFdBTVVUSUxGMDAyLmNvcnAuc2Uuc2VtcHJhLmNvbYIgQVBXQU1VVElMUTAyMS5jb3JwLnNlLnNlbXByYS5jb20wHQYDVR0OBBYEFFJQj6h+UQaJgGJllGu3IlkpdQzUMB8GA1UdIwQYMBaAFB98ZDrjPA/xIzVi0UWldwsr+2VZMIHABgNVHR8EgbgwgbUwgbKgga+ggayGUGh0dHA6Ly9jb3JwcGtpL3BraS9jcmwvU2VtcHJhJTIwRW5lcmd5JTIwVXRpbGl0aWVzJTIwRW50ZXJwcmlzZSUyMFNIQTIlMjBDQTMuY3JshlhodHRwOi8vcGtpMS5zZW1wcmEuY29tL3BraS9jcmwvU2VtcHJhJTIwRW5lcmd5JTIwVXRpbGl0aWVzJTIwRW50ZXJwcmlzZSUyMFNIQTIlMjBDQTMuY3JsMIIBGQYIKwYBBQUHAQEEggELMIIBBzB9BggrBgEFBQcwAoZxaHR0cDovL2NvcnBwa2kvcGtpL2FpYS9JUy1QS0lDQS1QMTAzLmNvcnAuU0Uuc2VtcHJhLmNvbV9TZW1wcmElMjBFbmVyZ3klMjBVdGlsaXRpZXMlMjBFbnRlcnByaXNlJTIwU0hBMiUyMENBMy5jcnQwgYUGCCsGAQUFBzAChnlodHRwOi8vcGtpMS5zZW1wcmEuY29tL3BraS9haWEvSVMtUEtJQ0EtUDEwMy5jb3JwLlNFLnNlbXByYS5jb21fU2VtcHJhJTIwRW5lcmd5JTIwVXRpbGl0aWVzJTIwRW50ZXJwcmlzZSUyMFNIQTIlMjBDQTMuY3J0MAsGA1UdDwQEAwIFoDA9BgkrBgEEAYI3FQcEMDAuBiYrBgEEAYI3FQiD06Fvg8XIAILdkwGFtK4thoXhJQWEzp1Ig9S+IgIBZAIBGDATBgNVHSUEDDAKBggrBgEFBQcDATAbBgkrBgEEAYI3FQoEDjAMMAoGCCsGAQUFBwMBMA0GCSqGSIb3DQEBCwUAA4ICAQAigQSlrX2d8UpSK08bZ3COZBBST/Va84MA+rndO3cHTJLnTGAdFf12uCNmsLLwmznyWLsUXM/AwRABxtzqIBKYE8kcY3+XNJa9ktDdUFYljKFgh2viEB+1/RurTuMr1bDfSfUQOR5+rFaCQNlEyFn93to72tmYxmK9Sayq6zyJQT1yNvNn5CuYxR9yR9hxJ/eoyUaKwnBRRWTHcxz7Jf2pWrFGoUJlm/GM/g2dE7L2HB4KjBXIvEoXo4Cpn/RB3pc4Ig9opa+midT6ddrie/I/vkRLNhj/bFGq9qCpoHf5xIvnyFB0CrCCm7aJoFPy8/+nJtyiOFxYHDWO74wih3DE99tCs808g4trxjmdxXtSrD8mk70bXTrSJvTUAja+Ajt/UlYYXgZ8SMElqr7rDxsy637eQzUGV59F7xLp/Kj6lDguyWDB/4uQmpnu0J9XE8nME0WBvE+GqaI9KH0doXWn2fRKJDuQsbl/UKJNt8CfAVQyFzztzSV9ku/zrCamNE4Hn3TsgrNVEleUsQJPz6RM7twgeZGVu5SaLCJFlDfDYpMTAFEg/iwAD8C3T88+3tau0Atu60LpGAVnosDH1ffzADvuLzLqfHh1RTgzAXRnV5NRnk+qs3cT+bAAPOlC/QhUwohq8i25Vfgomf0dW1shrx0ynRx8IeGQBVlZ4jdruw==";
-                        
-                        byte[] bytes = Convert.FromBase64String ( certMA );
-                        X509Certificate2 cMA = new X509Certificate2 ( bytes );
-                        
-                        bytes = Convert.FromBase64String ( certACL );
-                        X509Certificate2 cACL = new X509Certificate2 ( bytes );
-                        
-                        byte[] keyAndSha = new byte[] { 1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6 };
-                        
-                        MtuSha256 crypto = new MtuSha256 ();
-                    
-                        try
-                        {
-                            string mystring = Convert.ToBase64String ( cACL.GetPublicKey () );
-                            byte[] myarrayfromstring = Convert.FromBase64String ( mystring );
-                            
-                            keyAndSha = crypto.encryptBytes ( keyAndSha, myarrayfromstring );
-                        }
-                        catch ( Exception e )
-                        {
-                        }
-                        
-                        try
-                        {
-                            keyAndSha = crypto.encryptBytes ( keyAndSha, cACL.GetPublicKey () );
-                        }
-                        catch ( Exception e )
-                        {
-                        }
-                        
-                        try
-                        {
-                            string mystring = cACL.GetPublicKeyString ();
-                            byte[] myarrayfromstring = Convert.FromBase64String ( mystring );
-                            
-                            keyAndSha = crypto.encryptBytes ( keyAndSha, myarrayfromstring );
-                        }
-                        catch ( Exception e )
-                        {
-                        }
-                        
-                        try
-                        {
-                            keyAndSha = crypto.encryptBytes ( keyAndSha, cACL );
-                        }
-                        catch ( Exception e )
-                        {
-                        }
-                        
-                        */
-                        // <<<< TEST
-                        
-                        
                         Terminado();
                     }
                 }
@@ -615,12 +561,59 @@ namespace aclara_meters.view
          *
          ***/
 
+        private void RefreshPuckData(bool Firtstime = false)
+        {
+            if (!Singleton.Has<Puck>()) return;
+
+            Puck puck = Singleton.Get.Puck;
+            int battery;
+            string batteryIcon;
+
+            deviceID.Text = puck.Name;
+            macAddress.Text = puck.SerialNumber;
+
+            if (Firtstime)
+            {
+                battery = puck.BatteryLevelFix;
+                batteryIcon = puck.BatteryLevelIconFix;
+            }
+            else {
+                battery = puck.BatteryLevel;
+                batteryIcon = puck.BatteryLevelIcon;
+            }
+
+            int rssi = puck.RSSI;
+            string rssiIcon = puck.RSSIIcon;
+
+            Device.BeginInvokeOnMainThread(async() =>
+            {
+                batteryLevel.Text = battery.ToString() + " %";
+
+                imageBattery.Source = batteryIcon;
+                battery_level_detail.Source = batteryIcon + "_white";
+
+                imageRssi.Source = rssiIcon;
+                rssi_level_detail.Source = rssiIcon + "_white";
+
+                if (battery == 20)
+                    await Application.Current.MainPage.DisplayAlert("Attention", "The battery level is at 20%", "OK");
+
+                if (battery == 10)
+                    await Application.Current.MainPage.DisplayAlert("Attention", "The battery level is at 10%, soon the puck will turn off", "OK");
+
+            });
+
+            //Save Battery & Rssi info for the next windows
+            CrossSettings.Current.AddOrUpdateValue("battery_icon_topbar", batteryIcon + "_white");
+            CrossSettings.Current.AddOrUpdateValue("rssi_icon_topbar", rssiIcon + "_white");
+        }
 
         private void InvokeMethod()
         {
             //PrintToConsole("dentro del metodo - InvokeMethod");
 
             int timeout_connecting = 0;
+            int cont = 0;
 
             //PrintToConsole("se va a ejecutar un bucle (WHILE TRUE) - InvokeMethod");
 
@@ -636,6 +629,13 @@ namespace aclara_meters.view
                 int status = FormsApp.ble_interface.GetConnectionStatus();
 
                 PrintToConsole("se obtiene el estado de la conexion - InvokeMethod");
+
+                if (cont == 2000)
+                {
+                    RefreshPuckData();
+                    cont = 0;
+                }
+                else cont += 1;
 
                 if (status != peripheralConnected)
                 {
@@ -845,27 +845,7 @@ namespace aclara_meters.view
             {
                 try
                 {
-                    Puck puck = Singleton.Get.Puck;
-                
-                    deviceID  .Text = puck.Name;
-                    macAddress.Text = puck.SerialNumber;
-
-                    int    battery     = puck.BatteryLevel;
-                    string batteryIcon = puck.BatteryLevelIcon;
-                    int    rssi        = puck.RSSI;
-                    string rssiIcon    = puck.RSSIIcon;
-
-                    batteryLevel.Text = battery.ToString() + " %";
-
-                    imageBattery.Source = batteryIcon;
-                    battery_level_detail.Source = batteryIcon + "_white";
-
-                    imageRssi.Source = rssiIcon;
-                    rssi_level_detail.Source = rssiIcon + "_white";
-
-                    //Save Battery & Rssi info for the next windows
-                    CrossSettings.Current.AddOrUpdateValue("battery_icon_topbar", battery_level_detail.Source.ToString().Substring(6));
-                    CrossSettings.Current.AddOrUpdateValue("rssi_icon_topbar", rssi_level_detail.Source.ToString().Substring(6));
+                    RefreshPuckData(true);
 
                 }
                 catch (Exception e)
@@ -934,8 +914,9 @@ namespace aclara_meters.view
                                 if (blePeripherals[i] != null)
                                 {
                                     Puck puck = new Puck ( blePeripherals[ i ] );
+                                    //puck.BlInterfaz= FormsApp.ble_interface;
 
-									byte_now = puck.ManofacturerData;
+                                    byte_now = puck.ManofacturerData;
 
                                     bool enc = false;
                                     int sizeListTemp = employees.Count;
@@ -982,6 +963,7 @@ namespace aclara_meters.view
                                                 {
                                                     Singleton.Set = new Puck ();
                                                     Singleton.Get.Puck.Device = blePeripherals[ i ];
+                                                    Singleton.Get.Puck.BlInterfaz = FormsApp.ble_interface;
                                                     
                                                     peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                                                     peripheralManualDisconnection = false;
@@ -1121,11 +1103,6 @@ namespace aclara_meters.view
             });
         }
 
-        protected override void OnAppearing()
-        {
-            //DeviceList.RefreshCommand.Execute ( true );
-        }
-
         private async void LogOffOkTapped(object sender, EventArgs e)
         {
             // Upload log files
@@ -1138,10 +1115,7 @@ namespace aclara_meters.view
 
             printer.Abort(); //.Suspend();
 
-            Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
-            Singleton.Remove<Puck> ();
-            FormsApp.ble_interface.Close();
+            FormsApp.DoLogOff();
 
             background_scan_page.IsEnabled = true;
             background_scan_page_detail.IsEnabled = true;
@@ -1402,6 +1376,8 @@ namespace aclara_meters.view
         {
 
             FormsApp.ble_interface.Close();
+            //peripheralConnected = ble_library.BlePort.NO_CONNECTED;
+            //Singleton.Remove<Puck>();
 
             peripheralManualDisconnection = true;
 
@@ -1473,6 +1449,7 @@ namespace aclara_meters.view
             {
                 Singleton.Set = new Puck ();
                 Singleton.Get.Puck.Device = item.Peripheral;
+                Singleton.Get.Puck.BlInterfaz = FormsApp.ble_interface;
 
                 externalReconnect(reassociate);
 

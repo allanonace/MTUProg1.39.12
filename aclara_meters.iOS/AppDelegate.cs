@@ -4,6 +4,7 @@ using Foundation;
 using Microsoft.Intune.MAM;
 using nexus.protocols.ble;
 using UIKit;
+using Xamarin.Essentials;
 
 namespace aclara_meters.iOS
 {
@@ -28,7 +29,8 @@ namespace aclara_meters.iOS
 
             // Get Intun Parameters
             //Online.DownloadIntuneParameters ();
-            
+            Parameters.PrepareFromIntune();
+             
             // Core Foundation Keys:
             // https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
             var appVersion = NSBundle.MainBundle.InfoDictionary[ "CFBundleShortVersionString" ];
@@ -38,12 +40,18 @@ namespace aclara_meters.iOS
             IUserDialogs userDialogs = UserDialogs.Instance;
             string appversion = appVersion.Description + " ( " + appBuild.Description + " )";
 
+            Rg.Plugins.Popup.Popup.Init();
             appSave = new FormsApp ( bluetoothLowEnergyAdapter, userDialogs, appversion);
+
+            // Check if FTP settings is in securestorage
+            GenericUtilsClass.CheckFTPDownload();
 
             base.LoadApplication ( appSave );
 
             return base.FinishedLaunching ( app, options );
         }
+
+
 
         public override bool OpenUrl (
             UIApplication app,

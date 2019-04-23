@@ -226,18 +226,20 @@
                                             <Button BackgroundColor="#6aa2b8" 
                                                     CornerRadius="10" HeightRequest="48" BorderColor="Transparent" 
                                                     BorderRadius="10" IsEnabled="false" WidthRequest="300" BorderWidth="0" Margin="0,48,0,0" FontSize="20"
-                                                    TextColor="White" Text="Force Sync">
+                                                    TextColor="White" Text="Upload Log Files">
                                             </Button>
                                             <Button BackgroundColor="#6aa2b8" 
                                                     WidthRequest="300" HeightRequest="48" BorderColor="Transparent" 
                                                     CornerRadius="10" BorderRadius="10" x:Name="force_sync" Margin="0,48,0,0" FontSize="20" 
-                                                    TextColor="White" Text="Force Sync">
+                                                    TextColor="White" Text="Upload Log Files">
                                             </Button>
                                         </RelativeLayout>
                                     </StackLayout>
                                 </StackLayout>
                                 <!-- FTP settings-->
-                                <StackLayout IsVisible="false" Margin="-10,0,0,0" Scale="0.9" x:Name="ftp_block" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >
+                                <StackLayout IsVisible="false" Margin="0,0,0,0" Scale="0.9" x:Name="ftp_block" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >
+                                   
+                                   
                                     <StackLayout  VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >                                         
                                             <Label Text="Remote Host" Margin="0,4,0,0" x:Name="lb_remote_host" Font="Bold,17" HorizontalOptions="Start" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
@@ -268,7 +270,14 @@
                                                 </Frame>
                                             </Frame>
                                     </StackLayout>   
-                                    <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >                                             
+                                    <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" > 
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                               <ColumnDefinition Width="5*"/>
+                                               <ColumnDefinition Width="5*"/>
+                                            </Grid.ColumnDefinitions>
+                                                  
+                                            <StackLayout Grid.Row="0" Grid.Column="0" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >
                                             <Label Text="User Name" Margin="0,4,0,0" x:Name="lb_user_name" Font="Bold,17" HorizontalOptions="Start" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
@@ -282,8 +291,8 @@
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
-                                    </StackLayout>        
-                                    <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >                                             
+                                            </StackLayout>        
+                                            <StackLayout Grid.Row="0" Grid.Column="1" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand" >                                             
                                             <Label Text="User password" Margin="0,4,0,0" x:Name="lb_user_pass" Font="Bold,17" HorizontalOptions="Start" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
@@ -297,7 +306,8 @@
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
-                                    </StackLayout> 
+                                            </StackLayout> 
+                                        </Grid>  
                                     <StackLayout Orientation="Horizontal" Margin="0,10,0,0" HorizontalOptions="FillAndExpand">
                                             <Button BackgroundColor="#6aa2b8" HorizontalOptions="FillAndExpand" 
                                                     HeightRequest="48" BorderColor="Transparent" 
@@ -312,9 +322,19 @@
                                             <Button BackgroundColor="#6aa2b8" HorizontalOptions="FillAndExpand" 
                                                     HeightRequest="48" BorderColor="Transparent" 
                                                     CornerRadius="10" BorderRadius="10" x:Name="btn_Cancel" Margin="0,0,0,0" FontSize="20" 
-                                                    TextColor="White" Text="Cancel">
+                                                    TextColor="White" Text="Clean data">
                                             </Button>
                                         
+                                    </StackLayout>
+                                    <Image x:Name="img_barra2" Margin="-16,8,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
+                                    <StackLayout Orientation="Vertical" Margin="0,10,0,0" HorizontalOptions="FillAndExpand">
+                                        <Button BackgroundColor="#6aa2b8" HorizontalOptions="FillAndExpand" 
+                                                    HeightRequest="48" BorderColor="Transparent" 
+                                                    CornerRadius="10" BorderRadius="10" x:Name="btn_DownloadConf" Margin="0,0,0,0" FontSize="20" 
+                                                    TextColor="White" Text="Download Configuration Files">
+                                        </Button>
+                                    </StackLayout>
+                                    <StackLayout Margin="0,75,0,0"/>
                                     </StackLayout>
                                 </StackLayout>
                             </StackLayout>

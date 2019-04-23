@@ -133,14 +133,8 @@ namespace MTUComm
             { new FtpConnectionException (),                    810 },
             // Sending activity logs to the FTP has failed, only _var_ files have been uploaded
             { new FtpUpdateLogsException (),                    811 },
-            // The interface for the specified MTU ID was not found
-            { new InterfaceNotFoundException_Internal (),       812 },
-            // The interface for the specified MTU ID and action was not found
-            { new ActionInterfaceNotFoundException_Internal (), 813 },
-            // The Alarm list for the specified MTU ID was not found
-            { new AlarmNotFoundException_Internal (),           814 },
-            // The DemandaConfig for the specified MTU ID was not found
-            { new DemandNotFoundException_Internal (),          815 },
+             // Changed configuration files
+            { new ConfigFilesChangedException (),               812 }
         };
 
         #endregion

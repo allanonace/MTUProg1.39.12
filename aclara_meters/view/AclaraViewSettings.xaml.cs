@@ -6,14 +6,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using aclara.ViewModels;
-using aclara_meters.Helpers;
-using aclara_meters.Models;
 using Acr.UserDialogs;
-using Library;
+using aclara_meters.Models;
+using Xamarin.Forms;
+using aclara.ViewModels;
+using Plugin.Settings;
 using MTUComm;
 using Library.Exceptions;
 using Plugin.Settings;
@@ -22,6 +20,10 @@ using Xamarin.Forms;
 using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
+using System.IO;
+using Xml;
+using System.Xml.Linq;
+using Library;
 
 namespace aclara_meters.view
 {
@@ -30,7 +32,7 @@ namespace aclara_meters.view
         private const string TEXT_COPYR   = "Copyright © 2018 Aclara Technologies LLC.";
         private const string TEXT_SUPPORT = "System tech Support: 1-866-205-5058";
         private const string TEXT_VERSION = "Application Version: ";
-        //private const string TEXT_INTUNE  = " [ using Intune ]";
+        private const string TEXT_INTUNE  = " [ using Intune ]";
         private const string TEXT_LICENSE = "Licensed to: ";
 
         private ActionType actionType;
@@ -117,6 +119,7 @@ namespace aclara_meters.view
                     Device.BeginInvokeOnMainThread(LoadPhoneUIConnected);
                 });
             }
+            FocusEntryFields();
 
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
             LoadMTUView();
@@ -154,7 +157,6 @@ namespace aclara_meters.view
             });
         }
 
-
         public AclaraViewSettings(IUserDialogs dialogs)
         {
             InitializeComponent();
@@ -178,6 +180,7 @@ namespace aclara_meters.view
                     Device.BeginInvokeOnMainThread(LoadPhoneUIConnected);
                 });
             }
+            FocusEntryFields();
 
             dialogsSaved = dialogs;
             LoadMTUView();
@@ -1040,9 +1043,7 @@ namespace aclara_meters.view
         private async void ForceSyncButtonTapped(object sender, EventArgs e)
         {
             force_sync.IsEnabled = false;
-            backdark_bg.IsVisible = true;
-            indicator.IsVisible = true;
-            ContentNav.IsEnabled = false;
+            Wait(true);
 
             // Upload log files
             await GenericUtilsClass.UploadFiles (false);
@@ -1062,9 +1063,7 @@ namespace aclara_meters.view
 
                 lbl_backup.TextColor = colorText;
                 force_sync.IsEnabled = true;
-                ContentNav.IsEnabled = true;
-                backdark_bg.IsVisible = false;
-                indicator.IsVisible = false;
+                Wait(false);
            
         }
 
@@ -1089,6 +1088,8 @@ namespace aclara_meters.view
             btn_Save.Clicked += Btn_Save_Clicked;
             btn_Cancel.Clicked += Btn_Cancel_Clicked;
 
+            btn_DownloadConf.Clicked += Btn_DownloadConf_Clicked;
+
             logoff_no.Tapped += LogOffNoTapped;
             logoff_ok.Tapped += LogOffOkTapped;
 
@@ -1108,6 +1109,34 @@ namespace aclara_meters.view
 
         }
 
+        public async void Btn_DownloadConf_Clicked(object sender, EventArgs e)
+        {
+
+            if (await ConfirmDownloadFilesAsync())
+            {
+                Wait(true);
+    
+                if (await DownloadConfigProcess())
+                {
+                    await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration effective", "ok");
+                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                }
+                Wait(false);
+
+            }
+        }
+    
+        public async Task<bool> ConfirmDownloadFilesAsync()
+        {
+            var config = new Acr.UserDialogs.ConfirmConfig()
+            {
+                Message = "Are you sure you want to download the configuration files?",
+                OkText = "Yes",
+                CancelText = "No"
+            };
+            return await UserDialogs.Instance.ConfirmAsync(config);
+        }
+
         void Btn_Cancel_Clicked(object sender, EventArgs e)
         {
             tbx_user_name.Text = string.Empty;
@@ -1119,16 +1148,20 @@ namespace aclara_meters.view
 
         void Btn_Save_Clicked(object sender, EventArgs e)
         {
-            if (!TestFtpCredentials())
+
+            Wait(true);
+            if (!GenericUtilsClass.TestFtpCredentials(tbx_remote_host.Text, tbx_user_name.Text, tbx_user_pass.Text, tbx_remote_path.Text))
             {
                 DisplayAlert("Infomation", "Can't connect with the FTP, please check the entered data", "OK");
             }
             else
                 SaveFTPCredentials();
+            Wait(false);
         }
 
         private void SaveFTPCredentials()
         {
+            Wait(true);
             //Save FTP in global.xml and in global data
             try
             {
@@ -1138,7 +1171,7 @@ namespace aclara_meters.view
                 global.ftpRemotePath = tbx_remote_path.Text;
 
 
-                String uri = Path.Combine(Mobile.ConfigPath, "Global.xml");
+                String uri = Path.Combine(Mobile.ConfigPath, Configuration.XML_GLOBAL);
 
                 XDocument doc = XDocument.Load(uri);
 
@@ -1149,17 +1182,20 @@ namespace aclara_meters.view
 
 
                 doc.Save(uri);
+                DisplayAlert("Infomation", "SFTP/FTP settings saved in global.xml", "OK");
             }
             catch (Exception e)
             {
                 Errors.ShowAlert(new FtpConnectionException());
                 
             }
+            Wait(false);
         }
 
         private void Btn_Test_Clicked(object sender, EventArgs e)
         {
-            if (TestFtpCredentials())
+            Wait(true);
+            if (GenericUtilsClass.TestFtpCredentials(tbx_remote_host.Text, tbx_user_name.Text, tbx_user_pass.Text, tbx_remote_path.Text))
             {
                DisplayAlert("Information", "Connect to FTP succesfully", "OK");
             }
@@ -1167,34 +1203,7 @@ namespace aclara_meters.view
             {
                 Errors.ShowAlert(new FtpConnectionException());
             }
-        }
-
-        private bool TestFtpCredentials()
-        {
-            bool ok = true;
-
-            try
-            {
-               
-                using (SftpClient sftp = new SftpClient(tbx_remote_host.Text, 22, tbx_user_name.Text, tbx_user_pass.Text))
-                {
-                    sftp.Connect();
-
-                    if (!sftp.Exists(tbx_remote_path.Text))
-                        ok = false;
-
-
-                    sftp.Disconnect();
-                }
-            }
-            catch ( Exception e)
-            {
-                ok = false;
-            }
-            
-            //Utils.Print("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
-
-            return ok;
+            Wait(false);
         }
 
 
@@ -1304,10 +1313,8 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
-            Singleton.Remove<Puck> ();
-            FormsApp.ble_interface.Close();
+            FormsApp.DoLogOff();
+
             background_scan_page.IsEnabled = true;
 
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
@@ -1341,7 +1348,7 @@ namespace aclara_meters.view
 
         private void FtpButtonTapped(object sender, EventArgs e)
         {
-          // InitLayout(4);
+            InitLayout(4);
         }
 
         private void InitLayout(int valor)
@@ -1350,7 +1357,7 @@ namespace aclara_meters.view
 
             customers_copyr  .Text = TEXT_COPYR;
             customers_support.Text = TEXT_SUPPORT;
-            customers_version.Text = TEXT_VERSION + Configuration.GetInstance ().GetApplicationVersion (); //( ( Mobile.configData.IsCertLoaded ) ? TEXT_INTUNE : string.Empty );
+            customers_version.Text = TEXT_VERSION + Configuration.GetInstance ().GetApplicationVersion () + ( ( Mobile.configData.HasIntune ) ? TEXT_INTUNE : string.Empty );
             
             if ( Mobile.configData.IsCertLoaded )
             {
@@ -1507,6 +1514,159 @@ namespace aclara_meters.view
             backdark_bg.IsVisible = state;
             indicator.IsVisible = state;
             ContentNav.IsEnabled = !state;
+        }
+
+        private void FocusEntryFields()
+        {
+            this.tbx_user_name.Focused += (s, e) =>
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(true, (int)-120);
+                else
+                    SetLayoutPosition(true, (int)-100);
+            };
+
+            this.tbx_user_name.Unfocused += (s, e) =>
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(false, (int)-120);
+                else
+                    SetLayoutPosition(false, (int)-100);
+            };
+
+            this.tbx_user_pass.Focused += (s, e) =>
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(true, (int)-120);
+                else
+                    SetLayoutPosition(true, (int)-100);
+            };
+
+            this.tbx_user_pass.Unfocused += (s, e) =>
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(false, (int)-120);
+                else
+                    SetLayoutPosition(false, (int)-100);
+            };
+
+        }
+
+        void SetLayoutPosition(bool onFocus, int value)
+        {
+            if (onFocus)
+            {
+                if (Device.RuntimePlatform == Device.iOS)
+                {
+                    this.ftp_block.TranslateTo(0, value, 50);
+                }
+                else if (Device.RuntimePlatform == Device.Android)
+                {
+                    this.ftp_block.TranslateTo(0, value, 50);
+                }
+            }
+            else
+            {
+                if (Device.RuntimePlatform == Device.iOS)
+                {
+                    this.ftp_block.TranslateTo(0, 0, 50);
+                }
+                else if (Device.RuntimePlatform == Device.Android)
+                {
+                    this.ftp_block.TranslateTo(0, 0, 50);
+                }
+            }
+        }
+
+
+        public async Task<bool> DownloadConfigProcess()
+        {
+            if (Mobile.configData.HasIntune)
+            {
+                if (Mobile.IsNetAvailable())
+                {
+                    GenericUtilsClass.DownloadConfigFiles();
+                    return true;
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later", "OK");
+                    return false;
+                }
+            }
+            else if (Mobile.configData.HasFTP)
+            {
+                if (Mobile.IsNetAvailable())
+                {
+                    bool result = false;
+                    TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+                    // Console.WriteLine($"------------------------------------FTP  Thread: {Thread.CurrentThread.ManagedThreadId}");
+                    Device.BeginInvokeOnMainThread(async () =>
+                    {
+
+                        //MainPage = new NavigationPage(new FtpDownloadSettings());
+                        await Application.Current.MainPage.Navigation.PushAsync(new FtpDownloadSettings(tcs));
+                        //PopupNavigation.Instance.PushAsync(new FtpDownloadSettings());
+
+                        result = await tcs.Task;
+
+                        // Install certificate if needed ( Convert from .cer to base64 string / .txt )
+                        if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPath))
+                        {
+                            await Errors.ShowAlert(new CertificateFileNotValidException());
+                            result = false;
+
+                        }
+                        if (result)
+                        {
+                            await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "ok");
+                            //Errors.LogErrorNowAndKill(new ConfigFilesChangedException());
+                            System.Diagnostics.Process.GetCurrentProcess().Kill();
+                        }
+                        //return result;
+                    });
+
+                    return false; 
+                }
+                else
+                {
+                    await Application.Current.MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later", "OK");
+                    return false;
+                }
+            }
+            else
+            {
+                // Check if all configuration files are available in public folder
+                bool HasPublicFiles = GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath);
+                //this.abortMission = !this.HasDeviceAllXmls(Mobile.ConfigPublicPath);
+                if (HasPublicFiles)
+                {
+                    // Install certificate if needed ( Convert from .cer to base64 string / .txt )
+                    if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPublicPath))
+                    {
+                        await Errors.ShowAlert(new CertificateFileNotValidException());
+                        //this.ShowErrorAndKill(new CertificateFileNotValidException());
+                        return false;
+                    }
+                    //File.Copy(file.FullName, Path.Combine(url_to_copy, file.Name), true);
+                    bool CPD = false;
+                    if (GenericUtilsClass.TagGlobal("ConfigPublicDir", out dynamic value))
+                    {
+                        if (value != null)
+                            bool.TryParse((string)value, out CPD);
+                    }
+                    GenericUtilsClass.CopyConfigFilesToPrivate(!CPD);
+
+                    if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
+                        return false;
+                    return true;
+
+                }
+                else
+                    await Application.Current.MainPage.DisplayAlert("Attention", "There is not configuration files in public folder,copy files and try again", "OK");
+                return false;
+
+            }
         }
     }
 }

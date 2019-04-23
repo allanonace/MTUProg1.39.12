@@ -425,10 +425,8 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
-            Singleton.Remove<Puck> ();
-            FormsApp.ble_interface.Close();
+            FormsApp.DoLogOff();
+
             background_scan_page.IsEnabled = true;
 
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));

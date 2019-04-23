@@ -12,13 +12,13 @@ namespace MTUComm
 {
     public class Configuration
     {
-        private const string XML_MTUS      = "Mtu.xml";
-        private const string XML_METERS    = "Meter.xml";
-        private const string XML_GLOBAL    = "Global.xml";
+        private const string XML_MTUS      = "mtu.xml";
+        private const string XML_METERS    = "meter.xml";
+        public const string XML_GLOBAL     = "global.xml";
         private const string XML_INTERFACE = "Interface.xml";
-        private const string XML_ALARMS    = "Alarm.xml";
-        private const string XML_DEMANDS   = "DemandConf.xml";
-        private const string XML_USERS     = "User.xml";
+        private const string XML_ALARMS    = "alarm.xml";
+        private const string XML_DEMANDS   = "demandconf.xml";
+        private const string XML_USERS     = "user.xml";
 
         public MtuTypes mtuTypes;
         public MeterTypes meterTypes;
