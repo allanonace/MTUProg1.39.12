@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
+using Library.Exceptions;
 
 namespace Xml
 {
@@ -35,10 +36,10 @@ namespace Xml
         public List<Meter> FindByEncoderTypeAndLiveDigits(int encoderType, int liveDigits)
         {
             List<Meter> meters = Meters.FindAll(x => (x.EncoderType == encoderType && x.LiveDigits == liveDigits));
-            if (meters == null)
-            {
-                throw new MeterNotFoundException("Meter not found");
-            }
+            
+            if ( meters == null )
+                return new List<Meter> ();
+
             return meters;
         }
 
@@ -56,7 +57,7 @@ namespace Xml
             ));
 
             if ( meters == null )
-                throw new MeterNotFoundException ( "Meter not found" );
+                return new List<Meter> ();
 
             return meters;
         }

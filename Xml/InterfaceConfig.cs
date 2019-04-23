@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using Library.Exceptions;
 
 namespace Xml
 {
@@ -18,12 +19,14 @@ namespace Xml
         public ActionInterface GetInterfaceByMtuIdAndAction ( Mtu mtu, string actionType )
         {
             Interface mtu_interface = Interfaces.Find ( x => x.Id == currentIndexType );
-            if (mtu_interface == null)
-                throw new InterfaceNotFoundException("Meter not found");
+            
+            if ( mtu_interface == null )
+                throw new ActionInterfaceNotFoundException_Internal ();
 
             ActionInterface action_interface = mtu_interface.GetInterfaceActionType ( actionType );
-            if (action_interface == null)
-                throw new ActionInterfaceNotFoundException("Meter not found");
+            
+            if ( action_interface == null )
+                throw new ActionInterfaceNotFoundException_Internal ();
 
             return action_interface;
         }

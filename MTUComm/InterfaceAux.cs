@@ -1,5 +1,6 @@
 using Xml;
 using System.Collections.Generic;
+using Library.Exceptions;
 
 namespace MTUComm
 {
@@ -41,7 +42,7 @@ namespace MTUComm
                 MtuInterface iInfoMtu = xmlInterfaces.MtuInterfaces.Find ( x => x.Id == mtu.Id );
 
                 if ( iInfoMtu == null )
-                    throw new MtuNotFoundException("Mtu not found");
+                    throw new InterfaceNotFoundException_Internal ();
                 else
                     interfaceIndex = iInfoMtu.Interface;
             }
@@ -49,7 +50,7 @@ namespace MTUComm
             Interface iInfo = xmlInterfaces.Interfaces.Find(x => x.Id == interfaceIndex );
 
             if ( iInfo == null )
-                throw new InterfaceNotFoundException("Meter not found");
+                throw new InterfaceNotFoundException_Internal ();
             
             InterfaceConfig.currentIndexType = interfaceIndex;
             

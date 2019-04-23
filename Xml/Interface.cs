@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Serialization;
+using Library.Exceptions;
 
 namespace Xml
 {
@@ -19,11 +20,7 @@ namespace Xml
 
         public ActionInterface GetInterfaceActionType ( string actionType )
         {
-            ActionInterface action_interface = Actions.Find ( x => x.Type.ToLower ().Equals ( actionType.ToLower () ) );
-            if ( action_interface == null )
-                throw new ActionInterfaceNotFoundException("Meter not found");
-
-            return action_interface;
+            return Actions.Find ( x => x.Type.ToLower ().Equals ( actionType.ToLower () ) );
         }
     }
 }

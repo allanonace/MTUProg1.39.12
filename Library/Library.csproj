@@ -10,4 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Exceptions\MtuExceptions %28copia%29.cs" />
+  </ItemGroup>
 </Project>

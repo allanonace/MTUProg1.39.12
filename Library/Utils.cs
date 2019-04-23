@@ -9,8 +9,10 @@ using System.Linq;
 
 namespace Library
 {
-    public class Utils
+    public static class Utils
     {
+        #region Log
+
         private static bool DEEP_MODE = false;
     
         public static void PrintDeep (
@@ -33,17 +35,11 @@ namespace Library
             
             #endif
         }
-        
-        public static string ByteArrayToString (
-            byte[] bytes )
-        {
-            StringBuilder hex = new StringBuilder ( bytes.Length * 2 );
-            foreach ( byte b in bytes )
-                hex.AppendFormat ( "{0:x2} ", b );
-            
-            return hex.ToString ().Substring ( 0, hex.Length - 1 );
-        }
-        
+
+        #endregion
+
+        #region Math
+
         public static string NormalizeBooleans (
             string input )
         {
@@ -54,7 +50,11 @@ namespace Library
                 pattern.Replace ( "#", String.Join ( "|", words ) ),
                 entry => entry.Value.ToLower() );
         }
-        
+
+        #endregion
+
+        #region IO
+
         public static T DeserializeXml<T> (
             string path,
             bool isFromResources = false )
@@ -89,6 +89,10 @@ namespace Library
         {
             return new StreamReader ( fileName );
         }
+
+        #endregion
+
+        #region AES
 
         public static string EncryptStringToBase64_Aes (
             string text,
@@ -170,7 +174,11 @@ namespace Library
     
             return plaintext;
         }
-        
+
+        #endregion
+
+        #region Bytes
+
         public static string ByteToBits (
             object value )
         {
@@ -185,5 +193,17 @@ namespace Library
             
             return ( T )( object )value;
         }
+        
+        public static string ByteArrayToString (
+            byte[] bytes )
+        {
+            StringBuilder hex = new StringBuilder ( bytes.Length * 2 );
+            foreach ( byte b in bytes )
+                hex.AppendFormat ( "{0:x2} ", b );
+            
+            return hex.ToString ().Substring ( 0, hex.Length - 1 );
+        }
+
+        #endregion
     }
 }

@@ -669,6 +669,7 @@ namespace MTUComm
                         // At least one Meter was found
                         if ( meters.Count > 0 )
                             form.AddParameter ( FIELD.METER_TYPE, ( meterPort1 = meters[ 0 ] ).Id.ToString () );
+                        
                         // No meter was found using the selected parameters
                         else throw new ScriptingAutoDetectMeterException ();
                     }
@@ -720,6 +721,7 @@ namespace MTUComm
                             // At least one Meter was found
                             if ( meters.Count > 0 )
                                 form.AddParameter ( FIELD.METER_TYPE_2, ( meterPort2 = meters[ 0 ] ).Id.ToString () );
+                                
                             // No meter was found using the selected parameters
                             else throw new ScriptingAutoDetectMeterException ( string.Empty, 2 );
                         }
@@ -1559,10 +1561,10 @@ namespace MTUComm
             List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
             
             for ( int i = 0; i < modifiedRegisters.Count; i++ )
-                await modifiedRegisters[ i ].ValueWriteToMtu ( this.lexi );
+                await modifiedRegisters[ i ].ValueWriteToMtu ();
             
             //foreach ( dynamic r in modifiedRegisters )
-            //    await r.ValueWriteToMtu ( this.lexi );
+            //    await r.ValueWriteToMtu ();
 
             modifiedRegisters.Clear ();
             modifiedRegisters = null;

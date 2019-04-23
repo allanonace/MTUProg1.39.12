@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using Library.Exceptions;
 
 namespace Xml
 {
@@ -21,11 +22,11 @@ namespace Xml
 
         public List<Alarm> FindByMtuType(int mtuType)
         {
-            List<Alarm> alarms = Alarms.FindAll(x => (x.MTUType == mtuType));
-            if (alarms == null)
-            {
-                throw new AlarmNotFoundException("Alarms not found");
-            }
+            List<Alarm> alarms = Alarms.FindAll ( x => x.MTUType == mtuType );
+
+            if ( alarms == null )
+                throw new AlarmNotFoundException_Internal ();
+
             return alarms;
         }
     }

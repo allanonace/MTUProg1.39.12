@@ -22,6 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Memories.cs" />
+    <Compile Remove="MeterLoadException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="XMLs\Error.xml" />

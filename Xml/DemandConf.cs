@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
+using Library.Exceptions;
 
 namespace Xml
 {
@@ -12,11 +13,11 @@ namespace Xml
 
         public List<Demand> FindByMtuType(int mtuType)
         {
-            List<Demand> demands = Demands.FindAll(x => (x.MTUType == mtuType));
-            if (demands == null)
-            {
-                throw new DemandNotFoundException("Demands not found");
-            }
+            List<Demand> demands = Demands.FindAll ( x => x.MTUType == mtuType );
+            
+            if ( demands == null )
+                throw new DemandNotFoundException_Internal ();
+                
             return demands;
         }
     }

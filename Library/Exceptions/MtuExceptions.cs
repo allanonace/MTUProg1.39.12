@@ -233,4 +233,34 @@
     {
         public FtpUpdateLogsException ( string message = "", int port = 1, string messagePopup = "" ) : base( message, port, messagePopup ) { }
     }
+    
+    public class InterfaceNotFoundException_Internal : OwnExceptionsBase
+    {
+        public InterfaceNotFoundException_Internal ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class MtuNotFoundException_Internal : OwnExceptionsBase
+    {
+        public MtuNotFoundException_Internal ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class MeterNotFoundException_Internal : OwnExceptionsBase
+    {
+        public MeterNotFoundException_Internal ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class AlarmNotFoundException_Internal : OwnExceptionsBase
+    {
+        public AlarmNotFoundException_Internal ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class DemandNotFoundException_Internal : OwnExceptionsBase
+    {
+        public DemandNotFoundException_Internal ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class ActionInterfaceNotFoundException_Internal : OwnExceptionsBase
+    {
+        public ActionInterfaceNotFoundException_Internal ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
 }
