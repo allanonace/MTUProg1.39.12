@@ -7,6 +7,7 @@ using Library.Exceptions;
 using System.Xml.Serialization;
 using System.IO;
 using System.Threading.Tasks;
+using Library;
 
 namespace MTUComm
 {
@@ -138,7 +139,6 @@ namespace MTUComm
 
         #region Attributes
 
-        private static Errors instance;
         public  static string lastErrorLogGenerated { get; private set; }
 
         private Logger logger;
@@ -193,7 +193,7 @@ namespace MTUComm
             this.logger      = ( Action.currentAction != null ) ? Action.currentAction.logger : new Logger ();
             this.errors      = new Dictionary<int,Error> ();
             this.errorsToLog = new List<Error> ();
-            this.xmlErrors   = Aux.DeserializeXml<ErrorList> ( "Error.xml", true ).List;
+            this.xmlErrors   = Utils.DeserializeXml<ErrorList> ( "Error.xml", true ).List;
 
             if ( this.xmlErrors != null )
                 foreach ( Error errorXml in this.xmlErrors )
@@ -202,10 +202,10 @@ namespace MTUComm
 
         private static Errors GetInstance ()
         {
-            if ( Errors.instance == null )
-                Errors.instance = new Errors ();
+            if ( ! Singleton.Has<Errors> () )
+                Singleton.Set = new Errors ();
             
-            return Errors.instance;
+            return Singleton.Get.Errors;
         }
 
         #endregion

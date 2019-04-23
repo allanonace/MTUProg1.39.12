@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
-using System.Text;
 
 namespace MTUComm
 {
     public sealed class Aux
     {
+        /*
         public static string NormalizeBooleans (
             string input )
         {
@@ -149,5 +150,6 @@ namespace MTUComm
             
             return ( T )( object )value;
         }
+        */
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using Xml;
 using Library.Exceptions;
 using System.Xml.Serialization;
+using Library;
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -50,13 +51,13 @@ namespace MTUComm
             try
             {
                 // Load configuration files ( xml's )
-                mtuTypes   = Aux.DeserializeXml<MtuTypes>        ( Path.Combine ( configPath, XML_MTUS      ) );
-                meterTypes = Aux.DeserializeXml<MeterTypes>      ( Path.Combine ( configPath, XML_METERS    ) );
-                global     = Aux.DeserializeXml<Global>          ( Path.Combine ( configPath, XML_GLOBAL    ) );
-                alarms     = Aux.DeserializeXml<AlarmList>       ( Path.Combine ( configPath, XML_ALARMS    ) );
-                demands    = Aux.DeserializeXml<DemandConf>      ( Path.Combine ( configPath, XML_DEMANDS   ) );
-                users      = Aux.DeserializeXml<UserList>        ( Path.Combine ( configPath, XML_USERS     ) ).List;
-                interfaces = Aux.DeserializeXml<InterfaceConfig> ( XML_INTERFACE, true ); // From resources
+                mtuTypes   = Utils.DeserializeXml<MtuTypes>        ( Path.Combine ( configPath, XML_MTUS      ) );
+                meterTypes = Utils.DeserializeXml<MeterTypes>      ( Path.Combine ( configPath, XML_METERS    ) );
+                global     = Utils.DeserializeXml<Global>          ( Path.Combine ( configPath, XML_GLOBAL    ) );
+                alarms     = Utils.DeserializeXml<AlarmList>       ( Path.Combine ( configPath, XML_ALARMS    ) );
+                demands    = Utils.DeserializeXml<DemandConf>      ( Path.Combine ( configPath, XML_DEMANDS   ) );
+                users      = Utils.DeserializeXml<UserList>        ( Path.Combine ( configPath, XML_USERS     ) ).List;
+                interfaces = Utils.DeserializeXml<InterfaceConfig> ( XML_INTERFACE, true ); // From resources
                 
                 // Regenerate certificate from base64 string
                 Mobile.configData.GenerateCert ();
@@ -187,7 +188,7 @@ namespace MTUComm
             {
                 XmlSerializer serializer = new XmlSerializer ( typeof ( MemRegisterList ) );
                 
-                using ( TextReader reader = Aux.GetResourceStreamReader ( "family_" + family + ".xml" ) )
+                using ( TextReader reader = Utils.GetResourceStreamReader ( "family_" + family + ".xml" ) )
                 {
                     MemRegisterList list = serializer.Deserialize(reader) as MemRegisterList;
                     if (list.Registers != null)

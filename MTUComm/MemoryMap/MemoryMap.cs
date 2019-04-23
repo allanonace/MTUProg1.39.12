@@ -12,6 +12,7 @@ using Library;
 using Library.Exceptions;
 using Xml;
 using Lexi;
+using Library;
 
 /// <summary>
 /// LOGIC:
@@ -147,8 +148,8 @@ namespace MTUComm.MemoryMap
 
             // Parameter "family" when testing is full path to use
             TextReader reader = ( ! isUnityTest ) ?
-                Aux.GetResourceStreamReader ( XML_PREFIX + family + XML_EXTENSION ) :
-                Aux.GetStreamReader ( Path.Combine ( pathUnityTest, family + XML_EXTENSION ) );
+                Utils.GetResourceStreamReader ( XML_PREFIX + family + XML_EXTENSION ) :
+                Utils.GetStreamReader ( Path.Combine ( pathUnityTest, family + XML_EXTENSION ) );
 
             using ( reader )
             {

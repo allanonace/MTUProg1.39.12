@@ -221,7 +221,7 @@ namespace MTUComm.MemoryMap
             byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1 ) )[ 0 ];
 
             Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
-            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Aux.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags + " ]" );
+            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags + " ]" );
 
             var valueInMap = ( bool )( object )this.ValueRaw;
 
@@ -230,7 +230,7 @@ namespace MTUComm.MemoryMap
                  systemFlags = ( byte ) ( systemFlags |    1 << ( int )bit   );
             else systemFlags = ( byte ) ( systemFlags & ~( 1 << ( int )bit ) );
             
-            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Write bit to MTU: " + this.id + " -> " + Aux.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags + " ] to bit: " + bit );
+            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Write bit to MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags + " ] to bit: " + bit );
             
             await this.lexi.Write ( ( uint )this.address, new byte[] { systemFlags } );
         }

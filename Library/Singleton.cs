@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Dynamic;
 using System.Reflection;
 
-namespace MTUComm
+namespace Library
 {
     public sealed class Singleton : DynamicObject
     {

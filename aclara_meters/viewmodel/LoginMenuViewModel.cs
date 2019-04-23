@@ -7,6 +7,7 @@ using aclara_meters.view;
 using Acr.UserDialogs;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using Library;
 
 using MTUComm;
 using System.Linq;
@@ -82,7 +83,7 @@ namespace aclara_meters.viewmodel
                 Xml.User dbUser = coincidences.ToList<Xml.User> ()[ 0 ];
                 
                 if ( dbUser.Encrypted )
-                    return Aux.EncryptStringToBase64_Aes ( password, AES_KEY ).Equals ( dbUser.Pass );
+                    return Utils.EncryptStringToBase64_Aes ( password, AES_KEY ).Equals ( dbUser.Pass );
                 return password.Equals ( dbUser.Pass );
             }
             

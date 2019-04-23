@@ -2,6 +2,7 @@
 using Lexi;
 using nexus.protocols.ble;
 using ble_library;
+using Library;
 
 namespace MTUComm
 {

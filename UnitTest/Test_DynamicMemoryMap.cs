@@ -6,6 +6,7 @@ using System.IO;
 using System.Xml.Serialization;
 using Xml;
 using Xunit;
+using Library;
 
 // http://blog.benhall.me.uk/2008/01/introduction-to-xunit
 // https://www.devexpress.com/Support/Center/Question/Details/T562649/test-runner-does-not-run-xunit-2-2-unit-tests-in-net-standard-2-0-project
@@ -153,7 +154,7 @@ namespace UnitTest.Tests
 
             using ( StreamReader streamReader = new StreamReader ( path ) )
             {
-                string fileContent = Aux.NormalizeBooleans(streamReader.ReadToEnd());
+                string fileContent = Utils.NormalizeBooleans(streamReader.ReadToEnd());
                 using (StringReader reader = new StringReader(fileContent))
                 {
                     Assert.True(test(() => { return ( Global )s.Deserialize ( reader ); }), Error ( ERROR_MAP_GLOBAL ) );
@@ -171,7 +172,7 @@ namespace UnitTest.Tests
 
             using ( StreamReader streamReader = new StreamReader ( path ) )
             {
-                string fileContent = Aux.NormalizeBooleans(streamReader.ReadToEnd());
+                string fileContent = Utils.NormalizeBooleans(streamReader.ReadToEnd());
                 using (StringReader reader = new StringReader(fileContent))
                 {
                     Script script = ( Script )s.Deserialize ( reader );
