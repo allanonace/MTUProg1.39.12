@@ -6,7 +6,7 @@ using Library;
 using Microsoft.Intune.MAM;
 using MTUComm;
 using System.IO;
-using MTUComm.Exceptions;
+using Library.Exceptions;
 using Xamarin.Essentials;
 
 namespace aclara_meters.iOS

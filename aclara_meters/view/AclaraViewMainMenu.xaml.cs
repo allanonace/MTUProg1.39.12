@@ -20,6 +20,7 @@ using Plugin.Settings;
 using System.Linq;
 using MTUComm;
 using System.Security.Cryptography.X509Certificates;
+using Xamarin.Forms;
 
 using ActionType = MTUComm.Action.ActionType;
 

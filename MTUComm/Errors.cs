@@ -133,7 +133,7 @@ namespace MTUComm
             { new FtpConnectionException (),                    810 },
             // Sending activity logs to the FTP has failed, only _var_ files have been uploaded
             { new FtpUpdateLogsException (),                    811 },
- 		// Changed configuration files
+ 		    // Changed configuration files
             { new ConfigFilesChangedException (),               812 },
             
             // DEBUG - Configuration Files and System [ 85x ]

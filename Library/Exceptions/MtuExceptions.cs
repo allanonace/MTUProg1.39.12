@@ -264,7 +264,7 @@
         public ActionInterfaceNotFoundException_Internal ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
 
-public class ConfigFilesChangedException : OwnExceptionsBase
+    public class ConfigFilesChangedException : OwnExceptionsBase
     {
         public ConfigFilesChangedException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
