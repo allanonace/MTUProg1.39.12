@@ -44,6 +44,7 @@ namespace Xml
         }
 
         private string message;
+        private string messageDebug;
         private string messageFooter;
         private string messagePopup;
 
@@ -57,6 +58,26 @@ namespace Xml
                 else return message;
             }
             set { this.message = value; }
+        }
+        
+        [XmlIgnore]
+        public int MessageRelease { get; set; }
+        
+        [XmlAttribute("message_release")]
+        public string MessageRelease_AllowEmptyField
+        {
+            get { return this.MessageRelease.ToString(); }
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    int v;
+                    if (int.TryParse(value, out v))
+                         this.MessageRelease = v;
+                    else this.MessageRelease = EMPTY_VAL;
+                }
+                else this.MessageRelease = EMPTY_VAL;
+            }
         }
         
         [XmlAttribute("footer")]
