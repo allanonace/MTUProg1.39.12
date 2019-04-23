@@ -11,13 +11,13 @@ namespace MTUComm
 {
     public class Configuration
     {
-        private const string XML_MTUS      = "Mtu.xml";
-        private const string XML_METERS    = "Meter.xml";
-        private const string XML_GLOBAL    = "Global.xml";
+        private const string XML_MTUS      = "mtu.xml";
+        private const string XML_METERS    = "meter.xml";
+        public const string XML_GLOBAL     = "global.xml";
         private const string XML_INTERFACE = "Interface.xml";
-        private const string XML_ALARMS    = "Alarm.xml";
-        private const string XML_DEMANDS   = "DemandConf.xml";
-        private const string XML_USERS     = "User.xml";
+        private const string XML_ALARMS    = "alarm.xml";
+        private const string XML_DEMANDS   = "demandconf.xml";
+        private const string XML_USERS     = "user.xml";
 
         public MtuTypes mtuTypes;
         public MeterTypes meterTypes;
@@ -50,9 +50,9 @@ namespace MTUComm
             try
             {
                 // Load configuration files ( xml's )
+                global     = Aux.DeserializeXml<Global>          ( Path.Combine ( configPath, XML_GLOBAL    ) );
                 mtuTypes   = Aux.DeserializeXml<MtuTypes>        ( Path.Combine ( configPath, XML_MTUS      ) );
                 meterTypes = Aux.DeserializeXml<MeterTypes>      ( Path.Combine ( configPath, XML_METERS    ) );
-                global     = Aux.DeserializeXml<Global>          ( Path.Combine ( configPath, XML_GLOBAL    ) );
                 alarms     = Aux.DeserializeXml<AlarmList>       ( Path.Combine ( configPath, XML_ALARMS    ) );
                 demands    = Aux.DeserializeXml<DemandConf>      ( Path.Combine ( configPath, XML_DEMANDS   ) );
                 users      = Aux.DeserializeXml<UserList>        ( Path.Combine ( configPath, XML_USERS     ) ).List;

@@ -29,6 +29,7 @@ using Xml;
 using System.Xml.Linq;
 using aclara_meters.Helpers;
 using System.Threading;
+using Xamarin.Essentials;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
 namespace aclara_meters
@@ -51,20 +52,11 @@ namespace aclara_meters
         private const string SO_ANDROID = "Android";
         private const string SO_IOS     = "iOS";
         private const string SO_UNKNOWN = "Unknown";
-        public const string XML_EXT    = ".xml";
-        public const string XML_CER    = ".cer";
-        private const string CER_TXT    = "certificate.txt";
+  
+       
         public static bool ScriptingMode = false;
 
-        private string[] filesToCheck =
-        {
-            "alarm",
-            "demandconf",
-            "global",
-            "meter",
-            "mtu",
-            "user",
-        };
+
 
         #endregion
 
@@ -211,13 +203,15 @@ namespace aclara_meters
             }
             else
             {
+                Mobile.configData.HasFTP = false;
+                SecureStorage.RemoveAll();
                 // Check if all configuration files are available in public folder
-                bool HasPublicFiles = this.HasDeviceAllXmls(Mobile.ConfigPublicPath);
+                bool HasPublicFiles = GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath);
                 //this.abortMission = !this.HasDeviceAllXmls(Mobile.ConfigPublicPath);
                 if (HasPublicFiles)
                 {
                     // Install certificate if needed ( Convert from .cer to base64 string / .txt )
-                    if (!this.GenerateBase64Certificate(Mobile.ConfigPublicPath))
+                    if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPublicPath))
                     {
                         this.ShowErrorAndKill(new CertificateFileNotValidException());
 
@@ -225,17 +219,19 @@ namespace aclara_meters
                     }
                     //File.Copy(file.FullName, Path.Combine(url_to_copy, file.Name), true);
                     bool CPD = false;
-                    if (TagGlobal("ConfigPublicDir", out dynamic value))
+                    if (GenericUtilsClass.TagGlobal("ConfigPublicDir", out dynamic value))
                     {
-                        if (value != null) CPD = (bool)value;
+                        if (value != null)
+                            bool.TryParse((string)value,out CPD);
                     }
-                    CopyConfigFilesToPrivate(!CPD);
+                    GenericUtilsClass.CopyConfigFilesToPrivate(!CPD);
+
+                    if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
+                        return true;
 
                 }
                 else
                 {
-
-                    //Mobile.configData.HasFTP = false;
                     //Configure download FTP
                     if (Mobile.IsNetAvailable())
                     {
@@ -244,14 +240,19 @@ namespace aclara_meters
                         // Console.WriteLine($"------------------------------------FTP  Thread: {Thread.CurrentThread.ManagedThreadId}");
                         Device.BeginInvokeOnMainThread(async () =>
                         {
-                            //await MainPage.DisplayAlert("Attention", "Desea utilizar FTP?", "OK");
-                            Console.WriteLine($"------------------------------------Beginmain  Thread: {Thread.CurrentThread.ManagedThreadId}");
                            
-                            //await MainPage.Navigation.PushModalAsync(new FtpDownloadSettings());
-                            MainPage = new NavigationPage(new FtpDownloadSettings());
+                            MainPage = new NavigationPage(new FtpDownloadSettings(tcs));
                             //PopupNavigation.Instance.PushAsync(new FtpDownloadSettings());
 
                             result = await tcs.Task;
+                           
+                            // Install certificate if needed ( Convert from .cer to base64 string / .txt )
+                            if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPath))
+                            {
+                                this.ShowErrorAndKill(new CertificateFileNotValidException());
+
+                                return;
+                            }
 
                             if (!this.InitializeConfiguration())
                                 return;
@@ -270,7 +271,7 @@ namespace aclara_meters
                             else
                                 tcs1.SetResult(true);
                         });
-                            //result = tcs.Task;
+                            
                         return false;
                     }
                     else
@@ -288,11 +289,9 @@ namespace aclara_meters
             ConfigPaths();
 
             // Only download configuration files from FTP when all are not installed
-            //if (Mobile.IsNetAvailable() &&
-            //     !this.HasDeviceAllXmls())
-            //    this.DownloadConfigFiles();
+           
             bool Result = true;
-            if (!this.HasDeviceAllXmls(Mobile.ConfigPath))
+            if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
             {
                 Result = InitialConfigProcess();
             }
@@ -321,45 +320,6 @@ namespace aclara_meters
                     tcs1.SetResult(true);
             }
                   
-        }
-
-        private void CopyConfigFilesToPrivate(bool bRemove)
-        {
-            try
-            {
-                DirectoryInfo info = new DirectoryInfo(Mobile.ConfigPublicPath);
-                FileInfo[] files = info.GetFiles();
-
-                foreach (FileInfo file in files)
-                {
-                    string fileCopy = Path.Combine(Mobile.ConfigPath, file.Name);
-                    file.CopyTo(fileCopy);
-                    if (bRemove) file.Delete();
-                }
-            }
-            catch (Exception e)
-            {
-                this.ShowErrorAndKill(e);
-                return;
-            }
-        }
-
-        private bool TagGlobal(string sTag , out dynamic value) 
-        {
-            string sVal = String.Empty;
-            string uri = Path.Combine(Mobile.ConfigPublicPath, "Global.xml");
-
-            XDocument doc = XDocument.Load(uri);
-            foreach (XElement xElement in doc.Root.Elements())
-            {
-                if (xElement.Name == sTag)
-                {
-                    value = xElement.Value;
-                    return true;
-                }
-            }
-            value = null;
-            return false;
         }
 
         public bool InitializeConfiguration ()
@@ -399,81 +359,6 @@ namespace aclara_meters
             }
             
             return true;
-        }
-
-        private bool HasDeviceAllXmls (string path)
-        {
-            bool ok = true;
-
-            //string path = Mobile.ConfigPath;
-        
-
-                // Directory could exist but is empty
-                if ( string.IsNullOrEmpty ( path ) )
-                ok = false;
-
-            // Directory exists and is not empty
-            string[] filesLocal = Directory.GetFiles ( path );
-
-            int count = 0;
-            foreach ( string fileNeeded in filesToCheck )
-                foreach ( string filePath in filesLocal )
-                {
-                    string compareStr = fileNeeded + XML_EXT;
-                    compareStr = compareStr.Replace ( path, string.Empty ).Replace("/", string.Empty);
-
-                    string fileStr = filePath.ToString ();
-                    fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty).ToLower ();
-
-                    if ( fileStr.Equals ( compareStr ) )
-                    {
-                        count++;
-                        break;
-                    }
-                }
-
-            ok = ( count == filesToCheck.Length );
-
-            Console.WriteLine ( "Are all config.files installed? " + ( ( ok ) ? "OK" : "NO" ) );
-            
-            return ok;
-        }
-
-        private bool GenerateBase64Certificate (string configPath)
-        {
-            bool   ok         = true;
-            //string configPath = Mobile.ConfigPath;
-  
-            string txtPath    = Path.Combine ( configPath, CER_TXT );
-        
-            try
-            {
-                
-                foreach ( string filePath in Directory.GetFiles ( configPath ) )
-                {
-                    if ( filePath.Contains ( XML_CER ) )
-                    {
-                        // Convert certificate to base64 string                                
-                        string pathCer   = Path.Combine ( configPath, filePath );  // Path to .cer in Library
-                        byte[] bytes     = File.ReadAllBytes ( pathCer );          // Read .cer full bytes
-                        string strBase64 = Convert.ToBase64String ( bytes );       // Convert bytes to base64 string
-                        File.WriteAllText ( txtPath, strBase64 );                  // Create new {name}.txt file with base64 string and delete .cer
-                        File.Delete ( pathCer );
-                        
-                        break;
-                    }
-                }
-            }
-            catch ( Exception e )
-            {
-                ok = false;
-            }
-
-            if ( File.Exists ( txtPath ) )
-                 Console.WriteLine ( "Is the certificate installed correctly? " + ( ( ok ) ? "OK" : "NO" ) );
-            else Console.WriteLine ( "No certificate is being used" );
-
-            return ok;
         }
 
         private async Task PermisosLocationAsync()

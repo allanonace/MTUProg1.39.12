@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Acr.UserDialogs;
 using MTUComm;
 using MTUComm.Exceptions;
@@ -20,6 +21,11 @@ namespace aclara_meters
     public class GenericUtilsClass
     {
         public static int NumFilesUploaded;
+        private const string XML_EXT = ".xml";
+        private const string CER_TXT = "certificate.txt";
+        private const string XML_CER = ".cer";
+
+
 
         public async static Task<bool> UploadFiles (Boolean UploadPrompt = true, Boolean AllLogs = true )
         {
@@ -318,10 +324,10 @@ namespace aclara_meters
                     {
                         string name = file.Name;
 
-                        if ((isCertificate = name.Contains(FormsApp.XML_CER)) ||
-                             name.Contains(FormsApp.XML_EXT))
+                        if ((isCertificate = name.Contains(XML_CER)) ||
+                             name.Contains(XML_EXT))
                         {
-                            using (Stream stream = File.OpenWrite(Path.Combine(configPath, name)))
+                            using (Stream stream = File.OpenWrite(Path.Combine(configPath, name.ToLower())))  // keep in low case
                             {
                                sftp.DownloadFile(Path.Combine(data.ftpDownload_Path, name), stream);
                             }
@@ -340,5 +346,139 @@ namespace aclara_meters
 
             return ok;
         }
+
+        public static  bool GenerateBase64Certificate (string configPath)
+        {
+            bool   ok         = true;
+            //string configPath = Mobile.ConfigPath;
+  
+            string txtPath    = Path.Combine ( configPath, CER_TXT );
+        
+            try
+            {
+                
+                foreach ( string filePath in Directory.GetFiles ( configPath ) )
+                {
+                    if ( filePath.Contains ( XML_CER ) )
+                    {
+                        // Convert certificate to base64 string                                
+                        string pathCer   = Path.Combine ( configPath, filePath );  // Path to .cer in Library
+                        byte[] bytes     = File.ReadAllBytes ( pathCer );          // Read .cer full bytes
+                        string strBase64 = Convert.ToBase64String ( bytes );       // Convert bytes to base64 string
+                        File.WriteAllText ( txtPath, strBase64 );                  // Create new {name}.txt file with base64 string and delete .cer
+                        File.Delete ( pathCer );
+                        
+                        break;
+                    }
+                }
+            }
+            catch ( Exception e )
+            {
+                ok = false;
+            }
+
+            if ( File.Exists ( txtPath ) )
+                 Console.WriteLine ( "Is the certificate installed correctly? " + ( ( ok ) ? "OK" : "NO" ) );
+            else Console.WriteLine ( "No certificate is being used" );
+
+            return ok;
+        }
+
+       
+
+        public static bool HasDeviceAllXmls (string path)
+        {
+            bool ok = true;
+            string[] filesToCheck =
+            {
+                "alarm",
+                "demandconf",
+                "global",
+                "meter",
+                "mtu",
+                "user",
+            };
+            //string path = Mobile.ConfigPath;
+        
+
+                // Directory could exist but is empty
+            if ( string.IsNullOrEmpty ( path ) )
+                ok = false;
+
+            // Directory exists and is not empty
+            //string[] filesLocal = Directory.GetFiles ( path );
+
+            DirectoryInfo info = new DirectoryInfo(path);
+            FileInfo[] filesLocal = info.GetFiles();
+
+            int count = 0;
+            foreach ( string fileNeeded in filesToCheck )
+                foreach (FileInfo file in filesLocal)
+                {
+                    string compareStr = fileNeeded + XML_EXT;
+                    //compareStr = compareStr.Replace ( path, string.Empty ).Replace("/", string.Empty);
+
+                    string fileStr = file.Name.ToLower();
+                    //fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty).ToLower ();
+                    if ( fileStr.Equals ( compareStr ) )
+                    {
+                        if (!file.Name.Equals(compareStr)) // upper case
+                        {
+                            file.CopyTo(Path.Combine(path, file.Name.ToLower()), true);
+                            file.Delete();
+                        }
+                        count++;
+                        break;
+                    }
+                }
+
+            ok = ( count == filesToCheck.Length );
+
+            Console.WriteLine ( "Are all config.files installed? " + ( ( ok ) ? "OK" : "NO" ) );
+            
+            return ok;
+        }
+
+
+        public static void CopyConfigFilesToPrivate(bool bRemove)
+        {
+            try
+            {
+                DirectoryInfo info = new DirectoryInfo(Mobile.ConfigPublicPath);
+                FileInfo[] files = info.GetFiles();
+
+                foreach (FileInfo file in files)
+                { 
+                    string fileCopy = Path.Combine(Mobile.ConfigPath, file.Name.ToLower());
+                    
+                    file.CopyTo(fileCopy,true);
+                    if (bRemove) file.Delete();
+                }
+            }
+            catch (Exception e)
+            {
+                Errors.ShowAlert(e);
+                return;
+            }
+        }
+
+        public static bool TagGlobal(string sTag, out dynamic value)
+        {
+            string sVal = String.Empty;
+            string uri = Path.Combine(Mobile.ConfigPublicPath, Configuration.XML_GLOBAL);
+
+            XDocument doc = XDocument.Load(uri);
+            foreach (XElement xElement in doc.Root.Elements())
+            {
+                if (xElement.Name == sTag)
+                {
+                    value = xElement.Value;
+                    return true;
+                }
+            }
+            value = null;
+            return false;
+        }
+
     }
 }

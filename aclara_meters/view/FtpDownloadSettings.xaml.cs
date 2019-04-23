@@ -14,22 +14,28 @@ namespace aclara_meters.view
     public partial class FtpDownloadSettings: INotifyPropertyChanged//: Rg.Plugins.Popup.Pages.PopupPage
     {
         MTUComm.Mobile.ConfigData config = MTUComm.Mobile.configData;
-        public FtpDownloadSettings()
+        TaskCompletionSource<bool> tcs1;
+        public FtpDownloadSettings(TaskCompletionSource<bool> tcs)
         {
             InitializeComponent();
 
-            BindingContext = this;
-            //CloseWhenBackgroundIsClicked = false;
+            tcs1 = tcs;  //new TaskCompletionSource<bool>();
+            //tcs1 = tcs;
 
-            //Findicator.IsVisible = false;
-            // dialog_FTP.IsVisible = true;
-            //indicator.IsVisible = false;
+            BindingContext = this;
+
+            if (Device.Idiom == TargetIdiom.Tablet)
+                ScaleFrame = 1;
+            else
+                ScaleFrame = 1;
+
             Executing(false);
-                      
-          
+
+            FocusEntryFields();
+
             if (config.HasFTP)
             {
-                tbx_remote_host.Text = config.ftpDownload_Host ;
+                tbx_remote_host.Text = config.ftpDownload_Host;
                 //tbx_user_pass.Text = MTUComm.Mobile.configData.ftpDownload_Pass;
                 tbx_user_name.Text = config.ftpDownload_User;
                 tbx_remote_path.Text = config.ftpDownload_Path;
@@ -44,6 +50,8 @@ namespace aclara_meters.view
                 lb_Error.Text = bExec ? "" : lb_Error.Text;
 
                 Loading = bExec;
+                backgroundWait.IsEnabled = bExec;
+                Botones.IsVisible = !bExec;
      
         }
         private async void OK_Clicked(object sender, EventArgs e)
@@ -63,14 +71,13 @@ namespace aclara_meters.view
             }
             try
             {
-                FormsApp.tcs.SetResult(true);
                 await Navigation.PopAsync();
-                //await PopupNavigation.Instance.PopAsync();
+                tcs1.SetResult(true);
 
             }
             catch (Exception exc)
             {
-
+                tcs1.SetResult(false);//await Application.Current.MainPage.Navigation.PopAsync();
             }
           
             return;
@@ -116,7 +123,7 @@ namespace aclara_meters.view
         {
             await Navigation.PopAsync();
             //await PopupNavigation.Instance.PopAsync();
-            FormsApp.tcs.SetResult(false);
+            tcs1.SetResult(false);
         }
 
         private bool isLoading;
@@ -129,8 +136,77 @@ namespace aclara_meters.view
                 OnPropertyChanged();
             }
         }
+        private double _scaleFrame;
+        public double ScaleFrame
+        {
+            get => _scaleFrame;
+            set
+            {
+                _scaleFrame = value;
+                OnPropertyChanged();
+            }
+        }
 
-             
+        private void FocusEntryFields()
+        {
+            this.tbx_user_name.Focused += (s, e) =>
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(true, (int)-120);
+                else
+                    SetLayoutPosition(true, (int)-150);
+            };
 
+            this.tbx_user_name.Unfocused += (s, e) =>
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(false, (int)-120);
+                else
+                    SetLayoutPosition(false, (int)-150);
+            };
+
+            this.tbx_user_pass.Focused += (s, e) =>
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(true, (int)-120);
+                else
+                    SetLayoutPosition(true, (int)-150);
+            };
+
+            this.tbx_user_pass.Unfocused += (s, e) =>
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(false, (int)-120);
+                else
+                    SetLayoutPosition(false, (int)-150);
+            };
+
+        }
+
+        void SetLayoutPosition(bool onFocus, int value)
+        {
+            if (onFocus)
+            {
+                if (Device.RuntimePlatform == Device.iOS)
+                {
+                    this.frm_FTP.TranslateTo(0, value, 50);
+                }
+                else if (Device.RuntimePlatform == Device.Android)
+                {
+                    this.frm_FTP.TranslateTo(0, value, 50);
+                }
+            }
+            else
+            {
+                if (Device.RuntimePlatform == Device.iOS)
+                {
+                    this.frm_FTP.TranslateTo(0, 0, 50);
+                }
+                else if (Device.RuntimePlatform == Device.Android)
+                {
+                    this.frm_FTP.TranslateTo(0, 0, 50);
+                }
+            }
+        }
     }
 }

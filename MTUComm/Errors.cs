@@ -132,6 +132,8 @@ namespace MTUComm
             { new FtpConnectionException (),                    810 },
             // Sending activity logs to the FTP has failed, only _var_ files have been uploaded
             { new FtpUpdateLogsException (),                    811 },
+             // Changed configuration files
+            { new ConfigFilesChangedException (),               812 }
         };
 
         #endregion
@@ -373,7 +375,7 @@ namespace MTUComm
             Exception e,
             int portIndex,
             bool forceException,
-            bool kill = false )
+            bool kill = false)
         {
             Error error = this.AddErrorByException ( e, portIndex );
             PageLinker.ShowAlert ( ERROR_TITLE, error, kill );
