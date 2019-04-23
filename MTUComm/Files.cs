@@ -5,7 +5,7 @@ using System.Text;
 using System.Linq;
 using Renci.SshNet.Sftp;
 using Renci.SshNet;
-using MTUComm.Exceptions;
+using Library.Exceptions;
 using System.Collections.Generic;
 
 namespace MTUComm

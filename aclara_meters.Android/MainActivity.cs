@@ -11,6 +11,7 @@ using Android.Content;
 using Android.Content.PM;
 using Android.OS;
 using Android.Runtime;
+using Library;
 using nexus.protocols.ble;
 using Plugin.CurrentActivity;
 using Xamarin.Forms;
@@ -50,7 +51,7 @@ namespace aclara_meters.Droid
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.StackTrace);
+                Utils.Print(e.StackTrace);
             }
 
             // Obtain the bluetooth adapter so we can pass it into our (shared-code) Xamarin Forms app. There are
@@ -147,7 +148,7 @@ namespace aclara_meters.Droid
                 // If you want to enable/disable the Bluetooth adapter from code, you must call this.
                 BluetoothLowEnergyAdapter.Init(this);
             }catch(Exception e){
-                Console.WriteLine(e.StackTrace);
+                Utils.Print(e.StackTrace);
             }
 
             // Obtain the bluetooth adapter so we can pass it into our (shared-code) Xamarin Forms app. There are

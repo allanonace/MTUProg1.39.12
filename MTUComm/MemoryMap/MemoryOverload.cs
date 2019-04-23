@@ -1,5 +1,7 @@
-﻿using System;
-using MTUComm.Exceptions;
+﻿using Library;
+using Library.Exceptions;
+using System;
+using System.Threading.Tasks;
 
 using RegType       = MTUComm.MemoryMap.MemoryMap.RegType;
 using REGISTER_TYPE = MTUComm.MemoryMap.AMemoryMap.REGISTER_TYPE;
@@ -18,7 +20,7 @@ namespace MTUComm.MemoryMap
 
         #region Attributes
 
-        public Func<T> funcGet;
+        public Func<Task<T>> funcGet;
         public string id { get; }
         public string description { get; }
         public RegType valueType { get; }
@@ -59,9 +61,9 @@ namespace MTUComm.MemoryMap
             get { return this.customType == CUSTOM_TYPE.OPERATION; }
         }
 
-        public T Value
+        public async Task<T> GetValue ()
         {
-            get { return (T)this.funcGet(); }
+            return await this.funcGet ();
         }
 
         #endregion
@@ -87,7 +89,7 @@ namespace MTUComm.MemoryMap
             else
             {
                 // Selected dynamic member not exists
-                Console.WriteLine ( "Get " + id + ": Error - Overload registers need custom field" );
+                Utils.Print ( "Get " + id + ": Error - Overload registers need custom field" );
 
                 if ( ! MemoryMap.isUnityTest )
                     throw new OverloadEmptyCustomException ( EXCEP_OVER_CUSTOM + ": " + id );

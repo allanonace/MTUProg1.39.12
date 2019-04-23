@@ -650,6 +650,16 @@
     <CustomSet>method:ULongToBcd</CustomSet>
   </Register>
   <Register>
+    <Id>ReadMeter</Id>
+    <Description>Set to read meter (capture pulse count) if attached</Description>
+    <Type>bool</Type>
+    <Address>64</Address>
+    <Size>0</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
     <Id>P1ReadingErrorCode</Id>
     <Description>P1 Reading Error Code</Description>
     <Type>int</Type>

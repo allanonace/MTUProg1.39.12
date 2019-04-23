@@ -23,4 +23,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Library\Library.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="LogInfo.cs" />
+  </ItemGroup>
 </Project>

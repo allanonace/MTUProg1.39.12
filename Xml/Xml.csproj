@@ -26,4 +26,7 @@
   <ItemGroup>
     <None Remove="XMLs\Error.xml" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Library\Library.csproj" />
+  </ItemGroup>
 </Project>

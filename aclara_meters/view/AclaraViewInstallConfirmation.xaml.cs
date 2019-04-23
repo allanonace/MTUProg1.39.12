@@ -7,14 +7,14 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Acr.UserDialogs;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
-using Xamarin.Forms;
-using Plugin.Settings;
-using Xml;
+using Acr.UserDialogs;
+using Library;
 using MTUComm;
-using Plugin.Multilingual;
+using Plugin.Settings;
+using Xamarin.Forms;
+using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -192,7 +192,7 @@ namespace aclara_meters.view
                 }
                 catch (Exception i2)
                 {
-                    Console.WriteLine(i2.StackTrace);
+                    Utils.Print(i2.StackTrace);
                 }
             }));
         }
@@ -289,9 +289,9 @@ namespace aclara_meters.view
 
             add_mtu.OnFinish += ((s, e) =>
             {
-                Console.WriteLine("Action Succefull");
-                Console.WriteLine("Press Key to Exit");
-                //Console.WriteLine(s.ToString());
+                Utils.Print("Action Succefull");
+                Utils.Print("Press Key to Exit");
+                //Utils.Print(s.ToString());
 
                 // MTUDataListView = new List<ReadMTUItem>();  // Saves all the fields data from MTUComm - DEBUG
                 FinalReadListView = new List<ReadMTUItem>(); // Saves the data to view
@@ -309,7 +309,7 @@ namespace aclara_meters.view
                     }
                     catch (Exception e5)
                     {
-                        Console.WriteLine(e5.StackTrace);
+                        Utils.Print(e5.StackTrace);
                     }
                 }
 
@@ -702,7 +702,7 @@ namespace aclara_meters.view
             //    }
             //    catch (Exception v)
             //    {
-            //        Console.WriteLine(v.StackTrace);
+            //        Utils.Print(v.StackTrace);
             //    }
             //    contador--;
             //}
@@ -1073,7 +1073,7 @@ namespace aclara_meters.view
                 }
                 catch (Exception w1)
                 {
-                    Console.WriteLine(w1.StackTrace);
+                    Utils.Print(w1.StackTrace);
                 }
             }
             else

@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Library;
+using nexus.core;
 using nexus.protocols.ble;
 using nexus.protocols.ble.gatt;
 using nexus.protocols.ble.scan;
-using System.Security.Cryptography;
-using System.IO;
-using Plugin.Settings.Abstractions;
 using Plugin.Settings;
-using nexus.core;
-using Xamarin.Forms;
-using System.Threading;
+using Plugin.Settings.Abstractions;
 
 namespace ble_library
 {
@@ -62,7 +63,6 @@ namespace ble_library
             }
         }
     }
-
 
     /*
     BluetoothStatusReporter Class.
@@ -115,9 +115,10 @@ namespace ble_library
         }
     }
 
-
     public class BlePort
     {
+        ////public TaskCompletionSource<bool> waitForACK;
+        
         private Queue<byte> buffer_ble_data;
         private IBluetoothLowEnergyAdapter adapter;
         private IBleGattServerConnection gattServer_connection;
@@ -155,8 +156,16 @@ namespace ble_library
         private byte[] static_pass = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x74, 0x68, 0x65, 0x20, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x20, 0x66, 0x6f, 0x72, 0x20, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x2e };
         private byte[] say_hi = { 0x48, 0x69, 0x2c, 0x49, 0x27, 0x6d, 0x41, 0x63, 0x6c, 0x61, 0x72, 0x61, 0x00, 0x00, 0x00, 0x00 };
 
+        private const int LENGTH_HEADER = 3;
+        private const int MAX_LENGTH_DATA = 16;
+        private const int LENGTH_DATA_FRAME = 20;
+        private const int INDEX_LENGTH_DATA = 2;
+        private const int INDEX_CYPHER_COUNT = 1;
 
         private byte[] batteryLevel;
+        
+        public SemaphoreSlim semaphore { get; private set; }
+        private TaskCompletionSource<bool> ackException;
 
         public int TimeOutSeconds { get => timeOutSeconds; set => timeOutSeconds = value; }
 
@@ -182,7 +191,9 @@ namespace ble_library
             BlePeripheralList = new List<IBlePeripheral>();
 
             batteryLevel = new byte[] { 0x00 };
-
+            
+            this.semaphore = new SemaphoreSlim ( 0, 1 );
+            this.semaphore.Release ();
         }
 
         /// <summary>
@@ -277,7 +288,6 @@ namespace ble_library
             }
         }
 
-
         /// <summary>
         /// Listen to the characteristic notifications of a peripheral
         /// </summary>
@@ -297,7 +307,7 @@ namespace ble_library
             }
             catch (GattException ex)
             {
-                Console.WriteLine(ex.ToString());
+                Utils.Print(ex.ToString());
             }
 
             try
@@ -313,7 +323,7 @@ namespace ble_library
             }
             catch (GattException ex)
             {
-                Console.WriteLine(ex.ToString());
+                Utils.Print(ex.ToString());
             }
         }
 
@@ -330,7 +340,7 @@ namespace ble_library
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.StackTrace);
+                    Utils.Print(e.StackTrace);
                 }
                 try
                 {
@@ -338,7 +348,7 @@ namespace ble_library
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.StackTrace);
+                    Utils.Print(e.StackTrace);
                 }
 
 
@@ -349,12 +359,11 @@ namespace ble_library
                 }
                 catch (Exception e3)
                 {
-                    Console.WriteLine(e3.StackTrace);
+                    Utils.Print(e3.StackTrace);
                 }
             }
 
         }
-
 
         /// <summary>
         /// Writes a number of bytes via Bluetooth LE to the peripheral gatt connnection
@@ -362,64 +371,113 @@ namespace ble_library
         /// <param name="buffer">The byte array to write the input to.</param>
         /// <param name="offset">The offset in buffer at which to write the bytes.</param>
         /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
-        public async void Write_Characteristic(byte[] buffer, int offset, int count)
+        public async Task Write_Characteristic ( byte[] buffer, int offset, int count )
         {
             writeSavedBuffer = new byte[] { };
             writeSavedBuffer = buffer;
             writeSavedOffset = offset;
-            writeSavedCount = count;
+            writeSavedCount  = count;
 
-            byte[] ret = new byte[20];
+            // Data frame sent will always have a length of 20
+            byte[] ret = new byte[ LENGTH_DATA_FRAME ];
 
             try
             {
-                byte[] dataToCipher = new byte[16];
+                byte[] dataToCipher = new byte[ MAX_LENGTH_DATA ];
 
-                for (int i = 0; i < count; i++)
-                {
-                    dataToCipher[i] = buffer[i + offset];
-                }
+                for ( int i = 0; i < count; i++ )
+                    dataToCipher[ i ] = buffer[ i + offset ];
 
                 byte frameId = 0x02;
                 byte dataCount = (byte)count;
 
-                ret = new byte[] { frameId, cipheredDataSentCounter, dataCount }.ToArray().
-                                        Concat(AES_Encrypt(dataToCipher, dynamicPass)).
-                                        Concat(new byte[] { 0x00 }).ToArray();
+                // Data frame { 2 | CipherCount | Buffer.Length | Buffer_AESx16 | 0 }.Length = 20
+                ret = new byte[]
+                {
+                    frameId,
+                    cipheredDataSentCounter,
+                    dataCount
+                }.ToArray ()
+                .Concat ( AES_Encrypt ( dataToCipher, dynamicPass ) )
+                .Concat ( new byte[] { 0x00 } ).ToArray ();
+
+                Utils.PrintDeep ( "BlePort.WriteCharacteristic.." +
+                    " Buffer " + Utils.ByteArrayToString ( buffer ) +
+                    " [ " + count.ToString ( "D2" ) + " ]" +
+                    " | Offset " + offset.ToString ( "D2" ) +
+                    " | Ciph.SentCounter " + cipheredDataSentCounter +
+                    " | Ret " + Utils.ByteArrayToString ( ret ) +
+                    " [ " + ret.Length + " ]" );
 
                 cipheredDataSentCounter++;
-                if (cipheredDataSentCounter == 0)
-                {
+                if ( cipheredDataSentCounter <= 0 )
                     cipheredDataSentCounter = 1;
-                }
+                
+                Utils.PrintDeep ( "BlePort.Write_Characteristic -> Waiting semaphore.." );
+                
+                await this.semaphore.WaitAsync ();
+                
+                Utils.PrintDeep ( "BlePort.Write_Characteristic -> My turn!" );
+                
+                // Controls exception inside method UpdateACKBuffer
+                ackException = new TaskCompletionSource<bool> ();
 
                 await gattServer_connection.WriteCharacteristicValue(
                     new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                     new Guid("00000002-0000-1000-8000-00805f9b34fb"),
                     ret
                 );
+                
+                // Controls exception inside method UpdateACKBuffer
+                if ( await ackException.Task )
+                    throw new Exception ();
+                
+                Utils.PrintDeep ( "BlePort.Write_Characteristic -> Already writen" );
             }
             catch (GattException ex)
             {
-                Console.WriteLine(ex.ToString());
+                Utils.PrintDeep ( "BlePort.Write_Characteristic -> ERROR: " + ex.Message + " ( GattException )" );
+                
+                throw ex;
             }
-
+            catch ( Exception exg )
+            {
+                Utils.PrintDeep ( "BlePort.Write_Characteristic -> ERROR: " + exg.Message );
+                
+                throw exg;
+            }
         }
 
         /// <summary>
         /// Updates buffer with the notification data received 
         /// </summary>
-        private void UpdateBuffer(byte[] bytes)
+        private void UpdateBuffer ( byte[] bytes )
         {
-            byte[] tempArray = new byte[bytes[2]];
-
-            Array.Copy(AES_Decrypt(bytes.Skip(3).Take(16).ToArray(), dynamicPass), 0, tempArray, 0, bytes[2]);
-
-            for (int i = 0; i < tempArray.Length; i++)
+            try
             {
-                buffer_ble_data.Enqueue(tempArray[i]);
+                int bytesOfData = bytes[ INDEX_LENGTH_DATA ];
+                byte[] tempArray = new byte[ bytesOfData ];
+    
+                // Third byte is the length of bytes to read from data frame = 16
+                // Data frame { 2 | CipherCount | Buffer.Length | >>> Buffer_AESx16 <<< | 0 }.Length = 20
+                Array.Copy ( AES_Decrypt ( bytes.Skip ( LENGTH_HEADER ).Take ( MAX_LENGTH_DATA ).ToArray (), dynamicPass ), 0, tempArray, 0, bytesOfData );
+    
+                // FIFO collection to read data frames in the same order received
+                for ( int i = 0; i < tempArray.Length; i++ )
+                    buffer_ble_data.Enqueue ( tempArray[ i ] );
+                    
+                Utils.PrintDeep ( "BlePort.UpdateBuffer: " + Utils.ByteArrayToString ( bytes ) +
+                    " => Decrypt: [ " + bytesOfData.ToString ( "D2" ) + " -> " + buffer_ble_data.Count + " ] " +
+                    Utils.ByteArrayToString ( tempArray ) );
+                
+                //Utils.Print("Rx buffer updated");
             }
-            Console.WriteLine("Rx buffer updated");
+            catch ( Exception e )
+            {
+                Utils.PrintDeep ( "BlePort.UpdateBuffer -> ERROR: " + e.Message );
+                
+                throw e;
+            }
         }
 
         /// <summary>
@@ -444,22 +502,34 @@ namespace ble_library
                     // Optional IProgress<ConnectionProgress>
                     progress =>
                     {
-                            //                    Console.WriteLine(progress);
+                            //                    Utils.Print(progress);
                             //dialogs.Toast("Progreso: " + progress.ToString());
                         }
                 );
 
                 if (connection.IsSuccessful())
                 {
-
-
                     gattServer_connection = connection.GattServer;
-                    //                Console.WriteLine(gattServer_connection.State); // e.g. ConnectionState.Connected
+                    //                Utils.Print(gattServer_connection.State); // e.g. ConnectionState.Connected
                     // the server implements IObservable<ConnectionState> so you can subscribe to its state
                     gattServer_connection.Subscribe(new ObserverReporter(this));
 
                     adapter.CurrentState.Subscribe(new BluetoothStatusReporter(this));
 
+                    gattServer_connection.SubscribeOnError ( ( Exception e ) =>
+                    {
+                        Utils.PrintDeep ( "GATT server error: " + e.Message );
+                    });
+                    
+                    gattServer_connection.SubscribeOnComplete ( () =>
+                    {
+                        Utils.PrintDeep ( "GATT server: On Complete" );
+                    });
+                    
+                    gattServer_connection.SubscribeOnNext ( ( ConnectionState state ) =>
+                    {
+                        Utils.PrintDeep ( "GATT server: On Next = " + state );
+                    });
 
                     ble_peripheral = ble_device;
 
@@ -467,25 +537,19 @@ namespace ble_library
                 }
                 else
                 {
-
-
-
                     // Do something to inform user or otherwise handle unsuccessful connection.
-                    //                Console.WriteLine("Error connecting to device. result={0:g}", connection.ConnectionResult);
+                    //                Utils.Print("Error connecting to device. result={0:g}", connection.ConnectionResult);
                     // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
-
                 }
             }
             catch (GattException ex)
             {
-                Console.WriteLine(ex.ToString());
+                Utils.Print(ex.ToString());
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Utils.Print(e);
             }
-
-
         }
 
         /// <summary>
@@ -510,7 +574,7 @@ namespace ble_library
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.StackTrace);
+                        Utils.Print(e.StackTrace);
                     }
                     connectionError = DYNAMIC_KEY_ERROR;
                     DisconnectDevice();
@@ -539,7 +603,7 @@ namespace ble_library
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.StackTrace);
+                        Utils.Print(e.StackTrace);
                     }
                     isConnected = CONNECTED;
                     connectionError = NO_ERROR;
@@ -551,17 +615,51 @@ namespace ble_library
         /// <summary>
         /// Updates Ack buffer with the notification data received 
         /// </summary>
-        private void UpdateACKBuffer(byte[] bytes)
+        private async void UpdateACKBuffer ( byte[] bytes )
         {
-            if (bytes.Skip(3).Take(1).ToArray().SequenceEqual(new byte[] { 0x01 }))
+            bool fail = false;
+        
+            try
             {
-                cipheredDataSentCounter = bytes.Skip(1).Take(1).ToArray()[0];
-                cipheredDataSentCounter++;
-                if (cipheredDataSentCounter == 0)
+                Utils.PrintDeep ( "BlePort.UpdateACKBuffer: " + Utils.ByteArrayToString ( bytes ) );
+            
+                //bytes.Skip(3).Take(1).ToArray().SequenceEqual(new byte[] { 0x01 }))
+                if ( bytes[ LENGTH_HEADER ] == 0x01 )
                 {
-                    cipheredDataSentCounter = 1;
+                    Utils.PrintDeep ( "BlePort.UpdateACKBuffer -> NO" );
+                
+                    //cipheredDataSentCounter = bytes.Skip(1).Take(1).ToArray()[0];
+                    cipheredDataSentCounter = bytes[ INDEX_CYPHER_COUNT ]++;
+                    if ( cipheredDataSentCounter <= 0 )
+                        cipheredDataSentCounter = 1;
+                    
+                    Utils.PrintDeep ( "* BlePort.UpdateACKBuffer -> IF" +
+                        " Buffer " + Utils.ByteArrayToString ( writeSavedBuffer ) +
+                        " | CipheredDataSentCounter " + cipheredDataSentCounter +
+                        " | Offset " + writeSavedOffset.ToString ( "D2" ) +
+                        " | count " + writeSavedCount.ToString ( "D2" ) );
+                    
+                    await Write_Characteristic(writeSavedBuffer, writeSavedOffset, writeSavedCount);
+                    
+                    return;
                 }
-                Write_Characteristic(writeSavedBuffer, writeSavedOffset, writeSavedCount);
+            }
+            catch ( Exception e )
+            {
+                Utils.PrintDeep ( "BlePort.UpdateACKBuffer -> ERROR: " + e.Message );
+                
+                fail = true;
+            }
+            
+            // From this method is not possible to launch
+            // an exception because is not bubbled as expected
+            ackException.SetResult ( fail );
+            
+            if ( ! fail )
+            {
+                Utils.PrintDeep ( "BlePort.UpdateACKBuffer -> Release semaphore" );
+
+                this.semaphore.Release ();
             }
         }
 
@@ -596,7 +694,7 @@ namespace ble_library
                 //}
                 //catch (GattException ex)
                 //{
-                //    Console.WriteLine(ex.ToString());
+                //    Utils.Print(ex.ToString());
                 //}
 
                 //gattServer_connection.NotifyCharacteristicValue(
@@ -621,15 +719,15 @@ namespace ble_library
                     {
                         ListAllServices.Add(guid);
                         ListAllCharacteristics.Add("_______________________________");
-                        Console.WriteLine("_______________________________");
+                        Utils.Print("_______________________________");
                         ListAllCharacteristics.Add("Service: " + "\n\r" + guid + "\n\r");
-                        Console.WriteLine("Service: " + "\n\r" + guid + "\n\r");
+                        Utils.Print("Service: " + "\n\r" + guid + "\n\r");
                         ListAllCharacteristics.Add("________Caracteristics_________");
-                        Console.WriteLine("________Caracteristics_________");
+                        Utils.Print("________Caracteristics_________");
                         foreach (var DescriptionOrGuid in await gattServer_connection.ListServiceCharacteristics(guid))
                         {
                             ListAllCharacteristics.Add(DescriptionOrGuid);
-                            Console.WriteLine(DescriptionOrGuid);
+                            Utils.Print(DescriptionOrGuid);
                         }
                     }
                 }
@@ -651,7 +749,7 @@ namespace ble_library
                     }
                     catch (Exception test)
                     {
-                        Console.WriteLine(test.StackTrace); reintentos = 1;
+                        Utils.Print(test.StackTrace); reintentos = 1;
                     }
 
                     reintentos--;
@@ -739,7 +837,7 @@ namespace ble_library
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine(e.StackTrace);
+                            Utils.Print(e.StackTrace);
                         }
                         connectionError = NO_DYNAMIC_KEY_ERROR;
                         DisconnectDevice();
@@ -798,23 +896,17 @@ namespace ble_library
             }
             catch (GattException ex)
             {
-                Console.WriteLine(ex.ToString());
+                Utils.Print(ex.ToString());
             }
         }
-
-
 
         /// <summary>
         /// Updates Ack buffer with the notification data received 
         /// </summary>
         private void UpdateBatteryLevel(byte[] bytes)
         {
-
             batteryLevel = bytes;
         }
-
-
-
 
         /// <summary>
         /// AES Decryptation algorithm
@@ -822,6 +914,9 @@ namespace ble_library
         private byte[] AES_Decrypt(byte[] bytesToBeDecrypted, byte[] passwordBytes)
         {
             byte[] decryptedBytes = null;
+        
+            try
+            {
 
             using (MemoryStream ms = new MemoryStream())
             {
@@ -841,6 +936,12 @@ namespace ble_library
                     decryptedBytes = ms.ToArray();
                 }
             }
+            }
+            catch ( Exception e )
+            {
+                Utils.PrintDeep ( "BlePorts.AES_Decrypt -> ERROR: " + e.Message );
+            }
+
             return decryptedBytes;
         }
 
@@ -891,7 +992,7 @@ namespace ble_library
                     }
                     catch (Exception e1)
                     {
-                        Console.WriteLine(e1.StackTrace);
+                        Utils.Print(e1.StackTrace);
                     }
 
                     try
@@ -900,7 +1001,7 @@ namespace ble_library
                     }
                     catch (Exception e2)
                     {
-                        Console.WriteLine(e2.StackTrace);
+                        Utils.Print(e2.StackTrace);
                     }
 
 
@@ -910,7 +1011,7 @@ namespace ble_library
                     }
                     catch (Exception e3)
                     {
-                        Console.WriteLine(e3.StackTrace);
+                        Utils.Print(e3.StackTrace);
                     }
 
 
@@ -930,7 +1031,7 @@ namespace ble_library
                 }
                 catch (Exception e2)
                 {
-                    Console.WriteLine(e2.StackTrace);
+                    Utils.Print(e2.StackTrace);
                 }
 
             }
@@ -947,7 +1048,7 @@ namespace ble_library
                 }
                 catch (Exception e2)
                 {
-                    Console.WriteLine(e2.StackTrace);
+                    Utils.Print(e2.StackTrace);
                 }
             }
         }
@@ -958,11 +1059,11 @@ namespace ble_library
         private async Task ScanForBroadcasts()
         {
 
-           // Console.WriteLine($"--------------------------------------------------------------Empieza el escaneo: {isScanning.ToString()} thread: {Thread.CurrentThread.ManagedThreadId}");
+           // Utils.Print($"--------------------------------------------------------------Empieza el escaneo: {isScanning.ToString()} thread: {Thread.CurrentThread.ManagedThreadId}");
             if (!isScanning)
             {
                 //List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
-               // Console.WriteLine($"--------------------------------------------------------------Escaneando: thread: {Thread.CurrentThread.ManagedThreadId}");
+               // Utils.Print($"--------------------------------------------------------------Escaneando: thread: {Thread.CurrentThread.ManagedThreadId}");
                 BlePeripheralList.Clear();
                 isScanning = true;
                 await adapter.ScanForBroadcasts(
@@ -998,10 +1099,9 @@ namespace ble_library
                 //BlePeripheralList = BlePeripheralListAux;
             }
             isScanning = false;
-          //  Console.WriteLine($"-----------------------------------------------------Escaneado terminado, encontrados: {BlePeripheralList.Count}, thread: {Thread.CurrentThread.ManagedThreadId}");
+          //  Utils.Print($"-----------------------------------------------------Escaneado terminado, encontrados: {BlePeripheralList.Count}, thread: {Thread.CurrentThread.ManagedThreadId}");
             // scanning has been stopped when code reached this point
         }
-
 
         public byte[] GetBatteryLevel()
         {
@@ -1020,6 +1120,4 @@ namespace ble_library
         }
         */
     }
-
-
 }

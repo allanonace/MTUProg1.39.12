@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading.Tasks;
+using Lexi.Interfaces;
+using Library;
 using nexus.protocols.ble;
 using nexus.protocols.ble.scan;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Plugin.Settings.Abstractions;
-using Lexi.Interfaces;
 
 namespace ble_library
 {
@@ -52,27 +53,44 @@ namespace ble_library
         /// <returns>The number of bytes read.</returns>
         public int Read(byte[] buffer, int offset, int count)
         {
+            Utils.PrintDeep ( "-------READ_START--------" );
+        
+            Utils.PrintDeep ( "BleSerial.Read.." +
+                " Offset " + offset.ToString ( "D2" ) +
+                " | Count " + count.ToString ( "D2" ) );
+        
             ExceptionCheck(buffer, offset, count);
 
-            int readedElements = 0;
-
-            try{
-                for (int i = 0; i < count; i++)
+            try
+            {
+                for ( int i = 0; i < count; i++ )
                 {
-                    if (ble_port_serial.BytesToRead() == 0)
+                    // FIFO collection to read data frames in the same order received
+                    buffer[ i+offset ] = ble_port_serial.GetBufferElement ();
+                    
+                    // Last two bytes are the CRC
+                    if ( ble_port_serial.BytesToRead () == 0 )
                     {
-                        return readedElements;
+                        Utils.PrintDeep ( "BleSerial.Read.." +
+                        " DataFrames " + ( i+1 ).ToString ( "D2" ) +
+                        " | Buffer " + Utils.ByteArrayToString ( buffer ) );
+                    
+                        return i+1;
                     }
-                    buffer[i+offset] = ble_port_serial.GetBufferElement();
-                    readedElements++;
                 }
             }
             catch (Exception e)
             {
+                Utils.PrintDeep ( "BleSerial.Read -> ERROR: " + e.Message );
+            
                 throw e;
-            }  
-         
-            return readedElements;
+            }
+            finally
+            {
+                Utils.PrintDeep ( "-------READ_FINISH-------" );
+            }
+
+            return 0;
         }
 
         /// <summary>
@@ -82,26 +100,50 @@ namespace ble_library
         /// <param name="offset">The zero-based byte offset in the buffer parameter at which to begin copying bytes to the port.</param>
         /// <param name="count">The number of bytes to write.</param>
         /// <remarks></remarks>
-        public void Write(byte[] buffer, int offset, int count)
+        public async Task Write(byte[] buffer, int offset, int count)
         {
-            int bytesToWrite = count;
-            int bytesWritten = 0;
-            ExceptionCheck(buffer, offset, count);
-            do
+            Utils.PrintDeep ( "-------WRITE_START-------" );
+        
+            Utils.PrintDeep ( "BleSerial.Write.." +
+                " Buffer " + Utils.ByteArrayToString ( buffer ) +
+                " | Offset ( is always ) " + offset.ToString ( "D2" ) +
+                " | Count " + count.ToString ( "D2" ) );
+        
+            try
             {
-                int currentWriteCount = 16;
-                if (bytesToWrite <= 16)
+                ExceptionCheck ( buffer, offset, count );
+            
+                ble_port_serial.ClearBuffer ();
+            
+                int totalBytesToWrite = count;
+                int bytesWritten = 0;
+                do
                 {
-                    currentWriteCount = bytesToWrite;
+                    // Each data frame max length is 16
+                    int bytesDataFrame = ( totalBytesToWrite < 16 ) ? totalBytesToWrite : 16;
+    
+                    Utils.PrintDeep ( "BleSerial.Write.." +
+                        " TotalBytes " + totalBytesToWrite.ToString ( "D2" ) +
+                        " | Written " + bytesWritten.ToString ( "D2" ) +
+                        " | NextDataFrame " + bytesDataFrame.ToString ( "D2" ) );
+                    
+                    await ble_port_serial.Write_Characteristic ( buffer, bytesWritten + offset, bytesDataFrame );
+                    
+                    totalBytesToWrite -= bytesDataFrame;
+                    bytesWritten      += bytesDataFrame;
                 }
-                ble_port_serial.ClearBuffer();   // TO-DO
-                ble_port_serial.Write_Characteristic(buffer, bytesWritten + offset, currentWriteCount);
-                // TODO: check ack before next iteration
-
-                bytesToWrite = bytesToWrite - currentWriteCount;
-                bytesWritten = bytesWritten + currentWriteCount;
+                while ( totalBytesToWrite > 0 );
             }
-            while (bytesToWrite > 0);
+            catch ( Exception e )
+            {
+                Utils.PrintDeep ( "BleSerial.Write -> ERROR: " + e.Message );
+            
+                throw e;
+            }
+            finally
+            {
+                Utils.PrintDeep ( "-------WRITE_FINISH------" );
+            }
         }
 
         /// <summary>

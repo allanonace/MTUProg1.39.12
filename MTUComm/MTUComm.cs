@@ -1,20 +1,21 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Lexi.Interfaces;
+using Library;
 using MTUComm.actions;
-using MTUComm.Exceptions;
+using Library.Exceptions;
 using MTUComm.MemoryMap;
 using Xml;
-using System.Text;
 
-using ActionType  = MTUComm.Action.ActionType;
-using FIELD       = MTUComm.actions.AddMtuForm.FIELD;
-using LogDataType = MTUComm.LogQueryResult.LogDataType;
+using ActionType    = MTUComm.Action.ActionType;
+using FIELD         = MTUComm.actions.AddMtuForm.FIELD;
+using LogDataType   = MTUComm.LogQueryResult.LogDataType;
 using ParameterType = MTUComm.Parameter.ParameterType;
 
 namespace MTUComm
@@ -33,6 +34,7 @@ namespace MTUComm
         private const int SAME_MTU_DATA        = 10;
         private const int WAIT_BTW_TURNOFF     = 500;
         private const int WAIT_BTW_IC          = 1000;
+        private const int WAIT_BEFORE_READ     = 1000;
         
         private const int TIMES_TURNOFF = 3;
 
@@ -53,7 +55,7 @@ namespace MTUComm
 
         #region Delegates and Events
 
-        public delegate void ReadMtuHandler(object sender, ReadMtuArgs e);
+        public delegate Task ReadMtuHandler(object sender, ReadMtuArgs e);
         public event ReadMtuHandler OnReadMtu;
 
         public delegate void TurnOffMtuHandler(object sender, TurnOffMtuArgs e);
@@ -65,7 +67,7 @@ namespace MTUComm
         public delegate void ReadMtuDataHandler(object sender, ReadMtuDataArgs e);
         public event ReadMtuDataHandler OnReadMtuData;
 
-        public delegate ActionResult AddMtuHandler(object sender, AddMtuArgs e);
+        public delegate Task AddMtuHandler(object sender, AddMtuArgs e);
         public event AddMtuHandler OnAddMtu;
 
         public delegate void BasicReadHandler(object sender, BasicReadArgs e);
@@ -262,7 +264,7 @@ namespace MTUComm
                 // that cancel the action but not move to the main menu and could be happen
                 // that perform the basic read with a different MTU
                 if ( ! this.basicInfoLoaded )
-                    this.LoadMtuAndMetersBasicInfo ();
+                    await this.LoadMtuAndMetersBasicInfo ();
                 
                 Action.SetCurrentMtu ( this.latest_mtu );
 
@@ -300,6 +302,8 @@ namespace MTUComm
 
         #region Actions
 
+        #region Read Data
+
         public void Task_ReadDataMtu ( int NumOfDays )
         {
             DateTime start = DateTime.Now.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
@@ -332,11 +336,13 @@ namespace MTUComm
             }
         }
 
+        #endregion
+
         #region Install Confirmation
 
-        public void Task_InstallConfirmation ()
+        public async Task Task_InstallConfirmation ()
         {
-            if ( this.InstallConfirmation_Logic () < RESULT_EXCEPTION )
+            if ( await this.InstallConfirmation_Logic () < RESULT_EXCEPTION )
                 this.Task_ReadMtu ();
             else
                 this.OnError ();
@@ -348,7 +354,7 @@ namespace MTUComm
         /// <returns>0 OK, 1 Not achieved, 2 Error</returns>
         /// <param name="force">If set to <c>true</c> force.</param>
         /// <param name="time">Time.</param>
-        private int InstallConfirmation_Logic (
+        private async Task<int> InstallConfirmation_Logic (
             bool force   = false,
             int  time    = 0 )
         {
@@ -357,20 +363,16 @@ namespace MTUComm
             // DEBUG
             //this.WriteMtuBit ( 22, 0, false ); // Turn On MTU
             
-            MemRegister regICNotSynced = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationNotSynced" );
-            MemRegister regICRequest   = configuration.getFamilyRegister ( this.mtu, "InstallConfirmationRequest"   );
-            
-            // Reset to fail state the Install Confirmation result
-            // Set bit to true/one, because loop detection will continue while it doesn't change to false/zero
-            uint addressNotSynced = ( uint )regICNotSynced.Address;
-            uint bitSynced        = ( uint )regICNotSynced.Size;
+            dynamic map = this.GetMemoryMap ();
+            MemoryRegister<bool> regICNotSynced = map.InstallConfirmationNotSynced;
+            MemoryRegister<bool> regICRequest   = map.InstallConfirmationRequest;
             
             bool wasNotAboutPuck = false;
             try
             {
-                Console.WriteLine ( "InstallConfirmation trigger start" );
+                Utils.Print ( "InstallConfirmation trigger start" );
                 
-                this.WriteMtuBit ( addressNotSynced, bitSynced, true );
+                await regICNotSynced.ValueWriteToMtu ( true );
 
                 // MTU is turned off
                 if ( ! force &&
@@ -389,7 +391,7 @@ namespace MTUComm
                 }
 
                 // Set to true/one this flag to request a time sync
-                this.WriteMtuBit ( ( uint )regICRequest.Address, ( uint )regICRequest.Size, true );
+                await regICRequest.ValueWriteToMtu ( true );
 
                 bool fail;
                 int  count = 1;
@@ -404,7 +406,7 @@ namespace MTUComm
                     
                     Thread.Sleep ( wait * 1000 );
                     
-                    fail = this.ReadMtuBit ( addressNotSynced, bitSynced );
+                    fail = await regICNotSynced.ValueReadFromMtu ();
                 }
                 // Is MTU not synced with DCU yet?
                 while ( fail &&
@@ -439,7 +441,7 @@ namespace MTUComm
                 {
                     Thread.Sleep ( WAIT_BTW_IC );
                     
-                    return this.InstallConfirmation_Logic ( force, time );
+                    return await this.InstallConfirmation_Logic ( force, time );
                 }
                 
                 // Finish with error
@@ -454,15 +456,15 @@ namespace MTUComm
 
         #region Turn On|Off
 
-        public void Task_TurnOnOffMtu (
+        public async Task Task_TurnOnOffMtu (
             bool on )
         {        
             if ( on )
-                 Console.WriteLine ( "TurnOffMtu start" );
-            else Console.WriteLine ( "TurnOnMtu start"  );
+                 Utils.Print ( "TurnOffMtu start" );
+            else Utils.Print ( "TurnOnMtu start"  );
 
             // Launchs exception 'ActionNotAchievedTurnOffException'
-            if ( this.TurnOnOffMtu_Logic ( on ) )
+            if ( await this.TurnOnOffMtu_Logic ( on ) )
             {
                 if ( on )
                      this.OnTurnOnMtu  ( this, new TurnOnMtuArgs  ( this.mtu ) );
@@ -470,22 +472,21 @@ namespace MTUComm
             }
         }
 
-        private bool TurnOnOffMtu_Logic (
+        private async Task<bool> TurnOnOffMtu_Logic (
             bool on,
             bool fromAdd = false,
             int  time = 0 )
         {
             try
             {
-                MemRegister regShipbit = configuration.getFamilyRegister ( this.mtu, "Shipbit" );
-                uint address = ( uint )regShipbit.Address;
-                uint bit     = ( uint )regShipbit.Size;
-            
-                this.WriteMtuBit ( address, bit, ! on );         // Set state of the shipbit
-                bool shipbit = this.ReadMtuBit ( address, bit ); // Read written value to verify
+                dynamic map = this.GetMemoryMap ();
+                MemoryRegister<bool> shipbit = map.Shipbit;
+                
+                await shipbit.ValueWriteToMtu ( ! on );         // Set state of the shipbit
+                bool  read = await shipbit.ValueReadFromMtu (); // Read written value to verify
                 
                 // Fail turning off MTU
-                if ( shipbit == on )
+                if ( read == on )
                     throw new AttemptNotAchievedTurnOffException ();
             }
             // System.IO.IOException = Puck is not well placed or is off
@@ -507,7 +508,7 @@ namespace MTUComm
                 {
                     Thread.Sleep ( WAIT_BTW_TURNOFF );
                     
-                    return this.TurnOnOffMtu_Logic ( on, fromAdd, time );
+                    return await this.TurnOnOffMtu_Logic ( on, fromAdd, time );
                 }
                 
                 // Finish with error
@@ -526,53 +527,26 @@ namespace MTUComm
 
         #region Read MTU
 
-        public void Task_ReadMtu ()
-        {
-            OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
-        
-            String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtu );
-            int memory_map_size    = configuration.GetmemoryMapSizeByMtuId ( this.mtu );
-
-            byte[] buffer = new byte[ memory_map_size ];
-
+        public async Task Task_ReadMtu ()
+        {        
             try
             {
-                // Activates flag to read Meter -> ¿¿¿ is correct, no ???
-                lexi.Write ( 64, new byte[] { 1 } );
-                Thread.Sleep ( 1000 );
-    
-                // Just until the previous byte to the AES encryption key
-                System.Buffer.BlockCopy ( lexi.Read ( 0, 255 ), 0, buffer, 0, 255 );
-    
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
+            
+                // Only read all required registers once
+                var map = this.GetMemoryMap ( true );
+            
+                // Activates flag to read Meter
+                await map.ReadMeter.ValueWriteToMtu ( true );
+                
+                Thread.Sleep ( WAIT_BEFORE_READ );
+                
                 // Check if the MTU is still the same
-                if ( ! this.IsSameMtu () )
+                if ( ! await this.IsSameMtu () )
                     throw new MtuHasChangeBeforeFinishActionException ();
-    
-                if (memory_map_size > 255)
-                {
-                    System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
-                    System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
-                }
-    
-                if (memory_map_size > 320)
-                {
-                    //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
-                }
-    
-                if (memory_map_size > 960)
-                    System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
-                    
-                // Generates the memory map with recovered data
-                dynamic map = new MemoryMap.MemoryMap ( buffer, memory_map_type, false );
-    
-                bool InstallConfirmationNotSynced = map.InstallConfirmationNotSynced;
-                string InstallConfirmationStatus = map.InstallConfirmationStatus;
-    
-                // Finish!
-                OnReadMtu ( this, new ReadMtuArgs ( map, this.mtu ) );
+             
+                // Generates log using the interface
+                await this.OnReadMtu ( this, new ReadMtuArgs ( map, this.mtu ) );
             }
             // MtuHasChangeBeforeFinishActionException
             // System.IO.IOException = Puck is not well placed or is off
@@ -593,7 +567,7 @@ namespace MTUComm
 
         private Action truquitoAction;
 
-        private void Task_AddMtu ( Action action )
+        private async Task Task_AddMtu ( Action action )
         {
             truquitoAction     = action;
             Parameter[] ps     = action.GetParameters ();
@@ -609,8 +583,9 @@ namespace MTUComm
             
             try
             {
-                MemRegister regP2Status = configuration.getFamilyRegister ( this.mtu, "P2StatusFlag" );
-                bool port2IsActivated = ReadMtuBit ( ( uint )regP2Status.Address, ( uint )regP2Status.Size );
+                dynamic map = this.GetMemoryMap ();
+            
+                bool port2IsActivated = await map.P2StatusFlag.GetValue ();
     
                 // Recover parameters from script and translante from Aclara nomenclature to our own
                 foreach ( Parameter parameter in ps )
@@ -1115,7 +1090,7 @@ namespace MTUComm
             this.Task_AddMtu ( form, action.user, action, true );
         }
 
-        private void Task_AddMtu (
+        private async Task Task_AddMtu (
             dynamic form,
             string user,
             Action action,
@@ -1134,24 +1109,24 @@ namespace MTUComm
 
                 #region Turn Off MTU
 
+                Utils.Print ( "------TURN_OFF_START-----" );
+
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Turning Off..." ) );
 
-                this.TurnOnOffMtu_Logic ( false, true );
+                await this.TurnOnOffMtu_Logic ( false, true );
                 addMtuLog.LogTurnOff ();
+                
+                Utils.Print ( "-----TURN_OFF_FINISH-----" );
 
                 #endregion
 
                 #region Add MTU
 
+                Utils.Print ( "--------ADD_START--------" );
+
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Preparing MemoryMap..." ) );
 
-                // Prepare memory map
-                String memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtu ); //( int )MtuForm.mtuBasicInfo.Type );
-                int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( this.mtu ); //( int )MtuForm.mtuBasicInfo.Type );
-
-                byte[] memory = new byte[ memory_map_size ];
-                dynamic map = new MemoryMap.MemoryMap ( memory, memory_map_type );
-                
+                dynamic map = this.GetMemoryMap ();
                 form.map = map;
 
                 #region Account Number
@@ -1230,7 +1205,8 @@ namespace MTUComm
 
                 #region Snap Reads
 
-                if ( global.AllowDailyReads && mtu.DailyReads && form.ContainsParameter ( FIELD.SNAP_READS ) )
+                if ( global.AllowDailyReads && mtu.DailyReads &&
+                     form.ContainsParameter ( FIELD.SNAP_READS ) )
                 {
                     map.DailyGMTHourRead = form.SnapReads.Value;
                 }
@@ -1301,7 +1277,7 @@ namespace MTUComm
 
                 if ( mtu.TimeToSync &&
                      global.AFC &&
-                     map.MtuSoftVersion >= 19 )
+                     await map.MtuSoftVersion.GetValue () >= 19 )
                 {
                     map.F12WAYRegister1Int  = global.F12WAYRegister1;
                     map.F12WAYRegister10Int = global.F12WAYRegister10;
@@ -1310,8 +1286,10 @@ namespace MTUComm
 
                 #endregion
 
+                Utils.Print ( "--------ADD_FINISH-------" );
+
                 // Check if the MTU is still the same
-                if ( ! this.IsSameMtu () )
+                if ( ! await this.IsSameMtu () )
                     throw new MtuHasChangeBeforeFinishActionException ();
 
                 #region Encryption
@@ -1319,6 +1297,8 @@ namespace MTUComm
                 // Only encrypt MTUs with SpecialSet set
                 if ( mtu.SpecialSet )
                 {
+                    Utils.Print ( "----ENCRYPTION_START-----" );
+                
                     OnProgress ( this, new ProgressArgs ( 0, 0, "Encrypting..." ) );
                 
                     MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
@@ -1328,13 +1308,13 @@ namespace MTUComm
                     bool   ok     = false;
                     byte[] aesKey = new byte[ regAesKey.size    ]; // 16 bytes
                     byte[] sha    = new byte[ regAesKey.sizeGet ]; // 32 bytes
-                
+                    
                     try
                     {
                         // Generate random key
                         RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
                         rng.GetBytes ( aesKey );
-                     
+                        
                         // Calculate SHA for the new random key
                         // Using .Net API
                         /*
@@ -1343,32 +1323,38 @@ namespace MTUComm
                             sha = mySHA256.ComputeHash ( aesKey );
                         }
                         */
+                        
                         // Using Aclara/StarProgrammer class
                         // Note: Generates different result than using .Net SHA256 class
                         MtuSha256 crypto = new MtuSha256 ();
                         crypto.GenerateSHAHash ( aesKey, out sha );
-
+                        
                         // Try to write and validate AES encryption key up to five times
                         for ( int i = 0; i < 5; i++ )
                         {
                             // Write key in the MTU
-                            regAesKey.ValueWriteToMtu ( lexi, aesKey );
+                            Utils.Print ( "Write key to MTU" );
+                            await regAesKey.ValueWriteToMtu ( aesKey );
+                            
                             Thread.Sleep ( 1000 );
                             
                             // Verify if the MTU is encrypted
-                            bool encrypted   = ( bool )regEncrypted.ValueReadFromMtu ( lexi );
-                            int  encrypIndex = ( int  )regEncryIndex.ValueReadFromMtu ( lexi );
+                            Utils.Print ( "Read Encrypted from MTU" );
+                            bool encrypted   = ( bool )await regEncrypted .ValueReadFromMtu ();
+                            Utils.Print ( "Read EncryptedIndex from MTU" );
+                            int  encrypIndex = ( int  )await regEncryIndex.ValueReadFromMtu ();
+                            
                             if ( ! encrypted || encrypIndex <= -1 )
-                            {
                                 continue; // Error
-                            }
                             else
                             {
-                                byte[] mtuSha = ( byte[] )regAesKey.ValueReadFromMtu ( lexi, true, regAesKey.sizeGet ); // 32 bytes
+                                Utils.Print ( "Read EncryptionKey (SHA) from MTU" );
+                                byte[] mtuSha = ( byte[] )await regAesKey.ValueReadFromMtu ( true ); // 32 bytes
+                                
                                 Thread.Sleep ( 100 );
 
                                 // Compare local sha and sha generate reading key from MTU
-                                if ( ! sha.SequenceEqual (mtuSha ) )
+                                if ( ! sha.SequenceEqual ( mtuSha ) )
                                      continue; // Error
                                 else
                                 {
@@ -1407,26 +1393,36 @@ namespace MTUComm
                         throw new ActionNotAchievedEncryptionException ( "5" );
                     
                     // Check if the MTU is still the same
-                    if ( ! this.IsSameMtu () )
+                    if ( ! await this.IsSameMtu () )
                         throw new MtuHasChangeBeforeFinishActionException ();
+                    
+                    Utils.Print ( "----ENCRYPTION_FINISH----" );
                 }
 
                 #endregion
 
+                Utils.Print ( "---WRITE_TO_MTU_START----" );
+
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Writing MemoryMap to MTU..." ) );
 
                 // Write changes into MTU
-                this.WriteMtuModifiedRegisters ( map );
-                addMtuLog.LogAddMtu ( isFromScripting );
+                await this.WriteMtuModifiedRegisters ( map );
+                await addMtuLog.LogAddMtu ( isFromScripting );
+                
+                Utils.Print ( "---WRITE_TO_MTU_FINISH---" );
 
                 #endregion
 
                 #region Turn On MTU
 
+                Utils.Print ( "------TURN_ON_START------" );
+
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Turning On..." ) );
 
-                this.TurnOnOffMtu_Logic ( true, true );
+                await this.TurnOnOffMtu_Logic ( true, true );
                 addMtuLog.LogTurnOn ();
+                
+                Utils.Print ( "-----TURN_ON_FINISH------" );
 
                 #endregion
 
@@ -1456,11 +1452,13 @@ namespace MTUComm
                        form.ContainsParameter ( FIELD.FORCE_TIME_SYNC ) &&
                        form.ForceTimeSync ) )
                 {
+                    Utils.Print ( "--------IC_START---------" );
+                
                     OnProgress ( this, new ProgressArgs ( 0, 0, "Install Confirmation..." ) );
                 
                     // Force to execute Install Confirmation avoiding problems
                     // with MTU shipbit, because MTU is just turned on
-                    if ( this.InstallConfirmation_Logic ( true ) > RESULT_OK )
+                    if ( await this.InstallConfirmation_Logic ( true ) > RESULT_OK )
                     {
                         // If IC fails by any reason, add 4 seconds delay before
                         // reading MTU Tamper Memory settings for Tilt Alarm
@@ -1468,53 +1466,58 @@ namespace MTUComm
                     }
                     
                     // Check if the MTU is still the same
-                    if ( ! this.IsSameMtu () )
+                    if ( ! await this.IsSameMtu () )
                         throw new MtuHasChangeBeforeFinishActionException ();
+                        
+                    Utils.Print ( "--------IC_FINISH--------" );
                 }
 
                 #endregion
 
                 #region Read MTU
 
+                Utils.Print ( "----FINAL_READ_START-----" );
+
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
 
-                lexi.Write(64, new byte[] { 1 });
+                await lexi.Write(64, new byte[] { 1 });
                 Thread.Sleep(1000);
 
-                byte[] buffer = new byte[1024];
+                byte[] buffer = new byte[ map.Length ];
 
-                System.Buffer.BlockCopy(lexi.Read(0, 255), 0, buffer, 0, 255);
+                System.Buffer.BlockCopy( await lexi.Read(0, 255), 0, buffer, 0, 255);
                 
                 // Check if the MTU is still the same
-                if ( ! this.IsSameMtu () )
+                if ( ! await this.IsSameMtu () )
                     throw new MtuHasChangeBeforeFinishActionException ();
                
-                if (memory_map_size > 255)
+                if ( map.Length > 255)
                 {
-                    System.Buffer.BlockCopy(lexi.Read(256, 64), 0, buffer, 256, 64);
-                    System.Buffer.BlockCopy(lexi.Read(318, 2), 0, buffer, 318, 2);
+                    System.Buffer.BlockCopy( await lexi.Read(256, 64), 0, buffer, 256, 64);
+                    System.Buffer.BlockCopy( await lexi.Read(318, 2), 0, buffer, 318, 2);
                 }
-                if (memory_map_size > 320)
+                if ( map.Length > 320)
                 {
                     //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
                     //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
                     //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
                     //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
                 }
-                if (memory_map_size > 960)
+                if ( map.Length > 960)
                 {
-                    System.Buffer.BlockCopy(lexi.Read(960, 64), 0, buffer, 960, 64);
+                    System.Buffer.BlockCopy( await lexi.Read(960, 64), 0, buffer, 960, 64);
                 }
 
                 // Check if the MTU is still the same
-                if ( ! this.IsSameMtu () )
+                if ( ! await this.IsSameMtu () )
                     throw new MtuHasChangeBeforeFinishActionException ();
 
                 // Third parameter ( false ) is for avoiding update/read values from the MTU
-                MemoryMap.MemoryMap readMemoryMap = new MemoryMap.MemoryMap ( buffer, memory_map_type, false );
+                MemoryMap.MemoryMap readMap = new MemoryMap.MemoryMap ( buffer, map.Family, false );
 
-                List<string> diff = new List<string>(map.GetModifiedRegistersDifferences(readMemoryMap));
-                if (diff.Count > 1 || (diff.Count == 1 && !diff.Contains("EncryptionKey")))
+                List<string> diff = new List<string> ( map.GetModifiedRegistersDifferences ( readMap ) );
+                if ( diff.Count >  1 ||
+                     diff.Count == 1 && !diff.Contains ( "EncryptionKey" ) )
                 {
                     // ERROR
                 }
@@ -1522,12 +1525,13 @@ namespace MTUComm
                 {
                     // OK
                 }
+                
+                Utils.Print ( "----FINAL_READ_FINISH----" );
 
                 #endregion
 
                 // Generate log to show on device screen
-                AddMtuArgs addMtuArgs = new AddMtuArgs ( readMemoryMap, mtu, form, addMtuLog );
-                this.OnAddMtu ( this, addMtuArgs );
+                await this.OnAddMtu ( this, new AddMtuArgs ( readMap, mtu, form, addMtuLog ) );
             }
             catch ( Exception e )
             {
@@ -1550,82 +1554,43 @@ namespace MTUComm
 
         #region Read|Write from|to MTU
 
-        public void WriteMtuModifiedRegisters ( MemoryMap.MemoryMap map )
+        public async Task WriteMtuModifiedRegisters ( MemoryMap.MemoryMap map )
         {
             List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
-            foreach ( dynamic r in modifiedRegisters )
-            {
-                try
-                {
-                    this.WriteMtuRegister ( ( uint )r.address, map.memory, ( uint )r.size );
-                }
-                catch ( Exception e )
-                {
-
-                }
-            }
+            
+            for ( int i = 0; i < modifiedRegisters.Count; i++ )
+                await modifiedRegisters[ i ].ValueWriteToMtu ( this.lexi );
+            
+            //foreach ( dynamic r in modifiedRegisters )
+            //    await r.ValueWriteToMtu ( this.lexi );
 
             modifiedRegisters.Clear ();
             modifiedRegisters = null;
         }
 
-        public void WriteMtuRegister(uint address, byte[] memory, uint length)
+        public async Task<bool> ReadMtuBit ( uint address, uint bit )
         {
-            byte[] tmp = new byte[ length ];
-            Array.Copy ( memory, address, tmp, 0, length );
-
-            Console.WriteLine ( "Write subpart: Addr {0} | Value {1} | Length {2}", address, BitConverter.ToString(tmp), length );
-
-            lexi.Write ( address, tmp );
-        }
-
-        public void WriteMtuRegister ( uint address, byte[] values )
-        {
-            Console.WriteLine ( "Write values: Addr {0} | Value {1} | Length {2}", address, BitConverter.ToString(values), values.Length );
-
-            lexi.Write ( address, values );
-        }
-
-        public T ReadMtuRegister<T> ( uint address, uint length )
-        {
-            byte value = ( lexi.Read ( address, length ) )[ 0 ];
-
-            return ( T )( object )value;
-        }
-        
-        public byte[] ReadMtuRegister ( uint address, uint length )
-        {
-            return ( lexi.Read ( address, length ) );
-        }
-
-        public bool ReadMtuBit ( uint address, uint bit )
-        {
-            byte value = ( lexi.Read ( address, 1 ) )[ 0 ];
+            byte value = ( await lexi.Read ( address, 1 ) )[ 0 ];
 
             return ( ( ( value >> ( int )bit ) & 1 ) == 1 );
         }
 
-        public void WriteMtuBit ( uint address, uint bit, bool active )
-        {
-            this.WriteMtuBitAndVerify ( address, bit, active, false );
-        }
-
-        public bool WriteMtuBitAndVerify ( uint address, uint bit, bool active, bool verify = true )
+        public async Task<bool> WriteMtuBitAndVerify ( uint address, uint bit, bool active, bool verify = true )
         {
             // Read current value
-            byte systemFlags = ( lexi.Read ( address, 1 ) )[ 0 ];
+            byte systemFlags = ( await lexi.Read ( address, 1 ) )[ 0 ];
 
             // Modify bit and write to MTU
             if ( active )
                  systemFlags = ( byte ) ( systemFlags |    1 << ( int )bit   );
             else systemFlags = ( byte ) ( systemFlags & ~( 1 << ( int )bit ) );
             
-            lexi.Write ( address, new byte[] { systemFlags } );
+            await lexi.Write ( address, new byte[] { systemFlags } );
 
             // Read new written value to verify modification
             if ( verify )
             {
-                byte valueWritten = ( lexi.Read ( address, 1 ) )[ 0 ];
+                byte valueWritten = ( await lexi.Read ( address, 1 ) )[ 0 ];
                 return ( ( ( valueWritten >> ( int )bit ) & 1 ) == ( ( active ) ? 1 : 0 ) );
             }
 
@@ -1635,36 +1600,23 @@ namespace MTUComm
 
         #endregion
 
-        // NO PARECE USARSE
-        public byte[] ReadComplete ( byte addr, uint length )
-        {
-            byte[] tmp = new byte[length];
-            uint maxReadBytes = 255;
-            uint readsNumber = length / maxReadBytes;
-            uint additionalBytes = length % maxReadBytes;
-
-            for (uint i = 0; i < readsNumber; i++)
-            {
-                uint currentAddr = i * maxReadBytes;
-                Array.Copy(lexi.Read(currentAddr, maxReadBytes), 0, tmp, currentAddr, maxReadBytes);
-            }
-
-            if (additionalBytes > 0)
-            {
-                uint currentAddr = readsNumber * maxReadBytes;
-                Array.Copy(lexi.Read(currentAddr, additionalBytes), 0, tmp, currentAddr, additionalBytes);
-            }
-
-            return tmp;
-        }
-
         #region AuxiliaryFunctions
         
-        private void LoadMtuAndMetersBasicInfo ()
+        private dynamic GetMemoryMap (
+            bool readFromMtuOnlyOnce = false )
+        {
+            // Prepare memory map
+            string memory_map_type = configuration.GetMemoryMapTypeByMtuId ( this.mtu );
+            int    memory_map_size = configuration.GetmemoryMapSizeByMtuId ( this.mtu );
+            
+            return new MemoryMap.MemoryMap ( new byte[ memory_map_size ], memory_map_type, readFromMtuOnlyOnce );
+        }
+        
+        private async Task LoadMtuAndMetersBasicInfo ()
         {
             OnProgress ( this, new ProgressArgs ( 0, 0, "Initial Reading..." ) );
         
-            if ( this.LoadMtuBasicInfo () )
+            if ( await this.LoadMtuBasicInfo () )
             {
                 this.basicInfoLoaded = true;
             
@@ -1683,15 +1635,15 @@ namespace MTUComm
             }
         }
 
-        private bool LoadMtuBasicInfo (
+        private async Task<bool> LoadMtuBasicInfo (
             bool isAfterWriting = false )
         {
             List<byte> finalRead = new List<byte> ();
         
             try
             {
-                byte[] firstRead  = lexi.Read ( BASIC_READ_1_ADDRESS, BASIC_READ_1_DATA );
-                byte[] secondRead = lexi.Read ( BASIC_READ_2_ADDRESS, BASIC_READ_2_DATA );
+                byte[] firstRead  = await lexi.Read ( BASIC_READ_1_ADDRESS, BASIC_READ_1_DATA );
+                byte[] secondRead = await lexi.Read ( BASIC_READ_2_ADDRESS, BASIC_READ_2_DATA );
                 finalRead.AddRange ( firstRead  );
                 finalRead.AddRange ( secondRead );
             }
@@ -1716,12 +1668,12 @@ namespace MTUComm
             return this.mtuHasChanged;
         }
 
-        private bool IsSameMtu ()
+        private async Task<bool> IsSameMtu ()
         {
             byte[] read;
             try
             {
-                read = lexi.Read ( SAME_MTU_ADDRESS, SAME_MTU_DATA );
+                read = await lexi.Read ( SAME_MTU_ADDRESS, SAME_MTU_DATA );
             }
             catch ( Exception e )
             {

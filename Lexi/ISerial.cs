@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
+using System.Threading.Tasks;
+
 namespace Lexi.Interfaces
 {
     /// <summary>
@@ -75,7 +77,7 @@ namespace Lexi.Interfaces
         /// <param name="offset">The zero-based byte offset in the buffer parameter at which to begin copying bytes to the port.</param>
         /// <param name="count">The number of bytes to write.</param>
         /// <remarks></remarks>
-        void Write(byte[] buffer, int offset, int count);
+        Task Write(byte[] buffer, int offset, int count);
 
         /// <summary>
         /// Closes the port connection, sets the <c>IsOpen</c> property to false, and disposes of the internal Stream object.

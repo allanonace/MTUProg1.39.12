@@ -7,8 +7,9 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Acr.UserDialogs;
+using Library;
 using MTUComm;
-using MTUComm.Exceptions;
+using Library.Exceptions;
 using Renci.SshNet;
 using Xamarin.Forms;
 using Xml;
@@ -143,7 +144,7 @@ namespace aclara_meters
                                         
                                         progress.PercentComplete = ( int )( NumFilesUploaded * 100 / filesToUpload.Count );
                                         
-                                        Console.WriteLine ( "- " + file.Directory.Name + " uploaded" );
+                                        Utils.Print ( "- " + file.Directory.Name + " uploaded" );
                                     }
                                 }
                             }

@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Lexi.Interfaces;
+using Library;
 using MTUComm.actions;
 using Xml;
-
-using System.Threading;
 
 namespace MTUComm
 {
@@ -176,6 +176,7 @@ namespace MTUComm
         {
             public ActionResult Result { get; private set; }
             public AddMtuLog FormLog;
+            public Mtu Mtu;
 
             public ActionFinishArgs(ActionResult result )
             {
@@ -509,12 +510,13 @@ namespace MTUComm
             }
         }
 
-        private void Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
+        private async Task Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
         {
-            ActionResult result = CreateActionResultUsingInterface ( e.MemoryMap, e.Mtu );
+            ActionResult result = await CreateActionResultUsingInterface ( e.MemoryMap, e.Mtu );
             this.lastLogCreated = logger.ReadMTU ( this, result, e.Mtu );
             ActionFinishArgs args = new ActionFinishArgs ( result );
-
+            args.Mtu = e.Mtu;
+            
             OnFinish ( this, args );
         }
 
@@ -527,17 +529,14 @@ namespace MTUComm
             OnFinish ( this, args );
         }
 
-        private ActionResult Comm_OnAddMtu(object sender, MTUComm.AddMtuArgs e)
+        private async Task Comm_OnAddMtu ( object sender, MTUComm.AddMtuArgs e )
         {
-            ActionResult result = CreateActionResultUsingInterface ( e.MemoryMap, e.MtuType, e.Form );
+            ActionResult result = await CreateActionResultUsingInterface ( e.MemoryMap, e.MtuType, e.Form );
             ActionFinishArgs args = new ActionFinishArgs ( result );
             e.AddMtuLog.LogReadMtu ( result );
             this.lastLogCreated = e.AddMtuLog.Save ();
-            
-            //args.FormLog = e.AddMtuLog;
 
             OnFinish ( this, args );
-            return result;
         }
 
         private void Comm_OnBasicRead(object sender, MTUComm.BasicReadArgs e)
@@ -596,7 +595,7 @@ namespace MTUComm
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e.Message + "\r\n" + e.StackTrace);
+                        Utils.Print(e.Message + "\r\n" + e.StackTrace);
                     }
                 }
 
@@ -625,7 +624,7 @@ namespace MTUComm
 
         #region Interface
 
-        private ActionResult CreateActionResultUsingInterface (
+        private async Task<ActionResult> CreateActionResultUsingInterface (
             dynamic map  = null,
             Mtu     mtu  = null,
             MtuForm form = null,
@@ -642,12 +641,12 @@ namespace MTUComm
             {
                 if ( parameter.Name.Equals ( IFACE_PORT ) )
                     for ( int i = 0; i < mtu.Ports.Count; i++ )
-                        result.addPort ( ReadPort ( i + 1, parameter.Parameters.ToArray (), map, mtu ) );
+                        result.addPort ( await ReadPort ( i + 1, parameter.Parameters.ToArray (), map, mtu ) );
                 else
                 {
                     try
                     {
-                        if ( ValidateCondition ( parameter.Conditional, map, mtu ) )
+                        if ( await ValidateCondition ( parameter.Conditional, map, mtu ) )
                         {
                             string value          = string.Empty;
                             string sourceWhere    = string.Empty;
@@ -668,7 +667,7 @@ namespace MTUComm
                                 case IFACE_MTU   : value      = mtu .GetProperty  ( sourceProperty ); break;
                                 case IFACE_PUCK  : value      = puck.GetProperty  ( sourceProperty ); break;
                                 case IFACE_FORM  : paramToAdd = form.GetParameter ( sourceProperty ); break;
-                                default          : value      = map .GetProperty  ( sourceProperty ).Value.ToString (); break; // MemoryMap.ParameterName
+                                default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                             }
                             
                             if ( ! sourceWhere.Equals ( IFACE_FORM ) &&
@@ -700,7 +699,7 @@ namespace MTUComm
             return result;
         }
 
-        private ActionResult ReadPort (
+        private async Task<ActionResult> ReadPort (
             int indexPort,
             InterfaceParameters[] parameters,
             dynamic map,
@@ -717,7 +716,7 @@ namespace MTUComm
             Type         gType    = global.GetType ();
 
             // Meter Serial Number
-            int meterId = map.GetProperty ( PORT_PREFIX + indexPort + "MeterType" ).Value;
+            int meterId = await map[ PORT_PREFIX + indexPort + "MeterType" ].GetValue ();
 
             // Port has installed a Meter
             if ( meterId > 0 )
@@ -738,14 +737,14 @@ namespace MTUComm
                     // Meter readings are treated in a special way
                     if ( parameter.Name.Equals ( IFACE_MREADING ) )
                     {
-                        if ( ValidateCondition ( parameter.Conditional, map, mtu, indexPort ) )
+                        if ( await ValidateCondition ( parameter.Conditional, map, mtu, indexPort ) )
                         {
                             try
                             {
-                                string meter_reading_error = map.GetProperty ( PORT_PREFIX + indexPort + IFACE_READERROR ).Value.ToString ();
+                                string meter_reading_error = ( await map[ PORT_PREFIX + indexPort + IFACE_READERROR ].GetValue () ).ToString ();
                                 if ( meter_reading_error.Length < 1 )
                                 {
-                                    ulong meter_reading  = map.GetProperty ( PORT_PREFIX + indexPort + IFACE_MREADING ).Value;
+                                    ulong meter_reading  = await map[ PORT_PREFIX + indexPort + IFACE_MREADING ].GetValue ();
                                     ulong tempReadingVal = ( ! mtu.PulseCountOnly ) ? meter_reading : meter_reading * ( ulong )meter.HiResScaling;
                                     
                                     String tempReading = tempReadingVal.ToString ();
@@ -790,7 +789,7 @@ namespace MTUComm
                     {
                         try
                         {
-                            if ( ValidateCondition ( parameter.Conditional, map, mtu, indexPort ) )
+                            if ( await ValidateCondition ( parameter.Conditional, map, mtu, indexPort ) )
                             {
                                 string value          = string.Empty;
                                 string sourceWhere    = string.Empty;
@@ -809,7 +808,7 @@ namespace MTUComm
                                     case IFACE_PORT : value = portType .GetProperty ( sourceProperty ); break;
                                     case IFACE_MTU  : value = mtu      .GetProperty ( sourceProperty ); break;
                                     case IFACE_METER: value = meter    .GetProperty ( sourceProperty ); break;
-                                    default         : value = map.GetProperty ( PORT_PREFIX + indexPort + sourceProperty ).Value.ToString (); break; // MemoryMap.ParameterName
+                                    default         : value = ( await map[ PORT_PREFIX + indexPort + sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                                 }
                                 
                                 if ( ! string.IsNullOrEmpty ( value ) )
@@ -847,7 +846,7 @@ namespace MTUComm
             return result;
         }
 
-        private bool ValidateCondition (
+        private async Task<bool> ValidateCondition (
             string conditionStr,
             dynamic map,
             Mtu mtu,
@@ -895,9 +894,9 @@ namespace MTUComm
                             // Recover register from MTU memory map
                             // Some registers have port sufix but other not
                             if ( map.ContainsMember ( port + condProperty ) )
-                                currentValue = map.GetProperty ( port + condProperty ).Value.ToString ();
+                                currentValue = ( await map[ port + condProperty ].GetValue () ).ToString ();
                             else if ( map.ContainsMember ( condProperty ) )
-                                currentValue = map.GetProperty ( condProperty ).Value.ToString ();
+                                currentValue = ( await map[ condProperty ].GetValue () ).ToString ();
                             break;
                     }
 

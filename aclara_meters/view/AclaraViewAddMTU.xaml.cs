@@ -5,6 +5,7 @@ using aclara_meters.Behaviors;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
 using Acr.UserDialogs;
+using Library;
 using MTUComm;
 using MTUComm.actions;
 using Plugin.Geolocator;
@@ -450,10 +451,10 @@ namespace aclara_meters.view
             #endregion
         }
 
-        private void SetPort2Buttons ()
+        private async void SetPort2Buttons ()
         {
             // Port2 form starts visible or hidden depends on bit 1 of byte 28
-            this.port2IsActivated = this.add_mtu.comm.ReadMtuBit ( 28, 1 );
+            this.port2IsActivated = await this.add_mtu.comm.ReadMtuBit ( 28, 1 );
 
             Global global = FormsApp.config.global;
 
@@ -2465,7 +2466,7 @@ namespace aclara_meters.view
     
                 selected_MeterType_Name = selectedMeter.Display;
     
-                Console.WriteLine(selected_MeterType_Name + " Selected");
+                Utils.Print(selected_MeterType_Name + " Selected");
     
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -2501,7 +2502,7 @@ namespace aclara_meters.view
     
                 selected_MeterType_Name_2 = selectedMeter.Display;
                 
-                Console.WriteLine(selected_MeterType_Name_2 + " Selected");
+                Utils.Print(selected_MeterType_Name_2 + " Selected");
     
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -2604,7 +2605,7 @@ namespace aclara_meters.view
                     }
                     catch (Exception w1)
                     {
-                        Console.WriteLine(w1.StackTrace);
+                        Utils.Print(w1.StackTrace);
                     }
                 }
             }
@@ -3315,7 +3316,7 @@ namespace aclara_meters.view
                 }
                 catch (Exception i2)
                 {
-                    Console.WriteLine(i2.StackTrace);
+                    Utils.Print(i2.StackTrace);
                 }
             }));
         }
@@ -3511,7 +3512,7 @@ namespace aclara_meters.view
             }
             catch (Exception e25)
             {
-                Console.WriteLine(e25.StackTrace);
+                Utils.Print(e25.StackTrace);
             }
 
             background_scan_page.IsEnabled = true;
@@ -3956,7 +3957,7 @@ namespace aclara_meters.view
         {
             if ( ! this.waitOnClickLogic )
             {
-                Console.WriteLine ( "CLICK!" );
+                Utils.Print ( "CLICK!" );
             
                 this.waitOnClickLogic = true;
                 
@@ -3964,14 +3965,14 @@ namespace aclara_meters.view
             }
         }
 
-        private void NewPort2ClickTask ()
+        private async Task NewPort2ClickTask ()
         {
             Global global = FormsApp.config.global;
 
             // Button for enable|disable the second port
             if ( ! global.Port2DisableNo )
             {
-                bool ok = this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
+                bool ok = await this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
 
                 // Bit have not changed -> return to previous state
                 if ( ok )
@@ -4569,7 +4570,7 @@ namespace aclara_meters.view
             output += "\n" + $"Accuracy: {position.Accuracy}";
             output += "\n" + $"Altitude: {position.Altitude}";
             output += "\n" + $"Altitude Accuracy: {position.AltitudeAccuracy}";
-            Console.WriteLine(output);
+            Utils.Print(output);
             //accuracy.Text = output.ToString();
 
             this.tbx_MtuGeolocationLat .Text = position.Latitude .ToString ();
@@ -4579,7 +4580,7 @@ namespace aclara_meters.view
 
         private void PositionError ( object sender, PositionErrorEventArgs e )
         {
-            Console.WriteLine(e.Error);
+            Utils.Print(e.Error);
         }
 
         private async Task GpsStopListening ()

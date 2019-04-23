@@ -13,7 +13,7 @@ using Plugin.Geolocator;
 using Plugin.Geolocator.Abstractions;
 using Renci.SshNet;
 using Xamarin.Forms;
-using MTUComm.Exceptions;
+using Library.Exceptions;
 
 namespace aclara_meters.view
 {

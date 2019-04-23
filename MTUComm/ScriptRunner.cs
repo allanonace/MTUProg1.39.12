@@ -7,7 +7,7 @@ using System.Xml.Serialization;
 using Lexi.Interfaces;
 using Xml;
 using System.Text.RegularExpressions;
-using MTUComm.Exceptions;
+using Library.Exceptions;
 
 using ActionType = MTUComm.Action.ActionType;
 

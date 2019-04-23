@@ -7,15 +7,16 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Acr.UserDialogs;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
-using Xamarin.Forms;
-using Plugin.Settings;
-using Xml;
+using Acr.UserDialogs;
+using Library;
 using MTUComm;
+using Plugin.Settings;
+using Xamarin.Forms;
+using Xml;
+
 using ActionType = MTUComm.Action.ActionType;
-using MTUComm.Observer;
 
 namespace aclara_meters.view
 {
@@ -99,7 +100,7 @@ namespace aclara_meters.view
                 }
                 catch (Exception i2)
                 {
-                    Console.WriteLine(i2.StackTrace);
+                    Utils.Print(i2.StackTrace);
                 }
             });
         }
@@ -405,7 +406,7 @@ namespace aclara_meters.view
             //    }
             //    catch (Exception v)
             //    {
-            //        Console.WriteLine(v.StackTrace);
+            //        Utils.Print(v.StackTrace);
             //    }
             //    contador--;
             //}
@@ -739,7 +740,7 @@ namespace aclara_meters.view
             //    {
             //        await Navigation.PopAsync(false);
             //    }catch(Exception v){
-            //        Console.WriteLine(v.StackTrace);
+            //        Utils.Print(v.StackTrace);
             //    }
             //    contador--;
             //}
@@ -752,7 +753,7 @@ namespace aclara_meters.view
             }
             catch (Exception v)
             {
-                Console.WriteLine(v.StackTrace);
+                Utils.Print(v.StackTrace);
             }     
         }
 
@@ -799,7 +800,7 @@ namespace aclara_meters.view
                 }
                 catch (Exception w1)
                 {
-                    Console.WriteLine(w1.StackTrace);
+                    Utils.Print(w1.StackTrace);
                 }
             }
             else
@@ -1632,7 +1633,8 @@ namespace aclara_meters.view
                 FinalReadListView = new List<ReadMTUItem>();
 
                 Parameter[] paramResult = e.Result.getParameters ();
-
+                
+                /*
                 int mtu_type = 0;
 
                 // Get MtuType = MtuID
@@ -1645,8 +1647,9 @@ namespace aclara_meters.view
                         break;
                     }
                 }
+                */
 
-                Mtu mtu = Configuration.GetInstance ().GetMtuTypeById ( mtu_type );
+                Mtu mtu = Configuration.GetInstance ().GetMtuTypeById ( e.Mtu.Id );
 
                 InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields( mtu, ActionType.ReadMtu );
 

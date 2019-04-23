@@ -6,21 +6,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Acr.UserDialogs;
-using aclara_meters.Helpers;
-using aclara_meters.Models;
-using Xamarin.Forms;
-using Plugin.Settings;
-using System.Linq;
-using System.Threading;
-using MTUComm;
-using System.IO;
-using nexus.protocols.ble.scan;
 using System.Collections.ObjectModel;
-using System.Web;
+using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using aclara_meters.Models;
+using Library;
+using MTUComm;
+using nexus.protocols.ble.scan;
+using Plugin.Settings;
+using Xamarin.Forms;
 
 using Error = Xml.Error;
 
@@ -192,7 +190,7 @@ namespace aclara_meters.view
                         }
                         catch (Exception e11)
                         {
-                            Console.WriteLine(e11.StackTrace);
+                            Utils.Print(e11.StackTrace);
                         }
                     }
                     //DeviceList.IsRefreshing = true;
@@ -426,7 +424,7 @@ namespace aclara_meters.view
                                 ContentView_DeviceList.Opacity = 1;
                                 ContentView_DeviceList.IsEnabled = true;
 
-                                //Console.WriteLine("CONNECTED");
+                                //Utils.Print("CONNECTED");
 
                                 ContentView_Scripting.IsVisible = true;
                                 ContentView_DeviceList.IsVisible = false;
@@ -505,7 +503,7 @@ namespace aclara_meters.view
                                         }
                                         catch (Exception e)
                                         {
-                                            Console.WriteLine(e.StackTrace);
+                                            Utils.Print(e.StackTrace);
                                         }
 
 
@@ -516,7 +514,7 @@ namespace aclara_meters.view
                                 }
                                 catch (Exception e)
                                 {
-                                    Console.WriteLine(e.StackTrace);
+                                    Utils.Print(e.StackTrace);
                                 }
 
                                 PrintToConsole("Se va a ejecutar el Script - InvokeMethod");
@@ -527,7 +525,7 @@ namespace aclara_meters.view
                                 }
                                 catch (Exception e5)
                                 {
-                                    Console.WriteLine(e5.StackTrace);
+                                    Utils.Print(e5.StackTrace);
                                 }
 
 
@@ -552,7 +550,7 @@ namespace aclara_meters.view
                             ContentView_DeviceList.Opacity = 1;
                             ContentView_DeviceList.IsEnabled = true;
 
-                            //Console.WriteLine("NOT CONNECTED");
+                            //Utils.Print("NOT CONNECTED");
                             ContentView_Scripting.IsVisible = false;
                             ContentView_DeviceList.IsVisible = true;
                           
@@ -600,7 +598,7 @@ namespace aclara_meters.view
                             }
                             catch (Exception e5)
                             {
-                                Console.WriteLine(e5.StackTrace);
+                                Utils.Print(e5.StackTrace);
                             }
 
                         });
@@ -664,7 +662,7 @@ namespace aclara_meters.view
                     }
                     catch (Exception e2)
                     {
-                        Console.WriteLine(e2.StackTrace);
+                        Utils.Print(e2.StackTrace);
 
                     }
 
@@ -824,7 +822,7 @@ namespace aclara_meters.view
                                                 }
                                                 catch (Exception e)
                                                 {
-                                                    Console.WriteLine(e.StackTrace);
+                                                    Utils.Print(e.StackTrace);
                                                 }
 
                                             }
@@ -879,13 +877,13 @@ namespace aclara_meters.view
                             catch (Exception er)
                             {
 
-                                Console.WriteLine(er.StackTrace); //2018-09-21 13:08:25.918 aclara_meters.iOS[505:190980] System.NullReferenceException: Object reference not set to an instance of an object
+                                Utils.Print(er.StackTrace); //2018-09-21 13:08:25.918 aclara_meters.iOS[505:190980] System.NullReferenceException: Object reference not set to an instance of an object
                             }
                         }
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
+                        Utils.Print(e);
                     }
              //   }
             //});
@@ -1014,7 +1012,7 @@ namespace aclara_meters.view
 
         private void onStepFinish(object sender, int step, MTUComm.Action.ActionFinishArgs e)
         {
-            Console.WriteLine("HI FINISH RUNNER");
+            Utils.Print("HI FINISH RUNNER");
             //throw new NotImplementedException();
         }
 
@@ -1170,7 +1168,7 @@ namespace aclara_meters.view
             }
             catch (Exception e5)
             {
-                Console.WriteLine(e5.StackTrace);
+                Utils.Print(e5.StackTrace);
             }
            
 
@@ -1215,7 +1213,7 @@ namespace aclara_meters.view
         public void PrintToConsole(string printConsole)
         {
             if(DEBUG_MODE_ON)
-                Console.WriteLine("DEBUG_ACL: " + printConsole);
+                Utils.Print("DEBUG_ACL: " + printConsole);
         }
     }
 }

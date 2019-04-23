@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MTUComm.Exceptions
+namespace Library.Exceptions
 {
     public class OwnExceptionsBase : Exception
     {

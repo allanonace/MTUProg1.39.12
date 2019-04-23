@@ -6,19 +6,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Acr.UserDialogs;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
-using Xamarin.Forms;
-using System.Threading;
-using nexus.protocols.ble.scan;
-using System.Collections.ObjectModel;
-using Plugin.Settings;
-using System.Linq;
+using Acr.UserDialogs;
+using Library;
 using MTUComm;
-
-using System.Security.Cryptography.X509Certificates;
+using nexus.protocols.ble.scan;
+using Plugin.Settings;
+using Xamarin.Forms;
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -150,13 +149,13 @@ namespace aclara_meters.view
                     {
                         try
                         {
-                            Console.WriteLine("---------------  printer resume");
+                            Utils.Print("---------------  printer resume");
                             //printer.Interrupt();
                             printer.Resume();
                         }
                         catch (Exception e11)
                         {
-                            Console.WriteLine(e11.StackTrace);
+                            Utils.Print(e11.StackTrace);
                         }
                     }
                     //DeviceList.IsRefreshing = true;
@@ -807,12 +806,12 @@ namespace aclara_meters.view
 
                             try
                             {
-                                Console.WriteLine("---------------  printer suspend");
+                                Utils.Print("---------------  printer suspend");
                                 printer.Suspend();
                             }
                             catch (Exception e5)
                             {
-                                Console.WriteLine($"------ {e5.StackTrace}, {e5.Message}");
+                                Utils.Print($"------ {e5.StackTrace}, {e5.Message}");
                             }
 
 
@@ -871,7 +870,7 @@ namespace aclara_meters.view
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.StackTrace);
+                    Utils.Print(e.StackTrace);
                 }
 
                 background_scan_page_detail.IsVisible = true;
@@ -917,7 +916,7 @@ namespace aclara_meters.view
               //  {
                     try
                     {
-                       // Console.WriteLine($"------------------------------- ChangeListViewData while IsScanning, thread: {Thread.CurrentThread.ManagedThreadId}");
+                       // Utils.Print($"------------------------------- ChangeListViewData while IsScanning, thread: {Thread.CurrentThread.ManagedThreadId}");
                         List<IBlePeripheral> blePeripherals;
                         blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
 
@@ -997,7 +996,7 @@ namespace aclara_meters.view
                                                 }
                                                 catch (Exception e)
                                                 {
-                                                    Console.WriteLine(e.StackTrace);
+                                                    Utils.Print(e.StackTrace);
                                                 }
 
                                             }
@@ -1044,13 +1043,13 @@ namespace aclara_meters.view
                             }
                             catch (Exception er)
                             {
-                                Console.WriteLine(er.StackTrace); //2018-09-21 13:08:25.918 aclara_meters.iOS[505:190980] System.NullReferenceException: Object reference not set to an instance of an object
+                                Utils.Print(er.StackTrace); //2018-09-21 13:08:25.918 aclara_meters.iOS[505:190980] System.NullReferenceException: Object reference not set to an instance of an object
                             }
                         }
                     }
                     catch (Exception e)
                     {
-                        Console.WriteLine(e);
+                        Utils.Print(e);
                     }
                 //}
            // });
@@ -1435,7 +1434,7 @@ namespace aclara_meters.view
             }
             catch (Exception e5)
             {
-                Console.WriteLine(e5.StackTrace);
+                Utils.Print(e5.StackTrace);
             }
            
         }
@@ -1490,14 +1489,14 @@ namespace aclara_meters.view
                     }
                     catch (Exception e4)
                     {
-                        Console.WriteLine(e4.StackTrace);
+                        Utils.Print(e4.StackTrace);
                     }
                 });
 
             }
             catch (Exception e22)
             {
-                Console.WriteLine(e22.StackTrace);
+                Utils.Print(e22.StackTrace);
             }
 
         }
@@ -1538,7 +1537,7 @@ namespace aclara_meters.view
                 }
                 catch (Exception w1)
                 {
-                    Console.WriteLine(w1.StackTrace);
+                    Utils.Print(w1.StackTrace);
                 }
             }
             else
@@ -2251,7 +2250,7 @@ namespace aclara_meters.view
                 }
                 catch (Exception i2)
                 {
-                    Console.WriteLine(i2.StackTrace);
+                    Utils.Print(i2.StackTrace);
                 }
             }));
         }
@@ -2304,7 +2303,7 @@ namespace aclara_meters.view
 
             if (GetDebugVar())
             {
-                Console.WriteLine("DEBUG_ACL: " + printConsole);
+                Utils.Print("DEBUG_ACL: " + printConsole);
             }
         }
 

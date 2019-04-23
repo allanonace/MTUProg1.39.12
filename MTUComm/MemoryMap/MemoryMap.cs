@@ -6,9 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Library;
+using Library.Exceptions;
 using Xml;
-using MTUComm.Exceptions;
+using Lexi;
 
 /// <summary>
 /// LOGIC:
@@ -28,9 +31,9 @@ using MTUComm.Exceptions;
 ///      ----
 ///      dynamicObject.member = reference to property;
 ///      property = 2;
-///      Console.WriteLine ( dynamicObject.member ); // 2 and member continues being reference to property
+///      Utils.Print ( dynamicObject.member ); // 2 and member continues being reference to property
 ///      dynamicObject.member = 33;
-///      Console.WriteLine ( dynamicObject.member ); // 33 but member now is only an integer, not previously referenced property
+///      Utils.Print ( dynamicObject.member ); // 33 but member now is only an integer, not previously referenced property
 ///      ----
 /// - 8. New register properties simulated using ExpandoObject have to be used as normal class members
 ///      "memoryMap.registers.idProperty" to get value, and "memoryMap.registers.idProperty = value" to set
@@ -65,9 +68,11 @@ namespace MTUComm.MemoryMap
         private const string XML_EXTENSION      = ".xml";
 
         private const string METHODS_GET_PREFIX = "get_";
+        
         private const string METHODS_SET_PREFIX = "set_";
         private const string METHODS_GET_CUSTOM_PREFIX = "getCustom_";
         private const string METHODS_SET_CUSTOM_PREFIX = "setCustom_";
+        private const string METHODS_GET_MAP_PREFIX    = METHODS_GET_PREFIX + "map_";
         private const string METHODS_GET_BYTE_PREFIX   = METHODS_GET_PREFIX + "byte_";
         private const string METHODS_SET_STRING_PREFIX = METHODS_SET_PREFIX + "string_";
         private const string METHODS_SET_BYTE_PREFIX   = METHODS_SET_PREFIX + "byte_";
@@ -98,26 +103,38 @@ namespace MTUComm.MemoryMap
 
         #endregion
 
+        public int Length
+        {
+            get { return this.memory.Length; }
+        }
+        
+        public string Family
+        {
+            get { return this.family; }
+        }
+
         #region Attributes
 
         public static bool isUnityTest { get; private set; }
 
-        public byte[] memory { private set; get; }
+        private byte[] memory;
         private Dictionary<string,dynamic> registersObjs;
         private Lexi.Lexi lexi;
-        private bool updateFromMtu;
+        private bool readFromMtuOnlyOnce;
+        private string family;
 
         #endregion
 
         #region Initialization
 
-        public MemoryMap ( byte[] memory, string family, bool updateFromMtu = true, string pathUnityTest = "" )
+        public MemoryMap ( byte[] memory, string family, bool readFromMtuOnlyOnce = false, string pathUnityTest = "" )
         {
-            this.lexi = Singleton.Get.Lexi;
+            this.lexi   = Singleton.Get.Lexi;
+            this.family = family;
             
             // The third argument is used because is impossible to know if a byte
             // in the memory argument was read from the MTU or is only an empty byte
-            this.updateFromMtu = updateFromMtu;
+            this.readFromMtuOnlyOnce = readFromMtuOnlyOnce;
         
             this.memory = memory;
             this.registersObjs = new Dictionary<string,dynamic>();
@@ -194,6 +211,7 @@ namespace MTUComm.MemoryMap
                             bool w = memoryRegister.write;
                             dynamic get  =                                               base.registers[ METHODS_GET_PREFIX        + memoryRegister.id ];
                             dynamic getC = ( memoryRegister.HasCustomMethod_Get      ) ? base.registers[ METHODS_GET_CUSTOM_PREFIX + memoryRegister.id ] : null;
+                            dynamic getM =                                               base.registers[ METHODS_GET_MAP_PREFIX    + memoryRegister.id ];
                             dynamic getB =                                               base.registers[ METHODS_GET_BYTE_PREFIX   + memoryRegister.id ];
                             dynamic set  = ( w                                       ) ? base.registers[ METHODS_SET_PREFIX        + memoryRegister.id ] : null;
                             dynamic setC = ( w && memoryRegister.HasCustomMethod_Set ) ? base.registers[ METHODS_SET_CUSTOM_PREFIX + memoryRegister.id ] : null;
@@ -204,47 +222,53 @@ namespace MTUComm.MemoryMap
                             switch (type)
                             {
                                 case RegType.INT:
-                                    memoryRegister.funcGet        = (Func<int>)get;
+                                    memoryRegister.funcGet        = (Func<Task<int>>)get;
+                                    memoryRegister.funcGetMap     = (Func<int>)getM;
                                     memoryRegister.funcSet        = (Action<int>)set;
-                                    memoryRegister.funcGetCustom  = (Func<int>)getC;
-                                    memoryRegister.funcGetFromMtu = (Func<int>)setM;
+                                    memoryRegister.funcGetCustom  = (Func<Task<int>>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<Task<int>>)setM;
                                     break;
                                 case RegType.UINT:
-                                    memoryRegister.funcGet        = (Func<uint>)get;
+                                    memoryRegister.funcGet        = (Func<Task<uint>>)get;
+                                    memoryRegister.funcGetMap     = (Func<uint>)getM;
                                     memoryRegister.funcSet        = (Action<uint>)set;
-                                    memoryRegister.funcGetCustom  = (Func<uint>)getC;
-                                    memoryRegister.funcGetFromMtu = (Func<uint>)setM;
+                                    memoryRegister.funcGetCustom  = (Func<Task<uint>>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<Task<uint>>)setM;
                                     break;
                                 case RegType.ULONG:
-                                    memoryRegister.funcGet        = (Func<ulong>)get;
+                                    memoryRegister.funcGet        = (Func<Task<ulong>>)get;
+                                    memoryRegister.funcGetMap     = (Func<ulong>)getM;
                                     memoryRegister.funcSet        = (Action<ulong>)set;
-                                    memoryRegister.funcGetCustom  = (Func<ulong>)getC;
-                                    memoryRegister.funcGetFromMtu = (Func<ulong>)setM;
+                                    memoryRegister.funcGetCustom  = (Func<Task<ulong>>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<Task<ulong>>)setM;
                                     break;
                                 case RegType.BOOL:
-                                    memoryRegister.funcGet        = (Func<bool>)get;
+                                    memoryRegister.funcGet        = (Func<Task<bool>>)get;
+                                    memoryRegister.funcGetMap     = (Func<bool>)getM;
                                     memoryRegister.funcSet        = (Action<bool>)set;
-                                    memoryRegister.funcGetCustom  = (Func<bool>)getC;
-                                    memoryRegister.funcGetFromMtu = (Func<bool>)setM;
+                                    memoryRegister.funcGetCustom  = (Func<Task<bool>>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<Task<bool>>)setM;
                                     break;
                                 case RegType.CHAR:
-                                    memoryRegister.funcGet        = (Func<char>)get;
+                                    memoryRegister.funcGet        = (Func<Task<char>>)get;
+                                    memoryRegister.funcGetMap     = (Func<char>)getM;
                                     memoryRegister.funcSet        = (Action<char>)set;
-                                    memoryRegister.funcGetCustom  = (Func<char>)getC;
-                                    memoryRegister.funcGetFromMtu = (Func<char>)setM;
+                                    memoryRegister.funcGetCustom  = (Func<Task<char>>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<Task<char>>)setM;
                                     break;
                                 case RegType.STRING:
-                                    memoryRegister.funcGet        = (Func<string>)get;
+                                    memoryRegister.funcGet        = (Func<Task<string>>)get;
+                                    memoryRegister.funcGetMap     = (Func<string>)getM;
                                     memoryRegister.funcSet        = (Action<string>)set;
-                                    memoryRegister.funcGetCustom  = (Func<string>)getC;
-                                    memoryRegister.funcGetFromMtu = (Func<string>)setM;
+                                    memoryRegister.funcGetCustom  = (Func<Task<string>>)getC;
+                                    memoryRegister.funcGetFromMtu = (Func<Task<string>>)setM;
                                     break;
                             }
                             
-                            memoryRegister.funcSetCustom = (Func<dynamic,dynamic>)setC;
+                            memoryRegister.funcSetCustom = (Func<dynamic,Task<dynamic>>)setC;
     
                             // All register have this three functions
-                            memoryRegister.funcGetByteArray = (Func<byte[]>)getB;
+                            memoryRegister.funcGetByteArray = (Func<bool,byte[]>)getB;
                             memoryRegister.funcSetString    = (Action<string>)setS;
                             memoryRegister.funcSetByteArray = (Action<byte[]>)setB;
     
@@ -261,7 +285,7 @@ namespace MTUComm.MemoryMap
                         catch ( Exception e )
                         {
                             throw new MemoryMapParseXmlException ( "ERROR: " + e.Message );
-                            Console.WriteLine ( "ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException );
+                            Utils.Print ( "ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException );
                         }
                     }
 
@@ -301,12 +325,12 @@ namespace MTUComm.MemoryMap
                         TypeCode tc = Type.GetTypeCode ( SysType.GetType() );
                         switch (type)
                         {
-                            case RegType.INT   : memoryOverload.funcGet = (Func<int>   )get; break;
-                            case RegType.UINT  : memoryOverload.funcGet = (Func<uint>  )get; break;
-                            case RegType.ULONG : memoryOverload.funcGet = (Func<ulong> )get; break;
-                            case RegType.BOOL  : memoryOverload.funcGet = (Func<bool>  )get; break;
-                            case RegType.CHAR  : memoryOverload.funcGet = (Func<char>  )get; break;
-                            case RegType.STRING: memoryOverload.funcGet = (Func<string>)get; break;
+                            case RegType.INT   : memoryOverload.funcGet = (Func<Task<int>>   )get; break;
+                            case RegType.UINT  : memoryOverload.funcGet = (Func<Task<uint>>  )get; break;
+                            case RegType.ULONG : memoryOverload.funcGet = (Func<Task<ulong>> )get; break;
+                            case RegType.BOOL  : memoryOverload.funcGet = (Func<Task<bool>>  )get; break;
+                            case RegType.CHAR  : memoryOverload.funcGet = (Func<Task<char>>  )get; break;
+                            case RegType.STRING: memoryOverload.funcGet = (Func<Task<string>>)get; break;
                         }
 
                         AddProperty ( memoryOverload );
@@ -316,7 +340,7 @@ namespace MTUComm.MemoryMap
                         catch ( Exception e )
                         {
                             throw new MemoryMapParseXmlException ( "ERROR: " + e.Message );
-                            Console.WriteLine ( "ERROR! " + xmlOverload.Id + " -> " + e.Message + " " + e.InnerException );
+                            Utils.Print ( "ERROR! " + xmlOverload.Id + " -> " + e.Message + " " + e.InnerException );
                         }
                         
                     }
@@ -332,21 +356,35 @@ namespace MTUComm.MemoryMap
         // Custom header format: public T RegisterId_Get|CustomId ( MemoryRegister<T> MemoryRegister )
         private void CreateProperty_Get<T> ( MemoryRegister<T> memoryRegister )
         {
+            #region Raw Get
+
+            // Always only from memory map
+            base.AddMethod ( METHODS_GET_MAP_PREFIX + memoryRegister.id,
+                new Func<T>(() =>
+                {
+                    // Get value from local memory map ( not using/reading the MTU )
+                    return this.PropertyGet_Logic ( memoryRegister );
+                }));
+
+            #endregion
+
             #region Normal Get
 
             // All register have normal get block
             base.AddMethod ( METHODS_GET_PREFIX + memoryRegister.id,
-                new Func<T>(() =>
+                new Func<Task<T>>( async () =>
                 {
                     // The register has not be loaded yet from the MTU or is a
                     // readonly registers that in any moment could change their value
-                    if ( this.updateFromMtu &&
+                    if ( ! this.readFromMtuOnlyOnce &&       // Always for not read yet or readonly registers
                          ( ! memoryRegister.readedFromMtu ||
-                           ! memoryRegister.write ) )
-                        return ( T )memoryRegister.funcGetFromMtu ();
+                           ! memoryRegister.write ) ||
+                         this.readFromMtuOnlyOnce &&
+                         ! memoryRegister.readedFromMtu )    // Only the first time for not read yet registers
+                        return await memoryRegister.funcGetFromMtu ();
                     
                     // Get value from local memory map ( not using/reading the MTU )
-                    return ( T )this.PropertyGet_Logic ( memoryRegister );
+                    return this.PropertyGet_Logic ( memoryRegister );
                 }));
 
             #endregion
@@ -355,16 +393,21 @@ namespace MTUComm.MemoryMap
 
             // Read from the MTU and update local memory map previous to return the value
             base.AddMethod ( METHODS_SET_MTU_PREFIX + memoryRegister.id,
-                new Func<T>(() =>
+                new Func<Task<T>> ( async () =>
                 {
-                    // Read current value from the MTU
-                    byte[] read = lexi.Read ( ( uint )memoryRegister.address, ( uint )memoryRegister.sizeGet );
-                    
-                    Console.WriteLine ( "Read from MTU: " + memoryRegister.id +
+                    Utils.Print ( "Map -> Read from MTU: " + memoryRegister.id +
                                         " | dir: " + memoryRegister.address +
                                         " | Size Get: " + memoryRegister.sizeGet +
                                         " | Size Set: " + memoryRegister.size +
+                                        " | Bit: " + memoryRegister.bit +
                                         " -> " + ( ( ! memoryRegister.write ) ? "Readonly" : "Not loaded" ) );
+                
+                    // Read current value from the MTU
+                    byte[] read = await lexi.Read ( ( uint )memoryRegister.address, ( uint )memoryRegister.sizeGet );
+                    
+                    memoryRegister.lastRead = read;
+                    
+                    Utils.Print ( "Map -> From MTU value: " + memoryRegister.id + " = " + Utils.ByteArrayToString ( read ) );
                     
                     // Convert byte array to desired format
                     object value = default ( T );
@@ -378,25 +421,32 @@ namespace MTUComm.MemoryMap
                         case TypeCode.String : value = ( object )this.GetStringFromMem_Logic ( read ); break;
                     }
                     
-                    Console.WriteLine ( "Converted value: " + value );
+                    Utils.PrintDeep ( "Map -> Converted value: " + memoryRegister.id + " = " + value );
                     
-                    // Write converted value in the memory map
-                    switch ( Type.GetTypeCode( typeof( T ) ) )
+                    // When sizeGet is different to size, no setting is performed, only recover
+                    if ( memoryRegister.size == memoryRegister.sizeGet ||
+                         memoryRegister.valueType == RegType.BOOL )
                     {
-                        case TypeCode.Int32  : this.SetIntToMem   ( ( int   )( object )value, memoryRegister.address, memoryRegister.size ); break;
-                        case TypeCode.UInt32 : this.SetUIntToMem  ( ( uint  )( object )value, memoryRegister.address, memoryRegister.size ); break;
-                        case TypeCode.UInt64 : this.SetULongToMem ( ( ulong )( object )value, memoryRegister.address, memoryRegister.size ); break;
-                        case TypeCode.Boolean: this.SetBoolToMem  ( ( bool  )( object )value, memoryRegister.address, memoryRegister.size ); break;
-                        case TypeCode.Char   : this.SetCharToMem  ( ( char  )( object )value, memoryRegister.address ); break;
-                        case TypeCode.String : this.SetStringToMem<String> ( ( string )( object )value, memoryRegister.address, memoryRegister.size ); break;
+                        // Write converted value in the memory map
+                        switch ( Type.GetTypeCode( typeof( T ) ) )
+                        {
+                            case TypeCode.Int32  : this.SetIntToMem   ( ( int   )( object )value, memoryRegister.address, memoryRegister.sizeGet ); break;
+                            case TypeCode.UInt32 : this.SetUIntToMem  ( ( uint  )( object )value, memoryRegister.address, memoryRegister.sizeGet ); break;
+                            case TypeCode.UInt64 : this.SetULongToMem ( ( ulong )( object )value, memoryRegister.address, memoryRegister.sizeGet ); break;
+                            case TypeCode.Boolean: this.SetBoolToMem  ( ( bool  )( object )value, memoryRegister.address, memoryRegister.bit     ); break;
+                            case TypeCode.Char   : this.SetCharToMem  ( ( char  )( object )value, memoryRegister.address ); break;
+                            case TypeCode.String : this.SetStringToMem<String> ( ( string )( object )value, memoryRegister.address, memoryRegister.sizeGet ); break;
+                        }
+                        
+                        value = this.PropertyGet_Logic ( memoryRegister );
+                        
+                        Utils.PrintDeep ( "Map -> Read from map: " + memoryRegister.id + " = " + value );
                     }
-                
+                    
                     // Set flag to know that at least the register read one time its value from the MTU
                     memoryRegister.readedFromMtu = true;
-                
-                    Console.WriteLine ( "Read from map: " + ( T )this.PropertyGet_Logic ( memoryRegister ) );
-                
-                    return ( T )this.PropertyGet_Logic ( memoryRegister );
+                    
+                    return ( T )value;
                 }));
 
             #endregion
@@ -414,15 +464,17 @@ namespace MTUComm.MemoryMap
                 if ( customMethod == null )
                 {
                     string strError = EXCEP_REGI_METHOD.Replace ( "#", memoryRegister.methodId_Get );
-                    Console.WriteLine ( "Create Custom Get " + memoryRegister.id + ": Error - " + strError );
+                    Utils.Print ( "Create Custom Get " + memoryRegister.id + ": Error - " + strError );
 
                     throw new CustomMethodNotExistException ( strError );
                 }
 
                 base.AddMethod ( METHODS_GET_CUSTOM_PREFIX + memoryRegister.id,
-                    new Func<T>(() =>
+                    new Func<Task<T>>( async () =>
                     {
-                        return ( T )customMethod.Invoke ( this, new object[] { memoryRegister } );
+                        Task<T> result = ( Task<T> )customMethod.Invoke ( this, new object[] { memoryRegister } );
+                        
+                        return await result;
                     }));
             }
 
@@ -480,7 +532,7 @@ namespace MTUComm.MemoryMap
                     if ( customMethod == null )
                     {
                         string strError = EXCEP_OVER_METHOD.Replace ( "#", memoryOverload.methodId );
-                        Console.WriteLine ( "Create Custom Get " + memoryOverload.id + ": Error - " + strError );
+                        Utils.Print ( "Create Custom Get " + memoryOverload.id + ": Error - " + strError );
 
                         throw new CustomMethodNotExistException ( strError );
                     }
@@ -500,14 +552,18 @@ namespace MTUComm.MemoryMap
             
             // Overloads only have get block ( are readonly )
             base.AddMethod ( METHODS_GET_PREFIX + memoryOverload.id,
-                new Func<T>(() =>
+                new Func<Task<T>>( async () =>
                 {
                     // Use custom method
                     if ( memoryOverload.HasCustomMethod )
                     {
+                        Task<T> result = null;
+                    
                         if ( ! useParamArray )
-                             return ( T )customMethod.Invoke ( this, new object[] { memoryOverload, registersToUse } );
-                        else return ( T )customMethod.Invoke ( this, new object[] { memoryOverload, registersToUseArray } );
+                             result = ( Task<T> )customMethod.Invoke ( this, new object[] { memoryOverload, registersToUse      } );
+                        else result = ( Task<T> )customMethod.Invoke ( this, new object[] { memoryOverload, registersToUseArray } );
+                        
+                        return await result;
                     }
 
                     // Operation to evaluate
@@ -516,7 +572,7 @@ namespace MTUComm.MemoryMap
                         i = 0;
                         object[] values = new object[ dictionary.Count ];
                         foreach ( string id in dictionary.Keys )
-                            values[ i++ ] = base[ id ].Value;
+                            values[ i++ ] = await base[ id ].GetValue ();
 
                         return this.ExecuteOperation<T> ( memoryOverload.custom_Get, values );
                     }
@@ -526,9 +582,9 @@ namespace MTUComm.MemoryMap
         public void CreateProperty_Get_ByteArray<T> ( MemoryRegister<T> memoryRegister )
         {
             base.AddMethod ( METHODS_GET_BYTE_PREFIX + memoryRegister.id,
-                new Func<byte[]>(() =>
+                new Func<bool,byte[]>( ( bool useSizeGet ) =>
                 {
-                    return this.GetByteArrayFromMem ( memoryRegister.address, memoryRegister.sizeGet );
+                    return this.GetByteArrayFromMem ( memoryRegister.address, useSizeGet ? memoryRegister.sizeGet : memoryRegister.size );
                 }));
         }
 
@@ -547,6 +603,8 @@ namespace MTUComm.MemoryMap
                 {
                     this.PropertySet_Logic ( memoryRegister, _value );
                 }));
+                
+            //Utils.Print ( "-> Set: " + memoryRegister.id + " - " + ( base.registers[ METHODS_SET_PREFIX + memoryRegister.id ] == null ) );
 
             #endregion
 
@@ -567,16 +625,20 @@ namespace MTUComm.MemoryMap
                 if ( customMethod == null )
                 {
                     string strError = EXCEP_REGI_METHOD.Replace ( "#", memoryRegister.methodId_Set );
-                    Console.WriteLine ( "Create Custom Set " + memoryRegister.id + ": Error - " + strError );
+                    Utils.Print ( "Create Custom Set " + memoryRegister.id + ": Error - " + strError );
 
                     throw new CustomMethodNotExistException ( strError );
                 }
 
                 base.AddMethod ( METHODS_SET_CUSTOM_PREFIX + memoryRegister.id,
-                    new Func<dynamic,dynamic>((_value) =>
+                    new Func<dynamic,Task<dynamic>>( async (_value) =>
                     {
-                        return customMethod.Invoke ( this, new object[] { memoryRegister, _value } );
+                        Task<dynamic> result = ( Task<dynamic> )customMethod.Invoke ( this, new object[] { memoryRegister, _value } );
+                        
+                        return await result;
                     }));
+                
+                //Utils.Print ( "-> Set Custom: " + memoryRegister.id + " - " + ( base.registers[ METHODS_SET_CUSTOM_PREFIX + memoryRegister.id ] == null ) );
             }
 
             #endregion
@@ -680,7 +742,7 @@ namespace MTUComm.MemoryMap
                 case TypeCode.UInt64 : result = Convert.ToInt64  ( result ); break;
             }
 
-            Console.WriteLine ( "GetOperation: " + operation + " | " + value );
+            Utils.Print ( "GetOperation: " + operation + " | " + value + " = " + result );
 
             return ( T )result;
         }
@@ -700,7 +762,7 @@ namespace MTUComm.MemoryMap
                 case TypeCode.UInt64 : result = Convert.ToInt64  ( result ); break;
             }
 
-            Console.WriteLine ( "GetOperation: " + operation );
+            Utils.Print ( "GetOperation: " + operation + " = " + result );
 
             return ( T )result;
         }
@@ -966,7 +1028,7 @@ namespace MTUComm.MemoryMap
             int address,
             int size = MemRegister.DEF_SIZE )
         {
-            Console.WriteLine ( "Memory: size " + this.memory.Length + " | from: " + address + " to " + ( address + size ) );
+            Utils.Print ( "Memory: size " + this.memory.Length + " | from: " + address + " to " + ( address + size ) + " [ " + size + " bytes ]" );
         
             for ( int i = 0; i < size; i++ )
                 this.memory[ address + i ] = value[ i ];
@@ -983,6 +1045,25 @@ namespace MTUComm.MemoryMap
 
         #endregion
 
+        #region Get n bytes
+        
+        public async Task ReadFromMtu (
+            int address,
+            int numBytes,
+            int offset = 0 )
+        {
+            if ( address + numBytes < this.memory.Length )
+            {
+                Utils.Print ( "Read " + numBytes + " from MTU and add to memory map buffer" );
+                
+                Buffer.BlockCopy ( await lexi.Read ( ( uint )address, ( uint )numBytes ), 0, this.memory, offset, numBytes );
+            }
+            else
+                throw new Exception ();
+        }
+        
+        #endregion
+
         #region Get register
 
         // Registers and Overloads
@@ -992,7 +1073,7 @@ namespace MTUComm.MemoryMap
                 return base.registers[ id ];
 
             // Selected dynamic member not exists
-            Console.WriteLine("Set " + id + ": Error - Selected register is not loaded");
+            Utils.Print("Set " + id + ": Error - Selected register is not loaded");
 
             throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + " [ GetProperty ]: " + id);
         }
@@ -1003,7 +1084,7 @@ namespace MTUComm.MemoryMap
                 return (MemoryRegister<T>)base.registers[ id ];
 
             // Selected dynamic member not exists
-            Console.WriteLine("Set " + id + ": Error - Selected register is not loaded");
+            Utils.Print("Set " + id + ": Error - Selected register is not loaded");
 
             throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + " [ GetProperty<> ]: " + id);
         }

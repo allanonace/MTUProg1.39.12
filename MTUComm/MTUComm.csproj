@@ -24,6 +24,7 @@
     <ProjectReference Include="..\Lexi\Lexi.csproj" />
     <ProjectReference Include="..\Xml\Xml.csproj" />
     <ProjectReference Include="..\ble_library\ble_library.csproj" />
+    <ProjectReference Include="..\Library\Library.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -40,10 +41,7 @@
 
   <ItemGroup>
     <Folder Include="Observer\" />
-    <Folder Include="Exceptions\" />
     <Folder Include="Resource\" />
-    <Folder Include="Resource\Configsss\Folder_Copy.xml">
-    </Folder>
   </ItemGroup>
   <ItemGroup>
     <None Remove=".Configuration.cs.swp" />

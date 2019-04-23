@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Dynamic;
-using MTUComm.Exceptions;
+using Library;
+using Library.Exceptions;
 
 namespace MTUComm.MemoryMap
 {
@@ -32,7 +32,7 @@ namespace MTUComm.MemoryMap
                     return this.dictionary[ id ];
 
                 // Selected dynamic member not exists
-                Console.WriteLine ( "Get " + id + ": Error - " + MemoryMap.EXCEP_SET_USED );
+                Utils.Print ( "Get " + id + ": Error - " + MemoryMap.EXCEP_SET_USED );
                 throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + " [ Indexer ]: " + id );
             }
         }
@@ -46,7 +46,7 @@ namespace MTUComm.MemoryMap
             // Will contain MemoryRegister objects but thanks to TryGetMember
             // the returned values always will be property get block returned value
             // TryGetMember is only called using dot operator ( registers.id_register )
-            this.dictionary = new Dictionary<string, dynamic> ();
+            this.dictionary = new Dictionary<string,dynamic> ();
 
             // En la clase MemoryMap no se puede usar directamente "this|base.idPropiedad", habiendo
             // de declarar esta variable dinamica mediante la cual acceder a los miembros dinamicos
@@ -95,16 +95,17 @@ namespace MTUComm.MemoryMap
                 if ( register.GetType().GetGenericTypeDefinition() == typeof( MemoryOverload<> ) )
                     throw new MemoryOverloadsAreReadOnly ( MemoryMap.EXCEP_OVE_READONLY + ": " + id );
 
-                this.dictionary[id].Value = value;
+                this.dictionary[id].SetValue ( value );
 
                 return true;
             }
 
             // Selected dynamic member not exists
-            Console.WriteLine ( "Set " + id + ": Error - Selected register is not loaded" );
+            Utils.Print ( "Set " + id + ": Error - Selected register is not loaded" );
             throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + " [ Set ]: " + id );
         }
 
+        // NOTA: No se puede hacer asincrono porque no se admiten los parametros out
         public override bool TryGetMember ( GetMemberBinder binder, out object result )
         {
             return this.Get ( binder.Name, out result );
@@ -116,21 +117,25 @@ namespace MTUComm.MemoryMap
             {
                 dynamic register = this.dictionary[id];
 
+                result = this.dictionary[ id ];
+
+                /*
                 if ( register.registerType == REGISTER_TYPE.REGISTER )
                 {
                     // Some registers have customized get method
                     if ( ! register.HasCustomMethod_Get )
-                         result = ( object )this.dictionary[ id ].ValueRaw; // Invokes funGet method
-                    else result = ( object )this.dictionary[ id ].Value;    // Invokes funGetCustom method
+                         result = ( object )this.dictionary[ id ].GetValueRaw (); // Invokes funGet method
+                    else result = ( object )this.dictionary[ id ].GetValue ();    // Invokes funGetCustom method
                 }
                 else // Overload
-                    result = ( object )this.dictionary[ id ].Value;
+                    result = ( object )this.dictionary[ id ].GetValue ();
+                */
 
                 return true;
             }
 
             // Selected dynamic member not exists
-            Console.WriteLine ( "Get " + id + ": Error - Selected register is not loaded" );
+            Utils.Print ( "Get " + id + ": Error - Selected register is not loaded" );
             throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + " [ Get ]: " + id );
         }
 

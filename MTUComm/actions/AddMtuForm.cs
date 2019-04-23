@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Xml;
-using MTUComm.Exceptions;
+using Library.Exceptions;
 
 using ParameterType = MTUComm.Parameter.ParameterType;
 

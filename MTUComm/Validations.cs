@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Xml.Serialization;
 using MTUComm.MemoryMap;
 using Xml;
-using MTUComm.Exceptions;
+using Library.Exceptions;
 
 namespace MTUComm
 {

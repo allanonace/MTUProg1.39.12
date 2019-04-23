@@ -1,17 +1,19 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using aclara_meters.view;
 using Acr.UserDialogs;
 using ble_library;
+using Library;
 using MTUComm;
-using MTUComm.Exceptions;
+using Library.Exceptions;
 using nexus.protocols.ble;
-using nexus.protocols.ble.scan;
 using Plugin.DeviceInfo;
 using Plugin.Multilingual;
 using Plugin.Permissions;
@@ -20,10 +22,6 @@ using Renci.SshNet;
 using Renci.SshNet.Sftp;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-
-using System.Reflection;
-
-using System.Text;
 using Xml;
 
 [assembly: XamlCompilation(XamlCompilationOptions.Compile)]
@@ -143,7 +141,7 @@ namespace aclara_meters
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
         
-            Console.WriteLine ( "FormsApp: Interactive [ " + MTUComm.Action.IsFromScripting + " ]" );
+            Utils.Print ( "FormsApp: Interactive [ " + MTUComm.Action.IsFromScripting + " ]" );
         
             appVersion_str = appVersion;
 
@@ -307,7 +305,7 @@ namespace aclara_meters
                 ok = false;
             }
 
-            Console.WriteLine ( "Download config.files from FTP: " + ( ( ok ) ? "OK" : "NO" ) );
+            Utils.Print ( "Download config.files from FTP: " + ( ( ok ) ? "OK" : "NO" ) );
 
             return ok;
         }
@@ -345,7 +343,7 @@ namespace aclara_meters
 
             ok = ( count == filesToCheck.Length );
 
-            Console.WriteLine ( "Are all config.files installed? " + ( ( ok ) ? "OK" : "NO" ) );
+            Utils.Print ( "Are all config.files installed? " + ( ( ok ) ? "OK" : "NO" ) );
             
             return ok;
         }
@@ -381,8 +379,8 @@ namespace aclara_meters
             }
 
             if ( File.Exists ( txtPath ) )
-                 Console.WriteLine ( "Is the certificate installed correctly? " + ( ( ok ) ? "OK" : "NO" ) );
-            else Console.WriteLine ( "No certificate is being used" );
+                 Utils.Print ( "Is the certificate installed correctly? " + ( ( ok ) ? "OK" : "NO" ) );
+            else Utils.Print ( "No certificate is being used" );
 
             return ok;
         }
@@ -431,7 +429,7 @@ namespace aclara_meters
            
             MTUComm.Action.IsFromScripting = true;
             
-            Console.WriteLine ( "FormsApp: Scripting [ " + MTUComm.Action.IsFromScripting + " ]" );
+            Utils.Print ( "FormsApp: Scripting [ " + MTUComm.Action.IsFromScripting + " ]" );
         
             if ( this.abortMission )
                 return;
@@ -451,7 +449,7 @@ namespace aclara_meters
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.StackTrace);
+                Utils.Print(e.StackTrace);
             }
 
             if ( url != null )

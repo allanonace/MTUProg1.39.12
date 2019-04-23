@@ -134,5 +134,20 @@ namespace MTUComm
     
             return plaintext;
         }
+        
+        public static string ByteToBits (
+            object value )
+        {
+            return Convert.ToString ( Convert.ToInt64 ( value.ToString (), 16 ), 2 );
+        }
+    
+        public static T GetNumFromBytes<T> ( byte[] data )
+        {
+            var value = 0;
+            for ( int i = 0; i < data.Length; i++ )
+                value += data[ i ] << ( i * 8 );
+            
+            return ( T )( object )value;
+        }
     }
 }

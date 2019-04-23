@@ -1,10 +1,13 @@
 ﻿using System;
-using System.IO;
-using System.Threading;
-using Lexi.Interfaces;
-using Lexi.Exceptions;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Lexi.Exceptions;
+using Lexi.Interfaces;
+using Library;
+using Library.Exceptions;
 
 namespace Lexi
 {
@@ -70,7 +73,6 @@ namespace Lexi
         {
             m_serial = serial;
             m_timeout = timeout;
-
         }
 
         /// <summary>
@@ -82,7 +84,6 @@ namespace Lexi
             //set default read wait to response timeout to 400ms
             m_timeout = 400;
         }
-
 
         /// <summary>
         /// Adds two integers and returns the result.
@@ -106,14 +107,12 @@ namespace Lexi
         /// <exception cref="System.IO.InvalidDataException">Thrown when response data or
         /// CRC is not valid</exception>
         /// <see cref="Read(ISerial serial, UInt32 addres, uint data, int timeout)" />
-        public byte[] Read(UInt32 addres, uint data)
+        public async Task<byte[]> Read(UInt32 addres, uint data)
         {
             if (m_serial == null)
-            {
                 throw new ArgumentNullException("No Serial interface defined");
-            }
 
-            return Read(m_serial, addres, data, m_timeout);
+            return await Read(m_serial, addres, data, m_timeout);
         }
 
         /// <summary>
@@ -121,7 +120,7 @@ namespace Lexi
         /// </summary>
         /// <param name="serial">A double precision number.</param>
         /// <param name="addres">A double precision number.</param>
-        /// <param name="data">A double precision number.</param>
+        /// <param name="bytesToRead">A double precision number.</param>
         /// <param name="timeut">A double precision number.</param>
         /// <returns>
         /// Memory Map values from read address request
@@ -136,8 +135,12 @@ namespace Lexi
         /// See <see cref="Read(UInt32 addres, uint data)"/> to add doubles.
         /// <seealso cref="Write(byte addres, byte[] data)"/>
         /// <seealso cref="Write(ISerial serial, UInt32 addres, byte[] data, int timeout)"/>
-        public byte[] Read(ISerial serial, UInt32 addres, uint data, int timeout)
+        public async Task<byte[]> Read(ISerial serial, UInt32 addres, uint bytesToRead, int timeout)
         {
+            int TEST = new Random ().Next ( 0, 999 );
+            Utils.PrintDeep ( Environment.NewLine + "--------LEXI_READ-------| " + TEST + " |--" );
+            Utils.PrintDeep ( "Lexi.Read = Write + UpdateBuffer + Read" );
+        
             /* +------------+----------+----------------------------------------------------------+
              * | Byte Index |  Field   |                          Notes                           |
              * +------------+----------+----------------------------------------------------------+
@@ -155,80 +158,113 @@ namespace Lexi
              * block 2:addres >= 512 & < 768 = 0x84 => 132
              * block 3:addres >= 768 = 0x86 => 134
              */
-            uint read_comand = (uint)(128 + ((addres / 256) * 2));
-
-            /* Address
-             * -------
-             * addres then become offset from 256 block
-             * Example: Addres 600 --> block 2 --> offset 600 - 512 = 88;
-             */
-            uint start_addres = (uint)(addres - ((addres / 256) * 256));
-
-            //generate payload woth header, command, addres and data
-            byte[] payload = new byte[]{
-                0x25, // header
-                (byte)read_comand,
-                (byte)start_addres,
-                (byte)data
-            };
-
-            //Addes checksum to payload
-            byte[] stream = checkSum(payload);
-
-            //Send Lexi Read command thought "serial port"
-            serial.Write(stream, 0, stream.Length);
-
-
-            //define response buffer size
-            byte[] rawBuffer = new byte[2];
-            int response_offest = 0;
-            if (serial.isEcho()) { response_offest = stream.Length; }
-            Array.Resize(ref rawBuffer, (int)(rawBuffer.Length + data + response_offest));
-
-
-            // whait till the response buffer data is available or timeout limit is reached
-            long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
-
-            while (checkResponseOk(serial, rawBuffer))
+             
+            try
             {
-                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
+                uint read_comand = (uint)(128 + ((addres / 256) * 2));
+    
+                /* Address
+                 * -------
+                 * addres then become offset from 256 block
+                 * Example: Addres 600 --> block 2 --> offset 600 - 512 = 88;
+                 */
+                uint start_addres = (uint)(addres - ((addres / 256) * 256));
+    
+                // Data frame { 25 | ReadCmd | Address | BytesToRead | CheckSum }.Length = 5
+                byte[] payload = new byte[]{
+                    0x25,
+                    (byte)read_comand,
+                    (byte)start_addres,
+                    (byte)bytesToRead
+                };
+    
+                // Adds checksum to payload
+                byte[] stream = checkSum ( payload );
+                
+                Utils.PrintDeep ( "Lexi.Read -> Write.." +
+                    " Address " + start_addres +
+                    " | ReadCmd " + read_comand +
+                    " | BytesToRead " + bytesToRead +
+                    " | TimeOut " + timeout +
+                    " | Stream " + Utils.ByteArrayToString ( stream ) +
+                    " [ " + stream.Length + " ]" );
+    
+                // Send Lexi Read command
+                // Stream length is always "5" = 25 + ReadCmd + Address + BytesToRead + Checksum
+                await serial.Write ( stream, 0, stream.Length );
+                
+                Utils.PrintDeep ( "------BUFFER_START-------" );
+                
+                //define response buffer size
+                byte[] rawBuffer = new byte[0];
+                int headerOffset = ( serial.isEcho () ) ? stream.Length : 0;
+                Array.Resize ( ref rawBuffer, headerOffset + ( int )bytesToRead + 2 ); // Header + Data + CRC
+                
+                Utils.PrintDeep ( "Lexi.Read -> Array.Resize.." +
+                    " Echo " + serial.isEcho () +
+                    " [ " + rawBuffer.Length + " = " + bytesToRead + " + Header " + headerOffset + " + CRC 2 ]" );
+    
+                // Whait untill the response buffer data is available or timeout limit is reached
+                long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
+                while ( checkResponseOk ( serial, rawBuffer ) )
                 {
-                   
-                    if(serial.BytesToRead() <= response_offest)
+                    if ( DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                     {
-                        throw new IOException();
-                    }
-                    else
-                    {
-                        throw new TimeoutException();
-                    }
+                        int num = serial.BytesToRead ();
                     
+                        Utils.PrintDeep ( "Lexi.Read -> BytesToRead: " + num );
+                    
+                        if ( num <= headerOffset )
+                        {
+                            Utils.PrintDeep ( "Lexi.Read -> CheckResponseOk IOException" );
+                        
+                            throw new IOException ();
+                        }
+                        else
+                        {
+                            Utils.PrintDeep ( "Lexi.Read -> CheckResponseOk TimeoutException" );
+                        
+                            throw new TimeoutException ();
+                        }
+                    }
+                    Thread.Sleep ( 10 );
                 }
-                //Thread.Sleep(100);
-                // await Task.Delay(100);
+    
+                Utils.PrintDeep ( "------BUFFER_FINISH------" );
+    
+                //read the response buffer
+                serial.Read ( rawBuffer, 0, rawBuffer.Length );
+                
+                /*
+                 * +------------+-------+---------------+--------------------------------------------------------+
+                 * | Byte Index | Field |   Value(s)    |                         Notes                          |
+                 * +------------+-------+---------------+--------------------------------------------------------+
+                 * | 0..N-1     | Data  | Read from RAM | N = number of bytes specified in Data field of Request |
+                 * | N..N+1     | CRC   | Calculated    | CRC over all data bytes.  See section 7.2              |
+                 * +------------+-------+---------------+--------------------------------------------------------+
+                 * 
+                 */
+    
+                // Removes header
+                byte[] response = new byte[2];
+                Array.Resize ( ref response, response.Length + ( int )bytesToRead );
+                Array.Copy ( rawBuffer, headerOffset, response, 0, response.Length );
+                
+                Utils.PrintDeep ( "Lexi.Read ->" +
+                    " CheckCRC " + Utils.ByteArrayToString ( response ) +
+                    " [ " + response.Length + " = BytesToRead " + bytesToRead + " + CRC 2 ]" );
+    
+                // Validates CRC and if everything is ok, returns recovered data
+                return validateReadResponse ( response, bytesToRead );
             }
-
-            //read the response buffer
-            serial.Read(rawBuffer, 0, (int)(rawBuffer.Length));
-
-            /*
-             * +------------+-------+---------------+--------------------------------------------------------+
-             * | Byte Index | Field |   Value(s)    |                         Notes                          |
-             * +------------+-------+---------------+--------------------------------------------------------+
-             * | 0..N-1     | Data  | Read from RAM | N = number of bytes specified in Data field of Request |
-             * | N..N+1     | CRC   | Calculated    | CRC over all data bytes.  See section 7.2              |
-             * +------------+-------+---------------+--------------------------------------------------------+
-             * 
-             */
-
-            //Get response body from RAW response (clean echo response)
-            byte[] response = new byte[2];
-            Array.Resize(ref response, (int)(response.Length + data));
-            Array.Copy(rawBuffer, response_offest, response, 0, response.Length);
-
-            //Validare CRC ane get Response BUDY
-            return validateReadResponse(response, data);
-
+            catch ( Exception e )
+            {
+                throw new LexiReadingException ();
+            }
+            finally
+            {
+                Utils.PrintDeep ( "----LEXI_READ_FINISH----| " + TEST + " |--" + Environment.NewLine );
+            }
         }
 
         private bool checkResponseOk(ISerial serial, byte[] rawBuffer)
@@ -237,18 +273,22 @@ namespace Lexi
 
         }
 
-        public void Write(UInt32 addres, byte[] data)
+        public async Task Write(UInt32 addres, byte[] data)
         {
             if (m_serial == null)
             {
                 throw new ArgumentNullException("No Serial interface defined");
             }
 
-            Write(m_serial, addres, data, m_timeout);
+            await Write(m_serial, addres, data, m_timeout);
         }
 
-        public void Write(ISerial serial, UInt32 addres, byte[] data, int timeout)
+        public async Task Write(ISerial serial, UInt32 addres, byte[] data, int timeout)
         {
+            int TEST = new Random ().Next ( 0, 999 );
+            Utils.PrintDeep ( Environment.NewLine + "-------LEXI_WRITE--------| " + TEST + " |--" );
+            Utils.PrintDeep ( "Lexi.Write = Write + UpdateBuffer + Read" );
+        
             /*
              * +------------+----------+----------------------------------------------------------+
              * | Byte Index |  Field   |                          Notes                           |
@@ -269,72 +309,117 @@ namespace Lexi
              * block 2:addres >= 512 & < 768 = 0x85 => 133
              * block 3:addres >= 768 = 0x87 => 135
              */
-
-            uint write_comand = (uint)(129 + ((addres / 256) * 2));
-
-            /* Address
-             * -------
-             * addres then become offset from 256 block
-             * Example: Addres 600 --> block 2 --> offset 600 - 512 = 88;
-             */
-            uint start_addres = (uint)(addres - ((addres / 256) * 256));
-
-            byte[] payload = new byte[]{
-                0x25, // header
-                (byte)write_comand,
-                (byte)start_addres,
-                (byte)data.Length
-            };
-
-            //Addes checksum to payload
-            byte[] header = checkSum(payload);
-
-            byte[] stream = new byte[0];
-            Array.Resize(ref stream, (int)(header.Length + data.Length));
-
-            Array.Copy(header, 0, stream, 0, header.Length);
-            Array.Copy(data, 0, stream, header.Length, data.Length);
-
-
-            byte[] crc_bytes = BitConverter.GetBytes(calcCRC(data, data.Length));
-
-            Array.Resize(ref stream, (int)(header.Length + data.Length + 2));
-            stream[stream.Length - 1] = crc_bytes[1];
-            stream[stream.Length - 2] = crc_bytes[0];
-
-            serial.Write(stream, 0, stream.Length);
-
-            byte[] rawBuffer = new byte[2];
-            int response_offest = 0;
-            if (serial.isEcho()) { response_offest = stream.Length; }
-            Array.Resize(ref rawBuffer, (int)(response_offest + 2));
-
-            long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
-            while (serial.BytesToRead() < rawBuffer.Length - 1)
+    
+            try
             {
-                if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
+                uint write_comand = (uint)(129 + ((addres / 256) * 2));
+    
+                /* Address
+                 * -------
+                 * addres then become offset from 256 block
+                 * Example: Addres 600 --> block 2 --> offset 600 - 512 = 88;
+                 */
+                uint start_addres = (uint)(addres - ((addres / 256) * 256));
+    
+                // Data frame { 25 | WriteCmd | Address | BytesToWrite | CheckSum }.Length = 5
+                byte[] payload = new byte[]{
+                    0x25, // header
+                    (byte)write_comand,
+                    (byte)start_addres,
+                    (byte)data.Length
+                };
+    
+                // Adds checksum to payload
+                byte[] header = checkSum ( payload );
+    
+                byte[] crc = BitConverter.GetBytes ( calcCRC ( data, data.Length ) );
+    
+                // Concatenate header, data to write and calculated CRC
+                byte[] stream = new byte[0];
+                Array.Resize ( ref stream, header.Length + data.Length + 2 );
+                Array.Copy ( header, 0, stream, 0, header.Length );
+                Array.Copy ( data, 0, stream, header.Length, data.Length );
+                stream[ stream.Length - 1 ] = crc[ 1 ];
+                stream[ stream.Length - 2 ] = crc[ 0 ];
+    
+                Utils.PrintDeep ( "Lexi.Write -> Write.." +
+                    " Address " + start_addres +
+                    " | WriteCmd " + write_comand +
+                    " | Data " + Utils.ByteArrayToString ( data ) + " [ " + data.Length + " ]" +
+                    " | TimeOut " + timeout +
+                    " | Stream " + Utils.ByteArrayToString ( stream ) +
+                    " [ " + stream.Length + " ]" );
+    
+                // Send Lexi Write command
+                // Stream length is always "5" = 25 + WriteCmd + Address + BytesToWrite + Checksum
+                await serial.Write ( stream, 0, stream.Length );
+    
+                Utils.PrintDeep ( "------BUFFER_START-------" );
+    
+                //define response buffer size
+                byte[] rawBuffer = new byte[0];
+                int responseOffset = ( serial.isEcho () ) ? stream.Length : 0;
+                Array.Resize ( ref rawBuffer, responseOffset + 2 ); // CRC that will be recovered
+                
+                Utils.PrintDeep ( "Lexi.Write -> Array.Resize.." +
+                    " Echo " + serial.isEcho () +
+                    " [ " + rawBuffer.Length + " = " + data.Length + " + Header " + header.Length + " + CRC 2 + recover CRC 2 ]" );
+    
+                // Whait untill the response buffer data is available or timeout limit is reached
+                int bytesToRead;
+                long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds () + timeout;
+                while ( ( bytesToRead = serial.BytesToRead () ) < rawBuffer.Length - 1 )
                 {
-
-                    if (serial.BytesToRead() <= response_offest)
+                    Utils.PrintDeep ( "Lexi.Write -> BytesToRead: " + bytesToRead + ".. [ " + DateTimeOffset.Now.ToUnixTimeMilliseconds() + " > " + timeout_limit + " ]" );
+                
+                    if ( DateTimeOffset.Now.ToUnixTimeMilliseconds () > timeout_limit )
                     {
-                        throw new IOException();
+                        int num = serial.BytesToRead ();
+                    
+                        Utils.PrintDeep ( "Lexi.Write -> Bytes to Read: " + num );
+                    
+                        if ( num <= responseOffset )
+                        {
+                            Utils.PrintDeep ( "Lexi.Write -> CheckResponseOk IOException" );
+                        
+                            throw new IOException ();
+                        }
+                        else
+                        {
+                            Utils.PrintDeep ( "Lexi.Write -> CheckResponseOk TimeoutException" );
+                        
+                            throw new TimeoutException ();
+                        }
                     }
-                    else
-                    {
-                        throw new TimeoutException();
-                    }
+                    Thread.Sleep ( 10 );
                 }
-                Thread.Sleep(10);
+                
+                Utils.PrintDeep ( "Lexi.Read -> BytesRead: " + bytesToRead + " / " + ( rawBuffer.Length - 1 ) );
+                
+                Utils.PrintDeep ( "------BUFFER_FINISH------" );
+
+                serial.Read ( rawBuffer, 0, rawBuffer.Length );
+    
+                byte[] response = new byte[2];
+                Array.Copy(rawBuffer, responseOffset, response, 0, response.Length);
+                
+                Utils.PrintDeep ( "Lexi.Write" +
+                    " RawBuffer " + Utils.ByteArrayToString ( rawBuffer ) +
+                    " | ACK " + response[0] );
+    
+                // If first byte of the recovered CRC is 6, everything has gone OK
+                if ( response[0] != 0x06 )
+                {
+                    //throw new LexiWriteException(response);
+                }
             }
-
-            serial.Read(rawBuffer, 0, (int)(rawBuffer.Length));
-
-            byte[] response = new byte[2];
-            Array.Copy(rawBuffer, response_offest, response, 0, response.Length);
-
-            if (response[0] != 0x06)
+            catch ( Exception e )
             {
-                throw new LexiWriteException(response);
+                throw new LexiWritingException ();
+            }
+            finally
+            {
+                Utils.PrintDeep ( "----LEXI_WRITE_FINISH----| " + TEST + " |--" + Environment.NewLine );
             }
         }
 
@@ -625,24 +710,24 @@ namespace Lexi
 
         private byte[] validateReadResponse(byte[] response, uint response_length)
         {
-            if (!((response.Length - 2) == response_length))
-            {
-                throw new InvalidDataException("");
-
-            }
-
+            // Recover data has not last two CRC bytes
+            if ( ! ( response.Length - 2 == response_length ) )
+                throw new InvalidDataException ("");
 
             byte[] crc = new byte[2];
             byte[] response_body = new byte[0];
-            Array.Resize(ref response_body, (int)(response.Length - 2));
+            Array.Resize ( ref response_body, response.Length - 2 );
 
-            Array.Copy(response, response.Length - 2, crc, 0, crc.Length);
-            Array.Copy(response, 0, response_body, 0, response_body.Length);
+            Array.Copy ( response, response.Length - 2, crc, 0, crc.Length );   // CRC
+            Array.Copy ( response, 0, response_body, 0, response_body.Length ); // Data
 
-            if (calcCRC(response_body, response_body.Length) != BitConverter.ToUInt16(crc, 0))
-            {
+            if ( calcCRC ( response_body, response_body.Length ) != BitConverter.ToUInt16 ( crc, 0 ) )
                 throw new InvalidDataException("Bad CRC");
-            }
+            
+            Utils.PrintDeep ( "Lexi.ValidateResponde ->" +
+                " CRC " + Utils.ByteArrayToString ( crc ) +
+                " | Data " + Utils.ByteArrayToString ( response_body ) +
+                " [ " + response_body.Length + " ]" );
 
             return response_body;
 

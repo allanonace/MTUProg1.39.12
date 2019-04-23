@@ -6,23 +6,22 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
-using Acr.UserDialogs;
+using System.Xml.Linq;
+using aclara.ViewModels;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
-using Xamarin.Forms;
-using aclara.ViewModels;
-using Plugin.Settings;
+using Acr.UserDialogs;
+using Library;
 using MTUComm;
-using Xamarin.Essentials;
+using Library.Exceptions;
+using Plugin.Settings;
+using Renci.SshNet;
+using Xamarin.Forms;
+using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
-using System.IO;
-using Renci.SshNet;
-using Xml;
-using System.Xml.Linq;
-using MTUComm.Exceptions;
 
 namespace aclara_meters.view
 {
@@ -371,7 +370,7 @@ namespace aclara_meters.view
                 }
                 catch (Exception w2)
                 {
-                    Console.WriteLine(w2.StackTrace);
+                    Utils.Print(w2.StackTrace);
                 }
             }
             else
@@ -1193,7 +1192,7 @@ namespace aclara_meters.view
                 ok = false;
             }
             
-            //Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
+            //Utils.Print("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
 
             return ok;
         }

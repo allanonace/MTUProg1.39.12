@@ -3,7 +3,7 @@ using Xml;
 using System;
 using System.Linq;
 using System.Dynamic;
-using MTUComm.Exceptions;
+using Library.Exceptions;
 using System.Xml.Serialization;
 using System.IO;
 using System.Threading.Tasks;
@@ -444,7 +444,7 @@ namespace MTUComm
         }
         
         /// <summary>
-        /// Registers a new error based on an exception, shows an popup alert using
+        /// Registers a new error based on an exception, shows a popup alert using
         /// this last error and also registers in the ( activity or result ) log file
         /// </summary>
         /// <param name="e">Exception that represents the last error happened</param>
@@ -494,7 +494,7 @@ namespace MTUComm
         {
             // Last exception was not added yet
             if ( ! Errors.GetInstance ().IsLastExceptionUsed ( e ) )
-                Errors.LogErrorNow ( e );
+                Errors.LogErrorNow ( e, -1, false );
             
             // Last exception was already added
             else

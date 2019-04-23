@@ -1,4 +1,4 @@
-﻿namespace MTUComm.Exceptions
+﻿namespace Library.Exceptions
 {
     // MTU [ 1xx ]
     //----

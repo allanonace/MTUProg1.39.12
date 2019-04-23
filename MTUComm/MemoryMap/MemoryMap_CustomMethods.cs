@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Globalization;
 
+using System.Threading.Tasks;
+
 namespace MTUComm.MemoryMap
 {
     public partial class MemoryMap : AMemoryMap
@@ -90,15 +92,15 @@ namespace MTUComm.MemoryMap
 
         #region Overloads
 
-        public string RSSIStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> RSSIStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return string.Format ( "{0} dBm", MemoryRegisters.RSSI.Value ).Replace ( "-", "- " );
+            return string.Format ( "{0} dBm", await MemoryRegisters.RSSI.GetValue () ).Replace ( "-", "- " );
         }
 
-        public string DailySnap_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> DailySnap_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            int timeDiff = TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).Hours;
-            int curTime = MemoryRegisters.DailyGMTHourRead.Value + timeDiff;
+            int timeDiff = TimeZone.CurrentTimeZone.GetUtcOffset ( DateTime.Now ).Hours;
+            int curTime = await MemoryRegisters.DailyGMTHourRead.GetValue () + timeDiff;
 
             if ( curTime < 0 )
                 curTime = 24 + curTime;
@@ -111,185 +113,195 @@ namespace MTUComm.MemoryMap
             else return DISABLED;
         }
 
-        public string MtuStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> MtuStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return MemoryRegisters.Shipbit.Value ? STATE_OFF : STATE_ON;
+            return await MemoryRegisters.Shipbit.GetValue () ? STATE_OFF : STATE_ON;
         }
 
-        public string ReadInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> ReadInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return TimeFormatter(MemoryRegisters.ReadIntervalMinutes.Value);
+            return TimeFormatter ( await MemoryRegisters.ReadIntervalMinutes.GetValue () );
         }
 
-        public string XmitInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> XmitInterval_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return TimeFormatter ( MemoryRegisters.ReadIntervalMinutes.Value * ( 12 - MemoryRegisters.MessageOverlapCount.Value ) );
+            return TimeFormatter ( await MemoryRegisters.ReadIntervalMinutes.GetValue () *
+                                   ( 12 - await MemoryRegisters.MessageOverlapCount.GetValue () ) );
         }
 
-        public string PCBNumber_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> PCBNumber_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             string tempString = string.Empty;
 
             //ASCII RANGE FOR PCBSupplierCode
-            if ( MemoryRegisters.PCBSupplierCode.Value >= 65 &&
-                 MemoryRegisters.PCBSupplierCode.Value <= 90 )
-                tempString = tempString + Convert.ToChar(MemoryRegisters.PCBSupplierCode.Value) + "-";
+            if ( await MemoryRegisters.PCBSupplierCode.GetValue () >= 65 &&
+                 await MemoryRegisters.PCBSupplierCode.GetValue () <= 90 )
+                tempString = tempString + Convert.ToChar ( await MemoryRegisters.PCBSupplierCode.GetValue () ) + "-";
 
-            if ( MemoryRegisters.PCBCoreNumber.Value >= 0 )
-                tempString = tempString + string.Format ( PCBFORMAT, MemoryRegisters.PCBCoreNumber.Value );
+            if ( await MemoryRegisters.PCBCoreNumber.GetValue () >= 0 )
+                tempString = tempString + string.Format ( PCBFORMAT, await MemoryRegisters.PCBCoreNumber.GetValue () );
 
-            if ( MemoryRegisters.PCBProductRevision.Value >= 65 &&
-                 MemoryRegisters.PCBProductRevision.Value <= 90 )
-                tempString = tempString + "-" + Convert.ToChar(MemoryRegisters.PCBProductRevision.Value);
+            if ( await MemoryRegisters.PCBProductRevision.GetValue () >= 65 &&
+                 await MemoryRegisters.PCBProductRevision.GetValue () <= 90 )
+                tempString = tempString + "-" + Convert.ToChar ( await MemoryRegisters.PCBProductRevision.GetValue () );
 
             string result = ( string.IsNullOrEmpty ( tempString ) ) ? NTAVAILABLE : tempString;
 
             return result;
         }
 
-        public string Encryption_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> Encryption_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return ( MemoryRegisters.Encrypted.Value ) ? YES : NO;
+            return ( await MemoryRegisters.Encrypted.GetValue () ) ? YES : NO;
         }
 
-        public string MtuVoltageBattery_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> MtuVoltageBattery_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return ( ( ( float )MemoryRegisters.MtuMiliVoltageBattery.Value ) / 1000 ).ToString ( MTUVLFORMAT ).Replace ( ",", "." );
+            return ( ( ( float )await MemoryRegisters.MtuMiliVoltageBattery.GetValue () ) / 1000 )
+                .ToString ( MTUVLFORMAT ).Replace ( ",", "." );
         }
 
-        public string P1ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> P1ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return TranslateErrorCodes(MemoryRegisters.P1ReadingErrorCode.Value);
+            return TranslateErrorCodes ( await MemoryRegisters.P1ReadingErrorCode.GetValue () );
         }
 
-        public string P2ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> P2ReadingError_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return TranslateErrorCodes(MemoryRegisters.P2ReadingErrorCode.Value);
+            return TranslateErrorCodes ( await MemoryRegisters.P2ReadingErrorCode.GetValue () );
         }
 
-        public string InterfaceTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> InterfaceTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetTamperStatus(MemoryRegisters.P1InterfaceAlarm.Value, MemoryRegisters.ProgrammingCoilInterfaceTamper.Value);
+            return GetTamperStatus ( await MemoryRegisters.P1InterfaceAlarm.GetValue (),
+                                     await MemoryRegisters.ProgrammingCoilInterfaceTamper.GetValue () );
         }
 
-        public string TiltTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> TiltTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetTamperStatus(MemoryRegisters.P1TiltAlarm.Value, MemoryRegisters.TiltTamper.Value);
+            return GetTamperStatus ( await MemoryRegisters.P1TiltAlarm.GetValue (),
+                                     await MemoryRegisters.TiltTamper.GetValue () );
         }
 
-        public string MagneticTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> MagneticTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetTamperStatus(MemoryRegisters.P1MagneticAlarm.Value, MemoryRegisters.MagneticTamper.Value);
+            return GetTamperStatus ( await MemoryRegisters.P1MagneticAlarm.GetValue (),
+                                     await MemoryRegisters.MagneticTamper.GetValue () );
         }
 
-        public string RegisterCoverTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> RegisterCoverTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetTamperStatus(MemoryRegisters.P1RegisterCoverAlarm.Value, MemoryRegisters.RegisterCoverTamper.Value);
+            return GetTamperStatus ( await MemoryRegisters.P1RegisterCoverAlarm.GetValue (),
+                                     await MemoryRegisters.RegisterCoverTamper.GetValue () );
         }
 
-        public string ReverseFlowTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> ReverseFlowTamperStatus_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetTamperStatus(MemoryRegisters.P1ReverseFlowAlarm.Value, MemoryRegisters.ReverseFlowTamper.Value);
+            return GetTamperStatus ( await MemoryRegisters.P1ReverseFlowAlarm.GetValue (),
+                                     await MemoryRegisters.ReverseFlowTamper.GetValue () );
         }
 
-        public string FastMessagingMode_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> FastMessagingMode_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return ( MemoryRegisters.Fast2Way.Value ) ? MESAG_FAST : MESAG_SLOW;
+            return ( await MemoryRegisters.Fast2Way.GetValue () ) ? MESAG_FAST : MESAG_SLOW;
         }
 
-        public string LastGasp_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> LastGasp_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return ( MemoryRegisters.LastGaspTamper.Value ) ? ENABLED : TRIGGERED;
+            return ( await MemoryRegisters.LastGaspTamper.GetValue () ) ? ENABLED : TRIGGERED;
         }
 
-        public string InsufficentMemory_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> InsufficentMemory_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return ( MemoryRegisters.InsufficentMemoryTamper.Value ) ? ENABLED : TRIGGERED;
+            return ( await MemoryRegisters.InsufficentMemoryTamper.GetValue () ) ? ENABLED : TRIGGERED;
         }
 
-        public string P1Status_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> P1Status_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetPortStatus(MemoryRegisters.P1StatusFlag.Value);
+            return GetPortStatus ( await MemoryRegisters.P1StatusFlag.GetValue () );
         }
 
-        public string P2Status_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> P2Status_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return GetPortStatus(MemoryRegisters.P2StatusFlag.Value);
+            return GetPortStatus ( await MemoryRegisters.P2StatusFlag.GetValue () );
         }
 
-        public string F12WAYRegister1_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> F12WAYRegister1_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return HEX_PREFIX + MemoryRegisters.F12WAYRegister1Int.Value.ToString ( FWAYFORMAT );
+            return HEX_PREFIX + ( await MemoryRegisters.F12WAYRegister1Int.GetValue () ).ToString ( FWAYFORMAT );
         }
 
-        public string F12WAYRegister10_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> F12WAYRegister10_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return HEX_PREFIX + MemoryRegisters.F12WAYRegister10Int.Value.ToString ( FWAYFORMAT );
+            return HEX_PREFIX + ( await MemoryRegisters.F12WAYRegister10Int.GetValue () ).ToString ( FWAYFORMAT );
         }
 
-        public string F12WAYRegister14_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> F12WAYRegister14_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return HEX_PREFIX + MemoryRegisters.F12WAYRegister14Int.Value.ToString ( FWAYFORMAT );
+            return HEX_PREFIX + ( await MemoryRegisters.F12WAYRegister14Int.GetValue () ).ToString ( FWAYFORMAT );
         }
 
-        public string Frequency1Way_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> Frequency1Way_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return String.Format(new CultureInfo("en-us"), "{0:0.000}",(MemoryRegisters.Frequency1WayHz.Value / 1000000.0));
+            return String.Format ( new CultureInfo("en-us"), "{0:0.000}",
+                ( await MemoryRegisters.Frequency1WayHz.GetValue () / 1000000.0 ) );
         }
 
-        public string Frequency2WayTx_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> Frequency2WayTx_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return String.Format(new CultureInfo("en-us"), "{0:0.000}", (MemoryRegisters.Frequency2WayTxHz.Value / 1000000.0));
+            return String.Format ( new CultureInfo("en-us"), "{0:0.000}",
+                ( await MemoryRegisters.Frequency2WayTxHz.GetValue () / 1000000.0 ) );
         }
 
-        public string Frequency2WayRx_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> Frequency2WayRx_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return String.Format(new CultureInfo("en-us"), "{0:0.000}", (MemoryRegisters.Frequency2WayRxHz.Value / 1000000.0));
+            return String.Format ( new CultureInfo("en-us"), "{0:0.000}",
+                ( await MemoryRegisters.Frequency2WayRxHz.GetValue () / 1000000.0 ) );
         }
 
-        public string InstallConfirmationStatus_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> InstallConfirmationStatus_Get(MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
-            return ( MemoryRegisters.InstallConfirmationNotSynced.Value ) ? NTCONFIRMED : CONFIRMED;
+            return ( await MemoryRegisters.InstallConfirmationNotSynced.GetValue () ) ? NTCONFIRMED : CONFIRMED;
         }
 
-        public int MtuSoftVersion_Get ( MemoryOverload<int> memoryOverload, dynamic MemoryRegisters )
+        public async Task<int> MtuSoftVersion_Get ( MemoryOverload<int> memoryOverload, dynamic MemoryRegisters )
         {
-            if ( MemoryRegisters.MtuSoftVersionNew.Value == 255 )
-                return MemoryRegisters.MtuSoftVersionLegacy.Value;
-            return MemoryRegisters.MtuSoftVersionNew.Value;
+            if ( await MemoryRegisters.MtuSoftVersionNew.GetValue () == 255 )
+                return await MemoryRegisters.MtuSoftVersionLegacy.GetValue ();
+            return await MemoryRegisters.MtuSoftVersionNew.GetValue ();
         }
 
-        public string MtuSoftVersionString_Get ( MemoryOverload<string> memoryOverload, dynamic MemoryRegisters )
+        public async Task<string> MtuSoftVersionString_Get ( MemoryOverload<string> memoryOverload, dynamic MemoryRegisters )
         {
-            int mtuSoftVersion = MemoryRegisters.MtuSoftVersion.Value;
+            int mtuSoftVersion = await MemoryRegisters.MtuSoftVersion.GetValue ();
         
             if ( mtuSoftVersion == 254 )
                 return string.Format ( MTU_SOFTVERSION_LONG,
-                    MemoryRegisters.MtuSoftRevYear    .Value,
-                    MemoryRegisters.MtuSoftRevMonth   .Value,
-                    MemoryRegisters.MtuSoftBuildNumber.Value );
+                    await MemoryRegisters.MtuSoftRevYear    .GetValue (),
+                    await MemoryRegisters.MtuSoftRevMonth   .GetValue (),
+                    await MemoryRegisters.MtuSoftBuildNumber.GetValue () );
             
             return string.Format ( MTU_SOFTVERSION_SMALL, mtuSoftVersion );
         }
 
-        public int MtuSoftVersion342x_Get ( MemoryOverload<int> memoryOverload, dynamic MemoryRegisters )
+        public async Task<int> MtuSoftVersion342x_Get ( MemoryOverload<int> memoryOverload, dynamic MemoryRegisters )
         {
-            return MemoryRegisters.MtuSoftFormatFlag.Value;
+            return await MemoryRegisters.MtuSoftFormatFlag.GetValue ();
         }
 
-        public string MtuSoftVersionString342x_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        public async Task<string> MtuSoftVersionString342x_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
             return string.Format ( MTU_SOFTVERSION_LONG, 
-                MemoryRegisters.MtuSoftVersionMajor.Value,
-                MemoryRegisters.MtuSoftVersionMinor.Value,
-                MemoryRegisters.MtuSoftBuildNumber .Value );
+                await MemoryRegisters.MtuSoftVersionMajor.GetValue (),
+                await MemoryRegisters.MtuSoftVersionMinor.GetValue (),
+                await MemoryRegisters.MtuSoftBuildNumber .GetValue () );
         }
 
         #endregion
 
         #region Registers
 
-        public int ReadIntervalMinutes_Set ( MemoryRegister<int> MemoryRegister, dynamic inputValue )
+        public async Task<int> ReadIntervalMinutes_Set ( MemoryRegister<int> MemoryRegister, dynamic inputValue )
         {
             string[] readIntervalArray = ((string)inputValue).Split(' ');
             string readIntervalStr = readIntervalArray[0].ToLower ();
@@ -304,7 +316,7 @@ namespace MTUComm.MemoryMap
         }
 
         // Use with <CustomGet>method:ULongToBcd</CustomGet>
-        public ulong BcdToULong ( MemoryRegister<ulong> MemoryRegister )
+        public async Task<ulong> BcdToULong ( MemoryRegister<ulong> MemoryRegister )
         {
             byte[] bytes  = MemoryRegister.ValueByteArray;
             string outNum = string.Empty;
@@ -321,13 +333,11 @@ namespace MTUComm.MemoryMap
                 .Replace ( "E", "14" )
                 .Replace ( "F", "15" );
 
-            ulong a = ulong.Parse ( outNum );
-            
-            return a;
+            return ulong.Parse ( outNum );
         }
 
         // Use with <CustomSet>method:ULongToBcd</CustomSet>
-        public byte[] ULongToBcd ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
+        public async Task<byte[]> ULongToBcd ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
         {
             if ( inputValue is string )
                 return this.ULongToBcd_Logic ( inputValue, MemoryRegister.size );
@@ -336,7 +346,7 @@ namespace MTUComm.MemoryMap
 
         // Convert hexadecimal number to integer value
         // Use with <CustomSet>method:HexToInt</CustomSet>
-        public int HexToInt ( MemoryRegister<int> MemoryRegister, dynamic inputValue )
+        public async Task<int> HexToInt ( MemoryRegister<int> MemoryRegister, dynamic inputValue )
         {
             if ( inputValue is string ) // Removes 0x prefix
                  return int.Parse ( inputValue.Substring ( 2 ), NumberStyles.HexNumber );
@@ -347,10 +357,10 @@ namespace MTUComm.MemoryMap
 
         #region e-Coder
 
-        public string BackFlowState_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> BackFlowState_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             string reply = string.Empty;
-            string param = Convert.ToString ( MemoryRegisters.FlowState.Value,INDEX_STATE )
+            string param = Convert.ToString ( await MemoryRegisters.FlowState.GetValue (), INDEX_STATE )
                 .PadLeft(PAD_LEFT,ZERO)
                 .Substring(6);
             switch (param)
@@ -362,10 +372,10 @@ namespace MTUComm.MemoryMap
             return reply;
         }
 
-        public string DaysOfNoFlow_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> DaysOfNoFlow_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             string reply = string.Empty;
-            string param = Convert.ToString ( MemoryRegisters.FlowState.Value,INDEX_STATE )
+            string param = Convert.ToString ( await MemoryRegisters.FlowState.GetValue (), INDEX_STATE )
                 .PadLeft(PAD_LEFT,ZERO)
                 .Substring(3,3);
             switch (param)
@@ -381,10 +391,10 @@ namespace MTUComm.MemoryMap
             return reply + CASE_NOFLOW;
         }
 
-        public string LeakDetection_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> LeakDetection_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             string reply = string.Empty;
-            string param = Convert.ToString ( MemoryRegisters.LeakState.Value,INDEX_STATE )
+            string param = Convert.ToString ( await MemoryRegisters.LeakState.GetValue (), INDEX_STATE )
                 .PadLeft(PAD_LEFT,ZERO)
                 .Substring(5,2);
             switch (param)
@@ -396,10 +406,10 @@ namespace MTUComm.MemoryMap
             return reply;
         }
 
-        public string DaysOfLeak_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
+        public async Task<string> DaysOfLeak_Get (MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters)
         {
             string reply = string.Empty;
-            string param = Convert.ToString ( MemoryRegisters.LeakState.Value,INDEX_STATE )
+            string param = Convert.ToString ( await MemoryRegisters.LeakState.GetValue (), INDEX_STATE )
                 .PadLeft(PAD_LEFT,ZERO)
                 .Substring(2, 3);
             switch (param)

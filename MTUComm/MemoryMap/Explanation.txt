@@ -70,7 +70,7 @@ Registros presentes en los dispositivos, pudiendo ocupar una o mas posiciones ( 
 			 // MemoryMap31xx32xx.cs
 			 public int DailyRead_Logic ( MemoryRegister<int> MemoryRegister )
 			 {
-				 return MemoryRegister.Value;
+				 return MemoryRegister.GetValue ();
 			 }
 
 Overload
@@ -115,12 +115,12 @@ Son registros que como tal no existen en los dispositivos, al requerir de varios
 			 // MemoryMap31xx32xx.cs
 			 public int Overload_Method_Logic ( MemoryOverload<int> MemoryOverload, dynamic MemoryRegisters )
 			 {
-				 Console.WriteLine ( MemoryRegisters.Shipbit  .id + " -> " + MemoryRegisters.Shipbit  .Value );
-				 Console.WriteLine ( MemoryRegisters.MtuType  .id + " -> " + MemoryRegisters.MtuType  .Value );
-				 Console.WriteLine ( MemoryRegisters.DailyRead.id + " -> " + MemoryRegisters.DailyRead.Value );
+				 Console.WriteLine ( MemoryRegisters.Shipbit  .id + " -> " + MemoryRegisters.Shipbit  .GetValue () );
+				 Console.WriteLine ( MemoryRegisters.MtuType  .id + " -> " + MemoryRegisters.MtuType  .GetValue () );
+				 Console.WriteLine ( MemoryRegisters.DailyRead.id + " -> " + MemoryRegisters.DailyRead.GetValue () );
 
-				 if ( MemoryRegisters.Shipbit.Value )
-					 return MemoryRegisters.MtuType.Value + MemoryRegisters.DailyRead.Value;
+				 if ( MemoryRegisters.Shipbit.GetValue () )
+					 return MemoryRegisters.MtuType.Value + MemoryRegisters.DailyRead.GetValue ();
 			
 				 return -1;
 			 }
@@ -135,12 +135,12 @@ Son registros que como tal no existen en los dispositivos, al requerir de varios
 
 			 public int Method_reuse ( MemoryOverload<int> MemoryOverload, dynamic[] MemoryRegisters )
 			 {
-			   Console.WriteLine ( MemoryRegisters[ 0 ].id + " -> " + MemoryRegisters[ 0 ].Value );
-			   Console.WriteLine ( MemoryRegisters[ 1 ].id + " -> " + MemoryRegisters[ 1 ].Value );
-			   Console.WriteLine ( MemoryRegisters[ 2 ].id + " -> " + MemoryRegisters[ 2 ].Value );
+			   Console.WriteLine ( MemoryRegisters[ 0 ].id + " -> " + MemoryRegisters[ 0 ].GetValue () );
+			   Console.WriteLine ( MemoryRegisters[ 1 ].id + " -> " + MemoryRegisters[ 1 ].GetValue () );
+			   Console.WriteLine ( MemoryRegisters[ 2 ].id + " -> " + MemoryRegisters[ 2 ].GetValue () );
 
-			   if ( MemoryRegisters[ 1 ].Value )
-			     return MemoryRegisters[ 0 ].Value + MemoryRegisters[ 2 ].Value;
+			   if ( MemoryRegisters[ 1 ].GetValue () )
+			     return MemoryRegisters[ 0 ].GetValue () + MemoryRegisters[ 2 ].GetValue ();
 
 			   return -1;
 			 }

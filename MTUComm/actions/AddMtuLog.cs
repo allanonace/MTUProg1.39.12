@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Xml.Linq;
 using MTUComm.actions;
+using Library;
 using Xml;
+using System.Threading.Tasks;
 
 using System.IO;
 
@@ -70,7 +72,7 @@ namespace MTUComm
             logger.Parameter(this.turnOnAction, new Parameter("MtuId", "MTU ID", this.mtuBasicInfo.Id));
         }
 
-        public void LogAddMtu ( bool isFromScripting = false )
+        public async Task LogAddMtu ( bool isFromScripting = false )
         {
             Mtu     mtu    = form.mtu;
             Global  global = form.global;
@@ -126,7 +128,7 @@ namespace MTUComm
             // Related to F12WAYRegister1XX registers
             string afc = ( mtu.TimeToSync &&
                            global.AFC &&
-                           map.MtuSoftVersion >= 19 ) ? "Set" : "Off";
+                           await map.MtuSoftVersion.GetValue () >= 19 ) ? "Set" : "Off";
             logger.Parameter ( this.addMtuAction, new Parameter ( "AFC", "AFC", afc ) );
 
             #endregion
@@ -138,13 +140,13 @@ namespace MTUComm
             // Avoid try to log encryption info when not it has not been performed
             if ( data.isMtuEncrypted )
             {
-                //logger.Parameter ( this.addMtuAction, new Parameter ( "Encryption", "Encrypted", map.Encryption ) );
-                logger.Parameter ( this.addMtuAction, new Parameter ( "EncryptionIndex", "Encryption Index", map.EncryptionIndex ) );
+                //logger.Parameter ( this.addMtuAction, new Parameter ( "Encryption", "Encrypted", map.Encryption.GetValue () ) );
+                logger.Parameter ( this.addMtuAction, new Parameter ( "EncryptionIndex", "Encryption Index", await map.EncryptionIndex.GetValue () ) );
             
                 // Using certificate with public key
                 if ( data.IsCertLoaded )
                 {
-                    Console.WriteLine ( "Using certificate creating activity log" );
+                    Utils.Print ( "Using certificate creating activity log" );
                     
                     logger.Parameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaEncryptedInBase64 ) );
                     logger.Parameter ( this.addMtuAction, new Parameter ( "HeadendCertThumb",     "HeadendCertThumb",      data.certificate.Thumbprint ) );
@@ -154,7 +156,7 @@ namespace MTUComm
                 // No certificate present
                 else
                 {
-                    Console.WriteLine ( "Not using certificate creating activity log" );
+                    Utils.Print ( "Not using certificate creating activity log" );
                 
                     logger.Parameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaInBase64 ) );
                 }
@@ -298,22 +300,22 @@ namespace MTUComm
                     logger.Parameter(alarmSelection, new Parameter("Overlap", "Message Overlap", overlap));
 
                     if ( mtu.MagneticTamper )
-                        logger.Parameter ( alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper", map.MagneticTamperStatus ));
+                        logger.Parameter ( alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper", await map.MagneticTamperStatus.GetValue () ));
 
                     if ( mtu.RegisterCoverTamper )
-                        logger.Parameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Register Cover Tamper", map.RegisterCoverTamperStatus ));
+                        logger.Parameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Register Cover Tamper", await map.RegisterCoverTamperStatus.GetValue () ));
 
                     if ( mtu.TiltTamper )
-                        logger.Parameter( alarmSelection, new Parameter("TiltTamper", "Tilt Tamper", map.TiltTamperStatus ));
+                        logger.Parameter( alarmSelection, new Parameter("TiltTamper", "Tilt Tamper", await map.TiltTamperStatus.GetValue () ));
 
                     if ( mtu.ReverseFlowTamper )
                     {
-                        logger.Parameter ( alarmSelection, new Parameter("ReverseFlow", "Reverse Flow Tamper", map.ReverseFlowTamperStatus ));
+                        logger.Parameter ( alarmSelection, new Parameter("ReverseFlow", "Reverse Flow Tamper", await map.ReverseFlowTamperStatus.GetValue () ));
                         logger.Parameter(alarmSelection, new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
                     }
 
                     if ( mtu.InterfaceTamper)
-                        logger.Parameter ( alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper", map.InterfaceTamperStatus ));
+                        logger.Parameter ( alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper", await map.InterfaceTamperStatus.GetValue () ));
 
                     this.addMtuAction.Add(alarmSelection);
                 }

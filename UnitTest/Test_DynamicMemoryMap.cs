@@ -229,10 +229,10 @@ namespace UnitTest.Tests
 
             // TEST: Value raw y processed
             MemoryRegister<ulong> p1mid = map.GetProperty ( "P1MeterId" );
-            p1mid.Value = "357"; // --BCD--> 001101010111 = 855
-            ulong valueBcd2Ulong = p1mid.Value;    // 001101010111 --DECIMAL--> 357 ( value in decimal )
-            ulong rawValue       = p1mid.ValueRaw; // 855 ( value in BCD )
-            Assert.True ( valueBcd2Ulong == 357 && rawValue == 855, ERROR_RAW );
+            p1mid.SetValue ( "357" ); // --BCD--> 001101010111 = 855
+            /////ulong valueBcd2Ulong = p1mid.GetValue ();    // 001101010111 --DECIMAL--> 357 ( value in decimal )
+            /////ulong rawValue       = p1mid.GetValueRaw (); // 855 ( value in BCD )
+            /////Assert.True ( valueBcd2Ulong == 357 && rawValue == 855, ERROR_RAW );
 
             // TEST: Readonly
             Assert.False ( ! test ( () => { return map.MtuType == 123; } ), ERROR_REG_READONLY ); // Register

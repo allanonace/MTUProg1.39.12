@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Lexi;
+using Library;
 using Xml;
 
 using REGISTER_TYPE = MTUComm.MemoryMap.AMemoryMap.REGISTER_TYPE;
@@ -16,15 +19,15 @@ namespace MTUComm.MemoryMap
 
         #region Attributes
 
-        private Lexi.Lexi lexi;
-        public Func<T> funcGet;                 // MemoryRegister.Value{get}
-        public Func<T> funcGetCustom;           // Only use working dynamically ( IMemoryRegister.Get )
-        public Func<byte[]> funcGetByteArray;   // 
+        public Func<Task<T>> funcGet;                 // MemoryRegister.Value{get}
+        public Func<T> funcGetMap;              // MemoryRegister.Value{get}
+        public Func<Task<T>> funcGetCustom;           // Only use working dynamically ( IMemoryRegister.Get )
+        public Func<bool,byte[]> funcGetByteArray;   // 
         public Action<T> funcSet;               // MemoryRegister.Value{set}
-        public Func<dynamic,dynamic> funcSetCustom;         // MemoryRegister.Value{set}
+        public Func<dynamic,Task<dynamic>> funcSetCustom;         // MemoryRegister.Value{set}
         public Action<string> funcSetString;    // MemoryRegister.Value{set}
         public Action<byte[]> funcSetByteArray; // MemoryRegister.Value{set}
-        public Func<T> funcGetFromMtu;
+        public Func<Task<T>> funcGetFromMtu;
         public string id { get; }
         public string description { get; }
         public RegType valueType { get; }
@@ -41,6 +44,9 @@ namespace MTUComm.MemoryMap
         public REGISTER_TYPE registerType { get; }
         public bool used;   // Flag is used to know what registers should be written in the MTU
         public bool readedFromMtu; // Loaded at least one time reading from the MTU
+        private Lexi.Lexi lexi;
+        
+        public byte[] lastRead;
 
         #endregion
 
@@ -151,112 +157,138 @@ namespace MTUComm.MemoryMap
         #endregion
 
         // Read and write without processing data, raw info
-        public dynamic ValueRaw
+        public T ValueRaw
         {
-            get { return (T)this.funcGet (); }
-            set { this.funcSet ( (T)value ); }
+            get { return this.funcGetMap (); }
         }
 
         // Recover bytes without processing data, raw info
+        public byte[] ValueByteArray_SameSize
+        {
+            get { return this.funcGetByteArray ( false ); }
+        }
+        
         public byte[] ValueByteArray
         {
-            get { return this.funcGetByteArray (); }
+            get { return this.funcGetByteArray ( true ); }
         }
         
-        public dynamic ValueReadFromMtu (
-            Lexi.Lexi lexi,
-            bool returnByteArray = false,
-            int  customSize = 0 )
+        public async Task<dynamic> ValueReadFromMtu (
+            bool returnByteArray = false )
         {
-            bool useCustomSize = ( customSize > 0 );
+            Utils.PrintDeep ( Environment.NewLine + "------LOAD_FROM_MTU------" );
+            Utils.Print ( "Register -> ValueReadFromMtu -> " + this.id + " [ " + returnByteArray + " ]" );
         
-            // Read actual value from MTU
-            uint size = ( useCustomSize ) ? ( uint )customSize : ( ( ( ( uint )this.size <= 0 ) ? 1 : ( uint )this.size ) );
-            byte[] value = lexi.Read ( ( uint )this.address, size );
+            // Reset flag that will be used in funcGet to invoke funcGetFromMtu
+            this.readedFromMtu = false;
+            var result = await this.GetValue ();
             
-            // Set value in temporary memory map only if not using CustomSize,
-            // because is not possible to read X bytes and write Y ( different size )
-            // and customSize will be only for specific cases
-            if ( ! useCustomSize )
+            Utils.PrintDeep ( "---LOAD_FROM_MTU_FINISH--" + Environment.NewLine );
+            
+            if ( ! returnByteArray )
+            	 return result;
+          	else return this.lastRead;
+        }
+        
+        public async Task ValueWriteToMtu (
+            dynamic value = null )
+        {
+            Utils.PrintDeep ( Environment.NewLine + "------WRITE_TO_MTU-------" );
+            Utils.Print ( "Register -> ValueWriteToMtu -> " + this.id + " = " + value );
+        
+            // Set value in temporary memory map before write it to the MTU
+            if ( value != null )
+                await this.SetValue ( value );
+            
+            // Write value set in memory map to the MTU
+            if ( valueType == RegType.BOOL )
+                await this.ValueWriteToMtu_Bit ();
+            else
             {
-                this.funcSetByteArray ( value );
-                
-                // Return value in desired format
-                if ( ! returnByteArray )
-                    return this.Value;
-                return this.ValueByteArray;
+                // Recover byte array with length equals to the value to set,
+                // not the length ( sizeGet ) that will be used to recover/get
+                await this.lexi.Write ( ( uint )this.address, this.ValueByteArray_SameSize );
             }
-            return value;
+            
+            Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );
         }
         
-        public void ValueWriteToMtu (
-            Lexi.Lexi lexi,
-            dynamic value )
+        private async Task ValueWriteToMtu_Bit ()
         {
-            // Set value in temporary memory map
-            this.Value = value;
+            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> " + this.id );
+        
+            // Read current value
+            byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1 ) )[ 0 ];
+
+            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
+            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Aux.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags + " ]" );
+
+            var valueInMap = ( bool )( object )this.ValueRaw;
+
+            // Modify bit and write to MTU
+            if ( valueInMap )
+                 systemFlags = ( byte ) ( systemFlags |    1 << ( int )bit   );
+            else systemFlags = ( byte ) ( systemFlags & ~( 1 << ( int )bit ) );
             
-            // Recover just set value but in byte[] format
-            if ( value is Array )
-                 lexi.Write ( ( uint )this.address, value );
-            else lexi.Write ( ( uint )this.address, this.ValueByteArray );
+            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Write bit to MTU: " + this.id + " -> " + Aux.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags + " ] to bit: " + bit );
+            
+            await this.lexi.Write ( ( uint )this.address, new byte[] { systemFlags } );
+        }
+
+        // Register Value property always returns value from byte array without any modification
+        // This behaviour is mandatory to be able to use original value inside custom get methods,
+        // avoiding to create infinite loop: Custom Get -> Value -> Custom Get -> Value...
+        public async Task<T> GetValue ()
+        {
+            // If register has not customized get method, use normal/direct get raw value
+            if ( ! this.HasCustomMethod_Get )
+                return await this.funcGet ();
+
+            return await this.funcGetCustom ();
         }
 
         // Use custom methods if them are registered
-        public dynamic Value
+        public async Task SetValue (
+            dynamic value )
         {
-            // Register Value property always returns value from byte array without any modification
-            // This behaviour is mandatory to be able to use original value inside custom get methods,
-            // avoiding to create infinite loop: Custom Get -> Value -> Custom Get -> Value...
-            get
+            // Register with read and write
+            if ( this.write )
             {
-                // If register has not customized get method, use normal/direct get raw value
-                if ( ! this.HasCustomMethod_Get )
-                    return this.ValueRaw; // Invokes funGet method internally
+                // Method will modify passed value before set in byte array
+                // If XML custom field is "method" or "method:id"
+                if ( this.HasCustomMethod_Set )
+                    value = await this.funcSetCustom ( value );
 
-                return this.funcGetCustom ();
-            }
-            set
-            {
-                // Register with read and write
-                if ( this.write )
-                {
-                    // Method will modify passed value before set in byte array
-                    // If XML custom field is "method" or "method:id"
-                    if ( this.HasCustomMethod_Set )
-                        value = this.funcSetCustom ( value );
+                // Try to set string value after read form control
+                // If XML custom field is...
+                if ( value is string )
+                    this.funcSetString ( value ); 
 
-                    // Try to set string value after read form control
-                    // If XML custom field is...
-                    if ( value is string )
-                        this.funcSetString(value); 
+                // Try to set string but using byte array ( AES )
+                else if ( value is byte[] )
+                    this.funcSetByteArray ( value );
 
-                    // Try to set string but using byte array ( AES )
-                    else if ( value is byte[] )
-                        this.funcSetByteArray(value);
-
-                    // Try to set value of waited type
-                    // If XML custom field is a math expression ( e.g. _val_ * 2 / 5 )
-                    else
-                        this.ValueRaw = value;
-                    
-                    // Flag is used to know what registers should be written in the MTU
-                    this.used = true;
-                }
-                // Register is readonly
+                // Try to set value of waited type
+                // If XML custom field is a math expression ( e.g. _val_ * 2 / 5 )
                 else
-                {
-                    Console.WriteLine ( "Set " + id + ": Error - Can't write to this register because is readonly" );
+                    this.funcSet ( ( T )value );
+                
+                // Flag is used to know what registers should be written in the MTU
+                this.used = true;
+            }
+            // Register is readonly
+            else
+            {
+                Utils.Print ( "Set " + id + ": Error - Can't write to this register because is readonly" );
 
-                    if ( ! MemoryMap.isUnityTest )
-                        throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
-                }
+                if ( ! MemoryMap.isUnityTest )
+                    throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
             }
         }
 
-        public string ValueWithXMask ( string xMask, int digits )
+        public async Task<string> ValueWithXMask ( string xMask, int digits )
         {
-            string value = this.Value.ToString ();
+            string value = ( await this.GetValue () ).ToString ();
 
             // Ejemplo: num 1234 mask X00 digits 6
             // 1. 4 < 6
@@ -297,6 +329,7 @@ namespace MTUComm.MemoryMap
             this.custom_Get   = custom_Get.Replace ( " ", string.Empty );
             this.custom_Set   = custom_Set.Replace ( " ", string.Empty );
             this.registerType = REGISTER_TYPE.REGISTER;
+            this.lexi         = Singleton.Get.Lexi;
 
             // Custom Get
             if      ( this._HasCustomMethod_Get    ) this.customType_Get = CUSTOM_TYPE.METHOD;

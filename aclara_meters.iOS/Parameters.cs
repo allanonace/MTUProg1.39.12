@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Foundation;
+using Library;
 using Microsoft.Intune.MAM;
 using MTUComm;
-using System.IO;
-using MTUComm.Exceptions;
 
 namespace aclara_meters.iOS
 {
@@ -34,9 +33,9 @@ namespace aclara_meters.iOS
                 data.ftpDownload_Path =             paramsGroup.ValueForKey ( new NSString ( Mobile.ID_FTP_PATH    ) ).ToString ();
                 //data.GenerateCert        ( paramsGroup.ValueForKey ( new NSString ( Mobile.ID_CERTIFICATE ) ).ToString () );
                 
-                Console.WriteLine ( "Intune parameters loaded.." );
-                Console.WriteLine ( "FTP: " + data.ftpDownload_Host + ":" + data.ftpDownload_Port + " - " + data.ftpDownload_User + " [ " + data.ftpDownload_Pass + " ]" );
-                Console.WriteLine ( "Certificate: " + data.certificate.FriendlyName + " [ " + data.certificate.NotAfter + " ]" );
+                Utils.Print ( "Intune parameters loaded.." );
+                Utils.Print ( "FTP: " + data.ftpDownload_Host + ":" + data.ftpDownload_Port + " - " + data.ftpDownload_User + " [ " + data.ftpDownload_Pass + " ]" );
+                Utils.Print ( "Certificate: " + data.certificate.FriendlyName + " [ " + data.certificate.NotAfter + " ]" );
                 
                 // Free memory
                 paramsGroup .Dispose ();

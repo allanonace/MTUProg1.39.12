@@ -354,6 +354,10 @@
       <Project>{20113951-5BD8-473F-BC70-7AF5F875C305}</Project>
       <Name>MTUComm</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Library\Library.csproj">
+      <Project>{F6FA20D8-AEDF-4157-9885-6D4975AF2ED6}</Project>
+      <Name>Library</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <AndroidAsset Include="Assets\fonts\OpenSansBold.ttf" />

@@ -1,12 +1,11 @@
-﻿using System;
-using System.IO;
-using Xamarin.Essentials;
+﻿using Library;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using MTUComm.Exceptions;
-using Xamarin.Forms;
-
+using Library.Exceptions;
+using Xamarin.Essentials;
 
 namespace MTUComm
 {
@@ -76,13 +75,13 @@ namespace MTUComm
                         string content   = File.ReadAllText ( path );
                         this.certificate = new X509Certificate2 ( Encoding.ASCII.GetBytes ( CER_HEADER + content + CER_FOOTER ) );
                         
-                        Console.WriteLine ( "Local parameters loaded.." );
-                        Console.WriteLine ( "FTP: " + this.ftpDownload_Host + ":" + this.ftpDownload_Port + " - " + this.ftpDownload_User + " [ " + this.ftpDownload_Pass + " ]" );
-                        Console.WriteLine ( "Certificate: " + this.certificate.Subject + " [ " + this.certificate.NotAfter + " ]" );
+                        Utils.Print ( "Local parameters loaded.." );
+                        Utils.Print ( "FTP: " + this.ftpDownload_Host + ":" + this.ftpDownload_Port + " - " + this.ftpDownload_User + " [ " + this.ftpDownload_Pass + " ]" );
+                        Utils.Print ( "Certificate: " + this.certificate.Subject + " [ " + this.certificate.NotAfter + " ]" );
                         
-                        Console.WriteLine ( "Public Key: " + Convert.ToBase64String ( this.certificate.GetPublicKey () ) );
-                        Console.WriteLine ( "Devices Cert Subject: " + this.certificate.Subject + " " + this.certificate.SubjectName.Name );
-                        Console.WriteLine ( "Cert Thumbprint: " + this.certificate.Thumbprint );
+                        Utils.Print ( "Public Key: " + Convert.ToBase64String ( this.certificate.GetPublicKey () ) );
+                        Utils.Print ( "Devices Cert Subject: " + this.certificate.Subject + " " + this.certificate.SubjectName.Name );
+                        Utils.Print ( "Cert Thumbprint: " + this.certificate.Thumbprint );
                         
                         // Check if certificate is not valid/has expired
                         if ( DateTime.Compare ( this.certificate.NotAfter, DateTime.Today ) < 0 )
@@ -276,13 +275,13 @@ namespace MTUComm
         {
             string space = string.Empty.PadLeft ( numLevel * 4, ' ' );
             
-            Console.WriteLine ( space + "FOLDER: " + PATH );
+            Utils.Print ( space + "FOLDER: " + PATH );
             
             if ( Directory.GetFiles ( PATH ).Length > 0 )
             {
-                Console.WriteLine ( space + "· FILES.." );
+                Utils.Print ( space + "· FILES.." );
                 foreach ( string file in Directory.EnumerateFiles ( PATH ) )
-                    Console.WriteLine ( space + "  · " + file );
+                    Utils.Print ( space + "  · " + file );
             }
         
             foreach ( string folder in Directory.EnumerateDirectories ( PATH ) )
