@@ -1518,6 +1518,21 @@ namespace aclara_meters.view
 
         private void FocusEntryFields()
         {
+            this.tbx_remote_path.Focused += (s, e) =>
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(true, (int)-120);
+                else
+                    SetLayoutPosition(true, (int)-100);
+            };
+
+            this.tbx_remote_path.Unfocused += (s, e) =>
+            {
+                if (Device.Idiom == TargetIdiom.Tablet)
+                    SetLayoutPosition(false, (int)-120);
+                else
+                    SetLayoutPosition(false, (int)-100);
+            };
             this.tbx_user_name.Focused += (s, e) =>
             {
                 if (Device.Idiom == TargetIdiom.Tablet)

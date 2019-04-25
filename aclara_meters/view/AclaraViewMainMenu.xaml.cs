@@ -30,6 +30,7 @@ namespace aclara_meters.view
     {
         private bool autoConnect;
         private bool conectarDevice;
+        private bool bAlertBatt = false;
 
         private ActionType actionType;
 
@@ -596,12 +597,16 @@ namespace aclara_meters.view
                 imageRssi.Source = rssiIcon;
                 rssi_level_detail.Source = rssiIcon + "_white";
 
-                if (battery == 20)
+                if (battery == 20 && !bAlertBatt)
+                {
                     await Application.Current.MainPage.DisplayAlert("Attention", "The battery level is at 20%", "OK");
-
-                if (battery == 10)
+                    bAlertBatt = true;
+                }
+                if (battery == 10 && !bAlertBatt)
+                {
                     await Application.Current.MainPage.DisplayAlert("Attention", "The battery level is at 10%, soon the puck will turn off", "OK");
-
+                    bAlertBatt = true;
+                }
             });
 
             //Save Battery & Rssi info for the next windows
@@ -615,7 +620,9 @@ namespace aclara_meters.view
 
             int timeout_connecting = 0;
             int cont = 0;
+            int refresh = 0;
 
+            //bAlertBatt = false;
             //PrintToConsole("se va a ejecutar un bucle (WHILE TRUE) - InvokeMethod");
 
             while (true)
@@ -633,6 +640,13 @@ namespace aclara_meters.view
 
                 if (cont == 2000)
                 {
+                    if (refresh == 4)
+                    {
+                        refresh = 0;
+                        bAlertBatt = false;
+                    }
+                    else refresh += 1;
+
                     RefreshPuckData();
                     cont = 0;
                 }
@@ -733,6 +747,7 @@ namespace aclara_meters.view
                             });
                             peripheralConnected = status;
                             Singleton.Remove<Puck> ();
+                            bAlertBatt = false;
                         }
                         else // status == ble_library.BlePort.CONNECTED
                         {
@@ -759,6 +774,8 @@ namespace aclara_meters.view
                        
                         peripheralConnected = status;
                         Singleton.Remove<Puck> ();
+                        bAlertBatt = false;
+
                         Device.BeginInvokeOnMainThread(() =>
                         {
                             fondo.Opacity = 1;
@@ -1451,7 +1468,7 @@ namespace aclara_meters.view
                 Singleton.Set = new Puck ();
                 Singleton.Get.Puck.Device = item.Peripheral;
                 Singleton.Get.Puck.BlInterfaz = FormsApp.ble_interface;
-
+                bAlertBatt = false;
                 externalReconnect(reassociate);
 
                 Device.BeginInvokeOnMainThread(() =>

@@ -3506,9 +3506,10 @@ namespace aclara_meters.view
 
             try
             {
-                FormsApp.credentialsService.DeleteCredentials();
-                FormsApp.ble_interface.Close();
-                Singleton.Remove<Puck> ();
+                FormsApp.DoLogOff();
+                //FormsApp.credentialsService.DeleteCredentials();
+                //FormsApp.ble_interface.Close();
+                //Singleton.Remove<Puck>();
             }
             catch (Exception e25)
             {

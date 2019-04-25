@@ -437,7 +437,8 @@ namespace aclara_meters.view
 										// Minor bug fix in case of missing battery data
                                         try
                                         {
-                                            byte[] bateria = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
+                                            int pos = peripheral.Advertisement.ManufacturerSpecificData.Count();
+                                            byte[] bateria = peripheral.Advertisement.ManufacturerSpecificData.ElementAt(pos).Data.Skip(4).Take(1).ToArray();
 
                                             String icono_bateria = "battery_toolbar_high";
 
@@ -620,10 +621,6 @@ namespace aclara_meters.view
 
                 PrintToConsole("¿Se va a realizar reconexion? - InvokeMethod");
 
-
-
-
-
             }
 
         }
@@ -735,7 +732,8 @@ namespace aclara_meters.view
 
                                     if (!enc)
                                     {
-                                        bateria = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Skip(4).Take(1).ToArray();
+                                        int pos = blePeripherals[i].Advertisement.ManufacturerSpecificData.Count();
+                                        bateria = blePeripherals[i].Advertisement.ManufacturerSpecificData.ElementAt(pos).Data.Skip(4).Take(1).ToArray();
 
                                         icono_bateria = "battery_toolbar_high";
 

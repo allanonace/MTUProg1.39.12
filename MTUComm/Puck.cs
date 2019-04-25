@@ -3,7 +3,7 @@ using nexus.protocols.ble.scan;
 using System.Linq;
 using System.Collections.Generic;
 using ble_library;
-
+using nexus.protocols.ble.scan.advertisement;
 
 namespace MTUComm
 {
@@ -55,10 +55,11 @@ namespace MTUComm
         {
             get
             {
+                int posEnd = this.puck.Advertisement.ManufacturerSpecificData.Count()-1;
                 int batt= this.puck.
                         Advertisement.
                         ManufacturerSpecificData.
-                        ElementAt(0).Data.Skip(4).Take(1).ToArray()[0];
+                        ElementAt(posEnd).Data.Skip(4).Take(1).ToArray()[0];
                 Console.Write($"******************* Fix Serial number: {SerialNumber} - Bateria: {batt.ToString()}" + Environment.NewLine);
                 return BatteryRound(batt);
             }
@@ -67,10 +68,7 @@ namespace MTUComm
         {
             get
             {
-                int batt = this.puck.
-                        Advertisement.
-                        ManufacturerSpecificData.
-                        ElementAt(0).Data.Skip(4).Take(1).ToArray()[0];
+                int batt = BatteryLevelFix;
 
                 int battSerial = this.blSerial == null?-1:this.blSerial.GetBatteryLevel().
                         Take(1).ToArray()[0];

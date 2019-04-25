@@ -727,32 +727,20 @@ namespace aclara_meters.view
 
         private async void LogoutAsync(object sender, EventArgs e)
         {
-            Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
-            Singleton.Remove<Puck> ();
-            FormsApp.ble_interface.Close();
-            //int contador = Navigation.NavigationStack.Count;
-            //while(contador>0)
-            //{
-            //    try
-            //    {
-            //        await Navigation.PopAsync(false);
-            //    }catch(Exception v){
-            //        Utils.Print(v.StackTrace);
-            //    }
-            //    contador--;
-            //}
 
-            try
+            Device.BeginInvokeOnMainThread(() =>
             {
-                Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
-                //await Navigation.PopToRootAsync(false);
-
-            }
-            catch (Exception v)
-            {
-                Utils.Print(v.StackTrace);
-            }     
+                dialog_turnoff_one.IsVisible = false;
+                dialog_open_bg.IsVisible = true;
+                dialog_meter_replace_one.IsVisible = false;
+                dialog_turnoff_two.IsVisible = false;
+                dialog_turnoff_three.IsVisible = false;
+                dialog_replacemeter_one.IsVisible = false;
+                dialog_logoff.IsVisible = true;
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+            });
+         
         }
 
         private void ReturnToMainView(object sender, EventArgs e)
