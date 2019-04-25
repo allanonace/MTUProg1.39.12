@@ -695,7 +695,7 @@ namespace MTUComm.MemoryMap
                      Validations.NumericTypeLimit <T> ( value ) );
         }
 
-        public string[] GetModifiedRegistersDifferences ( MemoryMap otherMap )
+        public async Task<string[]> GetModifiedRegistersDifferences ( MemoryMap otherMap )
         {
             List<string> difs = new List<string> ();
 
@@ -705,8 +705,9 @@ namespace MTUComm.MemoryMap
             {
                 string name = register.id;
                 
-                if ( ! otherMap.ContainsMember ( name ) ||       // Register not present in other memory map
-                     ! base[ name ].Equals ( otherMap[ name ] )) // Both registers are not equal
+                if ( register.size == register.sizeGet &&                   // Only compare
+                     ( ! otherMap.ContainsMember ( name ) ||                // Register not present in other memory map
+                       ! await base[ name ].Equals ( otherMap[ name ] ) ) ) // Both registers are not equal
                 {
                     difs.Add ( name );
                     continue;
@@ -716,9 +717,9 @@ namespace MTUComm.MemoryMap
             return difs.ToArray ();
         }
 
-        public bool ValidateModifiedRegisters ( MemoryMap otherMap )
+        public async Task<bool> ValidateModifiedRegisters ( MemoryMap otherMap )
         {
-            return ( this.GetModifiedRegistersDifferences ( otherMap ).Length == 0 );
+            return ( ( await this.GetModifiedRegistersDifferences ( otherMap ) ).Length == 0 );
         }
 
         #endregion
@@ -1169,5 +1170,17 @@ namespace MTUComm.MemoryMap
         }
 
         #endregion
+        
+        public void ResetReadFlags ()
+        {
+            foreach ( dynamic register in this.registersObjs.Values )
+                register.readedFromMtu = false;
+        }
+        
+        public void SetReadFromMtuOnlyOnce (
+            bool ok )
+        {
+            this.readFromMtuOnlyOnce = ok;
+        }
     }
 }

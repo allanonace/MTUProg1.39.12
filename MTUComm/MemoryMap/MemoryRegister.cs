@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
-using Lexi;
 using Library;
 using Xml;
 
@@ -9,7 +9,7 @@ using RegType       = MTUComm.MemoryMap.MemoryMap.RegType;
 
 namespace MTUComm.MemoryMap
 {
-    public class MemoryRegister<T> : IEquatable<MemoryRegister<T>>
+    public class MemoryRegister<T>
     {
         #region Constants
 
@@ -138,7 +138,18 @@ namespace MTUComm.MemoryMap
         // Read and write without processing data, raw info
         public T ValueRaw
         {
-            get { return this.funcGetMap (); }
+            get
+            {
+                return this.funcGetMap ();
+            }
+        }
+        
+        public byte[] ValueByteArrayRaw
+        {
+            get
+            {
+                return this.funcGetByteArray ( true );
+            }
         }
 
         // Recover bytes without processing data, raw info
@@ -350,7 +361,7 @@ namespace MTUComm.MemoryMap
 
         #region Compare
 
-        public bool Equals ( MemoryRegister<T> other )
+        public async Task<bool> Equals ( MemoryRegister<T> other )
         {
             if ( other == null )
                 return false;
@@ -360,7 +371,27 @@ namespace MTUComm.MemoryMap
             bool ok_address     = ( this.address == other.address );
             bool ok_size        = ( this.size    == other.size    );
             bool ok_write       = ( this.write   == other.write   );
-            bool ok_value       = object.Equals ( this.ValueRaw, other.ValueRaw );
+            
+            byte[] valLocal = new byte[] { };
+            byte[] valOther = new byte[] { };
+            
+            bool ok_value = true;
+            try
+            {
+                valLocal = this.ValueByteArrayRaw;
+                valOther = await other.GetValueByteArray ();
+            
+                ok_value = valLocal.SequenceEqual ( valOther );
+            }
+            catch ( Exception e )
+            {
+                ok_value = false;
+            }
+
+            Utils.Print ( "Equals: " + this.id + " -> " +
+                Utils.ByteArrayToString ( valLocal ) + " == " +
+                Utils.ByteArrayToString ( valOther ) + " = " +
+                ok_value );
 
             return ok_id          &&
                    ok_description &&

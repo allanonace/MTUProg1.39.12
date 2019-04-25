@@ -1481,61 +1481,28 @@ namespace MTUComm
                 #region Read MTU
 
                 Utils.Print ( "----FINAL_READ_START-----" );
-
+                
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
-
-                await lexi.Write(64, new byte[] { 1 });
-                Thread.Sleep(1000);
-
-                byte[] buffer = new byte[ map.Length ];
-
-                System.Buffer.BlockCopy( await lexi.Read(0, 255), 0, buffer, 0, 255);
+                
+                // Used to check if all data was write ok, and then to generate the
+                // final log without read again from the MTU the registers already read
+                if ( ( await map.GetModifiedRegistersDifferences ( this.GetMemoryMap ( true ) ) ).Length > 0 )
+                    throw new PuckCantCommWithMtuException ();
                 
                 // Check if the MTU is still the same
                 if ( ! await this.IsSameMtu () )
                     throw new MtuHasChangeBeforeFinishActionException ();
-               
-                if ( map.Length > 255)
-                {
-                    System.Buffer.BlockCopy( await lexi.Read(256, 64), 0, buffer, 256, 64);
-                    System.Buffer.BlockCopy( await lexi.Read(318, 2), 0, buffer, 318, 2);
-                }
-                if ( map.Length > 320)
-                {
-                    //System.Buffer.BlockCopy(lexi.Read(320, 64), 0, buffer, 320, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(384, 64), 0, buffer, 384, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(448, 64), 0, buffer, 448, 64);
-                    //System.Buffer.BlockCopy(lexi.Read(512, 64), 0, buffer, 512, 64);
-                }
-                if ( map.Length > 960)
-                {
-                    System.Buffer.BlockCopy( await lexi.Read(960, 64), 0, buffer, 960, 64);
-                }
-
-                // Check if the MTU is still the same
-                if ( ! await this.IsSameMtu () )
-                    throw new MtuHasChangeBeforeFinishActionException ();
-
-                // Third parameter ( false ) is for avoiding update/read values from the MTU
-                MemoryMap.MemoryMap readMap = new MemoryMap.MemoryMap ( buffer, map.Family, false );
-
-                List<string> diff = new List<string> ( map.GetModifiedRegistersDifferences ( readMap ) );
-                if ( diff.Count >  1 ||
-                     diff.Count == 1 && !diff.Contains ( "EncryptionKey" ) )
-                {
-                    // ERROR
-                }
-                else
-                {
-                    // OK
-                }
                 
                 Utils.Print ( "----FINAL_READ_FINISH----" );
 
                 #endregion
 
+                // Use the map that counts with more registers loaded/set
+                // and avoid to read again from MTU those registers
+                map.SetReadFromMtuOnlyOnce ( true );
+
                 // Generate log to show on device screen
-                await this.OnAddMtu ( this, new AddMtuArgs ( readMap, mtu, form, addMtuLog ) );
+                await this.OnAddMtu ( this, new AddMtuArgs ( map, mtu, form, addMtuLog ) );
             }
             catch ( Exception e )
             {
