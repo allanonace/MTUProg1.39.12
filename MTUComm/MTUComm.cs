@@ -538,7 +538,7 @@ namespace MTUComm
             
                 // Only read all required registers once
                 var map = this.GetMemoryMap ( true );
-            
+                
                 // Activates flag to read Meter
                 await map.ReadMeter.SetValueToMtu ( true );
                 

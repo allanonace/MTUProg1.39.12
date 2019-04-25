@@ -13,7 +13,7 @@ namespace MTUComm.MemoryMap
     {
         #region Constants
 
-        private enum CUSTOM_TYPE { EMPTY, METHOD, OPERATION, FORMAT }
+        private enum CUSTOM_TYPE { EMPTY, METHOD, OPERATION }
 
         #endregion
 
@@ -57,8 +57,6 @@ namespace MTUComm.MemoryMap
 
         public string mathExpression_Get { get { return this.custom_Get; } }
         public string mathExpression_Set { get { return this.custom_Set; } }
-        public string format_Get { get { return this.custom_Get; } }
-        public string format_Set { get { return this.custom_Set; } }
 
         #region Custom Get
 
@@ -74,16 +72,9 @@ namespace MTUComm.MemoryMap
 
         private bool _HasCustomOperation_Get
         {
-            get { return ! this._HasCustomMethod_Get     &&
-                           this.valueType < RegType.CHAR &&
-                         ! string.IsNullOrEmpty ( this.custom_Get ); }
-        }
-
-        private bool _HasCustomFormat_Get
-        {
-            get { return ! this._HasCustomMethod_Get        &&
-                           this.valueType == RegType.STRING &&
-                         ! string.IsNullOrEmpty ( this.custom_Get ); }
+            get { return ! this._HasCustomMethod_Get     &&            // Is not a custom method ( "method" or "method:..." )
+                           this.valueType < RegType.BOOL &&            // Is a register of numeric type
+                         ! string.IsNullOrEmpty ( this.custom_Get ); } // And is not an empty string
         }
 
         // - MemoryMap.CreateProperty_Get<T>
@@ -98,12 +89,6 @@ namespace MTUComm.MemoryMap
         public bool HasCustomOperation_Get
         {
             get { return this.customType_Get == CUSTOM_TYPE.OPERATION; }
-        }
-
-        // - MemoryMap.CreateProperty_Get<T>
-        public bool HasCustomFormat_Get
-        {
-            get { return this.customType_Get == CUSTOM_TYPE.FORMAT; }
         }
 
         #endregion
@@ -146,12 +131,6 @@ namespace MTUComm.MemoryMap
         public bool HasCustomOperation_Set
         {
             get { return this.customType_Set == CUSTOM_TYPE.OPERATION; }
-        }
-
-        // - MemoryMap.CreateProperty_Set_String<T>
-        public bool HasCustomFormat_Set
-        {
-            get { return this.customType_Set == CUSTOM_TYPE.FORMAT; }
         }
 
         #endregion
@@ -345,7 +324,6 @@ namespace MTUComm.MemoryMap
             // Custom Get
             if      ( this._HasCustomMethod_Get    ) this.customType_Get = CUSTOM_TYPE.METHOD;
             else if ( this._HasCustomOperation_Get ) this.customType_Get = CUSTOM_TYPE.OPERATION;
-            else if ( this._HasCustomFormat_Get    ) this.customType_Get = CUSTOM_TYPE.FORMAT;
             else                                     this.customType_Get = CUSTOM_TYPE.EMPTY;
 
             if ( this.HasCustomMethod_Get )
@@ -358,7 +336,6 @@ namespace MTUComm.MemoryMap
             // Custom Set
             if      ( this._HasCustomMethod_Set    ) this.customType_Set = CUSTOM_TYPE.METHOD;
             else if ( this._HasCustomOperation_Set ) this.customType_Set = CUSTOM_TYPE.OPERATION;
-            else if ( this._HasCustomFormat_Set    ) this.customType_Set = CUSTOM_TYPE.FORMAT;
             else                                     this.customType_Set = CUSTOM_TYPE.EMPTY;
 
             if ( this.HasCustomMethod_Set )

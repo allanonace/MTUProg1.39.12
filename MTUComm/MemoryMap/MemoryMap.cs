@@ -499,10 +499,6 @@ namespace MTUComm.MemoryMap
             if ( memoryRegister.HasCustomOperation_Get )
                 return this.ExecuteOperation<T> ( memoryRegister.mathExpression_Get, result );
 
-            // String field with format to apply
-            else if ( memoryRegister.HasCustomFormat_Get )
-                return ( T )( object )this.ApplyFormat ( ( string )result, memoryRegister.format_Get );
-
             // Only return readed value
             return ( T )result;
         }
@@ -672,10 +668,6 @@ namespace MTUComm.MemoryMap
             base.AddMethod ( METHODS_SET_STRING_PREFIX + memoryRegister.id,
                 new Action<string>((_value) =>
                 {
-                    // String field with format to apply
-                    if ( memoryRegister.HasCustomFormat_Set )
-                        _value = this.ApplyFormat ( _value, memoryRegister.format_Set );
-
                     // Boolean register need to be forced to use one byte, because size could be zero ( for first bit )
                     this.SetStringToMem<T> ( _value, memoryRegister.address, ( memoryRegister.size <= 0 ) ? 1 : memoryRegister.size );
                 }));
@@ -771,15 +763,6 @@ namespace MTUComm.MemoryMap
             Utils.Print ( "GetOperation: " + operation + " = " + result );
 
             return ( T )result;
-        }
-
-        #endregion
-
-        #region Format
-
-        private string ApplyFormat ( string value, string mask )
-        {
-            return value; // string.Format ( mask, value );
         }
 
         #endregion
