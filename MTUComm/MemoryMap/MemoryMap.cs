@@ -634,9 +634,14 @@ namespace MTUComm.MemoryMap
                 base.AddMethod ( METHODS_SET_CUSTOM_PREFIX + memoryRegister.id,
                     new Func<dynamic,Task<dynamic>>( async (_value) =>
                     {
-                        Task<dynamic> result = ( Task<dynamic> )customMethod.Invoke ( this, new object[] { memoryRegister, _value } );
-                        
-                        return await result;
+                        // This method allows to use concrete return value type ( ex. Task<bool> )
+                        dynamic awaitable = customMethod.Invoke ( this, new object[] { memoryRegister, _value } );
+                        await   awaitable;
+                        return  awaitable.GetAwaiter ().GetResult ();
+                    
+                        // This method requires that references methods use Task<dynamic> as return value type
+                        //Task<dynamic> result = ( Task<dynamic> )customMethod.Invoke ( this, new object[] { memoryRegister, _value } );
+                        //return await result;
                     }));
                 
                 //Utils.Print ( "-> Set Custom: " + memoryRegister.id + " - " + ( base.registers[ METHODS_SET_CUSTOM_PREFIX + memoryRegister.id ] == null ) );

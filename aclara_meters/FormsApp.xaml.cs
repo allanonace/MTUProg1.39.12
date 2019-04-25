@@ -66,7 +66,7 @@ namespace aclara_meters
         public string appVersion_str;
         public string deviceId;
         
-        public static ICredentialsService credentialsService { get; private set; }
+        public static CredentialsService credentialsService { get; private set; }
         public static BleSerial ble_interface;
         public static Logger logger;
         public static Configuration config;

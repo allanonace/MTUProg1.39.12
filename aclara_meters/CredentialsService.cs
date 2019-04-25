@@ -1,55 +1,95 @@
 ﻿using System;
-using System.Linq;
-using Xamarin.Auth;
+using System.Threading.Tasks;
+using Xamarin.Essentials;
 
 namespace aclara_meters
 {
-	public class CredentialsService : ICredentialsService
+    // NOTE: Xamarin.IOS 12.2.1.16+ does not support Xamarin.Auth AccountStore ( is deprecated ) -> Moved to Xamarin.Essentials SecureStorage
+    public class CredentialsService
     {
+        private const string USER = "user";
+        private const string PASS = "pass";
+
+        private string userName;
+        private string password;
+
         public string UserName
         {
-            get
-            {
-                var account = AccountStore.Create().FindAccountsForService(FormsApp.AppName).FirstOrDefault();
-                return (account != null) ? account.Username : null;
-            }
+            private set { userName = value; }
+            get { return userName; }
         }
-
+        
         public string Password
         {
-            get
-            {
-                var account = AccountStore.Create().FindAccountsForService(FormsApp.AppName).FirstOrDefault();
-                return (account != null) ? account.Properties["Password"] : null;
-            }
+            private set { password = value; }
+            get { return password; }
         }
 
-        public void SaveCredentials(string userName, string password)
+        public async Task SaveCredentials (
+            string user,
+            string pass )
         {
-            if (!string.IsNullOrWhiteSpace(userName) && !string.IsNullOrWhiteSpace(password))
+            try
             {
-                Account account = new Account
-                {
-                    Username = userName
-                };
-                account.Properties.Add("Password", password);
-                AccountStore.Create().Save(account, FormsApp.AppName);
+                await SecureStorage.SetAsync ( USER, ( UserName = user ) );
+                await SecureStorage.SetAsync ( PASS, ( Password = pass ) );
             }
-
-        }
-
-        public void DeleteCredentials()
-        {
-            var account = AccountStore.Create().FindAccountsForService(FormsApp.AppName).FirstOrDefault();
-            if (account != null)
+            catch ( Exception e )
             {
-                AccountStore.Create().Delete(account, FormsApp.AppName);
+                //...
             }
         }
-
-        public bool DoCredentialsExist()
+        
+        private async Task<string> GetUserName ()
         {
-            return AccountStore.Create().FindAccountsForService(FormsApp.AppName).Any() ? true : false;
+            string name = string.Empty;
+        
+            try
+            {
+                name = await SecureStorage.GetAsync ( USER );
+            }
+            catch ( Exception e )
+            {
+                //...
+            }
+            
+            return name;
+        }
+        
+        private async Task<string> GetPassword ()
+        {
+            string pass = string.Empty;
+        
+            try
+            {
+                pass = await SecureStorage.GetAsync ( PASS );
+            }
+            catch ( Exception e )
+            {
+                //...
+            }
+            
+            return pass;
+        }
+
+        public void DeleteCredentials ()
+        {
+            SecureStorage.Remove ( USER );
+            SecureStorage.Remove ( PASS );
+        }
+
+        public async Task<bool> CredentialsExist ()
+        {
+            string user = await this.GetUserName ();
+        
+            if ( ! string.IsNullOrEmpty ( user ) )
+            {
+                UserName = user;
+                Password = await this.GetPassword ();
+                
+                return true;
+            }
+            return false;
         }
     }
 }

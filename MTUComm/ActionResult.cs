@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace MTUComm
 {
@@ -43,8 +41,8 @@ namespace MTUComm
             // The first element that matches the conditions defined by the specified predicate,
             // if found, returns the default value for type T
             return parameters.Find ( param => param.CustomParameter.Equals ( tag ) &&
-                                     ( param.source.Equals ( source ) || string.IsNullOrEmpty ( source ) ) &&
-                                     param.Port == port );
+                                              ( param.source.Equals ( source ) || string.IsNullOrEmpty ( source ) ) &&
+                                              param.Port == port );
         }
     }
 }

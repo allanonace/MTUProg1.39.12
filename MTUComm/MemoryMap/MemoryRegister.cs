@@ -194,7 +194,7 @@ namespace MTUComm.MemoryMap
             dynamic value = null )
         {
             Utils.PrintDeep ( Environment.NewLine + "------WRITE_TO_MTU-------" );
-            Utils.Print ( "Register -> ValueWriteToMtu -> " + this.id + " = " + value );
+            Utils.Print ( "Register -> ValueWriteToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
         
             // Set value in temporary memory map before write it to the MTU
             if ( value != null )
@@ -254,27 +254,37 @@ namespace MTUComm.MemoryMap
             // Register with read and write
             if ( this.write )
             {
-                // Method will modify passed value before set in byte array
-                // If XML custom field is "method" or "method:id"
-                if ( this.HasCustomMethod_Set )
-                    value = await this.funcSetCustom ( value );
-
-                // Try to set string value after read form control
-                // If XML custom field is...
-                if ( value is string )
-                    this.funcSetString ( value ); 
-
-                // Try to set string but using byte array ( AES )
-                else if ( value is byte[] )
-                    this.funcSetByteArray ( value );
-
-                // Try to set value of waited type
-                // If XML custom field is a math expression ( e.g. _val_ * 2 / 5 )
-                else
-                    this.funcSet ( ( T )value );
-                
-                // Flag is used to know what registers should be written in the MTU
-                this.used = true;
+                Utils.Print ( "Register -> SetValue: " + this.id + " = " + value );
+            
+                try
+                {
+                    // Method will modify passed value before set in byte array
+                    // If XML custom field is "method" or "method:id"
+                    if ( this.HasCustomMethod_Set )
+                        value = await this.funcSetCustom ( value );
+    
+                    // Try to set string value after read form control
+                    // If XML custom field is...
+                    if ( value is string )
+                        this.funcSetString ( value ); 
+    
+                    // Try to set string but using byte array ( AES )
+                    else if ( value is byte[] )
+                        this.funcSetByteArray ( value );
+    
+                    // Try to set value of waited type
+                    // If XML custom field is a math expression ( e.g. _val_ * 2 / 5 )
+                    else
+                        this.funcSet ( ( T )value );
+                    
+                    // Flag is used to know what registers should be written in the MTU
+                    this.used = true;
+                }
+                catch ( Exception e )
+                {
+                     Console.WriteLine ( "Register -> SetValue [ ERROR ]: " + e.Message );
+                     Console.WriteLine ( e.StackTrace );
+                }
             }
             // Register is readonly
             else

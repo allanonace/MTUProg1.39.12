@@ -2,6 +2,7 @@
 using System.Dynamic;
 using Library;
 using Library.Exceptions;
+using System.Threading.Tasks;
 
 namespace MTUComm.MemoryMap
 {
@@ -81,10 +82,10 @@ namespace MTUComm.MemoryMap
 
         public override bool TrySetMember ( SetMemberBinder binder, object value )
         {
-            return this.Set ( binder.Name, value );
+            return this.Set ( binder.Name, value ).Result;
         }
 
-        private bool Set ( string id, object value )
+        private async Task<bool> Set ( string id, object value )
         {
             // Selected dynamic member exists
             if ( this.dictionary.ContainsKey ( id ) )
@@ -95,7 +96,7 @@ namespace MTUComm.MemoryMap
                 if ( register.GetType().GetGenericTypeDefinition() == typeof( MemoryOverload<> ) )
                     throw new MemoryOverloadsAreReadOnly ( MemoryMap.EXCEP_OVE_READONLY + ": " + id );
 
-                this.dictionary[id].SetValue ( value );
+                await this.dictionary[id].SetValue ( value );
 
                 return true;
             }

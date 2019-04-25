@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml.Linq;
+using Library;
 using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
@@ -520,6 +521,9 @@ namespace MTUComm
         public void ComplexParameter ( XElement parent, ActionResult result, InterfaceParameters parameter, int portNumber = 0 )
         {
             Parameter param = result.getParameterByTag ( parameter.Name, parameter.Source, portNumber );
+            
+            Utils.Print ( "Log Param: " + parameter.Name + " " + parameter.Source + " " + portNumber +
+                " = " + ( ( param == null ) ? "..." : param.Value ) );
 
             /*
             if ( ! string.IsNullOrEmpty ( parameter.Source ) )
