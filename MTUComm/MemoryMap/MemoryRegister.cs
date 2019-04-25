@@ -163,21 +163,20 @@ namespace MTUComm.MemoryMap
         }
 
         // Recover bytes without processing data, raw info
-        public byte[] ValueByteArray_SameSize
+        public async Task<byte[]> GetValueByteArray (
+            bool useSizeGet = true )
         {
-            get { return this.funcGetByteArray ( false ); }
+            // Read value from MTU if is necessary
+            await this.funcGet ();
+        
+            return this.funcGetByteArray ( useSizeGet );
         }
         
-        public byte[] ValueByteArray
-        {
-            get { return this.funcGetByteArray ( true ); }
-        }
-        
-        public async Task<dynamic> ValueReadFromMtu (
+        public async Task<dynamic> GetValueFromMtu (
             bool returnByteArray = false )
         {
             Utils.PrintDeep ( Environment.NewLine + "------LOAD_FROM_MTU------" );
-            Utils.Print ( "Register -> ValueReadFromMtu -> " + this.id + " [ " + returnByteArray + " ]" );
+            Utils.Print ( "Register -> GetValueFromMtu -> " + this.id + " [ " + returnByteArray + " ]" );
         
             // Reset flag that will be used in funcGet to invoke funcGetFromMtu
             this.readedFromMtu = false;
@@ -190,11 +189,11 @@ namespace MTUComm.MemoryMap
           	else return this.lastRead;
         }
         
-        public async Task ValueWriteToMtu (
+        public async Task SetValueToMtu (
             dynamic value = null )
         {
             Utils.PrintDeep ( Environment.NewLine + "------WRITE_TO_MTU-------" );
-            Utils.Print ( "Register -> ValueWriteToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
+            Utils.Print ( "Register -> SetValueToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
         
             // Set value in temporary memory map before write it to the MTU
             if ( value != null )
@@ -202,18 +201,18 @@ namespace MTUComm.MemoryMap
             
             // Write value set in memory map to the MTU
             if ( valueType == RegType.BOOL )
-                await this.ValueWriteToMtu_Bit ();
+                await this.SetBitToMtu ();
             else
             {
                 // Recover byte array with length equals to the value to set,
                 // not the length ( sizeGet ) that will be used to recover/get
-                await this.lexi.Write ( ( uint )this.address, this.ValueByteArray_SameSize );
+                await this.lexi.Write ( ( uint )this.address, await this.GetValueByteArray ( false ) );
             }
             
             Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );
         }
         
-        private async Task ValueWriteToMtu_Bit ()
+        private async Task SetBitToMtu ()
         {
             Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> " + this.id );
         
@@ -296,7 +295,9 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        public async Task<string> ValueWithXMask ( string xMask, int digits )
+        public async Task<string> GetValueXMask (
+            string xMask,
+            int digits )
         {
             string value = ( await this.GetValue () ).ToString ();
 

@@ -30,7 +30,7 @@ namespace aclara_meters
 
         public async static Task<bool> UploadFiles (Boolean UploadPrompt = true, Boolean AllLogs = true )
         {
-            Global global = FormsApp.config.global;
+            Global global = FormsApp.config.Global;
         
             // Path where the file should be saved once downloaded (locally)
             string path = ( AllLogs ) ? Mobile.LogPath : Mobile.LogUserPath;

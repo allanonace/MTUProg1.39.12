@@ -16,6 +16,7 @@ namespace MTUComm
 {
     public class AddMtuLog
     {
+        private Configuration config;
         public  Logger logger;
         private string user;
         private dynamic form;
@@ -35,10 +36,12 @@ namespace MTUComm
         {
             this.logger = logger;
             this.form = form;
-            this.action = (Action)form.action;
             this.user = user;
             this.mtuBasicInfo = MtuForm.mtuBasicInfo;
             this.logUri = this.logger.CreateFileIfNotExist ();
+            
+            this.config = Singleton.Get.Configuration;
+            this.action = Singleton.Get.Action;
 
             this.addMtuAction  = new XElement("Action");
             this.turnOffAction = new XElement("Action");
@@ -75,13 +78,13 @@ namespace MTUComm
         public async Task LogAddMtu ( bool isFromScripting = false )
         {
             Mtu     mtu    = form.mtu;
-            Global  global = form.global;
+            Global  global = this.config.Global;
             dynamic map    = form.map;
             string  temp   = string.Empty;
             string  DISABLED = MemoryMap.MemoryMap.DISABLED;
             string  ENABLED  = MemoryMap.MemoryMap.ENABLED;
 
-            ActionType actionType = form.action.type;
+            ActionType actionType = this.action.type;
 
             bool isReplaceMeter = actionType == ActionType.ReplaceMeter           ||
                                   actionType == ActionType.ReplaceMtuReplaceMeter ||
@@ -168,7 +171,7 @@ namespace MTUComm
 
             Meter meter = ( ! isFromScripting ) ?
                 ( Meter )form.Meter.Value :
-                Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
+                this.config.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
 
             XElement port = new XElement("Port");
             logger.AddAtrribute(port, "display", "Port 1");
@@ -225,7 +228,7 @@ namespace MTUComm
             {
                 Meter meter2 = ( ! isFromScripting ) ?
                     ( Meter )form.Meter_2.Value :
-                    Configuration.GetInstance().getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter_2.Value ) );
+                    this.config.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter_2.Value ) );
 
                 port = new XElement ( "Port");
                 logger.AddAtrribute ( port, "display", "Port 2" );
@@ -374,7 +377,7 @@ namespace MTUComm
             logger.AddAtrribute(this.readMtuAction, "display", Action.displays[ActionType.ReadMtu]);
             logger.AddAtrribute(this.readMtuAction, "type", Action.tag_types[ActionType.ReadMtu]);
 
-            InterfaceParameters[] parameters = Configuration.GetInstance().getLogInterfaceFields( form.mtu, ActionType.ReadMtu );
+            InterfaceParameters[] parameters = this.config.getLogInterfaceFields( form.mtu, ActionType.ReadMtu );
             foreach (InterfaceParameters parameter in parameters)
             {
                 try
@@ -423,7 +426,7 @@ namespace MTUComm
             
             // Write in ActivityLog
             if ( Action.IsFromScripting &&
-                 ! Configuration.GetInstance ().global.ScriptOnly )
+                 ! this.config.Global.ScriptOnly )
             {
                 // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist
                 this.logger.ResetFixedName ();

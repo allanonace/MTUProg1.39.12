@@ -264,9 +264,12 @@ namespace MTUComm
                 // that cancel the action but not move to the main menu and could be happen
                 // that perform the basic read with a different MTU
                 if ( ! this.basicInfoLoaded )
+                {
                     await this.LoadMtuAndMetersBasicInfo ();
-                
-                Action.SetCurrentMtu ( this.latest_mtu );
+                    
+                    if ( Singleton.Has<Action> () )
+                        Singleton.Get.Action.SetCurrentMtu ( this.latest_mtu );
+                }
 
                 switch (type)
                 {
@@ -358,7 +361,7 @@ namespace MTUComm
             bool force   = false,
             int  time    = 0 )
         {
-            Global global = this.configuration.global;
+            Global global = this.configuration.Global;
         
             // DEBUG
             //this.WriteMtuBit ( 22, 0, false ); // Turn On MTU
@@ -372,7 +375,7 @@ namespace MTUComm
             {
                 Utils.Print ( "InstallConfirmation trigger start" );
                 
-                await regICNotSynced.ValueWriteToMtu ( true );
+                await regICNotSynced.SetValueToMtu ( true );
 
                 // MTU is turned off
                 if ( ! force &&
@@ -391,7 +394,7 @@ namespace MTUComm
                 }
 
                 // Set to true/one this flag to request a time sync
-                await regICRequest.ValueWriteToMtu ( true );
+                await regICRequest.SetValueToMtu ( true );
 
                 bool fail;
                 int  count = 1;
@@ -406,7 +409,7 @@ namespace MTUComm
                     
                     Thread.Sleep ( wait * 1000 );
                     
-                    fail = await regICNotSynced.ValueReadFromMtu ();
+                    fail = await regICNotSynced.GetValueFromMtu ();
                 }
                 // Is MTU not synced with DCU yet?
                 while ( fail &&
@@ -482,8 +485,8 @@ namespace MTUComm
                 dynamic map = this.GetMemoryMap ();
                 MemoryRegister<bool> shipbit = map.Shipbit;
                 
-                await shipbit.ValueWriteToMtu ( ! on );         // Set state of the shipbit
-                bool  read = await shipbit.ValueReadFromMtu (); // Read written value to verify
+                await shipbit.SetValueToMtu ( ! on );         // Set state of the shipbit
+                bool  read = await shipbit.GetValueFromMtu (); // Read written value to verify
                 
                 // Fail turning off MTU
                 if ( read == on )
@@ -537,7 +540,7 @@ namespace MTUComm
                 var map = this.GetMemoryMap ( true );
             
                 // Activates flag to read Meter
-                await map.ReadMeter.ValueWriteToMtu ( true );
+                await map.ReadMeter.SetValueToMtu ( true );
                 
                 Thread.Sleep ( WAIT_BEFORE_READ );
                 
@@ -572,7 +575,7 @@ namespace MTUComm
             truquitoAction     = action;
             Parameter[] ps     = action.GetParameters ();
             dynamic     form   = new AddMtuForm ( this.mtu );
-            Global      global = form.global;
+            Global      global = this.configuration.Global;
             form.usePort2      = false;
             bool scriptUseP2   = false;
             
@@ -1099,10 +1102,9 @@ namespace MTUComm
             bool isFromScripting = false )
         {
             Mtu    mtu    = form.mtu;
-            Global global = form.global;
+            Global global = configuration.Global;
         
             this.mtu = mtu;
-            form.action = action;
 
             try
             {
@@ -1336,22 +1338,22 @@ namespace MTUComm
                         {
                             // Write key in the MTU
                             Utils.Print ( "Write key to MTU" );
-                            await regAesKey.ValueWriteToMtu ( aesKey );
+                            await regAesKey.SetValueToMtu ( aesKey );
                             
                             Thread.Sleep ( 1000 );
                             
                             // Verify if the MTU is encrypted
                             Utils.Print ( "Read Encrypted from MTU" );
-                            bool encrypted   = ( bool )await regEncrypted .ValueReadFromMtu ();
+                            bool encrypted   = ( bool )await regEncrypted .GetValueFromMtu ();
                             Utils.Print ( "Read EncryptedIndex from MTU" );
-                            int  encrypIndex = ( int  )await regEncryIndex.ValueReadFromMtu ();
+                            int  encrypIndex = ( int  )await regEncryIndex.GetValueFromMtu ();
                             
                             if ( ! encrypted || encrypIndex <= -1 )
                                 continue; // Error
                             else
                             {
                                 Utils.Print ( "Read EncryptionKey (SHA) from MTU" );
-                                byte[] mtuSha = ( byte[] )await regAesKey.ValueReadFromMtu ( true ); // 32 bytes
+                                byte[] mtuSha = ( byte[] )await regAesKey.GetValueFromMtu ( true ); // 32 bytes
                                 
                                 Thread.Sleep ( 100 );
 
@@ -1561,10 +1563,10 @@ namespace MTUComm
             List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
             
             for ( int i = 0; i < modifiedRegisters.Count; i++ )
-                await modifiedRegisters[ i ].ValueWriteToMtu ();
+                await modifiedRegisters[ i ].SetValueToMtu ();
             
             //foreach ( dynamic r in modifiedRegisters )
-            //    await r.ValueWriteToMtu ();
+            //    await r.SetValueToMtu ();
 
             modifiedRegisters.Clear ();
             modifiedRegisters = null;

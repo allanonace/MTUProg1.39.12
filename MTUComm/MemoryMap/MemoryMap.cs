@@ -143,7 +143,7 @@ namespace MTUComm.MemoryMap
             isUnityTest = ! string.IsNullOrEmpty ( pathUnityTest );
 
             // Read MTU family XML and prepare setters and getters
-            Configuration config     = Configuration.GetInstance ( pathUnityTest );
+            Configuration config     = Configuration.GetInstanceWithParams ( pathUnityTest );
             XmlSerializer serializer = new XmlSerializer ( typeof ( MemRegisterList ) );
 
             // Parameter "family" when testing is full path to use
@@ -583,7 +583,7 @@ namespace MTUComm.MemoryMap
         public void CreateProperty_Get_ByteArray<T> ( MemoryRegister<T> memoryRegister )
         {
             base.AddMethod ( METHODS_GET_BYTE_PREFIX + memoryRegister.id,
-                new Func<bool,byte[]>( ( bool useSizeGet ) =>
+                new Func<bool,byte[]> ( ( bool useSizeGet ) =>
                 {
                     return this.GetByteArrayFromMem ( memoryRegister.address, useSizeGet ? memoryRegister.sizeGet : memoryRegister.size );
                 }));

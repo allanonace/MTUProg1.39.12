@@ -31,7 +31,7 @@ namespace MTUComm
 
         public string CreateBasicStructure ()
         {
-            Configuration config = Configuration.GetInstance ();
+            Configuration config = Singleton.Get.Configuration;
         
             string base_stream = "<?xml version=\"1.0\" encoding=\"ASCII\"?>";
             base_stream += "<StarSystem>";
@@ -56,7 +56,7 @@ namespace MTUComm
         
         private string CreateLogBase_Scripting_Error ()
         {
-            Configuration config = Configuration.GetInstance ();
+            Configuration config = Singleton.Get.Configuration;
         
             string base_stream = "<?xml version=\"1.0\" encoding=\"ASCII\"?>";
             base_stream += "<StarSystem>";
@@ -69,12 +69,13 @@ namespace MTUComm
             base_stream += "        <AppType>Scripted</AppType>";
             base_stream += "    </AppInfo>";
             
-            if ( Action.currentAction != null )
+            Action currentAction;
+            if ( ( currentAction = Singleton.Get.Action ) != null )
             {
-            base_stream += "    <Action display=\"" + Action.displays[ Action.currentAction.type ] + "\" type=\"" + Action.tag_types[ Action.currentAction.type ] + "\" reason=\"" + Action.tag_reasons[ Action.currentAction.type ] + "\">";
-            base_stream += "        <Date display=\"Date/Time\">" + DateTime.Now.ToString("MM/dd/yyyy HH:mm") + "</Date>";
-            base_stream += "        <User display=\"User\">" + Action.currentAction.user + "</User>";
-            base_stream += "    </Action>";
+                base_stream += "    <Action display=\"" + Action.displays[ currentAction.type ] + "\" type=\"" + Action.tag_types[ currentAction.type ] + "\" reason=\"" + Action.tag_reasons[ currentAction.type ] + "\">";
+                base_stream += "        <Date display=\"Date/Time\">" + DateTime.Now.ToString("MM/dd/yyyy HH:mm") + "</Date>";
+                base_stream += "        <User display=\"User\">" + currentAction.user + "</User>";
+                base_stream += "    </Action>";
             }
             
             base_stream += "</StarSystem>";
@@ -273,7 +274,7 @@ namespace MTUComm
             
             // Write in ActivityLog
             if ( Action.IsFromScripting &&
-                 ! Configuration.GetInstance ().global.ScriptOnly )
+                 ! Singleton.Get.Configuration.Global.ScriptOnly )
             {
                 // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist
                 this.ResetFixedName ();
@@ -298,7 +299,7 @@ namespace MTUComm
             AddAtrribute(element, "type", action.LogText);
             AddAtrribute(element, "reason", action.Reason);
 
-            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields( mtu, ActionType.ReadMtu );
+            InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogInterfaceFields( mtu, ActionType.ReadMtu );
             foreach ( InterfaceParameters parameter in parameters )
             {
                 try
@@ -344,7 +345,7 @@ namespace MTUComm
             AddAtrribute(element, "type", action.LogText);
             AddAtrribute(element, "reason", action.Reason);
 
-            InterfaceParameters[] parameters = Configuration.GetInstance ().getLogInterfaceFields ( mtu, ActionType.ReadData );
+            InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogInterfaceFields ( mtu, ActionType.ReadData );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name == "Port")
@@ -398,7 +399,7 @@ namespace MTUComm
             
             // Write in ActivityLog
             if ( Action.IsFromScripting &&
-                 ! Configuration.GetInstance ().global.ScriptOnly )
+                 ! Singleton.Get.Configuration.Global.ScriptOnly )
             {
                 // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist
                 this.ResetFixedName ();

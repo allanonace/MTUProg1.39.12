@@ -208,17 +208,11 @@ namespace MTUComm
         #endregion
 
         #region Attributes
-
-        public static Mtu currentMtu { private set; get; }
-        
-        public static void SetCurrentMtu (
-            MTUBasicInfo mtuBasic )
-        {
-            currentMtu = Configuration.GetInstance ().GetMtuTypeById ( ( int )mtuBasic.Type );
-        }
         
         private string lastLogCreated;
 
+        private Configuration config;
+        public Mtu CurrentMtu { private set; get; }
         public MTUComm comm { get; private set; }
         public ActionType type { get; }
         private List<Parameter> mparameters = new List<Parameter>();
@@ -232,8 +226,6 @@ namespace MTUComm
         
         public static bool IsFromScripting;
         
-        public static Action currentAction;
-
         #endregion
 
         #region Properties
@@ -318,7 +310,16 @@ namespace MTUComm
             this.user = user;
             comm.OnError += Comm_OnError;
             
-            currentAction = this;
+            this.config = Singleton.Get.Configuration;
+            
+            if ( this.type != ActionType.BasicRead )
+                Singleton.Set = this;
+        }
+        
+        public void SetCurrentMtu (
+            MTUBasicInfo mtuBasic )
+        {
+            CurrentMtu = this.config.GetMtuTypeById ( ( int )mtuBasic.Type );
         }
 
         #endregion
@@ -631,7 +632,7 @@ namespace MTUComm
             ActionType actionType = ActionType.ReadMtu )
         {
             Parameter paramToAdd;
-            Global       global = Configuration.GetInstance ().GetGlobal ();
+            Global       global = this.config.Global;
             Puck         puck   = Singleton.Get.Puck;
             Type         gType  = global.GetType ();
             ActionResult result = new ActionResult ();
@@ -712,7 +713,7 @@ namespace MTUComm
         
             
             Port         portType = mtu.Ports[ indexPort - 1 ];
-            Global       global   = Configuration.GetInstance ().GetGlobal ();
+            Global       global   = this.config.Global;
             Type         gType    = global.GetType ();
 
             // Meter Serial Number
@@ -872,7 +873,7 @@ namespace MTUComm
 
                 int    finalResult = 0;
                 string port   = PORT_PREFIX + portIndex;
-                Global global = Configuration.GetInstance ().GetGlobal ();
+                Global global = this.config.Global;
                 Type   gType  = global.GetType ();
                 
                 foreach ( ConditionObjet condition in conditions )

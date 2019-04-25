@@ -116,7 +116,7 @@ namespace aclara_meters.view
         public async void UpdateFiles ()
         {
             // Upload log files
-            if (FormsApp.config.global.UploadPrompt)
+            if (FormsApp.config.Global.UploadPrompt)
                 await GenericUtilsClass.UploadFiles ();
             
             // Init pucks detection
@@ -287,28 +287,28 @@ namespace aclara_meters.view
 
             MenuList.Add(new PageItem() { Title = "Read MTU", Icon = "readmtu_icon.png",Color= "White", TargetType = ActionType.ReadMtu }); 
 
-            if (FormsApp.config.global.ShowTurnOff)
+            if (FormsApp.config.Global.ShowTurnOff)
                 MenuList.Add(new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", Color = "White", TargetType = ActionType.TurnOffMtu });
 
-            if (FormsApp.config.global.ShowAddMTU)
+            if (FormsApp.config.Global.ShowAddMTU)
                 MenuList.Add(new PageItem() { Title = "Add MTU", Icon = "addMTU.png", Color = "White", TargetType = ActionType.AddMtu });
 
-            if (FormsApp.config.global.ShowReplaceMTU)
+            if (FormsApp.config.Global.ShowReplaceMTU)
                 MenuList.Add(new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", Color = "White", TargetType = ActionType.ReplaceMTU });
 
-            if (FormsApp.config.global.ShowReplaceMeter)
+            if (FormsApp.config.Global.ShowReplaceMeter)
                 MenuList.Add(new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", Color = "White", TargetType = ActionType.ReplaceMeter });
 
-            if (FormsApp.config.global.ShowAddMTUMeter)
+            if (FormsApp.config.Global.ShowAddMTUMeter)
                 MenuList.Add(new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", Color = "White", TargetType = ActionType.AddMtuAddMeter });
 
-            if (FormsApp.config.global.ShowAddMTUReplaceMeter)
+            if (FormsApp.config.Global.ShowAddMTUReplaceMeter)
                 MenuList.Add(new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", Color = "White", TargetType = ActionType.AddMtuReplaceMeter });
 
-            if (FormsApp.config.global.ShowReplaceMTUMeter)
+            if (FormsApp.config.Global.ShowReplaceMTUMeter)
                 MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", Color = "White", TargetType = ActionType.ReplaceMtuReplaceMeter });
 
-            if (FormsApp.config.global.ShowInstallConfirmation)
+            if (FormsApp.config.Global.ShowInstallConfirmation)
                 MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
 
 
@@ -1107,7 +1107,7 @@ namespace aclara_meters.view
         private async void LogOffOkTapped(object sender, EventArgs e)
         {
             // Upload log files
-            if (FormsApp.config.global.UploadPrompt)
+            if (FormsApp.config.Global.UploadPrompt)
                 await GenericUtilsClass.UploadFiles ();
 
             dialog_logoff.IsVisible = false;
@@ -1623,7 +1623,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (FormsApp.config.Global.ActionVerify)
                                 dialog_AddMTU.IsVisible = true;
                             else
                                 CallLoadViewAddMtu();
@@ -1678,7 +1678,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (FormsApp.config.Global.ActionVerify)
                                 dialog_turnoff_one.IsVisible = true;
                             else
                                 CallLoadViewTurnOff();
@@ -1785,7 +1785,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (FormsApp.config.Global.ActionVerify)
                                 dialog_replacemeter_one.IsVisible = true;
                             else
                                 CallLoadViewReplaceMtu();
@@ -1843,7 +1843,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (FormsApp.config.Global.ActionVerify)
                                 dialog_meter_replace_one.IsVisible = true;
                             else
                                 CallLoadViewReplaceMeter();
@@ -1901,7 +1901,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (FormsApp.config.Global.ActionVerify)
                                 dialog_AddMTUAddMeter.IsVisible = true;
                             else
                                 CallLoadViewAddMTUAddMeter();
@@ -1960,7 +1960,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (FormsApp.config.Global.ActionVerify)
                                 dialog_AddMTUReplaceMeter.IsVisible = true;
                             else
                                 CallLoadViewAddMTUReplaceMeter();
@@ -2020,7 +2020,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (FormsApp.config.Global.ActionVerify)
                                 dialog_ReplaceMTUReplaceMeter.IsVisible = true;
                             else
                                 CallLoadViewReplaceMTUReplaceMeter();

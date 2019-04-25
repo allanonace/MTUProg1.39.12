@@ -1,6 +1,7 @@
-using Xml;
 using System.Collections.Generic;
+using Library;
 using Library.Exceptions;
+using Xml;
 
 namespace MTUComm
 {
@@ -22,7 +23,7 @@ namespace MTUComm
 
         private static Interface GetInterfaceBytMtuId ( Mtu mtu )
         {
-            Configuration   config        = Configuration.GetInstance ();
+            Configuration   config        = Singleton.Get.Configuration;
             InterfaceConfig xmlInterfaces = config.interfaces;
             bool            meterIdIsNumeric;
             List<string>    portTypes     = mtu.Ports[ 0 ].GetPortTypes ( out meterIdIsNumeric );

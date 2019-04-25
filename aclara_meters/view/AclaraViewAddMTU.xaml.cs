@@ -274,13 +274,14 @@ namespace aclara_meters.view
 
         public AclaraViewAddMTU ( IUserDialogs dialogs, ActionType page )
         {
-            this.actionType = page;
-
             InitializeComponent ();
+            
+            this.global     = Singleton.Get.Configuration.Global;
+            this.actionType = page;
 
             dialogsSaved = dialogs;
 
-            this.config = Configuration.GetInstance ();
+            this.config = Singleton.Get.Configuration;
             this.mtuBasicInfo = MtuForm.mtuBasicInfo;
 
             this.detectedMtuType = ( int )this.mtuBasicInfo.Type;
@@ -350,8 +351,6 @@ namespace aclara_meters.view
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
 
-
-
             //listaMTUread.IsVisible = false;
 
             Task.Delay(10).ContinueWith(t =>
@@ -382,63 +381,35 @@ namespace aclara_meters.view
                         CheckBoxController();
 
                         #endregion
-
                     })
                  );
               })
             );
         }
 
-        private void CheckBoxController()
+        private void CheckBoxController ()
         {
-            #region Port 1 
-            div_SnapReads.IsVisible = true;
-            div_SnapReads.IsEnabled = true;
-            divSub_SnapReads.IsEnabled = true;
+            if ( ! div_SnapReads.IsEnabled )
+                return;
+        
+            sld_SnapReads.Value = global.DailyReadsDefault;
             sld_SnapReads.IsEnabled = false;
             divSub_SnapReads.Opacity = 0.8;
             cbx_SnapReads.Source = "checkbox_off";
-            #endregion
-
-            #region Start Slider Logic ? Should come from globals...
-
-            int snapReadsDefault = 10;
-            int snapReadsFromMem = 6;
 
             snapReadsStep = 1.0;
             sld_SnapReads.ValueChanged += OnSnapReadsSlider_ValueChanged;
 
-            if (snapReadsDefault > -1)
+            cbx_SnapReads.GestureRecognizers.Add ( new TapGestureRecognizer
             {
-                sld_SnapReads.Value = snapReadsDefault;
-            }
-            else
-            {
-                sld_SnapReads.Value = snapReadsFromMem;
-            }
-
-            #endregion
-
-            #region  Here lies the logic...
-
-            cbx_SnapReads.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = new Command(() =>
+                Command = new Command ( () =>
                 {
-                    if (!snapReadsStatus)
-                    {
-                        cbx_SnapReads.Source = "checkbox_on";
-                        sld_SnapReads.IsEnabled = true;
-                        divSub_SnapReads.Opacity = 1;
-                        snapReadsStatus = true;
-                    }
-                    else
-                    {
-                        cbx_SnapReads.Source = "checkbox_off";
-                        sld_SnapReads.IsEnabled = false;
-                        divSub_SnapReads.Opacity = OPACITY_DISABLE;
-                        snapReadsStatus = false;
-                    }
+                    bool ok = ! snapReadsStatus;
+                
+                    cbx_SnapReads.Source = "checkbox_" + ( ( ok ) ? "on" : "off" );
+                    sld_SnapReads.IsEnabled = ok;
+                    divSub_SnapReads.Opacity = ( ok ) ? 1 : OPACITY_DISABLE;
+                    snapReadsStatus = ok;
                     
                     if ( MANDATORY_SNAPREADS &&
                          global.IndividualDailyReads &&
@@ -447,16 +418,12 @@ namespace aclara_meters.view
                     else this.lb_SnapReads.TextColor = Color.Black;
                 }),
             });
-
-            #endregion
         }
 
         private async void SetPort2Buttons ()
         {
             // Port2 form starts visible or hidden depends on bit 1 of byte 28
             this.port2IsActivated = await this.add_mtu.comm.ReadMtuBit ( 28, 1 );
-
-            Global global = FormsApp.config.global;
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -508,7 +475,6 @@ namespace aclara_meters.view
         {
             #region Conditions
 
-            this.global       = this.addMtuForm.global;
             this.currentMtu   = this.addMtuForm.mtu;
             this.mtuBasicInfo = MtuForm.mtuBasicInfo;
 
@@ -749,7 +715,7 @@ namespace aclara_meters.view
 
             #region Read Interval
 
-            this.InitializePicker_ReadInterval ( this.mtuBasicInfo, this.currentMtu, this.global );
+            this.InitializePicker_ReadInterval ( this.mtuBasicInfo, this.currentMtu );
             
             // Use IndividualReadInterval tag to enable o disable read interval picker
             if ( ! ( this.pck_ReadInterval.IsEnabled = global.IndividualReadInterval ) )
@@ -765,7 +731,7 @@ namespace aclara_meters.view
 
             bool useDailyReads        = global.AllowDailyReads && this.currentMtu.DailyReads;
             bool changeableDailyReads = global.IndividualDailyReads;
-            int  dailyReadsDefault    = this.config.global.DailyReadsDefault;
+            int  dailyReadsDefault    = global.DailyReadsDefault;
             
             this.div_SnapReads   .IsEnabled = useDailyReads;
             this.div_SnapReads   .IsVisible = useDailyReads;
@@ -834,7 +800,7 @@ namespace aclara_meters.view
 
             #region Misc
 
-            if (this.config.global.Options.Count>0)
+            if ( this.global.Options.Count>0)
                 InitializeOptionalFields ();
 
             #endregion
@@ -842,7 +808,7 @@ namespace aclara_meters.view
             #region Cancel reason
 
             // Load cancel reasons from Global.xml
-            List<string> cancelReasons = this.config.global.Cancel;
+            List<string> cancelReasons = this.global.Cancel;
 
             if(!cancelReasons.Contains("Other"))
                 cancelReasons.Add("Other"); // Add "Other" option
@@ -1335,28 +1301,28 @@ namespace aclara_meters.view
 
             MenuList.Add(new PageItem() { Title = "Read MTU", Icon = "readmtu_icon.png",Color="White",TargetType = ActionType.ReadMtu });
 
-            if (FormsApp.config.global.ShowTurnOff)
+            if (this.global.ShowTurnOff)
                 MenuList.Add(new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", Color = "White", TargetType = ActionType.TurnOffMtu });
 
-            if (FormsApp.config.global.ShowAddMTU)
+            if (this.global.ShowAddMTU)
                 MenuList.Add(new PageItem() { Title = "Add MTU", Icon = "addMTU.png", Color = "White", TargetType = ActionType.AddMtu });
 
-            if (FormsApp.config.global.ShowReplaceMTU)
+            if (this.global.ShowReplaceMTU)
                 MenuList.Add(new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", Color = "White", TargetType = ActionType.ReplaceMTU });
 
-            if (FormsApp.config.global.ShowReplaceMeter)
+            if (this.global.ShowReplaceMeter)
                 MenuList.Add(new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", Color = "White", TargetType = ActionType.ReplaceMeter });
 
-            if (FormsApp.config.global.ShowAddMTUMeter)
+            if (this.global.ShowAddMTUMeter)
                 MenuList.Add(new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", Color = "White", TargetType = ActionType.AddMtuAddMeter });
 
-            if (FormsApp.config.global.ShowAddMTUReplaceMeter)
+            if (this.global.ShowAddMTUReplaceMeter)
                 MenuList.Add(new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", Color = "White", TargetType = ActionType.AddMtuReplaceMeter });
 
-            if (FormsApp.config.global.ShowReplaceMTUMeter)
+            if (this.global.ShowReplaceMTUMeter)
                 MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", Color = "White", TargetType = ActionType.ReplaceMtuReplaceMeter });
 
-            if (FormsApp.config.global.ShowInstallConfirmation)
+            if (this.global.ShowInstallConfirmation)
                 MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
 
 
@@ -1379,7 +1345,7 @@ namespace aclara_meters.view
             optionalMandatoryEntries = new List<Tuple<BorderlessEntry,Label>> ();
             optionalMandatoryDates = new List<Tuple<BorderlessDatePicker, Label>>();
             optionalMandatoryTimes = new List<Tuple<BorderlessTimePicker, Label>>();
-            foreach ( Option optionalField in this.config.global.Options )
+            foreach ( Option optionalField in this.global.Options )
             {
                 Frame optionalContainerB = new Frame()
                 {
@@ -1843,7 +1809,7 @@ namespace aclara_meters.view
 
             #region Color Entry
 
-            if (FormsApp.config.global.ColorEntry)
+            if (this.global.ColorEntry)
             {
                 meterVendorsLabel.TextColor = COL_MANDATORY;
        
@@ -1909,7 +1875,7 @@ namespace aclara_meters.view
 
             #region Color Entry
 
-            if (FormsApp.config.global.ColorEntry)
+            if (this.global.ColorEntry)
             {
                 meterModelsLabel.TextColor = COL_MANDATORY;
 
@@ -1976,7 +1942,7 @@ namespace aclara_meters.view
 
             #region Color Entry
 
-            if (FormsApp.config.global.ColorEntry)
+            if (this.global.ColorEntry)
             {
                 meterNamesLabel.TextColor = COL_MANDATORY;
 
@@ -2052,7 +2018,7 @@ namespace aclara_meters.view
 
             #region Color Entry
 
-            if (FormsApp.config.global.ColorEntry)
+            if (this.global.ColorEntry)
             {
                 meterVendors2Label.TextColor = COL_MANDATORY;
 
@@ -2118,7 +2084,7 @@ namespace aclara_meters.view
 
             #region Color Entry
 
-            if (FormsApp.config.global.ColorEntry)
+            if (this.global.ColorEntry)
             {
                 meterModels2Label.TextColor = COL_MANDATORY;
 
@@ -2185,7 +2151,7 @@ namespace aclara_meters.view
 
             #region Color Entry
 
-            if (FormsApp.config.global.ColorEntry)
+            if (this.global.ColorEntry)
                 meterNames2Label.TextColor = COL_MANDATORY;
 
             #endregion
@@ -2206,12 +2172,11 @@ namespace aclara_meters.view
 
         private void InitializePicker_ReadInterval (
             MTUBasicInfo mtuBasicInfo,
-            Mtu    mtu,
-            Global global )
+            Mtu mtu )
         {
             List<string> readIntervalList;
 
-            if ( mtuBasicInfo.version >= global.LatestVersion )
+            if ( mtuBasicInfo.version >= this.global.LatestVersion )
             {
                 readIntervalList = new List<string>()
                 {
@@ -2723,7 +2688,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (this.global.ActionVerify)
                                 dialog_AddMTU.IsVisible = true;
                             else
                             {
@@ -2778,7 +2743,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (this.global.ActionVerify)
                                 dialog_turnoff_one.IsVisible = true;
                             else
                             {
@@ -2882,7 +2847,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (this.global.ActionVerify)
                                 dialog_replacemeter_one.IsVisible = true;
                             else
                             {
@@ -2939,7 +2904,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (this.global.ActionVerify)
                                 dialog_meter_replace_one.IsVisible = true;
                             else
                             {
@@ -2996,7 +2961,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (this.global.ActionVerify)
                                 dialog_AddMTUAddMeter.IsVisible = true;
                             else
                             {
@@ -3055,7 +3020,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (this.global.ActionVerify)
                                 dialog_AddMTUReplaceMeter.IsVisible = true;
                             else
                             {
@@ -3114,7 +3079,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.global.ActionVerify)
+                            if (this.global.ActionVerify)
                                 dialog_ReplaceMTUReplaceMeter.IsVisible = true;
                             else
                             {
@@ -3557,8 +3522,6 @@ namespace aclara_meters.view
             miscview.IsVisible = false;
 
             port2view.FadeTo(1, 200);
-
-
         }
 
         private void port1_command()
@@ -3620,8 +3583,6 @@ namespace aclara_meters.view
         {
             if ( DEBUG_AUTO_MODE_ON )
                 return true;
-        
-            Global global = this.config.GetGlobal ();
 
             dynamic EmptyNoReq = new Func<string,bool,bool> ( ( value, isMandatory ) =>
                                     string.IsNullOrEmpty ( value ) && ! isMandatory );
@@ -3967,8 +3928,6 @@ namespace aclara_meters.view
 
         private async Task NewPort2ClickTask ()
         {
-            Global global = FormsApp.config.global;
-
             // Button for enable|disable the second port
             if ( ! global.Port2DisableNo )
             {
@@ -3984,8 +3943,6 @@ namespace aclara_meters.view
         
         private void UpdatePortButtons ()
         {
-            Global global = FormsApp.config.global;
-        
             Device.BeginInvokeOnMainThread(() =>
             {
                 if ( ! global.Port2DisableNo )
@@ -4052,8 +4009,7 @@ namespace aclara_meters.view
         { 
             #region Get values from form
 
-            Mtu    mtu    = this.addMtuForm.mtu;
-            Global global = this.addMtuForm.global;
+            Mtu mtu = this.addMtuForm.mtu;
 
             bool isReplaceMeter = ( this.actionType == ActionType.ReplaceMeter           ||
                                     this.actionType == ActionType.ReplaceMtuReplaceMeter ||
@@ -4409,9 +4365,10 @@ namespace aclara_meters.view
                     mtu_type = Int32.Parse(p.Value.ToString());
             }
 
-            Mtu mtu = Configuration.GetInstance ().GetMtuTypeById ( mtu_type );
-
+            Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
             InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields ( mtu, ActionType.ReadMtu );
+            
+            Mtu currentMtu = Singleton.Get.Action.CurrentMtu;
 
             foreach (InterfaceParameters iParameter in interfacesParams)
             {
@@ -4434,7 +4391,7 @@ namespace aclara_meters.view
                                 // For Read action when no Meter is installed on readed MTU
                                 if ( param != null )
                                      description = param.Value;
-                                else description = MTUComm.Action.currentMtu.Ports[i].GetProperty ( pParameter.Name );
+                                else description = currentMtu.Ports[i].GetProperty ( pParameter.Name );
                                 
                                 FinalReadListView.Add(new ReadMTUItem()
                                 {
