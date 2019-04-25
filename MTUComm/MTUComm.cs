@@ -1617,7 +1617,7 @@ namespace MTUComm
         private async Task LoadMtuAndMetersBasicInfo ()
         {
             OnProgress ( this, new ProgressArgs ( 0, 0, "Initial Reading..." ) );
-        
+
             if ( await this.LoadMtuBasicInfo () )
             {
                 this.basicInfoLoaded = true;

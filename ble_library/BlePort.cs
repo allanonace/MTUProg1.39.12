@@ -351,8 +351,6 @@ namespace ble_library
                     Utils.Print(e.StackTrace);
                 }
 
-
-
                 try
                 {
                     Listen_Battery_level.Dispose();
@@ -362,7 +360,6 @@ namespace ble_library
                     Utils.Print(e3.StackTrace);
                 }
             }
-
         }
 
         /// <summary>
@@ -486,7 +483,6 @@ namespace ble_library
         /// <param name="ble_device">The Bluetooth LE peripheral to connect.</param>
         public async Task ConnectoToDevice(IBlePeripheral ble_device, bool isBounded)
         {
-
             try
             {
                 isConnected = CONNECTING;
@@ -542,13 +538,11 @@ namespace ble_library
                     // e.g., "Error connecting to device. result=ConnectionAttemptCancelled"
                 }
             }
-            catch (GattException ex)
-            {
-                Utils.Print(ex.ToString());
-            }
             catch (Exception e)
             {
                 Utils.Print(e);
+                
+                await this.DisconnectDevice ();
             }
         }
 
@@ -577,7 +571,7 @@ namespace ble_library
                         Utils.Print(e.StackTrace);
                     }
                     connectionError = DYNAMIC_KEY_ERROR;
-                    DisconnectDevice();
+                    await DisconnectDevice();
                     // this.adapter.DisableAdapter();
 
                     //  this.adapter.EnableAdapter();
@@ -840,7 +834,7 @@ namespace ble_library
                             Utils.Print(e.StackTrace);
                         }
                         connectionError = NO_DYNAMIC_KEY_ERROR;
-                        DisconnectDevice();
+                        await DisconnectDevice();
                         return;
                     }
                     byte[] hi_msg;
@@ -890,13 +884,12 @@ namespace ble_library
                     new Guid("1d632100-dc5a-41ab-bdbb-7cff9901210d"),
                     new Guid("0000000c-0000-1000-8000-00805f9b34fb")
                 );
-
-
-
             }
-            catch (GattException ex)
+            catch ( Exception ex )
             {
                 Utils.Print(ex.ToString());
+                
+                await this.DisconnectDevice ();
             }
         }
 
@@ -977,15 +970,13 @@ namespace ble_library
         /// <summary>
         /// Disconnects from Bluetooth LE peripheral 
         /// </summary>
-        public async Task DisconnectDevice()
+        public async Task DisconnectDevice ()
         {
-            if (isConnected == CONNECTED)
+            try
             {
-
-                if (!adapter.CurrentState.IsDisabledOrDisabling())
+                if ( ! adapter.CurrentState.IsDisabledOrDisabling () )
                 {
-
-                    Stop_Listen_Characteristic_Notification();
+                    Stop_Listen_Characteristic_Notification ();
                     try
                     {
                         Listen_ack_response_Handler.Dispose();
@@ -1004,7 +995,6 @@ namespace ble_library
                         Utils.Print(e2.StackTrace);
                     }
 
-
                     try
                     {
                         Listen_Battery_level.Dispose();
@@ -1013,43 +1003,15 @@ namespace ble_library
                     {
                         Utils.Print(e3.StackTrace);
                     }
-
-
                 }
-
-
-
-
+            
+                await gattServer_connection.Disconnect();
 
                 isConnected = NO_CONNECTED;
-                try
-                {
-                    if (gattServer_connection.State == ConnectionState.Connected)
-                    {
-                        await gattServer_connection.Disconnect();
-                    }
-                }
-                catch (Exception e2)
-                {
-                    Utils.Print(e2.StackTrace);
-                }
-
             }
-            else if (isConnected == CONNECTING)
+            catch ( Exception e )
             {
-                isConnected = NO_CONNECTED;
-                try
-                {
-                    if (gattServer_connection.State == ConnectionState.Connected)
-                    {
-                        await gattServer_connection.Disconnect();
-                    }
-
-                }
-                catch (Exception e2)
-                {
-                    Utils.Print(e2.StackTrace);
-                }
+                
             }
         }
 

@@ -339,8 +339,6 @@ namespace MTUComm.MemoryMap
         // Use with <CustomSet>method:ULongToBcd</CustomSet>
         public async Task<byte[]> ULongToBcd ( MemoryRegister<ulong> MemoryRegister, dynamic inputValue )
         {
-            if ( inputValue is string )
-                return this.ULongToBcd_Logic ( inputValue, MemoryRegister.size );
             return this.ULongToBcd_Logic ( inputValue.ToString (), MemoryRegister.size );
         }
 

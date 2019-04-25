@@ -72,9 +72,9 @@ namespace aclara_meters.viewmodel
             }
         }
 
-        public void Load()
+        public async void Load ()
         {
-            if (FormsApp.credentialsService.DoCredentialsExist())
+            if ( await FormsApp.credentialsService.CredentialsExist () )
             {
                 string user = FormsApp.credentialsService.UserName;
                 //Mobile.LogUserPath = user;
@@ -141,12 +141,9 @@ namespace aclara_meters.viewmodel
 
                         if (isValid)
                         {
-                            bool doCredentialsExist = FormsApp.credentialsService.DoCredentialsExist();
-                            if (!doCredentialsExist)
-                            {
-                                FormsApp.credentialsService.SaveCredentials(userName, password);
-                        
-                            }
+                            if ( ! await FormsApp.credentialsService.CredentialsExist () )
+                                await FormsApp.credentialsService.SaveCredentials ( userName, password );
+                            
                             Settings.IsLoggedIn = true;
                             Settings.SavedUserName = User.Email;
 
