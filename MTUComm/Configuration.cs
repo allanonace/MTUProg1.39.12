@@ -22,7 +22,7 @@ namespace MTUComm
 
         public MtuTypes mtuTypes;
         public MeterTypes meterTypes;
-        public Global global;
+        public Global Global { private set; get; }
         public InterfaceConfig interfaces;
         public AlarmList alarms;
         public DemandConf demands;
@@ -34,26 +34,18 @@ namespace MTUComm
         private string appName;
         private static Configuration instance;
 
-        public static bool HasInstance
-        {
-            get { return instance != null; }
-        }
-
         private Configuration ( string path = "", bool avoidXmlError = false )
         {
             string configPath = Mobile.ConfigPath;
 
             device = "PC";
 
-            //TEST - Override configuration file to force parsing error
-            //File.WriteAllText ( Path.Combine ( Mobile.GetPathConfig (), "certificate.txt" ), "TEST" );
-
             try
             {
                 // Load configuration files ( xml's )
                 mtuTypes   = Utils.DeserializeXml<MtuTypes>        ( Path.Combine ( configPath, XML_MTUS      ) );
                 meterTypes = Utils.DeserializeXml<MeterTypes>      ( Path.Combine ( configPath, XML_METERS    ) );
-                global     = Utils.DeserializeXml<Global>          ( Path.Combine ( configPath, XML_GLOBAL    ) );
+                Global     = Utils.DeserializeXml<Global>          ( Path.Combine ( configPath, XML_GLOBAL    ) );
                 alarms     = Utils.DeserializeXml<AlarmList>       ( Path.Combine ( configPath, XML_ALARMS    ) );
                 demands    = Utils.DeserializeXml<DemandConf>      ( Path.Combine ( configPath, XML_DEMANDS   ) );
                 users      = Utils.DeserializeXml<UserList>        ( Path.Combine ( configPath, XML_USERS     ) ).List;
@@ -63,26 +55,12 @@ namespace MTUComm
                 Mobile.configData.GenerateCert ();
                 
                 // Check global min date allowed
-                if ( ! string.IsNullOrEmpty ( global.MinDate ) &&
-                     DateTime.Compare ( DateTime.ParseExact ( global.MinDate, "MM/dd/yyyy", null ), DateTime.Today ) < 0 )
+                if ( ! string.IsNullOrEmpty ( Global.MinDate ) &&
+                     DateTime.Compare ( DateTime.ParseExact ( Global.MinDate, "MM/dd/yyyy", null ), DateTime.Today ) < 0 )
                     throw new DeviceMinDateAllowedException ();
             }
             catch ( Exception e )
             {
-                /*
-                Console.WriteLine ( "Remove Config.Files.." );
-                Console.WriteLine ( "Num [ before ]: " + Directory.GetFiles ( Mobile.GetPathConfig () ).Length );
-
-                // For the moment, the approach is to delete the configuration files if an exception occurs
-                foreach ( string filePath in Directory.GetFiles ( Mobile.GetPathConfig () ) )
-                {
-                    File.Delete ( filePath );
-                    Console.WriteLine ( "- " + filePath + ": " + File.Exists ( filePath ) );
-                }
-                
-                Console.WriteLine ( "Num [ after ]: " + Directory.GetFiles ( Mobile.GetPathConfig () ).Length );
-                */
-
                 if ( ! avoidXmlError )
                 {
                     if ( Errors.IsOwnException ( e ) )
@@ -94,29 +72,17 @@ namespace MTUComm
             }
         }
 
-        public static Configuration GetInstance ( string path = "", bool avoidXmlError = false )
+        public static Configuration GetInstanceWithParams ( string path = "", bool avoidXmlError = false )
         {
-            if ( instance == null )
-                instance = new Configuration ( path, avoidXmlError );
+            if ( ! Singleton.Has<Configuration> () )
+                Singleton.Set = new Configuration ( path, avoidXmlError );
 
-            return instance;
-        }
-
-        public static void SetInstance ( Configuration configuration )
-        {
-            instance = configuration;
-        }
-
-        public Global GetGlobal()
-        {
-            return global;
-
+            return Singleton.Get.Configuration;
         }
 
         public Mtu[] GetMtuTypes()
         {
             return mtuTypes.Mtus.ToArray();
-
         }
 
         public Mtu GetMtuTypeById ( int mtuId )
@@ -219,7 +185,7 @@ namespace MTUComm
 
         public Boolean useDummyDigits()
         {
-            return !global.LiveDigitsOnly;
+            return !Global.LiveDigitsOnly;
         }
 
         public String GetDeviceUUID()

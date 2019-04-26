@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using Library;
 using System.Linq;
 using System.Text;
 using System.Web;
@@ -32,7 +33,7 @@ namespace MTUComm
         
         public static string GetUriParameter ()
         {
-            string paramGlobal = Configuration.GetInstance ().global.Compression.ToLower ();
+            string paramGlobal = Singleton.Get.Configuration.Global.Compression.ToLower ();
             
             string param = "&compress=";
             switch ( paramGlobal )
@@ -47,7 +48,7 @@ namespace MTUComm
 
         public static string CompressToUrlUsingGlobal ( string input, int times = 1 )
         {
-            string paramGlobal = Configuration.GetInstance ().global.Compression.ToLower ();
+            string paramGlobal = Singleton.Get.Configuration.Global.Compression.ToLower ();
         
             ALGORITHM algorithm = ALGORITHM.NOTHING;
             switch ( paramGlobal )

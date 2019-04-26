@@ -63,7 +63,7 @@ namespace aclara_meters.viewmodel
         {
             Mobile.LogPath = Mobile.ConfigPublicPath;//public folder
             Mobile.LogUserBackupPath = user;  //public folder
-            if (FormsApp.config.global.LogsPublicDir)
+            if (FormsApp.config.Global.LogsPublicDir)
                 Mobile.LogUserPath = user;
             else
             {
@@ -91,7 +91,7 @@ namespace aclara_meters.viewmodel
             string username,
             string password )
         {
-            Xml.User[] dbUsers = Configuration.GetInstance ().users;
+            Xml.User[] dbUsers = Singleton.Get.Configuration.users;
             
             IEnumerable<Xml.User> coincidences = dbUsers.Where ( user => user.Name.Equals ( username ) );
             if ( coincidences.Count () == 1 )
@@ -121,17 +121,17 @@ namespace aclara_meters.viewmodel
 
                         #region Credentials length Validation
 
-                        if (userName.Length < FormsApp.config.global.UserIdMinLength || userName.Length > FormsApp.config.global.UserIdMaxLength)
+                        if (userName.Length < FormsApp.config.Global.UserIdMinLength || userName.Length > FormsApp.config.Global.UserIdMaxLength)
                         {
                             IsBusy = false;
-                            Message = "The field UserName must be with a minimum length of " + FormsApp.config.global.UserIdMinLength+ " and a maximum length of " + FormsApp.config.global.UserIdMaxLength;
+                            Message = "The field UserName must be with a minimum length of " + FormsApp.config.Global.UserIdMinLength+ " and a maximum length of " + FormsApp.config.Global.UserIdMaxLength;
                             return;
                         }
 
-                        if(password.Length < FormsApp.config.global.PasswordMinLength || password.Length > FormsApp.config.global.PasswordMaxLength)
+                        if(password.Length < FormsApp.config.Global.PasswordMinLength || password.Length > FormsApp.config.Global.PasswordMaxLength)
                         {
                             IsBusy = false;
-                            Message = "The field Password must be with a minimum length of " + FormsApp.config.global.PasswordMinLength + " and a maximum length of " + FormsApp.config.global.PasswordMaxLength;
+                            Message = "The field Password must be with a minimum length of " + FormsApp.config.Global.PasswordMinLength + " and a maximum length of " + FormsApp.config.Global.PasswordMaxLength;
                             return;
                         }
 

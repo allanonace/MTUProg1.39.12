@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using Lexi.Interfaces;
-using Xml;
-using System.Text.RegularExpressions;
+using Library;
 using Library.Exceptions;
+using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -90,7 +90,7 @@ namespace MTUComm
                     if ( ! Enum.TryParse<ActionType> ( action.Type, out type ) )
                         throw new ScriptActionTypeInvalidException ( action.Type );
                 
-                    Action new_action = new Action ( Configuration.GetInstance(), serial_device, type, script.UserName, script.LogFile, true );
+                    Action new_action = new Action ( Singleton.Get.Configuration, serial_device, type, script.UserName, script.LogFile, true );
                     Type   actionType = action.GetType ();
     
                     Parameter.ParameterType paramTypeToAdd;

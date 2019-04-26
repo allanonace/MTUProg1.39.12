@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Dynamic;
+using Library;
 using Xml;
-
-using ActionType = MTUComm.Action.ActionType;
 
 namespace MTUComm.actions
 {
@@ -13,10 +12,8 @@ namespace MTUComm.actions
 
         private Dictionary<string,Parameter> dictionary;
         public static MTUBasicInfo mtuBasicInfo { get; private set; }
-        public Global global { get; }
         public Mtu mtu { get; }
         public dynamic map;
-        public Action action;
 
         #endregion
 
@@ -26,7 +23,7 @@ namespace MTUComm.actions
         {
             this.dictionary = new Dictionary<string,Parameter> ();
             //this.conditions = new Conditions ( mtu );
-            this.global  = Configuration.GetInstance().GetGlobal ();
+            //this.global  = Singleton.Get.Configuration.Global;
             this.mtu     = mtu;
         }
 

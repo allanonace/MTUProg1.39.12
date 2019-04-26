@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-using Xml;
-using System;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using System.Dynamic;
-using Library.Exceptions;
-using System.Xml.Serialization;
-using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Library;
+using Library.Exceptions;
+using Xml;
 
 namespace MTUComm
 {
@@ -187,8 +185,8 @@ namespace MTUComm
         {
             get
             {
-                Configuration config = Configuration.GetInstance ();
-                return ( config.global != null ) ? config.global.ErrorId : true;
+                Global global = Singleton.Get.Configuration.Global;
+                return ( global != null ) ? global.ErrorId : true;
             }
         }
 
@@ -203,7 +201,9 @@ namespace MTUComm
 
         private Errors ()
         {
-            this.logger      = ( Action.currentAction != null ) ? Action.currentAction.logger : new Logger ();
+            Action currentAction = Singleton.Get.Action;
+        
+            this.logger      = ( currentAction != null ) ? currentAction.logger : new Logger ();
             this.errors      = new Dictionary<int,Error> ();
             this.errorsToLog = new List<Error> ();
             this.xmlErrors   = Utils.DeserializeXml<ErrorList> ( "Error.xml", true ).List;
@@ -392,7 +392,7 @@ namespace MTUComm
             PageLinker.ShowAlert ( ERROR_TITLE, error, kill );
             
             // Method can be invoked when Configuration is not instantiated yet
-            if ( Configuration.HasInstance )
+            if ( Singleton.Has<Configuration> () )
                 lastErrorLogGenerated = this.logger.Error ();
             
             if ( forceException )

@@ -143,7 +143,7 @@ namespace MTUComm.MemoryMap
             isUnityTest = ! string.IsNullOrEmpty ( pathUnityTest );
 
             // Read MTU family XML and prepare setters and getters
-            Configuration config     = Configuration.GetInstance ( pathUnityTest );
+            Configuration config     = Configuration.GetInstanceWithParams ( pathUnityTest );
             XmlSerializer serializer = new XmlSerializer ( typeof ( MemRegisterList ) );
 
             // Parameter "family" when testing is full path to use
@@ -499,10 +499,6 @@ namespace MTUComm.MemoryMap
             if ( memoryRegister.HasCustomOperation_Get )
                 return this.ExecuteOperation<T> ( memoryRegister.mathExpression_Get, result );
 
-            // String field with format to apply
-            else if ( memoryRegister.HasCustomFormat_Get )
-                return ( T )( object )this.ApplyFormat ( ( string )result, memoryRegister.format_Get );
-
             // Only return readed value
             return ( T )result;
         }
@@ -583,7 +579,7 @@ namespace MTUComm.MemoryMap
         public void CreateProperty_Get_ByteArray<T> ( MemoryRegister<T> memoryRegister )
         {
             base.AddMethod ( METHODS_GET_BYTE_PREFIX + memoryRegister.id,
-                new Func<bool,byte[]>( ( bool useSizeGet ) =>
+                new Func<bool,byte[]> ( ( bool useSizeGet ) =>
                 {
                     return this.GetByteArrayFromMem ( memoryRegister.address, useSizeGet ? memoryRegister.sizeGet : memoryRegister.size );
                 }));
@@ -672,10 +668,6 @@ namespace MTUComm.MemoryMap
             base.AddMethod ( METHODS_SET_STRING_PREFIX + memoryRegister.id,
                 new Action<string>((_value) =>
                 {
-                    // String field with format to apply
-                    if ( memoryRegister.HasCustomFormat_Set )
-                        _value = this.ApplyFormat ( _value, memoryRegister.format_Set );
-
                     // Boolean register need to be forced to use one byte, because size could be zero ( for first bit )
                     this.SetStringToMem<T> ( _value, memoryRegister.address, ( memoryRegister.size <= 0 ) ? 1 : memoryRegister.size );
                 }));
@@ -703,7 +695,7 @@ namespace MTUComm.MemoryMap
                      Validations.NumericTypeLimit <T> ( value ) );
         }
 
-        public string[] GetModifiedRegistersDifferences ( MemoryMap otherMap )
+        public async Task<string[]> GetModifiedRegistersDifferences ( MemoryMap otherMap )
         {
             List<string> difs = new List<string> ();
 
@@ -713,8 +705,9 @@ namespace MTUComm.MemoryMap
             {
                 string name = register.id;
                 
-                if ( ! otherMap.ContainsMember ( name ) ||       // Register not present in other memory map
-                     ! base[ name ].Equals ( otherMap[ name ] )) // Both registers are not equal
+                if ( register.size == register.sizeGet &&                   // Only compare
+                     ( ! otherMap.ContainsMember ( name ) ||                // Register not present in other memory map
+                       ! await base[ name ].Equals ( otherMap[ name ] ) ) ) // Both registers are not equal
                 {
                     difs.Add ( name );
                     continue;
@@ -724,9 +717,9 @@ namespace MTUComm.MemoryMap
             return difs.ToArray ();
         }
 
-        public bool ValidateModifiedRegisters ( MemoryMap otherMap )
+        public async Task<bool> ValidateModifiedRegisters ( MemoryMap otherMap )
         {
-            return ( this.GetModifiedRegistersDifferences ( otherMap ).Length == 0 );
+            return ( ( await this.GetModifiedRegistersDifferences ( otherMap ) ).Length == 0 );
         }
 
         #endregion
@@ -771,15 +764,6 @@ namespace MTUComm.MemoryMap
             Utils.Print ( "GetOperation: " + operation + " = " + result );
 
             return ( T )result;
-        }
-
-        #endregion
-
-        #region Format
-
-        private string ApplyFormat ( string value, string mask )
-        {
-            return value; // string.Format ( mask, value );
         }
 
         #endregion
@@ -1186,5 +1170,17 @@ namespace MTUComm.MemoryMap
         }
 
         #endregion
+        
+        public void ResetReadFlags ()
+        {
+            foreach ( dynamic register in this.registersObjs.Values )
+                register.readedFromMtu = false;
+        }
+        
+        public void SetReadFromMtuOnlyOnce (
+            bool ok )
+        {
+            this.readFromMtuOnlyOnce = ok;
+        }
     }
 }

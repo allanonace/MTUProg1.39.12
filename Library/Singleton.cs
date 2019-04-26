@@ -26,7 +26,11 @@ namespace Library
         {
             if ( value.GetType ().GetTypeInfo ().IsClass &&
                  ! this.dictionary.ContainsKey ( name ) )
+            {
+                Utils.Print ( "Singleton: Add \"" + name + "\"" );
+            
                 this.dictionary.Add ( name, value );
+            }
         }
 
         public override bool TryGetMember ( GetMemberBinder binder, out object result )
@@ -84,6 +88,8 @@ namespace Library
             
             if ( s.dictionary.ContainsKey ( customName ) )
             {
+                Utils.Print ( "Singleton: Remove \"" + customName + "\"" );
+            
                 s.dictionary.Remove ( customName );
                 return true;
             }

@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
-using Lexi;
 using Library;
 using Xml;
 
@@ -9,11 +9,11 @@ using RegType       = MTUComm.MemoryMap.MemoryMap.RegType;
 
 namespace MTUComm.MemoryMap
 {
-    public class MemoryRegister<T> : IEquatable<MemoryRegister<T>>
+    public class MemoryRegister<T>
     {
         #region Constants
 
-        private enum CUSTOM_TYPE { EMPTY, METHOD, OPERATION, FORMAT }
+        private enum CUSTOM_TYPE { EMPTY, METHOD, OPERATION }
 
         #endregion
 
@@ -57,8 +57,6 @@ namespace MTUComm.MemoryMap
 
         public string mathExpression_Get { get { return this.custom_Get; } }
         public string mathExpression_Set { get { return this.custom_Set; } }
-        public string format_Get { get { return this.custom_Get; } }
-        public string format_Set { get { return this.custom_Set; } }
 
         #region Custom Get
 
@@ -74,16 +72,9 @@ namespace MTUComm.MemoryMap
 
         private bool _HasCustomOperation_Get
         {
-            get { return ! this._HasCustomMethod_Get     &&
-                           this.valueType < RegType.CHAR &&
-                         ! string.IsNullOrEmpty ( this.custom_Get ); }
-        }
-
-        private bool _HasCustomFormat_Get
-        {
-            get { return ! this._HasCustomMethod_Get        &&
-                           this.valueType == RegType.STRING &&
-                         ! string.IsNullOrEmpty ( this.custom_Get ); }
+            get { return ! this._HasCustomMethod_Get     &&            // Is not a custom method ( "method" or "method:..." )
+                           this.valueType < RegType.BOOL &&            // Is a register of numeric type
+                         ! string.IsNullOrEmpty ( this.custom_Get ); } // And is not an empty string
         }
 
         // - MemoryMap.CreateProperty_Get<T>
@@ -98,12 +89,6 @@ namespace MTUComm.MemoryMap
         public bool HasCustomOperation_Get
         {
             get { return this.customType_Get == CUSTOM_TYPE.OPERATION; }
-        }
-
-        // - MemoryMap.CreateProperty_Get<T>
-        public bool HasCustomFormat_Get
-        {
-            get { return this.customType_Get == CUSTOM_TYPE.FORMAT; }
         }
 
         #endregion
@@ -148,36 +133,40 @@ namespace MTUComm.MemoryMap
             get { return this.customType_Set == CUSTOM_TYPE.OPERATION; }
         }
 
-        // - MemoryMap.CreateProperty_Set_String<T>
-        public bool HasCustomFormat_Set
-        {
-            get { return this.customType_Set == CUSTOM_TYPE.FORMAT; }
-        }
-
         #endregion
 
         // Read and write without processing data, raw info
         public T ValueRaw
         {
-            get { return this.funcGetMap (); }
+            get
+            {
+                return this.funcGetMap ();
+            }
+        }
+        
+        public byte[] ValueByteArrayRaw
+        {
+            get
+            {
+                return this.funcGetByteArray ( true );
+            }
         }
 
         // Recover bytes without processing data, raw info
-        public byte[] ValueByteArray_SameSize
+        public async Task<byte[]> GetValueByteArray (
+            bool useSizeGet = true )
         {
-            get { return this.funcGetByteArray ( false ); }
+            // Read value from MTU if is necessary
+            await this.funcGet ();
+        
+            return this.funcGetByteArray ( useSizeGet );
         }
         
-        public byte[] ValueByteArray
-        {
-            get { return this.funcGetByteArray ( true ); }
-        }
-        
-        public async Task<dynamic> ValueReadFromMtu (
+        public async Task<dynamic> GetValueFromMtu (
             bool returnByteArray = false )
         {
             Utils.PrintDeep ( Environment.NewLine + "------LOAD_FROM_MTU------" );
-            Utils.Print ( "Register -> ValueReadFromMtu -> " + this.id + " [ " + returnByteArray + " ]" );
+            Utils.Print ( "Register -> GetValueFromMtu -> " + this.id + " [ " + returnByteArray + " ]" );
         
             // Reset flag that will be used in funcGet to invoke funcGetFromMtu
             this.readedFromMtu = false;
@@ -190,11 +179,11 @@ namespace MTUComm.MemoryMap
           	else return this.lastRead;
         }
         
-        public async Task ValueWriteToMtu (
+        public async Task SetValueToMtu (
             dynamic value = null )
         {
             Utils.PrintDeep ( Environment.NewLine + "------WRITE_TO_MTU-------" );
-            Utils.Print ( "Register -> ValueWriteToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
+            Utils.Print ( "Register -> SetValueToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
         
             // Set value in temporary memory map before write it to the MTU
             if ( value != null )
@@ -202,18 +191,18 @@ namespace MTUComm.MemoryMap
             
             // Write value set in memory map to the MTU
             if ( valueType == RegType.BOOL )
-                await this.ValueWriteToMtu_Bit ();
+                await this.SetBitToMtu ();
             else
             {
                 // Recover byte array with length equals to the value to set,
                 // not the length ( sizeGet ) that will be used to recover/get
-                await this.lexi.Write ( ( uint )this.address, this.ValueByteArray_SameSize );
+                await this.lexi.Write ( ( uint )this.address, await this.GetValueByteArray ( false ) );
             }
             
             Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );
         }
         
-        private async Task ValueWriteToMtu_Bit ()
+        private async Task SetBitToMtu ()
         {
             Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> " + this.id );
         
@@ -296,7 +285,9 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        public async Task<string> ValueWithXMask ( string xMask, int digits )
+        public async Task<string> GetValueXMask (
+            string xMask,
+            int digits )
         {
             string value = ( await this.GetValue () ).ToString ();
 
@@ -344,7 +335,6 @@ namespace MTUComm.MemoryMap
             // Custom Get
             if      ( this._HasCustomMethod_Get    ) this.customType_Get = CUSTOM_TYPE.METHOD;
             else if ( this._HasCustomOperation_Get ) this.customType_Get = CUSTOM_TYPE.OPERATION;
-            else if ( this._HasCustomFormat_Get    ) this.customType_Get = CUSTOM_TYPE.FORMAT;
             else                                     this.customType_Get = CUSTOM_TYPE.EMPTY;
 
             if ( this.HasCustomMethod_Get )
@@ -357,7 +347,6 @@ namespace MTUComm.MemoryMap
             // Custom Set
             if      ( this._HasCustomMethod_Set    ) this.customType_Set = CUSTOM_TYPE.METHOD;
             else if ( this._HasCustomOperation_Set ) this.customType_Set = CUSTOM_TYPE.OPERATION;
-            else if ( this._HasCustomFormat_Set    ) this.customType_Set = CUSTOM_TYPE.FORMAT;
             else                                     this.customType_Set = CUSTOM_TYPE.EMPTY;
 
             if ( this.HasCustomMethod_Set )
@@ -372,7 +361,7 @@ namespace MTUComm.MemoryMap
 
         #region Compare
 
-        public bool Equals ( MemoryRegister<T> other )
+        public async Task<bool> Equals ( MemoryRegister<T> other )
         {
             if ( other == null )
                 return false;
@@ -382,7 +371,27 @@ namespace MTUComm.MemoryMap
             bool ok_address     = ( this.address == other.address );
             bool ok_size        = ( this.size    == other.size    );
             bool ok_write       = ( this.write   == other.write   );
-            bool ok_value       = object.Equals ( this.ValueRaw, other.ValueRaw );
+            
+            byte[] valLocal = new byte[] { };
+            byte[] valOther = new byte[] { };
+            
+            bool ok_value = true;
+            try
+            {
+                valLocal = this.ValueByteArrayRaw;
+                valOther = await other.GetValueByteArray ();
+            
+                ok_value = valLocal.SequenceEqual ( valOther );
+            }
+            catch ( Exception e )
+            {
+                ok_value = false;
+            }
+
+            Utils.Print ( "Equals: " + this.id + " -> " +
+                Utils.ByteArrayToString ( valLocal ) + " == " +
+                Utils.ByteArrayToString ( valOther ) + " = " +
+                ok_value );
 
             return ok_id          &&
                    ok_description &&

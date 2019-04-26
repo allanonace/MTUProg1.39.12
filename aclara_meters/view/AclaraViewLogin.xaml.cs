@@ -100,11 +100,11 @@ namespace aclara_meters.view
                     SetLayoutPosition(false, (int)-80);
             };
 
-            EmailEntry.MaxLength = FormsApp.config.global.UserIdMaxLength;
+            EmailEntry.MaxLength = FormsApp.config.Global.UserIdMaxLength;
 
             //EmailEntry.MaxLength = FormsApp.config.global.UserIdMinLength;
 
-            PasswordEntry.MaxLength = FormsApp.config.global.PasswordMaxLength;
+            PasswordEntry.MaxLength = FormsApp.config.Global.PasswordMaxLength;
 
         }
 

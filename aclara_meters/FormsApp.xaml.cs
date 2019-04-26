@@ -326,7 +326,7 @@ namespace aclara_meters
         {
             try
             {
-                config = Configuration.GetInstance ( "", this.abortMission );
+                config = Configuration.GetInstanceWithParams ( string.Empty, this.abortMission );
                 logger = new Logger ();
     
                 switch ( Device.RuntimePlatform )
@@ -347,8 +347,6 @@ namespace aclara_meters
                         config.setPlatform   ( SO_UNKNOWN );
                         break;
                 }
-                
-                Configuration.SetInstance ( config );
             }
             catch ( Exception e )
             {
@@ -501,7 +499,7 @@ namespace aclara_meters
                 StringBuilder str = new StringBuilder ();
 
                 // MTU info
-                Mtu mtu = MTUComm.Action.currentMtu;
+                Mtu mtu = Singleton.Get.Action.CurrentMtu;
                 
                 str.AppendLine ( DateTime.Now.ToString () );
                 str.AppendLine ( "Unhandled Exception" );
@@ -515,7 +513,7 @@ namespace aclara_meters
                 str.AppendLine ( string.Format ( "{0,-50} : {1}", "Num.Ports",  mtu.Ports.Count ) );
                 
                 // Action info
-                MTUComm.Action action = MTUComm.Action.currentAction;
+                MTUComm.Action action = Singleton.Get.Action;
                 str.AppendLine ( "" );
                 str.AppendLine ( "Action" );
                 str.AppendLine ( "------" );
@@ -526,7 +524,7 @@ namespace aclara_meters
                 str.AppendLine ( "" );
                 str.AppendLine ( "Global.XML" );
                 str.AppendLine ( "----------" );
-                Global global = Configuration.GetInstance ().global;
+                Global global = Singleton.Get.Configuration.Global;
                 foreach ( var property in global.GetType ().GetProperties () )
                 {
                     if ( ! property.GetType ().IsArray &&
