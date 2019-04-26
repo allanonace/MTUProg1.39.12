@@ -196,7 +196,7 @@ namespace MTUComm.MemoryMap
             {
                 // Recover byte array with length equals to the value to set,
                 // not the length ( sizeGet ) that will be used to recover/get
-                await this.lexi.Write ( ( uint )this.address, await this.GetValueByteArray ( false ) );
+                await this.lexi.Write ( ( uint )this.address, this.funcGetByteArray ( false ) );
             }
             
             Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );

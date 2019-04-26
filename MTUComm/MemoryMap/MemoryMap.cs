@@ -383,9 +383,13 @@ namespace MTUComm.MemoryMap
                          this.readFromMtuOnlyOnce &&
                          ! memoryRegister.readedFromMtu )    // Only the first time for not read yet registers
                         return await memoryRegister.funcGetFromMtu ();
-                    
+
                     // Get value from local memory map ( not using/reading the MTU )
-                    return this.PropertyGet_Logic ( memoryRegister );
+                    T result = this.PropertyGet_Logic ( memoryRegister );
+
+                    Utils.Print ( "Map -> Value cache: " + memoryRegister.id + " = " + result );
+
+                    return result;
                 }));
 
             #endregion
@@ -422,7 +426,7 @@ namespace MTUComm.MemoryMap
                         case TypeCode.String : value = ( object )this.GetStringFromMem_Logic ( read ); break;
                     }
                     
-                    Utils.PrintDeep ( "Map -> Converted value: " + memoryRegister.id + " = " + value );
+                    Utils.Print ( "Map -> Converted value: " + memoryRegister.id + " = " + value );
                     
                     // When sizeGet is different to size, no setting is performed, only recover
                     if ( memoryRegister.size == memoryRegister.sizeGet ||

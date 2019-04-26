@@ -196,10 +196,12 @@ namespace aclara_meters
             if (Mobile.configData.HasIntune)
             {
                 if (Mobile.IsNetAvailable())
+                {
                     GenericUtilsClass.DownloadConfigFiles();
-                else
-                    MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
-                return true;
+                    return true;
+                }
+                MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
+                return false;
             }
             else
             {
