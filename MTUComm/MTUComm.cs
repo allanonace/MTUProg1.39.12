@@ -531,7 +531,7 @@ namespace MTUComm
         #region Read MTU
 
         public async Task Task_ReadMtu ()
-        {        
+        {
             try
             {
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
@@ -1130,7 +1130,7 @@ namespace MTUComm
 
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Preparing MemoryMap..." ) );
 
-                dynamic map = this.GetMemoryMap ();
+                dynamic map = this.GetMemoryMap ( true );
                 form.map = map;
 
                 #region Account Number
@@ -1496,10 +1496,6 @@ namespace MTUComm
                 Utils.Print ( "----FINAL_READ_FINISH----" );
 
                 #endregion
-
-                // Use the map that counts with more registers loaded/set
-                // and avoid to read again from MTU those registers
-                map.SetReadFromMtuOnlyOnce ( true );
 
                 // Generate log to show on device screen
                 await this.OnAddMtu ( this, new AddMtuArgs ( map, mtu, form, addMtuLog ) );

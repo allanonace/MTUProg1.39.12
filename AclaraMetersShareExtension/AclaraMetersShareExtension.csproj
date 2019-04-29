@@ -41,7 +41,7 @@
     <MtouchLink>SdkOnly</MtouchLink>
     <MtouchArch>ARM64</MtouchArch>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
-    <CodesignProvision></CodesignProvision>
+    <CodesignProvision>bizintekdist</CodesignProvision>
     <CodesignProvision>bizintekdist</CodesignProvision>
     <MtouchExtraArgs>
     </MtouchExtraArgs>

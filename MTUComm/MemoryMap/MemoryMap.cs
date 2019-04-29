@@ -383,9 +383,13 @@ namespace MTUComm.MemoryMap
                          this.readFromMtuOnlyOnce &&
                          ! memoryRegister.readedFromMtu )    // Only the first time for not read yet registers
                         return await memoryRegister.funcGetFromMtu ();
-                    
+
                     // Get value from local memory map ( not using/reading the MTU )
-                    return this.PropertyGet_Logic ( memoryRegister );
+                    T result = this.PropertyGet_Logic ( memoryRegister );
+
+                    Utils.Print ( "Map -> Value cache: " + memoryRegister.id + " = " + result );
+
+                    return result;
                 }));
 
             #endregion
@@ -422,7 +426,7 @@ namespace MTUComm.MemoryMap
                         case TypeCode.String : value = ( object )this.GetStringFromMem_Logic ( read ); break;
                     }
                     
-                    Utils.PrintDeep ( "Map -> Converted value: " + memoryRegister.id + " = " + value );
+                    Utils.Print ( "Map -> Converted value: " + memoryRegister.id + " = " + value );
                     
                     // When sizeGet is different to size, no setting is performed, only recover
                     if ( memoryRegister.size == memoryRegister.sizeGet ||
@@ -701,17 +705,27 @@ namespace MTUComm.MemoryMap
 
             // Only check modified registers
             List<dynamic> modifiedRegisters = this.GetModifiedRegisters ().GetAllElements ();
-            foreach ( dynamic register in modifiedRegisters )
+            for ( int i = 0; i < modifiedRegisters.Count; i++ )
             {
-                string name = register.id;
+                dynamic register = modifiedRegisters[ i ];
+                string  name     = register.id;
                 
-                if ( register.size == register.sizeGet &&                   // Only compare
+                Utils.Print ( "Check MTU write: " + name +
+                    " [ Size: " + register.size +
+                    ", SizeGet: " + register.sizeGet +
+                    ", Other contains: " + otherMap.ContainsMember ( name ) + " ]" );
+                
+                if ( ( register.size == register.sizeGet ||
+                       register.valueType == RegType.BOOL ) &&
                      ( ! otherMap.ContainsMember ( name ) ||                // Register not present in other memory map
                        ! await base[ name ].Equals ( otherMap[ name ] ) ) ) // Both registers are not equal
                 {
+                    Utils.Print ( "Equals: " + name + " -> NO" );
+                
                     difs.Add ( name );
                     continue;
                 }
+                else Utils.Print ( "Equals: " + name + " -> OK" );
             }
 
             return difs.ToArray ();

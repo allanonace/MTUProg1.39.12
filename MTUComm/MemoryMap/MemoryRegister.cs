@@ -144,6 +144,7 @@ namespace MTUComm.MemoryMap
             }
         }
         
+        // TODO: Change name to "ValueByteArray"
         public byte[] ValueByteArrayRaw
         {
             get
@@ -152,6 +153,7 @@ namespace MTUComm.MemoryMap
             }
         }
 
+        // TODO: Change name to "GetValueByteArrayFromMtu"
         // Recover bytes without processing data, raw info
         public async Task<byte[]> GetValueByteArray (
             bool useSizeGet = true )
@@ -196,7 +198,7 @@ namespace MTUComm.MemoryMap
             {
                 // Recover byte array with length equals to the value to set,
                 // not the length ( sizeGet ) that will be used to recover/get
-                await this.lexi.Write ( ( uint )this.address, await this.GetValueByteArray ( false ) );
+                await this.lexi.Write ( ( uint )this.address, this.funcGetByteArray ( false ) );
             }
             
             Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );
@@ -378,20 +380,35 @@ namespace MTUComm.MemoryMap
             bool ok_value = true;
             try
             {
-                valLocal = this.ValueByteArrayRaw;
-                valOther = await other.GetValueByteArray ();
-            
-                ok_value = valLocal.SequenceEqual ( valOther );
+                if ( this.valueType != RegType.BOOL )
+                {
+                    valLocal = this.ValueByteArrayRaw;
+                    valOther = await other.GetValueByteArray ();
+                    
+                    ok_value = valLocal.SequenceEqual ( valOther );
+                    
+                    Utils.Print ( "Equals: " + this.id + " -> " +
+                    Utils.ByteArrayToString ( valLocal ) + " == " +
+                    Utils.ByteArrayToString ( valOther ) + " = " +
+                    ok_value );
+                }
+                else
+                {
+                    T bitLocal = this.ValueRaw;
+                    T bitOther = await other.GetValueFromMtu ();
+                
+                    ok_value = ( bool.Equals ( bitLocal, bitOther ) );
+                    
+                    Utils.Print ( "Equals: " + this.id + " -> " +
+                        bitLocal + " == " +
+                        bitOther + " = " +
+                        ok_value );
+                }
             }
             catch ( Exception e )
             {
-                ok_value = false;
+                return false;
             }
-
-            Utils.Print ( "Equals: " + this.id + " -> " +
-                Utils.ByteArrayToString ( valLocal ) + " == " +
-                Utils.ByteArrayToString ( valOther ) + " = " +
-                ok_value );
 
             return ok_id          &&
                    ok_description &&

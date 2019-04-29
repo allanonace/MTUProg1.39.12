@@ -36,13 +36,10 @@ namespace Library
         public override bool TryGetMember ( GetMemberBinder binder, out object result )
         {           
             if ( this.dictionary.ContainsKey ( binder.Name ) )
-            {
-                result = this.dictionary[ binder.Name ];
-                return true;
-            }
-
-            result = null;
-            return false;
+                 result = this.dictionary[ binder.Name ];
+            else result = null;
+            
+            return true;
         }
         
         public static bool Has<T> ()
