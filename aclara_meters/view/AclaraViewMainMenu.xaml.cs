@@ -30,7 +30,8 @@ namespace aclara_meters.view
     {
         private bool autoConnect;
         private bool conectarDevice;
-        private bool bAlertBatt = false;
+        private bool bAlertBatt = true;
+        private bool bAlertBatt10 = true;
 
         private ActionType actionType;
 
@@ -38,7 +39,7 @@ namespace aclara_meters.view
 
         private List<PageItem> MenuList { get; set; }
         private IUserDialogs dialogsSaved;
-        private ObservableCollection<DeviceItem> employees;
+        private ObservableCollection<DeviceItem> listPucks;
 
         private int peripheralConnected = ble_library.BlePort.NO_CONNECTED;
         private Boolean peripheralManualDisconnection = false;
@@ -167,7 +168,7 @@ namespace aclara_meters.view
                         }
                     }
                     //DeviceList.IsRefreshing = true;
-                    employees = new ObservableCollection<DeviceItem>();
+                    listPucks = new ObservableCollection<DeviceItem>();
 
                     FormsApp.ble_interface.SetTimeOutSeconds(TimeOutSeconds);
                     await FormsApp.ble_interface.Scan();
@@ -180,9 +181,9 @@ namespace aclara_meters.view
                         ChangeListViewData();
 
                         //DeviceList.IsRefreshing = false;
-                        if (employees.Count != 0)
+                        if (listPucks.Count != 0)
                         {
-                            DeviceList.ItemsSource = employees;
+                            DeviceList.ItemsSource = listPucks;
                         }
                         if (conectarDevice)
                         {
@@ -205,7 +206,7 @@ namespace aclara_meters.view
             conectarDevice = false;
             #region Autoconnect to stored device 
 
-            PrintToConsole($"-----------------------------------va a conectar con : { Singleton.Get.Puck.Name }");
+            //Utils.Print($"-----------------------------------va a conectar con : { Singleton.Get.Puck.Name }");
             //Task.Factory.StartNew(NewOpenConnectionWithDevice);
             NewOpenConnectionWithDevice();
             #endregion
@@ -258,7 +259,6 @@ namespace aclara_meters.view
             printer = new Thread(new ThreadStart(InvokeMethod));
 
             printer.Start();
-            //employees = new ObservableCollection<DeviceItem>();
 
             DeviceList.RefreshCommand = refresh_command;
 
@@ -597,15 +597,15 @@ namespace aclara_meters.view
                 imageRssi.Source = rssiIcon;
                 rssi_level_detail.Source = rssiIcon + "_white";
 
-                if (battery == 20 && !bAlertBatt)
+                if (battery == 20 && bAlertBatt)
                 {
                     await Application.Current.MainPage.DisplayAlert("Attention", "The battery level is at 20%", "OK");
-                    bAlertBatt = true;
+                    bAlertBatt = false;
                 }
-                if (battery == 10 && !bAlertBatt)
+                if (battery == 10 && bAlertBatt10)
                 {
                     await Application.Current.MainPage.DisplayAlert("Attention", "The battery level is at 10%, soon the puck will turn off", "OK");
-                    bAlertBatt = true;
+                    bAlertBatt10 = false;
                 }
             });
 
@@ -627,23 +627,23 @@ namespace aclara_meters.view
 
             while (true)
             {
-
-                PrintToConsole($"---------------------------------Invoke method while ----dispositivos encontados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
-                PrintToConsole($"---------------------------------Invoke method while ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
+                //Utils.Print($"---------------------------------Invoke method while ----dispositivos encontados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
+                //Utils.Print($"---------------------------------Invoke method while ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
 
                 if (Settings.IsLoggedIn == false) 
                     break;
 
                 int status = FormsApp.ble_interface.GetConnectionStatus();
 
-                PrintToConsole("se obtiene el estado de la conexion - InvokeMethod");
+                //Utils.Print("se obtiene el estado de la conexion - InvokeMethod");
 
                 if (cont == 2000)
                 {
                     if (refresh == 4)
                     {
                         refresh = 0;
-                        bAlertBatt = false;
+                        bAlertBatt = true;
+                        bAlertBatt10 = true;
                     }
                     else refresh += 1;
 
@@ -655,36 +655,36 @@ namespace aclara_meters.view
                 if (status != peripheralConnected)
                 {
 
-                    PrintToConsole($"---------------------------------Invoke method ----estado : {status} , Perifericoconnected: {peripheralConnected}");
-                    PrintToConsole($"---------------------------------Invoke method ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
+                    Utils.Print($"---------------------------------Invoke method ----estado : {status} , Perifericoconnected: {peripheralConnected}");
+                    Utils.Print($"---------------------------------Invoke method ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
                     
                     //PrintToConsole("¿ES NO_CONNECTED? - InvokeMethod");
 
                     if (peripheralConnected == ble_library.BlePort.NO_CONNECTED)
                     {
-                        PrintToConsole("    NO_CONNECTED - InvokeMethod");
+                        //Utils.Print("    NO_CONNECTED - InvokeMethod");
                         peripheralConnected = status;
                         timeout_connecting = 0;
                     }
                     else if (peripheralConnected == ble_library.BlePort.CONNECTING)
                     {
-                        PrintToConsole("Nop, es CONNECTING - InvokeMethod");
+                        //Utils.Print("Nop, es CONNECTING - InvokeMethod");
 
                         if (status == ble_library.BlePort.NO_CONNECTED)
                         {
-                            PrintToConsole("Se va a ejecutar algo en la UI - InvokeMethod");
+                            //Utils.Print("Se va a ejecutar algo en la UI - InvokeMethod");
 
                             Device.BeginInvokeOnMainThread(() =>
                             {
-                                PrintToConsole("Se va a detectar el estado de la conexion - InvokeMethod");
+                                //Utils.Print("Se va a detectar el estado de la conexion - InvokeMethod");
 
                                 switch (FormsApp.ble_interface.GetConnectionError())
                                 {
                                     case ble_library.BlePort.NO_ERROR:
-                                        PrintToConsole("Estado conexion: NO_ERROR - InvokeMethod");
+                                        //Utils.Print("Estado conexion: NO_ERROR - InvokeMethod");
                                         break;
                                     case ble_library.BlePort.CONECTION_ERRROR:
-                                        PrintToConsole("Estado conexion: CONECTION_ERRROR - InvokeMethod");
+                                        //Utils.Print("Estado conexion: CONECTION_ERRROR - InvokeMethod");
 
                                         Device.BeginInvokeOnMainThread(() =>
                                         {
@@ -698,12 +698,12 @@ namespace aclara_meters.view
                                             #endregion
                                         });
 
-                                        PrintToConsole("Desactivar barra de progreso - InvokeMethod");
+                                        //Utils.Print("Desactivar barra de progreso - InvokeMethod");
 
                                         Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
                                         break;
                                     case ble_library.BlePort.DYNAMIC_KEY_ERROR:
-                                        PrintToConsole("Estado conexion: DYNAMIC_KEY_ERROR - InvokeMethod");
+                                        //Utils.Print("Estado conexion: DYNAMIC_KEY_ERROR - InvokeMethod");
 
                                         Device.BeginInvokeOnMainThread(() =>
                                         {
@@ -717,11 +717,11 @@ namespace aclara_meters.view
                                             #endregion
                                         });
 
-                                        PrintToConsole("Desactivar barra de progreso - InvokeMethod");
+                                        //Utils.Print("Desactivar barra de progreso - InvokeMethod");
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
                                     case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
-                                        PrintToConsole("Estado conexion: NO_DYNAMIC_KEY_ERROR - InvokeMethod");
+                                        //Utils.Print("Estado conexion: NO_DYNAMIC_KEY_ERROR - InvokeMethod");
 
                                         Device.BeginInvokeOnMainThread(() =>
                                         {
@@ -735,7 +735,7 @@ namespace aclara_meters.view
                                             #endregion
 
                                         });
-                                        PrintToConsole("Desactivar barra de progreso - InvokeMethod");
+                                        //Utils.Print("Desactivar barra de progreso - InvokeMethod");
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
                                 }
@@ -747,11 +747,13 @@ namespace aclara_meters.view
                             });
                             peripheralConnected = status;
                             Singleton.Remove<Puck> ();
-                            bAlertBatt = false;
+                            FormsApp.ble_interface.Close();
+                            bAlertBatt = true;
+                            bAlertBatt10 = true;
                         }
                         else // status == ble_library.BlePort.CONNECTED
                         {
-                            PrintToConsole("Estas Conectado - InvokeMethod");
+                            //Utils.Print("Estas Conectado - InvokeMethod");
 
                             DeviceList.IsEnabled = true;
                            
@@ -768,13 +770,15 @@ namespace aclara_meters.view
                     }
                     else if (peripheralConnected == ble_library.BlePort.CONNECTED)
                     {
-                        PrintToConsole("Nop, es CONNECTED - InvokeMethod");
+                        //Utils.Print("Nop, es CONNECTED - InvokeMethod");
 
                         DeviceList.IsEnabled = true;
                        
                         peripheralConnected = status;
                         Singleton.Remove<Puck> ();
-                        bAlertBatt = false;
+                        FormsApp.ble_interface.Close();
+                        bAlertBatt = true;
+                        bAlertBatt10 = true;
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
@@ -787,20 +791,20 @@ namespace aclara_meters.view
                     }
                 }
 
-                PrintToConsole("¿Está en CONNECTING? - InvokeMethod");
+                //Utils.Print("¿Está en CONNECTING? - InvokeMethod");
                 if (peripheralConnected == ble_library.BlePort.CONNECTING)
                 {
-                    PrintToConsole("Si, es CONNECTING - InvokeMethod");
+                    //Utils.Print("Si, es CONNECTING - InvokeMethod");
                     timeout_connecting++;
                     if (timeout_connecting >= 2 * 12) // 10 seconds
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            PrintToConsole("Un Timeout que te llevas - InvokeMethod");
+                            //Utils.Print("Un Timeout que te llevas - InvokeMethod");
                             Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
 
-                            employees = new ObservableCollection<DeviceItem>();
-                            DeviceList.ItemsSource = employees;
+                            listPucks = new ObservableCollection<DeviceItem>();
+                            DeviceList.ItemsSource = listPucks;
 
                             DeviceList.IsEnabled = true;
                             fondo.Opacity = 1;
@@ -809,18 +813,13 @@ namespace aclara_meters.view
 
                             autoConnect = false;
 
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-
-                                #region Disable Circular Progress bar Animations when done
+                            #region Disable Circular Progress bar Animations when done
 
                                 backdark_bg.IsVisible = false;
                                 indicator.IsVisible = false;
                                 background_scan_page.IsEnabled = true;
 
-                                #endregion
-
-                            });
+                            #endregion
 
                             try
                             {
@@ -837,20 +836,23 @@ namespace aclara_meters.view
                         peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                         timeout_connecting = 0;
 
-                        PrintToConsole("Cerrar Conexion - InvokeMethod");
-
+                        //Utils.Print("Cerrar Conexion - InvokeMethod");
+                        if (!Singleton.Has<Puck>()) 
+                            Singleton.Remove<Puck>();
+                        CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
                         FormsApp.ble_interface.Close();
                     }
                 }
                 else
                 {
-                    PrintToConsole("Nop, no es CONNECTING - InvokeMethod");
+                    //Utils.Print("Nop, no es CONNECTING - InvokeMethod");
                 }
 
-                PrintToConsole("Esperamos 300 ms - InvokeMethod");
+                
+                //Utils.Print("Esperamos 300 ms - InvokeMethod");
                 Thread.Sleep(300); // 0.5 Second
-
-                PrintToConsole("¿Se va a realizar reconexion? - InvokeMethod");
+                
+                //Utils.Print("¿Se va a realizar reconexion? - InvokeMethod");
 
             }
 
@@ -858,7 +860,7 @@ namespace aclara_meters.view
 
         private void IsConnectedUIChange(bool v)
         {
-            PrintToConsole($"---------------------------------IsConnectedUIChange param: {v} ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
+            Utils.Print($"---------------------------------IsConnectedUIChange param: {v} ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
             if (v)
             {
                 try
@@ -909,7 +911,7 @@ namespace aclara_meters.view
             //await Task.Factory.StartNew(() =>
             // {
             // wait until scan finish
-            PrintToConsole($"-------------------------------    ChangeListViewData, thread: {Thread.CurrentThread.ManagedThreadId}");
+            Utils.Print($"-------------------------------    ChangeListViewData, thread: {Thread.CurrentThread.ManagedThreadId}");
               //  while (FormsApp.ble_interface.IsScanning())
               //  {
                     try
@@ -937,11 +939,11 @@ namespace aclara_meters.view
                                     byte_now = puck.ManofacturerData;
 
                                     bool enc = false;
-                                    int sizeListTemp = employees.Count;
+                                    int sizeListTemp = listPucks.Count;
 
                                     for (int j = 0; j < sizeListTemp; j++)
                                     {
-                                        if ( employees[j].Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
+                                        if ( listPucks[j].Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
                                                 .SequenceEqual ( puck.ManofacturerData ) )
                                             enc = true;
                                     }
@@ -965,7 +967,7 @@ namespace aclara_meters.view
                                             Peripheral        = puck.Device
                                         };
 
-                                        employees.Add(device);
+                                        listPucks.Add(device);
 
                                         //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
                                         if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
@@ -1061,15 +1063,15 @@ namespace aclara_meters.view
         private void NewOpenConnectionWithDevice()
         {
 
-            PrintToConsole("Se va a entrar en un bucle mientras esté Escaneando bluetooth - NewOpenConnectionWithDevice");
+            //Utils.Print("Se va a entrar en un bucle mientras esté Escaneando bluetooth - NewOpenConnectionWithDevice");
 
             while (FormsApp.ble_interface.IsScanning())
             {
-                PrintToConsole("A esperar 100 ms mientras escanea... - NewOpenConnectionWithDevice");
+               // Utils.Print("A esperar 100 ms mientras escanea... - NewOpenConnectionWithDevice");
                 Thread.Sleep(100);
             }
 
-            PrintToConsole("Se va a ejecutar algo en el UI - NewOpenConnectionWithDevice");
+            //Utils.Print("Se va a ejecutar algo en el UI - NewOpenConnectionWithDevice");
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -1077,19 +1079,19 @@ namespace aclara_meters.view
 
                 Device.StartTimer(seconds, () =>
                 {
-                    PrintToConsole("Cada 1 segundo, se ejectua lo siguinete en el UI - NewOpenConnectionWithDevice");
+                    //Utils.Print("Cada 1 segundo, se ejectua lo siguinete en el UI - NewOpenConnectionWithDevice");
                     Device.BeginInvokeOnMainThread(() =>
                     {
 
-                        PrintToConsole("¿Esta la conexion abierta ? - NewOpenConnectionWithDevice");
+                        //Utils.Print("¿Esta la conexion abierta ? - NewOpenConnectionWithDevice");
 
 
                         if (!FormsApp.ble_interface.IsOpen())
                         {
-                            PrintToConsole("¿Esta escaneando perifericos ? - NewOpenConnectionWithDevice");
+                            //Utils.Print("¿Esta escaneando perifericos ? - NewOpenConnectionWithDevice");
                             while (FormsApp.ble_interface.IsScanning())
                             {
-                                PrintToConsole("A esperar 100 ms en bucle - NewOpenConnectionWithDevice");
+                                //Utils.Print("A esperar 100 ms en bucle - NewOpenConnectionWithDevice");
                                 Thread.Sleep(100);
                             }
                             /* MRA
@@ -1102,7 +1104,7 @@ namespace aclara_meters.view
                         }
                         else
                         {
-                            PrintToConsole("NOPE, no lo esta - NewOpenConnectionWithDevice");
+                            //Utils.Print("NOPE, no lo esta - NewOpenConnectionWithDevice");
                         }
                     });
 
@@ -1467,9 +1469,10 @@ namespace aclara_meters.view
             {
                 Singleton.Set = new Puck ();
                 Singleton.Get.Puck.Device = item.Peripheral;
-                Singleton.Get.Puck.BlInterfaz = FormsApp.ble_interface;
-                bAlertBatt = false;
+                bAlertBatt = true;
+                bAlertBatt10 = true;
                 externalReconnect(reassociate);
+                Singleton.Get.Puck.BlInterfaz = FormsApp.ble_interface;
 
                 Device.BeginInvokeOnMainThread(() =>
                 {

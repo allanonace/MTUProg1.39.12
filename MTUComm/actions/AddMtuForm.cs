@@ -5,6 +5,7 @@ using Xml;
 using Library.Exceptions;
 
 using ParameterType = MTUComm.Parameter.ParameterType;
+using Library;
 
 namespace MTUComm.actions
 {
@@ -96,7 +97,28 @@ namespace MTUComm.actions
         // 0. Parameter ID     = dynamicMap.id
         // 1. Custom parameter = <name>
         // 2. Custom display   = <display>
-        public Dictionary<FIELD, string[]> Texts =
+        public Dictionary<FIELD, string[]> Texts;
+
+        public bool usePort2;
+        private Dictionary<FIELD,Parameter> dictionary;
+
+        public int NumOfParamRegistered
+        {
+            get { return this.dictionary.Count; }
+        }
+
+        public Dictionary<FIELD,Parameter> RegisteredParamsByField
+        {
+            get { return new Dictionary<FIELD,Parameter> ( this.dictionary ); }
+        }
+
+        public AddMtuForm ( Mtu mtu ) : base ( mtu )
+        {
+            this.dictionary = new Dictionary<FIELD,Parameter> ();
+
+            Global global = Singleton.Get.Configuration.Global;
+
+            this.Texts =
             new Dictionary<FIELD, string[]>()
             {
                 #region Service Port ID = Account Number = Functl Loctn
@@ -106,7 +128,8 @@ namespace MTUComm.actions
                     {
                         "AccountNumber",
                         "AccountNumber",
-                        "Service Pt. ID"
+                        global.AccountLabel
+
                     }
                 },
                 {
@@ -115,7 +138,7 @@ namespace MTUComm.actions
                     {
                         "AccountNumber_2",
                         "AccountNumber",
-                        "Service Pt. ID"
+                        global.AccountLabel
                     }
                 },
                 #endregion
@@ -479,23 +502,6 @@ namespace MTUComm.actions
                 },
                 #endregion
             };
-
-        public bool usePort2;
-        private Dictionary<FIELD,Parameter> dictionary;
-
-        public int NumOfParamRegistered
-        {
-            get { return this.dictionary.Count; }
-        }
-
-        public Dictionary<FIELD,Parameter> RegisteredParamsByField
-        {
-            get { return new Dictionary<FIELD,Parameter> ( this.dictionary ); }
-        }
-
-        public AddMtuForm ( Mtu mtu ) : base ( mtu )
-        {
-            this.dictionary = new Dictionary<FIELD,Parameter> ();
         }
 
         public void AddParameter ( FIELD fieldType, dynamic value, int port = 0 )
