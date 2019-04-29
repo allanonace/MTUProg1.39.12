@@ -312,7 +312,10 @@ namespace MTUComm
             
             this.config = Singleton.Get.Configuration;
             
-            if ( this.type != ActionType.BasicRead )
+            // Only save reference for the current action,
+            // not for nested or auxiliary actions ( as BasicRead )
+            if ( this.type != ActionType.BasicRead &&
+                 ! Singleton.Has<Action> () )
                 Singleton.Set = this;
         }
         

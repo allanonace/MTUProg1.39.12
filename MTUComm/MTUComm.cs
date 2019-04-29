@@ -292,6 +292,9 @@ namespace MTUComm
                     case ActionType.MtuInstallationConfirmation: await Task.Run(() => Task_InstallConfirmation()); break;
                     default: break;
                 }
+                
+                // Reset current action reference
+                Singleton.Remove<Action> ();
             }
             // MTUComm.Exceptions.MtuTypeIsNotFoundException
             catch ( Exception e )
