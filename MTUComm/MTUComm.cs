@@ -531,7 +531,7 @@ namespace MTUComm
         #region Read MTU
 
         public async Task Task_ReadMtu ()
-        {        
+        {
             try
             {
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );

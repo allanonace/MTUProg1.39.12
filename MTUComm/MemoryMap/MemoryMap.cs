@@ -705,17 +705,27 @@ namespace MTUComm.MemoryMap
 
             // Only check modified registers
             List<dynamic> modifiedRegisters = this.GetModifiedRegisters ().GetAllElements ();
-            foreach ( dynamic register in modifiedRegisters )
+            for ( int i = 0; i < modifiedRegisters.Count; i++ )
             {
-                string name = register.id;
+                dynamic register = modifiedRegisters[ i ];
+                string  name     = register.id;
                 
-                if ( register.size == register.sizeGet &&                   // Only compare
+                Utils.Print ( "Check MTU write: " + name +
+                    " [ Size: " + register.size +
+                    ", SizeGet: " + register.sizeGet +
+                    ", Other contains: " + otherMap.ContainsMember ( name ) + " ]" );
+                
+                if ( ( register.size == register.sizeGet ||
+                       register.valueType == RegType.BOOL ) &&
                      ( ! otherMap.ContainsMember ( name ) ||                // Register not present in other memory map
                        ! await base[ name ].Equals ( otherMap[ name ] ) ) ) // Both registers are not equal
                 {
+                    Utils.Print ( "Equals: " + name + " -> NO" );
+                
                     difs.Add ( name );
                     continue;
                 }
+                else Utils.Print ( "Equals: " + name + " -> OK" );
             }
 
             return difs.ToArray ();
