@@ -235,6 +235,52 @@
     </Registers>
     <CustomGet>method:MtuSoftVersionString342x_Get</CustomGet>
   </Overload>
+  
+  <!-- Encoders auto-detect Meters -->
+  
+  <Register>
+    <Id>P1EncoderProtocol</Id>
+    <Description>MTU Type</Description>
+    <Type>int</Type>
+    <Address>30</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+      <CustomSet/>
+  </Register>
+  <Register>
+    <Id>P1EncoderLiveDigits</Id>
+    <Description>MTU Type</Description>
+    <Type>int</Type>
+    <Address>32</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+      <CustomSet/>
+  </Register>
+  <Register>
+    <Id>P2EncoderProtocol</Id>
+    <Description>MTU Type</Description>
+    <Type>int</Type>
+    <Address>50</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+      <CustomSet/>
+  </Register>
+  <Register>
+    <Id>P2EncoderLiveDigits</Id>
+    <Description>MTU Type</Description>
+    <Type>int</Type>
+    <Address>52</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+      <CustomSet/>
+  </Register>
+  
+  <!-- -->
+  
   <Register>
     <Id>MtuType</Id>
     <Description>MTU Type</Description>

@@ -6,6 +6,8 @@ namespace Xml
 {
     public class Mtu
     {
+        public enum VERSION { NEW, ARCH };
+    
         private const int DEF_FLOW = 0;
     
         public Mtu ()
@@ -194,6 +196,9 @@ namespace Xml
         [XmlElement("TiltTamper")]
         public bool TiltTamper { get; set; }
 
+        [XmlElement("Version")]
+        public string VersionString { get; set; }
+
         #endregion
 
         #endregion
@@ -212,6 +217,11 @@ namespace Xml
             {
                 return ( this.Ports.Count > 1 );
             }
+        }
+        
+        public VERSION Version
+        {
+            get { return ( this.VersionString.Equals ( VERSION.NEW.ToString () ) ) ? VERSION.NEW : VERSION.ARCH; }
         }
 
         #endregion

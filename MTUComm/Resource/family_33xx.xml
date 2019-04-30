@@ -236,6 +236,52 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
+  
+  <!-- Encoders auto-detect Meters -->
+  
+  <Register>
+    <Id>P1EncoderProtocol</Id>
+    <Description>MTU Type</Description>
+    <Type>int</Type>
+    <Address>40</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+      <CustomSet/>
+  </Register>
+  <Register>
+    <Id>P1EncoderLiveDigits</Id>
+    <Description>MTU Type</Description>
+    <Type>int</Type>
+    <Address>43</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+      <CustomSet/>
+  </Register>
+  <Register>
+    <Id>P2EncoderProtocol</Id>
+    <Description>MTU Type</Description>
+    <Type>int</Type>
+    <Address>56</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+      <CustomSet/>
+  </Register>
+  <Register>
+    <Id>P2EncoderLiveDigits</Id>
+    <Description>MTU Type</Description>
+    <Type>int</Type>
+    <Address>59</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+      <CustomSet/>
+  </Register>
+  
+  <!-- -->
+  
   <Register>
     <Id>MtuType</Id>
     <Description>MTU Type</Description>

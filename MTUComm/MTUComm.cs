@@ -308,6 +308,50 @@ namespace MTUComm
 
         #region Actions
 
+        #region AutoDetection Encoders
+
+        public async Task<string[]> AutodetectMetersEcoders (
+            int portIndex = 1 )
+        {
+            // Only for MTU Encoders ( Check MTU ports, Meters supported, to know that -> Type "E" )
+            dynamic map = this.GetMemoryMap ();
+            
+            // Force MTU to run enconder auto-detection for selected ports
+            map._FLAG_ = true;
+            
+            // Check until recover data from the MTU, but no more than 40 seconds
+            // MTU returns two values, Protocol and an echo ( it's not important )
+            int  count = 1;
+            int  wait  = 5;
+            int  max   = ( int )( 50 / wait ); // Seconds / Seconds = Rounded max number of iterations
+            int  protocol, liveDigits;
+            bool ok;
+            
+            do
+            {
+                if ( portIndex == 1 )
+                     protocol = await map.P1EncoderProtocol.GetValueFromMtu (); // Encoder Type: 1=ARBV, 2=ARBVI, 4=ABB, 8=Sensus
+                else protocol = await map.P2EncoderProtocol.GetValueFromMtu ();
+                
+                if ( portIndex == 1 )
+                     liveDigits = await map.P1EncoderLiveDigits.GetValueFromMtu (); // Encoder number of digits
+                else liveDigits = await map.P2EncoderLiveDigits.GetValueFromMtu ();
+                
+                ok = ( ( protocol == 1 || protocol == 2 || protocol == 4 || protocol == 8 ) &&
+                       liveDigits >= 0 );
+            }
+            while ( ! ok &&
+                    ++count <= max );
+            
+            List<string> meters = new List<string> ();
+            
+            
+            
+            return meters.ToArray ();
+        }
+
+        #endregion
+
         #region Read Data
 
         public void Task_ReadDataMtu ( int NumOfDays )
