@@ -203,32 +203,36 @@ namespace Lexi
                 Utils.PrintDeep ( "Lexi.Read -> Array.Resize.." +
                     " Echo " + serial.isEcho () +
                     " [ " + rawBuffer.Length + " = " + bytesToRead + " + Header " + headerOffset + " + CRC 2 ]" );
-    
+
                 // Whait untill the response buffer data is available or timeout limit is reached
+                timeout = 100000;
                 long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
-                while ( checkResponseOk ( serial, rawBuffer ) )
+                await Task.Run(() =>
                 {
-                    if ( DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
+                    while (checkResponseOk(serial, rawBuffer))
                     {
-                        int num = serial.BytesToRead ();
-                    
-                        Utils.PrintDeep ( "Lexi.Read -> BytesToRead: " + num );
-                    
-                        if ( num <= headerOffset )
+                        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                         {
-                            Utils.PrintDeep ( "Lexi.Read -> CheckResponseOk IOException" );
-                        
-                            throw new IOException ();
+                            int num = serial.BytesToRead();
+
+                            Utils.PrintDeep("Lexi.Read -> BytesToRead: " + num);
+
+                            if (num <= headerOffset)
+                            {
+                                Utils.PrintDeep("Lexi.Read -> CheckResponseOk IOException");
+
+                                throw new IOException();
+                            }
+                            else
+                            {
+                                Utils.PrintDeep("Lexi.Read -> CheckResponseOk TimeoutException");
+
+                                throw new TimeoutException();
+                            }
                         }
-                        else
-                        {
-                            Utils.PrintDeep ( "Lexi.Read -> CheckResponseOk TimeoutException" );
-                        
-                            throw new TimeoutException ();
-                        }
+                        Thread.Sleep(10);
                     }
-                    Thread.Sleep ( 10 );
-                }
+                });
     
                 Utils.PrintDeep ( "------BUFFER_FINISH------" );
     
@@ -366,33 +370,37 @@ namespace Lexi
                     " [ " + rawBuffer.Length + " = " + data.Length + " + Header " + header.Length + " + CRC 2 + recover CRC 2 ]" );
     
                 // Whait untill the response buffer data is available or timeout limit is reached
-                int bytesToRead;
+                int bytesToRead=0;
+                timeout = 100000;
                 long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds () + timeout;
-                while ( ( bytesToRead = serial.BytesToRead () ) < rawBuffer.Length - 1 )
+                await Task.Run(() =>
                 {
-                    Utils.PrintDeep ( "Lexi.Write -> BytesToRead: " + bytesToRead + ".. [ " + DateTimeOffset.Now.ToUnixTimeMilliseconds() + " > " + timeout_limit + " ]" );
-                
-                    if ( DateTimeOffset.Now.ToUnixTimeMilliseconds () > timeout_limit )
+                    while ((bytesToRead = serial.BytesToRead()) < rawBuffer.Length - 1)
                     {
-                        int num = serial.BytesToRead ();
-                    
-                        Utils.PrintDeep ( "Lexi.Write -> Bytes to Read: " + num );
-                    
-                        if ( num <= responseOffset )
+                        Utils.PrintDeep("Lexi.Write -> BytesToRead: " + bytesToRead + ".. [ " + DateTimeOffset.Now.ToUnixTimeMilliseconds() + " > " + timeout_limit + " ]");
+
+                        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
                         {
-                            Utils.PrintDeep ( "Lexi.Write -> CheckResponseOk IOException" );
-                        
-                            throw new IOException ();
+                            int num = serial.BytesToRead();
+
+                            Utils.PrintDeep("Lexi.Write -> Bytes to Read: " + num);
+
+                            if (num <= responseOffset)
+                            {
+                                Utils.PrintDeep("Lexi.Write -> CheckResponseOk IOException");
+
+                                throw new IOException();
+                            }
+                            else
+                            {
+                                Utils.PrintDeep("Lexi.Write -> CheckResponseOk TimeoutException");
+
+                                throw new TimeoutException();
+                            }
                         }
-                        else
-                        {
-                            Utils.PrintDeep ( "Lexi.Write -> CheckResponseOk TimeoutException" );
-                        
-                            throw new TimeoutException ();
-                        }
+                        Thread.Sleep(10);
                     }
-                    Thread.Sleep ( 10 );
-                }
+                });
                 
                 Utils.PrintDeep ( "Lexi.Read -> BytesRead: " + bytesToRead + " / " + ( rawBuffer.Length - 1 ) );
                 
