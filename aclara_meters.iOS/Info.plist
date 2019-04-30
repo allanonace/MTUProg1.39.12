@@ -27,7 +27,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0.0.35</string>
+	<string>0.0.36</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>MainStoryboardFile</key>
@@ -65,9 +65,7 @@
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>location</string>
 		<string>bluetooth-central</string>
-		<string>fetch</string>
 	</array>
 	<key>UIDeviceFamily</key>
 	<array>
