@@ -29,6 +29,7 @@ using System.Text;
 using Xml;
 using System.Xml.Linq;
 using aclara_meters.Helpers;
+using aclara_meters.util;
 using System.Threading;
 using Xamarin.Essentials;
 
@@ -158,6 +159,12 @@ namespace aclara_meters
             AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
 
             // Force to not download server XML files
+
+            if (Device.RuntimePlatform == Device.iOS)
+            {
+                var MamServ = DependencyService.Get<IMAMService>();
+                MamServ.UtilMAMService();
+            }
            
             this.LoadConfigurationAndOpenScene ( dialogs );   
 
@@ -200,7 +207,8 @@ namespace aclara_meters
                     GenericUtilsClass.DownloadConfigFiles();
                     return true;
                 }
-                MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
+                this.ShowErrorAndKill(new NoInternetException());
+                //MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
                 return false;
             }
             else
@@ -278,6 +286,7 @@ namespace aclara_meters
                     }
                     else
                     {
+                        this.ShowErrorAndKill(new NoInternetException());
                         this.abortMission = true;
                         return false;
                     }
