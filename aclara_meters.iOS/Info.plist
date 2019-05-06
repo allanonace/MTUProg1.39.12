@@ -51,6 +51,8 @@
 	<string>aclara-mtu-programmer bluetooth use.</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>aclara-mtu-programmer use your calendar.</string>
+	<key>NSFaceIdUsageDescription</key>
+	<string>NO</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>This app needs access to location when open and in the background.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -65,9 +67,7 @@
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>location</string>
 		<string>bluetooth-central</string>
-		<string>fetch</string>
 	</array>
 	<key>UIDeviceFamily</key>
 	<array>

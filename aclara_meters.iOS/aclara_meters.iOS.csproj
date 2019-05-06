@@ -187,6 +187,7 @@
     <Compile Include="Parameters.cs" />
     <Compile Include="BorderlessDatePickerRenderer.cs" />
     <Compile Include="BorderlessTimePickerRenderer.cs" />
+    <Compile Include="MAMService.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
