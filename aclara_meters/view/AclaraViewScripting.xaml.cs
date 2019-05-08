@@ -478,7 +478,7 @@ namespace aclara_meters.view
                             });
                             peripheralConnected = status;
                             Singleton.Remove<Puck>();
-                            FormsApp.ble_interface.Close();
+
                             bAlertBatt = true;
                             bAlertBatt10 = true;
                         }
@@ -559,7 +559,6 @@ namespace aclara_meters.view
 
                         peripheralConnected = status;
                         Singleton.Remove<Puck>();
-                        FormsApp.ble_interface.Close();
                         bAlertBatt = true;
                         bAlertBatt10 = true;
 
@@ -609,7 +608,7 @@ namespace aclara_meters.view
                             ContentView_DeviceList.IsEnabled = true;
 
                             #endregion
-                                                     
+
 
                             try
                             {
@@ -625,10 +624,7 @@ namespace aclara_meters.view
                         timeout_connecting = 0;
 
                         PrintToConsole("Cerrar Conexion - InvokeMethod");
-                        if (!Singleton.Has<Puck>())
-                            Singleton.Remove<Puck>();
-                        FormsApp.ble_interface.Close();
-
+                        //FormsApp.ble_interface.Close();
                     }
                 }
                 else

@@ -29,7 +29,7 @@ namespace aclara_meters.iOS
 
             // Get Intun Parameters
             //Online.DownloadIntuneParameters ();
-            Parameters.PrepareFromIntune();
+            //Parameters.PrepareFromIntune();
              
             // Core Foundation Keys:
             // https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html

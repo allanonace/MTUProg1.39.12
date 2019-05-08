@@ -328,7 +328,10 @@ namespace aclara_meters
                         if ((isCertificate = name.Contains(XML_CER)) ||
                              name.Contains(XML_EXT))
                         {
-                            using (Stream stream = File.OpenWrite(Path.Combine(configPath, name.ToLower())))  // keep in low case
+                            string sfile = Path.Combine(configPath, name.ToLower());
+                            if (File.Exists(sfile))
+                                File.Delete(sfile);
+                            using (Stream stream = File.OpenWrite(sfile))  // keep in low case
                             {
                                sftp.DownloadFile(Path.Combine(data.ftpDownload_Path, name), stream);
                             }
@@ -479,6 +482,55 @@ namespace aclara_meters
             }
             value = null;
             return false;
+        }
+
+        public static bool DeleteConfigFiles(string path)
+        {
+            bool ok = true;
+            string[] filesToCheck =
+            {
+                "alarm",
+                "demandconf",
+                "global",
+                "meter",
+                "mtu",
+                "user",
+            };
+            //string path = Mobile.ConfigPath;
+
+
+            // Directory could exist but is empty
+            if (string.IsNullOrEmpty(path))
+                ok = false;
+
+            // Directory exists and is not empty
+            //string[] filesLocal = Directory.GetFiles ( path );
+
+            DirectoryInfo info = new DirectoryInfo(path);
+            FileInfo[] filesLocal = info.GetFiles();
+
+            int count = 0;
+            foreach (string fileNeeded in filesToCheck)
+                foreach (FileInfo file in filesLocal)
+                {
+                    string compareStr = fileNeeded + XML_EXT;
+                    //compareStr = compareStr.Replace ( path, string.Empty ).Replace("/", string.Empty);
+
+                    string fileStr = file.Name.ToLower();
+                    //fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty).ToLower ();
+                    if (fileStr.Equals(compareStr))
+                    {
+                        file.Delete();
+                        count++;
+                        break;
+                    }
+                }
+
+            ok = (count == filesToCheck.Length);
+
+            Console.WriteLine("Are all config.files deleted? " + ((ok) ? "OK" : "NO"));
+
+            return ok;
         }
 
     }

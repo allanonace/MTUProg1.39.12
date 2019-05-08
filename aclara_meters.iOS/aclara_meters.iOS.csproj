@@ -165,7 +165,7 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
     <MtouchArch>ARM64</MtouchArch>
-    <CodesignProvision>PublicAclaraProg</CodesignProvision>
+    <CodesignProvision>bizintekdist</CodesignProvision>
     <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <BuildIpa>true</BuildIpa>

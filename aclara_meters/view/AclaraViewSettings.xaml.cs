@@ -1601,6 +1601,7 @@ namespace aclara_meters.view
                 if (Mobile.IsNetAvailable())
                 {
                     GenericUtilsClass.DownloadConfigFiles();
+
                     return true;
                 }
                 else

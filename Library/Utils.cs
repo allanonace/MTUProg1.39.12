@@ -13,7 +13,7 @@ namespace Library
     {
         #region Log
 
-        private static bool DEEP_MODE = false;
+        private static bool DEEP_MODE = true;
     
         public static void PrintDeep (
             object element,
