@@ -60,6 +60,46 @@
         public ScriptingAutoDetectTagsMissingScript ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
     
+    public class EncoderMeterFFException : OwnExceptionsBase
+    {
+        public EncoderMeterFFException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class EncoderMeterFEException : OwnExceptionsBase
+    {
+        public EncoderMeterFEException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class EncoderMeterFDException : OwnExceptionsBase
+    {
+        public EncoderMeterFDException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class EncoderMeterFCException : OwnExceptionsBase
+    {
+        public EncoderMeterFCException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class EncoderMeterFBException : OwnExceptionsBase
+    {
+        public EncoderMeterFBException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class EncoderMeterUnknownException : OwnExceptionsBase
+    {
+        public EncoderMeterUnknownException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class EncoderAutodetectNotAchievedException : OwnExceptionsBase
+    {
+        public EncoderAutodetectNotAchievedException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    public class EncoderAutodetectException : OwnExceptionsBase
+    {
+        public EncoderAutodetectException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
     // Scripting Parameters [ 3xx ]
     //---------------------
     

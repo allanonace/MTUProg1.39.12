@@ -106,13 +106,14 @@ namespace aclara_meters
             {
                 InitializeComponent();
                 
-                //Singleton.Set = new Puck ();
+                Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
+                Data.Set ( "IsAndroid", Device.RuntimePlatform == Device.Android );
 
                 this.adapter = adapter;
                 this.dialogs = dialogs;
                 this.appVersion = appVersion;
 
-                if (Device.RuntimePlatform == Device.Android)
+                if ( Data.Get.IsAndroid )
                 {
                     Task.Run(async () =>
                     {

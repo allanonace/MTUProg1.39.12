@@ -35,12 +35,20 @@ namespace Xml
 
         public List<Meter> FindByEncoderTypeAndLiveDigits(int encoderType, int liveDigits)
         {
-            List<Meter> meters = Meters.FindAll(x => (x.EncoderType == encoderType && x.LiveDigits == liveDigits));
+            List<Meter> meters = Meters.FindAll ( x => (
+                x.EncoderType == encoderType &&
+                ( liveDigits <= 0 || x.LiveDigits == liveDigits )
+            ));
             
             if ( meters == null )
                 return new List<Meter> ();
 
             return meters;
+        }
+        
+        public List<Meter> FindAllForEncodersAndEcoders ()
+        {
+            return Meters.FindAll ( meter => meter.IsForEncoderOrEcoder ); // Type "E"
         }
 
         public List<Meter> FindByDialDescription (
@@ -62,7 +70,9 @@ namespace Xml
             return meters;
         }
 
-        public List<Meter> FindByPortTypeAndFlow(string portType, int flow = -1)
+        public List<Meter> FindByPortTypeAndFlow (
+            string portType,
+            int flow = -1 )
         {
             List<string> portTypes;
             List<Meter> meters;

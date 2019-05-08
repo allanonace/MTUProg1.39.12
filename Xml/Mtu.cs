@@ -97,6 +97,30 @@ namespace Xml
 
         [XmlElement("HexNum")]
         public string HexNum { get; set; }
+        
+        [XmlIgnore]
+        public bool IsFamilly31xx32xx
+        {
+            get
+            {
+                string hexnum = this.HexNum.ToLower ();
+            
+                return hexnum.StartsWith ( "31" ) ||
+                       hexnum.StartsWith ( "32" );
+            }
+        }
+        
+        [XmlIgnore]
+        public bool IsFamilly33xx
+        {
+            get { return this.HexNum.ToLower ().StartsWith ( "33" ); }
+        }
+        
+        [XmlIgnore]
+        public bool IsFamilly342x
+        {
+            get { return this.HexNum.ToLower ().StartsWith ( "342" ); }
+        }
 
         [XmlElement("IsEcoder")]
         public bool IsEcoder { get; set; }
@@ -116,6 +140,18 @@ namespace Xml
         [XmlElement("Port")]
         public List<Port> Ports { get; set; }
         
+        [XmlIgnore]
+        public Port Port1
+        {
+            get { return this.Ports[ 0 ]; }
+        }
+        
+        [XmlIgnore]
+        public Port Port2
+        {
+            get { return this.Ports[ 1 ]; }
+        }
+        
         [XmlElement("PulseCountOnly")]
         public bool PulseCountOnly { get; set; }
         
@@ -131,8 +167,11 @@ namespace Xml
         [XmlElement("TimeToSync")]
         public bool TimeToSync { get; set; }
         
+        [XmlElement("Version")]
+        public string VersionString { get; set; }
+
         #region Tampers
-        
+
         [XmlElement("CutWireDelaySetting")]
         public bool CutWireDelaySetting { get; set; }
         
@@ -196,9 +235,6 @@ namespace Xml
         [XmlElement("TiltTamper")]
         public bool TiltTamper { get; set; }
 
-        [XmlElement("Version")]
-        public string VersionString { get; set; }
-
         #endregion
 
         #endregion
@@ -219,9 +255,10 @@ namespace Xml
             }
         }
         
+        [XmlIgnore]
         public VERSION Version
         {
-            get { return ( this.VersionString.Equals ( VERSION.NEW.ToString () ) ) ? VERSION.NEW : VERSION.ARCH; }
+            get { return ( this.VersionString.ToLower ().Equals ( VERSION.NEW.ToString ().ToLower () ) ) ? VERSION.NEW : VERSION.ARCH; }
         }
 
         #endregion

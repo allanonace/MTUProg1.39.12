@@ -14,6 +14,14 @@
     <Error id="204" message="The script does not contain the tag DriveDialSize needed to select the MTU" /> <!-- footer not necessary -->
     <Error id="205" message="The script does not contain the tag UnitOfMeasure needed to select the MTU" /> <!-- footer not necessary -->
     <Error id="206" message="Some of the necessary parameters for Meter autodetection are missing in the script" footer="Missing Meter auto-detection params" />
+    <Error id="207" message="The selected Meter is not compatible with the Encoder because of 'No reading / No response from Encoder'" footer="Incompatible Meter selected" />
+    <Error id="208" message="The selected Meter is not compatible with the Encoder because of 'Encoder has bad digit in reading'" footer="Incompatible Meter selected" />
+    <Error id="209" message="The selected Meter is not compatible with the Encoder because of 'Delta overflow'" footer="Incompatible Meter selected" />
+    <Error id="210" message="The selected Meter is not compatible with the Encoder because of 'Deltas purged / New install / Reset'" footer="Incompatible Meter selected" />
+    <Error id="211" message="The selected Meter is not compatible with the Encoder because of 'Encoder clock shorted'" footer="Incompatible Meter selected" />
+    <Error id="212" message="The selected Meter is not compatible with the Encoder because of an unknown error code" footer="Incompatible Meter selected" />
+    <Error id="213" message="Encoder auto-detection process cannot be performed after having tried it for _var_ seconds" footer="Encoder auto-detect not achieved" />
+    <Error id="214" message="Encoder auto-detection process cannot be performed, perhaps due to a problem with the MTU" footer="Encoder auto-detect not achieved" />
     
     <!-- Scripting parameters -->
     <Error id="300" message="Error translating or validating parameters _var_ from script file" footer="Translating script params" />
@@ -57,7 +65,7 @@
     <Error id="809" message="Missing credentials for SFTP in global.xml" />
     <Error id="810" message="App cannot comunnicate with the FTP" />
     <Error id="811" message="Sending activity logs to the FTP has failed, only _var_ files have been uploaded" />
-	<Error id="812" message="Changed configuration files"/>    
+	<Error id="812" message="Changed configuration files"/>
 
     <!-- DEBUG -->
     

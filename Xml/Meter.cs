@@ -19,6 +19,12 @@ namespace Xml
  
         [XmlElement("Type")]
         public string Type { get; set; }
+        
+        [XmlIgnore]
+        public bool IsForEncoderOrEcoder
+        {
+            get { return Type.Equals ( "E" ); }
+        }
 
         [XmlElement("MeterMask")]
         public string MeterMask { get; set; }

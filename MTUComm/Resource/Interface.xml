@@ -53,11 +53,15 @@
 			<Parameter name="Frequency" display="1 Way Tx Freq" log="true" source="MemoryMap.Frequency1Way" interface="true" conditional="Global.ShowFreq=true"/>
 			<Parameter name="Frequency" display="2 Way Tx Freq" log="true" source="MemoryMap.Frequency2WayTx" interface="true" conditional="Global.ShowFreq=true"/>
 			<Parameter name="Frequency" display="2 Way Rx Freq" log="true" source="MemoryMap.Frequency2WayRx" interface="true" conditional="Global.ShowFreq=true"/>
+			<!-- INIT - Alarms -->
 			<Parameter name="TiltTamperStatus" display="Tilt Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.TiltTamper=true"/>
 			<Parameter name="MagneticTamperStatus" display="Magnetic Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.MagneticTamper=true"/>
-			<Parameter name="InterfaceTamperStatus" display="Interface Tamp" log="true" interface="true"  conditional="MemoryMap.Shipbit=false + Mtu.InterfaceTamper=true"/>
+			<Parameter name="InterfaceTamperStatus" display="Interface Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.InterfaceTamper=true"/>
 			<Parameter name="RegisterCoverTamperStatus" display="Reg. Cover" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.RegisterCoverTamper=true"/>
 			<Parameter name="ReverseFlowTamperStatus" display="Rev. Fl. Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.ReverseFlowTamper=true"/>
+			<Parameter name="P1CutWireTamperStatus" display="Cut Wire Port1" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.TamperPort1=true"/>
+			<Parameter name="P2CutWireTamperStatus" display="Cut Wire Port2" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.TamperPort2=true"/>
+			<!-- END - Alarms -->
 			<Parameter name="DailySnap" display="Daily Reads" log="true" interface="true" conditional="MemoryMap.Shipbit=false"/>
 			<Parameter name="DailyGMTHourRead" display="GMT Daily Reads" log="true" interface="false" conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
 			<Parameter name="InstallationConfirmationStatus" display="Installation" log="true" interface="true" source="MemoryMap.InstallConfirmationStatus"/>
@@ -91,8 +95,58 @@
 			<Parameter name="PCBNumber" display="PCB Number" log="true" interface="true"/>
 		</Action>
 	</Interface>
-	<Interface ID="2" memorymap="33xx" memorysize="255">
+	<Interface ID="2" memorymap="33xx" memorysize="256">
 		<Action type="ReadMTU">
+			<Parameter name="Date" display="Date/Time" log="true" source="Action.Date" interface="false"/>
+			<Parameter name="User" display="User" log="true" source="Action.User" interface="false"/>
+			<Parameter name="MtuStatus" display="MTU Status" log="true" interface="true"/>
+			<Parameter name="MtuSerialNumber" display="MTU Ser No" log="true" interface="true"/>
+            <Parameter name="PuckSerialNumber" display="Puck Ser No" log="true" interface="false" source="Puck.SerialNumber" />
+            <Parameter name="PuckBattery" display="Puck Battery" log="true" interface="false" source="Puck.BatteryLevel" />
+			<Parameter name="Frequency" display="1 Way Tx Freq" log="true" source="MemoryMap.Frequency1Way" interface="true" conditional="Global.ShowFreq=true"/>
+			<Parameter name="Frequency" display="2 Way Tx Freq" log="true" source="MemoryMap.Frequency2WayTx" interface="true" conditional="Global.ShowFreq=true"/>
+			<Parameter name="Frequency" display="2 Way Rx Freq" log="true" source="MemoryMap.Frequency2WayRx" interface="true" conditional="Global.ShowFreq=true"/>
+			<!-- INIT - Alarms -->
+			<Parameter name="TiltTamperStatus" display="Tilt Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.TiltTamper=true"/>
+			<Parameter name="MagneticTamperStatus" display="Magnetic Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.MagneticTamper=true"/>
+			<Parameter name="InterfaceTamperStatus" display="Interface Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.InterfaceTamper=true"/>
+			<Parameter name="RegisterCoverTamperStatus" display="Reg. Cover" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.RegisterCoverTamper=true"/>
+			<Parameter name="ReverseFlowTamperStatus" display="Rev. Fl. Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.ReverseFlowTamper=true"/>
+			<Parameter name="P1CutWireTamperStatus" display="Cut Wire Port1" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.TamperPort1=true"/>
+			<Parameter name="P2CutWireTamperStatus" display="Cut Wire Port2" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.TamperPort2=true"/>
+			<!-- END - Alarms -->
+			<Parameter name="DailySnap" display="Daily Reads" log="true" interface="true" conditional="MemoryMap.Shipbit=false"/>
+			<Parameter name="DailyGMTHourRead" display="GMT Daily Reads" log="true" interface="false" conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
+			<Parameter name="InstallationConfirmationStatus" display="Installation" log="true" interface="true" source="MemoryMap.InstallConfirmationStatus"/>
+			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter name="Encryption" display="Encrypted" log="true" interface="true" conditional="Mtu.SpecialSet=true"/>
+			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
+			<Parameter name="Port" display="Port {0}" log="true" interface="true">
+				<Parameter name="Description" display="Description" log="true" interface="true" source="Port.Description"/>
+				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port=P2"/>
+				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+			</Parameter>
+			<Parameter name="XmitInterval" display="Xmit Interval" log="true" interface="true"/>
+			<Parameter name="ReadInterval" display="Read Interval" log="true" interface="true"/>
+			<Parameter name="ReadIntervalMinutes" display="ReadIntervalMinutes" log="true" interface="false"/>
+			<Parameter name="MtuVoltageBattery" display="Battery" log="true" interface="true"/>
+			<Parameter name="MtuType" display="MTU Type" log="true" interface="true"/>
+			<Parameter name="MtuSoftware" display="MTU Software" log="true" interface="true" source="MemoryMap.MtuSoftVersionString"/>
+			<Parameter name="MTUFirmwareVersionFormatFlag" display="MTU firmware version format flag" log="true" interface="false" source="MemoryMap.MtuSoftVersion"/>
+			<Parameter name="RxInterval" display="Rx Interval" log="true" interface="true"/>
+			<Parameter name="F12WAYRegister1" display="F12WAYRegister1" log="true" interface="true"/>
+			<Parameter name="F12WAYRegister10" display="F12WAYRegister10" log="true" interface="true"/>
+			<Parameter name="F12WAYRegister14" display="F12WAYRegister14" log="true" interface="true"/>
+			<Parameter name="MtuPartNumber" display="Mtu Part Number" source="Mtu.HexNum" log="true" interface="false"/>
+			<Parameter name="PCBNumber" display="PCB Number" log="true" interface="true"/>
+		<!--
 			<Parameter name="Date" display="Date/Time" log="true" source="Action.Date" interface="false"/>
 			<Parameter name="User" display="User" log="true" source="Action.User" interface="false"/>
 			<Parameter name="MtuStatus" display="MTU Status" log="true" interface="true"/>
@@ -140,10 +194,63 @@
 			<Parameter name="F12WAYRegister14" display="F12WAYRegister14" log="true" interface="true"/>
 			<Parameter name="MtuPartNumber" display="Mtu Part Number" source="Mtu.HexNum" log="true" interface="false"/>
 			<Parameter name="PCBNumber" display="PCB Number" log="true" interface="true"/>
+		-->
 		</Action>
 	</Interface>
 	<Interface ID="3" memorymap="342x" memorysize="1024">
 		<Action type="ReadMTU">
+			<Parameter name="Date" display="Date/Time" log="true" source="Action.Date" interface="false"/>
+			<Parameter name="User" display="User" log="true" source="Action.User" interface="false"/>
+			<Parameter name="MtuStatus" display="MTU Status" log="true" interface="true"/>
+			<Parameter name="MtuSerialNumber" display="MTU Ser No" log="true" interface="true"/>
+            <Parameter name="PuckSerialNumber" display="Puck Ser No" log="true" interface="false" source="Puck.SerialNumber" />
+            <Parameter name="PuckBattery" display="Puck Battery" log="true" interface="false" source="Puck.BatteryLevel" />
+			<Parameter name="Frequency" display="1 Way Tx Freq" log="true" source="MemoryMap.Frequency1Way" interface="true" conditional="Global.ShowFreq=true"/>
+			<Parameter name="Frequency" display="2 Way Tx Freq" log="true" source="MemoryMap.Frequency2WayTx" interface="true" conditional="Global.ShowFreq=true"/>
+			<Parameter name="Frequency" display="2 Way Rx Freq" log="true" source="MemoryMap.Frequency2WayRx" interface="true" conditional="Global.ShowFreq=true"/>
+			<!-- INIT - Alarms -->
+			<Parameter name="InsufficentMemoryTamperStatus" display="Insufficent Memory Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.InsufficentMemoryTamper=true"/>
+			<Parameter name="LastGaspTamperStatus" display="Last Gasp Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.LastGaspTamper=true"/>
+			<Parameter name="TiltTamperStatus" display="Tilt Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.TiltTamper=true"/>
+			<Parameter name="MagneticTamperStatus" display="Magnetic Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.MagneticTamper=true"/>
+			<Parameter name="InterfaceTamperStatus" display="Interface Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.InterfaceTamper=true"/>
+			<Parameter name="RegisterCoverTamperStatus" display="Reg. Cover" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.RegisterCoverTamper=true"/>
+			<Parameter name="ReverseFlowTamperStatus" display="Rev. Fl. Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.ReverseFlowTamper=true"/>
+			<Parameter name="P1CutWireTamperStatus" display="Cut Wire Port1" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.TamperPort1=true"/>
+			<Parameter name="P2CutWireTamperStatus" display="Cut Wire Port2" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.TamperPort2=true"/>
+			<!-- END - Alarms -->
+			<Parameter name="DailySnap" display="Daily Reads" log="true" interface="true" conditional="MemoryMap.Shipbit=false"/>
+			<Parameter name="DailyGMTHourRead" display="GMT Daily Reads" log="true" interface="false" conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
+			<Parameter name="InstallationConfirmationStatus" display="Installation" log="true" interface="true" source="MemoryMap.InstallConfirmationStatus"/>
+			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter name="Encryption" display="Encrypted" log="true" interface="true" conditional="Mtu.SpecialSet=true"/>
+			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
+			<Parameter name="Port" display="Port {0}" log="true" interface="true">
+				<Parameter name="Description" display="Description" log="true" interface="true" source="Port.Description"/>
+				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port=P2"/>
+				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+			</Parameter>
+			<Parameter name="XmitInterval" display="Xmit Interval" log="true" interface="true"/>
+			<Parameter name="ReadInterval" display="Read Interval" log="true" interface="true"/>
+			<Parameter name="ReadIntervalMinutes" display="ReadIntervalMinutes" log="true" interface="false"/>
+			<Parameter name="MtuVoltageBattery" display="Battery" log="true" interface="true"/>
+			<Parameter name="MtuType" display="MTU Type" log="true" interface="true"/>
+			<Parameter name="MtuSoftware" display="MTU Software" log="true" interface="true" source="MemoryMap.MtuSoftVersionString"/>
+			<Parameter name="MTUFirmwareVersionFormatFlag" display="MTU firmware version format flag" log="true" interface="false" source="MemoryMap.MtuSoftVersion"/>
+			<Parameter name="RxInterval" display="Rx Interval" log="true" interface="true"/>
+			<Parameter name="F12WAYRegister1" display="F12WAYRegister1" log="true" interface="true"/>
+			<Parameter name="F12WAYRegister10" display="F12WAYRegister10" log="true" interface="true"/>
+			<Parameter name="F12WAYRegister14" display="F12WAYRegister14" log="true" interface="true"/>
+			<Parameter name="MtuPartNumber" display="Mtu Part Number" source="Mtu.HexNum" log="true" interface="false"/>
+			<Parameter name="PCBNumber" display="PCB Number" log="true" interface="true"/>
+		<!--
 			<Parameter name="Date" display="Date/Time" log="true" source="Action.Date" interface="false"/>
 			<Parameter name="User" display="User" log="true" source="Action.User" interface="false"/>
 			<Parameter name="MtuStatus" display="MTU Status" log="true" interface="true"/>
@@ -192,6 +299,7 @@
 			<Parameter name="MTUFirmwareVersionFormatFlag" display="MTU firmware version format flag" log="true" interface="false" source="MemoryMap.MtuSoftVersion"/>
 			<Parameter name="MtuPartNumber" display="Mtu Part Number" source="Mtu.HexNum" log="true" interface="false"/>
 			<Parameter name="PCBNumber" display="PCB Number" log="true" interface="true"/>
+		-->
 		</Action>
 		<Action type="DataRead">
 			<Parameter name="Date" display="Date/Time" log="true" source="Action.Date" interface="false"/>

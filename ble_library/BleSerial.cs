@@ -114,6 +114,9 @@ namespace ble_library
                 ExceptionCheck ( buffer, offset, count );
             
                 ble_port_serial.ClearBuffer ();
+
+                if ( ble_port_serial.semaphore.CurrentCount <= 0 )
+                    ble_port_serial.semaphore.Release ();
             
                 int totalBytesToWrite = count;
                 int bytesWritten = 0;

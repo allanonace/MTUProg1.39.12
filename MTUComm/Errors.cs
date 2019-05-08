@@ -50,6 +50,22 @@ namespace MTUComm
             { new UnitOfMeasureTagMissingScript (),             205 },
             // Some of the necessary parameters for Meter autodetection are missing in the script
             { new ScriptingAutoDetectTagsMissingScript (),      206 },
+            // The selected Meter is not compatible with the Encoder because of 'No reading / No response from Encoder'
+            { new EncoderMeterFFException (),                   207 },
+            // The selected Meter is not compatible with the Encoder because of 'Encoder has bad digit in reading'
+            { new EncoderMeterFEException (),                   208 },
+            // The selected Meter is not compatible with the Encoder because of 'Delta overflow'
+            { new EncoderMeterFDException (),                   209 },
+            // The selected Meter is not compatible with the Encoder because of 'Deltas purged / New install / Reset'
+            { new EncoderMeterFCException (),                   210 },
+            // The selected Meter is not compatible with the Encoder because of 'Encoder clock shorted'
+            { new EncoderMeterFBException (),                   211 },
+            // The selected Meter is not compatible with the Encoder because of an unknown error code
+            { new EncoderMeterUnknownException (),              212 },
+            // Encoder auto-detection process cannot be performed after having tried it for _var_ seconds
+            { new EncoderAutodetectNotAchievedException (),     213 },
+            // Encoder auto-detection process cannot be performed, perhaps due to a problem with the MTU
+            { new EncoderAutodetectException (),                214 },
             
             // Scripting Parameters [ 3xx ]
             //---------------------
@@ -73,7 +89,6 @@ namespace MTUComm
             { new SameParameterRepeatScriptException (),        308 },
             // User name missing in the script file
             { new ScriptUserNameMissingException (),            309 },
-
             
             // Alarm [ 4xx ]
             //------

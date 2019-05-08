@@ -276,6 +276,13 @@ namespace aclara_meters.view
         {
             InitializeComponent ();
             
+            Device.BeginInvokeOnMainThread ( () =>
+            {
+                  backdark_bg.IsVisible = true;
+                  indicator  .IsVisible = true;
+                  background_scan_page.IsEnabled = false;
+            });
+            
             this.global     = Singleton.Get.Configuration.Global;
             this.actionType = page;
 
@@ -307,8 +314,8 @@ namespace aclara_meters.view
                 bg_read_mtu_button_img.Source = texts[ 3 ];
                 
                 label_read.Opacity    = 1;
-                backdark_bg.IsVisible = false;
-                indicator.IsVisible   = false;
+                //backdark_bg.IsVisible = false;
+                //indicator.IsVisible   = false;
                 
                 if ( Device.Idiom == TargetIdiom.Tablet )
                      LoadTabletUI ();
@@ -346,14 +353,45 @@ namespace aclara_meters.view
             
             TappedListeners ();
             InitializeLowerbarLabel();
-            InitializeAddMtuForm ();
-
+            
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
 
-            //listaMTUread.IsVisible = false;
+            Task.Run ( async () =>
+            {
+                await InitializeAddMtuForm ();
+            })
+            .ContinueWith ( t =>
+                Device.BeginInvokeOnMainThread ( () =>
+                {
+                    Task.Delay ( 100 )
+                    .ContinueWith ( t0 =>
+                        Device.BeginInvokeOnMainThread ( () =>
+                        {
+                            label_read.Opacity = 1;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            background_scan_page.IsEnabled = true;
+                            label_read.Text = "Press Button to Start";
+                            
+                            #region Port 2 Buttons Listener
+                            
+                            Task.Factory.StartNew(SetPort2Buttons);
+                            
+                            #endregion
+                            
+                            #region Snap Read CheckBox Controller
+                            
+                            CheckBoxController();
+                            
+                            #endregion
+                        })
+                    );
+                })
+            );
 
-            Task.Delay(10).ContinueWith(t =>
+            /*
+            Task.Delay ( 10 ).ContinueWith ( t =>
               Device.BeginInvokeOnMainThread(() =>
               {
                   backdark_bg.IsVisible = true;
@@ -384,9 +422,13 @@ namespace aclara_meters.view
                     })
                  );
               })
-            );
+            ).ContinueWith ( async ( t ) =>
+            {
+                await InitializeAddMtuForm ();
+            });
+            */
         }
-
+        
         private void CheckBoxController ()
         {
             if ( ! div_SnapReads.IsEnabled )
@@ -471,7 +513,7 @@ namespace aclara_meters.view
             this.UpdatePortButtons ();
         }
 
-        private void InitializeAddMtuForm ()
+        private async Task InitializeAddMtuForm ()
         {
             #region Conditions
 
@@ -688,18 +730,49 @@ namespace aclara_meters.view
 
             #region Meter Type
 
-            this.list_MeterTypesForMtu = this.config.meterTypes.FindByPortTypeAndFlow (
-                currentMtu.Ports[0].Type,
-                currentMtu.Flow );
-            this.InitializePicker_MeterType ();
+            // Ecoder/Encoder Will be only filtered by protocol + livedigits
+            // If auto-detect fails, show all Encoder/Ecoder Meters
+            if ( currentMtu.Port1.IsForEncoderOrEcoder )
+            {
+                if ( await this.add_mtu.comm.AutodetectMetersEcoders ( currentMtu ) )
+                    this.list_MeterTypesForMtu = this.config.meterTypes.FindByEncoderTypeAndLiveDigits (
+                        currentMtu.Port1.MeterProtocol,
+                        currentMtu.Port1.MeterLiveDigits );
+                else
+                    this.list_MeterTypesForMtu = this.config.meterTypes.FindAllForEncodersAndEcoders ();
+            }
+            else
+            {
+                this.list_MeterTypesForMtu = this.config.meterTypes.FindByPortTypeAndFlow (
+                    currentMtu.Ports[0].Type,
+                    currentMtu.Flow );
+            }
 
             if ( hasTwoPorts )
             {
-                this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByPortTypeAndFlow (
-                    currentMtu.Ports[1].Type,
-                    currentMtu.Flow );
-                this.InitializePicker_MeterType_2 ();
+                if ( currentMtu.Port2.IsForEncoderOrEcoder )
+                {
+                    if ( await this.add_mtu.comm.AutodetectMetersEcoders ( currentMtu, 2 ) )
+                        this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByEncoderTypeAndLiveDigits (
+                            currentMtu.Port2.MeterProtocol,
+                            currentMtu.Port2.MeterLiveDigits );
+                    else
+                        this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindAllForEncodersAndEcoders ();
+                }
+                else
+                {
+                    this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByPortTypeAndFlow (
+                        currentMtu.Ports[1].Type,
+                        currentMtu.Flow );
+                }
             }
+            
+            Device.BeginInvokeOnMainThread ( () =>
+            {
+                this.InitializePicker_MeterType ();
+                if ( hasTwoPorts )
+                    this.InitializePicker_MeterType_2 ();
+            });
 
             bool ShowMeterVendor = global.ShowMeterVendor;
             if (ShowMeterVendor)
@@ -1807,15 +1880,8 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
-            #region Color Entry
-
-            if (this.global.ColorEntry)
-            {
+            if ( this.global.ColorEntry )
                 meterVendorsLabel.TextColor = COL_MANDATORY;
-       
-            }
-
-            #endregion
 
             meterVendorsContainerD.Children.Add(pck_MeterType_Vendors);
             meterVendorsContainerC.Content = meterVendorsContainerD;
@@ -1872,17 +1938,8 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
-
-            #region Color Entry
-
-            if (this.global.ColorEntry)
-            {
+            if ( this.global.ColorEntry )
                 meterModelsLabel.TextColor = COL_MANDATORY;
-
-            }
-
-            #endregion
-
 
             meterModelsContainerD.Children.Add(pck_MeterType_Models);
             meterModelsContainerC.Content = meterModelsContainerD;
@@ -1939,17 +1996,8 @@ namespace aclara_meters.view
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
-
-            #region Color Entry
-
-            if (this.global.ColorEntry)
-            {
+            if ( this.global.ColorEntry )
                 meterNamesLabel.TextColor = COL_MANDATORY;
-
-            }
-
-            #endregion
-
 
             meterNamesContainerD.Children.Add(pck_MeterType_Names);
             meterNamesContainerC.Content = meterNamesContainerD;

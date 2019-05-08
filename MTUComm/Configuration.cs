@@ -51,6 +51,21 @@ namespace MTUComm
                 users      = Utils.DeserializeXml<UserList>        ( Path.Combine ( configPath, XML_USERS     ) ).List;
                 interfaces = Utils.DeserializeXml<InterfaceConfig> ( XML_INTERFACE, true ); // From resources
                 
+                // Preload port types, because some ports use a letter but other a list of Meter IDs
+                // Done here because Xml project has no reference to MTUComm ( cross references )
+                List<string> portTypes;
+                foreach ( Mtu mtu in mtuTypes.Mtus )
+                    foreach ( Port port in mtu.Ports )
+                    {
+                        bool isNumeric = MeterAux.GetPortTypes ( port.Type, out portTypes );
+                        
+                        if ( ! isNumeric )
+                             port.TypeString = portTypes[ 0 ];
+                        else port.TypeString = meterTypes.FindByMterId ( int.Parse ( portTypes[ 0 ] ) ).Type;
+                        
+                        Utils.Print ( "MTU " + mtu.Id + ": Type " + port.TypeString );
+                    }
+                
                 // Regenerate certificate from base64 string
                 Mobile.configData.GenerateCert ();
                 

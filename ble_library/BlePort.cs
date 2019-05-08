@@ -193,7 +193,6 @@ namespace ble_library
             batteryLevel = new byte[] { 0x00 };
             
             this.semaphore = new SemaphoreSlim ( 0, 1 );
-            this.semaphore.Release ();
         }
 
         /// <summary>

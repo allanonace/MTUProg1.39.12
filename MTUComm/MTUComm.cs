@@ -246,7 +246,7 @@ namespace MTUComm
         {
             this.configuration = configuration;
             latest_mtu = new MTUBasicInfo(new byte[BASIC_READ_1_DATA + BASIC_READ_2_DATA]);
-            lexi = new Lexi.Lexi(serial, 10000);
+            lexi = new Lexi.Lexi(serial, Data.Get.IsIOS ? 10000 : 20000 );
             
             Singleton.Set = lexi;
         }
@@ -310,44 +310,137 @@ namespace MTUComm
 
         #region AutoDetection Encoders
 
-        public async Task<string[]> AutodetectMetersEcoders (
+        public async Task<bool> AutodetectMetersEcoders (
+            Mtu mtu,
+            int portIndex = 1 )
+        {
+            this.mtu     = mtu;
+            dynamic map  = this.GetMemoryMap ();
+            bool isPort1 = ( portIndex == 1 );
+            
+            // NOTE: If process fails, Aclara STAR Programmer writes "ERROR: Check Meter" or "Bad Reading"
+            // MTU ID: 63004810 -> ERROR: Check Meter ( Meter connected | AMCO C-700 5/8 )
+            // MTU ID: 63021489 -> Bad Reading ( without Meter )
+            // MTU ID: 63004809 -> Error Reading MTU ( without Meter )
+            // MTU ID: 958029   -> Invalidad MTU Type Found ( Meter 1112 | NEPT T10 3/4 )
+            
+            try
+            {
+                // Clear previous auto-detection values
+                if ( isPort1 )
+                {
+                    await map.P1EncoderProtocol  .SetValueToMtu ( 0 );
+                    await map.P1EncoderLiveDigits.SetValueToMtu ( 0 );
+                }
+                else
+                {
+                    await map.P2EncoderProtocol  .SetValueToMtu ( 0 );
+                    await map.P2EncoderLiveDigits.SetValueToMtu ( 0 );
+                }
+            
+                // Force MTU to run enconder auto-detection for selected ports
+                if ( isPort1 )
+                     await map.P1EncoderAutodetect.ResetByteAndSetValueToMtu ( true );
+                else await map.P2EncoderAutodetect.ResetByteAndSetValueToMtu ( true );
+            
+                // Check until recover data from the MTU, but no more than 40 seconds
+                // MTU returns two values, Protocol and an echo ( it's not important )
+                int  count = 1;
+                int  wait  = 2;
+                int  time  = 50;
+                int  max   = ( int )( time / wait ); // Seconds / Seconds = Rounded max number of iterations
+                int  protocol, liveDigits = 0;
+                bool ok;
+                do
+                {
+                    if ( isPort1 )
+                         protocol = await map.P1EncoderProtocol.GetValueFromMtu (); // Encoder Type: 1=ARBV, 2=ARBVI, 4=ABB, 8=Sensus
+                    else protocol = await map.P2EncoderProtocol.GetValueFromMtu ();
+                    
+                    if ( liveDigits <= 0 )
+                    {
+                        if ( isPort1 )
+                             liveDigits = await map.P1EncoderLiveDigits.GetValueFromMtu (); // Encoder number of digits
+                        else liveDigits = await map.P2EncoderLiveDigits.GetValueFromMtu ();
+                    }
+                    
+                    if ( ! ( ok = ( protocol == 1 || protocol == 2 || protocol == 4 || protocol == 8 ) ) )
+                        await Task.Delay ( wait * 1000 );
+                }
+                while ( ! ok &&
+                        ++count <= max );
+                
+                if ( ok )
+                {
+                    Port port = ( isPort1 ) ? mtu.Port1 : mtu.Port2;
+                    port.MeterProtocol   = protocol;
+                    port.MeterLiveDigits = liveDigits;
+                
+                    return true;
+                }
+                else throw new EncoderAutodetectNotAchievedException ( time.ToString () );
+            }
+            catch ( Exception e )
+            {
+                // Is not own exception
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new EncoderAutodetectException (), portIndex );
+                else Errors.LogErrorNowAndContinue ( e, portIndex );
+            }
+            
+            return false;
+        }
+        
+        private async Task CheckSelectedEncoderMeter (
             int portIndex = 1 )
         {
             // Only for MTU Encoders ( Check MTU ports, Meters supported, to know that -> Type "E" )
             dynamic map = this.GetMemoryMap ();
             
-            // Force MTU to run enconder auto-detection for selected ports
-            map._FLAG_ = true;
+            Port port = ( portIndex == 1 ) ? this.mtu.Port1 : this.mtu.Port2;
+            int protocol   = port.MeterProtocol;
+            int liveDigits = port.MeterLiveDigits;
             
-            // Check until recover data from the MTU, but no more than 40 seconds
-            // MTU returns two values, Protocol and an echo ( it's not important )
-            int  count = 1;
-            int  wait  = 5;
-            int  max   = ( int )( 50 / wait ); // Seconds / Seconds = Rounded max number of iterations
-            int  protocol, liveDigits;
-            bool ok;
-            
-            do
+            try
             {
+                // Write back values to the MTU
                 if ( portIndex == 1 )
-                     protocol = await map.P1EncoderProtocol.GetValueFromMtu (); // Encoder Type: 1=ARBV, 2=ARBVI, 4=ABB, 8=Sensus
-                else protocol = await map.P2EncoderProtocol.GetValueFromMtu ();
+                     await map.P1EncoderProtocol.SetValueToMtu ( protocol );
+                else await map.P2EncoderProtocol.SetValueToMtu ( protocol );
                 
                 if ( portIndex == 1 )
-                     liveDigits = await map.P1EncoderLiveDigits.GetValueFromMtu (); // Encoder number of digits
-                else liveDigits = await map.P2EncoderLiveDigits.GetValueFromMtu ();
+                     await map.P1EncoderLiveDigits.SetValueToMtu ( liveDigits );
+                else await map.P2EncoderLiveDigits.SetValueToMtu ( liveDigits );
                 
-                ok = ( ( protocol == 1 || protocol == 2 || protocol == 4 || protocol == 8 ) &&
-                       liveDigits >= 0 );
+                // Set flag in MTU forcing to read meter
+                map.ReadMeter.SetValueToMtu ( true );
+                
+                await Task.Delay ( 4 * 1000 );
+                
+                // Check for errors
+                byte erCode;
+                if ( portIndex == 1 )
+                     erCode = Convert.ToByte ( await map.P1EncoderError.GetValueFromMtu () );
+                else erCode = Convert.ToByte ( await map.P2EncoderError.GetValueFromMtu () );
+                
+                switch ( erCode )
+                {
+                    case 0xFF: throw new EncoderMeterFFException ( "", portIndex ); // No reading / No response from Encoder
+                    case 0xFE: throw new EncoderMeterFEException ( "", portIndex ); // Encoder has bad digit in reading
+                    case 0xFD: throw new EncoderMeterFDException ( "", portIndex ); // Delta overflow
+                    case 0xFC: throw new EncoderMeterFCException ( "", portIndex ); // Deltas purged / New install / Reset
+                    case 0xFB: throw new EncoderMeterFBException ( "", portIndex ); // Encoder clock shorted
+                    case 0x00: break; // No error
+                    default  : throw new EncoderMeterUnknownException ( "", portIndex ); // Unknown error code
+                }
             }
-            while ( ! ok &&
-                    ++count <= max );
-            
-            List<string> meters = new List<string> ();
-            
-            
-            
-            return meters.ToArray ();
+            catch ( Exception e )
+            {
+                // Is not own exception
+                if ( ! Errors.IsOwnException ( e ) )
+                     throw new PuckCantCommWithMtuException ( "", portIndex );
+                else throw e;
+            }
         }
 
         #endregion
@@ -393,9 +486,8 @@ namespace MTUComm
         public async Task Task_InstallConfirmation ()
         {
             if ( await this.InstallConfirmation_Logic () < RESULT_EXCEPTION )
-                this.Task_ReadMtu ();
-            else
-                this.OnError ();
+                 await this.Task_ReadMtu ();
+            else this.OnError ();
         }
 
         /// <summary>
@@ -405,8 +497,8 @@ namespace MTUComm
         /// <param name="force">If set to <c>true</c> force.</param>
         /// <param name="time">Time.</param>
         private async Task<int> InstallConfirmation_Logic (
-            bool force   = false,
-            int  time    = 0 )
+            bool force = false,
+            int  time  = 0 )
         {
             Global global = this.configuration.Global;
         
@@ -454,7 +546,7 @@ namespace MTUComm
                     int progress = ( int )Math.Round ( ( decimal )( ( count * 100.0 ) / max ) );
                     OnProgress ( this, new ProgressArgs ( count, max, "Checking IC... "+ progress.ToString() + "%" ) );
                     
-                    Thread.Sleep ( wait * 1000 );
+                    await Task.Delay ( wait * 1000 );
                     
                     fail = await regICNotSynced.GetValueFromMtu ();
                 }
@@ -467,13 +559,6 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                /*
-                // Action finished ok but launched a rare CRC exception = False negative
-                if ( Errors.IsOwnException ( e ) &&
-                     ! this.ReadMtuBit ( addressNotSynced, bitSynced ) )
-                    return true;
-                */
-                
                 if ( ! ( e is PuckCantCommWithMtuException ) &&
                      e is AttemptNotAchievedICException )
                     Errors.AddError ( e );
@@ -489,7 +574,7 @@ namespace MTUComm
                 // Retry action ( thre times = first plus two replies )
                 if ( ++time < global.TimeSyncCountRepeat )
                 {
-                    Thread.Sleep ( WAIT_BTW_IC );
+                    await Task.Delay ( WAIT_BTW_IC );
                     
                     return await this.InstallConfirmation_Logic ( force, time );
                 }
@@ -524,7 +609,6 @@ namespace MTUComm
 
         private async Task<bool> TurnOnOffMtu_Logic (
             bool on,
-            bool fromAdd = false,
             int  time = 0 )
         {
             try
@@ -532,7 +616,7 @@ namespace MTUComm
                 dynamic map = this.GetMemoryMap ();
                 MemoryRegister<bool> shipbit = map.Shipbit;
                 
-                await shipbit.SetValueToMtu ( ! on );         // Set state of the shipbit
+                await shipbit.SetValueToMtu ( ! on );          // Set state of the shipbit
                 bool  read = await shipbit.GetValueFromMtu (); // Read written value to verify
                 
                 // Fail turning off MTU
@@ -546,29 +630,18 @@ namespace MTUComm
                     Errors.AddError ( e );
                 // Finish
                 else
-                {
-                    if ( ! fromAdd )
-                         Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
-                    else throw new PuckCantCommWithMtuException ();
-                    return false;
-                }
+                    throw new PuckCantCommWithMtuException ();
                 
                 // Retry action ( thre times = first plus two replies )
                 if ( ++time < TIMES_TURNOFF )
                 {
-                    Thread.Sleep ( WAIT_BTW_TURNOFF );
+                    await Task.Delay ( WAIT_BTW_TURNOFF );
                     
-                    return await this.TurnOnOffMtu_Logic ( on, fromAdd, time );
+                    return await this.TurnOnOffMtu_Logic ( on, time );
                 }
                 
                 // Finish with error
-                else
-                {
-                    if ( ! fromAdd )
-                         Errors.LogErrorNow ( new ActionNotAchievedTurnOffException ( TIMES_TURNOFF + "" ) );
-                    else throw new ActionNotAchievedTurnOffException ( TIMES_TURNOFF + "" );
-                }
-                return false;
+                throw new ActionNotAchievedTurnOffException ( TIMES_TURNOFF + "" );
             }
             return true;
         }
@@ -589,25 +662,19 @@ namespace MTUComm
                 // Activates flag to read Meter
                 await map.ReadMeter.SetValueToMtu ( true );
                 
-                Thread.Sleep ( WAIT_BEFORE_READ );
+                await Task.Delay ( WAIT_BEFORE_READ );
                 
-                // Check if the MTU is still the same
-                if ( ! await this.IsSameMtu () )
-                    throw new MtuHasChangeBeforeFinishActionException ();
+                await this.CheckIsTheSameMTU ();
              
                 // Generates log using the interface
                 await this.OnReadMtu ( this, new ReadMtuArgs ( map, this.mtu ) );
             }
-            // MtuHasChangeBeforeFinishActionException
-            // System.IO.IOException = Puck is not well placed or is off
             catch ( Exception e )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
-                    Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
-                
-                // Allow to continue rising the error
-                else throw ( e );
+                     throw new PuckCantCommWithMtuException ();
+                else throw e;
             }
         }
 
@@ -1133,10 +1200,8 @@ namespace MTUComm
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
-                else Errors.LogErrorNow ( e );
-                
-                return;
+                     throw new PuckCantCommWithMtuException ();
+                else throw e;
             }
 
             this.Task_AddMtu ( form, action.user, action, true );
@@ -1164,10 +1229,29 @@ namespace MTUComm
 
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Turning Off..." ) );
 
-                await this.TurnOnOffMtu_Logic ( false, true );
+                await this.TurnOnOffMtu_Logic ( false );
                 addMtuLog.LogTurnOff ();
                 
                 Utils.Print ( "-----TURN_OFF_FINISH-----" );
+
+                #endregion
+                
+                await this.CheckIsTheSameMTU ();
+
+                #region Check Meter for Encoder
+
+                // Check if selected Meter is supported for current MTU
+                if ( this.mtu.Port1.IsForEncoderOrEcoder )
+                    await this.CheckSelectedEncoderMeter ();
+
+                if ( form.usePort2 &&
+                     this.mtu.Port2.IsForEncoderOrEcoder )
+                    await this.CheckSelectedEncoderMeter ( 2 );
+
+                if ( this.mtu.Port1.IsForEncoderOrEcoder ||
+                     form.usePort2 &&
+                     this.mtu.Port2.IsForEncoderOrEcoder )
+                    await this.CheckIsTheSameMTU ();
 
                 #endregion
 
@@ -1281,18 +1365,29 @@ namespace MTUComm
                     {
                         try
                         {
+                            if ( mtu.TiltTamper          ) map.TiltAlarm          = alarms.Tilt;
+                            if ( mtu.MagneticTamper      ) map.MagneticAlarm      = alarms.Magnetic;
+                            if ( mtu.RegisterCoverTamper ) map.RegisterCoverAlarm = alarms.RegisterCover;
+                            if ( mtu.ReverseFlowTamper   ) map.ReverseFlowAlarm   = alarms.ReverseFlow;
+                            if ( mtu.TamperPort1         ) map.P1CutWireAlarm     = alarms.TamperPort1;
+                            if ( mtu.TamperPort2         ) map.P2CutWireAlarm     = alarms.TamperPort2;
+                            if ( mtu.InsufficentMemory   ) map.InsufficentMemoryAlarm = alarms.InsufficientMemory;
+                            if ( mtu.LastGasp            ) map.LastGaspAlarm      = alarms.LastGasp;
+
+                            if ( mtu.IsFamilly31xx32xx )
+                            {
+                                // map.P1CutWireAlarm = ...
+                                // map.P2CutWireAlarm = ...
+                            }
+
                             //if ( mtu.CutWireDelaySetting  ) map.xxx = alarms.CutWireDelaySetting;
                             //if ( mtu.GasCutWireAlarm      ) map.P1CutWireAlarm = alarms.LastGasp;
                             //if ( mtu.GasCutWireAlarmImm   ) map.xxx = alarms.LastGaspImm;
                             //if ( mtu.InsufficentMemory    ) map.xxx = alarms.InsufficientMemory;
                             //if ( mtu.InsufficentMemoryImm ) map.xxx = alarms.InsufficientMemoryImm;
-                            if ( mtu.InterfaceTamper      ) map.P1InterfaceAlarm = alarms.InterfaceTamper;
                             //if ( mtu.InterfaceTamperImm   ) map.xxx = alarms.InterfaceTamperImm;
                             //if ( mtu.LastGasp             ) map.P1CutWireAlarm = alarms.LastGasp;
                             //if ( mtu.LastGaspImm          ) map.xxx = alarms.LastGaspImm;
-                            if ( mtu.MagneticTamper       ) map.P1MagneticAlarm = alarms.Magnetic;
-                            if ( mtu.RegisterCoverTamper  ) map.P1RegisterCoverAlarm = alarms.RegisterCover;
-                            if ( mtu.ReverseFlowTamper    ) map.P1ReverseFlowAlarm = alarms.ReverseFlow;
                             //if ( mtu.SerialComProblem     ) map.xxx = alarms.SerialComProblem;
                             //if ( mtu.SerialComProblemImm  ) map.xxx = alarms.SerialComProblemImm;
                             //if ( mtu.SerialCutWire        ) map.xxx = alarms.SerialCutWire;
@@ -1301,7 +1396,6 @@ namespace MTUComm
                             //if ( mtu.TamperPort2          ) map.xxx = alarms.TamperPort2;
                             //if ( mtu.TamperPort1Imm       ) map.xxx = alarms.TamperPort1Imm;
                             //if ( mtu.TamperPort2Imm       ) map.xxx = alarms.TamperPort2Imm;
-                            if ( mtu.TiltTamper           ) map.P1TiltAlarm = alarms.Tilt;
                         
                             // Write directly ( without conditions )
                             map.P1ImmediateAlarm = alarms.ImmediateAlarmTransmit;
@@ -1338,10 +1432,6 @@ namespace MTUComm
                 #endregion
 
                 Utils.Print ( "--------ADD_FINISH-------" );
-
-                // Check if the MTU is still the same
-                if ( ! await this.IsSameMtu () )
-                    throw new MtuHasChangeBeforeFinishActionException ();
 
                 #region Encryption
 
@@ -1443,9 +1533,7 @@ namespace MTUComm
                     if ( ! ( Mobile.configData.isMtuEncrypted = ok ) )
                         throw new ActionNotAchievedEncryptionException ( "5" );
                     
-                    // Check if the MTU is still the same
-                    if ( ! await this.IsSameMtu () )
-                        throw new MtuHasChangeBeforeFinishActionException ();
+                    await this.CheckIsTheSameMTU ();
                     
                     Utils.Print ( "----ENCRYPTION_FINISH----" );
                 }
@@ -1464,18 +1552,22 @@ namespace MTUComm
 
                 #endregion
 
+                await this.CheckIsTheSameMTU ();
+
                 #region Turn On MTU
 
                 Utils.Print ( "------TURN_ON_START------" );
 
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Turning On..." ) );
 
-                await this.TurnOnOffMtu_Logic ( true, true );
+                await this.TurnOnOffMtu_Logic ( true );
                 addMtuLog.LogTurnOn ();
                 
                 Utils.Print ( "-----TURN_ON_FINISH------" );
 
                 #endregion
+
+                await this.CheckIsTheSameMTU ();
 
                 #region Alarm #2
 
@@ -1485,7 +1577,7 @@ namespace MTUComm
                     
                     // PCI Alarm needs to be set after MTU is turned on, just before the read MTU
                     // The Status will show enabled during install and actual status (triggered) during the read
-                    if ( mtu.InterfaceTamper ) map.P1InterfaceAlarm = alarms.InterfaceTamper;
+                    if ( mtu.InterfaceTamper ) await map.InterfaceAlarm.SetValueToMtu ( alarms.InterfaceTamper );
                 }
 
                 #endregion
@@ -1513,17 +1605,15 @@ namespace MTUComm
                     {
                         // If IC fails by any reason, add 4 seconds delay before
                         // reading MTU Tamper Memory settings for Tilt Alarm
-                        Thread.Sleep ( 4000 );
+                        await Task.Delay ( 4000 );
                     }
                     
-                    // Check if the MTU is still the same
-                    if ( ! await this.IsSameMtu () )
-                        throw new MtuHasChangeBeforeFinishActionException ();
-                        
                     Utils.Print ( "--------IC_FINISH--------" );
                 }
 
                 #endregion
+
+                await this.CheckIsTheSameMTU ();
 
                 #region Read MTU
 
@@ -1536,13 +1626,11 @@ namespace MTUComm
                 if ( ( await map.GetModifiedRegistersDifferences ( this.GetMemoryMap ( true ) ) ).Length > 0 )
                     throw new PuckCantCommWithMtuException ();
                 
-                // Check if the MTU is still the same
-                if ( ! await this.IsSameMtu () )
-                    throw new MtuHasChangeBeforeFinishActionException ();
-                
                 Utils.Print ( "----FINAL_READ_FINISH----" );
 
                 #endregion
+
+                await this.CheckIsTheSameMTU ();
 
                 // Generate log to show on device screen
                 await this.OnAddMtu ( this, new AddMtuArgs ( map, mtu, form, addMtuLog ) );
@@ -1551,8 +1639,8 @@ namespace MTUComm
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
-                else Errors.LogErrorNow ( e );
+                     throw new PuckCantCommWithMtuException ();
+                else throw e;
             }
         }
 
@@ -1682,7 +1770,7 @@ namespace MTUComm
             return this.mtuHasChanged;
         }
 
-        private async Task<bool> IsSameMtu ()
+        private async Task CheckIsTheSameMTU ()
         {
             byte[] read;
             try
@@ -1691,8 +1779,7 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
-                return false;
+                throw new PuckCantCommWithMtuException ();
             }
 
             uint mtuType = read[ 0 ];
@@ -1701,8 +1788,9 @@ namespace MTUComm
             Array.Copy ( read, 6, id_stream, 0, 4 );
             uint mtuId = BitConverter.ToUInt32 ( id_stream, 0 );
 
-            return mtuType == latest_mtu.Type &&
-                   mtuId   == latest_mtu.Id;
+            if ( mtuType != latest_mtu.Type ||
+                   mtuId != latest_mtu.Id )
+                throw new MtuHasChangeBeforeFinishActionException ();
         }
 
         public MTUBasicInfo GetBasicInfo ()

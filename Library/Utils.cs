@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
@@ -182,7 +183,13 @@ namespace Library
         public static string ByteToBits (
             object value )
         {
-            return Convert.ToString ( Convert.ToInt64 ( value.ToString (), 16 ), 2 );
+            string str = string.Empty;
+            
+            BitArray ar = new BitArray ( new byte[] { byte.Parse ( value.ToString () ) } );
+            for ( int i = ar.Length - 1; i >= 0; i-- )
+                str += ( ar[ i ] ) ? 1 : 0;
+            
+            return str;
         }
     
         public static T GetNumFromBytes<T> ( byte[] data )

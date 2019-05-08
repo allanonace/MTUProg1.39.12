@@ -168,7 +168,7 @@ namespace MTUComm.MemoryMap
             bool returnByteArray = false )
         {
             Utils.PrintDeep ( Environment.NewLine + "------LOAD_FROM_MTU------" );
-            Utils.Print ( "Register -> GetValueFromMtu -> " + this.id + " [ " + returnByteArray + " ]" );
+            Utils.Print ( "Register -> GetValueFromMtu -> " + this.id + " [ Return byte array: " + returnByteArray + " ]" );
         
             // Reset flag that will be used in funcGet to invoke funcGetFromMtu
             this.readedFromMtu = false;
@@ -179,6 +179,21 @@ namespace MTUComm.MemoryMap
             if ( ! returnByteArray )
             	 return result;
           	else return this.lastRead;
+        }
+        
+        public async Task ResetByteAndSetValueToMtu (
+            dynamic value = null )
+        {
+            if ( this.valueType == RegType.BOOL )
+            {
+                Utils.Print ( "Register -> ResetByte -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
+            
+                // Reset full byte ( all flags to zero/disable )
+                await this.lexi.Write ( ( uint )this.address, new byte[] { default ( byte ) } );
+                
+                // Write flag for this register
+                await this.SetValueToMtu ( value );
+            }
         }
         
         public async Task SetValueToMtu (
@@ -206,22 +221,20 @@ namespace MTUComm.MemoryMap
         
         private async Task SetBitToMtu ()
         {
-            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> " + this.id );
-        
             // Read current value
             byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1 ) )[ 0 ];
 
-            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
-            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags + " ]" );
+            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
+            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ]" );
 
-            var valueInMap = ( bool )( object )this.ValueRaw;
+            bool valueInMap = ( bool )( object )this.ValueRaw;
 
             // Modify bit and write to MTU
             if ( valueInMap )
                  systemFlags = ( byte ) ( systemFlags |    1 << ( int )bit   );
             else systemFlags = ( byte ) ( systemFlags & ~( 1 << ( int )bit ) );
             
-            Utils.PrintDeep ( "Register -> ValueWriteToMtu_Bit -> Write bit to MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags + " ] to bit: " + bit );
+            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Write full byte to MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ] to bit: " + bit );
             
             await this.lexi.Write ( ( uint )this.address, new byte[] { systemFlags } );
         }

@@ -288,37 +288,67 @@ namespace MTUComm
                 if ( alarms != null )
                 {
                     XElement alarmSelection = new XElement("AlarmSelection");
-                    logger.AddAtrribute(alarmSelection, "display", "Alarm Selection");
+                    logger.AddAtrribute ( alarmSelection, "display", "Alarm Selection");
 
                     string alarmConfiguration = alarms.Name;
-                    logger.Parameter(alarmSelection, new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
+                    logger.Parameter ( alarmSelection,
+                    new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
 
                     string immediateAlarmTransmit = ( alarms.ImmediateAlarmTransmit ) ? "True" : "False";
-                    logger.Parameter(alarmSelection, new Parameter("ImmediateAlarm", "Immediate Alarm Transmit", immediateAlarmTransmit));
+                    logger.Parameter ( alarmSelection,
+                    new Parameter("ImmediateAlarm", "Immediate Alarm Transmit", immediateAlarmTransmit));
 
                     string urgentAlarm = ( alarms.DcuUrgentAlarm ) ? "True" : "False";
-                    logger.Parameter(alarmSelection, new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
+                    logger.Parameter ( alarmSelection,
+                    new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
 
                     string overlap = alarms.Overlap.ToString();
-                    logger.Parameter(alarmSelection, new Parameter("Overlap", "Message Overlap", overlap));
-
-                    if ( mtu.MagneticTamper )
-                        logger.Parameter ( alarmSelection, new Parameter("MagneticTamper", "Magnetic Tamper", await map.MagneticTamperStatus.GetValue () ));
-
-                    if ( mtu.RegisterCoverTamper )
-                        logger.Parameter ( alarmSelection, new Parameter("RegisterCoverTamper", "Register Cover Tamper", await map.RegisterCoverTamperStatus.GetValue () ));
+                    logger.Parameter ( alarmSelection,
+                    new Parameter("Overlap", "Message Overlap", overlap));
 
                     if ( mtu.TiltTamper )
-                        logger.Parameter( alarmSelection, new Parameter("TiltTamper", "Tilt Tamper", await map.TiltTamperStatus.GetValue () ));
+                        logger.Parameter( alarmSelection,
+                        new Parameter("TiltTamper", "Tilt Tamper", await map.TiltTamperStatus.GetValue () ));
+
+                    if ( mtu.MagneticTamper )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter("MagneticTamper", "Magnetic Tamper", await map.MagneticTamperStatus.GetValue () ));
+
+                    if ( mtu.InterfaceTamper)
+                        logger.Parameter ( alarmSelection,
+                        new Parameter("InterfaceTamper", "Interface Tamper", await map.InterfaceTamperStatus.GetValue () ));
+
+                    if ( mtu.RegisterCoverTamper )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter("RegisterCoverTamper", "Register Cover Tamper", await map.RegisterCoverTamperStatus.GetValue () ));
 
                     if ( mtu.ReverseFlowTamper )
                     {
-                        logger.Parameter ( alarmSelection, new Parameter("ReverseFlow", "Reverse Flow Tamper", await map.ReverseFlowTamperStatus.GetValue () ));
-                        logger.Parameter(alarmSelection, new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
+                        logger.Parameter ( alarmSelection,
+                        new Parameter("ReverseFlow", "Reverse Flow Tamper", await map.ReverseFlowTamperStatus.GetValue () ));
+                        logger.Parameter ( alarmSelection,
+                        new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
                     }
 
-                    if ( mtu.InterfaceTamper)
-                        logger.Parameter ( alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper", await map.InterfaceTamperStatus.GetValue () ));
+                    // TODO: Use same labels than STAR Programmer
+                    if ( mtu.TamperPort1 )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter ( "CutWirePort1", "Cut Wire Port1", await map.P1CutWireTamperStatus.GetValue () ) );
+
+                    // TODO: Use same labels than STAR Programmer
+                    if ( mtu.TamperPort2 )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter ( "CutWirePort2", "Cut Wire Port2", await map.P2CutWireTamperStatus.GetValue () ) );
+
+                    // TODO: Use same labels than STAR Programmer
+                    if ( mtu.InsufficentMemory )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter ( "InsufficentMemory", "Insufficent Memory", await map.InsufficentMemoryTamperStatus.GetValue () ) );
+
+                    // TODO: Use same labels than STAR Programmer
+                    if ( mtu.LastGasp )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter ( "LastGasp", "Last Gasp", await map.LastGaspTamperStatus.GetValue () ) );
 
                     this.addMtuAction.Add(alarmSelection);
                 }

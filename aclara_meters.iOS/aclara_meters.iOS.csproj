@@ -96,8 +96,8 @@
     <OptimizePNGs>false</OptimizePNGs>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
     <MtouchFastDev>true</MtouchFastDev>
-    <CodesignProvision>bizintekdist</CodesignProvision>
     <DeviceSpecificBuild>false</DeviceSpecificBuild>
+    <CodesignProvision>bizintekdist</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
