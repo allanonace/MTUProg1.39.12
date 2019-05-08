@@ -248,7 +248,7 @@
                                                         <Controls:BorderlessEntry Margin="0,0,0,0" 
                                                                                   HorizontalOptions="FillAndExpand"
                                                                                   Text="" HeightRequest="40" x:Name="tbx_remote_host" 
-                                                                                  Keyboard="Text" FontSize="17"
+                                                                                  Keyboard="Numeric" FontSize="17"
                                                                                   HorizontalTextAlignment="Start">
                                                         </Controls:BorderlessEntry>
                                                     </StackLayout>

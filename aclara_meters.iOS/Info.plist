@@ -27,7 +27,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0.0.35</string>
+	<string>0.0.36</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>MainStoryboardFile</key>
@@ -46,7 +46,7 @@
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>MinimumOSVersion</key>
-	<string>9.3</string>
+	<string>10.0</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>aclara-mtu-programmer bluetooth use.</string>
 	<key>NSCalendarsUsageDescription</key>

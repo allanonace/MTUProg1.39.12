@@ -747,7 +747,7 @@ namespace aclara_meters.view
                             });
                             peripheralConnected = status;
                             Singleton.Remove<Puck> ();
-                            FormsApp.ble_interface.Close();
+                           
                             bAlertBatt = true;
                             bAlertBatt10 = true;
                         }
@@ -776,7 +776,6 @@ namespace aclara_meters.view
                        
                         peripheralConnected = status;
                         Singleton.Remove<Puck> ();
-                        FormsApp.ble_interface.Close();
                         bAlertBatt = true;
                         bAlertBatt10 = true;
 
@@ -836,10 +835,6 @@ namespace aclara_meters.view
                         peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                         timeout_connecting = 0;
 
-                        //Utils.Print("Cerrar Conexion - InvokeMethod");
-                        if (!Singleton.Has<Puck>()) 
-                            Singleton.Remove<Puck>();
-                        CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
                         FormsApp.ble_interface.Close();
                     }
                 }

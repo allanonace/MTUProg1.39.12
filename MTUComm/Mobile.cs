@@ -88,13 +88,7 @@ namespace MTUComm
 
                     this.certificate = new X509Certificate2(Encoding.ASCII.GetBytes(CER_HEADER + content + CER_FOOTER));
 
-                    Utils.Print("Local parameters loaded..");
-                    Utils.Print("FTP: " + this.ftpDownload_Host + ":" + this.ftpDownload_Port + " - " + this.ftpDownload_User + " [ " + this.ftpDownload_Pass + " ]");
-                    Utils.Print("Certificate: " + this.certificate.Subject + " [ " + this.certificate.NotAfter + " ]");
-
-                    Utils.Print("Public Key: " + Convert.ToBase64String(this.certificate.GetPublicKey()));
-                    Utils.Print("Devices Cert Subject: " + this.certificate.Subject + " " + this.certificate.SubjectName.Name);
-                    Utils.Print("Cert Thumbprint: " + this.certificate.Thumbprint);
+                    
 
                     // Check if certificate is not valid/has expired
                     if (DateTime.Compare(this.certificate.NotAfter, DateTime.Today) < 0)
