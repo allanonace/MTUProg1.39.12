@@ -16,12 +16,12 @@ using nexus.protocols.ble;
 using Plugin.CurrentActivity;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
-using Application = Android.App.Application;
+//using Application = Android.App.Application;
 
 namespace aclara_meters.Droid
 {
     [Activity(Theme = "@style/MainTheme",  MainLauncher = true, NoHistory = true, Name = "com.aclara.mtu.programmer.urlentryclass")]
-    public class urlentryclass : FormsApplicationActivity
+    public class urlentryclass : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         /// <remarks>
         /// This must be implemented if you want to Subscribe() to IBluetoothLowEnergyAdapter.State to be notified when the
@@ -79,11 +79,10 @@ namespace aclara_meters.Droid
             // Set our view from the "main" layout resource
             //SetContentView(Resource.Layout.SplashScreen);
 
-            Context     context    = Application.Context;
+            Context     context    = Android.App.Application.Context;
             PackageInfo info       = context.PackageManager.GetPackageInfo ( context.PackageName, 0 );
             string      appversion = info.VersionName + " ( " + info.VersionCode + " )";
-            //Rg.Plugins.Popup.Popup.Init(this, bundle);
-
+            
             FormsApp app = new FormsApp ( bluetooth, UserDialogs.Instance, appversion );
 
             LoadApplication(app);
@@ -91,7 +90,7 @@ namespace aclara_meters.Droid
             app.HandleUrl(new System.Uri(data.ToString()), bluetooth); 
         }
 
-        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
             Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -99,7 +98,7 @@ namespace aclara_meters.Droid
     }
 
     [Application(AllowBackup = true, AllowClearUserData = true)]
-    public class MyApplication : Application
+    public class MyApplication : Android.App.Application
     {
         protected MyApplication(IntPtr javaReference, JniHandleOwnership transfer)
         : base(javaReference, transfer)
@@ -121,7 +120,7 @@ namespace aclara_meters.Droid
         ScreenOrientation = ScreenOrientation.Unspecified
     )]
 
-    public class MainActivity : FormsApplicationActivity
+    public class MainActivity : global::Xamarin.Forms.Platform.Android.FormsApplicationActivity
     {
         /// <remarks>
         /// This must be implemented if you want to Subscribe() to IBluetoothLowEnergyAdapter.State to be notified when the

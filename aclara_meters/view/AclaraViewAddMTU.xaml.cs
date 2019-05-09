@@ -2626,7 +2626,7 @@ namespace aclara_meters.view
                         {
                             navigationDrawerList.SelectedItem = null;
 
-                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, page), false);
 
                             background_scan_page.Opacity = 1;
 

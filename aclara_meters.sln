@@ -1,8 +1,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2016
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aclara_meters.Android", "aclara_meters.Android\aclara_meters.Android.csproj", "{C575974E-22A1-4C63-B127-4C89D873DBA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aclara_meters.Droid", "aclara_meters.Android\aclara_meters.Droid.csproj", "{C575974E-22A1-4C63-B127-4C89D873DBA3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "aclara_meters.iOS", "aclara_meters.iOS\aclara_meters.iOS.csproj", "{6647D796-74D3-48BC-8011-1E783F835121}"
 EndProject
@@ -20,7 +20,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Lexi", "Lexi\Lexi.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTest", "UnitTest\UnitTest.csproj", "{FFA26D19-CF18-4BE2-8432-28C3D6C50A24}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Library", "Library\Library.csproj", "{F6FA20D8-AEDF-4157-9885-6D4975AF2ED6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Library", "Library\Library.csproj", "{F6FA20D8-AEDF-4157-9885-6D4975AF2ED6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

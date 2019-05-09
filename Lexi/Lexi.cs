@@ -205,7 +205,7 @@ namespace Lexi
                     " [ " + rawBuffer.Length + " = " + bytesToRead + " + Header " + headerOffset + " + CRC 2 ]" );
 
                 // Whait untill the response buffer data is available or timeout limit is reached
-                timeout = 25000;
+                timeout = 8000;
                 long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
                 await Task.Run(() =>
                 {
@@ -371,7 +371,7 @@ namespace Lexi
     
                 // Whait untill the response buffer data is available or timeout limit is reached
                 int bytesToRead=0;
-                timeout = 25000;
+                timeout = 8000;
                 long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds () + timeout;
                 await Task.Run(() =>
                 {

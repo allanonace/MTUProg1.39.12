@@ -11,7 +11,6 @@ namespace aclara_meters.Droid
 {
     public class BorderlessEntryRenderer : EntryRenderer
     {
-       
         public BorderlessEntryRenderer(Context context) : base(context)
         {
         }

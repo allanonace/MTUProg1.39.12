@@ -13,7 +13,6 @@ namespace aclara_meters.Droid
 {
     public class ViewCellTransparentRenderer : ViewCellRenderer
     {
-       
         protected override View GetCellCore(Cell item, View convertView, ViewGroup parent, Context context)
         {
             var cell = base.GetCellCore(item, convertView, parent, context);

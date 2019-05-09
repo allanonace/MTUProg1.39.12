@@ -1117,7 +1117,7 @@ namespace aclara_meters.view
                         {
                             navigationDrawerList.SelectedItem = null;
 
-                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved,page), false);
 
                             background_scan_page.Opacity = 1;
 
@@ -1878,7 +1878,7 @@ namespace aclara_meters.view
             Device.BeginInvokeOnMainThread(() =>
             {
                 navigationDrawerList.SelectedItem = null;
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
+                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, ActionType.ReadMtu), false);
                 background_scan_page.Opacity = 1;
                 if (Device.Idiom == TargetIdiom.Tablet)
                 {

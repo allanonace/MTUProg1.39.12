@@ -15,8 +15,7 @@ using Xamarin.Forms;
 namespace aclara_meters.Droid
 {
     public class PathService : IPathService
-    {
-     
+    {     
         public string InternalFolder
         {
             get

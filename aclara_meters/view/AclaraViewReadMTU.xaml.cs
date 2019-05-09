@@ -35,7 +35,7 @@ namespace aclara_meters.view
         {
             InitializeComponent();
         }
-
+     
         private void LoadMTUData()
         {
             // Creating our pages for menu navigation
@@ -130,7 +130,10 @@ namespace aclara_meters.view
                     ChangeLowerButtonImage(true);
                     _userTapped = true;
 
-                    Task.Factory.StartNew(ThreadProcedureMTUCOMMAction);
+                    if (actionType == ActionType.ReadFabric)
+                        Task.Factory.StartNew(ThreadProcedureMTUReadFabric);
+                    else
+                       Task.Factory.StartNew(ThreadProcedureMTUCOMMAction);
                 });
 
             }
@@ -289,11 +292,11 @@ namespace aclara_meters.view
             return isVisible;
         }
 
-        public AclaraViewReadMTU(IUserDialogs dialogs)
+        public AclaraViewReadMTU(IUserDialogs dialogs, ActionType page)
         {
             InitializeComponent();
 
-            this.actionType = ActionType.ReadMtu;
+            this.actionType = page;
 
             Task.Run(() =>
             {
@@ -823,7 +826,7 @@ namespace aclara_meters.view
                         {
                             navigationDrawerList.SelectedItem = null;
 
-                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, page), false);
 
                             background_scan_page.Opacity = 1;
                           
@@ -1573,7 +1576,7 @@ namespace aclara_meters.view
             Device.BeginInvokeOnMainThread(() =>
             {
                 navigationDrawerList.SelectedItem = null;
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved), false);
+                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, ActionType.ReadMtu), false);
                 background_scan_page.Opacity = 1;
                 if (Device.Idiom == TargetIdiom.Tablet)
                 {
@@ -1749,6 +1752,51 @@ namespace aclara_meters.view
             ContentNav.IsEnabled   = true;
             indicator.IsVisible    = false;
             listaMTUread.IsVisible = true;
+        }
+
+
+        private void ThreadProcedureMTUReadFabric()
+        {
+            //Create Ation when opening Form
+            //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
+            MTUComm.Action add_mtu = new MTUComm.Action(
+                config: FormsApp.config,
+                serial: FormsApp.ble_interface,
+                type: actionType,
+                user: FormsApp.credentialsService.UserName);
+
+            //Define finish and error event handler
+            //add_mtu.OnFinish += Add_mtu_OnFinish;
+            //add_mtu.OnError += Add_mtu_OnError;
+
+            add_mtu.OnProgress += ((s, e) =>
+            {
+                string mensaje = e.Message;
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    if (!string.IsNullOrEmpty(mensaje))
+                        label_read.Text = mensaje;
+                });
+            });
+
+            add_mtu.OnFinish += ((s,e) =>
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    EnableInteraction();
+                });
+            });
+
+            add_mtu.OnError += (() =>
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    EnableInteraction();
+                });
+            });
+
+            add_mtu.Run();
         }
     }
 }

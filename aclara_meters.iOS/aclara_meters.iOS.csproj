@@ -259,6 +259,7 @@
       <IsAppExtension>true</IsAppExtension>
       <Project>{884ACC36-012A-4AFC-AAAC-1A85B0D17616}</Project>
       <Name>AclaraMetersShareExtension</Name>
+      <IsWatchApp>false</IsWatchApp>
     </ProjectReference>
     <ProjectReference Include="..\MTUComm\MTUComm.csproj">
       <Project>{20113951-5BD8-473F-BC70-7AF5F875C305}</Project>
