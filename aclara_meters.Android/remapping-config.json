@@ -1,0 +1,320 @@
+{
+  "AssembliesToProcess": [
+    "Xamarin.Forms.Platform.Android.dll"
+  ],
+  "RemapToAssembly": {
+    "TargetAssembly": "Microsoft.Intune.Android.dll",
+    "BaseTypeMappings": [
+      {
+        "From": "Android.App.Activity",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMActivity",
+        "MethodMappings": {
+          "OnActivityResult": "OnMAMActivityResult",
+          "OnCreate": "OnMAMCreate",
+          "OnDestroy": "OnMAMDestroy",
+          "OnNewIntent": "OnMAMNewIntent",
+          "OnPause": "OnMAMPause",
+          "OnPostCreate": "OnMAMPostCreate",
+          "OnPostResume": "OnMAMPostResume",
+          "OnProvideAssistContent": "OnMAMProvideAssistContent",
+          "OnProvideReferrer": "OnMAMProvideReferrer",
+          "OnResume": "OnMAMResume",
+          "OnSaveInstanceState": "OnMAMSaveInstanceState",
+          "OnSearchRequested": "OnMAMSearchRequested",
+          "OnStateNotSaved": "OnMAMStateNotSaved",
+          "OnPrepareOptionsMenu": "OnMAMPrepareOptionsMenu"
+        }
+      },
+      {
+        "From": "Android.App.ActivityGroup",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMActivityGroup",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.App.AliasActivity",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMAliasActivity",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.App.ExpandableListActivity",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMExpandableListActivity",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.App.LauncherActivity",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMLauncherActivity",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.App.ListActivity",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMListActivity",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.App.NativeActivity",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMNativeActivity",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.App.TabActivity",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMTabActivity",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.Preference.PreferenceActivity",
+        "To": "Microsoft.Intune.Mam.Client.Preference.MAMPreferenceActivity",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.App.Application",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMApplication",
+        "MethodMappings": {
+          "OnCreate": "OnMAMCreate"
+        }
+      },
+      {
+        "From": "Android.App.Fragment",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMFragment",
+        "MethodMappings": {
+          "OnActivityCreated": "OnMAMActivityCreated",
+          "OnActivityResult": "OnMAMActivityResult",
+          "OnAttach": "OnMAMAttach",
+          "OnCreate": "OnMAMCreate",
+          "OnCreateAnimator": "OnMAMCreateAnimator",
+          "OnCreateContextMenu": "OnMAMCreateContextMenu",
+          "OnCreateOptionsMenu": "OnMAMCreateOptionsMenu",
+          "OnCreateView": "OnMAMCreateView",
+          "OnDestroy": "OnMAMDestroy",
+          "OnDestroyOptionsMenu": "OnMAMDestroyOptionsMenu",
+          "OnDestroyView": "OnMAMDestroyView",
+          "OnDetach": "OnMAMDetach",
+          "OnPause": "OnMAMPause",
+          "OnResume": "OnMAMResume",
+          "OnSaveInstanceState": "OnMAMSaveInstanceState",
+          "OnStart": "OnMAMStart",
+          "OnStop": "OnMAMStop",
+          "OnViewCreated": "OnMAMViewCreated",
+          "OnViewStateRestored": "OnMAMViewStateRestored"
+        }
+      },
+      {
+        "From": "Android.App.ListFragment",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMListFragment",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.App.DialogFragment",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMDialogFragment",
+        "MethodMappings": {
+          "OnCreateDialog": "OnMAMCreateDialog"
+        }
+      },
+      {
+        "From": "Android.App.Service",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMService",
+        "MethodMappings": {
+          "OnBind": "OnMAMBind",
+          "OnStart": "OnMAMStart",
+          "OnStartCommand": "OnMAMStartCommand"
+        }
+      },
+      {
+        "From": "Android.App.IntentService",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMIntentService",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.App.Dialog",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMDialog",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.Content.BroadcastReceiver",
+        "To": "Microsoft.Intune.Mam.Client.Content.MAMBroadcastReceiver",
+        "MethodMappings": {
+          "OnReceive": "OnMAMReceive"
+        }
+      },
+      {
+        "From": "Android.Content.ContentProvider",
+        "To": "Microsoft.Intune.Mam.Client.Content.MAMContentProvider",
+        "MethodMappings": {
+          "ApplyBatch": "ApplyBatchMAM",
+          "AttachInfo": "AttachInfoMAM",
+          "BulkInsert": "BulkInsertMAM",
+          "Call": "CallMAM",
+          "Delete": "DeleteMAM",
+          "Insert": "InsertMAM",
+          "OpenAssetFile": "OpenAssetFileMAM",
+          "OpenFile": "OpenFileMAM",
+          "OpenTypedAssetFile": "OpenTypedAssetFileMAM",
+          "Query": "QueryMAM",
+          "Update": "UpdateMAM"
+        }
+      },
+      {
+        "From": "Android.Provider.DocumentsProvider",
+        "To": "Microsoft.Intune.Mam.Client.Content.MAMDocumentsProvider",
+        "MethodMappings": {
+          "CopyDocument": "CopyDocumentMAM",
+          "CreateDocument": "CreateDocumentMAM",
+          "CreateWebLinkIntent": "CreateWebLinkIntentMAM",
+          "DeleteDocument": "DeleteDocumentMAM",
+          "EjectRoot": "EjectRootMAM",
+          "FindDocumentPath": "FindDocumentPathMAM",
+          "MoveDocument": "MoveDocumentMAM",
+          "OpenDocument": "OpenDocumentMAM",
+          "OpenDocumentThumbnail": "OpenDocumentThumbnailMAM",
+          "OpenTypedDocument": "OpenTypedDocumentMAM",
+          "QueryDocument": "QueryDocumentMAM",
+          "QueryChildDocuments": "QueryChildDocumentsMAM",
+          "QueryRecentDocuments": "QueryRecentDocumentsMAM",
+          "QueryRoots": "QueryRootsMAM",
+          "QuerySearchDocuments": "QuerySearchDocumentsMAM",
+          "RemoveDocument": "RemoveDocumentMAM",
+        }
+      },
+      {
+        "From": "Android.OS.AsyncTask",
+        "To": "Microsoft.Intune.Mam.Client.Identity.MAMAsyncTask",
+        "MethodMappings": {
+          "DoInBackground": "DoInBackgroundMAM",
+          "OnPreExecute": "OnPreExecuteMAM"
+        }
+      },
+      {
+        "From": "Android.App.Backup.BackupAgent",
+        "To": "Microsoft.Intune.Mam.Client.App.Backup.MAMBackupAgent",
+        "MethodMappings": {
+          "OnBackup": "OnMAMBackup",
+          "OnCreate": "OnMAMCreate",
+          "OnFullBackup": "OnMAMFullBackup",
+          "OnRestore": "OnMAMRestore",
+          "OnRestoreFile": "OnMAMRestoreFile",
+          "OnRestoreFinished": "OnMAMRestoreFinished"
+        }
+      },
+      {
+        "From": "Android.App.Backup.BackupAgentHelper",
+        "To": "Microsoft.Intune.Mam.Client.App.Backup.MAMBackupAgentHelper",
+        "MethodMappings": {
+          "AddHelper": "AddMAMHelper",
+          "OnBackup": "OnMAMBackup",
+          "OnCreate": "OnMAMCreate",
+          "OnRestore": "OnMAMRestore"
+        }
+      },
+      {
+        "From": "Android.App.Backup.FileBackupHelper",
+        "To": "Microsoft.Intune.Mam.Client.App.Backup.MAMFileBackupHelper",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.App.Backup.SharedPreferencesBackupHelper",
+        "To": "Microsoft.Intune.Mam.Client.App.Backup.MAMSharedPreferencesBackupHelper",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.OS.Binder",
+        "To": "Microsoft.Intune.Mam.Client.Os.MAMBinder",
+        "MethodMappings": {
+          "OnTransact": "OnMAMTransact"
+        }
+      },
+      {
+        "From": "Android.Support.V4.App.Fragment",
+        "To": "Microsoft.Intune.Mam.Client.Support.V4.App.MAMFragment",
+        "MethodMappings": {
+          "OnActivityCreated": "OnMAMActivityCreated",
+          "OnActivityResult": "OnMAMActivityResult",
+          "OnAttach": "OnMAMAttach",
+          "OnCreate": "OnMAMCreate",
+          "OnCreateAnimator": "OnMAMCreateAnimator",
+          "OnCreateContextMenu": "OnMAMCreateContextMenu",
+          "OnCreateOptionsMenu": "OnMAMCreateOptionsMenu",
+          "OnCreateView": "OnMAMCreateView",
+          "OnDestroy": "OnMAMDestroy",
+          "OnDestroyOptionsMenu": "OnMAMDestroyOptionsMenu",
+          "OnDestroyView": "OnMAMDestroyView",
+          "OnDetach": "OnMAMDetach",
+          "OnPause": "OnMAMPause",
+          "OnResume": "OnMAMResume",
+          "OnSaveInstanceState": "OnMAMSaveInstanceState",
+          "OnStart": "OnMAMStart",
+          "OnStop": "OnMAMStop",
+          "OnViewCreated": "OnMAMViewCreated",
+          "OnViewStateRestored": "OnMAMViewStateRestored"
+        }
+      },
+      {
+        "From": "Android.Support.V4.App.DialogFragment",
+        "To": "Microsoft.Intune.Mam.Client.Support.V4.App.MAMDialogFragment",
+        "MethodMappings": {
+          "OnCreateDialog": "OnMAMCreateDialog"
+        }
+      },
+      {
+        "From": "Android.Support.V4.App.ListFragment",
+        "To": "Microsoft.Intune.Mam.Client.Support.V4.App.MAMListFragment",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.Support.V4.App.FragmentActivity",
+        "To": "Microsoft.Intune.Mam.Client.Support.V4.App.MAMFragmentActivity",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.Support.V4.Content.WakefulBroadcastReceiver",
+        "To": "Microsoft.Intune.Mam.Client.Support.V4.Content.MAMWakefulBroadcastReceiver",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.Support.V7.App.AppCompatActivity",
+        "To": "Microsoft.Intune.Mam.Client.Support.V7.App.MAMAppCompatActivity",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.Support.V4.Content.FileProvider",
+        "To": "Microsoft.Intune.Mam.Client.Support.V4.Content.MAMFileProvider",
+        "MethodMappings": null
+      },
+      {
+        "From": "Android.Support.V4.App.JobIntentService",
+        "To": "Microsoft.Intune.Mam.Client.Support.V4.App.MAMJobIntentService",
+        "MethodMappings": {
+          "OnHandleWork": "OnMAMHandleWork"
+        }
+      }
+    ],
+    "GlobalRewriteMappings": [
+      {
+        "From": "Android.App.TaskStackBuilder",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMTaskStackBuilder",
+        "MethodMappings": {
+          "Create": "Create",
+          "From": "From"
+        }
+      },
+      {
+        "From": "Android.App.PendingIntent",
+        "To": "Microsoft.Intune.Mam.Client.App.MAMPendingIntent",
+        "MethodMappings": {
+          "GetActivities": "GetActivities",
+          "GetActivity": "GetActivity",
+          "GetBroadcast": "GetBroadcast",
+          "GetService": "GetService"
+        }
+      },
+      {
+        "From": "Java.Lang.Class",
+        "To": "Microsoft.Intune.Mam.Client.App.WrappedAppReflectionUtils",
+        "MethodMappings": {
+          "GetDeclaredMethod": "GetDeclaredMethod",
+          "GetDeclaredMethods": "GetDeclaredMethods",
+          "GetMethod": "GetMethod",
+          "GetMethods": "GetMethods"
+        }
+      }
+    ]
+  }
+}

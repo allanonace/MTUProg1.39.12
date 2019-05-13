@@ -1087,9 +1087,11 @@ namespace aclara_meters.view
             btn_Test.Clicked += Btn_Test_Clicked;
             btn_Save.Clicked += Btn_Save_Clicked;
             btn_Cancel.Clicked += Btn_Cancel_Clicked;
-
+            
             btn_DownloadConf.Clicked += Btn_DownloadConf_Clicked;
 
+            TabPrevious.Tapped += Previous_Clicked;
+            TabNext.Tapped += Next_Clicked;
             logoff_no.Tapped += LogOffNoTapped;
             logoff_ok.Tapped += LogOffOkTapped;
 
