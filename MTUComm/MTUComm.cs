@@ -349,22 +349,31 @@ namespace MTUComm
                 int  wait  = 2;
                 int  time  = 50;
                 int  max   = ( int )( time / wait ); // Seconds / Seconds = Rounded max number of iterations
-                int  protocol, liveDigits = 0;
+                int  protocol   = -1;
+                int  liveDigits = -1;
                 bool ok;
                 do
                 {
-                    if ( isPort1 )
-                         protocol = await map.P1EncoderProtocol.GetValueFromMtu (); // Encoder Type: 1=ARBV, 2=ARBVI, 4=ABB, 8=Sensus
-                    else protocol = await map.P2EncoderProtocol.GetValueFromMtu ();
-                    
-                    if ( liveDigits <= 0 )
+                    try
                     {
+                        if ( isPort1 )
+                             protocol = await map.P1EncoderProtocol.GetValueFromMtu (); // Encoder Type: 1=ARBV, 2=ARBVI, 4=ABB, 8=Sensus
+                        else protocol = await map.P2EncoderProtocol.GetValueFromMtu ();
+                        
                         if ( isPort1 )
                              liveDigits = await map.P1EncoderLiveDigits.GetValueFromMtu (); // Encoder number of digits
                         else liveDigits = await map.P2EncoderLiveDigits.GetValueFromMtu ();
                     }
+                    catch ( Exception e )
+                    {
+                        Utils.Print ( "AutodetectMetersEcoders: " + e.GetType ().Name );
+                    }
+                    finally
+                    {
+                        Utils.Print ( "AutodetectMetersEcoders: Protocol " + protocol + " LiveDigits " + liveDigits );
+                    }
                     
-                    if ( ! ( ok = ( protocol == 1 || protocol == 2 || protocol == 4 || protocol == 8 ) ) )
+                    if ( ! ( ok = ( protocol == 1 || protocol == 2 || protocol == 4 || protocol == 8 ) && liveDigits > 0 ) )
                         await Task.Delay ( wait * 1000 );
                 }
                 while ( ! ok &&
@@ -420,8 +429,8 @@ namespace MTUComm
                 // Check for errors
                 byte erCode;
                 if ( portIndex == 1 )
-                     erCode = Convert.ToByte ( await map.P1EncoderError.GetValueFromMtu () );
-                else erCode = Convert.ToByte ( await map.P2EncoderError.GetValueFromMtu () );
+                     erCode = Convert.ToByte ( await map.P1ReadingErrorCode.GetValueFromMtu () );
+                else erCode = Convert.ToByte ( await map.P2ReadingErrorCode.GetValueFromMtu () );
                 
                 switch ( erCode )
                 {
@@ -1240,6 +1249,14 @@ namespace MTUComm
 
                 #region Check Meter for Encoder
 
+                if ( this.mtu.Port1.IsForEncoderOrEcoder || form.usePort2 &&
+                     this.mtu.Port2.IsForEncoderOrEcoder )
+                {
+                    Utils.Print ( "------CHECK_ENCODER_START-----" );
+
+                    OnProgress ( this, new ProgressArgs ( 0, 0, "Checking Encoder..." ) );
+                }
+
                 // Check if selected Meter is supported for current MTU
                 if ( this.mtu.Port1.IsForEncoderOrEcoder )
                     await this.CheckSelectedEncoderMeter ();
@@ -1251,7 +1268,11 @@ namespace MTUComm
                 if ( this.mtu.Port1.IsForEncoderOrEcoder ||
                      form.usePort2 &&
                      this.mtu.Port2.IsForEncoderOrEcoder )
+                {
+                    Utils.Print ( "------CHECK_ENCODER_FINISH-----" );
+                
                     await this.CheckIsTheSameMTU ();
+                }
 
                 #endregion
 
@@ -1365,46 +1386,22 @@ namespace MTUComm
                     {
                         try
                         {
-                            if ( mtu.TiltTamper          ) map.TiltAlarm          = alarms.Tilt;
-                            if ( mtu.MagneticTamper      ) map.MagneticAlarm      = alarms.Magnetic;
-                            if ( mtu.RegisterCoverTamper ) map.RegisterCoverAlarm = alarms.RegisterCover;
-                            if ( mtu.ReverseFlowTamper   ) map.ReverseFlowAlarm   = alarms.ReverseFlow;
-                            if ( mtu.TamperPort1         ) map.P1CutWireAlarm     = alarms.TamperPort1;
-                            if ( mtu.TamperPort2         ) map.P2CutWireAlarm     = alarms.TamperPort2;
+                            if ( mtu.TiltTamper          ) map.TiltAlarm              = alarms.Tilt;
+                            if ( mtu.MagneticTamper      ) map.MagneticAlarm          = alarms.Magnetic;
+                            if ( mtu.RegisterCoverTamper ) map.RegisterCoverAlarm     = alarms.RegisterCover;
+                            if ( mtu.ReverseFlowTamper   ) map.ReverseFlowAlarm       = alarms.ReverseFlow;
+                            if ( mtu.TamperPort1         ) map.P1CutWireAlarm         = alarms.TamperPort1;
+                            if ( mtu.TamperPort2         ) map.P2CutWireAlarm         = alarms.TamperPort2;
                             if ( mtu.InsufficentMemory   ) map.InsufficentMemoryAlarm = alarms.InsufficientMemory;
-                            if ( mtu.LastGasp            ) map.LastGaspAlarm      = alarms.LastGasp;
+                            if ( mtu.LastGasp            ) map.LastGaspAlarm          = alarms.LastGasp;
 
-                            if ( mtu.IsFamilly31xx32xx )
-                            {
-                                // map.P1CutWireAlarm = ...
-                                // map.P2CutWireAlarm = ...
-                            }
-
-                            //if ( mtu.CutWireDelaySetting  ) map.xxx = alarms.CutWireDelaySetting;
-                            //if ( mtu.GasCutWireAlarm      ) map.P1CutWireAlarm = alarms.LastGasp;
-                            //if ( mtu.GasCutWireAlarmImm   ) map.xxx = alarms.LastGaspImm;
-                            //if ( mtu.InsufficentMemory    ) map.xxx = alarms.InsufficientMemory;
-                            //if ( mtu.InsufficentMemoryImm ) map.xxx = alarms.InsufficientMemoryImm;
-                            //if ( mtu.InterfaceTamperImm   ) map.xxx = alarms.InterfaceTamperImm;
-                            //if ( mtu.LastGasp             ) map.P1CutWireAlarm = alarms.LastGasp;
-                            //if ( mtu.LastGaspImm          ) map.xxx = alarms.LastGaspImm;
-                            //if ( mtu.SerialComProblem     ) map.xxx = alarms.SerialComProblem;
-                            //if ( mtu.SerialComProblemImm  ) map.xxx = alarms.SerialComProblemImm;
-                            //if ( mtu.SerialCutWire        ) map.xxx = alarms.SerialCutWire;
-                            //if ( mtu.SerialCutWireImm     ) map.xxx = alarms.SerialCutWireImm;
-                            //if ( mtu.TamperPort1          ) map.xxx = alarms.TamperPort1;
-                            //if ( mtu.TamperPort2          ) map.xxx = alarms.TamperPort2;
-                            //if ( mtu.TamperPort1Imm       ) map.xxx = alarms.TamperPort1Imm;
-                            //if ( mtu.TamperPort2Imm       ) map.xxx = alarms.TamperPort2Imm;
+                            // For the moment only for the family 33xx
+                            if ( map.ContainsMember ( "AlarmMask1" ) ) map.AlarmMask1 = false;
+                            if ( map.ContainsMember ( "AlarmMask2" ) ) map.AlarmMask2 = false;
                         
                             // Write directly ( without conditions )
-                            map.P1ImmediateAlarm = alarms.ImmediateAlarmTransmit;
-                            map.P1UrgentAlarm    = alarms.DcuUrgentAlarm;
-                            
-                            // P2CutWireAlarm
-                            
-                            // Message overlap count
-                            // Number of new readings to take before transmit
+                            map.P1ImmediateAlarm    = alarms.ImmediateAlarmTransmit;
+                            map.P1UrgentAlarm       = alarms.DcuUrgentAlarm;
                             map.MessageOverlapCount = alarms.Overlap;
                         }
                         catch ( Exception e )
@@ -1540,6 +1537,8 @@ namespace MTUComm
 
                 #endregion
 
+                #region Write to MTU
+
                 Utils.Print ( "---WRITE_TO_MTU_START----" );
 
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Writing MemoryMap to MTU..." ) );
@@ -1549,6 +1548,8 @@ namespace MTUComm
                 await addMtuLog.LogAddMtu ( isFromScripting );
                 
                 Utils.Print ( "---WRITE_TO_MTU_FINISH---" );
+
+                #endregion
 
                 #endregion
 

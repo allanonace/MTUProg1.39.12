@@ -348,27 +348,12 @@
                                             <StackLayout HorizontalOptions="FillAndExpand" Margin="0,4,0,0" x:Name="div_MeterType" />
                                         </StackLayout>
                                         <!-- ( New ) Meter Reading / Initial Reading -->
-                                        <Label Text="Meter Reading" x:Name="lb_MeterReading" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
-                                        <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                            <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="div_MeterReading">
-                                                <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MeterReading" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
-                                                        HorizontalTextAlignment="Start">
-                                                        <Controls:BorderlessEntry.Behaviors>
-                                                            <behaviors:EntryValidatorBehavior />
-                                                        </Controls:BorderlessEntry.Behaviors>
-                                                    </Controls:BorderlessEntry>
-                                                </StackLayout>
-                                            </Frame>
-                                        </Frame>
-                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_MeterType" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
-                                        <!-- ( New ) Meter Reading / Initial Reading - Dual -->
-                                        <StackLayout x:Name="div_MeterReading_Dual" IsVisible="false">
-                                            <Label Text="Meter Reading" x:Name="lb_MeterReading_Dual" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                        <StackLayout x:Name="div_MeterReadings">
+                                            <Label Text="Meter Reading" x:Name="lb_MeterReading" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_Dual">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="div_MeterReading">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MeterReading_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MeterReading" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
                                                             HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
@@ -377,8 +362,25 @@
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
-                                            <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualError" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
-                                            <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualMeterType" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                            <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_MeterType" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                            <!-- ( New ) Meter Reading / Initial Reading - Dual -->
+                                            <StackLayout x:Name="div_MeterReading_Dual" IsVisible="false">
+                                                <Label Text="Meter Reading" x:Name="lb_MeterReading_Dual" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                    <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_Dual">
+                                                        <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                            <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MeterReading_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
+                                                                HorizontalTextAlignment="Start">
+                                                                <Controls:BorderlessEntry.Behaviors>
+                                                                    <behaviors:EntryValidatorBehavior />
+                                                                </Controls:BorderlessEntry.Behaviors>
+                                                            </Controls:BorderlessEntry>
+                                                        </StackLayout>
+                                                    </Frame>
+                                                </Frame>
+                                                <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualError" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                                <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualMeterType" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                            </StackLayout>
                                         </StackLayout>
                                         <!--  Read Inverval -->
                                         <StackLayout>
@@ -656,27 +658,12 @@
                                             <StackLayout HorizontalOptions="FillAndExpand" Margin="0,4,0,0" x:Name="div_MeterType_2" />
                                         </StackLayout>
                                         <!-- ( New ) Meter Reading / Initial Reading -->
-                                        <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_2" VerticalOptions="Center" Font="Bold,17" />
-                                        <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                            <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_2">
-                                                <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MeterReading_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
-                                                        HorizontalTextAlignment="Start">
-                                                        <Controls:BorderlessEntry.Behaviors>
-                                                            <behaviors:EntryValidatorBehavior />
-                                                        </Controls:BorderlessEntry.Behaviors>
-                                                    </Controls:BorderlessEntry>
-                                                </StackLayout>
-                                            </Frame>
-                                        </Frame>
-                                        <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_MeterType_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
-                                        <!-- ( New ) Meter Reading / Initial Reading - Dual -->
-                                        <StackLayout x:Name="div_MeterReading_Dual_2">
-                                            <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_Dual_2" VerticalOptions="Center" Font="Bold,17" />
+                                        <StackLayout x:Name="div_MeterReadings_2">
+                                            <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_2" VerticalOptions="Center" Font="Bold,17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_Dual_2">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_2">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MeterReading_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MeterReading_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
                                                             HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
@@ -685,8 +672,25 @@
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
-                                            <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualError_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
-                                            <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualMeterType_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                            <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_MeterType_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                            <!-- ( New ) Meter Reading / Initial Reading - Dual -->
+                                            <StackLayout x:Name="div_MeterReading_Dual_2">
+                                                <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_Dual_2" VerticalOptions="Center" Font="Bold,17" />
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                    <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_Dual_2">
+                                                        <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                            <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MeterReading_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
+                                                                HorizontalTextAlignment="Start">
+                                                                <Controls:BorderlessEntry.Behaviors>
+                                                                    <behaviors:EntryValidatorBehavior />
+                                                                </Controls:BorderlessEntry.Behaviors>
+                                                            </Controls:BorderlessEntry>
+                                                        </StackLayout>
+                                                    </Frame>
+                                                </Frame>
+                                                <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualError_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                                <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualMeterType_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                            </StackLayout>
                                         </StackLayout>
                                         <StackLayout Margin="0,4,0,148" />
                                     </StackLayout>

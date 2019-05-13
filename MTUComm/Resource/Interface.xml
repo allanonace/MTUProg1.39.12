@@ -71,14 +71,14 @@
 			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
 				<Parameter name="Description" display="Description" log="true" interface="true" source="Port.Description"/>
-				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port=P2"/>
-				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port.Number=2"/>
+				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
+				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
+				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
+				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
 			</Parameter>
 			<Parameter name="XmitInterval" display="Xmit Interval" log="true" interface="true"/>
 			<Parameter name="ReadInterval" display="Read Interval" log="true" interface="true"/>
@@ -124,14 +124,14 @@
 			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
 				<Parameter name="Description" display="Description" log="true" interface="true" source="Port.Description"/>
-				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port=P2"/>
-				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port.Number=2"/>
+				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
 			</Parameter>
 			<Parameter name="XmitInterval" display="Xmit Interval" log="true" interface="true"/>
 			<Parameter name="ReadInterval" display="Read Interval" log="true" interface="true"/>
@@ -172,14 +172,14 @@
 			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
 		        <Parameter name="Description" display="Description" log="true" interface="true" source="Port.Description"/>
-		        <Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port=P2"/>
-		        <Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-		        <Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-		        <Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-		        <Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-		        <Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-		        <Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-		        <Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+		        <Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port.Number=2"/>
+		        <Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+		        <Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+		        <Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+		        <Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+		        <Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+		        <Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+		        <Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
 			</Parameter>
 			<Parameter name="XmitInterval" display="Xmit Interval" log="true" interface="true"/>
 			<Parameter name="ReadInterval" display="Read Interval" log="true" interface="true"/>
@@ -228,26 +228,24 @@
 			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
 				<Parameter name="Description" display="Description" log="true" interface="true" source="Port.Description"/>
-				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port=P2"/>
-				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port.Number=2"/>
+				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
+				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
+				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
+				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
 			</Parameter>
 			<Parameter name="XmitInterval" display="Xmit Interval" log="true" interface="true"/>
 			<Parameter name="ReadInterval" display="Read Interval" log="true" interface="true"/>
 			<Parameter name="ReadIntervalMinutes" display="ReadIntervalMinutes" log="true" interface="false"/>
 			<Parameter name="MtuVoltageBattery" display="Battery" log="true" interface="true"/>
+            <Parameter name="Fast-2-Way" display="2-Way" source="MemoryMap.FastMessagingMode" log="true" interface="true"/>
 			<Parameter name="MtuType" display="MTU Type" log="true" interface="true"/>
 			<Parameter name="MtuSoftware" display="MTU Software" log="true" interface="true" source="MemoryMap.MtuSoftVersionString"/>
 			<Parameter name="MTUFirmwareVersionFormatFlag" display="MTU firmware version format flag" log="true" interface="false" source="MemoryMap.MtuSoftVersion"/>
 			<Parameter name="RxInterval" display="Rx Interval" log="true" interface="true"/>
-			<Parameter name="F12WAYRegister1" display="F12WAYRegister1" log="true" interface="true"/>
-			<Parameter name="F12WAYRegister10" display="F12WAYRegister10" log="true" interface="true"/>
-			<Parameter name="F12WAYRegister14" display="F12WAYRegister14" log="true" interface="true"/>
 			<Parameter name="MtuPartNumber" display="Mtu Part Number" source="Mtu.HexNum" log="true" interface="false"/>
 			<Parameter name="PCBNumber" display="PCB Number" log="true" interface="true"/>
 		<!--
@@ -270,12 +268,12 @@
 			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
 				<Parameter name="Description" display="Description" log="true" interface="true" source="Port.Description"/>
-				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port=P2"/>
-				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
-				<Parameter name="NumberOfDigits" display="Digits #" log="true" interface="true" source="Meter.LiveDigits" conditional="MemoryMap.StatusFlag=true | Port=P1"/>
+				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false + Port.Number=2"/>
+				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="NumberOfDigits" display="Digits #" log="true" interface="true" source="Meter.LiveDigits" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
 			</Parameter>
 			<Parameter name="XmitInterval" display="Xmit Interval" log="true" interface="true"/>
 			<Parameter name="ReadInterval" display="Read Interval" log="true" interface="true"/>
@@ -310,7 +308,7 @@
 				<!-- -->
 			</Parameter>
 		 	<Parameter name="AccountNumber" display="Functl Loctn" source="ActionParams.AccountNumber" log="true" interface="true"/>
-			<Parameter name="DaysOfRead" display="DaysOfRead" source="ActionParams.DaysOfRead" log="true" interface="true" conditional="Port=P1"/>
+			<Parameter name="DaysOfRead" display="DaysOfRead" source="ActionParams.DaysOfRead" log="true" interface="true" conditional="Port.Number=1"/>
 			<Parameter name="Comment" display="Comments" source="ActionParams.Comment" log="true" interface="true"/>
 			<Parameter name="MTU_Location_Data" display="MTU Location Data" source="ActionParams.MTU_Location_Data" log="true" interface="true"/>
 			<Parameter name="Construction_Type" display="Construction Type" source="ActionParams.Construction_Type" log="true" interface="true"/>

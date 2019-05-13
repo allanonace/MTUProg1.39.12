@@ -25,6 +25,12 @@ namespace Xml
         {
             get { return TypeString.Equals ( "E" ); }
         }
+
+        [XmlIgnore]
+        public bool IsForPulse
+        {
+            get { return ! TypeString.Equals ( "E" ); }
+        }
         
         [XmlIgnore]
         public int MeterProtocol { get; set; }

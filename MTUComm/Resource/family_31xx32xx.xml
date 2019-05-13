@@ -263,6 +263,7 @@
   
   <!-- INIT - Alarms -->
 
+  <!-- Immediate + Urgent -->
   <Register> <!-- OK -->
     <Id>ImmediateAlarm</Id>
     <Description>Set to transmit an immediate alarm</Description>
@@ -284,6 +285,7 @@
     <CustomSet/>
   </Register>
 
+  <!-- Set Alarms -->
   <Register> <!-- OK -->
     <Id>TiltAlarm</Id>
     <Description>Set to enable tilt tamper</Description>
@@ -355,6 +357,7 @@
     <CustomSet/>
   </Register>
 
+  <!-- Tampers -->
   <Register> <!-- OK -->
     <Id>TiltTamper</Id>
     <Description>Set when tilt tamper</Description>
@@ -427,6 +430,42 @@
   </Register>
 
   <!-- END - Alarms -->
+
+  <!-- INIT - Encryption -->
+
+  <Register> <!-- OK -->
+    <Id>EncryptionKey</Id>
+    <Description>EncryptionKey but the data read is the SHA-256 of the key written ( 32bytes )</Description>
+    <Type>string</Type>
+    <Address>256</Address>
+    <Size>16</Size>
+    <SizeGet>32</SizeGet>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>Encrypted</Id>
+    <Description>Encryption enabled</Description>
+    <Type>bool</Type>
+    <Address>318</Address>
+    <Size>0</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>EncryptionIndex</Id>
+    <Description>EncryptionIndex</Description>
+    <Type>int</Type>
+    <Address>319</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  
+  <!-- END - Encryption -->
 
   <Register> <!-- OK -->
     <Id>MtuType</Id>
@@ -793,37 +832,6 @@
     <Description>MTU software revision day</Description>
     <Type>int</Type>
     <Address>247</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
-    <Id>EncryptionKey</Id>
-    <Description>EncryptionKey but the data read is the SHA-256 of the key written ( 32bytes )</Description>
-    <Type>string</Type>
-    <Address>256</Address>
-    <Size>16</Size>
-    <SizeGet>32</SizeGet>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
-    <Id>Encrypted</Id>
-    <Description>Encryption enabled</Description>
-    <Type>bool</Type>
-    <Address>318</Address>
-    <Size>0</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
-    <Id>EncryptionIndex</Id>
-    <Description>EncryptionIndex</Description>
-    <Type>int</Type>
-    <Address>319</Address>
     <Size>1</Size>
     <Write>false</Write>
     <CustomGet/>

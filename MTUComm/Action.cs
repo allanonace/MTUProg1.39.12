@@ -745,8 +745,17 @@ namespace MTUComm
                         {
                             try
                             {
-                                string meter_reading_error = ( await map[ PORT_PREFIX + indexPort + IFACE_READERROR ].GetValue () ).ToString ();
-                                if ( meter_reading_error.Length < 1 )
+                                string meter_reading_error   = string.Empty;
+                                string encoderReadingErrorId = PORT_PREFIX + indexPort + IFACE_READERROR;
+
+                                bool mtuHasNotEncoderErrorCodes = ! map.ContainsMember ( encoderReadingErrorId );
+                                
+                                if ( ! mtuHasNotEncoderErrorCodes )
+                                    meter_reading_error = ( await map[ encoderReadingErrorId ].GetValue () ).ToString ();
+
+                                // Encoder MTUs have register to know if an error occurred while trying to read the Meter
+                                if ( mtuHasNotEncoderErrorCodes ||
+                                     meter_reading_error.Length < 1 )
                                 {
                                     ulong meter_reading  = await map[ PORT_PREFIX + indexPort + IFACE_MREADING ].GetValue ();
                                     ulong tempReadingVal = ( ! mtu.PulseCountOnly ) ? meter_reading : meter_reading * ( ulong )meter.HiResScaling;
@@ -878,6 +887,7 @@ namespace MTUComm
                 string port   = PORT_PREFIX + portIndex;
                 Global global = this.config.Global;
                 Type   gType  = global.GetType ();
+                Type   pType  = typeof ( Port );
                 
                 foreach ( ConditionObjet condition in conditions )
                 {
@@ -889,9 +899,8 @@ namespace MTUComm
                     // Class or Type
                     switch ( condMembers[ 0 ] )
                     {
-                        case IFACE_PORT  : currentValue = port; break; // P1 or P2
+                        case IFACE_PORT  : currentValue = pType.GetProperty ( condProperty ).GetValue ( mtu.Ports[ portIndex - 1 ] ).ToString (); break;
                         case IFACE_ACTION: currentValue = GetProperty ( condProperty ); break; // User, Date or Type
-                        case IFACE_METER : break;
                         case IFACE_MTU   : currentValue = mtu.GetProperty ( condProperty ); break; // Mtu class
                         case IFACE_GLOBAL: currentValue = gType.GetProperty ( condProperty ).GetValue ( global, null ).ToString(); break; // Global class
                         default: // Dynamic MemoryMap

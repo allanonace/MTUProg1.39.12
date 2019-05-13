@@ -307,6 +307,13 @@ namespace MTUComm.MemoryMap
         {
             int mtuSoftVersion = await MemoryRegisters.MtuSoftVersion.GetValue ();
         
+            // NOTE: MtuSoftVersion in Encoders/E-coders seems to be always 254 and
+            // the bytes for registers used creating MTU_SOFTVERSION_LONG are the same,
+            // changing only the name ( e.g. MtuSoftRevYear and MtuSoftVersionMajor both 245 )
+            // For example mtuSoftVersion for MTUs..
+            // For 138, 149, 151 is 41
+            // For 146, 148 is 50
+            // For 159 is 47
             if ( mtuSoftVersion == 254 )
                 return string.Format ( MTU_SOFTVERSION_LONG,
                     await MemoryRegisters.MtuSoftRevYear    .GetValue (),
@@ -316,6 +323,7 @@ namespace MTUComm.MemoryMap
             return string.Format ( MTU_SOFTVERSION_SMALL, mtuSoftVersion );
         }
 
+        // TODO: This method ( overload ) can be removed and get directly the register value
         public async Task<int> MtuSoftVersion342x_Get ( MemoryOverload<int> memoryOverload, dynamic MemoryRegisters )
         {
             return await MemoryRegisters.MtuSoftFormatFlag.GetValue ();

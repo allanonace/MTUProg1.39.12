@@ -412,7 +412,7 @@ namespace MTUComm.MemoryMap
                     
                     memoryRegister.lastRead = read;
                     
-                    Utils.Print ( "Map -> From MTU value: " + memoryRegister.id + " = " + Utils.ByteArrayToString ( read ) );
+                    Utils.Print ( "Map -> From MTU value: " + memoryRegister.id + " = " + Utils.ByteArrayToString ( read ) + " [ " + read + " ]" );
                     
                     // Convert byte array to desired format
                     object value = default ( T );

@@ -174,33 +174,6 @@
     <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
-    <Id>F12WAYRegister1</Id>
-    <Description>7021 reg1</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>F12WAYRegister1Int</Register>
-    </Registers>
-    <CustomGet>method</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>F12WAYRegister10</Id>
-    <Description>7021 reg10</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>F12WAYRegister10Int</Register>
-    </Registers>
-    <CustomGet>method</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>F12WAYRegister14</Id>
-    <Description>7021 reg14</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>F12WAYRegister14Int</Register>
-    </Registers>
-    <CustomGet>method</CustomGet>
-  </Overload>
-  <Overload>
     <Id>Frequency1Way</Id>
     <Description>1 Way channel Frequency</Description>
     <Type>string</Type>
@@ -224,24 +197,6 @@
     <Type>string</Type>
     <Registers>
       <Register>Frequency2WayRxHz</Register>
-    </Registers>
-    <CustomGet>method</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P1ReadingError</Id>
-    <Description>P1 Reading Error Message</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1ReadingErrorCode</Register>
-    </Registers>
-    <CustomGet>method</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>P2ReadingError</Id>
-    <Description>P1 Reading Error Message</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P2ReadingErrorCode</Register>
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
@@ -283,13 +238,32 @@
     </Registers>
     <CustomGet>method:MtuSoftVersionString342x_Get</CustomGet>
   </Overload>
-  
+  <Overload>
+    <Id>P1ReadingError</Id>
+    <Description>P1 Encoder error message trying to read Meter</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1ReadingErrorCode</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2ReadingError</Id>
+    <Description>P1 Encoder error message trying to read Meter</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2ReadingErrorCode</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+
   <!-- END - Overloads -->
   
   <!-- INIT - Registers -->
   
   <!-- INIT - Alarms -->
 
+  <!-- Immediate + Urgent -->
   <Register> <!-- OK -->
     <Id>ImmediateAlarm</Id>
     <Description>Set to transmit an immediate alarm</Description>
@@ -311,13 +285,14 @@
     <CustomSet/>
   </Register>
 
+  <!-- Set Alarms -->
   <Register> <!-- OK -->
     <Id>InsufficentMemoryAlarm</Id>
     <Description>Set for enable insufficent memory tamper</Description>
     <Type>bool</Type>
     <Address>194</Address>
     <Size>0</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -327,7 +302,7 @@
     <Type>bool</Type>
     <Address>194</Address>
     <Size>7</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -402,6 +377,7 @@
     <CustomSet/>
   </Register>
 
+  <!-- Tampers -->
   <Register> <!-- OK -->
     <Id>InsufficentMemoryTamper</Id>
     <Description>Insufficent Memory Tamper</Description>
@@ -495,8 +471,45 @@
 
   <!-- END - Alarms -->
 
+  <!-- INIT - Encryption -->
+
+  <Register> <!-- OK -->
+    <Id>EncryptionKey</Id>
+    <Description>EncryptionKey but the data read is the SHA-256 of the key written ( 32bytes )</Description>
+    <Type>string</Type>
+    <Address>256</Address>
+    <Size>16</Size>
+    <SizeGet>32</SizeGet>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>Encrypted</Id>
+    <Description>Encryption enabled</Description>
+    <Type>bool</Type>
+    <Address>318</Address>
+    <Size>0</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>EncryptionIndex</Id>
+    <Description>EncryptionIndex</Description>
+    <Type>int</Type>
+    <Address>319</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+
+  <!-- END - Encryption -->
+
   <!-- INIT - Encoders auto-detect Meters -->
   
+  <!-- Autodetect flags -->
   <Register> <!-- OK -->
     <Id>P1EncoderAutodetect</Id>
     <Description>Encoder auto-detection mode</Description>
@@ -518,12 +531,13 @@
     <CustomSet/>
   </Register>
   
+  <!-- Protocol + LiveDigits -->
   <Register> <!-- ¿1 or 2 bytes? -->
     <Id>P1EncoderProtocol</Id>
     <Description>P1 Encoder auto-detection protocol/encoder type</Description>
     <Type>int</Type>
     <Address>30</Address>
-    <Size>2</Size>
+    <Size>1</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
@@ -543,7 +557,7 @@
     <Description>P2 Encoder auto-detection protocol/encoder type</Description>
     <Type>int</Type>
     <Address>50</Address>
-    <Size>2</Size>
+    <Size>1</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
@@ -559,9 +573,10 @@
     <CustomSet/>
   </Register>
   
+  <!-- Error -->
   <Register> <!-- OK -->
-    <Id>P1EncoderError</Id>
-    <Description>Encoder auto-detection error code</Description>
+    <Id>P1ReadingErrorCode</Id>
+    <Description>P1 Encoder error code trying to read Meter</Description>
     <Type>int</Type>
     <Address>106</Address>
     <Size>1</Size>
@@ -570,8 +585,8 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>P2EncoderError</Id>
-    <Description>Encoder auto-detection error code</Description>
+    <Id>P2ReadingErrorCode</Id>
+    <Description>P2 Encoder error code trying to read Meter</Description>
     <Type>int</Type>
     <Address>107</Address>
     <Size>1</Size>
@@ -672,7 +687,7 @@
     <Size>2</Size>
     <Write>true</Write>
     <CustomGet/>
-	  <CustomSet/>
+	  <CustomSet>method</CustomSet>
   </Register>
   <Register> <!-- OK -->
     <Id>P1MeterType</Id>
@@ -835,6 +850,16 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
+    <Id>FastMessagingMode</Id>
+    <Description>Fast Messaging Configuration</Description>
+    <Type>bool</Type>
+    <Address>163</Address>
+    <Size>0</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
     <Id>DailyGMTHourRead</Id>
     <Description>Indicates the hour of the daily read (network time). Range [0,23]</Description>
     <Type>int</Type>
@@ -912,51 +937,10 @@
     <Size>1</Size>
     <Write>false</Write>
     <CustomGet/>
-	  <CustomSet/>
+  	<CustomSet/>
   </Register>
-  <Register> <!-- OK -->
-    <Id>EncryptionKey</Id>
-    <Description>EncryptionKey but the data read is the SHA-256 of the key written ( 32bytes )</Description>
-    <Type>string</Type>
-    <Address>256</Address>
-    <Size>16</Size>
-    <SizeGet>32</SizeGet>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
-    <Id>Encrypted</Id>
-    <Description>Encrypted enabled</Description>
-    <Type>bool</Type>
-    <Address>318</Address>
-    <Size>0</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
-    <Id>EncryptionIndex</Id>
-    <Description>Encryption Index</Description>
-    <Type>int</Type>
-    <Address>319</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-
-  <Register> <!-- OK -->
-    <Id>Fast2Way</Id>
-    <Description>Fast Messaging Mode</Description>
-    <Type>bool</Type>
-    <Address>163</Address>
-    <Size>0</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
+  
+  <Register>
     <Id>MtuMsgProtocolConfig</Id>
     <Description>Mtu Msg Protocol Configuration or Response frequency</Description>
     <Type>bool</Type>
@@ -964,9 +948,9 @@
     <Size>1</Size>
     <Write>false</Write>
     <CustomGet/>
-	  <CustomSet/>
+	<CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register>
     <Id>MtuPrimaryWindowInterval</Id>
     <Description>MTU Primary Window Interval A in seconds</Description>
     <Type>int</Type>
@@ -974,9 +958,9 @@
     <Size>2</Size>
     <Write>false</Write>
     <CustomGet/>
-	  <CustomSet/>
+	<CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register>
     <Id>MtuWindowAStart</Id>
     <Description>Time of the day when the Window A time period starts</Description>
     <Type>int</Type>
@@ -984,9 +968,9 @@
     <Size>1</Size>
     <Write>false</Write>
     <CustomGet/>
-	  <CustomSet/>
+	<CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register>
     <Id>MtuWindowBStart</Id>
     <Description>Time of the day when the Window B time period starts</Description>
     <Type>int</Type>
@@ -996,7 +980,7 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register>
     <Id>MtuPrimaryWindowIntervalB</Id>
     <Description>MTU Primary Message Window Interval B in seconds</Description>
     <Type>int</Type>
@@ -1006,7 +990,7 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register>
     <Id>MtuPrimaryWindowOffset</Id>
     <Description>Seconds past for the first Primary Message Rx Window</Description>
     <Type>int</Type>
@@ -1016,7 +1000,7 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register>
     <Id>MtuNumLowPriorityMsg</Id>
     <Description>Number of times each low priority message will be transmitted. Range [1,+]</Description>
     <Type>int</Type>
@@ -1026,7 +1010,7 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register>
     <Id>OnDemandCount</Id>
     <Description>On Demand Count</Description>
     <Type>int</Type>
@@ -1036,7 +1020,7 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register>
     <Id>DataRequestCount</Id>
     <Description>Data Request Count</Description>
     <Type>int</Type>
@@ -1046,7 +1030,7 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register>
     <Id>FOTACount</Id>
     <Description>FOTACount</Description>
     <Type>int</Type>
@@ -1056,7 +1040,7 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register>
     <Id>FOTCCount</Id>
     <Description>FOTCCount</Description>
     <Type>int</Type>

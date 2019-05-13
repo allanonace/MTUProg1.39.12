@@ -18,6 +18,7 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
+  <!-- Not Implemented
   <Overload>
     <Id>DailySnap</Id>
     <Description>Mtu Daily Snap</Description>
@@ -27,6 +28,7 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
+  -->
   <Overload>
     <Id>ReadInterval</Id>
     <Description>Read Interval</Description>
@@ -177,6 +179,24 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
+  <Overload>
+    <Id>P1ReadingError</Id>
+    <Description>P1 Encoder error message trying to read Meter</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1ReadingErrorCode</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2ReadingError</Id>
+    <Description>P1 Encoder error message trying to read Meter</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2ReadingErrorCode</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
   
   <!-- END - Overloads -->
   
@@ -184,6 +204,7 @@
 
   <!-- INIT - Alarms -->
 
+  <!-- Immediate + Urgent -->
   <Register> <!-- OK -->
     <Id>ImmediateAlarm</Id>
     <Description>Set to transmit an immediate alarm</Description>
@@ -205,23 +226,24 @@
     <CustomSet/>
   </Register>
 
+  <!-- Bits to reset ( zero/false ) -->
   <Register> <!-- OK -->
-    <Id>P1TiltTamper</Id>
-    <Description>P1 Set Tilt tamper</Description>
+    <Id>AlarmMask1</Id>
+    <Description>Alarm mask first bit</Description>
     <Type>bool</Type>
-    <Address>71</Address>
+    <Address>42</Address>
     <Size>0</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>P2TiltTamper</Id>
-    <Description>P2 Set Tilt tamper</Description>
+    <Id>AlarmMask2</Id>
+    <Description>Alarm mask second bit</Description>
     <Type>bool</Type>
-    <Address>71</Address>
+    <Address>42</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>
@@ -230,6 +252,7 @@
 
   <!-- INIT - Encoders auto-detect Meters -->
   
+  <!-- Autodetect flags -->
   <Register> <!-- OK -->
     <Id>P1EncoderAutodetect</Id>
     <Description>Encoder auto-detection mode</Description>
@@ -251,12 +274,13 @@
     <CustomSet/>
   </Register>
 
+  <!-- Protocol + LiveDigits -->
   <Register> <!-- ¿1 or 2 bytes? -->
     <Id>P1EncoderProtocol</Id>
     <Description>Encoder auto-detection protocol/encoder type</Description>
     <Type>int</Type>
     <Address>40</Address>
-    <Size>2</Size>
+    <Size>1</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
@@ -276,7 +300,7 @@
     <Description>Encoder auto-detection protocol/encoder type</Description>
     <Type>int</Type>
     <Address>56</Address>
-    <Size>2</Size>
+    <Size>1</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
@@ -292,9 +316,10 @@
     <CustomSet/>
   </Register>
   
+  <!-- Error -->
   <Register> <!-- OK -->
-    <Id>P1EncoderError</Id>
-    <Description>P1 Encoder auto-detection error code</Description>
+    <Id>P1ReadingErrorCode</Id>
+    <Description>P1 Encoder error code trying to read Meter</Description>
     <Type>int</Type>
     <Address>72</Address>
     <Size>1</Size>
@@ -303,8 +328,8 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>P2EncoderError</Id>
-    <Description>P2 Encoder auto-detection error code</Description>
+    <Id>P1ReadingErrorCode</Id>
+    <Description>P2 Encoder error code trying to read Meter</Description>
     <Type>int</Type>
     <Address>112</Address>
     <Size>1</Size>
@@ -617,7 +642,8 @@
     <CustomGet/>
     <CustomSet>method:HexToInt</CustomSet>
   </Register>
-  <Register> <!-- ¿Not Implemented? -->
+  <!-- Not Implemented
+  <Register>
     <Id>DailyGMTHourRead</Id>
     <Description>Indicates the hour of the daily read (network time). Range [0,23]</Description>
     <Type>int</Type>
@@ -627,6 +653,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
+  -->
   <Register> <!-- OK -->
     <Id>PCBSupplierCode</Id>
     <Description>PCB Number Supplier Code. Range ASCII [65,90]</Description>
