@@ -23,9 +23,9 @@
                                 <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                     <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                         <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal">
-                                            <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text="" HeightRequest="40" x:Name="tbx_remote_host" Keyboard="Text" FontSize="17" HorizontalTextAlignment="Start">
+                                            <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text="" WidthRequest="150" HeightRequest="40" x:Name="tbx_remote_host" Keyboard="Text" FontSize="17" HorizontalTextAlignment="Start">
                                             </Controls:BorderlessEntry>
-                                            <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text="" HeightRequest="40" x:Name="tbx_remote_port" Keyboard="Text" FontSize="17" HorizontalTextAlignment="End">
+                                            <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text=""  HeightRequest="40" x:Name="tbx_remote_port" Keyboard="Text" FontSize="17" HorizontalTextAlignment="End">
                                             </Controls:BorderlessEntry>
                                         </StackLayout>
                                     </Frame>

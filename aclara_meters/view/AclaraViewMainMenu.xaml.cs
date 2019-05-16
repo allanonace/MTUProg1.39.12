@@ -23,6 +23,7 @@ using System.Security.Cryptography.X509Certificates;
 using Xamarin.Forms;
 
 using ActionType = MTUComm.Action.ActionType;
+using ble_library;
 
 namespace aclara_meters.view
 {
@@ -151,9 +152,13 @@ namespace aclara_meters.view
 
                 if (!GetAutoConnectStatus())
                 {
-                   
                     Esperando();
-                   
+
+                    if (FormsApp.ble_interface.IsOpen()) FormsApp.ble_interface.Close();
+                    
+                    //FormsApp.ble_interface= new BleSerial();
+
+                    Utils.PrintDeep("----------------------------------------------  init Ble_iterface");
                     if (printer.ThreadState == ThreadState.Suspended)
                     {
                         try
@@ -169,7 +174,7 @@ namespace aclara_meters.view
                     }
                     //DeviceList.IsRefreshing = true;
                     listPucks = new ObservableCollection<DeviceItem>();
-
+                   
                     FormsApp.ble_interface.SetTimeOutSeconds(TimeOutSeconds);
                     await FormsApp.ble_interface.Scan();
                     TimeOutSeconds = 3; // los siguientes escaneos son de 5 sec
@@ -334,37 +339,37 @@ namespace aclara_meters.view
             switch (e.Direction)
             {
                 case SwipeDirection.Left:
+                    SideMenuClose(sender, e);
 
+                    //fondo.Opacity = 1;
+                    //ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    //shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    //background_scan_page.Opacity = 1;
+                    //background_scan_page_detail.Opacity = 1;
 
-                    fondo.Opacity = 1;
-                    ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    background_scan_page.Opacity = 1;
-                    background_scan_page_detail.Opacity = 1;
-
-                    Task.Delay(200).ContinueWith(t =>
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        ContentNav.Opacity = 0;
-                        shadoweffect.IsVisible = false;
-                        ContentNav.IsVisible = false;
-                      //  background_scan_page.IsEnabled = true;
-                      //  background_scan_page_detail.IsEnabled = true;
-                    }));
+                    //Task.Delay(200).ContinueWith(t =>
+                    //Device.BeginInvokeOnMainThread(() =>
+                    //{
+                    //    ContentNav.Opacity = 0;
+                    //    shadoweffect.IsVisible = false;
+                    //    ContentNav.IsVisible = false;
+                    //    background_scan_page.IsEnabled = true;
+                    //    background_scan_page_detail.IsEnabled = true;
+                    //}));
 
                     break;
                 case SwipeDirection.Right:
-                    fondo.Opacity = 0;
-                    ContentNav.IsVisible = true;
-                    shadoweffect.IsVisible = true;
-                    background_scan_page.Opacity = 0.5;
-                    background_scan_page_detail.Opacity = 0.5;
-                    ContentNav.Opacity = 1;
-                    ContentNav.TranslateTo(0, 0, 175, Easing.SinIn);
-                    shadoweffect.TranslateTo(0, 0, 175, Easing.SinIn);
-                   //background_scan_page.IsEnabled = true;
-
-                   // background_scan_page_detail.IsEnabled = true;
+                    SideMenuOpen(sender, e);
+                    //fondo.Opacity = 0;
+                    //ContentNav.IsVisible = true;
+                    //shadoweffect.IsVisible = true;
+                    //background_scan_page.Opacity = 0.5;
+                    //background_scan_page_detail.Opacity = 0.5;
+                    //ContentNav.Opacity = 1;
+                    //ContentNav.TranslateTo(0, 0, 175, Easing.SinIn);
+                    //shadoweffect.TranslateTo(0, 0, 175, Easing.SinIn);
+                    //background_scan_page.IsEnabled = false;
+                    //background_scan_page_detail.IsEnabled = false;
                     break;
 
             }
@@ -659,8 +664,8 @@ namespace aclara_meters.view
                 if (status != peripheralConnected)
                 {
 
-                    Utils.Print($"---------------------------------Invoke method ----estado : {status} , Perifericoconnected: {peripheralConnected}");
-                    Utils.Print($"---------------------------------Invoke method ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
+                   // Utils.Print($"---------------------------------Invoke method ----estado : {status} , Perifericoconnected: {peripheralConnected}");
+                   // Utils.Print($"---------------------------------Invoke method ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
                     
                     //PrintToConsole("¿ES NO_CONNECTED? - InvokeMethod");
 
@@ -744,6 +749,7 @@ namespace aclara_meters.view
                                         break;
                                 }
                                 DeviceList.IsEnabled = true;
+                                
                                 fondo.Opacity = 1;
                                 background_scan_page.Opacity = 1;
                                 background_scan_page.IsEnabled = true;
@@ -859,7 +865,7 @@ namespace aclara_meters.view
 
         private void IsConnectedUIChange(bool v)
         {
-            Utils.Print($"---------------------------------IsConnectedUIChange param: {v} ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
+            //Utils.Print($"---------------------------------IsConnectedUIChange param: {v} ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
             if (v)
             {
                 try
@@ -910,7 +916,7 @@ namespace aclara_meters.view
             //await Task.Factory.StartNew(() =>
             // {
             // wait until scan finish
-            Utils.Print($"-------------------------------    ChangeListViewData, thread: {Thread.CurrentThread.ManagedThreadId}");
+            //Utils.Print($"-------------------------------    ChangeListViewData, thread: {Thread.CurrentThread.ManagedThreadId}");
               //  while (FormsApp.ble_interface.IsScanning())
               //  {
                     try

@@ -22,10 +22,6 @@ using Renci.SshNet;
 using Renci.SshNet.Sftp;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-
-using System.Reflection;
-
-using System.Text;
 using Xml;
 using System.Xml.Linq;
 using aclara_meters.Helpers;
@@ -99,7 +95,7 @@ namespace aclara_meters
         }
 
         public FormsApp (
-            IBluetoothLowEnergyAdapter adapter,
+            IBluetoothLowEnergyAdapter badapter,
             IUserDialogs dialogs,
             string appVersion )
         {
@@ -109,7 +105,7 @@ namespace aclara_meters
                 
                 //Singleton.Set = new Puck ();
 
-                this.adapter = adapter;
+                adapter = badapter;
                 this.dialogs = dialogs;
                 this.appVersion = appVersion;
 

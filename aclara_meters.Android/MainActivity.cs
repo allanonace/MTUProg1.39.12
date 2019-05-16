@@ -43,6 +43,7 @@ namespace aclara_meters.Droid
 
             UserDialogs.Init(this);
             global::Xamarin.Forms.Forms.Init(this, bundle);
+            Xamarin.Essentials.Platform.Init(this, bundle);
 
             try
             {
