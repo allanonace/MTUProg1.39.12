@@ -129,9 +129,9 @@ index ef03e70..51b7726 100644
 +            logParameter(alarmSelection, new Parameter("Overlap", "Message Overlap", "6")); // TODO: replace real value
 +            logParameter(alarmSelection, new Parameter("LastGaspImm", "Last Gasp Imm", "Enabled")); // TODO: replace real value
 +            logParameter(alarmSelection, new Parameter("InterfaceTamperImm", "SerialComProblem Imm", "Enabled")); // TODO: replace real value
-+            logParameter(alarmSelection, new Parameter("InsufficentMemoryImm", "Insufficent Memory Imm", "Enabled")); // TODO: replace real value
++            logParameter(alarmSelection, new Parameter("InsufficientMemoryImm", "Insufficient Memory Imm", "Enabled")); // TODO: replace real value
 +            logParameter(alarmSelection, new Parameter("LastGasp", "Last Gasp", "Enabled")); // TODO: replace real value
-+            logParameter(alarmSelection, new Parameter("InsufficentMemory", "Insufficent Memory", "Enabled")); // TODO: replace real value
++            logParameter(alarmSelection, new Parameter("InsufficientMemory", "Insufficient Memory", "Enabled")); // TODO: replace real value
 +            logParameter(alarmSelection, new Parameter("InterfaceTamper", "Interface Tamper", "Enabled")); // TODO: replace real value
 +            action.Add(alarmSelection);
 +

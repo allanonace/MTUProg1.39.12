@@ -179,60 +179,12 @@ namespace MTUComm.MemoryMap
             return TranslateErrorCodes ( await MemoryRegisters.P2ReadingErrorCode.GetValue () );
         }
 
-        public async Task<string> InsufficentMemoryTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        public async Task<string> TamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic[] MemoryRegisters )
         {
-            return GetTamperStatus ( await MemoryRegisters.InsufficentMemoryAlarm.GetValue (),
-                                     await MemoryRegisters.InsufficentMemoryTamper.GetValue () );
-        }
-
-        public async Task<string> LastGaspTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return GetTamperStatus ( await MemoryRegisters.LastGaspAlarm.GetValue (),
-                                     await MemoryRegisters.LastGaspTamper.GetValue () );
-        }
-
-        public async Task<string> TiltTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return GetTamperStatus ( await MemoryRegisters.TiltAlarm.GetValue (),
-                                     await MemoryRegisters.TiltTamper.GetValue () );
-        }
-
-        public async Task<string> MagneticTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return GetTamperStatus ( await MemoryRegisters.MagneticAlarm.GetValue (),
-                                     await MemoryRegisters.MagneticTamper.GetValue () );
-        }
-
-        public async Task<string> InterfaceTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return GetTamperStatus ( await MemoryRegisters.InterfaceAlarm.GetValue (),
-                                     await MemoryRegisters.InterfaceTamper.GetValue () );
-        }
-
-        public async Task<string> RegisterCoverTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return GetTamperStatus ( await MemoryRegisters.RegisterCoverAlarm.GetValue (),
-                                     await MemoryRegisters.RegisterCoverTamper.GetValue () );
-        }
-
-        public async Task<string> ReverseFlowTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return GetTamperStatus ( await MemoryRegisters.ReverseFlowAlarm.GetValue (),
-                                     await MemoryRegisters.ReverseFlowTamper.GetValue () );
-        }
-
-        public async Task<string> P1CutWireTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return GetTamperStatus ( await MemoryRegisters.P1CutWireAlarm.GetValue (),
-                                     await MemoryRegisters.P1CutWireTamper.GetValue () );
+            return GetTamperStatus ( await MemoryRegisters[ 0 ].GetValue (),   // Alarm
+                                     await MemoryRegisters[ 1 ].GetValue () ); // Tamper
         }
         
-        public async Task<string> P2CutWireTamperStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return GetTamperStatus ( await MemoryRegisters.P2CutWireAlarm.GetValue (),
-                                     await MemoryRegisters.P2CutWireTamper.GetValue () );
-        }
-
         public async Task<string> FastMessagingMode_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
             return ( await MemoryRegisters.Fast2Way.GetValue () ) ? MESAG_FAST : MESAG_SLOW;
@@ -243,9 +195,9 @@ namespace MTUComm.MemoryMap
             return ( await MemoryRegisters.LastGaspTamper.GetValue () ) ? ENABLED : TRIGGERED;
         }
 
-        public async Task<string> InsufficentMemory_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        public async Task<string> InsufficientMemory_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
-            return ( await MemoryRegisters.InsufficentMemoryTamper.GetValue () ) ? ENABLED : TRIGGERED;
+            return ( await MemoryRegisters.InsufficientMemoryTamper.GetValue () ) ? ENABLED : TRIGGERED;
         }
 
         public async Task<string> P1Status_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )

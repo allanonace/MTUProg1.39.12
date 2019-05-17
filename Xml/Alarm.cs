@@ -122,10 +122,10 @@ namespace Xml
         [XmlElement("ImmediateTransmit")]
         public bool ImmediateTransmit { get; set; }
 
-        [XmlElement("InsufficientMemory")]
+        [XmlElement("InsufficentMemory")]
         public bool InsufficientMemory { get; set; }
 
-        [XmlElement("InsufficientMemoryImm")]
+        [XmlElement("InsufficentMemoryImm")]
         public bool InsufficientMemoryImm { get; set; }
         
         [XmlElement("InterfaceTamper")]

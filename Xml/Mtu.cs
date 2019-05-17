@@ -12,44 +12,44 @@ namespace Xml
     
         public Mtu ()
         {
-            this.CutWireDelaySetting  = false;
-            this.DataRead             = false;
-            this.DailyReads           = true;
-            // this.Description       = SET BY ACLARA
-            this.DigitsToDrop         = false;
-            this.Ecoder               = false;
-            this.FastMessageConfig    = false;
-            //this.Flow               = SET BY ACLARA [0,1]
-            this.GasCutWireAlarm      = false;
-            this.GasCutWireAlarmImm   = false;
-            this.InsufficentMemory    = false;
-            this.InsufficentMemoryImm = false;
-            this.InterfaceTamper      = true;
-            this.InterfaceTamperImm   = false;
-            this.IsEcoder             = false;
-            this.LastGasp             = false;
-            this.LastGaspImm          = false;
-            //this.MagneticTamper     = ¿?
-            //this.Model              = SET BY ACLARA
-            this.MtuDemand            = false;
-            this.NodeDiscovery        = false;
-            this.OnTimeSync           = false;
-            this.PulseCountOnly       = false;
-            this.RegisterCoverTamper  = false;
-            this.RequiresAlarmProfile = false;
-            this.ReverseFlowTamper    = false;
-            this.SerialComProblem     = false;
-            this.SerialComProblemImm  = false;
-            this.SerialCutWire        = false;
-            this.SerialCutWireImm     = false;
-            this.STAREncryptionType   = "AES256"; // [None,AES128,AES256]
-            this.SpecialSet           = false;
-            this.TamperPort1          = false;
-            this.TamperPort2          = false;
-            this.TamperPort1Imm       = false;
-            this.TamperPort2Imm       = false;
-            this.TiltTamper           = false;
-            this.TimeToSync           = false;
+            this.CutWireDelaySetting   = false;
+            this.DataRead              = false;
+            this.DailyReads            = true;
+            // this.Description        = SET BY ACLARA
+            this.DigitsToDrop          = false;
+            this.Ecoder                = false;
+            this.FastMessageConfig     = false;
+            //this.Flow                = SET BY ACLARA [0,1]
+            this.GasCutWireAlarm       = false;
+            this.GasCutWireAlarmImm    = false;
+            this.InsufficientMemory    = false;
+            this.InsufficientMemoryImm = false;
+            this.InterfaceTamper       = true;
+            this.InterfaceTamperImm    = false;
+            this.IsEcoder              = false;
+            this.LastGasp              = false;
+            this.LastGaspImm           = false;
+            //this.MagneticTamper      = ¿?
+            //this.Model               = SET BY ACLARA
+            this.MtuDemand             = false;
+            this.NodeDiscovery         = false;
+            this.OnTimeSync            = false;
+            this.PulseCountOnly        = false;
+            this.RegisterCoverTamper   = false;
+            this.RequiresAlarmProfile  = false;
+            this.ReverseFlowTamper     = false;
+            this.SerialComProblem      = false;
+            this.SerialComProblemImm   = false;
+            this.SerialCutWire         = false;
+            this.SerialCutWireImm      = false;
+            this.STAREncryptionType    = "AES256"; // [None,AES128,AES256]
+            this.SpecialSet            = false;
+            this.TamperPort1           = false;
+            this.TamperPort2           = false;
+            this.TamperPort1Imm        = false;
+            this.TamperPort2Imm        = false;
+            this.TiltTamper            = false;
+            this.TimeToSync            = false;
         }
 
         #region Elements
@@ -182,10 +182,10 @@ namespace Xml
         public bool GasCutWireAlarmImm { get; set; }
         
         [XmlElement("InsufficentMemory")]
-        public bool InsufficentMemory { get; set; }
+        public bool InsufficientMemory { get; set; }
 
         [XmlElement("InsufficentMemoryImm")]
-        public bool InsufficentMemoryImm { get; set; }
+        public bool InsufficientMemoryImm { get; set; }
         
         [XmlElement("InterfaceTamper")]
         public bool InterfaceTamper { get; set; }
@@ -259,6 +259,18 @@ namespace Xml
         public VERSION Version
         {
             get { return ( this.VersionString.ToLower ().Equals ( VERSION.NEW.ToString ().ToLower () ) ) ? VERSION.NEW : VERSION.ARCH; }
+        }
+        
+        [XmlIgnore]
+        public bool IsArchVersion
+        {
+            get { return this.Version == VERSION.ARCH; }
+        }
+
+        [XmlIgnore]
+        public bool IsNewVersion
+        {
+            get { return this.Version == VERSION.NEW; }
         }
 
         #endregion

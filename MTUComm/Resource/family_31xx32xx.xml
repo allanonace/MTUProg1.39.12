@@ -13,7 +13,7 @@
       <Register>TiltAlarm</Register>
       <Register>TiltTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>MagneticTamperStatus</Id>
@@ -23,7 +23,7 @@
       <Register>MagneticAlarm</Register>
       <Register>MagneticTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>InterfaceTamperStatus</Id>
@@ -33,7 +33,7 @@
       <Register>InterfaceAlarm</Register>
       <Register>InterfaceTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>RegisterCoverTamperStatus</Id>
@@ -43,7 +43,7 @@
       <Register>RegisterCoverAlarm</Register>
       <Register>RegisterCoverTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>ReverseFlowTamperStatus</Id>
@@ -53,7 +53,7 @@
       <Register>ReverseFlowAlarm</Register>
       <Register>ReverseFlowTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>P1CutWireTamperStatus</Id>
@@ -63,7 +63,7 @@
       <Register>P1CutWireAlarm</Register>
       <Register>P1CutWireTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>P2CutWireTamperStatus</Id>
@@ -73,7 +73,7 @@
       <Register>P2CutWireAlarm</Register>
       <Register>P2CutWireTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
 
   <!-- END - Alarms -->

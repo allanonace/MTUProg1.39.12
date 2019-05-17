@@ -1249,26 +1249,22 @@ namespace MTUComm
 
                 #region Check Meter for Encoder
 
-                if ( this.mtu.Port1.IsForEncoderOrEcoder || form.usePort2 &&
+                if ( this.mtu.Port1.IsForEncoderOrEcoder ||
+                     form.usePort2 &&
                      this.mtu.Port2.IsForEncoderOrEcoder )
                 {
                     Utils.Print ( "------CHECK_ENCODER_START-----" );
 
                     OnProgress ( this, new ProgressArgs ( 0, 0, "Checking Encoder..." ) );
-                }
 
-                // Check if selected Meter is supported for current MTU
-                if ( this.mtu.Port1.IsForEncoderOrEcoder )
-                    await this.CheckSelectedEncoderMeter ();
+                    // Check if selected Meter is supported for current MTU
+                    if ( this.mtu.Port1.IsForEncoderOrEcoder )
+                        await this.CheckSelectedEncoderMeter ();
 
-                if ( form.usePort2 &&
-                     this.mtu.Port2.IsForEncoderOrEcoder )
-                    await this.CheckSelectedEncoderMeter ( 2 );
+                    if ( form.usePort2 &&
+                         this.mtu.Port2.IsForEncoderOrEcoder )
+                        await this.CheckSelectedEncoderMeter ( 2 );
 
-                if ( this.mtu.Port1.IsForEncoderOrEcoder ||
-                     form.usePort2 &&
-                     this.mtu.Port2.IsForEncoderOrEcoder )
-                {
                     Utils.Print ( "------CHECK_ENCODER_FINISH-----" );
                 
                     await this.CheckIsTheSameMTU ();
@@ -1386,23 +1382,37 @@ namespace MTUComm
                     {
                         try
                         {
-                            if ( mtu.TiltTamper          ) map.TiltAlarm              = alarms.Tilt;
-                            if ( mtu.MagneticTamper      ) map.MagneticAlarm          = alarms.Magnetic;
-                            if ( mtu.RegisterCoverTamper ) map.RegisterCoverAlarm     = alarms.RegisterCover;
-                            if ( mtu.ReverseFlowTamper   ) map.ReverseFlowAlarm       = alarms.ReverseFlow;
-                            if ( mtu.TamperPort1         ) map.P1CutWireAlarm         = alarms.TamperPort1;
-                            if ( mtu.TamperPort2         ) map.P2CutWireAlarm         = alarms.TamperPort2;
-                            if ( mtu.InsufficentMemory   ) map.InsufficentMemoryAlarm = alarms.InsufficientMemory;
-                            if ( mtu.LastGasp            ) map.LastGaspAlarm          = alarms.LastGasp;
+                            // Set alarms [ Alarm Message Transmission ]
+                            if ( mtu.InsufficientMemory  ) map.InsufficientMemoryAlarm = alarms.InsufficientMemory;
+                            if ( mtu.GasCutWireAlarm     ) map.GasCutWireAlarm         = alarms.CutAlarmCable;
+                            if ( mtu.SerialComProblem    ) map.SerialComProblemAlarm   = alarms.SerialComProblem;
+                            if ( mtu.LastGasp            ) map.LastGaspAlarm           = alarms.LastGasp;
+                            if ( mtu.TiltTamper          ) map.TiltAlarm               = alarms.Tilt;
+                            if ( mtu.MagneticTamper      ) map.MagneticAlarm           = alarms.Magnetic;
+                            if ( mtu.RegisterCoverTamper ) map.RegisterCoverAlarm      = alarms.RegisterCover;
+                            if ( mtu.ReverseFlowTamper   ) map.ReverseFlowAlarm        = alarms.ReverseFlow;
+                            if ( mtu.SerialCutWire       ) map.SerialCutWireAlarm      = alarms.SerialCutWire;
+                            if ( mtu.TamperPort1         ) map.P1CutWireAlarm          = alarms.TamperPort1;
+                            if ( mtu.TamperPort2         ) map.P2CutWireAlarm          = alarms.TamperPort2;
+
+                            // Set immediate alarms [ Alarm Message Immediate ]
+                            if ( mtu.InsufficientMemoryImm ) map.InsufficientMemoryImmAlarm = alarms.InsufficientMemoryImm;
+                            if ( mtu.GasCutWireAlarmImm    ) map.GasCutWireImmAlarm         = alarms.CutWireAlarmImm;
+                            if ( mtu.SerialComProblemImm   ) map.SerialComProblemImmAlarm   = alarms.SerialComProblemImm;
+                            if ( mtu.LastGaspImm           ) map.LastGaspImmAlarm           = alarms.LastGaspImm;
+                            if ( mtu.TamperPort1Imm        ) map.P1CutWireImmAlarm          = alarms.TamperPort1Imm;
+                            if ( mtu.TamperPort2Imm        ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;
+                            if ( mtu.InterfaceTamperImm    ) map.InterfaceImmAlarm          = alarms.InterfaceTamperImm;
+                            if ( mtu.SerialCutWireImm      ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;
+
+                            // Write directly ( without conditions )
+                            map.ImmediateAlarm      = alarms.ImmediateAlarmTransmit;
+                            map.UrgentAlarm         = alarms.DcuUrgentAlarm;
+                            map.MessageOverlapCount = alarms.Overlap;
 
                             // For the moment only for the family 33xx
-                            if ( map.ContainsMember ( "AlarmMask1" ) ) map.AlarmMask1 = false;
+                            if ( map.ContainsMember ( "AlarmMask1" ) ) map.AlarmMask1 = false; // Set '0'
                             if ( map.ContainsMember ( "AlarmMask2" ) ) map.AlarmMask2 = false;
-                        
-                            // Write directly ( without conditions )
-                            map.P1ImmediateAlarm    = alarms.ImmediateAlarmTransmit;
-                            map.P1UrgentAlarm       = alarms.DcuUrgentAlarm;
-                            map.MessageOverlapCount = alarms.Overlap;
                         }
                         catch ( Exception e )
                         {
@@ -1418,6 +1428,7 @@ namespace MTUComm
                 #region Frequencies
 
                 if ( mtu.TimeToSync &&
+                     mtu.IsNewVersion &&
                      global.AFC &&
                      await map.MtuSoftVersion.GetValue () >= 19 )
                 {

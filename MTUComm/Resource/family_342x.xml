@@ -6,14 +6,34 @@
   <!-- INIT - Alarms -->
 
   <Overload> <!-- OK -->
-    <Id>InsufficentMemoryTamperStatus</Id>
-    <Description>Insufficent Memory Tamper Status</Description>
+    <Id>InsufficientMemoryTamperStatus</Id>
+    <Description>Insufficient Memory Tamper Status</Description>
     <Type>string</Type>
     <Registers>
-      <Register>InsufficentMemoryAlarm</Register>
-      <Register>InsufficentMemoryTamper</Register>
+      <Register>InsufficientMemoryAlarm</Register>
+      <Register>InsufficientMemoryTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK -->
+    <Id>GasCutWireTamperStatus</Id>
+    <Description>Gas Cut Wire Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>GasCutWireAlarm</Register>
+      <Register>GasCutWireTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK -->
+    <Id>SerialComProblemTamperStatus</Id>
+    <Description>Serial Com Port Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>SerialComProblemAlarm</Register>
+      <Register>SerialComProblemTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>LastGaspTamperStatus</Id>
@@ -23,7 +43,7 @@
       <Register>LastGaspAlarm</Register>
       <Register>LastGaspTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>TiltTamperStatus</Id>
@@ -33,7 +53,7 @@
       <Register>TiltAlarm</Register>
       <Register>TiltTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>MagneticTamperStatus</Id>
@@ -43,17 +63,17 @@
       <Register>MagneticAlarm</Register>
       <Register>MagneticTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>InterfaceTamperStatus</Id>
-    <Description>Interface TamperS tatus</Description>
+    <Description>Interface Tamper Status</Description>
     <Type>string</Type>
     <Registers>
       <Register>InterfaceAlarm</Register>
       <Register>InterfaceTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>RegisterCoverTamperStatus</Id>
@@ -63,7 +83,7 @@
       <Register>RegisterCoverAlarm</Register>
       <Register>RegisterCoverTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>ReverseFlowTamperStatus</Id>
@@ -73,7 +93,17 @@
       <Register>ReverseFlowAlarm</Register>
       <Register>ReverseFlowTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK -->
+    <Id>SerialCutWireTamperStatus</Id>
+    <Description>Serial Cut Wire Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>SerialCutWireAlarm</Register>
+      <Register>SerialCutWireTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>P1CutWireTamperStatus</Id>
@@ -83,7 +113,7 @@
       <Register>P1CutWireAlarm</Register>
       <Register>P1CutWireTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
     <Id>P2CutWireTamperStatus</Id>
@@ -93,7 +123,7 @@
       <Register>P2CutWireAlarm</Register>
       <Register>P2CutWireTamper</Register>
     </Registers>
-    <CustomGet>method</CustomGet>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
 
   <!-- END - Alarms -->
@@ -285,13 +315,115 @@
     <CustomSet/>
   </Register>
 
+  <!-- Set Alarms Imm -->
+  <Register> <!-- OK -->
+    <Id>InsufficientMemoryImmAlarm</Id>
+    <Description>Set for enable  tamper</Description>
+    <Type>bool</Type>
+    <Address>192</Address>
+    <Size>0</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>GasCutWireImmAlarm</Id>
+    <Description>Set for enable  tamper</Description>
+    <Type>bool</Type>
+    <Address>192</Address>
+    <Size>5</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>SerialComProblemImmAlarm</Id>
+    <Description>Set for enable  tamper</Description>
+    <Type>bool</Type>
+    <Address>192</Address>
+    <Size>6</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>LastGaspImmAlarm</Id>
+    <Description>Set for enable  tamper</Description>
+    <Type>bool</Type>
+    <Address>192</Address>
+    <Size>7</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2CutWireImmAlarm</Id>
+    <Description>Set for enable  tamper</Description>
+    <Type>bool</Type>
+    <Address>193</Address>
+    <Size>3</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>InterfaceImmAlarm</Id>
+    <Description>Set for enable  tamper</Description>
+    <Type>bool</Type>
+    <Address>193</Address>
+    <Size>4</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>SerialCutWireImmAlarm</Id>
+    <Description>Set for enable  tamper</Description>
+    <Type>bool</Type>
+    <Address>193</Address>
+    <Size>7</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P1CutWireImmAlarm</Id>
+    <Description>Set for enable  tamper</Description>
+    <Type>bool</Type>
+    <Address>193</Address>
+    <Size>7</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+
   <!-- Set Alarms -->
   <Register> <!-- OK -->
-    <Id>InsufficentMemoryAlarm</Id>
-    <Description>Set for enable insufficent memory tamper</Description>
+    <Id>InsufficientMemoryAlarm</Id>
+    <Description>Set for enable insufficient memory tamper</Description>
     <Type>bool</Type>
     <Address>194</Address>
     <Size>0</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>GasCutWireAlarm</Id>
+    <Description>Set for enable cut cable tamper</Description>
+    <Type>bool</Type>
+    <Address>194</Address>
+    <Size>5</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>SerialComProblemAlarm</Id>
+    <Description>Set for enable serial com problem tamper</Description>
+    <Type>bool</Type>
+    <Address>194</Address>
+    <Size>6</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
@@ -376,14 +508,44 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
+  <Register> <!-- OK -->
+    <Id>SerialCutWireAlarm</Id>
+    <Description>Set to enable serial cut wire tamper</Description>
+    <Type>bool</Type>
+    <Address>195</Address>
+    <Size>7</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
 
   <!-- Tampers -->
   <Register> <!-- OK -->
-    <Id>InsufficentMemoryTamper</Id>
-    <Description>Insufficent Memory Tamper</Description>
+    <Id>InsufficientMemoryTamper</Id>
+    <Description>Insufficient Memory Tamper</Description>
     <Type>bool</Type>
     <Address>108</Address>
     <Size>0</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>GasCutWireTamper</Id>
+    <Description>Last Gasp Tamper</Description>
+    <Type>bool</Type>
+    <Address>108</Address>
+    <Size>5</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>SerialComProblemTamper</Id>
+    <Description>Serial Com Problem Tamper</Description>
+    <Type>bool</Type>
+    <Address>108</Address>
+    <Size>6</Size>
     <Write>false</Write>
     <CustomGet/>
     <CustomSet/>
@@ -461,6 +623,16 @@
   <Register> <!-- OK -->
     <Id>P1CutWireTamper</Id>
     <Description>Set when cut wire tamper</Description>
+    <Type>bool</Type>
+    <Address>109</Address>
+    <Size>7</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>SerialCutWireTamper</Id>
+    <Description>Serial Cut Wire tamper</Description>
     <Type>bool</Type>
     <Address>109</Address>
     <Size>7</Size>

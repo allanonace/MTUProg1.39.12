@@ -107,7 +107,7 @@ namespace ble_library
             Utils.PrintDeep ( "BleSerial.Write.." +
                 " Buffer " + Utils.ByteArrayToString ( buffer ) +
                 " | Offset ( is always ) " + offset.ToString ( "D2" ) +
-                " | Count " + count.ToString ( "D2" ) );
+                " | NumBytesToWrite " + count.ToString ( "D2" ) );
         
             try
             {
@@ -117,6 +117,8 @@ namespace ble_library
 
                 if ( ble_port_serial.semaphore.CurrentCount <= 0 )
                     ble_port_serial.semaphore.Release ();
+                    
+                ble_port_serial.timeInit = 0L;
             
                 int totalBytesToWrite = count;
                 int bytesWritten = 0;
@@ -126,9 +128,8 @@ namespace ble_library
                     int bytesDataFrame = ( totalBytesToWrite < 16 ) ? totalBytesToWrite : 16;
     
                     Utils.PrintDeep ( "BleSerial.Write.." +
-                        " TotalBytes " + totalBytesToWrite.ToString ( "D2" ) +
-                        " | Written " + bytesWritten.ToString ( "D2" ) +
-                        " | NextDataFrame " + bytesDataFrame.ToString ( "D2" ) );
+                        " Next stream " + bytesDataFrame.ToString ( "D2" ) + " bytes" +
+                        " | Written " + bytesWritten.ToString ( "D2" ) + "/" + count.ToString ( "D2" ) );
                     
                     await ble_port_serial.Write_Characteristic ( buffer, bytesWritten + offset, bytesDataFrame );
                     

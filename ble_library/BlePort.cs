@@ -361,6 +361,8 @@ namespace ble_library
             }
         }
 
+        public long timeInit;
+
         /// <summary>
         /// Writes a number of bytes via Bluetooth LE to the peripheral gatt connnection
         /// </summary>
@@ -396,24 +398,34 @@ namespace ble_library
                 }.ToArray ()
                 .Concat ( AES_Encrypt ( dataToCipher, dynamicPass ) )
                 .Concat ( new byte[] { 0x00 } ).ToArray ();
-
-                Utils.PrintDeep ( "BlePort.WriteCharacteristic.." +
-                    " Buffer " + Utils.ByteArrayToString ( buffer ) +
-                    " [ " + count.ToString ( "D2" ) + " ]" +
-                    " | Offset " + offset.ToString ( "D2" ) +
-                    " | Ciph.SentCounter " + cipheredDataSentCounter +
-                    " | Ret " + Utils.ByteArrayToString ( ret ) +
-                    " [ " + ret.Length + " ]" );
+                
+                Utils.PrintDeep ( "BlePort.WriteCharacteristic.. " +
+                "StreamToPrepare = " + Utils.ByteArrayToString ( buffer ) + " | " +
+                "NumBytesToWrite " + count.ToString ( "D2" ) + " | " +
+                "Offset " + offset.ToString ( "D2" ) );
+                
+                Utils.PrintDeep ( "BlePort.WriteCharacteristic.. " +
+                "StreamToWrite = " +
+                "0x02 + " +
+                "CipherCount 0x" + cipheredDataSentCounter.ToString ( "D2" ) + " ( " + Convert.ToInt32 ( cipheredDataSentCounter.ToString (), 16 ) + " ) + " +
+                "NumBytesToWrite 0x" + dataCount + " ( " + Convert.ToInt32 ( dataCount.ToString (), 16 ) + " ) + " +
+                "Buffer.AESx16 + 0x0 " +
+                "= " + Utils.ByteArrayToString ( ret ) + " [ Length " + ret.Length + " ]" );
 
                 cipheredDataSentCounter++;
                 if ( cipheredDataSentCounter <= 0 )
                     cipheredDataSentCounter = 1;
                 
-                Utils.PrintDeep ( "BlePort.Write_Characteristic -> Waiting semaphore.." );
+                Utils.PrintDeep ( "BlePort.WriteCharacteristic.. Waiting semaphore" );
                 
                 await this.semaphore.WaitAsync ();
                 
-                Utils.PrintDeep ( "BlePort.Write_Characteristic -> My turn!" );
+                long nextTimeInit = DateTimeOffset.Now.ToUnixTimeMilliseconds ();
+                
+                Utils.PrintDeep ( "BlePort.WriteCharacteristic.. My turn | Start at " + timeInit +
+                    ( ( timeInit > 0 ) ? " [ Since prev. " + ( nextTimeInit - timeInit ) + " ms. ]" : string.Empty ) );
+                
+                timeInit = nextTimeInit;
                 
                 // Controls exception inside method UpdateACKBuffer
                 ackException = new TaskCompletionSource<bool> ();
@@ -428,17 +440,17 @@ namespace ble_library
                 if ( await ackException.Task )
                     throw new Exception ();
                 
-                Utils.PrintDeep ( "BlePort.Write_Characteristic -> Already writen" );
+                Utils.PrintDeep ( "BlePort.WriteCharacteristic.. Already writen" );
             }
             catch (GattException ex)
             {
-                Utils.PrintDeep ( "BlePort.Write_Characteristic -> ERROR: " + ex.Message + " ( GattException )" );
+                Utils.PrintDeep ( "BlePort.WriteCharacteristic -> ERROR: " + ex.Message + " ( GattException )" );
                 
                 throw ex;
             }
             catch ( Exception exg )
             {
-                Utils.PrintDeep ( "BlePort.Write_Characteristic -> ERROR: " + exg.Message );
+                Utils.PrintDeep ( "BlePort.WriteCharacteristic -> ERROR: " + exg.Message );
                 
                 throw exg;
             }
@@ -461,10 +473,11 @@ namespace ble_library
                 // FIFO collection to read data frames in the same order received
                 for ( int i = 0; i < tempArray.Length; i++ )
                     buffer_ble_data.Enqueue ( tempArray[ i ] );
-                    
-                Utils.PrintDeep ( "BlePort.UpdateBuffer: " + Utils.ByteArrayToString ( bytes ) +
-                    " => Decrypt: [ " + bytesOfData.ToString ( "D2" ) + " -> " + buffer_ble_data.Count + " ] " +
-                    Utils.ByteArrayToString ( tempArray ) );
+                
+                Utils.PrintDeep ( "BlePort.UpdateBuffer.. " +
+                "Stream = " + Utils.ByteArrayToString ( bytes ) +
+                " | Stream.Decrypted = " + Utils.ByteArrayToString ( tempArray ) +
+                " [ +" + bytesOfData + " = " + buffer_ble_data.Count + " received ]" );
                 
                 //Utils.Print("Rx buffer updated");
             }
@@ -614,19 +627,20 @@ namespace ble_library
         
             try
             {
-                Utils.PrintDeep ( "BlePort.UpdateACKBuffer: " + Utils.ByteArrayToString ( bytes ) );
+                Utils.PrintDeep ( "BlePort.UpdateACKBuffer.. " + Utils.ByteArrayToString ( bytes ) +
+                " | CipherCount " + bytes[ 1 ].ToString ( "D2" ) );
             
                 //bytes.Skip(3).Take(1).ToArray().SequenceEqual(new byte[] { 0x01 }))
                 if ( bytes[ LENGTH_HEADER ] == 0x01 )
                 {
-                    Utils.PrintDeep ( "BlePort.UpdateACKBuffer -> NO" );
+                    Utils.PrintDeep ( "BlePort.UpdateACKBuffer.. NO" );
                 
                     //cipheredDataSentCounter = bytes.Skip(1).Take(1).ToArray()[0];
                     cipheredDataSentCounter = bytes[ INDEX_CYPHER_COUNT ]++;
                     if ( cipheredDataSentCounter <= 0 )
                         cipheredDataSentCounter = 1;
                     
-                    Utils.PrintDeep ( "* BlePort.UpdateACKBuffer -> IF" +
+                    Utils.PrintDeep ( "* BlePort.UpdateACKBuffer.. IF" +
                         " Buffer " + Utils.ByteArrayToString ( writeSavedBuffer ) +
                         " | CipheredDataSentCounter " + cipheredDataSentCounter +
                         " | Offset " + writeSavedOffset.ToString ( "D2" ) +
@@ -650,7 +664,8 @@ namespace ble_library
             
             if ( ! fail )
             {
-                Utils.PrintDeep ( "BlePort.UpdateACKBuffer -> Release semaphore" );
+                long timeEnd = DateTimeOffset.Now.ToUnixTimeMilliseconds ();
+                Utils.PrintDeep ( "BlePort.UpdateACKBuffer.. Release semaphore | Finish at " + timeEnd + " [ Dif = " + ( timeEnd - timeInit ) + " ms. ]" );
 
                 this.semaphore.Release ();
             }

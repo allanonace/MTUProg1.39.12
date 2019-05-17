@@ -290,6 +290,10 @@ namespace MTUComm
                     XElement alarmSelection = new XElement("AlarmSelection");
                     logger.AddAtrribute ( alarmSelection, "display", "Alarm Selection");
 
+                    string overlap = alarms.Overlap.ToString();
+                    logger.Parameter ( alarmSelection,
+                    new Parameter("Overlap", "Message Overlap", overlap));
+
                     string alarmConfiguration = alarms.Name;
                     logger.Parameter ( alarmSelection,
                     new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
@@ -302,9 +306,21 @@ namespace MTUComm
                     logger.Parameter ( alarmSelection,
                     new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
 
-                    string overlap = alarms.Overlap.ToString();
-                    logger.Parameter ( alarmSelection,
-                    new Parameter("Overlap", "Message Overlap", overlap));
+                    if ( mtu.InsufficientMemory )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter ( "InsufficentMemory", "Insufficent Memory", await map.InsufficientMemoryTamperStatus.GetValue () ) );
+
+                    if ( mtu.GasCutWireAlarm )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter ( "CutAlarmCable", "Cut Alarm Cable", await map.GasCutWireTamperStatus.GetValue () ) );
+
+                    if ( mtu.SerialComProblem )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter ( "SerialComProblem", "Serial Com Problem", await map.SerialComProblemTamperStatus.GetValue () ) );
+
+                    if ( mtu.LastGasp )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter ( "LastGasp", "Last Gasp", await map.LastGaspTamperStatus.GetValue () ) );
 
                     if ( mtu.TiltTamper )
                         logger.Parameter( alarmSelection,
@@ -330,25 +346,17 @@ namespace MTUComm
                         new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
                     }
 
-                    // TODO: Use same labels than STAR Programmer
+                    if ( mtu.SerialCutWire )
+                        logger.Parameter ( alarmSelection,
+                        new Parameter ( "SerialCutWire", "Serial Cut Wire", await map.SerialCutWireTamperStatus.GetValue () ) );
+
                     if ( mtu.TamperPort1 )
                         logger.Parameter ( alarmSelection,
-                        new Parameter ( "CutWirePort1", "Cut Wire Port1", await map.P1CutWireTamperStatus.GetValue () ) );
+                        new Parameter ( "Cut1WireTamper", "Cut Port1 Wire Tamper", await map.P1CutWireTamperStatus.GetValue () ) );
 
-                    // TODO: Use same labels than STAR Programmer
                     if ( mtu.TamperPort2 )
                         logger.Parameter ( alarmSelection,
-                        new Parameter ( "CutWirePort2", "Cut Wire Port2", await map.P2CutWireTamperStatus.GetValue () ) );
-
-                    // TODO: Use same labels than STAR Programmer
-                    if ( mtu.InsufficentMemory )
-                        logger.Parameter ( alarmSelection,
-                        new Parameter ( "InsufficentMemory", "Insufficent Memory", await map.InsufficentMemoryTamperStatus.GetValue () ) );
-
-                    // TODO: Use same labels than STAR Programmer
-                    if ( mtu.LastGasp )
-                        logger.Parameter ( alarmSelection,
-                        new Parameter ( "LastGasp", "Last Gasp", await map.LastGaspTamperStatus.GetValue () ) );
+                        new Parameter ( "Cut2WireTamper", "Cut Port2 Wire Tamper", await map.P2CutWireTamperStatus.GetValue () ) );
 
                     this.addMtuAction.Add(alarmSelection);
                 }
