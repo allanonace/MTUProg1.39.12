@@ -15,6 +15,7 @@ namespace MTUComm
         {
             private const string CER_HEADER = "-----BEGIN CERTIFICATE-----\n";
             private const string CER_FOOTER = "\n-----END CERTIFICATE-----";
+            private const string CER_INIT   = "MII";
         
             public string ftpDownload_User;
             public string ftpDownload_Pass;
@@ -86,7 +87,15 @@ namespace MTUComm
                     }
                     else return;
 
-                    this.certificate = new X509Certificate2(Encoding.ASCII.GetBytes(CER_HEADER + content + CER_FOOTER));
+                    byte[] contentBytes;
+
+                    // If the cer file used was already in base64 format, was saved in the
+                    // txt file doubly converted in base64 and directly with header and footer
+                    if ( ! content.StartsWith ( CER_INIT ) )
+                         contentBytes = Convert.FromBase64String ( content );
+                    else contentBytes = Encoding.ASCII.GetBytes ( CER_HEADER + content + CER_FOOTER );
+                    
+                    this.certificate = new X509Certificate2 ( contentBytes );
 
                     Utils.Print("Local parameters loaded..");
                     Utils.Print("FTP: " + this.ftpDownload_Host + ":" + this.ftpDownload_Port + " - " + this.ftpDownload_User + " [ " + this.ftpDownload_Pass + " ]");

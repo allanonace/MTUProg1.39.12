@@ -369,6 +369,8 @@ namespace aclara_meters
                         File.WriteAllText ( txtPath, strBase64 );                  // Create new {name}.txt file with base64 string and delete .cer
                         File.Delete ( pathCer );
                         
+                        Utils.Print ( "Certificate to base64 txt: '" + strBase64 + "'" );
+                        
                         break;
                     }
                 }
