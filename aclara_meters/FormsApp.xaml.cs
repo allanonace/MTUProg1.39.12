@@ -83,9 +83,11 @@ namespace aclara_meters
 
         #region Properties
 
+        private static string appName = "Aclara MTU Programmer ";
+
         public static string AppName
         {
-            get { return "Aclara MTU Programmer iOS"; }
+            get { return appName; }
         }
 
         #endregion
@@ -109,9 +111,10 @@ namespace aclara_meters
                 Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
                 Data.Set ( "IsAndroid", Device.RuntimePlatform == Device.Android );
 
-                this.adapter = adapter;
-                this.dialogs = dialogs;
+                this.adapter    = adapter;
+                this.dialogs    = dialogs;
                 this.appVersion = appVersion;
+                appName        += ( Data.Get.IsAndroid ) ? "Android" : "iOS";
 
                 if ( Data.Get.IsAndroid )
                 {
