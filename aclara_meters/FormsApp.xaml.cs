@@ -85,7 +85,7 @@ namespace aclara_meters
 
         public static string AppName
         {
-            get { return "Aclara MTU Programmer"; }
+            get { return "Aclara MTU Programmer iOS"; }
         }
 
         #endregion
