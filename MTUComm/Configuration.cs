@@ -78,11 +78,14 @@ namespace MTUComm
             {
                 if ( ! avoidXmlError )
                 {
-                    if ( Errors.IsOwnException ( e ) )
+                    if (Errors.IsOwnException(e))
                         throw e;
-                    else if ( e is FileNotFoundException )
-                         throw new ConfigurationFilesNotFoundException ();
-                    else throw new ConfigurationFilesCorruptedException ();
+                    else if (e is FileNotFoundException)
+                        throw new ConfigurationFilesNotFoundException();
+                    else
+                    {
+                        throw new ConfigurationFilesCorruptedException();
+                    }
                 }
             }
         }

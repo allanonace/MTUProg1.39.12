@@ -14,10 +14,10 @@ namespace MTUComm.MemoryMap
         private const string NOON        = "Noon";
         private const string AM          = " AM";
         private const string PM          = " PM";
-        private const string OFF         = "Off";
+        private const string OFF         = "OFF";
 
-        private const string STATE_ON    = "On";
-        private const string STATE_OFF   = "Off";
+        private const string STATE_ON    = "ON";
+        private const string STATE_OFF   = "OFF";
 
         private const string YES         = "Yes";
         private const string NO          = "No";

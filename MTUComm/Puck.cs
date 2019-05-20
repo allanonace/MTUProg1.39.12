@@ -60,7 +60,7 @@ namespace MTUComm
                         Advertisement.
                         ManufacturerSpecificData.
                         ElementAt(posEnd).Data.Skip(4).Take(1).ToArray()[0];
-                Console.Write($"******************* Fix Serial number: {SerialNumber} - Bateria: {batt.ToString()}" + Environment.NewLine);
+               // Console.Write($"******************* Fix Serial number: {SerialNumber} - Bateria: {batt.ToString()}" + Environment.NewLine);
                 return BatteryRound(batt);
             }
         }
@@ -74,7 +74,7 @@ namespace MTUComm
                         Take(1).ToArray()[0];
                 if (battSerial >= 0 && battSerial <= 100 && battSerial <= batt)
                     batt = battSerial;
-                Console.Write($"******************* Refresh Serial number: {SerialNumber} - Bateria: {batt.ToString()}" + Environment.NewLine);
+               // Console.Write($"******************* Refresh Serial number: {SerialNumber} - Bateria: {batt.ToString()}" + Environment.NewLine);
 
                 return BatteryRound(batt);
             }
@@ -94,7 +94,7 @@ namespace MTUComm
             else if (batt >= 11) batt = 20;
             else batt = 10;
 
-            Console.Write($"******************* ***************************** - Bateria: {batt.ToString()}" + Environment.NewLine);
+          //  Console.Write($"******************* ***************************** - Bateria: {batt.ToString()}" + Environment.NewLine);
 
             return batt;
         }

@@ -22,13 +22,10 @@ using Renci.SshNet;
 using Renci.SshNet.Sftp;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
-
-using System.Reflection;
-
-using System.Text;
 using Xml;
 using System.Xml.Linq;
 using aclara_meters.Helpers;
+using aclara_meters.util;
 using System.Threading;
 using Xamarin.Essentials;
 
@@ -100,7 +97,7 @@ namespace aclara_meters
         }
 
         public FormsApp (
-            IBluetoothLowEnergyAdapter adapter,
+            IBluetoothLowEnergyAdapter badapter,
             IUserDialogs dialogs,
             string appVersion )
         {
@@ -161,8 +158,15 @@ namespace aclara_meters
 
             AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
 
-            // Force to not download server XML files
-           
+            // Config path
+            ConfigPaths();
+
+            if (Device.RuntimePlatform == Device.iOS)
+            {
+                var MamServ = DependencyService.Get<IMAMService>();
+                MamServ.UtilMAMService();
+            }
+
             this.LoadConfigurationAndOpenScene ( dialogs );   
 
         }
@@ -204,7 +208,8 @@ namespace aclara_meters
                     GenericUtilsClass.DownloadConfigFiles();
                     return true;
                 }
-                MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
+                this.ShowErrorAndKill(new NoInternetException());
+                //MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
                 return false;
             }
             else
@@ -216,13 +221,13 @@ namespace aclara_meters
                 //this.abortMission = !this.HasDeviceAllXmls(Mobile.ConfigPublicPath);
                 if (HasPublicFiles)
                 {
-                    // Install certificate if needed ( Convert from .cer to base64 string / .txt )
-                    if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPublicPath))
-                    {
-                        this.ShowErrorAndKill(new CertificateFileNotValidException());
+                    //// Install certificate if needed ( Convert from .cer to base64 string / .txt )
+                    //if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPublicPath))
+                    //{
+                    //    this.ShowErrorAndKill(new CertificateFileNotValidException());
 
-                        return false;
-                    }
+                    //    return false;
+                    //}
                     //File.Copy(file.FullName, Path.Combine(url_to_copy, file.Name), true);
                     bool CPD = false;
                     if (GenericUtilsClass.TagGlobal("ConfigPublicDir", out dynamic value))
@@ -282,6 +287,7 @@ namespace aclara_meters
                     }
                     else
                     {
+                        this.ShowErrorAndKill(new NoInternetException());
                         this.abortMission = true;
                         return false;
                     }
@@ -292,7 +298,7 @@ namespace aclara_meters
 
         private void  LoadConfigurationAndOpenScene(IUserDialogs dialogs)
         {
-            ConfigPaths();
+            //ConfigPaths();
 
             // Only download configuration files from FTP when all are not installed
            
@@ -300,6 +306,13 @@ namespace aclara_meters
             if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
             {
                 Result = InitialConfigProcess();
+                //Install certificate if needed(Convert from.cer to base64 string / .txt)
+                if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPath))
+                {
+                    this.ShowErrorAndKill(new CertificateFileNotValidException());
+
+                    return;
+                }
             }
 
             if (Result)
@@ -308,7 +321,22 @@ namespace aclara_meters
                 // If some configuration file is not present, Configuration.cs initialization should avoid
                 // launch exception when try to parse xmls, to be able to use generating the log error
                 if (!this.InitializeConfiguration())
+                {
+                    GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
                     return;
+                }
+
+                if (!Mobile.configData.HasIntune) Utils.Print("Local parameters loaded..");
+                else Utils.Print("Intune parameters loaded..");
+                if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
+                {
+                    Utils.Print("FTP: " + Mobile.configData.ftpDownload_Host + ":" + Mobile.configData.ftpDownload_Port + " - "
+                        + Mobile.configData.ftpDownload_User + " [ " + Mobile.configData.ftpDownload_Pass + " ]");
+                    if (Mobile.configData.IsCertLoaded)
+                    {
+                        Utils.Print("Certificate: " + Mobile.configData.certificate.Subject + " [ " + Mobile.configData.certificate.NotAfter + " ]");
+                    }
+                }
 
                 if (this.abortMission)
                 {
@@ -417,7 +445,7 @@ namespace aclara_meters
             try
             {
                 ScriptingMode = true; 
-                ble_interface.Close();
+                if (ble_interface.IsOpen()) ble_interface.Close();
 
                 #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
 
@@ -450,8 +478,13 @@ namespace aclara_meters
                     File.WriteAllText ( path, Base64Decode ( script_data ) );
 
                 if ( callback != null ) { /* ... */ }
-                tcs1 = new TaskCompletionSource<bool>(); 
-                bool result = await tcs1.Task;
+
+
+                if (MainPage == null)  // no interactive 
+                {
+                    tcs1 = new TaskCompletionSource<bool>(); 
+                    bool result = await tcs1.Task;
+                }
 
                 await Task.Run(async () =>
                 {

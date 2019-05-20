@@ -11,7 +11,6 @@ namespace aclara_meters.Droid
 {
     public class BorderlessPickerRenderer : PickerRenderer
     {
-       
         public BorderlessPickerRenderer(Context context) : base(context)
         {
         }

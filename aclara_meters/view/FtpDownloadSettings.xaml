@@ -12,9 +12,9 @@
                             HorizontalOptions="Center" VerticalOptions="Center">
                 <Frame x:Name="frm_FTP" CornerRadius="6" HasShadow="true" OutlineColor="White" Scale="{Binding ScaleFrame}" Margin="30" Padding="5" Opacity="1" BackgroundColor="White">
                     <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
-                        <Label Margin="6,6,6,6" HorizontalTextAlignment="Center" FontSize="20" Text="FTP Settings to download configuration files">
+                        <Label Margin="10,10,10,10" HorizontalTextAlignment="Center" FontSize="20" Text="FTP Settings to download configuration files">
                         </Label>
-                        <StackLayout IsVisible="true" Margin="0,0,0,0" x:Name="ftp_block" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
+                        <StackLayout IsVisible="true" Margin="10,0" x:Name="ftp_block" VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
                             <StackLayout VerticalOptions="StartAndExpand" HorizontalOptions="FillAndExpand">
                                 <StackLayout Orientation="Horizontal">
                                     <Label Text="Remote Host" Margin="0,4,0,0" x:Name="lb_remote_host" Font="Bold,17" HorizontalOptions="Start" />
@@ -23,9 +23,9 @@
                                 <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                     <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                         <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal">
-                                            <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text="" HeightRequest="40" x:Name="tbx_remote_host" Keyboard="Text" FontSize="17" HorizontalTextAlignment="Start">
+                                            <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text="" WidthRequest="150" HeightRequest="40" x:Name="tbx_remote_host" Keyboard="Text" FontSize="17" HorizontalTextAlignment="Start">
                                             </Controls:BorderlessEntry>
-                                            <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text="" HeightRequest="40" x:Name="tbx_remote_port" Keyboard="Text" FontSize="17" HorizontalTextAlignment="End">
+                                            <Controls:BorderlessEntry Margin="0,0,0,0" HorizontalOptions="FillAndExpand" Text=""  HeightRequest="40" x:Name="tbx_remote_port" Keyboard="Text" FontSize="17" HorizontalTextAlignment="End">
                                             </Controls:BorderlessEntry>
                                         </StackLayout>
                                     </Frame>
@@ -66,12 +66,12 @@
                             </StackLayout>
                         </StackLayout>
                         <StackLayout x:Name="Botones" Margin="10,10,10,10" Orientation="Horizontal">
-                            <Label HorizontalOptions="StartAndExpand" HorizontalTextAlignment="Start" TextColor="#6aa2b8" FontSize="18" Text="OK">
+                            <Label HorizontalOptions="StartAndExpand" HorizontalTextAlignment="Start" TextColor="#6aa2b8" FontSize="20" Text="OK">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer x:Name="btn_ok" Tapped="OK_Clicked" />
                                 </Label.GestureRecognizers>
                             </Label>
-                            <Label HorizontalOptions="EndAndExpand" HorizontalTextAlignment="End" TextColor="#6aa2b8" FontSize="18" Text="Cancel">
+                            <Label HorizontalOptions="EndAndExpand" HorizontalTextAlignment="End" TextColor="#6aa2b8" FontSize="20" Text="Cancel">
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer x:Name="btn_cancel" Tapped="Cancel_Clicked" />
                                 </Label.GestureRecognizers>

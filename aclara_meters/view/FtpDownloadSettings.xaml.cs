@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Xamarin.Forms;
-using Rg.Plugins.Popup.Services;
+
 using Xamarin.Essentials;
 using Acr.UserDialogs;
 using System.Threading;

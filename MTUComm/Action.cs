@@ -80,7 +80,8 @@ namespace MTUComm
             ReadData,
             MtuInstallationConfirmation,
             Diagnosis,
-            BasicRead
+            BasicRead,
+            ReadFabric
         }
 
         public static Dictionary<ActionType, String> displays = new Dictionary<ActionType, String>()
@@ -97,7 +98,8 @@ namespace MTUComm
             {ActionType.TurnOnMtu,"Turn On MTU" },
             {ActionType.ReadData,"Read Data Log" },
             {ActionType.MtuInstallationConfirmation,"Install Confirmation" },
-            {ActionType.Diagnosis, string.Empty }
+            {ActionType.Diagnosis, string.Empty },
+            {ActionType.ReadFabric, "Read Fabric" }
         };
 
         public static Dictionary<ActionType, String> tag_types = new Dictionary<ActionType, String>()
@@ -114,7 +116,8 @@ namespace MTUComm
             {ActionType.TurnOnMtu,"TurnOnMtu" },
             {ActionType.ReadData, "ReadDataLog" },
             {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
-            {ActionType.Diagnosis, string.Empty }
+            {ActionType.Diagnosis, string.Empty },
+            {ActionType.ReadFabric, "ReadFabric" }
         };
 
         public static Dictionary<ActionType, String> tag_reasons = new Dictionary<ActionType, String>()
@@ -131,7 +134,8 @@ namespace MTUComm
             {ActionType.TurnOnMtu, "TurnOnMtu" },
             {ActionType.ReadData, "DataRead" },
             {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
-            {ActionType.Diagnosis, string.Empty }
+            {ActionType.Diagnosis, string.Empty },
+            {ActionType.ReadFabric, "ReadFabric" }
         };
 
         #endregion
@@ -404,11 +408,17 @@ namespace MTUComm
 
                 switch (type)
                 {
+                    case ActionType.ReadFabric:
+                        comm.OnReadFabric -= Comm_OnReadFabric;
+                        comm.OnReadFabric += Comm_OnReadFabric;
+                        break;
+
                     case ActionType.ReadMtu:
+                    case ActionType.MtuInstallationConfirmation:
                         comm.OnReadMtu -= Comm_OnReadMtu;
                         comm.OnReadMtu += Comm_OnReadMtu;
                         break;
-
+                       
                     case ActionType.AddMtu:
                     case ActionType.AddMtuAddMeter:
                     case ActionType.AddMtuReplaceMeter:
@@ -428,11 +438,7 @@ namespace MTUComm
                         comm.OnTurnOffMtu -= Comm_OnTurnOnOffMtu;
                         comm.OnTurnOffMtu += Comm_OnTurnOnOffMtu;
                         break;
-
-                    case ActionType.MtuInstallationConfirmation:
-                        comm.OnReadMtu -= Comm_OnReadMtu;
-                        comm.OnReadMtu += Comm_OnReadMtu;
-                        break;
+                                       
 
                     case ActionType.ReadData:
                         Parameter param = mparameters.Find(x => (x.Type == Parameter.ParameterType.DaysOfRead));
@@ -513,7 +519,10 @@ namespace MTUComm
                     break;
             }
         }
-
+        private async Task Comm_OnReadFabric(object sender)
+        {
+            OnFinish(this,null);
+        }
         private async Task Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
         {
             ActionResult result = await CreateActionResultUsingInterface ( e.MemoryMap, e.Mtu );

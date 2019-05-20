@@ -165,7 +165,7 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>False</ConsolePause>
     <MtouchArch>ARM64</MtouchArch>
-    <CodesignProvision>PublicAclaraProg</CodesignProvision>
+    <CodesignProvision>bizintekdist</CodesignProvision>
     <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <BuildIpa>true</BuildIpa>
@@ -187,6 +187,7 @@
     <Compile Include="Parameters.cs" />
     <Compile Include="BorderlessDatePickerRenderer.cs" />
     <Compile Include="BorderlessTimePickerRenderer.cs" />
+    <Compile Include="MAMService.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="Resources\LaunchScreen.storyboard" />
@@ -258,6 +259,7 @@
       <IsAppExtension>true</IsAppExtension>
       <Project>{884ACC36-012A-4AFC-AAAC-1A85B0D17616}</Project>
       <Name>AclaraMetersShareExtension</Name>
+      <IsWatchApp>false</IsWatchApp>
     </ProjectReference>
     <ProjectReference Include="..\MTUComm\MTUComm.csproj">
       <Project>{20113951-5BD8-473F-BC70-7AF5F875C305}</Project>

@@ -54,6 +54,8 @@ namespace MTUComm
         #endregion
 
         #region Delegates and Events
+        public delegate Task ReadFabricHandler(object sender);
+        public event ReadFabricHandler OnReadFabric;
 
         public delegate Task ReadMtuHandler(object sender, ReadMtuArgs e);
         public event ReadMtuHandler OnReadMtu;
@@ -290,6 +292,7 @@ namespace MTUComm
                     case ActionType.ReadData   : await Task.Run(() => Task_ReadDataMtu((int)args[0])); break;
                     case ActionType.BasicRead  : await Task.Run(() => Task_BasicRead()); break;
                     case ActionType.MtuInstallationConfirmation: await Task.Run(() => Task_InstallConfirmation()); break;
+                    case ActionType.ReadFabric: await Task.Run(() => Task_ReadFabric()); break;
                     default: break;
                 }
                 
@@ -654,7 +657,31 @@ namespace MTUComm
             }
             return true;
         }
-        
+
+        #endregion
+
+        #region ReadFabric
+        public async Task Task_ReadFabric()
+        {
+            try
+            {
+                OnProgress(this, new ProgressArgs(0, 0, "Testing puck..."));
+
+                // Only read all required registers once
+                var map = this.GetMemoryMap(true);
+
+                // Activates flag to read Meter
+                int MtuType = await  map.MtuType.GetValueFromMtu();
+
+                OnProgress(this, new ProgressArgs(0, 0, $"Successful MTU read ({MtuType.ToString()})"));
+                await OnReadFabric(this);
+
+            }
+            catch (Exception e)
+            {
+                Errors.LogErrorNow(new PuckCantCommWithMtuException());
+            }
+        }
         #endregion
 
         #region Read MTU

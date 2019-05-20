@@ -12,7 +12,7 @@ namespace aclara_meters.Android.Helpers
 	[ContentProperty("Text")]
 	public class TranslateExtension : IMarkupExtension
 	{
-		const string ResourceId = "aclara_meters.Android.AppResources";
+		const string ResourceId = "aclara_meters.Droid.AppResources";
 
 		static readonly Lazy<ResourceManager> resmgr = new Lazy<ResourceManager>(() => new ResourceManager(ResourceId, typeof(TranslateExtension).GetTypeInfo().Assembly));
 		

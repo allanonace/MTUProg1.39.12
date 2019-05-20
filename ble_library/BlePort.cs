@@ -563,10 +563,12 @@ namespace ble_library
         /// </summary>
         private async void UpdateAESBuffer(byte[] bytes)
         {
+            Utils.PrintDeep("BlePort.UpdateAESBuffer: " + Utils.ByteArrayToString(bytes));
             if (isConnected == CONNECTING)
             {
                 if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0xCC }))
                 {
+                    Utils.PrintDeep("BlePort.UpdateAESBuffer -> 0xCC -> NO");
                     isPaired = false;
                     saved_settings.AddOrUpdateValue("session_dynamicpass", string.Empty);
                     saved_settings.AddOrUpdateValue("session_peripheral", string.Empty);
@@ -591,6 +593,7 @@ namespace ble_library
 
                 if (bytes.Take(1).ToArray().SequenceEqual(new byte[] { 0x11 }))
                 {
+                    Utils.PrintDeep("BlePort.UpdateAESBuffer -> 0x11 -> SI");
                     isPaired = true;
                     saved_settings.AddOrUpdateValue("responsehi", isPaired.ToString());
                     saved_settings.AddOrUpdateValue("session_peripheral", ble_peripheral.Advertisement.DeviceName);
@@ -1018,10 +1021,10 @@ namespace ble_library
                         Utils.Print(e3.StackTrace);
                     }
                 }
-            
-                await gattServer_connection.Disconnect();
 
                 isConnected = NO_CONNECTED;
+                await gattServer_connection.Disconnect();
+
             }
             catch ( Exception e )
             {

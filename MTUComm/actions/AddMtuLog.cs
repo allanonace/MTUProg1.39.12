@@ -131,7 +131,7 @@ namespace MTUComm
             // Related to F12WAYRegister1XX registers
             string afc = ( mtu.TimeToSync &&
                            global.AFC &&
-                           await map.MtuSoftVersion.GetValue () >= 19 ) ? "Set" : "Off";
+                           await map.MtuSoftVersion.GetValue () >= 19 ) ? "Set" : "OFF";
             logger.Parameter ( this.addMtuAction, new Parameter ( "AFC", "AFC", afc ) );
 
             #endregion

@@ -11,7 +11,6 @@ namespace aclara_meters.Droid
 {
     public class BorderlessTimePickerRenderer : TimePickerRenderer
     {
-
         public BorderlessTimePickerRenderer(Context context) : base(context)
         {
         }

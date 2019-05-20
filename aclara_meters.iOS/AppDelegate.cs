@@ -29,7 +29,7 @@ namespace aclara_meters.iOS
 
             // Get Intun Parameters
             //Online.DownloadIntuneParameters ();
-            Parameters.PrepareFromIntune();
+            //Parameters.PrepareFromIntune();
              
             // Core Foundation Keys:
             // https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
@@ -40,7 +40,7 @@ namespace aclara_meters.iOS
             IUserDialogs userDialogs = UserDialogs.Instance;
             string appversion = appVersion.Description + " ( " + appBuild.Description + " )";
 
-            Rg.Plugins.Popup.Popup.Init();
+            
             appSave = new FormsApp ( bluetoothLowEnergyAdapter, userDialogs, appversion);
 
             // Check if FTP settings is in securestorage
