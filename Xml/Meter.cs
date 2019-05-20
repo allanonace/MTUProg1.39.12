@@ -193,7 +193,7 @@ namespace Xml
         }
 
         public string FillLeftLiveDigits (
-            string value )
+            string value = "" )
         {
             return value.PadLeft ( this.LiveDigits, '0' );
         }

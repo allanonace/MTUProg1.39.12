@@ -539,7 +539,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>MessageOverlapCount</Id>
-    <Description>P1 Number of new readings to take before transmit. Rage [1-12]</Description>
+    <Description>P1 Number of new readings to take before transmit. Digits range [1-12]</Description>
     <Type>int</Type>
     <Address>25</Address>
     <Size>1</Size>
@@ -619,7 +619,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>P2MessageOverlapCount</Id>
-    <Description>P2 Number of new readings to take before transmit. Rage [1-12]</Description>
+    <Description>P2 Number of new readings to take before transmit. Digits range [1-12]</Description>
     <Type>int</Type>
     <Address>61</Address>
     <Size>1</Size>

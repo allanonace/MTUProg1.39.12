@@ -50,11 +50,8 @@ namespace aclara_meters
         private const string SO_ANDROID = "Android";
         private const string SO_IOS     = "iOS";
         private const string SO_UNKNOWN = "Unknown";
-  
        
         public static bool ScriptingMode = false;
-
-
 
         #endregion
 
@@ -76,6 +73,7 @@ namespace aclara_meters
 
         public static TaskCompletionSource<bool> tcs;
         public static TaskCompletionSource<bool> tcs1;
+
         #endregion
 
         #region Properties
@@ -108,7 +106,7 @@ namespace aclara_meters
                 Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
                 Data.Set ( "IsAndroid", Device.RuntimePlatform == Device.Android );
 
-                this.adapter    = adapter;
+                this.adapter    = badapter;
                 this.dialogs    = dialogs;
                 this.appVersion = appVersion;
                 appName        += ( Data.Get.IsAndroid ) ? "Android" : "iOS";
@@ -168,7 +166,6 @@ namespace aclara_meters
             }
 
             this.LoadConfigurationAndOpenScene ( dialogs );   
-
         }
 
         #endregion
@@ -195,8 +192,6 @@ namespace aclara_meters
             #if DEBUG
             Mobile.LogUniPath = sPath;
             #endif
-
-
         }
 
         private bool InitialConfigProcess()

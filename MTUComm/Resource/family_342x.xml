@@ -279,7 +279,7 @@
   </Overload>
   <Overload>
     <Id>P2ReadingError</Id>
-    <Description>P1 Encoder error message trying to read Meter</Description>
+    <Description>P2 Encoder error message trying to read Meter</Description>
     <Type>string</Type>
     <Registers>
       <Register>P2ReadingErrorCode</Register>
@@ -843,7 +843,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>MessageOverlapCount</Id>
-    <Description>P1 and P2 Number of new readings to take before transmit. Rage [1-12]</Description>
+    <Description>P1 and P2 Number of new readings to take before transmit. Digits range [1-12]</Description>
     <Type>int</Type>
     <Address>25</Address>
     <Size>1</Size>

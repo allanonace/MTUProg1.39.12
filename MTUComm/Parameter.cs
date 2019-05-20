@@ -240,11 +240,19 @@ namespace MTUComm
         public string GetValueOrDefault<T> (
             int numCharacters )
         {
-            char val = ( typeof ( T ) == typeof ( string ) ) ? ' ' : '0';
+            char   val   = ( typeof ( T ) == typeof ( string ) ) ? ' ' : '0';
+            string value = this.Value.ToString ();
         
-            if ( mValue is null )
-                return "".PadRight ( numCharacters, val );
-            return mValue;
+            if ( string.IsNullOrEmpty ( value ) )
+                value = "".PadRight ( numCharacters, val );
+            else
+            {
+                if ( value.Length > numCharacters )
+                     value = value.Substring ( 0, numCharacters );                      // Get only n first characters
+                else value = "".PadRight ( numCharacters - value.Length, val ) + value; // Fill in left side to default character value
+            }
+
+            return value;
         }
 
         public override string ToString()

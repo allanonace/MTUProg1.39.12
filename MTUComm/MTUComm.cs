@@ -54,6 +54,7 @@ namespace MTUComm
         #endregion
 
         #region Delegates and Events
+
         public delegate Task ReadFabricHandler(object sender);
         public event ReadFabricHandler OnReadFabric;
 
@@ -661,7 +662,8 @@ namespace MTUComm
         #endregion
 
         #region ReadFabric
-        public async Task Task_ReadFabric()
+
+        public async Task Task_ReadFabric ()
         {
             try
             {
@@ -682,6 +684,7 @@ namespace MTUComm
                 Errors.LogErrorNow(new PuckCantCommWithMtuException());
             }
         }
+
         #endregion
 
         #region Read MTU
@@ -907,7 +910,7 @@ namespace MTUComm
     
                 dynamic EmptyNum = new Func<string,bool> ( ( v ) =>
                                         string.IsNullOrEmpty ( v ) || ! Validations.IsNumeric ( v ) );
-    
+
                 // Value equals to maximum length
                 dynamic NoEqNum = new Func<string,int,bool> ( ( v, maxLength ) =>
                                     ! Validations.NumericText ( v, maxLength ) );
@@ -944,17 +947,24 @@ namespace MTUComm
                         // Validates each parameter before continue with the action
                         switch ( type )
                         {
+                            #region Activity Log Id
                             case FIELD.ACTIVITY_LOG_ID:
                             if ( fail = EmptyNum ( value ) )
                                 msgDescription = "should be a valid numeric value";
                             break;
-                            
+                            #endregion
+                            #region Account Number
                             case FIELD.ACCOUNT_NUMBER:
                             case FIELD.ACCOUNT_NUMBER_2:
-                            if ( fail = NoEqNum ( value, global.AccountLength ) )
-                                msgDescription = "should be equal to global.AccountLength (" + global.AccountLength + ")";
+                            // In scripted mode not taking into account global.AccountLength
+                            if ( fail = EmptyNum ( value ) )
+                                msgDescription = "should be a valid numeric value";
+
+                            //if ( fail = NoEqNum ( value, global.AccountLength ) )
+                            //    msgDescription = "should be equal to global.AccountLength (" + global.AccountLength + ")";
                             break;
-                            
+                            #endregion
+                            #region Work Order
                             case FIELD.WORK_ORDER:
                             case FIELD.WORK_ORDER_2:
                             if ( fail = NoELTxt ( value, global.WorkOrderLength ) )
@@ -967,7 +977,8 @@ namespace MTUComm
                                      form.RemoveParameter ( FIELD.WORK_ORDER   );
                                 else form.RemoveParameter ( FIELD.WORK_ORDER_2 );
                             break;
-                            
+                            #endregion
+                            #region MTU Id Old
                             case FIELD.MTU_ID_OLD:
                             if ( fail = NoEqNum ( value, global.MtuIdLength ) )
                                 msgDescription = "should be equal to global.MtuIdLength (" + global.MtuIdLength + ")";
@@ -978,7 +989,8 @@ namespace MTUComm
                                  action.type != ActionType.ReplaceMtuReplaceMeter )
                                 form.RemoveParameter ( FIELD.MTU_ID_OLD );
                             break;
-                            
+                            #endregion
+                            #region Meter Serial Number
                             case FIELD.METER_NUMBER:
                             case FIELD.METER_NUMBER_2:
                             case FIELD.METER_NUMBER_OLD:
@@ -1020,7 +1032,8 @@ namespace MTUComm
                                 }
                             }
                             break;
-                            
+                            #endregion
+                            #region Meter Reading
                             case FIELD.METER_READING:
                             case FIELD.METER_READING_2:
                             if ( ! isAutodetectMeter )
@@ -1072,7 +1085,8 @@ namespace MTUComm
                                 else msgDescription = "should be equal to or less than Meter.NumberOfDials (" + meter.NumberOfDials + ")";
                             }
                             break;
-                            
+                            #endregion
+                            #region Meter Reading Old
                             case FIELD.METER_READING_OLD:
                             case FIELD.METER_READING_OLD_2:
                             if ( fail = NoELNum ( value, 12 ) )
@@ -1087,12 +1101,14 @@ namespace MTUComm
                                 else form.RemoveParameter ( FIELD.METER_READING_OLD_2 );
                             }
                             break;
-                            
+                            #endregion
+                            #region Meter Type
                             case FIELD.METER_TYPE:
                             case FIELD.METER_TYPE_2:
                             //...
                             break;
-                            
+                            #endregion
+                            #region Read Interval
                             case FIELD.READ_INTERVAL:
                             List<string> readIntervalList;
                             if ( MtuForm.mtuBasicInfo.version >= global.LatestVersion )
@@ -1139,7 +1155,8 @@ namespace MTUComm
                             if ( fail = Empty ( value ) || ! readIntervalList.Contains ( value ) )
                                 msgDescription = "should be one of the possible values and using Hr/s or Min";
                             break;
-                            
+                            #endregion
+                            #region Snap Reads
                             case FIELD.SNAP_READS:
                             if ( fail = EmptyNum ( value ) )
                                 msgDescription = "should be a valid numeric value";
@@ -1150,7 +1167,8 @@ namespace MTUComm
                                    ! mtu.DailyReads ) )
                                 form.RemoveParameter ( FIELD.SNAP_READS );
                             break;
-                            
+                            #endregion
+                            #region Auto-detect Meter
                             case FIELD.NUMBER_OF_DIALS:
                             case FIELD.NUMBER_OF_DIALS_2:
                             case FIELD.DRIVE_DIAL_SIZE:
@@ -1163,12 +1181,14 @@ namespace MTUComm
                             case FIELD.UNIT_MEASURE_2:
                             //...
                             break;
-                            
+                            #endregion
+                            #region Force Time Sync
                             case FIELD.FORCE_TIME_SYNC:
                             bool.TryParse ( value, out fail );
                             if ( fail = ! fail )
                                 msgDescription = "should be 'true' or 'false'";
                             break;
+                            #endregion
                         }
                     }
     
@@ -1311,10 +1331,12 @@ namespace MTUComm
                 #region Account Number
 
                 // Uses default value fill to zeros if parameter is missing in scripting
-                map.P1MeterId = form.AccountNumber.GetValueOrDefault<ulong> ( global.AccountLength );
+                // Only first 12 numeric characters are recorded in MTU memory
+                // F1 electric can have 20 alphanumeric characters but in the activity log should be written all characters
+                map.P1MeterId = form.AccountNumber.GetValueOrDefault<ulong> ( 12 );
                 if ( form.usePort2 &&
                      form.ContainsParameter ( FIELD.ACCOUNT_NUMBER_2 ) )
-                    map.P2MeterId = form.AccountNumber_2.GetValueOrDefault<ulong> ( global.AccountLength );
+                    map.P2MeterId = form.AccountNumber_2.GetValueOrDefault<ulong> ( 12 );
 
                 #endregion
 
@@ -1339,34 +1361,43 @@ namespace MTUComm
 
                 #endregion
 
-                #region Initial Reading = Meter Reading
+                #region ( Initial or New ) Meter Reading
 
                 string p1readingStr = "0";
                 string p2readingStr = "0";
 
                 if ( form.ContainsParameter ( FIELD.METER_READING ) )
                 {
-                    if ( ! isFromScripting ) // No mask
-                         p1readingStr = form.MeterReading.Value;
-                    else p1readingStr = selectedMeter.FillLeftLiveDigits ( form.MeterReading.GetValueOrDefault<ulong> ( selectedMeter.LiveDigits ) );
-                    // Uses default value fill to zeros if parameter is missing in scripting
-                    
+                    p1readingStr = form.MeterReading.Value;
                     ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
     
                     map.P1MeterReading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
                 }
-                
-                if ( form.usePort2 &&
-                     form.ContainsParameter ( FIELD.METER_READING_2 ) )
+                else if ( this.mtu.Port1.IsForPulse )
                 {
-                    if ( ! isFromScripting ) // No mask
-                         p2readingStr = form.MeterReading_2.Value;
-                    else p2readingStr = selectedMeter2.FillLeftLiveDigits ( form.MeterReading_2.GetValueOrDefault<ulong> ( selectedMeter2.LiveDigits ) );
-                    // Uses default value fill to zeros if parameter is missing in scripting
-                    
-                    ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( ( p2readingStr ) ) : 0;
-    
-                    map.P2MeterReading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
+                    // If meter reading was not present, fill in to zeros up to length equals to selected Meter livedigits
+                    p1readingStr = selectedMeter.FillLeftLiveDigits ();
+
+                    form.AddParameter ( FIELD.METER_READING, p1readingStr );
+                    map.P1MeterReading = p1readingStr;
+                }
+                
+                if ( form.usePort2 )
+                {
+                    if ( form.ContainsParameter ( FIELD.METER_READING_2 ) )
+                    {
+                        p2readingStr = form.MeterReading_2.Value;
+                        ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( ( p2readingStr ) ) : 0;
+        
+                        map.P2MeterReading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
+                    }
+                    else if ( this.mtu.Port2.IsForPulse )
+                    {
+                        p2readingStr = selectedMeter2.FillLeftLiveDigits ();
+
+                        form.AddParameter ( FIELD.METER_READING_2, p2readingStr );
+                        map.P2MeterReading = p2readingStr;
+                    }
                 }
 
                 #endregion
@@ -1389,14 +1420,6 @@ namespace MTUComm
                 {
                     map.DailyGMTHourRead = form.SnapReads.Value;
                 }
-
-                #endregion
-
-                #region Overlap count
-
-                map.MessageOverlapCount = DEFAULT_OVERLAP;
-                if ( form.usePort2 )
-                    map.P2MessageOverlapCount = DEFAULT_OVERLAP;
 
                 #endregion
 
@@ -1433,9 +1456,13 @@ namespace MTUComm
                             if ( mtu.SerialCutWireImm      ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;
 
                             // Write directly ( without conditions )
-                            map.ImmediateAlarm      = alarms.ImmediateAlarmTransmit;
-                            map.UrgentAlarm         = alarms.DcuUrgentAlarm;
+                            map.ImmediateAlarm = alarms.ImmediateAlarmTransmit;
+                            map.UrgentAlarm    = alarms.DcuUrgentAlarm;
+                            
+                            // Overlap count
                             map.MessageOverlapCount = alarms.Overlap;
+                            if ( form.usePort2 )
+                                map.P2MessageOverlapCount = alarms.Overlap;
 
                             // For the moment only for the family 33xx
                             if ( map.ContainsMember ( "AlarmMask1" ) ) map.AlarmMask1 = false; // Set '0'

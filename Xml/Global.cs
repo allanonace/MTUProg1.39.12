@@ -14,7 +14,7 @@ namespace Xml
             this.AccountEnabledAppt           = false; // [LOW PRIORITY = NOT CONFIRMED] Enable or disable values after appointment in interactive mode ( Account Number )
             this.AccountFilled                = false; // Allows AccountNumber to be filled with MTU ID automatically
             this.AccountLabel                 = "Service Pt. ID"; // [1-15] Label for AccountNumber field
-            this.AccountLength                = 7; // [1-20] Number of digits to use in AccountNumber field
+            this.AccountLength                = 7; // [1-12] Number of digits to use in AccountNumber field
             this.ActionVerify                 = true; // Display popup to confirm that user wants to perform the action
             this.Address1Len                  = 100; // Length of appointment address line 1 field
             this.Address2Len                  = 100; // ... 2 field

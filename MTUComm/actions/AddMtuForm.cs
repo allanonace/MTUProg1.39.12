@@ -515,6 +515,12 @@ namespace MTUComm.actions
                 throw new SameParameterRepeatScriptException ();
         }
 
+        public void UpdateParameter ( FIELD fieldType, dynamic value, int port = 0 )
+        {
+            if ( this.dictionary.ContainsKey ( fieldType ) )
+                this.dictionary[ fieldType ].Value = value;
+        }
+
         public void AddParameterTranslatingAclaraXml ( Parameter parameter )
         {
             ParameterType typeAclara;
