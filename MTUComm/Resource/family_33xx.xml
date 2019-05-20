@@ -39,6 +39,15 @@
     <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
+    <Id>RSSIStatus</Id>
+    <Description>Dcu Packet RSSI in string format</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>RSSI</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
     <Id>XmitInterval</Id>
     <Description>Transmit Interval</Description>
     <Type>string</Type>
