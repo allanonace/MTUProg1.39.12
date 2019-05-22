@@ -9,6 +9,8 @@ namespace Xml
         public InterfaceParameters ()
         {
             this.Source = string.Empty;
+            this.Length = string.Empty;
+            this.Fill   = string.Empty;
         }
 
         [XmlAttribute("name")]
@@ -28,6 +30,12 @@ namespace Xml
 
         [XmlAttribute("source")]
         public string Source { get; set; }
+
+        [XmlAttribute("length")]
+        public string Length { get; set; }
+
+        [XmlAttribute("fill")]
+        public string Fill { get; set; }
 
         [XmlText]
         public string Value { get; set; }

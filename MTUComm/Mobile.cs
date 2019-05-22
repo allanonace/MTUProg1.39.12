@@ -58,6 +58,37 @@ namespace MTUComm
                 this.HasFTP = false;
             }
 
+            public void LoadCertFromKeychain ()
+            {
+                // https://docs.microsoft.com/es-es/dotnet/api/system.security.cryptography.x509certificates.storename?view=netframework-4.8
+
+                GetCol ( StoreName.AddressBook );
+                GetCol ( StoreName.AuthRoot );
+                GetCol ( StoreName.CertificateAuthority );
+                GetCol ( StoreName.Disallowed );
+                GetCol ( StoreName.My );
+                GetCol ( StoreName.Root );
+                GetCol ( StoreName.TrustedPeople );
+                GetCol ( StoreName.TrustedPublisher );
+            }
+            
+            private void GetCol ( StoreName name )
+            {
+                X509Store store = new X509Store ( name );
+                store.Open ( OpenFlags.ReadWrite );
+                X509Certificate2 certificate = new X509Certificate2 ();
+
+                X509Certificate2Collection storecollection = (X509Certificate2Collection)store.Certificates;
+                
+                Console.WriteLine("Store name: {0}", store.Name);
+                Console.WriteLine("Store location: {0} , count: {1}", store.Location, storecollection.Count );
+                foreach (X509Certificate2 x509 in storecollection)
+                    Console.WriteLine("certificate name: {0}", x509.Subject);
+
+                store.Close ();
+                store.Dispose ();
+            }
+
             public void GenerateCert (string sCertificate = null)
             {
                 string content;

@@ -700,7 +700,10 @@ namespace MTUComm
                             }
                             
                             if ( paramToAdd != null )
+                            {
+                                paramToAdd.Value = this.FormatLength ( paramToAdd.Value, parameter.Length, parameter.Fill );
                                 result.AddParameter ( paramToAdd );
+                            }
                         }
                     }
                     catch ( Exception e )
@@ -835,6 +838,7 @@ namespace MTUComm
                                 
                                 if ( ! string.IsNullOrEmpty ( value ) )
                                 {
+                                    value = this.FormatLength ( value, parameter.Length, parameter.Fill );
                                     string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
                                                        gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
                                                        parameter.Display;
@@ -866,6 +870,34 @@ namespace MTUComm
             }
             
             return result;
+        }
+
+        private string FormatLength (
+            string value,
+            string source,
+            string fill )
+        {
+            Global global = this.config.Global;
+            Type   gType  = global.GetType ();
+
+            if ( ! string.IsNullOrEmpty ( source ) )
+            {
+                int length;
+                if ( ! int.TryParse ( source, out length ) &&
+                     source.ToLower ().StartsWith ( "global." ) )
+                    length = ( int ) gType.GetProperty ( source.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null );
+
+                if ( length > 0 && value.Length > length )
+                    value = value.Substring ( 0, length );
+
+                switch ( fill.ToLower () )
+                {
+                    case "left" : value = value.PadLeft  ( length, '0' ); break;
+                    case "right": value = value.PadRight ( length, '0' ); break;
+                }
+            }
+
+            return value;
         }
 
         private async Task<bool> ValidateCondition (

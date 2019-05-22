@@ -40,18 +40,17 @@ namespace aclara_meters.iOS
             IUserDialogs userDialogs = UserDialogs.Instance;
             string appversion = appVersion.Description + " ( " + appBuild.Description + " )";
 
-            
             appSave = new FormsApp ( bluetoothLowEnergyAdapter, userDialogs, appversion);
 
             // Check if FTP settings is in securestorage
             GenericUtilsClass.CheckFTPDownload();
 
+            //TEST.Test ();
+
             base.LoadApplication ( appSave );
 
             return base.FinishedLaunching ( app, options );
         }
-
-
 
         public override bool OpenUrl (
             UIApplication app,

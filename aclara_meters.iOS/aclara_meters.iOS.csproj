@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
@@ -11,8 +11,7 @@
     <RootNamespace>aclara_meters.iOS</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
     <AssemblyName>aclara_meters.iOS</AssemblyName>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <NuGetPackageImportStamp />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhoneSimulator' ">
     <DebugSymbols>true</DebugSymbols>
@@ -36,42 +35,31 @@
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\iPhoneSimulator\Release</OutputPath>
-    <DefineConstants>
-    </DefineConstants>
-    <DefineConstants>
-    </DefineConstants>
+    <DefineConstants />
+    <DefineConstants />
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <DocumentationFile>
-    </DocumentationFile>
+    <DocumentationFile />
     <MtouchLink>SdkOnly</MtouchLink>
     <MtouchArch>x86_64</MtouchArch>
     <ConsolePause>false</ConsolePause>
     <CrashReportingEnabled>false</CrashReportingEnabled>
-    <CodesignEntitlements>
-    </CodesignEntitlements>
-    <OnDemandResourcesInitialInstallTags>
-    </OnDemandResourcesInitialInstallTags>
-    <OnDemandResourcesPrefetchOrder>
-    </OnDemandResourcesPrefetchOrder>
-    <NoWarn>
-    </NoWarn>
+    <CodesignEntitlements />
+    <OnDemandResourcesInitialInstallTags />
+    <OnDemandResourcesPrefetchOrder />
+    <NoWarn />
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <LangVersion>Default</LangVersion>
     <NoStdLib>false</NoStdLib>
     <PlatformTarget>anycpu</PlatformTarget>
-    <WarningsNotAsErrors>
-    </WarningsNotAsErrors>
-    <OnDemandResourcesInitialInstallTags>
-    </OnDemandResourcesInitialInstallTags>
-    <OnDemandResourcesPrefetchOrder>
-    </OnDemandResourcesPrefetchOrder>
+    <WarningsNotAsErrors />
+    <OnDemandResourcesInitialInstallTags />
+    <OnDemandResourcesPrefetchOrder />
     <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
     <CodesignProvision>bizintekdist</CodesignProvision>
-    <MtouchDebug>
-    </MtouchDebug>
+    <MtouchDebug />
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|iPhone' ">
@@ -90,8 +78,7 @@
     <BuildIpa>true</BuildIpa>
     <IpaIncludeArtwork>false</IpaIncludeArtwork>
     <MtouchLink>SdkOnly</MtouchLink>
-    <OnDemandResourcesInitialInstallTags>
-    </OnDemandResourcesInitialInstallTags>
+    <OnDemandResourcesInitialInstallTags />
     <MtouchArch>ARM64</MtouchArch>
     <OptimizePNGs>false</OptimizePNGs>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
@@ -113,30 +100,19 @@
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <CodesignProvision>Internal</CodesignProvision>
     <MtouchLink>SdkOnly</MtouchLink>
-    <OptimizePNGs>
-    </OptimizePNGs>
-    <MtouchFloat32>
-    </MtouchFloat32>
-    <CodesignExtraArgs>
-    </CodesignExtraArgs>
-    <CodesignExtraArgs>
-    </CodesignExtraArgs>
-    <MtouchEnableBitcode>
-    </MtouchEnableBitcode>
-    <IOSDebuggerPort>
-    </IOSDebuggerPort>
-    <IOSDebuggerPort>
-    </IOSDebuggerPort>
-    <IOSDebuggerPort>
-    </IOSDebuggerPort>
+    <OptimizePNGs />
+    <MtouchFloat32 />
+    <CodesignExtraArgs />
+    <CodesignExtraArgs />
+    <MtouchEnableBitcode />
+    <IOSDebuggerPort />
+    <IOSDebuggerPort />
+    <IOSDebuggerPort />
     <NoStdLib>false</NoStdLib>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
-    <MtouchDebug>
-    </MtouchDebug>
-    <MtouchEnableSGenConc>
-    </MtouchEnableSGenConc>
-    <OnDemandResourcesInitialInstallTags>
-    </OnDemandResourcesInitialInstallTags>
+    <MtouchDebug />
+    <MtouchEnableSGenConc />
+    <OnDemandResourcesInitialInstallTags />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Ad-Hoc|iPhone' ">
     <DebugType>none</DebugType>
@@ -370,6 +346,7 @@
     <PackageReference Include="Microsoft.Intune.MAM.Xamarin.iOS">
       <Version>8.1.1.2</Version>
     </PackageReference>
+    <Compile Include="TEST.cs" />
   </ItemGroup>
   <Target Name="_CompileITunesMetadata" DependsOnTargets="_DetectSdkLocations;_DetectAppManifest;_GenerateBundleName;_CompileAppManifest">
     <Message Text="Skipping CompileITunesMetadata task to prevent inclusion of iTunesMetadata.plist in the IPA" />

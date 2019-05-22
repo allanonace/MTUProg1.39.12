@@ -77,7 +77,7 @@
 				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
 				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
 				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
-				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="AcctNumber" display="Global.AccountLabel" length="Global.AccountLength" fill="left" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
 				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
 			</Parameter>
 			<Parameter name="XmitInterval" display="Xmit Interval" log="true" interface="true"/>
@@ -237,7 +237,7 @@
 				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
 				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
 				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true | Port.Number=1 + Port.IsForPulse=true"/>
-				<Parameter name="AcctNumber" display="Global.AccountLabel" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
+				<Parameter name="AcctNumber" display="Global.AccountLabel" length="Global.AccountLength" fill="left" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
 				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true | Port.Number=1"/>
 			</Parameter>
 			<Parameter name="XmitInterval" display="Xmit Interval" log="true" interface="true"/>
