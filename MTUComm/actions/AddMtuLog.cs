@@ -352,11 +352,11 @@ namespace MTUComm
 
                     if ( mtu.TamperPort1 )
                         logger.Parameter ( alarmSelection,
-                        new Parameter ( "Cut1WireTamper", "Cut Port1 Wire Tamper", await map.P1CutWireTamperStatus.GetValue () ) );
+                        new Parameter ( "Cut1WireTamper", "Cut Port1 Wire Tamper", await map.GasCutWireTamperStatus.GetValue () ) );
 
                     if ( mtu.TamperPort2 )
                         logger.Parameter ( alarmSelection,
-                        new Parameter ( "Cut2WireTamper", "Cut Port2 Wire Tamper", await map.P2CutWireTamperStatus.GetValue () ) );
+                        new Parameter ( "Cut2WireTamper", "Cut Port2 Wire Tamper", await map.P2GasCutWireTamperStatus.GetValue () ) );
 
                     this.addMtuAction.Add(alarmSelection);
                 }

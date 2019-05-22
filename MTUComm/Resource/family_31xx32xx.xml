@@ -75,6 +75,16 @@
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
+  <Overload> <!-- OK -->
+    <Id>GasCutWireTamperStatus</Id>
+    <Description>Gas Cut Wire Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1CutWireAlarm</Register>
+      <Register>P1CutWireTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
 
   <!-- END - Alarms -->
 
@@ -286,7 +296,7 @@
   </Register>
 
   <!-- Set Alarms -->
-  <Register> <!-- OK -->
+  <Register> <!-- TiltAlarm -->
     <Id>TiltAlarm</Id>
     <Description>Set to enable tilt tamper</Description>
     <Type>bool</Type>
@@ -296,7 +306,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- MagneticAlarm -->
     <Id>MagneticAlarm</Id>
     <Description>Set to enable magnetic tamper</Description>
     <Type>bool</Type>
@@ -306,7 +316,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- InterfaceAlarm -->
     <Id>InterfaceAlarm</Id>
     <Description>Set to enable programming coil interface tamper</Description>
     <Type>bool</Type>
@@ -316,7 +326,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- RegisterCoverAlarm -->
     <Id>RegisterCoverAlarm</Id>
     <Description>Set to enable register cover tamper</Description>
     <Type>bool</Type>
@@ -326,7 +336,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- ReverseFlowAlarm -->
     <Id>ReverseFlowAlarm</Id>
     <Description>Set to enable reverse flow tamper</Description>
     <Type>bool</Type>
@@ -336,7 +346,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- P1CutWireAlarm -->
     <Id>P1CutWireAlarm</Id>
     <Description>Set to enable cut wire tamper</Description>
     <Type>bool</Type>
@@ -347,6 +357,16 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
+    <Id>GasCutWireAlarm</Id>
+    <Description>Set for enable cut cable tamper</Description>
+    <Type>bool</Type>
+    <Address>45</Address>
+    <Size>0</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- P2CutWireAlarm -->
     <Id>P2CutWireAlarm</Id>
     <Description> P2 Set to enable port 2 alarm (cut or corrector)</Description>
     <Type>bool</Type>

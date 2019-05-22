@@ -1436,6 +1436,9 @@ namespace MTUComm
                     {
                         try
                         {
+                            // TODO: IN FAMILY 31XX32XX GasCutWireAlarm is equal to P1CutWireAlarm
+                            // using also GasCutWireTamperStatus that us equal to P1CutWireTamperStatus
+
                             // Set alarms [ Alarm Message Transmission ]
                             if ( mtu.InsufficientMemory  ) map.InsufficientMemoryAlarm = alarms.InsufficientMemory;
                             if ( mtu.GasCutWireAlarm     ) map.GasCutWireAlarm         = alarms.CutAlarmCable;

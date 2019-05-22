@@ -437,7 +437,6 @@ namespace MTUComm
                         comm.OnTurnOffMtu -= Comm_OnTurnOnOffMtu;
                         comm.OnTurnOffMtu += Comm_OnTurnOnOffMtu;
                         break;
-                                       
 
                     case ActionType.ReadData:
                         Parameter param = mparameters.Find(x => (x.Type == Parameter.ParameterType.DaysOfRead));
@@ -718,9 +717,7 @@ namespace MTUComm
                                 case IFACE_MTU   : value      = mtu .GetProperty  ( sourceProperty ); break;
                                 case IFACE_PUCK  : value      = puck.GetProperty  ( sourceProperty ); break;
                                 case IFACE_FORM  : paramToAdd = form.GetParameter ( sourceProperty ); break;
-                                default          : var test  = map[ sourceProperty ];
-                                                   var vTest = await test.GetValue ();
-                                                   value     = vTest.ToString (); break; // MemoryMap.ParameterName
+                                default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                             }
                         }
                         catch ( Exception e )
@@ -730,7 +727,7 @@ namespace MTUComm
                         }
                         
                         if ( ! sourceWhere.Equals ( IFACE_FORM ) &&
-                                ! string.IsNullOrEmpty ( value ) )
+                             ! string.IsNullOrEmpty ( value ) )
                         {
                             string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
                                                 gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
