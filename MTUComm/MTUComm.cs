@@ -1260,14 +1260,13 @@ namespace MTUComm
                 else throw e;
             }
 
-            this.Task_AddMtu ( form, action.user, action, true );
+            this.Task_AddMtu ( form, action.user, action );
         }
 
         private async Task Task_AddMtu (
             dynamic form,
             string user,
-            Action action,
-            bool isFromScripting = false )
+            Action action )
         {
             Mtu    mtu    = form.mtu;
             Global global = configuration.Global;
@@ -1276,8 +1275,8 @@ namespace MTUComm
 
             try
             {
-                Logger logger = ( ! isFromScripting ) ? new Logger () : truquitoAction.logger;
-                addMtuLog = new AddMtuLog ( logger, form, user, isFromScripting );
+                Logger logger = ( ! Data.Get.IsFromScripting ) ? new Logger () : truquitoAction.logger;
+                addMtuLog = new AddMtuLog ( logger, form, user );
 
                 #region Turn Off MTU
 
@@ -1345,7 +1344,7 @@ namespace MTUComm
                 Meter selectedMeter  = null;
                 Meter selectedMeter2 = null;
                    
-                if ( ! isFromScripting )
+                if ( ! Data.Get.IsFromScripting )
                      selectedMeter = (Meter)form.Meter.Value;
                 else selectedMeter = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
                 map.P1MeterType = selectedMeter.Id;
@@ -1353,7 +1352,7 @@ namespace MTUComm
                 if ( form.usePort2 &&
                      form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
                 {
-                    if ( ! isFromScripting )
+                    if ( ! Data.Get.IsFromScripting )
                          selectedMeter2 = (Meter)form.Meter_2.Value;
                     else selectedMeter2 = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter_2.Value ) );
                     map.P2MeterType = selectedMeter2.Id;
@@ -1610,7 +1609,7 @@ namespace MTUComm
 
                 // Write changes into MTU
                 await this.WriteMtuModifiedRegisters ( map );
-                await addMtuLog.LogAddMtu ( isFromScripting );
+                await addMtuLog.LogAddMtu ();
                 
                 Utils.Print ( "---WRITE_TO_MTU_FINISH---" );
 

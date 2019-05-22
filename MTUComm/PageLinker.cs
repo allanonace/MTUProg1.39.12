@@ -2,6 +2,7 @@
 using Acr.UserDialogs;
 using Xamarin.Forms;
 using Xml;
+using Library;
 
 namespace MTUComm
 {
@@ -44,9 +45,12 @@ namespace MTUComm
                     // NOTE: Xamarin DisplayAlert dialog cannot be closed/disposed from code
                     //await currentPage.DisplayAlert ( title, message, btnText );
                     
-                    await UserDialogs.Instance.AlertAsync ( message, title, btnText );
+                    bool IsFromScripting = Data.Get.IsFromScripting;
+
+                    if ( ! IsFromScripting )
+                        await UserDialogs.Instance.AlertAsync ( message, title, btnText );
                     
-                    if ( kill )
+                    if ( kill || IsFromScripting )
                     {
                         // Wait four seconds and kill the popup
                         //await Task.Delay ( TimeSpan.FromSeconds ( 6 ) );

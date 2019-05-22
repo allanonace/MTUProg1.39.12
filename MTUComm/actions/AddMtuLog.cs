@@ -32,7 +32,7 @@ namespace MTUComm
         
         private string uniLog;
 
-        public AddMtuLog(Logger logger, dynamic form, string user, bool isFromScripting )
+        public AddMtuLog(Logger logger, dynamic form, string user )
         {
             this.logger = logger;
             this.form = form;
@@ -75,7 +75,7 @@ namespace MTUComm
             logger.Parameter(this.turnOnAction, new Parameter("MtuId", "MTU ID", this.mtuBasicInfo.Id));
         }
 
-        public async Task LogAddMtu ( bool isFromScripting = false )
+        public async Task LogAddMtu ()
         {
             Mtu     mtu    = form.mtu;
             Global  global = this.config.Global;
@@ -169,7 +169,7 @@ namespace MTUComm
 
             #region Port 1
 
-            Meter meter = ( ! isFromScripting ) ?
+            Meter meter = ( ! Data.Get.IsFromScripting ) ?
                 ( Meter )form.Meter.Value :
                 this.config.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
 
@@ -226,7 +226,7 @@ namespace MTUComm
 
             if ( form.usePort2 )
             {
-                Meter meter2 = ( ! isFromScripting ) ?
+                Meter meter2 = ( ! Data.Get.IsFromScripting ) ?
                     ( Meter )form.Meter_2.Value :
                     this.config.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter_2.Value ) );
 
@@ -463,7 +463,7 @@ namespace MTUComm
 #endif
             
             // Write in ActivityLog
-            if ( Action.IsFromScripting &&
+            if ( Data.Get.IsFromScripting &&
                  ! this.config.Global.ScriptOnly )
             {
                 // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist

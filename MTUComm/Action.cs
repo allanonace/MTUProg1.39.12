@@ -228,8 +228,6 @@ namespace MTUComm
         public  int order = 0;
         //public Func<object, object, object> OnFinish;
         
-        public static bool IsFromScripting;
-        
         #endregion
 
         #region Properties
@@ -302,7 +300,7 @@ namespace MTUComm
 
         #region Initialization
 
-        public Action(Configuration config, ISerial serial, ActionType type, String user = "", String outputfile = "", bool isFromScripting = false )
+        public Action(Configuration config, ISerial serial, ActionType type, String user = "", String outputfile = "" )
         {
             // outputfile = new FileInfo ( outputfile ).Name; // NO
             // System.IO.Path.GetFileName(outputfile)); // NO

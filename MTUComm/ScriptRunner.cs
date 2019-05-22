@@ -90,7 +90,7 @@ namespace MTUComm
                     if ( ! Enum.TryParse<ActionType> ( action.Type, out type ) )
                         throw new ScriptActionTypeInvalidException ( action.Type );
                 
-                    Action new_action = new Action ( Singleton.Get.Configuration, serial_device, type, script.UserName, script.LogFile, true );
+                    Action new_action = new Action ( Singleton.Get.Configuration, serial_device, type, script.UserName, script.LogFile );
                     Type   actionType = action.GetType ();
     
                     Parameter.ParameterType paramTypeToAdd;

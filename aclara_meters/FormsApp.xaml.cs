@@ -103,6 +103,7 @@ namespace aclara_meters
             {
                 InitializeComponent();
                 
+                Data.Set ( "IsFromScripting", false );
                 Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
                 Data.Set ( "IsAndroid", Device.RuntimePlatform == Device.Android );
 
@@ -142,7 +143,7 @@ namespace aclara_meters
             AppDomain.CurrentDomain.UnhandledException += CurrentDomainOnUnhandledException;
             TaskScheduler.UnobservedTaskException += TaskSchedulerOnUnobservedTaskException;
         
-            Utils.Print ( "FormsApp: Interactive [ " + MTUComm.Action.IsFromScripting + " ]" );
+            Utils.Print ( "FormsApp: Interactive [ " + Data.Get.IsFromScripting + " ]" );
         
             appVersion_str = appVersion;
 
@@ -429,10 +430,9 @@ namespace aclara_meters
 
         public async void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
         {
-           
-            MTUComm.Action.IsFromScripting = true;
-            
-            Utils.Print ( "FormsApp: Scripting [ " + MTUComm.Action.IsFromScripting + " ]" );
+            Data.Set ( "IsFromScripting", true );
+
+            Utils.Print ( "FormsApp: Scripting [ " + Data.Get.IsFromScripting + " ]" );
         
             if ( this.abortMission )
                 return;

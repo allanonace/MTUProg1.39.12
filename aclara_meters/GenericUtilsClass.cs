@@ -138,7 +138,7 @@ namespace aclara_meters
                                     if ( Enumerable.SequenceEqual ( md5Local, md5Remote ) )
                                     {
                                         // Only create backup file ( "moving" log to backup folder ) in interactive mode
-                                        if ( ! MTUComm.Action.IsFromScripting )
+                                        if ( ! Data.Get.IsFromScripting )
                                         {
                                             string url_to_copy = Mobile.LogUserBackupPath;// Path.Combine ( file.Directory.FullName, Mobile.PATH_BACKUP );
                                             if ( ! Directory.Exists ( url_to_copy ) )
