@@ -57,8 +57,14 @@ namespace Xml
             {
                 if ( this.Exception != null &&
                      this.Exception is OwnExceptionsBase )
-                     return message.Replace ( "_var_", ( ( OwnExceptionsBase )this.Exception ).VarMessage );
-                else return message;
+                {
+                    OwnExceptionsBase ownExc = ( OwnExceptionsBase )this.Exception;
+
+                    if ( ! string.IsNullOrEmpty ( ownExc.VarMessage ) )
+                        return this.message.Replace ( "_var_", ownExc.VarMessage );
+                }
+                     
+                return message;
             }
             set { this.message = value; }
         }
@@ -102,8 +108,17 @@ namespace Xml
 
                 if ( this.Exception != null &&
                      this.Exception is OwnExceptionsBase )
-                     return text.Replace ( "_var_", ( ( OwnExceptionsBase )this.Exception ).VarMessagePopup );
-                else return text;
+                {
+                    OwnExceptionsBase ownExc = ( OwnExceptionsBase )this.Exception;
+
+                    if ( ! string.IsNullOrEmpty ( ownExc.VarMessagePopup ) )
+                        return text.Replace ( "_var_", ownExc.VarMessagePopup );
+
+                    else if ( ! string.IsNullOrEmpty ( ownExc.VarMessage ) )
+                        return text.Replace ( "_var_", ownExc.VarMessage );
+                }
+                
+                return text;
             }
             set { this.messagePopup = value; }
         }

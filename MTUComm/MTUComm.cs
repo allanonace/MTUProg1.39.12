@@ -299,9 +299,6 @@ namespace MTUComm
                     case ActionType.ReadFabric: await Task.Run(() => Task_ReadFabric()); break;
                     default: break;
                 }
-                
-                // Reset current action reference
-                Singleton.Remove<Action> ();
 
                 // Reset initialization status
                 Data.Set ( "ActionInitialized", false );
@@ -630,6 +627,8 @@ namespace MTUComm
             bool on,
             int  time = 0 )
         {
+            
+        
             try
             {
                 dynamic map = this.GetMemoryMap ();
@@ -647,9 +646,9 @@ namespace MTUComm
             {
                 if ( Errors.IsOwnException ( e ) )
                     Errors.AddError ( e );
+                
                 // Finish
-                else
-                    throw new PuckCantCommWithMtuException ();
+                else throw new PuckCantCommWithMtuException ();
                 
                 // Retry action ( thre times = first plus two replies )
                 if ( ++time < TIMES_TURNOFF )
@@ -1257,6 +1256,8 @@ namespace MTUComm
                 }
 
                 #endregion
+            
+                await this.Task_AddMtu ( form, action.user, action );
             }
             catch ( Exception e )
             {
@@ -1265,8 +1266,6 @@ namespace MTUComm
                      throw new PuckCantCommWithMtuException ();
                 else throw e;
             }
-
-            this.Task_AddMtu ( form, action.user, action );
         }
 
         private async Task Task_AddMtu (

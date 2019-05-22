@@ -494,6 +494,9 @@ namespace MTUComm
         private void Comm_OnError ()
         {
             this.OnError ();
+
+            // Reset current action reference
+            Singleton.Remove<Action> ();
         }
 
         private void Comm_OnReadMtuData(object sender, MTUComm.ReadMtuDataArgs e)
@@ -514,14 +517,23 @@ namespace MTUComm
                     ActionResult result = ReadMTUData(e.Start, e.End, e.Entries, e.MtuType, mtu_type);
                     logger.ReadData(this, result, mtu_type);
                     ActionFinishArgs f_args = new ActionFinishArgs(null);
-                    OnFinish(this, f_args);
+                    this.Finish ( f_args );
                     break;
             }
         }
 
         private async Task Comm_OnReadFabric(object sender)
         {
-            OnFinish ( this,null );
+            this.Finish ( null );
+        }
+
+        private void Finish (
+            ActionFinishArgs args )
+        {
+            OnFinish ( this, args );
+
+            // Reset current action reference
+            Singleton.Remove<Action> ();
         }
 
         private async Task Comm_OnReadMtu ( object sender, MTUComm.ReadMtuArgs args )
@@ -530,10 +542,10 @@ namespace MTUComm
             {
                 ActionResult result = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu );
                 this.lastLogCreated = logger.ReadMTU ( this, result, args.Mtu );
-                ActionFinishArgs finishArgs = new ActionFinishArgs ( result );
-                finishArgs.Mtu = args.Mtu;
+                ActionFinishArgs finalArgs = new ActionFinishArgs ( result );
+                finalArgs.Mtu = args.Mtu;
                 
-                OnFinish ( this, finishArgs );
+                this.Finish ( finalArgs );
             }
             catch ( Exception e )
             {
@@ -550,7 +562,7 @@ namespace MTUComm
                 this.lastLogCreated = logger.TurnOnOff ( this, args.Mtu, result.getParameters()[2].Value );
                 ActionFinishArgs finalArgs = new ActionFinishArgs ( result );
 
-                OnFinish ( this, finalArgs );
+                this.Finish ( finalArgs );
             }
             catch ( Exception e )
             {
@@ -568,7 +580,7 @@ namespace MTUComm
                 args.AddMtuLog.LogReadMtu ( result );
                 this.lastLogCreated = args.AddMtuLog.Save ();
 
-                OnFinish ( this, finalArgs );
+                this.Finish ( finalArgs );
             }
             catch ( Exception e )
             {
@@ -580,8 +592,9 @@ namespace MTUComm
         private void Comm_OnBasicRead(object sender, MTUComm.BasicReadArgs e)
         {
             ActionResult result = new ActionResult();
-            ActionFinishArgs args = new ActionFinishArgs(result);
-            OnFinish(this, args);
+            ActionFinishArgs finalArgs = new ActionFinishArgs(result);
+
+            this.Finish ( finalArgs );
         }
 
         #endregion
@@ -697,13 +710,23 @@ namespace MTUComm
                         }
 
                         paramToAdd = null;
-                        switch ( sourceWhere )
+                        try
                         {
-                            case IFACE_ACTION: value      = this.GetProperty  ( sourceProperty ); break;
-                            case IFACE_MTU   : value      = mtu .GetProperty  ( sourceProperty ); break;
-                            case IFACE_PUCK  : value      = puck.GetProperty  ( sourceProperty ); break;
-                            case IFACE_FORM  : paramToAdd = form.GetParameter ( sourceProperty ); break;
-                            default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
+                            switch ( sourceWhere )
+                            {
+                                case IFACE_ACTION: value      = this.GetProperty  ( sourceProperty ); break;
+                                case IFACE_MTU   : value      = mtu .GetProperty  ( sourceProperty ); break;
+                                case IFACE_PUCK  : value      = puck.GetProperty  ( sourceProperty ); break;
+                                case IFACE_FORM  : paramToAdd = form.GetParameter ( sourceProperty ); break;
+                                default          : var test  = map[ sourceProperty ];
+                                                   var vTest = await test.GetValue ();
+                                                   value     = vTest.ToString (); break; // MemoryMap.ParameterName
+                            }
+                        }
+                        catch ( Exception e )
+                        {
+                            Utils.Print ( "Interface: Map Error: " + sourceProperty );
+                            throw new Exception ();
                         }
                         
                         if ( ! sourceWhere.Equals ( IFACE_FORM ) &&
@@ -840,12 +863,20 @@ namespace MTUComm
                                 sourceProperty   = sources[ 1 ];
                             }
 
-                            switch ( sourceWhere )
+                            try
                             {
-                                case IFACE_PORT : value = portType.GetProperty ( sourceProperty ); break;
-                                case IFACE_MTU  : value = mtu     .GetProperty ( sourceProperty ); break;
-                                case IFACE_METER: value = meter   .GetProperty ( sourceProperty ); break;
-                                default         : value = ( await map[ PORT_PREFIX + indexPort + sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
+                                switch ( sourceWhere )
+                                {
+                                    case IFACE_PORT : value = portType.GetProperty ( sourceProperty ); break;
+                                    case IFACE_MTU  : value = mtu     .GetProperty ( sourceProperty ); break;
+                                    case IFACE_METER: value = meter   .GetProperty ( sourceProperty ); break;
+                                    default         : value = ( await map[ sourceProperty = PORT_PREFIX + indexPort + sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
+                                }
+                            }
+                            catch ( Exception e )
+                            {
+                                Utils.Print ( "Interface: Map Error: " + sourceProperty );
+                                throw new Exception ();
                             }
                             
                             if ( ! string.IsNullOrEmpty ( value ) )

@@ -51,8 +51,6 @@ namespace aclara_meters
         private const string SO_IOS     = "iOS";
         private const string SO_UNKNOWN = "Unknown";
        
-        public static bool ScriptingMode = false;
-
         #endregion
 
         #region Attributes
@@ -271,7 +269,7 @@ namespace aclara_meters
 
                                 return;
                             }
-                            if (!ScriptingMode)
+                            if ( ! Data.Get.IsFromScripting )
                             {
                                 Console.WriteLine($"------------------------------------Login  Thread: {Thread.CurrentThread.ManagedThreadId}");
                                 Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
@@ -341,7 +339,8 @@ namespace aclara_meters
 
                     return;
                 }
-                if (!ScriptingMode)
+                
+                if ( ! Data.Get.IsFromScripting )
                     Device.BeginInvokeOnMainThread(async() =>
                     {
                        Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
@@ -440,8 +439,9 @@ namespace aclara_meters
         
             try
             {
-                ScriptingMode = true; 
-                if (ble_interface.IsOpen()) ble_interface.Close();
+                if ( ble_interface != null &&
+                     ble_interface.IsOpen() )
+                    ble_interface.Close();
 
                 #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
 

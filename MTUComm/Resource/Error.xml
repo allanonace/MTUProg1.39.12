@@ -41,7 +41,7 @@
     
     <!-- Turn Off -->
     <Error id="500" message="Turn off MTU process has failed trying to activated the Ship Bit" footer="MTU already turned off" />
-    <Error id="501" message="MTU cannot be turned off after having tried it _var_ times" footer="Turn off not achieved" />
+    <Error id="501" message="MTU cannot be turned on or off after having tried it _var_ times" footer="Turn on or off not achieved" />
     
     <!-- Install Confirmation -->    
     <Error id="600" message="The MTU does not support for two-way or tag TimeToSync is false in Globa.xml" footer="MTU not support two-way" />
