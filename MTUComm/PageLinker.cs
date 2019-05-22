@@ -45,12 +45,18 @@ namespace MTUComm
                     // NOTE: Xamarin DisplayAlert dialog cannot be closed/disposed from code
                     //await currentPage.DisplayAlert ( title, message, btnText );
                     
-                    bool IsFromScripting = Data.Get.IsFromScripting;
+                    bool isFromScripting   = Data.Get.IsFromScripting;
+                    bool actionInitialized = Data.Get.ActionInitialized;
 
-                    if ( ! IsFromScripting )
+                    Utils.Print ( "Is from Scripting: " + isFromScripting + " , Action Initialized: " + actionInitialized );
+
+                    // In scripted mode avoid to show pop-ups
+                    if ( ! isFromScripting )
                         await UserDialogs.Instance.AlertAsync ( message, title, btnText );
                     
-                    if ( kill || IsFromScripting )
+                    // In scripted mode force to kill app when no action logic was executing
+                    if ( kill ||
+                         isFromScripting && ! actionInitialized )
                     {
                         // Wait four seconds and kill the popup
                         //await Task.Delay ( TimeSpan.FromSeconds ( 6 ) );

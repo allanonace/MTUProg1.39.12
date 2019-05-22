@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Xml.Serialization;
+using Library.Exceptions;
 
 namespace Xml
 {
@@ -7,11 +8,17 @@ namespace Xml
     {
         private const int EMPTY_VAL = -1;
     
+        private string message;
+        private string messageDebug;
+        private string messageFooter;
+        private string messagePopup;
+
         public Error ()
         {
-            this.Port     = 1;
-            this.Id       = EMPTY_VAL;
-            this.DotNetId = EMPTY_VAL;
+            this.Port         = 1;
+            this.Id           = EMPTY_VAL;
+            this.DotNetId     = EMPTY_VAL;
+            this.MessagePopup = string.Empty;
         }
         
         public Error ( string message )
@@ -43,18 +50,14 @@ namespace Xml
             }
         }
 
-        private string message;
-        private string messageDebug;
-        private string messageFooter;
-        private string messagePopup;
-
         [XmlAttribute("message")]
         public string Message
         {
             get
             {
-                if ( this.Exception != null )
-                     return message.Replace ( "_var_", this.Exception.Message );
+                if ( this.Exception != null &&
+                     this.Exception is OwnExceptionsBase )
+                     return message.Replace ( "_var_", ( ( OwnExceptionsBase )this.Exception ).VarMessage );
                 else return message;
             }
             set { this.message = value; }
@@ -90,16 +93,25 @@ namespace Xml
             set { this.messageFooter = value; }
         }
         
-        [XmlIgnore]
+        [XmlAttribute("popup")]
         public string MessagePopup
         {
             get
             {
-                if ( this.Exception != null )
-                     return messagePopup.Replace ( "_var_", this.Exception.Message );
-                else return messagePopup;
+                string text = ( string.IsNullOrEmpty ( this.messagePopup ) ) ? this.message : this.messagePopup;
+
+                if ( this.Exception != null &&
+                     this.Exception is OwnExceptionsBase )
+                     return text.Replace ( "_var_", ( ( OwnExceptionsBase )this.Exception ).VarMessagePopup );
+                else return text;
             }
             set { this.messagePopup = value; }
+        }
+
+        [XmlIgnore]
+        public bool HasMessagePopup
+        {
+            get { return ! string.IsNullOrEmpty ( this.messagePopup ); }
         }
 
         public int Port;

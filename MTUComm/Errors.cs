@@ -272,15 +272,15 @@ namespace MTUComm
                 int id = this.ex2id.Single ( item => item.Key.GetType () == typeExp ).Value;
                 
                 error = this.GetErrorById ( id, e, portIndex );
-                error.MessagePopup = ( ( OwnExceptionsBase )e ).MessagePopup;
+                error.Exception = e;
             }
             // .NET exception
             else
             {
                 error = ( Error )this.TryToTranslateDotNet ( e ).Clone ();
-                error.Port      = portIndex;
-                error.Exception = e;
-                error.Message   = e.Message;
+                error.Port         = portIndex;
+                error.Exception    = e;
+                error.Message      = e.Message;
                 error.MessagePopup = e.Message;
             }
             

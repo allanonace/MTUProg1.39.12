@@ -262,6 +262,9 @@ namespace MTUComm
         {
             try
             {
+                // Avoid to kill app on error message
+                Data.Set ( "ActionInitialized", true );
+
                 // Avoid to load more than one time the basic info for the same action,
                 // because an action can be launched multiple times because of exceptions
                 // that cancel the action but not move to the main menu and could be happen
@@ -299,6 +302,9 @@ namespace MTUComm
                 
                 // Reset current action reference
                 Singleton.Remove<Action> ();
+
+                // Reset initialization status
+                Data.Set ( "ActionInitialized", false );
             }
             // MTUComm.Exceptions.MtuTypeIsNotFoundException
             catch ( Exception e )
@@ -667,21 +673,21 @@ namespace MTUComm
         {
             try
             {
-                OnProgress(this, new ProgressArgs(0, 0, "Testing puck..."));
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Testing puck..." ) );
 
                 // Only read all required registers once
-                var map = this.GetMemoryMap(true);
+                var map = this.GetMemoryMap ( true );
 
                 // Activates flag to read Meter
-                int MtuType = await  map.MtuType.GetValueFromMtu();
+                int MtuType = await  map.MtuType.GetValueFromMtu ();
 
-                OnProgress(this, new ProgressArgs(0, 0, $"Successful MTU read ({MtuType.ToString()})"));
-                await OnReadFabric(this);
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Successful MTU read (" + MtuType.ToString() + ")" ) );
+                await OnReadFabric ( this );
 
             }
-            catch (Exception e)
+            catch ( Exception e )
             {
-                Errors.LogErrorNow(new PuckCantCommWithMtuException());
+                Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
             }
         }
 

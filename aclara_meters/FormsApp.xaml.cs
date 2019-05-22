@@ -103,7 +103,8 @@ namespace aclara_meters
             {
                 InitializeComponent();
                 
-                Data.Set ( "IsFromScripting", false );
+                Data.Set ( "IsFromScripting",   false );
+                Data.Set ( "ActionInitialized", false );
                 Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
                 Data.Set ( "IsAndroid", Device.RuntimePlatform == Device.Android );
 

@@ -53,7 +53,6 @@ namespace aclara_meters.view
 
         public AclaraViewScripting(string url, string callback, string script_name)
         {
-
             PrintToConsole($"-------------------------------       AclaraViewScripting, thread: { Thread.CurrentThread.ManagedThreadId}");
             InitializeComponent();
 
@@ -132,7 +131,6 @@ namespace aclara_meters.view
                 this.txtBuscando.Text = "Uploading files...";
 
                 this.UpdateFiles();
-
                
                 return;
             }
@@ -143,8 +141,8 @@ namespace aclara_meters.view
                 Interface_ContentView_DeviceList();
             }
             #endregion
-
         }
+
         public async void UpdateFiles()
         {
             String sMessage;
@@ -919,7 +917,7 @@ namespace aclara_meters.view
         }
 
         #endregion
-         
+        
         private void OnError ()
         {
             Task.Run(() =>
@@ -929,6 +927,8 @@ namespace aclara_meters.view
                     Error error = Errors.LastError;
                 
                     ContentView_Scripting_textScript.Text = "Error code: " + error.Id + "\n" + error.Message;
+
+                    Utils.Print ( "[ Scripting ] " + ContentView_Scripting_textScript.Text + ( ( error.HasMessagePopup ) ? " | " + error.MessagePopup : string.Empty ) );
 
                     Device.BeginInvokeOnMainThread(() =>
                     {
@@ -945,7 +945,10 @@ namespace aclara_meters.view
                                                    "&output_filename=" + resultScriptName +
                                                    "&output_data=" + Compression.CompressToUrlUsingGlobal ( Errors.lastErrorLogGenerated ) ) );
 
-                        FormsApp.ble_interface.Close();
+                        FormsApp.ble_interface.Close ();
+
+                        // Close the app
+                        System.Diagnostics.Process.GetCurrentProcess ().Kill ();
                     });
                 });
             });

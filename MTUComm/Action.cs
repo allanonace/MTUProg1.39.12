@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -7,6 +7,7 @@ using Lexi.Interfaces;
 using Library;
 using MTUComm.actions;
 using Xml;
+using Library.Exceptions;
 
 namespace MTUComm
 {
@@ -517,37 +518,63 @@ namespace MTUComm
                     break;
             }
         }
+
         private async Task Comm_OnReadFabric(object sender)
         {
-            OnFinish(this,null);
-        }
-        private async Task Comm_OnReadMtu(object sender, MTUComm.ReadMtuArgs e)
-        {
-            ActionResult result = await CreateActionResultUsingInterface ( e.MemoryMap, e.Mtu );
-            this.lastLogCreated = logger.ReadMTU ( this, result, e.Mtu );
-            ActionFinishArgs args = new ActionFinishArgs ( result );
-            args.Mtu = e.Mtu;
-            
-            OnFinish ( this, args );
+            OnFinish ( this,null );
         }
 
-        private void Comm_OnTurnOnOffMtu ( object sender, MTUComm.TurnOffMtuArgs e )
+        private async Task Comm_OnReadMtu ( object sender, MTUComm.ReadMtuArgs args )
         {
-            ActionResult result = getBasciInfoResult ();
-            this.lastLogCreated = logger.TurnOnOff ( this, e.Mtu, result.getParameters()[2].Value );
-            ActionFinishArgs args = new ActionFinishArgs ( result );
-
-            OnFinish ( this, args );
+            try
+            {
+                ActionResult result = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu );
+                this.lastLogCreated = logger.ReadMTU ( this, result, args.Mtu );
+                ActionFinishArgs finishArgs = new ActionFinishArgs ( result );
+                finishArgs.Mtu = args.Mtu;
+                
+                OnFinish ( this, finishArgs );
+            }
+            catch ( Exception e )
+            {
+                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                this.OnError ();
+            }
         }
 
-        private async Task Comm_OnAddMtu ( object sender, MTUComm.AddMtuArgs e )
+        private void Comm_OnTurnOnOffMtu ( object sender, MTUComm.TurnOffMtuArgs args )
         {
-            ActionResult result = await CreateActionResultUsingInterface ( e.MemoryMap, e.MtuType, e.Form );
-            ActionFinishArgs args = new ActionFinishArgs ( result );
-            e.AddMtuLog.LogReadMtu ( result );
-            this.lastLogCreated = e.AddMtuLog.Save ();
+            try
+            {
+                ActionResult result = getBasciInfoResult ();
+                this.lastLogCreated = logger.TurnOnOff ( this, args.Mtu, result.getParameters()[2].Value );
+                ActionFinishArgs finalArgs = new ActionFinishArgs ( result );
 
-            OnFinish ( this, args );
+                OnFinish ( this, finalArgs );
+            }
+            catch ( Exception e )
+            {
+                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                this.OnError ();
+            }
+        }
+
+        private async Task Comm_OnAddMtu ( object sender, MTUComm.AddMtuArgs args )
+        {
+            try
+            {
+                ActionResult result = await CreateActionResultUsingInterface ( args.MemoryMap, args.MtuType, args.Form );
+                ActionFinishArgs finalArgs = new ActionFinishArgs ( result );
+                args.AddMtuLog.LogReadMtu ( result );
+                this.lastLogCreated = args.AddMtuLog.Save ();
+
+                OnFinish ( this, finalArgs );
+            }
+            catch ( Exception e )
+            {
+                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                this.OnError ();
+            }
         }
 
         private void Comm_OnBasicRead(object sender, MTUComm.BasicReadArgs e)
@@ -655,61 +682,55 @@ namespace MTUComm
                         result.addPort ( await ReadPort ( i + 1, parameter.Parameters.ToArray (), map, mtu ) );
                 else
                 {
-                    try
+                    if ( await ValidateCondition ( parameter.Conditional, map, mtu ) )
                     {
-                        if ( await ValidateCondition ( parameter.Conditional, map, mtu ) )
+                        string value          = string.Empty;
+                        string sourceWhere    = string.Empty;
+                        string sourceProperty = parameter.Name;
+
+                        if ( ! string.IsNullOrEmpty ( parameter.Source ) &&
+                                Regex.IsMatch ( parameter.Source, NET_IDS + "." + NET_IDS ) )
                         {
-                            string value          = string.Empty;
-                            string sourceWhere    = string.Empty;
-                            string sourceProperty = parameter.Name;
-
-                            if ( ! string.IsNullOrEmpty ( parameter.Source ) &&
-                                 Regex.IsMatch ( parameter.Source, NET_IDS + "." + NET_IDS ) )
-                            {
-                                string[] sources = parameter.Source.Split(new char[] { '.' });
-                                sourceWhere      = sources[ 0 ];
-                                sourceProperty   = sources[ 1 ];
-                            }
-
-                            paramToAdd = null;
-                            switch ( sourceWhere )
-                            {
-                                case IFACE_ACTION: value      = this.GetProperty  ( sourceProperty ); break;
-                                case IFACE_MTU   : value      = mtu .GetProperty  ( sourceProperty ); break;
-                                case IFACE_PUCK  : value      = puck.GetProperty  ( sourceProperty ); break;
-                                case IFACE_FORM  : paramToAdd = form.GetParameter ( sourceProperty ); break;
-                                default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
-                            }
-                            
-                            if ( ! sourceWhere.Equals ( IFACE_FORM ) &&
-                                 ! string.IsNullOrEmpty ( value ) )
-                            {
-                                string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
-                                                   gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
-                                                   parameter.Display;
-                                
-                                paramToAdd = new Parameter ( parameter.Name, display, value, parameter.Source );
-                            }
-                            // To change "name" attribute to show in IFACE_FORM case
-                            else
-                            {
-                                paramToAdd.CustomParameter = parameter.Name;
-                                paramToAdd.source          = parameter.Source;
-                            }
-                            
-                            if ( paramToAdd != null )
-                            {
-                                paramToAdd.Value = this.FormatLength ( paramToAdd.Value, parameter.Length, parameter.Fill );
-                                result.AddParameter ( paramToAdd );
-                            }
+                            string[] sources = parameter.Source.Split(new char[] { '.' });
+                            sourceWhere      = sources[ 0 ];
+                            sourceProperty   = sources[ 1 ];
                         }
-                    }
-                    catch ( Exception e )
-                    {
-                        //...
+
+                        paramToAdd = null;
+                        switch ( sourceWhere )
+                        {
+                            case IFACE_ACTION: value      = this.GetProperty  ( sourceProperty ); break;
+                            case IFACE_MTU   : value      = mtu .GetProperty  ( sourceProperty ); break;
+                            case IFACE_PUCK  : value      = puck.GetProperty  ( sourceProperty ); break;
+                            case IFACE_FORM  : paramToAdd = form.GetParameter ( sourceProperty ); break;
+                            default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
+                        }
+                        
+                        if ( ! sourceWhere.Equals ( IFACE_FORM ) &&
+                                ! string.IsNullOrEmpty ( value ) )
+                        {
+                            string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
+                                                gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
+                                                parameter.Display;
+                            
+                            paramToAdd = new Parameter ( parameter.Name, display, value, parameter.Source );
+                        }
+                        // To change "name" attribute to show in IFACE_FORM case
+                        else
+                        {
+                            paramToAdd.CustomParameter = parameter.Name;
+                            paramToAdd.source          = parameter.Source;
+                        }
+                        
+                        if ( paramToAdd != null )
+                        {
+                            paramToAdd.Value = this.FormatLength ( paramToAdd.Value, parameter.Length, parameter.Fill );
+                            result.AddParameter ( paramToAdd );
+                        }
                     }
                 }
             }
+            
             return result;
         }
 
@@ -720,11 +741,6 @@ namespace MTUComm
             Mtu mtu )
         {
             ActionResult result   = new ActionResult ();
-        
-            try
-            {
-        
-            
             Port         portType = mtu.Ports[ indexPort - 1 ];
             Global       global   = this.config.Global;
             Type         gType    = global.GetType ();
@@ -810,43 +826,36 @@ namespace MTUComm
                     }
                     else
                     {
-                        try
+                        if ( await ValidateCondition ( parameter.Conditional, map, mtu, indexPort ) )
                         {
-                            if ( await ValidateCondition ( parameter.Conditional, map, mtu, indexPort ) )
+                            string value          = string.Empty;
+                            string sourceWhere    = string.Empty;
+                            string sourceProperty = parameter.Name;
+
+                            if ( ! string.IsNullOrEmpty ( parameter.Source ) &&
+                                    Regex.IsMatch ( parameter.Source, NET_IDS + "." + NET_IDS ) )
                             {
-                                string value          = string.Empty;
-                                string sourceWhere    = string.Empty;
-                                string sourceProperty = parameter.Name;
-
-                                if ( ! string.IsNullOrEmpty ( parameter.Source ) &&
-                                     Regex.IsMatch ( parameter.Source, NET_IDS + "." + NET_IDS ) )
-                                {
-                                    string[] sources = parameter.Source.Split(new char[] { '.' });
-                                    sourceWhere      = sources[ 0 ];
-                                    sourceProperty   = sources[ 1 ];
-                                }
-
-                                switch ( sourceWhere )
-                                {
-                                    case IFACE_PORT : value = portType .GetProperty ( sourceProperty ); break;
-                                    case IFACE_MTU  : value = mtu      .GetProperty ( sourceProperty ); break;
-                                    case IFACE_METER: value = meter    .GetProperty ( sourceProperty ); break;
-                                    default         : value = ( await map[ PORT_PREFIX + indexPort + sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
-                                }
-                                
-                                if ( ! string.IsNullOrEmpty ( value ) )
-                                {
-                                    value = this.FormatLength ( value, parameter.Length, parameter.Fill );
-                                    string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
-                                                       gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
-                                                       parameter.Display;
-                                    result.AddParameter ( new Parameter ( parameter.Name, display, value, parameter.Source, indexPort - 1 ) );
-                                }
+                                string[] sources = parameter.Source.Split(new char[] { '.' });
+                                sourceWhere      = sources[ 0 ];
+                                sourceProperty   = sources[ 1 ];
                             }
-                        }
-                        catch ( Exception e )
-                        {
-                            //...
+
+                            switch ( sourceWhere )
+                            {
+                                case IFACE_PORT : value = portType.GetProperty ( sourceProperty ); break;
+                                case IFACE_MTU  : value = mtu     .GetProperty ( sourceProperty ); break;
+                                case IFACE_METER: value = meter   .GetProperty ( sourceProperty ); break;
+                                default         : value = ( await map[ PORT_PREFIX + indexPort + sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
+                            }
+                            
+                            if ( ! string.IsNullOrEmpty ( value ) )
+                            {
+                                value = this.FormatLength ( value, parameter.Length, parameter.Fill );
+                                string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
+                                                    gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
+                                                    parameter.Display;
+                                result.AddParameter ( new Parameter ( parameter.Name, display, value, parameter.Source, indexPort - 1 ) );
+                            }
                         }
                     }
                 }
@@ -857,14 +866,6 @@ namespace MTUComm
                 result.AddParameter(new Parameter("Status", "Status", "Not Installed"));
                 result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", "000000000"));
                 result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
-            }
-            
-            
-
-            }
-            catch ( Exception ex )
-            {
-
             }
             
             return result;
