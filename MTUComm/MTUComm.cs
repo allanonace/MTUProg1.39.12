@@ -1436,8 +1436,20 @@ namespace MTUComm
                     {
                         try
                         {
-                            // TODO: IN FAMILY 31XX32XX GasCutWireAlarm is equal to P1CutWireAlarm
-                            // using also GasCutWireTamperStatus that us equal to P1CutWireTamperStatus
+                            // In family 31xx32xx the only MTU that use GasCutWireAlarm is 148
+
+                            /*
+                            This is for family 342x, not for 31xx32xx
+                            if (tempEvt.tempMtu.CurrentMtu.GasCutWireAlarm)
+                            {
+                                / log
+                                FrmMain.myglobals.log.MtuData("CutAlarmCable", myglobals.alarmList[index].CutAlarmCable ? "Enabled" : "Disabled", "Cut Alarm Cable");
+                                / set
+                                tempEvt.tempMtu.Port[0].SetBitInfoFromCertainByte(Mtu.ArchTamperMemorySet + 2, //2 ^ 5// 32, myglobals.alarmList[index].CutAlarmCable);
+                            }
+                            Mtu.ArchTamperMemorySet  = 192
+                            */
+                            
 
                             // Set alarms [ Alarm Message Transmission ]
                             if ( mtu.InsufficientMemory  ) map.InsufficientMemoryAlarm = alarms.InsufficientMemory;

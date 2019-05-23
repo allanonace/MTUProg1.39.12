@@ -11,6 +11,7 @@ using nexus.core;
 using nexus.protocols.ble;
 using nexus.protocols.ble.gatt;
 using nexus.protocols.ble.scan;
+using nexus.protocols.ble.scan.advertisement;
 using Plugin.Settings;
 using Plugin.Settings.Abstractions;
 
@@ -1037,15 +1038,14 @@ namespace ble_library
         /// </summary>
         private async Task ScanForBroadcasts()
         {
-
-           // Utils.Print($"--------------------------------------------------------------Empieza el escaneo: {isScanning.ToString()} thread: {Thread.CurrentThread.ManagedThreadId}");
+            // Utils.Print($"--------------------------------------------------------------Empieza el escaneo: {isScanning.ToString()} thread: {Thread.CurrentThread.ManagedThreadId}");
             if (!isScanning)
             {
                 //List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
                // Utils.Print($"--------------------------------------------------------------Escaneando: thread: {Thread.CurrentThread.ManagedThreadId}");
                 BlePeripheralList.Clear();
                 isScanning = true;
-                await adapter.ScanForBroadcasts(
+                await adapter.ScanForBroadcasts (
                     // Optional scan filter to ensure that the observer will only receive peripherals
                     // that pass the filter. If you want to scan for everything around, omit this argument.
                     new ScanFilter().SetIgnoreRepeatBroadcasts(false),
@@ -1053,22 +1053,74 @@ namespace ble_library
                     // that passes the above can filter (if provided).
                     (IBlePeripheral peripheral) =>
                     {
-                        // read the advertising data...
-                        var adv = peripheral.Advertisement;
-
-                        if (adv.DeviceName != null)
+                        try
                         {
-                            if (adv.DeviceName.Equals("Aclara"))
+                            if ( peripheral as IBlePeripheral == null )
                             {
-                                if (BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
+                                Utils.Print ( "Can't create object" );
+                            
+                                return;
+                            }
+                        
+                            if ( peripheral == null )
+                            {
+                                Utils.Print ( "Avoid:..." );
+                                
+                                return;
+                            }
+                            
+                            if ( peripheral.Advertisement == null ||
+                                 string.IsNullOrEmpty ( peripheral.Advertisement.DeviceName ) )
+                            {
+                                Utils.Print ( "Avoid: Address " + Utils.ByteArrayToString ( peripheral.Address ) + " | ID " + peripheral.DeviceId + " | RSSI " + peripheral.Rssi );
+                                
+                                return;
+                            }
+                        
+                            Utils.Print ( "-> 1" );
+                        
+                            // read the advertising data...
+                            var adv = peripheral.Advertisement;
+                            
+                            Utils.Print ( "-> 2" );
+                            
+                            if ( adv.DeviceName != null )
+                            {
+                                Utils.Print ( "-> 3" );
+                            
+                                if (adv.DeviceName.Equals("Aclara"))
                                 {
-                                    BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
-                                }
-                                else
-                                {
-                                    BlePeripheralList.Add(peripheral);
+                                    Utils.Print ( "-> 4" );
+                                
+                                    IEnumerable<nexus.protocols.ble.scan.advertisement.AdvertisingManufacturerData> manuData = peripheral.Advertisement.ManufacturerSpecificData;
+                                    Utils.Print ( "Address: " + Utils.ByteArrayToString ( peripheral.Address ) );
+                                    
+                                    Utils.Print ( "-> 5" );
+                                    
+                                    if ( manuData.Count () <= 0 )
+                                    {
+                                        Utils.Print ( "Error: Puck nazi encontrado!!!" );
+                                    
+                                        return;
+                                    }
+                                    
+                                    Utils.Print ( "Puck: " + peripheral.DeviceId + " | " + Utils.ByteArrayToString ( manuData.ElementAt(0).Data.Take(4).ToArray() ) );
+                                    Utils.Print ( "BlePeripheralList: " + BlePeripheralList.Count );
+                                
+                                    if (BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
+                                    {
+                                        BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
+                                    }
+                                    else
+                                    {
+                                        BlePeripheralList.Add(peripheral);
+                                    }
                                 }
                             }
+                        }
+                        catch ( Exception e )
+                        {
+
                         }
                     },
                     // TimeSpan or CancellationToken to stop the scan
