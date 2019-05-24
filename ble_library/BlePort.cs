@@ -1037,49 +1037,74 @@ namespace ble_library
         /// </summary>
         private async Task ScanForBroadcasts()
         {
-
-           // Utils.Print($"--------------------------------------------------------------Empieza el escaneo: {isScanning.ToString()} thread: {Thread.CurrentThread.ManagedThreadId}");
-            if (!isScanning)
+            try
             {
-                //List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
-               // Utils.Print($"--------------------------------------------------------------Escaneando: thread: {Thread.CurrentThread.ManagedThreadId}");
-                BlePeripheralList.Clear();
-                isScanning = true;
-                await adapter.ScanForBroadcasts(
-                    // Optional scan filter to ensure that the observer will only receive peripherals
-                    // that pass the filter. If you want to scan for everything around, omit this argument.
-                    new ScanFilter().SetIgnoreRepeatBroadcasts(false),
-                    // IObserver<IBlePeripheral> or Action<IBlePeripheral> will be triggered for each discovered peripheral
-                    // that passes the above can filter (if provided).
-                    (IBlePeripheral peripheral) =>
-                    {
-                        // read the advertising data...
-                        var adv = peripheral.Advertisement;
+                // Utils.Print($"--------------------------------------------------------------Empieza el escaneo: {isScanning.ToString()} thread: {Thread.CurrentThread.ManagedThreadId}");
+                if (!isScanning)
+                {
+                    //List<IBlePeripheral> BlePeripheralListAux = new List<IBlePeripheral>();
+                    // Utils.Print($"--------------------------------------------------------------Escaneando: thread: {Thread.CurrentThread.ManagedThreadId}");
+                    BlePeripheralList.Clear();
+                    isScanning = true;
 
-                        if (adv.DeviceName != null)
+                    ScanFilter filter = new ScanFilter
+                    {
+                        AdvertisedDeviceName = "Aclara",
+                         IgnoreRepeatBroadcasts = false
+
+                    };
+                    await adapter.ScanForBroadcasts(
+                        // Optional scan filter to ensure that the observer will only receive peripherals
+                        // that pass the filter. If you want to scan for everything around, omit this argument.
+                        filter,//.SetIgnoreRepeatBroadcasts(false),
+                        // IObserver<IBlePeripheral> or Action<IBlePeripheral> will be triggered for each discovered peripheral
+                        // that passes the above can filter (if provided).
+                        (IBlePeripheral peripheral) =>
                         {
-                            if (adv.DeviceName.Equals("Aclara"))
+                            try
                             {
-                                if (BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
+                            // read the advertising data...
+                            var adv = peripheral.Advertisement;
+
+
+                                //Utils.PrintDeep("--------" + Utils.ByteArrayToString(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()));
+                               
+                                if (adv.DeviceName != null)
                                 {
-                                    BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
-                                }
-                                else
-                                {
-                                    BlePeripheralList.Add(peripheral);
+                                    Utils.PrintDeep("-------" + adv.DeviceName);
+                                    if (adv.DeviceName.Equals("Aclara"))
+                                    {
+                                        Utils.PrintDeep("--------" + Utils.ByteArrayToString(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()));
+                                        if (BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
+                                        {
+                                            BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;
+                                        }
+                                        else
+                                        {
+                                            BlePeripheralList.Add(peripheral);
+                                        }
+                                    }
                                 }
                             }
-                        }
-                    },
-                    // TimeSpan or CancellationToken to stop the scan
-                    // If you omit this argument, it will use BluetoothLowEnergyUtils.DefaultScanTimeout
-                    TimeSpan.FromSeconds(timeOutSeconds)
-                );
-                //BlePeripheralList = BlePeripheralListAux;
+                            catch (Exception e)
+                            {
+
+                            }
+                        },
+                        // TimeSpan or CancellationToken to stop the scan
+                        // If you omit this argument, it will use BluetoothLowEnergyUtils.DefaultScanTimeout
+                        TimeSpan.FromSeconds(timeOutSeconds)
+                    );
+                    //BlePeripheralList = BlePeripheralListAux;
+                }
+                isScanning = false;
+                //  Utils.Print($"-----------------------------------------------------Escaneado terminado, encontrados: {BlePeripheralList.Count}, thread: {Thread.CurrentThread.ManagedThreadId}");
+                // scanning has been stopped when code reached this point
             }
-            isScanning = false;
-          //  Utils.Print($"-----------------------------------------------------Escaneado terminado, encontrados: {BlePeripheralList.Count}, thread: {Thread.CurrentThread.ManagedThreadId}");
-            // scanning has been stopped when code reached this point
+            catch (Exception e)
+            {
+
+            }
         }
 
         public byte[] GetBatteryLevel()

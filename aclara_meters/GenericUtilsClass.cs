@@ -115,7 +115,7 @@ namespace aclara_meters
                                     using ( FileStream fileStream = new FileStream ( file.FullName, FileMode.Open ) )
                                     {
                                         // Folder path
-                                        remotePath = global.ftpRemotePath + file.Directory.Name; // Logs + User folder
+                                        remotePath = Path.Combine(global.ftpRemotePath,file.Directory.Name); // Logs + User folder
                                         
                                         if ( ! sftp.Exists ( remotePath ) )
                                             sftp.CreateDirectory ( remotePath );
