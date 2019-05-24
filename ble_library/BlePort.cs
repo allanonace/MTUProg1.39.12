@@ -11,6 +11,7 @@ using nexus.core;
 using nexus.protocols.ble;
 using nexus.protocols.ble.gatt;
 using nexus.protocols.ble.scan;
+using nexus.protocols.ble.scan.advertisement;
 using Plugin.Settings;
 using Plugin.Settings.Abstractions;
 

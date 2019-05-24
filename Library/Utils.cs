@@ -204,6 +204,9 @@ namespace Library
         public static string ByteArrayToString (
             byte[] bytes )
         {
+            if ( bytes.Length <= 0 )
+                return string.Empty;
+        
             StringBuilder hex = new StringBuilder ( bytes.Length * 2 );
             foreach ( byte b in bytes )
                 hex.AppendFormat ( "{0:x2} ", b );

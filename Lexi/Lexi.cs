@@ -63,7 +63,6 @@ namespace Lexi
                                   58886, 54429, 50452, 45483, 40994, 37561, 33584, 31687, 27214, 22741,
                                   18780, 15843, 11370, 7921, 3960};
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="Lexi.Lexi" /> class.
         /// </summary>
@@ -135,62 +134,27 @@ namespace Lexi
         /// See <see cref="Read(UInt32 addres, uint data)"/> to add doubles.
         /// <seealso cref="Write(byte addres, byte[] data)"/>
         /// <seealso cref="Write(ISerial serial, UInt32 addres, byte[] data, int timeout)"/>
-        public async Task<byte[]> Read(ISerial serial, UInt32 addres, uint bytesToRead, int timeout)
+        public async Task<byte[]> Read(ISerial serial, UInt32 address, uint bytesToRead, int timeout)
         {
             int TEST = new Random ().Next ( 0, 999 );
             Utils.PrintDeep ( Environment.NewLine + "--------LEXI_READ-------| " + TEST + " |--" );
             Utils.PrintDeep ( "Lexi.Read = Write + UpdateBuffer + Read" );
         
-            /* +------------+----------+----------------------------------------------------------+
-             * | Byte Index |  Field   |                          Notes                           |
-             * +------------+----------+----------------------------------------------------------+
-             * |          0 | Header   | This field is always 0x25                                |
-             * |          1 | Command  | 0x80, 0x82, 0x84, 0x86 as detailed in section 4.2 above  |
-             * |          2 | Address  | Address of first byte to read                            |
-             * |          3 | Size     | Number of bytes to read                                  |
-             * |          4 | Checksum | 2’s complement of sum: header + command + address + data |
-             * +------------+----------+----------------------------------------------------------+ 
-             * 
-             * Command
-             * -------
-             * block 0 addres >= 0 & < 256 = 0x80 => 128
-             * block 1: addres >= 256 & < 512 = 0x82 => 130
-             * block 2:addres >= 512 & < 768 = 0x84 => 132
-             * block 3:addres >= 768 = 0x86 => 134
-             */
-             
             try
             {
-                uint read_comand = (uint)(128 + ((addres / 256) * 2));
-    
-                /* Address
-                 * -------
-                 * addres then become offset from 256 block
-                 * Example: Addres 600 --> block 2 --> offset 600 - 512 = 88;
-                 */
-                uint start_addres = (uint)(addres - ((addres / 256) * 256));
-    
-                // Data frame { 25 | ReadCmd | Address | BytesToRead | CheckSum }.Length = 5
-                byte[] payload = new byte[]{
-                    0x25,
-                    (byte)read_comand,
-                    (byte)start_addres,
-                    (byte)bytesToRead
-                };
-    
-                // Adds checksum to payload
-                byte[] stream = checkSum ( payload );
+                byte[] stream;
+                var info = GeneratePackage ( LexiAction.Read, out stream, address, null, bytesToRead );
                 
-                Utils.PrintDeep ( "Lexi.Read -> Write.." +
-                    " Address " + start_addres +
-                    " | ReadCmd " + read_comand +
-                    " | BytesToRead " + bytesToRead +
-                    " | TimeOut " + timeout +
-                    " | Stream " + Utils.ByteArrayToString ( stream ) +
-                    " [ " + stream.Length + " ]" );
+                Utils.PrintDeep ( "Lexi.Read.. " +
+                "Stream = " +
+                "0x" + info.header + " ( " + Convert.ToInt32 ( info.header, 16 ) + " ) + " +
+                "WriteCmd 0x" + info.cmd + " ( " + Convert.ToInt32 ( info.cmd, 16 ) + " ) + " +
+                "Address 0x" + info.startAddress + " ( " + Convert.ToInt32 ( info.startAddress, 16 ) + " ) + " +
+                "Checksum 0x" + info.checksum + " ( " + Convert.ToInt32 ( info.checksum, 16 ) + " )" );
+    
+                Utils.PrintDeep ( "Lexi.Read.. " + Utils.ByteArrayToString ( stream ).Trim () + " [ Length " + stream.Length + " ]" );
     
                 // Send Lexi Read command
-                // Stream length is always "5" = 25 + ReadCmd + Address + BytesToRead + Checksum
                 await serial.Write ( stream, 0, stream.Length );
                 
                 Utils.PrintDeep ( "------BUFFER_START-------" );
@@ -245,7 +209,6 @@ namespace Lexi
                  * | 0..N-1     | Data  | Read from RAM | N = number of bytes specified in Data field of Request |
                  * | N..N+1     | CRC   | Calculated    | CRC over all data bytes.  See section 7.2              |
                  * +------------+-------+---------------+--------------------------------------------------------+
-                 * 
                  */
     
                 // Removes header
@@ -286,79 +249,30 @@ namespace Lexi
             await Write(m_serial, addres, data, m_timeout);
         }
 
-        public async Task Write(ISerial serial, UInt32 addres, byte[] data, int timeout)
+        public async Task Write(ISerial serial, UInt32 address, byte[] data, int timeout)
         {
             int TEST = new Random ().Next ( 0, 999 );
             Utils.PrintDeep ( Environment.NewLine + "-------LEXI_WRITE--------| " + TEST + " |--" );
             Utils.PrintDeep ( "Lexi.Write = Write + UpdateBuffer + ReadBuffer" );
-        
-            /*
-             * +------------+----------+----------------------------------------------------------+
-             * | Byte Index |  Field   |                          Notes                           |
-             * +------------+----------+----------------------------------------------------------+
-             * | 0          | Header   | This field is always 0x25                                |
-             * | 1          | Command  | 0x81, 0x83, 0x85, 0x87 as detailed in section 4.2 above  |
-             * | 2          | Address  | Address of first byte to write                           |
-             * | 3          | Size     | Number of bytes to write                                 |
-             * | 4          | Checksum | 2’s complement of sum: header + command + address + data |
-             * | 5..4+N     | Data     | N = number of bytes specified in Data/Size field above   |
-             * | 6+N..7+N   | CRC      | See section 7.2                                          |
-             * +------------+----------+----------------------------------------------------------+
-             * 
-             * Command
-             * -------
-             * block 0 addres >= 0 & < 256 = 0x81 => 129
-             * block 1: addres >= 256 & < 512 = 0x83 => 131
-             * block 2:addres >= 512 & < 768 = 0x85 => 133
-             * block 3:addres >= 768 = 0x87 => 135
-             */
     
             try
             {
-                uint write_comand = (uint)(129 + ((addres / 256) * 2));
-    
-                /* Address
-                 * -------
-                 * addres then become offset from 256 block
-                 * Example: Addres 600 --> block 2 --> offset 600 - 512 = 88;
-                 */
-                uint start_addres = (uint)(addres - ((addres / 256) * 256));
-    
-                // Data frame { 25 | WriteCmd | Address | BytesToWrite | Checksum }.Length = 5
-                byte[] payload = new byte[]{
-                    0x25, // header
-                    (byte)write_comand,
-                    (byte)start_addres,
-                    (byte)data.Length
-                };
-    
-                // Adds checksum to payload
-                byte[] header = checkSum ( payload );
-    
-                byte[] crc = BitConverter.GetBytes ( calcCRC ( data, data.Length ) );
-    
-                // Concatenate header, data to write and calculated CRC
-                byte[] stream = new byte[0];
-                Array.Resize ( ref stream, header.Length + data.Length + 2 /*CRC*/ );
-                Array.Copy ( header, 0, stream, 0, header.Length );
-                Array.Copy ( data, 0, stream, header.Length, data.Length );
-                stream[ stream.Length - 1 ] = crc[ 1 ];
-                stream[ stream.Length - 2 ] = crc[ 0 ];
+                byte[] stream;
+                var info = GeneratePackage ( LexiAction.Write, out stream, address, data );
 
                 Utils.PrintDeep ( "Lexi.Write.. " +
-                "Stream = Header [ " +
-                "0x25 + " +
-                "WriteCmd 0x" + ( byte )write_comand + " ( " + write_comand + " ) + " +
-                "Address 0x" + ( byte )start_addres + " ( " + start_addres + " ) + " +
-                "NumBytesToWrite 0x" + ( byte )data.Length + " ( " + data.Length + " ) + " +
-                "Checksum 0x" + ( byte )header [ header.Length - 1 ] + " ( " + header [ header.Length - 1 ] + " ) + " +
+                "Stream = " +
+                "0x" + info.header + " ( " + Convert.ToInt32 ( info.header, 16 ) + " ) + " +
+                "WriteCmd 0x" + info.cmd + " ( " + Convert.ToInt32 ( info.cmd, 16 ) + " ) + " +
+                "Address 0x" + info.startAddress + " ( " + Convert.ToInt32 ( info.startAddress, 16 ) + " ) + " +
+                "NumBytesToWrite 0x" + data.Length + " ( " + data.Length + " ) + " +
+                "Checksum 0x" + info.checksum + " ( " + Convert.ToInt32 ( info.checksum, 16 ) + " ) + " +
                 "Data [ " + Utils.ByteArrayToString ( data ) + " ] + " +
-                "CRC [ " + Utils.ByteArrayToString ( crc.Take ( 2 ).ToArray () ) + " ]" );
+                "CRC [ " + Utils.ByteArrayToString ( info.crc ) + " ]" );
     
                 Utils.PrintDeep ( "Lexi.Write.. " + Utils.ByteArrayToString ( stream ).Trim () + " [ Length " + stream.Length + " ]" );
     
                 // Send Lexi Write command
-                // Stream length is always "5" = 25 + WriteCmd + Address + BytesToWrite + Checksum
                 await serial.Write ( stream, 0, stream.Length );
     
                 Utils.PrintDeep ( "------BUFFER_START-------" );
@@ -370,22 +284,20 @@ namespace Lexi
                 
                 Utils.PrintDeep ( "Lexi.Write.. " +
                     "Echo " + serial.isEcho ().ToString ().ToUpper () +
-                    " | StreamFromMTU = Header x" + header.Length + " + Data x" + data.Length + " + CRC x2 + MTU.CRC x2 = " + rawBuffer.Length + " bytes" );
+                    " | StreamFromMTU = Header x" + ( stream.Length - data.Length - rawBuffer.Length ) + " + Data x" + data.Length + " + CRC x2 + MTU.CRC x2 = " + rawBuffer.Length + " bytes" );
     
                 // Whait untill the response buffer data is available or timeout limit is reached
-                int bytesToRead=0;
+                int  bytesToRead   = 0;
                 long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds () + timeout;
-                await Task.Run(() =>
+                await Task.Run ( () =>
                 {
-                    while ((bytesToRead = serial.BytesToRead()) < rawBuffer.Length - 1)
+                    while ( ( bytesToRead = serial.BytesToRead () ) < rawBuffer.Length - 1 )
                     {
                         Utils.PrintDeep("Lexi.Write.. BytesToRead: " + bytesToRead + "/" + rawBuffer.Length + " [ " + DateTimeOffset.Now.ToUnixTimeMilliseconds() + " > " + timeout_limit + " ]");
 
-                        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
+                        if ( DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit )
                         {
-                            int num = serial.BytesToRead();
-
-                            if (num <= responseOffset)
+                            if ( serial.BytesToRead() <= responseOffset )
                             {
                                 Utils.PrintDeep("Lexi.Write -> CheckResponseOk IOException");
 
@@ -398,7 +310,7 @@ namespace Lexi
                                 throw new TimeoutException();
                             }
                         }
-                        Thread.Sleep(10);
+                        Thread.Sleep ( 10 );
                     }
                 });
                 
@@ -417,9 +329,7 @@ namespace Lexi
     
                 // If first byte of the recovered CRC is 6, everything has gone OK
                 if ( response[0] != 0x06 )
-                {
-                    //throw new LexiWriteException(response);
-                }
+                    throw new LexiWriteException ( response );
             }
             catch ( Exception e )
             {
@@ -465,7 +375,6 @@ namespace Lexi
 
             serial.Write(stream, 0, stream.Length);
 
-
             byte[] rawBuffer = new byte[2];
             int response_offest = 0;
             if (serial.isEcho()) { response_offest = stream.Length; }
@@ -500,6 +409,111 @@ namespace Lexi
                 throw new LexiWriteException(response);
             }
 
+        }
+
+        private enum LexiAction
+        {
+            Read,
+            Write,
+            OperationRequest
+        }
+
+        private ( string header, string cmd, string startAddress, string checksum, byte[] crc ) GeneratePackage (
+            LexiAction lexiAction,
+            out byte[] array,
+            uint address,
+            byte[] data = null,
+            params object[] arguments )
+        {
+            byte[] header = new byte[ 4 ];
+            byte[] crc    = new byte[ 0 ];
+
+            // Address become offset from 256 block
+            // Example: Addres 600 --> block 2 --> offset 600 - 512 = 88
+
+            switch ( lexiAction )
+            {
+                case LexiAction.Read:
+                /*
+                * +------------+----------+----------------------------------------------------------+
+                * | Byte Index |  Field   |                          Notes                           |
+                * +------------+----------+----------------------------------------------------------+
+                * | 0          | Header   | This field is always 0x25                                |
+                * | 1          | Command  | 0x80, 0x82, 0x84, 0x86                                   |
+                * | 2          | Address  | Address of first byte to read                            |
+                * | 3          | Size     | Number of bytes to read                                  |
+                * | 4          | Checksum | 2’s complement of sum: header + command + address + data |
+                * +------------+----------+----------------------------------------------------------+
+                * Command
+                * -------
+                * block 0: addres >=   0 & < 256 = 0x80 => 128
+                * block 1: addres >= 256 & < 512 = 0x82 => 130
+                * block 2: addres >= 512 & < 768 = 0x84 => 132
+                * block 3: addres >=         768 = 0x86 => 134
+                */
+                header[ 0 ] = 0x25;
+                header[ 1 ] = ( byte )( uint )( 128 + ( ( address / 256 ) * 2 ) );
+                header[ 2 ] = ( byte )( uint )( address - ( ( address / 256 ) * 256 ) );
+                header[ 3 ] = ( byte )( uint )arguments[ 0 ];
+                header      = checkSum ( header );
+                break;
+
+                case LexiAction.Write:
+                /*
+                * +------------+----------+----------------------------------------------------------+
+                * | Byte Index |  Field   |                          Notes                           |
+                * +------------+----------+----------------------------------------------------------+
+                * | 0          | Header   | This field is always 0x25                                |
+                * | 1          | Command  | 0x81, 0x83, 0x85, 0x87                                   |
+                * | 2          | Address  | Address of first byte to write                           |
+                * | 3          | Size     | Number of bytes to write                                 |
+                * | 4          | Checksum | 2’s complement of sum: header + command + address + data |
+                * | 5..4+N     | Data     | Data array                                               |
+                * | 6+N..7+N   | CRC      | Byte 0: 0x06 ACK, 0x15 NAK | Byte 1: NAK Reason          |
+                * +------------+----------+----------------------------------------------------------+
+                * Command
+                * -------
+                * block 0: addres >=   0 & < 256 = 0x81 => 129
+                * block 1: addres >= 256 & < 512 = 0x83 => 131
+                * block 2: addres >= 512 & < 768 = 0x85 => 133
+                * block 3: addres >=         768 = 0x87 => 135
+                */
+                header[ 0 ] = 0x25;
+                header[ 1 ] = ( byte )( uint )(     129 + ( ( address / 256 ) *   2 ) );
+                header[ 2 ] = ( byte )( uint )( address - ( ( address / 256 ) * 256 ) );
+                header[ 3 ] = ( byte )data.Length;
+                header      = checkSum ( header );
+                break;
+            }
+
+            // Concatenate..
+            array = null;
+            switch ( lexiAction )
+            {
+                case LexiAction.Read:
+                array = header;
+                break;
+                
+                case LexiAction.Write:
+                // Header + Data to write + Calculated CRC
+                array = new byte[ header.Length + data.Length + 2 ];
+                crc = BitConverter.GetBytes ( calcCRC ( data, data.Length ) );
+                
+                Array.Copy ( header, 0, array, 0, header.Length );
+                Array.Copy ( data, 0, array, header.Length, data.Length );
+                Array.Copy ( crc, 0, array, header.Length + data.Length, 2 );
+                break;
+                
+                case LexiAction.OperationRequest:
+                break;
+            }
+            
+            return (
+                header      : String.Format ( "{0:x2}", array[ 0 ] ),
+                cmd         : String.Format ( "{0:x2}", array[ 1 ] ),
+                startAddress: String.Format ( "{0:x2}", array[ 2 ] ),
+                checksum    : String.Format ( "{0:x2}", array[ 4 ] ),
+                crc         : crc );
         }
 
         public byte[] GetNextLogQueryResult()
@@ -679,7 +693,6 @@ namespace Lexi
             }
             return BitConverter.GetBytes(num).Reverse().ToArray();
         }
-
 
         static byte[] checkSum(byte[] data)
         {

@@ -453,7 +453,7 @@ namespace MTUComm
                         }
                         comm.OnReadMtuData -= Comm_OnReadMtuData;
                         comm.OnReadMtuData += Comm_OnReadMtuData;
-                        parameters.Add(DaysOfRead);
+                        parameters.Add ( DaysOfRead );
                         break;
 
                     case ActionType.BasicRead:
