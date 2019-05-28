@@ -69,7 +69,7 @@ namespace ble_library
                     buffer[ i+offset ] = ble_port_serial.GetBufferElement ();
                     
                     // Last two bytes are the CRC
-                    if ( ble_port_serial.BytesToRead () == 0 )
+                    if ( ble_port_serial.BytesReadCount () == 0 )
                     {
                         Utils.PrintDeep ( "BleSerial.Read.." +
                         " DataFrames " + ( i+1 ).ToString ( "D2" ) +
@@ -234,9 +234,14 @@ namespace ble_library
         /// <remarks>
         /// The receive buffer includes the serial driver's receive buffer as well as internal buffering in the <c>ISerial</c> object itself.
         /// </remarks>
-        public int BytesToRead()
+        public int BytesReadCount ()
         {
-            return ble_port_serial.BytesToRead();
+            return ble_port_serial.BytesReadCount ();
+        }
+
+        public byte[] BytesRead ()
+        {
+            return ble_port_serial.BytesRead;
         }
 
         /// <summary>

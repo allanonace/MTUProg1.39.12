@@ -7,6 +7,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Library
 {
@@ -52,6 +53,18 @@ namespace Library
                 entry => entry.Value.ToLower() );
         }
 
+        public static byte[] DateTimeToFourBytes (
+            DateTime dateTime )
+        {
+            return new byte[]
+            {
+                ( byte )dateTime.Month,
+                ( byte )dateTime.Day,
+                ( byte )( dateTime.Year - 2000 ),
+                0x00
+            };
+        }
+
         #endregion
 
         #region IO
@@ -79,7 +92,9 @@ namespace Library
         public static StreamReader GetResourceStreamReader (
             string fileName )
         {
-            Stream path = AppDomain.CurrentDomain.GetAssemblies ().First ( x => x.FullName.Contains ( "MTUComm" ) ).GetManifestResourceStream ( "MTUComm.Resource." + fileName );
+            Stream path = AppDomain.CurrentDomain.GetAssemblies ()
+                .First ( x => x.FullName.Contains ( "MTUComm" ) )
+                .GetManifestResourceStream ( "MTUComm.Resource." + fileName );
             //Stream path = classProject.Assembly.GetManifestResourceStream ( classProject.Name + ".Resource." + fileName );
             
             return new StreamReader ( path );
@@ -89,6 +104,19 @@ namespace Library
             string fileName )
         {
             return new StreamReader ( fileName );
+        }
+
+        public static X509Certificate2 GetCertificateFromResources (
+            string fileName )
+        {
+            using ( StreamReader streamReader = GetResourceStreamReader ( fileName ) )
+            {
+                using ( MemoryStream memStream = new MemoryStream () )
+                {
+                    streamReader.BaseStream.CopyTo ( memStream );
+                    return new X509Certificate2 ( memStream.ToArray () );
+                }
+            }
         }
 
         #endregion
@@ -174,6 +202,24 @@ namespace Library
             }
     
             return plaintext;
+        }
+
+        #endregion
+
+        #region Arrays
+
+        public static string ArrayToString<T> (
+            T[] entries )
+        where T : struct
+        {
+            if ( entries.Length <= 0 )
+                return string.Empty;
+        
+            StringBuilder stbr = new StringBuilder ();
+            foreach ( var entry in entries )
+                stbr.AppendFormat ( "{0} ", entry );
+            
+            return stbr.ToString ().Substring ( 0, stbr.Length - 1 );
         }
 
         #endregion

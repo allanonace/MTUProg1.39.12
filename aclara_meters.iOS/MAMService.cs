@@ -44,22 +44,21 @@ namespace aclara_meters.iOS
                 data.ftpDownload_Path = paramsGroup.ValueForKey(new NSString(Mobile.ID_FTP_PATH)).ToString();
                 data.HasIntune = true;
                 data.GenerateCert(paramsGroup.ValueForKey(new NSString(Mobile.ID_CERTIFICATE)).ToString());
-                
 
-               // Utils.Print("Intune parameters loaded..");
-               // Utils.Print("FTP: " + data.ftpDownload_Host + ":" + data.ftpDownload_Port + " - " + data.ftpDownload_User + " [ " + data.ftpDownload_Pass + " ]");
-               // Utils.Print("Certificate: " + data.certificate.FriendlyName + " [ " + data.certificate.NotAfter + " ]");
+                Utils.Print("Intune parameters loaded..");
+                Utils.Print("FTP: " + data.ftpDownload_Host + ":" + data.ftpDownload_Port + " - " + data.ftpDownload_User + " [ " + data.ftpDownload_Pass + " ]");
+                //Utils.Print("Certificate: " + data.certificate.FriendlyName + " [ " + data.certificate.NotAfter + " ]");
 
                 // Free memory
-                paramsGroup.Dispose();
+                paramsGroup .Dispose();
                 paramsGroups.Dispose();
-                dictionary.Dispose();
-                value.Dispose();
-                paramsGroup = null;
+                dictionary  .Dispose();
+                value       .Dispose();
+                paramsGroup  = null;
                 paramsGroups = null;
-                keys = null;
-                dictionary = null;
-                value = null;
+                keys         = null;
+                dictionary   = null;
+                value        = null;
             }
             catch (Exception e )
             {

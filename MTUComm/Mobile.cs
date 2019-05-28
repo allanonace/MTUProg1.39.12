@@ -58,6 +58,81 @@ namespace MTUComm
                 this.HasFTP = false;
             }
 
+            public void TestCertificateIOS ()
+            {
+                // Load certificate from resources
+                //X509Certificate2 cer = Utils.GetCertificateFromResources ( "certificate.cer" );
+
+                // Install certificate in the keystore for the app
+                X509Store store = new X509Store ( StoreName.Root, StoreLocation.CurrentUser );
+                store.Open ( OpenFlags.ReadWrite );
+                //store.Add ( cer );
+
+                // Load certificate from keystore
+                foreach ( var c in store.Certificates )
+                    Utils.Print ( "- " + c.Subject + " | " + c.Issuer + " | " + c.NotAfter );
+
+                store.Close ();
+            }
+
+            public void RecoverAppFilesTree ()
+            {
+                /*
+                Using ios-deploy: ios-deploy --nolldb --list --bundle_id com.aclara.programmer
+                //
+                /Documents/
+                /Documents/LogsUni/
+                /Documents/.config/
+                /Documents/.config/.mono/
+                /Documents/.config/.mono/certs/
+                /Documents/.config/.mono/certs/Trust/
+                /Documents/Logs/
+                /Library/
+                /Library/global.xml
+                /Library/Caches/
+                /Library/Caches/com.aclara.programmer/
+                /Library/Caches/com.aclara.programmer/MAMURLCache/
+                /Library/Caches/com.aclara.programmer/MAMURLCache/Cache.db
+                /Library/Caches/com.aclara.programmer/MAMURLCache/Cache.db-wal
+                /Library/Caches/com.aclara.programmer/MAMURLCache/Cache.db-shm
+                /Library/Caches/.IntuneMAM/
+                /Library/Caches/.IntuneMAM/com.microsoft.intune.ApplicationInsights/
+                /Library/Caches/.IntuneMAM/com.microsoft.intune.ApplicationInsights/regularPrio/
+                /Library/Caches/.IntuneMAM/com.microsoft.intune.ApplicationInsights/metaData/
+                /Library/Caches/.IntuneMAM/com.microsoft.intune.ApplicationInsights/metaData/metaData
+                /Library/Caches/Snapshots/
+                /Library/Caches/Snapshots/com.aclara.programmer/
+                /Library/Caches/Snapshots/com.aclara.programmer/77B9721D-8B75-4CCB-AEB3-356A40AD0472@2x.ktx
+                /Library/Caches/Snapshots/com.aclara.programmer/8897336D-4446-46AC-B916-A3FC2FDEB36F@2x.ktx
+                /Library/Caches/Snapshots/com.aclara.programmer/downscaled/
+                /Library/Caches/Snapshots/com.aclara.programmer/downscaled/B5D8074E-7B0B-40C1-BC86-B8F2A15BE80B@2x.ktx
+                /Library/user.xml
+                /Library/mtu.xml
+                /Library/meter.xml
+                /Library/certificate.txt
+                /Library/alarm.xml
+                /Library/.IntuneMAM/
+                /Library/.IntuneMAM/NBUConfig.plist
+                /Library/.IntuneMAM/Config.plist
+                /Library/.IntuneMAM/com.aclara.programmer066B69C4-B148-49CC-8C5A-6D0B3C45A307-0.txt
+                /Library/Preferences/
+                /Library/Preferences/com.aclara.programmer.plist
+                /Library/demandconf.xml
+                /SystemData/
+                /tmp/
+                */
+
+                //string publicDir  = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
+                //string privateDir = Environment.GetFolderPath ( Environment.SpecialFolder.Personal );
+
+                var    baseDirs  = Directory.EnumerateDirectories ( "./" );
+                foreach ( var directory in baseDirs )
+                {
+                    Utils.Print ( "------------------> " + directory );
+                }
+            }
+
+            /*
             public void LoadCertFromKeychain ()
             {
                 // https://docs.microsoft.com/es-es/dotnet/api/system.security.cryptography.x509certificates.storename?view=netframework-4.8
@@ -88,6 +163,7 @@ namespace MTUComm
                 store.Close ();
                 store.Dispose ();
             }
+            */
 
             public void GenerateCert (string sCertificate = null)
             {
@@ -103,7 +179,7 @@ namespace MTUComm
                         // and seems that always starting with "MII..." and finish with "=="
                         // https://www.base64encode.org
                         // e.g. Aclara certificate in base64
-                        // base64cert = "MIICxDCCAaygAwIBAgIQV5fB/SvFm4VDwxNIjmx3LzANBgkqhkiG9w0BAQUFADAeMRwwGgYDVQQDExNOZXctVGVzdC1EZXYtQWNsYXJhMB4XDTE1MDQxNTA0MDAwMFoXDTI1MDQyMjA0MDAwMFowHjEcMBoGA1UEAxMTTmV3LVRlc3QtRGV2LUFjbGFyYTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANOISmTy1kRTeOPqajIm+y27q676LFKodBpgrm0M3imYpwnVd+aTnVdk7+NT5vSA1c9dB5PSojh/UfGg2kWDe5gNj2ZA+KaemXFqvl8YI/D6XjoNz3JqoqocjF4/hJnrUdwqOoUL6WPtbWEhCnzin/cVkKx5qxMrOh9qAzp+qYAqyJ26Aocr+nlM7oHRtBUmYRKZbpkNAnpiIV/Q6quSR5Qzsf4XrhvkPDkf2ZX8DvcJmAbXEAaBVa2ORsY9qA86jIphui5kwI9JPcw9hTZy1QxvNcZAijtPyC6AKDuRyEv0Awa1gcSBBRsf0HbeCSD91U/O51+alP3hLhA9tcxddx0CAwEAATANBgkqhkiG9w0BAQUFAAOCAQEAGuTqwTvEgaTl/E2jdG9RUD3zN9MhRCijJIpjv9NdkkH13LK5Sn9up1+DraaccA5h2El9kiXDHYWPA/qRMq1auhNcmTFVYjeQSNW0tyuTqbQiG/8fwZiAZrGn6UmOU/vzzhkyv05x5KzVAEwp94fU/J+kOIJVH0ff5jnMeYHARc1sY6JgXgJKoJbdS4Q4wG2RHj5yFAixv/zwS1XBy2GWtsz03aucNQzBIbk1uTIv2eyYqFMhSGT36vkfJFidRcR3H4FWnvInWoWmxlGcs0MS3bNOAv5ij55h0rREGJ9WdJmI/gw84aA4itFwwUuG6kKdF9AF/rljtVCFVH6T9PFI2Q==";
+                        // base64cert = "MIICxDCCAaygAwIBAgIQV5fB/SvFm4VD...uG6kKdF9AF/rljtVCFVH6T9PFI2Q==";
 
                         // /Library/Frameworks/Xamarin.iOS.framework/Versions/12.2.1.13/src/Xamarin.iOS/mcs/class/Mono.Security/Mono.Security.X509/X509Certificate.cs
                         // NOTE: Method PEM needs to find the header and footer strings previous to start with certificate
@@ -346,7 +422,7 @@ namespace MTUComm
             return null;
         }
         
-        private static void RecurReadFolders ( string PATH, int numLevel = 0 )
+        public static void RecurReadFolders ( string PATH, int numLevel = 0 )
         {
             string space = string.Empty.PadLeft ( numLevel * 4, ' ' );
             
@@ -356,11 +432,28 @@ namespace MTUComm
             {
                 Utils.Print ( space + "· FILES.." );
                 foreach ( string file in Directory.EnumerateFiles ( PATH ) )
+                {
                     Utils.Print ( space + "  · " + file );
+                    
+                    string backPath = Mobile.ConfigPublicPath + "/BACKUP";
+                    if ( ! Directory.Exists ( backPath ) )
+                        Directory.CreateDirectory ( backPath );
+                    
+                    string newPath  = file.Replace ( PATH, backPath );
+                    
+                    Utils.Print ( "--------> new path: " + newPath );
+                    
+                    File.Copy ( file, newPath, true );
+                }
             }
         
             foreach ( string folder in Directory.EnumerateDirectories ( PATH ) )
+            {
+                if ( folder.Contains ( "BACKUP" ) )
+                    continue;
+            
                 RecurReadFolders ( folder, numLevel + 1 );
+            }
         }
 
         public static bool IsNetAvailable ()

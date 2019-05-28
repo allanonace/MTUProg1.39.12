@@ -68,8 +68,14 @@ namespace MTUComm
                 
                 // Regenerate certificate from base64 string
                 Mobile.configData.GenerateCert ();
-                //Mobile.configData.LoadCertFromKeychain ();
+
+
+
+                //Mobile.configData.TestCertificateIOS ();
+                //Mobile.RecurReadFolders ( Mobile.ConfigPath ); //System.IO.Directory.GetParent ( "./" ).FullName );
                 
+
+
                 // Check global min date allowed
                 if ( ! string.IsNullOrEmpty ( Global.MinDate ) &&
                      DateTime.Compare ( DateTime.ParseExact ( Global.MinDate, "MM/dd/yyyy", null ), DateTime.Today ) < 0 )

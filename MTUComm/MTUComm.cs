@@ -17,6 +17,7 @@ using ActionType    = MTUComm.Action.ActionType;
 using FIELD         = MTUComm.actions.AddMtuForm.FIELD;
 using LogDataType   = MTUComm.LogQueryResult.LogDataType;
 using ParameterType = MTUComm.Parameter.ParameterType;
+using LexiAction    = Lexi.Lexi.LexiAction;
 
 namespace MTUComm
 {
@@ -277,7 +278,7 @@ namespace MTUComm
                         Singleton.Get.Action.SetCurrentMtu ( this.latest_mtu );
                 }
 
-                switch (type)
+                switch ( type )
                 {
                     case ActionType.AddMtu:
                     case ActionType.AddMtuAddMeter:
@@ -287,16 +288,17 @@ namespace MTUComm
                     case ActionType.ReplaceMtuReplaceMeter:
                         // Interactive and Scripting
                         if ( args.Length > 1 )
-                             await Task.Run(() => Task_AddMtu ( (AddMtuForm)args[0], (string)args[1], (Action)args[2] ) );
-                        else await Task.Run(() => Task_AddMtu ( (Action)args[0] ) );
+                             await Task.Run ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ], ( Action )args[ 2 ] ) );
+                        else await Task.Run ( () => Task_AddMtu ( ( Action )args[ 0 ] ) );
                         break;
-                    case ActionType.ReadMtu    : await Task.Run(() => Task_ReadMtu()); break;
-                    case ActionType.TurnOffMtu : await Task.Run(() => Task_TurnOnOffMtu ( false ) ); break;
-                    case ActionType.TurnOnMtu  : await Task.Run(() => Task_TurnOnOffMtu ( true  ) ); break;
-                    case ActionType.ReadData   : await Task.Run(() => Task_ReadDataMtu((int)args[0])); break;
-                    case ActionType.BasicRead  : await Task.Run(() => Task_BasicRead()); break;
-                    case ActionType.MtuInstallationConfirmation: await Task.Run(() => Task_InstallConfirmation()); break;
-                    case ActionType.ReadFabric: await Task.Run(() => Task_ReadFabric()); break;
+                    //case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadDataMtu ( 3 ) ); break; // Task_ReadMtu () ); break;
+                    case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
+                    case ActionType.TurnOffMtu : await Task.Run ( () => Task_TurnOnOffMtu ( false ) ); break;
+                    case ActionType.TurnOnMtu  : await Task.Run ( () => Task_TurnOnOffMtu ( true  ) ); break;
+                    case ActionType.ReadData   : await Task.Run ( () => Task_ReadDataMtu ( ( int )args[ 0 ] ) ); break;
+                    case ActionType.BasicRead  : await Task.Run ( () => Task_BasicRead () ); break;
+                    case ActionType.MtuInstallationConfirmation: await Task.Run ( () => Task_InstallConfirmation () ); break;
+                    case ActionType.ReadFabric: await Task.Run ( () => Task_ReadFabric () ); break;
                     default: break;
                 }
 
@@ -463,15 +465,43 @@ namespace MTUComm
 
         #region Read Data
 
-        public void Task_ReadDataMtu ( int NumOfDays )
+        public async Task Task_ReadDataMtu (
+            int numDays )
         {
-            DateTime start = DateTime.Now.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
-            DateTime end = DateTime.Now.Date.AddSeconds(86399);
+            // NOTE: Is impossible to save a full datetime in only four bytes,
+            // because by definition it requires eight. This approach using only
+            // three bytes implemented by Aclara, is only valid until 2255 ( byte = 8 bits = [0-255] )
+            DateTime end   = DateTime.Now;
+            DateTime start = end.Date.Subtract ( new TimeSpan ( numDays, 0, 0, 0 ) );
 
-            lexi.TriggerReadEventLogs(start, end);
+            byte[] data = new byte[ 10 ]; // 1+1+4*2
+            data[ 0 ] = 0x01; // Filter mode
+            data[ 1 ] = 0x01; // Log entry type
+            Array.Copy ( Utils.DateTimeToFourBytes ( start ), 0, data, 2, 4 ); // Start time
+            Array.Copy ( Utils.DateTimeToFourBytes ( end   ), 0, data, 6, 4 ); // Stop time
 
-            List<LogDataEntry> entries = new List<LogDataEntry>();
+            // Use address parameter to set request code
+            await this.lexi.Write ( 0x13, data, null, null, LexiAction.OperationRequest ); // Return +2 ACK
 
+            await Task.Delay ( WAIT_BEFORE_READ );
+
+            // Recover logs
+            List<LogDataEntry> entries = new List<LogDataEntry> ();
+
+            //while ( true )
+            {
+                byte[] response =
+                    await this.lexi.Write ( 0x14, null,
+                        new uint[]{ 25, 5 }, // ACK with log entry or without
+                        new ( int,int,byte )[] {
+                          ( 25, 2, 0 ), // Entry data included
+                          (  5, 2, 1 ), // Complete but without data
+                          (  5, 2, 2 )  // The MTU is busy
+                        },
+                        LexiAction.OperationRequest );
+            }
+
+            /*
             bool last_packet = false;
             while (!last_packet)
             {
@@ -490,9 +520,9 @@ namespace MTUComm
                         entries.Add(response.Entry);
                         OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu, response.TotalEntries, response.CurrentEntry));
                         break;
-
                 }
             }
+            */
         }
 
         #endregion
@@ -1787,7 +1817,7 @@ namespace MTUComm
 
         #endregion
 
-        #region AuxiliaryFunctions
+        #region Auxiliary Functions
         
         private dynamic GetMemoryMap (
             bool readFromMtuOnlyOnce = false )
