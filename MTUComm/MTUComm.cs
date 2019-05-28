@@ -291,8 +291,8 @@ namespace MTUComm
                              await Task.Run ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ], ( Action )args[ 2 ] ) );
                         else await Task.Run ( () => Task_AddMtu ( ( Action )args[ 0 ] ) );
                         break;
-                    //case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadDataMtu ( 3 ) ); break; // Task_ReadMtu () ); break;
-                    case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
+                    case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadDataMtu ( 3 ) ); break; // Task_ReadMtu () ); break;
+                    //case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
                     case ActionType.TurnOffMtu : await Task.Run ( () => Task_TurnOnOffMtu ( false ) ); break;
                     case ActionType.TurnOnMtu  : await Task.Run ( () => Task_TurnOnOffMtu ( true  ) ); break;
                     case ActionType.ReadData   : await Task.Run ( () => Task_ReadDataMtu ( ( int )args[ 0 ] ) ); break;
@@ -463,7 +463,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Read Data
+        #region Data Read
 
         public async Task Task_ReadDataMtu (
             int numDays )
