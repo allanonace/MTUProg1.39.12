@@ -475,8 +475,8 @@ namespace MTUComm
             DateTime start = end.Date.Subtract ( new TimeSpan ( numDays, 0, 0, 0 ) );
 
             byte[] data = new byte[ 10 ]; // 1+1+4*2
-            data[ 0 ] = 0x01; // Filter mode
-            data[ 1 ] = 0x01; // Log entry type
+            data[ 0 ] = 0x01; // Filter mode [ LogFilterMode.Match ]
+            data[ 1 ] = 0x01; // Log entry type [ LogEntryType.MeterRead ]
             Array.Copy ( Utils.DateTimeToFourBytes ( start ), 0, data, 2, 4 ); // Start time
             Array.Copy ( Utils.DateTimeToFourBytes ( end   ), 0, data, 6, 4 ); // Stop time
 

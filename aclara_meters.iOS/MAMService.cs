@@ -10,18 +10,12 @@ using System.Linq;
 [assembly: Dependency(typeof(aclara_meters.iOS.MAMService))]
 namespace aclara_meters.iOS
 {
-
     public class MAMService : IMAMService
     {
-        
         void IMAMService.UtilMAMService()
         {
             try
             {
-                //IntuneMAMAppConfigManager appConfig = IntuneMAMAppConfigManager.Instance;
-                // IntuneMAMAppConfig conf = IntuneMAMAppConfig.;
-                //  NSDictionary paramsGroups1 =IntuneMAMAppConfig_Extensions.
-
                 IntuneMAMPolicyManager value = IntuneMAMPolicyManager.Instance;
 
                 Utils.Print($"------ Es ManagementEnabled:  {value.IsManagementEnabled.ToString()}");

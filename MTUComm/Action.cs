@@ -503,15 +503,15 @@ namespace MTUComm
             ActionProgressArgs args;
             switch (e.Status)
             {
-                case LogQueryResult.LogDataType.Bussy:
+                case LogQueryResult.LogDataType.Busy:
                     args = new ActionProgressArgs(0, 0);
                     OnProgress(this, args);
                     break;
-                case LogQueryResult.LogDataType.NewPacket:
+                case LogQueryResult.LogDataType.NewEventLog:
                     args = new ActionProgressArgs(e.CurrentEntry, e.TotalEntries);
                     OnProgress(this, args);
                     break;
-                case LogQueryResult.LogDataType.LastPacket:
+                case LogQueryResult.LogDataType.LastEventLog:
                     Mtu mtu_type = configuration.GetMtuTypeById((int)e.MtuType.Type);
                     ActionResult result = ReadMTUData(e.Start, e.End, e.Entries, e.MtuType, mtu_type);
                     logger.ReadData(this, result, mtu_type);

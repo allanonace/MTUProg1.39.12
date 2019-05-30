@@ -6,60 +6,75 @@ namespace MTUComm
 {
     public class LogQueryResult
     {
+        #region Constants
+
         public enum LogDataType
         {
-            Bussy,
-            NewPacket,
-            LastPacket,
+            Busy,
+            NewEventLog,
+            LastEventLog,
         }
+        
+        private const int BYTE_ACKINFO = 1;
+        private const int BYTE_RESULT  = 2;
+        private const int BYTE_NUMLOGS = 3;
+        private const int BYTE_CURRENT = 5;
 
-        private LogDataType mStatus;
-        private LogDataEntry mEntry;
+        #endregion
 
-        public int TotalEntries { get; private set; }
-        public int CurrentEntry { get; private set; }
+        #region Attributes
 
+        private LogDataType status;
+        private LogDataEntry eventLogEntry;
+        private int totalEntries;
+        private int indexCurrentEntry;
 
-        public LogQueryResult(byte[] response)
-        {
-            if (response[1] == 1)
-            {
-                if (response[2] == 1)
-                {
-                    mStatus = LogDataType.LastPacket;
-                }
-                else
-                {
-                    mStatus = LogDataType.Bussy;
-                }
-                TotalEntries = 0;
-                CurrentEntry = 0;
+        #endregion
 
-            }
-            else
-            {
-                mStatus = LogDataType.NewPacket;
-                TotalEntries = response[3] + (response[4] << 8);
-                CurrentEntry = response[5] + (response[6] << 8);
-
-                mEntry = new LogDataEntry(response);
-            }
-        }
+        #region Properties
 
         public LogDataType Status
         {
-            get
+            get { return status; }
+        }
+
+        public LogDataEntry EventLogEntry
+        {
+            get { return eventLogEntry; }
+        }
+
+        public int TotalEntries
+        {
+            get { return totalEntries; }
+        }
+
+        public int IndexCurrentEntry
+        {
+            get { return indexCurrentEntry; }
+        }
+
+        #endregion
+
+        #region Initialization
+
+        public LogQueryResult (
+            byte[] response )
+        {
+            // Response – ACK with no log entry
+            if ( response[ BYTE_ACKINFO ] == 1 )
             {
-                return mStatus;
+                this.status = ( response[ BYTE_RESULT ] == 1 ) ? LogDataType.LastEventLog : LogDataType.Busy;
+            }
+            // Response – ACK with log entry
+            else
+            {
+                this.status            = LogDataType.NewEventLog;
+                this.totalEntries      = response[ BYTE_NUMLOGS ] + ( response[ BYTE_NUMLOGS + 1 ] << 8 );
+                this.indexCurrentEntry = response[ BYTE_CURRENT ] + ( response[ BYTE_CURRENT + 1 ] << 8 );
+                this.eventLogEntry     = new LogDataEntry ( response );
             }
         }
 
-        public LogDataEntry Entry
-        {
-            get
-            {
-                return mEntry;
-            }
-        }
+        #endregion
     }
 }

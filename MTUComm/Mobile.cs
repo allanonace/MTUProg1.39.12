@@ -60,6 +60,7 @@ namespace MTUComm
 
             public void TestCertificateIOS ()
             {
+                /*
                 // Load certificate from resources
                 //X509Certificate2 cer = Utils.GetCertificateFromResources ( "certificate.cer" );
 
@@ -69,6 +70,27 @@ namespace MTUComm
                 //store.Add ( cer );
 
                 // Load certificate from keystore
+                foreach ( var c in store.Certificates )
+                    Utils.Print ( "- " + c.Subject + " | " + c.Issuer + " | " + c.NotAfter );
+
+                store.Close ();
+                */
+
+                // NOTE: Certificates deployed using Intune are not present in the keychain
+                foreach ( var storeLocation in Enum.GetValues ( typeof ( StoreLocation ) ) )
+                    foreach ( var storeName in Enum.GetValues ( typeof ( StoreName ) ) )
+                        RecoverCerts ( ( StoreName )storeName, ( StoreLocation )storeLocation );
+            }
+
+            private void RecoverCerts ( StoreName storeName, StoreLocation storeLocation )
+            {
+                Utils.Print ( "---------------------" );
+                Utils.Print ( "Recover Certificates: Store Name '" + storeName + "' and Location '" + storeLocation + "'" );
+
+                // Install certificate in the keystore for the app
+                X509Store store = new X509Store ( storeName, storeLocation );
+                store.Open ( OpenFlags.ReadWrite );
+
                 foreach ( var c in store.Certificates )
                     Utils.Print ( "- " + c.Subject + " | " + c.Issuer + " | " + c.NotAfter );
 

@@ -260,6 +260,21 @@ namespace Library
             return hex.ToString ().Substring ( 0, hex.Length - 1 );
         }
 
+        public static T GetNumericValueFromBytes<T> (
+            byte[] data,
+            int startAt,
+            int size )
+        where T : struct
+        {
+            // NOTE: C# for the moment does not allow to use mathematical operators with T as one of the operands
+            // One walkaround can be to operate with longer type and the convert to target type, usually smaller
+            long value = 0L;
+            for ( int i = 0; i < size; i++ )
+                value += data[ i + startAt ] << ( i * 8 );
+
+            return ( T )( object )value;
+        }
+
         #endregion
     }
 }

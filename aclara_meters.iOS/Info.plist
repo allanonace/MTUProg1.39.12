@@ -30,6 +30,10 @@
 	<string>0.0.4</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
+		<key>AppGroupIdentifiers</key>
+		<array>
+			<string>group.bizintek</string>
+		</array>
 		<key>MainStoryboardFile</key>
 		<string>LaunchScreen</string>
 	</dict>
