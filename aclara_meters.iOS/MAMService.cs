@@ -14,24 +14,24 @@ namespace aclara_meters.iOS
 {
     public class MAMService : IMAMService
     {
-        //public static void LoginUserMAM()
-        //{
-        //    try
-        //    {
+        public static void LoginUserMAM()
+        {
+            try
+            {
 
-        //        string user = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
-        //        //IntuneMAMPolicyManager value = IntuneMAMPolicyManager.Instance;
-        //        if (string.IsNullOrEmpty(user))
-        //        {
-        //             IntuneMAMEnrollmentManager.Instance.LoginAndEnrollAccount(null);
-        //        }
+                string user = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
+                //IntuneMAMPolicyManager value = IntuneMAMPolicyManager.Instance;
+                if (string.IsNullOrEmpty(user))
+                {
+                     IntuneMAMEnrollmentManager.Instance.LoginAndEnrollAccount(null);
+                }
               
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Utils.Print($"Enrollment exceptions: {e.ToString()}");
-        //    }
-        //}
+            }
+            catch (Exception e)
+            {
+                Utils.Print($"Enrollment exceptions: {e.ToString()}");
+            }
+        }
 
         public void UtilMAMService()
         {

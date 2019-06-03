@@ -33,7 +33,7 @@ namespace aclara_meters.iOS
             var Mode = GenericUtilsClass.ChekInstallMode();
             if (Mode.Equals("None"))
             {
-                LoginUserMAM();
+                MAMService.LoginUserMAM();
                 Thread.Sleep(5000);
             }
 
@@ -62,24 +62,7 @@ namespace aclara_meters.iOS
 
             return base.FinishedLaunching ( app, options );
         }
-        public static void LoginUserMAM()
-        {
-            try
-            {
 
-                string user = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
-                //IntuneMAMPolicyManager value = IntuneMAMPolicyManager.Instance;
-                if (string.IsNullOrEmpty(user))
-                {
-                    IntuneMAMEnrollmentManager.Instance.LoginAndEnrollAccount(null);
-                }
-
-            }
-            catch (Exception e)
-            {
-                Utils.Print($"Enrollment exceptions: {e.ToString()}");
-            }
-        }
         public override bool OpenUrl (
             UIApplication app,
             NSUrl         url,
