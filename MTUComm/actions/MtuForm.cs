@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Dynamic;
 using Library;
 using Xml;
+using System.Linq;
+using Library.Exceptions;
 
 namespace MTUComm.actions
 {
@@ -11,17 +13,24 @@ namespace MTUComm.actions
         #region Attributes
 
         private Dictionary<string,Parameter> dictionary;
+        protected List<Parameter> additionalParams;
         public static MTUBasicInfo mtuBasicInfo { get; private set; }
         public Mtu mtu { get; }
         public dynamic map;
 
         #endregion
 
+        public Parameter[] AdditionalParameters
+        {
+            get { return this.additionalParams.ToArray (); }
+        }
+
         #region Initialization
 
         public MtuForm ( Mtu mtu )
         {
             this.dictionary = new Dictionary<string,Parameter> ();
+            this.additionalParams = new List<Parameter> ();
             //this.conditions = new Conditions ( mtu );
             //this.global  = Singleton.Get.Configuration.Global;
             this.mtu     = mtu;
@@ -80,6 +89,14 @@ namespace MTUComm.actions
             this.dictionary[ parameter.Type.ToString () ] = parameter;
         }
 
+        public void AddAdditionalParameter ( string id, dynamic value, int port = 0 )
+        {
+            if ( ! this.additionalParams.Any ( p => p.CustomDisplay.Equals ( id ) ) )
+                this.additionalParams.Add ( new Parameter ( id, id, value, "", port ) );
+            else
+                throw new SameParameterRepeatScriptException ();
+        }
+
         public Parameter FindParameterById(string paramId)
         {
             return GetParameter(paramId);
@@ -112,6 +129,7 @@ namespace MTUComm.actions
         public void RemoveParameters ()
         {
             this.dictionary.Clear ();
+            this.additionalParams.Clear ();
         }
 
         #endregion

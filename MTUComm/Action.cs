@@ -221,6 +221,7 @@ namespace MTUComm
         public MTUComm comm { get; private set; }
         public ActionType type { get; }
         private List<Parameter> mparameters = new List<Parameter>();
+        private List<Parameter> additionalParameters = new List<Parameter>();
         private Boolean canceled = false;
         public  String user { get; private set; }
         public  Logger logger;
@@ -232,6 +233,11 @@ namespace MTUComm
         #endregion
 
         #region Properties
+
+        public List<Parameter> AdditionalParameters
+        {
+            get { return this.additionalParameters; }
+        }
 
         public String DisplayText
         {
@@ -314,6 +320,8 @@ namespace MTUComm
             comm.OnError += Comm_OnError;
             
             this.config = Singleton.Get.Configuration;
+
+            this.additionalParameters = new List<Parameter> ();
             
             // Only save reference for the current action,
             // not for nested or auxiliary actions ( as BasicRead )
@@ -335,6 +343,11 @@ namespace MTUComm
         public void AddParameter (Parameter parameter)
         {
             mparameters.Add(parameter);
+        }
+
+        public void AddAdditionalParameter ( Parameter parameter )
+        {
+            this.additionalParameters.Add ( parameter );
         }
 
         public void AddParameter ( MtuForm form )
@@ -439,21 +452,8 @@ namespace MTUComm
                         break;
 
                     case ActionType.ReadData:
-                        Parameter param = mparameters.Find(x => (x.Type == Parameter.ParameterType.DaysOfRead));
-                        if (param == null)
-                        {
-                            this.OnError (); //this, new ActionErrorArgs("Days Of Read parameter Not Defined or Invalid"));
-                            break;
-                        }
-                        int DaysOfRead = 0;
-                        if (!Int32.TryParse(param.Value, out DaysOfRead) || DaysOfRead <= 0)
-                        {
-                            this.OnError (); //this, new ActionErrorArgs("Days Of Read parameter Invalid"));
-                            break;
-                        }
                         comm.OnReadMtuData -= Comm_OnReadMtuData;
                         comm.OnReadMtuData += Comm_OnReadMtuData;
-                        parameters.Add ( DaysOfRead );
                         break;
 
                     case ActionType.BasicRead:
@@ -500,18 +500,19 @@ namespace MTUComm
 
         private void Comm_OnReadMtuData(object sender, MTUComm.ReadMtuDataArgs e)
         {
+            /*
             ActionProgressArgs args;
             switch (e.Status)
             {
-                case LogQueryResult.LogDataType.Bussy:
+                case LogQueryResult.LogDataType.Busy:
                     args = new ActionProgressArgs(0, 0);
                     OnProgress(this, args);
                     break;
-                case LogQueryResult.LogDataType.NewPacket:
+                case LogQueryResult.LogDataType.NewEventLog:
                     args = new ActionProgressArgs(e.CurrentEntry, e.TotalEntries);
                     OnProgress(this, args);
                     break;
-                case LogQueryResult.LogDataType.LastPacket:
+                case LogQueryResult.LogDataType.LastEventLog:
                     Mtu mtu_type = configuration.GetMtuTypeById((int)e.MtuType.Type);
                     ActionResult result = ReadMTUData(e.Start, e.End, e.Entries, e.MtuType, mtu_type);
                     logger.ReadData(this, result, mtu_type);
@@ -519,6 +520,7 @@ namespace MTUComm
                     this.Finish ( f_args );
                     break;
             }
+            */
         }
 
         private async Task Comm_OnReadFabric(object sender)
@@ -539,9 +541,9 @@ namespace MTUComm
         {
             try
             {
-                ActionResult result = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu );
-                this.lastLogCreated = logger.ReadMTU ( this, result, args.Mtu );
-                ActionFinishArgs finalArgs = new ActionFinishArgs ( result );
+                ActionResult resultAllInterfaces = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu );
+                this.lastLogCreated = logger.ReadMTU ( this, resultAllInterfaces, args.Mtu );
+                ActionFinishArgs finalArgs = new ActionFinishArgs ( resultAllInterfaces );
                 finalArgs.Mtu = args.Mtu;
                 
                 this.Finish ( finalArgs );
@@ -557,9 +559,9 @@ namespace MTUComm
         {
             try
             {
-                ActionResult result = getBasciInfoResult ();
-                this.lastLogCreated = logger.TurnOnOff ( this, args.Mtu, result.getParameters()[2].Value );
-                ActionFinishArgs finalArgs = new ActionFinishArgs ( result );
+                ActionResult resultBasic = getBasciInfoResult ();
+                this.lastLogCreated = logger.TurnOnOff ( this, args.Mtu, resultBasic );
+                ActionFinishArgs finalArgs = new ActionFinishArgs ( resultBasic );
 
                 this.Finish ( finalArgs );
             }
@@ -600,8 +602,9 @@ namespace MTUComm
 
         #region Reads
 
-        private ActionResult ReadMTUData ( DateTime start, DateTime end, List<LogDataEntry> Entries, MTUBasicInfo mtuInfo, Mtu mtu )
+        private ActionResult ReadMTUData ( DateTime start, DateTime end, EventLogList eventLogList, MTUBasicInfo mtuInfo, Mtu mtu )
         {
+            /*
             ActionResult result = new ActionResult();
 
             string log_path = logger.ReadDataEntries(mtuInfo.Id.ToString("d15"), start, end, Entries);
@@ -656,6 +659,9 @@ namespace MTUComm
             result.AddParameter(new Parameter("ReadResultFile", "Read Result File", log_path));
 
             return result;
+            */
+
+            return null;
         }
 
         private ActionResult getBasciInfoResult ()
@@ -665,7 +671,11 @@ namespace MTUComm
             
             result.AddParameter(new Parameter("Date", "Date/Time", GetProperty("Date")));
             result.AddParameter(new Parameter("User", "User", GetProperty("User")));
+            result.AddParameter(new Parameter("MtuType", "MTU Type", basic.Type));
             result.AddParameter(new Parameter("MtuId", "MTU ID", basic.Id));
+            
+            foreach ( Parameter param in this.AdditionalParameters )
+                result.AddParameter ( param );
     
             return result;
         }
@@ -677,15 +687,15 @@ namespace MTUComm
         private async Task<ActionResult> CreateActionResultUsingInterface (
             dynamic map  = null,
             Mtu     mtu  = null,
-            MtuForm form = null,
-            ActionType actionType = ActionType.ReadMtu )
+            MtuForm form = null ) //,
+            //ActionType actionType = ActionType.ReadMtu )
         {
             Parameter paramToAdd;
             Global       global = this.config.Global;
             Puck         puck   = Singleton.Get.Puck;
             Type         gType  = global.GetType ();
             ActionResult result = new ActionResult ();
-            InterfaceParameters[] parameters = configuration.getAllInterfaceFields ( mtu, actionType );
+            InterfaceParameters[] parameters = configuration.getAllInterfaceFields ( mtu, ActionType.ReadMtu ); //, actionType );
             
             foreach ( InterfaceParameters parameter in parameters )
             {
@@ -751,6 +761,11 @@ namespace MTUComm
                 }
             }
             
+            // Add additional parameters for all actions except for the Add
+            if ( form == null )
+                foreach ( Parameter param in this.AdditionalParameters )
+                    result.AddParameter ( param );
+
             return result;
         }
 

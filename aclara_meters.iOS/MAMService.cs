@@ -12,7 +12,6 @@ using System.Threading;
 [assembly: Dependency(typeof(aclara_meters.iOS.MAMService))]
 namespace aclara_meters.iOS
 {
-
     public class MAMService : IMAMService
     {
         //public static void LoginUserMAM()

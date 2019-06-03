@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using Library;
 using Xml;
+using System.Linq;
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -181,7 +182,7 @@ namespace MTUComm
 
             XElement element = new XElement("AppMessage");
 
-            Parameter(element, new Parameter("Date", null, DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
+            AddParameter(element, new Parameter("Date", null, DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
 
             XElement message = new XElement("Message", "User Login: "+ username);
             element.Add(message);
@@ -217,7 +218,7 @@ namespace MTUComm
             {
                 error = new XElement ( "AppError" );
 
-                Parameter ( error, new Parameter ( "Date", null, time ) );
+                AddParameter ( error, new Parameter ( "Date", null, time ) );
             
                 message = new XElement ( "Message", e.Message );
                 
@@ -238,7 +239,7 @@ namespace MTUComm
             
             // Only for the result log
             element = new XElement("AppMessage");
-            Parameter ( element, new Parameter ( "Date", null, time ) );
+            AddParameter ( element, new Parameter ( "Date", null, time ) );
             message = new XElement ( "Message" );
             element.Add ( message );
             docLog.Root.Add ( element );
@@ -251,11 +252,20 @@ namespace MTUComm
             return docLogText;
         }
 
-        public string ReadMTU ( Action action, ActionResult result, Mtu mtu )
+        private void AddAdditionalParameters ( XElement xmlAction, ActionResult result )
+        {
+            // Add additional parameters to the log
+            result.getParameters ()
+                .Where ( param => param.Optional )
+                .ToList ()
+                .ForEach ( param => AddParameter ( xmlAction, param ) );
+        }
+
+        public string ReadMTU ( Action action, ActionResult resultAllInterfaces, Mtu mtu )
         {
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
-            PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, result, mtu );
+            PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, resultAllInterfaces, mtu );
             doc.Save(uri);
 
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
@@ -263,14 +273,17 @@ namespace MTUComm
             byte[] byteArray = Encoding.UTF8.GetBytes(CreateBasicStructure());
             Stream BasicStruct = new MemoryStream(byteArray);
             XDocument uniDoc = XDocument.Load(BasicStruct);
-            PrepareLog_ReadMTU(uniDoc.Root.Element("Mtus"), action, result, mtu);
-#if DEBUG
+            PrepareLog_ReadMTU(uniDoc.Root.Element("Mtus"), action, resultAllInterfaces, mtu);
+            
+            #if DEBUG
+            
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( false, uniUri );
  
             uniDoc.Save ( uniUri );
-#endif
+            
+            #endif
             
             // Write in ActivityLog
             if ( Data.Get.IsFromScripting &&
@@ -281,18 +294,15 @@ namespace MTUComm
                 
                 uri = CreateFileIfNotExist ();
                 doc = XDocument.Load( uri );
-                PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, result, mtu );
+                PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, resultAllInterfaces, mtu );
                 doc.Save(uri);
             }
 
             return uniDoc.ToString ();
         }
 
-        private void PrepareLog_ReadMTU ( XElement parent, Action action, ActionResult result, Mtu mtu )
+        private void PrepareLog_ReadMTU ( XElement parent, Action action, ActionResult resultAllInterfaces, Mtu mtu )
         {
-            try
-            {
-            
             XElement element = new XElement("Action");
 
             AddAtrribute(element, "display", action.DisplayText);
@@ -304,28 +314,27 @@ namespace MTUComm
             {
                 try
                 {
-            
-                if ( parameter.Name == "Port" )
-                {
-                    ActionResult[] ports = result.getPorts();
-                    for ( int i = 0; i < ports.Length; i++ )
-                        Port(i, element, ports[i], parameter.Parameters.ToArray());
-                }
-                else this.ComplexParameter(element, result, parameter);
-                
+                    if ( parameter.Name == "Port" )
+                    {
+                        ActionResult[] ports = resultAllInterfaces.getPorts();
+                        for ( int i = 0; i < ports.Length; i++ )
+                            Port(i, element, ports[i], parameter.Parameters.ToArray());
+                    }
+                    else
+                        this.ComplexParameter(element, resultAllInterfaces, parameter);
                 }
                 catch ( Exception ex )
                 {
                 
                 }
             }
-            parent.Add(element);
-
-            }
-            catch ( Exception ex )
-            {
-
-            }
+            
+            // Add additional parameters
+            if ( action.type == ActionType.ReadMtu ||
+                 action.type == ActionType.MtuInstallationConfirmation )
+                this.AddAdditionalParameters ( element, resultAllInterfaces );
+            
+            parent.Add ( element );
         }
 
         public void ReadData ( Action action, ActionResult result, Mtu mtu )
@@ -337,7 +346,7 @@ namespace MTUComm
             doc.Save(uri);
         }
 
-        private void PrepareLog_ReadData ( XElement parent, Action action, ActionResult result, Mtu mtu )
+        private void PrepareLog_ReadData ( XElement parent, Action action, ActionResult resultAllInterfaces, Mtu mtu )
         {
             XElement element = new XElement("Action");
 
@@ -350,17 +359,17 @@ namespace MTUComm
             {
                 if (parameter.Name == "Port")
                 {
-                    ActionResult[] ports = result.getPorts();
+                    ActionResult[] ports = resultAllInterfaces.getPorts();
                     for (int i = 0; i < ports.Length; i++)
                         Port(i, element, ports[i], parameter.Parameters.ToArray());
                 }
-                else this.ComplexParameter(element, result, parameter);
+                else this.ComplexParameter(element, resultAllInterfaces, parameter);
             }
 
             parent.Add(element);
         }
 
-        public void Port ( int portnumber, XElement parent, ActionResult result, InterfaceParameters[] parameters )
+        public void Port ( int portnumber, XElement parent, ActionResult resultAllInterfaces, InterfaceParameters[] parameters )
         {
             XElement element = new XElement("Port");
 
@@ -368,34 +377,36 @@ namespace MTUComm
             AddAtrribute(element, "number", (portnumber + 1).ToString());
 
             foreach (InterfaceParameters parameter in parameters)
-                this.ComplexParameter(element, result, parameter, portnumber );
+                this.ComplexParameter(element, resultAllInterfaces, parameter, portnumber );
 
             parent.Add(element);
         }
 
         #region TurnOnOff
 
-        public string TurnOnOff ( Action action, Mtu mtu, uint mtuId )
+        public string TurnOnOff ( Action action, Mtu mtu, ActionResult resultBasic )
         {
             String uri = CreateFileIfNotExist ();
             XDocument doc = XDocument.Load ( uri );
-            PrepareLog_TurnOff(doc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, mtuId );
+            PrepareLog_TurnOnOff(doc.Root.Element("Mtus"), action, resultBasic );
             doc.Save(uri);
 
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
-            // but the log send to the explorer should be only the last action performed
-            byte[] byteArray = Encoding.UTF8.GetBytes(CreateBasicStructure());
-            Stream BasicStruct = new MemoryStream(byteArray);
-            XDocument uniDoc = XDocument.Load(BasicStruct);
-            PrepareLog_TurnOff(uniDoc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, mtuId);
-#if DEBUG
+            byte[]    byteArray   = Encoding.UTF8.GetBytes(CreateBasicStructure());
+            Stream    BasicStruct = new MemoryStream(byteArray);
+            XDocument uniDoc      = XDocument.Load(BasicStruct);
+            PrepareLog_TurnOnOff(uniDoc.Root.Element("Mtus"), action, resultBasic );
+            
+            #if DEBUG
+            
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( false, uniUri );
              
-            uniDoc.Save ( uniUri );          
-#endif
+            uniDoc.Save ( uniUri );
+            
+            #endif
             
             // Write in ActivityLog
             if ( Data.Get.IsFromScripting &&
@@ -406,52 +417,32 @@ namespace MTUComm
                 
                 uri = CreateFileIfNotExist ();
                 doc = XDocument.Load ( uri );
-                PrepareLog_TurnOff(doc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, mtuId );
+                PrepareLog_TurnOnOff(doc.Root.Element("Mtus"), action, resultBasic );
                 doc.Save(uri);
             }
             
             return uniDoc.ToString ();
         }
 
-        private void PrepareLog_TurnOff (XElement parent, string display, string type, string user, uint MtuId )
+        private void PrepareLog_TurnOnOff ( XElement parent, Action action, ActionResult resultBasic )
         {
             XElement element = new XElement("Action");
 
-            AddAtrribute(element, "display", display);
-            AddAtrribute(element, "type", type );
+            AddAtrribute(element, "display", action.DisplayText );
+            AddAtrribute(element, "type", action.LogText );
 
-            Parameter(element, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
+            AddParameter(element, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
 
-            if (user != null)
-                Parameter(element, new Parameter("User", "User", user));
+            if ( action.user != null )
+                AddParameter(element, new Parameter("User", "User", action.user ));
 
-            Parameter(element, new Parameter("MtuId", "MTU ID", MtuId.ToString()));
+            AddParameter ( element, resultBasic.getParameters()[ 2 ] ); // MtuType ( e.g. 138 )
+            AddParameter ( element, resultBasic.getParameters()[ 3 ] ); // MtuID / Serial number
 
-            parent.Add(element);
-        }
-
-        public void TurnOn ( Action action, uint MtuId )
-        {
-            String uri = CreateFileIfNotExist();
-            XDocument doc = XDocument.Load(uri);
-            
-            PrepareLog_TurnOn(doc.Root.Element("Mtus"), action.DisplayText, action.LogText, action.user, MtuId);
-            doc.Save(uri);
-        }
-
-        private void PrepareLog_TurnOn ( XElement parent, string display, string type, string user, uint MtuId )
-        {
-            XElement element = new XElement("Action");
-
-            AddAtrribute(element, "display", display);
-            AddAtrribute(element, "type", type);
-
-            Parameter(element, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
-
-            if (user != null)
-                Parameter(element, new Parameter("User", "User", user));
-
-            Parameter(element, new Parameter("MtuId", "MTU ID", MtuId.ToString()));
+            // Add additional parameters
+            if ( action.type == ActionType.TurnOnMtu ||
+                 action.type == ActionType.TurnOffMtu )
+                this.AddAdditionalParameters ( element, resultBasic );
 
             parent.Add(element);
         }
@@ -469,17 +460,17 @@ namespace MTUComm
             AddAtrribute(element, "type", action.LogText);
             AddAtrribute(element, "reason", action.Reason);
 
-            Parameter(element, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
-            Parameter(element, new Parameter("User", "User", action.user));
+            AddParameter(element, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
+            AddParameter(element, new Parameter("User", "User", action.user));
 
-            Parameter(element, new Parameter("Cancel", "Cancel Action", cancel));
-            Parameter(element, new Parameter("Reason", "Cancel Reason", reason));
+            AddParameter(element, new Parameter("Cancel", "Cancel Action", cancel));
+            AddParameter(element, new Parameter("Reason", "Cancel Reason", reason));
 
             doc.Root.Element("Mtus").Add(element);
             doc.Save(uri);
         }
 
-        public string ReadDataEntries ( string mtu_id, DateTime start, DateTime end, List<LogDataEntry> Entries )
+        public string ReadDataEntries ( string mtu_id, DateTime start, DateTime end, EventLogList eventLogList )
         {
             String    path     = CreateEventFileIfNotExist(mtu_id);
             XDocument doc      = XDocument.Load(path);
@@ -491,8 +482,8 @@ namespace MTUComm
             AddAtrribute(events, "RangeStart", start.ToString("yyyy-MM-dd HH:mm:ss"));
             AddAtrribute(events, "RangeStop", end.ToString("yyyy-MM-dd HH:mm:ss"));
 
-            foreach (LogDataEntry entry in Entries)
-                PrepareLog_ReadDataEntries(events, entry);
+            foreach ( EventLog eventLog in eventLogList.Entries )
+                PrepareLog_ReadDataEntries ( events, eventLog );
 
             transfer.Add(events);
             doc.Save(path);
@@ -500,28 +491,28 @@ namespace MTUComm
             return path;
         }
         
-        private void PrepareLog_ReadDataEntries ( XElement events, LogDataEntry entry )
+        private void PrepareLog_ReadDataEntries ( XElement events, EventLog eventLog )
         {
             XElement read_event = new XElement("MeterReadEvent");
 
-            AddAtrribute(read_event, "FormatVersion", entry.FormatVersion.ToString());
+            AddAtrribute(read_event, "FormatVersion", eventLog.FormatVersion.ToString());
 
-            read_event.Add(new XElement("TimeStamp", entry.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss")));
-            read_event.Add(new XElement("MeterRead", entry.MeterRead.ToString()));
-            read_event.Add(new XElement("ErrorStatus", entry.ErrorStatus.ToString()));
-            read_event.Add(new XElement("ReadInterval", "PT"+entry.ReadInterval.ToString()+"M"));
-            read_event.Add(new XElement("PortNumber", "PORT"+(entry.PortNumber + 1 ).ToString()));
-            read_event.Add(new XElement("IsDailyRead", entry.IsDailyRead.ToString()));
-            read_event.Add(new XElement("IsTopOfHourRead", entry.IsTopOfHourRead.ToString()));
-            read_event.Add(new XElement("ReadReason", entry.ReasonForRead.ToString()));
-            read_event.Add(new XElement("IsSynchronized", entry.IsSynchronized.ToString()));
+            read_event.Add(new XElement("TimeStamp", eventLog.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss")));
+            read_event.Add(new XElement("MeterRead", eventLog.MeterRead.ToString()));
+            read_event.Add(new XElement("ErrorStatus", eventLog.ErrorStatus.ToString()));
+            read_event.Add(new XElement("ReadInterval", "PT"+eventLog.ReadInterval.ToString()+"M"));
+            read_event.Add(new XElement("PortNumber", "PORT"+(eventLog.PortNumber + 1 ).ToString()));
+            read_event.Add(new XElement("IsDailyRead", eventLog.IsDailyRead.ToString()));
+            read_event.Add(new XElement("IsTopOfHourRead", eventLog.IsTopOfHourRead.ToString()));
+            read_event.Add(new XElement("ReadReason", eventLog.ReasonForRead.ToString()));
+            read_event.Add(new XElement("IsSynchronized", eventLog.IsSynchronized.ToString()));
 
             events.Add(read_event);
         }
 
-        public void ComplexParameter ( XElement parent, ActionResult result, InterfaceParameters parameter, int portNumber = 0 )
+        public void ComplexParameter ( XElement parent, ActionResult resultAllInterfaces, InterfaceParameters parameter, int portNumber = 0 )
         {
-            Parameter param = result.getParameterByTag ( parameter.Name, parameter.Source, portNumber );
+            Parameter param = resultAllInterfaces.getParameterByTag ( parameter.Name, parameter.Source, portNumber );
             
             Utils.Print ( "Log Param: " + parameter.Name + " " + parameter.Source + " " + portNumber +
                 " = " + ( ( param == null ) ? "..." : param.Value ) );
@@ -543,17 +534,17 @@ namespace MTUComm
             */
 
             if (param != null)
-                Parameter ( parent, param );
+                AddParameter ( parent, param );
         }
 
-        public void Parameter ( XElement parent, Parameter parameter )
+        public void AddParameter ( XElement parent, Parameter parameter )
         {
             XElement xml_parameter = new XElement ( parameter.getLogTag(), parameter.Value );
             AddAtrribute(xml_parameter, "display", parameter.getLogDisplay());
             
-            if ( parameter.Optional )
-                AddAtrribute(xml_parameter, "option", "1");
-                
+            //if ( parameter.Optional )
+            //    AddAtrribute(xml_parameter, "option", "1");
+            
             parent.Add ( xml_parameter );
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xml;
 using Library.Exceptions;
+using System.Linq;
 
 using ParameterType = MTUComm.Parameter.ParameterType;
 using Library;
@@ -524,26 +525,28 @@ namespace MTUComm.actions
         public void AddParameterTranslatingAclaraXml ( Parameter parameter )
         {
             ParameterType typeAclara;
-            FIELD typeOwn = FIELD.NOTHING;
 
             string nameTypeAclara = parameter.Type.ToString ();
 
-            // Translate aclara tag/id to us
-            if ( ! Enum.TryParse<ParameterType> ( nameTypeAclara, out typeAclara ) )
+            // Translate aclara tag/parameter to app tag
+            if ( ! Enum.TryParse<ParameterType> ( nameTypeAclara, out typeAclara ) ||
+                 ! IdsAclara.ContainsKey ( typeAclara ) )
+            {
+                // Allow non-reserved tags
+                //AddAdditionalParameter ( nameTypeAclara, parameter.Value, parameter.Port );
+                
                 Errors.LogErrorNow ( new ProcessingParamsScriptException () );
+            }
             else
             {
-                if ( IdsAclara.ContainsKey ( typeAclara ) )
-                    typeOwn = IdsAclara[ typeAclara ];
-                else
-                    return;
+                FIELD typeOwn = IdsAclara[ typeAclara ];
 
                 // If is for port two, find the correct enum element adding two ( "_2" ) as sufix
                 if ( parameter.Port == 1 )
                     Enum.TryParse<FIELD> ( typeOwn.ToString () + PORT_2_SUFIX, out typeOwn );
-            }
 
-            this.AddParameter ( typeOwn, parameter.Value, parameter.Port );
+                this.AddParameter ( typeOwn, parameter.Value, parameter.Port );
+            }
         }
 
         public Parameter FindById ( FIELD field_type )

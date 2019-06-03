@@ -6,6 +6,27 @@ namespace Xml
 {
     public class ScriptAction
     {
+        private Dictionary<string,string> additionalParameters;
+        
+        public ScriptAction ()
+        {
+            this.additionalParameters = new Dictionary<string,string> ();
+        }
+        
+        [XmlIgnore]
+        public Dictionary<string,string> AdditionalParameters
+        {
+            get { return this.additionalParameters; }
+        }
+
+        public void AddAdditionParameter (
+            string id,
+            string value )
+        {
+            if ( ! this.additionalParameters.ContainsKey ( id ) )
+                this.additionalParameters.Add ( id, value );
+        }
+    
         [XmlAttribute("type")]
         public string Type { get; set; }
 

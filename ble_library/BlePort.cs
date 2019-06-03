@@ -15,6 +15,7 @@ using nexus.protocols.ble.scan.advertisement;
 using Plugin.Settings;
 using Plugin.Settings.Abstractions;
 
+==== BASE ====
 namespace ble_library
 {
     /*
@@ -47,8 +48,12 @@ namespace ble_library
         }
 
         public virtual void OnError(Exception error)
+==== BASE ====
         {
+==== BASE ====
+==== BASE ====
 
+==== BASE ====
         }
 
         public void OnNext(ConnectionState value)
@@ -64,6 +69,7 @@ namespace ble_library
             }
         }
     }
+==== BASE ====
 
     /*
     BluetoothStatusReporter Class.
@@ -119,10 +125,13 @@ namespace ble_library
     public class BlePort
     {
         ////public TaskCompletionSource<bool> waitForACK;
+==== BASE ====
         
         private Queue<byte> buffer_ble_data;
+        private byte[] buffer_array;
         private IBluetoothLowEnergyAdapter adapter;
         private IBleGattServerConnection gattServer_connection;
+==== BASE ====
         private IDisposable Listen_aes_conection_Handler;
         private IDisposable Listen_ack_response_Handler;
         private IDisposable Listen_Characteristic_Notification_Handler;
@@ -227,9 +236,14 @@ namespace ble_library
         /// Returns the number of bytes to read from the buffer
         /// </summary>
         /// <returns>The number of bytes to read from the buffer</returns>
-        public int BytesToRead()
+        public int BytesReadCount ()
         {
             return buffer_ble_data.Count;
+        }
+
+        public byte[] BytesRead
+        {
+            get { return buffer_array; }
         }
 
         /// <summary>
@@ -252,6 +266,7 @@ namespace ble_library
         /// <summary>
         /// If bluetooth antenna is enabled on device, starts scanning devices. If not, turns it on, and proceeds to scan.
         /// </summary>
+==== BASE ====
         public async Task StartScan()
         {
             await BluetoothEnable();
@@ -465,21 +480,35 @@ namespace ble_library
             try
             {
                 int bytesOfData = bytes[ INDEX_LENGTH_DATA ];
-                byte[] tempArray = new byte[ bytesOfData ];
-    
-                // Third byte is the length of bytes to read from data frame = 16
-                // Data frame { 2 | CipherCount | Buffer.Length | >>> Buffer_AESx16 <<< | 0 }.Length = 20
-                Array.Copy ( AES_Decrypt ( bytes.Skip ( LENGTH_HEADER ).Take ( MAX_LENGTH_DATA ).ToArray (), dynamicPass ), 0, tempArray, 0, bytesOfData );
-    
-                // FIFO collection to read data frames in the same order received
-                for ( int i = 0; i < tempArray.Length; i++ )
-                    buffer_ble_data.Enqueue ( tempArray[ i ] );
+                if ( bytesOfData > 0 )
+                {
+                    byte[] tempArray = new byte[ bytesOfData ];
+        
+                    // Third byte is the length of bytes to read from data frame = 16
+                    // Data frame { 2 | CipherCount | Buffer.Length | >>> Buffer_AESx16 <<< | 0 }.Length = 20
+                    Array.Copy ( AES_Decrypt ( bytes.Skip ( LENGTH_HEADER ).Take ( MAX_LENGTH_DATA ).ToArray (), dynamicPass ), 0, tempArray, 0, bytesOfData );
+        
+                    // FIFO collection to read data frames in the same order received
+                    for ( int i = 0; i < tempArray.Length; i++ )
+                        buffer_ble_data.Enqueue ( tempArray[ i ] );
+
+                    buffer_array = buffer_ble_data.ToArray ();
+                    
+                    Utils.PrintDeep ( "BlePort.UpdateBuffer.. " +
+                    "Stream = " + Utils.ByteArrayToString ( bytes ) +
+                    " | Stream.Decrypted = " + Utils.ByteArrayToString ( tempArray ) +
+                    " [ +" + bytesOfData + " = " + buffer_ble_data.Count + " received ]" );
+                }
+                else
+                    Utils.PrintDeep ( "BlePort.UpdateBuffer.. Waiting data" );
                 
+==== BASE ====
                 Utils.PrintDeep ( "BlePort.UpdateBuffer.. " +
                 "Stream = " + Utils.ByteArrayToString ( bytes ) +
                 " | Stream.Decrypted = " + Utils.ByteArrayToString ( tempArray ) +
                 " [ +" + bytesOfData + " = " + buffer_ble_data.Count + " received ]" );
                 
+==== BASE ====
                 //Utils.Print("Rx buffer updated");
             }
             catch ( Exception e )

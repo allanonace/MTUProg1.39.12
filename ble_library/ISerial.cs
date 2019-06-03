@@ -105,6 +105,8 @@ namespace Lexi.Interfaces
         /// </remarks>
         int BytesToRead();
 
+        byte[] BytesRead ();
+
         /// <summary>
         /// 
         /// </summary>

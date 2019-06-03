@@ -784,6 +784,8 @@ namespace MTUComm.MemoryMap
 
         #region Get value
 
+        // NOTE: C# for the moment does not allow to use mathematical operators with T as one of the operands
+
         private int GetIntFromMem ( int address, int size = MemRegister.DEF_SIZE )
         {
             byte[] data = new byte[ size ];

@@ -105,7 +105,9 @@ namespace Lexi.Interfaces
         /// <remarks>
         /// The receive buffer includes the serial driver's receive buffer as well as internal buffering in the <c>ISerial</c> object itself.
         /// </remarks>
-        int BytesToRead();
+        int BytesReadCount();
+
+        byte[] BytesRead ();
 
         /// <summary>
         /// 

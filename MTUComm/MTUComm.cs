@@ -13,10 +13,11 @@ using Library.Exceptions;
 using MTUComm.MemoryMap;
 using Xml;
 
-using ActionType    = MTUComm.Action.ActionType;
-using FIELD         = MTUComm.actions.AddMtuForm.FIELD;
-using LogDataType   = MTUComm.LogQueryResult.LogDataType;
-using ParameterType = MTUComm.Parameter.ParameterType;
+using ActionType          = MTUComm.Action.ActionType;
+using FIELD               = MTUComm.actions.AddMtuForm.FIELD;
+using EventLogQueryResult = MTUComm.EventLogList.EventLogQueryResult;
+using ParameterType       = MTUComm.Parameter.ParameterType;
+using LexiAction          = Lexi.Lexi.LexiAction;
 
 namespace MTUComm
 {
@@ -32,24 +33,33 @@ namespace MTUComm
         private const int DEFAULT_LENGTH_AES   = 16;
         private const int SAME_MTU_ADDRESS     = 0;
         private const int SAME_MTU_DATA        = 10;
+        private const int IC_OK                = 0;
+        private const int IC_NOT_ACHIEVED      = 1;
+        private const int IC_EXCEPTION         = 2;
         private const int WAIT_BTW_TURNOFF     = 500;
         private const int WAIT_BTW_IC          = 1000;
         private const int WAIT_BEFORE_READ     = 1000;
-        
-        private const int TIMES_TURNOFF = 3;
+        private const int TIMES_TURNOFF        = 3;
+        private const int DATA_READ_END_DAYS   = 60;
+        private const byte CMD_START_LOGS      = 0x13;
+        private const byte CMD_NEXT_LOG        = 0x14;
+        private const int CMD_NEXT_RESULT_1    = 25;
+        private const int CMD_NEXT_RESULT_2    = 5;
+        private const int CMD_NEXT_BYTE_RESULT = 2;
+        private const byte CMD_NEXT_WITH_DATA  = 0x00;
+        private const byte CMD_NEXT_NO_DATA    = 0x01;
+        private const byte CMD_NEXT_BUSY       = 0x02;
+        private const int WAIT_BEFORE_LOGS     = 2000;
+        private const int WAIT_BETWEEN_LOGS    = 1000;
 
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
-        private const string ERROR_LOADMETER = "MeterLoadException";
-        private const string ERROR_LOADMTU = "MtuLoadException";
-        private const string ERROR_LOADALARM = "AlarmLoadException";
-        private const string ERROR_NOTFOUNDMTU = "MtuNotFoundException";
-        private const string ERROR_LOADINTERFACE = "InterfaceLoadException";
-        private const string ERROR_LOADGLOBAL = "GlobalLoadException";
-        private const string ERROR_NOTFOUNDMETER = "MeterNotFoundException";
-        
-        private const int RESULT_OK           = 0;
-        private const int RESULT_NOT_ACHIEVED = 1;
-        private const int RESULT_EXCEPTION    = 2;
+        private const string ERROR_LOADMETER      = "MeterLoadException";
+        private const string ERROR_LOADMTU        = "MtuLoadException";
+        private const string ERROR_LOADALARM      = "AlarmLoadException";
+        private const string ERROR_NOTFOUNDMTU    = "MtuNotFoundException";
+        private const string ERROR_LOADINTERFACE  = "InterfaceLoadException";
+        private const string ERROR_LOADGLOBAL     = "GlobalLoadException";
+        private const string ERROR_NOTFOUNDMETER  = "MeterNotFoundException";
 
         #endregion
 
@@ -115,6 +125,7 @@ namespace MTUComm
 
         public class ReadMtuDataArgs : EventArgs
         {
+            /*
             public LogDataType Status { get; private set; }
 
             public int TotalEntries { get; private set; }
@@ -154,7 +165,7 @@ namespace MTUComm
                 Start = start;
                 End = end;
             }
-
+            */
         }
 
         public class ProgressArgs : EventArgs
@@ -277,7 +288,7 @@ namespace MTUComm
                         Singleton.Get.Action.SetCurrentMtu ( this.latest_mtu );
                 }
 
-                switch (type)
+                switch ( type )
                 {
                     case ActionType.AddMtu:
                     case ActionType.AddMtuAddMeter:
@@ -287,16 +298,17 @@ namespace MTUComm
                     case ActionType.ReplaceMtuReplaceMeter:
                         // Interactive and Scripting
                         if ( args.Length > 1 )
-                             await Task.Run(() => Task_AddMtu ( (AddMtuForm)args[0], (string)args[1], (Action)args[2] ) );
-                        else await Task.Run(() => Task_AddMtu ( (Action)args[0] ) );
+                             await Task.Run ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ], ( Action )args[ 2 ] ) );
+                        else await Task.Run ( () => Task_AddMtu ( ( Action )args[ 0 ] ) );
                         break;
-                    case ActionType.ReadMtu    : await Task.Run(() => Task_ReadMtu()); break;
-                    case ActionType.TurnOffMtu : await Task.Run(() => Task_TurnOnOffMtu ( false ) ); break;
-                    case ActionType.TurnOnMtu  : await Task.Run(() => Task_TurnOnOffMtu ( true  ) ); break;
-                    case ActionType.ReadData   : await Task.Run(() => Task_ReadDataMtu((int)args[0])); break;
-                    case ActionType.BasicRead  : await Task.Run(() => Task_BasicRead()); break;
-                    case ActionType.MtuInstallationConfirmation: await Task.Run(() => Task_InstallConfirmation()); break;
-                    case ActionType.ReadFabric: await Task.Run(() => Task_ReadFabric()); break;
+                    //case ActionType.ReadMtu    : await Task.Run ( () => Task_DataRead () ); break;
+                    case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
+                    case ActionType.TurnOffMtu : await Task.Run ( () => Task_TurnOnOffMtu ( false ) ); break;
+                    case ActionType.TurnOnMtu  : await Task.Run ( () => Task_TurnOnOffMtu ( true  ) ); break;
+                    case ActionType.ReadData   : await Task.Run ( () => Task_DataRead () ); break;
+                    case ActionType.BasicRead  : await Task.Run ( () => Task_BasicRead () ); break;
+                    case ActionType.MtuInstallationConfirmation: await Task.Run ( () => Task_InstallConfirmation () ); break;
+                    case ActionType.ReadFabric: await Task.Run ( () => Task_ReadFabric () ); break;
                     default: break;
                 }
 
@@ -461,17 +473,114 @@ namespace MTUComm
 
         #endregion
 
-        #region Read Data
+        #region Data Read
 
-        public void Task_ReadDataMtu ( int NumOfDays )
+        public async Task Task_DataRead ()
         {
-            DateTime start = DateTime.Now.Date.Subtract(new TimeSpan(NumOfDays, 0, 0, 0));
-            DateTime end = DateTime.Now.Date.AddSeconds(86399);
+            Global global = this.configuration.Global;
 
-            lexi.TriggerReadEventLogs(start, end);
+            try
+            {
+                // NOTE: Is impossible to save a full datetime in only four bytes,
+                // because by definition it requires eight. This approach using only
+                // three bytes implemented by Aclara, is only valid until 2255 ( byte = 8 bits = [0-255] )
+                DateTime start = DateTime.Now.Date.Subtract ( new TimeSpan ( 30, 0, 0, 0 ) ); //global.NumOfDays, 0, 0, 0 ) );
+                DateTime end   = DateTime.Now.Date.AddDays ( DATA_READ_END_DAYS );
 
-            List<LogDataEntry> entries = new List<LogDataEntry>();
+                byte[] data = new byte[ 10 ]; // 1+1+4*2
+                data[ 0 ] = 0x01; // Filter mode [ LogFilterMode.Match ]
+                data[ 1 ] = 0x01; // Log entry type [ LogEntryType.MeterRead ]
+                Array.Copy ( Utils.DateTimeToFourBytes ( start ), 0, data, 2, 4 ); // Start time
+                Array.Copy ( Utils.DateTimeToFourBytes ( end   ), 0, data, 6, 4 ); // Stop time
 
+                // Use address parameter to set request code
+                
+                await this.lexi.Write ( CMD_START_LOGS, data, null, null, LexiAction.OperationRequest ); // Return +2 ACK
+
+                await Task.Delay ( WAIT_BEFORE_LOGS );
+
+                // Recover all logs registered in the MTU for the specified date range
+                int maxAttempts   = ( Data.Get.IsFromScripting ) ? 20 : 5;
+                int countAttempts = 0;
+                EventLogList eventLogList = new EventLogList ();
+                ( byte[] bytes, int responseOffset ) fullResponse = ( null, 0 ); // echo + response
+                while ( true )
+                {
+                    try
+                    {
+                        fullResponse =
+                            await this.lexi.Write ( CMD_NEXT_LOG, null,
+                                new uint[]{ CMD_NEXT_RESULT_1, CMD_NEXT_RESULT_2 }, // ACK with log entry or without
+                                new ( int,int,byte )[] {
+                                    ( CMD_NEXT_RESULT_1, CMD_NEXT_BYTE_RESULT, CMD_NEXT_WITH_DATA ), // Entry data included
+                                    ( CMD_NEXT_RESULT_2, CMD_NEXT_BYTE_RESULT, CMD_NEXT_NO_DATA   ), // Complete but without data
+                                    ( CMD_NEXT_RESULT_2, CMD_NEXT_BYTE_RESULT, CMD_NEXT_BUSY      )  // The MTU is busy
+                                },
+                                LexiAction.OperationRequest );
+                    }
+                    catch ( Exception e )
+                    {
+                        // Is not own exception
+                        if ( ! Errors.IsOwnException ( e ) )
+                            throw new PuckCantCommWithMtuException ();
+
+                        // Finish without perform the action
+                        else if ( ++countAttempts >= maxAttempts )
+                            throw new ActionNotAchievedGetEventsLogException ();
+
+                        // Try one more time
+                        Errors.LogErrorNowAndContinue ( new AttemptNotAchievedGetEventsLogException () );
+                        continue;
+                    }
+
+                    // Check if some event log was recovered, but first removed echo bytes
+                    byte[] response = new byte[ fullResponse.bytes.Length - fullResponse.responseOffset ];
+                    Array.Copy ( fullResponse.bytes, fullResponse.responseOffset, response, 0, response.Length );
+
+                    EventLogQueryResult queryResult = eventLogList.TryToAdd ( response );
+                    switch ( queryResult )
+                    {
+                        // Finish because the MTU has not event logs for specified date range
+                        case EventLogQueryResult.Empty:
+                            goto BREAK;
+
+                        // Try one more time to recover an event log
+                        case EventLogQueryResult.Busy:
+                            if ( ++countAttempts > maxAttempts )
+                                throw new ActionNotAchievedGetEventsLogException ();
+                            else
+                            {
+                                Errors.LogErrorNowAndContinue ( new MtuIsBusyToGetEventsLogException () );
+                                await Task.Delay ( WAIT_BETWEEN_LOGS );
+                            }
+                            break;
+
+                        // Wait a bit and try to read/recover the next log
+                        case EventLogQueryResult.NextRead:
+                            await Task.Delay ( WAIT_BETWEEN_LOGS );
+                            break;
+
+                        // Was last event log
+                        case EventLogQueryResult.LastRead:
+                            goto BREAK;
+                    }
+                }
+
+                BREAK:
+
+                Utils.Print ( "DataRead Finished: " + eventLogList.Count );
+            }
+            catch ( Exception e )
+            {
+                // Is not own exception
+                if ( ! Errors.IsOwnException ( e ) )
+                     throw new PuckCantCommWithMtuException ();
+                else throw e;
+            }
+
+            // if 
+
+            /*
             bool last_packet = false;
             while (!last_packet)
             {
@@ -490,9 +599,9 @@ namespace MTUComm
                         entries.Add(response.Entry);
                         OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu, response.TotalEntries, response.CurrentEntry));
                         break;
-
                 }
             }
+            */
         }
 
         #endregion
@@ -501,7 +610,7 @@ namespace MTUComm
 
         public async Task Task_InstallConfirmation ()
         {
-            if ( await this.InstallConfirmation_Logic () < RESULT_EXCEPTION )
+            if ( await this.InstallConfirmation_Logic () < IC_EXCEPTION )
                  await this.Task_ReadMtu ();
             else this.OnError ();
         }
@@ -584,7 +693,7 @@ namespace MTUComm
                     if ( ! wasNotAboutPuck )
                          Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                     else Errors.LogErrorNowAndContinue ( e );
-                    return RESULT_EXCEPTION;
+                    return IC_EXCEPTION;
                 }
             
                 // Retry action ( thre times = first plus two replies )
@@ -597,10 +706,10 @@ namespace MTUComm
                 
                 // Finish with error
                 Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat ) + "" ) );
-                return RESULT_NOT_ACHIEVED;
+                return IC_NOT_ACHIEVED;
             }
             
-            return RESULT_OK;
+            return IC_OK;
         }
 
         #endregion
@@ -851,6 +960,10 @@ namespace MTUComm
                     else if ( ! portTypes.Contains ( form.Meter.Value ) && // By Meter Id = Numeric
                               ! portTypes.Contains ( meterPort1.Type ) )   // By Type = Chars
                         throw new ScriptingAutoDetectNotSupportedException ();
+                    
+                    // Set values for the Meter selected InterfaceTamper the script
+                    this.mtu.Port1.MeterProtocol   = meterPort1.EncoderType;
+                    this.mtu.Port1.MeterLiveDigits = meterPort1.LiveDigits;
                 }
     
                 // Port 2
@@ -903,6 +1016,10 @@ namespace MTUComm
                         else if ( ! portTypes.Contains ( form.Meter_2.Value ) && // By Meter Id = Numeric
                                   ! portTypes.Contains ( meterPort2.Type ) )     // By Type = Chars
                             throw new ScriptingAutoDetectNotSupportedException ( string.Empty, 2 );
+                            
+                        // Set values for the Meter selected InterfaceTamper the script
+                        this.mtu.Port2.MeterProtocol   = meterPort2.EncoderType;
+                        this.mtu.Port2.MeterLiveDigits = meterPort2.LiveDigits;
                     }
                 }
 
@@ -1686,7 +1803,7 @@ namespace MTUComm
                 
                     // Force to execute Install Confirmation avoiding problems
                     // with MTU shipbit, because MTU is just turned on
-                    if ( await this.InstallConfirmation_Logic ( true ) > RESULT_OK )
+                    if ( await this.InstallConfirmation_Logic ( true ) > IC_OK )
                     {
                         // If IC fails by any reason, add 4 seconds delay before
                         // reading MTU Tamper Memory settings for Tilt Alarm
@@ -1787,7 +1904,7 @@ namespace MTUComm
 
         #endregion
 
-        #region AuxiliaryFunctions
+        #region Auxiliary Functions
         
         private dynamic GetMemoryMap (
             bool readFromMtuOnlyOnce = false )

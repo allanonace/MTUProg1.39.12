@@ -33,6 +33,14 @@ namespace MTUComm
             { new PuckCantReadFromMtuAfterWritingException (),  102 },
             // The Mtu.xml file does no contain the MTU ID specified
             { new MtuMissingException (),                       103 },
+            // Error trying to start the event log query
+            { new MtuQueryEventLogsException (),                104 },
+            // Get next event log process has failed trying to recover data from the MTU
+            { new AttemptNotAchievedGetEventsLogException (),   105 },
+            // Get next event log process has failed trying because the MTU is busy
+            { new MtuIsBusyToGetEventsLogException (),          106 },
+            // Get next event log can't be performed after having tried it several times
+            { new ActionNotAchievedGetEventsLogException (),    107 },
         
             // Meter [ 2xx ]
             //------

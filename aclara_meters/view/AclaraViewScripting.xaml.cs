@@ -993,61 +993,59 @@ namespace aclara_meters.view
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                
-                try
-                {
-                    ContentView_Scripting_textScript.Text = "";
-                    Parameter[] allParams = e.Result.getParameters();
-
-                    for (int k = 0; k < allParams.Length; k++)
+                    try
                     {
-                        String res = allParams[k].getLogDisplay() + ": " + allParams[k].Value;
-                        String val = ContentView_Scripting_textScript.Text;
-                        ContentView_Scripting_textScript.Text = val + res + "\r\n";
-                    }
-
-                    ActionResult[] allports = e.Result.getPorts();
-
-                    for (int i = 0; i < allports.Length; i++)
-                    {
-                        ActionResult actionResult = allports[i];
-                        Parameter[] portParams = actionResult.getParameters();
-
-                        for (int j = 0; j < portParams.Length; j++)
+                        ContentView_Scripting_textScript.Text = "";
+                        Parameter[] allParams = e.Result.getParameters();
+    
+                        for (int k = 0; k < allParams.Length; k++)
                         {
-                            String res = portParams[j].getLogDisplay() + ": " + portParams[j].Value;
+                            String res = allParams[k].getLogDisplay() + ": " + allParams[k].Value;
                             String val = ContentView_Scripting_textScript.Text;
                             ContentView_Scripting_textScript.Text = val + res + "\r\n";
                         }
+    
+                        ActionResult[] allports = e.Result.getPorts();
+    
+                        for (int i = 0; i < allports.Length; i++)
+                        {
+                            ActionResult actionResult = allports[i];
+                            Parameter[] portParams = actionResult.getParameters();
+    
+                            for (int j = 0; j < portParams.Length; j++)
+                            {
+                                String res = portParams[j].getLogDisplay() + ": " + portParams[j].Value;
+                                String val = ContentView_Scripting_textScript.Text;
+                                ContentView_Scripting_textScript.Text = val + res + "\r\n";
+                            }
+                        }
+    
+                        string xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(e.Result);
+    
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+                            ContentView_Scripting.IsEnabled = true;
+                            _userTapped = false;
+                            ContentView_Scripting_label_read.Text = "Successful Script Execution";
+    
+                            Device.OpenUri ( new Uri ( resultCallback + "?" +
+                                                       "status=success" +
+                                                       Compression.GetUriParameter () +
+                                                       "&output_filename=" + resultScriptName +
+                                                       "&output_data=" + Compression.CompressToUrlUsingGlobal ( xmlResultTocallback ) ) );
+                            
+                            FormsApp.ble_interface.Close();
+                            
+                            System.Diagnostics.Process.GetCurrentProcess().Kill();
+                        });
+    
                     }
-
-                    string xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(e.Result);
-
-                    Device.BeginInvokeOnMainThread(() =>
+                    catch ( Exception ex )
                     {
-                        backdark_bg.IsVisible = false;
-                        indicator.IsVisible = false;
-                        ContentView_Scripting.IsEnabled = true;
-                        _userTapped = false;
-                        ContentView_Scripting_label_read.Text = "Successful Script Execution";
-
-                        Device.OpenUri ( new Uri ( resultCallback + "?" +
-                                                   "status=success" +
-                                                   Compression.GetUriParameter () +
-                                                   "&output_filename=" + resultScriptName +
-                                                   "&output_data=" + Compression.CompressToUrlUsingGlobal ( xmlResultTocallback ) ) );
                         
-                        FormsApp.ble_interface.Close();
-                        
-                        System.Diagnostics.Process.GetCurrentProcess().Kill();
-                    });
-
-                }
-                catch ( Exception ex )
-                {
-                    
-                }
-
+                    }
                 });
             });
         }
