@@ -65,9 +65,10 @@ namespace MTUComm
                         
                         Utils.Print ( "MTU " + mtu.Id + ": Type " + port.TypeString );
                     }
-                
+
                 // Regenerate certificate from base64 string
-                Mobile.configData.GenerateCert ();
+                Mobile.configData.GenerateCertFromStore();
+                //Mobile.configData.GenerateCert ();
                 //Mobile.configData.LoadCertFromKeychain ();
                 
                 // Check global min date allowed

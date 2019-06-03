@@ -5,11 +5,11 @@
 	<key>CFBundleDisplayName</key>
 	<string>aclara-mtu-programmer</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.aclara.mtu.programmer</string>
+	<string>com.aclara.programmer</string>
 	<key>CFBundleName</key>
 	<string>Aclara MTU Programmer</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.37.03</string>
+	<string>1.37.01</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -27,7 +27,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0.0.4</string>
+	<string>0.0.2</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>MainStoryboardFile</key>

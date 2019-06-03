@@ -98,7 +98,7 @@
     <ConsolePause>false</ConsolePause>
     <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
-    <CodesignProvision>Internal</CodesignProvision>
+    <CodesignProvision>bizintekdist</CodesignProvision>
     <MtouchLink>SdkOnly</MtouchLink>
     <OptimizePNGs />
     <MtouchFloat32 />
@@ -125,7 +125,7 @@
     <MtouchArch>ARM64</MtouchArch>
     <BuildIpa>true</BuildIpa>
     <IpaIncludeArtwork>false</IpaIncludeArtwork>
-    <CodesignProvision>Internal</CodesignProvision>
+    <CodesignProvision>bizintekdist</CodesignProvision>
     <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <DeviceSpecificBuild>true</DeviceSpecificBuild>
@@ -343,10 +343,10 @@
     <PackageReference Include="ble.net-ios">
       <Version>1.2.1</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.Intune.MAM.Xamarin.iOS">
-      <Version>8.1.1.2</Version>
-    </PackageReference>
     <Compile Include="TEST.cs" />
+    <PackageReference Include="Microsoft.Intune.MAM.Xamarin.iOS">
+      <Version>10.0.7</Version>
+    </PackageReference>
   </ItemGroup>
   <Target Name="_CompileITunesMetadata" DependsOnTargets="_DetectSdkLocations;_DetectAppManifest;_GenerateBundleName;_CompileAppManifest">
     <Message Text="Skipping CompileITunesMetadata task to prevent inclusion of iTunesMetadata.plist in the IPA" />

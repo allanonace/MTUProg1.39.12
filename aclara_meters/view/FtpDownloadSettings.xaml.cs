@@ -8,6 +8,7 @@ using System.Threading;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using MTUComm;
 
 namespace aclara_meters.view
 {
@@ -106,12 +107,16 @@ namespace aclara_meters.view
                 SecureStorage.SetAsync("ftpDownload_Path", tbx_remote_path.Text);
 
 
-                if (!GenericUtilsClass.DownloadConfigFiles())
+                if (GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
                 {
-
-                    return false;
+                    if (!string.IsNullOrEmpty(sFileCert))
+                    {
+                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+                    }
+                    return true;
                 }
-                return true;
+                else
+                    return  false;
             }
             else
             {

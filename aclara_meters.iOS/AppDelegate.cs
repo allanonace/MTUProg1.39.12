@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Threading;
 using Acr.UserDialogs;
 using Foundation;
+using Library;
 using Microsoft.Intune.MAM;
 using nexus.protocols.ble;
 using UIKit;
@@ -28,9 +30,16 @@ namespace aclara_meters.iOS
             //Distribute.DontCheckForUpdatesInDebug();
 
             // Get Intun Parameters
+            var Mode = GenericUtilsClass.ChekInstallMode();
+            if (Mode.Equals("None"))
+            {
+                LoginUserMAM();
+                Thread.Sleep(5000);
+            }
+
             //Online.DownloadIntuneParameters ();
             //Parameters.PrepareFromIntune();
-             
+
             // Core Foundation Keys:
             // https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
             var appVersion = NSBundle.MainBundle.InfoDictionary[ "CFBundleShortVersionString" ];
@@ -40,8 +49,10 @@ namespace aclara_meters.iOS
             IUserDialogs userDialogs = UserDialogs.Instance;
             string appversion = appVersion.Description + " ( " + appBuild.Description + " )";
 
+
             appSave = new FormsApp ( bluetoothLowEnergyAdapter, userDialogs, appversion);
 
+           
             // Check if FTP settings is in securestorage
             GenericUtilsClass.CheckFTPDownload();
 
@@ -51,7 +62,24 @@ namespace aclara_meters.iOS
 
             return base.FinishedLaunching ( app, options );
         }
+        public static void LoginUserMAM()
+        {
+            try
+            {
 
+                string user = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
+                //IntuneMAMPolicyManager value = IntuneMAMPolicyManager.Instance;
+                if (string.IsNullOrEmpty(user))
+                {
+                    IntuneMAMEnrollmentManager.Instance.LoginAndEnrollAccount(null);
+                }
+
+            }
+            catch (Exception e)
+            {
+                Utils.Print($"Enrollment exceptions: {e.ToString()}");
+            }
+        }
         public override bool OpenUrl (
             UIApplication app,
             NSUrl         url,

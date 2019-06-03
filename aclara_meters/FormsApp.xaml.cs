@@ -159,11 +159,9 @@ namespace aclara_meters
             // Config path
             ConfigPaths();
 
-            if (Device.RuntimePlatform == Device.iOS)
-            {
-                var MamServ = DependencyService.Get<IMAMService>();
-                MamServ.UtilMAMService();
-            }
+            var MamServ = DependencyService.Get<IMAMService>();
+            MamServ.UtilMAMService();
+
 
             this.LoadConfigurationAndOpenScene ( dialogs );   
         }
@@ -196,11 +194,19 @@ namespace aclara_meters
 
         private bool InitialConfigProcess()
         {
+            SecureStorage.RemoveAll();
             if (Mobile.configData.HasIntune)
             {
                 if (Mobile.IsNetAvailable())
                 {
-                    GenericUtilsClass.DownloadConfigFiles();
+
+                    GenericUtilsClass.DownloadConfigFiles(out string sFileCert);
+                    if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
+                    {
+                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+                    }
+                    GenericUtilsClass.SetInstallMode("Intune");
+
                     return true;
                 }
                 this.ShowErrorAndKill(new NoInternetException());
@@ -210,7 +216,7 @@ namespace aclara_meters
             else
             {
                 Mobile.configData.HasFTP = false;
-                SecureStorage.RemoveAll();
+
                 // Check if all configuration files are available in public folder
                 bool HasPublicFiles = GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath);
                 //this.abortMission = !this.HasDeviceAllXmls(Mobile.ConfigPublicPath);
@@ -230,7 +236,11 @@ namespace aclara_meters
                         if (value != null)
                             bool.TryParse((string)value,out CPD);
                     }
-                    GenericUtilsClass.CopyConfigFilesToPrivate(!CPD);
+                    GenericUtilsClass.CopyConfigFilesToPrivate(!CPD, out string sFileCert);
+                    if (!string.IsNullOrEmpty(sFileCert))
+                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+
+                    GenericUtilsClass.SetInstallMode("Manual");
 
                     if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
                         return true;
@@ -253,15 +263,11 @@ namespace aclara_meters
                             result = await tcs.Task;
                            
                             // Install certificate if needed ( Convert from .cer to base64 string / .txt )
-                            if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPath))
-                            {
-                                this.ShowErrorAndKill(new CertificateFileNotValidException());
-
-                                return;
-                            }
-
+                           
                             if (!this.InitializeConfiguration())
                                 return;
+
+                            GenericUtilsClass.SetInstallMode("FTP");
 
                             if (this.abortMission)
                             {
@@ -302,12 +308,12 @@ namespace aclara_meters
             {
                 Result = InitialConfigProcess();
                 //Install certificate if needed(Convert from.cer to base64 string / .txt)
-                if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPath))
-                {
-                    this.ShowErrorAndKill(new CertificateFileNotValidException());
+                //if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPath))
+                //{
+                //    this.ShowErrorAndKill(new CertificateFileNotValidException());
 
-                    return;
-                }
+                //    return;
+                //}
             }
 
             if (Result)

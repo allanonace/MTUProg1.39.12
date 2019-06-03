@@ -16,7 +16,8 @@ namespace MTUComm
             private const string CER_HEADER = "-----BEGIN CERTIFICATE-----\n";
             private const string CER_FOOTER = "\n-----END CERTIFICATE-----";
             private const string CER_INIT   = "MII";
-        
+            private const string XML_CER = ".cer";
+
             public string ftpDownload_User;
             public string ftpDownload_Pass;
             public string ftpDownload_Host;
@@ -28,6 +29,7 @@ namespace MTUComm
             public byte[] lastRandomKey;
             public byte[] lastRandomKeySha;
             public bool   isMtuEncrypted;
+
 
             public string RandomKeyAndShaEncryptedInBase64
             {
@@ -56,6 +58,7 @@ namespace MTUComm
                 this.ftpDownload_Path = string.Empty;
                 this.HasIntune = false;
                 this.HasFTP = false;
+               
             }
 
             public void LoadCertFromKeychain ()
@@ -76,7 +79,7 @@ namespace MTUComm
             {
                 X509Store store = new X509Store ( name );
                 store.Open ( OpenFlags.ReadWrite );
-                X509Certificate2 certificate = new X509Certificate2 ();
+                //X509Certificate2 certificate = new X509Certificate2 ();
 
                 X509Certificate2Collection storecollection = (X509Certificate2Collection)store.Certificates;
                 
@@ -89,6 +92,96 @@ namespace MTUComm
                 store.Dispose ();
             }
 
+            public X509Certificate2 CreateCertificate(string sCert = null, string sFileCer = null)
+            {
+                string content;
+                byte[] contentBytes;
+                X509Certificate2 certNew = null;
+                try
+                {
+                    if (!String.IsNullOrEmpty(sCert))
+                    {
+                        content = sCert;
+
+                        if (!content.StartsWith(CER_INIT))
+                            contentBytes = Convert.FromBase64String(content);
+                        else contentBytes = Encoding.ASCII.GetBytes(CER_HEADER + content + CER_FOOTER);
+
+
+                        certNew = new X509Certificate2(contentBytes);
+                    }
+                    else if (!String.IsNullOrEmpty(sFileCer))
+                    {
+                        sFileCer = Path.Combine(ConfigPath, sFileCer);
+                        certNew = new X509Certificate2(sFileCer);
+
+                        File.Delete(sFileCer);
+                    }
+                    return certNew;
+
+
+                }
+                catch(Exception e)
+                {
+                    return null;
+                }
+            }
+
+            public bool StoreCertificate(X509Certificate2 cert)
+            {
+                bool bFound = false;
+                try
+                {
+                    if (cert!= null)
+                    {
+                        X509Store store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+                        store.Open(OpenFlags.ReadWrite);
+                        foreach (var c in store.Certificates)
+                        {
+                            if (c.Equals(cert))
+                            {
+                                bFound = true;
+                                break;
+                            }
+                            else if (c.SubjectName == cert.SubjectName && c.NotAfter < cert.NotAfter)
+                            {
+                                store.Remove(c);  // only one certificate
+                            }
+                        }
+                        if (!bFound)
+                            store.Add(cert);
+                        store.Close();
+                    }
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+            }
+
+
+            public bool GenerateCertFromStore()
+            {
+                try
+                {
+                    X509Store store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
+                    store.Open(OpenFlags.ReadOnly);
+
+                    foreach (var c in store.Certificates)
+                    {
+                        this.certificate = c; //only has one 
+                        break;
+                    }
+
+                    store.Close();
+                    return true;
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+            }
             public void GenerateCert (string sCertificate = null)
             {
                 string content;

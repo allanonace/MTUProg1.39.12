@@ -19,14 +19,23 @@ using Xml;
 
 namespace aclara_meters
 {
-    public class GenericUtilsClass
+    public static class GenericUtilsClass
     {
         public static int NumFilesUploaded;
         private const string XML_EXT = ".xml";
         private const string CER_TXT = "certificate.txt";
         private const string XML_CER = ".cer";
+        private const string INSTALL_MODE = "InstallMode";
 
-
+        private static string[] filesToCheck =
+            {
+                "alarm",
+                "demandconf",
+                "global",
+                "meter",
+                "mtu",
+                "user",
+            };
 
         public async static Task<bool> UploadFiles (Boolean UploadPrompt = true, Boolean AllLogs = true )
         {
@@ -285,6 +294,20 @@ namespace aclara_meters
             return ok;
         }
 
+        public static void SetInstallMode(string Mode)
+        {
+            SecureStorage.SetAsync(INSTALL_MODE, Mode);
+        }
+
+        public static string ChekInstallMode()
+        {
+            var Mode = SecureStorage.GetAsync(INSTALL_MODE);
+            if (String.IsNullOrEmpty(Mode.Result))
+            {
+                return "None";
+            }
+            return Mode.Result;
+        }
         public static bool CheckFTPDownload()
         {
             var Host = SecureStorage.GetAsync("ftpDownload_Host");
@@ -296,16 +319,30 @@ namespace aclara_meters
                 data.ftpDownload_User = SecureStorage.GetAsync("ftpDownload_User").Result;
                 data.ftpDownload_Port = int.Parse(SecureStorage.GetAsync("ftpDownload_Port").Result);
                 data.HasFTP = true;
+                data.HasIntune = false;
                 return true;
             }
 
             return false;
         }
 
-        public static bool DownloadConfigFiles()
+        private static bool CheckConfigFile(string name)
+        {
+            string sFile;
+            foreach (string file in filesToCheck)
+            {
+                sFile = file + XML_EXT;
+                if (name.Equals(sFile))
+                    return true;
+
+            }
+            return false;
+        }
+
+        public static bool DownloadConfigFiles( out string sfileCert)
         {
             bool ok = true;
-
+            sfileCert = String.Empty;
             try
             {
                 Mobile.ConfigData data = Mobile.configData;
@@ -318,22 +355,23 @@ namespace aclara_meters
                     List<SftpFile> ftp_array_files = new List<SftpFile>();
 
                     // Remote FTP File directory
-                    bool isCertificate;
+                    //bool isCertificate;
                     string configPath = Mobile.ConfigPath;
 
                     foreach (SftpFile file in sftp.ListDirectory(data.ftpDownload_Path))
                     {
                         string name = file.Name;
+                        if (name.ToLower().Contains(XML_CER)) sfileCert = name.ToLower();
 
-                        if ((isCertificate = name.Contains(XML_CER)) ||
-                             name.Contains(XML_EXT))
+                        if (name.Contains(XML_CER) ||
+                          ( name.Contains(XML_EXT) && CheckConfigFile(name.ToLower())))
                         {
                             string sfile = Path.Combine(configPath, name.ToLower());
                             if (File.Exists(sfile))
                                 File.Delete(sfile);
                             using (Stream stream = File.OpenWrite(sfile))  // keep in low case
                             {
-                               sftp.DownloadFile(Path.Combine(data.ftpDownload_Path, name), stream);
+                                sftp.DownloadFile(Path.Combine(data.ftpDownload_Path, name), stream);
                             }
                         }
                     }
@@ -395,15 +433,7 @@ namespace aclara_meters
         public static bool HasDeviceAllXmls (string path)
         {
             bool ok = true;
-            string[] filesToCheck =
-            {
-                "alarm",
-                "demandconf",
-                "global",
-                "meter",
-                "mtu",
-                "user",
-            };
+
             //string path = Mobile.ConfigPath;
         
 
@@ -446,15 +476,17 @@ namespace aclara_meters
         }
 
 
-        public static void CopyConfigFilesToPrivate(bool bRemove)
+        public static void CopyConfigFilesToPrivate(bool bRemove, out string sFileCert)
         {
+            sFileCert = string.Empty;
             try
             {
                 DirectoryInfo info = new DirectoryInfo(Mobile.ConfigPublicPath);
                 FileInfo[] files = info.GetFiles();
 
                 foreach (FileInfo file in files)
-                { 
+                {
+                    if (file.Name.Contains(XML_CER)) sFileCert = file.Name.ToLower();
                     string fileCopy = Path.Combine(Mobile.ConfigPath, file.Name.ToLower());
                     
                     file.CopyTo(fileCopy,true);

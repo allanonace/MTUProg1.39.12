@@ -1602,7 +1602,7 @@ namespace aclara_meters.view
             {
                 if (Mobile.IsNetAvailable())
                 {
-                    GenericUtilsClass.DownloadConfigFiles();
+                    GenericUtilsClass.DownloadConfigFiles(out string sFileCert);
 
                     return true;
                 }
@@ -1629,12 +1629,12 @@ namespace aclara_meters.view
                         result = await tcs.Task;
 
                         // Install certificate if needed ( Convert from .cer to base64 string / .txt )
-                        if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPath))
-                        {
-                            await Errors.ShowAlert(new CertificateFileNotValidException());
-                            result = false;
+                        //if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPath))
+                        //{
+                        //    await Errors.ShowAlert(new CertificateFileNotValidException());
+                        //    result = false;
 
-                        }
+                        //}
                         if (result)
                         {
                             await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "ok");
@@ -1660,12 +1660,12 @@ namespace aclara_meters.view
                 if (HasPublicFiles)
                 {
                     // Install certificate if needed ( Convert from .cer to base64 string / .txt )
-                    if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPublicPath))
-                    {
-                        await Errors.ShowAlert(new CertificateFileNotValidException());
-                        //this.ShowErrorAndKill(new CertificateFileNotValidException());
-                        return false;
-                    }
+                    //if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPublicPath))
+                    //{
+                    //    await Errors.ShowAlert(new CertificateFileNotValidException());
+                    //    //this.ShowErrorAndKill(new CertificateFileNotValidException());
+                    //    return false;
+                    //}
                     //File.Copy(file.FullName, Path.Combine(url_to_copy, file.Name), true);
                     bool CPD = false;
                     if (GenericUtilsClass.TagGlobal("ConfigPublicDir", out dynamic value))
@@ -1673,7 +1673,7 @@ namespace aclara_meters.view
                         if (value != null)
                             bool.TryParse((string)value, out CPD);
                     }
-                    GenericUtilsClass.CopyConfigFilesToPrivate(!CPD);
+                    GenericUtilsClass.CopyConfigFilesToPrivate(!CPD, out string sFileCert);
 
                     if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
                         return false;
