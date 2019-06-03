@@ -14,14 +14,14 @@ using aclara.ViewModels;
 using Plugin.Settings;
 using MTUComm;
 using Library.Exceptions;
-using Plugin.Settings;
+
 using Renci.SshNet;
-using Xamarin.Forms;
+
 using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
 using System.IO;
-using Xml;
+
 using System.Xml.Linq;
 using Library;
 
@@ -1685,6 +1685,11 @@ namespace aclara_meters.view
                 return false;
 
             }
+        }
+
+        protected override bool OnBackButtonPressed()
+        {
+            return true;
         }
     }
 }

@@ -17,8 +17,8 @@ using Library;
 using MTUComm;
 using nexus.protocols.ble.scan;
 using Plugin.Settings;
-using System.Linq;
-using MTUComm;
+
+
 using System.Security.Cryptography.X509Certificates;
 using Xamarin.Forms;
 

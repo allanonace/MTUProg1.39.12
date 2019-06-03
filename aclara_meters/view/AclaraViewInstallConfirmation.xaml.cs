@@ -1893,5 +1893,9 @@ namespace aclara_meters.view
                 shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //  if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
             }));
         }
+        protected override bool OnBackButtonPressed()
+        {
+            return true;
+        }
     }
 }

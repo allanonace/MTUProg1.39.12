@@ -113,10 +113,10 @@ namespace aclara_meters
 
                 if ( Data.Get.IsAndroid )
                 {
-                    Task.Run(async () =>
-                    {
-                        await PermisosLocationAsync();
-                    });
+                    //Task.Run(async () =>
+                    //{
+                    //    await PermisosLocationAsync();
+                    //});
                     CallToInitApp(adapter, dialogs, appVersion);
                 }
                 else

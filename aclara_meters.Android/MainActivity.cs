@@ -5,7 +5,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
+using System.Collections.Generic;
 using Acr.UserDialogs;
+using Android;
 using Android.App;
 using Android.Content;
 using Android.Content.PM;
@@ -13,7 +15,6 @@ using Android.OS;
 using Android.Runtime;
 using Library;
 using nexus.protocols.ble;
-using Plugin.CurrentActivity;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 //using Application = Android.App.Application;
@@ -29,17 +30,17 @@ namespace aclara_meters.Droid
         /// you don't need to implement this -- you can still query the state of the adapter, the observable just won't work. See
         /// <see cref="IBluetoothLowEnergyAdapter.State" />
         /// </remarks>
-        protected override void OnActivityResult(Int32 requestCode, Result resultCode, Intent data)
+        protected override void OnMAMActivityResult(Int32 requestCode, Result resultCode, Intent data)
         {
             BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
         }
 
-        protected override void OnCreate(Bundle bundle)
+        protected override void OnMAMCreate(Bundle bundle)
         {
             //TabLayoutResource = Resource.Layout.Tabbar;
             // ToolbarResource = Resource.Layout.Toolbar;
 
-            base.OnCreate(bundle);
+            base.OnMAMCreate(bundle);
 
             UserDialogs.Init(this);
             global::Xamarin.Forms.Forms.Init(this, bundle);
@@ -64,7 +65,7 @@ namespace aclara_meters.Droid
                  RequestedOrientation = ScreenOrientation.Portrait;
             else RequestedOrientation = ScreenOrientation.Landscape;
 
-            CrossCurrentActivity.Current.Init ( this, bundle );
+           // CrossCurrentActivity.Current.Init ( this, bundle );
 
             var data = Intent.Data;
 
@@ -98,19 +99,19 @@ namespace aclara_meters.Droid
         }
     }
 
-    [Application(AllowBackup = true, AllowClearUserData = true)]
-    public class MyApplication : Android.App.Application
-    {
-        protected MyApplication(IntPtr javaReference, JniHandleOwnership transfer)
-        : base(javaReference, transfer)
-        {
-        }
+    //[Application(AllowBackup = true, AllowClearUserData = true)]
+    //public class MyApplication : Android.App.Application
+    //{
+    //    protected MyApplication(IntPtr javaReference, JniHandleOwnership transfer)
+    //    : base(javaReference, transfer)
+    //    {
+    //    }
 
-        public override void OnCreate()
-        {
+    //    public override void OnCreate()
+    //    {
             
-        }
-    }
+    //    }
+    //}
 
     [Activity(
         Label = "aclara_meters", 
@@ -129,17 +130,17 @@ namespace aclara_meters.Droid
         /// you don't need to implement this -- you can still query the state of the adapter, the observable just won't work. See
         /// <see cref="IBluetoothLowEnergyAdapter.State" />
         /// </remarks>
-        protected override void OnActivityResult(Int32 requestCode, Result resultCode, Intent data)
+        protected override void OnMAMActivityResult(Int32 requestCode, Result resultCode, Intent data)
         {
             BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
         }
 
-        protected override void OnCreate(Bundle bundle)
+        protected override void OnMAMCreate(Bundle bundle)
         {
             //TabLayoutResource = Resource.Layout.Tabbar;
            // ToolbarResource = Resource.Layout.Toolbar;
 
-            base.OnCreate(bundle);
+            base.OnMAMCreate(bundle);
 
             UserDialogs.Init(this);
             global::Xamarin.Forms.Forms.Init(this, bundle);
@@ -167,7 +168,7 @@ namespace aclara_meters.Droid
                 RequestedOrientation = ScreenOrientation.Landscape;
             }
 
-            CrossCurrentActivity.Current.Init(this, bundle);
+            //CrossCurrentActivity.Current.Init(this, bundle);
 
 
             var context = Android.App.Application.Context;
@@ -175,6 +176,9 @@ namespace aclara_meters.Droid
 
             string value = info.VersionName.ToString();
 
+
+            // Check if FTP settings is in securestorage
+            GenericUtilsClass.CheckFTPDownload();
 
 
             LoadApplication(new FormsApp ( bluetooth, UserDialogs.Instance, value));
@@ -185,6 +189,35 @@ namespace aclara_meters.Droid
         {
             Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+        protected override void OnStart()
+        {
+            var ListPerm = new List<String>();
+
+            if (CheckSelfPermission(Manifest.Permission.AccessCoarseLocation) != Permission.Granted)
+            {
+                ListPerm.Add(Manifest.Permission.AccessCoarseLocation);
+                ListPerm.Add(Manifest.Permission.AccessFineLocation);
+            }
+
+            if (CheckSelfPermission(Manifest.Permission.WriteExternalStorage) != Permission.Granted)
+            {
+                ListPerm.Add(Manifest.Permission.WriteExternalStorage);
+                ListPerm.Add(Manifest.Permission.ReadExternalStorage);
+
+            }
+            if (CheckSelfPermission(Manifest.Permission.GetAccounts) != Permission.Granted)
+            {
+                ListPerm.Add(Manifest.Permission.GetAccounts);
+                ListPerm.Add(Manifest.Permission.ManageAccounts);
+                ListPerm.Add(Manifest.Permission.UseCredentials);
+
+            }
+
+            if (ListPerm.Count > 0)
+                RequestPermissions(ListPerm.ToArray(), 0);
+
+            base.OnStart();
         }
 
     }

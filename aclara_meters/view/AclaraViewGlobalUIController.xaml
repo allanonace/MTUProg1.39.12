@@ -8,7 +8,7 @@
                x:Class="aclara_meters.view.AclaraViewGlobalUIController">
 
     <RelativeLayout IsVisible="true">
-        <ContentView BackgroundColor="White" WidthRequest="1024" x:Name="fondo" IsVisible="true"
+        <ContentView BackgroundColor="White" WidthRequest="1500" x:Name="fondo" IsVisible="true"
             RelativeLayout.YConstraint=
               "{ConstraintExpression Type=RelativeToParent,
                                      Property=Height,

@@ -182,7 +182,7 @@
         <!--                                                                                                                         -->
         <!--                                                                                                                         -->
         <!--                                                                                                                         -->
-        <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" IsVisible="true" WidthRequest="1024" Opacity="0.6">
+        <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" IsVisible="true" WidthRequest="1500" Opacity="0.6">
         </StackLayout>
         <StackLayout Orientation="Vertical" InputTransparent="true" VerticalOptions="Center" HorizontalOptions="Center" 
                      RelativeLayout.YConstraint="{ConstraintExpression 
@@ -214,7 +214,7 @@
                 
         </StackLayout>
       
-        <Image BackgroundColor="Black" x:Name="dialog_open_bg" WidthRequest="1024" IsVisible="false" HeightRequest="1024" Opacity="0.5">
+        <Image BackgroundColor="Black" x:Name="dialog_open_bg" WidthRequest="1500" IsVisible="false" HeightRequest="1024" Opacity="0.5">
         </Image>
     </RelativeLayout>
 </util:BasePage>

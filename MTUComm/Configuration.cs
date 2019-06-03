@@ -63,7 +63,7 @@ namespace MTUComm
                              port.TypeString = portTypes[ 0 ];
                         else port.TypeString = meterTypes.FindByMterId ( int.Parse ( portTypes[ 0 ] ) ).Type;
                         
-                        Utils.Print ( "MTU " + mtu.Id + ": Type " + port.TypeString );
+                       // Utils.Print ( "MTU " + mtu.Id + ": Type " + port.TypeString );
                     }
 
                 // Regenerate certificate from base64 string

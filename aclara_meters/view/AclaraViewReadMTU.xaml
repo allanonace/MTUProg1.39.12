@@ -90,7 +90,7 @@
                 </StackLayout>
             </Grid>
         </ContentView>
-        <Image Source="shadoweffect" Margin="298,0,0,0" Opacity="0.75" IsVisible="false" WidthRequest="29" HeightRequest="768" x:Name="shadoweffect">
+        <Image Source="shadoweffect" Margin="298,0,0,0" Opacity="0.75" IsVisible="false" WidthRequest="29" HeightRequest="1024" x:Name="shadoweffect">
         </Image>
         <!-- Menu desplegable -->
         <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" IsVisible="false" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=1}">
@@ -195,13 +195,13 @@
                 </StackLayout>
             </RelativeLayout>
         </ContentView>
-        <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" IsVisible="true" WidthRequest="1024" Opacity="0.6">
+        <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" IsVisible="true" WidthRequest="1500" Opacity="0.6">
         </StackLayout>
         <StackLayout InputTransparent="true" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                                     Property=Height,&#xA;                                                     Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                                     Property=Height,&#xA;                                                     Factor=1}" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                                     Property=Width,&#xA;                                                     Factor=1}">
             <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
         </StackLayout>
         <!--   DIALOGS   -->
-        <Image BackgroundColor="Black" x:Name="dialog_open_bg" WidthRequest="1024" IsVisible="false" HeightRequest="1024" Opacity="0.5">
+        <Image BackgroundColor="Black" x:Name="dialog_open_bg" WidthRequest="1500" IsVisible="false" HeightRequest="1024" Opacity="0.5">
         </Image>
         <ContentView Scale="1.2" IsVisible="false" HeightRequest="200" x:Name="turnoff_mtu_background" RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=0.19}" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=0.620}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Height,&#xA;                                     Factor=0.4}">
             <Frame CornerRadius="6" HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">

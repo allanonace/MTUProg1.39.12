@@ -4651,7 +4651,10 @@ namespace aclara_meters.view
             }
 
         }
-
+        protected override bool OnBackButtonPressed()
+        {
+            return true;
+        }
         #endregion
     }
 }
