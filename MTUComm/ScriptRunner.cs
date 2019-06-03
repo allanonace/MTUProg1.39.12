@@ -32,36 +32,33 @@ namespace MTUComm
 
         public void ParseScriptAndRun ( ISerial serial_device, String script_stream, int stream_size )
         {
-            // Script file is empty
-            if ( string.IsNullOrEmpty ( script_stream.Trim () ) )
-            {
-                Errors.LogErrorNowAndKill ( new ScriptEmptyException () );
-                //this.OnError ();
-                
-                return;
-            }
+            XmlSerializer s = null;
         
-            Script script = new Script();
-            XmlSerializer s = new XmlSerializer(typeof(Script));
-
-            // Register unknown elements ( not present in Script class ) as additional parameters
-            s.UnknownElement += this.UnknownElementEvent;
-
             try
             {
+                // Script file is empty
+                if ( string.IsNullOrEmpty ( script_stream.Trim () ) )
+                    throw new ScriptEmptyException ();
+            
+                Script script = new Script ();
+                s = new XmlSerializer ( typeof ( Script ) );
+    
+                // Register unknown elements ( not present in Script class ) as additional parameters
+                s.UnknownElement += this.UnknownElementEvent;
+            
                 using ( StringReader reader = new StringReader ( script_stream.Substring ( 0, stream_size ) ) )
                 {
-                    script = ( Script )s.Deserialize( reader );
+                    script = ( Script )s.Deserialize ( reader );
                 }
                 BuildScriptActions ( serial_device, script );
             }
-            catch (Exception e)
+            catch ( Exception e )
             {
                 if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndKill ( new ScriptWrongStructureException () ); // Script file has invalid format or structure
-                else Errors.LogErrorNowAndKill ( e ); // ScriptLogfileInvalidException, ScriptActionTypeInvalidException
-                
-                //this.OnError ();
+                     Errors.LogErrorNowAndContinue ( new ScriptWrongStructureException () ); // Script file has invalid format or structure
+                else Errors.LogErrorNowAndContinue ( e ); // ScriptLogfileInvalidException, ScriptActionTypeInvalidException
+
+                this.OnError ();
                 
                 return;
             }
@@ -85,8 +82,8 @@ namespace MTUComm
 
             int step = 0;
 
-            if (string.IsNullOrEmpty(script.UserName))
-                throw new ScriptUserNameMissingException();
+            if ( string.IsNullOrEmpty ( script.UserName ) )
+                throw new ScriptUserNameMissingException ();
 
             Mobile.LogUserPath = script.UserName;
 

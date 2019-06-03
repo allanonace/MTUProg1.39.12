@@ -55,8 +55,8 @@ namespace MTUComm
                         await UserDialogs.Instance.AlertAsync ( message, title, btnText );
                     
                     // In scripted mode force to kill app when no action logic was executing
-                    if ( kill ||
-                         isFromScripting && ! actionInitialized )
+                    if ( kill ) // ||
+                         //isFromScripting && ! actionInitialized )
                     {
                         // Wait four seconds and kill the popup
                         //await Task.Delay ( TimeSpan.FromSeconds ( 6 ) );

@@ -62,6 +62,7 @@ namespace aclara_meters.iOS
 
             return base.FinishedLaunching ( app, options );
         }
+        
         public static void LoginUserMAM()
         {
             try
@@ -80,6 +81,7 @@ namespace aclara_meters.iOS
                 Utils.Print($"Enrollment exceptions: {e.ToString()}");
             }
         }
+        
         public override bool OpenUrl (
             UIApplication app,
             NSUrl         url,
