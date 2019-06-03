@@ -5,7 +5,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>aclara-mtu-programmer</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.aclara.programmer</string>
+	<string>com.aclara.mtu.programmer</string>
 	<key>CFBundleName</key>
 	<string>Aclara MTU Programmer</string>
 	<key>CFBundleShortVersionString</key>
@@ -30,10 +30,6 @@
 	<string>0.0.4</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
-		<key>AppGroupIdentifiers</key>
-		<array>
-			<string>group.bizintek</string>
-		</array>
 		<key>MainStoryboardFile</key>
 		<string>LaunchScreen</string>
 	</dict>

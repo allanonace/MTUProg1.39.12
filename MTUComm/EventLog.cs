@@ -5,7 +5,7 @@ using Library;
 
 namespace MTUComm
 {
-    public class LogDataEntry
+    public class EventLog
     {
         #region Constants
 
@@ -16,13 +16,17 @@ namespace MTUComm
             TaskFlag   // Bit set using the coil interface
         }
 
-        private const int BYTE_FORMAT       = 8;
-        private const int BYTE_SECSTIME     = 9;
-        private const int BYTE_FLAGS        = 13;
-        private const int BYTE_READINTERVAL = 15;
-        private const int BYTE_METERREAD    = 17;
-        private const int BYTE_ERROR        = 22;
-
+        private const int BYTE_RESULT            = 2;
+        private const int BYTE_NUMLOGS           = 3;
+        private const int BYTE_CURRENT           = 5;
+        private const int BYTE_FORMAT            = 8;
+        private const int BYTE_SECSTIME          = 9;
+        private const int BYTE_FLAGS             = 13;
+        private const int BYTE_READINTERVAL      = 15;
+        private const int BYTE_METERREAD         = 17;
+        private const int BYTE_ERROR             = 22;
+        private const int NUM_BYTES_NUMLOGS      = 2;
+        private const int NUM_BYTES_CURRENT      = 2;
         private const int NUM_BYTES_SECSTIME     = 4;
         private const int NUM_BYTES_FLAGS        = 2;
         private const int NUM_BYTES_READINTERVAL = 2;
@@ -32,6 +36,8 @@ namespace MTUComm
 
         #region Attributes
 
+        private int index;
+        private int totalLogs;
         private int formatVersion;
         private DateTime timeStamp;
         private int readInterval;
@@ -43,6 +49,16 @@ namespace MTUComm
         #endregion
 
         #region Properties
+
+        public int Index
+        {
+            get { return this.index; }
+        }
+
+        public bool IsLast
+        {
+            get { return this.index >= this.totalLogs; }
+        }
 
         public int FormatVersion
         {
@@ -115,15 +131,17 @@ namespace MTUComm
 
         #region Initialization
 
-        public LogDataEntry (
-            byte[] data )
+        public EventLog (
+            byte[] response )
         {
-            this.formatVersion = ( int )data[ BYTE_FORMAT ];
-            this.errorStatus   = ( int )data[ BYTE_ERROR  ];
-            long secTimeStamp  = Utils.GetNumericValueFromBytes<long> ( data, BYTE_SECSTIME,     NUM_BYTES_SECSTIME     ); // 9, 10, 11 and 12
-            this.flags         = Utils.GetNumericValueFromBytes<int>  ( data, BYTE_FLAGS,        NUM_BYTES_FLAGS        ); // 13 and 14
-            this.readInterval  = Utils.GetNumericValueFromBytes<int>  ( data, BYTE_READINTERVAL, NUM_BYTES_READINTERVAL ); // 15 and 16
-            this.meterRead     = Utils.GetNumericValueFromBytes<long> ( data, BYTE_METERREAD,    NUM_BYTES_METERREAD    ); // 17, 18, 19, 20 and 21
+            this.formatVersion = ( int )response[ BYTE_FORMAT ];
+            this.errorStatus   = ( int )response[ BYTE_ERROR  ];
+            this.totalLogs     = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_NUMLOGS,      NUM_BYTES_NUMLOGS      ); // 3 and 4
+            this.index         = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_CURRENT,      NUM_BYTES_CURRENT      ); // 5 and 6
+            long secTimeStamp  = Utils.GetNumericValueFromBytes<long> ( response, BYTE_SECSTIME,     NUM_BYTES_SECSTIME     ); // 9, 10, 11 and 12
+            this.flags         = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_FLAGS,        NUM_BYTES_FLAGS        ); // 13 and 14
+            this.readInterval  = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_READINTERVAL, NUM_BYTES_READINTERVAL ); // 15 and 16
+            this.meterRead     = Utils.GetNumericValueFromBytes<long> ( response, BYTE_METERREAD,    NUM_BYTES_METERREAD    ); // 17, 18, 19, 20 and 21
             this.timeStamp     = new DateTime ( 1970, 1, 1, 0, 0, 0 ).AddSeconds ( secTimeStamp );
             this.portNumber    = ( ( this.flags & 3 ) == 0 ) ? 1 : ( ( ( this.flags & 3 ) == 1 ) ? 2 : -1 );
         }

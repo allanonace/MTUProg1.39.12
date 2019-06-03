@@ -9,7 +9,8 @@ namespace Xml
     {
         public Global ()
         {
-            // Default values extracted from Y20318-TUM_Rev_E.PDF
+            // Default values extracted from Y20318-TUM_Rev_E.PDF and STAR Programmer source code
+
             this.AccountDualEntry             = true; // Enables or disables dual entry for AccountNumber
             this.AccountEnabledAppt           = false; // [LOW PRIORITY = NOT CONFIRMED] Enable or disable values after appointment in interactive mode ( Account Number )
             this.AccountFilled                = false; // Allows AccountNumber to be filled with MTU ID automatically
@@ -191,13 +192,17 @@ namespace Xml
             this.WriteF1SystemTime            = false; // F1 write MTU system time from handheld or PC
             this.XmitTimer                    = 0; // [UInt] Transmit Timer
             
-            // New parameters/tags
+            // New parameters/tags ( Own )
             
             // gzip is simply deflate plus a checksum and header/footer. Deflate is faster and smaller
             // So naturally, no checksum is faster but then you also can't detect corrupt streams
             this.Compression                  = string.Empty; // "", "gzip" and "deflate"
+
+            // New parameters/tags ( Aclara )
+
+            this.NumOfDays                    = 0; // TODO: Default initial value
         
-            // Lists
+            #region Collections
         
             this.Cancel_Deserialized = new List<string> ();
             this.Cancel_Default      = new List<string> ()
@@ -254,7 +259,11 @@ namespace Xml
                     }
                 }
             };
+
+            #endregion
         }
+
+        #region Tags
 
         public bool IsFtpUploadSet
         {
@@ -869,10 +878,21 @@ namespace Xml
                 return this.Cancel_Deserialized;
             }
         }
+
+        #endregion
         
-        // New parameters/tags
+        #region New Tags ( Own )
         
         [XmlElement("Compression")]
         public string Compression { get; set; }
+
+        #endregion
+
+        #region New Tags ( Aclara )
+
+        [XmlElement("NumOfDays")]
+        public int NumOfDays { get; set; }
+
+        #endregion
     }
 }

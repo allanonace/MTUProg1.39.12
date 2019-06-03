@@ -8,6 +8,7 @@ using Lexi.Interfaces;
 using Library;
 using Library.Exceptions;
 using Xml;
+using Library;
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -43,13 +44,16 @@ namespace MTUComm
             Script script = new Script();
             XmlSerializer s = new XmlSerializer(typeof(Script));
 
+            // Register unknown elements ( not present in Script class ) as additional parameters
+            s.UnknownElement += this.UnknownElementEvent;
+
             try
             {
-                using (StringReader reader = new StringReader(script_stream.Substring(0, stream_size)))
+                using ( StringReader reader = new StringReader ( script_stream.Substring ( 0, stream_size ) ) )
                 {
-                    script = (Script)s.Deserialize(reader);
+                    script = ( Script )s.Deserialize( reader );
                 }
-                buildScriptActions ( serial_device, script );
+                BuildScriptActions ( serial_device, script );
             }
             catch (Exception e)
             {
@@ -61,11 +65,21 @@ namespace MTUComm
                 
                 return;
             }
+            finally
+            {
+                s.UnknownElement -= this.UnknownElementEvent;
+            }
 
             this.Run ();
         }
 
-        private void buildScriptActions ( ISerial serial_device, Script script )
+        private void UnknownElementEvent ( object sender, XmlElementEventArgs e )
+        {
+            ScriptAction script = ( ScriptAction )e.ObjectBeingDeserialized;
+            script.AddAdditionParameter ( e.Element.Name, e.Element.InnerText );
+        }
+
+        private void BuildScriptActions ( ISerial serial_device, Script script )
         {
             actions = new List<Action>();
 
@@ -84,29 +98,29 @@ namespace MTUComm
             else
             {
                 ActionType type;
-                foreach ( Xml.ScriptAction action in script.Actions )
+                foreach ( Xml.ScriptAction scriptAction in script.Actions )
                 {
                     // Action string is not present in ActionType enum
-                    if ( ! Enum.TryParse<ActionType> ( action.Type, out type ) )
-                        throw new ScriptActionTypeInvalidException ( action.Type );
+                    if ( ! Enum.TryParse<ActionType> ( scriptAction.Type, out type ) )
+                        throw new ScriptActionTypeInvalidException ( scriptAction.Type );
                 
                     Action new_action = new Action ( Singleton.Get.Configuration, serial_device, type, script.UserName, script.LogFile );
-                    Type   actionType = action.GetType ();
+                    Type   actionType = scriptAction.GetType ();
     
                     Parameter.ParameterType paramTypeToAdd;
-                    foreach ( PropertyInfo parameter in action.GetType().GetProperties () )
+                    foreach ( PropertyInfo propertyInfo in scriptAction.GetType().GetProperties () )
                     {
-                        var paramValue = actionType.GetProperty ( parameter.Name ).GetValue ( action, null );
+                        var property   = actionType.GetProperty ( propertyInfo.Name );
+                        var paramValue = property.GetValue ( scriptAction, null );
                         if ( paramValue is null )
                             continue;
                         
-                        Type valueType  = paramValue.GetType ();
+                        Type valueType = paramValue.GetType ();
                     
                         if ( valueType.Name.ToLower ().Contains ( "actionparameter" ) )
                         {
                             // The parameter name is not listed in the ParameterType enumeration
-                            // NOTE: This also is useful to ignore automaticaly created properties ( xxx_deserialize )
-                            if ( ! Enum.TryParse<Parameter.ParameterType> ( parameter.Name, out paramTypeToAdd ) )
+                            if ( ! Enum.TryParse<Parameter.ParameterType> ( propertyInfo.Name, out paramTypeToAdd ) )
                                 continue;
                         
                             List<ActionParameter> list = new List<ActionParameter> ();
@@ -124,6 +138,15 @@ namespace MTUComm
                                         aParam.Value,
                                         aParam.Port ) );
                         }
+                    }
+
+                    // Additional parameters
+                    Parameter parameter;
+                    foreach ( var entry in scriptAction.AdditionalParameters )
+                    {
+                        parameter = new Parameter ( entry.Key, entry.Key, entry.Value );
+                        parameter.Optional = true;
+                        new_action.AddAdditionalParameter ( parameter );
                     }
     
                     new_action.order = step;

@@ -21,6 +21,26 @@
     {
         public MtuMissingException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
+
+    public class MtuQueryEventLogsException : OwnExceptionsBase
+    {
+        public MtuQueryEventLogsException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    public class AttemptNotAchievedGetEventsLogException : OwnExceptionsBase
+    {
+        public AttemptNotAchievedGetEventsLogException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    public class ActionNotAchievedGetEventsLogException : OwnExceptionsBase
+    {
+        public ActionNotAchievedGetEventsLogException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    public class MtuIsBusyToGetEventsLogException : OwnExceptionsBase
+    {
+        public MtuIsBusyToGetEventsLogException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
     
     // Meter [ 2xx ]
     //------

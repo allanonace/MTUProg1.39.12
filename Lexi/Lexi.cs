@@ -253,7 +253,7 @@ namespace Lexi
             }
         }
 
-        public async Task<byte[]> Write (
+        public async Task<(byte[] bytes, int responseOffset)> Write (
             uint   address,
             byte[] data           = null,
             uint[] bytesResponse  = null, // By default is +2 ACK
@@ -273,7 +273,7 @@ namespace Lexi
             return await Write ( m_serial, address, data, bytesResponse, filtersResponse, m_timeout, lexiAction );
         }
 
-        private async Task<byte[]> Write (
+        private async Task<(byte[] bytes, int responseOffset)> Write (
             ISerial serial,
             UInt32 address,
             byte[] data,
@@ -370,6 +370,7 @@ namespace Lexi
                                     }
                                 }
                                 
+                                // No condition was validated
                                 if ( ! ok )
                                     goto CONTINUE;
 
@@ -414,7 +415,7 @@ namespace Lexi
     
                 // First two bytes always are the ACK
                 byte[] response = new byte[ 2 ];
-                Array.Copy(rawBuffer, responseOffset, response, 0, response.Length);
+                Array.Copy ( rawBuffer, responseOffset, response, 0, response.Length );
                 
                 Utils.PrintDeep ( "Lexi.Write.." +
                     " RawBuffer " + Utils.ByteArrayToString ( rawBuffer ) +
@@ -428,7 +429,7 @@ namespace Lexi
                     Utils.PrintDeep ( "----LEXI_WRITE_FINISH----| " + TEST + " |--" + Environment.NewLine );
 
                     // Return MTU response
-                    return rawBuffer;
+                    return ( bytes: rawBuffer, responseOffset: responseOffset );
                 }
             }
             catch ( Exception e )
@@ -508,6 +509,7 @@ namespace Lexi
 
                 case LexiAction.OperationRequest:
                 /*
+                * Base package format
                 * +------------+---------------+------------------------------------------------------+
                 * | Byte Index |  Field        |                          Notes                       |
                 * +------------+---------------+------------------------------------------------------+

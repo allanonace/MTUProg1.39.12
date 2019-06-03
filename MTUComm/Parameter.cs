@@ -195,6 +195,10 @@ namespace MTUComm
 
         public bool Optional
         {
+            set
+            {
+                optional = value;
+            }
             get
             {
                 return this.optional;

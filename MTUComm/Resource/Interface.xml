@@ -47,6 +47,7 @@
 			<Parameter name="Date" display="Date/Time" log="true" source="Action.Date" interface="false"/>
 			<Parameter name="User" display="User" log="true" source="Action.User" interface="false"/>
 			<Parameter name="MtuStatus" display="MTU Status" log="true" interface="true"/>
+			<Parameter name="MtuType" display="MTU Type" log="true" interface="true"/>
 			<Parameter name="MtuSerialNumber" display="MTU Ser No" log="true" interface="true"/>
             <Parameter name="PuckSerialNumber" display="Puck Ser No" log="true" interface="false" source="Puck.SerialNumber" />
             <Parameter name="PuckBattery" display="Puck Battery" log="true" interface="false" source="Puck.BatteryLevel" />
@@ -84,7 +85,6 @@
 			<Parameter name="ReadInterval" display="Read Interval" log="true" interface="true"/>
 			<Parameter name="ReadIntervalMinutes" display="ReadIntervalMinutes" log="true" interface="false"/>
 			<Parameter name="MtuVoltageBattery" display="Battery" log="true" interface="true"/>
-			<Parameter name="MtuType" display="MTU Type" log="true" interface="true"/>
 			<Parameter name="MtuSoftware" display="MTU Software" log="true" interface="true" source="MemoryMap.MtuSoftVersionString"/>
 			<Parameter name="MTUFirmwareVersionFormatFlag" display="MTU firmware version format flag" log="true" interface="false" source="MemoryMap.MtuSoftVersion"/>
 			<Parameter name="RxInterval" display="Rx Interval" log="true" interface="true"/>
@@ -100,6 +100,7 @@
 			<Parameter name="Date" display="Date/Time" log="true" source="Action.Date" interface="false"/>
 			<Parameter name="User" display="User" log="true" source="Action.User" interface="false"/>
 			<Parameter name="MtuStatus" display="MTU Status" log="true" interface="true"/>
+			<Parameter name="MtuType" display="MTU Type" log="true" interface="true"/>
 			<Parameter name="MtuSerialNumber" display="MTU Ser No" log="true" interface="true"/>
             <Parameter name="PuckSerialNumber" display="Puck Ser No" log="true" interface="false" source="Puck.SerialNumber" />
             <Parameter name="PuckBattery" display="Puck Battery" log="true" interface="false" source="Puck.BatteryLevel" />
@@ -137,7 +138,6 @@
 			<Parameter name="ReadInterval" display="Read Interval" log="true" interface="true"/>
 			<Parameter name="ReadIntervalMinutes" display="ReadIntervalMinutes" log="true" interface="false"/>
 			<Parameter name="MtuVoltageBattery" display="Battery" log="true" interface="true"/>
-			<Parameter name="MtuType" display="MTU Type" log="true" interface="true"/>
 			<Parameter name="MtuSoftware" display="MTU Software" log="true" interface="true" source="MemoryMap.MtuSoftVersionString"/>
 			<Parameter name="MTUFirmwareVersionFormatFlag" display="MTU firmware version format flag" log="true" interface="false" source="MemoryMap.MtuSoftVersion"/>
 			<Parameter name="RxInterval" display="Rx Interval" log="true" interface="true"/>
@@ -202,6 +202,7 @@
 			<Parameter name="Date" display="Date/Time" log="true" source="Action.Date" interface="false"/>
 			<Parameter name="User" display="User" log="true" source="Action.User" interface="false"/>
 			<Parameter name="MtuStatus" display="MTU Status" log="true" interface="true"/>
+			<Parameter name="MtuType" display="MTU Type" log="true" interface="true"/>
 			<Parameter name="MtuSerialNumber" display="MTU Ser No" log="true" interface="true"/>
             <Parameter name="PuckSerialNumber" display="Puck Ser No" log="true" interface="false" source="Puck.SerialNumber" />
             <Parameter name="PuckBattery" display="Puck Battery" log="true" interface="false" source="Puck.BatteryLevel" />
@@ -245,7 +246,6 @@
 			<Parameter name="ReadIntervalMinutes" display="ReadIntervalMinutes" log="true" interface="false"/>
 			<Parameter name="MtuVoltageBattery" display="Battery" log="true" interface="true"/>
             <Parameter name="Fast-2-Way" display="2-Way" source="MemoryMap.FastMessagingMode" log="true" interface="true"/>
-			<Parameter name="MtuType" display="MTU Type" log="true" interface="true"/>
 			<Parameter name="MtuSoftware" display="MTU Software" log="true" interface="true" source="MemoryMap.MtuSoftVersionString"/>
 			<Parameter name="MTUFirmwareVersionFormatFlag" display="MTU firmware version format flag" log="true" interface="false" source="MemoryMap.MtuSoftVersion"/>
 			<Parameter name="RxInterval" display="Rx Interval" log="true" interface="true"/>
