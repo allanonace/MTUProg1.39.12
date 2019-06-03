@@ -61,7 +61,6 @@
     <None Remove="Resource\family_33xx.xml" />
     <None Remove="Resource\family_342x.xml" />
     <None Remove="Resource\family_31xx32xx.xml" />
-    <None Remove="Resource\certificate.cer" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="TaskExtensions.cs" />
@@ -74,6 +73,5 @@
     <EmbeddedResource Include="Resource\family_33xx.xml" />
     <EmbeddedResource Include="Resource\family_342x.xml" />
     <EmbeddedResource Include="Resource\family_31xx32xx.xml" />
-    <EmbeddedResource Include="Resource\certificate.cer" />
   </ItemGroup>
 </Project>

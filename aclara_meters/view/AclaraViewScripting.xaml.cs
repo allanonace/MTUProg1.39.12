@@ -689,7 +689,7 @@ namespace aclara_meters.view
 
         private void scriptFunction()
         {
-            ScriptRunner runner = new ScriptRunner();
+            ScriptRunner runner = new ScriptRunner ();
 
             //Define finish and error event handler
             runner.OnFinish     += OnFinish;
