@@ -43,6 +43,7 @@ namespace MTUComm
             try
             {
                 // Load configuration files ( xml's )
+
                 mtuTypes   = Utils.DeserializeXml<MtuTypes>        ( Path.Combine ( configPath, XML_MTUS      ) );
                 meterTypes = Utils.DeserializeXml<MeterTypes>      ( Path.Combine ( configPath, XML_METERS    ) );
                 Global     = Utils.DeserializeXml<Global>          ( Path.Combine ( configPath, XML_GLOBAL    ) );
@@ -98,6 +99,28 @@ namespace MTUComm
                 Singleton.Set = new Configuration ( path, avoidXmlError );
 
             return Singleton.Get.Configuration;
+        }
+
+        public static bool CheckLoadXML()
+        {
+            string configPath = Mobile.ConfigPath;
+            try
+            {
+                // Load configuration files ( xml's )
+                MtuTypes auxMtus = Utils.DeserializeXml<MtuTypes>(Path.Combine(configPath, XML_MTUS));
+                MeterTypes auxMeters = Utils.DeserializeXml<MeterTypes>(Path.Combine(configPath, XML_METERS));
+                Global auxGlobal = Utils.DeserializeXml<Global>(Path.Combine(configPath, XML_GLOBAL));
+                AlarmList auxAlarm  = Utils.DeserializeXml<AlarmList>(Path.Combine(configPath, XML_ALARMS));
+                DemandConf auxDemand = Utils.DeserializeXml<DemandConf>(Path.Combine(configPath, XML_DEMANDS));
+                User[] auxUsers  = Utils.DeserializeXml<UserList>(Path.Combine(configPath, XML_USERS)).List;
+                return true;
+
+            }
+            catch (Exception )
+            {
+                //throw new ConfigurationFilesCorruptedException();
+                return false;
+            }
         }
 
         public Mtu[] GetMtuTypes()

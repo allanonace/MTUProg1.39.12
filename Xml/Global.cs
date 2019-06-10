@@ -61,6 +61,7 @@ namespace Xml
             this.CertUpdate                   = string.Empty;         // [DateTime] Date on which certificate must be updated
             this.CertUpdateValid              = false;                // If true, application makes CertUpdate one day prior to Certvalid
             this.CertValid                    = string.Empty;         // [DateTime] CertValidActual certificate expiration date. Application will not run if current date is past this date
+            this.CheckConfigFiles             = false;                //Check for updated XML config files and certificate            
             this.CheckMTUfield                = string.Empty;         // What field to use with CheckMtuType tag
             this.CheckMTUtype                 = false;                // Check if this MTU is suitable for this appointment
             this.CheckMTUvalue                = string.Empty;         // What value to compare
@@ -431,6 +432,9 @@ namespace Xml
 
         [XmlElement("CheckSavedField")]
         public bool CheckSavedField { get; set; }
+
+        [XmlElement("CheckConfigFiles")]
+        public bool CheckConfigFiles { get; set; }
 
         [XmlElement("CoilDetect")]
         public bool CoilDetect { get; set; }

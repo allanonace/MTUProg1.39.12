@@ -24,6 +24,7 @@ using System.IO;
 
 using System.Xml.Linq;
 using Library;
+using Xamarin.Essentials;
 
 namespace aclara_meters.view
 {
@@ -34,11 +35,14 @@ namespace aclara_meters.view
         private const string TEXT_VERSION = "Application Version: ";
         private const string TEXT_INTUNE  = " [ using Intune ]";
         private const string TEXT_LICENSE = "Licensed to: ";
+        private const string TEXT_CONFVER = "Configuration version: ";
 
         private ActionType actionType;
         private IUserDialogs dialogsSaved;
         private TabLogViewModel viewModelTabLog;
         private List<PageItem> MenuList { get; set; }
+
+        private string NewConfigVersion;
 
         Global global;
 
@@ -1117,11 +1121,24 @@ namespace aclara_meters.view
             if (await ConfirmDownloadFilesAsync())
             {
                 Wait(true);
-    
+
+                GenericUtilsClass.BackUpConfigFiles();
                 if (await DownloadConfigProcess())
                 {
-                    await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration effective", "ok");
-                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    if (Configuration.CheckLoadXML())
+                    {
+                        await SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
+                        await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "OK");
+                        //Errors.LogErrorNowAndKill(new ConfigFilesChangedException());
+                        System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    }
+                    else
+                    {
+                        GenericUtilsClass.RestoreConfigFiles();
+                        await Application.Current.MainPage.DisplayAlert("Attention", 
+                            "The new version configuration files are corrupted, the app will continues with the actual files. Contact your IT administratorn", "OK");
+                    }
+                   
                 }
                 Wait(false);
 
@@ -1360,7 +1377,8 @@ namespace aclara_meters.view
             customers_copyr  .Text = TEXT_COPYR;
             customers_support.Text = TEXT_SUPPORT;
             customers_version.Text = TEXT_VERSION + Singleton.Get.Configuration.GetApplicationVersion () + ( ( Mobile.configData.HasIntune ) ? TEXT_INTUNE : string.Empty );
-            
+            config_version.Text = TEXT_CONFVER + SecureStorage.GetAsync("ConfigVersion").Result;
+
             if ( Mobile.configData.IsCertLoaded )
             {
                 certificate_name.Text = $"Certificate: {Mobile.configData.certificate.Subject}";
@@ -1603,7 +1621,9 @@ namespace aclara_meters.view
                 if (Mobile.IsNetAvailable())
                 {
                     GenericUtilsClass.DownloadConfigFiles(out string sFileCert);
-
+                    if (!string.IsNullOrEmpty(sFileCert))
+                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+                    NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
                     return true;
                 }
                 else
@@ -1628,18 +1648,21 @@ namespace aclara_meters.view
 
                         result = await tcs.Task;
 
-                        // Install certificate if needed ( Convert from .cer to base64 string / .txt )
-                        //if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPath))
-                        //{
-                        //    await Errors.ShowAlert(new CertificateFileNotValidException());
-                        //    result = false;
-
-                        //}
                         if (result)
                         {
-                            await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "ok");
-                            //Errors.LogErrorNowAndKill(new ConfigFilesChangedException());
-                            System.Diagnostics.Process.GetCurrentProcess().Kill();
+                            if (Configuration.CheckLoadXML())
+                            {
+                                await SecureStorage.SetAsync("ConfigVersion", GenericUtilsClass.CheckFTPConfigVersion());
+                                await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "ok");
+                                //Errors.LogErrorNowAndKill(new ConfigFilesChangedException());
+                                System.Diagnostics.Process.GetCurrentProcess().Kill();
+                            }
+                            else
+                            {
+                                GenericUtilsClass.RestoreConfigFiles();
+                                await Application.Current.MainPage.DisplayAlert("Attention", 
+                                     "The new version configuration files are corrupted, the app will continues with the actual files. Contact your IT administratorn", "OK"); 
+                            }
                         }
                         //return result;
                     });
@@ -1659,22 +1682,18 @@ namespace aclara_meters.view
                 //this.abortMission = !this.HasDeviceAllXmls(Mobile.ConfigPublicPath);
                 if (HasPublicFiles)
                 {
-                    // Install certificate if needed ( Convert from .cer to base64 string / .txt )
-                    //if (!GenericUtilsClass.GenerateBase64Certificate(Mobile.ConfigPublicPath))
-                    //{
-                    //    await Errors.ShowAlert(new CertificateFileNotValidException());
-                    //    //this.ShowErrorAndKill(new CertificateFileNotValidException());
-                    //    return false;
-                    //}
-                    //File.Copy(file.FullName, Path.Combine(url_to_copy, file.Name), true);
+
                     bool CPD = false;
-                    if (GenericUtilsClass.TagGlobal("ConfigPublicDir", out dynamic value))
+                    if (GenericUtilsClass.TagGlobal(true,"ConfigPublicDir", out dynamic value))
                     {
                         if (value != null)
                             bool.TryParse((string)value, out CPD);
                     }
-                    GenericUtilsClass.CopyConfigFilesToPrivate(!CPD, out string sFileCert);
+                    GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert);
+                    if (!string.IsNullOrEmpty(sFileCert))
+                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
 
+                    NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
                     if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
                         return false;
                     return true;
