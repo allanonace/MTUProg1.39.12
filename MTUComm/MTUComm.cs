@@ -18,6 +18,8 @@ using FIELD               = MTUComm.actions.AddMtuForm.FIELD;
 using EventLogQueryResult = MTUComm.EventLogList.EventLogQueryResult;
 using ParameterType       = MTUComm.Parameter.ParameterType;
 using LexiAction          = Lexi.Lexi.LexiAction;
+using LogFilterMode       = Lexi.Lexi.LogFilterMode;
+using LogEntryType        = Lexi.Lexi.LogEntryType;
 
 namespace MTUComm
 {
@@ -43,14 +45,17 @@ namespace MTUComm
         private const int DATA_READ_END_DAYS   = 60;
         private const byte CMD_START_LOGS      = 0x13;
         private const byte CMD_NEXT_LOG        = 0x14;
+        private const byte CMD_LAST_LOG        = 0x15;
         private const int CMD_NEXT_RESULT_1    = 25;
         private const int CMD_NEXT_RESULT_2    = 5;
         private const int CMD_NEXT_BYTE_RESULT = 2;
         private const byte CMD_NEXT_WITH_DATA  = 0x00;
         private const byte CMD_NEXT_NO_DATA    = 0x01;
         private const byte CMD_NEXT_BUSY       = 0x02;
-        private const int WAIT_BEFORE_LOGS     = 2000;
-        private const int WAIT_BETWEEN_LOGS    = 1000;
+
+        private const int WAIT_BEFORE_LOGS     = 1000;
+        private const int WAIT_BTW_LOG_ERRORS  = 1000;
+        private const int WAIT_BTW_LOGS        = 100;
 
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
         private const string ERROR_LOADMETER      = "MeterLoadException";
@@ -337,15 +342,9 @@ namespace MTUComm
             dynamic map  = this.GetMemoryMap ();
             bool isPort1 = ( portIndex == 1 );
             
-            // NOTE: If process fails, Aclara STAR Programmer writes "ERROR: Check Meter" or "Bad Reading"
-            // MTU ID: 63004810 -> ERROR: Check Meter ( Meter connected | AMCO C-700 5/8 )
-            // MTU ID: 63021489 -> Bad Reading ( without Meter )
-            // MTU ID: 63004809 -> Error Reading MTU ( without Meter )
-            // MTU ID: 958029   -> Invalidad MTU Type Found ( Meter 1112 | NEPT T10 3/4 )
-            
             try
             {
-                // Clear previous auto-detection values
+                // Clear/reset previous auto-detected values
                 if ( isPort1 )
                 {
                     await map.P1EncoderProtocol  .SetValueToMtu ( 0 );
@@ -357,17 +356,17 @@ namespace MTUComm
                     await map.P2EncoderLiveDigits.SetValueToMtu ( 0 );
                 }
             
-                // Force MTU to run enconder auto-detection for selected ports
+                // Force MTU to run Meter/Enconder auto-detection for selected ports
                 if ( isPort1 )
                      await map.P1EncoderAutodetect.ResetByteAndSetValueToMtu ( true );
                 else await map.P2EncoderAutodetect.ResetByteAndSetValueToMtu ( true );
             
-                // Check until recover data from the MTU, but no more than 40 seconds
-                // MTU returns two values, Protocol and an echo ( it's not important )
-                int  count = 1;
-                int  wait  = 2;
-                int  time  = 50;
-                int  max   = ( int )( time / wait ); // Seconds / Seconds = Rounded max number of iterations
+                // Check until recover data from the MTU, but no more than 50 seconds
+                // MTU returns two values, Protocol and LiveDigits
+                int  count      = 1;
+                int  wait       = 2;
+                int  time       = 50;
+                int  max        = ( int )( time / wait );  // Seconds / Seconds = Rounded max number of iterations
                 int  protocol   = -1;
                 int  liveDigits = -1;
                 bool ok;
@@ -392,6 +391,8 @@ namespace MTUComm
                         Utils.Print ( "AutodetectMetersEcoders: Protocol " + protocol + " LiveDigits " + liveDigits );
                     }
                     
+                    // It is usual for LiveDigits to take value 8 but only for a moment
+                    // and then reset to zero before take the final/real value
                     if ( ! ( ok = ( protocol == 1 || protocol == 2 || protocol == 4 || protocol == 8 ) && liveDigits > 0 ) )
                         await Task.Delay ( wait * 1000 );
                 }
@@ -481,35 +482,47 @@ namespace MTUComm
 
             try
             {
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Requesting event logs..." ) );
+
                 // NOTE: Is impossible to save a full datetime in only four bytes,
                 // because by definition it requires eight. This approach using only
                 // three bytes implemented by Aclara, is only valid until 2255 ( byte = 8 bits = [0-255] )
-                DateTime start = DateTime.Now.Date.Subtract ( new TimeSpan ( 30, 0, 0, 0 ) ); //global.NumOfDays, 0, 0, 0 ) );
-                DateTime end   = DateTime.Now.Date.AddDays ( DATA_READ_END_DAYS );
+                DateTime end   = DateTime.UtcNow.Date.AddSeconds ( 86399 ); //Date.AddDays ( DATA_READ_END_DAYS );
+                DateTime start = DateTime.UtcNow.Date.Subtract ( new TimeSpan ( 32, 0, 0, 0 ) ); //DateTime.Now.Date.Subtract ( new TimeSpan ( 60, 0, 0, 0 ) ); //global.NumOfDays, 0, 0, 0 ) );
 
-                byte[] data = new byte[ 10 ]; // 1+1+4*2
-                data[ 0 ] = 0x01; // Filter mode [ LogFilterMode.Match ]
-                data[ 1 ] = 0x01; // Log entry type [ LogEntryType.MeterRead ]
-                Array.Copy ( Utils.DateTimeToFourBytes ( start ), 0, data, 2, 4 ); // Start time
-                Array.Copy ( Utils.DateTimeToFourBytes ( end   ), 0, data, 6, 4 ); // Stop time
+                byte[] data = new byte[ 10 ]; // 1+1+4x2
+                data[ 0 ] = ( byte )LogFilterMode.Match;
+                data[ 1 ] = ( byte )LogEntryType.MeterRead;
+                Array.Copy ( Utils.GetTimeSinceDate ( start ), 0, data, 2, 4 ); // Start time
+                Array.Copy ( Utils.GetTimeSinceDate ( end   ), 0, data, 6, 4 ); // Stop time
 
                 // Use address parameter to set request code
-                
                 await this.lexi.Write ( CMD_START_LOGS, data, null, null, LexiAction.OperationRequest ); // Return +2 ACK
 
-                await Task.Delay ( WAIT_BEFORE_LOGS );
+                await Task.Delay ( 10000 ); //WAIT_BEFORE_LOGS );
 
                 // Recover all logs registered in the MTU for the specified date range
-                int maxAttempts   = ( Data.Get.IsFromScripting ) ? 20 : 5;
-                int countAttempts = 0;
-                EventLogList eventLogList = new EventLogList ();
+                int currentEventLog = 0;
+                int maxAttempts     = ( Data.Get.IsFromScripting ) ? 20 : 5;
+                int countAttempts   = 0;
+                EventLogList eventLogList = new EventLogList ( start, end, ( LogFilterMode )data[ 0 ], ( LogEntryType )data[ 1 ] );
                 ( byte[] bytes, int responseOffset ) fullResponse = ( null, 0 ); // echo + response
                 while ( true )
                 {
                     try
                     {
+                        currentEventLog++;
+                    
+                        if ( eventLogList.TotalEntries > -1 &&
+                             currentEventLog >= eventLogList.TotalEntries )
+                        {
+
+                        }
+                    
                         fullResponse =
-                            await this.lexi.Write ( CMD_NEXT_LOG, null,
+                            await this.lexi.Write (
+                                ( eventLogList.TotalEntries == -1 || currentEventLog < eventLogList.TotalEntries ) ? CMD_NEXT_LOG : CMD_LAST_LOG,
+                                null,
                                 new uint[]{ CMD_NEXT_RESULT_1, CMD_NEXT_RESULT_2 }, // ACK with log entry or without
                                 new ( int,int,byte )[] {
                                     ( CMD_NEXT_RESULT_1, CMD_NEXT_BYTE_RESULT, CMD_NEXT_WITH_DATA ), // Entry data included
@@ -520,6 +533,8 @@ namespace MTUComm
                     }
                     catch ( Exception e )
                     {
+                        currentEventLog--;
+                    
                         // Is not own exception
                         if ( ! Errors.IsOwnException ( e ) )
                             throw new PuckCantCommWithMtuException ();
@@ -528,8 +543,11 @@ namespace MTUComm
                         else if ( ++countAttempts >= maxAttempts )
                             throw new ActionNotAchievedGetEventsLogException ();
 
+                        await Task.Delay ( WAIT_BTW_LOG_ERRORS );
+
                         // Try one more time
-                        Errors.LogErrorNowAndContinue ( new AttemptNotAchievedGetEventsLogException () );
+                        //Errors.LogErrorNowAndContinue ( new AttemptNotAchievedGetEventsLogException () );
+                        Errors.AddError ( new AttemptNotAchievedGetEventsLogException () );
                         continue;
                     }
 
@@ -550,18 +568,23 @@ namespace MTUComm
                                 throw new ActionNotAchievedGetEventsLogException ();
                             else
                             {
-                                Errors.LogErrorNowAndContinue ( new MtuIsBusyToGetEventsLogException () );
-                                await Task.Delay ( WAIT_BETWEEN_LOGS );
+                                Errors.AddError ( new MtuIsBusyToGetEventsLogException () );
+                                await Task.Delay ( WAIT_BTW_LOG_ERRORS );
+                                currentEventLog--;
                             }
                             break;
 
                         // Wait a bit and try to read/recover the next log
                         case EventLogQueryResult.NextRead:
-                            await Task.Delay ( WAIT_BETWEEN_LOGS );
+                            OnProgress ( this, new ProgressArgs ( 0, 0, "Requesting event logs... " + currentEventLog + "/" + eventLogList.TotalEntries ) );
+                            
+                            await Task.Delay ( WAIT_BTW_LOGS );
+                            countAttempts = 0; // Reset accumulated fails after reading ok
                             break;
 
                         // Was last event log
                         case EventLogQueryResult.LastRead:
+                            OnProgress ( this, new ProgressArgs ( 0, 0, "All event logs requested" ) );
                             goto BREAK;
                     }
                 }
@@ -736,8 +759,6 @@ namespace MTUComm
             bool on,
             int  time = 0 )
         {
-            
-        
             try
             {
                 dynamic map = this.GetMemoryMap ();
@@ -1263,12 +1284,10 @@ namespace MTUComm
                             
                             // TwoWay MTU reading interval cannot be less than 15 minutes
                             if ( ! this.mtu.TimeToSync )
-                            {
                                 readIntervalList.AddRange ( new string[]{
                                     "10 Min",
                                     "5 Min"
                                 });
-                            }
                             
                             value = value.ToLower ()
                                          .Replace ( "hr", "hour" )
@@ -1544,6 +1563,19 @@ namespace MTUComm
 
                 #endregion
 
+                #region Time of day for TimeSync
+
+                if ( global.TimeToSync &&
+                     mtu.TimeToSync    &&
+                     mtu.IsNewVersion )
+                {
+                    map.TimeToSyncHr  = global.TimeToSyncHR;
+                    map.TimeToSyncMin = global.TimeToSyncMin;
+                    map.TimeToSyncSec = 30;
+                }
+
+                #endregion
+
                 #region Alarm
 
                 if ( mtu.RequiresAlarmProfile )
@@ -1553,24 +1585,11 @@ namespace MTUComm
                     {
                         try
                         {
-                            // In family 31xx32xx the only MTU that use GasCutWireAlarm is 148
-
-                            /*
-                            This is for family 342x, not for 31xx32xx
-                            if (tempEvt.tempMtu.CurrentMtu.GasCutWireAlarm)
-                            {
-                                / log
-                                FrmMain.myglobals.log.MtuData("CutAlarmCable", myglobals.alarmList[index].CutAlarmCable ? "Enabled" : "Disabled", "Cut Alarm Cable");
-                                / set
-                                tempEvt.tempMtu.Port[0].SetBitInfoFromCertainByte(Mtu.ArchTamperMemorySet + 2, //2 ^ 5// 32, myglobals.alarmList[index].CutAlarmCable);
-                            }
-                            Mtu.ArchTamperMemorySet  = 192
-                            */
-                            
-
                             // Set alarms [ Alarm Message Transmission ]
                             if ( mtu.InsufficientMemory  ) map.InsufficientMemoryAlarm = alarms.InsufficientMemory;
                             if ( mtu.GasCutWireAlarm     ) map.GasCutWireAlarm         = alarms.CutAlarmCable;
+                            if ( form.usePort2 &&
+                                 mtu.GasCutWireAlarm     ) map.P2GasCutWireAlarm       = alarms.CutAlarmCable;
                             if ( mtu.SerialComProblem    ) map.SerialComProblemAlarm   = alarms.SerialComProblem;
                             if ( mtu.LastGasp            ) map.LastGaspAlarm           = alarms.LastGasp;
                             if ( mtu.TiltTamper          ) map.TiltAlarm               = alarms.Tilt;
@@ -1579,17 +1598,28 @@ namespace MTUComm
                             if ( mtu.ReverseFlowTamper   ) map.ReverseFlowAlarm        = alarms.ReverseFlow;
                             if ( mtu.SerialCutWire       ) map.SerialCutWireAlarm      = alarms.SerialCutWire;
                             if ( mtu.TamperPort1         ) map.P1CutWireAlarm          = alarms.TamperPort1;
-                            if ( mtu.TamperPort2         ) map.P2CutWireAlarm          = alarms.TamperPort2;
+                            if ( form.usePort2 &&
+                                 mtu.TamperPort2         ) map.P2CutWireAlarm          = alarms.TamperPort2;
 
                             // Set immediate alarms [ Alarm Message Immediate ]
                             if ( mtu.InsufficientMemoryImm ) map.InsufficientMemoryImmAlarm = alarms.InsufficientMemoryImm;
                             if ( mtu.GasCutWireAlarmImm    ) map.GasCutWireImmAlarm         = alarms.CutWireAlarmImm;
                             if ( mtu.SerialComProblemImm   ) map.SerialComProblemImmAlarm   = alarms.SerialComProblemImm;
                             if ( mtu.LastGaspImm           ) map.LastGaspImmAlarm           = alarms.LastGaspImm;
-                            if ( mtu.TamperPort1Imm        ) map.P1CutWireImmAlarm          = alarms.TamperPort1Imm;
-                            if ( mtu.TamperPort2Imm        ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;
                             if ( mtu.InterfaceTamperImm    ) map.InterfaceImmAlarm          = alarms.InterfaceTamperImm;
                             if ( mtu.SerialCutWireImm      ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;
+                            if ( mtu.TamperPort1Imm        ) map.P1CutWireImmAlarm          = alarms.TamperPort1Imm;
+                            if ( form.usePort2 &&
+                                 mtu.TamperPort2Imm        ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;
+
+                            // Ecoder alarms
+                            if ( mtu.Ecoder )
+                            {
+                                if ( mtu.ECoderLeakDetectionCurrent ) map.ECoderLeakDetectionCurrent = alarms.ECoderLeakDetectionCurrent;
+                                if ( mtu.ECoderDaysOfLeak           ) map.ECoderDaysOfLeak           = alarms.ECoderDaysOfLeak;
+                                if ( mtu.ECoderDaysNoFlow           ) map.ECoderDaysNoFlow           = alarms.ECoderDaysNoFlow;
+                                if ( mtu.ECoderReverseFlow          ) map.ECoderReverseFlow          = alarms.ECoderReverseFlow;
+                            }
 
                             // Write directly ( without conditions )
                             map.ImmediateAlarm = alarms.ImmediateAlarmTransmit;
@@ -1617,9 +1647,9 @@ namespace MTUComm
 
                 #region Frequencies
 
-                if ( mtu.TimeToSync &&
+                if ( global.AFC       &&
+                     mtu.TimeToSync   &&
                      mtu.IsNewVersion &&
-                     global.AFC &&
                      await map.MtuSoftVersion.GetValue () >= 19 )
                 {
                     map.F12WAYRegister1Int  = global.F12WAYRegister1;

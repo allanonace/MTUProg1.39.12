@@ -405,10 +405,10 @@ namespace MTUComm
             //"/data/"
         };
 
-        public static void CreateIfNotExist(string path)
+        public static void CreateDirectoryIfNotExist ( string path )
         {
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
+            if ( ! Directory.Exists ( path ) )
+                Directory.CreateDirectory ( path );
         }
 
         public  static ConfigData configData;
@@ -427,7 +427,7 @@ namespace MTUComm
             }
             set
             {
-                CreateIfNotExist(value);
+                CreateDirectoryIfNotExist(value);
                 pathCachePublic = value;
             }
         }
@@ -439,7 +439,7 @@ namespace MTUComm
             }
             set
             {
-                CreateIfNotExist(value);
+                CreateDirectoryIfNotExist(value);
                 pathCacheConfig = value;
             }
         }
@@ -453,7 +453,7 @@ namespace MTUComm
             set
             {
                 string path = Path.Combine(value, PATH_LOGS);
-                CreateIfNotExist(path);
+                CreateDirectoryIfNotExist(path);
                 pathCacheLogs = path;
             }
         }
@@ -462,13 +462,13 @@ namespace MTUComm
         {
             get
             {
-                CreateIfNotExist(pathCacheLogsUni);
+                CreateDirectoryIfNotExist(pathCacheLogsUni);
                 return pathCacheLogsUni;
             }
             set
             {
                 string path = Path.Combine(value, PATH_LOGSUNI);
-                CreateIfNotExist(path);
+                CreateDirectoryIfNotExist(path);
                 pathCacheLogsUni = path;
             }
         }
@@ -482,7 +482,7 @@ namespace MTUComm
             set
             {
                 string path = Path.Combine(LogPath, value);
-                CreateIfNotExist(path);
+                CreateDirectoryIfNotExist(path);
                 pathCacheLogsUser = path;
             }
         }
@@ -496,9 +496,9 @@ namespace MTUComm
             set
             {
                 string path = Path.Combine(LogPath, value);
-                CreateIfNotExist(path);
+                CreateDirectoryIfNotExist(path);
                 path = Path.Combine(path, PATH_BACKUP);
-                CreateIfNotExist(path);
+                CreateDirectoryIfNotExist(path);
                 pathCacheLogsUserBackup = path;
             }
         }

@@ -13,6 +13,12 @@ namespace MTUComm
 {
     public class Logger
     {
+        public enum BasicFileType
+        {
+            READ,
+            DATA_READ
+        }
+
         public static string fixed_name = String.Empty;
 
         public void ResetFixedName ()
@@ -30,25 +36,46 @@ namespace MTUComm
             return ! string.IsNullOrEmpty ( fixed_name.Trim () );
         }
 
-        public string CreateBasicStructure ()
+        public string CreateBasicStructure (
+            BasicFileType basicFileType = BasicFileType.READ )
         {
             Configuration config = Singleton.Get.Configuration;
         
-            string base_stream = "<?xml version=\"1.0\" encoding=\"ASCII\"?>";
-            base_stream += "<StarSystem>";
-            base_stream += "    <AppInfo>";
-            base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
-            base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
-            base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
-            base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
-            base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
-            base_stream += "        <AppType>" + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
-            base_stream += "    </AppInfo>";
-            base_stream += "    <Message />";
-            base_stream += "    <Mtus />";
-            base_stream += "    <Warning />";
-            base_stream += "    <Error />";
-            base_stream += "</StarSystem>";
+            string base_stream = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+
+            switch ( basicFileType )
+            {
+                case BasicFileType.READ:
+                base_stream += "<StarSystem>";
+                base_stream += "    <AppInfo>";
+                base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
+                base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
+                base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
+                base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+                base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
+                base_stream += "        <AppType>" + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
+                base_stream += "    </AppInfo>";
+                base_stream += "    <Message />";
+                base_stream += "    <Mtus />";
+                base_stream += "    <Warning />";
+                base_stream += "    <Error />";
+                base_stream += "</StarSystem>";
+                break;
+
+                case BasicFileType.DATA_READ:
+                base_stream += "<Log>";
+                base_stream += "    <Transfer>";
+                base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
+                base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
+                base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
+                base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+                base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
+                base_stream += "        <AppType>" + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
+                base_stream += "        <Events />";
+                base_stream += "    </Transfer>";
+                base_stream += "</Log>";
+                break;
+            }
             
             config = null;
             
@@ -59,7 +86,7 @@ namespace MTUComm
         {
             Configuration config = Singleton.Get.Configuration;
         
-            string base_stream = "<?xml version=\"1.0\" encoding=\"ASCII\"?>";
+            string base_stream = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
             base_stream += "<StarSystem>";
             base_stream += "    <AppInfo>";
             base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
@@ -84,7 +111,7 @@ namespace MTUComm
             config = null;
             
             string uri = Path.Combine ( Mobile.ConfigPath, "___tmp.xml" );
-            Mobile.CreateIfNotExist(Mobile.ConfigPath);
+            Mobile.CreateDirectoryIfNotExist(Mobile.ConfigPath);
 
             using ( System.IO.StreamWriter file = new System.IO.StreamWriter ( uri, false ) )
             {
@@ -95,6 +122,7 @@ namespace MTUComm
         }
 
         public string CreateFileIfNotExist (
+            BasicFileType basicFileType = BasicFileType.READ,
             bool   append     = true,
             string customPath = "" )
         {
@@ -111,9 +139,9 @@ namespace MTUComm
     
                 string full_new_path = Path.Combine (String.IsNullOrEmpty(Mobile.LogUserPath)?Mobile.LogPath:Mobile.LogUserPath, rel_path );
 
-                Mobile.CreateIfNotExist(Mobile.LogPath);
+                Mobile.CreateDirectoryIfNotExist(Mobile.LogPath);
 
-                Mobile.CreateIfNotExist(full_new_path);
+                Mobile.CreateDirectoryIfNotExist(full_new_path);
 
                 uri = Path.Combine ( full_new_path, filename_clean );
             }
@@ -122,14 +150,14 @@ namespace MTUComm
             { 
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, append ))
                 {
-                    file.WriteLine ( CreateBasicStructure (  ) );
+                    file.WriteLine ( CreateBasicStructure ( basicFileType ) );
                 }
             }
             else if ( ! append )
             {
                 using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, false ))
                 {
-                    file.WriteLine ( CreateBasicStructure () );
+                    file.WriteLine ( CreateBasicStructure ( basicFileType ) );
                 }
             }
             else
@@ -142,7 +170,7 @@ namespace MTUComm
                 {
                     using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, false ))
                     {
-                        file.WriteLine ( CreateBasicStructure () );
+                        file.WriteLine ( CreateBasicStructure ( basicFileType ) );
                     }
                 }
             }
@@ -279,7 +307,7 @@ namespace MTUComm
             
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
-            this.CreateFileIfNotExist ( false, uniUri );
+            this.CreateFileIfNotExist ( BasicFileType.READ, false, uniUri );
  
             uniDoc.Save ( uniUri );
             
@@ -402,7 +430,7 @@ namespace MTUComm
             
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
-            this.CreateFileIfNotExist ( false, uniUri );
+            this.CreateFileIfNotExist ( BasicFileType.READ, false, uniUri );
              
             uniDoc.Save ( uniUri );
             
@@ -448,6 +476,69 @@ namespace MTUComm
         }
 
         #endregion
+
+        public void DataReadFile (
+            EventLogList eventLogList,
+            Mtu mtu )
+        {
+            /*
+            <?xml version="1.0" encoding="utf-8"?>
+            <Log>
+                <Transfer>
+                    <MtuId>000000063004810</MtuId>
+                    <LocalTimeStamp>2019-06-10 13:36:45</LocalTimeStamp>
+                    <MtuTimeStamp>2019-06-10 11:26:39</MtuTimeStamp>
+                    <Events FilterMode="Match" FilterValue="MeterRead" RangeStart="2019-05-09 00:00:00" RangeStop="2019-06-10 23:59:59">
+                        <MeterReadEvent FormatVersion="0">
+                            <TimeStamp>2019-05-10 04:00:01</TimeStamp>
+                            <MeterRead>999994</MeterRead>
+                            <ErrorStatus>0</ErrorStatus>
+                            <ReadInterval>PT720M</ReadInterval>
+                            <PortNumber>PORT1</PortNumber>
+                            <IsDailyRead>False</IsDailyRead>
+                            <IsTopOfHourRead>True</IsTopOfHourRead>
+                            <ReadReason>Scheduled</ReadReason>
+                            <IsSynchronized>True</IsSynchronized>
+                        </MeterReadEvent>
+                        ...
+                    </Events>
+                </Transfer>
+            </Log>
+            */
+
+            String uri = CreateFileIfNotExist ( BasicFileType.DATA_READ, false,
+                mtu.Id + "-" + DateTime.Now.ToString ( "MMddyyyyHH" ) + "DataLog.xml" );
+            XDocument doc = XDocument.Load ( uri );
+
+            XElement transfer = doc.Root.Element ( "Transfer" );
+            transfer.Add ( new XElement ( "MtuId", mtu.Id ) );
+
+            XElement events = doc.Root.Element ( "Events" );
+            events.Add ( new XAttribute ( "FilterMode",  eventLogList.FilterMode ) );
+            events.Add ( new XAttribute ( "FilterValue", eventLogList.EntryType  ) );
+            events.Add ( new XAttribute ( "RangeStart",  eventLogList.DateStart  ) );
+            events.Add ( new XAttribute ( "RangeStop",   eventLogList.DateEnd    ) );
+
+            foreach ( EventLog log in eventLogList.Entries )
+            {
+                XElement parent = new XElement ( "MeterReadEvent" );
+                parent.Add ( new XAttribute ( "FormatVersion",   log.FormatVersion       ) );
+                parent.Add ( new XElement   ( "TimeStamp",       log.TimeStamp           ) );
+                parent.Add ( new XElement   ( "MeterRead",       log.MeterRead           ) );
+                parent.Add ( new XElement   ( "ErrorStatus",     log.ErrorStatus         ) );
+                parent.Add ( new XElement   ( "ReadInterval",    log.ReadInterval        ) );
+                parent.Add ( new XElement   ( "PortNumber",      "PORT" + log.PortNumber ) );
+                parent.Add ( new XElement   ( "IsDailyRead",     log.IsDailyRead         ) );
+                parent.Add ( new XElement   ( "IsTopOfHourRead", log.IsTopOfHourRead     ) );
+                parent.Add ( new XElement   ( "ReadReason",      log.ReasonForRead       ) );
+                parent.Add ( new XElement   ( "IsSynchronized",  log.IsSynchronized      ) );
+
+                events.Add ( parent );
+            }
+
+            // Update file with new data
+            doc.Save ( uri );
+        }
 
         public void Cancel ( Action action, String cancel, String reason )
         {

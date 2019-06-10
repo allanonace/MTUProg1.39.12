@@ -64,6 +64,7 @@ namespace MTUComm
         private const string IFACE_GLOBAL    = "Global";
         private const string IFACE_MEMORYMAP = "MemoryMap";
         private const string IFACE_FORM      = "Form";
+        private const string IFACE_DATA      = "Data";
         private const string IFACE_MREADING  = "MeterReading";
         private const string IFACE_READERROR = "ReadingError";
         
@@ -727,6 +728,7 @@ namespace MTUComm
                                 case IFACE_MTU   : value      = mtu .GetProperty  ( sourceProperty ); break;
                                 case IFACE_PUCK  : value      = puck.GetProperty  ( sourceProperty ); break;
                                 case IFACE_FORM  : paramToAdd = form.GetParameter ( sourceProperty ); break;
+                                case IFACE_DATA  : value      = ( string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ] ) ? string.Empty : value ); break;
                                 default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                             }
                         }

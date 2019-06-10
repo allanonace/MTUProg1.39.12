@@ -32,6 +32,16 @@ namespace Xml
         [XmlElement("Utility")]
         public string Utility { get; set; }
 
+        [XmlIgnore]
+        public bool IsForGas
+        {
+            get
+            {
+                return ! string.IsNullOrEmpty ( this.Utility ) &&
+                         this.Utility.ToLower ().Equals ( "gas" );
+            }
+        }
+
         [XmlElement("Vendor")]
         public string Vendor { get; set; }
 

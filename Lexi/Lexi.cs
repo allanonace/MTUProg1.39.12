@@ -29,6 +29,203 @@ namespace Lexi
         }
 
         /// <summary>
+        /// Available filters for log requests.
+        /// </summary>
+        public enum LogFilterMode
+        {
+            /// <summary>
+            /// Do not filter results.
+            /// </summary>
+            None = 0,
+
+            /// <summary>
+            /// Only return matching entries.
+            /// </summary>
+            Match = 1,
+
+            /// <summary>
+            /// Return entries that are not of the specified type.
+            /// </summary>
+            DontMatch = 2
+        }
+
+        /// <summary>
+        /// The different types of log events.
+        /// </summary>
+        public enum LogEntryType : byte
+        {
+            /// <summary>
+            /// Standard meter reading.
+            /// </summary>
+            MeterRead = 0x01,
+
+            /// <summary>
+            /// Autodetect for a meter was run.
+            /// </summary>
+            MeterAutodetect = 0x02,
+
+            /// <summary>
+            /// Entered or exited ship mode.
+            /// </summary>
+            ShipModeWrite = 0x03,
+
+            /// <summary>
+            /// The MTU reset.
+            /// </summary>
+            MtuReset = 0x04,
+
+            /// <summary>
+            /// The time on the MTU was changed.
+            /// </summary>
+            TimeAdjustment = 0x05,
+
+            /// <summary>
+            /// A time sync was requested from the DCU.
+            /// </summary>
+            TimeSyncReqTransmit = 0x06,
+
+            /// <summary>
+            /// The MTU firmware was upgraded.
+            /// </summary>
+            FwUpgrade = 0x07,
+
+            /// <summary>
+            /// The MTU encountered an alarm condition.
+            /// </summary>
+            Alarm = 0x08,
+
+            /// <summary>
+            /// The AFC averaging adjustment was performed.
+            /// </summary>
+            AfcAdjustment = 0x09,
+
+            /// <summary>
+            /// A custom, user defined, message.
+            /// </summary>
+            CustomLexiLog = 0x0A,
+
+            /// <summary>
+            /// The event log was read.
+            /// </summary>
+            LexiQuery = 0x0B,
+
+            /// <summary>
+            /// Sent a health message.
+            /// </summary>
+            HealthMessage = 0x0C,
+
+            /// <summary>
+            /// Port 1 information during wakeup.
+            /// </summary>
+            WakeupPort1 = 0x0D,
+
+            /// <summary>
+            /// Port 2 information during wakeup.
+            /// </summary>
+            WakeupPort2 = 0x0E,
+
+            /// <summary>
+            /// Write to a memory map location.
+            /// </summary>
+            MemoryMapWrite = 0x0F,
+
+            /// <summary>
+            /// Min/Max and averages of general system information.
+            /// </summary>
+            SystemStatusReport = 0x10,
+
+            /// <summary>
+            /// Start of the node discovery process.
+            /// </summary>
+            DiscoveryStart = 0x11,
+
+            /// <summary>
+            /// Discovery response information from a DCU.
+            /// </summary>
+            DiscoveryResponse = 0x12,
+
+            /// <summary>
+            /// Information about received messages.
+            /// </summary>
+            GeneralRfReceive = 0x13,
+
+            /// <summary>
+            /// Moisture measurement information.
+            /// </summary>
+            Moisture = 0x14,
+
+            /// <summary>
+            /// Significant VSWR change event information.
+            /// </summary>
+            Vswr = 0x15,
+
+            /// <summary>
+            /// General information about a watchdog related crash.
+            /// </summary>
+            WatchdogCrash = 0x16,
+
+            /// <summary>
+            /// Contains priority list information related to a watchdog crash.
+            /// </summary>
+            PriorityListHead = 0x17,
+
+            /// <summary>
+            /// Contains information about the event block related to a watchdog crash.
+            /// </summary>
+            EventStatus = 0x18,
+
+            /// <summary>
+            /// Contains information about transnmissions by the MTU.
+            /// </summary>
+            GeneralRfTransmission = 0x19,
+
+            /// <summary>
+            /// Contains information about RDD actions and status.
+            /// </summary>
+            Rdd = 0x1A,
+
+            /// <summary>
+            /// Contains information about GPS events.
+            /// </summary>
+            Gps = 0x1B,
+
+            /// <summary>
+            /// Contains information about a Zonescan event.
+            /// </summary>
+            ZonescanEvent = 0x1C,
+
+            /// <summary>
+            /// Contains information about a Zonescan event.
+            /// </summary>
+            ZonescanWakeup = 0x1D,
+
+            /// <summary>
+            /// Contains information about a Zonescan event.
+            /// </summary>
+            ZonescanWakeupExt = 0x1E,
+
+            /// <summary>
+            /// Contains information about a radio failure
+            /// </summary>
+            RadioFailure = 0x1F,
+
+            /// <summary>
+            /// Entry for when a message is scheduled for transmit.
+            /// </summary>
+            TxScheduled = 0x20,
+
+            /// <summary>
+            /// Entry for a function call log.
+            /// </summary>
+            FnCall = 0xFE,
+
+            /// <summary>
+            /// There is no event - this is a blank log item.
+            /// </summary>
+            Unused = 0xFF
+        }
+
+        /// <summary>
         /// Precalculated CRC Table
         /// </summary>
         /// <remarks>This table is used by CRC validation function and it makes CRC calculation fast</remarks>
@@ -523,6 +720,7 @@ namespace Lexi
                 * +------------+---------------+------------------------------------------------------+
                 * 
                 * Start Event Log Query: Op.Cmd 0x13 ( 19 )
+                * Request..
                 * +------------+---------------+------------------------------------------------------+
                 * | Byte Index |  Field        |                          Notes                       |
                 * +------------+---------------+------------------------------------------------------+
@@ -537,8 +735,16 @@ namespace Lexi
                 * | 11..14     | Stop Time     | NCC time for last event - uint, 4 bytes              |--+
                 * | 15..16     | CRC           | Byte 0: 0x06 ACK, 0x15 NAK                           |
                 * +------------+---------------+------------------------------------------------------+
+                * Response..
+                * +------------+---------------+------------------------------------------------------+
+                * | Byte Index |  Field        |                          Notes                       |
+                * +------------+---------------+------------------------------------------------------+
+                * | 0          | ACK           | 0x06 Operation successful                            |
+                * | 1          | ACK Info Size | 0x00 No ACK Info to follow                           |
+                * +------------+---------------+------------------------------------------------------+
                 * 
                 * Get Next Event Log Response: Op.Cmd 0x14 ( 20 )
+                * Request..
                 * +------------+---------------+------------------------------------------------------+
                 * | Byte Index |  Field        |                          Notes                       |
                 * +------------+---------------+------------------------------------------------------+
@@ -547,6 +753,20 @@ namespace Lexi
                 * | 2          | Request Code  | 0x14                                                 |  |--- Header
                 * | 3          | Size          | 0x00 ( No data )                                     |  |
                 * | 4          | Checksum      | 2’s complement of sum: header + cmd + code + size    |--+
+                * +------------+---------------+------------------------------------------------------+
+                * Response..
+                * ACK with log entry ( Result 0 ): 25 bytes
+                * ACK with no log entry ( Result 1 or 2 ): 5 bytes = ACK + ACK Info Size + Result + CRC
+                * +------------+---------------+------------------------------------------------------+
+                * | Byte Index |  Field        |                          Notes                       |
+                * +------------+---------------+------------------------------------------------------+
+                * | 0          | ACK           | 0x06 Operation successful                            |
+                * | 1          | ACK Info Size | 0x15 ( 21 ) bytes of data if Result 0, otherwise 1   |
+                * | 2          | Result        | 0 = Data included, 1 = No more data, 2 = MTU busy    |
+                * | 3..4       | Num. Results  | Total number of query results                        |--+
+                * | 5..6       | Current Item  | Current result number ( 1 based )                    |  |--- Result with log entry
+                * | 7..22      | Data          | Data bytes fog the log item                          |--+
+                * | 23..24     | CRC           | Byte 0: 0x06 ACK, 0x15 NAK                           |
                 * +------------+---------------+------------------------------------------------------+
                 */
                 header[ 0 ] = 0x25;

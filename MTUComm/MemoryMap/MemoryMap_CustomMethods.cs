@@ -34,6 +34,8 @@ namespace MTUComm.MemoryMap
 
         private const string MESAG_FAST  = "Fast";
         private const string MESAG_SLOW  = "Slow";
+        private const int    ON_INT      = 1;
+        private const int    OFF_INT     = 0;
 
         private const string HOURS       = " Hrs";
         private const string HOUR        = " Hr";
@@ -184,11 +186,6 @@ namespace MTUComm.MemoryMap
             return GetTamperStatus ( await MemoryRegisters[ 0 ].GetValue (),   // Alarm
                                      await MemoryRegisters[ 1 ].GetValue () ); // Tamper
         }
-        
-        public async Task<string> FastMessagingMode_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
-        {
-            return ( await MemoryRegisters.Fast2Way.GetValue () ) ? MESAG_FAST : MESAG_SLOW;
-        }
 
         public async Task<string> LastGasp_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
@@ -289,6 +286,16 @@ namespace MTUComm.MemoryMap
                 await MemoryRegisters.MtuSoftBuildNumber .GetValue () );
         }
 
+        public async Task<int> FastMessagingMode_Get ( MemoryOverload<int> MemoryOverload, dynamic MemoryRegisters )
+        {
+            return ( await MemoryRegisters.FastMessagingConfigMode.GetValue () ) ? ON_INT : OFF_INT;
+        }
+
+        public async Task<string> FastMessagingFrequency_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        {
+            return ( await MemoryRegisters.FastMessagingConfigFreq.GetValue () ) ? MESAG_FAST : MESAG_SLOW;
+        }
+
         #endregion
 
         #region Registers
@@ -347,10 +354,10 @@ namespace MTUComm.MemoryMap
 
         #region e-Coder
 
-        public async Task<string> BackFlowState_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        public async Task<string> BackFlowState_Get ( MemoryOverload<string> MemoryOverload, dynamic[] MemoryRegisters )
         {
             string reply = string.Empty;
-            string param = Convert.ToString ( await MemoryRegisters.FlowState.GetValue (), INDEX_STATE )
+            string param = Convert.ToString ( await MemoryRegisters[ 0 ].GetValue (), INDEX_STATE )
                 .PadLeft(PAD_LEFT,ZERO)
                 .Substring(6);
             switch (param)
@@ -362,10 +369,10 @@ namespace MTUComm.MemoryMap
             return reply;
         }
 
-        public async Task<string> DaysOfNoFlow_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        public async Task<string> DaysOfNoFlow_Get ( MemoryOverload<string> MemoryOverload, dynamic[] MemoryRegisters )
         {
             string reply = string.Empty;
-            string param = Convert.ToString ( await MemoryRegisters.FlowState.GetValue (), INDEX_STATE )
+            string param = Convert.ToString ( await MemoryRegisters[ 0 ].GetValue (), INDEX_STATE )
                 .PadLeft(PAD_LEFT,ZERO)
                 .Substring(3,3);
             switch (param)
@@ -381,10 +388,10 @@ namespace MTUComm.MemoryMap
             return reply + CASE_NOFLOW;
         }
 
-        public async Task<string> LeakDetection_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        public async Task<string> LeakDetection_Get ( MemoryOverload<string> MemoryOverload, dynamic[] MemoryRegisters )
         {
             string reply = string.Empty;
-            string param = Convert.ToString ( await MemoryRegisters.LeakState.GetValue (), INDEX_STATE )
+            string param = Convert.ToString ( await MemoryRegisters[ 0 ].GetValue (), INDEX_STATE )
                 .PadLeft(PAD_LEFT,ZERO)
                 .Substring(5,2);
             switch (param)
@@ -396,10 +403,10 @@ namespace MTUComm.MemoryMap
             return reply;
         }
 
-        public async Task<string> DaysOfLeak_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        public async Task<string> DaysOfLeak_Get ( MemoryOverload<string> MemoryOverload, dynamic[] MemoryRegisters )
         {
             string reply = string.Empty;
-            string param = Convert.ToString ( await MemoryRegisters.LeakState.GetValue (), INDEX_STATE )
+            string param = Convert.ToString ( await MemoryRegisters[ 0 ].GetValue (), INDEX_STATE )
                 .PadLeft(PAD_LEFT,ZERO)
                 .Substring(2, 3);
             switch (param)

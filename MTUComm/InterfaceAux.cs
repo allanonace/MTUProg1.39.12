@@ -34,7 +34,8 @@ namespace MTUComm
             if ( mtu.Port1.IsForPulse &&
                  ( mtu.Ports[ 0 ].Type.Contains ( "M" ) ||
                    mtu.Ports[ 0 ].Type.Contains ( "R" ) ||
-                   ( meterIdIsNumeric && config.getMeterTypeById ( int.Parse ( portTypes[ 0 ] ) ).Utility.ToLower ().Equals ( "gas" ) ) ) )
+                   ( meterIdIsNumeric &&
+                     config.getMeterTypeById ( int.Parse ( portTypes[ 0 ] ) ).IsForGas ) ) )
             {
                  interfaceIndex = 1; // Family 31xx32xx
             }

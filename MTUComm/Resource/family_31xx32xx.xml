@@ -56,8 +56,8 @@
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
-    <Id>P1CutWireTamperStatus</Id>
-    <Description>Port 1 CutWire Tamper Status</Description>
+    <Id>GasCutWireTamperStatus</Id>
+    <Description>Gas Cut Wire Tamper Status Port 1</Description>
     <Type>string</Type>
     <Registers>
       <Register>P1CutWireAlarm</Register>
@@ -66,22 +66,12 @@
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
   <Overload> <!-- OK -->
-    <Id>P2CutWireTamperStatus</Id>
-    <Description>Port 2 Tamper Status</Description>
+    <Id>P2GasCutWireTamperStatus</Id>
+    <Description>Gas Cut Wire Tamper Status Port 2</Description>
     <Type>string</Type>
     <Registers>
       <Register>P2CutWireAlarm</Register>
       <Register>P2CutWireTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> <!-- OK -->
-    <Id>GasCutWireTamperStatus</Id>
-    <Description>Gas Cut Wire Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1CutWireAlarm</Register>
-      <Register>P1CutWireTamper</Register>
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
@@ -296,7 +286,7 @@
   </Register>
 
   <!-- Set Alarms -->
-  <Register> <!-- TiltAlarm -->
+  <Register> <!-- OK -->
     <Id>TiltAlarm</Id>
     <Description>Set to enable tilt tamper</Description>
     <Type>bool</Type>
@@ -306,7 +296,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- MagneticAlarm -->
+  <Register> <!-- OK -->
     <Id>MagneticAlarm</Id>
     <Description>Set to enable magnetic tamper</Description>
     <Type>bool</Type>
@@ -316,7 +306,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- InterfaceAlarm -->
+  <Register> <!-- OK -->
     <Id>InterfaceAlarm</Id>
     <Description>Set to enable programming coil interface tamper</Description>
     <Type>bool</Type>
@@ -326,7 +316,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- RegisterCoverAlarm -->
+  <Register> <!-- OK -->
     <Id>RegisterCoverAlarm</Id>
     <Description>Set to enable register cover tamper</Description>
     <Type>bool</Type>
@@ -336,22 +326,12 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- ReverseFlowAlarm -->
+  <Register> <!-- OK -->
     <Id>ReverseFlowAlarm</Id>
     <Description>Set to enable reverse flow tamper</Description>
     <Type>bool</Type>
     <Address>42</Address>
     <Size>6</Size>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- P1CutWireAlarm -->
-    <Id>P1CutWireAlarm</Id>
-    <Description>Set to enable cut wire tamper</Description>
-    <Type>bool</Type>
-    <Address>45</Address>
-    <Size>0</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
@@ -366,8 +346,8 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- P2CutWireAlarm -->
-    <Id>P2CutWireAlarm</Id>
+  <Register> <!-- OK -->
+    <Id>P2GasCutWireAlarm</Id>
     <Description> P2 Set to enable port 2 alarm (cut or corrector)</Description>
     <Type>bool</Type>
     <Address>45</Address>
@@ -399,7 +379,7 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>P2CutWireTamper</Id>
+    <Id>P2GasCutWireTamper</Id>
     <Description>Set when port 2 tamper</Description>
     <Type>bool</Type>
     <Address>71</Address>
@@ -439,7 +419,7 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>P1CutWireTamper</Id>
+    <Id>P1GasCutWireTamper</Id>
     <Description>Set when cut wire tamper</Description>
     <Type>bool</Type>
     <Address>71</Address>
@@ -594,6 +574,36 @@
     <Address>28</Address>
     <Size>1</Size>
     <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TimeToSyncHr</Id>
+    <Description>Time of day to listen for Time Sync - Hour</Description>
+    <Type>int</Type>
+    <Address>29</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TimeToSyncMin</Id>
+    <Description>Time of day to listen for Time Sync - Minute</Description>
+    <Type>int</Type>
+    <Address>30</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TimeToSyncSec</Id>
+    <Description>Time of day to listen for Time Sync - Seconds - Should be set to 30</Description>
+    <Type>int</Type>
+    <Address>31</Address>
+    <Size>1</Size>
+    <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>

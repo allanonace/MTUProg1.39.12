@@ -13,6 +13,8 @@ namespace Library
 {
     public static class Utils
     {
+        private static DateTime eventEpoch = new DateTime ( 1970, 1, 1, 0, 0, 0 );
+
         #region Log
 
         private static bool DEEP_MODE = true;
@@ -63,6 +65,20 @@ namespace Library
                 ( byte )( dateTime.Year - 2000 ),
                 0x00
             };
+        }
+
+        public static byte[] GetTimeSinceDate (
+            DateTime date,
+            DateTime init = default ( DateTime ) )
+        {
+            if ( init == default ( DateTime ) )
+                init = eventEpoch;
+
+            // fixup any times before epoch to prevent rollover
+            if ( date.CompareTo ( init ) < 0 )
+                date = init;
+
+            return BitConverter.GetBytes ( ( long )date.Subtract ( init ).TotalSeconds );
         }
 
         #endregion
@@ -272,7 +288,8 @@ namespace Library
             for ( int i = 0; i < size; i++ )
                 value += data[ i + startAt ] << ( i * 8 );
 
-            return ( T )( object )value;
+            // NOTE: Can be used ( T )( object )value nor ( T )value
+            return ( T )Convert.ChangeType ( value, typeof( T ) );
         }
 
         #endregion

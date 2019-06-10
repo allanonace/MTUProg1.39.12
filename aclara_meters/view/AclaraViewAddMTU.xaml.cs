@@ -441,36 +441,24 @@ namespace aclara_meters.view
                     BtnSwitchPort2.Tapped += OnClick_BtnSwitchPort2;
                     div_EnablePort2.IsEnabled = true;
                 }
-              
+
                 // Copy current values of port1 form controls to port2 form controls
-                btn_CopyPort1To2.GestureRecognizers.Add(new TapGestureRecognizer
+                btn_CopyPort1To2.GestureRecognizers.Add ( new TapGestureRecognizer
                 {
-                    Command = new Command(() =>
+                    Command = new Command ( () =>
                     {
                         if ( this.port2IsActivated )
                         {
-                            //this.pck_MeterType_Vendors_2         .SelectedIndex = this.pck_MeterType_Vendors           .SelectedIndex;
-                            //this.pck_MeterType_Models_2          .SelectedIndex = this.pck_MeterType_Models            .SelectedIndex;
-                            //this.pck_MeterType_Names_2           .SelectedIndex = this.pck_MeterType_Names             .SelectedIndex;
-                        
-                            this.tbx_AccountNumber_2             .Text          = this.tbx_AccountNumber               .Text;
-                            this.tbx_AccountNumber_Dual_2        .Text          = this.tbx_AccountNumber_Dual          .Text;
+                            this.tbx_AccountNumber_2     .Text = this.tbx_AccountNumber.Text;
+                            this.tbx_AccountNumber_Dual_2.Text = this.tbx_AccountNumber_Dual.Text;
+                            this.tbx_WorkOrder_2         .Text = this.tbx_WorkOrder.Text;
+                            this.tbx_WorkOrder_Dual_2    .Text = this.tbx_WorkOrder_Dual.Text;
 
-                            this.tbx_WorkOrder_2                 .Text          = this.tbx_WorkOrder                   .Text;
-                            this.tbx_WorkOrder_Dual_2            .Text          = this.tbx_WorkOrder_Dual              .Text;
-
-                            //this.tbx_OldMeterSerialNumber_2      .Text          = this.tbx_OldMeterSerialNumber        .Text;
-                            //this.tbx_OldMeterSerialNumber_Dual_2 .Text          = this.tbx_OldMeterSerialNumber_Dual   .Text;
-                            //this.tbx_MeterSerialNumber_2         .Text          = this.tbx_MeterSerialNumber           .Text;
-                            //this.tbx_MeterSerialNumber_Dual_2    .Text          = this.tbx_MeterSerialNumber_Dual      .Text;
-
-                            //this.tbx_OldMeterReading_2           .Text          = this.tbx_OldMeterReading             .Text;
-                            //this.tbx_OldMeterReading_Dual_2      .Text          = this.tbx_OldMeterReading_Dual        .Text;
-                            //this.tbx_MeterReading_2              .Text          = this.tbx_MeterReading                .Text;
-                            //this.tbx_MeterReading_Dual_2         .Text          = this.tbx_MeterReading_Dual           .Text;
-                            
-                            this.pck_OldMeterWorking_2           .SelectedIndex = this.pck_OldMeterWorking             .SelectedIndex;
-                            this.pck_ReplaceMeterRegister_2      .SelectedIndex = this.pck_ReplaceMeterRegister        .SelectedIndex;
+                            if ( global.NewMeterPort2isTheSame )
+                            {
+                                this.tbx_MeterSerialNumber_2     .Text = this.tbx_MeterSerialNumber.Text;
+                                this.tbx_MeterSerialNumber_Dual_2.Text = this.tbx_MeterSerialNumber_Dual.Text;
+                            }
                         }
                     }),
                 });
@@ -819,7 +807,10 @@ namespace aclara_meters.view
 
             #region 2-Way
 
-            bool useTwoWay = this.currentMtu.TimeToSync && this.currentMtu.FastMessageConfig;
+            // Only for 34xx MTUs and above
+            bool useTwoWay = global.TimeToSync          &&
+                             this.currentMtu.TimeToSync &&
+                             this.currentMtu.FastMessageConfig;
             
             this.Initialize_TwoWay ();
 
@@ -1151,8 +1142,8 @@ namespace aclara_meters.view
             }
             
             // Button for copy port 1 common fields values to port 2
-            this.div_CopyPort1To2.IsVisible = this.port2IsActivated && global.NewMeterPort2isTheSame;
-            this.div_CopyPort1To2.IsEnabled = this.port2IsActivated && global.NewMeterPort2isTheSame;
+            this.div_CopyPort1To2.IsVisible = this.port2IsActivated;
+            this.div_CopyPort1To2.IsEnabled = this.port2IsActivated;
             
             btn_CopyPort1To2.Text = COPY_1_TO_2;
 
@@ -3993,8 +3984,8 @@ namespace aclara_meters.view
                 }
             
                 // Button for copy port 1 common fields values to port 2
-                this.div_CopyPort1To2.IsVisible = this.port2IsActivated && global.NewMeterPort2isTheSame;
-                this.div_CopyPort1To2.IsEnabled = this.port2IsActivated && global.NewMeterPort2isTheSame;
+                this.div_CopyPort1To2.IsVisible = this.port2IsActivated;
+                this.div_CopyPort1To2.IsEnabled = this.port2IsActivated;
                 
                 // Allow click again the button
                 this.waitOnClickLogic = false;

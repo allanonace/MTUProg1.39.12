@@ -295,6 +295,96 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
+  <Overload>
+    <Id>P1BackFlowState</Id>
+    <Description>P1 Backflow state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:BackFlowState_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1DaysOfNoFlow</Id>
+    <Description>P1 Days of no flow</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1LeakDetection</Id>
+    <Description>P1 Leak detection state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:LeakDetection_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1DaysOfLeak</Id>
+    <Description>P1 Days of leak</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfLeak_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2BackFlowState</Id>
+    <Description>P2 Backflow state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:BackFlowState_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2DaysOfNoFlow</Id>
+    <Description>P2 Days of no flow</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderFlowAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2LeakDetection</Id>
+    <Description>P2 Leak detection state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:LeakDetection_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2DaysOfLeak</Id>
+    <Description>P2 Days of leak</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2EcoderLeakAlarms</Register>
+    </Registers>
+    <CustomGet>method:DaysOfLeak_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>FastMessagingMode</Id>
+    <Description>Fast Messaging Configuration - Fast Messaging Mode</Description>
+    <Type>int</Type>
+    <Registers>
+      <Register>FastMessagingConfigMode</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>FastMessagingFrequency</Id>
+    <Description>Fast Messaging Configuration - Response Frequency</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>FastMessagingConfigFreq</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
 
   <!-- END - Overloads -->
   
@@ -528,7 +618,7 @@
     <CustomSet/>
   </Register>
 
-  <!-- Tampers -->
+  <!-- Read Alarms -->
   <Register> <!-- OK -->
     <Id>InsufficientMemoryTamper</Id>
     <Description>Insufficient Memory Tamper</Description>
@@ -650,6 +740,48 @@
     <CustomSet/>
   </Register>
 
+  <!-- Set Ecoder alarms -->
+  <Register> <!-- OK -->
+    <Id>ECoderLeakDetectionCurrent</Id>
+    <Description>Leak Detection Current Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>ECoderDaysOfLeak</Id>
+    <Description>Days of Leak Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>ECoderDaysNoFlow</Id>
+    <Description>Days No Flow Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>3</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>ECoderReverseFlow</Id>
+    <Description>Reverse Flow Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>4</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+
   <!-- END - Alarms -->
 
   <!-- INIT - Encryption -->
@@ -713,6 +845,7 @@
   </Register>
   
   <!-- Protocol + LiveDigits -->
+  <!-- CoilCMD: 129 65 64 | 128 30 y 128 32 -->
   <Register> <!-- ¿1 or 2 bytes? -->
     <Id>P1EncoderProtocol</Id>
     <Description>P1 Encoder auto-detection protocol/encoder type</Description>
@@ -789,6 +922,36 @@
     <Write>false</Write> <!-- Use CoilCMD to simulate other MTUs -->
     <CustomGet/>
 	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TimeToSyncHr</Id>
+    <Description>Time of day to listen for Time Sync - Hour</Description>
+    <Type>int</Type>
+    <Address>1</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TimeToSyncMin</Id>
+    <Description>Time of day to listen for Time Sync - Minute</Description>
+    <Type>int</Type>
+    <Address>2</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TimeToSyncSec</Id>
+    <Description>Time of day to listen for Time Sync - Seconds - Should be set to 30</Description>
+    <Type>int</Type>
+    <Address>3</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
   </Register>
   <Register> <!-- OK -->
     <Id>MtuSerialNumber</Id>
@@ -971,6 +1134,26 @@
 	  <CustomSet/>
   </Register>
   <Register> <!-- OK -->
+    <Id>P1EcoderFlowAlarms</Id>
+    <Description>In Encoder Mode this is used for Port 1 ECoder Flow Alarms</Description>
+    <Type>int</Type>
+    <Address>86</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P1EcoderLeakAlarms</Id>
+    <Description>In Encoder Mode this is used for Port 1 ECoder Leak Alarms</Description>
+    <Type>int</Type>
+    <Address>87</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
     <Id>P2MeterReading</Id>
     <Description>P2 Meter Reading</Description>
     <Type>ulong</Type>
@@ -981,8 +1164,8 @@
 	  <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>FlowState</Id>
-    <Description>Flow State Record</Description>
+    <Id>P2EcoderFlowAlarms</Id>
+    <Description>In Encoder Mode this is used for Port 2 ECoder Flow Alarms</Description>
     <Type>int</Type>
     <Address>94</Address>
     <Size>1</Size>
@@ -991,8 +1174,8 @@
 	  <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>LeakState</Id>
-    <Description>Leak State Record</Description>
+    <Id>P2EcoderLeakAlarms</Id>
+    <Description>In Encoder Mode this is used for Port 2 ECoder Leak Alarms</Description>
     <Type>int</Type>
     <Address>95</Address>
     <Size>1</Size>
@@ -1026,16 +1209,6 @@
     <Type>int</Type>
     <Address>124</Address>
     <Size>4</Size>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
-    <Id>FastMessagingMode</Id>
-    <Description>Fast Messaging Configuration</Description>
-    <Type>bool</Type>
-    <Address>163</Address>
-    <Size>0</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>
@@ -1121,77 +1294,9 @@
   	<CustomSet/>
   </Register>
   
-  <Register>
-    <Id>MtuMsgProtocolConfig</Id>
-    <Description>Mtu Msg Protocol Configuration or Response frequency</Description>
-    <Type>bool</Type>
-    <Address>163</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	<CustomSet/>
-  </Register>
-  <Register>
-    <Id>MtuPrimaryWindowInterval</Id>
-    <Description>MTU Primary Window Interval A in seconds</Description>
-    <Type>int</Type>
-    <Address>164</Address>
-    <Size>2</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	<CustomSet/>
-  </Register>
-  <Register>
-    <Id>MtuWindowAStart</Id>
-    <Description>Time of the day when the Window A time period starts</Description>
-    <Type>int</Type>
-    <Address>166</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	<CustomSet/>
-  </Register>
-  <Register>
-    <Id>MtuWindowBStart</Id>
-    <Description>Time of the day when the Window B time period starts</Description>
-    <Type>int</Type>
-    <Address>167</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>MtuPrimaryWindowIntervalB</Id>
-    <Description>MTU Primary Message Window Interval B in seconds</Description>
-    <Type>int</Type>
-    <Address>168</Address>
-    <Size>2</Size>
-    <Write>false</Write> 
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>MtuPrimaryWindowOffset</Id>
-    <Description>Seconds past for the first Primary Message Rx Window</Description>
-    <Type>int</Type>
-    <Address>170</Address>
-    <Size>1</Size>
-    <Write>false</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
-    <Id>MtuNumLowPriorityMsg</Id>
-    <Description>Number of times each low priority message will be transmitted. Range [1,+]</Description>
-    <Type>int</Type>
-    <Address>150</Address>
-    <Size>1</Size>
-    <Write>true</Write>
-    <CustomGet/>
-	  <CustomSet/>
-  </Register>
-  <Register>
+  <!-- INIT - On Demand -->
+
+  <Register> <!-- OK -->
     <Id>OnDemandCount</Id>
     <Description>On Demand Count</Description>
     <Type>int</Type>
@@ -1201,7 +1306,7 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register>
+  <Register> <!-- OK -->
     <Id>DataRequestCount</Id>
     <Description>Data Request Count</Description>
     <Type>int</Type>
@@ -1211,7 +1316,7 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register>
+  <Register> <!-- OK -->
     <Id>FOTACount</Id>
     <Description>FOTACount</Description>
     <Type>int</Type>
@@ -1221,7 +1326,7 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
-  <Register>
+  <Register> <!-- OK -->
     <Id>FOTCCount</Id>
     <Description>FOTCCount</Description>
     <Type>int</Type>
@@ -1231,7 +1336,89 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
+  <Register> <!-- OK -->
+    <Id>MtuNumLowPriorityMsg</Id>
+    <Description>Number of times each low priority message will be transmitted. Range [1,+]</Description>
+    <Type>int</Type>
+    <Address>150</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>FastMessagingConfigMode</Id>
+    <Description>Fast Messaging Configuration - Fast Messaging Mode ( False-Off | True-On )</Description>
+    <Type>bool</Type>
+    <Address>163</Address>
+    <Size>0</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>FastMessagingConfigFreq</Id>
+    <Description>Fast Messaging Configuration - Response Frequency ( False-F1/Slow | True-F2/Fast )</Description>
+    <Type>bool</Type>
+    <Address>163</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MtuPrimaryWindowInterval</Id>
+    <Description>MTU Primary Window Interval A in seconds</Description>
+    <Type>int</Type>
+    <Address>164</Address>
+    <Size>2</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MtuWindowAStart</Id>
+    <Description>Time of the day when the Window A time period starts</Description>
+    <Type>int</Type>
+    <Address>166</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MtuWindowBStart</Id>
+    <Description>Time of the day when the Window B time period starts</Description>
+    <Type>int</Type>
+    <Address>167</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MtuPrimaryWindowIntervalB</Id>
+    <Description>MTU Primary Message Window Interval B in seconds</Description>
+    <Type>int</Type>
+    <Address>168</Address>
+    <Size>2</Size>
+    <Write>false</Write> 
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MtuPrimaryWindowOffset</Id>
+    <Description>Seconds past for the first Primary Message Rx Window</Description>
+    <Type>int</Type>
+    <Address>170</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
   
+  <!-- END - On Demand -->
+
   <!-- END - Registers -->
   
 </Registers>

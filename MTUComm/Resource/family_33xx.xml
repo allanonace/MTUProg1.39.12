@@ -5,7 +5,47 @@
 
   <!-- INIT - Alarms -->
 
-  
+  <!-- Set Ecoder alarms -->
+  <Register> <!-- OK -->
+    <Id>ECoderLeakDetectionCurrent</Id>
+    <Description>Leak Detection Current Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>ECoderDaysOfLeak</Id>
+    <Description>Days of Leak Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>ECoderDaysNoFlow</Id>
+    <Description>Days No Flow Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>3</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>ECoderReverseFlow</Id>
+    <Description>Reverse Flow Alarm</Description>
+    <Type>bool</Type>
+    <Address>200</Address>
+    <Size>4</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
 
   <!-- END - Alarms -->
 
@@ -74,15 +114,6 @@
     <Type>string</Type>
     <Registers>
      <Register>InstallConfirmationNotSynced</Register>
-    </Registers>
-    <CustomGet>method</CustomGet>
-  </Overload>
-  <Overload>
-    <Id>Encryption</Id>
-    <Description>Encryption</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>Encrypted</Register>
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
@@ -206,6 +237,78 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
+  <Overload>
+    <Id>P1BackFlowState</Id>
+    <Description>P1 Backflow state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1FlowState</Register>
+    </Registers>
+    <CustomGet>method:BackFlowState_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1DaysOfNoFlowState</Id>
+    <Description>P1 Days of no flow</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1FlowState</Register>
+    </Registers>
+    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1LeakDetectionState</Id>
+    <Description>P1 Leak detection state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1LeakState</Register>
+    </Registers>
+    <CustomGet>method:LeakDetection_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P1DaysOfLeakState</Id>
+    <Description>P1 Days of leak</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1LeakState</Register>
+    </Registers>
+    <CustomGet>method:DaysOfLeak_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2BackFlowState</Id>
+    <Description>P2 Backflow state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2FlowState</Register>
+    </Registers>
+    <CustomGet>method:BackFlowState_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2DaysOfNoFlowState</Id>
+    <Description>P2 Days of no flow</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2FlowState</Register>
+    </Registers>
+    <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2LeakDetectionState</Id>
+    <Description>P2 Leak detection state</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2LeakState</Register>
+    </Registers>
+    <CustomGet>method:LeakDetection_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2DaysOfLeakState</Id>
+    <Description>P2 Days of leak</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2LeakState</Register>
+    </Registers>
+    <CustomGet>method:DaysOfLeak_Get</CustomGet>
+  </Overload>
   
   <!-- END - Overloads -->
   
@@ -284,6 +387,7 @@
   </Register>
 
   <!-- Protocol + LiveDigits -->
+  <!-- CoilCMD: 129 65 64 | 128 40 y 128 43 -->
   <Register> <!-- ¿1 or 2 bytes? -->
     <Id>P1EncoderProtocol</Id>
     <Description>Encoder auto-detection protocol/encoder type</Description>
@@ -462,6 +566,36 @@
 	  <CustomSet/>
   </Register>
   <Register> <!-- OK -->
+    <Id>TimeToSyncHr</Id>
+    <Description>Time of day to listen for Time Sync - Hour</Description>
+    <Type>int</Type>
+    <Address>29</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TimeToSyncMin</Id>
+    <Description>Time of day to listen for Time Sync - Minute</Description>
+    <Type>int</Type>
+    <Address>30</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TimeToSyncSec</Id>
+    <Description>Time of day to listen for Time Sync - Seconds - Should be set to 30</Description>
+    <Type>int</Type>
+    <Address>31</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
     <Id>P1MeterType</Id>
     <Description>P1 meter Type</Description>
     <Type>int</Type>
@@ -562,8 +696,8 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>FlowState</Id>
-    <Description>Flow State Record</Description>
+    <Id>P1FlowState</Id>
+    <Description>Port 1 Flow State Record</Description>
     <Type>int</Type>
     <Address>102</Address>
     <Size>1</Size>
@@ -572,8 +706,8 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>LeakState</Id>
-    <Description>Leak State Record</Description>
+    <Id>P1LeakState</Id>
+    <Description>Port 1 Leak State Record</Description>
     <Type>int</Type>
     <Address>103</Address>
     <Size>1</Size>
@@ -588,6 +722,26 @@
     <Address>104</Address>
     <Size>6</Size>
     <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2FlowState</Id>
+    <Description>Port 2 Flow State Record</Description>
+    <Type>int</Type>
+    <Address>110</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2LeakState</Id>
+    <Description>Port 2 Leak State Record</Description>
+    <Type>int</Type>
+    <Address>111</Address>
+    <Size>1</Size>
+    <Write>false</Write>
     <CustomGet/>
     <CustomSet/>
   </Register>

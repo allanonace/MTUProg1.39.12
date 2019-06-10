@@ -10,6 +10,18 @@ namespace Library
         
         private Dictionary<string,dynamic> dictionary;
         
+        public dynamic this[ string id ]
+        {
+            get
+            {
+                if ( this.dictionary.ContainsKey ( id ) )
+                    return this.dictionary[ id ];
+
+                // Selected dynamic member not exists
+                return null;
+            }
+        }
+
         private Data ()
         {
             this.dictionary = new Dictionary<string,dynamic> ();

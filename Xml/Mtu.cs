@@ -12,44 +12,49 @@ namespace Xml
     
         public Mtu ()
         {
-            this.CutWireDelaySetting   = false;
-            this.DataRead              = false;
-            this.DailyReads            = true;
-            // this.Description        = SET BY ACLARA
-            this.DigitsToDrop          = false;
-            this.Ecoder                = false;
-            this.FastMessageConfig     = false;
-            //this.Flow                = SET BY ACLARA [0,1]
-            this.GasCutWireAlarm       = false;
-            this.GasCutWireAlarmImm    = false;
-            this.InsufficientMemory    = false;
-            this.InsufficientMemoryImm = false;
-            this.InterfaceTamper       = true;
-            this.InterfaceTamperImm    = false;
-            this.IsEcoder              = false;
-            this.LastGasp              = false;
-            this.LastGaspImm           = false;
-            //this.MagneticTamper      = ¿?
-            //this.Model               = SET BY ACLARA
-            this.MtuDemand             = false;
-            this.NodeDiscovery         = false;
-            this.OnTimeSync            = false;
-            this.PulseCountOnly        = false;
-            this.RegisterCoverTamper   = false;
-            this.RequiresAlarmProfile  = false;
-            this.ReverseFlowTamper     = false;
-            this.SerialComProblem      = false;
-            this.SerialComProblemImm   = false;
-            this.SerialCutWire         = false;
-            this.SerialCutWireImm      = false;
-            this.STAREncryptionType    = "AES256"; // [None,AES128,AES256]
-            this.SpecialSet            = false;
-            this.TamperPort1           = false;
-            this.TamperPort2           = false;
-            this.TamperPort1Imm        = false;
-            this.TamperPort2Imm        = false;
-            this.TiltTamper            = false;
-            this.TimeToSync            = false;
+            //this.Description              = SET BY ACLARA
+            //this.Flow                     = SET BY ACLARA [0,1]
+            //this.IsEcoder                 = Konstantin: Please use Ecoder only,  isEcoder is for legacy MTUs
+            //this.MagneticTamper           = ¿?
+            //this.Model                    = SET BY ACLARA
+
+            this.CutWireDelaySetting        = false;
+            this.DataRead                   = false;
+            this.DailyReads                 = true;
+            this.DigitsToDrop               = false;
+            this.Ecoder                     = false;     // Ecoder Only MTUs
+            this.ECoderDaysNoFlow           = false;
+            this.ECoderDaysOfLeak           = false;
+            this.ECoderLeakDetectionCurrent = false;
+            this.ECoderReverseFlow          = false;
+            this.FastMessageConfig          = false;
+            this.GasCutWireAlarm            = false;
+            this.GasCutWireAlarmImm         = false;
+            this.InsufficientMemory         = false;
+            this.InsufficientMemoryImm      = false;
+            this.InterfaceTamper            = true;
+            this.InterfaceTamperImm         = false;
+            this.LastGasp                   = false;
+            this.LastGaspImm                = false;
+            this.MtuDemand                  = false;
+            this.NodeDiscovery              = false;
+            this.OnTimeSync                 = false;
+            this.PulseCountOnly             = false;
+            this.RegisterCoverTamper        = false;
+            this.RequiresAlarmProfile       = false;
+            this.ReverseFlowTamper          = false;
+            this.SerialComProblem           = false;
+            this.SerialComProblemImm        = false;
+            this.SerialCutWire              = false;
+            this.SerialCutWireImm           = false;
+            this.STAREncryptionType         = "AES256";  // [None,AES128,AES256]
+            this.SpecialSet                 = false;
+            this.TamperPort1                = false;
+            this.TamperPort2                = false;
+            this.TamperPort1Imm             = false;
+            this.TamperPort2Imm             = false;
+            this.TiltTamper                 = false;
+            this.TimeToSync                 = false;
         }
 
         #region Elements
@@ -71,6 +76,18 @@ namespace Xml
 
         [XmlElement("Ecoder")]
         public bool Ecoder { get; set; }
+
+        [XmlElement("ECoderDaysNoFlow")]
+        public bool ECoderDaysNoFlow { get; set; }
+
+        [XmlElement("ECoderDaysOfLeak")]
+        public bool ECoderDaysOfLeak { get; set; }
+
+        [XmlElement("ECoderLeakDetectionCurrent")]
+        public bool ECoderLeakDetectionCurrent { get; set; }
+
+        [XmlElement("ECoderReverseFlow")]
+        public bool ECoderReverseFlow { get; set; }
 
         [XmlElement("FastMessageConfig")]
         public bool FastMessageConfig { get; set; }
@@ -121,9 +138,6 @@ namespace Xml
         {
             get { return this.HexNum.ToLower ().StartsWith ( "342" ); }
         }
-
-        [XmlElement("IsEcoder")]
-        public bool IsEcoder { get; set; }
 
         [XmlElement("Model")]
         public string Model { get; set; }

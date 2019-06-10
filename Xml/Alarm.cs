@@ -10,25 +10,26 @@ namespace Xml
     
         public Alarm ()
         {
+            //this.ImmediateTransmit        = Konstantin: Use ImmediateAlarmTransmit instead
+            //this.IntervalData             = Konstantin: No need to implement
+
             this.CutAlarmCable              = false;
             this.CutWireAlarmImm            = false;
             this.CutWireDelaySetting        = DEF_CUTWIRE;
-            //this.DcuUrgentAlarm           = ¿?
+            this.DcuUrgentAlarm             = false;
             this.ECoderDaysNoFlow           = false;
             this.ECoderDaysOfLeak           = false;
             this.ECoderLeakDetectionCurrent = false;
             this.ECoderReverseFlow          = false;
-            //this.ImmediateAlarmTransmit   = ¿?
-            //this.ImmediateTransmit        = ¿?
+            this.ImmediateAlarmTransmit     = false;
             this.InsufficientMemory         = false;
             this.InsufficientMemoryImm      = false;
             this.InterfaceTamper            = true;
             this.InterfaceTamperImm         = false;
-            //this.IntervalData             = ¿?
             this.LastGasp                   = false;
             this.LastGaspImm                = false;
             this.Magnetic                   = true;
-            this.Overlap                    = DEF_OVERLAP; // [1-11]
+            this.Overlap                    = DEF_OVERLAP;  // [1-11]
             this.RegisterCover              = true;
             this.ReverseFlow                = true;
             this.SerialComProblem           = false;
@@ -49,9 +50,6 @@ namespace Xml
 
         [XmlAttribute("Name")]
         public string Name { get; set; }
-
-        [XmlElement("IntervalData")]
-        public bool IntervalData { get; set; }
 
         [XmlIgnore]
         public byte CutWireDelaySetting { get; set; }
@@ -118,9 +116,6 @@ namespace Xml
 
         [XmlElement("ImmediateAlarmTransmit")]
         public bool ImmediateAlarmTransmit { get; set; }
-
-        [XmlElement("ImmediateTransmit")]
-        public bool ImmediateTransmit { get; set; }
 
         [XmlElement("InsufficentMemory")]
         public bool InsufficientMemory { get; set; }

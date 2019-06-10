@@ -125,7 +125,9 @@ namespace MTUComm
             if ( ! dailyGmtHourRead.Equals ( DISABLED ) )
                 logger.AddParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
 
-            if ( mtu.FastMessageConfig )
+            if ( global.TimeToSync &&
+                 mtu.TimeToSync    &&
+                 mtu.FastMessageConfig )
                 logger.AddParameter ( this.addMtuAction, form.TwoWay );
 
             // Related to F12WAYRegister1XX registers
@@ -322,6 +324,11 @@ namespace MTUComm
                         logger.AddParameter ( alarmSelection,
                         new Parameter ( "CutAlarmCable", "Cut Alarm Cable", await map.GasCutWireTamperStatus.GetValue () ) );
 
+                    if ( form.usePort2 &&
+                         mtu.GasCutWireAlarm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter ( "Cut2AlarmCable", "Cut Port2 Alarm Cable", await map.P2GasCutWireTamperStatus.GetValue () ) );
+
                     if ( mtu.SerialComProblem )
                         logger.AddParameter ( alarmSelection,
                         new Parameter ( "SerialComProblem", "Serial Com Problem", await map.SerialComProblemTamperStatus.GetValue () ) );
@@ -360,11 +367,12 @@ namespace MTUComm
 
                     if ( mtu.TamperPort1 )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "Cut1WireTamper", "Cut Port1 Wire Tamper", await map.GasCutWireTamperStatus.GetValue () ) );
+                        new Parameter ( "Cut1WireTamper", "Cut Port1 Wire Tamper", await map.P1CutWireTamperStatus.GetValue () ) );
 
-                    if ( mtu.TamperPort2 )
+                    if ( form.usePort2 &&
+                         mtu.TamperPort2 )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "Cut2WireTamper", "Cut Port2 Wire Tamper", await map.P2GasCutWireTamperStatus.GetValue () ) );
+                        new Parameter ( "Cut2WireTamper", "Cut Port2 Wire Tamper", await map.P2CutWireTamperStatus.GetValue () ) );
 
                     this.addMtuAction.Add(alarmSelection);
                 }
@@ -465,7 +473,7 @@ namespace MTUComm
 #if DEBUG
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 this.mtuBasicInfo.Type + "-" + this.action.type + ( ( form.mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
-            this.logger.CreateFileIfNotExist ( false, uniUri );
+            this.logger.CreateFileIfNotExist ( Logger.BasicFileType.READ, false, uniUri );
 
             uniDoc.Save ( uniUri );           
 #endif

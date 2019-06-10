@@ -9,198 +9,200 @@ namespace Xml
     {
         public Global ()
         {
-            // Default values extracted from Y20318-TUM_Rev_E.PDF and STAR Programmer source code
+            // Default values and comments are extracted from Y20318-TUM_Rev_E.PDF and STAR Programmer source code
 
-            this.AccountDualEntry             = true; // Enables or disables dual entry for AccountNumber
-            this.AccountEnabledAppt           = false; // [LOW PRIORITY = NOT CONFIRMED] Enable or disable values after appointment in interactive mode ( Account Number )
-            this.AccountFilled                = false; // Allows AccountNumber to be filled with MTU ID automatically
-            this.AccountLabel                 = "Service Pt. ID"; // [1-15] Label for AccountNumber field
-            this.AccountLength                = 7; // [1-12] Number of digits to use in AccountNumber field
-            this.ActionVerify                 = true; // Display popup to confirm that user wants to perform the action
-            this.Address1Len                  = 100; // Length of appointment address line 1 field
-            this.Address2Len                  = 100; // ... 2 field
-            this.Address3Len                  = 100; // ... 3 field
-            this.Address4Len                  = 100; // ... 4 field
-            this.AddressLine1                 = string.Empty; // [Custumer specific] Definition of line 1 of verified addres in appointment file ( e.g. HouseNo )
-            this.AddressLine2                 = string.Empty; // ... line 2 ... ( e.g. Street )
-            this.AddressLine3                 = string.Empty; // ... line 3 ... ( e.g. N/A )
-            this.AddressLine4                 = string.Empty; // ... line 4 ... ( e.g. N/A )
-            this.AddressVerify                = false; // Set to true is appointment address should be verified
-            this.AFC                          = true; // Advance Frequency Change on 3000 MTUs after firmware 19
-            this.Allow2Port1Appt              = false; // Allow use of dual port MTUs for one port appointments
-            this.AllowAbort                   = false; // Adds an abort button on cancellation screen during installation
-            this.AllowDailyReads              = true; // Enable SnapReads/DailyReads
-            this.AppointmentsLocation         = string.Empty; // Specifies an alternate location for the Appointments file ( PC only )
-            this.AppointmentsName             = "Appointments.xml"; // [LOW PRIORITY = NOT CONFIRMED][1-255] Name of the appointments file
-            this.AppointmentsReq              = false; // Forces you to accept the appointment before being allowed to program the MTU
-            this.ApptGridConditionStatus      = "All"; // [LOW PRIORITY = NOT CONFIRMED][All,New,Plan] Controls contents of conditional grid
-            this.ApptInstallerId              = false; // Works only if AppointmentsReq is true and will add ( as prefix ) installer ID to the activity file with installer id name from appointments file
-            this.ApptInstallerName            = "ApptInstallerName"; // [LOW PRIORITY = NOT CONFIRMED][1-100] Installer name indicates the tag to use in appointments file
-            this.ApptPort1Field               = string.Empty; // Saving fields in addition to the status
-            this.ApptPort2Field               = string.Empty; // Saving fields in addition to the status
-            this.ApptSave                     = false; // Allows editing and saving changes to the appointments file
-            this.ApptScreen                   = false; // [LOW PRIORITY = NOT CONFIRMED] Enables or disables display of the appointments screen
-            this.ApptStatusDefinitions        = string.Empty; // Used to display Appointment Statuses
-            this.AreYouSure                   = false; // Displays "Are you sure?" confirmation messages if true
-            this.AutoNewMeterPort2isTheSame   = false; // Automatically copies values from Port 1 to Port 2
-            this.AutoPurge                    = false; // Enables / disables automatic purging of log files
-            this.AutoPurgeSize                = 0; // [x-9999] Maximum size in kilobytes for log file before auto purge if AutoPurge is true
-            this.AutoRegisterRecording        = false; // Records Register selection in Activity Log based on the old meter serial number and new serial number
-            this.AutoRFCheck                  = false; // NOT PRESENT IN THE PDF NORE KG.CODE // It will be used for 34XX series MTUs
-            this.ByPassAutoDetect             = false; // Bypass F1 Ecoder/Encoder Autodetect
             //this.Cancel                     = [Custom] Cancel options
-            this.CertPair                     = false; // Whether a certificate pair (i.e. Public and Private) is installed ( PC only )
-            this.CertPath                     = string.Empty; // Key Store Path for certificate ( PC Only )
-            this.CertPswd                     = string.Empty; // Digital Certificate Password if Full certificate stored
-            this.CertPubKey                   = string.Empty; // [Base64] Digital Certificate Public Key
-            this.CertRecord                   = true; // Copy Certificate attributes into Global.xml ( PC Only )
-            this.CertSubject                  = string.Empty; // Digital Certificate Subject Search ( PC Only )
-            this.CertThumbprint               = string.Empty; // NOT PRESENT IN KG.CODE // Unique Value of Digital Certificate
-            this.CertUpdate                   = string.Empty; // [DateTime] Date on which certificate must be updated
-            this.CertUpdateValid              = false; // If true, application makes CertUpdate one day prior to Certvalid
-            this.CertValid                    = string.Empty; // [DateTime] CertValidActual certificate expiration date. Application will not run if current date is past this date
-            this.CheckMTUfield                = string.Empty; // What field to use with CheckMtuType tag
-            this.CheckMTUtype                 = false; // Check if this MTU is suitable for this appointment
-            this.CheckMTUvalue                = string.Empty; // What value to compare
-            this.CheckSavedField              = false; // Checks and saves fields in appointment file
-            this.CoilDetect                   = true; // Check coil presence
-            this.ColorEntry                   = false; // Uses a color screen for newer model handhelds
-            this.ComPort                      = string.Empty; // [COM1-COM9] Default COM port to use if the CF ( compact flash ) interface card is not found
-            this.ConfigLocation               = string.Empty; // Specifies an alternate location for the permanent configuration log file ( PC Only )
-            this.ConfigPublicDir              = false;  // Specifies if the config files remains in the public folder or not, after copy the files in private folder
-            this.CustomerMeterError           = string.Empty; // [1-20] If meter error occurs, this message will appear
-            this.CustomerName                 = "Aclara"; // [1-20] Display the tag value in the About sceen
-            this.DailyReadingOffset           = 0; // [Byte] Daily Reading Offset for Electric MTU Type 92
-            this.DailyReadsDefault            = 13; // [0-23] Hour (in military time) for daily reads/snap
-            this.dangerosZone                 = "cache disk"; // PPC W 5.0 and Up volatile area "flash file store"
-            this.DefaultF1ReadInterval        = false; // [NOT NEED TO SUPPORT = NOT CONFIRMED] Use [1Hr] Interval for F1 radio. Allows using 2 read intervals for old and new flat packs
-            this.DeviceCertSubject            = string.Empty; // Actual certificate subject
-            this.ElectricPort1_2Interval      = 60; // [NOT NEED TO SUPPORT = NOT CONFIRMED][5,10,15,20,30,60,120,180,240] Default transmit/read intervals in minutes for Port 1 and Port 2 of electric MTUs
-            this.ElectricPort3_4Interval      = 120; // [NOT NEED TO SUPPORT = NOT CONFIRMED][5,10,15,20,30,60,120,180,240] Default transmit/read intervals in minutes for Port 3 and Port 4 of electric MTUs
-            this.EMeterConnected              = false; // NOT PRESENT IN THE PDF // KG: To display the meter info in full read MTU
-            this.EnableFEC                    = false; // Enable Forward Error Correction (FEC) for Electric MTU
-            this.ErrorId                      = false; // Add Error Id numbers to Activity Log error messages
-            this.F12WAYRegister1              = 0x01C7D011; // PDF: 0x01C75011 // [4bytes Hex or Decimals] Frequency value for channel 1
-            this.F12WAYRegister10             = 0x0130360A; // ... channel 10
-            this.F12WAYRegister14             = 0x021B5021; // ... channel 14
-            this.F1TamperCheck                = false; // Perform continuity test between MTU and Meter for Pulse
-            this.forceElectricMtuOn           = true; // Forcibly turn on electric MTUs except types 74 and 75 ( Landis & Gyr Focus AX )
-            this.ForceTimeSync                = false; // Force an Installation Confirmation during MTU installation for 3000 MTU
-            this.ftpPassword                  = string.Empty; // FTP login password ( PC Only )
-            this.ftpRemoteHost                = string.Empty; // FTP remote host name ( PC Only )
-            this.ftpRemotePath                = string.Empty; // Path to FTP remote host ( PC Only )
-            this.ftpTransferredPath           = string.Empty; // FTP Parameters ( PC Only )
-            this.ftpUserName                  = string.Empty; // FTP login user name ( PC Only )
-            this.FullResult                   = false; // Makes Result file schema identical to that of the Activity Log
-            this.FutureDate                   = 7; // [1-255] The number of days from the appointment's scheduled start date within which it is acceptable for work to startInteger
-            this.GetMtuDelay                  = 0; // [1-5000] If required, contact Engineering for details. MTU read delay
-            this.GpsBaudRate                  = 9600; // [9600,4800] GPS Communication Baud Rate
-            this.GpsComPort                   = "COM2"; // [NOT NEED TO SUPPORT = NOT CONFIRMED][COMX] Specifies the COM port for GPS tracking
-            this.GpsMetric                    = false; // Record the result in Metric or Imperial
-            this.gridColumn                   = string.Empty; // [Custom] Description for Grid
-            this.HideProgressScreen           = false; // Hides the Progress Bar during MTU installation or reading
-            this.HideRevision                 = false; // Hides Revision number in About screen
-            this.HourToAdjust                 = 0; // Use Hours to randomize for 3000 MTU
-            this.ICfield1                     = 0; // [LOW PRIORITY = NOT CONFIRMED][0-100] Installation Confirmation field free-form description
-            this.ICfield2                     = 0; // [LOW PRIORITY = NOT CONFIRMED][0-100] Installation Confirmation field free-form description
-            this.IndividualDailyReads         = true; // Allow selection of daily Reads interval value
-            this.IndividualReadInterval       = false; // Controls whether the read interval can be specified on a per MTU basis or default only
-            this.LatestVersion                = 16; // [Byte] F1 MTU Good firmware version. Specifies the minimum version that can have a 20-minute read interval
-            this.LiveDigitsOnly               = true; // If true it will show X for Dummy Digits. False it will show 0
-            this.LoadOptions                  = false; // Load options screen through appointments
-            this.LogLocation                  = string.Empty; // Specifies an alternate location for the Activity Log file ( PC Only )
-            this.LogsPublicDir                = false; //specifies if the logs files are in the public folder or in the privte folder
-            this.MeterNumberLength            = 12; // [1-20] Maximum length of the meter serial number
-            this.MeterSerialEnabledAppt       = false; // Enable or disable values after appointment in interactive mode ( Meter Old/Serial Number )
-            this.MeterWorkRecording           = true; // Enables or disables the "Old Meter Working" dialog box during MTU programming
-            this.MinDate                      = string.Empty; // If the handheld reports a date earlier than “MinDate”, STAR Programmer stops working in order to prevent the wrong date from being entered
-            this.MtuIdLength                  = 8; // [5-11] Number of digits in the MTU ID, including leading zeros
-            this.NewMeterCalc                 = string.Empty; // Prefix of new meter ID
-            this.NewMeterFormat               = string.Empty; // Sets guidelines for entering a new meter
-            this.NewMeterLabel                = "New Meter #"; // [1-15] Optional parameter for new meter
-            this.NewMeterPort2isTheSame       = false; // Optionally copies Port 1 data to Port 2
-            this.NewMeterPrefix               = false; // Enables adding prefix to meter number
-            this.NewMeterValidation           = false; // Enable New Meter navigation/validation based on prefix and actual meter
-            this.NewSerialNumDualEntry        = true; // Enables or disables dual entry of the new meter serial number during programming
-            this.NormXmitInterval             = "1 Hr"; // Default transmit interval
-            this.OldReadingDualEntry          = true; // F1 Flatpack 2000/3000 series up to version 2.1.1 and firmware up to 15
-            this.OldReadingRecording          = true; // Enables or disables dual entry of the old meter reading during programming
-            this.OldSerialNumDualEntry        = true; // Enables or disables entry of old meter reading
             //this.Options                    = [Custom] Misc Fields. Needs new section to describe
-            this.OtherCancelCode              = string.Empty; // [1-15] Use a special code for other cancel option
-            this.OverWriteAutoDetect          = false; // To show overwrite button on the sceen
-            this.PasswordMaxLength            = 10; // [1-10] Sets the maximum logon user password length in characters
-            this.PasswordMinLength            = 1; // [1-10] Sets the minimum logon user password length in characters
-            this.PlaySound                    = false; // Play sound on HH after Installation Confirmation is complete
-            this.Port2DisableNo               = false; // Disable ability to click on Display checkbox to disable Port2
-            this.Port2MeterTypeTheSameWarning = false; // Display a warning if Meter types are the same for dual port MTU
-            this.PowerPolicy                  = true; // Disable/Enable USB Power programatically
-            this.ReadDelay                    = 5; // [1-10] Number of seconds of wait time before reading or writing the MTU
-            this.ReadingDualEntry             = true; // Enables or disables dual entry of the meter reading during programming
-            this.RegisterRecording            = true; // Enables or disables display of the Register/Meter change question during programming
-            this.RegisterRecordingDefault     = "Meter"; // [Meter,Register] What is the default value for recording
-            this.RegisterRecordingItems       = "101"; // [0,1] Controls contents of the Register Recording Selection dropdown list. Which one first and so on
-            this.RegisterRecordingReq         = false; // Required to choose if RegisterRecording is “true” on the screen
-            this.ReportLogLocationStatus      = true; // Specifies whether to display warning messages if log location is in volatile memory
-            this.ReverseReading               = false; // Enables or disables entry of old and new meter readings in reverse format
-            this.ScanDetail                   = false; // Scan meter Manufacture Bar Code
-            this.ScanDetailLength             = 9; // [1-99] Scan Meter Manufacture Bar Code length
-            this.scanfield                    = string.Empty; // [Custom] Description of Manufacturing Barcode
-            this.ScanMtu                      = false; // Enables STAR Programmer to read an electric MTU if the MTU does not have power
-            this.ScanSumCheck                 = false; // [Not used yet] Scan Manufacture Bar Code
-            this.ScriptOnly                   = true; // Specifies whether the application should log to the permanent log file in addition to the results log ( Only applies in scripted mode )
-            this.SecondNormXmitCondition      = string.Empty; // [Custom] Second transmit interval condition. For F1 MTUs only. Works with old and new MTUs
-            this.SecondNormXmitField          = string.Empty; // [Custom] Corresponding Field in Appointment File
-            this.SecondNormXmitInterval       = string.Empty; // [Custom] Alternate transmit interval in hours or minutes. Works for F1 only. The same values as regular read interval
-            this.SerialNumLabel               = "Meter #"; // [1-20] Labels the Serial Number from Appointment
-            this.ShowAddMTU                   = true; // Display or hide the “Add MTU” programming option on the main menu
-            this.ShowAddMTUMeter              = true; // Display or hide the “Add MTU and Meter” programming option on the main menu
-            this.ShowAddMTUReplaceMeter       = true; // Display or hide the “Add MTU and Replace Meter” programming option on the main menu
-            this.ShowFreq                     = false; // Show the MTU operating frequency in the Read MTU display
-            this.ShowInstallConfirmation      = false; // Show the Installation Confirmation Button on the main screen
-            this.ShowMeterVendor              = false; // Specifies whether to display vendor and model information for meters during MTU programming
-            this.ShowReplaceMeter             = true; // Display or hide the “Replace Meter” programming option on the main menu
-            this.ShowReplaceMTU               = true; // Display or hide the "Replace MTU" programming option on the main menu
-            this.ShowReplaceMTUMeter          = true; // Display or hide the “Replace MTU And Meter” programming option on the main menu
-            this.ShowScriptErrorMessage       = true; // Specifies whether error messages are shown in scripted mode
-            this.ShowTime                     = false; // Show System time on the screen during the MTU read or install
-            this.ShowTurnOff                  = true; // Show Turn Off MTU button on main screen
-            this.Siesta                       = false; // Turn off wake up during installation for F1 Flatpack
-            this.SpecialSet                   = "SOLONROCKSACLARA"; // [NOT NEED TO SUPPORT = NOT CONFIRMED][16bytes] Encryption Initial Vector
-            this.StartPoint                   = string.Empty; // Tag name in Appointments file that contains the Start Date
-            this.SystemDateVerify             = false; // Verify System Date
-            this.TempXmitCount                = 0; // Default temporary reading transmit duration in days. Available for Legacy Flatpack Only
-            this.TempXmitInterval             = string.Empty; // Default temporary transmit/read intervals in hours or minutes
-            this.TimeSyncCountDefault         = 63; // [0-255] How long to check (in seconds) after requesting Time Sync
-            this.TimeSyncCountRepeat          = 1; // NOT PRESENT IN THE PDF // Number of attempts to for the installation confirmation process
-            this.TimeToSync                   = false; // Enable MTU time sync
-            this.TimeToSyncHR                 = 0; // [0-23] Hour at which MTU listens for time sync
-            this.TimeToSyncMin                = 0; // [0-59] Minute at which MTU listens for time sync
-            this.UploadPrompt                 = false; // NOT PRESENT IN THE PDF // Show a popup when user log out remembering that has pending files to upload
-            this.Use83                        = false; // [NOT NEED TO SUPPORT = NOT CONFIRMED] Specifies whether to use 8.3 formatted file names for log files
-            this.UseMeterSerialNumber         = true; // Enables or disables the recording of meter serial numbers
-            this.UserIdMaxLength              = 10; // [1-10] Sets the maximum logon user ID length in characters
-            this.UserIdMinLength              = 1; // [1-10] Sets the minimum logon user ID length in characters
-            this.UTCOffset                    = 235; // [Byte] Universal Time Offset for Electric MTU Type 92
-            this.WakeUpCount                  = 32; // Number of wake up messages to initially send. Old FlatPack only
-            this.WorkOrderDualEntry           = true; // Enables or disables dual entry of the work order number during programming
-            this.WorkOrderEnabledAppt         = false; // Enable or disable values after appointment in interactive mode ( Work Order )
-            this.WorkOrderLabel               = "Field Order"; // [1-15] The label for the Work Order Number field
-            this.WorkOrderLength              = 15; // [1-20] Maximum length in characters of the Work Order Number field
-            this.WorkOrderRecording           = true; // Enables or disables work order number recording during MTU programming
-            this.WriteDelay                   = 0; // [0-5000] Additional delay in milliseconds after write to MTU
-            this.WriteF1SystemTime            = false; // F1 write MTU system time from handheld or PC
-            this.XmitTimer                    = 0; // [UInt] Transmit Timer
+
+            this.AccountDualEntry             = true;                 // Enables or disables dual entry for AccountNumber
+            this.AccountEnabledAppt           = false;                // [LOW PRIORITY = NOT CONFIRMED] Enable or disable values after appointment in interactive mode ( Account Number )
+            this.AccountFilled                = false;                // Allows AccountNumber to be filled with MTU ID automatically
+            this.AccountLabel                 = "Service Pt. ID";     // [1-15] Label for AccountNumber field
+            this.AccountLength                = 7;                    // [1-12] Number of digits to use in AccountNumber field
+            this.ActionVerify                 = true;                 // Display popup to confirm that user wants to perform the action
+            this.Address1Len                  = 100;                  // Length of appointment address line 1 field
+            this.Address2Len                  = 100;                  // ... 2 field
+            this.Address3Len                  = 100;                  // ... 3 field
+            this.Address4Len                  = 100;                  // ... 4 field
+            this.AddressLine1                 = string.Empty;         // [Custumer specific] Definition of line 1 of verified addres in appointment file ( e.g. HouseNo )
+            this.AddressLine2                 = string.Empty;         // ... line 2 ... ( e.g. Street )
+            this.AddressLine3                 = string.Empty;         // ... line 3 ... ( e.g. N/A )
+            this.AddressLine4                 = string.Empty;         // ... line 4 ... ( e.g. N/A )
+            this.AddressVerify                = false;                // Set to true is appointment address should be verified
+            this.AFC                          = true;                 // Advance Frequency Change on 3000 MTUs after firmware 19
+            this.Allow2Port1Appt              = false;                // Allow use of dual port MTUs for one port appointments
+            this.AllowAbort                   = false;                // Adds an abort button on cancellation screen during installation
+            this.AllowDailyReads              = true;                 // Enable SnapReads/DailyReads
+            this.AppointmentsLocation         = string.Empty;         // Specifies an alternate location for the Appointments file ( PC only )
+            this.AppointmentsName             = "Appointments.xml";   // [LOW PRIORITY = NOT CONFIRMED][1-255] Name of the appointments file
+            this.AppointmentsReq              = false;                // Forces you to accept the appointment before being allowed to program the MTU
+            this.ApptGridConditionStatus      = "All";                // [LOW PRIORITY = NOT CONFIRMED][All,New,Plan] Controls contents of conditional grid
+            this.ApptInstallerId              = false;                // Works only if AppointmentsReq is true and will add ( as prefix ) installer ID to the activity file with installer id name from appointments file
+            this.ApptInstallerName            = "ApptInstallerName";  // [LOW PRIORITY = NOT CONFIRMED][1-100] Installer name indicates the tag to use in appointments file
+            this.ApptPort1Field               = string.Empty;         // Saving fields in addition to the status
+            this.ApptPort2Field               = string.Empty;         // Saving fields in addition to the status
+            this.ApptSave                     = false;                // Allows editing and saving changes to the appointments file
+            this.ApptScreen                   = false;                // [LOW PRIORITY = NOT CONFIRMED] Enables or disables display of the appointments screen
+            this.ApptStatusDefinitions        = string.Empty;         // Used to display Appointment Statuses
+            this.AreYouSure                   = false;                // Displays "Are you sure?" confirmation messages if true
+            this.AutoNewMeterPort2isTheSame   = false;                // Automatically copies values from Port 1 to Port 2
+            this.AutoPurge                    = false;                // Enables / disables automatic purging of log files
+            this.AutoPurgeSize                = 0;                    // [x-9999] Maximum size in kilobytes for log file before auto purge if AutoPurge is true
+            this.AutoRegisterRecording        = false;                // Records Register selection in Activity Log based on the old meter serial number and new serial number
+            this.AutoRFCheck                  = false;                // NOT PRESENT IN THE PDF NORE KG.CODE // It will be used for 34XX series MTUs
+            this.ByPassAutoDetect             = false;                // Bypass F1 Ecoder/Encoder Autodetect
+            this.CertPair                     = false;                // Whether a certificate pair (i.e. Public and Private) is installed ( PC only )
+            this.CertPath                     = string.Empty;         // Key Store Path for certificate ( PC Only )
+            this.CertPswd                     = string.Empty;         // Digital Certificate Password if Full certificate stored
+            this.CertPubKey                   = string.Empty;         // [Base64] Digital Certificate Public Key
+            this.CertRecord                   = true;                 // Copy Certificate attributes into Global.xml ( PC Only )
+            this.CertSubject                  = string.Empty;         // Digital Certificate Subject Search ( PC Only )
+            this.CertThumbprint               = string.Empty;         // NOT PRESENT IN KG.CODE // Unique Value of Digital Certificate
+            this.CertUpdate                   = string.Empty;         // [DateTime] Date on which certificate must be updated
+            this.CertUpdateValid              = false;                // If true, application makes CertUpdate one day prior to Certvalid
+            this.CertValid                    = string.Empty;         // [DateTime] CertValidActual certificate expiration date. Application will not run if current date is past this date
+            this.CheckMTUfield                = string.Empty;         // What field to use with CheckMtuType tag
+            this.CheckMTUtype                 = false;                // Check if this MTU is suitable for this appointment
+            this.CheckMTUvalue                = string.Empty;         // What value to compare
+            this.CheckSavedField              = false;                // Checks and saves fields in appointment file
+            this.CoilDetect                   = true;                 // Check coil presence
+            this.ColorEntry                   = false;                // Uses a color screen for newer model handhelds
+            this.ComPort                      = string.Empty;         // [COM1-COM9] Default COM port to use if the CF ( compact flash ) interface card is not found
+            this.ConfigLocation               = string.Empty;         // Specifies an alternate location for the permanent configuration log file ( PC Only )
+            this.ConfigPublicDir              = false;                // Specifies if the config files remains in the public folder or not, after copy the files in private folder
+            this.CustomerMeterError           = string.Empty;         // [1-20] If meter error occurs, this message will appear
+            this.CustomerName                 = "Aclara";             // [1-20] Display the tag value in the About sceen
+            this.DailyReadingOffset           = 0;                    // [Byte] Daily Reading Offset for Electric MTU Type 92
+            this.DailyReadsDefault            = 13;                   // [0-23] Hour (in military time) for daily reads/snap
+            this.dangerosZone                 = "cache disk";         // PPC W 5.0 and Up volatile area "flash file store"
+            this.DefaultF1ReadInterval        = false;                // [NOT NEED TO SUPPORT = NOT CONFIRMED] Use [1Hr] Interval for F1 radio. Allows using 2 read intervals for old and new flat packs
+            this.DeviceCertSubject            = string.Empty;         // Actual certificate subject
+            this.ElectricPort1_2Interval      = 60;                   // [NOT NEED TO SUPPORT = NOT CONFIRMED][5,10,15,20,30,60,120,180,240] Default transmit/read intervals in minutes for Port 1 and Port 2 of electric MTUs
+            this.ElectricPort3_4Interval      = 120;                  // [NOT NEED TO SUPPORT = NOT CONFIRMED][5,10,15,20,30,60,120,180,240] Default transmit/read intervals in minutes for Port 3 and Port 4 of electric MTUs
+            this.EMeterConnected              = false;                // NOT PRESENT IN THE PDF // KG: To display the meter info in full read MTU
+            this.EnableFEC                    = false;                // Enable Forward Error Correction (FEC) for Electric MTU
+            this.ErrorId                      = false;                // Add Error Id numbers to Activity Log error messages
+            this.F12WAYRegister1              = 0x01C7D011;           // PDF: 0x01C75011 // [4bytes Hex or Decimals] Frequency value for channel 1
+            this.FastMessageConfig            = false;                // To make migratable switch for migratable MTUs => Bit 0: Fast Messaging Mode - 0=Off, 1=On Location 163 Migratable
+            this.F12WAYRegister10             = 0x0130360A;           // ... channel 10
+            this.F12WAYRegister14             = 0x021B5021;           // ... channel 14
+            this.F1TamperCheck                = false;                // Perform continuity test between MTU and Meter for Pulse
+            this.forceElectricMtuOn           = true;                 // Forcibly turn on electric MTUs except types 74 and 75 ( Landis & Gyr Focus AX )
+            this.ForceTimeSync                = false;                // Force an Installation Confirmation during MTU installation for 3000 MTU
+            this.ftpPassword                  = string.Empty;         // FTP login password ( PC Only )
+            this.ftpRemoteHost                = string.Empty;         // FTP remote host name ( PC Only )
+            this.ftpRemotePath                = string.Empty;         // Path to FTP remote host ( PC Only )
+            this.ftpTransferredPath           = string.Empty;         // FTP Parameters ( PC Only )
+            this.ftpUserName                  = string.Empty;         // FTP login user name ( PC Only )
+            this.FullResult                   = false;                // Makes Result file schema identical to that of the Activity Log
+            this.FutureDate                   = 7;                    // [1-255] The number of days from the appointment's scheduled start date within which it is acceptable for work to startInteger
+            this.GetMtuDelay                  = 0;                    // [1-5000] If required, contact Engineering for details. MTU read delay
+            this.GpsBaudRate                  = 9600;                 // [9600,4800] GPS Communication Baud Rate
+            this.GpsComPort                   = "COM2";               // [NOT NEED TO SUPPORT = NOT CONFIRMED][COMX] Specifies the COM port for GPS tracking
+            this.GpsMetric                    = false;                // Record the result in Metric or Imperial
+            this.gridColumn                   = string.Empty;         // [Custom] Description for Grid
+            this.HideProgressScreen           = false;                // Hides the Progress Bar during MTU installation or reading
+            this.HideRevision                 = false;                // Hides Revision number in About screen
+            this.HourToAdjust                 = 0;                    // Use Hours to randomize for 3000 MTU
+            this.ICfield1                     = 0;                    // [LOW PRIORITY = NOT CONFIRMED][0-100] Installation Confirmation field free-form description
+            this.ICfield2                     = 0;                    // [LOW PRIORITY = NOT CONFIRMED][0-100] Installation Confirmation field free-form description
+            this.IndividualDailyReads         = true;                 // Allow selection of daily Reads interval value
+            this.IndividualReadInterval       = false;                // Controls whether the read interval can be specified on a per MTU basis or default only
+            this.LatestVersion                = 16;                   // [Byte] F1 MTU Good firmware version. Specifies the minimum version that can have a 20-minute read interval
+            this.LiveDigitsOnly               = true;                 // If true it will show X for Dummy Digits. False it will show 0
+            this.LoadOptions                  = false;                // Load options screen through appointments
+            this.LogLocation                  = string.Empty;         // Specifies an alternate location for the Activity Log file ( PC Only )
+            this.LogsPublicDir                = false;                //specifies if the logs files are in the public folder or in the privte folder
+            this.MeterNumberLength            = 12;                   // [1-20] Maximum length of the meter serial number
+            this.MeterSerialEnabledAppt       = false;                // Enable or disable values after appointment in interactive mode ( Meter Old/Serial Number )
+            this.MeterWorkRecording           = true;                 // Enables or disables the "Old Meter Working" dialog box during MTU programming
+            this.MinDate                      = string.Empty;         // If the handheld reports a date earlier than “MinDate”, STAR Programmer stops working in order to prevent the wrong date from being entered
+            this.MtuIdLength                  = 8;                    // [5-11] Number of digits in the MTU ID, including leading zeros
+            this.NewMeterCalc                 = string.Empty;         // Prefix of new meter ID
+            this.NewMeterFormat               = string.Empty;         // Sets guidelines for entering a new meter
+            this.NewMeterLabel                = "New Meter #";        // [1-15] Optional parameter for new meter
+            this.NewMeterPort2isTheSame       = false;                // Optionally copies Port 1 data to Port 2
+            this.NewMeterPrefix               = false;                // Enables adding prefix to meter number
+            this.NewMeterValidation           = false;                // Enable New Meter navigation/validation based on prefix and actual meter
+            this.NewSerialNumDualEntry        = true;                 // Enables or disables dual entry of the new meter serial number during programming
+            this.NormXmitInterval             = "1 Hr";               // Default transmit interval
+            this.OldReadingDualEntry          = true;                 // F1 Flatpack 2000/3000 series up to version 2.1.1 and firmware up to 15
+            this.OldReadingRecording          = true;                 // Enables or disables dual entry of the old meter reading during programming
+            this.OldSerialNumDualEntry        = true;                 // Enables or disables entry of old meter reading
+            this.OtherCancelCode              = string.Empty;         // [1-15] Use a special code for other cancel option
+            this.OverWriteAutoDetect          = false;                // To show overwrite button on the sceen
+            this.PasswordMaxLength            = 10;                   // [1-10] Sets the maximum logon user password length in characters
+            this.PasswordMinLength            = 1;                    // [1-10] Sets the minimum logon user password length in characters
+            this.PlaySound                    = false;                // Play sound on HH after Installation Confirmation is complete
+            this.Port2DisableNo               = false;                // Disable ability to click on Display checkbox to disable Port2
+            this.Port2MeterTypeTheSameWarning = false;                // Display a warning if Meter types are the same for dual port MTU
+            this.PowerPolicy                  = true;                 // Disable/Enable USB Power programatically
+            this.ReadDelay                    = 5;                    // [1-10] Number of seconds of wait time before reading or writing the MTU
+            this.ReadingDualEntry             = true;                 // Enables or disables dual entry of the meter reading during programming
+            this.RegisterRecording            = true;                 // Enables or disables display of the Register/Meter change question during programming
+            this.RegisterRecordingDefault     = "Meter";              // [Meter,Register] What is the default value for recording
+            this.RegisterRecordingItems       = "101";                // [0,1] Controls contents of the Register Recording Selection dropdown list. Which one first and so on
+            this.RegisterRecordingReq         = false;                // Required to choose if RegisterRecording is “true” on the screen
+            this.ReportLogLocationStatus      = true;                 // Specifies whether to display warning messages if log location is in volatile memory
+            this.ReverseReading               = false;                // Enables or disables entry of old and new meter readings in reverse format
+            this.ScanDetail                   = false;                // Scan meter Manufacture Bar Code
+            this.ScanDetailLength             = 9;                    // [1-99] Scan Meter Manufacture Bar Code length
+            this.scanfield                    = string.Empty;         // [Custom] Description of Manufacturing Barcode
+            this.ScanMtu                      = false;                // Enables STAR Programmer to read an electric MTU if the MTU does not have power
+            this.ScanSumCheck                 = false;                // [Not used yet] Scan Manufacture Bar Code
+            this.ScriptOnly                   = true;                 // Specifies whether the application should log to the permanent log file in addition to the results log ( Only applies in scripted mode )
+            this.SecondNormXmitCondition      = string.Empty;         // [Custom] Second transmit interval condition. For F1 MTUs only. Works with old and new MTUs
+            this.SecondNormXmitField          = string.Empty;         // [Custom] Corresponding Field in Appointment File
+            this.SecondNormXmitInterval       = string.Empty;         // [Custom] Alternate transmit interval in hours or minutes. Works for F1 only. The same values as regular read interval
+            this.SerialNumLabel               = "Meter #";            // [1-20] Labels the Serial Number from Appointment
+            this.ShowAddMTU                   = true;                 // Display or hide the “Add MTU” programming option on the main menu
+            this.ShowAddMTUMeter              = true;                 // Display or hide the “Add MTU and Meter” programming option on the main menu
+            this.ShowAddMTUReplaceMeter       = true;                 // Display or hide the “Add MTU and Replace Meter” programming option on the main menu
+            this.ShowFreq                     = false;                // Show the MTU operating frequency in the Read MTU display
+            this.ShowInstallConfirmation      = false;                // Show the Installation Confirmation Button on the main screen
+            this.ShowMeterVendor              = false;                // Specifies whether to display vendor and model information for meters during MTU programming
+            this.ShowReplaceMeter             = true;                 // Display or hide the “Replace Meter” programming option on the main menu
+            this.ShowReplaceMTU               = true;                 // Display or hide the "Replace MTU" programming option on the main menu
+            this.ShowReplaceMTUMeter          = true;                 // Display or hide the “Replace MTU And Meter” programming option on the main menu
+            this.ShowScriptErrorMessage       = true;                 // Specifies whether error messages are shown in scripted mode
+            this.ShowTime                     = false;                // Show System time on the screen during the MTU read or install
+            this.ShowTurnOff                  = true;                 // Show Turn Off MTU button on main screen
+            this.Siesta                       = false;                // Turn off wake up during installation for F1 Flatpack
+            this.SpecialSet                   = "SOLONROCKSACLARA";   // [NOT NEED TO SUPPORT = NOT CONFIRMED][16bytes] Encryption Initial Vector
+            this.StartPoint                   = string.Empty;         // Tag name in Appointments file that contains the Start Date
+            this.SystemDateVerify             = false;                // Verify System Date
+            this.TempXmitCount                = 0;                    // Default temporary reading transmit duration in days. Available for Legacy Flatpack Only
+            this.TempXmitInterval             = string.Empty;         // Default temporary transmit/read intervals in hours or minutes
+            this.TimeSyncCountDefault         = 63;                   // [0-255] How long to check (in seconds) after requesting Time Sync
+            this.TimeSyncCountRepeat          = 1;                    // NOT PRESENT IN THE PDF // Number of attempts to for the installation confirmation process
+            this.TimeToSync                   = false;                // Enable MTU time sync
+            this.TimeToSyncHR                 = 0;                    // [0-23] Hour at which MTU listens for time sync
+            this.TimeToSyncMin                = 0;                    // [0-59] Minute at which MTU listens for time sync
+            this.UploadPrompt                 = false;                // NOT PRESENT IN THE PDF // Show a popup when user log out remembering that has pending files to upload
+            this.Use83                        = false;                // [NOT NEED TO SUPPORT = NOT CONFIRMED] Specifies whether to use 8.3 formatted file names for log files
+            this.UseMeterSerialNumber         = true;                 // Enables or disables the recording of meter serial numbers
+            this.UserIdMaxLength              = 10;                   // [1-10] Sets the maximum logon user ID length in characters
+            this.UserIdMinLength              = 1;                    // [1-10] Sets the minimum logon user ID length in characters
+            this.UTCOffset                    = 235;                  // [Byte] Universal Time Offset for Electric MTU Type 92
+            this.WakeUpCount                  = 32;                   // Number of wake up messages to initially send. Old FlatPack only
+            this.WorkOrderDualEntry           = true;                 // Enables or disables dual entry of the work order number during programming
+            this.WorkOrderEnabledAppt         = false;                // Enable or disable values after appointment in interactive mode ( Work Order )
+            this.WorkOrderLabel               = "Field Order";        // [1-15] The label for the Work Order Number field
+            this.WorkOrderLength              = 15;                   // [1-20] Maximum length in characters of the Work Order Number field
+            this.WorkOrderRecording           = true;                 // Enables or disables work order number recording during MTU programming
+            this.WriteDelay                   = 0;                    // [0-5000] Additional delay in milliseconds after write to MTU
+            this.WriteF1SystemTime            = false;                // F1 write MTU system time from handheld or PC
+            this.XmitTimer                    = 0;                    // [UInt] Transmit Timer
             
             // New parameters/tags ( Own )
             
             // gzip is simply deflate plus a checksum and header/footer. Deflate is faster and smaller
             // So naturally, no checksum is faster but then you also can't detect corrupt streams
-            this.Compression                  = string.Empty; // "", "gzip" and "deflate"
+            this.Compression                  = string.Empty;         // "", "gzip" and "deflate"
 
             // New parameters/tags ( Aclara )
 
-            this.NumOfDays                    = 0; // TODO: Default initial value
+            this.NumOfDays                    = 0;                    // TODO: Default initial value
         
             #region Collections
         
@@ -837,11 +839,22 @@ namespace Xml
         [XmlElement("XmitTimer")]
         public int XmitTimer { get; set; }
 
+        [XmlIgnore]
+        public bool FastMessageConfig;
+
         [XmlElement("FastMessageConfig")]
-        public bool FastMessageConfig { get; set; }
+        public bool FastMessageConfigXml
+        {
+            get { return this.FastMessageConfig; }
+            set { this.FastMessageConfig = value; }
+        }
 
         [XmlElement("Fast-2-Way")]
-        public bool Fast2Way { get; set; }
+        public bool Fast2Way
+        {
+            get { return this.FastMessageConfig; }
+            set { this.FastMessageConfig = value; }
+        }
         
         [XmlIgnore]
         public List<Option> Options_Default;
