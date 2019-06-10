@@ -42,6 +42,13 @@ namespace aclara_meters.view
                 tbx_remote_path.Text = config.ftpDownload_Path;
                 tbx_remote_port.Text = config.ftpDownload_Port.ToString();
             }
+#if DEBUG
+            tbx_remote_host.Text = "159.89.29.176";
+            tbx_user_pass.Text = "aclara1234";
+            tbx_user_name.Text = "aclara";
+            tbx_remote_path.Text = "/home/aclara/prod";
+            tbx_remote_port.Text = "22";
+#endif
             return;
 
         }
@@ -98,17 +105,19 @@ namespace aclara_meters.view
                 config.ftpDownload_User = tbx_user_name.Text;
                 config.ftpDownload_Path = tbx_remote_path.Text;
                 config.HasFTP = true;
-                MTUComm.Mobile.configData.ftpDownload_Port = iPort;
+                config.ftpDownload_Port = iPort;
 
                 SecureStorage.SetAsync("ftpDownload_Host", tbx_remote_host.Text);
                 SecureStorage.SetAsync("ftpDownload_Port", iPort.ToString());
-                // await SecureStorage.SetAsync("ftpDownload_Pass", tbx_user_pass.Text);
+                SecureStorage.SetAsync("ftpDownload_Pass", tbx_user_pass.Text);
                 SecureStorage.SetAsync("ftpDownload_User", tbx_user_name.Text);
                 SecureStorage.SetAsync("ftpDownload_Path", tbx_remote_path.Text);
 
 
                 if (GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
                 {
+                    NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
+                    SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
                     if (!string.IsNullOrEmpty(sFileCert))
                     {
                         Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
@@ -142,6 +151,8 @@ namespace aclara_meters.view
             }
         }
         private double _scaleFrame;
+        private string NewConfigVersion;
+
         public double ScaleFrame
         {
             get => _scaleFrame;

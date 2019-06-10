@@ -83,6 +83,8 @@
                                     </Label>
                                     <Label HorizontalTextAlignment="Center" x:Name="customers_version" FontSize="14" Text="Application Version: 1.20.0.0">
                                     </Label>
+                                    <Label HorizontalTextAlignment="Center" x:Name="config_version" FontSize="14" Text="Configuration Version: 1.20.0.0">
+                                    </Label>
                                     <Label HorizontalTextAlignment="Center" x:Name="customers_name" FontSize="14" Text="Licensed to: **************">
                                     </Label>
                                     <Label HorizontalTextAlignment="Center" x:Name="certificate_name" FontSize="14" Text="Certificate: none">

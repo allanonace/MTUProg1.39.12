@@ -63,6 +63,7 @@ namespace Xml
             this.CheckMTUtype                 = false; // Check if this MTU is suitable for this appointment
             this.CheckMTUvalue                = string.Empty; // What value to compare
             this.CheckSavedField              = false; // Checks and saves fields in appointment file
+            this.CheckConfigFiles             = false; //Check for updated XML config files and certificate 
             this.CoilDetect                   = true; // Check coil presence
             this.ColorEntry                   = false; // Uses a color screen for newer model handhelds
             this.ComPort                      = string.Empty; // [COM1-COM9] Default COM port to use if the CF ( compact flash ) interface card is not found
@@ -429,6 +430,9 @@ namespace Xml
 
         [XmlElement("CheckSavedField")]
         public bool CheckSavedField { get; set; }
+
+        [XmlElement("CheckConfigFiles")]
+        public bool CheckConfigFiles { get; set; }
 
         [XmlElement("CoilDetect")]
         public bool CoilDetect { get; set; }

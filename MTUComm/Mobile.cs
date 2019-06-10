@@ -219,9 +219,11 @@ namespace MTUComm
 
 
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                    return null;
+                    if (Errors.IsOwnException(e))
+                        throw e;
+                    else throw new CertificateInstalledNotValidException();
                 }
             }
 
@@ -241,10 +243,15 @@ namespace MTUComm
                                 bFound = true;
                                 break;
                             }
-                            else if (c.SubjectName == cert.SubjectName && c.NotAfter < cert.NotAfter)
+                            else if (c.NotAfter <= cert.NotAfter)
                             {
                                 store.Remove(c);  // only one certificate
                             }
+                            else 
+                            {
+                                bFound=true;  // if date is previous not save in store
+                            }
+
                         }
                         if (!bFound)
                             store.Add(cert);
@@ -254,7 +261,9 @@ namespace MTUComm
                 }
                 catch (Exception e)
                 {
-                    return false;
+                    if (Errors.IsOwnException(e))
+                        throw e;
+                    else throw new CertificateInstalledNotValidException();
                 }
             }
 
@@ -268,18 +277,33 @@ namespace MTUComm
 
                     foreach (var c in store.Certificates)
                     {
-                        this.certificate = c; //only has one 
-                        break;
+                        this.certificate = c;
+                        foreach (var c2 in store.Certificates)
+                        {
+                            if (!c.Equals(c2))
+                                if (c.NotAfter <= c2.NotAfter)
+                                    this.certificate = c2; //
+                        }
                     }
 
                     store.Close();
+
+                    if (IsCertLoaded)
+                        // Check if certificate is not valid/has expired
+                        if (DateTime.Compare(this.certificate.NotAfter, DateTime.Today) < 0)
+                            throw new CertificateInstalledExpiredException();
+
                     return true;
                 }
                 catch (Exception e)
                 {
-                    return false;
+                    if (Errors.IsOwnException(e))
+                        throw e;
+                    else throw new CertificateInstalledNotValidException();
                 }
             }
+
+
             public void GenerateCert (string sCertificate = null)
             {
                 string content;

@@ -70,6 +70,7 @@
     <Error id="810" message="App cannot comunnicate with the FTP" />
     <Error id="811" message="Sending activity logs to the FTP has failed, only _var_ files have been uploaded" />
 	<Error id="812" message="Changed configuration files"/>
+    <Error id="813" message="The new version configuration files are corrupted, the app will continues with the actual ones when restart it. Contact your IT administrator"/>
 
     <!-- DEBUG -->
     

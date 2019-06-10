@@ -14,7 +14,7 @@ namespace aclara_meters.iOS
 {
     public class MAMService : IMAMService
     {
-        public static void LoginUserMAM()
+        public void LoginUserMAM()
         {
             try
             {

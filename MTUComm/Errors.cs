@@ -156,7 +156,9 @@ namespace MTUComm
             { new FtpUpdateLogsException (),                    811 },
  		    // Changed configuration files
             { new ConfigFilesChangedException (),               812 },
-            
+            // New version files corrupted
+            { new ConfigurationFilesNewVersionException (),     813 },
+
             // DEBUG - Configuration Files and System [ 85x ]
             //-------------------------------
             // The interface for the specified MTU ID was not found

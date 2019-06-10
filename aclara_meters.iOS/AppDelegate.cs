@@ -30,12 +30,12 @@ namespace aclara_meters.iOS
             //Distribute.DontCheckForUpdatesInDebug();
 
             // Get Intun Parameters
-            var Mode = GenericUtilsClass.ChekInstallMode();
-            if (Mode.Equals("None"))
-            {
-                MAMService.LoginUserMAM();
-                Thread.Sleep(5000);
-            }
+            //var Mode = GenericUtilsClass.ChekInstallMode();
+            //if (Mode.Equals("None"))
+            //{
+            //    MAMService.LoginUserMAM();
+            //    Thread.Sleep(2000);
+            //}
 
             //Online.DownloadIntuneParameters ();
             //Parameters.PrepareFromIntune();
@@ -51,11 +51,10 @@ namespace aclara_meters.iOS
 
 
             appSave = new FormsApp ( bluetoothLowEnergyAdapter, userDialogs, appversion);
+                 
 
-           
-            // Check if FTP settings is in securestorage
-            GenericUtilsClass.CheckFTPDownload();
 
+            //string user = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
             //TEST.Test ();
 
             base.LoadApplication ( appSave );

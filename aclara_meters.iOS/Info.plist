@@ -5,7 +5,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>aclara-mtu-programmer</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.aclara.mtu.programmer</string>
+	<string>com.aclara.programmer</string>
 	<key>CFBundleName</key>
 	<string>Aclara MTU Programmer</string>
 	<key>CFBundleShortVersionString</key>

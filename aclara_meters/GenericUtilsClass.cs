@@ -25,6 +25,7 @@ namespace aclara_meters
         private const string XML_EXT = ".xml";
         private const string CER_TXT = "certificate.txt";
         private const string XML_CER = ".cer";
+        private const string FIL_VER = ".ver";
         private const string INSTALL_MODE = "InstallMode";
 
         private static string[] filesToCheck =
@@ -317,6 +318,7 @@ namespace aclara_meters
                 data.ftpDownload_Host = Host.Result;
                 data.ftpDownload_Path = SecureStorage.GetAsync("ftpDownload_Path").Result;
                 data.ftpDownload_User = SecureStorage.GetAsync("ftpDownload_User").Result;
+                data.ftpDownload_Pass = SecureStorage.GetAsync("ftpDownload_Pass").Result;
                 data.ftpDownload_Port = int.Parse(SecureStorage.GetAsync("ftpDownload_Port").Result);
                 data.HasFTP = true;
                 data.HasIntune = false;
@@ -337,6 +339,64 @@ namespace aclara_meters
 
             }
             return false;
+        }
+
+        public static string CheckFTPConfigVersion()
+        {
+            string sVersion = string.Empty;
+            try
+            {
+                Mobile.ConfigData data = Mobile.configData;
+                using (SftpClient sftp = new SftpClient(data.ftpDownload_Host, data.ftpDownload_Port, data.ftpDownload_User, data.ftpDownload_Pass))
+                {
+                    sftp.Connect();
+
+                    foreach (SftpFile file in sftp.ListDirectory(data.ftpDownload_Path))
+                    {
+                        if (file.Name.Contains(FIL_VER))
+                        {
+                            sVersion = file.Name.Substring(0, file.Name.Length - 4); // delete ".ver"
+                            break;
+                        }
+                    }
+                    sftp.Disconnect();
+                    if (string.IsNullOrEmpty(sVersion))
+                        return "Version_0";
+                    return sVersion;
+                }
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+        }
+
+        public static string CheckPubConfigVersion()
+        {
+            string sVersion = string.Empty;
+            try
+            {
+                DirectoryInfo info = new DirectoryInfo(Mobile.ConfigPublicPath);
+                FileInfo[] files = info.GetFiles();
+
+                foreach (FileInfo file in files)
+                {
+                    if (file.Name.Contains(FIL_VER))
+                    {
+                        //sVersion = file.Name.Substring(0, file.Name.Length - 4); // delete ".ver"
+                        sVersion = Path.GetFileNameWithoutExtension(file.Name); // delete ".ver"
+                        break;
+                    }
+                }   
+                if (string.IsNullOrEmpty(sVersion))
+                    return "Version_0";
+                return sVersion;
+             
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
         }
 
         public static bool DownloadConfigFiles( out string sfileCert)
@@ -363,7 +423,7 @@ namespace aclara_meters
                         string name = file.Name;
                         if (name.ToLower().Contains(XML_CER)) sfileCert = name.ToLower();
 
-                        if (name.Contains(XML_CER) ||
+                        if (name.Contains(XML_CER) || //name.Contains(FIL_VER) ||
                           ( name.Contains(XML_EXT) && CheckConfigFile(name.ToLower())))
                         {
                             string sfile = Path.Combine(configPath, name.ToLower());
@@ -474,22 +534,28 @@ namespace aclara_meters
             
             return ok;
         }
-
-
-        public static void CopyConfigFilesToPrivate(bool bRemove, out string sFileCert)
+               
+        public static void CopyConfigFiles(bool bRemove, string sPathFrom, string sPathTo, out string sFileCert)
         {
             sFileCert = string.Empty;
+            string fileCopy = string.Empty;
             try
             {
-                DirectoryInfo info = new DirectoryInfo(Mobile.ConfigPublicPath);
+                Mobile.CreateIfNotExist(sPathTo);
+
+                DirectoryInfo info = new DirectoryInfo(sPathFrom);
                 FileInfo[] files = info.GetFiles();
 
                 foreach (FileInfo file in files)
                 {
                     if (file.Name.Contains(XML_CER)) sFileCert = file.Name.ToLower();
-                    string fileCopy = Path.Combine(Mobile.ConfigPath, file.Name.ToLower());
-                    
-                    file.CopyTo(fileCopy,true);
+
+                    if (file.Name.Contains(XML_CER) || //name.Contains(FIL_VER) ||
+                          (file.Name.Contains(XML_EXT) && CheckConfigFile(file.Name.ToLower())))
+                    {
+                        fileCopy = Path.Combine(sPathTo, file.Name.ToLower());
+                    }
+                    file.CopyTo(fileCopy, true);
                     if (bRemove) file.Delete();
                 }
             }
@@ -500,10 +566,14 @@ namespace aclara_meters
             }
         }
 
-        public static bool TagGlobal(string sTag, out dynamic value)
+        public static bool TagGlobal(bool bPublic, string sTag, out dynamic value)
         {
             string sVal = String.Empty;
-            string uri = Path.Combine(Mobile.ConfigPublicPath, Configuration.XML_GLOBAL);
+            string uri;
+            if (bPublic)
+                uri = Path.Combine(Mobile.ConfigPublicPath, Configuration.XML_GLOBAL);
+            else
+                uri = Path.Combine(Mobile.ConfigPath, Configuration.XML_GLOBAL);
 
             XDocument doc = XDocument.Load(uri);
             foreach (XElement xElement in doc.Root.Elements())
@@ -565,6 +635,24 @@ namespace aclara_meters
             Console.WriteLine("Are all config.files deleted? " + ((ok) ? "OK" : "NO"));
 
             return ok;
+        }
+
+        public static void BackUpConfigFiles()
+        {
+            string sPathBackup = Path.Combine(Mobile.ConfigPath, "Backup");
+
+            CopyConfigFiles(true, Mobile.ConfigPath, sPathBackup, out string sFileCert);
+
+        }
+        public static void RestoreConfigFiles()
+        {
+            
+            string sPathBackup = Path.Combine(Mobile.ConfigPath, "Backup");
+
+            CopyConfigFiles(true, sPathBackup, Mobile.ConfigPath, out string sFileCert);
+
+            Directory.Delete(sPathBackup);
+
         }
 
     }
