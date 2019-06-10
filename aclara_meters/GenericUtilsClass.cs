@@ -541,7 +541,7 @@ namespace aclara_meters
             string fileCopy = string.Empty;
             try
             {
-                Mobile.CreateIfNotExist(sPathTo);
+                Mobile.CreateDirectoryIfNotExist(sPathTo);
 
                 DirectoryInfo info = new DirectoryInfo(sPathFrom);
                 FileInfo[] files = info.GetFiles();

@@ -15,7 +15,11 @@ namespace aclara_meters.Droid
 
     public class MAMService : IMAMService
     {
-        
+        public void LoginUserMAM()
+        {
+            throw new NotImplementedException();
+        }
+
         public void UtilMAMService()
         {
             IMAMAppConfigManager _configManager;
