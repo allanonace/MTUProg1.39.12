@@ -114,16 +114,19 @@ namespace MTUComm
             logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuType", "MTU Type", this.mtuBasicInfo.Type ) );
             logger.AddParameter ( this.addMtuAction, form.ReadInterval );
 
-            bool   useDailyReads    = ( global.AllowDailyReads && 
-                                        mtu.DailyReads &&
-                                        form.ContainsParameter ( FIELD.SNAP_READS ) );
+            if ( form.ContainsParameter ( FIELD.SNAP_READS ) )
+            {
+                bool   useDailyReads    = ( global.AllowDailyReads && 
+                                            mtu.DailyReads &&
+                                            form.ContainsParameter ( FIELD.SNAP_READS ) );
 
-            string dailyReads       = ( useDailyReads ) ? form.SnapReads.Value : DISABLED;
-            string dailyGmtHourRead = ( useDailyReads ) ? form.SnapReads.Value : DISABLED;
-            logger.AddParameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
-            
-            if ( ! dailyGmtHourRead.Equals ( DISABLED ) )
-                logger.AddParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
+                string dailyReads       = ( useDailyReads ) ? form.SnapReads.Value : DISABLED;
+                string dailyGmtHourRead = ( useDailyReads ) ? form.SnapReads.Value : DISABLED;
+                logger.AddParameter(this.addMtuAction, new Parameter("DailyGMTHourRead", "GMT Daily Reads", dailyGmtHourRead));
+                
+                if ( ! dailyGmtHourRead.Equals ( DISABLED ) )
+                    logger.AddParameter(this.addMtuAction, new Parameter("DailyReads", "Daily Reads", dailyReads));
+            }
 
             if ( global.TimeToSync &&
                  mtu.TimeToSync    &&

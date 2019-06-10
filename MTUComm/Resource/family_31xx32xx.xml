@@ -60,8 +60,8 @@
     <Description>Gas Cut Wire Tamper Status Port 1</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P1CutWireAlarm</Register>
-      <Register>P1CutWireTamper</Register>
+      <Register>GasCutWireAlarm</Register>
+      <Register>P1GasCutWireTamper</Register>
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
@@ -70,8 +70,8 @@
     <Description>Gas Cut Wire Tamper Status Port 2</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P2CutWireAlarm</Register>
-      <Register>P2CutWireTamper</Register>
+      <Register>P2GasCutWireAlarm</Register>
+      <Register>P2GasCutWireTamper</Register>
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>

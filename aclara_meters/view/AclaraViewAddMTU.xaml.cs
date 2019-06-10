@@ -787,7 +787,7 @@ namespace aclara_meters.view
 
             #region Snap Reads / Daily Reads
 
-            bool useDailyReads        = global.AllowDailyReads && this.currentMtu.DailyReads;
+            bool useDailyReads        = global.AllowDailyReads && this.currentMtu.DailyReads && ! this.currentMtu.IsFamilly33xx;
             bool changeableDailyReads = global.IndividualDailyReads;
             int  dailyReadsDefault    = global.DailyReadsDefault;
             
@@ -4226,7 +4226,8 @@ namespace aclara_meters.view
             // Snap Reads [ SOLO SE LOGEA ¿? ]
             if ( ( DEBUG_AUTO_MODE_ON && DEBUG_SNAPSREADS_OK || ! DEBUG_AUTO_MODE_ON ) &&
                  global.AllowDailyReads &&
-                 mtu.DailyReads )
+                 mtu.DailyReads &&
+                 ! mtu.IsFamilly33xx )
                 this.addMtuForm.AddParameter ( FIELD.SNAP_READS, value_sre );
 
             // Is a two-way MTU

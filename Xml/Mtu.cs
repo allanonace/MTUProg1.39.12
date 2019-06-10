@@ -32,7 +32,7 @@ namespace Xml
             this.GasCutWireAlarmImm         = false;
             this.InsufficientMemory         = false;
             this.InsufficientMemoryImm      = false;
-            this.InterfaceTamper            = true;
+            this.InterfaceTamper            = false;
             this.InterfaceTamperImm         = false;
             this.LastGasp                   = false;
             this.LastGaspImm                = false;

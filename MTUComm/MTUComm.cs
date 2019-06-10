@@ -796,7 +796,7 @@ namespace MTUComm
 
         #endregion
 
-        #region ReadFabric
+        #region Read Fabric
 
         public async Task Task_ReadFabric ()
         {
@@ -1555,8 +1555,10 @@ namespace MTUComm
 
                 #region Snap Reads
 
-                if ( global.AllowDailyReads && mtu.DailyReads &&
-                     form.ContainsParameter ( FIELD.SNAP_READS ) )
+                if ( global.AllowDailyReads &&
+                     mtu.DailyReads &&
+                     form.ContainsParameter ( FIELD.SNAP_READS ) ) // &&
+                     //map.ContainsMember ( "DailyGMTHourRead" ) )
                 {
                     map.DailyGMTHourRead = form.SnapReads.Value;
                 }

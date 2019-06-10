@@ -213,9 +213,10 @@
     <Description>Mtu software version</Description>
     <Type>string</Type>
     <Registers>
-     <Register>MtuSoftRevYear</Register>
-     <Register>MtuSoftRevMonth</Register>
-     <Register>MtuSoftBuildNumber</Register>
+      <Register>MtuSoftVersion</Register>
+      <Register>MtuSoftRevYear</Register>
+      <Register>MtuSoftRevMonth</Register>
+      <Register>MtuSoftBuildNumber</Register>
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
@@ -242,34 +243,34 @@
     <Description>P1 Backflow state</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P1FlowState</Register>
+      <Register>P1EcoderFlowAlarms</Register>
     </Registers>
     <CustomGet>method:BackFlowState_Get</CustomGet>
   </Overload>
   <Overload>
-    <Id>P1DaysOfNoFlowState</Id>
+    <Id>P1DaysOfNoFlow</Id>
     <Description>P1 Days of no flow</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P1FlowState</Register>
+      <Register>P1EcoderFlowAlarms</Register>
     </Registers>
     <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
   </Overload>
   <Overload>
-    <Id>P1LeakDetectionState</Id>
+    <Id>P1LeakDetection</Id>
     <Description>P1 Leak detection state</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P1LeakState</Register>
+      <Register>P1EcoderLeakAlarms</Register>
     </Registers>
     <CustomGet>method:LeakDetection_Get</CustomGet>
   </Overload>
   <Overload>
-    <Id>P1DaysOfLeakState</Id>
+    <Id>P1DaysOfLeak</Id>
     <Description>P1 Days of leak</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P1LeakState</Register>
+      <Register>P1EcoderLeakAlarms</Register>
     </Registers>
     <CustomGet>method:DaysOfLeak_Get</CustomGet>
   </Overload>
@@ -278,34 +279,34 @@
     <Description>P2 Backflow state</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P2FlowState</Register>
+      <Register>P2EcoderFlowAlarms</Register>
     </Registers>
     <CustomGet>method:BackFlowState_Get</CustomGet>
   </Overload>
   <Overload>
-    <Id>P2DaysOfNoFlowState</Id>
+    <Id>P2DaysOfNoFlow</Id>
     <Description>P2 Days of no flow</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P2FlowState</Register>
+      <Register>P2EcoderFlowAlarms</Register>
     </Registers>
     <CustomGet>method:DaysOfNoFlow_Get</CustomGet>
   </Overload>
   <Overload>
-    <Id>P2LeakDetectionState</Id>
+    <Id>P2LeakDetection</Id>
     <Description>P2 Leak detection state</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P2LeakState</Register>
+      <Register>P2EcoderLeakAlarms</Register>
     </Registers>
     <CustomGet>method:LeakDetection_Get</CustomGet>
   </Overload>
   <Overload>
-    <Id>P2DaysOfLeakState</Id>
+    <Id>P2DaysOfLeak</Id>
     <Description>P2 Days of leak</Description>
     <Type>string</Type>
     <Registers>
-      <Register>P2LeakState</Register>
+      <Register>P2EcoderLeakAlarms</Register>
     </Registers>
     <CustomGet>method:DaysOfLeak_Get</CustomGet>
   </Overload>
@@ -696,7 +697,7 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>P1FlowState</Id>
+    <Id>P1EcoderFlowAlarms</Id>
     <Description>Port 1 Flow State Record</Description>
     <Type>int</Type>
     <Address>102</Address>
@@ -706,7 +707,7 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>P1LeakState</Id>
+    <Id>P1EcoderLeakAlarms</Id>
     <Description>Port 1 Leak State Record</Description>
     <Type>int</Type>
     <Address>103</Address>
@@ -726,7 +727,7 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>P2FlowState</Id>
+    <Id>P2EcoderFlowAlarms</Id>
     <Description>Port 2 Flow State Record</Description>
     <Type>int</Type>
     <Address>110</Address>
@@ -736,7 +737,7 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>P2LeakState</Id>
+    <Id>P2EcoderLeakAlarms</Id>
     <Description>Port 2 Leak State Record</Description>
     <Type>int</Type>
     <Address>111</Address>
