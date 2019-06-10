@@ -34,6 +34,11 @@ namespace aclara_meters.view
         public async void Btn_FTP_Clicked(object sender, EventArgs e)
         {
             bool result;
+            if (Mobile.IsNetAvailable())
+            {
+                await DisplayAlert("Attention", "No internet connection, try later", "OK");
+                return;
+            }
             GenericUtilsClass.SetInstallMode("FTP");
             TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
             await Navigation.PushAsync(new FtpDownloadSettings(tcs));
@@ -44,6 +49,11 @@ namespace aclara_meters.view
         }
         public async void Btn_Intune_Clicked(object sender, EventArgs e)
         {
+            if (Mobile.IsNetAvailable())
+            {
+                await DisplayAlert("Attention", "No internet connection, try later", "OK");
+                return;
+            }
             GenericUtilsClass.SetInstallMode("Intune");
             var MamServ = DependencyService.Get<IMAMService>();
             MamServ.LoginUserMAM();
