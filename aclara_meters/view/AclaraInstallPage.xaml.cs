@@ -34,7 +34,7 @@ namespace aclara_meters.view
         public async void Btn_FTP_Clicked(object sender, EventArgs e)
         {
             bool result;
-            if (Mobile.IsNetAvailable())
+            if (!Mobile.IsNetAvailable())
             {
                 await DisplayAlert("Attention", "No internet connection, try later", "OK");
                 return;
@@ -49,7 +49,7 @@ namespace aclara_meters.view
         }
         public async void Btn_Intune_Clicked(object sender, EventArgs e)
         {
-            if (Mobile.IsNetAvailable())
+            if (!Mobile.IsNetAvailable())
             {
                 await DisplayAlert("Attention", "No internet connection, try later", "OK");
                 return;

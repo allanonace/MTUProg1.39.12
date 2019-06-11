@@ -345,7 +345,7 @@
     </PackageReference>
     <Compile Include="TEST.cs" />
     <PackageReference Include="Microsoft.Intune.MAM.Xamarin.iOS">
-      <Version>10.0.7</Version>
+      <Version>8.1.1.2</Version>
     </PackageReference>
   </ItemGroup>
   <Target Name="_CompileITunesMetadata" DependsOnTargets="_DetectSdkLocations;_DetectAppManifest;_GenerateBundleName;_CompileAppManifest">
