@@ -158,6 +158,8 @@ namespace MTUComm
             { new ConfigFilesChangedException (),               812 },
             // New version files corrupted
             { new ConfigurationFilesNewVersionException (),     813 },
+            // Intune credentials missing
+            { new IntuneCredentialsException (),                814 },
 
             // DEBUG - Configuration Files and System [ 85x ]
             //-------------------------------

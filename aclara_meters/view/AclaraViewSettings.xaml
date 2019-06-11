@@ -305,7 +305,7 @@
                                                     <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                         <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" >
                                                             <Controls:BorderlessEntry Margin="0,0,0,0"  
-                                                                                  HorizontalOptions="FillAndExpand"
+                                                                                  HorizontalOptions="FillAndExpand" IsPassword="true"
                                                                                   Text="" HeightRequest="40" x:Name="tbx_user_pass" 
                                                                                   Keyboard="Text" FontSize="17"
                                                                                   HorizontalTextAlignment="Start">

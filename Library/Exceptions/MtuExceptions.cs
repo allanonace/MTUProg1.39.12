@@ -249,6 +249,11 @@
         public ConfigurationFilesNewVersionException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
 
+    public class IntuneCredentialsException : OwnExceptionsBase
+    {
+        public IntuneCredentialsException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+    }
+
     public class CertificateFileNotValidException : OwnExceptionsBase
     {
         public CertificateFileNotValidException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }

@@ -251,8 +251,15 @@ namespace aclara_meters
 
                         return true;
                     }
+                    else
+                    {
+                        this.ShowErrorAndKill(new IntuneCredentialsException());
+                        GenericUtilsClass.SetInstallMode("None");
+                        return false;
+                    }
                 }
-                this.ShowErrorAndKill(new NoInternetException());
+                else
+                    this.ShowErrorAndKill(new NoInternetException());
                 //MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
                 return false;
             }
