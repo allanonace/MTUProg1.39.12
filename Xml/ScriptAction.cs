@@ -33,11 +33,11 @@ namespace Xml
         [XmlElement("ActivityLogId")]
         public ActionParameter ActivityLogId { get; set; }
 
-        [XmlElement("Port2Disabled")]
-        public ActionParameter Port2Disabled { get; set; }
+        //[XmlElement("Port2Disabled")]
+        //public ActionParameter Port2Disabled { get; set; }
 
-        [XmlElement("ProvidingHandFactor")]
-        public ActionParameter ProvidingHandFactor { get; set; }
+        //[XmlElement("ProvidingHandFactor")]
+        //public ActionParameter ProvidingHandFactor { get; set; }
 
         [XmlElement("OldMtuId")]
         public ActionParameter OldMtuId { get; set; }
@@ -51,17 +51,17 @@ namespace Xml
         [XmlElement("ForceTimeSync")]
         public ActionParameter ForceTimeSync { get; set; }
 
-        [XmlElement("LiveDigits")]
-        public ActionParameter LiveDigits { get; set; }
+        //[XmlElement("LiveDigits")]
+        //public ActionParameter LiveDigits { get; set; }
 
-        [XmlElement("TempReadInterval")]
-        public ActionParameter TempReadInterval { get; set; }
+        //[XmlElement("TempReadInterval")]
+        //public ActionParameter TempReadInterval { get; set; }
 
         [XmlElement("Alarm")]
         public ActionParameter Alarm { get; set; }
 
-        [XmlElement("TempReadDays")]
-        public ActionParameter TempReadDays { get; set; }
+        //[XmlElement("TempReadDays")]
+        //public ActionParameter TempReadDays { get; set; }
 
         [XmlElement("Custom")]
         public ActionParameter Custom { get; set; }
@@ -92,18 +92,14 @@ namespace Xml
         [XmlElement("MeterSerialNumber")]
         public ActionParameter[] MeterSerialNumber { get; set; }
 
-
         [XmlElement("NewMeterSerialNumber")]
         public ActionParameter[] NewMeterSerialNumber { get; set; }
-
      
         [XmlElement("NewMeterReading")]
         public ActionParameter[] NewMeterReading { get; set; }
-       
         
         [XmlElement("MeterReading")]
         public ActionParameter[] MeterReading { get; set; }
-
         
         [XmlElement("MeterType")]
         public ActionParameter[] MeterType { get; set; }
