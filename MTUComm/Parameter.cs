@@ -13,18 +13,18 @@ namespace MTUComm
             ActivityLogId = 0,
             MeterType = 1,
             UnitOfMeasure = 2,
-            Port2Disabled = 3,
+            //Port2Disabled = 3,
             AccountNumber = 4,
-            ProvidingHandFactor = 5,
+            //ProvidingHandFactor = 5,
             ReadInterval = 6,
             ForceTimeSync = 7,
             WorkOrder = 8,
-            LiveDigits = 9,
-            TempReadInterval = 10,
+            //LiveDigits = 9,
+            //TempReadInterval = 10,
             Alarm = 11,
             MeterSerialNumber = 12,
             NumberOfDials = 13,
-            TempReadDays = 14,
+            //TempReadDays = 14,
             MeterReading = 15,
             DriveDialSize = 16,
             SnapRead = 17,
@@ -33,7 +33,7 @@ namespace MTUComm
             NewMeterSerialNumber = 20,
             OldMeterReading = 21,
             NewMeterReading = 22,
-            DaysOfRead = 23,
+            //DaysOfRead = 23,
             Custom = 24
         };
 
@@ -58,18 +58,18 @@ namespace MTUComm
             {ParameterType.ActivityLogId, new ParameterDefine(true, true, "ActivityLogId", "") },
             {ParameterType.MeterType, new ParameterDefine(true, true, "Port{0}MeterType", "Meter Type")},
             {ParameterType.UnitOfMeasure, new ParameterDefine(true, true, "UnitOfMeasure", "")},
-            {ParameterType.Port2Disabled, new ParameterDefine(true, true, "Port2Disabled", "")},
+            //{ParameterType.Port2Disabled, new ParameterDefine(true, true, "Port2Disabled", "")},
             {ParameterType.AccountNumber, new ParameterDefine(true, true, "Port{0}AccountNumber", "Service Pt. ID")},
-            {ParameterType.ProvidingHandFactor, new ParameterDefine(true, true, "ProvidingHandFactor", "")},
+            //{ParameterType.ProvidingHandFactor, new ParameterDefine(true, true, "ProvidingHandFactor", "")},
             {ParameterType.ReadInterval, new ParameterDefine(true, true, "ReadInterval", "Read Interval")},
             {ParameterType.ForceTimeSync, new ParameterDefine(true, true, "ForceTimeSync", "")},
             {ParameterType.WorkOrder, new ParameterDefine(true, true, "WorkOrder", "Field Order")},
-            {ParameterType.LiveDigits, new ParameterDefine(true, true, "LiveDigits", "")},
-            {ParameterType.TempReadInterval, new ParameterDefine(true, true, "TempReadInterval", "")},
+            //{ParameterType.LiveDigits, new ParameterDefine(true, true, "LiveDigits", "")},
+            //{ParameterType.TempReadInterval, new ParameterDefine(true, true, "TempReadInterval", "")},
             {ParameterType.Alarm, new ParameterDefine(true, true, "Alarm", "")},
             {ParameterType.MeterSerialNumber, new ParameterDefine(true, true, "MeterSerialNumber", "Meter Number")},
             {ParameterType.NumberOfDials, new ParameterDefine(true, true, "NumberOfDials", "")},
-            {ParameterType.TempReadDays, new ParameterDefine(true, true, "TempReadDays", "")},
+            //{ParameterType.TempReadDays, new ParameterDefine(true, true, "TempReadDays", "")},
             {ParameterType.MeterReading, new ParameterDefine(true, true, "MeterReading", "Meter Reading")},
             {ParameterType.DriveDialSize, new ParameterDefine(true, true, "DriveDialSize", "")},
             {ParameterType.SnapRead, new ParameterDefine(true, true, "SnapRead", "")},
@@ -78,10 +78,9 @@ namespace MTUComm
             {ParameterType.NewMeterSerialNumber, new ParameterDefine(true, true, "Port{0}NewMeterSerialNumber", "New Meter Serial Number")},
             {ParameterType.OldMeterReading, new ParameterDefine(true, true, "Port{0}OldMeterReading", "Old Meter Reading")},
             {ParameterType.NewMeterReading, new ParameterDefine(true, true, "Port{0}NewMeterReading", "")},
-            {ParameterType.DaysOfRead, new ParameterDefine(true, true, "DaysOfRead", "DaysOfRead")},
+            //{ParameterType.DaysOfRead, new ParameterDefine(true, true, "DaysOfRead", "DaysOfRead")},
             {ParameterType.Custom, new ParameterDefine(true, true, "{1}", "{1}")}
         };
-
 
         private Boolean has_port = false;
         private int port = 0;
