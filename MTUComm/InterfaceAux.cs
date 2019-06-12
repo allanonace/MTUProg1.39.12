@@ -31,7 +31,8 @@ namespace MTUComm
             int interfaceIndex;
 
             // Gas MTUs of family 33xx should use family 31xx32xx memorymap
-            if ( mtu.Port1.IsForPulse &&
+            if ( mtu.IsFamilly33xx &&
+                 mtu.Port1.IsForPulse &&
                  ( mtu.Ports[ 0 ].Type.Contains ( "M" ) ||
                    mtu.Ports[ 0 ].Type.Contains ( "R" ) ||
                    ( meterIdIsNumeric &&
