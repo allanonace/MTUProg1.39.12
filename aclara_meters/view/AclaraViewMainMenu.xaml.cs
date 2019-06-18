@@ -113,11 +113,18 @@ namespace aclara_meters.view
             }
 
             // Upload log files and then start pucks detection
-            this.UpdateFiles ();
+            this.UploadFilesAndCheckCertificate ();
         }
 
-        public async void UpdateFiles ()
+        public async void UploadFilesAndCheckCertificate()
         {
+            if (Mobile.configData.IsCertLoaded)
+            {
+               if (Mobile.configData.certificate.NotAfter.AddMonths(-2) <= DateTime.Today)
+                {
+                   await Application.Current.MainPage.DisplayAlert("Alert", $"The installed certificate will expire on: {Mobile.configData.certificate.NotAfter.ToShortDateString()}", "OK");
+                }
+            }
             // Upload log files
             if (FormsApp.config.Global.UploadPrompt)
                 await GenericUtilsClass.UploadFiles ();
