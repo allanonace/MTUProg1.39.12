@@ -4,6 +4,10 @@
 .sass-cache/
 .tscache/
 .vscode/
+.sonarlint/
+.sonarqube/
+.scannerwork/
+
 node_modules/
 lib/packages/
 obj/
@@ -33,3 +37,6 @@ project.lock.json
 artifacts/
 
 *.Cache
+*.ruleset
+*.old
+*.bat
