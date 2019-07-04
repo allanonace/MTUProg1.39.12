@@ -1,10 +1,7 @@
 ﻿using System;
 using Android.App;
 using Android.Runtime;
-//using Microsoft.Intune.Mam.Client.App;
-//using Microsoft.Intune.Mam.Client.Notification;
-//using Microsoft.Intune.Mam.Policy;
-//using Microsoft.Intune.Mam.Policy.Notification;
+using Microsoft.Intune.Mam.Client.App;
 
 namespace aclara_meters.Droid
 {
@@ -18,18 +15,18 @@ namespace aclara_meters.Droid
     [Application(AllowBackup = false, AllowClearUserData = true)]
 #endif
 
-    public class MyApplication : Application
+    public class MyApplication : MAMApplication
     {
         protected MyApplication(IntPtr javaReference, JniHandleOwnership transfer)
         : base(javaReference, transfer)
         {
         }
 
-      
-        //public override byte[] GetADALSecretKey()
-        //{
-        //    return null;
-        //}
+
+        public override byte[] GetADALSecretKey()
+        {
+            return null;
+        }
     }
 
 }

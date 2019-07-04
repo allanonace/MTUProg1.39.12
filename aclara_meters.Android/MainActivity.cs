@@ -32,17 +32,17 @@ namespace aclara_meters.Droid
         /// you don't need to implement this -- you can still query the state of the adapter, the observable just won't work. See
         /// <see cref="IBluetoothLowEnergyAdapter.State" />
         /// </remarks>
-        protected override void OnActivityResult(Int32 requestCode, Result resultCode, Intent data)
+        protected override void OnMAMActivityResult(Int32 requestCode, Result resultCode, Intent data)
         {
             BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
         }
 
-        protected override void OnCreate(Bundle bundle)
+        protected override void OnMAMCreate(Bundle bundle)
         {
             //TabLayoutResource = Resource.Layout.Tabbar;
             // ToolbarResource = Resource.Layout.Toolbar;
 
-            base.OnCreate(bundle);
+            base.OnMAMCreate(bundle);
 
             UserDialogs.Init(this);
             global::Xamarin.Forms.Forms.Init(this, bundle);
@@ -133,17 +133,17 @@ namespace aclara_meters.Droid
         /// you don't need to implement this -- you can still query the state of the adapter, the observable just won't work. See
         /// <see cref="IBluetoothLowEnergyAdapter.State" />
         /// </remarks>
-        protected override void OnActivityResult(Int32 requestCode, Result resultCode, Intent data)
+        protected override void OnMAMActivityResult(Int32 requestCode, Result resultCode, Intent data)
         {
             BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
         }
 
-        protected override void OnCreate(Bundle bundle)
+        protected override void OnMAMCreate(Bundle bundle)
         {
             //TabLayoutResource = Resource.Layout.Tabbar;
            // ToolbarResource = Resource.Layout.Toolbar;
 
-            base.OnCreate(bundle);
+            base.OnMAMCreate(bundle);
 
             UserDialogs.Init(this);
             global::Xamarin.Forms.Forms.Init(this, bundle);
