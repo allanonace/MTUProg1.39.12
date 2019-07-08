@@ -293,5 +293,40 @@ namespace Library
         }
 
         #endregion
+
+        #region String
+
+        public static string FirstCharToCapital (
+            object value )
+        {
+            Type type = value.GetType ();
+            if ( type.IsClass ||
+                 type.IsArray )
+            {
+                return string.Empty;
+            }
+
+            string str = value.ToString ();
+            return str[ 0 ].ToString ().ToUpper () + str.Substring ( 1 );
+        }
+
+        #endregion
+
+        #region Type
+
+        public static bool IsBool (
+            object value )
+        {
+            if ( value is bool )
+                return true;
+
+            if ( ! ( value is string ) )
+                return false;
+
+            bool ok;
+            return bool.TryParse ( value.ToString (), out ok );
+        }
+
+        #endregion        
     }
 }

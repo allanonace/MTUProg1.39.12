@@ -315,7 +315,7 @@ namespace aclara_meters.view
 
                 Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
 
-                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields ( mtu, ActionType.ReadMtu );
+                InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
                 foreach (InterfaceParameters parameter in interfacesParams)
                 {
                     if (parameter.Name.Equals("Port"))

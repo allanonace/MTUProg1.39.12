@@ -408,10 +408,6 @@ namespace MTUComm
                  form.ContainsParameter ( FIELD.GPS_LONGITUDE ) &&
                  form.ContainsParameter ( FIELD.GPS_ALTITUDE  ) )
             {
-                //logger.logParameter ( this.addMtuAction, form.GPS_LATITUDE  );
-                //logger.logParameter ( this.addMtuAction, form.GPS_LONGITUDE );
-                //logger.logParameter ( this.addMtuAction, form.GPS_ALTITUDE  );
-
                 logger.AddParameter(this.addMtuAction, new Parameter("GPS_Y", "Lat", form.GPSLat.Value ));
                 logger.AddParameter(this.addMtuAction, new Parameter("GPS_X", "Long", form.GPSLon.Value ));
                 logger.AddParameter(this.addMtuAction, new Parameter("Altitude", "Elevation", form.GPSAlt.Value ));
@@ -434,7 +430,7 @@ namespace MTUComm
             logger.AddAtrribute(this.readMtuAction, "display", Action.displays[ActionType.ReadMtu]);
             logger.AddAtrribute(this.readMtuAction, "type", Action.tag_types[ActionType.ReadMtu]);
 
-            InterfaceParameters[] parameters = this.config.getLogInterfaceFields( form.mtu, ActionType.ReadMtu );
+            InterfaceParameters[] parameters = this.config.getLogParamsFromInterface( form.mtu, ActionType.ReadMtu );
             foreach (InterfaceParameters parameter in parameters)
             {
                 try

@@ -27,36 +27,34 @@ namespace MTUComm
     {
         #region Constants
 
-        private const int BASIC_READ_1_ADDRESS = 0;
-        private const int BASIC_READ_1_DATA    = 32;
-        private const int BASIC_READ_2_ADDRESS = 244;
-        private const int BASIC_READ_2_DATA    = 1;
-        private const int DEFAULT_OVERLAP      = 6;
-        private const int DEFAULT_LENGTH_AES   = 16;
-        private const int SAME_MTU_ADDRESS     = 0;
-        private const int SAME_MTU_DATA        = 10;
-        private const int IC_OK                = 0;
-        private const int IC_NOT_ACHIEVED      = 1;
-        private const int IC_EXCEPTION         = 2;
-        private const int WAIT_BTW_TURNOFF     = 500;
-        private const int WAIT_BTW_IC          = 1000;
-        private const int WAIT_BEFORE_READ     = 1000;
-        private const int TIMES_TURNOFF        = 3;
-        private const int DATA_READ_END_DAYS   = 60;
-        private const byte CMD_START_LOGS      = 0x13;
-        private const byte CMD_NEXT_LOG        = 0x14;
-        private const byte CMD_LAST_LOG        = 0x15;
-        private const int CMD_NEXT_RESULT_1    = 25;
-        private const int CMD_NEXT_RESULT_2    = 5;
-        private const int CMD_NEXT_BYTE_RESULT = 2;
-        private const byte CMD_NEXT_WITH_DATA  = 0x00;
-        private const byte CMD_NEXT_NO_DATA    = 0x01;
-        private const byte CMD_NEXT_BUSY       = 0x02;
-
-        private const int WAIT_BEFORE_LOGS     = 1000;
-        private const int WAIT_BTW_LOG_ERRORS  = 1000;
-        private const int WAIT_BTW_LOGS        = 100;
-
+        private const int BASIC_READ_1_ADDRESS    = 0;
+        private const int BASIC_READ_1_DATA       = 32;
+        private const int BASIC_READ_2_ADDRESS    = 244;
+        private const int BASIC_READ_2_DATA       = 1;
+        private const int DEFAULT_OVERLAP         = 6;
+        private const int DEFAULT_LENGTH_AES      = 16;
+        private const int SAME_MTU_ADDRESS        = 0;
+        private const int SAME_MTU_DATA           = 10;
+        private const int IC_OK                   = 0;
+        private const int IC_NOT_ACHIEVED         = 1;
+        private const int IC_EXCEPTION            = 2;
+        private const int WAIT_BTW_TURNOFF        = 500;
+        private const int WAIT_BTW_IC             = 1000;
+        private const int WAIT_BEFORE_READ        = 1000;
+        private const int TIMES_TURNOFF           = 3;
+        private const int DATA_READ_END_DAYS      = 60; // In STARProgrammer code is used .AddSeconds ( 86399 ) -> 86399 / 60 / 24 = 59,999 = 60 days
+        private const byte CMD_INIT_EVENT_LOGS    = 0x13; // 19
+        private const byte CMD_NEXT_EVENT_LOG     = 0x14; // 20
+        private const byte CMD_REPE_EVENT_LOG     = 0x15; // 21
+        private const int CMD_NEXT_EVENT_RES_1    = 25;   // Response ACK with log entry [0-24] = 25 bytes
+        private const int CMD_NEXT_EVENT_RES_2    = 5;    // Response ACK with no data [0-4] = 5 bytes
+        private const int CMD_NEXT_EVENT_BYTE_RES = 2;    // Response second byte is result or status ( 0 = Log entry, 1 or 2 = No data )
+        private const byte CMD_NEXT_EVENT_DATA    = 0x00; // ACK with log entry
+        private const byte CMD_NEXT_EVENT_EMPTY   = 0x01; // ACK without log entry ( query complete )
+        private const byte CMD_NEXT_EVENT_BUSY    = 0x02; // ACK without log entry ( MTU is busy or some error trying to recover next log entry )
+        private const int WAIT_BEFORE_LOGS        = 3000; // The host device should delay for at least 2 seconds to give the MTU time to begin the query
+        private const int WAIT_BTW_LOG_ERRORS     = 1000;
+        private const int WAIT_BTW_LOGS           = 100;
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
         private const string ERROR_LOADMETER      = "MeterLoadException";
         private const string ERROR_LOADMTU        = "MtuLoadException";
@@ -82,8 +80,8 @@ namespace MTUComm
         public delegate void TurnOnMtuHandler(object sender, TurnOnMtuArgs e);
         public event TurnOnMtuHandler OnTurnOnMtu;
 
-        public delegate void ReadMtuDataHandler(object sender, ReadMtuDataArgs e);
-        public event ReadMtuDataHandler OnReadMtuData;
+        public delegate Task DataReadHandler(object sender, DataReadArgs e);
+        public event DataReadHandler OnDataRead;
 
         public delegate Task AddMtuHandler(object sender, AddMtuArgs e);
         public event AddMtuHandler OnAddMtu;
@@ -121,56 +119,26 @@ namespace MTUComm
 
             public Mtu Mtu { get; private set; }
 
-            public ReadMtuArgs(AMemoryMap memorymap, Mtu mtype)
+            public ReadMtuArgs ( AMemoryMap memorymap, Mtu mtuType )
             {
-                MemoryMap = memorymap;
-                Mtu = mtype;
+                this.MemoryMap = memorymap;
+                this.Mtu       = mtuType;
             }
         }
 
-        public class ReadMtuDataArgs : EventArgs
+        public class DataReadArgs : EventArgs
         {
-            /*
-            public LogDataType Status { get; private set; }
+            public AMemoryMap MemoryMap { get; private set; }
 
-            public int TotalEntries { get; private set; }
-            public int CurrentEntry { get; private set; }
+            public Mtu Mtu { get; private set; }
+            public EventLogList ListEntries { get; private set; }
 
-            public DateTime Start { get; private set; }
-            public DateTime End { get; private set; }
-
-            public MTUBasicInfo MtuType { get; private set; }
-
-
-            public List<LogDataEntry> Entries { get; private set; }
-
-            public ReadMtuDataArgs(LogDataType status, DateTime start, DateTime end, MTUBasicInfo mtype)
+            public DataReadArgs ( AMemoryMap memorymap, Mtu mtuType, EventLogList listEntries )
             {
-                Status = status;
-                TotalEntries = 0;
-                CurrentEntry = 0;
-                MtuType = mtype;
+                this.MemoryMap   = memorymap;
+                this.Mtu         = mtuType;
+                this.ListEntries = listEntries;
             }
-
-            public ReadMtuDataArgs(LogDataType status, DateTime start, DateTime end, MTUBasicInfo mtype, List<LogDataEntry> entries)
-            {
-                Status = status;
-                TotalEntries = entries.Count;
-                CurrentEntry = entries.Count;
-                Entries = entries;
-                MtuType = mtype;
-            }
-
-            public ReadMtuDataArgs(LogDataType status, DateTime start, DateTime end, MTUBasicInfo mtype, int totalEntries, int currentEntry)
-            {
-                Status = status;
-                TotalEntries = totalEntries;
-                CurrentEntry = currentEntry;
-                MtuType = mtype;
-                Start = start;
-                End = end;
-            }
-            */
         }
 
         public class ProgressArgs : EventArgs
@@ -219,11 +187,11 @@ namespace MTUComm
             public MtuForm Form { get; private set; }
             public AddMtuLog AddMtuLog { get; private set; }
 
-            public AddMtuArgs(AMemoryMap memorymap, Mtu mtype, MtuForm form, AddMtuLog addMtuLog )
+            public AddMtuArgs(AMemoryMap memorymap, Mtu mtuType, MtuForm form, AddMtuLog addMtuLog )
             {
                 MemoryMap = memorymap;
-                MtuType = mtype;
-                Form = form;
+                MtuType   = mtuType;
+                Form      = form;
                 AddMtuLog = addMtuLog;
             }
         }
@@ -306,11 +274,13 @@ namespace MTUComm
                              await Task.Run ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ], ( Action )args[ 2 ] ) );
                         else await Task.Run ( () => Task_AddMtu ( ( Action )args[ 0 ] ) );
                         break;
-                    //case ActionType.ReadMtu    : await Task.Run ( () => Task_DataRead () ); break;
-                    case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
+                    //case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
+                    // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                    case ActionType.ReadMtu    : await Task.Run ( () => Task_DataRead ( ( int )args[ 0 ] ) ); break;
+                    // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                     case ActionType.TurnOffMtu : await Task.Run ( () => Task_TurnOnOffMtu ( false ) ); break;
                     case ActionType.TurnOnMtu  : await Task.Run ( () => Task_TurnOnOffMtu ( true  ) ); break;
-                    case ActionType.ReadData   : await Task.Run ( () => Task_DataRead () ); break;
+                    case ActionType.DataRead   : await Task.Run ( () => Task_DataRead ( ( int )args[ 0 ] ) ); break;
                     case ActionType.BasicRead  : await Task.Run ( () => Task_BasicRead () ); break;
                     case ActionType.MtuInstallationConfirmation: await Task.Run ( () => Task_InstallConfirmation () ); break;
                     case ActionType.ReadFabric: await Task.Run ( () => Task_ReadFabric () ); break;
@@ -441,10 +411,10 @@ namespace MTUComm
                      await map.P1EncoderLiveDigits.SetValueToMtu ( liveDigits );
                 else await map.P2EncoderLiveDigits.SetValueToMtu ( liveDigits );
                 
-                // Set flag in MTU forcing to read meter
-                map.ReadMeter.SetValueToMtu ( true );
+                // Activates flag to read Meter
+                await map.ReadMeter.SetValueToMtu ( true );
                 
-                await Task.Delay ( 4 * 1000 );
+                await Task.Delay ( WAIT_BEFORE_READ );
                 
                 // Check for errors
                 byte erCode;
@@ -476,7 +446,14 @@ namespace MTUComm
 
         #region Data Read
 
-        public async Task Task_DataRead ()
+        // MTU_Datalogging ( DataRead 3.4 )
+        // · Pag 33 - 3.4 Accesing Log Information via the Local External Interface ( LExI )
+        // Y61063-DSD-Rev_G-Local_External_Interface_Specification
+        // · Pag 37 - 4.2.3.18 Start Event Log Query
+        // · Pag 38 - 4.2.3.19 Get Next Event Log Response
+        // · Pag 39 - 4.2.3.20 Get Repeat Last Event Log Response
+        public async Task Task_DataRead (
+            int numOfDays = 0 )
         {
             Global global = this.configuration.Global;
 
@@ -484,27 +461,30 @@ namespace MTUComm
             {
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Requesting event logs..." ) );
 
-                // NOTE: Is impossible to save a full datetime in only four bytes,
-                // because by definition it requires eight. This approach using only
-                // three bytes implemented by Aclara, is only valid until 2255 ( byte = 8 bits = [0-255] )
-                DateTime end   = DateTime.UtcNow.Date.AddSeconds ( 86399 ); //Date.AddDays ( DATA_READ_END_DAYS );
-                DateTime start = DateTime.UtcNow.Date.Subtract ( new TimeSpan ( 32, 0, 0, 0 ) ); //DateTime.Now.Date.Subtract ( new TimeSpan ( 60, 0, 0, 0 ) ); //global.NumOfDays, 0, 0, 0 ) );
+                // Save in Data to recover while creating log from interface
+                Data.Set ( "NumOfDays", ( numOfDays > 0 ) ? numOfDays : global.NumOfDays );
+
+                // NOTE: It is not clear why in STARProgrammer 86399 are added to calculate the end date
+                DateTime end   = DateTime.UtcNow.AddDays ( DATA_READ_END_DAYS );
+                DateTime start = DateTime.UtcNow.Subtract ( new TimeSpan ( Data.Get.NumOfDays, 0, 0, 0 ) );
 
                 byte[] data = new byte[ 10 ]; // 1+1+4x2
-                data[ 0 ] = ( byte )LogFilterMode.Match;
-                data[ 1 ] = ( byte )LogEntryType.MeterRead;
+                data[ 0 ] = ( byte )LogFilterMode.Match;    // Only return logs that matches the Log Entry Filter Field specified
+                data[ 1 ] = ( byte )LogEntryType.MeterRead; // The log entry filter to use
                 Array.Copy ( Utils.GetTimeSinceDate ( start ), 0, data, 2, 4 ); // Start time
                 Array.Copy ( Utils.GetTimeSinceDate ( end   ), 0, data, 6, 4 ); // Stop time
 
-                // Use address parameter to set request code
-                await this.lexi.Write ( CMD_START_LOGS, data, null, null, LexiAction.OperationRequest ); // Return +2 ACK
+                // Start new event log query
+                // NOTE: Use address parameter to set request code
+                await this.lexi.Write ( CMD_INIT_EVENT_LOGS, data, null, null, LexiAction.OperationRequest ); // Return +2 ACK
 
-                await Task.Delay ( 10000 ); //WAIT_BEFORE_LOGS );
+                await Task.Delay ( WAIT_BEFORE_LOGS );
 
                 // Recover all logs registered in the MTU for the specified date range
-                int currentEventLog = 0;
-                int maxAttempts     = ( Data.Get.IsFromScripting ) ? 20 : 5;
-                int countAttempts   = 0;
+                bool retrying        = false;
+                int  currentEventLog = 0;
+                int  maxAttempts     = ( Data.Get.IsFromScripting ) ? 20 : 5;
+                int  countAttempts   = 0;
                 EventLogList eventLogList = new EventLogList ( start, end, ( LogFilterMode )data[ 0 ], ( LogEntryType )data[ 1 ] );
                 ( byte[] bytes, int responseOffset ) fullResponse = ( null, 0 ); // echo + response
                 while ( true )
@@ -513,21 +493,18 @@ namespace MTUComm
                     {
                         currentEventLog++;
                     
-                        if ( eventLogList.TotalEntries > -1 &&
-                             currentEventLog >= eventLogList.TotalEntries )
-                        {
-
-                        }
-                    
+                        // Get next event log response command or Get repeat last event log response command
+                        // NOTE: In MTU_Dataloggin ( DataRead 3.4 ) indicates that Get repeat command has only two
+                        // possible responses, but if it is the same as relaunch the last Get next, should be has three
                         fullResponse =
                             await this.lexi.Write (
-                                ( eventLogList.TotalEntries == -1 || currentEventLog < eventLogList.TotalEntries ) ? CMD_NEXT_LOG : CMD_LAST_LOG,
+                                ( ! retrying ) ? CMD_NEXT_EVENT_LOG : CMD_REPE_EVENT_LOG,
                                 null,
-                                new uint[]{ CMD_NEXT_RESULT_1, CMD_NEXT_RESULT_2 }, // ACK with log entry or without
+                                new uint[]{ CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_RES_2 }, // ACK with log entry or without
                                 new ( int,int,byte )[] {
-                                    ( CMD_NEXT_RESULT_1, CMD_NEXT_BYTE_RESULT, CMD_NEXT_WITH_DATA ), // Entry data included
-                                    ( CMD_NEXT_RESULT_2, CMD_NEXT_BYTE_RESULT, CMD_NEXT_NO_DATA   ), // Complete but without data
-                                    ( CMD_NEXT_RESULT_2, CMD_NEXT_BYTE_RESULT, CMD_NEXT_BUSY      )  // The MTU is busy
+                                    ( CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_BYTE_RES, CMD_NEXT_EVENT_DATA  ), // Entry data included
+                                    ( CMD_NEXT_EVENT_RES_2, CMD_NEXT_EVENT_BYTE_RES, CMD_NEXT_EVENT_EMPTY ), // Complete but without data
+                                    ( CMD_NEXT_EVENT_RES_2, CMD_NEXT_EVENT_BYTE_RES, CMD_NEXT_EVENT_BUSY  )  // The MTU is busy, response not ready yet
                                 },
                                 LexiAction.OperationRequest );
                     }
@@ -569,7 +546,11 @@ namespace MTUComm
                             else
                             {
                                 Errors.AddError ( new MtuIsBusyToGetEventsLogException () );
+
                                 await Task.Delay ( WAIT_BTW_LOG_ERRORS );
+
+                                // Try again, using this time Get Repeat Last Event Log Response command
+                                retrying = true;
                                 currentEventLog--;
                             }
                             break;
@@ -580,18 +561,27 @@ namespace MTUComm
                             
                             await Task.Delay ( WAIT_BTW_LOGS );
                             countAttempts = 0; // Reset accumulated fails after reading ok
+                            retrying      = false; // And use Get Next Event Log Response command
                             break;
 
                         // Was last event log
                         case EventLogQueryResult.LastRead:
                             OnProgress ( this, new ProgressArgs ( 0, 0, "All event logs requested" ) );
-                            goto BREAK;
+                            goto BREAK; // Exit from infinite while
                     }
                 }
 
                 BREAK:
 
                 Utils.Print ( "DataRead Finished: " + eventLogList.Count );
+
+                // Load memory map and prepare to read from Meters
+                var map = await ReadMtu_Logic ();
+                
+                await this.CheckIsTheSameMTU ();
+
+                // Generates log using the interface
+                await this.OnDataRead ( this, new DataReadArgs ( map, this.mtu, eventLogList ) );
             }
             catch ( Exception e )
             {
@@ -600,31 +590,6 @@ namespace MTUComm
                      throw new PuckCantCommWithMtuException ();
                 else throw e;
             }
-
-            // if 
-
-            /*
-            bool last_packet = false;
-            while (!last_packet)
-            {
-                LogQueryResult response = new LogQueryResult(lexi.GetNextLogQueryResult());
-                switch (response.Status)
-                {
-                    case LogDataType.LastPacket:
-                        last_packet = true;
-                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu, entries));
-                        break;
-                    case LogDataType.Bussy:
-                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu));
-                        Thread.Sleep(100);
-                        break;
-                    case LogDataType.NewPacket:
-                        entries.Add(response.Entry);
-                        OnReadMtuData(this, new ReadMtuDataArgs(response.Status, start, end, latest_mtu, response.TotalEntries, response.CurrentEntry));
-                        break;
-                }
-            }
-            */
         }
 
         #endregion
@@ -830,13 +795,8 @@ namespace MTUComm
             {
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
             
-                // Only read all required registers once
-                var map = this.GetMemoryMap ( true );
-                
-                // Activates flag to read Meter
-                await map.ReadMeter.SetValueToMtu ( true );
-                
-                await Task.Delay ( WAIT_BEFORE_READ );
+                // Load memory map and prepare to read from Meters
+                var map = await ReadMtu_Logic ();
                 
                 await this.CheckIsTheSameMTU ();
              
@@ -850,6 +810,19 @@ namespace MTUComm
                      throw new PuckCantCommWithMtuException ();
                 else throw e;
             }
+        }
+
+        private async Task<dynamic> ReadMtu_Logic ()
+        {
+            // Only read all required registers once
+            var map = this.GetMemoryMap ( true );
+            
+            // Activates flag to read Meter
+            await map.ReadMeter.SetValueToMtu ( true );
+            
+            await Task.Delay ( WAIT_BEFORE_READ );
+
+            return map;
         }
 
         #endregion
@@ -873,10 +846,8 @@ namespace MTUComm
             Meter meterPort2 = null;
             
             try
-            {
-                dynamic map = this.GetMemoryMap ();
-            
-                bool port2IsActivated = await map.P2StatusFlag.GetValue ();
+            {            
+                bool port2IsActivated = await this.GetMemoryMap ( true ).P2StatusFlag.GetValue ();
     
                 // Recover parameters from script and translante from Aclara nomenclature to our own
                 foreach ( Parameter parameter in ps )
@@ -1816,7 +1787,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Install Confirmation
+                #region Install Confirmation | RF Check for OnDemand 1.2 MTUs
 
                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true

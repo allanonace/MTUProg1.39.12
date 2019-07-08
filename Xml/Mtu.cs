@@ -59,6 +59,7 @@ namespace Xml
 
         #region Elements
 
+        // NOTE: Is the Mtu Type ( 171, 177,... ) and not the Serial Number or Mtu ID
         [XmlAttribute("ID")]
         public int Id { get; set; }
 

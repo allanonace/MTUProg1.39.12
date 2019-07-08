@@ -212,19 +212,21 @@ namespace aclara_meters
         {
             string sPath = String.Empty;
             string sPathPrivate = String.Empty;
-            if (Device.RuntimePlatform == Device.Android)
+            
+            if ( Device.RuntimePlatform == Device.Android )
             {
                 sPath = DependencyService.Get<IPathService>().PrivateExternalFolder;
                 sPathPrivate = DependencyService.Get<IPathService>().InternalFolder;
             }
             else
             {
-                sPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                sPathPrivate = Path.Combine(sPath, "..", "Library");
+                sPath = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
+                sPathPrivate = Path.Combine ( sPath, "..", "Library" );
             }
             Mobile.ConfigPublicPath = sPath;
-            Mobile.ConfigPath = sPathPrivate;
-            Mobile.LogPath = sPath;
+            Mobile.ConfigPath       = sPathPrivate;
+            Mobile.LogPath          = sPath;
+            Mobile.EventPath        = sPath;
             #if DEBUG
             Mobile.LogUniPath = sPath;
             #endif

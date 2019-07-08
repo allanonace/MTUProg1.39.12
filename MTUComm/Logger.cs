@@ -13,28 +13,50 @@ namespace MTUComm
 {
     public class Logger
     {
+        #region Constants
+
         public enum BasicFileType
         {
             READ,
             DATA_READ
         }
 
-        public static string fixed_name = String.Empty;
+        #endregion
 
-        public void ResetFixedName ()
-        {
-            fixed_name = string.Empty;
-        }
+        #region Attributes
+
+        private string fixed_name = String.Empty;
+
+        #endregion
+
+        #region Properties
+
+
+
+        #endregion
+
+        #region Initialization
 
         public Logger ( string outFileName = "" )
         {
             fixed_name = outFileName;
         }
 
+        #endregion
+
+        #region Logic
+
         private Boolean IsFixedName ()
         {
             return ! string.IsNullOrEmpty ( fixed_name.Trim () );
         }
+
+        public void ResetFixedName ()
+        {
+            fixed_name = string.Empty;
+        }
+
+        #endregion
 
         public string CreateBasicStructure (
             BasicFileType basicFileType = BasicFileType.READ )
@@ -50,7 +72,7 @@ namespace MTUComm
                 base_stream += "    <AppInfo>";
                 base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
                 base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
-                base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
+                base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
                 base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "        <AppType>" + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
@@ -67,7 +89,8 @@ namespace MTUComm
                 base_stream += "    <Transfer>";
                 base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
                 base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
-                base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm") + "</Date>";
+                base_stream += "        <MtuId />";
+                base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
                 base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "        <AppType>" + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
@@ -289,31 +312,39 @@ namespace MTUComm
                 .ForEach ( param => AddParameter ( xmlAction, param ) );
         }
 
-        public string ReadMTU ( Action action, ActionResult resultAllInterfaces, Mtu mtu )
+        public string ReadMTU (
+            Action action,
+            ActionResult allParamsFromInterface,
+            Mtu mtu,
+            bool isSubAction = false )
         {
+            // Create or write in the result file in scripted mode or
+            // create or write in the activity log in interactive mode
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
-            PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, resultAllInterfaces, mtu );
+            PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action.type, allParamsFromInterface, mtu, isSubAction );
             doc.Save(uri);
 
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
-            byte[] byteArray = Encoding.UTF8.GetBytes(CreateBasicStructure());
-            Stream BasicStruct = new MemoryStream(byteArray);
-            XDocument uniDoc = XDocument.Load(BasicStruct);
-            PrepareLog_ReadMTU(uniDoc.Root.Element("Mtus"), action, resultAllInterfaces, mtu);
+            XDocument uniDoc;
+            using ( Stream BasicStruct = new MemoryStream ( Encoding.UTF8.GetBytes ( CreateBasicStructure () ) ) )
+            {
+                uniDoc = XDocument.Load(BasicStruct);
+                PrepareLog_ReadMTU(uniDoc.Root.Element("Mtus"), action.type, allParamsFromInterface, mtu, isSubAction );
+            }
             
             #if DEBUG
             
+            // Single file for debugging purposes
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( BasicFileType.READ, false, uniUri );
- 
             uniDoc.Save ( uniUri );
             
             #endif
             
-            // Write in ActivityLog
+            // Create or write in the ActivityLog in scripted mode
             if ( Data.Get.IsFromScripting &&
                  ! Singleton.Get.Configuration.Global.ScriptOnly )
             {
@@ -322,34 +353,41 @@ namespace MTUComm
                 
                 uri = CreateFileIfNotExist ();
                 doc = XDocument.Load( uri );
-                PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action, resultAllInterfaces, mtu );
+                PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action.type, allParamsFromInterface, mtu, isSubAction );
                 doc.Save(uri);
             }
 
             return uniDoc.ToString ();
         }
 
-        private void PrepareLog_ReadMTU ( XElement parent, Action action, ActionResult resultAllInterfaces, Mtu mtu )
+        private void PrepareLog_ReadMTU (
+            XElement parent,
+            ActionType actionType,
+            ActionResult allParamsFromInterface,
+            Mtu mtu,
+            bool isSubAction )
         {
             XElement element = new XElement("Action");
 
-            AddAtrribute(element, "display", action.DisplayText);
-            AddAtrribute(element, "type", action.LogText);
-            AddAtrribute(element, "reason", action.Reason);
+            AddAtrribute(element, "display", Action.displays[ actionType ] );
+            AddAtrribute(element, "type", Action.tag_types[ actionType ] );
 
-            InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogInterfaceFields( mtu, ActionType.ReadMtu );
+            if ( ! isSubAction )
+                AddAtrribute(element, "reason", Action.tag_reasons[ actionType ] );
+
+            InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogParamsFromInterface ( mtu, actionType );
             foreach ( InterfaceParameters parameter in parameters )
             {
                 try
                 {
                     if ( parameter.Name == "Port" )
                     {
-                        ActionResult[] ports = resultAllInterfaces.getPorts();
+                        ActionResult[] ports = allParamsFromInterface.getPorts();
                         for ( int i = 0; i < ports.Length; i++ )
                             Port(i, element, ports[i], parameter.Parameters.ToArray());
                     }
                     else
-                        this.ComplexParameter(element, resultAllInterfaces, parameter);
+                        this.ComplexParameter(element, allParamsFromInterface, parameter);
                 }
                 catch ( Exception ex )
                 {
@@ -358,46 +396,158 @@ namespace MTUComm
             }
             
             // Add additional parameters
-            if ( action.type == ActionType.ReadMtu ||
-                 action.type == ActionType.MtuInstallationConfirmation )
-                this.AddAdditionalParameters ( element, resultAllInterfaces );
+            if ( actionType == ActionType.ReadMtu ||
+                 actionType == ActionType.MtuInstallationConfirmation )
+                this.AddAdditionalParameters ( element, allParamsFromInterface );
             
             parent.Add ( element );
         }
 
-        public void ReadData ( Action action, ActionResult result, Mtu mtu )
+        public string DataRead (
+            ActionResult dataRead_allParamsFromInterface,
+            ActionResult readMtu_allParamsFromInterface,
+            EventLogList eventList,
+            Mtu mtu )
         {
+            #region Events Log
+
+            string eventsUri = Data.Get.ReadResultFileFull;
+            using ( Stream BasicStruct = new MemoryStream ( Encoding.UTF8.GetBytes(CreateBasicStructure ( BasicFileType.DATA_READ ) ) ) )
+            {
+                XDocument eventsDoc = XDocument.Load ( BasicStruct );
+                XElement  events    = eventsDoc.Root.Element ( "Transfer" ).Element ( "Events" );
+
+                // Events attributes
+                AddAtrribute ( events, "FilterMode",  eventList.FilterMode.ToString () );
+                AddAtrribute ( events, "FilterValue", eventList.EntryType .ToString () );
+                AddAtrribute ( events, "RangeStart",  eventList.DateStart .ToString ( "yyyy-MM-dd HH:mm:ss" ) );
+                AddAtrribute ( events, "RangeStop",   eventList.DateEnd   .ToString ( "yyyy-MM-dd HH:mm:ss" ) );
+
+                // Mtu ID value
+                eventsDoc.Root.Element ( "Transfer" ).Element ( "MtuId" ).Value = Data.Get.MtuId;
+
+                // Add events to the log
+                PrepareLog_DataReadEvents ( events, eventList );
+
+                this.CreateFileIfNotExist ( BasicFileType.DATA_READ, true, eventsUri );
+                eventsDoc.Save ( eventsUri );
+            }
+
+            #endregion
+
+            #region Activity Log
+
+            // Create or write in the result file in scripted mode or
+            // create or write in the activity log in interactive mode
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
-
-            PrepareLog_ReadData(doc.Root.Element("Mtus"), action, result, mtu );
+            PrepareLog_DataRead (
+                doc.Root.Element("Mtus"),
+                dataRead_allParamsFromInterface,
+                readMtu_allParamsFromInterface,
+                mtu );
             doc.Save(uri);
+
+            // Launching multiple times scripts with the same output path, concatenates the actions logs,
+            // but the log send to the explorer should be only the last action performed
+            XDocument uniDoc;
+            using ( Stream BasicStruct = new MemoryStream ( Encoding.UTF8.GetBytes ( CreateBasicStructure () ) ) )
+            {
+                uniDoc = XDocument.Load(BasicStruct);
+                PrepareLog_DataRead (
+                    uniDoc.Root.Element("Mtus"),
+                    dataRead_allParamsFromInterface,
+                    readMtu_allParamsFromInterface,
+                    mtu );
+            }
+            
+            #if DEBUG
+            
+            // Single file for debugging purposes
+            string uniUri = Path.Combine ( Mobile.LogUniPath,
+                mtu.Id + "-" + ActionType.DataRead + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
+            this.CreateFileIfNotExist ( BasicFileType.DATA_READ, false, uniUri );
+            uniDoc.Save ( uniUri );
+            
+            #endif
+            
+            // Create or write in the ActivityLog in scripted mode
+            if ( Data.Get.IsFromScripting &&
+                 ! Singleton.Get.Configuration.Global.ScriptOnly )
+            {
+                // Reset fixed_name to add to the ActivityLog in CreateFileIfNotExist
+                this.ResetFixedName ();
+                
+                uri = CreateFileIfNotExist ();
+                doc = XDocument.Load( uri );
+                PrepareLog_DataRead (
+                    doc.Root.Element("Mtus"),
+                    dataRead_allParamsFromInterface,
+                    readMtu_allParamsFromInterface,
+                    mtu );
+                doc.Save(uri);
+            }
+
+            #endregion
+
+            return uniDoc.ToString ();
         }
 
-        private void PrepareLog_ReadData ( XElement parent, Action action, ActionResult resultAllInterfaces, Mtu mtu )
+        private void PrepareLog_DataRead (
+            XElement parent,
+            ActionResult dataRead_allParamsFromInterface,
+            ActionResult readMtu_allParamsFromInterface,
+            Mtu mtu )
         {
             XElement element = new XElement("Action");
 
-            AddAtrribute(element, "display", action.DisplayText);
-            AddAtrribute(element, "type", action.LogText);
-            AddAtrribute(element, "reason", action.Reason);
+            // DataRead log
+            ActionType actionType = ActionType.DataRead;
+            AddAtrribute(element, "display", Action.displays   [ actionType ] );
+            AddAtrribute(element, "type",    Action.tag_types  [ actionType ] );
+            AddAtrribute(element, "reason",  Action.tag_reasons[ actionType ] );
 
-            InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogInterfaceFields ( mtu, ActionType.ReadData );
+            InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogParamsFromInterface ( mtu, actionType );
             foreach (InterfaceParameters parameter in parameters)
             {
                 if (parameter.Name == "Port")
                 {
-                    ActionResult[] ports = resultAllInterfaces.getPorts();
+                    ActionResult[] ports = dataRead_allParamsFromInterface.getPorts();
                     for (int i = 0; i < ports.Length; i++)
                         Port(i, element, ports[i], parameter.Parameters.ToArray());
                 }
-                else this.ComplexParameter(element, resultAllInterfaces, parameter);
+                else this.ComplexParameter(element, dataRead_allParamsFromInterface, parameter);
             }
 
-            parent.Add(element);
+            // ReadMtu log as subaction
+            PrepareLog_ReadMTU ( element, ActionType.ReadMtu, readMtu_allParamsFromInterface, mtu, true );
+
+            parent.Add ( element );
         }
 
-        public void Port ( int portnumber, XElement parent, ActionResult resultAllInterfaces, InterfaceParameters[] parameters )
+        private void PrepareLog_DataReadEvents (
+            XElement eventsParent,
+            EventLogList eventList )
+        {
+            foreach ( EventLog log in eventList.Entries )
+            {
+                XElement evnt = new XElement ( "MeterReadEvent" );
+                evnt.Add ( new XAttribute ( "FormatVersion",   log.FormatVersion ) );
+                evnt.Add ( new XElement   ( "TimeStamp",       log.TimeStamp.ToString ( "yyyy-MM-dd HH:mm:ss" ) ) );
+                evnt.Add ( new XElement   ( "MeterRead",       log.MeterRead ) );
+                evnt.Add ( new XElement   ( "ErrorStatus",     log.ErrorStatus ) );
+                evnt.Add ( new XElement   ( "ReadInterval",    "PT" + log.ReadInterval + "M" ) );
+                evnt.Add ( new XElement   ( "PortNumber",      "PORT" + log.PortNumber ) );
+                evnt.Add ( new XElement   ( "IsDailyRead",     Utils.FirstCharToCapital ( log.IsDailyRead.ToString () ) ) );
+                evnt.Add ( new XElement   ( "IsTopOfHourRead", Utils.FirstCharToCapital ( log.IsTopOfHourRead ) ) );
+                evnt.Add ( new XElement   ( "ReadReason",      log.ReasonForRead.ToString () ) );
+                evnt.Add ( new XElement   ( "IsSynchronized",  Utils.FirstCharToCapital ( log.IsSynchronized ) ) );
+ 
+                eventsParent.Add ( evnt );
+            }
+        }
+
+        public void Port ( int portnumber, XElement parent, ActionResult allParamsFromInterface, InterfaceParameters[] parameters )
         {
             XElement element = new XElement("Port");
 
@@ -405,7 +555,7 @@ namespace MTUComm
             AddAtrribute(element, "number", (portnumber + 1).ToString());
 
             foreach (InterfaceParameters parameter in parameters)
-                this.ComplexParameter(element, resultAllInterfaces, parameter, portnumber );
+                this.ComplexParameter(element, allParamsFromInterface, parameter, portnumber );
 
             parent.Add(element);
         }
@@ -477,69 +627,6 @@ namespace MTUComm
 
         #endregion
 
-        public void DataReadFile (
-            EventLogList eventLogList,
-            Mtu mtu )
-        {
-            /*
-            <?xml version="1.0" encoding="utf-8"?>
-            <Log>
-                <Transfer>
-                    <MtuId>000000063004810</MtuId>
-                    <LocalTimeStamp>2019-06-10 13:36:45</LocalTimeStamp>
-                    <MtuTimeStamp>2019-06-10 11:26:39</MtuTimeStamp>
-                    <Events FilterMode="Match" FilterValue="MeterRead" RangeStart="2019-05-09 00:00:00" RangeStop="2019-06-10 23:59:59">
-                        <MeterReadEvent FormatVersion="0">
-                            <TimeStamp>2019-05-10 04:00:01</TimeStamp>
-                            <MeterRead>999994</MeterRead>
-                            <ErrorStatus>0</ErrorStatus>
-                            <ReadInterval>PT720M</ReadInterval>
-                            <PortNumber>PORT1</PortNumber>
-                            <IsDailyRead>False</IsDailyRead>
-                            <IsTopOfHourRead>True</IsTopOfHourRead>
-                            <ReadReason>Scheduled</ReadReason>
-                            <IsSynchronized>True</IsSynchronized>
-                        </MeterReadEvent>
-                        ...
-                    </Events>
-                </Transfer>
-            </Log>
-            */
-
-            String uri = CreateFileIfNotExist ( BasicFileType.DATA_READ, false,
-                mtu.Id + "-" + DateTime.Now.ToString ( "MMddyyyyHH" ) + "DataLog.xml" );
-            XDocument doc = XDocument.Load ( uri );
-
-            XElement transfer = doc.Root.Element ( "Transfer" );
-            transfer.Add ( new XElement ( "MtuId", mtu.Id ) );
-
-            XElement events = doc.Root.Element ( "Events" );
-            events.Add ( new XAttribute ( "FilterMode",  eventLogList.FilterMode ) );
-            events.Add ( new XAttribute ( "FilterValue", eventLogList.EntryType  ) );
-            events.Add ( new XAttribute ( "RangeStart",  eventLogList.DateStart  ) );
-            events.Add ( new XAttribute ( "RangeStop",   eventLogList.DateEnd    ) );
-
-            foreach ( EventLog log in eventLogList.Entries )
-            {
-                XElement parent = new XElement ( "MeterReadEvent" );
-                parent.Add ( new XAttribute ( "FormatVersion",   log.FormatVersion       ) );
-                parent.Add ( new XElement   ( "TimeStamp",       log.TimeStamp           ) );
-                parent.Add ( new XElement   ( "MeterRead",       log.MeterRead           ) );
-                parent.Add ( new XElement   ( "ErrorStatus",     log.ErrorStatus         ) );
-                parent.Add ( new XElement   ( "ReadInterval",    log.ReadInterval        ) );
-                parent.Add ( new XElement   ( "PortNumber",      "PORT" + log.PortNumber ) );
-                parent.Add ( new XElement   ( "IsDailyRead",     log.IsDailyRead         ) );
-                parent.Add ( new XElement   ( "IsTopOfHourRead", log.IsTopOfHourRead     ) );
-                parent.Add ( new XElement   ( "ReadReason",      log.ReasonForRead       ) );
-                parent.Add ( new XElement   ( "IsSynchronized",  log.IsSynchronized      ) );
-
-                events.Add ( parent );
-            }
-
-            // Update file with new data
-            doc.Save ( uri );
-        }
-
         public void Cancel ( Action action, String cancel, String reason )
         {
             String uri = CreateFileIfNotExist();
@@ -561,49 +648,9 @@ namespace MTUComm
             doc.Save(uri);
         }
 
-        public string ReadDataEntries ( string mtu_id, DateTime start, DateTime end, EventLogList eventLogList )
+        public void ComplexParameter ( XElement parent, ActionResult allParamsFromInterface, InterfaceParameters parameter, int portNumber = 0 )
         {
-            String    path     = CreateEventFileIfNotExist(mtu_id);
-            XDocument doc      = XDocument.Load(path);
-            XElement  transfer = doc.Root.Element("Transfer");
-            XElement  events   = new XElement("Events");
-
-            AddAtrribute(events, "FilterMode", "Match");
-            AddAtrribute(events, "FilterValue", "MeterRead");
-            AddAtrribute(events, "RangeStart", start.ToString("yyyy-MM-dd HH:mm:ss"));
-            AddAtrribute(events, "RangeStop", end.ToString("yyyy-MM-dd HH:mm:ss"));
-
-            foreach ( EventLog eventLog in eventLogList.Entries )
-                PrepareLog_ReadDataEntries ( events, eventLog );
-
-            transfer.Add(events);
-            doc.Save(path);
-
-            return path;
-        }
-        
-        private void PrepareLog_ReadDataEntries ( XElement events, EventLog eventLog )
-        {
-            XElement read_event = new XElement("MeterReadEvent");
-
-            AddAtrribute(read_event, "FormatVersion", eventLog.FormatVersion.ToString());
-
-            read_event.Add(new XElement("TimeStamp", eventLog.TimeStamp.ToString("yyyy-MM-dd HH:mm:ss")));
-            read_event.Add(new XElement("MeterRead", eventLog.MeterRead.ToString()));
-            read_event.Add(new XElement("ErrorStatus", eventLog.ErrorStatus.ToString()));
-            read_event.Add(new XElement("ReadInterval", "PT"+eventLog.ReadInterval.ToString()+"M"));
-            read_event.Add(new XElement("PortNumber", "PORT"+(eventLog.PortNumber + 1 ).ToString()));
-            read_event.Add(new XElement("IsDailyRead", eventLog.IsDailyRead.ToString()));
-            read_event.Add(new XElement("IsTopOfHourRead", eventLog.IsTopOfHourRead.ToString()));
-            read_event.Add(new XElement("ReadReason", eventLog.ReasonForRead.ToString()));
-            read_event.Add(new XElement("IsSynchronized", eventLog.IsSynchronized.ToString()));
-
-            events.Add(read_event);
-        }
-
-        public void ComplexParameter ( XElement parent, ActionResult resultAllInterfaces, InterfaceParameters parameter, int portNumber = 0 )
-        {
-            Parameter param = resultAllInterfaces.getParameterByTag ( parameter.Name, parameter.Source, portNumber );
+            Parameter param = allParamsFromInterface.getParameterByTag ( parameter.Name, parameter.Source, portNumber );
             
             Utils.Print ( "Log Param: " + parameter.Name + " " + parameter.Source + " " + portNumber +
                 " = " + ( ( param == null ) ? "..." : param.Value ) );

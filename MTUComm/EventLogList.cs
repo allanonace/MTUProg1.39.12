@@ -87,8 +87,8 @@ namespace MTUComm
             LogEntryType entryType )
         {
             this.entries    = new List<EventLog> ();
-            this.dateStart  = new DateTime ( start.Year, start.Month, start.Day );
-            this.dateEnd    = new DateTime ( end.Year, end.Month, end.Day );
+            this.dateStart  = start;
+            this.dateEnd    = end;
             this.filterMode = filterMode;
             this.entryType  = entryType;
         }

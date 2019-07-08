@@ -1639,7 +1639,7 @@ namespace aclara_meters.view
                 */
 
                 Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( e.Mtu.Id );
-                InterfaceParameters[] interfacesParams = FormsApp.config.getUserInterfaceFields( mtu, ActionType.ReadMtu );
+                InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface( mtu, ActionType.ReadMtu );
                 
                 Mtu currentMtu = Singleton.Get.Action.CurrentMtu;
 

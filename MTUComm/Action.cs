@@ -8,6 +8,7 @@ using Library;
 using MTUComm.actions;
 using Xml;
 using Library.Exceptions;
+using System.IO;
 
 namespace MTUComm
 {
@@ -79,7 +80,7 @@ namespace MTUComm
             ReplaceMeter,
             TurnOffMtu,
             TurnOnMtu,
-            ReadData,
+            DataRead,
             MtuInstallationConfirmation,
             Diagnosis,
             BasicRead,
@@ -98,7 +99,7 @@ namespace MTUComm
             {ActionType.ReplaceMeter,"Replace Meter" },
             {ActionType.TurnOffMtu,"Turn Off MTU" },
             {ActionType.TurnOnMtu,"Turn On MTU" },
-            {ActionType.ReadData,"Read Data Log" },
+            {ActionType.DataRead,"Read Data Log" },
             {ActionType.MtuInstallationConfirmation,"Install Confirmation" },
             {ActionType.Diagnosis, string.Empty },
             {ActionType.ReadFabric, "Read Fabric" }
@@ -116,7 +117,7 @@ namespace MTUComm
             {ActionType.ReplaceMeter,"Program MTU" },
             {ActionType.TurnOffMtu,"TurnOffMtu" },
             {ActionType.TurnOnMtu,"TurnOnMtu" },
-            {ActionType.ReadData, "ReadDataLog" },
+            {ActionType.DataRead, "ReadDataLog" },
             {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
             {ActionType.Diagnosis, string.Empty },
             {ActionType.ReadFabric, "ReadFabric" }
@@ -134,7 +135,7 @@ namespace MTUComm
             {ActionType.ReplaceMeter,"ReplaceMeter" },
             {ActionType.TurnOffMtu, "TurnOffMtu" },
             {ActionType.TurnOnMtu, "TurnOnMtu" },
-            {ActionType.ReadData, "DataRead" },
+            {ActionType.DataRead, "DataRead" },
             {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
             {ActionType.Diagnosis, string.Empty },
             {ActionType.ReadFabric, "ReadFabric" }
@@ -328,7 +329,13 @@ namespace MTUComm
             // not for nested or auxiliary actions ( as BasicRead )
             if ( this.type != ActionType.BasicRead &&
                  ! Singleton.Has<Action> () )
+            {
                 Singleton.Set = this;
+                
+                // Reset temp data but not all data, because some data is created
+                // only one time and is needed during the life of the application
+                Data.Reset ();
+            }
         }
         
         public void SetCurrentMtu (
@@ -428,8 +435,14 @@ namespace MTUComm
 
                     case ActionType.ReadMtu:
                     case ActionType.MtuInstallationConfirmation:
-                        comm.OnReadMtu -= Comm_OnReadMtu;
-                        comm.OnReadMtu += Comm_OnReadMtu;
+                        //comm.OnReadMtu -= Comm_OnReadMtu;
+                        //comm.OnReadMtu += Comm_OnReadMtu;
+
+                        // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
+                        parameters.Add ( 1 );
+                        comm.OnDataRead -= Comm_OnDataReadEvent;
+                        comm.OnDataRead += Comm_OnDataReadEvent;
+                        // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
                         break;
                        
                     case ActionType.AddMtu:
@@ -441,9 +454,9 @@ namespace MTUComm
                         comm.OnAddMtu -= Comm_OnAddMtu;
                         comm.OnAddMtu += Comm_OnAddMtu;
                         // Interactive and Scripting
-                        if (mtuForm != null)
-                             parameters.AddRange(new object[] { (AddMtuForm)mtuForm, this.user, this });
-                        else parameters.Add(this);
+                        if ( mtuForm != null )
+                             parameters.AddRange ( new object[] { (AddMtuForm)mtuForm, this.user, this } );
+                        else parameters.Add ( this );
                         break;
 
                     case ActionType.TurnOffMtu:
@@ -452,9 +465,10 @@ namespace MTUComm
                         comm.OnTurnOffMtu += Comm_OnTurnOnOffMtu;
                         break;
 
-                    case ActionType.ReadData:
-                        comm.OnReadMtuData -= Comm_OnReadMtuData;
-                        comm.OnReadMtuData += Comm_OnReadMtuData;
+                    case ActionType.DataRead:
+                        parameters.AddRange ( new object[] { ( int ) 1 }); // TODO: Use new entry created in Library.Data
+                        comm.OnDataRead -= Comm_OnDataReadEvent;
+                        comm.OnDataRead += Comm_OnDataReadEvent;
                         break;
 
                     case ActionType.BasicRead:
@@ -499,29 +513,53 @@ namespace MTUComm
             Singleton.Remove<Action> ();
         }
 
-        private void Comm_OnReadMtuData(object sender, MTUComm.ReadMtuDataArgs e)
+        private async Task Comm_OnDataReadEvent ( object sender, MTUComm.DataReadArgs args )
         {
-            /*
-            ActionProgressArgs args;
-            switch (e.Status)
+            try
             {
-                case LogQueryResult.LogDataType.Busy:
-                    args = new ActionProgressArgs(0, 0);
-                    OnProgress(this, args);
-                    break;
-                case LogQueryResult.LogDataType.NewEventLog:
-                    args = new ActionProgressArgs(e.CurrentEntry, e.TotalEntries);
-                    OnProgress(this, args);
-                    break;
-                case LogQueryResult.LogDataType.LastEventLog:
-                    Mtu mtu_type = configuration.GetMtuTypeById((int)e.MtuType.Type);
-                    ActionResult result = ReadMTUData(e.Start, e.End, e.Entries, e.MtuType, mtu_type);
-                    logger.ReadData(this, result, mtu_type);
-                    ActionFinishArgs f_args = new ActionFinishArgs(null);
-                    this.Finish ( f_args );
-                    break;
+                // Mtu ID value formated
+                dynamic map = args.MemoryMap;
+                int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
+                string strMtuId = ( await map.MtuSerialNumber.GetValueFromMtu () ).ToString ().PadLeft ( mtuIdLength, '0' );
+                Data.Set ( "MtuId", strMtuId );
+
+                // Prepare custom values
+                EventLogList eventList = args.ListEntries;
+
+                Data.Set ( "ReadResult",
+                    $"Number of Reads {eventList.Count} for Selected Period " +
+                    $"From {eventList.DateStart.ToString ( "dd/MM/yyyy HH:mm:ss" )} " +
+                    $"Till {eventList.DateEnd  .ToString ( "dd/MM/yyyy HH:mm:ss" )}" );
+
+                // NOTE: STARProgrammer MtuComm.cs Line 5341
+                string path = Path.Combine ( Mobile.EventPath,
+                    $"MTUID{strMtuId}-{DateTime.Now.ToString ( "MMddyyyyHH" )}-" +
+                    $"{ DateTime.Now.Ticks }DataLog.xml" );
+                string subpath = path.Substring ( path.LastIndexOf ( "/" ) + 1 );
+                Data.Set ( "ReadResultFileFull", path );
+                Data.Set ( "ReadResultFile", subpath );
+
+                // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
+                Data.Set ( "MtuLocation", "Outside", true );
+                Data.Set ( "Construction", "Wood", true );
+                Data.Set ( "GpsLat", 12, true );
+                Data.Set ( "GpsLon", 34, true );
+                Data.Set ( "GpsAlt", 56, true );
+                // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
+
+                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu, null, ActionType.DataRead );
+                ActionResult readMtu_allParamsFromInterface  = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu );
+                this.lastLogCreated = logger.DataRead ( dataRead_allParamsFromInterface, readMtu_allParamsFromInterface, args.ListEntries, args.Mtu );
+                ActionFinishArgs finalArgs = new ActionFinishArgs ( readMtu_allParamsFromInterface );
+                finalArgs.Mtu = args.Mtu;
+                
+                this.Finish ( finalArgs );
             }
-            */
+            catch ( Exception e )
+            {
+                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                this.OnError ();
+            }
         }
 
         private async Task Comm_OnReadFabric(object sender)
@@ -601,70 +639,6 @@ namespace MTUComm
 
         #endregion
 
-        #region Reads
-
-        private ActionResult ReadMTUData ( DateTime start, DateTime end, EventLogList eventLogList, MTUBasicInfo mtuInfo, Mtu mtu )
-        {
-            /*
-            ActionResult result = new ActionResult();
-
-            string log_path = logger.ReadDataEntries(mtuInfo.Id.ToString("d15"), start, end, Entries);
-
-            InterfaceParameters[] parameters = configuration.getAllInterfaceFields(mtu, ActionType.ReadData );
-            foreach (InterfaceParameters parameter in parameters)
-            {
-                if (parameter.Name.Equals("Port"))
-                {
-                    for (int i = 0; i < mtu.Ports.Count; i++)
-                    {
-                        foreach (InterfaceParameters port_parameter in parameter.Parameters)
-                        {
-                            if (port_parameter.Source != null && port_parameter.Source.StartsWith("ActionParams"))
-                            {
-                                Parameter sel_parameter = GetParameterByTag(port_parameter.Name, i + 1);
-                                if (sel_parameter != null)
-                                {
-                                    result.AddParameter(new Parameter(port_parameter.Name, port_parameter.Display, sel_parameter.Value));
-                                }
-                            }
-
-                        }
-
-
-                    }
-                }
-                else
-                {
-                    try
-                    {
-
-                        if (parameter.Source != null && parameter.Source.StartsWith("ActionParams"))
-                        {
-                            Parameter sel_parameter = GetParameterByTag(parameter.Name);
-                            if (sel_parameter != null)
-                            {
-                                result.AddParameter(new Parameter(parameter.Name, parameter.Display, sel_parameter.Value));
-                            }
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Utils.Print(e.Message + "\r\n" + e.StackTrace);
-                    }
-                }
-
-            }
-
-            result.AddParameter(new Parameter("ReadRequest", "Number Read Request Days", ""));
-            result.AddParameter(new Parameter("ReadResult", "Read Result", "Number of Reads " + Entries.Count.ToString() + " for Selected Period From " + start.ToString("dd/MM/yyyy") + " 0:00:00 Till " + end.ToString("dd/MM/yyyy") + " 23:59:59"));
-            result.AddParameter(new Parameter("ReadResultFile", "Read Result File", log_path));
-
-            return result;
-            */
-
-            return null;
-        }
-
         private ActionResult getBasciInfoResult ()
         {
             ActionResult result = new ActionResult ();
@@ -681,22 +655,20 @@ namespace MTUComm
             return result;
         }
 
-        #endregion
-
         #region Interface
 
         private async Task<ActionResult> CreateActionResultUsingInterface (
             dynamic map  = null,
             Mtu     mtu  = null,
-            MtuForm form = null ) //,
-            //ActionType actionType = ActionType.ReadMtu )
+            MtuForm form = null,
+            ActionType actionType = ActionType.ReadMtu )
         {
             Parameter paramToAdd;
             Global       global = this.config.Global;
             Puck         puck   = Singleton.Get.Puck;
             Type         gType  = global.GetType ();
             ActionResult result = new ActionResult ();
-            InterfaceParameters[] parameters = configuration.getAllInterfaceFields ( mtu, ActionType.ReadMtu ); //, actionType );
+            InterfaceParameters[] parameters = configuration.getAllParamsFromInterface ( mtu, actionType );
             
             foreach ( InterfaceParameters parameter in parameters )
             {
@@ -724,11 +696,12 @@ namespace MTUComm
                         {
                             switch ( sourceWhere )
                             {
-                                case IFACE_ACTION: value      = this.GetProperty  ( sourceProperty ); break;
-                                case IFACE_MTU   : value      = mtu .GetProperty  ( sourceProperty ); break;
-                                case IFACE_PUCK  : value      = puck.GetProperty  ( sourceProperty ); break;
-                                case IFACE_FORM  : paramToAdd = form.GetParameter ( sourceProperty ); break;
-                                case IFACE_DATA  : value      = ( string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ] ) ? string.Empty : value ); break;
+                                case IFACE_ACTION: value      = this .GetProperty  ( sourceProperty ); break; // Current action
+                                case IFACE_MTU   : value      = mtu  .GetProperty  ( sourceProperty ); break; // Current MTU
+                                case IFACE_PUCK  : value      = puck .GetProperty  ( sourceProperty ); break;
+                                case IFACE_FORM  : paramToAdd = form .GetParameter ( sourceProperty ); break; // actions.AddMtuForm class
+                                case IFACE_GLOBAL: value      = gType.GetProperty  ( sourceProperty ).GetValue ( global, null ).ToString(); break; // Global class
+                                case IFACE_DATA  : value      = ( string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) ? string.Empty : value ); break; // Library.Data class
                                 default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                             }
                         }
@@ -756,7 +729,9 @@ namespace MTUComm
                         
                         if ( paramToAdd != null )
                         {
-                            paramToAdd.Value = this.FormatLength ( paramToAdd.Value, parameter.Length, parameter.Fill );
+                            if ( Utils.IsBool ( paramToAdd.Value ) )
+                                 paramToAdd.Value = Utils.FirstCharToCapital ( paramToAdd.Value );
+                            else paramToAdd.Value = this.FormatLength ( paramToAdd.Value, parameter.Length, parameter.Fill );
                             result.AddParameter ( paramToAdd );
                         }
                     }
@@ -881,10 +856,12 @@ namespace MTUComm
                             {
                                 switch ( sourceWhere )
                                 {
-                                    case IFACE_PORT : value = portType.GetProperty ( sourceProperty ); break;
-                                    case IFACE_MTU  : value = mtu     .GetProperty ( sourceProperty ); break;
-                                    case IFACE_METER: value = meter   .GetProperty ( sourceProperty ); break;
-                                    default         : value = ( await map[ sourceProperty = PORT_PREFIX + indexPort + sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
+                                    case IFACE_PORT  : value = portType.GetProperty ( sourceProperty ); break;
+                                    case IFACE_MTU   : value = mtu     .GetProperty ( sourceProperty ); break;
+                                    case IFACE_METER : value = meter   .GetProperty ( sourceProperty ); break;
+                                    case IFACE_GLOBAL: value = gType   .GetProperty ( sourceProperty ).GetValue ( global, null ).ToString(); break; // Global class
+                                    case IFACE_DATA  : value = ( string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) ? string.Empty : value ); break; // Library.Data class
+                                    default          : value = ( await map[ sourceProperty = PORT_PREFIX + indexPort + sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                                 }
                             }
                             catch ( Exception e )
@@ -895,10 +872,14 @@ namespace MTUComm
                             
                             if ( ! string.IsNullOrEmpty ( value ) )
                             {
-                                value = this.FormatLength ( value, parameter.Length, parameter.Fill );
+                                if ( Utils.IsBool ( value ) )
+                                     value = Utils.FirstCharToCapital ( value );
+                                else value = this.FormatLength ( value, parameter.Length, parameter.Fill );
+
                                 string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
-                                                    gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
-                                                    parameter.Display;
+                                                   gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
+                                                   parameter.Display;
+
                                 result.AddParameter ( new Parameter ( parameter.Name, display, value, parameter.Source, indexPort - 1 ) );
                             }
                         }

@@ -12,6 +12,14 @@ csx/
 rcf/
 Backup/
 
+# Aclara repository with two projects, that forces to create this
+# folder to replicate the remote structure and be able to push project files
+./MTU%20Programmer
+
+.sonarqube/
+.scannerwork/
+sonar-project.properties
+
 .baseDir.ts
 .userprefs
 gulp-tsc-tmp*

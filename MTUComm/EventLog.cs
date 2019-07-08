@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Library;
 
 using LogEntryType = Lexi.Lexi.LogEntryType;
@@ -74,7 +72,6 @@ namespace MTUComm
         private long         meterRead;
         private int          flags;
         private int          errorStatus;
-        private int          portNumber;
 
         #endregion
 
@@ -120,11 +117,6 @@ namespace MTUComm
             get { return meterRead; }
         }
 
-        public int Flags
-        {
-            get { return flags; }
-        }
-
         public int ErrorStatus
         {
             get { return errorStatus; }
@@ -132,7 +124,7 @@ namespace MTUComm
 
         public int PortNumber
         {
-            get { return this.portNumber; }
+            get { return ( ( this.flags & 3 ) == 0 ) ? 1 : ( ( ( this.flags & 3 ) == 1 ) ? 2 : -1 ); }
         }
 
         /// <summary>
@@ -174,17 +166,16 @@ namespace MTUComm
         public EventLog (
             byte[] response )
         {
-            this.logType       = ( LogEntryType )response[ BYTE_TYPE ];
-            this.formatVersion = ( int )response[ BYTE_FORMAT ];
-            this.errorStatus   = ( int )response[ BYTE_ERROR  ];
+            this.logType       = ( LogEntryType )response[ BYTE_TYPE ]; // 7
+            this.formatVersion = ( int )response[ BYTE_FORMAT ];        // 8
+            this.errorStatus   = ( int )response[ BYTE_ERROR  ];        // 22
             this.totalLogs     = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_NUMLOGS,      NUM_BYTES_NUMLOGS      ); // 3 and 4
             this.index         = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_CURRENT,      NUM_BYTES_CURRENT      ); // 5 and 6
-            long secTimeStamp  = Utils.GetNumericValueFromBytes<long> ( response, BYTE_SECSTIME,     NUM_BYTES_SECSTIME     ); // 9, 10, 11 and 12
+            long secsTimeStamp = Utils.GetNumericValueFromBytes<long> ( response, BYTE_SECSTIME,     NUM_BYTES_SECSTIME     ); // 9, 10, 11 and 12
             this.flags         = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_FLAGS,        NUM_BYTES_FLAGS        ); // 13 and 14
             this.readInterval  = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_READINTERVAL, NUM_BYTES_READINTERVAL ); // 15 and 16
             this.meterRead     = Utils.GetNumericValueFromBytes<long> ( response, BYTE_METERREAD,    NUM_BYTES_METERREAD    ); // 17, 18, 19, 20 and 21
-            this.timeStamp     = new DateTime ( 1970, 1, 1, 0, 0, 0 ).AddSeconds ( secTimeStamp );
-            this.portNumber    = ( ( this.flags & 3 ) == 0 ) ? 1 : ( ( ( this.flags & 3 ) == 1 ) ? 2 : -1 );
+            this.timeStamp     = new DateTime ( 1970, 1, 1, 0, 0, 0 ).AddSeconds ( secsTimeStamp );
         }
 
         #endregion

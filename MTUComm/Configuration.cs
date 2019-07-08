@@ -107,12 +107,12 @@ namespace MTUComm
             try
             {
                 // Load configuration files ( xml's )
-                MtuTypes auxMtus = Utils.DeserializeXml<MtuTypes>(Path.Combine(configPath, XML_MTUS));
-                MeterTypes auxMeters = Utils.DeserializeXml<MeterTypes>(Path.Combine(configPath, XML_METERS));
-                Global auxGlobal = Utils.DeserializeXml<Global>(Path.Combine(configPath, XML_GLOBAL));
-                AlarmList auxAlarm  = Utils.DeserializeXml<AlarmList>(Path.Combine(configPath, XML_ALARMS));
-                DemandConf auxDemand = Utils.DeserializeXml<DemandConf>(Path.Combine(configPath, XML_DEMANDS));
-                User[] auxUsers  = Utils.DeserializeXml<UserList>(Path.Combine(configPath, XML_USERS)).List;
+                MtuTypes   auxMtus   = Utils.DeserializeXml<MtuTypes>   ( Path.Combine(configPath, XML_MTUS    ) );
+                MeterTypes auxMeters = Utils.DeserializeXml<MeterTypes> ( Path.Combine(configPath, XML_METERS  ) );
+                Global     auxGlobal = Utils.DeserializeXml<Global>     ( Path.Combine(configPath, XML_GLOBAL  ) );
+                AlarmList  auxAlarm  = Utils.DeserializeXml<AlarmList>  ( Path.Combine(configPath, XML_ALARMS  ) );
+                DemandConf auxDemand = Utils.DeserializeXml<DemandConf> ( Path.Combine(configPath, XML_DEMANDS ) );
+                User[]     auxUsers  = Utils.DeserializeXml<UserList>   ( Path.Combine(configPath, XML_USERS   ) ).List;
                 return true;
 
             }
@@ -154,19 +154,19 @@ namespace MTUComm
             return meterTypes.FindByMterId(meterId);
         }
 
-        public InterfaceParameters[] getAllInterfaceFields ( Mtu mtu, ActionType actionType )
+        public InterfaceParameters[] getAllParamsFromInterface ( Mtu mtu, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getAllInterfaces ();
+            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getAllParams ();
         }
 
-        public InterfaceParameters[] getLogInterfaceFields ( Mtu mtu, ActionType actionType )
+        public InterfaceParameters[] getLogParamsFromInterface ( Mtu mtu, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getLogInterfaces ();
+            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getLogParams ();
         }
 
-        public InterfaceParameters[] getUserInterfaceFields ( Mtu mtu, ActionType actionType )
+        public InterfaceParameters[] getUserParamsFromInterface ( Mtu mtu, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getUserInterfaces ();
+            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getUserParams ();
         }
 
         public string GetMemoryMapTypeByMtuId ( Mtu mtu )

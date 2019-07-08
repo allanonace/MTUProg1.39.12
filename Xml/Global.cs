@@ -203,7 +203,7 @@ namespace Xml
 
             // New parameters/tags ( Aclara )
 
-            this.NumOfDays                    = 0;                    // TODO: Default initial value
+            this.NumOfDays                    = 1;                    // Number of days used for recover DataRead events
         
             #region Collections
         

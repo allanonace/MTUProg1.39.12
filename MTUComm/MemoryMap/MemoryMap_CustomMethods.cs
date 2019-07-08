@@ -247,9 +247,10 @@ namespace MTUComm.MemoryMap
 
         public async Task<int> MtuSoftVersion_Get ( MemoryOverload<int> memoryOverload, dynamic MemoryRegisters )
         {
-            if ( await MemoryRegisters.MtuSoftVersionNew.GetValue () == 255 )
+            int newVersion;
+            if ( ( newVersion = await MemoryRegisters.MtuSoftVersionNew.GetValue () ) == 255 )
                 return await MemoryRegisters.MtuSoftVersionLegacy.GetValue ();
-            return await MemoryRegisters.MtuSoftVersionNew.GetValue ();
+            return newVersion;
         }
 
         public async Task<string> MtuSoftVersionString_Get ( MemoryOverload<string> memoryOverload, dynamic MemoryRegisters )

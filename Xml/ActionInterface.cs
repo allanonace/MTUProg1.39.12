@@ -12,7 +12,7 @@ namespace Xml
         [XmlElement("Parameter")]
         public List<InterfaceParameters> Parameters { get; set; }
 
-        public InterfaceParameters[] getLogInterfaces()
+        public InterfaceParameters[] getLogParams()
         {
             List<InterfaceParameters> copyParameters = new List<InterfaceParameters> ();
             
@@ -26,7 +26,7 @@ namespace Xml
             return copyParameters.ToArray ();
         }
 
-        public InterfaceParameters[] getUserInterfaces()
+        public InterfaceParameters[] getUserParams()
         {
             List<InterfaceParameters> copyParameters = new List<InterfaceParameters> ();
             
@@ -40,7 +40,7 @@ namespace Xml
             return copyParameters.ToArray ();
         }
 
-        public InterfaceParameters[] getAllInterfaces()
+        public InterfaceParameters[] getAllParams()
         {
             return Parameters.ToArray ();
         }
