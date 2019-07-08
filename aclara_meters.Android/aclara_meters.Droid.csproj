@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
     <AndroidLinkMode>None</AndroidLinkMode>
     <MandroidI18n />
+    <AotAssemblies>false</AotAssemblies>
+    <EnableLLVM>false</EnableLLVM>
+    <BundleAssemblies>false</BundleAssemblies>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>false</Optimize>
@@ -45,6 +48,9 @@
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
     <AndroidSupportedAbis />
+    <AotAssemblies>false</AotAssemblies>
+    <EnableLLVM>false</EnableLLVM>
+    <BundleAssemblies>false</BundleAssemblies>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Mono.Android" />
@@ -59,6 +65,18 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Intune.MAM.Remapper.Tasks">
       <Version>0.1.4428.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.Intune.MAM.Xamarin.Android">
+      <Version>3.0.4428.1</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Android.Support.Compat">
+      <Version>28.0.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Android.Support.Emoji.AppCompat">
+      <Version>28.0.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="Xamarin.Android.Support.v17.Leanback">
+      <Version>28.0.0.1</Version>
     </PackageReference>
     <PackageReference Include="Xamarin.Forms" Version="3.6.0.344457" />
     <PackageReference Include="Xamarin.Android.Support.Design" Version="28.0.0.1" />
@@ -102,9 +120,6 @@
     <PackageReference Include="Plugin.Multilingual">
       <Version>1.1.6-beta</Version>
     </PackageReference>
-    <PackageReference Include="Microsoft.Intune.MAM.Xamarin.Android">
-      <Version>3.0.4035.4</Version>
-    </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MainActivity.cs" />
@@ -123,7 +138,6 @@
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
-    <None Include="Properties\AndroidManifest_S.xml" />
     <None Include="Helpers\TranslateExtension.txt" />
     <None Include="Resources\refreshsignal.png" />
   </ItemGroup>
@@ -375,6 +389,9 @@
     <AndroidAsset Include="Assets\fonts\OpenSansLight.ttf" />
     <AndroidAsset Include="Assets\fonts\OpenSansRegular.ttf" />
     <AndroidAsset Include="Assets\verdana.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\AndroidManifest.xml.sI" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Properties\AndroidManifest.xml" />

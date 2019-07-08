@@ -66,6 +66,7 @@ namespace aclara_meters
         public static BleSerial ble_interface;
         public static Logger logger;
         public static Configuration config;
+        private static Uri dataUrl;
 
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
@@ -99,14 +100,15 @@ namespace aclara_meters
         public FormsApp (
             IBluetoothLowEnergyAdapter badapter,
             IUserDialogs dialogs,
-            string appVersion )
+            string appVersion, Uri url=null )
         {
             try
             {
                 InitializeComponent();
                 VersionTracking.Track();
+                dataUrl=url;
 
-                Data.Set ( "IsFromScripting",   false );
+               // Data.Set ( "IsFromScripting",   false );
                 Data.Set ( "ActionInitialized", false );
                 Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
                 Data.Set ( "IsAndroid", Device.RuntimePlatform == Device.Android );
@@ -301,56 +303,7 @@ namespace aclara_meters
             }
             else
             { 
-                //{
-                //    //Configure download FTP
-                //    if (Mobile.IsNetAvailable())
-                //    {
-                //         bool result =false;
-                //         tcs = new TaskCompletionSource<bool>();
-                //        // Console.WriteLine($"------------------------------------FTP  Thread: {Thread.CurrentThread.ManagedThreadId}");
-                //        Device.BeginInvokeOnMainThread(async () =>
-                //        {
 
-                //            MainPage = new NavigationPage(new FtpDownloadSettings(tcs));
-                //            //PopupNavigation.Instance.PushAsync(new FtpDownloadSettings());
-
-                //            result = await tcs.Task;
-
-                //            if (!this.InitializeConfiguration())
-                //            {
-                //                GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
-                //                return;
-                //            }
-
-                //           //NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
-                //            GenericUtilsClass.SetInstallMode("FTP");
-
-                //            if (this.abortMission)
-                //            {
-                //                this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
-
-                //                return;
-                //            }
-                //            //await SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
-
-                //            if ( ! Data.Get.IsFromScripting )
-                //            {
-                //                Console.WriteLine($"------------------------------------Login  Thread: {Thread.CurrentThread.ManagedThreadId}");
-                //                Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
-                //            }
-                //            else
-                //                tcs1.SetResult(true);
-                //        });
-
-                //        return false;
-                //    }
-                //    else
-                //    {
-                //        this.ShowErrorAndKill(new NoInternetException());
-                //        this.abortMission = true;
-                //        return false;
-                //    }
-                //}
                 return true;
         
             }
@@ -370,6 +323,7 @@ namespace aclara_meters
             {
                 Result = InitialConfigProcess();
                 SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
+                SecureStorage.SetAsync("DateCheck", DateTime.Today.ToShortDateString());
 
             }
             else
@@ -466,7 +420,17 @@ namespace aclara_meters
                        // await MainPage.Navigation.PopToRootAsync(true);
                     });
                 else
-                    tcs1.SetResult(true);
+                {
+                    if (Data.Get.IsIOS)
+                    {
+                        tcs1.SetResult(true);
+                    }
+                    else
+                    {
+                        HandleUrl(dataUrl,adapter);
+                    }
+                  
+                }
             }
                   
         }
@@ -568,8 +532,8 @@ namespace aclara_meters
 
                 #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
 
-                await adapter.DisableAdapter();
-                await adapter.EnableAdapter(); //Android shows a window to allow bluetooth
+               // await adapter.DisableAdapter();
+               // await adapter.EnableAdapter(); //Android shows a window to allow bluetooth
 
                 #endregion
 
@@ -598,25 +562,39 @@ namespace aclara_meters
 
                 if ( callback != null ) { /* ... */ }
 
-
-                if (MainPage == null)  // no interactive 
+                
+                if ( Data.Get.IsIOS)  
                 {
-                    tcs1 = new TaskCompletionSource<bool>(); 
-                    bool result = await tcs1.Task;
-                }
-
-                await Task.Run(async () =>
-                {
-                    await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread ( async () =>
+                    if (MainPage == null) // no interactive 
                     {
-                        //Settings.IsLoggedIn = false;
-                        //credentialsService.DeleteCredentials ();
+                        tcs1 = new TaskCompletionSource<bool>(); 
+                        bool result = await tcs1.Task;
+                    }
+                    await Task.Run(async () =>
+                    {
+                        await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread ( async () =>
+                        {
+                            //Settings.IsLoggedIn = false;
+                            //credentialsService.DeleteCredentials ();
 
-                        MainPage = new NavigationPage(new AclaraViewScripting ( path, callback, script_name ) );
+                            Application.Current.MainPage = new NavigationPage(new AclaraViewScripting ( path, callback, script_name ) );
 
-                        await MainPage.Navigation.PopToRootAsync ( true );
+                            await MainPage.Navigation.PopToRootAsync ( true );
+                        });
                     });
-                });
+                }
+                else
+                {
+                    Device.BeginInvokeOnMainThread ( async () =>
+                        {
+                            //Settings.IsLoggedIn = false;
+                            //credentialsService.DeleteCredentials ();
+
+                            Application.Current.MainPage = new NavigationPage(new AclaraViewScripting ( path, callback, script_name ) );
+
+                            //await MainPage.Navigation.PopToRootAsync ( true );
+                        });
+                }
             }
         }
         
@@ -636,6 +614,11 @@ namespace aclara_meters
 
         protected override void OnResume()
         {
+            DateCheck = SecureStorage.GetAsync("DateCheck").Result;
+            if (!String.IsNullOrEmpty(DateCheck) && DateCheck != DateTime.Today.ToShortDateString())  // once per day
+            {
+                System.Diagnostics.Process.GetCurrentProcess().Kill();
+            }
         }
 
         private static void TaskSchedulerOnUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs unobservedTaskExceptionEventArgs)

@@ -80,7 +80,7 @@ namespace aclara_meters.iOS
                 {
                     stringValues.TryGetValue(Mobile.ID_CERTIFICATE, out certificate);
                     data.StoreCertificate(data.CreateCertificate(certificate));  //save the certificate in keychain
-                    data.GenerateCertFromStore();
+                    //data.GenerateCertFromStore();
                     //data.GenerateCert(certificate);
                 }
                

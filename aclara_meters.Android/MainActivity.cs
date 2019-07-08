@@ -6,6 +6,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using aclara_meters.view;
 using Acr.UserDialogs;
 using Android;
 using Android.App;
@@ -84,12 +86,13 @@ namespace aclara_meters.Droid
             Context     context    = Android.App.Application.Context;
             PackageInfo info       = context.PackageManager.GetPackageInfo ( context.PackageName, 0 );
             string      appversion = info.VersionName + " ( " + info.VersionCode + " )";
-            
-            FormsApp app = new FormsApp ( bluetooth, UserDialogs.Instance, appversion );
 
+            Data.Set ( "IsFromScripting",   true);
+            FormsApp app = new FormsApp ( bluetooth, UserDialogs.Instance, appversion,new System.Uri(data.ToString()));
+                     
             LoadApplication(app);
-
-            app.HandleUrl(new System.Uri(data.ToString()), bluetooth); 
+            //app.HandleUrl(new System.Uri(data.ToString()), bluetooth); 
+            
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
@@ -178,9 +181,9 @@ namespace aclara_meters.Droid
 
 
             // Check if FTP settings is in securestorage
-            GenericUtilsClass.CheckFTPDownload();
+            // GenericUtilsClass.CheckFTPDownload();
 
-
+            Data.Set ( "IsFromScripting",   false );
             LoadApplication(new FormsApp ( bluetooth, UserDialogs.Instance, value));
 
         }

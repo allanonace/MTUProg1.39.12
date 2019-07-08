@@ -49,7 +49,7 @@ namespace aclara_meters.iOS
             IUserDialogs userDialogs = UserDialogs.Instance;
             string appversion = appVersion.Description + " ( " + appBuild.Description + " )";
 
-
+            Data.Set("IsFromScripting", false);
             appSave = new FormsApp ( bluetoothLowEnergyAdapter, userDialogs, appversion);
                  
 

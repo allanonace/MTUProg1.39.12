@@ -21,7 +21,7 @@ namespace aclara_meters.Droid
             if (Control != null)
             {
                 Control.Background = new ColorDrawable(Android.Graphics.Color.Transparent);  
-                Control.SetPadding(10, 10, 10, 10);
+                Control.SetPadding(10, 10, 10, 4);
             }
         }
     }

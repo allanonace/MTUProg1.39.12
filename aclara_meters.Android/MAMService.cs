@@ -1,12 +1,13 @@
 ﻿using System;
 using Xamarin.Forms;
-using Microsoft.Intune.Mam.Policy.AppConfig;
 using aclara_meters.util;
 using Library;
 using MTUComm;
 using System.Linq;
 using Microsoft.Intune.Mam.Policy;
 using Microsoft.Intune.Mam.Client.App;
+using Microsoft.Intune.Mam.Policy.AppConfig;
+
 using System.Collections.Generic;
 
 [assembly: Dependency(typeof(aclara_meters.Droid.MAMService))]
@@ -82,14 +83,14 @@ namespace aclara_meters.Droid
 
 
                 data.HasIntune = true;
-                string certificate = string.Empty;             
+                string certificate = string.Empty;
                 if (dict.TryGetValue(Mobile.ID_CERTIFICATE, out certificate))
                 {
                     data.StoreCertificate(data.CreateCertificate(certificate));  //save the certificate in keychain
-                    data.GenerateCertFromStore();
+                    //data.GenerateCertFromStore();
                     //data.GenerateCert(certificate);
                 }
-                
+
             }
             catch (Exception e)
             {

@@ -96,9 +96,9 @@
     <WarningLevel>4</WarningLevel>
     <MtouchArch>ARM64</MtouchArch>
     <ConsolePause>false</ConsolePause>
-    <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
+    <CodesignKey>iPhone Distribution: Aclara Technologies LLC (FMKPYHX7PQ)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
-    <CodesignProvision>bizintekdist</CodesignProvision>
+    <CodesignProvision>Aclara Distribution</CodesignProvision>
     <MtouchLink>SdkOnly</MtouchLink>
     <OptimizePNGs />
     <MtouchFloat32 />
@@ -125,12 +125,12 @@
     <MtouchArch>ARM64</MtouchArch>
     <BuildIpa>true</BuildIpa>
     <IpaIncludeArtwork>false</IpaIncludeArtwork>
-    <CodesignProvision>bizintekdist</CodesignProvision>
-    <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
+    <CodesignKey>iPhone Distribution: Aclara Technologies LLC (FMKPYHX7PQ)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <DeviceSpecificBuild>true</DeviceSpecificBuild>
     <MtouchLink>SdkOnly</MtouchLink>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
+    <CodesignProvision>Aclara Distribution</CodesignProvision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
     <DebugType>none</DebugType>
@@ -345,7 +345,7 @@
     </PackageReference>
     <Compile Include="TEST.cs" />
     <PackageReference Include="Microsoft.Intune.MAM.Xamarin.iOS">
-      <Version>8.1.1.2</Version>
+      <Version>10.0.7</Version>
     </PackageReference>
   </ItemGroup>
   <Target Name="_CompileITunesMetadata" DependsOnTargets="_DetectSdkLocations;_DetectAppManifest;_GenerateBundleName;_CompileAppManifest">

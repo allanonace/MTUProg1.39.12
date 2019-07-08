@@ -36,7 +36,7 @@
     <ErrorReport>prompt</ErrorReport>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
+    <CodesignKey>iPhone Distribution: Aclara Technologies LLC (FMKPYHX7PQ)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <MtouchLink>SdkOnly</MtouchLink>
     <MtouchArch>ARM64</MtouchArch>

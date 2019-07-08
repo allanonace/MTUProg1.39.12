@@ -236,6 +236,8 @@ namespace MTUComm
                     {
                         X509Store store = new X509Store(StoreName.Root, StoreLocation.CurrentUser);
                         store.Open(OpenFlags.ReadWrite);
+
+                        X509Certificate2Collection certRemove = new X509Certificate2Collection();
                         foreach (var c in store.Certificates)
                         {
                             if (c.Equals(cert))
@@ -245,7 +247,8 @@ namespace MTUComm
                             }
                             else if (c.NotAfter <= cert.NotAfter)
                             {
-                                store.Remove(c);  // only one certificate
+                                certRemove.Add(c);
+
                             }
                             else 
                             {
@@ -253,6 +256,8 @@ namespace MTUComm
                             }
 
                         }
+                        if (certRemove.Count > 0)
+                            store.RemoveRange(certRemove);
                         if (!bFound)
                             store.Add(cert);
                         store.Close();

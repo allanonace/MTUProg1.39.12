@@ -2,9 +2,6 @@
 using Android.App;
 using Android.Runtime;
 using Microsoft.Intune.Mam.Client.App;
-using Microsoft.Intune.Mam.Client.Notification;
-using Microsoft.Intune.Mam.Policy;
-using Microsoft.Intune.Mam.Policy.Notification;
 
 namespace aclara_meters.Droid
 {
@@ -25,7 +22,7 @@ namespace aclara_meters.Droid
         {
         }
 
-      
+
         public override byte[] GetADALSecretKey()
         {
             return null;
