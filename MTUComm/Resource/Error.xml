@@ -9,6 +9,7 @@
     <Error id="105" message="Get next event log process has failed trying to recover data from the MTU" /> <!-- footer not necessary -->
     <Error id="106" message="Get next event log process has failed trying because the MTU is busy" /> <!-- footer not necessary -->
     <Error id="107" message="Get next event log can't be performed after having tried it several times" footer="Get next event log not achieved" />
+    <Error id="108" message="The MTU is not an OnDemand compatible device" footer="It isn't an OnDemand MTU" />
 
     <!-- Meter -->
     <Error id="200" message="The Meter.xml file does not contain the Meter ID specified" footer="Meter not listed in Meter.xml" />
@@ -72,7 +73,6 @@
 	<Error id="812" message="Changed configuration files"/>
     <Error id="813" message="The new version configuration files are corrupted, the app will continues with the actual ones when restart it. Contact your IT administrator"/>
     <Error id="814" message="Credentials from Intune missing" />
-    <!-- DEBUG -->
     
     <!-- Configuration Files -->
     <Error id="850" message="The interface for the specified MTU ID was not found" /> <!-- message_release="" /> -->
@@ -81,6 +81,6 @@
     <Error id="853" message="The DemandaConfig for the specified MTU ID was not found" /> <!-- message_release="" /> -->
     
     <!--<Error id="" message="" />-->
-    <!--<Error id="100" message="Mensaje de prueba de error propio" />-->
+    <!--<Error id="100" message="Mensaje de prueba de error propio" [ footer="..." ] />-->
     <!--<Error id="101" dotnet="80020012" message="Mensaje de prueba de error de .Net traducido" />-->
 </Errors>

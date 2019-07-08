@@ -459,6 +459,10 @@ namespace MTUComm
 
             try
             {
+                // Check if the MTU is an OnDemand MTU
+                if ( ! this.mtu.MtuDemand )
+                    throw new MtuIsNotOnDemandCompatibleDevice ();
+
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Requesting event logs..." ) );
 
                 // Save in Data to recover while creating log from interface
@@ -572,6 +576,8 @@ namespace MTUComm
                 }
 
                 BREAK:
+
+                await this.CheckIsTheSameMTU ();
 
                 Utils.Print ( "DataRead Finished: " + eventLogList.Count );
 

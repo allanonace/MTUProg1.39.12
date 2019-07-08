@@ -41,6 +41,8 @@ namespace MTUComm
             { new MtuIsBusyToGetEventsLogException (),          106 },
             // Get next event log can't be performed after having tried it several times
             { new ActionNotAchievedGetEventsLogException (),    107 },
+            // The MtU is not an OnDemand device
+            { new MtuIsNotOnDemandCompatibleDevice (),          108 },
         
             // Meter [ 2xx ]
             //------

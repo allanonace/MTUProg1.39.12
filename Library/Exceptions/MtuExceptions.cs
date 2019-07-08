@@ -1,7 +1,7 @@
 ﻿namespace Library.Exceptions
 {
-    // MTU [ 1xx ]
-    //----
+    #region MTU [ 1xx ]
+
     public class MtuHasChangeBeforeFinishActionException : OwnExceptionsBase
     {
         public MtuHasChangeBeforeFinishActionException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
@@ -32,18 +32,24 @@
         public AttemptNotAchievedGetEventsLogException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
 
+    public class MtuIsBusyToGetEventsLogException : OwnExceptionsBase
+    {
+        public MtuIsBusyToGetEventsLogException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
     public class ActionNotAchievedGetEventsLogException : OwnExceptionsBase
     {
         public ActionNotAchievedGetEventsLogException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
 
-    public class MtuIsBusyToGetEventsLogException : OwnExceptionsBase
+    public class MtuIsNotOnDemandCompatibleDevice : OwnExceptionsBase
     {
-        public MtuIsBusyToGetEventsLogException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+        public MtuIsNotOnDemandCompatibleDevice ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
     
-    // Meter [ 2xx ]
-    //------
+    #endregion
+
+    #region Meter [ 2xx ]
 
     public class ScriptingAutoDetectMeterMissing : OwnExceptionsBase
     {
@@ -120,8 +126,9 @@
         public EncoderAutodetectException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
     
-    // Scripting Parameters [ 3xx ]
-    //---------------------
+    #endregion
+
+    #region Scripting Parameters [ 3xx ]
     
     public class ProcessingParamsScriptException : OwnExceptionsBase
     {
@@ -173,9 +180,9 @@
         public ScriptUserNameMissingException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
 
+    #endregion
 
-    // Alarm [ 4xx ]
-    //------
+    #region Alarm [ 4xx ]
 
     public class ScriptingAlarmForCurrentMtuException : OwnExceptionsBase
     {
@@ -187,8 +194,9 @@
         public SelectedAlarmForCurrentMtuException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
     
-    // Turn Off [ 5xx ]
-    //---------
+    #endregion
+    
+    #region Turn Off [ 5xx ]
     
     public class AttemptNotAchievedTurnOffException : OwnExceptionsBase
     {
@@ -200,8 +208,9 @@
         public ActionNotAchievedTurnOffException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
     
-    // Install Confirmation [ 6xx ]
-    //---------------------
+    #endregion
+    
+    #region Install Confirmation [ 6xx ]
     
     public class MtuIsNotTwowayICException : OwnExceptionsBase
     {
@@ -223,17 +232,19 @@
         public ActionNotAchievedICException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
     
-    // Encryption [ 7xx ]
-    //-----------
+    #endregion
     
+    #region Encryption [ 7xx ]
+
     public class ActionNotAchievedEncryptionException : OwnExceptionsBase
     {
         public ActionNotAchievedEncryptionException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
     
-    // Configuration Files and System [ 8xx ]
-    //-------------------------------
+    #endregion
     
+    #region Configuration Files and System [ 8xx ]
+
     public class ConfigurationFilesNotFoundException : OwnExceptionsBase
     {
         public ConfigurationFilesNotFoundException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
@@ -338,4 +349,6 @@
     {
         public ConfigFilesChangedException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
+
+    #endregion
 }

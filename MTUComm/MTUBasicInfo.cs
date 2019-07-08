@@ -6,6 +6,8 @@ namespace MTUComm
 {
     public class MTUBasicInfo
     {
+        #region Attributes
+
         private uint mtu_type;
         private uint mtu_id;
 
@@ -17,6 +19,8 @@ namespace MTUComm
         private int p2enabled;
         
         public  int version { get; }
+
+        #endregion
 
         private PortType[] ports = new PortType[] { PortType.TYPE_NONE, PortType.TYPE_NONE }; //Currently max 2 ports
 
@@ -168,7 +172,6 @@ namespace MTUComm
 
         public void setPortType(int port_number, string port_type)
         {
-
             ports[port_number] = portStringToType(port_type);
 
             foreach(PortType type in ports){
@@ -183,6 +186,5 @@ namespace MTUComm
         {
             get { return mEncoder; }
         }
-
     }
 }

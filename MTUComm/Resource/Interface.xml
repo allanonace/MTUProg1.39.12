@@ -98,22 +98,22 @@
 	<Interface ID="2" memorymap="33xx" memorysize="256">
 		<!--
 		Differences with 31xx32xx:
-		- Remove DailySnap				-> In the memory map but not implemented
-		- Remove DailyGMTHourRead		-> In the memory map but not implemented
-		- Remove Encryption 			-> Not supported
-		- Remove EncryptionIndex 		-> Not supported
-		- Remove TiltTamperStatus		-> Famili 33xx no log any alarm
-		- Remove MagneticTamperStatus
-		- Remove InterfaceTamperStatus
-		- Remove RegisterCoverTamperStatus
-		- Remove ReverseFlowTamperStatus
-		- Remove Cut1WireTamperStatus
-		- Remove Cut2WireTamperStatus
-		- Add BackFlowState [ Port ]	-> Only for Ecoders
-		- Add DaysOfNoFlow [ Port ]		-> Only for Ecoders
-		- Add LeakDetection [ Port ]	-> Only for Ecoders
-		- Add DaysOfLeak [ Port ]		-> Only for Ecoders
-		- Add NumberOfDigits [ Port ]	-> For Encoders and Ecoders
+		- Remove DailySnap					-> In the memory map but not implemented
+		- Remove DailyGMTHourRead			-> In the memory map but not implemented
+		- Remove Encryption 				-> Not supported
+		- Remove EncryptionIndex 			-> Not supported
+		- Remove TiltTamperStatus			-> Family 33xx no log any alarm
+		- Remove MagneticTamperStatus		-> Alarm not present in Family 33xx
+		- Remove InterfaceTamperStatus		-> Alarm not present in Family 33xx
+		- Remove RegisterCoverTamperStatus	-> Alarm not present in Family 33xx
+		- Remove ReverseFlowTamperStatus	-> Alarm not present in Family 33xx
+		- Remove Cut1WireTamperStatus		-> Alarm not present in Family 33xx
+		- Remove Cut2WireTamperStatus		-> Alarm not present in Family 33xx
+		- Add BackFlowState [ Port ]		-> Only for Ecoders
+		- Add DaysOfNoFlow [ Port ]			-> Only for Ecoders
+		- Add LeakDetection [ Port ]		-> Only for Ecoders
+		- Add DaysOfLeak [ Port ]			-> Only for Ecoders
+		- Add NumberOfDigits [ Port ]		-> For Encoders and Ecoders
 		-->
 		<Action type="ReadMTU">
 			<Parameter name="Date" display="Date/Time" log="true" source="Action.Date" interface="false"/>
@@ -174,18 +174,18 @@
 		- Add LeakDetection [ Port ]	-> Only for Ecoders
 		- Add DaysOfLeak [ Port ]		-> Only for Ecoders
 		- Add NumberOfDigits [ Port ]	-> For Encoders and Ecoders
-		- Add Fast-2-way register		-> Only for 34xx MTUs and above
-		- Add MtuMsgProtocolConfig		-> For OnDemand?
-		- Add MtuPrimaryWindowInterval	-> For OnDemand?
-		- Add MtuWindowAStart			-> For OnDemand?
-		- Add MtuWindowBStart			-> For OnDemand?
-		- Add MtuPrimaryWindowIntervalB	-> For OnDemand?
-		- Add MtuPrimaryWindowOffset	-> For OnDemand?
-		- Add MtuNumLowPriorityMsg		-> For OnDemand?
-		- Add OnDemandCount				-> For OnDemand?
-		- Add DataRequestCount			-> For OnDemand?
-		- Add FOTACount					-> For OnDemand?
-		- Add FOTCCount					-> For OnDemand?
+		- Add Fast-2-way register		-> Fast Messaging, Only for 34xx MTUs and above
+		- Add MtuMsgProtocolConfig		-> Fast Messaging
+		- Add MtuPrimaryWindowInterval	-> Fast Messaging
+		- Add MtuWindowAStart			-> Fast Messaging
+		- Add MtuWindowBStart			-> Fast Messaging
+		- Add MtuPrimaryWindowIntervalB	-> Fast Messaging
+		- Add MtuPrimaryWindowOffset	-> Fast Messaging
+		- Add MtuNumLowPriorityMsg		-> Fast Messaging
+		- Add OnDemandCount				-> Fast Messaging
+		- Add DataRequestCount			-> Fast Messaging
+		- Add FOTACount					-> Fast Messaging
+		- Add FOTCCount					-> Fast Messaging
 		- Remove F12WAYRegister1		-> Not supported
 		- Remove F12WAYRegister10		-> Not supported
 		- Remove F12WAYRegister14		-> Not supported
@@ -256,8 +256,8 @@
 			<Parameter name="DataRequestCount" display="Data Req Cnt" log="true" interface="true" conditional="Mtu.FastMessageConfig=true"/>
 			<Parameter name="FOTACount" display="FOTA Cnt" log="true" interface="true" conditional="Mtu.FastMessageConfig=true"/>
 			<Parameter name="FOTCCount" display="FOTC Cnt" log="true" interface="true" conditional="Mtu.FastMessageConfig=true"/>
+			<Parameter name="TxBetweenRx" display="Tx Between Rx" log="true" interface="true" source="MemoryMap.RxInterval" conditional="Mtu.FastMessageConfig=true"/>
 			<!-- END - Fast-2-Way / Fast Messaging -->
-			<Parameter name="TxBetweenRx" display="Tx Between Rx" log="true" interface="true" source="MemoryMap.RxInterval"/>
 			<Parameter name="MtuType" display="MTU Type" log="true" interface="true"/>
 			<Parameter name="MtuSoftware" display="MTU Software" log="true" interface="true" source="MemoryMap.MtuSoftVersionString"/>
 			<Parameter name="MTUFirmwareVersionFormatFlag" display="MTU firmware version format flag" log="true" interface="false" source="MemoryMap.MtuSoftVersion"/>
