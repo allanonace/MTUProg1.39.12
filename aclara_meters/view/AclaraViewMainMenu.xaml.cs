@@ -324,6 +324,8 @@ namespace aclara_meters.view
             if (FormsApp.config.Global.ShowInstallConfirmation)
                 MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
 
+            if (FormsApp.config.Global.ShowDataRead)
+                MenuList.Add(new PageItem() { Title = "Data Read", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.DataRead });
 #if DEBUG
            // MenuList.Add(new PageItem() { Title = "Read Fabric", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadFabric });
 #endif
@@ -1347,8 +1349,10 @@ namespace aclara_meters.view
                 Task.Delay(100).ContinueWith(t =>
                     Device.BeginInvokeOnMainThread(() =>
                     {
-
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
+                        if (actionType == ActionType.DataRead)
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
+                        else
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
 
                         #region New Circular Progress bar Animations    
 
@@ -1560,6 +1564,68 @@ namespace aclara_meters.view
         {
             switch (page)
             {
+                    case ActionType.DataRead:
+
+                    #region New Circular Progress bar Animations    
+
+                    DeviceList.IsRefreshing = false;
+                    backdark_bg.IsVisible = true;
+                    indicator.IsVisible = true;
+
+                    #endregion
+
+                    #region Read Data Controller
+
+                    background_scan_page.Opacity = 1;
+                    background_scan_page_detail.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+                    background_scan_page_detail.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            navigationDrawerList.SelectedItem = null;
+
+                            //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,page), false);
+                            DoBasicRead();
+
+                            background_scan_page.Opacity = 1;
+                            background_scan_page_detail.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+
+                            #region New Circular Progress bar Animations    
+
+                            DeviceList.IsRefreshing = false;
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+
+                            #endregion
+
+                        })
+                    );
+
+                    #endregion
+
+                    break;
                 case ActionType.ReadFabric:
 
                     #region New Circular Progress bar Animations    
@@ -2211,9 +2277,7 @@ namespace aclara_meters.view
 
             DoBasicRead();
         }
-
-
-
+       
         private void OpenSettingsTapped(object sender, EventArgs e)
         {
             //printer.Suspend();

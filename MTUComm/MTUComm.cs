@@ -52,7 +52,7 @@ namespace MTUComm
         private const byte CMD_NEXT_EVENT_DATA    = 0x00; // ACK with log entry
         private const byte CMD_NEXT_EVENT_EMPTY   = 0x01; // ACK without log entry ( query complete )
         private const byte CMD_NEXT_EVENT_BUSY    = 0x02; // ACK without log entry ( MTU is busy or some error trying to recover next log entry )
-        private const int WAIT_BEFORE_LOGS        = 3000; // The host device should delay for at least 2 seconds to give the MTU time to begin the query
+        private const int WAIT_BEFORE_LOGS        = 10000; // The host device should delay for at least 2 seconds to give the MTU time to begin the query
         private const int WAIT_BTW_LOG_ERRORS     = 1000;
         private const int WAIT_BTW_LOGS           = 100;
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
@@ -274,13 +274,17 @@ namespace MTUComm
                              await Task.Run ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ], ( Action )args[ 2 ] ) );
                         else await Task.Run ( () => Task_AddMtu ( ( Action )args[ 0 ] ) );
                         break;
-                    //case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
+                    case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
                     // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                    case ActionType.ReadMtu    : await Task.Run ( () => Task_DataRead ( ( int )args[ 0 ] ) ); break;
+                    //case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu ( ( int )args[ 0 ] ) ); break;
                     // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                     case ActionType.TurnOffMtu : await Task.Run ( () => Task_TurnOnOffMtu ( false ) ); break;
                     case ActionType.TurnOnMtu  : await Task.Run ( () => Task_TurnOnOffMtu ( true  ) ); break;
-                    case ActionType.DataRead   : await Task.Run ( () => Task_DataRead ( ( int )args[ 0 ] ) ); break;
+                    case ActionType.DataRead   : 
+                        if ( args.Length == 1 )
+                            await Task.Run ( () => Task_DataRead ( ( Action )args[ 0 ] ) );
+                        else await Task.Run ( () => Task_DataRead ( ));
+                        break;
                     case ActionType.BasicRead  : await Task.Run ( () => Task_BasicRead () ); break;
                     case ActionType.MtuInstallationConfirmation: await Task.Run ( () => Task_InstallConfirmation () ); break;
                     case ActionType.ReadFabric: await Task.Run ( () => Task_ReadFabric () ); break;
@@ -453,7 +457,7 @@ namespace MTUComm
         // · Pag 38 - 4.2.3.19 Get Next Event Log Response
         // · Pag 39 - 4.2.3.20 Get Repeat Last Event Log Response
         public async Task Task_DataRead (
-            int numOfDays = 0 )
+            Action action = null )
         {
             Global global = this.configuration.Global;
 
@@ -462,7 +466,7 @@ namespace MTUComm
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Requesting event logs..." ) );
 
                 // Save in Data to recover while creating log from interface
-                Data.Set ( "NumOfDays", ( numOfDays > 0 ) ? numOfDays : global.NumOfDays );
+                //Data.Set ( "NumOfDays", ( numOfDays > 0 ) ? numOfDays : global.NumOfDays );
 
                 // NOTE: It is not clear why in STARProgrammer 86399 are added to calculate the end date
                 DateTime end   = DateTime.UtcNow.AddDays ( DATA_READ_END_DAYS );
@@ -1928,17 +1932,15 @@ namespace MTUComm
                 this.basicInfoLoaded = true;
             
                 MtuForm.SetBasicInfo ( latest_mtu );
-                
+                              
                 // Launchs exception 'MtuTypeIsNotFoundException'
                 this.mtu = configuration.GetMtuTypeById ( ( int )this.latest_mtu.Type );
-                
-                if ( this.mtuHasChanged )
-                {
-                    for ( int i = 0; i < this.mtu.Ports.Count; i++ )
-                        latest_mtu.setPortType ( i, this.mtu.Ports[ i ].Type );
-                    
-                    if ( latest_mtu.isEncoder ) { }
-                }
+               
+                for ( int i = 0; i < this.mtu.Ports.Count; i++ )
+                    latest_mtu.setPortType ( i, this.mtu.Ports[ i ].Type );
+                                     
+                Data.Set("MemoryMap",GetMemoryMap(true),false);
+
             }
         }
 

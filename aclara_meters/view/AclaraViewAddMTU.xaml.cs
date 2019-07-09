@@ -8,9 +8,8 @@ using Acr.UserDialogs;
 using Library;
 using MTUComm;
 using MTUComm.actions;
-using Plugin.Geolocator;
-using Plugin.Geolocator.Abstractions;
 using Plugin.Settings;
+using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xml;
 
@@ -1377,6 +1376,8 @@ namespace aclara_meters.view
             if (this.global.ShowInstallConfirmation)
                 MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
 
+            if (FormsApp.config.Global.ShowDataRead)
+                MenuList.Add(new PageItem() { Title = "Data Read", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.DataRead });
 
             // ListView needs to be at least  elements for UI Purposes, even empty ones
             while (MenuList.Count < 9)
@@ -1662,7 +1663,10 @@ namespace aclara_meters.view
         {
             Device.BeginInvokeOnMainThread(() =>
             {
-                Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, this.actionType ), false);
+                if (actionType==ActionType.DataRead)
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved, this.actionType ), false);
+                else 
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, this.actionType ), false);
 
                 #region New Circular Progress bar Animations    
 
@@ -2623,6 +2627,66 @@ namespace aclara_meters.view
 
             switch ( page )
             {
+                 case ActionType.DataRead:
+
+                    #region New Circular Progress bar Animations    
+
+             
+                    backdark_bg.IsVisible = true;
+                    indicator.IsVisible = true;
+
+                    #endregion
+
+
+                    #region Read Data Controller
+                    this.actionType = this.actionTypeNew; 
+
+                    background_scan_page.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            navigationDrawerList.SelectedItem = null;
+
+                            //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved, page), false);
+                            ChangeAction();
+
+                            background_scan_page.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+
+                            #region New Circular Progress bar Animations    
+
+                  
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+
+                            #endregion
+                        })
+                    );
+
+                    #endregion
+
+                    break;
                 case ActionType.ReadMtu:
 
                     #region New Circular Progress bar Animations    
@@ -4014,13 +4078,7 @@ namespace aclara_meters.view
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    // DEBUG
-                    if ( DEBUG_AUTO_MODE_ON )
-                    {
-                        this.SetMeterVendor ( DEBUG_VENDOR_INDEX );
-                        this.SetMeterModel  ( DEBUG_MODEL_INDEX  );
-                    }
-
+                   
                     backdark_bg.IsVisible = true;
                     indicator.IsVisible = true;
                     _userTapped = true;
@@ -4518,66 +4576,53 @@ namespace aclara_meters.view
 
         #region Location
 
-        private void GpsUpdateButton ( object sender, EventArgs e )
+        private async void GpsUpdateButton ( object sender, EventArgs e )
         {
-            if ( IsLocationAvailable () )
-                Task.Run(async () => { await GpsStartListening(); });
+            var position = await GetCurrentPosition();
+            if (position==null)
+                await dialogsSaved.AlertAsync("You must activate the GPS on the device to return coordinates","Alert");
+            else
+            {
+                this.tbx_MtuGeolocationLat .Text = position.Latitude .ToString ();
+                this.tbx_MtuGeolocationLong.Text = position.Longitude.ToString ();
+                this.mtuGeolocationAlt           = position.Altitude .ToString ();
+            }
         }
 
-        public bool IsLocationAvailable ()
-        {
-            if (!CrossGeolocator.IsSupported)
-                return false;
+        public static async Task<Location> GetCurrentPosition()
+	    {
+            Location location = null;
+           
+            try
+            {
+                var request = new GeolocationRequest(GeolocationAccuracy.Medium);
+                location = await Geolocation.GetLocationAsync(request);
+            }
+            catch (FeatureNotSupportedException fnsEx)
+            {
+                // Handle not supported on device exception
+            }
+            catch (FeatureNotEnabledException fneEx)
+            {
+               return null; // Handle not enabled on device exception
+            }
+            catch (PermissionException pEx)
+            {
+                // Handle permission exception
+            }
+            catch (Exception ex)
+            {
+                // Unable to get location
+            }
 
-            CrossGeolocator.Current.DesiredAccuracy = 5;
+            if (location != null)
+            {
+                Console.WriteLine($"Latitude: {location.Latitude}, Longitude: {location.Longitude}, Altitude: {location.Altitude}");
+            }
 
-
-            return CrossGeolocator.Current.IsGeolocationAvailable;
-        }
-
-        async Task GpsStartListening ()
-        {
-            if (CrossGeolocator.Current.IsListening)
-                return;
-            await CrossGeolocator.Current.StartListeningAsync(TimeSpan.FromSeconds(1), 1, true);
-            CrossGeolocator.Current.PositionChanged += PositionChanged;
-            CrossGeolocator.Current.PositionError += PositionError;
-            await Task.Delay(5000).ContinueWith(t => GpsStopListening());
-        }
-
-        private void PositionChanged ( object sender, PositionEventArgs e )
-        {
-            //If updating the UI, ensure you invoke on main thread
-            var position = e.Position;
-            var output = "Full: Lat: " + position.Latitude + " Long: " + position.Longitude;
-            output += "\n" + $"Time: {position.Timestamp}";
-            output += "\n" + $"Heading: {position.Heading}";
-            output += "\n" + $"Speed: {position.Speed}";
-            output += "\n" + $"Accuracy: {position.Accuracy}";
-            output += "\n" + $"Altitude: {position.Altitude}";
-            output += "\n" + $"Altitude Accuracy: {position.AltitudeAccuracy}";
-            Utils.Print(output);
-            //accuracy.Text = output.ToString();
-
-            this.tbx_MtuGeolocationLat .Text = position.Latitude .ToString ();
-            this.tbx_MtuGeolocationLong.Text = position.Longitude.ToString ();
-            this.mtuGeolocationAlt           = position.Altitude .ToString ();
-        }
-
-        private void PositionError ( object sender, PositionErrorEventArgs e )
-        {
-            Utils.Print(e.Error);
-        }
-
-        private async Task GpsStopListening ()
-        {
-            if (!CrossGeolocator.Current.IsListening)
-                return;
-            await CrossGeolocator.Current.StopListeningAsync();
-            CrossGeolocator.Current.PositionChanged -= PositionChanged;
-            CrossGeolocator.Current.PositionError -= PositionError;
-        }
-
+            return location;
+            
+	    }
         #endregion
 
         #region Other methods
@@ -4648,5 +4693,7 @@ namespace aclara_meters.view
             return true;
         }
         #endregion
+  
     }
+
 }

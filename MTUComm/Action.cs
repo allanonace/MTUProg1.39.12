@@ -435,14 +435,8 @@ namespace MTUComm
 
                     case ActionType.ReadMtu:
                     case ActionType.MtuInstallationConfirmation:
-                        //comm.OnReadMtu -= Comm_OnReadMtu;
-                        //comm.OnReadMtu += Comm_OnReadMtu;
-
-                        // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
-                        parameters.Add ( 1 );
-                        comm.OnDataRead -= Comm_OnDataReadEvent;
-                        comm.OnDataRead += Comm_OnDataReadEvent;
-                        // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
+                        comm.OnReadMtu -= Comm_OnReadMtu;
+                        comm.OnReadMtu += Comm_OnReadMtu;
                         break;
                        
                     case ActionType.AddMtu:
@@ -466,7 +460,9 @@ namespace MTUComm
                         break;
 
                     case ActionType.DataRead:
-                        parameters.AddRange ( new object[] { ( int ) 1 }); // TODO: Use new entry created in Library.Data
+                       // parameters.AddRange ( new object[] { ( int ) 1 }); // TODO: Use new entry created in Library.Data
+                        if (Data.Get.IsFromScripting) parameters.Add ( this );
+                       
                         comm.OnDataRead -= Comm_OnDataReadEvent;
                         comm.OnDataRead += Comm_OnDataReadEvent;
                         break;
@@ -518,10 +514,11 @@ namespace MTUComm
             try
             {
                 // Mtu ID value formated
-                dynamic map = args.MemoryMap;
-                int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
-                string strMtuId = ( await map.MtuSerialNumber.GetValueFromMtu () ).ToString ().PadLeft ( mtuIdLength, '0' );
-                Data.Set ( "MtuId", strMtuId );
+                //dynamic map = args.MemoryMap;
+                //int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
+                //string strMtuId = ( await map.MtuSerialNumber.GetValueFromMtu () ).ToString ().PadLeft ( mtuIdLength, '0' );
+                //Data.Set ( "MtuId", strMtuId );
+                string strMtuId = Data.Get.MtuId;
 
                 // Prepare custom values
                 EventLogList eventList = args.ListEntries;
@@ -539,13 +536,13 @@ namespace MTUComm
                 Data.Set ( "ReadResultFileFull", path );
                 Data.Set ( "ReadResultFile", subpath );
 
-                // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
-                Data.Set ( "MtuLocation", "Outside", true );
-                Data.Set ( "Construction", "Wood", true );
-                Data.Set ( "GpsLat", 12, true );
-                Data.Set ( "GpsLon", 34, true );
-                Data.Set ( "GpsAlt", 56, true );
-                // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
+                //// >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
+                //Data.Set ( "MtuLocation", "Outside", true );
+                //Data.Set ( "Construction", "Wood", true );
+                //Data.Set ( "GpsLat", 12, true );
+                //Data.Set ( "GpsLon", 34, true );
+                //Data.Set ( "GpsAlt", 56, true );
+                //// >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu, null, ActionType.DataRead );
                 ActionResult readMtu_allParamsFromInterface  = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu );

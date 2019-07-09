@@ -273,7 +273,7 @@
 				<Parameter name="AccountNumber" display="Global.AccountLabel" length="Global.AccountLength" fill="left" log="true" interface="true" source="MemoryMap.MeterId"/>
 				<Parameter name="DaysOfRead" display="Days of Read" source="Data.NumOfDays" log="true" interface="true" conditional="MemoryMap.StatusFlag=true"/>
 			</Parameter>
-			<Parameter name="MTU_Location_Data" display="MTU Location Data" log="true" interface="true" source="Data.MtuLocation"/>
+			<Parameter name="MTU_Location_Data" display="MTU Location Data" log="true" interface="true" source="Data.MTULocation"/>
 			<Parameter name="Construction_Type" display="Construction Type" log="true" interface="true" source="Data.Construction"/>
 			<Parameter name="GPS_Y" display="Lat" log="true" interface="true" source="Data.GpsLat"/>
 			<Parameter name="GPS_X" display="Long" log="true" interface="true" source="Data.GpsLon"/>

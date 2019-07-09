@@ -713,19 +713,19 @@
                                     <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Margin="4">
                                         <Label Text="Lat." Margin="0,4,0,0" VerticalOptions="Center" FontSize="16">
                                         </Label>
-                                        <Frame CornerRadius="6" HeightRequest="28" Margin="0,4,0,0" HorizontalOptions="FillAndExpand" BackgroundColor="#7a868c">
-                                            <Frame CornerRadius="6" HeightRequest="28" Margin="-7" BackgroundColor="White">
+                                        <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" HorizontalOptions="FillAndExpand" BackgroundColor="#7a868c">
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="28" x:Name="tbx_MtuGeolocationLat" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
+                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MtuGeolocationLat" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
                                         <Label Text="Lon." Margin="0,4,0,0" VerticalOptions="Center" FontSize="16">
                                         </Label>
-                                        <Frame CornerRadius="6" HorizontalOptions="FillAndExpand" HeightRequest="28" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                            <Frame CornerRadius="6" HeightRequest="28" Margin="-7" BackgroundColor="White">
+                                        <Frame CornerRadius="6" HorizontalOptions="FillAndExpand" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="28" x:Name="tbx_MtuGeolocationLong" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
+                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MtuGeolocationLong" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>

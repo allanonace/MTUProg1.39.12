@@ -87,6 +87,8 @@ namespace aclara_meters.view
             if (FormsApp.config.Global.ShowInstallConfirmation)
                 MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
 
+            if (FormsApp.config.Global.ShowDataRead)
+                MenuList.Add(new PageItem() { Title = "Data Read", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.DataRead });
 
             // ListView needs to be at least  elements for UI Purposes, even empty ones
             while (MenuList.Count < 9)
@@ -392,6 +394,48 @@ namespace aclara_meters.view
 
             switch (page)
             {
+                case ActionType.DataRead:
+
+                    #region Read data Controller
+
+                    background_scan_page.Opacity = 1;
+
+                    background_scan_page.IsEnabled = true;
+
+                    if (Device.Idiom == TargetIdiom.Phone)
+                    {
+                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                    }
+
+                    Task.Delay(200).ContinueWith(t =>
+
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            navigationDrawerList.SelectedItem = null;
+
+                            //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved, page), false);
+                            DoBasicRead();
+
+                            background_scan_page.Opacity = 1;
+
+                            if (Device.Idiom == TargetIdiom.Tablet)
+                            {
+                                ContentNav.Opacity = 1;
+                                ContentNav.IsVisible = true;
+                            }
+                            else
+                            {
+                                ContentNav.Opacity = 0;
+                                ContentNav.IsVisible = false;
+                            }
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                        })
+                    );
+
+                    #endregion
+
+                    break;
                 case ActionType.ReadMtu:
 
                     #region Read Mtu Controller
@@ -956,8 +1000,10 @@ namespace aclara_meters.view
                 Task.Delay(100).ContinueWith(t =>
                     Device.BeginInvokeOnMainThread(() =>
                     {
-
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
+                        if (actionType == ActionType.DataRead)
+                             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
+                        else
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
 
                         #region New Circular Progress bar Animations    
 
