@@ -326,7 +326,7 @@ namespace aclara_meters.view
             #region Labels
 
             // Account Number
-            this.lb_AccountNumber       .Text = global.AccountLabel;      
+            this.lb_AccountNumber.Text = global.AccountLabel;      
 
             #endregion
              
@@ -337,15 +337,14 @@ namespace aclara_meters.view
                         
             #endregion
             int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
-          
-            var MtuId = await Data.Get.MemoryMap.MtuSerialNumber.GetValue();
-            var MtuStatus = await Data.Get.MemoryMap.MtuStatus.GetValue();
-            var accName= await  Data.Get.MemoryMap.P1MeterId.GetValue();
+            var MtuId       = await Data.Get.MemoryMap.MtuSerialNumber.GetValue();
+            var MtuStatus   = await Data.Get.MemoryMap.MtuStatus.GetValue();
+            var accName     = await  Data.Get.MemoryMap.P1MeterId.GetValue();
 
             Device.BeginInvokeOnMainThread(()=>{
-            this.tbx_MtuId.Text      =  MtuId.ToString();
-            this.tbx_Mtu_Status.Text = MtuStatus;
-            this.tbx_AccountNumber.Text =  accName.ToString();
+            this.tbx_MtuId.Text         = MtuId.ToString().PadLeft ( mtuIdLength, '0' );
+            this.tbx_Mtu_Status.Text    = MtuStatus;
+            this.tbx_AccountNumber.Text = accName.ToString();
             });
         }
 

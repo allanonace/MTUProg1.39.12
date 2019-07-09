@@ -6,10 +6,12 @@
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DefineConstants>TRACE;DEBUG;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+    <CodeAnalysisRuleSet />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType></DebugType>
     <Optimize>true</Optimize>
+    <CodeAnalysisRuleSet />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AdHoc|AnyCPU' ">
     <IntermediateOutputPath>obj\AdHoc</IntermediateOutputPath>
@@ -86,6 +88,8 @@
     <Folder Include="Behaviors\" />
   </ItemGroup>
   <ItemGroup>
+    <None Remove="aclara_meters-1.ruleset" />
+    <None Remove="aclara_meters.ruleset" />
     <None Remove="XML\XmlElementList.xml" />
     <None Remove="view\.AclaraViewMainMenu.xaml.cs.swp" />
     <None Remove="Resources\Alarm.xml" />

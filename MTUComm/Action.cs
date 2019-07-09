@@ -437,14 +437,8 @@ namespace MTUComm
                     case ActionType.MtuInstallationConfirmation:
                         comm.OnReadMtu -= Comm_OnReadMtu;
                         comm.OnReadMtu += Comm_OnReadMtu;
-
-                        // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
-                        //Data.Set ( "NumOfDays", 1, true );
-                        //comm.OnDataRead -= Comm_OnDataReadEvent;
-                        //comm.OnDataRead += Comm_OnDataReadEvent;
-                        // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
                         break;
-                       
+                      
                     case ActionType.AddMtu:
                     case ActionType.AddMtuAddMeter:
                     case ActionType.AddMtuReplaceMeter:
@@ -521,10 +515,7 @@ namespace MTUComm
             try
             {
                 // Mtu ID value formated
-                dynamic map = args.MemoryMap;
-                int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
-                string strMtuId = ( await map.MtuSerialNumber.GetValueFromMtu () ).ToString ().PadLeft ( mtuIdLength, '0' );
-                Data.Set ( "MtuId", strMtuId );
+                string strMtuId = Data.Get.MtuId;
 
                 // Prepare custom values
                 EventLogList eventList = args.ListEntries;
@@ -541,14 +532,6 @@ namespace MTUComm
                 string subpath = path.Substring ( path.LastIndexOf ( "/" ) + 1 );
                 Data.Set ( "ReadResultFileFull", path );
                 Data.Set ( "ReadResultFile", subpath );
-
-                // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
-                Data.Set ( "MtuLocation", "Outside", true );
-                Data.Set ( "Construction", "Wood", true );
-                Data.Set ( "GpsLat", 12, true );
-                Data.Set ( "GpsLon", 34, true );
-                Data.Set ( "GpsAlt", 56, true );
-                // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
 
                 ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu, null, ActionType.DataRead );
                 ActionResult readMtu_allParamsFromInterface  = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu );

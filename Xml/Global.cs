@@ -165,6 +165,7 @@ namespace Xml
             this.ShowReplaceMeter             = true;                 // Display or hide the “Replace Meter” programming option on the main menu
             this.ShowReplaceMTU               = true;                 // Display or hide the "Replace MTU" programming option on the main menu
             this.ShowReplaceMTUMeter          = true;                 // Display or hide the “Replace MTU And Meter” programming option on the main menu
+            this.ShowDataRead                 = true;                // Display or hide the “DataRead” programming option on the main menu
             this.ShowScriptErrorMessage       = true;                 // Specifies whether error messages are shown in scripted mode
             this.ShowTime                     = false;                // Show System time on the screen during the MTU read or install
             this.ShowTurnOff                  = true;                 // Show Turn Off MTU button on main screen
@@ -745,6 +746,9 @@ namespace Xml
 
         [XmlElement("ShowReplaceMtuMeter")]
         public bool ShowReplaceMTUMeter { get; set; }
+
+        [XmlElement("ShowDataRead")]
+        public bool ShowDataRead { get; set; }
 
         [XmlElement("ShowScriptErrorMessage")]
         public bool ShowScriptErrorMessage { get; set; }

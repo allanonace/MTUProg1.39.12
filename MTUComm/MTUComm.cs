@@ -53,7 +53,7 @@ namespace MTUComm
         private const byte CMD_NEXT_EVENT_DATA    = 0x00; // ACK with log entry
         private const byte CMD_NEXT_EVENT_EMPTY   = 0x01; // ACK without log entry ( query complete )
         private const byte CMD_NEXT_EVENT_BUSY    = 0x02; // ACK without log entry ( MTU is busy or some error trying to recover next log entry )
-        private const int WAIT_BEFORE_LOGS        = 3000; // The host device should delay for at least 2 seconds to give the MTU time to begin the query
+        private const int WAIT_BEFORE_LOGS        = 10000; // The host device should delay for at least 2 seconds to give the MTU time to begin the query
         private const int WAIT_BTW_LOG_ERRORS     = 1000;
         private const int WAIT_BTW_LOGS           = 100;
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
@@ -1958,14 +1958,11 @@ namespace MTUComm
                 
                 // Launchs exception 'MtuTypeIsNotFoundException'
                 this.mtu = configuration.GetMtuTypeById ( ( int )this.mtuBasicInfo.Type );
-                
-                if ( this.mtuHasChanged )
-                {
-                    for ( int i = 0; i < this.mtu.Ports.Count; i++ )
-                        mtuBasicInfo.setPortType ( i, this.mtu.Ports[ i ].Type );
-                    
-                    if ( mtuBasicInfo.isEncoder ) { }
-                }
+               
+                for ( int i = 0; i < this.mtu.Ports.Count; i++ )
+                    latest_mtu.setPortType ( i, this.mtu.Ports[ i ].Type );
+                                     
+                Data.Set("MemoryMap",GetMemoryMap(true),false);
             }
         }
 
