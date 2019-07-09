@@ -435,13 +435,13 @@ namespace MTUComm
 
                     case ActionType.ReadMtu:
                     case ActionType.MtuInstallationConfirmation:
-                        //comm.OnReadMtu -= Comm_OnReadMtu;
-                        //comm.OnReadMtu += Comm_OnReadMtu;
+                        comm.OnReadMtu -= Comm_OnReadMtu;
+                        comm.OnReadMtu += Comm_OnReadMtu;
 
                         // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
-                        parameters.Add ( 1 );
-                        comm.OnDataRead -= Comm_OnDataReadEvent;
-                        comm.OnDataRead += Comm_OnDataReadEvent;
+                        //Data.Set ( "NumOfDays", 1, true );
+                        //comm.OnDataRead -= Comm_OnDataReadEvent;
+                        //comm.OnDataRead += Comm_OnDataReadEvent;
                         // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<
                         break;
                        
@@ -466,9 +466,12 @@ namespace MTUComm
                         break;
 
                     case ActionType.DataRead:
-                        parameters.AddRange ( new object[] { ( int ) 1 }); // TODO: Use new entry created in Library.Data
                         comm.OnDataRead -= Comm_OnDataReadEvent;
                         comm.OnDataRead += Comm_OnDataReadEvent;
+                        // In interactive mode value are already set in Data
+                        // but in scripted mode they are stored in Action.parameters
+                        if ( Data.Get.IsFromScripting )
+                            parameters.Add ( this );
                         break;
 
                     case ActionType.BasicRead:

@@ -39,6 +39,9 @@ namespace Xml
         //[XmlElement("ProvidingHandFactor")]
         //public ActionParameter ProvidingHandFactor { get; set; }
 
+        [XmlElement("DaysOfRead")]
+        public ActionParameter DaysOfRead { get; set; }
+
         [XmlElement("OldMtuId")]
         public ActionParameter OldMtuId { get; set; }
 

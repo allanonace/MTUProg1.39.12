@@ -33,7 +33,7 @@ namespace MTUComm
             NewMeterSerialNumber = 20,
             OldMeterReading = 21,
             NewMeterReading = 22,
-            //DaysOfRead = 23,
+            DaysOfRead = 23,
             Custom = 24
         };
 

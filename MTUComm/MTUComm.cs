@@ -15,6 +15,7 @@ using Xml;
 
 using ActionType          = MTUComm.Action.ActionType;
 using FIELD               = MTUComm.actions.AddMtuForm.FIELD;
+using APP_FIELD           = MTUComm.ScriptAux.APP_FIELD;
 using EventLogQueryResult = MTUComm.EventLogList.EventLogQueryResult;
 using ParameterType       = MTUComm.Parameter.ParameterType;
 using LexiAction          = Lexi.Lexi.LexiAction;
@@ -209,21 +210,12 @@ namespace MTUComm
 
         private Lexi.Lexi lexi;
         private Configuration configuration;
-        private MTUBasicInfo _latest_mtu;
+        public MTUBasicInfo mtuBasicInfo { private set; get; }
         private Mtu mtu;
         private Boolean isPulse = false;
         private Boolean mtuHasChanged;
         private bool basicInfoLoaded = false;
         private AddMtuLog addMtuLog;
-        
-        private MTUBasicInfo latest_mtu
-        {
-            get { return _latest_mtu; }
-            set
-            {
-                _latest_mtu = value;
-            }
-        }
 
         #endregion
 
@@ -232,7 +224,7 @@ namespace MTUComm
         public MTUComm(ISerial serial, Configuration configuration)
         {
             this.configuration = configuration;
-            latest_mtu = new MTUBasicInfo(new byte[BASIC_READ_1_DATA + BASIC_READ_2_DATA]);
+            mtuBasicInfo = new MTUBasicInfo(new byte[BASIC_READ_1_DATA + BASIC_READ_2_DATA]);
             lexi = new Lexi.Lexi(serial, Data.Get.IsIOS ? 10000 : 20000 );
             
             Singleton.Set = lexi;
@@ -258,7 +250,7 @@ namespace MTUComm
                     await this.LoadMtuAndMetersBasicInfo ();
                     
                     if ( Singleton.Has<Action> () )
-                        Singleton.Get.Action.SetCurrentMtu ( this.latest_mtu );
+                        Singleton.Get.Action.SetCurrentMtu ( this.mtuBasicInfo );
                 }
 
                 switch ( type )
@@ -274,16 +266,18 @@ namespace MTUComm
                              await Task.Run ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ], ( Action )args[ 2 ] ) );
                         else await Task.Run ( () => Task_AddMtu ( ( Action )args[ 0 ] ) );
                         break;
-                    //case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
-                    // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                    case ActionType.ReadMtu    : await Task.Run ( () => Task_DataRead ( ( int )args[ 0 ] ) ); break;
-                    // >>>> DEBUG <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                    case ActionType.DataRead:
+                        // Scripting and Interactive
+                        if ( args.Length == 1 )
+                             await Task.Run ( () => Task_DataRead ( ( Action )args[ 0 ] ) );
+                        else await Task.Run ( () => Task_DataRead () );
+                        break;
+                    case ActionType.MtuInstallationConfirmation: await Task.Run ( () => Task_InstallConfirmation () ); break;
+                    case ActionType.ReadFabric : await Task.Run ( () => Task_ReadFabric () ); break;
+                    case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
                     case ActionType.TurnOffMtu : await Task.Run ( () => Task_TurnOnOffMtu ( false ) ); break;
                     case ActionType.TurnOnMtu  : await Task.Run ( () => Task_TurnOnOffMtu ( true  ) ); break;
-                    case ActionType.DataRead   : await Task.Run ( () => Task_DataRead ( ( int )args[ 0 ] ) ); break;
                     case ActionType.BasicRead  : await Task.Run ( () => Task_BasicRead () ); break;
-                    case ActionType.MtuInstallationConfirmation: await Task.Run ( () => Task_InstallConfirmation () ); break;
-                    case ActionType.ReadFabric: await Task.Run ( () => Task_ReadFabric () ); break;
                     default: break;
                 }
 
@@ -446,14 +440,44 @@ namespace MTUComm
 
         #region Data Read
 
+        private async Task Task_DataRead (
+            Action action )
+        {
+            try
+            {
+                // Translate Aclara parameters ID into application's nomenclature
+                var translatedParams = ScriptAux.TranslateAclaraParams ( action.GetParameters () );
+
+                // Check if the second port is enabled
+                bool port2enabled = await this.GetMemoryMap ( true ).P2StatusFlag.GetValue ();
+
+                // Validate script parameters ( removing the unnecessary ones )
+                Dictionary<APP_FIELD,string> psSelected = ScriptAux.ValidateParams (
+                    port2enabled, this.mtu, this.mtuBasicInfo, action, translatedParams );
+
+                // Add parameters to Library.Data
+                foreach ( var entry in psSelected )
+                    Data.Set ( entry.Key.ToString (), entry.Value, true );
+
+                // Init DataRead logic using translated parameters
+                await this.Task_DataRead ();
+            }
+            catch ( Exception e )
+            {
+                // Is not own exception
+                if ( ! Errors.IsOwnException ( e ) )
+                     throw new PuckCantCommWithMtuException ();
+                else throw e;
+            }
+        }
+
         // MTU_Datalogging ( DataRead 3.4 )
         // · Pag 33 - 3.4 Accesing Log Information via the Local External Interface ( LExI )
         // Y61063-DSD-Rev_G-Local_External_Interface_Specification
         // · Pag 37 - 4.2.3.18 Start Event Log Query
         // · Pag 38 - 4.2.3.19 Get Next Event Log Response
         // · Pag 39 - 4.2.3.20 Get Repeat Last Event Log Response
-        public async Task Task_DataRead (
-            int numOfDays = 0 )
+        public async Task Task_DataRead ()
         {
             Global global = this.configuration.Global;
 
@@ -465,12 +489,9 @@ namespace MTUComm
 
                 OnProgress ( this, new ProgressArgs ( 0, 0, "Requesting event logs..." ) );
 
-                // Save in Data to recover while creating log from interface
-                Data.Set ( "NumOfDays", ( numOfDays > 0 ) ? numOfDays : global.NumOfDays );
-
                 // NOTE: It is not clear why in STARProgrammer 86399 are added to calculate the end date
                 DateTime end   = DateTime.UtcNow.AddDays ( DATA_READ_END_DAYS );
-                DateTime start = DateTime.UtcNow.Subtract ( new TimeSpan ( Data.Get.NumOfDays, 0, 0, 0 ) );
+                DateTime start = DateTime.UtcNow.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
 
                 byte[] data = new byte[ 10 ]; // 1+1+4x2
                 data[ 0 ] = ( byte )LogFilterMode.Match;    // Only return logs that matches the Log Entry Filter Field specified
@@ -637,7 +658,7 @@ namespace MTUComm
 
                 // MTU is turned off
                 if ( ! force &&
-                     this.latest_mtu.Shipbit )
+                     this.mtuBasicInfo.Shipbit )
                 {
                     wasNotAboutPuck = true;
                     throw new MtuIsAlreadyTurnedOffICException ();
@@ -852,7 +873,7 @@ namespace MTUComm
             Meter meterPort2 = null;
             
             try
-            {            
+            {
                 bool port2IsActivated = await this.GetMemoryMap ( true ).P2StatusFlag.GetValue ();
     
                 // Recover parameters from script and translante from Aclara nomenclature to our own
@@ -1933,17 +1954,17 @@ namespace MTUComm
             {
                 this.basicInfoLoaded = true;
             
-                MtuForm.SetBasicInfo ( latest_mtu );
+                MtuForm.SetBasicInfo ( mtuBasicInfo );
                 
                 // Launchs exception 'MtuTypeIsNotFoundException'
-                this.mtu = configuration.GetMtuTypeById ( ( int )this.latest_mtu.Type );
+                this.mtu = configuration.GetMtuTypeById ( ( int )this.mtuBasicInfo.Type );
                 
                 if ( this.mtuHasChanged )
                 {
                     for ( int i = 0; i < this.mtu.Ports.Count; i++ )
-                        latest_mtu.setPortType ( i, this.mtu.Ports[ i ].Type );
+                        mtuBasicInfo.setPortType ( i, this.mtu.Ports[ i ].Type );
                     
-                    if ( latest_mtu.isEncoder ) { }
+                    if ( mtuBasicInfo.isEncoder ) { }
                 }
             }
         }
@@ -1970,13 +1991,13 @@ namespace MTUComm
                 return false;
             }
 
-            MTUBasicInfo mtu_info = new MTUBasicInfo ( finalRead.ToArray () );
-            this.mtuHasChanged = ( latest_mtu.Id   == 0 ||
-                                   latest_mtu.Type == 0 ||
-                                   mtu_info.Id     != latest_mtu.Id ||
-                                   mtu_info.Type   != latest_mtu.Type );
+            MTUBasicInfo basicInfo = new MTUBasicInfo ( finalRead.ToArray () );
+            this.mtuHasChanged = ( mtuBasicInfo.Id   == 0 ||
+                                   mtuBasicInfo.Type == 0 ||
+                                   basicInfo.Id   != mtuBasicInfo.Id ||
+                                   basicInfo.Type != mtuBasicInfo.Type );
             
-            latest_mtu = mtu_info;
+            mtuBasicInfo = basicInfo;
             
             return this.mtuHasChanged;
         }
@@ -1999,14 +2020,14 @@ namespace MTUComm
             Array.Copy ( read, 6, id_stream, 0, 4 );
             uint mtuId = BitConverter.ToUInt32 ( id_stream, 0 );
 
-            if ( mtuType != latest_mtu.Type ||
-                   mtuId != latest_mtu.Id )
+            if ( mtuType != mtuBasicInfo.Type ||
+                   mtuId != mtuBasicInfo.Id )
                 throw new MtuHasChangeBeforeFinishActionException ();
         }
 
         public MTUBasicInfo GetBasicInfo ()
         {
-            return this.latest_mtu;
+            return this.mtuBasicInfo;
         }
 
         private byte GetByteSettingOnlyOneBit ( int bit )
