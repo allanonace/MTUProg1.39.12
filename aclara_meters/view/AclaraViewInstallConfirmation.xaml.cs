@@ -317,7 +317,7 @@ namespace aclara_meters.view
                 }
 
                 Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
-
+              
                 InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
                 foreach (InterfaceParameters parameter in interfacesParams)
                 {
@@ -333,6 +333,13 @@ namespace aclara_meters.view
 
                                 if (port_parameter.Name.Equals("Description"))
                                 {
+                                    string description;
+
+                                    // For Read action when no Meter is installed on readed MTU
+                                    if (param != null)
+                                        description = param.Value;
+                                    else description = mtu.Ports[i].GetProperty(port_parameter.Name);
+
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
                                         Title = "Here lies the Port title...",
@@ -340,7 +347,7 @@ namespace aclara_meters.view
                                         Height = "40",
                                         isMTU = "false",
                                         isMeter = "true",
-                                        Description = "Port " + i + ": " + param.Value //parameter.Value
+                                        Description = "Port " + (i+1) + ": " + description //parameter.Value
                                     });
                                 }
                                 else

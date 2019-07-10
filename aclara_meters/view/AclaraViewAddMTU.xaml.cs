@@ -430,7 +430,7 @@ namespace aclara_meters.view
         private async void SetPort2Buttons ()
         {
             // Port2 form starts visible or hidden depends on bit 1 of byte 28
-            this.port2IsActivated = await this.add_mtu.comm.ReadMtuBit ( 28, 1 );
+            this.port2IsActivated = await Data.Get.MemoryMap.P2StatusFlag.GetValue();
 
             Device.BeginInvokeOnMainThread(() =>
             {
