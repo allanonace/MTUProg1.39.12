@@ -746,8 +746,19 @@ namespace MTUComm
             // Meter Serial Number
             int meterId = await map[ PORT_PREFIX + indexPort + "MeterType" ].GetValue ();
 
-            // Port has installed a Meter
-            if ( meterId > 0 )
+            // Port is disabled
+            if ( ! await map[$"P{indexPort}StatusFlag"].GetValue () )
+            {
+                result.AddParameter ( new Parameter ( "Status", "Status", "Disabled", string.Empty, indexPort-1 ) );
+            }
+            // Port has not a Meter installed
+            else if ( meterId <= 0 )
+            {
+                result.AddParameter(new Parameter("Status", "Status", "Not Installed",string.Empty,indexPort-1));
+                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", "000000000",string.Empty,indexPort-1));
+                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading",string.Empty,indexPort-1));
+            }
+            else
             {
                 Meter meter = configuration.getMeterTypeById ( meterId );
                 
@@ -871,13 +882,6 @@ namespace MTUComm
                         }
                     }
                 }
-            }
-            // Port has not installed a Meter
-            else
-            {
-                result.AddParameter(new Parameter("Status", "Status", "Not Installed"));
-                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", "000000000"));
-                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
             }
             
             return result;
