@@ -305,7 +305,11 @@ namespace MTUComm
             this.mtu     = mtu;
             dynamic map  = this.GetMemoryMap ();
             bool isPort1 = ( portIndex == 1 );
-            
+
+            // Check if the port is enabled
+            if (!await map[$"P{portIndex}StatusFlag"].GetValue())
+                return false;
+
             try
             {
                 // Clear/reset previous auto-detected values
