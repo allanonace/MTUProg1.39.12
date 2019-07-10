@@ -1960,7 +1960,7 @@ namespace MTUComm
                 this.mtu = configuration.GetMtuTypeById ( ( int )this.mtuBasicInfo.Type );
                
                 for ( int i = 0; i < this.mtu.Ports.Count; i++ )
-                    latest_mtu.setPortType ( i, this.mtu.Ports[ i ].Type );
+                    mtuBasicInfo.setPortType ( i, this.mtu.Ports[ i ].Type );
                                      
                 Data.Set("MemoryMap",GetMemoryMap(true),false);
             }

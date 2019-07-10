@@ -375,7 +375,7 @@ namespace MTUComm
             if ( ! isSubAction )
                 AddAtrribute(element, "reason", Action.tag_reasons[ actionType ] );
 
-            InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogParamsFromInterface ( mtu, actionType );
+            InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogParamsFromInterface ( mtu, ActionType.ReadMtu );
             foreach ( InterfaceParameters parameter in parameters )
             {
                 try

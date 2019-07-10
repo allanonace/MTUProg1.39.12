@@ -36,7 +36,6 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>companyportal</string>
-		<string>companyportal-intunemam</string>
 		<string>https-intunemam</string>
 		<string>http-intunemam</string>
 		<string>microsoft-edge-https-intunemam</string>
