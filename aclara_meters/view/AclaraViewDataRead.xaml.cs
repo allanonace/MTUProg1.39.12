@@ -108,27 +108,7 @@ namespace aclara_meters.view
             },
         };
 
-        public  const string TWOWAY_FAST     = "Fast";
-        public  const string TWOWAY_SLOW     = "Slow";
-        public  const string CANCEL_COMPLETE = "Complete";
-        public  const string CANCEL_CANCEL   = "Cancel";
-        public  const string CANCEL_SKIP     = "Skip";
-        public  const string CANCEL_NOTHOME  = "Not Home";
-        public  const string CANCEL_OTHER    = "Other";
-        public  const string SWITCH_P2_ON    = "Enable Port 2";
-        public  const string SWITCH_P2_OFF   = "Disable Port 2";
-        public  const string COPY_1_TO_2     = "Copy Port 1";
-        private const string AUTO_DETECTING  = "Encoder auto-detect...";
-        private       Color  COL_MANDATORY   = Color.FromHex ( "#FF0000" );
-        private const int    MAX_ACCOUNTNUMBER = 12;
-        private const int    MAX_METERREADING  = 12;
-
-        private const string DUAL_PREFIX    = "Repeat ";
-        private const string OLD_PREFIX     = "Old ";
-        private const string TEXT_READING   = "Meter Reading";
-        
-        private const string DUAL_ERROR      = "* Both values ​​must be the same";
-        private const string FIRST_METERTYPE = "* You should select Meter Type before enter readings";
+        private Color COL_MANDATORY = Color.FromHex("#FF0000");
         private const float  OPACITY_ENABLE  = 1;
         private const float  OPACITY_DISABLE = 0.8f;
         
@@ -173,16 +153,11 @@ namespace aclara_meters.view
 
         private ActionType actionType;
         private ActionType actionTypeNew;
-        private bool hasTwoPorts;
-        private bool port2IsActivated;
-        private bool p1NoNewMeterReadings;
-        private bool p2NoNewMeterReadings;
-        private bool waitOnClickLogic;
+       
         private bool isCancellable;
         private bool isLogout;
         private bool isReturn;
         private bool isSettings;
-        private bool   snapReadsStatus = false;
         private string mtuGeolocationAlt;
 
         #endregion
@@ -223,7 +198,7 @@ namespace aclara_meters.view
                 type  : this.actionType,
                 user  : FormsApp.credentialsService.UserName );
             
-            isCancellable = false;
+            isCancellable = true;
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -656,7 +631,7 @@ namespace aclara_meters.view
             
             settings_button.Tapped += OpenSettingsCallAsync;
             back_button.Tapped += ReturnToMainView;
-            bg_read_mtu_button.Tapped += AddMtu;
+            bg_read_mtu_button.Tapped += DataReadMtu;
 
             turnoffmtu_ok.Tapped += TurnOffMTUOkTapped;
             turnoffmtu_no.Tapped += TurnOffMTUNoTapped;
@@ -2045,7 +2020,7 @@ namespace aclara_meters.view
 
         #region Action
 
-        private void AddMtu ( object sender, EventArgs e )
+        private void DataReadMtu ( object sender, EventArgs e )
         {
             string msgError = string.Empty;
             if ( ! DEBUG_AUTO_MODE_ON &&
@@ -2055,7 +2030,7 @@ namespace aclara_meters.view
                 return;
             }
 
-            isCancellable = true;
+            isCancellable =true;
 
             if (!_userTapped)
             {

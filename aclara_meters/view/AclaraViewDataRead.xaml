@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <util:BasePage xmlns="http://xamarin.com/schemas/2014/forms" 
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
                xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" 
@@ -96,52 +96,6 @@
                             <StackLayout>
                                 <StackLayout IsVisible="false" Margin="12,0,12,0">
                                     <Label Margin="0,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Add MTU" />
-                                    <!--<StackLayout Margin="0,0,0,0">
-                                        --><!--  FUNCTL LOCTN --><!--
-                                        <StackLayout x:Name="Block_FunctlLoctn">
-                                            <Label Text="Service Pt. ID" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" />
-                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
-                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="input_functlLoctn" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
-                                                    </StackLayout>
-                                                </Frame>
-                                            </Frame>
-                                        </StackLayout>
-                                        --><!--  METER NUMBER --><!--
-                                        <StackLayout x:Name="Block_MeterNumber">
-                                            <Label Text="Field Order" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
-                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
-                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="MeterNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
-                                                    </StackLayout>
-                                                </Frame>
-                                            </Frame>
-                                        </StackLayout>
-                                        --><!--  1. Vendor --><!--
-                                        <StackLayout x:Name="Block_Vendor">
-                                            <Label Text="Vendor" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
-                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
-                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="Vendor" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
-                                                    </StackLayout>
-                                                </Frame>
-                                            </Frame>
-                                        </StackLayout>
-                                        --><!--  Comments --><!--
-                                        <StackLayout x:Name="Block_Comments">
-                                            <Label Text="Comments" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
-                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
-                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="Comments" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
-                                                    </StackLayout>
-                                                </Frame>
-                                            </Frame>
-                                        </StackLayout>
-                                    </StackLayout>-->
                                 </StackLayout>
                                 <!--                   -->
                                 <!--      Port 1       -->
@@ -154,7 +108,7 @@
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric" HeightRequest="40" x:Name="tbx_AccountNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17"
+                                                    <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" Keyboard="Numeric" HeightRequest="40" x:Name="tbx_AccountNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17"
                                                         HorizontalTextAlignment="Start">
                                                         <Controls:BorderlessEntry.Behaviors>
                                                             <behaviors:EntryValidatorBehavior />
@@ -169,7 +123,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MtuId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MtuId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
                                                             HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
@@ -185,7 +139,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_Mtu_Status" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_Mtu_Status" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
                                                             HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
