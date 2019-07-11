@@ -438,6 +438,7 @@ namespace aclara_meters.view
 
         private void InitializeOptionalFields()
         {
+           
             optionalPickers = new List<BorderlessPicker>();
             optionalEntries = new List<BorderlessEntry>();
             optionalDates = new List<BorderlessDatePicker>();
@@ -607,12 +608,6 @@ namespace aclara_meters.view
                 }
 
                 // Mandatory fields
-                // Construction must be mandatory for DataRead
-                if (optionalLabel.Text == "Construction")
-                {
-                    this.optionalMandatoryPickers.Add(new Tuple<BorderlessPicker, Label>(optionalPicker, optionalLabel));
-                    optionalLabel.TextColor = COL_MANDATORY;
-                }
                 if ( optionalField.Required )
                 {
                     if ( isList )
@@ -1988,13 +1983,7 @@ namespace aclara_meters.view
             dynamic NoValNOrEmpty = new Func<string,bool> ( ( value ) =>
                                         ! string.IsNullOrEmpty ( value ) &&
                                         ! Validations.IsNumeric ( value ) );
-
-            if ( string.IsNullOrEmpty ( this.tbx_MtuGeolocationLat .Text ) ||
-                 string.IsNullOrEmpty ( this.tbx_MtuGeolocationLong.Text ) )
-            {
-                msgError = "Field 'GPS Coordinates' are incorrectly filled";
-                return false;
-            }
+                  
 
             if ( NoValNOrEmpty ( this.tbx_MtuGeolocationLat .Text ) ||
                  NoValNOrEmpty ( this.tbx_MtuGeolocationLong.Text ) )
@@ -2094,25 +2083,24 @@ namespace aclara_meters.view
 
 
             //List<Parameter> optionalParams = new List<Parameter>();
+            Data.Set("Options", new List<Parameter>());
 
-            foreach ( BorderlessPicker p in optionalPickers )
-                if ( p.SelectedItem != null )
-                   if (p.Display=="MTU Location")
-                        Data.Set("MTULocation",p.SelectedItem,true);
-                   else Data.Set(p.Name, p.SelectedItem,true);
-
+            foreach (BorderlessPicker p in optionalPickers)
+                if (p.SelectedItem != null)
+                    Data.Get.Options.Add(new Parameter(p.Name, p.Display, p.SelectedItem));
+ 
             foreach ( BorderlessEntry e in optionalEntries )
-                if ( ! string.IsNullOrEmpty ( e.Text ) )
-                   Data.Set(e.Name,e.Text,true);
-
+                if( ! string.IsNullOrEmpty ( e.Text ) )
+                    Data.Get.Options.Add(new Parameter(e.Name, e.Display, e.Text));
+          
             foreach (BorderlessDatePicker d in optionalDates)
                 if (!string.IsNullOrEmpty(d.Date.ToShortDateString()))
-                   Data.Set(d.Name,$"{d.Date.ToShortDateString()} 12:00:00",true);
-
+                    Data.Get.Options.Add(new Parameter(d.Name, d.Display, $"{d.Date.ToShortDateString()} 12:00:00"));
+            
             foreach (BorderlessTimePicker t in optionalTimes)
                 if (!string.IsNullOrEmpty(t.Time.ToString()))
-                  Data.Set(t.Name,$"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}",true);
-
+                    Data.Get.Options.Add(new Parameter(t.Name, t.Display, $"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}"));
+         
             //if ( optionalParams.Count > 0 )
             //    Data.Set("Miscelanea",optionalParams, true);
             //    //this.addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );
