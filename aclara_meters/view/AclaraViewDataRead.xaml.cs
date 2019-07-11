@@ -604,8 +604,14 @@ namespace aclara_meters.view
 
                     this.optionalFields.Children.Add(optionalContainerA);
                 }
-                
+
                 // Mandatory fields
+                // Construction must be mandatory for DataRead
+                if (optionalLabel.Text == "Construction")
+                {
+                    this.optionalMandatoryPickers.Add(new Tuple<BorderlessPicker, Label>(optionalPicker, optionalLabel));
+                    optionalLabel.TextColor = COL_MANDATORY;
+                }
                 if ( optionalField.Required )
                 {
                     if ( isList )
@@ -1982,6 +1988,13 @@ namespace aclara_meters.view
                                         ! string.IsNullOrEmpty ( value ) &&
                                         ! Validations.IsNumeric ( value ) );
 
+            if ( string.IsNullOrEmpty ( this.tbx_MtuGeolocationLat .Text ) ||
+                 string.IsNullOrEmpty ( this.tbx_MtuGeolocationLong.Text ) )
+            {
+                msgError = "Field 'GPS Coordinates' are incorrectly filled";
+                return false;
+            }
+
             if ( NoValNOrEmpty ( this.tbx_MtuGeolocationLat .Text ) ||
                  NoValNOrEmpty ( this.tbx_MtuGeolocationLong.Text ) )
             {
@@ -2072,8 +2085,6 @@ namespace aclara_meters.view
                 double lat = Convert.ToDouble ( value_lat );
                 double lon = Convert.ToDouble ( value_lon );
         
-              //  Data.Set ( "MtuLocation", "Outside", true );
-              //  Data.Set ( "Construction", "Wood", true );
                 Data.Set ( "GpsLat", lat, true );
                 Data.Set ( "GpsLon", lon, true );
                 Data.Set ( "GpsAlt", value_alt, true );
