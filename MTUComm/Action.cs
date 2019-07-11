@@ -687,7 +687,10 @@ namespace MTUComm
                                 case IFACE_PUCK  : value      = puck .GetProperty  ( sourceProperty ); break;
                                 case IFACE_FORM  : paramToAdd = form .GetParameter ( sourceProperty ); break; // actions.AddMtuForm class
                                 case IFACE_GLOBAL: value      = gType.GetProperty  ( sourceProperty ).GetValue ( global, null ).ToString(); break; // Global class
-                                case IFACE_DATA  : value      = ( string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) ? string.Empty : value ); break; // Library.Data class
+                                case IFACE_DATA  : if ( ! Data.Contains ( sourceProperty ) || // Library.Data class
+                                                        string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) )
+                                                     value = string.Empty;
+                                                   break; 
                                 default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                             }
                         }
@@ -724,9 +727,14 @@ namespace MTUComm
                 }
             }
             
-            // Add additional parameters for all actions except for the Add
+            // Add additional parameters ( from script ) for all actions except for the Add
             if ( form == null )
                 foreach ( Parameter param in this.AdditionalParameters )
+                    result.AddParameter ( param );
+
+            // Add additional parameters ( from Global.xml ) for DataRead action
+            if ( this.type == ActionType.DataRead )
+                foreach ( Parameter param in Data.Get.Options )
                     result.AddParameter ( param );
 
             return result;
@@ -857,7 +865,10 @@ namespace MTUComm
                                     case IFACE_MTU   : value = mtu     .GetProperty ( sourceProperty ); break;
                                     case IFACE_METER : value = meter   .GetProperty ( sourceProperty ); break;
                                     case IFACE_GLOBAL: value = gType   .GetProperty ( sourceProperty ).GetValue ( global, null ).ToString(); break; // Global class
-                                    case IFACE_DATA  : value = ( string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) ? string.Empty : value ); break; // Library.Data class
+                                    case IFACE_DATA  : if ( ! Data.Contains ( sourceProperty ) || // Library.Data class
+                                                            string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) )
+                                                         value = string.Empty;
+                                                       break;
                                     default          : value = ( await map[ sourceProperty = PORT_PREFIX + indexPort + sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                                 }
                             }

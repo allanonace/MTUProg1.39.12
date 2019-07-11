@@ -95,5 +95,13 @@ namespace Library
                 .Where ( entry => ! entry.Value.ForReset )
                 .ToDictionary ( entry => entry.Key, entry => entry.Value );
         }
+
+        public static bool Contains (
+            string name )
+        {
+            Data d = Get;
+
+            return d.dictionary.ContainsKey ( name );
+        }
     }
 }
