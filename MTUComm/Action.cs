@@ -735,7 +735,7 @@ namespace MTUComm
                     result.AddParameter ( param );
 
             // Add additional parameters ( from Global.xml ) for DataRead action
-            if ( actionType == ActionType.DataRead )
+            if ( actionType == ActionType.DataRead && Data.Contains("Options"))
                 foreach ( Parameter param in Data.Get.Options )
                     result.AddParameter ( param );
 

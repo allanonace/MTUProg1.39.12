@@ -452,8 +452,10 @@ namespace MTUComm
                 // Translate Aclara parameters ID into application's nomenclature
                 var translatedParams = ScriptAux.TranslateAclaraParams ( action.GetParameters () );
 
+                dynamic map = this.GetMemoryMap(true);
+
                 // Check if the second port is enabled
-                bool port2enabled = await this.GetMemoryMap ( true ).P2StatusFlag.GetValue ();
+                bool port2enabled = await map.P2StatusFlag.GetValue ();
 
                 // Validate script parameters ( removing the unnecessary ones )
                 Dictionary<APP_FIELD,string> psSelected = ScriptAux.ValidateParams (
@@ -462,6 +464,15 @@ namespace MTUComm
                 // Add parameters to Library.Data
                 foreach ( var entry in psSelected )
                     Data.Set ( entry.Key.ToString (), entry.Value, true );
+
+                var MtuId = await map.MtuSerialNumber.GetValue();
+                var MtuStatus = await map.MtuStatus.GetValue();
+                var accName = await map.P1MeterId.GetValue();
+
+                Data.Set("AccountNumber", accName, true);
+                Data.Set("MtuId", MtuId.ToString(), true);
+                Data.Set("MtuStatus", MtuStatus, true);
+                
 
                 // Init DataRead logic using translated parameters
                 await this.Task_DataRead ();
