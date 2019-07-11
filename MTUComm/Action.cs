@@ -699,21 +699,23 @@ namespace MTUComm
                             Utils.Print ( "Interface: Map Error: " + sourceProperty );
                             throw new Exception ();
                         }
-                        
-                        if ( ! sourceWhere.Equals ( IFACE_FORM ) &&
-                             ! string.IsNullOrEmpty ( value ) )
+                        if (!string.IsNullOrEmpty(value))
                         {
-                            string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?
-                                                gType.GetProperty ( parameter.Display.Split ( new char[] { '.' } )[ 1 ] ).GetValue ( global, null ).ToString () :
-                                                parameter.Display;
-                            
-                            paramToAdd = new Parameter ( parameter.Name, display, value, parameter.Source );
-                        }
-                        // To change "name" attribute to show in IFACE_FORM case
-                        else
-                        {
-                            paramToAdd.CustomParameter = parameter.Name;
-                            paramToAdd.source          = parameter.Source;
+
+                            if (!sourceWhere.Equals(IFACE_FORM))
+                            {
+                                string display = (parameter.Display.ToLower().StartsWith("global.")) ?
+                                                    gType.GetProperty(parameter.Display.Split(new char[] { '.' })[1]).GetValue(global, null).ToString() :
+                                                    parameter.Display;
+
+                                paramToAdd = new Parameter(parameter.Name, display, value, parameter.Source);
+                            }
+                            // To change "name" attribute to show in IFACE_FORM case
+                            else
+                            {
+                                paramToAdd.CustomParameter = parameter.Name;
+                                paramToAdd.source = parameter.Source;
+                            }
                         }
                         
                         if ( paramToAdd != null )

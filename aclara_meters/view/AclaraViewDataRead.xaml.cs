@@ -2080,27 +2080,33 @@ namespace aclara_meters.view
                 Data.Set ( "GpsAlt", value_alt, true );
                 
             }
+            else
+            {
+                Data.Set("GpsLat", string.Empty, true);
+                Data.Set("GpsLon", string.Empty, true);
+                Data.Set("GpsAlt", string.Empty, true);
+            }
 
 
             //List<Parameter> optionalParams = new List<Parameter>();
-            Data.Set("Options", new List<Parameter>());
+            Data.Set("Options", new List<Parameter>(), true);
 
             foreach (BorderlessPicker p in optionalPickers)
                 if (p.SelectedItem != null)
-                    Data.Get.Options.Add(new Parameter(p.Name, p.Display, p.SelectedItem));
+                    Data.Get.Options.Add(new Parameter(p.Name, p.Display, p.SelectedItem,"",0,true));
  
             foreach ( BorderlessEntry e in optionalEntries )
                 if( ! string.IsNullOrEmpty ( e.Text ) )
-                    Data.Get.Options.Add(new Parameter(e.Name, e.Display, e.Text));
-          
+                    Data.Get.Options.Add(new Parameter(e.Name, e.Display, e.Text, "", 0, true));
+
             foreach (BorderlessDatePicker d in optionalDates)
                 if (!string.IsNullOrEmpty(d.Date.ToShortDateString()))
-                    Data.Get.Options.Add(new Parameter(d.Name, d.Display, $"{d.Date.ToShortDateString()} 12:00:00"));
-            
+                    Data.Get.Options.Add(new Parameter(d.Name, d.Display, $"{d.Date.ToShortDateString()} 12:00:00", "", 0, true));
+
             foreach (BorderlessTimePicker t in optionalTimes)
                 if (!string.IsNullOrEmpty(t.Time.ToString()))
-                    Data.Get.Options.Add(new Parameter(t.Name, t.Display, $"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}"));
-         
+                    Data.Get.Options.Add(new Parameter(t.Name, t.Display, $"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}", "", 0, true));
+
             //if ( optionalParams.Count > 0 )
             //    Data.Set("Miscelanea",optionalParams, true);
             //    //this.addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );
