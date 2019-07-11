@@ -74,8 +74,8 @@
 				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false"/>
 				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true"/>
-				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
-				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
+				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
+				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
 				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
 				<Parameter name="AcctNumber" display="Global.AccountLabel" length="Global.AccountLength" fill="left" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter name="MeterReading" display="Meter Reading" log="true" interface="true" conditional="MemoryMap.StatusFlag=true"/>
@@ -133,8 +133,8 @@
 				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false"/>
 				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true"/>
-				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
-				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
+				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
+				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
 				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
 				<!-- INIT - Ecoder -->
 				<Parameter name="BackFlowState" display="Backflow State" log="true" interface="true" conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true"/>
@@ -226,8 +226,8 @@
 				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false"/>
 				<Parameter name="MeterType" display="Meter Type" log="true" interface="true" source="Meter.Display" conditional="MemoryMap.StatusFlag=true"/>
 				<Parameter name="MeterTypeId" display="Meter Type ID" log="true" interface="false" source="Meter.Id" conditional="MemoryMap.StatusFlag=true"/>
-				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
-				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
+				<Parameter name="NumberOfDials" display="Number Of Dials" log="true" interface="true" source="Meter.NumberOfDials" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
+				<Parameter name="DriveDialSize" display="Drive Dial Size" log="true" interface="true" source="Meter.DriveDialSize" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
 				<Parameter name="UnitOfMeasure" display="Unit Of Measure" log="true" interface="true" source="Meter.UnitOfMeasure" conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
 				<!-- INIT - Ecoder -->
 				<Parameter name="BackFlowState" display="Backflow State" log="true" interface="true" conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true"/>

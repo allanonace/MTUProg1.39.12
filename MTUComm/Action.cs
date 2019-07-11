@@ -746,8 +746,19 @@ namespace MTUComm
             // Meter Serial Number
             int meterId = await map[ PORT_PREFIX + indexPort + "MeterType" ].GetValue ();
 
-            // Port has installed a Meter
-            if ( meterId > 0 )
+            // Port is disabled
+            if ( ! await map[$"P{indexPort}StatusFlag"].GetValue () )
+            {
+                result.AddParameter ( new Parameter ( "Status", "Status", "Disabled", string.Empty, indexPort-1 ) );
+            }
+            // Port has not a Meter installed
+            else if ( meterId <= 0 )
+            {
+                result.AddParameter(new Parameter("Status", "Status", "Not Installed",string.Empty,indexPort-1));
+                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", "000000000",string.Empty,indexPort-1));
+                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading",string.Empty,indexPort-1));
+            }
+            else
             {
                 Meter meter = configuration.getMeterTypeById ( meterId );
                 
@@ -824,7 +835,7 @@ namespace MTUComm
                     }
                     else
                     {
-                        if ( await ValidateCondition ( parameter.Conditional, map, mtu, indexPort ) )
+                        if ( await ValidateCondition ( parameter.Conditional, map, mtu, indexPort, meter ) )
                         {
                             string value          = string.Empty;
                             string sourceWhere    = string.Empty;
@@ -872,13 +883,6 @@ namespace MTUComm
                     }
                 }
             }
-            // Port has not installed a Meter
-            else
-            {
-                result.AddParameter(new Parameter("Status", "Status", "Not Installed"));
-                result.AddParameter(new Parameter("MeterTypeId", "Meter Type ID", "000000000"));
-                result.AddParameter(new Parameter("MeterReading", "Meter Reading", "Bad Reading"));
-            }
             
             return result;
         }
@@ -915,7 +919,8 @@ namespace MTUComm
             string conditionStr,
             dynamic map,
             Mtu mtu,
-            int portIndex = 1 )
+            int portIndex = 1,
+            Meter meter = null )
         {
             if ( string.IsNullOrEmpty ( conditionStr ) )
                 return true;
@@ -952,8 +957,9 @@ namespace MTUComm
                     switch ( condMembers[ 0 ] )
                     {
                         case IFACE_PORT  : currentValue = pType.GetProperty ( condProperty ).GetValue ( mtu.Ports[ portIndex - 1 ] ).ToString (); break;
-                        case IFACE_ACTION: currentValue = GetProperty ( condProperty ); break; // User, Date or Type
-                        case IFACE_MTU   : currentValue = mtu.GetProperty ( condProperty ); break; // Mtu class
+                        case IFACE_ACTION: currentValue = this .GetProperty ( condProperty ); break; // User, Date or Type
+                        case IFACE_MTU   : currentValue = mtu  .GetProperty ( condProperty ); break; // Mtu class
+                        case IFACE_METER : currentValue = meter.GetProperty ( condProperty ); break; // Meter
                         case IFACE_GLOBAL: currentValue = gType.GetProperty ( condProperty ).GetValue ( global, null ).ToString(); break; // Global class
                         default: // Dynamic MemoryMap
                             // Recover register from MTU memory map
