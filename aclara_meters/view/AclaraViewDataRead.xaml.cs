@@ -295,6 +295,7 @@ namespace aclara_meters.view
 
             if ( this.global.Options.Count>0)
                 InitializeOptionalFields ();
+            
 
             #endregion
 
