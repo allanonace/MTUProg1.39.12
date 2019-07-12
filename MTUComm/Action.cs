@@ -507,13 +507,14 @@ namespace MTUComm
             this.OnError ();
 
             // Reset current action reference
-            Singleton.Remove<Action> ();
+            //Singleton.Remove<Action> ();
         }
 
         private async Task Comm_OnDataReadEvent ( object sender, MTUComm.DataReadArgs args )
         {
             try
             {
+                await Task.Delay(1000);
                 // Mtu ID value formated
                 string strMtuId = Data.Get.MtuId;
 
@@ -559,7 +560,7 @@ namespace MTUComm
             OnFinish ( this, args );
 
             // Reset current action reference
-            Singleton.Remove<Action> ();
+            //Singleton.Remove<Action> ();
         }
 
         private async Task Comm_OnReadMtu ( object sender, MTUComm.ReadMtuArgs args )

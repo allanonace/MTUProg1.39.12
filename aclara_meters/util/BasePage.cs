@@ -6,6 +6,7 @@
 
 using Xamarin.Forms;
 using MTUComm;
+using Library;
 
 namespace aclara_meters.util
 {
@@ -14,6 +15,7 @@ namespace aclara_meters.util
         public BasePage ()
         {
             PageLinker.CurrentPage = this;
+            Singleton.Remove<Action>();
         }
 
         protected override void OnAppearing()
