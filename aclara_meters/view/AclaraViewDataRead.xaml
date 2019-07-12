@@ -106,7 +106,7 @@
                                         <!-- Account Number / Service Port ID -->
                                         <Label Text="Service Port ID" Margin="0,4,0,0" x:Name="lb_AccountNumber" VerticalOptions="Center" Font="Bold,17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                            <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                            <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" Keyboard="Numeric" HeightRequest="40" x:Name="tbx_AccountNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17"
                                                         HorizontalTextAlignment="Start">
@@ -121,7 +121,7 @@
                                         <StackLayout x:Name="div_MtuId">
                                             <Label Text="MTU ID" Margin="0,4,0,0" x:Name="lb_MtuId" VerticalOptions="Center" Font="Bold,17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                         <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MtuId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
                                                             HorizontalTextAlignment="Start">
@@ -137,7 +137,7 @@
                                         <StackLayout x:Name="div_Mtu_Status">
                                             <Label Text="MTU Status" Margin="0,4,0,0" x:Name="lb_Mtu_Status" VerticalOptions="Center" Font="Bold,17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
-                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                         <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_Mtu_Status" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
                                                             HorizontalTextAlignment="Start">
