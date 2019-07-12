@@ -29,6 +29,8 @@ namespace MTUComm
             { new MtuHasChangeBeforeFinishActionException (),   100 },
             // Puck can't write or read to/from MTU
             { new PuckCantCommWithMtuException (),              101 },
+            { new LexiReadingException (),                      101 },
+            { new LexiWritingException (),                      101 },
             // Puck can't read from MTU after has completed writing process
             { new PuckCantReadFromMtuAfterWritingException (),  102 },
             // The Mtu.xml file does no contain the MTU ID specified
