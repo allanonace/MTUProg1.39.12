@@ -511,7 +511,6 @@ namespace MTUComm
         {
             try
             {
-                await Task.Delay(1000);
                 // Mtu ID value formated
                 string strMtuId = Data.Get.MtuId;
 

@@ -56,6 +56,7 @@ namespace MTUComm
         private const int WAIT_BEFORE_LOGS        = 10000; // The host device should delay for at least 2 seconds to give the MTU time to begin the query
         private const int WAIT_BTW_LOG_ERRORS     = 1000;
         private const int WAIT_BTW_LOGS           = 100;
+        private const int WAIT_AFTER_EVENT_LOGS   = 1000;
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
         private const string ERROR_LOADMETER      = "MeterLoadException";
         private const string ERROR_LOADMTU        = "MtuLoadException";
@@ -618,6 +619,8 @@ namespace MTUComm
                 }
 
                 BREAK:
+
+                await Task.Delay ( WAIT_AFTER_EVENT_LOGS );
 
                 await this.CheckIsTheSameMTU ();
 
