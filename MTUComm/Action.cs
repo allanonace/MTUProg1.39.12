@@ -505,9 +505,6 @@ namespace MTUComm
         private void Comm_OnError ()
         {
             this.OnError ();
-
-            // Reset current action reference
-            //Singleton.Remove<Action> ();
         }
 
         private async Task Comm_OnDataReadEvent ( object sender, MTUComm.DataReadArgs args )
@@ -558,9 +555,6 @@ namespace MTUComm
             ActionFinishArgs args )
         {
             OnFinish ( this, args );
-
-            // Reset current action reference
-            //Singleton.Remove<Action> ();
         }
 
         private async Task Comm_OnReadMtu ( object sender, MTUComm.ReadMtuArgs args )

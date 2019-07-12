@@ -15,6 +15,8 @@ namespace aclara_meters.util
         public BasePage ()
         {
             PageLinker.CurrentPage = this;
+
+            // Reset previous main action reference
             Singleton.Remove<Action>();
         }
 

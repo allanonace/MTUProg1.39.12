@@ -1143,9 +1143,13 @@ namespace MTUComm
                             // Do not use
                             if ( ! fail &&
                                  ! global.WorkOrderRecording )
+                            {
                                 if ( parameter.Port == 0 )
                                      form.RemoveParameter ( FIELD.WORK_ORDER   );
                                 else form.RemoveParameter ( FIELD.WORK_ORDER_2 );
+
+                                continue;
+                            }   
                             break;
                             #endregion
                             #region MTU Id Old
@@ -1157,7 +1161,11 @@ namespace MTUComm
                             if ( ! fail &&
                                  action.type != ActionType.ReplaceMTU &&
                                  action.type != ActionType.ReplaceMtuReplaceMeter )
+                            {
                                 form.RemoveParameter ( FIELD.MTU_ID_OLD );
+
+                                continue;
+                            }
                             break;
                             #endregion
                             #region Meter Serial Number
@@ -1200,6 +1208,8 @@ namespace MTUComm
                                         break;
                                     }
                                 }
+
+                                continue;
                             }
                             break;
                             #endregion
@@ -1212,6 +1222,8 @@ namespace MTUComm
                             {
                                 form.RemoveParameter ( ( parameter.Port == 0 ) ?
                                     FIELD.METER_READING : FIELD.METER_READING_2 );
+                                
+                                continue;
                             }
                             else if ( ! isAutodetectMeter )
                             {
@@ -1268,8 +1280,12 @@ namespace MTUComm
                             case FIELD.METER_READING_OLD_2:
                             // OLD values are only needed during replacing actions
                             if ( ! isReplaceMeter )
+                            {
                                 form.RemoveParameter ( ( parameter.Port == 0 ) ?
                                     FIELD.METER_READING_OLD : FIELD.METER_READING_OLD_2 );
+
+                                continue;
+                            }
 
                             else if ( fail = NoELNum ( value, 12 ) )
                                 msgDescription = "should be equal to or less than 12";
@@ -1281,6 +1297,8 @@ namespace MTUComm
                                 if ( parameter.Port == 0 )
                                      form.RemoveParameter ( FIELD.METER_READING_OLD   );
                                 else form.RemoveParameter ( FIELD.METER_READING_OLD_2 );
+
+                                continue;
                             }
                             break;
                             #endregion
@@ -1346,7 +1364,11 @@ namespace MTUComm
                                  ( ! global.AllowDailyReads ||
                                    ! mtu.DailyReads ||
                                    mtu.IsFamilly33xx ) )
+                            {
                                 form.RemoveParameter ( FIELD.SNAP_READS );
+
+                                continue;
+                            }
                             break;
                             #endregion
                             #region Auto-detect Meter
