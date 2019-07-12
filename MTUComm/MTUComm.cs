@@ -895,9 +895,14 @@ namespace MTUComm
 
             // Action is about Replace Meter
             bool isReplaceMeter = (
-                action.type == ActionType.ReplaceMeter           ||
+                action.type == ActionType.ReplaceMeter ||
                 action.type == ActionType.ReplaceMtuReplaceMeter ||
                 action.type == ActionType.AddMtuReplaceMeter );
+
+            // Action is about Replace MTU
+            bool isReplaceMtu = (
+                action.type == ActionType.ReplaceMTU ||
+                action.type == ActionType.ReplaceMtuReplaceMeter );
             
             List<Meter> meters;
             List<string> portTypes;
@@ -1077,6 +1082,8 @@ namespace MTUComm
                 #endregion
     
                 #region Validation
+
+                #region Methods
     
                 dynamic Empty = new Func<string,bool> ( ( v ) =>
                                         string.IsNullOrEmpty ( v ) );
@@ -1097,6 +1104,8 @@ namespace MTUComm
                                     
                 dynamic NoELTxt = new Func<string,int,bool> ( ( v, maxLength ) =>
                                     ! Validations.Text ( v, maxLength, 1, true, true, false ) );
+
+                #endregion
             
                 // Validate each parameter and remove those that are not going to be used
 
@@ -1140,35 +1149,34 @@ namespace MTUComm
                             #region Work Order
                             case FIELD.WORK_ORDER:
                             case FIELD.WORK_ORDER_2:
-                            if ( fail = NoELTxt ( value, global.WorkOrderLength ) )
-                                msgDescription = "should be equal to or less than global.WorkOrderLength (" + global.WorkOrderLength + ")";
-                            
                             // Do not use
-                            if ( ! fail &&
-                                 ! global.WorkOrderRecording )
+                            if ( ! global.WorkOrderRecording )
                             {
                                 if ( parameter.Port == 0 )
                                      form.RemoveParameter ( FIELD.WORK_ORDER   );
                                 else form.RemoveParameter ( FIELD.WORK_ORDER_2 );
 
                                 continue;
-                            }   
+                            }
+
+                            else if ( fail = NoELTxt ( value, global.WorkOrderLength ) )
+                                msgDescription =
+                                    "should be equal to or less than global.WorkOrderLength (" + global.WorkOrderLength + ")";
                             break;
                             #endregion
                             #region MTU Id Old
                             case FIELD.MTU_ID_OLD:
-                            if ( fail = NoEqNum ( value, global.MtuIdLength ) )
-                                msgDescription = "should be equal to global.MtuIdLength (" + global.MtuIdLength + ")";
-                            
                             // Do not use
-                            if ( ! fail &&
-                                 action.type != ActionType.ReplaceMTU &&
-                                 action.type != ActionType.ReplaceMtuReplaceMeter )
+                            if ( ! isReplaceMtu )
                             {
                                 form.RemoveParameter ( FIELD.MTU_ID_OLD );
 
                                 continue;
                             }
+
+                            else if ( fail = NoEqNum ( value, global.MtuIdLength ) )
+                                msgDescription =
+                                    "should be equal to global.MtuIdLength (" + global.MtuIdLength + ")";
                             break;
                             #endregion
                             #region Meter Serial Number
@@ -1176,12 +1184,8 @@ namespace MTUComm
                             case FIELD.METER_NUMBER_2:
                             case FIELD.METER_NUMBER_OLD:
                             case FIELD.METER_NUMBER_OLD_2:
-                            if ( fail = NoELTxt ( value, global.MeterNumberLength ) )
-                                msgDescription = "should be equal to or less than global.MeterNumberLength (" + global.MeterNumberLength + ")";
-                            
                             // Do not use
-                            if ( ! fail &&
-                                 ! global.UseMeterSerialNumber )
+                            if ( ! global.UseMeterSerialNumber )
                             {
                                 if ( parameter.Port == 0 )
                                 {
@@ -1214,6 +1218,10 @@ namespace MTUComm
 
                                 continue;
                             }
+
+                            else if ( fail = NoELTxt ( value, global.MeterNumberLength ) )
+                                msgDescription =
+                                    "should be equal to or less than global.MeterNumberLength (" + global.MeterNumberLength + ")";
                             break;
                             #endregion
                             #region Meter Reading
@@ -1281,8 +1289,10 @@ namespace MTUComm
                             #region Meter Reading Old
                             case FIELD.METER_READING_OLD:
                             case FIELD.METER_READING_OLD_2:
-                            // OLD values are only needed during replacing actions
-                            if ( ! isReplaceMeter )
+                            // Param totally useless in this action type
+                            // Do not use
+                            if ( ! isReplaceMeter ||
+                                 ! global.OldReadingRecording )
                             {
                                 form.RemoveParameter ( ( parameter.Port == 0 ) ?
                                     FIELD.METER_READING_OLD : FIELD.METER_READING_OLD_2 );
@@ -1292,17 +1302,6 @@ namespace MTUComm
 
                             else if ( fail = NoELNum ( value, 12 ) )
                                 msgDescription = "should be equal to or less than 12";
-                            
-                            // Do not use
-                            if ( ! fail &&
-                                 ! global.OldReadingRecording )
-                            {
-                                if ( parameter.Port == 0 )
-                                     form.RemoveParameter ( FIELD.METER_READING_OLD   );
-                                else form.RemoveParameter ( FIELD.METER_READING_OLD_2 );
-
-                                continue;
-                            }
                             break;
                             #endregion
                             #region Meter Type
@@ -1313,6 +1312,14 @@ namespace MTUComm
                             #endregion
                             #region Read Interval
                             case FIELD.READ_INTERVAL:
+                            // Do not use
+                            if ( ! global.IndividualReadInterval )
+                            {
+                                form.RemoveParameter ( FIELD.WORK_ORDER );
+
+                                continue;
+                            }
+
                             List<string> readIntervalList;
                             if ( MtuForm.mtuBasicInfo.version >= global.LatestVersion )
                             {
@@ -1353,25 +1360,25 @@ namespace MTUComm
                                          .Replace ( "hr", "hour" )
                                          .Replace ( "h", "H" )
                                          .Replace ( "m", "M" );
-                            if ( fail = Empty ( value ) || ! readIntervalList.Contains ( value ) )
+                            if ( fail = Empty ( value ) ||
+                                 ! readIntervalList.Contains ( value ) )
                                 msgDescription = "should be one of the possible values and using Hr/s or Min";
                             break;
                             #endregion
                             #region Snap Reads
                             case FIELD.SNAP_READS:
-                            if ( fail = EmptyNum ( value ) )
-                                msgDescription = "should be a valid numeric value";
-                            
                             // Do not use
-                            if ( ! fail &&
-                                 ( ! global.AllowDailyReads ||
-                                   ! mtu.DailyReads ||
-                                   mtu.IsFamilly33xx ) )
+                            if ( ! global.AllowDailyReads ||
+                                 ! mtu.DailyReads ||
+                                 mtu.IsFamilly33xx )
                             {
                                 form.RemoveParameter ( FIELD.SNAP_READS );
 
                                 continue;
                             }
+
+                            else if ( fail = EmptyNum ( value ) )
+                                msgDescription = "should be a valid numeric value";
                             break;
                             #endregion
                             #region Auto-detect Meter

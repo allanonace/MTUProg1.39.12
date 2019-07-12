@@ -176,11 +176,22 @@ namespace MTUComm
             bool isAutodetectMeter = false;
 
             // These actions do not need to get the meter types
-            bool isNotWrite = actionType == ActionType.ReadMtu    ||
+            bool isNotWrite = actionType == ActionType.ReadMtu ||
                               actionType == ActionType.TurnOffMtu ||
-                              actionType == ActionType.TurnOnMtu  ||
+                              actionType == ActionType.TurnOnMtu ||
                               actionType == ActionType.MtuInstallationConfirmation ||
                               actionType == ActionType.DataRead;
+            
+            // Action is about Replace Meter
+            bool isReplaceMeter = (
+                action.type == ActionType.ReplaceMeter ||
+                action.type == ActionType.ReplaceMtuReplaceMeter ||
+                action.type == ActionType.AddMtuReplaceMeter );
+
+            // Action is about Replace MTU
+            bool isReplaceMtu = (
+                action.type == ActionType.ReplaceMTU ||
+                action.type == ActionType.ReplaceMtuReplaceMeter );
 
             #region Get Meters
 
@@ -327,6 +338,8 @@ namespace MTUComm
 
             #region Validation
 
+            #region Methods
+
             dynamic Empty = new Func<string,bool> ( ( v ) =>
                                 string.IsNullOrEmpty ( v ) );
     
@@ -346,6 +359,8 @@ namespace MTUComm
                                 
             dynamic NoELTxt = new Func<string,int,bool> ( ( v, maxLength ) =>
                                 ! Validations.Text ( v, maxLength, 1, true, true, false ) );
+
+            #endregion
         
             // Validate each parameter and remove those that are not going to be used
             
@@ -386,7 +401,7 @@ namespace MTUComm
                         if ( isNotWrite )
                             continue;
                         
-                        if ( fail = EmptyNum ( valueStr ) )
+                        else if ( fail = EmptyNum ( valueStr ) )
                             msgDescription = MSG_NUMBER;
 
                         // NOTE: In scripted mode not taking into account global.AccountLength
@@ -397,29 +412,24 @@ namespace MTUComm
                         #region Work Order
                         case APP_FIELD.WorkOrder:
                         case APP_FIELD.WorkOrder_2:
-                        if ( fail = NoELTxt ( valueStr, global.WorkOrderLength ) )
-                            msgDescription = String.Format ( MSG_ELTHAN, "global.WorkOrderLength", global.WorkOrderLength );
-                        
                         // Do not use
-                        if ( ! fail &&
-                             ! global.WorkOrderRecording )
+                        if ( ! global.WorkOrderRecording )
                             continue;
+
+                        else if ( fail = NoELTxt ( valueStr, global.WorkOrderLength ) )
+                            msgDescription =
+                                String.Format ( MSG_ELTHAN, "global.WorkOrderLength", global.WorkOrderLength );
                         break;
                         #endregion
                         #region MTU Id Old [ Only Writing ]
                         case APP_FIELD.OldMtuId:
                         // Param totally useless in this action type
-                        if ( isNotWrite )
+                        if ( ! isReplaceMtu )
                             continue;
                         
-                        if ( fail = NoEqNum ( valueStr, global.MtuIdLength ) )
-                            msgDescription = String.Format ( MSG_EQUAL, "global.MtuIdLength", global.MtuIdLength );
-                        
-                        // Do not use
-                        if ( ! fail &&
-                             action.type != ActionType.ReplaceMTU &&
-                             action.type != ActionType.ReplaceMtuReplaceMeter )
-                            continue;
+                        else if ( fail = NoEqNum ( valueStr, global.MtuIdLength ) )
+                            msgDescription =
+                                String.Format ( MSG_EQUAL, "global.MtuIdLength", global.MtuIdLength );
                         break;
                         #endregion
                         #region Meter Serial Number [ Only Writing ]
@@ -428,16 +438,14 @@ namespace MTUComm
                         case APP_FIELD.MeterNumberOld:
                         case APP_FIELD.MeterNumberOld_2:
                         // Param totally useless in this action type
-                        if ( isNotWrite )
-                            continue;
-                        
-                        if ( fail = NoELTxt ( valueStr, global.MeterNumberLength ) )
-                            msgDescription = String.Format ( MSG_ELTHAN, "global.MeterNumberLength", global.MeterNumberLength );
-                        
                         // Do not use
-                        if ( ! fail &&
+                        if ( isNotWrite ||
                              ! global.UseMeterSerialNumber )
                             continue;
+                        
+                        else if ( fail = NoELTxt ( valueStr, global.MeterNumberLength ) )
+                            msgDescription =
+                                String.Format ( MSG_ELTHAN, "global.MeterNumberLength", global.MeterNumberLength );
                         break;
                         #endregion
                         #region Meter Reading [ Only Writing ]
@@ -446,8 +454,13 @@ namespace MTUComm
                         // Param totally useless in this action type
                         if ( isNotWrite )
                             continue;
+                        
+                        // Do not ask for new Meter reading if the port is for Encoders/Ecoders
+                        else if ( port == 0 && meterPort1.IsForEncoderOrEcoder ||
+                                  port == 1 && meterPort2.IsForEncoderOrEcoder )
+                            continue;
 
-                        if ( ! isAutodetectMeter )
+                        else if ( ! isAutodetectMeter )
                         {
                             // If necessary fill left to 0's up to LiveDigits
                             if ( port == 0 )
@@ -501,16 +514,13 @@ namespace MTUComm
                         case APP_FIELD.MeterReadingOld:
                         case APP_FIELD.MeterReadingOld_2:
                         // Param totally useless in this action type
-                        if ( isNotWrite )
-                            continue;
-                        
-                        if ( fail = NoELNum ( valueStr, 12 ) )
-                            msgDescription = String.Format ( MSG_ELONLY, "12" );
-                        
                         // Do not use
-                        if ( ! fail &&
+                        if ( ! isReplaceMeter ||
                              ! global.OldReadingRecording )
                             continue;
+                        
+                        else if ( fail = NoELNum ( valueStr, 12 ) )
+                            msgDescription = String.Format ( MSG_ELONLY, "12" );
                         break;
                         #endregion
                         #region Meter Type [ Only Writing ]
@@ -524,7 +534,9 @@ namespace MTUComm
                         #region Read Interval [ Only Writing ]
                         case APP_FIELD.ReadInterval:
                         // Param totally useless in this action type
-                        if ( isNotWrite )
+                        // Do not use
+                        if ( isNotWrite ||
+                             ! global.IndividualReadInterval )
                             continue;
 
                         List<string> readIntervalList;
@@ -567,24 +579,24 @@ namespace MTUComm
                                         .Replace ( "hr", "hour" )
                                         .Replace ( "h", "H" )
                                         .Replace ( "m", "M" );
-                        if ( fail = Empty ( valueStr ) || ! readIntervalList.Contains ( valueStr ) )
+                        
+                        if ( fail = Empty ( valueStr ) ||
+                             ! readIntervalList.Contains ( valueStr ) )
                             msgDescription = MSG_HSMINS;
                         break;
                         #endregion
                         #region Snap Reads [ Only Writing ]
                         case APP_FIELD.SnapReads:
                         // Param totally useless in this action type
-                        if ( isNotWrite )
+                        // Do not use
+                        if ( isNotWrite ||
+                             ! global.AllowDailyReads ||
+                             ! mtu.DailyReads ||
+                             mtu.IsFamilly33xx )
                             continue;
 
                         if ( fail = EmptyNum ( valueStr ) )
                             msgDescription = MSG_NUMBER;
-                        
-                        // Do not use
-                        if ( ! fail &&
-                             ( ! global.AllowDailyReads ||
-                             ! mtu.DailyReads ) )
-                            continue;
                         break;
                         #endregion
                         #region Auto-detect Meter [ Only Writing ]
