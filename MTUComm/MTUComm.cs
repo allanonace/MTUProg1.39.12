@@ -522,17 +522,16 @@ namespace MTUComm
 
                 // Recover all logs registered in the MTU for the specified date range
                 bool retrying        = false;
-                int  currentEventLog = 0;
                 int  maxAttempts     = ( Data.Get.IsFromScripting ) ? 20 : 5;
+                int  maxAttemptsEr   = 2; // maxAttempts is for when the Mtu is busy and maxAttemptsEr for exceptions ( LExI,... )
                 int  countAttempts   = 0;
+                int  countAttemptsEr = 0;
                 EventLogList eventLogList = new EventLogList ( start, end, ( LogFilterMode )data[ 0 ], ( LogEntryType )data[ 1 ] );
                 ( byte[] bytes, int responseOffset ) fullResponse = ( null, 0 ); // echo + response
                 while ( true )
                 {
                     try
                     {
-                        currentEventLog++;
-                    
                         // Get next event log response command or Get repeat last event log response command
                         // NOTE: In MTU_Dataloggin ( DataRead 3.4 ) indicates that Get repeat command has only two
                         // possible responses, but if it is the same as relaunch the last Get next, should be has three
@@ -550,30 +549,38 @@ namespace MTUComm
                     }
                     catch ( Exception e )
                     {
-                        currentEventLog--;
-                    
                         // Is not own exception
                         if ( ! Errors.IsOwnException ( e ) )
                             throw new PuckCantCommWithMtuException ();
 
                         // Finish without perform the action
-                        else if ( ++countAttempts >= maxAttempts )
+                        else if ( ++countAttemptsEr >= maxAttemptsEr )
                             throw new ActionNotAchievedGetEventsLogException ();
 
                         await Task.Delay ( WAIT_BTW_LOG_ERRORS );
 
+                        Utils.Print ( "DataRead: Error trying to recover event [ Attemps " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
+
                         // Try one more time
-                        //Errors.LogErrorNowAndContinue ( new AttemptNotAchievedGetEventsLogException () );
                         Errors.AddError ( new AttemptNotAchievedGetEventsLogException () );
+
+                        // Try again, using this time Get Repeat Last Event Log Response command
+                        // NOTE: Is very strange how works the MTU is a LExI command fails and you use the
+                        // process RepeatLast because some times it recovers events previous to the current one
+                        retrying = true;
+
                         continue;
                     }
+
+                    // Reset exceptions counter
+                    countAttemptsEr = 0;
 
                     // Check if some event log was recovered, but first removed echo bytes
                     byte[] response = new byte[ fullResponse.bytes.Length - fullResponse.responseOffset ];
                     Array.Copy ( fullResponse.bytes, fullResponse.responseOffset, response, 0, response.Length );
 
-                    EventLogQueryResult queryResult = eventLogList.TryToAdd ( response );
-                    switch ( queryResult )
+                    var queryResult = eventLogList.TryToAdd ( response );
+                    switch ( queryResult.Result )
                     {
                         // Finish because the MTU has not event logs for specified date range
                         case EventLogQueryResult.Empty:
@@ -585,19 +592,18 @@ namespace MTUComm
                                 throw new ActionNotAchievedGetEventsLogException ();
                             else
                             {
-                                Errors.AddError ( new MtuIsBusyToGetEventsLogException () );
+                                //Errors.AddError ( new MtuIsBusyToGetEventsLogException () );
 
                                 await Task.Delay ( WAIT_BTW_LOG_ERRORS );
 
                                 // Try again, using this time Get Repeat Last Event Log Response command
                                 retrying = true;
-                                currentEventLog--;
                             }
                             break;
 
                         // Wait a bit and try to read/recover the next log
                         case EventLogQueryResult.NextRead:
-                            OnProgress ( this, new ProgressArgs ( 0, 0, "Requesting event logs... " + currentEventLog + "/" + eventLogList.TotalEntries ) );
+                            OnProgress ( this, new ProgressArgs ( 0, 0, "Requesting event logs... " + queryResult.Index + "/" + eventLogList.TotalEntries ) );
                             
                             await Task.Delay ( WAIT_BTW_LOGS );
                             countAttempts = 0; // Reset accumulated fails after reading ok
@@ -623,6 +629,8 @@ namespace MTUComm
                 await this.CheckIsTheSameMTU ();
 
                 // Generates log using the interface
+                OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
+                
                 await this.OnDataRead ( this, new DataReadArgs ( map, this.mtu, eventLogList ) );
             }
             catch ( Exception e )
@@ -881,6 +889,12 @@ namespace MTUComm
             Global      global = this.configuration.Global;
             form.usePort2      = false;
             bool scriptUseP2   = false;
+
+            // Action is about Replace Meter
+            bool isReplaceMeter = (
+                action.type == ActionType.ReplaceMeter           ||
+                action.type == ActionType.ReplaceMtuReplaceMeter ||
+                action.type == ActionType.AddMtuReplaceMeter );
             
             List<Meter> meters;
             List<string> portTypes;
@@ -1082,7 +1096,7 @@ namespace MTUComm
                                     ! Validations.Text ( v, maxLength, 1, true, true, false ) );
             
                 // Validate each parameter and remove those that are not going to be used
-                
+
                 string value = string.Empty;
                 string msgDescription  = string.Empty;
                 StringBuilder msgError = new StringBuilder ();
@@ -1192,7 +1206,14 @@ namespace MTUComm
                             #region Meter Reading
                             case FIELD.METER_READING:
                             case FIELD.METER_READING_2:
-                            if ( ! isAutodetectMeter )
+                            // Do not ask for new Meter reading if the port is for Encoders/Ecoders
+                            if ( parameter.Port == 0 && meterPort1.IsForEncoderOrEcoder ||
+                                 parameter.Port == 1 && meterPort2.IsForEncoderOrEcoder )
+                            {
+                                form.RemoveParameter ( ( parameter.Port == 0 ) ?
+                                    FIELD.METER_READING : FIELD.METER_READING_2 );
+                            }
+                            else if ( ! isAutodetectMeter )
                             {
                                 // If necessary fill left to 0's up to LiveDigits
                                 if ( parameter.Port == 0 )
@@ -1245,7 +1266,12 @@ namespace MTUComm
                             #region Meter Reading Old
                             case FIELD.METER_READING_OLD:
                             case FIELD.METER_READING_OLD_2:
-                            if ( fail = NoELNum ( value, 12 ) )
+                            // OLD values are only needed during replacing actions
+                            if ( ! isReplaceMeter )
+                                form.RemoveParameter ( ( parameter.Port == 0 ) ?
+                                    FIELD.METER_READING_OLD : FIELD.METER_READING_OLD_2 );
+
+                            else if ( fail = NoELNum ( value, 12 ) )
                                 msgDescription = "should be equal to or less than 12";
                             
                             // Do not use
@@ -1318,7 +1344,8 @@ namespace MTUComm
                             // Do not use
                             if ( ! fail &&
                                  ( ! global.AllowDailyReads ||
-                                   ! mtu.DailyReads ) )
+                                   ! mtu.DailyReads ||
+                                   mtu.IsFamilly33xx ) )
                                 form.RemoveParameter ( FIELD.SNAP_READS );
                             break;
                             #endregion

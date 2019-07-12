@@ -95,23 +95,28 @@ namespace MTUComm
 
         #endregion
 
-        public EventLogQueryResult TryToAdd (
+        public ( EventLogQueryResult Result, int Index ) TryToAdd (
             byte[] response )
         {
+            EventLog evnt = null;
+        
             switch ( response[ BYTE_RESULT ] )
             {
                 // ACK without log entry
                 case byte val when val != 0x00:
-                    return ( val == HAS_NOT_DATA ) ? EventLogQueryResult.Empty : EventLogQueryResult.Busy;
+                    return ( ( val == HAS_NOT_DATA ) ? EventLogQueryResult.Empty : EventLogQueryResult.Busy, -1 );
 
                 // ACK with log entry
                 case HAS_DATA:
-                    this.entries.Add ( new EventLog ( response ) );
+                    evnt = new EventLog ( response );
+                    if ( this.entries.Count >= evnt.Index )
+                         this.entries[ evnt.Index - 1 ] = evnt;
+                    else this.entries.Add ( evnt );
                     break;
             }
 
-            return ( this.entries[ this.entries.Count - 1 ].IsLast ) ?
-                EventLogQueryResult.LastRead : EventLogQueryResult.NextRead;
+            return ( ( this.entries[ this.entries.Count - 1 ].IsLast ) ?
+                EventLogQueryResult.LastRead : EventLogQueryResult.NextRead, evnt.Index );
         }
     }
 }

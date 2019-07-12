@@ -553,7 +553,7 @@ namespace aclara_meters.view
 
             #endregion
 
-            #region Service Port ID
+            #region Account Number / Service Port ID
 
             // Dual entry
             bool useDualAccountNumber = global.AccountDualEntry;

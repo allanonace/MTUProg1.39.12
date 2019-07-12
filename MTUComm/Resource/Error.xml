@@ -5,10 +5,10 @@
     <Error id="101" message="Puck cannot communicate with MTU" footer="Puck communication" />
     <Error id="102" message="Puck cannot communicate with MTU after has completed writing process" footer="Puck communication after writing" />
     <Error id="103" message="The Mtu.xml file does no contain the MTU ID specified" footer="MTU not listed in Mtu.xml" />
-    <Error id="104" message="Error trying to start the event log query" footer="Starting event log query" />
-    <Error id="105" message="Get next event log process has failed trying to recover data from the MTU" /> <!-- footer not necessary -->
-    <Error id="106" message="Get next event log process has failed trying because the MTU is busy" /> <!-- footer not necessary -->
-    <Error id="107" message="Get next event log can't be performed after having tried it several times" footer="Get next event log not achieved" />
+    <Error id="104" message="Error trying to start the MeterRead events log query" footer="Starting event log query" />
+    <Error id="105" message="Recover MeterRead events process has failed trying to recover data from the MTU" /> <!-- footer not necessary -->
+    <Error id="106" message="Recover MeterRead events process has failed trying because the MTU is busy" /> <!-- footer not necessary -->
+    <Error id="107" message="Recover MeterRead events can't be performed after having tried it several times" footer="Recover MeterRead events not achieved" />
     <Error id="108" message="The MTU is not an OnDemand compatible device" footer="It isn't an OnDemand MTU" />
 
     <!-- Meter -->
