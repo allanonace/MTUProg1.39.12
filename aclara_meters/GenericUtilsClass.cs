@@ -228,7 +228,7 @@ namespace aclara_meters
                      file.Directory.Name.ToLower () == Mobile.PATH_LOGS  .ToLower () )
                     continue;
                 
-                if ( file.Name.ToLower ().Contains ("result") )
+                if ( file.Name.ToLower ().Contains ("result") || file.Name.ToLower().Contains("mtuid"))
                     local_array_files.Add ( file );
                 else
                 {

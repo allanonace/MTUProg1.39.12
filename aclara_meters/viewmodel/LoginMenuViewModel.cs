@@ -70,6 +70,7 @@ namespace aclara_meters.viewmodel
                 Mobile.LogPath = Mobile.ConfigPath;  // private folder
                 Mobile.LogUserPath = user;
             }
+            Mobile.EventPath = user;
         }
 
         public async void Load ()

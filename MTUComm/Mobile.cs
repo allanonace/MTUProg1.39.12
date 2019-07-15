@@ -543,7 +543,7 @@ namespace MTUComm
             }
             set
             {
-                string path = Path.Combine(value, PATH_EVENTS);
+                string path = Path.Combine(pathCacheLogsUser, value + "_" + PATH_EVENTS);
                 CreateDirectoryIfNotExist(path);
                 pathCacheEvents = path;
             }

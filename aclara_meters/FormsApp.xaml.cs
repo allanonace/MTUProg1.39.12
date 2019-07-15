@@ -228,7 +228,7 @@ namespace aclara_meters
             Mobile.ConfigPublicPath = sPath;
             Mobile.ConfigPath       = sPathPrivate;
             Mobile.LogPath          = sPath;
-            Mobile.EventPath        = sPath;
+            //Mobile.EventPath        = sPath;
             #if DEBUG
             Mobile.LogUniPath = sPath;
             #endif
