@@ -81,7 +81,13 @@
     <Error id="853" message="The DemandaConfig for the specified MTU ID was not found" /> <!-- message_release="" /> -->
     
     <!-- Internal -->
-    <Error id="900" message="The register _var_ does not exist in the MemoryMap" footer="Register does not exist" />
+    <Error id="900" message="Deserializing MemoryMap has failed due to validate required fields _var_" footer="Error validating MemoryMap" />
+    <Error id="901" message="Error generating MemoryMap in the _var_ register" footer="Error generating MemoryMap" />
+    <Error id="902" message="The register _var_ does not exist in the MemoryMap" footer="Register does not exist" />
+    <Error id="903" message="Custom method _var_ does not exist in MTU family class" footer="Custom method does not exist" />
+    <Error id="904" message="Overload register _var_ must have the custom field configured" footer="Overload method not set" />
+    <Error id="905" message="String argument can't be casted to _var_" footer="Invalid value casting" />
+    <Error id="906" message="Argument value is outside _var_ limits" footer="Invalid value size" />
 
     <!--<Error id="" message="" />-->
     <!--<Error id="100" message="Mensaje de prueba de error propio" [ footer="..." ] />-->

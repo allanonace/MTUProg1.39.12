@@ -14,8 +14,6 @@ namespace MTUComm.MemoryMap
 
         private enum CUSTOM_TYPE { OPERATION, METHOD }
 
-        private const string EXCEP_OVER_CUSTOM = "Custom field is empty";
-
         #endregion
 
         #region Attributes
@@ -92,7 +90,7 @@ namespace MTUComm.MemoryMap
                 Utils.Print ( "Get " + id + ": Error - Overload registers need custom field" );
 
                 if ( ! MemoryMap.isUnityTest )
-                    throw new OverloadEmptyCustomException ( EXCEP_OVER_CUSTOM + ": " + id );
+                    throw new OverloadEmptyCustomException ( id );
             }
 
             if ( this.HasCustomMethod )

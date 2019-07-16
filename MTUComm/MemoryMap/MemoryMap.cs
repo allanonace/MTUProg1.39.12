@@ -90,16 +90,13 @@ namespace MTUComm.MemoryMap
 
         private const string HEX_PREFIX          = "0x";
 
-        private const string EXCEP_SET_INT       = "String argument can't be casted to int";
-        private const string EXCEP_SET_UINT      = "String argument can't be casted to uint";
-        private const string EXCEP_SET_ULONG     = "String argument can't be casted to ulong";
         private const string EXCEP_SET_LIM_INT   = "Argument value is outside int limits";
         private const string EXCEP_SET_LIM_UINT  = "Argument value is outside uint limits";
         private const string EXCEP_SET_LIM_ULONG = "Argument value is outside ulong limits";
         public  const string EXCEP_SET_USED      = "The specified record has not been mapped";
         public  const string EXCEP_SET_READONLY  = "The specified record is readonly";
         public  const string EXCEP_OVE_READONLY  = "All overloads are readonly";
-        private const string EXCEP_REGI_METHOD   = "Custom register method '#' is not present in MTU family class";
+        //private const string EXCEP_REGI_METHOD   = "Custom register method '#' is not present in MTU family class";
         private const string EXCEP_OVER_METHOD   = "Custom overload method '#' is not present in MTU family class";
 
         #endregion
@@ -285,7 +282,7 @@ namespace MTUComm.MemoryMap
                         }
                         catch ( Exception e )
                         {
-                            throw new MemoryMapParseXmlException ( "ERROR: " + e.Message );
+                            throw new MemoryMapParseXmlException ( xmlRegister.Id );
                             Utils.Print ( "ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException );
                         }
                     }
@@ -340,7 +337,7 @@ namespace MTUComm.MemoryMap
                         }
                         catch ( Exception e )
                         {
-                            throw new MemoryMapParseXmlException ( "ERROR: " + e.Message );
+                            throw new MemoryMapParseXmlException ( xmlOverload.Id );
                             Utils.Print ( "ERROR! " + xmlOverload.Id + " -> " + e.Message + " " + e.InnerException );
                         }
                         
@@ -468,10 +465,9 @@ namespace MTUComm.MemoryMap
                 // Method is not present in the MemoryMap_CustomMethods class
                 if ( customMethod == null )
                 {
-                    string strError = EXCEP_REGI_METHOD.Replace ( "#", memoryRegister.methodId_Get );
-                    Utils.Print ( "Create Custom Get " + memoryRegister.id + ": Error - " + strError );
+                    Utils.Print ( "ERROR: Create Custom Get method " + memoryRegister.id );
 
-                    throw new CustomMethodNotExistException ( strError );
+                    throw new CustomMethodNotExistException ( memoryRegister.methodId_Get );
                 }
 
                 base.AddMethod ( METHODS_GET_CUSTOM_PREFIX + memoryRegister.id,
@@ -532,10 +528,9 @@ namespace MTUComm.MemoryMap
                     // If both options are not present, thow an exception
                     if ( customMethod == null )
                     {
-                        string strError = EXCEP_OVER_METHOD.Replace ( "#", memoryOverload.methodId );
-                        Utils.Print ( "Create Custom Get " + memoryOverload.id + ": Error - " + strError );
+                        Utils.Print ( "ERROR: Create Custom Get method " + memoryOverload.id );
 
-                        throw new CustomMethodNotExistException ( strError );
+                        throw new CustomMethodNotExistException ( memoryOverload.methodId );
                     }
                 }
             }
@@ -625,10 +620,9 @@ namespace MTUComm.MemoryMap
                 // Method is not present in MTU family class
                 if ( customMethod == null )
                 {
-                    string strError = EXCEP_REGI_METHOD.Replace ( "#", memoryRegister.methodId_Set );
-                    Utils.Print ( "Create Custom Set " + memoryRegister.id + ": Error - " + strError );
+                    Utils.Print ( "ERROR: Create Custom Set method " + memoryRegister.id );
 
-                    throw new CustomMethodNotExistException ( strError );
+                    throw new CustomMethodNotExistException ( memoryRegister.methodId_Set );
                 }
 
                 base.AddMethod ( METHODS_SET_CUSTOM_PREFIX + memoryRegister.id,
@@ -904,8 +898,7 @@ namespace MTUComm.MemoryMap
             if ( this.ValidateNumeric<int> ( value, size ) )
                 this.SetNumToMem_Logic ( value, address, size );
             else
-                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " +
-                    value + " -> Address: " + address + " + Bytes: " + size );
+                throw new SetMemoryTypeLimitException ( value + ".Int." + address + "+" + size );
         }
 
         private void SetIntToMem (
@@ -915,14 +908,13 @@ namespace MTUComm.MemoryMap
         {
             int vCasted;
             if (!int.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException ( EXCEP_SET_INT + ": " + value );
+                throw new SetMemoryFormatException ( value + ".Int" );
             else
             {
                 if ( this.ValidateNumeric<int> ( value, size ) )
                     this.SetNumToMem_Logic ( vCasted, address, size );
                 else
-                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_INT + ": " +
-                        value + " -> Address: " + address + " + Bytes: " + size );
+                    throw new SetMemoryTypeLimitException ( value + ".Int." + address + "+" + size );
             }
         }
 
@@ -934,8 +926,7 @@ namespace MTUComm.MemoryMap
             if ( this.ValidateNumeric<uint> ( value, size ) )
                 this.SetNumToMem_Logic ( value, address, size );
             else
-                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " +
-                    value + " -> Address: " + address + " + Bytes: " + size );
+                throw new SetMemoryTypeLimitException ( value + ".UInt." + address + "+" + size );
         }
 
         private void SetUIntToMem (
@@ -945,14 +936,13 @@ namespace MTUComm.MemoryMap
         {
             uint vCasted;
             if (!uint.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException ( EXCEP_SET_UINT + ": " + value );
+                throw new SetMemoryFormatException ( value + ".UInt" );
             else
             {
                 if ( this.ValidateNumeric<uint> ( value, size ) )
                     this.SetNumToMem_Logic ( vCasted, address, size );
                 else
-                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_UINT + ": " +
-                        value + " -> Address: " + address + " + Bytes: " + size );
+                    throw new SetMemoryTypeLimitException ( value + ".UInt." + address + "+" + size );
             }
         }
 
@@ -964,8 +954,7 @@ namespace MTUComm.MemoryMap
             if ( this.ValidateNumeric<ulong> ( value, size ) )
                 this.SetNumToMem_Logic ( value, address, size );
             else
-                throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " +
-                    value + " -> Address: " + address + " + Bytes: " + size );
+                throw new SetMemoryTypeLimitException ( value + ".ULong." + address + "+" + size );
         }
 
         private void SetULongToMem (
@@ -975,14 +964,13 @@ namespace MTUComm.MemoryMap
         {
             ulong vCasted;
             if (!ulong.TryParse(value, out vCasted))
-                throw new SetMemoryFormatException ( EXCEP_SET_ULONG + ": " + value );
+                throw new SetMemoryFormatException ( value + ".ULong" );
             else
             {
                 if ( this.ValidateNumeric<ulong> ( value, size ) )
                     this.SetNumToMem_Logic ( vCasted, address, size );
                 else
-                    throw new SetMemoryTypeLimitException ( EXCEP_SET_LIM_ULONG + ": " +
-                        value + " -> Address: " + address + " + Bytes: " + size );
+                    throw new SetMemoryTypeLimitException ( value + ".ULong." + address + "+" + size );
             }
         }
 

@@ -16,7 +16,6 @@ namespace MTUComm
         private const string PREFIX_AUX     = "_AllowEmptyField";
         private const string EXCEP_NAME_INI = "#";
         private const string EXCEP_NAME_SGN = "_";
-        private const string EXCEP_VALIDATE = "Deserializing XML has failed due to validate required fields [ " + EXCEP_NAME_SGN + " ]";
 
         #endregion
 
@@ -310,7 +309,7 @@ namespace MTUComm
             catch ( Exception e )
             {
                 // Capture validation error with element name and launch a new exception
-                throw new MemoryMapXmlValidationException ( EXCEP_VALIDATE.Replace ( EXCEP_NAME_SGN, e.Message ) );
+                throw new MemoryMapXmlValidationException ( e.Message );
             }
             return deserialize;
         }

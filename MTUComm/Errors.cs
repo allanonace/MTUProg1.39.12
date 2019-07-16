@@ -176,10 +176,22 @@ namespace MTUComm
             // The DemandaConfig for the specified MTU ID was not found
             { new DemandNotFoundException_Internal (),          853 },
 
-            // Internal [ 9x ]
+            // Internal [ 9xx ]
             //-------------------------------
-            // The register _var_ does not exist in the MemoryMap
-            { new MemoryRegisterNotExistException (),           900 },
+            // Deserializing MemoryMap has failed due to validate required fields ...
+            { new MemoryMapXmlValidationException (),           900 },
+            // Error generating MemoryMap in the ... register
+            { new MemoryMapParseXmlException (),                901 },
+            // The register ... does not exist in the MemoryMap
+            { new MemoryRegisterNotExistException (),           902 },
+            // Custom method ... does not exist in MTU family class
+            { new CustomMethodNotExistException (),             903 },
+            // Overload register ... must have the custom field configured
+            { new OverloadEmptyCustomException (),              904 },
+            // String argument can't be casted to ...
+            { new SetMemoryFormatException (),                  905 },
+            // Argument value is outside ... limits
+            { new SetMemoryTypeLimitException (),               906 },
         };
 
         #endregion
