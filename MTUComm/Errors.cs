@@ -175,6 +175,11 @@ namespace MTUComm
             { new AlarmNotFoundException_Internal (),           852 },
             // The DemandaConfig for the specified MTU ID was not found
             { new DemandNotFoundException_Internal (),          853 },
+
+            // Internal [ 9x ]
+            //-------------------------------
+            // The register _var_ does not exist in the MemoryMap
+            { new MemoryRegisterNotExistException (),           900 },
         };
 
         #endregion

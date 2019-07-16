@@ -1081,7 +1081,7 @@ namespace MTUComm.MemoryMap
             // Selected dynamic member not exists
             Utils.Print("Set " + id + ": Error - Selected register is not loaded");
 
-            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + " [ GetProperty ]: " + id);
+            throw new MemoryRegisterNotExistException ( id + ".GetProperty" );
         }
 
         public MemoryRegister<T> GetProperty<T>(string id)
@@ -1092,7 +1092,7 @@ namespace MTUComm.MemoryMap
             // Selected dynamic member not exists
             Utils.Print("Set " + id + ": Error - Selected register is not loaded");
 
-            throw new MemoryRegisterNotExistException(MemoryMap.EXCEP_SET_USED + " [ GetProperty<> ]: " + id);
+            throw new MemoryRegisterNotExistException ( id + ".GetProperty<T>" );
         }
 
         public MemoryRegister<int> GetProperty_Int(string id)

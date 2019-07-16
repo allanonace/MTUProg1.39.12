@@ -80,6 +80,9 @@
     <Error id="852" message="The Alarm list for the specified MTU ID was not found" /> <!-- message_release="" /> -->
     <Error id="853" message="The DemandaConfig for the specified MTU ID was not found" /> <!-- message_release="" /> -->
     
+    <!-- Internal -->
+    <Error id="900" message="The register _var_ does not exist in the MemoryMap" footer="Register does not exist" />
+
     <!--<Error id="" message="" />-->
     <!--<Error id="100" message="Mensaje de prueba de error propio" [ footer="..." ] />-->
     <!--<Error id="101" dotnet="80020012" message="Mensaje de prueba de error de .Net traducido" />-->

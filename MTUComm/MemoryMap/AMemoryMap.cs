@@ -34,7 +34,7 @@ namespace MTUComm.MemoryMap
 
                 // Selected dynamic member not exists
                 Utils.Print ( "Get " + id + ": Error - " + MemoryMap.EXCEP_SET_USED );
-                throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + " [ Indexer ]: " + id );
+                throw new MemoryRegisterNotExistException ( id + ".Indexer" );
             }
         }
 
@@ -103,7 +103,7 @@ namespace MTUComm.MemoryMap
 
             // Selected dynamic member not exists
             Utils.Print ( "Set " + id + ": Error - Selected register is not loaded" );
-            throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + " [ Set ]: " + id );
+            throw new MemoryRegisterNotExistException ( id + ".Set" );
         }
 
         // NOTA: No se puede hacer asincrono porque no se admiten los parametros out
@@ -137,7 +137,7 @@ namespace MTUComm.MemoryMap
 
             // Selected dynamic member not exists
             Utils.Print ( "Get " + id + ": Error - Selected register is not loaded" );
-            throw new MemoryRegisterNotExistException ( MemoryMap.EXCEP_SET_USED + " [ Get ]: " + id );
+            throw new MemoryRegisterNotExistException ( id + ".Get" );
         }
 
         #endregion

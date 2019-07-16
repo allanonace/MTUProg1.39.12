@@ -703,7 +703,7 @@ namespace MTUComm
 
                 bool fail;
                 int  count = 1;
-                int  wait  = 5;
+                int  wait  = 3;
                 int  max   = ( int )( global.TimeSyncCountDefault / wait ); // Seconds / Seconds = Rounded max number of iterations
                 
                 do
