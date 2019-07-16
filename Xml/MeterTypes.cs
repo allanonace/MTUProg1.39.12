@@ -18,6 +18,16 @@ namespace Xml
         [XmlElement("Meter")]
         public List<Meter> Meters { get; set; }
 
+        public bool ContainsNumericType (
+            string number )
+        {
+            int numInt;
+            if ( ! int.TryParse ( number, out numInt ) )
+                return false;
+
+            return this.Meters.Any ( meter => meter.Type.Equals ( number ) );
+        }
+
         public Meter FindByMterId(int meterId)
         {
             Meter meter = Meters.Find(x => x.Id == meterId);

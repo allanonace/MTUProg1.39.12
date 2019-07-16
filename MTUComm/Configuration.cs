@@ -60,8 +60,11 @@ namespace MTUComm
                     {
                         bool isNumeric = MeterAux.GetPortTypes ( port.Type, out portTypes );
                         
-                        if ( ! isNumeric )
-                             port.TypeString = portTypes[ 0 ];
+                        // Some Meters have numeric type and some of them appears twice
+                        // in meter.xml, one for a Meter ID and other for a Meter type
+                        if ( ! isNumeric ||
+                             meterTypes.ContainsNumericType ( portTypes[ 0 ] ) )
+                             port.TypeString = string.Join ( string.Empty, portTypes );
                         else port.TypeString = meterTypes.FindByMterId ( int.Parse ( portTypes[ 0 ] ) ).Type;
                         
                        // Utils.Print ( "MTU " + mtu.Id + ": Type " + port.TypeString );
