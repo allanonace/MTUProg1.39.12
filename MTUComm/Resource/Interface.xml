@@ -1,5 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <InterfaceConfig>
+    <MtuInterface ID="104" interface="2"/>
+    <MtuInterface ID="105" interface="2"/>
+    <MtuInterface ID="107" interface="2"/>
+    <MtuInterface ID="109" interface="2"/>
+    <MtuInterface ID="111" interface="2"/>
+    <MtuInterface ID="114" interface="2"/>
+    <MtuInterface ID="119" interface="2"/>
+    <MtuInterface ID="122" interface="1"/>
+    <MtuInterface ID="123" interface="1"/>
+    <MtuInterface ID="124" interface="1"/>
+    <MtuInterface ID="125" interface="1"/>
+    <MtuInterface ID="128" interface="1"/>
 	<MtuInterface ID="130" interface="2"/>
 	<MtuInterface ID="131" interface="2"/>
 	<MtuInterface ID="134" interface="2"/>
