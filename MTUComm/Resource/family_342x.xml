@@ -165,6 +165,20 @@
     <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
+    <Id>MtuDatetime</Id>
+    <Description>New MTU time after Time Sync formated</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>MtuDatetime_Seconds</Register>
+      <Register>MtuDatetime_Minutes</Register>
+      <Register>MtuDatetime_Hour</Register>
+      <Register>MtuDatetime_Day</Register>
+      <Register>MtuDatetime_Month</Register>
+      <Register>MtuDatetime_Year</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
     <Id>XmitInterval</Id>
     <Description>Transmit Interval</Description>
     <Type>string</Type>
@@ -1124,6 +1138,66 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
+    <Id>MtuDatetime_Seconds</Id>
+    <Description>New MTU time after Time Sync</Description>
+    <Type>int</Type>
+    <Address>74</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MtuDatetime_Minutes</Id>
+    <Description>New MTU time after Time Sync</Description>
+    <Type>int</Type>
+    <Address>75</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MtuDatetime_Hour</Id>
+    <Description>New MTU time after Time Sync</Description>
+    <Type>int</Type>
+    <Address>76</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MtuDatetime_Day</Id>
+    <Description>New MTU time after Time Sync</Description>
+    <Type>int</Type>
+    <Address>77</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MtuDatetime_Month</Id>
+    <Description>New MTU time after Time Sync</Description>
+    <Type>int</Type>
+    <Address>78</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MtuDatetime_Year</Id>
+    <Description>New MTU time after Time Sync. Current year minus 2000</Description>
+    <Type>int</Type>
+    <Address>79</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
     <Id>P1MeterReading</Id>
     <Description>P1 Reading</Description>
     <Type>ulong</Type>
@@ -1201,6 +1275,16 @@
     <Size>1</Size>
     <Write>false</Write>
     <CustomGet>(_val_ / 2) - 130</CustomGet>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>Deviation</Id>
+    <Description>Deviation of last received packet</Description>
+    <Type>int</Type>
+    <Address>123</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
