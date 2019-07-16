@@ -226,7 +226,8 @@ namespace MTUComm
             if ( global.UseMeterSerialNumber )
                 logger.AddParameter ( port, form.MeterNumber );
             
-            logger.AddParameter ( port, form.MeterReading );
+            if ( ! mtu.Port1.IsForEncoderOrEcoder )
+                logger.AddParameter ( port, form.MeterReading );
             
             logger.AddParameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
             logger.AddParameter ( port, new Parameter("PulseLo","Pulse Low Time", meter.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
@@ -282,8 +283,9 @@ namespace MTUComm
                 
                 if ( global.UseMeterSerialNumber )
                     logger.AddParameter ( port, form.MeterNumber_2 );
-                    
-                logger.AddParameter ( port, form.MeterReading_2 );
+                
+                if ( ! mtu.Port2.IsForEncoderOrEcoder )
+                    logger.AddParameter ( port, form.MeterReading_2 );
 
                 logger.AddParameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter2.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
                 logger.AddParameter ( port, new Parameter("PulseLo","Pulse Low Time", meter2.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );

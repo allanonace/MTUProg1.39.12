@@ -100,6 +100,17 @@ namespace MTUComm.MemoryMap
             return string.Format ( "{0} dBm", await MemoryRegisters.RSSI.GetValue () ).Replace ( "-", "- " );
         }
 
+        public async Task<string> MtuDatetime_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        {
+            return string.Format ( "{0}/{1}/20{2} {3}:{4}:{5}",
+                await MemoryRegisters.MtuDatetime_Month.GetValue (),
+                await MemoryRegisters.MtuDatetime_Day.GetValue (),
+                await MemoryRegisters.MtuDatetime_Year.GetValue (),
+                await MemoryRegisters.MtuDatetime_Hour.GetValue (),
+                await MemoryRegisters.MtuDatetime_Minutes.GetValue (),
+                await MemoryRegisters.MtuDatetime_Seconds.GetValue () );
+        }
+
         public async Task<string> DailySnap_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
             Global global = Singleton.Get.Configuration.Global;

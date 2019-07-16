@@ -79,6 +79,8 @@
 			<Parameter name="InstallationConfirmationStatus" display="Installation" log="true" interface="true" source="MemoryMap.InstallConfirmationStatus"/>
 			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter name="Deviation" display="Deviation" log="true" interface="false" conditional="MemoryMap.InstallConfirmationNotSynced=false">
+			<Parameter name="MTU_DateTime" display="MtuGmtDateTime" log="true" interface="false" source="Memory.MtuDatetime" conditional="MemoryMap.InstallConfirmationNotSynced=false">
 			<Parameter name="Encryption" display="Encrypted" log="true" interface="true" conditional="Mtu.SpecialSet=true"/>
 			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
@@ -140,6 +142,8 @@
 			<Parameter name="InstallationConfirmationStatus" display="Installation" log="true" interface="true" source="MemoryMap.InstallConfirmationStatus"/>
 			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter name="Deviation" display="Deviation" log="true" interface="false" conditional="MemoryMap.InstallConfirmationNotSynced=false">
+			<Parameter name="MTU_DateTime" display="MtuGmtDateTime" log="true" interface="false" source="Memory.MtuDatetime" conditional="MemoryMap.InstallConfirmationNotSynced=false">
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
 				<Parameter name="Description" display="Description" log="true" interface="true" source="Port.Description"/>
 				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false"/>
@@ -231,6 +235,8 @@
 			<Parameter name="InstallationConfirmationStatus" display="Installation" log="true" interface="true" source="MemoryMap.InstallConfirmationStatus"/>
 			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter name="Deviation" display="Deviation" log="true" interface="false" conditional="MemoryMap.InstallConfirmationNotSynced=false">
+			<Parameter name="MTU_DateTime" display="MtuGmtDateTime" log="true" interface="false" source="Memory.MtuDatetime" conditional="MemoryMap.InstallConfirmationNotSynced=false">
 			<Parameter name="Encryption" display="Encrypted" log="true" interface="true" conditional="Mtu.SpecialSet=true"/>
 			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
