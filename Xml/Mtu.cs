@@ -8,7 +8,7 @@ namespace Xml
     {
         public enum VERSION { NEW, ARCH };
     
-        private const int DEF_FLOW = 0;
+        private const int DEF_FLOW = -1;
     
         public Mtu ()
         {
@@ -28,6 +28,7 @@ namespace Xml
             this.ECoderLeakDetectionCurrent = false;
             this.ECoderReverseFlow          = false;
             this.FastMessageConfig          = false;
+            this.Flow                       = DEF_FLOW;
             this.GasCutWireAlarm            = false;
             this.GasCutWireAlarmImm         = false;
             this.InsufficientMemory         = false;

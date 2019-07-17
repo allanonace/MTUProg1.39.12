@@ -84,44 +84,16 @@ namespace Xml
         }
 
         public List<Meter> FindByPortTypeAndFlow (
-            string portType,
-            int flow = -1 )
+            Mtu mtu,
+            int portNumber = 0 )
         {
-            List<string> portTypes;
-            List<Meter> meters;
-
-            bool isNumeric = MeterAux.GetPortTypes(portType, out portTypes);
-
-            if (isNumeric)
-            {
-                // portType match and no flow match required
-                // OR
-                // portType match and flow match
-                meters = Meters.FindAll(m => portTypes.Contains(m.Id.ToString()) && ((flow <= -1) || m.Flow.Equals(flow)));
-            }
-            else
-            {
-                // portType match and no flow match required
-                // OR
-                // portType match and flow match
-                meters = Meters.FindAll(m => MatchMeterTypes(portTypes, m) && ((flow <= -1) || m.Flow.Equals(flow)));
-            }
-            return meters;
-        }
-
-        private bool MatchMeterTypes(List<string> mtuMeterTypes, Meter meter) //List<string> meterTypes)
-        {
-            List<string> meterTypes = new List<string>();
-
-            if ( MeterAux.IsStringPortType ( meter.Type ) )
-                meterTypes.Add(meter.Type);
-            else
-                foreach (char c in meter.Type)
-                    meterTypes.Add(c.ToString());
-
-            IEnumerable<string> r = mtuMeterTypes.Intersect(meterTypes);
-            bool match = r.Count() > 0;
-            return match;
+            int  flow = mtu.Flow;
+            Port port = mtu.Ports[ portNumber ];
+        
+            // The port type is required to be supported but the flow can be differente
+            // and maybe the Mtu port has only certain Meter IDs supported
+            return Meters.FindAll ( meter => port.IsThisMeterSupported ( meter ) &&
+                                             ( ( flow <= -1 ) || meter.Flow.Equals ( flow ) ) );
         }
 
         public List<string> GetVendorsFromMeters(List<Meter> meters)

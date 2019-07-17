@@ -477,7 +477,6 @@ namespace aclara_meters.view
                 });
 
             // Ecoder/Encoder Will be only filtered by protocol + livedigits
-            // If auto-detect fails, show all Encoder/Ecoder Meters
             if ( currentMtu.Port1.IsForEncoderOrEcoder )
             {
                 bool autoDetect = await this.add_mtu.comm.AutodetectMetersEcoders ( currentMtu );
@@ -490,15 +489,13 @@ namespace aclara_meters.view
                      this.list_MeterTypesForMtu.Count <= 0 )
                     this.list_MeterTypesForMtu = this.config.meterTypes.FindAllForEncodersAndEcoders ();
             }
+            // If auto-detect fails, show all Encoder/Ecoder Meters
             else
-            {
-                this.list_MeterTypesForMtu = this.config.meterTypes.FindByPortTypeAndFlow (
-                    currentMtu.Ports[0].Type,
-                    currentMtu.Flow );
-            }
+                this.list_MeterTypesForMtu = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu );
 
             if ( hasTwoPorts )
             {
+                // Ecoder/Encoder Will be only filtered by protocol + livedigits
                 if ( currentMtu.Port2.IsForEncoderOrEcoder )
                 {
                     bool autoDetect = await this.add_mtu.comm.AutodetectMetersEcoders ( currentMtu, 2 );
@@ -511,12 +508,9 @@ namespace aclara_meters.view
                          this.list_MeterTypesForMtu_2.Count <= 0 )
                         this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindAllForEncodersAndEcoders ();
                 }
+                // If auto-detect fails, show all Encoder/Ecoder Meters
                 else
-                {
-                    this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByPortTypeAndFlow (
-                        currentMtu.Ports[1].Type,
-                        currentMtu.Flow );
-                }
+                    this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu, 1 );
             }
             
             Device.BeginInvokeOnMainThread ( () =>

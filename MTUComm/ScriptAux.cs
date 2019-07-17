@@ -251,20 +251,19 @@ namespace MTUComm
             else
             {
                 meterPort1 = config.getMeterTypeById ( int.Parse ( data[ APP_FIELD.Meter ].Value ) );
-                portTypes  = mtu.Ports[ 0 ].GetPortTypes ();
+                Port port  = mtu.Port1;
                 
                 // Is not valid Meter ID ( not present in Meter.xml )
                 if ( meterPort1.IsEmpty )
                     throw new ScriptingAutoDetectMeterMissing ();
                 
                 // Current MTU does not support selected Meter
-                else if ( ! portTypes.Contains ( data[ APP_FIELD.Meter ].Value ) && // By Meter Id = Numeric
-                          ! portTypes.Contains ( meterPort1.Type ) )                // By Type = Chars
+                else if ( ! port.IsThisMeterSupported ( meterPort1 ) )
                     throw new ScriptingAutoDetectNotSupportedException ();
                 
                 // Set values for the Meter selected InterfaceTamper the script
-                mtu.Port1.MeterProtocol   = meterPort1.EncoderType;
-                mtu.Port1.MeterLiveDigits = meterPort1.LiveDigits;
+                port.MeterProtocol   = meterPort1.EncoderType;
+                port.MeterLiveDigits = meterPort1.LiveDigits;
             }
 
             #endregion
@@ -313,20 +312,19 @@ namespace MTUComm
                 else
                 {
                     meterPort2 = config.getMeterTypeById ( int.Parse ( data[ APP_FIELD.Meter_2 ].Value ) );
-                    portTypes  = mtu.Ports[ 1 ].GetPortTypes ();
+                    Port port  = mtu.Port2;
                     
                     // Is not valid Meter ID ( not present in Meter.xml )
                     if ( meterPort2.IsEmpty )
                         throw new ScriptingAutoDetectMeterMissing ( string.Empty, 2 );
                     
                     // Current MTU does not support selected Meter
-                    else if ( ! portTypes.Contains ( data[ APP_FIELD.Meter_2 ].Value ) && // By Meter Id = Numeric
-                              ! portTypes.Contains ( meterPort2.Type ) )                  // By Type = Chars
+                    else if ( ! port.IsThisMeterSupported ( meterPort2 ) )
                         throw new ScriptingAutoDetectNotSupportedException ( string.Empty, 2 );
                     
                     // Set values for the Meter selected InterfaceTamper the script
-                    mtu.Port2.MeterProtocol   = meterPort2.EncoderType;
-                    mtu.Port2.MeterLiveDigits = meterPort2.LiveDigits;
+                    port.MeterProtocol   = meterPort2.EncoderType;
+                    port.MeterLiveDigits = meterPort2.LiveDigits;
                 }
             }
 

@@ -5,6 +5,8 @@ using Xml;
 using Library.Exceptions;
 using System.Xml.Serialization;
 using Library;
+using System.Linq;
+using System.Text;
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -55,20 +57,54 @@ namespace MTUComm
                 // Preload port types, because some ports use a letter but other a list of Meter IDs
                 // Done here because Xml project has no reference to MTUComm ( cross references )
                 List<string> portTypes;
+                StringBuilder allTypes = new StringBuilder ();
                 foreach ( Mtu mtu in mtuTypes.Mtus )
+                {
                     foreach ( Port port in mtu.Ports )
                     {
-                        bool isNumeric = MeterAux.GetPortTypes ( port.Type, out portTypes );
-                        
-                        // Some Meters have numeric type and some of them appears twice
-                        // in meter.xml, one for a Meter ID and other for a Meter type
+                        bool isNumeric = MtuAux.GetPortTypes ( port.Type, out portTypes );
+
+                        // Some Meters have numeric type ( e.g. 122 ) and some of them appears
+                        // twice in meter.xml, one for a Meter ID and other for a Meter type
+                        port.IsSpecialCaseNumType = meterTypes.ContainsNumericType ( portTypes[ 0 ] );
+
+                        // Set if this Mtu only supports certain Meter IDs
+                        if ( isNumeric &&
+                             ! port.IsSpecialCaseNumType )
+                            port.CertainMeterIds.AddRange ( portTypes );
+
+                        // Type is string or is an special numeric case ( e.g. 122, 123,... )
                         if ( ! isNumeric ||
-                             meterTypes.ContainsNumericType ( portTypes[ 0 ] ) )
-                             port.TypeString = string.Join ( string.Empty, portTypes );
-                        else port.TypeString = meterTypes.FindByMterId ( int.Parse ( portTypes[ 0 ] ) ).Type;
+                             port.IsSpecialCaseNumType )
+                            port.TypeString = string.Join ( string.Empty, portTypes );
+                        
+                        // Type is a number or list of numbers/IDs supported
+                        // Recover Meter searching for the first supported Meter and get its type
+                        else
+                        {
+                            foreach ( string id in portTypes )
+                            {
+                                string types = meterTypes.FindByMterId ( int.Parse ( id ) ).Type;
+
+                                // Get all different types from all supported Meters
+                                // Type 1: ABC
+                                // Type 2: DRE
+                                // Type 3: MFR
+                                // Type 4: ACC
+                                // Type 5: ROL
+                                // Result: ABCDREMFOL
+                                foreach ( char c in types.ToList ().Except ( allTypes.ToString ().ToList () ) )
+                                    allTypes.Append ( c );
+                            }
+
+                            port.TypeString = allTypes.ToString ();
+                            allTypes.Clear ();
+                        }
                         
                        // Utils.Print ( "MTU " + mtu.Id + ": Type " + port.TypeString );
                     }
+                }
+                allTypes = null;
 
                 // Regenerate certificate from base64 string
                 Mobile.configData.GenerateCertFromStore();

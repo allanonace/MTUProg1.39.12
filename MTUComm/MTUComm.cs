@@ -1006,15 +1006,14 @@ namespace MTUComm
                 else
                 {
                     meterPort1 = configuration.getMeterTypeById ( int.Parse ( form.Meter.Value ) );
-                    portTypes  = this.mtu.Ports[ 0 ].GetPortTypes ();
+                    Port port  = this.mtu.Port1;
                     
                     // Is not valid Meter ID ( not present in Meter.xml )
                     if ( meterPort1.IsEmpty )
                         throw new ScriptingAutoDetectMeterMissing ();
-                    
-                    // Current MTU does not support selected Meter
-                    else if ( ! portTypes.Contains ( form.Meter.Value ) && // By Meter Id = Numeric
-                              ! portTypes.Contains ( meterPort1.Type ) )   // By Type = Chars
+
+                    // Check if current MTU supports the selected Meter
+                    else if ( ! port.IsThisMeterSupported ( meterPort1 ) )
                         throw new ScriptingAutoDetectNotSupportedException ();
                     
                     // Set values for the Meter selected InterfaceTamper the script
@@ -1062,15 +1061,14 @@ namespace MTUComm
                     else
                     {
                         meterPort2 = configuration.getMeterTypeById ( int.Parse ( form.Meter_2.Value ) );
-                        portTypes  = this.mtu.Ports[ 1 ].GetPortTypes ();
+                        Port port  = this.mtu.Port2;
                         
                         // Is not valid Meter ID ( not present in Meter.xml )
                         if ( meterPort2.IsEmpty )
                             throw new ScriptingAutoDetectMeterMissing ( string.Empty, 2 );
                         
                         // Current MTU does not support selected Meter
-                        else if ( ! portTypes.Contains ( form.Meter_2.Value ) && // By Meter Id = Numeric
-                                  ! portTypes.Contains ( meterPort2.Type ) )     // By Type = Chars
+                        else if ( ! port.IsThisMeterSupported ( meterPort2 ) )
                             throw new ScriptingAutoDetectNotSupportedException ( string.Empty, 2 );
                             
                         // Set values for the Meter selected InterfaceTamper the script
@@ -2031,11 +2029,13 @@ namespace MTUComm
                 MtuForm.SetBasicInfo ( mtuBasicInfo );
                 
                 // Launchs exception 'MtuTypeIsNotFoundException'
+
+                // Get Mtu entry using numeric ID ( e.g. 138 )
                 this.mtu = configuration.GetMtuTypeById ( ( int )this.mtuBasicInfo.Type );
                
-                for ( int i = 0; i < this.mtu.Ports.Count; i++ )
-                    mtuBasicInfo.setPortType ( i, this.mtu.Ports[ i ].Type );
-                                     
+                //for ( int i = 0; i < this.mtu.Ports.Count; i++ )
+                //    mtuBasicInfo.setPortType ( i, this.mtu.Ports[ i ].TypeString );
+                
                 Data.Set("MemoryMap",GetMemoryMap(true),false);
             }
         }
