@@ -75,8 +75,8 @@
 			<Parameter name="Cut1WireTamperStatus" display="Cut 1 Wire Tamp" log="true" interface="true" source="MemoryMap.GasCutWireTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.GasCutWireAlarm=true"/>
 			<Parameter name="Cut2WireTamperStatus" display="Cut 2 Wire Tamp" log="true" interface="true" source="MemoryMap.P2GasCutWireTamperStatus" conditional="Memory.P2StatusFlag=true + MemoryMap.Shipbit=false + Mtu.GasCutWireAlarm=true"/>
 			<!-- END - Alarms -->
-			<Parameter name="DailySnap" display="Daily Reads" log="true" interface="true" conditional="MemoryMap.Shipbit=false"/>
-			<Parameter name="DailyGMTHourRead" display="GMT Daily Reads" log="true" interface="false" conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
+			<Parameter name="DailySnap" display="Daily Snap" log="true" interface="true" conditional="MemoryMap.Shipbit=false"/>
+			<Parameter name="DailyGMTHourRead" display="Daily GMT Hour Read" log="true" interface="false" conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
 			<Parameter name="InstallationConfirmationStatus" display="Installation" log="true" interface="true" source="MemoryMap.InstallConfirmationStatus"/>
 			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
@@ -231,8 +231,8 @@
 			<Parameter name="SerialComProblem" display="Ser. Com Prm" log="true" interface="true" source="MemoryMap.SerialComProblemTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.SerialComProblem=true"/>
 			<Parameter name="SerialCutWire" display="Ser. Cut Wire" log="true" interface="true" source="MemoryMap.SerialCutWireTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.SerialCutWire=true"/>
 			<!-- END - Alarms -->
-			<Parameter name="DailySnap" display="Daily Reads" log="true" interface="true" conditional="MemoryMap.Shipbit=false"/>
-			<Parameter name="DailyGMTHourRead" display="GMT Daily Reads" log="true" interface="false" conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
+			<Parameter name="DailySnap" display="Daily Snap" log="true" interface="true" conditional="MemoryMap.Shipbit=false"/>
+			<Parameter name="DailyGMTHourRead" display="Daily GMT Hour Read" log="true" interface="false" conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
 			<Parameter name="InstallationConfirmationStatus" display="Installation" log="true" interface="true" source="MemoryMap.InstallConfirmationStatus"/>
 			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
