@@ -1452,6 +1452,9 @@ namespace aclara_meters.view
             logs_block.Opacity = 0;
             sync_block.Opacity = 0;
             ftp_block.Opacity = 0;
+            TitleGen.IsVisible = true;
+            TitleLog.IsVisible = false;
+            
 
             switch (valor)
             {
@@ -1481,6 +1484,8 @@ namespace aclara_meters.view
                     title_text.Text = "Activity Logs";
                     title_text.IsVisible = false;
                     img_barra.IsVisible = false;
+                    TitleGen.IsVisible = false;
+                    TitleLog.IsVisible = true;
 
                     logs_block.FadeTo(1, 200);
 
