@@ -30,7 +30,7 @@ namespace aclara.ViewModels
 
         public void RefreshList()
         {
-            FileList = GenericUtilsClass.LogFilesToUpload(Mobile.LogUserPath,true);
+            FileList = GenericUtilsClass.LogFilesToUpload(Mobile.LogUserPath,true,false);
             IndexFile = FileList.Count-1;
             TotalFiles = FileList.Count-1;
         }

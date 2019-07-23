@@ -213,7 +213,7 @@ namespace aclara_meters
             return BackupFiles().Count;
         }
 
-        public static List<FileInfo> LogFilesToUpload(string path, bool AllFiles = false )
+        public static List<FileInfo> LogFilesToUpload(string path, bool AllFiles = false, bool Events = true )
         {
             List<FileInfo> local_array_files = new List<FileInfo>();
 
@@ -227,7 +227,10 @@ namespace aclara_meters
                 if ( file.Directory.Name.ToLower () == Mobile.PATH_BACKUP.ToLower () ||
                      file.Directory.Name.ToLower () == Mobile.PATH_LOGS  .ToLower () )
                     continue;
-                
+
+                if (!Events && file.Name.ToLower().Contains("mtuid"))
+                    continue;
+
                 if ( file.Name.ToLower ().Contains ("result") || file.Name.ToLower().Contains("mtuid"))
                     local_array_files.Add ( file );
                 else
