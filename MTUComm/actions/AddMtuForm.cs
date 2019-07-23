@@ -169,7 +169,7 @@ namespace MTUComm.actions
                     new string[]
                     {
                         "OldMtuId",
-                        "OldMtuID",
+                        "OldMtuId",
                         "Old MTU ID"
                     }
                 },

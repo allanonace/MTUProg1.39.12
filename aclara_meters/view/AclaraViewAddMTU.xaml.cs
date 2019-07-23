@@ -1513,33 +1513,6 @@ namespace aclara_meters.view
 
                     this.optionalFields.Children.Add(optionalContainerA);
                 }
-                else if (optionalField.Format == "time")
-                {
-                    bool required = optionalField.Required;
-                    optionalDate = new BorderlessDatePicker()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                        // HeightRequest = 70,
-                        FontSize = 17
-                    };
-                    optionalDate.Name = optionalField.Name.Replace(" ", "_");
-                    optionalDate.Display = optionalField.Display;
-
-                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    //behavior.MaxLength = optionalField.Len;
-
-                    //optionalEntry.Behaviors.Add(behavior);
-
-                    optionalDates.Add(optionalDate);
-
-                    optionalContainerD.Children.Add(optionalDate);
-                    optionalContainerC.Content = optionalContainerD;
-                    optionalContainerB.Content = optionalContainerC;
-                    optionalContainerA.Children.Add(optionalLabel);
-                    optionalContainerA.Children.Add(optionalContainerB);
-
-                    this.optionalFields.Children.Add(optionalContainerA);
-                }
                 else // Text
                 {
                     string format = optionalField.Format;

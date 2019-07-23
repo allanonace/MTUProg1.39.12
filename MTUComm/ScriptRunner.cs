@@ -149,6 +149,7 @@ namespace MTUComm
                 throw new ScriptUserNameMissingException ();
 
             Mobile.LogUserPath = script.UserName;
+            Mobile.EventPath = script.UserName;
 
             // Using invalid log file/path
             if ( string.IsNullOrEmpty ( script.LogFile ) ||

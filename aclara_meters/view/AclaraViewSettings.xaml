@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <util:BasePage xmlns="http://xamarin.com/schemas/2014/forms" 
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
                xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" 
@@ -70,8 +70,40 @@
                         </StackLayout>
                     </StackLayout>
                     <StackLayout Orientation="Vertical" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                        <StackLayout Margin="0,0,0,0" x:Name="TitleGen" IsVisible="true">
                         <Label x:Name="title_text" Margin="16,14,0,0" FontSize="22" TextColor="#6aa2b8" Text="About"/>
                         <Image x:Name="img_barra" Margin="-16,4,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
+                        </StackLayout>
+                        <StackLayout Margin="0,0,0,0" x:Name="TitleLog" IsVisible="false">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="45" /> 
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Image x:Name="btnPrevious" Margin="0,0,0,0" HeightRequest="56" Scale="1" Source="prev_icon.png"  
+                                       Grid.Row="0" Grid.Column="0" HorizontalOptions="Start">
+                                    <Image.GestureRecognizers>
+                                        <TapGestureRecognizer x:Name="TabPrevious" NumberOfTapsRequired="1" />
+                                    </Image.GestureRecognizers>
+                                </Image>
+                                <Label x:Name="file_name" Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" 
+                                       Margin="0,14,0,0" FontSize="18" TextColor="#6aa2b8" Text="Activity Log:" />
+                                <Image x:Name="btnNext" Margin="0,0,0,0" HeightRequest="56" Scale="1" Source="next_icon.png"  
+                                       Grid.Row="0" Grid.Column="2" HorizontalOptions="End">
+                                    <Image.GestureRecognizers>
+                                        <TapGestureRecognizer x:Name="TabNext" NumberOfTapsRequired="1" />
+                                    </Image.GestureRecognizers>
+                                </Image>
+                                </Grid>
+                                <Image Margin="-16,4,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
+                            
+                            </StackLayout>
+                            
+                        <ScrollView Margin="0,-6,0,-6" x:Name="scrollSettings" IsEnabled="true">
                         <StackLayout Orientation="Vertical"    VerticalOptions="StartAndExpand">
                             <StackLayout Orientation="Vertical"  VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0">
                                 <!--  ABOUT -->
@@ -94,31 +126,6 @@
                                 </StackLayout>
                                 <!--  LOGS -->
                                 <StackLayout IsVisible="false" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="StartAndExpand" Scale="1" Margin="0,0,0,0" x:Name="logs_block">
-                                    <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="45" /> 
-                                            </Grid.RowDefinitions>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <Image x:Name="btnPrevious" Margin="0,0,0,0" HeightRequest="56" Scale="1" Source="prev_icon.png"  
-                                               Grid.Row="0" Grid.Column="0" HorizontalOptions="Start">
-                                            <Image.GestureRecognizers>
-                                                <TapGestureRecognizer x:Name="TabPrevious" NumberOfTapsRequired="1" />
-                                            </Image.GestureRecognizers>
-                                        </Image>
-                                        <Label x:Name="file_name" Grid.Row="0" Grid.Column="1" HorizontalOptions="Center" 
-                                               Margin="0,14,0,0" FontSize="18" TextColor="#6aa2b8" Text="Activity Log:" />
-                                        <Image x:Name="btnNext" Margin="0,0,0,0" HeightRequest="56" Scale="1" Source="next_icon.png"  
-                                               Grid.Row="0" Grid.Column="2" HorizontalOptions="End">
-                                            <Image.GestureRecognizers>
-                                                <TapGestureRecognizer x:Name="TabNext" NumberOfTapsRequired="1" />
-                                            </Image.GestureRecognizers>
-                                        </Image>
-                                    </Grid>
-                                    <Image Margin="-16,4,-16,8" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
                                     <ScrollView IsVisible="true" Margin="0,0,0,0" Orientation="Vertical" HorizontalOptions="CenterAndExpand" VerticalOptions="Center">
                                      
                                     <accordion:AccordionRepeaterView x:Name="Acordeon" Spacing="0" KeepOnlyOneItemOpen="True" ItemsSource="{Binding ItemsLog}">
@@ -346,7 +353,7 @@
                                     </StackLayout>
                                 </StackLayout>
                             </StackLayout>
-                      
+                        </ScrollView>
                     </StackLayout>
                 </StackLayout>
             </Grid>
