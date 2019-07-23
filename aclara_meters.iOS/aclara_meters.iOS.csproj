@@ -85,6 +85,7 @@
     <MtouchFastDev>true</MtouchFastDev>
     <DeviceSpecificBuild>false</DeviceSpecificBuild>
     <CodesignProvision>bizintekdist</CodesignProvision>
+    <MtouchFloat32>true</MtouchFloat32>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
@@ -101,7 +102,7 @@
     <CodesignProvision>bizintekdist</CodesignProvision>
     <MtouchLink>SdkOnly</MtouchLink>
     <OptimizePNGs />
-    <MtouchFloat32 />
+    <MtouchFloat32>true</MtouchFloat32>
     <CodesignExtraArgs />
     <CodesignExtraArgs />
     <MtouchEnableBitcode />
@@ -131,6 +132,7 @@
     <MtouchLink>SdkOnly</MtouchLink>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
     <CodesignProvision>bizintekdist</CodesignProvision>
+    <MtouchFloat32>true</MtouchFloat32>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
     <DebugType>none</DebugType>
@@ -146,6 +148,7 @@
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <BuildIpa>true</BuildIpa>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
+    <MtouchFloat32>true</MtouchFloat32>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <AppExtensionDebugBundleId />

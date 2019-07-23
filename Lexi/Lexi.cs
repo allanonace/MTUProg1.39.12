@@ -13,10 +13,6 @@ namespace Lexi
 {
     /// <summary>
     /// Contains all methods required to implement the Lexi ( Local EXternal Interface ) Protocol V2.
-    /// <para>
-    /// TODO: Change methods that use unnamed tuples, named tuples or 'classic' .Net tuples as return value,
-    /// creating new classes to work with them that will allow documentation tools to correctly recognize these methods.
-    /// </para>
     /// </summary>
     public class Lexi
     {
