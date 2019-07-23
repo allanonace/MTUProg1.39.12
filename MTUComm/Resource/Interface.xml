@@ -291,7 +291,7 @@
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
                 <Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false"/>
 				<Parameter name="AccountNumber" display="Global.AccountLabel" length="Global.AccountLength" fill="left" log="true" interface="true" source="MemoryMap.MeterId" conditional="MemoryMap.StatusFlag=true"/>
-				<Parameter name="DaysOfRead" display="Days of Read" source="Data.NumOfDays" log="true" interface="true" conditional="MemoryMap.StatusFlag=true"/>
+				<Parameter name="DaysOfRead" display="Days of Read" source="Data.TotalDifDays" log="true" interface="true" conditional="MemoryMap.StatusFlag=true"/>
 			</Parameter>
 			<Parameter name="GPS_Y" display="Lat" log="true" interface="true" source="Data.GpsLat"/>
 			<Parameter name="GPS_X" display="Long" log="true" interface="true" source="Data.GpsLon"/>

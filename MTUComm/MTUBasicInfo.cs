@@ -4,34 +4,23 @@ using System.Text;
 
 namespace MTUComm
 {
+    /// <summary>
+    /// Basic information necessary to work with an MTU and be able to prepare
+    /// the forms of the UI with the correct values ( compatible Meters,.. ),
+    /// being the first step for all supported actions.
+    /// </summary>
     public class MTUBasicInfo
     {
         #region Attributes
 
         private uint mtu_type;
         private uint mtu_id;
-
-        private Boolean mEncoder = true;
-
         private int shipbit;
-
         private int p1enabled;
         private int p2enabled;
-        
         public  int version { get; }
 
         #endregion
-
-        public enum Model
-        {
-            A,
-            C,
-            D,
-            D2,
-            F,
-            Z,
-            MET
-        }
 
         public MTUBasicInfo(byte[] buffer)
         {
@@ -94,11 +83,6 @@ namespace MTUComm
             {
                 return mtu_id;
             }
-        }
-
-        public Boolean isEncoder
-        {
-            get { return mEncoder; }
         }
     }
 }

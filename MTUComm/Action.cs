@@ -12,6 +12,15 @@ using System.IO;
 
 namespace MTUComm
 {
+    /// <summary>
+    /// Generic representation of the supported actions, with all the information
+    /// and events required to be able to execute the action and stablish a bidirectional
+    /// communicate between the view ( UI or script ) and the controller ( logic ).
+    /// <para>
+    /// See <see cref="ActionType"/> for a list of available actions.
+    /// </para>
+    /// </summary>
+    /// <seealso cref="MTUComm"/>
     public class Action
     {
         #region Nested class
@@ -69,6 +78,62 @@ namespace MTUComm
         private const string IFACE_MREADING  = "MeterReading";
         private const string IFACE_READERROR = "ReadingError";
         
+        /// <summary>
+        /// Types of actions supported by the applicaton working with MTUs and Meters.
+        /// <para>&#160;</para>
+        /// </para>
+        /// <list type="ActionType">
+        /// <item>
+        ///     <term>ActionType.ReadMtu</term>
+        ///     <description>Read an MTU</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.AddMtu</term>
+        ///     <description>Installation of a MTU</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.ReplaceMTU</term>
+        ///     <description>Installation of a MTU replacing current MTU</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.ReplaceMeter</term>
+        ///     <description>Installation of a MTU replacing current Meter</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.AddMtuAddMeter</term>
+        ///     <description>It is equal to ActionType.AddMtu</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.AddMtuReplaceMeter</term>
+        ///     <description>It is equal to ActionType.ReplaceMTU</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.ReplaceMtuReplaceMeter</term>
+        ///     <description>It is a combination of ActionType.ReplaceMTU and ActionType.ReplaceMeter</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.TurnOffMtu</term>
+        ///     <description>Turn off the MTU if it is not already turned off</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.TurnOnMtu</term>
+        ///     <description>Turn on the MTU if it is not already turned on</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.DataRead</term>
+        ///     <description>Recover ang generates a log with MeterRead events</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.MtuInstallationConfirmation</term>
+        ///     <description>Installation confirmation process a.k.a. RFCheck</description>
+        /// </item>
+        /// <item>
+        ///     <term>ActionType.ReadFabric</term>
+        ///     <description>Fast test method to know if the app can read from an MTU</description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// </summary>
         public enum ActionType
         {
             ReadMtu,
@@ -145,14 +210,23 @@ namespace MTUComm
 
         #region Events and Delegates
 
-        public delegate void ActionProgresshHandler(object sender, ActionProgressArgs e);
+        /// <summary>
+        /// Event that can be launched whenever we want during the action logic execution.
+        /// </summary>
         public event ActionProgresshHandler OnProgress;
+        public delegate void ActionProgresshHandler(object sender, ActionProgressArgs e);
 
-        public delegate void ActionFinishHandler(object sender, ActionFinishArgs e);
+        /// <summary>
+        /// Event invoked only if the action completes successfully and without launches an exception.
+        /// </summary>
         public event ActionFinishHandler OnFinish;
+        public delegate void ActionFinishHandler(object sender, ActionFinishArgs e);
 
-        public delegate void ActionErrorHandler ();
+        /// <summary>
+        /// Event invoked if the action does not complete successfully or if it launches an exception.
+        /// </summary>
         public event ActionErrorHandler OnError;
+        public delegate void ActionErrorHandler ();
 
         #endregion
 
@@ -219,12 +293,29 @@ namespace MTUComm
         private string lastLogCreated;
 
         private Configuration config;
+        /// <summary>
+        /// Represents current MTU.
+        /// </summary>
         public Mtu CurrentMtu { private set; get; }
         public MTUComm comm { get; private set; }
         public ActionType type { get; }
+        /// <summary>
+        /// In scripted mode it stores the parameters read from the script file
+        /// that are listed in <see cref="Parameter.ParameterType"/> enumeration.
+        /// </summary>
         private List<Parameter> mparameters = new List<Parameter>();
+        /// <summary>
+        /// In scripted mode it stores the parameters read from the script file
+        /// that are NOT listed in <see cref="Parameter.ParameterType"/> enumeration,
+        /// treated as additional parameters and will only be loged.
+        /// </summary>
         private List<Parameter> additionalParameters = new List<Parameter>();
         private Boolean canceled = false;
+        /// <summary>
+        /// Name of the user that is executing the action, that in interactive
+        /// mode is who has logged-in and in scripted mode is the string set
+        /// in username tag in script file.
+        /// </summary>
         public  String user { get; private set; }
         public  Logger logger;
         private Configuration configuration;
@@ -413,6 +504,18 @@ namespace MTUComm
 
         #region Execution
 
+        /// <summary>
+        /// Prepares the events ( OnError, OnProgress and OnFinish ) for all possible situations,
+        /// registers the required parameters and pass the control to <see cref="MTUComm"/> where
+        /// the logic will be executed.
+        /// <para>
+        /// See <see cref="MTUComm.LaunchActionThread(ActionType, object[])"/> for the entry point of the action logic.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// TODO: Modify all the write logic ( Add/Replace ) to use the log interface.
+        /// </remarks>
+        /// <param name="mtuForm">Write actions stores the set data in an intermediate form object</param>
         public void Run(MtuForm mtuForm = null)
         {
             if (canceled)
@@ -516,6 +619,8 @@ namespace MTUComm
 
                 // Prepare custom values
                 EventLogList eventList = args.ListEntries;
+
+                Data.Set ( "TotalDifDays", eventList.TotalDifDays );
 
                 Data.Set ( "ReadResult",
                     $"Number of Reads {eventList.Count} for Selected Period " +
@@ -637,6 +742,22 @@ namespace MTUComm
 
         #region Interface
 
+        /// <summary>
+        /// Generates the list of ALL parameters to write in a log using the XML interface for the
+        /// family of current MTU and the action performed.
+        /// <para>
+        /// This method does not filter depending on the output target,
+        /// not taking into account the boolean tags 'log' ( file ) and 'interface' ( UI ).
+        /// </para>
+        /// <para>
+        /// See <see cref="ActionType"/> for a list of available actions.
+        /// </para>
+        /// </summary>
+        /// <param name="map"><see cref="MemoryMap"/> generated during the action</param>
+        /// <param name="mtu"><see cref="Xml.Mtu"/> that represents current MTU</param>
+        /// <param name="form">Write actions stores the set data in an intermediate form object</param>
+        /// <param name="actionType">Type of the action</param>
+        /// <returns></returns>
         private async Task<ActionResult> CreateActionResultUsingInterface (
             dynamic map  = null,
             Mtu     mtu  = null,

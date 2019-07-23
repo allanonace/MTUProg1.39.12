@@ -14,23 +14,63 @@ using ActionType = MTUComm.Action.ActionType;
 
 namespace MTUComm
 {
+    /// <summary>
+    /// Interprets the content of the script files, converting them to a usable
+    /// format of the application, initiating the indicated action with the
+    /// selected parameters, without ask the user to enter any value.
+    /// <para>
+    /// This is the way designed and implemented to allow third applications
+    /// to interact with this application, returning a URL formatted string,
+    /// which can also be compressed, with the information of the successful
+    /// result or the error information.
+    /// </para>
+    /// </summary>
     public class ScriptRunner
     {
         private List<Action> actions;
 
-        public delegate void ActionFinishHandler(object sender, Action.ActionFinishArgs e);
-        public event ActionFinishHandler OnFinish;
-
-        public delegate void ActionOnProgressHandler(object sender, Action.ActionProgressArgs e);
+        /// <summary>
+        /// Event that can be launched whenever we want during the action logic execution.
+        /// </summary>
         public event ActionOnProgressHandler OnProgress;
+        public delegate void ActionOnProgressHandler(object sender, Action.ActionProgressArgs e);
 
-        public delegate void ActionStepFinishHandler(object sender, int step, Action.ActionFinishArgs e);
+        /// <summary>
+        /// Event invoked only if the action completes successfully and without launches an exception.
+        /// </summary>
+        public event ActionFinishHandler OnFinish;
+        public delegate void ActionFinishHandler(object sender, Action.ActionFinishArgs e);
+        
+        /// <summary>
+        /// Event invoked if the action does not complete successfully or if it launches an exception.
+        /// </summary>        
         public event ActionStepFinishHandler onStepFinish;
+        public delegate void ActionStepFinishHandler(object sender, int step, Action.ActionFinishArgs e);
 
         public delegate void ActionErrorHandler ();
         public event ActionErrorHandler OnError;
 
-        public void ParseScriptAndRun ( ISerial serial_device, String script_stream, int stream_size )
+        /// <summary>
+        /// Tries to parse the content of a script to start the indicated action with
+        /// the selected parameters.
+        /// <para>
+        /// Additional parameters, those that do not
+        /// appear in <see cref="Parameter.ParameterType"/> enumeration, will be treated
+        /// as information that will only be written in the log, without validating them nor taking
+        /// them into account in the actions logic.
+        /// </para>
+        /// <para>
+        /// See <see cref="Run"/> for the method invoked to initiate the actions logic.
+        /// </para>
+        /// </summary>
+        /// <param name="serial_device">BLE interface</param>
+        /// <param name="script_stream">Content of the script</param>
+        /// <param name="stream_size">Number of characters of the content of the script to be used</param>
+        /// <seealso cref="ble_library.BlePort"/>
+        public void ParseScriptAndRun (
+            ISerial serial_device,
+            String  script_stream,
+            int     stream_size )
         {
             XmlSerializer s = null;
         
@@ -70,13 +110,36 @@ namespace MTUComm
             this.Run ();
         }
 
-        private void UnknownElementEvent ( object sender, XmlElementEventArgs e )
+        /// <summary>
+        /// Method invoked each time a property is not recognized during the script parsing
+        /// process, because it is not defined in <see cref="ScriptAction"/> as a property
+        /// or if it does not have read and write privileges ( get; set; ).
+        /// <para>
+        /// All these elements will be treated as additional parameters that
+        /// will only be written in the log.
+        /// </para>
+        /// </summary>
+        private void UnknownElementEvent (
+            object sender,
+            XmlElementEventArgs e )
         {
             ScriptAction script = ( ScriptAction )e.ObjectBeingDeserialized;
             script.AddAdditionParameter ( e.Element.Name, e.Element.InnerText );
         }
 
-        private void BuildScriptActions ( ISerial serial_device, Script script )
+        /// <summary>
+        /// After parse the script content, the specific action is launched using selected parameters
+        /// and registering all required events ( OnProgress, OnError and OnFinish ) before execute
+        /// actions logic.
+        /// </summary>
+        /// <remarks>
+        /// The action type should be listen in <see cref="ActionType"/> enumeration or won't be executed.
+        /// </remarks>  
+        /// <param name="serial_device">BLE interface</param>
+        /// <param name="script">Script already parsed to a usable object in the application</param>
+        private void BuildScriptActions (
+            ISerial serial_device,
+            Script script )
         {
             actions = new List<Action>();
 
@@ -157,22 +220,24 @@ namespace MTUComm
             }
         }
 
+        /// <summary>
+        /// Initializes the logic of the action after having parsed and validated the content of the script.
+        /// </summary>
         public void Run()
         {
             actions.ToArray()[0].Run();
         }
 
-        private void Action_OnError ()
-        {
-            this.OnError ();
-        }
-
-        private void Action_OnProgress(object sender, Action.ActionProgressArgs e)
+        private void Action_OnProgress (
+            object sender,
+            Action.ActionProgressArgs e )
         {
             OnProgress(sender, e);
         }
 
-        private void Action_OnFinish(object sender, Action.ActionFinishArgs e)
+        private void Action_OnFinish (
+            object sender,
+            Action.ActionFinishArgs e )
         {
             Action act = (Action)sender;
             if (act.order < (actions.Count-1))
@@ -184,6 +249,11 @@ namespace MTUComm
             {
                 OnFinish(act, e);
             }
+        }
+
+        private void Action_OnError ()
+        {
+            this.OnError ();
         }
     }
 }

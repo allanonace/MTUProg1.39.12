@@ -212,9 +212,9 @@ namespace MTUComm
 
         /// <summary>
         /// An indexer to easiest recover errors without having to use a methods,
-        /// doing the structure more logical, associating the class itself with errors
+        /// doing the structure more logical, associating the class itself with the errors.
         /// </summary>
-        /// <param name="id">Error identifier</param>
+        /// <param name="id">Error identifier in numeric format</param>
         public Error this[ int id ]
         {
             get
@@ -226,9 +226,14 @@ namespace MTUComm
         }
         
         /// <summary>
-        /// Indicates if the error id should be written or only the messages
+        /// Indicates if the error ID should be written or only the messages.
         /// </summary>
-        /// <value><c>true</c> if the client wants to show error IDs in the log; otherwise, <c>false</c></value>
+        /// <remarks>
+        /// This value is red from Global.xml file, searching for the tag 'ErrorId'.
+        /// </remarks>
+        /// <returns>
+        /// <see langword="true"/> if the client wants to show error IDs
+        /// </returns>
         public static bool ShowId
         {
             get
@@ -320,11 +325,6 @@ namespace MTUComm
             return error;
         }
         
-        /// <summary>
-        /// Returns all registered errors and by default clear list after that
-        /// </summary>
-        /// <returns>The errors to log.</returns>
-        /// <param name="clearList">If set to <c>true</c> clear list of registered errors</param>
         private Error[] _GetErrorsToLog (
             bool clearList = true )
         {
@@ -482,7 +482,7 @@ namespace MTUComm
         #region Direct Singleton
 
         /// <summary>
-        /// Gets all errors registered to log, used from class Logger
+        /// Returns all errors registered to log, used from class Logger.
         /// </summary>
         /// <returns>Array of registered errors</returns>
         /// <param name="clearList">Clear list of registered errors after being returned</param>
@@ -493,7 +493,7 @@ namespace MTUComm
         }
         
         /// <summary>
-        /// Registers a new error based on an ( own or .Net ) exception
+        /// Registers a new error based on an ( own or .Net ) exception.
         /// </summary>
         /// <param name="e">Exception that represents the last error happened</param>
         /// <param name="portIndex">MTU port index related</param>
@@ -506,7 +506,7 @@ namespace MTUComm
         
         /// <summary>
         /// Registers a new error based on an exception, shows a popup alert using
-        /// this last error and also registers in the ( activity or result ) log file
+        /// this last error and also writes it in the ( activity or result ) log file.
         /// </summary>
         /// <param name="e">Exception that represents the last error happened</param>
         /// <param name="portIndex">Index of MTU port associated to the error</param>
@@ -523,7 +523,7 @@ namespace MTUComm
         
         /// <summary>
         /// Registers a new error based on an exception and shows an popup alert using
-        /// this last error, but does not register in the ( activity or result ) log file
+        /// this last error, but does not write it in the ( activity or result ) log file.
         /// </summary>
         /// <param name="e">Exception that represents the last error happened</param>
         /// <param name="portindex">Index of MTU port associated to the error</param>
@@ -536,9 +536,9 @@ namespace MTUComm
 
         /// <summary>
         /// Used during the initialization process, when the app
-        /// is not loaded yet and the error forces to close the app
+        /// has not yet loaded and the error forces the application to close.
         /// </summary>
-        /// <param name="e">Exception that represents the last error happened</param>
+        /// <param name="e">Exception that represents the last error</param>
         public static void LogErrorNowAndKill (
             Exception e )
         {
@@ -547,7 +547,7 @@ namespace MTUComm
 
         /// <summary>
         /// Both options will log all registered exceptions that remain, but in
-        /// the first case previously the last exception launched will be added
+        /// the first case previously the last exception launched will be added.
         /// </summary>
         /// <param name="e">Exception that represents the last error happened</param>
         public static void LogRemainExceptions (

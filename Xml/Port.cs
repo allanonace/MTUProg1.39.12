@@ -5,6 +5,71 @@ using System.Linq;
 
 namespace Xml
 {
+    /// <summary>
+    /// Class used to map the 'Port' section of the 'Mtu' entries present
+    /// in the Mtu.xml configuration file.
+    /// <para>&#160;</para>
+    /// <para>
+    /// Properties
+    /// <list type="Port">
+    /// <item>
+    ///   <term>Number</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>Description</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>Type</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>TypeString</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>IsSpecialCaseNumType</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>IsThisMeterSupported</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>HasCertainMeterId</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>IsForEncoderOrEcode</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>IsForPuls</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>MeterProtocol</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>MeterLiveDigits</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>TamperSerialize</term>
+    ///   <description></description>
+    /// </item>
+    /// </list>
+    /// </para>
+    /// <para>&#160;</para>
+    /// </summary>
+    /// <remarks>
+    /// NOTE: The values set in the constructor of the class are the default
+    /// values that are used when a tag is not present in the configuration file.
+    /// </remarks>
+    /// <seealso cref="MtuTypes"/>
+    /// <seealso cref="Mtu"/>
     public class Port
     {
         public Port ()

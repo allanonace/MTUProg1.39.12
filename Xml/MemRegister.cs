@@ -2,14 +2,14 @@
 
 namespace Xml
 {
-    /// <summary>
-    /// Deserializing default attribute is not used, only during serializing,
-    /// for that reason integer elements launch exception when field is empty
-    /// The workaround to solve this problem is to manage element as string
-    /// using second property, marking main property to be ignore during XML
-    /// processing, and if field is empty or value is not parsed ok to integer,
-    /// default constant value is assigned to the element
-    /// </summary>
+    /*
+     Deserializing default attribute is not used, only during serializing,
+     for that reason integer elements launch exception when field is empty
+     The workaround to solve this problem is to manage element as string
+     using second property, marking main property to be ignore during XML
+     processing, and if field is empty or value is not parsed ok to integer,
+     default constant value is assigned to the element
+    */
     public class MemRegister
     {
         public  const int    ERROR_VAL   = -1;

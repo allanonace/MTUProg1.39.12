@@ -4,35 +4,15 @@ using System.Text;
 
 namespace Lexi.Exceptions
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <remarks></remarks>
     public class LexiWriteException : Exception
     {
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <remarks></remarks>
         private int error_code;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Lexi.Exceptions.LexiWriteException" /> class. 
-        /// </summary>
-        /// <param name="response"></param>
-        /// <remarks></remarks>
         public LexiWriteException(byte[] response) : base(getMessge(response[1]))
         {
             error_code = response[1];
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="code"></param>
-        /// <returns>String value that descrives the error identified by error code</returns>
-        /// <remarks></remarks>
         private static String getMessge(int code)
         {
             switch (code)
@@ -46,6 +26,7 @@ namespace Lexi.Exceptions
             }
         }
 
+        /*
         /// <summary>
         /// Gets Error code of the Exception:
         /// <list type="bullet">
@@ -67,6 +48,7 @@ namespace Lexi.Exceptions
         /// </list>
         /// </summary>
         /// <value>The ErrorCode property gest the byte code identifier of the error sent by MTU</value>
+        */
         public int ErrorCode
         {
             get { return error_code; }

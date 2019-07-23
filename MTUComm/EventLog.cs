@@ -127,33 +127,25 @@ namespace MTUComm
             get { return ( ( this.flags & 3 ) == 0 ) ? 1 : ( ( ( this.flags & 3 ) == 1 ) ? 2 : -1 ); }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the read was a daily read.
-        /// </summary>
+        // Gets a value indicating whether the read was a daily read.
         public bool IsDailyRead
         {
             get { return ( this.flags & 4 ) != 0; }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the read was a top of the hour read.
-        /// </summary>
+        // Gets a value indicating whether the read was a top of the hour read.
         public bool IsTopOfHourRead
         {
             get { return ( this.flags & 8 ) != 0; }
         }
 
-        /// <summary>
-        /// Gets the reason for the reading.
-        /// </summary>
+        // Gets the reason for the reading.
         public ReadReason ReasonForRead
         {
             get { return ( ReadReason )( ( this.flags >> 4 ) & 7 ); }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the time was synchronized when the reading was taken.
-        /// </summary>
+        // Gets a value indicating whether the time was synchronized when the reading was taken.
         public bool IsSynchronized
         {
             get { return ( this.flags & 0x80 ) != 0; }

@@ -116,8 +116,14 @@ namespace ble_library
         }
     }
 
+    /// <summary>
+    /// Contains all methods required to implement BLE ( Bluetooth Low Energy )
+    /// communication to communicate the application with the MTU through the puck.
+    /// </summary>
     public class BlePort
     {
+        #region Attributes
+
         ////public TaskCompletionSource<bool> waitForACK;
         
         private Queue<byte> buffer_ble_data;
@@ -171,10 +177,12 @@ namespace ble_library
 
         public int TimeOutSeconds { get => timeOutSeconds; set => timeOutSeconds = value; }
 
+        #endregion
+
         /// <summary>
-        /// Initizalize Bluetooth LE Serial Port
+        /// Initializes the BLE ( Bluetooth Low Energy ) Serial port.
         /// </summary>
-        /// <param name="adapter_app">The Bluetooth Low Energy Adapter from the OS</param>
+        /// <param name="adapter_app">The bluetooth adapter from the OS</param>
         public BlePort(IBluetoothLowEnergyAdapter adapter_app)
         {
             adapter = adapter_app;
@@ -198,36 +206,39 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Returns the Connection status with the Bluetooth device
+        /// Returns the Connection status with the Bluetooth device.
         /// </summary>
-        /// <returns>The Bluetooth connection status.</returns>
+        /// <returns>Connection status.</returns>
         public int GetConnectionStatus()
         {
             return isConnected;
         }
 
         /// <summary>
-        /// Returns the Connection error
+        /// Returns a value indicating the error on the connection.
         /// </summary>
-        /// <returns> Connection error.</returns>
+        /// <returns>Connection error.</returns>
         public int GetConnectionError()
         {
             return connectionError;
         }
 
         /// <summary>
-        /// Returns the byte array from buffer and drops the element out of the queue
+        /// Extracts the next/first element from the buffer and returns it.
         /// </summary>
-        /// <returns>The byte array from the buffer that is dropped out the queue</returns>
+        /// <remarks>
+        /// The buffer is a queue, an implementation of a FIFO ( First In, First Out ) list.
+        /// </remarks>
+        /// <returns>Next/first element.</returns>
         public byte GetBufferElement()
         {
             return buffer_ble_data.Dequeue();
         }
 
         /// <summary>
-        /// Returns the number of bytes to read from the buffer
+        /// Returns the number of bytes to read stored in the buffer/queue.
         /// </summary>
-        /// <returns>The number of bytes to read from the buffer</returns>
+        /// <returns>Number of bytes.</returns>
         public int BytesReadCount ()
         {
             return buffer_ble_data.Count;
@@ -239,7 +250,7 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Clears the buffer queue
+        /// Clears the buffer.
         /// </summary>
         public void ClearBuffer()
         {
@@ -247,16 +258,16 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Returns the Bluetooth LE Peripherals detected by the scan
+        /// Returns the BLE ( Bluetooth Low Energy ) devices detected by the scan.
         /// </summary>
-        /// <returns>The Bluetooth LE periphals around the scanning device</returns>
+        /// <returns>Devices list.</returns>
         public List<IBlePeripheral> GetBlePeripherals()
         {
             return BlePeripheralList;
         }
 
         /// <summary>
-        /// If bluetooth antenna is enabled on device, starts scanning devices. If not, turns it on, and proceeds to scan.
+        /// Starts the device scanning.
         /// </summary>
         public async Task StartScan()
         {
@@ -275,9 +286,9 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Check if the BLE interface is executing a scan
+        /// Indicates if the device scanning is performing or not.
         /// </summary>
-        /// <returns>True if the BLE interface is executing a scan. False in other case </returns>
+        /// <returns><see langword="true"/> if the the device sanning is active.</returns>
         public Boolean IsScanning()
         {
             return isScanning;
@@ -294,9 +305,7 @@ namespace ble_library
             }
         }
 
-        /// <summary>
-        /// Listen to the characteristic notifications of a peripheral
-        /// </summary>
+        // Listen to the characteristic notifications of a peripheral
         private void Listen_Characteristic_Notification()
         {
             // TODO: comprobar que existe servicio?
@@ -333,9 +342,7 @@ namespace ble_library
             }
         }
 
-        /// <summary>
-        /// Stops listening to the characteristic notifications of a peripheral
-        /// </summary>
+        // Stops listening to the characteristic notifications of a peripheral
         private void Stop_Listen_Characteristic_Notification()
         {
             if (!adapter.CurrentState.IsDisabledOrDisabling())
@@ -371,11 +378,11 @@ namespace ble_library
         public long timeInit;
 
         /// <summary>
-        /// Writes a number of bytes via Bluetooth LE to the peripheral gatt connnection
+        /// Writes a number of bytes via BLE ( Bluetooth Low Energy ) to the peripheral gatt connnection.
         /// </summary>
-        /// <param name="buffer">The byte array to write the input to.</param>
-        /// <param name="offset">The offset in buffer at which to write the bytes.</param>
-        /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
+        /// <param name="buffer">Bytes to write</param>
+        /// <param name="offset">Zero based byte offset</param>
+        /// <param name="count">The maximum number of bytes to read</param>
         public async Task Write_Characteristic ( byte[] buffer, int offset, int count )
         {
             writeSavedBuffer = new byte[] { };
@@ -464,7 +471,8 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Updates buffer with the notification data received 
+        /// Receives data from the bluetooth devices and updates the
+        /// buffer with that, at the beginning of the list ( queue ).
         /// </summary>
         private void UpdateBuffer ( byte[] bytes )
         {
@@ -503,10 +511,6 @@ namespace ble_library
             }
         }
 
-        /// <summary>
-        /// Updates buffer with the notification data received 
-        /// </summary>
-        /// <param name="ble_device">The Bluetooth LE peripheral to connect.</param>
         public async Task ConnectoToDevice(IBlePeripheral ble_device, bool isBounded)
         {
             try
@@ -572,9 +576,6 @@ namespace ble_library
             }
         }
 
-        /// <summary>
-        /// Updates AES buffer with the notification data received 
-        /// </summary>
         private async void UpdateAESBuffer(byte[] bytes)
         {
             Utils.PrintDeep("BlePort.UpdateAESBuffer: " + Utils.ByteArrayToString(bytes));
@@ -636,7 +637,8 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Updates Ack buffer with the notification data received 
+        /// Receives the ACK message that indicates that the
+        /// writing of the characteristic has been successful or not.
         /// </summary>
         private async void UpdateACKBuffer ( byte[] bytes )
         {
@@ -694,7 +696,7 @@ namespace ble_library
         }
 
         /// <summary>
-        /// AES Verification to connect Bluetooth LE peripheral 
+        /// Performs an AES Verification to connect bluetooth peripherals.
         /// </summary>
         private async Task AESConnectionVerifyAsync(IBlePeripheral ble_device, bool isBounded)
         {
@@ -924,16 +926,13 @@ namespace ble_library
             }
         }
 
-        /// <summary>
-        /// Updates Ack buffer with the notification data received 
-        /// </summary>
         private void UpdateBatteryLevel(byte[] bytes)
         {
             batteryLevel = bytes;
         }
 
         /// <summary>
-        /// AES Decryptation algorithm
+        /// The AES Decryptation algorithm.
         /// </summary>
         private byte[] AES_Decrypt(byte[] bytesToBeDecrypted, byte[] passwordBytes)
         {
@@ -970,7 +969,7 @@ namespace ble_library
         }
 
         /// <summary>
-        /// AES Encryptation algorithm
+        /// The AES Encryptation algorithm.
         /// </summary>
         private byte[] AES_Encrypt(byte[] bytesToBeEncrypted, byte[] passwordBytes)
         {
@@ -999,7 +998,7 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Disconnects from Bluetooth LE peripheral 
+        /// Disconnects from the bluetooth device.
         /// </summary>
         public async Task DisconnectDevice ()
         {
@@ -1047,7 +1046,7 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Scans for Bluetooth LE peripheral broadcasts 
+        /// Broadcast scanning for bluetooth devices.
         /// </summary>
         private async Task ScanForBroadcasts()
 		{

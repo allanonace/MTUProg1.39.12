@@ -55,6 +55,39 @@ namespace MTUComm.MemoryMap
     {
         #region Constants
 
+        /// <summary>
+        /// Available types to set the "Type" tag in the entries present in the XML memory map, that
+        /// will be used to generate the <see cref="MemoryRegister{T}"/>s.
+        /// <para>&#160;</para>
+        /// </para>
+        /// <list type="RegType">
+        /// <item>
+        ///     <term>RegType.INT</term>
+        ///     <description>For ( signed ) integer values</description>
+        /// </item>
+        /// <item>
+        ///     <term>RegType.UINT</term>
+        ///     <description>For unsigned integer values</description>
+        /// </item>
+        /// <item>
+        ///     <term>RegType.ULONG</term>
+        ///     <description>For unsigned long values</description>
+        /// </item>
+        /// <item>
+        ///     <term>RegType.BOOL</term>
+        ///     <description>For boolean values, using only one bit of an specific byte</description>
+        /// </item>
+        /// <item>
+        ///     <term>RegType.CHAR</term>
+        ///     <description>For character values</description>
+        /// </item>
+        /// <item>
+        ///     <term>RegType.STRING</term>
+        ///     <description>For string/array of characters values</description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// </summary>
         public enum RegType
         {
             INT,
@@ -125,6 +158,35 @@ namespace MTUComm.MemoryMap
 
         #region Initialization
 
+        /// <summary>
+        /// Representation of a memory map of an MTU with all the information required
+        /// to be able to simulate all the memory registers of the physical memory of the MTU,
+        /// in a human readable way.
+        /// <para>&#160;</para>
+        /// </para>
+        /// Families of the MTUs
+        /// <list type="Families">
+        /// <item>
+        ///     <term>31xx32xx</term>
+        ///     <description>Memory map file is 'family_31xx32xx.xml'</description>
+        /// </item>
+        /// <item>
+        ///     <term>33xx</term>
+        ///     <description>Memory map is 'family_33xx.xml'</description>
+        /// </item>
+        /// <item>
+        ///     <term>342x</term>
+        ///     <description>Memory map is 'family_342x.xml'</description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// </summary>
+        /// <param name="memory">The memory map can be initialized with a specific memory or empty</param>
+        /// <param name="family">Family of the MTU to load the correct XML memory map</param>
+        /// <param name="readFromMtuOnlyOnce">By default, to get a register value the physical
+        /// memory of the MTU is read, but sometimes it is preferable
+        /// to only read once and cache the data</param>
+        /// <param name="pathUnityTest">Only for debug purposes</param>
         public MemoryMap ( byte[] memory, string family, bool readFromMtuOnlyOnce = false, string pathUnityTest = "" )
         {
             this.lexi   = Singleton.Get.Lexi;
@@ -693,6 +755,23 @@ namespace MTUComm.MemoryMap
                      Validations.NumericTypeLimit <T> ( value ) );
         }
 
+        /// <summary>
+        /// Compares two memory maps only taking into account the <see cref="MemoryRegister{T}"/> that have been
+        /// modified ( set/write ) and returns an string array with the identifiers of the registers with differences.
+        /// <para>
+        /// See <see cref="MemoryRegister.Equals(MemoryRegister{T})"/> to compare two <see cref="MemoryRegister{T}"/>.
+        /// </para>
+        /// <para>
+        /// See <see cref="ValidateModifiedRegisters(MemoryMap)"/> to know if two <see cref="MemoryMap"/>s are equal.
+        /// </para>
+        /// </summary>
+        /// <param name="otherMap">Other <see cref="MemoryMap"/> to compare with this</param>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.
+        /// <para>
+        /// List of identifiers of differente registers.
+        /// </para>
+        /// </returns>
         public async Task<string[]> GetModifiedRegistersDifferences ( MemoryMap otherMap )
         {
             List<string> difs = new List<string> ();
@@ -725,6 +804,20 @@ namespace MTUComm.MemoryMap
             return difs.ToArray ();
         }
 
+        /// <summary>
+        /// Compares two memory maps only taking into account the <see cref="MemoryRegister{T}"/> that have been
+        /// modified ( set/write ).
+        /// <para>
+        /// See <see cref="MemoryRegister.Equals(MemoryRegister{T})"/> to compare two <see cref="MemoryRegister{T}"/>.
+        /// </para>
+        /// </summary>
+        /// <param name="otherMap">Other <see cref="MemoryMap"/> to compare with this</param>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.
+        /// <para>
+        /// Boolean that indicates if both <see cref="MemoryMap"/>s are equal.
+        /// </para>
+        /// </returns>
         public async Task<bool> ValidateModifiedRegisters ( MemoryMap otherMap )
         {
             return ( ( await this.GetModifiedRegistersDifferences ( otherMap ) ).Length == 0 );
@@ -736,7 +829,7 @@ namespace MTUComm.MemoryMap
 
         private T ExecuteOperation<T> ( string operation, object value )
         {
-            // The following arithmetic operators are supported in expressions: +, -, *, / y %
+            // The following arithmetic operators are supported in expressions: +, -, *, / and %
             // NOTA: No se puede hacer la conversion directa de un double a un entero generico
             //return ( T )( new DataTable ().Compute ( operation.Replace ( "_val_", value.ToString () ), null ) );
 
@@ -1041,6 +1134,18 @@ namespace MTUComm.MemoryMap
 
         #region Get n bytes
         
+        /// <summary>
+        /// Loads a specific amount of data, reading from the physical the memory of the MTU,
+        /// into the memory of the memory map, more commonly known as data dump.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: Used only for debug purposes.
+        /// </remarks>
+        /// <param name="address">Initial byte to start reading from the MTU</param>
+        /// <param name="numBytes">Number of consecutive bytes from the initial <see cref="address"/></param>
+        /// <param name="offset">Number of bytes of the result to avoid from the beginning</param>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
         public async Task ReadFromMtu (
             int address,
             int numBytes,
@@ -1060,7 +1165,13 @@ namespace MTUComm.MemoryMap
 
         #region Get register
 
-        // Registers and Overloads
+        /// <summary>
+        /// Returns the reference to a register dynamic member of the memory map, that can be a
+        /// <see cref="MemoryRegister{T}"/> or a
+        /// <see cref="MemoryOverload{T}"/>
+        /// </summary>
+        /// <param name="id">Identifier of the member to recover</param>
+        /// <returns>The instance of the dynamic member stored in the memory map.</returns>
         public dynamic GetProperty ( string id )
         {
             if ( base.ContainsMember ( id ) )
@@ -1072,6 +1183,16 @@ namespace MTUComm.MemoryMap
             throw new MemoryRegisterNotExistException ( id + ".GetProperty" );
         }
 
+        /// <summary>
+        /// Returns the reference to the <see cref="MemoryRegister{T}"/> stored as
+        /// a dynamic member in the memory map, with the specific identifier and of T type.
+        /// <para>
+        /// See <see cref="RegType"/> for a list of available types.
+        /// </para>
+        /// </summary>
+        /// <param name="id">Identifier of the member to recover</param>
+        /// <typeparam name="T">Type of the register</typeparam>
+        /// <returns>The instance of the dynamic member stored in the memory map.</returns>
         public MemoryRegister<T> GetProperty<T>(string id)
         {
             if ( base.ContainsMember ( id ) )
@@ -1083,31 +1204,67 @@ namespace MTUComm.MemoryMap
             throw new MemoryRegisterNotExistException ( id + ".GetProperty<T>" );
         }
 
+        /// <summary>
+        /// Returns the reference to the <see cref="MemoryRegister{T}"/> stored as
+        /// a dynamic member in the memory map, with the specific identifier and of integer type.
+        /// </summary>
+        /// <param name="id">Identifier of the member to recover</param>
+        /// <returns>The instance of the dynamic member stored in the memory map.</returns>
         public MemoryRegister<int> GetProperty_Int(string id)
         {
             return this.GetProperty<int>(id);
         }
 
+        /// <summary>
+        /// Returns the reference to the <see cref="MemoryRegister{T}"/> stored as
+        /// a dynamic member in the memory map, with the specific identifier and of unsigned integer type.
+        /// </summary>
+        /// <param name="id">Identifier of the member to recover</param>
+        /// <returns>The instance of the dynamic member stored in the memory map.</returns>
         public MemoryRegister<uint> GetProperty_UInt(string id)
         {
             return this.GetProperty<uint>(id);
         }
 
+        /// <summary>
+        /// Returns the reference to the <see cref="MemoryRegister{T}"/> stored as
+        /// a dynamic member in the memory map, with the specific identifier and of unsigned long type.
+        /// </summary>
+        /// <param name="id">Identifier of the member to recover</param>
+        /// <returns>The instance of the dynamic member stored in the memory map.</returns>
         public MemoryRegister<ulong> GetProperty_ULong(string id)
         {
             return this.GetProperty<ulong>(id);
         }
 
+        /// <summary>
+        /// Returns the reference to the <see cref="MemoryRegister{T}"/> stored as
+        /// a dynamic member in the memory map, with the specific identifier and of boolean type.
+        /// </summary>
+        /// <param name="id">Identifier of the member to recover</param>
+        /// <returns>The instance of the dynamic member stored in the memory map.</returns>
         public MemoryRegister<bool> GetProperty_Bool(string id)
         {
             return this.GetProperty<bool>(id);
         }
 
+        /// <summary>
+        /// Returns the reference to the <see cref="MemoryRegister{T}"/> stored as
+        /// a dynamic member in the memory map, with the specific identifier and of char type.
+        /// </summary>
+        /// <param name="id">Identifier of the member to recover</param>
+        /// <returns>The instance of the dynamic member stored in the memory map.</returns>
         public MemoryRegister<char> GetProperty_Char(string id)
         {
             return this.GetProperty<char>(id);
         }
 
+        /// <summary>
+        /// Returns the reference to the <see cref="MemoryRegister{T}"/> stored as
+        /// a dynamic member in the memory map, with the specific identifier and of string/char array type.
+        /// </summary>
+        /// <param name="id">Identifier of the member to recover</param>
+        /// <returns>The instance of the dynamic member stored in the memory map.</returns>
         public MemoryRegister<string> GetProperty_String(string id)
         {
             return this.GetProperty<string>(id);
@@ -1117,6 +1274,17 @@ namespace MTUComm.MemoryMap
 
         #region Used
 
+        /// <summary>
+        /// Returns a dictionary with only the modified memory registers,
+        /// those whose values have been modified.
+        /// <para>
+        /// See <see cref="MTUComm.WriteMtuModifiedRegisters"/> to write to the phisical memory of the MTU only the memory registers modified.
+        /// </para>
+        /// <para>
+        /// See <see cref="MemoryRegister.used"/> that is the flag modified when a memory register value is set.
+        /// </para>
+        /// </summary>
+        /// <returns></returns>
         public MemoryRegisterDictionary GetModifiedRegisters ()
         {
             MemoryRegisterDictionary changes = new MemoryRegisterDictionary ();
@@ -1175,12 +1343,21 @@ namespace MTUComm.MemoryMap
 
         #endregion
         
+        /// <summary>
+        /// Resets the memory registers flags that indicate that at least
+        /// once they have been read from the physical memory of the MTU.
+        /// </summary>
         public void ResetReadFlags ()
         {
             foreach ( dynamic register in this.registersObjs.Values )
                 register.readedFromMtu = false;
         }
         
+        /// <summary>
+        /// Configures how to work with the MTU, caching data or always recovering
+        /// from the physical memory of the MTU each time a memory register is read.
+        /// </summary>
+        /// <param name="ok"><see langword="true"/> to cache the first reading performed</param>
         public void SetReadFromMtuOnlyOnce (
             bool ok )
         {

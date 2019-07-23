@@ -12,15 +12,36 @@ using Library.Exceptions;
 namespace Lexi
 {
     /// <summary>
-    /// Lexi Protocol Class.
-    /// Contains all methods of Lexi Protocol V2: Read, Write and Operations.
-    /// <see cref="Lexi.Lexi" /> Protocol Class.
-    /// Contains all methods of Lexi Protocol V2: Read, Write and Operations.
+    /// Contains all methods required to implement the Lexi ( Local EXternal Interface ) Protocol V2.
+    /// <para>
+    /// TODO: Change methods that use unnamed tuples, named tuples or 'classic' .Net tuples as return value,
+    /// creating new classes to work with them that will allow documentation tools to correctly recognize these methods.
+    /// </para>
     /// </summary>
     public class Lexi
     {
         #region Constants
 
+        /// <summary>
+        /// Types of actions supported by our implementation of the LExI protocol.
+        /// <para>&#160;</para>
+        /// </para>
+        /// <list type="LexiAction">
+        /// <item>
+        ///     <term>LexiAction.Read</term>
+        ///     <description>Reads data from the physical memory of the MTU</description>
+        /// </item>
+        /// <item>
+        ///     <term>LexiAction.Write</term>
+        ///     <description>Writes data to the physical memory of the MTU</description>
+        /// </item>
+        /// <item>
+        ///     <term>LexiAction.OperationRequest</term>
+        ///     <description>Writes data to the physical memory of the MTU, requesting a specific operation</description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// </summary>
         public enum LexiAction
         {
             Read,
@@ -29,8 +50,11 @@ namespace Lexi
         }
 
         /// <summary>
-        /// Available filters for log requests.
+        /// Filters for the log requests operation.
         /// </summary>
+        /// <remarks>
+        /// NOTE: Copied from Aclara source code.
+        /// </remarks>
         public enum LogFilterMode
         {
             /// <summary>
@@ -50,8 +74,11 @@ namespace Lexi
         }
 
         /// <summary>
-        /// The different types of log events.
+        /// Types of log events to recover using the log requests operation.
         /// </summary>
+        /// <remarks>
+        /// NOTE: Copied from Aclara source code.
+        /// </remarks>
         public enum LogEntryType : byte
         {
             /// <summary>
@@ -226,9 +253,8 @@ namespace Lexi
         }
 
         /// <summary>
-        /// Precalculated CRC Table
+        /// Precalculated CRC table that is used by CRC validation process to make it faster.
         /// </summary>
-        /// <remarks>This table is used by CRC validation function and it makes CRC calculation fast</remarks>
         static uint[] CRCTable = {0, 4489, 8978, 12955, 17956, 22445, 25910, 29887, 35912, 40385, 44890,
                                   48851, 51820, 56293, 59774, 63735, 4225, 264, 13203, 8730, 22181,
                                   18220, 30135, 25662, 40137, 36160, 49115, 44626, 56045, 52068, 63999,
@@ -260,37 +286,20 @@ namespace Lexi
 
         #region Attributes
 
-        /// <summary>
-        /// Serial port interface used to communicate through Lexi
-        /// </summary>
-        /// <remarks>User should iplement custom serial that inherist from ISearial</remarks>
-        private ISerial m_serial;
+        private ISerial m_serial; // Serial port interface used to communicate through Lexi
 
-        /// <summary>
-        /// Timout limit to wait for MTU response.
-        /// </summary>
-        /// <remarks>Once request is sent, timeot defines the time to wait for a response from MTU</remarks>
-        private int m_timeout;
+        private int m_timeout; // Timout limit to wait for MTU response.
 
         #endregion
 
         #region Initialization
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Lexi.Lexi" /> class. 
-        /// </summary>
-        /// <remarks></remarks>
         public Lexi()
         {
             //set default read wait to response timeout to 400ms
             m_timeout = 400;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Lexi.Lexi" /> class.
-        /// </summary>
-        /// <param name="serial"></param>
-        /// <param name="timeout"></param>
         public Lexi(ISerial serial, int timeout)
         {
             m_serial = serial;
@@ -302,28 +311,15 @@ namespace Lexi
         #region Read and Write
 
         /// <summary>
-        /// Adds two integers and returns the result.
+        /// Prepares and executes a read action from the physical memory of the MTU.
         /// </summary>
-        /// <param name="addres">A double precision number.</param>
-        /// <param name="data">A double precision number.</param>
-        /// <returns>
-        /// The sum of two integers.
-        /// </returns>
-        /// <example>
-        ///   <code><![CDATA[
-        /// lx.Read(0, 1)
-        /// ]]></code>
-        /// </example>
-        /// <seealso cref="Write(byteaddres,byte[]data)" />
-        /// <seealso cref="Write(ISerialserial,UInt32addres,byte[]data,inttimeout)" />
-        /// <exception cref="System.ArgumentNullException">Thrown when no Serial is
-        /// defines</exception>
-        /// <exception cref="System.TimeoutException">Thrown response Timeout is
-        /// reached</exception>
-        /// <exception cref="System.IO.InvalidDataException">Thrown when response data or
-        /// CRC is not valid</exception>
-        /// <see cref="Read(ISerial serial, UInt32 addres, uint data, int timeout)" />
-        public async Task<byte[]> Read(UInt32 addres, uint data)
+        /// <param name="addres">Address in the physical memory of the MTU</param>
+        /// <param name="data">Additional data to be sent with the LExI command</param>
+        /// <returns>Response from the MTU.</returns>
+        /// <seealso cref="Write(uint, byte[], uint[], LexiFiltersResponse, LexiAction)"/>
+        public async Task<byte[]> Read (
+            UInt32 addres,
+            uint data )
         {
             if ( m_serial == null )
                 throw new ArgumentNullException("No Serial interface defined");
@@ -331,27 +327,11 @@ namespace Lexi
             return await Read(m_serial, addres, data, m_timeout);
         }
 
-        /// <summary>
-        /// Request to read bytes from memory map
-        /// </summary>
-        /// <param name="serial">A double precision number.</param>
-        /// <param name="addres">A double precision number.</param>
-        /// <param name="bytesToRead">A double precision number.</param>
-        /// <param name="timeut">A double precision number.</param>
-        /// <returns>
-        /// Memory Map values from read address request
-        /// </returns>
-        /// <example>
-        /// <code>
-        /// lx.Read(new USBSerial("COM5"), 0, 1, 400)
-        /// </code>
-        /// </example>
-        /// <exception cref="System.TimeoutException">Thrown response Timeout is reached </exception>
-        /// <exception cref="System.IO.InvalidDataException">Thrown when response data or CRC is not valid </exception>
-        /// See <see cref="Read(UInt32 addres, uint data)"/> to add doubles.
-        /// <seealso cref="Write(byte addres, byte[] data)"/>
-        /// <seealso cref="Write(ISerial serial, UInt32 addres, byte[] data, int timeout)"/>
-        private async Task<byte[]> Read(ISerial serial, UInt32 address, uint bytesToRead, int timeout)
+        private async Task<byte[]> Read (
+            ISerial serial,
+            UInt32 address,
+            uint bytesToRead,
+            int timeout )
         {
             int TEST = new Random ().Next ( 0, 999 );
             Utils.PrintDeep ( Environment.NewLine + "--------LEXI_READ-------| " + TEST + " |--" );
@@ -364,10 +344,10 @@ namespace Lexi
                 
                 Utils.PrintDeep ( "Lexi.Read.. " +
                 "Stream = " +
-                "0x" + info.header + " ( " + Convert.ToInt32 ( info.header, 16 ) + " ) + " +
-                "WriteCmd 0x" + info.cmd + " ( " + Convert.ToInt32 ( info.cmd, 16 ) + " ) + " +
-                "Address 0x" + info.startAddress + " ( " + Convert.ToInt32 ( info.startAddress, 16 ) + " ) + " +
-                "Checksum 0x" + info.checksum + " ( " + Convert.ToInt32 ( info.checksum, 16 ) + " )" );
+                "0x" + info.Header + " ( " + Convert.ToInt32 ( info.Header, 16 ) + " ) + " +
+                "WriteCmd 0x" + info.Cmd + " ( " + Convert.ToInt32 ( info.Cmd, 16 ) + " ) + " +
+                "Address 0x" + info.StartAddress + " ( " + Convert.ToInt32 ( info.StartAddress, 16 ) + " ) + " +
+                "Checksum 0x" + info.Checksum + " ( " + Convert.ToInt32 ( info.Checksum, 16 ) + " )" );
     
                 Utils.PrintDeep ( "Lexi.Read.. " + Utils.ByteArrayToString ( stream ).Trim () + " [ Length " + stream.Length + " ]" );
     
@@ -450,11 +430,21 @@ namespace Lexi
             }
         }
 
-        public async Task<(byte[] bytes, int responseOffset)> Write (
+        /// <summary>
+        /// Prepares and executes a write action in the physical memory of the MTU.
+        /// </summary>
+        /// <param name="address">Address in the physical memory of the MTU</param>
+        /// <param name="data">Additional data to be sent with the LExI command</param>
+        /// <param name="bytesResponse">Will store the created stream/package</param>
+        /// <param name="filtersResponse">Custom filters to accept specific responses</param>
+        /// <param name="lexiAction">Action to perform using <see cref="LexiAction"/> enumeration ( lexiAction.OperationRequest or lexiAction.Write )</param>
+        /// <returns>Response from the MTU.</returns>
+        /// <seealso cref="Read(uint, uint)"/>
+        public async Task<LexiWriteResult> Write (
             uint   address,
             byte[] data           = null,
             uint[] bytesResponse  = null, // By default is +2 ACK
-            ( int responseBytes, int indexByte, byte value )[] filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
+            LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
             LexiAction lexiAction = LexiAction.Write )
         {
             if ( m_serial == null )
@@ -469,13 +459,13 @@ namespace Lexi
 
             return await Write ( m_serial, address, data, bytesResponse, filtersResponse, m_timeout, lexiAction );
         }
-
-        private async Task<(byte[] bytes, int responseOffset)> Write (
+        
+        private async Task<LexiWriteResult> Write (
             ISerial serial,
             UInt32 address,
             byte[] data,
             uint[] bytesResponse,
-            ( int responseBytes, int indexByte, byte value )[] filtersResponse,
+            LexiFiltersResponse filtersResponse,
             int timeout,
             LexiAction lexiAction )
         {
@@ -496,13 +486,13 @@ namespace Lexi
 
                 Utils.PrintDeep ( "Lexi.Write.. " +
                 "Stream = " +
-                "0x" + info.header + " ( " + Convert.ToInt32 ( info.header, 16 ) + " ) + " +
-                "WriteCmd 0x" + info.cmd + " ( " + Convert.ToInt32 ( info.cmd, 16 ) + " ) + " +
-                "Address 0x" + info.startAddress + " ( " + Convert.ToInt32 ( info.startAddress, 16 ) + " ) + " +
+                "0x" + info.Header + " ( " + Convert.ToInt32 ( info.Header, 16 ) + " ) + " +
+                "WriteCmd 0x" + info.Cmd + " ( " + Convert.ToInt32 ( info.Cmd, 16 ) + " ) + " +
+                "Address 0x" + info.StartAddress + " ( " + Convert.ToInt32 ( info.StartAddress, 16 ) + " ) + " +
                 "NumBytesToWrite 0x" + data.Length + " ( " + data.Length + " ) + " +
-                "Checksum 0x" + info.checksum + " ( " + Convert.ToInt32 ( info.checksum, 16 ) + " ) + " +
+                "Checksum 0x" + info.Checksum + " ( " + Convert.ToInt32 ( info.Checksum, 16 ) + " ) + " +
                 "Data [ " + Utils.ByteArrayToString ( data ) + " ] + " +
-                "CRC [ " + Utils.ByteArrayToString ( info.crc.Take ( 2 ).ToArray () ) + " ]" );
+                "CRC [ " + Utils.ByteArrayToString ( info.CRC.Take ( 2 ).ToArray () ) + " ]" );
     
                 Utils.PrintDeep ( "Lexi.Write.. " + Utils.ByteArrayToString ( stream ).Trim () + " [ Length " + stream.Length + " ]" );
     
@@ -522,8 +512,8 @@ namespace Lexi
 
                 bool hasFilters = ( filtersResponse != null );
                 if ( hasFilters )
-                    for ( int i = 0; i < filtersResponse.Length; i++ )
-                        filtersResponse[ i ].responseBytes += responseOffset;
+                    for ( int i = 0; i < filtersResponse.Count; i++ )
+                        filtersResponse[ i ].ResponseBytes += responseOffset;
                 
                 Utils.PrintDeep ( "Lexi.Write.. " +
                     "Echo " + serial.isEcho ().ToString ().ToUpper () +
@@ -552,13 +542,14 @@ namespace Lexi
                             {
                                 bool ok = false;
                                 byte[] arBytesRead = serial.BytesRead ();
-                                var filters = filtersResponse.Where ( entry => entry.responseBytes == bytesRead ).ToArray ();
+                                var filters = filtersResponse.Entries.Where ( entry => entry.ResponseBytes == bytesRead ).ToArray ();
                                 for ( int i = 0; i < filters.Length; i++ )
                                 {
                                     var filter = filters[ i ];
-                                    bool conditionOk = arBytesRead[ responseOffset + filter.indexByte ] == filter.value;
+                                    bool conditionOk = arBytesRead[ responseOffset + filter.IndexByte ] == filter.Value;
 
-                                    Utils.PrintDeep ( "Lexi.Write.. Condition ( " + arBytesRead[ responseOffset + filter.indexByte ] + " == " + filter.value + " ) = " + conditionOk.ToString ().ToUpper () );
+                                    Utils.PrintDeep ( "Lexi.Write.. Condition ( " + arBytesRead[ responseOffset + filter.IndexByte ] +
+                                        " == " + filter.Value + " ) = " + conditionOk.ToString ().ToUpper () );
 
                                     if ( conditionOk )
                                     {
@@ -626,7 +617,8 @@ namespace Lexi
                     Utils.PrintDeep ( "----LEXI_WRITE_FINISH----| " + TEST + " |--" + Environment.NewLine );
 
                     // Return MTU response
-                    return ( bytes: rawBuffer, responseOffset: responseOffset );
+                    //return ( bytes: rawBuffer, responseOffset: responseOffset );
+                    return new LexiWriteResult ( rawBuffer, responseOffset );
                 }
             }
             catch ( Exception e )
@@ -635,7 +627,25 @@ namespace Lexi
             }
         }
 
-        private ( string header, string cmd, string startAddress, string checksum, byte[] crc ) GeneratePackage (
+        /// <summary>
+        /// Depending on the process to be executed ( write or read ) and the LExI command,
+        /// this method prepares the package to be sent to the MTU, avoiding to have dupled
+        /// code inside read and write methods.
+        /// <para>
+        /// See <see cref="Read(uint, uint)"/> to send read command to the MTU.
+        /// </para>
+        /// <para>
+        /// See <see cref="Write(uint, byte[], uint[], (int responseBytes, int indexByte, byte value)[], LexiAction)"/>
+        /// to send write command to the MTU.
+        /// </para>
+        /// </summary>
+        /// <param name="lexiAction">Action to perform using <see cref="LexiAction"/> enumeration</param>
+        /// <param name="array">Will store the created stream/package</param>
+        /// <param name="address">Address in the physical memory of the MTU</param>
+        /// <param name="data">Additional data to be sent with the LExI command</param>
+        /// <param name="arguments">Number of bytes to read ( only used reading )</param>
+        /// <returns></returns>
+        private LexiPackage GeneratePackage (
             LexiAction lexiAction,
             out byte[] array,
             uint address,
@@ -804,7 +814,7 @@ namespace Lexi
                 break;
             }
             
-            return (
+            return new LexiPackage (
                 header      : String.Format ( "{0:x2}", array[ 0 ] ),
                 cmd         : String.Format ( "{0:x2}", array[ 1 ] ),
                 startAddress: String.Format ( "{0:x2}", array[ 2 ] ),

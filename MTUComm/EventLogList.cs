@@ -27,14 +27,22 @@ namespace MTUComm
         #region Attributes
 
         private List<EventLog> entries;
-        private DateTime dateStart;
-        private DateTime dateEnd;
-        private LogFilterMode filterMode;
-        private LogEntryType entryType;
+        private DateTime       dateStart;
+        private DateTime       dateEnd;
+        private LogFilterMode  filterMode;
+        private LogEntryType   entryType;
+        private int            acumDays     = 0;
+        private int            lastDayIndex = -1;
+        private DateTime       lastDay      = new DateTime ( 1, 1, 1 );
 
         #endregion
 
         #region Properties
+
+        public int TotalDifDays
+        {
+            get { return this.acumDays; }
+        }
 
         public DateTime DateStart
         {
@@ -76,6 +84,16 @@ namespace MTUComm
             }
         }
 
+        public EventLog LastEvent
+        {
+            get
+            {
+                if ( this.entries.Count > 0 )
+                    return this.entries[ this.entries.Count - 1 ];
+                return null;
+            }
+        }
+
         #endregion
 
         #region Initialization
@@ -109,10 +127,21 @@ namespace MTUComm
                 // ACK with log entry
                 case HAS_DATA:
                     evnt = new EventLog ( response );
+                    // Repeating entry
                     if ( this.entries.Count >= evnt.Index )
                          this.entries[ evnt.Index - 1 ] = evnt;
+                    // New entry
                     else this.entries.Add ( evnt );
                     break;
+            }
+
+            // Accumulate different days
+            if ( evnt.Index     > lastDayIndex &&
+                 evnt.TimeStamp > lastDay )
+            {
+                lastDayIndex = evnt.Index;
+                lastDay      = evnt.TimeStamp;
+                acumDays++;
             }
 
             return ( ( this.entries[ this.entries.Count - 1 ].IsLast ) ?

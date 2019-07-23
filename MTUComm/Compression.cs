@@ -8,10 +8,40 @@ using System.Web;
 
 namespace MTUComm
 {
+    /// <summary>
+    /// Compresses strings using the algorithm Deflate or  GZip and encoding
+    /// the result to URL format, to allow to send data directly within the URL.
+    /// </summary>
     public sealed class Compression
     {
-        // GZip is simply deflate plus a checksum and header/footer. Deflate is faster and smaller
-        // So naturally, no checksum is faster but then you also can't detect corrupt streams
+        /// <summary>
+        /// Types of compression available.
+        /// <para>&#160;</para>
+        /// </para>
+        /// <list type="ALGORITHM">
+        /// <item>
+        ///     <term>ALGORITHM.NOTHING</term>
+        ///     <description>Use to not compress</description>
+        /// </item>
+        /// <item>
+        ///     <term>ALGORITHM.DEFLATE</term>
+        ///     <description>Use to compress using Deflate algorithm</description>
+        /// </item>
+        /// <item>
+        ///     <term>LexiAction.GZIP</term>
+        ///     <description>Use to compress using GZip algorithm</description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// <para>&#160;</para>
+        /// </summary>
+        /// <remarks>
+        /// GZip is simply the Deflate algorithm plus a checksum and header/footer.
+        /// <para>
+        /// Deflate is faster and smaller, so naturally not doing a checksum is faster
+        /// but then you can not detect corrupt streams.
+        /// </para>
+        /// </remarks>
         public enum ALGORITHM
         {
             NOTHING,
@@ -22,6 +52,14 @@ namespace MTUComm
         private const string DEFLATE = "deflate";
         private const string GZIP    = "gzip";
 
+        /// <summary>
+        /// Returns a string generated randomly with the specific length.
+        /// <para>
+        /// The method uses these characters 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.
+        /// </para>
+        /// </summary>
+        /// <param name="length">Number of characters.</param>
+        /// <returns></returns>
         public static string RandomString ( int length )
         {
             Random random = new Random();
@@ -46,6 +84,16 @@ namespace MTUComm
             return param;
         }
 
+        /// <summary>
+        /// Compresses a string using the algorithm indicated in the Global.xml configuration file.
+        /// See <see cref="Xml.Global"/> to show the class used to map Global.xml file.
+        /// </summary>
+        /// <remarks>
+        /// By default, the Compression tag in Global.xml is set to an empty string, NO compression.
+        /// </remarks>
+        /// <param name="input">String to compress</param>
+        /// <param name="times">Number of times to apply the compression</param>
+        /// <returns>Compressed and URL encoded string.</returns>
         public static string CompressToUrlUsingGlobal ( string input, int times = 1 )
         {
             string paramGlobal = Singleton.Get.Configuration.Global.Compression.ToLower ();
@@ -60,11 +108,25 @@ namespace MTUComm
             return HttpUtility.UrlEncode ( Compress ( input, algorithm, times ) );
         }
         
+        /// <summary>
+        /// Compresses a string using the selected algorithm and encodes the result string to URL format.
+        /// </summary>
+        /// <param name="input">String to compress</param>
+        /// <param name="algorithm">Algorithm to use ( See ALGORITHM enumeration )</param>
+        /// <param name="times">Number of times to apply the compression</param>
+        /// <returns>Compressed and URL encoded string.</returns>
         public static string CompressToUrl ( string input, ALGORITHM algorithm = ALGORITHM.DEFLATE, int times = 1 )
         {
             return HttpUtility.UrlEncode ( Compress ( input, algorithm, times ) );
         }
         
+        /// <summary>
+        /// Compresses a string using the selected algorithm.
+        /// </summary>
+        /// <param name="input">String to compress</param>
+        /// <param name="algorithm">Algorithm to use ( See ALGORITHM enumeration )</param>
+        /// <param name="times">Number of times to apply the compression</param>
+        /// <returns>Compressed string.</returns>
         public static string Compress ( string input, ALGORITHM algorithm = ALGORITHM.DEFLATE, int times = 1 )
         {
             string result = Compress_Logic ( input, algorithm );
@@ -74,6 +136,13 @@ namespace MTUComm
             return result;
         }
         
+        /// <summary>
+        /// Decompresses a string using the selected algorithm.
+        /// </summary>
+        /// <param name="input">String to decompress</param>
+        /// <param name="algorithm">Algorithm to use ( See ALGORITHM enumeration )</param>
+        /// <param name="times">Number of times to apply the decompression</param>
+        /// <returns>Decompressed string.</returns>
         public static string Decompress ( string input, ALGORITHM algorithm = ALGORITHM.DEFLATE, int times = 1 )
         {
             string result = Decompress_Logic ( input, algorithm );

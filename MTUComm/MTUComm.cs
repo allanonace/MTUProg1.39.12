@@ -11,6 +11,7 @@ using Library;
 using MTUComm.actions;
 using Library.Exceptions;
 using MTUComm.MemoryMap;
+using Lexi;
 using Xml;
 
 using ActionType          = MTUComm.Action.ActionType;
@@ -24,6 +25,14 @@ using LogEntryType        = Lexi.Lexi.LogEntryType;
 
 namespace MTUComm
 {
+    /// <summary>
+    /// Class that contains most of the logic of the application, with the methods used to
+    /// perform all the supported actions, working with MTUs and Meters connected to them.
+    /// <para>
+    /// See <see cref="Action.ActionType"/> for a list of available actions.
+    /// </para>
+    /// </summary>
+    /// <seealso cref="Action"/>
     public class MTUComm
     {
         #region Constants
@@ -211,7 +220,7 @@ namespace MTUComm
 
         private Lexi.Lexi lexi;
         private Configuration configuration;
-        public MTUBasicInfo mtuBasicInfo { private set; get; }
+        private MTUBasicInfo mtuBasicInfo;
         private Mtu mtu;
         private Boolean isPulse = false;
         private Boolean mtuHasChanged;
@@ -235,7 +244,31 @@ namespace MTUComm
 
         #region Launch Actions
 
-        public async void LaunchActionThread ( ActionType type, params object[] args )
+        /// <summary>
+        /// The entry point of the action logic, loading the basic MTU data required,
+        /// acting as the distributor, invoking the correct method for each action.
+        /// <para>
+        /// Also, is the highest point where exceptions can bubble up/arise, because
+        /// it is easier to control how to manage exceptions at a single point in the app.
+        /// </para>
+        /// <para>
+        /// See <see cref="LoadMtuAndMetersBasicInfo"/> to recover basic data from the MTU.
+        /// </para>
+        /// </summary>
+        /// <param name="type">Current action type ( AddMtu, ReplaceMeter,.. )</param>
+        /// <param name="args">Arguments required for some actions</param>
+        /// <seealso cref="Task_AddMtu(Action)"/>
+        /// <seealso cref="Task_AddMtu(dynamic, string, Action)"/>
+        /// <seealso cref="Task_BasicRead"/>
+        /// <seealso cref="Task_DataRead"/>
+        /// <seealso cref="Task_DataRead(Action)"/>
+        /// <seealso cref="Task_InstallConfirmation"/>
+        /// <seealso cref="Task_ReadFabric"/>
+        /// <seealso cref="Task_ReadMtu"/>
+        /// <seealso cref="Task_TurnOnOffMtu(bool)"/>
+        public async void LaunchActionThread (
+            ActionType type,
+            params object[] args )
         {
             try
             {
@@ -299,6 +332,22 @@ namespace MTUComm
 
         #region AutoDetection Encoders
 
+        /// <summary>
+        /// Process performed only by MTU with ports compatible with Encoder or E-Coders,
+        /// to automatically recover the Meter protocol and livedigits that will
+        /// be used to filter the Meter list and during selected Meter validation.
+        /// <para>
+        /// See <see cref="CheckSelectedEncoderMeter(int)"/> to validate a Meter for current MTU.
+        /// </para>
+        /// </summary>
+        /// <param name="mtu">Current MTU</param>
+        /// <param name="portIndex">Port number to read from the MTU</param>
+        /// <returns>Task object required to execute the method asynchronously and a correct
+        /// exceptions bubbling.
+        /// <para>
+        /// Boolean that indicates if the autodetection worked or not.
+        /// </para>
+        /// </returns>
         public async Task<bool> AutodetectMetersEcoders (
             Mtu mtu,
             int portIndex = 1 )
@@ -389,6 +438,17 @@ namespace MTUComm
             return false;
         }
         
+        /// <summary>
+        /// Logic of Meters autodetection process extracted from AutodetectMetersEcoders
+        /// method, for an easy and readable reuse of the code for the two MTUs ports.
+        /// <para>
+        /// See <see cref="AutodetectMetersEcoders(Mtu,int)"/> to detect automatically.
+        /// the Meter protocol and livedigits of compatible Meters for current MTU.
+        /// </para>
+        /// </summary>
+        /// <param name="portIndex">Port number to read from the MTU</param>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
         private async Task CheckSelectedEncoderMeter (
             int portIndex = 1 )
         {
@@ -445,6 +505,18 @@ namespace MTUComm
 
         #region Data Read
 
+        /// <summary>
+        /// In scripted mode this method overload is called before the main method,
+        /// because it is necessary to translate the script parameters from Aclara into
+        /// the app terminology and validate their values, removing unnecesary ones
+        /// to avoid headaches.
+        /// <para>
+        /// See <see cref="Task_DataRead"/> for the DataRead logic.
+        /// </para>
+        /// </summary>
+        /// <param name="action">Current action type ( AddMtu, ReplaceMeter,.. )</param>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
         private async Task Task_DataRead (
             Action action )
         {
@@ -453,7 +525,7 @@ namespace MTUComm
                 // Translate Aclara parameters ID into application's nomenclature
                 var translatedParams = ScriptAux.TranslateAclaraParams ( action.GetParameters () );
 
-                dynamic map = this.GetMemoryMap(true);
+                dynamic map = this.GetMemoryMap ( true );
 
                 // Check if the second port is enabled
                 bool port2enabled = await map.P2StatusFlag.GetValue ();
@@ -473,7 +545,6 @@ namespace MTUComm
                 Data.Set("AccountNumber", accName, true);
                 Data.Set("MtuId", MtuId.ToString(), true);
                 Data.Set("MtuStatus", MtuStatus, true);
-                
 
                 // Init DataRead logic using translated parameters
                 await this.Task_DataRead ();
@@ -487,12 +558,43 @@ namespace MTUComm
             }
         }
 
-        // MTU_Datalogging ( DataRead 3.4 )
-        // · Pag 33 - 3.4 Accesing Log Information via the Local External Interface ( LExI )
-        // Y61063-DSD-Rev_G-Local_External_Interface_Specification
-        // · Pag 37 - 4.2.3.18 Start Event Log Query
-        // · Pag 38 - 4.2.3.19 Get Next Event Log Response
-        // · Pag 39 - 4.2.3.20 Get Repeat Last Event Log Response
+        /// <summary>
+        /// Process performed only by MTUs with the tag MtuDemand set to true in mtu.xml file,
+        /// recovering all the MeterReading events saved in the MTU for the number of days indicated.
+        /// <para>
+        /// See <see cref="Task_DataRead(Action)"/> for the entry point of the DataRead process in scripted mode.
+        /// </para>
+        /// <para>&#160;</para>
+        /// <para/><para>
+        /// MTU_Datalogging ( DataRead )
+        /// </para>
+        /// <list type="MTU_Datalogging">
+        /// <item>
+        ///     <term>Pag 33 - 3.4</term>
+        ///     <description>Accesing Log Information via the Local External Interface ( LExI )</description>
+        /// </item>
+        /// </list>
+        /// <para>&#160;</para>
+        /// <para>
+        /// Y61063-DSD-Rev_G-Local_External_Interface_Specification
+        /// </para>
+        /// <list type="Y61063">
+        /// <item>
+        ///     <term>Pag 37 - 4.2.3.18</term>
+        ///     <description>Start Event Log Query</description>
+        /// </item>
+        /// <item>
+        ///     <term>Pag 38 - 4.2.3.19</term>
+        ///     <description>Get Next Event Log Response</description>
+        /// </item>
+        /// <item>
+        ///     <term>Pag 39 - 4.2.3.20</term>
+        ///     <description>Get Repeat Last Event Log Response</description>
+        /// </item>
+        /// </list>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
         public async Task Task_DataRead ()
         {
             Global global = this.configuration.Global;
@@ -528,7 +630,8 @@ namespace MTUComm
                 int  countAttempts   = 0;
                 int  countAttemptsEr = 0;
                 EventLogList eventLogList = new EventLogList ( start, end, ( LogFilterMode )data[ 0 ], ( LogEntryType )data[ 1 ] );
-                ( byte[] bytes, int responseOffset ) fullResponse = ( null, 0 ); // echo + response
+                //( byte[] bytes, int responseOffset ) fullResponse = ( null, 0 ); // echo + response
+                LexiWriteResult fullResponse; // echo + response
                 while ( true )
                 {
                     try
@@ -541,11 +644,11 @@ namespace MTUComm
                                 ( ! retrying ) ? CMD_NEXT_EVENT_LOG : CMD_REPE_EVENT_LOG,
                                 null,
                                 new uint[]{ CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_RES_2 }, // ACK with log entry or without
-                                new ( int,int,byte )[] {
+                                new LexiFiltersResponse ( new ( int,int,byte )[] {
                                     ( CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_BYTE_RES, CMD_NEXT_EVENT_DATA  ), // Entry data included
                                     ( CMD_NEXT_EVENT_RES_2, CMD_NEXT_EVENT_BYTE_RES, CMD_NEXT_EVENT_EMPTY ), // Complete but without data
                                     ( CMD_NEXT_EVENT_RES_2, CMD_NEXT_EVENT_BYTE_RES, CMD_NEXT_EVENT_BUSY  )  // The MTU is busy, response not ready yet
-                                },
+                                } ),
                                 LexiAction.OperationRequest );
                     }
                     catch ( Exception e )
@@ -577,8 +680,8 @@ namespace MTUComm
                     countAttemptsEr = 0;
 
                     // Check if some event log was recovered, but first removed echo bytes
-                    byte[] response = new byte[ fullResponse.bytes.Length - fullResponse.responseOffset ];
-                    Array.Copy ( fullResponse.bytes, fullResponse.responseOffset, response, 0, response.Length );
+                    byte[] response = new byte[ fullResponse.Bytes.Length - fullResponse.ResponseOffset ];
+                    Array.Copy ( fullResponse.Bytes, fullResponse.ResponseOffset, response, 0, response.Length );
 
                     var queryResult = eventLogList.TryToAdd ( response );
                     switch ( queryResult.Result )
@@ -649,6 +752,16 @@ namespace MTUComm
 
         #region Install Confirmation
 
+        /// <summary>
+        /// This method is called only executing the Installation Confirmation action but
+        /// the logic is in a different method, which allows to reuse it from the writing
+        /// logic without mixing the processing of the result of the process.
+        /// <para>
+        /// See <see cref="InstallConfirmation_Logic(bool,int)"/> for the Install Confirmation logic.
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
         public async Task Task_InstallConfirmation ()
         {
             if ( await this.InstallConfirmation_Logic () < IC_EXCEPTION )
@@ -657,11 +770,23 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Installs the confirmation logic.
+        /// Process performed only if the MTU is switch on ( not in ship mode ) and all
+        /// related tags ( Global.TimeToSync, Mtu.TimeToSync ) are set to true, to confirm
+        /// the correct communication between the MTU and a DCU.
+        /// <para>
+        /// See <see cref="Task_InstallConfirmation"/> for the entry point of the Installation Confirmation process executed directly.
+        /// </para>
         /// </summary>
-        /// <returns>0 OK, 1 Not achieved, 2 Error</returns>
-        /// <param name="force">If set to <c>true</c> force.</param>
-        /// <param name="time">Time.</param>
+        /// <param name="force">Forces the Install Confirmation needed during installations,
+        /// because sometimes the shipbit does not yet updated, resulting in a false positive</param>
+        /// <param name="time">Internally used by the method to control the max number of attempts</param>
+        /// <returns>Task object required to execute the method asynchronously and a correct
+        /// exceptions bubbling.
+        /// <para>
+        /// Integer value that indicates if the Installation
+        /// Confirmation has worked ( 0 ) or not ( 1 Not achieved, 2 Error )
+        /// </para>
+        /// </returns>
         private async Task<int> InstallConfirmation_Logic (
             bool force = false,
             int  time  = 0 )
@@ -757,6 +882,18 @@ namespace MTUComm
 
         #region Turn On|Off
 
+        /// <summary>
+        /// This method is called only executing the Switch Off action
+        /// but the logic is in different method, which allows to use it from the
+        /// writing logic without mixing the processing of the result of the process.
+        /// <para>
+        /// See <see cref="TurnOnOffMtu_Logic(bool,int)"/> for the Turn On/Off logic
+        /// </para>
+        /// </summary>
+        /// <param name="on">Desired status of the MTU, true for run mode
+        /// and false for ship mode ( turned off )</param>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
         public async Task Task_TurnOnOffMtu (
             bool on )
         {        
@@ -773,6 +910,22 @@ namespace MTUComm
             }
         }
 
+        /// <summary>
+        /// Logic of the switch on or off of the MTU, changing between rune
+        /// mode and ship mode respectively.
+        /// <para>
+        /// See <see cref="Task_TurnOnOffMtu(bool)"/> for the entry point of the Turn On/Off process executed directly.
+        /// </para>
+        /// </summary>
+        /// <param name="on">Desired status of the MTU, true for run mode
+        /// and false for ship mode ( turned off )</param>
+        /// <param name="time">Internally used by the method to control the max number of attempts</param>
+        /// <returns>Task object required to execute the method asynchronously and a correct
+        /// exceptions bubbling.
+        /// <para>
+        /// Boolean that indicates if the autodetection has worked or not.
+        /// </para>
+        /// </returns>
         private async Task<bool> TurnOnOffMtu_Logic (
             bool on,
             int  time = 0 )
@@ -816,6 +969,16 @@ namespace MTUComm
 
         #region Read Fabric
 
+        /// <summary>
+        /// Simple and quick method to verify if the app can read from an MTU,
+        /// reading from the physical memory only the first register, that corresponds
+        /// to the MTU type, and the process is successful if no exception is launched.
+        /// <para>
+        /// See <see cref="Task_ReadMtu"/> to perform a full read of the MTU.
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
         public async Task Task_ReadFabric ()
         {
             try
@@ -842,6 +1005,17 @@ namespace MTUComm
 
         #region Read MTU
 
+        /// <summary>
+        /// This method is called only executing the Read MTU action
+        /// but the logic is in different method, which allows to use it from the
+        /// writing logic without mixing the processing of the result of the process.
+        /// <para>
+        /// See <see cref="ReadMtu_Logic"/> for the ReadMtu logic.
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
+        
         public async Task Task_ReadMtu ()
         {
             try
@@ -865,6 +1039,20 @@ namespace MTUComm
             }
         }
 
+        /// <summary>
+        /// Generates an instance of the dynamic MemoryMap that represents the memory
+        /// of the MTU used, prepared to read values from there and caching the data,
+        /// only recovering/reading one time from MTU physical memory.
+        /// <para>
+        /// See <see cref="Task_ReadMtu"/> for the entry point of the ReadMtu process executed directly.
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously and a
+        /// correct exceptions bubbling.
+        /// <para>
+        /// Instance of a dynamic memory map for current MTU.
+        /// </para>
+        /// </returns>
         private async Task<dynamic> ReadMtu_Logic ()
         {
             // Only read all required registers once
@@ -1960,6 +2148,14 @@ namespace MTUComm
 
         #region Read|Write from|to MTU
 
+        /// <summary>
+        /// Writes to the MTU physical memory only the registers that have been modified
+        /// during the writing action performed, optimizing the process and lengthening
+        /// the MTU memory useful life.
+        /// </summary>
+        /// <param name="map">Instance of the MemoryMap used in the writing process</param>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
         public async Task WriteMtuModifiedRegisters ( MemoryMap.MemoryMap map )
         {
             List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
@@ -1974,13 +2170,24 @@ namespace MTUComm
             modifiedRegisters = null;
         }
 
-        public async Task<bool> ReadMtuBit ( uint address, uint bit )
-        {
-            byte value = ( await lexi.Read ( address, 1 ) )[ 0 ];
-
-            return ( ( ( value >> ( int )bit ) & 1 ) == 1 );
-        }
-
+        /// <summary>
+        /// Writes to the MTU physical memory only modifying a bit of the indicated address.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: This method is deprecated and should be used the dynamic MemoryMap and
+        /// the <see cref="MTUComm.MemoryMap.MemoryRegisters">registers</see> methods.
+        /// </remarks>
+        /// <param name="address">Address of the register to modify in the MTU memory</param>
+        /// <param name="bit">Bit to modify in the select address/byte</param>
+        /// <param name="active">Desired status ( true = 1/one, false = 0/zero )</param>
+        /// <param name="verify">Optionally the writing process can be validated reading
+        /// the same register and comparing with desired status</param>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.
+        /// <para>
+        /// Boolean that indicates if the write action has completed successfully.
+        /// </para>
+        /// </returns>
         public async Task<bool> WriteMtuBitAndVerify ( uint address, uint bit, bool active, bool verify = true )
         {
             // Read current value
@@ -2008,6 +2215,15 @@ namespace MTUComm
 
         #region Auxiliary Functions
         
+        /// <summary>
+        /// Generates a new instance of the dynamic MemoryMap for current MTU,
+        /// using the associated family to load the correct XML map, allowing
+        /// to communicate ( write and read ) with the physical memory of the MTU.
+        /// </summary>
+        /// <param name="readFromMtuOnlyOnce">By default, to get a register value the physical
+        /// memory of the MTU is read, but sometimes it is preferable
+        /// to only read once and cache the data</param>
+        /// <returns>An instance of the dynamic MemoryMap.</returns>
         private dynamic GetMemoryMap (
             bool readFromMtuOnlyOnce = false )
         {
@@ -2018,6 +2234,17 @@ namespace MTUComm
             return new MemoryMap.MemoryMap ( new byte[ memory_map_size ], memory_map_type, readFromMtuOnlyOnce );
         }
         
+        /// <summary>
+        /// Loads the basic information necessary to work with an MTU and be able to prepare
+        /// the forms of the UI with the correct values ( compatible Meters,.. ), but the logic
+        /// is in another method to create a more readable and easy to mantain source code.
+        /// <para>
+        /// See <see cref="LoadMtuBasicInfo"/> to recover basic data from the MTU.
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
+        /// <seealso cref="MTUBasicInfo"/>
         private async Task LoadMtuAndMetersBasicInfo ()
         {
             OnProgress ( this, new ProgressArgs ( 0, 0, "Initial Reading..." ) );
@@ -2040,8 +2267,16 @@ namespace MTUComm
             }
         }
 
-        private async Task<bool> LoadMtuBasicInfo (
-            bool isAfterWriting = false )
+        /// <summary>
+        /// Loads the basic information necessary to work with an MTU and be able to
+        /// prepare the forms of the UI with the correct values ( compatible Meters,.. ).
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling, returning a boolean that indicates
+        /// if the autodetection worked or not.</returns>
+        /// <seealso cref="MTUBasicInfo"/>
+        private async Task<bool> LoadMtuBasicInfo ()
+        //    bool isAfterWriting = false )
         {
             List<byte> finalRead = new List<byte> ();
         
@@ -2055,9 +2290,9 @@ namespace MTUComm
             // System.IO.IOException = Puck is not well placed or is off
             catch ( Exception e )
             {
-                if ( ! isAfterWriting )
+                //if ( ! isAfterWriting )
                      Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
-                else Errors.LogErrorNow ( new PuckCantReadFromMtuAfterWritingException () );
+                //else Errors.LogErrorNow ( new PuckCantReadFromMtuAfterWritingException () );
                 
                 return false;
             }
@@ -2073,6 +2308,12 @@ namespace MTUComm
             return this.mtuHasChanged;
         }
 
+        /// <summary>
+        /// Checks if the MTU is still the same as at the beggining of the process,
+        /// otherwise the process should be canceled immediately, forcing an exception.
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously
+        /// and a correct exceptions bubbling.</returns>
         private async Task CheckIsTheSameMTU ()
         {
             byte[] read;
@@ -2096,27 +2337,17 @@ namespace MTUComm
                 throw new MtuHasChangeBeforeFinishActionException ();
         }
 
+        /// <summary>
+        /// Returns the basic information loaded of the current MTU.
+        /// <para>
+        /// See <see cref="LoadMtuAndMetersBasicInfo"/> to recover basic data from the MTU.
+        /// </para>
+        /// </summary>
+        /// <returns>Instance of the MTU basic information</returns>
+        /// <seealso cref="MTUBasicInfo"/>
         public MTUBasicInfo GetBasicInfo ()
         {
             return this.mtuBasicInfo;
-        }
-
-        private byte GetByteSettingOnlyOneBit ( int bit )
-        {
-            BitArray bits = new BitArray ( bit + 1 );
-            
-            if ( bit > 0 )
-                for ( int i = 0; i < bit; i++ )
-                    bits[ i ] = false;
-                    
-            bits[ bit ] = true;
-            
-            // Left to right: e.g. 4 is not 100 but false false true
-            
-            byte[] result = new byte[ 1 ];
-            bits.CopyTo ( result, 0 );
-            
-            return result[ 0 ];
         }
 
         #endregion

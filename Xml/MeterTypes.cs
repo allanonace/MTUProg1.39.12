@@ -6,6 +6,32 @@ using Library.Exceptions;
 
 namespace Xml
 {
+    /// <summary>
+    /// Class used to map the Meter.xml configuration file.
+    /// <para>&#160;</para>
+    /// <para>
+    /// Properties
+    /// <list type="MeterTypes">
+    /// <item>
+    ///   <term>FileVersion</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>FileDate</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>Meters</term>
+    ///   <description>List of <see cref="Meter"/> entries</description>
+    /// </item>
+    /// </list>
+    /// </para>
+    /// <para>&#160;</para>
+    /// </summary>
+    /// <remarks>
+    /// NOTE: The values set in the constructor of the class are the default
+    /// values that are used when a tag is not present in the configuration file.
+    /// </remarks>
     [XmlRoot("MeterTypes")]
     public class MeterTypes
     {

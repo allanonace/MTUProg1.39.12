@@ -9,20 +9,25 @@ using nexus.protocols.ble.scan;
 
 namespace ble_library
 {
+    /// <summary>
+    /// Implementation of the <see cref="ISerial"/> interface to
+    /// use BLE ( Bluetooth Low Energy ) communication that complies with the LExI protocol.
+    /// </summary>
     public class BleSerial : ISerial
     {
         private BlePort ble_port_serial;
 
         /// <summary>
-        /// Initialize Bluetooth LE Serial port
+        /// Initializes the BLE ( Bluetooth Low Energy ) Serial port.
         /// </summary>
-        /// <param name="adapter">The Bluetooth Low Energy Adapter from the OS</param>
+        /// <param name="adapter">The bluetooth adapter from the OS</param>
         public BleSerial(IBluetoothLowEnergyAdapter adapter)
         {     
             ble_port_serial = new BlePort(adapter);
         }
 
-        private void ExceptionCheck(byte[] buffer, int offset, int count){
+        private void ExceptionCheck(byte[] buffer, int offset, int count)
+        {
             if (buffer == null)
             {
                 throw new ArgumentException("Parameter cannot be null", nameof(buffer));
@@ -45,11 +50,11 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Reads a number of characters from the ISerial input buffer and writes them into an array of characters at a given offset.
+        /// Reads a number of characters from the input buffer and writes them into an array of characters at a given offset.
         /// </summary>
-        /// <param name="buffer">The byte array to write the input to.</param>
-        /// <param name="offset">The offset in buffer at which to write the bytes.</param>
-        /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
+        /// <param name="buffer">Data to be written to the port</param>
+        /// <param name="offset">Zero based byte offset</param>
+        /// <param name="count">The maximum number of bytes to read</param>
         /// <returns>The number of bytes read.</returns>
         public int Read(byte[] buffer, int offset, int count)
         {
@@ -94,12 +99,11 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Writes a specified number of characters to the serial port using data from a buffer.
+        /// Writes a specific number of characters to the serial port using data from a buffer.
         /// </summary>
-        /// <param name="buffer">The byte array that contains the data to write to the port.</param>
-        /// <param name="offset">The zero-based byte offset in the buffer parameter at which to begin copying bytes to the port.</param>
-        /// <param name="count">The number of bytes to write.</param>
-        /// <remarks></remarks>
+        /// <param name="buffer">Data to be written to the port</param>
+        /// <param name="offset">Zero based byte offset</param>
+        /// <param name="count">Number of bytes to write</param>
         public async Task Write(byte[] buffer, int offset, int count)
         {
             Utils.PrintDeep ( "-------WRITE_START-------" );
@@ -151,52 +155,52 @@ namespace ble_library
         }
 
         /// <summary>
-        /// Closes the port connection, sets the <c>IsOpen</c> property to false, and disposes of the internal Stream object.
+        /// Closes the port connection and disposes of the internal Stream object.
         /// </summary>
-        /// <remarks></remarks>
         public void Close()
         {
             Task.Factory.StartNew(ble_port_serial.DisconnectDevice);
         }
 
         /// <summary>
-        /// Gets a value indicating the open or closed status of the ISerial object.
+        /// Indicates if the connection status is open or closed.
         /// </summary>
-        /// <returns>Boolean value indicating the open or closed status of the ISerial object</returns>
-        /// <remarks>The IsOpen property tracks whether the port is open for use by the caller, not whether the port is open by any application on the machine.</remarks>
+        /// <returns><see langword="true"/> if connection status is open.</returns>
         public Boolean IsOpen()
         {
             return (ble_port_serial.GetConnectionStatus() == BlePort.CONNECTED);
         }
 
         /// <summary>
-        /// Gets a value indicating the open or closed status of the ISerial object.
+        /// Returns a value indicating the open or closed status of the ISerial object.
         /// </summary>
         /// <returns>Int value indicating the open or closed status of the ISerial object</returns>
-        /// <remarks>The IsOpen property tracks whether the port is open for use by the caller, not whether the port is open by any application on the machine.</remarks>
         public int GetConnectionStatus()
         {
             return ble_port_serial.GetConnectionStatus();
         }
 
         /// <summary>
-        /// Gets a value indicating the error on the connectio
+        /// Returns a value indicating the error on the connection.
         /// </summary>
-        /// <returns>int value indicating the error on the connectio</returns>
+        /// <returns>Connection error.</returns>
         public int GetConnectionError()
         {
             return ble_port_serial.GetConnectionError();
         }
 
         /// <summary>
-        /// Starts the device scanning
+        /// Starts the device scanning.
         /// </summary>
-        /// <remarks></remarks>
-        public async Task Scan(){
-            
+        public async Task Scan()
+        {
             await ble_port_serial.StartScan();
         }
 
+        /// <summary>
+        /// Indicates if the device scanning is performing or not.
+        /// </summary>
+        /// <returns><see langword="true"/> if the the device sanning is active.</returns>
         public Boolean IsScanning()
         {
             return ble_port_serial.IsScanning();
@@ -205,9 +209,10 @@ namespace ble_library
         /// <summary>
         /// Opens a new serial port connection.
         /// </summary>
-        /// <param name="blePeripheral">The object that contains the device information.</param>
-        /// <remarks></remarks>
-        public void Open(IBlePeripheral blePeripheral, bool isBounded = false)
+        /// <param name="blePeripheral">Device information.</param>
+        public void Open (
+            IBlePeripheral blePeripheral,
+            bool isBounded = false )
         {
             if(!IsOpen())
             {
@@ -218,65 +223,53 @@ namespace ble_library
             }
         }
 
-        /// <summary>
-        /// Opens a new serial port connection.
-        /// </summary>
-        /// <remarks></remarks>
-        public void Open()
-        {
-         
-        }
+        public void Open() { }
 
         /// <summary>
-        /// Gets the number of bytes of data in the receive buffer.
+        /// Returns the number of bytes of data received stored in the buffer.
         /// </summary>
-        /// <returns>Number of bytes of data in the receive buffer</returns>
-        /// <remarks>
-        /// The receive buffer includes the serial driver's receive buffer as well as internal buffering in the <c>ISerial</c> object itself.
-        /// </remarks>
         public int BytesReadCount ()
         {
             return ble_port_serial.BytesReadCount ();
         }
 
+        /// <summary>
+        /// Buffer of bytes of data received.
+        /// </summary>
         public byte[] BytesRead ()
         {
             return ble_port_serial.BytesRead;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        /// <remarks></remarks>
-        public Boolean isEcho()
+        public Boolean isEcho ()
         {
             return true;
         }
 
         /// <summary>
-        /// Gets the BLE device list
+        /// Gets the BLE ( Bluetooth Low Energy ) device list.
         /// </summary>
-        /// <returns>The BLE device list</returns>
-        /// <remarks></remarks>
-        public List <IBlePeripheral> GetBlePeripheralList() {
-            return ble_port_serial.GetBlePeripherals();
+        /// <returns>Device list.</returns>
+        public List <IBlePeripheral> GetBlePeripheralList ()
+        {
+            return ble_port_serial.GetBlePeripherals ();
         }
 
         /// <summary>
-        /// Gets the BLE device Battery Level
+        /// Gets the BLE ( Bluetooth Low Energy ) device Battery Level.
         /// </summary>
-        /// <returns>The BLE device Battery Level</returns>
-        /// <remarks></remarks>
-        public byte[] GetBatteryLevel(){
-            return ble_port_serial.GetBatteryLevel();
+        /// <returns>Battery Level.</returns>
+        public byte[] GetBatteryLevel()
+        {
+            return ble_port_serial.GetBatteryLevel ();
         }
+
         /// <summary>
-        /// Gets the TimeOut in seconds
+        /// Gets the timeout in seconds.
         /// </summary>
-        /// <returns>Gets the TimeOut in seconds</returns>
-        /// <remarks></remarks>
-        public void SetTimeOutSeconds(int sec)
+        /// <returns>Number of seconds.</returns>
+        public void SetTimeOutSeconds (
+            int sec )
         {
             ble_port_serial.TimeOutSeconds = sec;
         }

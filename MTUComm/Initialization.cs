@@ -21,15 +21,6 @@ namespace MTUComm
             Singleton.Set = lexi;
         }
         
-        /// <summary>
-        /// Clases que tendran que tratarse como singleton:
-        /// - Configuration
-        /// - MTUComm
-        /// - Logger
-        /// - Errors
-        /// - 
-        /// </summary>
-        
         public static void Unload ()
         {
             // Closes bluetooth port

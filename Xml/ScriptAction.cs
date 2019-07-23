@@ -4,6 +4,57 @@ using System.Xml;
 using System.Xml.Serialization;
 namespace Xml
 {
+    /// <summary>
+    /// Class used to map the 'action' entries present in the the script file.
+    /// <para>&#160;</para>
+    /// <para>
+    /// Properties
+    /// <list type="ScriptAction">
+    /// <item>
+    ///   <term>Type</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>ActivityLogId</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>DaysOfRead</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>OldMtuId</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>ReadInterval</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>SnapRead</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>ForceTimeSync</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>Alarm</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
+    ///   <term>Custom</term>
+    ///   <description></description>
+    /// </item>
+    /// </list>
+    /// </para>
+    /// <para>&#160;</para>
+    /// </summary>
+    /// <remarks>
+    /// NOTE: The values set in the constructor of the class are the default
+    /// values that are used when a tag is not present in the configuration file.
+    /// </remarks>
+    /// <seealso cref="Script"/>
     public class ScriptAction
     {
         private Dictionary<string,string> additionalParameters;
