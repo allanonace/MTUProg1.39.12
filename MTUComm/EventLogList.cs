@@ -135,12 +135,17 @@ namespace MTUComm
                     break;
             }
 
+            DateTime dateSimplified = new DateTime (
+                evnt.TimeStamp.Year,
+                evnt.TimeStamp.Month,
+                evnt.TimeStamp.Day );
+
             // Accumulate different days
             if ( evnt.Index     > lastDayIndex &&
-                 evnt.TimeStamp > lastDay )
+                 dateSimplified > lastDay )
             {
                 lastDayIndex = evnt.Index;
-                lastDay      = evnt.TimeStamp;
+                lastDay      = dateSimplified;
                 acumDays++;
             }
 
