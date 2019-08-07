@@ -33,7 +33,7 @@ namespace MTUComm
         /// Event that can be launched whenever we want during the action logic execution.
         /// </summary>
         public event ActionOnProgressHandler OnProgress;
-        public delegate void ActionOnProgressHandler(object sender, Action.ActionProgressArgs e);
+        public delegate void ActionOnProgressHandler(object sender, Delegates.ProgressArgs e);
 
         /// <summary>
         /// Event invoked only if the action completes successfully and without launches an exception.
@@ -165,7 +165,7 @@ namespace MTUComm
                     if ( ! Enum.TryParse<ActionType> ( scriptAction.Type, out type ) )
                         throw new ScriptActionTypeInvalidException ( scriptAction.Type );
                 
-                    Action new_action = new Action ( Singleton.Get.Configuration, serial_device, type, script.UserName, script.LogFile );
+                    Action new_action = new Action ( serial_device, type, script.UserName, script.LogFile );
                     Type   actionType = scriptAction.GetType ();
     
                     Parameter.ParameterType paramTypeToAdd;
@@ -210,10 +210,10 @@ namespace MTUComm
                         new_action.AddAdditionalParameter ( parameter );
                     }
     
-                    new_action.order = step;
+                    new_action.Order       = step;
                     new_action.OnProgress += Action_OnProgress;
-                    new_action.OnFinish += Action_OnFinish;
-                    new_action.OnError += Action_OnError;
+                    new_action.OnFinish   += Action_OnFinish;
+                    new_action.OnError    += Action_OnError;
     
                     actions.Add(new_action);
                     step++;
@@ -231,9 +231,9 @@ namespace MTUComm
 
         private void Action_OnProgress (
             object sender,
-            Action.ActionProgressArgs e )
+            Delegates.ProgressArgs e )
         {
-            OnProgress(sender, e);
+            OnProgress ( sender, e );
         }
 
         private void Action_OnFinish (
@@ -241,10 +241,10 @@ namespace MTUComm
             Action.ActionFinishArgs e )
         {
             Action act = (Action)sender;
-            if (act.order < (actions.Count-1))
+            if ( act.Order < ( actions.Count - 1 ) )
             {
-                onStepFinish(act, act.order, e);
-                actions.ToArray()[act.order+1].Run();
+                onStepFinish(act, act.Order, e);
+                actions.ToArray()[act.Order+1].Run();
             }
             else
             {

@@ -561,11 +561,10 @@ namespace aclara_meters.view
 
         void BasicReadThread()
         {
-            MTUComm.Action basicRead = new MTUComm.Action(
-               config: FormsApp.config,
-               serial: FormsApp.ble_interface,
-               type: MTUComm.Action.ActionType.BasicRead,
-               user: FormsApp.credentialsService.UserName);
+            MTUComm.Action basicRead = new MTUComm.Action (
+               FormsApp.ble_interface,
+               MTUComm.Action.ActionType.BasicRead,
+               FormsApp.credentialsService.UserName );
 
             /*
             basicRead.OnFinish += ((s, args) =>
@@ -697,11 +696,10 @@ namespace aclara_meters.view
         private void TurnOffMethod()
         {
 
-            MTUComm.Action turnOffAction = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type: MTUComm.Action.ActionType.TurnOffMtu,
-                user: FormsApp.credentialsService.UserName);
+            MTUComm.Action turnOffAction = new MTUComm.Action (
+                FormsApp.ble_interface,
+                MTUComm.Action.ActionType.TurnOffMtu,
+                FormsApp.credentialsService.UserName );
 
             turnOffAction.OnFinish += ((s, args) =>
             {
@@ -1649,11 +1647,10 @@ namespace aclara_meters.view
         {
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action add_mtu = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type: MTUComm.Action.ActionType.ReadMtu,
-                user: FormsApp.credentialsService.UserName);
+            MTUComm.Action add_mtu = new MTUComm.Action (
+                FormsApp.ble_interface,
+                MTUComm.Action.ActionType.ReadMtu,
+                FormsApp.credentialsService.UserName );
 
             //Define finish and error event handler
             //add_mtu.OnFinish += Add_mtu_OnFinish;
@@ -1812,11 +1809,10 @@ namespace aclara_meters.view
         {
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action add_mtu = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type: actionType,
-                user: FormsApp.credentialsService.UserName);
+            MTUComm.Action add_mtu = new MTUComm.Action (
+                FormsApp.ble_interface,
+                actionType,
+                FormsApp.credentialsService.UserName );
 
             //Define finish and error event handler
             //add_mtu.OnFinish += Add_mtu_OnFinish;

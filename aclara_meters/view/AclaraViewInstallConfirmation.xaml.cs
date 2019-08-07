@@ -271,11 +271,10 @@ namespace aclara_meters.view
         {
             //Create Ation when opening Form
             //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
-            MTUComm.Action add_mtu = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type: MTUComm.Action.ActionType.MtuInstallationConfirmation,
-                user: FormsApp.credentialsService.UserName);
+            MTUComm.Action add_mtu = new MTUComm.Action (
+                FormsApp.ble_interface,
+                MTUComm.Action.ActionType.MtuInstallationConfirmation,
+                FormsApp.credentialsService.UserName );
 
             //Define finish and error event handler
             //add_mtu.OnFinish += Add_mtu_OnFinish;
@@ -841,12 +840,10 @@ namespace aclara_meters.view
 
         void BasicReadThread()
         {
-            MTUComm.Action basicRead = new MTUComm.Action(
-               config: FormsApp.config,
-               serial: FormsApp.ble_interface,
-               type: MTUComm.Action.ActionType.BasicRead,
-               user: FormsApp.credentialsService.UserName);
-
+            MTUComm.Action basicRead = new MTUComm.Action (
+               FormsApp.ble_interface,
+               MTUComm.Action.ActionType.BasicRead,
+               FormsApp.credentialsService.UserName );
  
             basicRead.OnFinish += ((s, e) =>
             {
@@ -990,11 +987,10 @@ namespace aclara_meters.view
         private void TurnOffMethod()
         {
 
-            MTUComm.Action turnOffAction = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type: MTUComm.Action.ActionType.TurnOffMtu,
-                user: FormsApp.credentialsService.UserName);
+            MTUComm.Action turnOffAction = new MTUComm.Action (
+                FormsApp.ble_interface,
+                MTUComm.Action.ActionType.TurnOffMtu,
+                FormsApp.credentialsService.UserName );
 
             turnOffAction.OnFinish += ((s, args) =>
             {

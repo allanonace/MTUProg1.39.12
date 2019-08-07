@@ -51,8 +51,8 @@ namespace MTUComm
 
         public void LogTurnOff ()
         {
-            logger.AddAtrribute(this.turnOffAction, "display", Action.displays[ActionType.TurnOffMtu]);
-            logger.AddAtrribute(this.turnOffAction, "type", Action.tag_types[ActionType.TurnOffMtu]);
+            logger.AddAtrribute(this.turnOffAction, "display", Action.logDisplays[ActionType.TurnOffMtu]);
+            logger.AddAtrribute(this.turnOffAction, "type", Action.logTypes[ActionType.TurnOffMtu]);
 
             logger.AddParameter(this.turnOffAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") ));
 
@@ -64,8 +64,8 @@ namespace MTUComm
 
         public void LogTurnOn ()
         {
-            logger.AddAtrribute(this.turnOnAction, "display", Action.displays[ActionType.TurnOnMtu]);
-            logger.AddAtrribute(this.turnOnAction, "type", Action.tag_types[ActionType.TurnOnMtu]);
+            logger.AddAtrribute(this.turnOnAction, "display", Action.logDisplays[ActionType.TurnOnMtu]);
+            logger.AddAtrribute(this.turnOnAction, "type", Action.logTypes[ActionType.TurnOnMtu]);
 
             logger.AddParameter(this.turnOnAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
@@ -97,9 +97,9 @@ namespace MTUComm
             //logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
             // logger.addAtrribute ( this.addMtuAction, "type",    addMtuType    );
             // logger.addAtrribute ( this.addMtuAction, "reason",  addMtuReason  );
-            logger.AddAtrribute(this.addMtuAction, "display", Action.displays[this.action.type]);
-            logger.AddAtrribute(this.addMtuAction, "type", Action.tag_types[this.action.type]);
-            logger.AddAtrribute(this.addMtuAction, "reason", Action.tag_reasons[this.action.type]);
+            logger.AddAtrribute(this.addMtuAction, "display", Action.logDisplays[this.action.type]);
+            logger.AddAtrribute(this.addMtuAction, "type", Action.logTypes[this.action.type]);
+            logger.AddAtrribute(this.addMtuAction, "reason", Action.logReasons[this.action.type]);
 
             logger.AddParameter ( this.addMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
@@ -144,7 +144,7 @@ namespace MTUComm
             #region Additional tags
 
             // Add additional parameters for all actions except for the Add
-            foreach ( Parameter param in this.action.AdditionalParameters )
+            foreach ( Parameter param in this.action.AdditionalScriptParameters )
                 logger.AddParameter ( this.addMtuAction, param );
 
             #endregion
@@ -429,8 +429,8 @@ namespace MTUComm
 
         public void LogReadMtu(ActionResult result)
         {
-            logger.AddAtrribute(this.readMtuAction, "display", Action.displays[ActionType.ReadMtu]);
-            logger.AddAtrribute(this.readMtuAction, "type", Action.tag_types[ActionType.ReadMtu]);
+            logger.AddAtrribute(this.readMtuAction, "display", Action.logDisplays[ActionType.ReadMtu]);
+            logger.AddAtrribute(this.readMtuAction, "type", Action.logTypes[ActionType.ReadMtu]);
 
             InterfaceParameters[] parameters = this.config.getLogParamsFromInterface( form.mtu, ActionType.ReadMtu );
             foreach (InterfaceParameters parameter in parameters)

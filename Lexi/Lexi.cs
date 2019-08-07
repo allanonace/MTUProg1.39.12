@@ -248,6 +248,14 @@ namespace Lexi
             Unused = 0xFF
         }
 
+        public enum NodeType : byte
+        {
+            All      = 0x00,
+            DCUsOnly = 0x01,
+            MTUsOnly = 0x02,
+            Zonescan = 0x03
+        }
+
         /// <summary>
         /// Precalculated CRC table that is used by CRC validation process to make it faster.
         /// </summary>

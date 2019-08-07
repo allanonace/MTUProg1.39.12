@@ -441,7 +441,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>GasCutWireImmAlarm</Id>
-    <Description>Set for enable  tamper</Description>
+    <Description>Set for enable  tamper. This should not be set for OnDemand MTUs</Description>
     <Type>bool</Type>
     <Address>192</Address>
     <Size>5</Size>
@@ -523,7 +523,7 @@
   </Register>
   <Register> <!-- OK -->
     <Id>GasCutWireAlarm</Id>
-    <Description>Set for enable cut cable tamper</Description>
+    <Description>Set for enable cut cable tamper. This should not be set for OnDemand MTUs</Description>
     <Type>bool</Type>
     <Address>194</Address>
     <Size>5</Size>
@@ -1436,7 +1436,7 @@
     <Type>bool</Type>
     <Address>163</Address>
     <Size>0</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
 	  <CustomSet/>
   </Register>
@@ -1446,7 +1446,7 @@
     <Type>bool</Type>
     <Address>163</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
 	  <CustomSet/>
   </Register>
@@ -1456,7 +1456,7 @@
     <Type>int</Type>
     <Address>164</Address>
     <Size>2</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
 	  <CustomSet/>
   </Register>
@@ -1466,7 +1466,7 @@
     <Type>int</Type>
     <Address>166</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
 	  <CustomSet/>
   </Register>
@@ -1476,7 +1476,7 @@
     <Type>int</Type>
     <Address>167</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
 	  <CustomSet/>
   </Register>
@@ -1486,7 +1486,7 @@
     <Type>int</Type>
     <Address>168</Address>
     <Size>2</Size>
-    <Write>false</Write> 
+    <Write>true</Write> 
     <CustomGet/>
 	  <CustomSet/>
   </Register>
@@ -1496,7 +1496,7 @@
     <Type>int</Type>
     <Address>170</Address>
     <Size>1</Size>
-    <Write>false</Write>
+    <Write>true</Write>
     <CustomGet/>
 	  <CustomSet/>
   </Register>

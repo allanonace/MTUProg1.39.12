@@ -4,8 +4,19 @@ namespace Lexi
 {
     public class LexiWriteResult
     {
-        public readonly byte[] Bytes;
-        public readonly int    ResponseOffset;
+        public readonly byte[] Bytes; // Echo + ACKx2 [ + Response/Result ]
+        public readonly int    ResponseOffset; // Echo length
+
+        public byte[] Response // ACKx2 + Response/Result
+        {
+            get
+            {
+                byte[] response = new byte[ Bytes.Length - ResponseOffset ];
+                Array.Copy ( Bytes, ResponseOffset, response, 0, response.Length );
+
+                return response;
+            }
+        }
 
         public LexiWriteResult (
             byte[] bytes,

@@ -25,6 +25,49 @@ namespace MTUComm
     {
         #region Nested class
 
+        /// <summary>
+        /// Nested class used during the evaluation of the conditions listed in the parameters in the XML interface file.
+        /// <para>
+        /// See <see cref="ValidateCondition"/> for the validation method.
+        /// </para>
+        /// <para>&#160;</para>
+        /// <para>
+        /// The operand on the right side of the conditional sentence should always be a specific value, not the name of a member,
+        /// and the addition operator ( + ) should be used to concatenate ( AND, && ) more than one condition or "|" to separate
+        /// different condition sentences ( OR, || ). Three type of value are admitted, true and false for boolean cases, positive
+        /// and negative numbers, always parsing to float type to recover the decimal digits, and strings will be converted to lowercase.
+        /// </para>
+        /// <para>
+        /// <example>
+        /// <code>
+        /// <Parameter name="DailyGMTHourRead" display="Daily GMT Hour Read" log="true" interface="false"
+        /// conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
+        /// </code>
+        /// </example>
+        /// </para>
+        /// <para>&#160;</para>
+        /// </para>
+        /// Operators
+        /// <list type="Conditions">
+        /// <item>
+        ///     <term>Equal</term>
+        ///     <description>The member value must be equal to the specified value ( e.g. "Port.Number eq 1" )</description>
+        /// </item>
+        /// <item>
+        ///     <term>Lower than</term>
+        ///     <description>The member value must be less than the specified value ( e.g. "MemoryMap.P1MeterReading lt 999" )</description>
+        /// </item>
+        /// <item>
+        ///     <term>Biger than</term>
+        ///     <description>The member value must be greater than the specified value ( e.g. "MemoryMap.P1MeterReading gt 0" )</description>
+        /// </item>
+        /// <item>
+        ///     <term>Different</term>
+        ///     <description>The member value must be different from the specified value ( e.g. "Meter.Utility ! Water" )</description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// </summary>
         private class ConditionObjet
         {
             public String Condition { get; private set; }
@@ -33,7 +76,7 @@ namespace MTUComm
             public String Value     { get; private set; }
 
             public bool IsEqual   { get { return this.Operator.Equals ( "=" ); } }
-            public bool IsLower   { get { return this.Operator.Equals ( "lt" ); } }
+            public bool IsLess   { get { return this.Operator.Equals ( "lt" ); } }
             public bool IsGreater { get { return this.Operator.Equals ( "gt" ); } }
             public bool IsNot     { get { return this.Operator.Equals ( "!" ); } }
 
@@ -58,11 +101,9 @@ namespace MTUComm
 
         #region Constants
 
-        private const string NET_IDS   = @"[_a-zA-Z][_a-zA-Z0-9]+";
-
+        private const string NET_IDS         = @"[_a-zA-Z][_a-zA-Z0-9]+";
         // [ + or | ] Type/Class[.Property] +|<|>|! Value -> e.g. MemoryMap.ShipBit=false|Mtu.InterfaceTamper=true
-        private const string REGEX_IFS = @"(\+|\|)?(" + NET_IDS + @"(?:." + NET_IDS + @")?)(=|lt|gt|!)(-?[0-9]+|[_a-zA-Z0-9]+)";
-
+        private const string REGEX_IFS       = @"(\+|\|)?(" + NET_IDS + @"(?:." + NET_IDS + @")?)(=|lt|gt|!)(-?[0-9]+|[_a-zA-Z0-9]+)";
         private const string IFACE_AND       = "+";
         private const string IFACE_OR        = "|";
         private const string PORT_PREFIX     = "P";
@@ -152,106 +193,40 @@ namespace MTUComm
             ReadFabric
         }
 
-        public static Dictionary<ActionType, String> displays = new Dictionary<ActionType, String>()
-        {
-            {ActionType.BasicRead,"Basic Read" },
-            {ActionType.ReadMtu,"Read MTU" },
-            {ActionType.AddMtu,"Add MTU" },
-            {ActionType.ReplaceMTU,"Replace MTU" },
-            {ActionType.AddMtuAddMeter,"Add MTU/Add Meter" },
-            {ActionType.AddMtuReplaceMeter,"Add MTU/Replace Meter" },
-            {ActionType.ReplaceMtuReplaceMeter,"Replace MTU/Replace Meter" },
-            {ActionType.ReplaceMeter,"Replace Meter" },
-            {ActionType.TurnOffMtu,"Turn Off MTU" },
-            {ActionType.TurnOnMtu,"Turn On MTU" },
-            {ActionType.DataRead,"Read Data Log" },
-            {ActionType.MtuInstallationConfirmation,"Install Confirmation" },
-            {ActionType.Diagnosis, string.Empty },
-            {ActionType.ReadFabric, "Read Fabric" }
-        };
-
-        public static Dictionary<ActionType, String> tag_types = new Dictionary<ActionType, String>()
-        {
-            {ActionType.BasicRead,"BasicRead" },
-            {ActionType.ReadMtu,"ReadMTU" },
-            {ActionType.AddMtu,"Program MTU" },
-            {ActionType.ReplaceMTU,"Program MTU" },
-            {ActionType.AddMtuAddMeter,"Program MTU" },
-            {ActionType.AddMtuReplaceMeter,"Program MTU" },
-            {ActionType.ReplaceMtuReplaceMeter,"Program MTU" },
-            {ActionType.ReplaceMeter,"Program MTU" },
-            {ActionType.TurnOffMtu,"TurnOffMtu" },
-            {ActionType.TurnOnMtu,"TurnOnMtu" },
-            {ActionType.DataRead, "ReadDataLog" },
-            {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
-            {ActionType.Diagnosis, string.Empty },
-            {ActionType.ReadFabric, "ReadFabric" }
-        };
-
-        public static Dictionary<ActionType, String> tag_reasons = new Dictionary<ActionType, String>()
-        {
-            {ActionType.BasicRead, "BasicRead" },
-            {ActionType.ReadMtu, "ReadMtu" },
-            {ActionType.AddMtu,"AddMtu" },
-            {ActionType.ReplaceMTU,"ReplaceMtu" },
-            {ActionType.AddMtuAddMeter,"AddMtuAddMeter" },
-            {ActionType.AddMtuReplaceMeter,"AddMtuReplaceMeter" },
-            {ActionType.ReplaceMtuReplaceMeter,"ReplaceMtuReplaceMeter" },
-            {ActionType.ReplaceMeter,"ReplaceMeter" },
-            {ActionType.TurnOffMtu, "TurnOffMtu" },
-            {ActionType.TurnOnMtu, "TurnOnMtu" },
-            {ActionType.DataRead, "DataRead" },
-            {ActionType.MtuInstallationConfirmation,"InstallConfirmation" },
-            {ActionType.Diagnosis, string.Empty },
-            {ActionType.ReadFabric, "ReadFabric" }
-        };
+        public static Dictionary<ActionType, String> logDisplays;
+        public static Dictionary<ActionType, String> logTypes;
+        public static Dictionary<ActionType, String> logReasons;
 
         #endregion
 
         #region Events and Delegates
 
         /// <summary>
-        /// Event that can be launched whenever we want during the action logic execution.
+        /// Event that can be invoked during the execution of any action, for
+        /// example to update the visual feedback by modifying the text of a label control.
+        /// <para>
+        /// See <see cref="Action.OnProgress"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// </para>
         /// </summary>
-        public event ActionProgresshHandler OnProgress;
-        public delegate void ActionProgresshHandler(object sender, ActionProgressArgs e);
+        public event Delegates.ProgresshHandler OnProgress;
 
         /// <summary>
-        /// Event invoked only if the action completes successfully and without launches an exception.
+        /// Event invoked only if the action completes successfully, with no exceptions.
         /// </summary>
         public event ActionFinishHandler OnFinish;
         public delegate void ActionFinishHandler(object sender, ActionFinishArgs e);
 
         /// <summary>
         /// Event invoked if the action does not complete successfully or if it launches an exception.
+        /// <para>
+        /// See <see cref="Action.OnError"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// </para>
         /// </summary>
-        public event ActionErrorHandler OnError;
-        public delegate void ActionErrorHandler ();
+        public event Delegates.Empty OnError;
 
         #endregion
 
         #region Args
-
-        public class ActionProgressArgs : EventArgs
-        {
-            public int Step { get; private set; }
-            public int TotalSteps { get; private set; }
-            public string Message { get; private set; }
-
-            public ActionProgressArgs(int step, int totalsteps)
-            {
-                Step = step;
-                TotalSteps = totalsteps;
-                Message = "";
-            }
-
-            public ActionProgressArgs(int step, int totalsteps, string message)
-            {
-                Step = step;
-                TotalSteps = totalsteps;
-                Message = message;
-            }
-        }
 
         public class ActionFinishArgs : EventArgs
         {
@@ -290,61 +265,124 @@ namespace MTUComm
 
         #region Attributes
         
-        private string lastLogCreated;
-
+        private ActionType type;
+        private List<Action> subActions;
+        private int order;
+        private String user;
+        private List<Parameter> scriptParameters;
+        private List<Parameter> additionalScriptParameters;
+        private Mtu currentMtu;
         private Configuration config;
-        /// <summary>
-        /// Represents current MTU.
-        /// </summary>
-        public Mtu CurrentMtu { private set; get; }
-        public MTUComm comm { get; private set; }
-        public ActionType type { get; }
-        /// <summary>
-        /// In scripted mode it stores the parameters read from the script file
-        /// that are listed in <see cref="Parameter.ParameterType"/> enumeration.
-        /// </summary>
-        private List<Parameter> mparameters = new List<Parameter>();
-        /// <summary>
-        /// In scripted mode it stores the parameters read from the script file
-        /// that are NOT listed in <see cref="Parameter.ParameterType"/> enumeration,
-        /// treated as additional parameters and will only be loged.
-        /// </summary>
-        private List<Parameter> additionalParameters = new List<Parameter>();
+        private MTUComm mtucomm;
+        private Logger logger;
+        private string lastLogCreated;
         private Boolean canceled = false;
-        /// <summary>
-        /// Name of the user that is executing the action, that in interactive
-        /// mode is who has logged-in and in scripted mode is the string set
-        /// in username tag in script file.
-        /// </summary>
-        public  String user { get; private set; }
-        public  Logger logger;
-        private Configuration configuration;
-        private List<Action> sub_actions = new List<Action>();
-        public  int order = 0;
-        //public Func<object, object, object> OnFinish;
         
         #endregion
 
         #region Properties
 
-        public List<Parameter> AdditionalParameters
+        /// <summary>
+        /// Name of the user that is executing the action, that in interactive
+        /// mode is who has logged-in and in scripted mode is the string set
+        /// in username tag in script file.
+        /// </summary>
+        public string User
         {
-            get { return this.additionalParameters; }
+            get { return this.user; }
         }
 
-        public String DisplayText
+        /// <summary>
+        /// Represents current MTU.
+        /// </summary>
+        public Mtu CurrentMtu
         {
-            get { return displays[type]; }
+            get { return this.currentMtu; }
         }
 
-        public String LogText
+        public MTUComm MTUComm
         {
-            get { return tag_types[this.type]; }
+            get { return this.mtucomm; }
         }
 
-        public String Reason
+        public  Logger Logger
         {
-            get { return tag_reasons[this.type]; }
+            get { return this.logger; }
+        }
+
+        public int Order
+        {
+            get { return this.order; }
+            set { this.order = value; }
+        }
+
+        public ActionType Type
+        {
+            get { return this.type; }
+        }
+
+        /// <summary>
+        /// In scripted mode it stores the parameters read from the script file
+        /// that are listed in <see cref="Parameter.ParameterType"/> enumeration.
+        /// </summary>
+        public List<Parameter> ScriptParameters
+        {
+            get { return this.scriptParameters; }
+        }
+
+        /// <summary>
+        /// In scripted mode it stores the parameters read from the script file
+        /// that are NOT listed in <see cref="Parameter.ParameterType"/> enumeration,
+        /// treated as additional parameters and will only be loged.
+        /// </summary>
+        public List<Parameter> AdditionalScriptParameters
+        {
+            get { return this.additionalScriptParameters; }
+        }
+
+        /// <summary>
+        /// Text to be used to set the "display" attribute in the header of the Action block in the activity log.
+        /// <example>
+        /// <code>
+        /// <Action display="Add MTU" type="..." reason="...">
+        /// ...
+        /// </Action>
+        /// </code>
+        /// </example>
+        /// </summary>
+        public String LogDisplay
+        {
+            get { return logDisplays[type]; }
+        }
+
+        /// <summary>
+        /// Text to be used to set the "type" attribute in the header of the Action block in the activity log.
+        /// <example>
+        /// <code>
+        /// <Action display="..." type="Program MTU" reason="...">
+        /// ...
+        /// </Action>
+        /// </code>
+        /// </example>
+        /// </summary>
+        public String LogType
+        {
+            get { return logTypes[this.type]; }
+        }
+
+        /// <summary>
+        /// Text to be used to set the "reason" attribute in the header of the Action block in the activity log.
+        /// <example>
+        /// <code>
+        /// <Action display="..." type="..." reason="AddMtu">
+        /// ...
+        /// </Action>
+        /// </code>
+        /// </example>
+        /// </summary>
+        public String LogReason
+        {
+            get { return logReasons[this.type]; }
         }
 
         public bool IsWrite
@@ -400,21 +438,87 @@ namespace MTUComm
 
         #region Initialization
 
-        public Action(Configuration config, ISerial serial, ActionType type, String user = "", String outputfile = "" )
+        static Action ()
+        {
+            logDisplays = new Dictionary<ActionType,String> ()
+            {
+                {ActionType.BasicRead,                      "Basic Read" },
+                {ActionType.ReadMtu,                        "Read MTU" },
+                {ActionType.AddMtu,                         "Add MTU" },
+                {ActionType.ReplaceMTU,                     "Replace MTU" },
+                {ActionType.AddMtuAddMeter,                 "Add MTU/Add Meter" },
+                {ActionType.AddMtuReplaceMeter,             "Add MTU/Replace Meter" },
+                {ActionType.ReplaceMtuReplaceMeter,         "Replace MTU/Replace Meter" },
+                {ActionType.ReplaceMeter,                   "Replace Meter" },
+                {ActionType.TurnOffMtu,                     "Turn Off MTU" },
+                {ActionType.TurnOnMtu,                      "Turn On MTU" },
+                {ActionType.DataRead,                       "Read Data Log" },
+                {ActionType.MtuInstallationConfirmation,    "Install Confirmation" },
+                {ActionType.Diagnosis,                      string.Empty },
+                {ActionType.ReadFabric,                     "Read Fabric" }
+            };
+
+            logTypes = new Dictionary<ActionType,String> ()
+            {
+                {ActionType.BasicRead,                      "BasicRead" },
+                {ActionType.ReadMtu,                        "ReadMTU" },
+                {ActionType.AddMtu,                         "Program MTU" },
+                {ActionType.ReplaceMTU,                     "Program MTU" },
+                {ActionType.AddMtuAddMeter,                 "Program MTU" },
+                {ActionType.AddMtuReplaceMeter,             "Program MTU" },
+                {ActionType.ReplaceMtuReplaceMeter,         "Program MTU" },
+                {ActionType.ReplaceMeter,                   "Program MTU" },
+                {ActionType.TurnOffMtu,                     "TurnOffMtu" },
+                {ActionType.TurnOnMtu,                      "TurnOnMtu" },
+                {ActionType.DataRead,                       "ReadDataLog" },
+                {ActionType.MtuInstallationConfirmation,    "InstallConfirmation" },
+                {ActionType.Diagnosis,                      string.Empty },
+                {ActionType.ReadFabric,                     "ReadFabric" }
+            };
+
+            logReasons = new Dictionary<ActionType,String> ()
+            {
+                {ActionType.BasicRead,                      "BasicRead" },
+                {ActionType.ReadMtu,                        "ReadMtu" },
+                {ActionType.AddMtu,                         "AddMtu" },
+                {ActionType.ReplaceMTU,                     "ReplaceMtu" },
+                {ActionType.AddMtuAddMeter,                 "AddMtuAddMeter" },
+                {ActionType.AddMtuReplaceMeter,             "AddMtuReplaceMeter" },
+                {ActionType.ReplaceMtuReplaceMeter,         "ReplaceMtuReplaceMeter" },
+                {ActionType.ReplaceMeter,                   "ReplaceMeter" },
+                {ActionType.TurnOffMtu,                     "TurnOffMtu" },
+                {ActionType.TurnOnMtu,                      "TurnOnMtu" },
+                {ActionType.DataRead,                       "DataRead" },
+                {ActionType.MtuInstallationConfirmation,    "InstallConfirmation" },
+                {ActionType.Diagnosis,                      string.Empty },
+                {ActionType.ReadFabric,                     "ReadFabric" }
+            };
+        }
+
+        public Action (
+            ISerial serial,
+            ActionType type,
+            String user = "",
+            String outputfile = "" )
         {
             // outputfile = new FileInfo ( outputfile ).Name; // NO
             // System.IO.Path.GetFileName(outputfile)); // NO
 
-            configuration = config;
-            logger = new Logger(outputfile.Substring(outputfile.LastIndexOf('\\') + 1) ); 
-            comm = new MTUComm(serial, config);
+            this.subActions                 = new List<Action> ();
+            this.scriptParameters           = new List<Parameter> ();
+            this.additionalScriptParameters = new List<Parameter> ();
+
+            this.logger = new Logger ( outputfile.Substring ( outputfile.LastIndexOf ( '\\' ) + 1 ) );
+            
             this.type = type;
             this.user = user;
-            comm.OnError += Comm_OnError;
+
+            this.mtucomm = new MTUComm ( serial, config );
+            this.mtucomm.OnError += OnError;
             
             this.config = Singleton.Get.Configuration;
 
-            this.additionalParameters = new List<Parameter> ();
+            this.additionalScriptParameters = new List<Parameter> ();
             
             // Only save reference for the current action,
             // not for nested or auxiliary actions ( as BasicRead )
@@ -432,7 +536,7 @@ namespace MTUComm
         public void SetCurrentMtu (
             MTUBasicInfo mtuBasic )
         {
-            CurrentMtu = this.config.GetMtuTypeById ( ( int )mtuBasic.Type );
+            this.currentMtu = this.config.GetMtuTypeById ( ( int )mtuBasic.Type );
         }
 
         #endregion
@@ -441,29 +545,29 @@ namespace MTUComm
 
         public void AddParameter (Parameter parameter)
         {
-            mparameters.Add(parameter);
+            scriptParameters.Add(parameter);
         }
 
         public void AddAdditionalParameter ( Parameter parameter )
         {
-            this.additionalParameters.Add ( parameter );
+            this.additionalScriptParameters.Add ( parameter );
         }
 
         public void AddParameter ( MtuForm form )
         {
             Parameter[] addMtuParams = form.GetParameters ();
             foreach ( Parameter parameter in addMtuParams )
-                mparameters.Add (parameter);
+                scriptParameters.Add (parameter);
         }
 
         public Parameter[] GetParameters()
         {
-            return mparameters.ToArray();
+            return scriptParameters.ToArray();
         }
 
         public Parameter GetParameterByTag(string tag, int port = -1)
         {
-            return mparameters.Find(x => x.getLogTag().Equals(tag) && ( port == -1 || x.Port == port ) );
+            return scriptParameters.Find(x => x.getLogTag().Equals(tag) && ( port == -1 || x.Port == port ) );
         }
 
         #endregion
@@ -472,12 +576,12 @@ namespace MTUComm
 
         public void AddActions(Action action)
         {
-            sub_actions.Add(action);
+            subActions.Add(action);
         }
 
         public Action[] GetSubActions()
         {
-            return sub_actions.ToArray();
+            return subActions.ToArray();
         }
 
         #endregion
@@ -509,7 +613,7 @@ namespace MTUComm
         /// registers the required parameters and pass the control to <see cref="MTUComm"/> where
         /// the logic will be executed.
         /// <para>
-        /// See <see cref="MTUComm.LaunchActionThread(ActionType, object[])"/> for the entry point of the action logic.
+        /// See <see cref="MTUComm.LaunchActionThread"/> for the entry point of the action logic.
         /// </para>
         /// </summary>
         /// <remarks>
@@ -526,20 +630,20 @@ namespace MTUComm
             {
                 List<object> parameters = new List<object>();
 
-                comm.OnProgress -= Comm_OnProgress;
-                comm.OnProgress += Comm_OnProgress;
+                mtucomm.OnProgress -= OnProgress;
+                mtucomm.OnProgress += OnProgress;
 
                 switch (type)
                 {
                     case ActionType.ReadFabric:
-                        comm.OnReadFabric -= Comm_OnReadFabric;
-                        comm.OnReadFabric += Comm_OnReadFabric;
+                        mtucomm.OnReadFabric -= OnReadFabric;
+                        mtucomm.OnReadFabric += OnReadFabric;
                         break;
 
                     case ActionType.ReadMtu:
                     case ActionType.MtuInstallationConfirmation:
-                        comm.OnReadMtu -= Comm_OnReadMtu;
-                        comm.OnReadMtu += Comm_OnReadMtu;
+                        mtucomm.OnReadMtu -= OnReadMtu;
+                        mtucomm.OnReadMtu += OnReadMtu;
                         break;
                       
                     case ActionType.AddMtu:
@@ -548,8 +652,8 @@ namespace MTUComm
                     case ActionType.ReplaceMTU:
                     case ActionType.ReplaceMeter:
                     case ActionType.ReplaceMtuReplaceMeter:
-                        comm.OnAddMtu -= Comm_OnAddMtu;
-                        comm.OnAddMtu += Comm_OnAddMtu;
+                        mtucomm.OnAddMtu -= OnAddMtu;
+                        mtucomm.OnAddMtu += OnAddMtu;
                         // Interactive and Scripting
                         if ( mtuForm != null )
                              parameters.AddRange ( new object[] { (AddMtuForm)mtuForm, this.user, this } );
@@ -558,13 +662,13 @@ namespace MTUComm
 
                     case ActionType.TurnOffMtu:
                     case ActionType.TurnOnMtu:
-                        comm.OnTurnOffMtu -= Comm_OnTurnOnOffMtu;
-                        comm.OnTurnOffMtu += Comm_OnTurnOnOffMtu;
+                        mtucomm.OnTurnOffMtu -= OnTurnOnOffMtu;
+                        mtucomm.OnTurnOffMtu += OnTurnOnOffMtu;
                         break;
 
                     case ActionType.DataRead:
-                        comm.OnDataRead -= Comm_OnDataReadEvent;
-                        comm.OnDataRead += Comm_OnDataReadEvent;
+                        mtucomm.OnDataRead -= OnDataRead;
+                        mtucomm.OnDataRead += OnDataRead;
                         // In interactive mode value are already set in Data
                         // but in scripted mode they are stored in Action.parameters
                         if ( Data.Get.IsFromScripting )
@@ -572,14 +676,14 @@ namespace MTUComm
                         break;
 
                     case ActionType.BasicRead:
-                        comm.OnBasicRead -= Comm_OnBasicRead;
-                        comm.OnBasicRead += Comm_OnBasicRead;
+                        mtucomm.OnBasicRead -= OnBasicRead;
+                        mtucomm.OnBasicRead += OnBasicRead;
                         break;
                 }
 
                 // Is more easy to control one point of invokation
                 // than N, one for each action/new task to launch
-                comm.LaunchActionThread(type, parameters.ToArray());
+                mtucomm.LaunchActionThread(type, parameters.ToArray());
             }
         }
 
@@ -593,24 +697,18 @@ namespace MTUComm
 
         #region OnEvents
 
-        private void Comm_OnProgress(object sender, MTUComm.ProgressArgs e)
-        {
-            try
-            {
-                OnProgress(this, new ActionProgressArgs(e.Step, e.TotalSteps, e.Message));
-            }
-            catch (Exception pe)
-            {
-
-            }
-        }
-
-        private void Comm_OnError ()
-        {
-            this.OnError ();
-        }
-
-        private async Task Comm_OnDataReadEvent ( object sender, MTUComm.DataReadArgs args )
+        /// <summary>
+        /// Method invoked after have completing correctly a <see cref="ActionType"/>.DataRead
+        /// action, without exceptions.
+        /// <para>
+        /// See <see cref="MTUComm.OnDataRead"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="MTUComm.DataRead"/>
+        /// <seealso cref="MTUComm.DataRead(Action)"/>
+        private async Task OnDataRead ( object sender, MTUComm.DataReadArgs args )
         {
             try
             {
@@ -641,7 +739,7 @@ namespace MTUComm
                 ActionFinishArgs finalArgs = new ActionFinishArgs ( readMtu_allParamsFromInterface );
                 finalArgs.Mtu = args.Mtu;
                 
-                this.Finish ( finalArgs );
+                this.OnFinish ( this, finalArgs );
             }
             catch ( Exception e )
             {
@@ -650,18 +748,32 @@ namespace MTUComm
             }
         }
 
-        private async Task Comm_OnReadFabric(object sender)
+        /// <summary>
+        /// Method invoked after have completing correctly a <see cref="ActionType"/>.ReadFabric
+        /// action, without exceptions.
+        /// <para>
+        /// See <see cref="MTUComm.OnReadFabric"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="MTUComm.ReadFabric"/>
+        private async Task OnReadFabric(object sender)
         {
-            this.Finish ( null );
+            this.OnFinish ( this, null );
         }
 
-        private void Finish (
-            ActionFinishArgs args )
-        {
-            OnFinish ( this, args );
-        }
-
-        private async Task Comm_OnReadMtu ( object sender, MTUComm.ReadMtuArgs args )
+        /// <summary>
+        /// Method invoked after have completing correctly a <see cref="ActionType"/>.ReadMtu
+        /// action, without exceptions.
+        /// <para>
+        /// See <see cref="MTUComm.OnReadMtu"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="MTUComm.ReadMtu"/>
+        private async Task OnReadMtu ( object sender, MTUComm.ReadMtuArgs args )
         {
             try
             {
@@ -670,7 +782,7 @@ namespace MTUComm
                 ActionFinishArgs finalArgs = new ActionFinishArgs ( resultAllInterfaces );
                 finalArgs.Mtu = args.Mtu;
                 
-                this.Finish ( finalArgs );
+                this.OnFinish ( this, finalArgs );
             }
             catch ( Exception e )
             {
@@ -679,7 +791,15 @@ namespace MTUComm
             }
         }
 
-        private void Comm_OnTurnOnOffMtu ( object sender, MTUComm.TurnOffMtuArgs args )
+        /// <summary>
+        /// Method invoked after have completing correctly a <see cref="ActionType"/>.TurnOffMtu
+        /// or TurnOnMtu action, without exceptions.
+        /// <para>
+        /// See <see cref="MTUComm.OnTurnOffMtu"/> and <see cref="MTUComm.OnTurnOnMtu"/> for the events associated ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        /// <seealso cref="MTUComm.TurnOnOffMtu"/>
+        private void OnTurnOnOffMtu ( object sender, MTUComm.TurnOffMtuArgs args )
         {
             try
             {
@@ -687,7 +807,7 @@ namespace MTUComm
                 this.lastLogCreated = logger.TurnOnOff ( this, args.Mtu, resultBasic );
                 ActionFinishArgs finalArgs = new ActionFinishArgs ( resultBasic );
 
-                this.Finish ( finalArgs );
+                this.OnFinish ( this, finalArgs );
             }
             catch ( Exception e )
             {
@@ -696,7 +816,18 @@ namespace MTUComm
             }
         }
 
-        private async Task Comm_OnAddMtu ( object sender, MTUComm.AddMtuArgs args )
+        /// <summary>
+        /// Method invoked after have completing correctly a writing ( <see cref="ActionType"/>.Add|Replace ) action,
+        /// without exceptions.
+        /// <para>
+        /// See <see cref="MTUComm.OnAddMtu"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="MTUComm.AddMtu(Action)"/>
+        /// <seealso cref="MTUComm.AddMtu(dynamic, string, Action)"/>
+        private async Task OnAddMtu ( object sender, MTUComm.AddMtuArgs args )
         {
             try
             {
@@ -705,7 +836,7 @@ namespace MTUComm
                 args.AddMtuLog.LogReadMtu ( result );
                 this.lastLogCreated = args.AddMtuLog.Save ();
 
-                this.Finish ( finalArgs );
+                this.OnFinish ( this, finalArgs );
             }
             catch ( Exception e )
             {
@@ -714,12 +845,20 @@ namespace MTUComm
             }
         }
 
-        private void Comm_OnBasicRead(object sender, MTUComm.BasicReadArgs e)
+        /// <summary>
+        /// Method invoked after have completing correctly a <see cref="ActionType"/>.BasicRead
+        /// action, without exceptions.
+        /// <para>
+        /// See <see cref="MTUComm.OnBasicRead"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        /// <seealso cref="MTUComm.BasicRead"/>
+        private void OnBasicRead(object sender, MTUComm.BasicReadArgs e)
         {
             ActionResult result = new ActionResult();
             ActionFinishArgs finalArgs = new ActionFinishArgs(result);
 
-            this.Finish ( finalArgs );
+            this.OnFinish ( this, finalArgs );
         }
 
         #endregion
@@ -727,14 +866,14 @@ namespace MTUComm
         private ActionResult getBasciInfoResult ()
         {
             ActionResult result = new ActionResult ();
-            MTUBasicInfo basic  = comm.GetBasicInfo ();
+            MTUBasicInfo basic  = mtucomm.GetBasicInfo ();
             
             result.AddParameter(new Parameter("Date", "Date/Time", GetProperty("Date")));
             result.AddParameter(new Parameter("User", "User", GetProperty("User")));
             result.AddParameter(new Parameter("MtuType", "MTU Type", basic.Type));
             result.AddParameter(new Parameter("MtuId", "MTU ID", basic.Id));
             
-            foreach ( Parameter param in this.AdditionalParameters )
+            foreach ( Parameter param in this.AdditionalScriptParameters )
                 result.AddParameter ( param );
     
             return result;
@@ -743,8 +882,8 @@ namespace MTUComm
         #region Interface
 
         /// <summary>
-        /// Generates the list of ALL parameters to write in a log using the XML interface for the
-        /// family of current MTU and the action performed.
+        /// Generates the list of ALL parameters, using the XML interface file
+        /// for the family of current MTU and the action performed.
         /// <para>
         /// This method does not filter depending on the output target,
         /// not taking into account the boolean tags 'log' ( file ) and 'interface' ( UI ).
@@ -754,10 +893,15 @@ namespace MTUComm
         /// </para>
         /// </summary>
         /// <param name="map"><see cref="MemoryMap"/> generated during the action</param>
-        /// <param name="mtu"><see cref="Xml.Mtu"/> that represents current MTU</param>
+        /// <param name="mtu"><see cref="Mtu"/> that represents current MTU</param>
         /// <param name="form">Write actions stores the set data in an intermediate form object</param>
         /// <param name="actionType">Type of the action</param>
-        /// <returns></returns>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// All the parameters required for the action type and log target, interface or log file.
+        /// </para>
+        /// </returns>
         private async Task<ActionResult> CreateActionResultUsingInterface (
             dynamic map  = null,
             Mtu     mtu  = null,
@@ -769,7 +913,7 @@ namespace MTUComm
             Puck         puck   = Singleton.Get.Puck;
             Type         gType  = global.GetType ();
             ActionResult result = new ActionResult ();
-            InterfaceParameters[] parameters = configuration.getAllParamsFromInterface ( mtu, actionType );
+            InterfaceParameters[] parameters = this.config.getAllParamsFromInterface ( mtu, actionType );
             
             foreach ( InterfaceParameters parameter in parameters )
             {
@@ -846,7 +990,7 @@ namespace MTUComm
             
             // Add additional parameters ( from script ) for all actions except for the Add
             if ( form == null )
-                foreach ( Parameter param in this.AdditionalParameters )
+                foreach ( Parameter param in this.AdditionalScriptParameters )
                     result.AddParameter ( param );
 
             // Add additional parameters ( from Global.xml ) for DataRead action
@@ -857,6 +1001,20 @@ namespace MTUComm
             return result;
         }
 
+        /// <summary>
+        /// Generates the list of parameters associated with the indicated port index, using
+        /// the XML interface file for the family of current MTU and the action performed.
+        /// </summary>
+        /// <param name="indexPort">Index of the MTU <see cref="Port"/> to analize</param>
+        /// <param name="parameters">List of parameters associated to the ports in the XML interface file to analize</param>
+        /// <param name="map"><see cref="MemoryMap"/> generated during the action</param>
+        /// <param name="mtu"><see cref="Mtu"/> that represents current MTU</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// All the parameters required for the action type and log target, interface or log file, for the specified port.
+        /// </para>
+        /// </returns>
         private async Task<ActionResult> ReadPort (
             int indexPort,
             InterfaceParameters[] parameters,
@@ -885,7 +1043,7 @@ namespace MTUComm
             }
             else
             {
-                Meter meter = configuration.getMeterTypeById ( meterId );
+                Meter meter = this.config.getMeterTypeById ( meterId );
                 
                 // Meter type not found in database
                 if ( meter.Type.Equals ( "NOTFOUND" ) )
@@ -928,19 +1086,19 @@ namespace MTUComm
                                     if ( meter.LeadingDummy > 0 )
                                         tempReading = tempReading.PadLeft (
                                             tempReading.Length + meter.LeadingDummy,
-                                            configuration.useDummyDigits() ? 'X' : '0' );
+                                            this.config.useDummyDigits() ? 'X' : '0' );
                                         
                                     if ( meter.DummyDigits > 0 )
                                         tempReading = tempReading.PadRight (
                                             tempReading.Length + meter.DummyDigits,
-                                            configuration.useDummyDigits() ? 'X' : '0' );
+                                            this.config.useDummyDigits() ? 'X' : '0' );
                                         
                                     if ( meter.Scale > 0 &&
                                          tempReading.IndexOf(".") == -1 )
                                         tempReading = tempReading.Insert ( tempReading.Length - meter.Scale, "." );
                                         
                                     if ( meter.PaintedDigits > 0 &&
-                                         configuration.useDummyDigits () )
+                                         this.config.useDummyDigits () )
                                         tempReading = tempReading.PadRight (
                                             tempReading.Length + meter.PaintedDigits, '0' ).Insert ( tempReading.Length, " - " );
     
@@ -1043,6 +1201,24 @@ namespace MTUComm
             return value;
         }
 
+        /// <summary>
+        /// Evaluates the conditions listed in the parameters in the XML interface file, indicating
+        /// whether each parameter should be added to the generated log or not.
+        /// <para>
+        /// See <see cref="ConditionObjet"/> for the nested class used to map parameters conditions.
+        /// </para>
+        /// </summary>
+        /// <param name="conditionStr">Conditional sentence of the parameter, which can be an empty string</param>
+        /// <param name="map"><see cref="MemoryMap"/> generated during the action</param>
+        /// <param name="mtu"><see cref="Mtu"/> that represents current MTU</param>
+        /// <param name="portIndex">Index of the MTU <see cref="Port"/> to analize</param>
+        /// <param name="meter"><see cref="Meter"/> used in the specified port</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// Indicates whether the parameter should be added to the log or not.
+        /// </para>
+        /// </returns>
         private async Task<bool> ValidateCondition (
             string conditionStr,
             dynamic map,
@@ -1102,14 +1278,17 @@ namespace MTUComm
                     // Compare property value with condition value
                     if ( ! string.IsNullOrEmpty ( currentValue ) )
                     {
-                        if ( condition.IsEqual &&
-                             currentValue.ToLower ().Equals ( condition.Value.ToLower () ) ||
-                             condition.IsNot &&
-                             ! currentValue.ToLower ().Equals ( condition.Value.ToLower () ) ||
-                             condition.IsLower &&
-                             float.Parse ( currentValue ) < float.Parse ( condition.Value ) ||
-                             condition.IsGreater &&
-                             float.Parse ( currentValue ) > float.Parse ( condition.Value ) )
+                        float numCurrentValue, numValue;
+                        bool   isNumberCurrent = float.TryParse ( currentValue,    out numCurrentValue );
+                        bool   isNumber        = float.TryParse ( condition.Value, out numValue        );
+                        bool   bothNumber      = isNumberCurrent && isNumber;
+                        string lowerCurrent    = currentValue.ToLower ();
+                        string lower           = condition.Value.ToLower ();
+
+                        if ( condition.IsEqual   &&   lowerCurrent.Equals ( lower ) ||
+                             condition.IsNot     && ! lowerCurrent.Equals ( lower ) ||
+                             condition.IsLess    && bothNumber && numCurrentValue < numValue ||
+                             condition.IsGreater && bothNumber && numCurrentValue > numValue )
                             result = 1; // Ok
                     }
 

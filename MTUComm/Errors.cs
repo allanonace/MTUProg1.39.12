@@ -126,6 +126,14 @@ namespace MTUComm
             { new AttemptNotAchievedICException (),             602 },
             // Installation Confirmation can't be performed after having tried it several times
             { new ActionNotAchievedICException (),              603 },
+            // Node Discovery not initialized correctly
+            { new NodeDiscoveryNotInitializedException (),      604 },
+            // Node Discovery not started correctly
+            { new NodeDiscoveryNotStartedException (),          605 },
+            // Node Discovery process has failed trying to recover a node/DCU
+            { new AttemptNotAchievedNodeDiscoveryException (),  606 },
+            // Node Discovery cannot be performed after having tried it several times
+            { new ActionNotAchievedNodeDiscoveryException (),   607 },
 
             // Encryption [ 7xx ]
             //-----------
@@ -192,6 +200,8 @@ namespace MTUComm
             { new SetMemoryFormatException (),                  905 },
             // Argument value is outside ... limits
             { new SetMemoryTypeLimitException (),               906 },
+            // All overload registers are readonly members
+            { new MemoryOverloadsAreReadOnly (),                907 },
         };
 
         #endregion

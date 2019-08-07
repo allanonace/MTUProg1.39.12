@@ -299,10 +299,9 @@ namespace aclara_meters.view
             this.addMtuForm = new AddMtuForm ( currentMtu );
             
             this.add_mtu = new MTUComm.Action (
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type  : this.actionType,
-                user  : FormsApp.credentialsService.UserName );
+                FormsApp.ble_interface,
+                this.actionType,
+                FormsApp.credentialsService.UserName );
             
             isCancellable = false;
 
@@ -476,39 +475,41 @@ namespace aclara_meters.view
                     label_read.Text = AUTO_DETECTING;
                 });
 
-            // Ecoder/Encoder Will be only filtered by protocol + livedigits
+            // Ecoder/Encoder
             if ( currentMtu.Port1.IsForEncoderOrEcoder )
             {
-                bool autoDetect = await this.add_mtu.comm.AutodetectMetersEcoders ( currentMtu );
+                bool autoDetect = await this.add_mtu.MTUComm.AutodetectMetersEcoders ( currentMtu );
                 if ( autoDetect )
                     this.list_MeterTypesForMtu = this.config.meterTypes.FindByEncoderTypeAndLiveDigits (
                         currentMtu.Port1.MeterProtocol,
                         currentMtu.Port1.MeterLiveDigits );
-                
+
+                // If auto-detect fails, show all Encoder/Ecoder Meters    
                 if ( ! autoDetect ||
                      this.list_MeterTypesForMtu.Count <= 0 )
                     this.list_MeterTypesForMtu = this.config.meterTypes.FindAllForEncodersAndEcoders ();
             }
-            // If auto-detect fails, show all Encoder/Ecoder Meters
+            // Pulse
             else
                 this.list_MeterTypesForMtu = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu );
 
             if ( hasTwoPorts )
             {
-                // Ecoder/Encoder Will be only filtered by protocol + livedigits
+                // Ecoder/Encoder
                 if ( currentMtu.Port2.IsForEncoderOrEcoder )
                 {
-                    bool autoDetect = await this.add_mtu.comm.AutodetectMetersEcoders ( currentMtu, 2 );
+                    bool autoDetect = await this.add_mtu.MTUComm.AutodetectMetersEcoders ( currentMtu, 2 );
                     if ( autoDetect )
                         this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByEncoderTypeAndLiveDigits (
                             currentMtu.Port2.MeterProtocol,
                             currentMtu.Port2.MeterLiveDigits );
-                    
+
+                    // If auto-detect fails, show all Encoder/Ecoder Meters    
                     if ( ! autoDetect ||
                          this.list_MeterTypesForMtu_2.Count <= 0 )
                         this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindAllForEncodersAndEcoders ();
                 }
-                // If auto-detect fails, show all Encoder/Ecoder Meters
+                // Pulse
                 else
                     this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu, 1 );
             }
@@ -3407,11 +3408,10 @@ namespace aclara_meters.view
 
         private void TurnOffMethod ()
         {
-            MTUComm.Action turnOffAction = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type: MTUComm.Action.ActionType.TurnOffMtu,
-                user: FormsApp.credentialsService.UserName);
+            MTUComm.Action turnOffAction = new MTUComm.Action (
+                FormsApp.ble_interface,
+                MTUComm.Action.ActionType.TurnOffMtu,
+                FormsApp.credentialsService.UserName );
 
             turnOffAction.OnFinish += ((s, args) =>
             {
@@ -3990,7 +3990,7 @@ namespace aclara_meters.view
             // Button for enable|disable the second port
             if ( ! global.Port2DisableNo )
             {
-                bool ok = await this.add_mtu.comm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
+                bool ok = await this.add_mtu.MTUComm.WriteMtuBitAndVerify ( 28, 1, ( this.port2IsActivated = !this.port2IsActivated ) );
 
                 // Bit have not changed -> return to previous state
                 if ( ok )
@@ -4392,7 +4392,7 @@ namespace aclara_meters.view
             add_mtu.Run ( this.addMtuForm );
         }
 
-        private void OnProgress ( object sender, MTUComm.Action.ActionProgressArgs e )
+        private void OnProgress ( object sender, MTUComm.Delegates.ProgressArgs e )
         {
             string mensaje = e.Message;
 

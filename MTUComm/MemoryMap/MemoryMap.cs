@@ -51,6 +51,11 @@ using Library;
 /// </summary>
 namespace MTUComm.MemoryMap
 {
+    /// <summary>
+    /// Representation of a memory map of an MTU with all the information required
+    /// to be able to simulate all the memory registers of the physical memory of the MTU,
+    /// in a human readable way.
+    /// </summary>
     public partial class MemoryMap : AMemoryMap
     {
         #region Constants
@@ -159,24 +164,20 @@ namespace MTUComm.MemoryMap
         #region Initialization
 
         /// <summary>
-        /// Representation of a memory map of an MTU with all the information required
-        /// to be able to simulate all the memory registers of the physical memory of the MTU,
-        /// in a human readable way.
-        /// <para>&#160;</para>
         /// </para>
         /// Families of the MTUs
         /// <list type="Families">
         /// <item>
         ///     <term>31xx32xx</term>
-        ///     <description>Memory map file is 'family_31xx32xx.xml'</description>
+        ///     <description>Memory map file name is 'family_31xx32xx.xml'</description>
         /// </item>
         /// <item>
         ///     <term>33xx</term>
-        ///     <description>Memory map is 'family_33xx.xml'</description>
+        ///     <description>Memory map is name 'family_33xx.xml'</description>
         /// </item>
         /// <item>
         ///     <term>342x</term>
-        ///     <description>Memory map is 'family_342x.xml'</description>
+        ///     <description>Memory map is name 'family_342x.xml'</description>
         /// </item>
         /// </list>
         /// </para>
@@ -335,7 +336,7 @@ namespace MTUComm.MemoryMap
                             // BAD: Reference to property itself
                             // OK : Reference to register object and use TrySet|GetMember methods
                             //      to override set and get logic, avoiding ExpandoObject problems
-                            // NOTA: No se puede usar "base." porque parece ser invalidaria el comportamiento dinamico
+                            // NOTA: No se puede usar "base." porque parece invalidar el comportamiento dinamico
                             AddProperty ( memoryRegister );
     
                             // Add new object to collection where will be
@@ -766,8 +767,8 @@ namespace MTUComm.MemoryMap
         /// </para>
         /// </summary>
         /// <param name="otherMap">Other <see cref="MemoryMap"/> to compare with this</param>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
         /// <para>
         /// List of identifiers of differente registers.
         /// </para>
@@ -812,8 +813,8 @@ namespace MTUComm.MemoryMap
         /// </para>
         /// </summary>
         /// <param name="otherMap">Other <see cref="MemoryMap"/> to compare with this</param>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
         /// <para>
         /// Boolean that indicates if both <see cref="MemoryMap"/>s are equal.
         /// </para>
@@ -1144,8 +1145,8 @@ namespace MTUComm.MemoryMap
         /// <param name="address">Initial byte to start reading from the MTU</param>
         /// <param name="numBytes">Number of consecutive bytes from the initial <see cref="address"/></param>
         /// <param name="offset">Number of bytes of the result to avoid from the beginning</param>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
         public async Task ReadFromMtu (
             int address,
             int numBytes,

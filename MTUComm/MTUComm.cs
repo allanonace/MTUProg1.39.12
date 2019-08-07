@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -14,14 +15,16 @@ using MTUComm.MemoryMap;
 using Lexi;
 using Xml;
 
-using ActionType          = MTUComm.Action.ActionType;
-using FIELD               = MTUComm.actions.AddMtuForm.FIELD;
-using APP_FIELD           = MTUComm.ScriptAux.APP_FIELD;
-using EventLogQueryResult = MTUComm.EventLogList.EventLogQueryResult;
-using ParameterType       = MTUComm.Parameter.ParameterType;
-using LexiAction          = Lexi.Lexi.LexiAction;
-using LogFilterMode       = Lexi.Lexi.LogFilterMode;
-using LogEntryType        = Lexi.Lexi.LogEntryType;
+using ActionType               = MTUComm.Action.ActionType;
+using FIELD                    = MTUComm.actions.AddMtuForm.FIELD;
+using APP_FIELD                = MTUComm.ScriptAux.APP_FIELD;
+using EventLogQueryResult      = MTUComm.EventLogList.EventLogQueryResult;
+using ParameterType            = MTUComm.Parameter.ParameterType;
+using LexiAction               = Lexi.Lexi.LexiAction;
+using LogFilterMode            = Lexi.Lexi.LogFilterMode;
+using LogEntryType             = Lexi.Lexi.LogEntryType;
+using NodeType                 = Lexi.Lexi.NodeType;
+using NodeDiscoveryQueryResult = MTUComm.NodeDiscoveryList.NodeDiscoveryQueryResult;
 
 namespace MTUComm
 {
@@ -36,6 +39,38 @@ namespace MTUComm
     public class MTUComm
     {
         #region Constants
+
+        /// <summary>
+        /// All possible results for the Node Discovery process.
+        /// <para>&#160;</para>
+        /// </para>
+        /// <list type="NodeDiscoveryResult">
+        /// <item>
+        ///     <term>NodeDiscoveryResult.GOOD</term>
+        ///     <description>The Node Discovery process was completed validating at least the minimum nodes/DCUs required</description>
+        /// </item>
+        /// <item>
+        ///     <term>NodeDiscoveryResult.EXCELLENT</term>
+        ///     <description>The Node Discovery process was completed validating the same or more than the desired nodes/DCUs</description>
+        /// </item>
+        /// <item>
+        ///     <term>NodeDiscoveryResult.NOT_ACHIEVED</term>
+        ///     <description>The Node Discovery process has finished validating fewer nodes/DCUs than the minimum required</description>
+        /// </item>
+        ///  <item>
+        ///     <term>NodeDiscoveryResult.EXCEPTION</term>
+        ///     <description>Some uncontrollable exception occurred during the execution of the Node Discovery process</description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// </summary>
+        private enum NodeDiscoveryResult
+        {
+            GOOD,
+            EXCELLENT,
+            NOT_ACHIEVED,
+            EXCEPTION
+        }
 
         private const int BASIC_READ_1_ADDRESS    = 0;
         private const int BASIC_READ_1_DATA       = 32;
@@ -58,7 +93,7 @@ namespace MTUComm
         private const byte CMD_REPE_EVENT_LOG     = 0x15; // 21
         private const int CMD_NEXT_EVENT_RES_1    = 25;   // Response ACK with log entry [0-24] = 25 bytes
         private const int CMD_NEXT_EVENT_RES_2    = 5;    // Response ACK with no data [0-4] = 5 bytes
-        private const int CMD_NEXT_EVENT_BYTE_RES = 2;    // Response second byte is result or status ( 0 = Log entry, 1 or 2 = No data )
+        private const int CMD_BYTE_RES            = 2;    // Response second byte is result or status ( 0 = Log entry, 1 or 2 = No data )
         private const byte CMD_NEXT_EVENT_DATA    = 0x00; // ACK with log entry
         private const byte CMD_NEXT_EVENT_EMPTY   = 0x01; // ACK without log entry ( query complete )
         private const byte CMD_NEXT_EVENT_BUSY    = 0x02; // ACK without log entry ( MTU is busy or some error trying to recover next log entry )
@@ -66,6 +101,20 @@ namespace MTUComm
         private const int WAIT_BTW_LOG_ERRORS     = 1000;
         private const int WAIT_BTW_LOGS           = 100;
         private const int WAIT_AFTER_EVENT_LOGS   = 1000;
+        private const int CMD_INIT_NODE_DISC      = 0x18; // 24 Node discovery initiation command
+        private const int CMD_INIT_NODE_DISC_INI  = 1; // Node discovery initiated
+        private const int CMD_QUERY_NODE_DISC     = 0x19; // 25 Start/Reset node discovery response query
+        private const int CMD_INIT_NODE_BUSY      = 0; // The MTU is busy
+        private const int CMD_NEXT_NODE_DISC      = 0x1A; // 26 Get next node discovery response
+        private const int CMD_NEXT_NODE_1         = 10; // ACK with general information [0-9] = 10 bytes
+        private const int CMD_NEXT_NODE_2         = 26; // ACK with log entry [0-25] = 26 bytes
+        private const int CMD_NEXT_NODE_3         = 5; // ACK without log entry [0-4] = 5 bytes
+        private const byte CMD_NEXT_NODE_DATA     = 0x00; // ACK with node entry
+        private const byte CMD_NEXT_NODE_EMPTY    = 0x01; // ACK without node entry ( query complete )
+        private const int WAIT_BEFORE_START_NODE  = 1000;
+        private const int WAIT_MAX_START_NODE     = 10000;
+        private const int WAIT_BTW_NODE_ERRORS    = 1000;
+        private const int WAIT_BTW_NODES          = 100;
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
         private const string ERROR_LOADMETER      = "MeterLoadException";
         private const string ERROR_LOADMTU        = "MtuLoadException";
@@ -79,32 +128,92 @@ namespace MTUComm
 
         #region Delegates and Events
 
-        public delegate Task ReadFabricHandler(object sender);
+        /// <summary>
+        /// Event invoked only if the <see cref="Action.ActionType"/>.ReadFabric
+        /// action completes successfully, with no exceptions.
+        /// <para>
+        /// See <see cref="Action.OnReadFabric"/> for the associated method ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
         public event ReadFabricHandler OnReadFabric;
+        public delegate Task ReadFabricHandler(object sender);
 
-        public delegate Task ReadMtuHandler(object sender, ReadMtuArgs e);
+        /// <summary>
+        /// Event invoked only if the <see cref="Action.ActionType"/>.ReadMtu
+        /// action completes successfully, with no exceptions.
+        /// <para>
+        /// See <see cref="Action.OnReadMtu"/> for the associated method ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
         public event ReadMtuHandler OnReadMtu;
+        public delegate Task ReadMtuHandler(object sender, ReadMtuArgs e);
 
-        public delegate void TurnOffMtuHandler(object sender, TurnOffMtuArgs e);
+        /// <summary>
+        /// Event invoked only if the <see cref="Action.ActionType"/>.TurnOffMtu
+        /// action completes successfully, with no exceptions.
+        /// <para>
+        /// See <see cref="Action.OnTurnOnOffMtu"/> for the associated method ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
         public event TurnOffMtuHandler OnTurnOffMtu;
+        public delegate void TurnOffMtuHandler(object sender, TurnOffMtuArgs e);
 
-        public delegate void TurnOnMtuHandler(object sender, TurnOnMtuArgs e);
+        /// <summary>
+        /// Event invoked only if the <see cref="Action.ActionType"/>.TurnOnMtu
+        /// action completes successfully, with no exceptions.
+        /// <para>
+        /// See <see cref="Action.OnTurnOnOffMtu"/> for the associated method ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
         public event TurnOnMtuHandler OnTurnOnMtu;
+        public delegate void TurnOnMtuHandler(object sender, TurnOnMtuArgs e);
 
-        public delegate Task DataReadHandler(object sender, DataReadArgs e);
+        /// <summary>
+        /// Event invoked only if the <see cref="Action.ActionType"/>.DataRead
+        /// action completes successfully, with no exceptions.
+        /// <para>
+        /// See <see cref="Action.OnDataRead"/> for the associated method ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
         public event DataReadHandler OnDataRead;
+        public delegate Task DataReadHandler(object sender, DataReadArgs e);
 
-        public delegate Task AddMtuHandler(object sender, AddMtuArgs e);
+        /// <summary>
+        /// Event invoked only if the writing ( <see cref="ActionType"/>.Add|Replace )
+        /// action completes successfully, with no exceptions.
+        /// <para>
+        /// See <see cref="Action.OnAddMtu"/> for the associated method ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
         public event AddMtuHandler OnAddMtu;
+        public delegate Task AddMtuHandler(object sender, AddMtuArgs e);
 
-        public delegate void BasicReadHandler(object sender, BasicReadArgs e);
+        /// <summary>
+        /// Event invoked only if the <see cref="Action.ActionType"/>.BasicRead
+        /// action completes successfully, with no exceptions.
+        /// <para>
+        /// See <see cref="Action.OnBasicRead"/> for the associated method ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
         public event BasicReadHandler OnBasicRead;
+        public delegate void BasicReadHandler(object sender, BasicReadArgs e);
 
-        public delegate void ErrorHandler ();
-        public event ErrorHandler OnError;
+        /// <summary>
+        /// Event that can be invoked during the execution of any action, for
+        /// example to update the visual feedback by modifying the text of a label control.
+        /// <para>
+        /// See <see cref="Action.OnProgress"/> for the event associated ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        public event Delegates.ProgresshHandler OnProgress;
 
-        public delegate void ProgresshHandler(object sender, ProgressArgs e);
-        public event ProgresshHandler OnProgress;
+        /// <summary>
+        /// Event invoked if the action does not complete successfully or if it launches an exception.
+        /// <para>
+        /// See <see cref="Action.OnError"/> for the event associated ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        public event Delegates.Empty OnError;
 
         #endregion
 
@@ -149,27 +258,6 @@ namespace MTUComm
                 this.MemoryMap   = memorymap;
                 this.Mtu         = mtuType;
                 this.ListEntries = listEntries;
-            }
-        }
-
-        public class ProgressArgs : EventArgs
-        {
-            public int Step { get; private set; }
-            public int TotalSteps { get; private set; }
-            public string Message { get; private set; }
-
-            public ProgressArgs(int step, int totalsteps)
-            {
-                Step = step;
-                TotalSteps = totalsteps;
-                Message = "";
-            }
-
-            public ProgressArgs(int step, int totalsteps, string message)
-            {
-                Step = step;
-                TotalSteps = totalsteps;
-                Message = message;
             }
         }
 
@@ -257,15 +345,15 @@ namespace MTUComm
         /// </summary>
         /// <param name="type">Current action type ( AddMtu, ReplaceMeter,.. )</param>
         /// <param name="args">Arguments required for some actions</param>
-        /// <seealso cref="Task_AddMtu(Action)"/>
-        /// <seealso cref="Task_AddMtu(dynamic, string, Action)"/>
-        /// <seealso cref="Task_BasicRead"/>
-        /// <seealso cref="Task_DataRead"/>
-        /// <seealso cref="Task_DataRead(Action)"/>
-        /// <seealso cref="Task_InstallConfirmation"/>
-        /// <seealso cref="Task_ReadFabric"/>
-        /// <seealso cref="Task_ReadMtu"/>
-        /// <seealso cref="Task_TurnOnOffMtu(bool)"/>
+        /// <seealso cref="AddMtu(Action)"/>
+        /// <seealso cref="AddMtu(dynamic, string, Action)"/>
+        /// <seealso cref="BasicRead"/>
+        /// <seealso cref="DataRead"/>
+        /// <seealso cref="DataRead(Action)"/>
+        /// <seealso cref="InstallConfirmation"/>
+        /// <seealso cref="ReadFabric"/>
+        /// <seealso cref="ReadMtu"/>
+        /// <seealso cref="TurnOnOffMtu(bool)"/>
         public async void LaunchActionThread (
             ActionType type,
             params object[] args )
@@ -297,21 +385,21 @@ namespace MTUComm
                     case ActionType.ReplaceMtuReplaceMeter:
                         // Interactive and Scripting
                         if ( args.Length > 1 )
-                             await Task.Run ( () => Task_AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ], ( Action )args[ 2 ] ) );
-                        else await Task.Run ( () => Task_AddMtu ( ( Action )args[ 0 ] ) );
+                             await Task.Run ( () => AddMtu ( ( AddMtuForm )args[ 0 ], ( string )args[ 1 ], ( Action )args[ 2 ] ) );
+                        else await Task.Run ( () => AddMtu ( ( Action )args[ 0 ] ) );
                         break;
                     case ActionType.DataRead:
                         // Scripting and Interactive
                         if ( args.Length == 1 )
-                             await Task.Run ( () => Task_DataRead ( ( Action )args[ 0 ] ) );
-                        else await Task.Run ( () => Task_DataRead () );
+                             await Task.Run ( () => DataRead ( ( Action )args[ 0 ] ) );
+                        else await Task.Run ( () => DataRead () );
                         break;
-                    case ActionType.MtuInstallationConfirmation: await Task.Run ( () => Task_InstallConfirmation () ); break;
-                    case ActionType.ReadFabric : await Task.Run ( () => Task_ReadFabric () ); break;
-                    case ActionType.ReadMtu    : await Task.Run ( () => Task_ReadMtu () ); break;
-                    case ActionType.TurnOffMtu : await Task.Run ( () => Task_TurnOnOffMtu ( false ) ); break;
-                    case ActionType.TurnOnMtu  : await Task.Run ( () => Task_TurnOnOffMtu ( true  ) ); break;
-                    case ActionType.BasicRead  : await Task.Run ( () => Task_BasicRead () ); break;
+                    case ActionType.MtuInstallationConfirmation: await Task.Run ( () => InstallConfirmation () ); break;
+                    case ActionType.ReadFabric : await Task.Run ( () => ReadFabric () ); break;
+                    case ActionType.ReadMtu    : await Task.Run ( () => ReadMtu () ); break;
+                    case ActionType.TurnOffMtu : await Task.Run ( () => TurnOnOffMtu ( false ) ); break;
+                    case ActionType.TurnOnMtu  : await Task.Run ( () => TurnOnOffMtu ( true  ) ); break;
+                    case ActionType.BasicRead  : await Task.Run ( () => BasicRead () ); break;
                     default: break;
                 }
 
@@ -334,7 +422,7 @@ namespace MTUComm
 
         /// <summary>
         /// Process performed only by MTU with ports compatible with Encoder or E-Coders,
-        /// to automatically recover the Meter protocol and livedigits that will
+        /// to automatically recover the Meter protocol and live digits that will
         /// be used to filter the Meter list and during selected Meter validation.
         /// <para>
         /// See <see cref="CheckSelectedEncoderMeter(int)"/> to validate a Meter for current MTU.
@@ -342,12 +430,15 @@ namespace MTUComm
         /// </summary>
         /// <param name="mtu">Current MTU</param>
         /// <param name="portIndex">Port number to read from the MTU</param>
-        /// <returns>Task object required to execute the method asynchronously and a correct
-        /// exceptions bubbling.
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
         /// <para>
-        /// Boolean that indicates if the autodetection worked or not.
+        /// Indicates whether the auto-detection worked or not.
         /// </para>
         /// </returns>
+        /// <exception cref="EncoderAutodetectNotAchievedException">( Used internally, not bubbling up )</exception>
+        /// <exception cref="EncoderAutodetectException">( Used internally, not bubbling up )</exception>
+        /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
         public async Task<bool> AutodetectMetersEcoders (
             Mtu mtu,
             int portIndex = 1 )
@@ -439,16 +530,24 @@ namespace MTUComm
         }
         
         /// <summary>
-        /// Logic of Meters autodetection process extracted from AutodetectMetersEcoders
+        /// Logic of Meters auto-detection process extracted from AutodetectMetersEcoders
         /// method, for an easy and readable reuse of the code for the two MTUs ports.
         /// <para>
-        /// See <see cref="AutodetectMetersEcoders(Mtu,int)"/> to detect automatically.
-        /// the Meter protocol and livedigits of compatible Meters for current MTU.
+        /// See <see cref="AutodetectMetersEcoders(Mtu,int)"/> to detect automatically
+        /// the Meter protocol and live digits of compatible Meters for current MTU.
         /// </para>
         /// </summary>
         /// <param name="portIndex">Port number to read from the MTU</param>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <exception cref="EncoderMeterFFException"></exception>
+        /// <exception cref="EncoderMeterFEException"></exception>
+        /// <exception cref="EncoderMeterFDException"></exception>
+        /// <exception cref="EncoderMeterFCException"></exception>
+        /// <exception cref="EncoderMeterFBException"></exception>
+        /// <exception cref="EncoderMeterUnknownException"></exception>
+        /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
+        /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
         private async Task CheckSelectedEncoderMeter (
             int portIndex = 1 )
         {
@@ -508,16 +607,29 @@ namespace MTUComm
         /// <summary>
         /// In scripted mode this method overload is called before the main method,
         /// because it is necessary to translate the script parameters from Aclara into
-        /// the app terminology and validate their values, removing unnecesary ones
+        /// the app terminology and validate their values, removing unnecessary ones
         /// to avoid headaches.
         /// <para>
-        /// See <see cref="Task_DataRead"/> for the DataRead logic.
+        /// See <see cref="DataRead"/> for the DataRead logic.
         /// </para>
         /// </summary>
         /// <param name="action">Current action type ( AddMtu, ReplaceMeter,.. )</param>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
-        private async Task Task_DataRead (
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <exception cref="ScriptForOnePortButTwoEnabledException">( From ScriptAux.ValidateParams )</exception>
+        /// <exception cref="ScriptForTwoPortsButMtuOnlyOneException">( From ScriptAux.ValidateParams )</exception>
+        /// <exception cref="ScriptingAutoDetectMeterException">( From ScriptAux.ValidateParams )</exception>
+        /// <exception cref="NumberOfDialsTagMissingScript">( Used internally, not bubbling up )</exception>
+        /// <exception cref="DriveDialSizeTagMissingScript">( Used internally, not bubbling up )</exception>
+        /// <exception cref="UnitOfMeasureTagMissingScript">( Used internally, not bubbling up )</exception>
+        /// <exception cref="ScriptingAutoDetectTagsMissingScript">( From ScriptAux.ValidateParams )</exception>
+        /// <exception cref="ScriptingAutoDetectMeterMissing">( From ScriptAux.ValidateParams )</exception>
+        /// <exception cref="ScriptingAutoDetectNotSupportedException">( From ScriptAux.ValidateParams )</exception>
+        /// <exception cref="ProcessingParamsScriptException">( From ScriptAux.ValidateParams )</exception>
+        /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
+        /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
+        /// <exception cref="DataRead () exceptions..."></exception>
+        private async Task DataRead (
             Action action )
         {
             try
@@ -547,7 +659,7 @@ namespace MTUComm
                 Data.Set("MtuStatus", MtuStatus, true);
 
                 // Init DataRead logic using translated parameters
-                await this.Task_DataRead ();
+                await this.DataRead ();
             }
             catch ( Exception e )
             {
@@ -562,7 +674,7 @@ namespace MTUComm
         /// Process performed only by MTUs with the tag MtuDemand set to true in mtu.xml file,
         /// recovering all the MeterReading events saved in the MTU for the number of days indicated.
         /// <para>
-        /// See <see cref="Task_DataRead(Action)"/> for the entry point of the DataRead process in scripted mode.
+        /// See <see cref="DataRead(Action)"/> for the entry point of the DataRead process in scripted mode.
         /// </para>
         /// <para>&#160;</para>
         /// <para/><para>
@@ -570,8 +682,8 @@ namespace MTUComm
         /// </para>
         /// <list type="MTU_Datalogging">
         /// <item>
-        ///     <term>Pag 33 - 3.4</term>
-        ///     <description>Accesing Log Information via the Local External Interface ( LExI )</description>
+        ///     <term>Page 33 - 3.4</term>
+        ///     <description>Accessing Log Information via the Local External Interface ( LExI )</description>
         /// </item>
         /// </list>
         /// <para>&#160;</para>
@@ -580,22 +692,30 @@ namespace MTUComm
         /// </para>
         /// <list type="Y61063">
         /// <item>
-        ///     <term>Pag 37 - 4.2.3.18</term>
+        ///     <term>Page 37 - 4.2.3.18</term>
         ///     <description>Start Event Log Query</description>
         /// </item>
         /// <item>
-        ///     <term>Pag 38 - 4.2.3.19</term>
+        ///     <term>Page 38 - 4.2.3.19</term>
         ///     <description>Get Next Event Log Response</description>
         /// </item>
         /// <item>
-        ///     <term>Pag 39 - 4.2.3.20</term>
+        ///     <term>Page 39 - 4.2.3.20</term>
         ///     <description>Get Repeat Last Event Log Response</description>
         /// </item>
         /// </list>
         /// </summary>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
-        public async Task Task_DataRead ()
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <exception cref="MtuIsNotOnDemandCompatibleDevice"></exception>
+        /// <exception cref="AttemptNotAchievedGetEventsLogException">( Used internally, not bubbling up )</exception>
+        /// <exception cref="MtuIsBusyToGetEventsLogException">( Not in use )</exception>
+        /// <exception cref="ActionNotAchievedGetEventsLogException"></exception>
+        /// <exception cref="MtuHasChangeBeforeFinishActionException">( From CheckIsTheSameMTU )</exception>
+        /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
+        /// <exception cref="ReadMtu_Logic exceptions..."></exception>
+        /// <seealso cref="OnDataRead"/>
+        public async Task DataRead ()
         {
             Global global = this.configuration.Global;
 
@@ -605,9 +725,9 @@ namespace MTUComm
                 if ( ! this.mtu.MtuDemand )
                     throw new MtuIsNotOnDemandCompatibleDevice ();
 
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Requesting event logs..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Requesting event logs..." ) );
 
-                // NOTE: It is not clear why in STARProgrammer 86399 are added to calculate the end date
+                // NOTE: It is not clear why in STARProgrammer 86399 ( seconds ~= 60 days ) are added to calculate the end date
                 DateTime end   = DateTime.UtcNow.AddDays ( DATA_READ_END_DAYS );
                 DateTime start = DateTime.UtcNow.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
 
@@ -631,13 +751,13 @@ namespace MTUComm
                 int  countAttemptsEr = 0;
                 EventLogList eventLogList = new EventLogList ( start, end, ( LogFilterMode )data[ 0 ], ( LogEntryType )data[ 1 ] );
                 //( byte[] bytes, int responseOffset ) fullResponse = ( null, 0 ); // echo + response
-                LexiWriteResult fullResponse; // echo + response
+                LexiWriteResult fullResponse;
                 while ( true )
                 {
                     try
                     {
                         // Get next event log response command or Get repeat last event log response command
-                        // NOTE: In MTU_Dataloggin ( DataRead 3.4 ) indicates that Get repeat command has only two
+                        // NOTE: In MTU_Datalogging ( DataRead 3.4 ) indicates that Get repeat command has only two
                         // possible responses, but if it is the same as relaunch the last Get next, should be has three
                         fullResponse =
                             await this.lexi.Write (
@@ -645,9 +765,9 @@ namespace MTUComm
                                 null,
                                 new uint[]{ CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_RES_2 }, // ACK with log entry or without
                                 new LexiFiltersResponse ( new ( int,int,byte )[] {
-                                    ( CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_BYTE_RES, CMD_NEXT_EVENT_DATA  ), // Entry data included
-                                    ( CMD_NEXT_EVENT_RES_2, CMD_NEXT_EVENT_BYTE_RES, CMD_NEXT_EVENT_EMPTY ), // Complete but without data
-                                    ( CMD_NEXT_EVENT_RES_2, CMD_NEXT_EVENT_BYTE_RES, CMD_NEXT_EVENT_BUSY  )  // The MTU is busy, response not ready yet
+                                    ( CMD_NEXT_EVENT_RES_1, CMD_BYTE_RES, CMD_NEXT_EVENT_DATA  ), // Entry data included
+                                    ( CMD_NEXT_EVENT_RES_2, CMD_BYTE_RES, CMD_NEXT_EVENT_EMPTY ), // Complete but without data
+                                    ( CMD_NEXT_EVENT_RES_2, CMD_BYTE_RES, CMD_NEXT_EVENT_BUSY  )  // The MTU is busy, response not ready yet
                                 } ),
                                 LexiAction.OperationRequest );
                     }
@@ -663,7 +783,7 @@ namespace MTUComm
 
                         await Task.Delay ( WAIT_BTW_LOG_ERRORS );
 
-                        Utils.Print ( "DataRead: Error trying to recover event [ Attemps " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
+                        Utils.Print ( "DataRead: Error trying to recover an event [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
 
                         // Try one more time
                         Errors.AddError ( new AttemptNotAchievedGetEventsLogException () );
@@ -679,11 +799,8 @@ namespace MTUComm
                     // Reset exceptions counter
                     countAttemptsEr = 0;
 
-                    // Check if some event log was recovered, but first removed echo bytes
-                    byte[] response = new byte[ fullResponse.Bytes.Length - fullResponse.ResponseOffset ];
-                    Array.Copy ( fullResponse.Bytes, fullResponse.ResponseOffset, response, 0, response.Length );
-
-                    var queryResult = eventLogList.TryToAdd ( response );
+                    // Check if some event log was recovered
+                    var queryResult = eventLogList.TryToAdd ( fullResponse.Response );
                     switch ( queryResult.Result )
                     {
                         // Finish because the MTU has not event logs for specified date range
@@ -707,7 +824,7 @@ namespace MTUComm
 
                         // Wait a bit and try to read/recover the next log
                         case EventLogQueryResult.NextRead:
-                            OnProgress ( this, new ProgressArgs ( 0, 0, "Requesting event logs... " + queryResult.Index + "/" + eventLogList.TotalEntries ) );
+                            OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Requesting event logs... " + queryResult.Index + "/" + eventLogList.TotalEntries ) );
                             
                             await Task.Delay ( WAIT_BTW_LOGS );
                             countAttempts = 0; // Reset accumulated fails after reading ok
@@ -716,7 +833,7 @@ namespace MTUComm
 
                         // Was last event log
                         case EventLogQueryResult.LastRead:
-                            OnProgress ( this, new ProgressArgs ( 0, 0, "All event logs requested" ) );
+                            OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "All event logs requested" ) );
                             goto BREAK; // Exit from infinite while
                     }
                 }
@@ -735,7 +852,7 @@ namespace MTUComm
                 await this.CheckIsTheSameMTU ();
 
                 // Generates log using the interface
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Reading from MTU..." ) );
                 
                 await this.OnDataRead ( this, new DataReadArgs ( map, this.mtu, eventLogList ) );
             }
@@ -760,12 +877,13 @@ namespace MTUComm
         /// See <see cref="InstallConfirmation_Logic(bool,int)"/> for the Install Confirmation logic.
         /// </para>
         /// </summary>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
-        public async Task Task_InstallConfirmation ()
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="OnReadMtu"/>
+        public async Task InstallConfirmation ()
         {
             if ( await this.InstallConfirmation_Logic () < IC_EXCEPTION )
-                 await this.Task_ReadMtu ();
+                 await this.ReadMtu ();
             else this.OnError ();
         }
 
@@ -774,19 +892,25 @@ namespace MTUComm
         /// related tags ( Global.TimeToSync, Mtu.TimeToSync ) are set to true, to confirm
         /// the correct communication between the MTU and a DCU.
         /// <para>
-        /// See <see cref="Task_InstallConfirmation"/> for the entry point of the Installation Confirmation process executed directly.
+        /// See <see cref="InstallConfirmation"/> for the entry point of the Installation Confirmation process executed directly.
         /// </para>
         /// </summary>
         /// <param name="force">Forces the Install Confirmation needed during installations,
         /// because sometimes the shipbit does not yet updated, resulting in a false positive</param>
         /// <param name="time">Internally used by the method to control the max number of attempts</param>
-        /// <returns>Task object required to execute the method asynchronously and a correct
-        /// exceptions bubbling.
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
         /// <para>
         /// Integer value that indicates if the Installation
         /// Confirmation has worked ( 0 ) or not ( 1 Not achieved, 2 Error )
         /// </para>
         /// </returns>
+        /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
+        /// <exception cref="MtuIsAlreadyTurnedOffICException">( Used internally, not bubbling up )</exception>
+        /// <exception cref="MtuIsNotTwowayICException">( Used internally, not bubbling up )</exception>
+        /// <exception cref="AttemptNotAchievedICException">( Used internally, not bubbling up )</exception>
+        /// <exception cref="ActionNotAchievedICException">( Used internally, not bubbling up )</exception>
+        /// <exception cref="PuckCantCommWithMtuException">( Generic error and used internally, not bubbling up )</exception>
         private async Task<int> InstallConfirmation_Logic (
             bool force = false,
             int  time  = 0 )
@@ -835,7 +959,7 @@ namespace MTUComm
                 {
                     // Update interface text to look the progress
                     int progress = ( int )Math.Round ( ( decimal )( ( count * 100.0 ) / max ) );
-                    OnProgress ( this, new ProgressArgs ( count, max, "Checking IC... "+ progress.ToString() + "%" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( count, max, "Checking IC... "+ progress.ToString() + "%" ) );
                     
                     await Task.Delay ( wait * 1000 );
                     
@@ -862,7 +986,7 @@ namespace MTUComm
                     return IC_EXCEPTION;
                 }
             
-                // Retry action ( thre times = first plus two replies )
+                // Retry action ( three times = first plus two replies )
                 if ( ++time < global.TimeSyncCountRepeat )
                 {
                     await Task.Delay ( WAIT_BTW_IC );
@@ -874,8 +998,269 @@ namespace MTUComm
                 Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat ) + "" ) );
                 return IC_NOT_ACHIEVED;
             }
+
+            // Node Discovery with OnDemand 1.2 MTUs
+            if ( this.mtu.MtuDemand )
+            {
+                // TODO: IF NODE DISCOVERY FAILS, SHOULD WE CANCEL THE INSTALLATION ( ADD/REPLACE )?
+                switch ( await this.NodeDiscovery ( map ) )
+                {
+                    case NodeDiscoveryResult.EXCELLENT:
+                    case NodeDiscoveryResult.GOOD:
+                    return IC_OK;
+
+                    case NodeDiscoveryResult.NOT_ACHIEVED:
+                    return IC_NOT_ACHIEVED;
+
+                    case NodeDiscoveryResult.EXCEPTION:
+                    return IC_EXCEPTION;
+                }
+            }
             
             return IC_OK;
+        }
+
+        /// <summary>
+        /// The Node Discovery process is only performed working with OnDemand compatible MTUs,
+        /// searching for all nodes ( DCUs ) available in a specific area around the MTU, validating
+        /// all them to ensure a desired minimum.
+        /// </summary>
+        /// <param name="map"><see cref="MemoryMap"/> used in the Install Confirmation process</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// A <see cref="NodeDiscoveryResult"/> value that indicates
+        /// whether the Node Discovery process has worked or not.
+        /// </para>
+        /// </returns>
+        private async Task<NodeDiscoveryResult> NodeDiscovery (
+            dynamic map )
+        {
+            try
+            {
+                Global global = this.configuration.Global;
+
+                Stopwatch nodeCounter = new Stopwatch ();
+                nodeCounter.Start ();
+
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Node Discovery..." ) );
+
+                while ( true )
+                {
+                    // Node discovery initiation command
+                    byte[] data = new byte[ 8 ]; // 1+4+1+1+1
+                    data[ 0 ] = ( byte )NodeType.DCUsOnly;
+                    data[ 1 ] = 0x00; // Target node ID LSB
+                    data[ 2 ] = 0x00; // ...
+                    data[ 3 ] = 0x00; // ...
+                    data[ 4 ] = 0x00; // Target node ID MSB
+                    data[ 5 ] = 0x0A; // Max dither time in seconds
+                    data[ 6 ] = 0x00; // Min request send time in seconds
+                    data[ 7 ] = 0x04; // RF Channels bitmap up to 8 channels ( 4 = 0000.0100 = Channel 3 )
+
+                    // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
+                    // NOTE: Use address parameter to set the request code
+                    LexiWriteResult fullResponse = await this.lexi.Write (
+                        CMD_INIT_NODE_DISC, data, null, null, LexiAction.OperationRequest );
+
+                    // Node discovery mode NOT initiated in the MTU
+                    if ( fullResponse.Response[ CMD_BYTE_RES ] != CMD_INIT_NODE_DISC_INI )
+                    {
+                        Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotInitializedException () );
+                        goto BREAK_FAIL;
+                    }
+                    // Node discovery mode successfully initiated in the MTU
+                    else
+                    {
+                        #region Detection
+
+                        // Start/Reset node discovery response query
+                        bool timeOut = false;
+                        Stopwatch counter = new Stopwatch ();
+                        counter.Start ();
+                        do
+                        {
+                            await Task.Delay ( WAIT_BEFORE_START_NODE );
+                            
+                            // Response: Byte 2 { 0 = The MTU is busy, 1 = The MTU is ready for query }
+                            fullResponse = await this.lexi.Write (
+                                CMD_QUERY_NODE_DISC, null, null, null, LexiAction.OperationRequest );
+                        }
+                        while ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_INIT_NODE_BUSY &&
+                                ! ( timeOut = counter.ElapsedMilliseconds > WAIT_MAX_START_NODE ) );
+                        // TODO: USE SPECIFIC MAX TIME FOR THIS LEXI CMD OR USE GLOBAL.MaxTimeRFCheck FOR ALL NODE DISCOVERY PROCESS
+                        
+                        counter.Stop ();
+                        counter = null;
+
+                        // Node discovery mode not started/ready for query
+                        if ( timeOut )
+                        {
+                            Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotStartedException () );
+                            goto BREAK_FAIL;
+                        }
+
+                        // Get next node discovery response
+                        int  maxAttemptsEr   = 2;
+                        int  countAttemptsEr = 0;
+                        NodeDiscoveryList nodeList = new NodeDiscoveryList ( ( NodeType )data[ 0 ] );
+                        while ( true )
+                        {
+                            try
+                            {
+                                fullResponse = await this.lexi.Write (
+                                    CMD_NEXT_NODE_DISC,
+                                    null,
+                                    new uint[] {
+                                        CMD_NEXT_NODE_1,
+                                        CMD_NEXT_NODE_2,
+                                        CMD_NEXT_NODE_3 },
+                                    new LexiFiltersResponse ( new ( int,int,byte )[] {
+                                        ( CMD_NEXT_NODE_1, CMD_BYTE_RES, CMD_NEXT_NODE_DATA  ), // General information
+                                        ( CMD_NEXT_NODE_2, CMD_BYTE_RES, CMD_NEXT_NODE_DATA  ), // Entry data included
+                                        ( CMD_NEXT_NODE_3, CMD_BYTE_RES, CMD_NEXT_NODE_EMPTY )  // Complete but without data
+                                    } ),
+                                    LexiAction.OperationRequest );
+                            }
+                            catch ( Exception e )
+                            {
+                                // Is not own exception
+                                if ( ! Errors.IsOwnException ( e ) )
+                                {
+                                    Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                                    return NodeDiscoveryResult.EXCEPTION;
+                                }
+
+                                // Finish without perform the action
+                                else if ( ++countAttemptsEr >= maxAttemptsEr )
+                                {
+                                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( maxAttemptsEr + "" ) );
+                                    goto BREAK_FAIL;
+                                }
+
+                                await Task.Delay ( WAIT_BTW_NODE_ERRORS );
+
+                                Utils.Print ( "Node Discovery: Error trying to recover a node [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
+
+                                // Try one more time
+                                Errors.AddError ( new AttemptNotAchievedNodeDiscoveryException () );
+
+                                continue;
+                            }
+
+                            // Reset exceptions counter
+                            countAttemptsEr = 0;
+
+                            // Check if some node was recovered
+                            var queryResult = nodeList.TryToAdd ( fullResponse.Response );
+                            switch ( queryResult.Result )
+                            {
+                                // Wait a bit and try to read/recover the next node
+                                case NodeDiscoveryQueryResult.NextRead:
+                                    OnProgress ( this, new Delegates.ProgressArgs ( 0, 0,
+                                        "Requesting nodes... " + queryResult.Index + "/" + nodeList.TotalEntries ) );
+                                    
+                                    await Task.Delay ( WAIT_BTW_NODES );
+                                    break;
+
+                                // Was the last node or no node was recovered
+                                case NodeDiscoveryQueryResult.LastRead:
+                                case NodeDiscoveryQueryResult.Empty:
+                                    OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "All nodes requested" ) );
+                                    goto BREAK_OK; // Exit from infinite while
+                            }
+                        }
+
+                        #endregion
+
+                        BREAK_OK:
+
+                        #region Validation
+
+                        bool    isF1;
+                        decimal prob       = 0m;
+                        decimal acumProbF1 = 0m;
+                        decimal acumProbF2 = 0m;
+                        int     maxRSSIResponse = -150;
+                        string  freq1way   = await map.Frequency1Way  .GetValue ();
+                        string  freq2wayTx = await map.Frequency2WayTx.GetValue ();
+                        foreach ( NodeDiscovery node in nodeList.Entries )
+                        {
+                            // Channel / Frequency
+                            string freq = ( ( node.FreqChannelRequest * 6250 + 450000000 ) / 1000000 ).ToString ();
+                            if ( ! ( isF1 = freq.Equals ( freq1way ) ) &&
+                                 ! freq.Equals ( freq2wayTx ) )
+                                continue;
+
+                            node.SetAsValidated ();
+
+                            // Calculates the probability based on the signal strength
+                            // Probability value is normalized [0,1] where 1 is 100%
+                            prob = nodeList.GetProbability ( node.RSSIRequest );
+
+                            // Total probability, accumulated using the probability of each validated node
+                            // Channel F1 = Slow
+                            if ( isF1 )
+                            {
+                                if ( acumProbF1 == 0 )
+                                    acumProbF1 = 1;
+
+                                acumProbF1 *= prob;
+                            }
+                            // Channel F2 = Fast
+                            else
+                            {
+                                if ( acumProbF2 == 0 )
+                                    acumProbF2 = 1;
+
+                                acumProbF2 *= prob;
+
+                                // Save the highest RSSI detected and validated
+                                if ( node.RSSIResponse > maxRSSIResponse )
+                                    maxRSSIResponse = node.RSSIResponse;
+                            }
+                        }
+
+                        // DCU probability from the highest signal strength validated
+                        prob = nodeList.GetProbability ( maxRSSIResponse );
+
+                        // Probability for two-way/fast channel
+                        // NOTE: Math.Pow works with double, not decimal
+                        decimal precalc = 1 - prob * acumProbF2;
+                        decimal p2Way   = 1 - precalc * precalc * precalc;
+
+                        // Validation result
+                        // Excellent
+                        int numNodesValidated = nodeList.CountEntriesValidated;
+                        if ( numNodesValidated >= global.GoodNumDCU &&
+                             acumProbF1 >= global.GoodF1Rely/100 &&
+                             p2Way >= global.GoodF2Rely/100 )
+                            return NodeDiscoveryResult.EXCELLENT;
+                        
+                        // Minimum
+                        else if ( numNodesValidated >= global.MinNumDCU &&
+                                  acumProbF1 >= global.MinF1Rely/100 &&
+                                  p2Way >= global.MinF2Rely/100 )
+                            return NodeDiscoveryResult.GOOD;
+
+                        // Minimum not reached
+                        return NodeDiscoveryResult.NOT_ACHIEVED;
+
+                        #endregion
+                    }
+
+                    BREAK_FAIL:
+
+                    // The max time to perform Node Discovery process has expired
+                    if ( nodeCounter.ElapsedMilliseconds > global.MaxTimeRFCheck )
+                        return NodeDiscoveryResult.NOT_ACHIEVED;
+                }
+            }
+            catch ( Exception )
+            {
+                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                return NodeDiscoveryResult.EXCEPTION;
+            }
         }
 
         #endregion
@@ -892,16 +1277,17 @@ namespace MTUComm
         /// </summary>
         /// <param name="on">Desired status of the MTU, true for run mode
         /// and false for ship mode ( turned off )</param>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
-        public async Task Task_TurnOnOffMtu (
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="OnTurnOffMtu"/>
+        /// <seealso cref="OnTurnOnMtu"/>
+        public async Task TurnOnOffMtu (
             bool on )
         {        
             if ( on )
                  Utils.Print ( "TurnOffMtu start" );
             else Utils.Print ( "TurnOnMtu start"  );
 
-            // Launchs exception 'ActionNotAchievedTurnOffException'
             if ( await this.TurnOnOffMtu_Logic ( on ) )
             {
                 if ( on )
@@ -914,18 +1300,22 @@ namespace MTUComm
         /// Logic of the switch on or off of the MTU, changing between rune
         /// mode and ship mode respectively.
         /// <para>
-        /// See <see cref="Task_TurnOnOffMtu(bool)"/> for the entry point of the Turn On/Off process executed directly.
+        /// See <see cref="TurnOnOffMtu(bool)"/> for the entry point of the Turn On/Off process executed directly.
         /// </para>
         /// </summary>
         /// <param name="on">Desired status of the MTU, true for run mode
         /// and false for ship mode ( turned off )</param>
         /// <param name="time">Internally used by the method to control the max number of attempts</param>
-        /// <returns>Task object required to execute the method asynchronously and a correct
-        /// exceptions bubbling.
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
         /// <para>
-        /// Boolean that indicates if the autodetection has worked or not.
+        /// Boolean that indicates if the auto-detection has worked or not.
         /// </para>
         /// </returns>
+        /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
+        /// <exception cref="AttemptNotAchievedTurnOffException">( Used internally, not bubbling up )</exception>
+        /// <exception cref="ActionNotAchievedTurnOffException"></exception>
+        /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
         private async Task<bool> TurnOnOffMtu_Logic (
             bool on,
             int  time = 0 )
@@ -951,7 +1341,7 @@ namespace MTUComm
                 // Finish
                 else throw new PuckCantCommWithMtuException ();
                 
-                // Retry action ( thre times = first plus two replies )
+                // Retry action ( three times = first plus two replies )
                 if ( ++time < TIMES_TURNOFF )
                 {
                     await Task.Delay ( WAIT_BTW_TURNOFF );
@@ -974,16 +1364,19 @@ namespace MTUComm
         /// reading from the physical memory only the first register, that corresponds
         /// to the MTU type, and the process is successful if no exception is launched.
         /// <para>
-        /// See <see cref="Task_ReadMtu"/> to perform a full read of the MTU.
+        /// See <see cref="ReadMtu"/> to perform a full read of the MTU.
         /// </para>
         /// </summary>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
-        public async Task Task_ReadFabric ()
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
+        /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
+        /// <seealso cref="OnReadFabric"/>
+        public async Task ReadFabric ()
         {
             try
             {
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Testing puck..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Testing puck..." ) );
 
                 // Only read all required registers once
                 var map = this.GetMemoryMap ( true );
@@ -991,11 +1384,11 @@ namespace MTUComm
                 // Activates flag to read Meter
                 int MtuType = await  map.MtuType.GetValueFromMtu ();
 
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Successful MTU read (" + MtuType.ToString() + ")" ) );
-                await OnReadFabric ( this );
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Successful MTU read (" + MtuType.ToString() + ")" ) );
 
+                await OnReadFabric ( this );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
             }
@@ -1013,14 +1406,17 @@ namespace MTUComm
         /// See <see cref="ReadMtu_Logic"/> for the ReadMtu logic.
         /// </para>
         /// </summary>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
-        
-        public async Task Task_ReadMtu ()
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <exception cref="MtuHasChangeBeforeFinishActionException">( From CheckIsTheSameMTU )</exception>
+        /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
+        /// <exception cref="ReadMtu_Logic exceptions..."></exception>
+        /// <seealso cref="OnReadMtu"/>
+        public async Task ReadMtu ()
         {
             try
             {
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Reading from MTU..." ) );
             
                 // Load memory map and prepare to read from Meters
                 var map = await ReadMtu_Logic ();
@@ -1044,15 +1440,17 @@ namespace MTUComm
         /// of the MTU used, prepared to read values from there and caching the data,
         /// only recovering/reading one time from MTU physical memory.
         /// <para>
-        /// See <see cref="Task_ReadMtu"/> for the entry point of the ReadMtu process executed directly.
+        /// See <see cref="ReadMtu"/> for the entry point of the ReadMtu process executed directly,
+        /// not as a sub-action within another action.
         /// </para>
         /// </summary>
-        /// <returns>Task object required to execute the method asynchronously and a
-        /// correct exceptions bubbling.
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
         /// <para>
         /// Instance of a dynamic memory map for current MTU.
         /// </para>
         /// </returns>
+        /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
         private async Task<dynamic> ReadMtu_Logic ()
         {
             // Only read all required registers once
@@ -1072,7 +1470,33 @@ namespace MTUComm
 
         private Action truquitoAction;
 
-        private async Task Task_AddMtu ( Action action )
+        /// <summary>
+        /// In scripted mode this method overload is called before the main method,
+        /// because it is necessary to translate the script parameters from Aclara into
+        /// the app terminology and validate their values, removing unnecessary ones
+        /// to avoid headaches.
+        /// <para>
+        /// See <see cref="AddMtu(dynamic, string, Action)"/> for the writing logic.
+        /// </para>
+        /// </summary>
+        /// <param name="action">Current action type ( AddMtu, ReplaceMeter,.. )</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <exception cref="ScriptForOnePortButTwoEnabledException"></exception>
+        /// <exception cref="ScriptForTwoPortsButMtuOnlyOneException"></exception>
+        /// <exception cref="ScriptingAutoDetectMeterException"></exception>
+        /// <exception cref="NumberOfDialsTagMissingScript">( Used internally, not bubbling up )</exception>
+        /// <exception cref="DriveDialSizeTagMissingScript">( Used internally, not bubbling up )</exception>
+        /// <exception cref="UnitOfMeasureTagMissingScript">( Used internally, not bubbling up )</exception>
+        /// <exception cref="ScriptingAutoDetectTagsMissingScript"></exception>
+        /// <exception cref="ScriptingAutoDetectMeterMissing"></exception>
+        /// <exception cref="ScriptingAutoDetectNotSupportedException"></exception>
+        /// <exception cref="ProcessingParamsScriptException"></exception>
+        /// <exception cref="ScriptingAlarmForCurrentMtuException"></exception>
+        /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
+        /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
+        /// <exception cref="AddMtu (dynamic,string,Action) exceptions..."></exception>
+        private async Task AddMtu ( Action action )
         {
             truquitoAction     = action;
             Parameter[] ps     = action.GetParameters ();
@@ -1083,17 +1507,16 @@ namespace MTUComm
 
             // Action is about Replace Meter
             bool isReplaceMeter = (
-                action.type == ActionType.ReplaceMeter ||
-                action.type == ActionType.ReplaceMtuReplaceMeter ||
-                action.type == ActionType.AddMtuReplaceMeter );
+                action.Type == ActionType.ReplaceMeter ||
+                action.Type == ActionType.ReplaceMtuReplaceMeter ||
+                action.Type == ActionType.AddMtuReplaceMeter );
 
             // Action is about Replace MTU
             bool isReplaceMtu = (
-                action.type == ActionType.ReplaceMTU ||
-                action.type == ActionType.ReplaceMtuReplaceMeter );
+                action.Type == ActionType.ReplaceMTU ||
+                action.Type == ActionType.ReplaceMtuReplaceMeter );
             
             List<Meter> meters;
-            List<string> portTypes;
             Meter meterPort1 = null;
             Meter meterPort2 = null;
             
@@ -1101,11 +1524,11 @@ namespace MTUComm
             {
                 bool port2IsActivated = await this.GetMemoryMap ( true ).P2StatusFlag.GetValue ();
     
-                // Recover parameters from script and translante from Aclara nomenclature to our own
+                // Recover parameters from script and translate from Aclara nomenclature to our own
                 foreach ( Parameter parameter in ps )
                 {
-                    // Launchs exception 'TranslatingParamsScriptException'
-                    // Launchs exception 'SameParameterRepeatScriptException'
+                    // Launches exception 'TranslatingParamsScriptException'
+                    // Launches exception 'SameParameterRepeatScriptException'
                     form.AddParameterTranslatingAclaraXml ( parameter );
                     
                     if ( parameter.Port == 1 )
@@ -1651,7 +2074,7 @@ namespace MTUComm
 
                 #endregion
             
-                await this.Task_AddMtu ( form, action.user, action );
+                await this.AddMtu ( form, action.User, action );
             }
             catch ( Exception e )
             {
@@ -1662,7 +2085,25 @@ namespace MTUComm
             }
         }
 
-        private async Task Task_AddMtu (
+        /// <summary>
+        /// Installation process is used to install a new MTU or Meter unit or replace an old one,
+        /// configuring the MTU physical memory with the new values set in the application form or
+        /// read from the script file.
+        /// <para>
+        /// See <see cref="AddMtu(Action)"/> for the entry point of the DataRead process in scripted mode.
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <exception cref="SelectedAlarmForCurrentMtuException"></exception>
+        /// <exception cref="ActionNotAchievedEncryptionException"></exception>
+        /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
+        /// <exception cref="MtuHasChangeBeforeFinishActionException">( From CheckIsTheSameMTU )</exception>
+        /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
+        /// <exception cref="TurnOnOffMtu_Logic () exceptions..."></exception>
+        /// <exception cref="CheckSelectedEncoderMeter () exceptions..."></exception>
+        /// <seealso cref="OnAddMtu"/>
+        private async Task AddMtu (
             dynamic form,
             string user,
             Action action )
@@ -1674,14 +2115,14 @@ namespace MTUComm
 
             try
             {
-                Logger logger = ( ! Data.Get.IsFromScripting ) ? new Logger () : truquitoAction.logger;
+                Logger logger = ( ! Data.Get.IsFromScripting ) ? new Logger () : truquitoAction.Logger;
                 addMtuLog = new AddMtuLog ( logger, form, user );
 
                 #region Turn Off MTU
 
                 Utils.Print ( "------TURN_OFF_START-----" );
 
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Turning Off..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Turning Off..." ) );
 
                 await this.TurnOnOffMtu_Logic ( false );
                 addMtuLog.LogTurnOff ();
@@ -1700,7 +2141,7 @@ namespace MTUComm
                 {
                     Utils.Print ( "------CHECK_ENCODER_START-----" );
 
-                    OnProgress ( this, new ProgressArgs ( 0, 0, "Checking Encoder..." ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Checking Encoder..." ) );
 
                     // Check if selected Meter is supported for current MTU
                     if ( this.mtu.Port1.IsForEncoderOrEcoder )
@@ -1721,7 +2162,7 @@ namespace MTUComm
 
                 Utils.Print ( "--------ADD_START--------" );
 
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Preparing MemoryMap..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Preparing MemoryMap..." ) );
 
                 dynamic map = this.GetMemoryMap ( true );
                 form.map = map;
@@ -1773,7 +2214,7 @@ namespace MTUComm
                 }
                 else if ( this.mtu.Port1.IsForPulse )
                 {
-                    // If meter reading was not present, fill in to zeros up to length equals to selected Meter livedigits
+                    // If meter reading was not present, fill in to zeros up to length equals to selected Meter live digits
                     p1readingStr = selectedMeter.FillLeftLiveDigits ();
 
                     form.AddParameter ( FIELD.METER_READING, p1readingStr );
@@ -1894,7 +2335,7 @@ namespace MTUComm
                             if ( map.ContainsMember ( "AlarmMask1" ) ) map.AlarmMask1 = false; // Set '0'
                             if ( map.ContainsMember ( "AlarmMask2" ) ) map.AlarmMask2 = false;
                         }
-                        catch ( Exception e )
+                        catch ( Exception )
                         {
 
                         }
@@ -1928,7 +2369,7 @@ namespace MTUComm
                 {
                     Utils.Print ( "----ENCRYPTION_START-----" );
                 
-                    OnProgress ( this, new ProgressArgs ( 0, 0, "Encrypting..." ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Encrypting..." ) );
                 
                     MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
                     MemoryRegister<bool>   regEncrypted  = map[ "Encrypted"       ];
@@ -1993,7 +2434,7 @@ namespace MTUComm
                             }
                         }
                     }
-                    catch ( Exception e )
+                    catch ( Exception )
                     {
                         //...
                     }
@@ -2032,7 +2473,7 @@ namespace MTUComm
 
                 Utils.Print ( "---WRITE_TO_MTU_START----" );
 
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Writing MemoryMap to MTU..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Writing MemoryMap to MTU..." ) );
 
                 // Write changes into MTU
                 await this.WriteMtuModifiedRegisters ( map );
@@ -2050,7 +2491,7 @@ namespace MTUComm
 
                 Utils.Print ( "------TURN_ON_START------" );
 
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Turning On..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Turning On..." ) );
 
                 await this.TurnOnOffMtu_Logic ( true );
                 addMtuLog.LogTurnOn ();
@@ -2089,7 +2530,7 @@ namespace MTUComm
                 {
                     Utils.Print ( "--------IC_START---------" );
                 
-                    OnProgress ( this, new ProgressArgs ( 0, 0, "Install Confirmation..." ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Install Confirmation..." ) );
                 
                     // Force to execute Install Confirmation avoiding problems
                     // with MTU shipbit, because MTU is just turned on
@@ -2111,7 +2552,7 @@ namespace MTUComm
 
                 Utils.Print ( "----FINAL_READ_START-----" );
                 
-                OnProgress ( this, new ProgressArgs ( 0, 0, "Reading from MTU..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Reading from MTU..." ) );
                 
                 // Used to check if all data was write ok, and then to generate the
                 // final log without read again from the MTU the registers already read
@@ -2138,7 +2579,11 @@ namespace MTUComm
 
         #endregion
 
-        public void Task_BasicRead ()
+        /// <summary>
+        /// It is an action without logic, that only performs the initial MTU basic information reading.
+        /// </summary>
+        /// <seealso cref="OnBasicRead"/>
+        public void BasicRead ()
         {
             BasicReadArgs args = new BasicReadArgs();
             OnBasicRead(this, args);
@@ -2153,9 +2598,9 @@ namespace MTUComm
         /// during the writing action performed, optimizing the process and lengthening
         /// the MTU memory useful life.
         /// </summary>
-        /// <param name="map">Instance of the MemoryMap used in the writing process</param>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
+        /// <param name="map">MemoryMap used in the writing process</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
         public async Task WriteMtuModifiedRegisters ( MemoryMap.MemoryMap map )
         {
             List<dynamic> modifiedRegisters = map.GetModifiedRegisters ().GetAllElements ();
@@ -2182,8 +2627,8 @@ namespace MTUComm
         /// <param name="active">Desired status ( true = 1/one, false = 0/zero )</param>
         /// <param name="verify">Optionally the writing process can be validated reading
         /// the same register and comparing with desired status</param>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
         /// <para>
         /// Boolean that indicates if the write action has completed successfully.
         /// </para>
@@ -2220,10 +2665,11 @@ namespace MTUComm
         /// using the associated family to load the correct XML map, allowing
         /// to communicate ( write and read ) with the physical memory of the MTU.
         /// </summary>
-        /// <param name="readFromMtuOnlyOnce">By default, to get a register value the physical
+        /// <param name="readFromMtuOnlyOnce">To get a register value the physical
         /// memory of the MTU is read, but sometimes it is preferable
         /// to only read once and cache the data</param>
         /// <returns>An instance of the dynamic MemoryMap.</returns>
+        /// <exception cref="MemoryMapParseXmlException"></exception>
         private dynamic GetMemoryMap (
             bool readFromMtuOnlyOnce = false )
         {
@@ -2237,17 +2683,19 @@ namespace MTUComm
         /// <summary>
         /// Loads the basic information necessary to work with an MTU and be able to prepare
         /// the forms of the UI with the correct values ( compatible Meters,.. ), but the logic
-        /// is in another method to create a more readable and easy to mantain source code.
+        /// is in another method to create a more readable and easy to maintain source code.
         /// <para>
         /// See <see cref="LoadMtuBasicInfo"/> to recover basic data from the MTU.
         /// </para>
         /// </summary>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <exception cref="MtuMissingException">( From Configuration.GetMtuTypeById )</exception>
+        /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
         /// <seealso cref="MTUBasicInfo"/>
         private async Task LoadMtuAndMetersBasicInfo ()
         {
-            OnProgress ( this, new ProgressArgs ( 0, 0, "Initial Reading..." ) );
+            OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Initial Reading..." ) );
 
             if ( await this.LoadMtuBasicInfo () )
             {
@@ -2255,7 +2703,7 @@ namespace MTUComm
             
                 MtuForm.SetBasicInfo ( mtuBasicInfo );
                 
-                // Launchs exception 'MtuTypeIsNotFoundException'
+                // Launches exception 'MtuTypeIsNotFoundException'
 
                 // Get Mtu entry using numeric ID ( e.g. 138 )
                 this.mtu = configuration.GetMtuTypeById ( ( int )this.mtuBasicInfo.Type );
@@ -2271,9 +2719,12 @@ namespace MTUComm
         /// Loads the basic information necessary to work with an MTU and be able to
         /// prepare the forms of the UI with the correct values ( compatible Meters,.. ).
         /// </summary>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling, returning a boolean that indicates
-        /// if the autodetection worked or not.</returns>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// Indicates whether the auto-detection worked or not.
+        /// </para>
+        /// </returns>
         /// <seealso cref="MTUBasicInfo"/>
         private async Task<bool> LoadMtuBasicInfo ()
         //    bool isAfterWriting = false )
@@ -2288,7 +2739,7 @@ namespace MTUComm
                 finalRead.AddRange ( secondRead );
             }
             // System.IO.IOException = Puck is not well placed or is off
-            catch ( Exception e )
+            catch ( Exception )
             {
                 //if ( ! isAfterWriting )
                      Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
@@ -2309,11 +2760,13 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Checks if the MTU is still the same as at the beggining of the process,
+        /// Checks if the MTU is still the same as at the beginning of the process,
         /// otherwise the process should be canceled immediately, forcing an exception.
         /// </summary>
-        /// <returns>Task object required to execute the method asynchronously
-        /// and a correct exceptions bubbling.</returns>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <exception cref="MtuHasChangeBeforeFinishActionException"></exception>
+        /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
         private async Task CheckIsTheSameMTU ()
         {
             byte[] read;
@@ -2321,7 +2774,7 @@ namespace MTUComm
             {
                 read = await lexi.Read ( SAME_MTU_ADDRESS, SAME_MTU_DATA );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 throw new PuckCantCommWithMtuException ();
             }

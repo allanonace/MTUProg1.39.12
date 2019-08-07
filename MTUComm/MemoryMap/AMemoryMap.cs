@@ -6,14 +6,17 @@ using System.Threading.Tasks;
 
 namespace MTUComm.MemoryMap
 {
+    /// <summary>
+    /// This is the abstract class used as base to generate the dynamic <see cref="MemoryMap"/> for interact with the physical memory of the MTUs.
+    /// </summary>
     public abstract class AMemoryMap : DynamicObject
     {
         #region Constants
 
         /// <summary>
-        /// Types of elements present in the XML memory map, associated with
-        /// <see cref="MemoryRegister{T}"/>,
-        /// <see cref="MemoryOverload{T}"/>
+        /// Types of elements present in the XML <see cref="MemoryMap"/>, associated with
+        /// <see cref="MemoryRegister"/>,
+        /// <see cref="MemoryOverload"/>
         /// respectively
         /// <para>&#160;</para>
         /// </para>
@@ -38,11 +41,14 @@ namespace MTUComm.MemoryMap
         /// <summary>
         /// Dictionary used by the dynamic object to register dynamic members.
         /// <para>
-        /// NOTE: Should not be used directly, instead use TrySetMember and TryGetMember methods,
-        /// invoked transparently to the user who only needs to use the dot operator ( "." ).
+        /// NOTE: Should not be used directly, instead use <see cref="TrySetMember"/> and <see cref="TryGetMember"/> methods,
+        /// invoked transparently to the user, who only needs to use the dot operator ( "." ).
         /// </para>
         /// <para>
-        /// See <see cref="TrySetMember" /> to add a new member dynamically to the object.
+        /// See <see cref="TrySetMember"/> to add a new member dynamically to the object.
+        /// </para>
+        /// <para>
+        /// See <see cref="TryGetMember"/> to recover a member registered in the object.
         /// </para>
         /// </summary>
         private Dictionary<string, dynamic> dictionary;
@@ -54,8 +60,8 @@ namespace MTUComm.MemoryMap
 
         /// <summary>
         /// Easy way to recover members registered in the dynamic object, in this case
-        /// <see cref="MemoryRegister{T}"/>,
-        /// <see cref="MemoryOverload{T}"/> and
+        /// <see cref="MemoryRegister"/>,
+        /// <see cref="MemoryOverload"/> and
         /// the associated methods.
         /// </summary>
         /// <remarks>
@@ -86,9 +92,6 @@ namespace MTUComm.MemoryMap
 
         #region Initialization
 
-        /// <summary>
-        /// This is the abstract class used as base to generate the dynamic memory map for interact with the physical memory of the MTUs.
-        /// </summary>
         public AMemoryMap ()
         {
             // Will contain MemoryRegister objects but thanks to TryGetMember
@@ -106,11 +109,11 @@ namespace MTUComm.MemoryMap
         #region Methods
 
         /// <summary>
-        /// Add a dynamic member to the memory map of type
-        /// <see cref="MemoryRegister{T}"/>
-        /// or <see cref="MemoryOverload{T}"/>.
+        /// Add a dynamic member to the <see cref="MemoryMap"/> of type
+        /// <see cref="MemoryRegister"/>
+        /// or <see cref="MemoryOverload"/>.
         /// </summary>
-        /// <param name="register">Instance of the element to add to the memory map</param>
+        /// <param name="register">Element to add to the <see cref="MemoryMap"/></param>
         protected void AddProperty ( dynamic register )
         {
             if ( ! this.dictionary.ContainsKey ( register.id ) )
@@ -118,7 +121,7 @@ namespace MTUComm.MemoryMap
         }
 
         /// <summary>
-        /// Add a dynamic member to the memory map of type Func<> or Action<>
+        /// Add a dynamic member to the <see cref="MemoryMap"/> of type Func<> or Action<>.
         /// </summary>
         /// <param name="id">Name of the method to be registered</param>
         /// <param name="method">Reference to the method</param>
@@ -129,10 +132,10 @@ namespace MTUComm.MemoryMap
         }
 
         /// <summary>
-        /// Check if the memory map contains/has registered a member with an specific name.
+        /// Check if the <see cref="MemoryMap"/> contains/has registered a member with an specific name.
         /// </summary>
         /// <param name="id">Name of the element to search</param>
-        /// <returns><see langword="true"/> if the member is present in the memory map</returns>
+        /// <returns><see langword="true"/> if the member is present in the <see cref="MemoryMap"/>.</returns>
         public bool ContainsMember ( string id )
         {
             return this.dictionary.ContainsKey ( id );
@@ -143,18 +146,38 @@ namespace MTUComm.MemoryMap
         /// <summary>
         /// Method inherited from DynamicObject base class, that allows to set
         /// new dynamic members using the dot operator ( "." ).
+        /// <para>
+        /// In the application this method is not used to set new dynamic members
+        /// but for to change the value of already registered ( during the <see cref="MemoryMap"/>
+        /// initialization ) members.
+        /// </para>
         /// </summary>
         /// <remarks>
-        /// NOTE: This method can not be converted into an asynchronous method.
+        /// NOTE: This .NET method can not be converted into an asynchronous method.
+        /// <para>
+        /// See <see cref="Set"/> to modify the value of a member.
+        /// </para>
         /// </remarks>
         /// <param name="binder">Use binder.Name property to recover the member ID/name specified</param>
         /// <param name="value">Value to be associated to the new generated member</param>
         /// <returns><see langword="true"/> if the new member is generated correctly.</returns>
+        /// <exception cref="Set exceptions..."></exception>
         public override bool TrySetMember ( SetMemberBinder binder, object value )
         {
             return this.Set ( binder.Name, value ).Result;
         }
 
+        /// <summary>
+        /// Inherited method <see cref="TrySetMember"/> cannot be executed in asynchronous way and for
+        /// that reason the logic was extracted to this method.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: For the moment this method is only invoked synchronously.
+        /// </remarks>
+        /// <param name="id">Member ID/name</param>
+        /// <param name="value">Value to be associated to the member</param>
+        /// <exception cref="MemoryOverloadsAreReadOnly"></exception>
+        /// <exception cref="MemoryRegisterNotExistException"></exception>
         private async Task<bool> Set ( string id, object value )
         {
             // Selected dynamic member exists
@@ -181,25 +204,39 @@ namespace MTUComm.MemoryMap
         /// registered dynamic members using the dot operator ( "." ).
         /// </summary>
         /// <remarks>
-        /// NOTE: This method can not be converted into an asynchronous method.
+        /// NOTE: This .NET method can not be converted into an asynchronous method.
+        /// <para>
+        /// See <see cref="Get"/> to recover a registered member.
+        /// </para>
         /// </remarks>
         /// <param name="binder">Use binder.Name property to recover the member ID/name specified</param>
         /// <param name="result">It will be the reference to the recovered member</param>
         /// <returns><see langword="true"/> if the member is present in the dictionary and it is recovered correctly.</returns>
+        /// <exception cref="Get exceptions..."></exception>
         public override bool TryGetMember ( GetMemberBinder binder, out object result )
         {
             return this.Get ( binder.Name, out result );
         }
 
+        /// <summary>
+        /// Inherited method <see cref="TryGetMember"/> cannot be executed in asynchronous way and for
+        /// that reason the logic was extracted to this method.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: For the moment this method is only invoked synchronously.
+        /// </remarks>
+        /// <param name="id">Member ID/name</param>
+        /// <param name="result">It will be the reference to the recovered member</param>
+        /// <exception cref="MemoryRegisterNotExistException"></exception>
         private bool Get ( string id, out object result )
         {
             if ( this.dictionary.ContainsKey ( id ) )
             {
-                dynamic register = this.dictionary[id];
-
                 result = this.dictionary[ id ];
 
                 /*
+                dynamic register = this.dictionary[id];
+
                 if ( register.registerType == REGISTER_TYPE.REGISTER )
                 {
                     // Some registers have customized get method

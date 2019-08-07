@@ -52,7 +52,7 @@ namespace ble_library
         /// <summary>
         /// Reads a number of characters from the input buffer and writes them into an array of characters at a given offset.
         /// </summary>
-        /// <param name="buffer">Data to be written to the port</param>
+        /// <param name="buffer">Bytes to write</param>
         /// <param name="offset">Zero based byte offset</param>
         /// <param name="count">The maximum number of bytes to read</param>
         /// <returns>The number of bytes read.</returns>
@@ -101,7 +101,7 @@ namespace ble_library
         /// <summary>
         /// Writes a specific number of characters to the serial port using data from a buffer.
         /// </summary>
-        /// <param name="buffer">Data to be written to the port</param>
+        /// <param name="buffer">Bytes to write</param>
         /// <param name="offset">Zero based byte offset</param>
         /// <param name="count">Number of bytes to write</param>
         public async Task Write(byte[] buffer, int offset, int count)

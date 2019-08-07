@@ -976,7 +976,7 @@ namespace aclara_meters.view
             //throw new NotImplementedException();
         }
 
-        private void OnProgress ( object sender, MTUComm.Action.ActionProgressArgs e )
+        private void OnProgress ( object sender, MTUComm.Delegates.ProgressArgs e )
         {
             string mensaje = e.Message;
 

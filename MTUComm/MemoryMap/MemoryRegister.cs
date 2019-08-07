@@ -9,6 +9,11 @@ using RegType       = MTUComm.MemoryMap.MemoryMap.RegType;
 
 namespace MTUComm.MemoryMap
 {
+    /// <summary>
+    /// Representation of a memory register with all the information required
+    /// to be able to simulate n bytes of the physical memory of the MTU, in
+    /// a human readable way.
+    /// </summary>
     public class MemoryRegister<T>
     {
         #region Constants
@@ -162,15 +167,33 @@ namespace MTUComm.MemoryMap
                          ! string.IsNullOrEmpty ( this.custom_Get ); } // And is not an empty string
         }
 
-        // - MemoryMap.CreateProperty_Get<T>
-        // - MemoryRegister{Constructor}
-        // - IMemoryMap.TryGetMember|Get
+        /// <summary>
+        /// Indicates whether the register value will be recovered in raw format, without performing any post-process.
+        /// <para>
+        /// If <see langword="true"/>, the value will be processed before returned, modifying the value read from the physical memory of the MTU.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// NOTE: If <see cref="HasCustomMethod_Get"/> and <see cref="HasCustomOperation_Get"/> are <see langword="false"/>, the
+        /// value will be recovered in raw format, without applying any post-process.
+        /// </remarks>
+        /// <seealso cref="HasCustomOperation_Get"/>
         public bool HasCustomMethod_Get
         {
             get { return this.customType_Get == CUSTOM_TYPE.METHOD; }
         }
 
-        // - MemoryMap.CreateProperty_Get<T>
+        /// <summary>
+        /// Indicates whether the register value will be calculated used the inline operation defined.
+        /// <para>
+        /// If <see langword="true"/>, the value will be processed before returned, modifying the value read from the physical memory of the MTU.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// NOTE: If <see cref="HasCustomMethod_Get"/> and <see cref="HasCustomOperation_Get"/> are <see langword="false"/>, the
+        /// value will be recovered in raw format, without applying any post-process.
+        /// </remarks>
+        /// <seealso cref="HasCustomMethod_Get"/>
         public bool HasCustomOperation_Get
         {
             get { return this.customType_Get == CUSTOM_TYPE.OPERATION; }
@@ -222,7 +245,7 @@ namespace MTUComm.MemoryMap
 
         /// <summary>
         /// Returns immediately the value stored in the register without
-        /// applying any process to the data ( raw ) in register format.
+        /// applying any post-process to the data ( raw ) in register format.
         /// <para>
         /// See <see cref="ValueByteArrayRaw"/> to recover raw data in byte array format.
         /// </para>
@@ -244,7 +267,7 @@ namespace MTUComm.MemoryMap
         
         /// <summary>
         /// Returns immediately the value stored in the register without
-        /// applying any process to the data ( raw ) in byte array format.
+        /// applying any post-process to the data ( raw ) in byte array format.
         /// <para>
         /// See <see cref="ValueRaw"/> to recover raw data in in register format.
         /// </para>
@@ -265,7 +288,8 @@ namespace MTUComm.MemoryMap
         }
 
         /// <summary>
-        /// Returns asynchronously the value stored in the register without applying any process to the data ( raw ) in byte array format.
+        /// Returns asynchronously the value stored in the register without applying
+        /// any post-process to the data ( raw ) in byte array format.
         /// <para>
         /// See <see cref="GetValueFromMtu(bool)"/> to recover data in register format.
         /// </para>
@@ -274,8 +298,8 @@ namespace MTUComm.MemoryMap
         /// TODO: Rename to "GetValueByteArrayFromMtu"
         /// </remarks>
         /// <param name="useSizeGet"><see langword="false"/> to recover register data using the same size as writing</param>
-        /// <returns>Task object required to execute the method asynchronously and a correct
-        /// exceptions bubbling.
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
         /// <para>
         /// Current value stored in the register in byte array format.
         /// </para>
@@ -293,14 +317,15 @@ namespace MTUComm.MemoryMap
         }
 
         /// <summary>
-        /// Returns asynchronously the value stored in the register without applying any process to the data ( raw ).
+        /// Returns asynchronously the value stored in the register without
+        /// applying any post-process to the data ( raw ).
         /// <para>
         /// See <see cref="GetValueByteArray(bool)"/> to recover data in byte array format.
         /// </para>
         /// </summary>
         /// <param name="returnByteArray"><see langword="true"/> to recover data in byte array format</param>
-        /// <returns>Task object required to execute the method asynchronously and a correct
-        /// exceptions bubbling.
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
         /// <para>
         /// Current value stored in the register in register format or byte array format-
         /// </para>
@@ -340,8 +365,8 @@ namespace MTUComm.MemoryMap
         /// </para>
         /// </remarks>
         /// <param name="value">New value that will be set to the bit pointed by the register and then written to the physical memory of the MTU</param>
-        /// <returns>Task object required to execute the method asynchronously and a correct
-        /// exceptions bubbling.</returns>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="SetBitToMtu"/>
         /// <seealso cref="SetValue(dynamic)"/>
         /// <seealso cref="SetValueToMtu(dynamic)"/>
@@ -372,8 +397,8 @@ namespace MTUComm.MemoryMap
         /// </para>
         /// </summary>
         /// <param name="value">New value that will be set to the register and then written to the physical memory of the MTU</param>
-        /// <returns>Task object required to execute the method asynchronously and a correct
-        /// exceptions bubbling.</returns>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="ResetByteAndSetValueToMtu(dynamic)"/>
         /// <seealso cref="SetBitToMtu"/>
         /// <seealso cref="SetValue(dynamic)"/>
@@ -406,8 +431,8 @@ namespace MTUComm.MemoryMap
         /// <remarks>
         /// NOTE: This method should only be used working with bool registers.
         /// </remarks>
-        /// <returns>Task object required to execute the method asynchronously and a correct
-        /// exceptions bubbling.</returns>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="ResetByteAndSetValueToMtu"/>
         private async Task SetBitToMtu ()
         {
@@ -434,8 +459,8 @@ namespace MTUComm.MemoryMap
         /// the physical memory of the MTU, at least for this register because using custom
         /// methods could be necessary to recover other registers from the MTU.
         /// </summary>
-        /// <returns>Task object required to execute the method asynchronously and a correct
-        /// exceptions bubbling.
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
         /// <para>
         /// Current ( cached ) value of the register.
         /// </para>
@@ -461,8 +486,8 @@ namespace MTUComm.MemoryMap
         /// </para>
         /// </summary>
         /// <param name="value">Value that will be set to the register and then written to the physical memory of the MTU</param>
-        /// <returns>Task object required to execute the method asynchronously and a correct
-        /// exceptions bubbling.</returns>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="ResetByteAndSetValueToMtu(dynamic)"/>
         /// <seealso cref="SetValue(dynamic)"/>
         /// <seealso cref="SetValueToMtu(dynamic)"/>
@@ -536,19 +561,9 @@ namespace MTUComm.MemoryMap
 
         #region Initialization
 
-        /// <summary>
-        /// Representation of a memory register with all the information required
-        /// to be able to simulate n bytes of the physical memory of the MTU, in
-        /// a human readable way.
-        /// </summary>
         public MemoryRegister () { }
 
-        /// <summary>
-        /// Representation of a memory register with all the information required
-        /// to be able to simulate n bytes of the physical memory of the MTU, in
-        /// a human readable way.
-        /// </summary>
-        /// <param name="id">Identifier of the memory register</param>
+        /// <param name="id">Identifier of the register</param>
         /// <param name="type">Type of the register ( int, uint, ulong, bool or string )</param>
         /// <param name="description">Additional information about the register and its purpose</param>
         /// <param name="address">First byte in the MTU memory used by the register</param>
@@ -610,10 +625,10 @@ namespace MTUComm.MemoryMap
         #region Compare
 
         /// <summary>
-        /// Compares two registers, used to know if two memory maps are the
-        /// same and which registers have been modified from one to another.
+        /// Compares two <see cref="MemoryRegister"/>s, used to know if two <see cref="MemoryMap"/>s are the
+        /// same and which ones have been modified from one to another.
         /// </summary>
-        /// <param name="other">Other memory register to compare with this</param>
+        /// <param name="other">Other <see cref="MemoryRegister"/> to compare with this</param>
         /// <returns><see langword="true"/> if both registers have the same values.</returns>
         public async Task<bool> Equals ( MemoryRegister<T> other )
         {

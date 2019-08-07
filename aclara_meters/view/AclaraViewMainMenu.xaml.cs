@@ -1208,11 +1208,10 @@ namespace aclara_meters.view
         private void TurnOffMethod()
         {
 
-            MTUComm.Action turnOffAction = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type: MTUComm.Action.ActionType.TurnOffMtu,
-                user: FormsApp.credentialsService.UserName);
+            MTUComm.Action turnOffAction = new MTUComm.Action (
+                FormsApp.ble_interface,
+                MTUComm.Action.ActionType.TurnOffMtu,
+                FormsApp.credentialsService.UserName );
 
             turnOffAction.OnFinish += ((s, args) =>
             {
@@ -1333,11 +1332,10 @@ namespace aclara_meters.view
 
         void BasicReadThread()
         {
-            MTUComm.Action basicRead = new MTUComm.Action(
-               config: FormsApp.config,
-               serial: FormsApp.ble_interface,
-               type: MTUComm.Action.ActionType.BasicRead,
-               user: FormsApp.credentialsService.UserName);
+            MTUComm.Action basicRead = new MTUComm.Action (
+               FormsApp.ble_interface,
+               MTUComm.Action.ActionType.BasicRead,
+               FormsApp.credentialsService.UserName );
 
             /*
             basicRead.OnFinish += ((s, args) =>

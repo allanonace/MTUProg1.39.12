@@ -193,10 +193,9 @@ namespace aclara_meters.view
            // this.addMtuForm = new AddMtuForm ( currentMtu );
             
             this.Data_read = new MTUComm.Action (
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type  : this.actionType,
-                user  : FormsApp.credentialsService.UserName );
+                FormsApp.ble_interface,
+                this.actionType,
+                FormsApp.credentialsService.UserName );
             
             isCancellable = true;
 
@@ -1769,11 +1768,10 @@ namespace aclara_meters.view
 
         private void TurnOffMethod ()
         {
-            MTUComm.Action turnOffAction = new MTUComm.Action(
-                config: FormsApp.config,
-                serial: FormsApp.ble_interface,
-                type: MTUComm.Action.ActionType.TurnOffMtu,
-                user: FormsApp.credentialsService.UserName);
+            MTUComm.Action turnOffAction = new MTUComm.Action (
+                FormsApp.ble_interface,
+                MTUComm.Action.ActionType.TurnOffMtu,
+                FormsApp.credentialsService.UserName );
 
             turnOffAction.OnFinish += ((s, args) =>
             {
@@ -2130,7 +2128,7 @@ namespace aclara_meters.view
             Data_read.Run ();
         }
 
-        private void OnProgress ( object sender, MTUComm.Action.ActionProgressArgs e )
+        private void OnProgress ( object sender, MTUComm.Delegates.ProgressArgs e )
         {
             string mensaje = e.Message;
 

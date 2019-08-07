@@ -347,6 +347,18 @@ namespace Xml
     ///   <description>[1-5000] If required, contact Engineering for details. MTU read delay</description>
     /// </item>
     /// <item>
+    ///   <term>GoodF1Rely</term>
+    ///   <description>Good F1 frequency threshold in meters for the evaluation of nodes during the Node Discovery process</description>
+    /// </item>
+    /// <item>
+    ///   <term>GoodF2Rely</term>
+    ///   <description>Good F2 frequency threshold in meters for the evaluation of nodes during the Node Discovery process</description>
+    /// </item>
+    /// <item>
+    ///   <term>GoodNumDCU</term>
+    ///   <description>The desired number of DCUs for the evaluation of the Node Discovery process</description>
+    /// </item>
+    /// <item>
     ///   <term>GpsBaudRate</term>
     ///   <description>[9600,4800] GPS Communication Baud Rate</description>
     /// </item>
@@ -411,6 +423,10 @@ namespace Xml
     ///   <description>specifies if the logs files are in the public folder or in the privte folder</description>
     /// </item>
     /// <item>
+    ///   <term>MaxTimeRFCheck</term>
+    ///   <description>Maximum time in seconds to perform the Node Discovery process</description>
+    /// </item>
+    /// <item>
     ///   <term>MeterNumberLength</term>
     ///   <description>[1-20] Maximum length of the meter serial number</description>
     /// </item>
@@ -425,6 +441,18 @@ namespace Xml
     /// <item>
     ///   <term>MinDate</term>
     ///   <description>If the handheld reports a date earlier than“MinDate”, STAR Programmer stops working in order to prevent the wrong date from being entered</description>
+    /// </item>
+    /// <item>
+    ///   <term>MinF1Rely</term>
+    ///   <description>The minimum F1 frequency threshold in meters for the evaluation of nodes during the Node Discovery process</description>
+    /// </item>
+    /// <item>
+    ///   <term>MinF2Rely</term>
+    ///   <description>The minimum F2 frequency threshold in meters for the evaluation of nodes during the Node Discovery process</description>
+    /// </item>
+    /// <item>
+    ///   <term>MinNumDCU</term>
+    ///   <description>The minimum number of DCUs for the evaluation of the Node Discovery process</description>
     /// </item>
     /// <item>
     ///   <term>MtuIdLength</term>
@@ -934,15 +962,23 @@ namespace Xml
             this.WriteF1SystemTime            = false;                // F1 write MTU system time from handheld or PC
             this.XmitTimer                    = 0;                    // [UInt] Transmit Timer
             
+            // DataRead
+            this.NumOfDays                    = 1;                    // Number of days used for recover DataRead events
+
+            // Node Discovery
+            this.MinNumDCU                    = 1;                    // Minimum number of DCUs
+            this.GoodNumDCU                   = 3;                    // Good number of DCUs
+            this.MinF1Rely                    = 75m;                  // Minimum F1 frequency threshold
+            this.MinF2Rely                    = 50m;                  // Minimum F2 frequency threshold
+            this.GoodF1Rely                   = 98.5m;                // Good F1 frequency threshold
+            this.GoodF2Rely                   = 75m;                  // Good F2 frequency threshold
+            this.MaxTimeRFCheck               = 60;                   // Max time in seconds to perform the process
+
             // New parameters/tags ( Own )
             
             // gzip is simply deflate plus a checksum and header/footer. Deflate is faster and smaller
             // So naturally, no checksum is faster but then you also can't detect corrupt streams
             this.Compression                  = string.Empty;         // "", "gzip" and "deflate"
-
-            // New parameters/tags ( Aclara )
-
-            this.NumOfDays                    = 1;                    // Number of days used for recover DataRead events
         
             #region Collections
         
@@ -1284,6 +1320,15 @@ namespace Xml
         [XmlElement("GetMtuDelay")]
         public int GetMtuDelay { get; set; }
 
+        [XmlElement("GoodF1Rely")]
+        public decimal GoodF1Rely { get; set; }
+
+        [XmlElement("GoodF2Rely")]
+        public decimal GoodF2Rely { get; set; }
+
+        [XmlElement("GoodNumDCU")]
+        public int GoodNumDCU { get; set; }
+
         [XmlElement("GpsBaudRate")]
         public int GpsBaudRate { get; set; }
 
@@ -1332,6 +1377,9 @@ namespace Xml
         [XmlElement("LogsPublicDir")]
         public bool LogsPublicDir { get; set; }
 
+        [XmlElement("MaxTimeRFCheck")]
+        public int MaxTimeRFCheck { get; set; }
+
         [XmlElement("MeterNumberLength")]
         public int MeterNumberLength { get; set; }
 
@@ -1343,6 +1391,15 @@ namespace Xml
 
         [XmlElement("MinDate")]
         public string MinDate { get; set; }
+
+        [XmlElement("MinF1Rely")]
+        public decimal MinF1Rely { get; set; }
+
+        [XmlElement("MinF2Rely")]
+        public decimal MinF2Rely { get; set; }
+
+        [XmlElement("MinNumDCU")]
+        public int MinNumDCU { get; set; }
 
         [XmlElement("MtuIdLength")]
         public int MtuIdLength { get; set; }
@@ -1370,6 +1427,9 @@ namespace Xml
 
         [XmlElement("NormXmitInterval")]
         public string NormXmitInterval { get; set; }
+
+        [XmlElement("NumOfDays")]
+        public int NumOfDays { get; set; }
 
         [XmlElement("OldReadingDualEntry")]
         public bool OldReadingDualEntry { get; set; }
@@ -1644,13 +1704,6 @@ namespace Xml
         
         [XmlElement("Compression")]
         public string Compression { get; set; }
-
-        #endregion
-
-        #region New Tags ( Aclara )
-
-        [XmlElement("NumOfDays")]
-        public int NumOfDays { get; set; }
 
         #endregion
     }

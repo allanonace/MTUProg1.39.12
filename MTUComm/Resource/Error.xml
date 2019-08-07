@@ -53,6 +53,10 @@
     <Error id="601" message="The MTU is turned off" footer="MTU turned off" />
     <Error id="602" message="Installation Confirmation process has failed trying to communicate with the DCU" /> <!-- footer not necessary -->
     <Error id="603" message="Installation Confirmation cannot be performed after having tried it _var_ times" footer="IC not achieved" />
+    <Error id="604" message="Node Discovery not initialized correctly" footer="NodeDiscovery not initialized" />
+    <Error id="605" message="Node Discovery not started correctly" footer="NodeDiscovery not started" />
+    <Error id="606" message="Node Discovery process has failed trying to recover a node/DCU" />
+    <Error id="607" message="Node Discovery cannot be performed after having tried it _var_ times" footer="NodeDiscovery not achieved" />
 
     <!-- Encryption -->
     <Error id="700" message="The MTU encryption process can't be performed after having tried it _var_ times" footer="Encryption not achieved" />
@@ -88,6 +92,7 @@
     <Error id="904" message="Overload register _var_ must have the custom field configured" footer="Overload method not set" />
     <Error id="905" message="String argument can't be casted to _var_" footer="Invalid value casting" />
     <Error id="906" message="Argument value is outside _var_ limits" footer="Invalid value size" />
+    <Error id="907" message="All overload registers are readonly members" footer="Overloads are read-only" />
 
     <!--<Error id="" message="" />-->
     <!--<Error id="100" message="Mensaje de prueba de error propio" [ footer="..." ] />-->

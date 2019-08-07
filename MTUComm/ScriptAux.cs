@@ -165,7 +165,7 @@ namespace MTUComm
         {
             Configuration config         = Singleton.Get.Configuration;
             Global        global         = config.Global;
-            ActionType    actionType     = action.type;
+            ActionType    actionType     = action.Type;
             var           data           = translatedParams.Data;
             bool          scriptUsePort2 = translatedParams.UsePort2;
 
@@ -184,14 +184,14 @@ namespace MTUComm
             
             // Action is about Replace Meter
             bool isReplaceMeter = (
-                action.type == ActionType.ReplaceMeter ||
-                action.type == ActionType.ReplaceMtuReplaceMeter ||
-                action.type == ActionType.AddMtuReplaceMeter );
+                action.Type == ActionType.ReplaceMeter ||
+                action.Type == ActionType.ReplaceMtuReplaceMeter ||
+                action.Type == ActionType.AddMtuReplaceMeter );
 
             // Action is about Replace MTU
             bool isReplaceMtu = (
-                action.type == ActionType.ReplaceMTU ||
-                action.type == ActionType.ReplaceMtuReplaceMeter );
+                action.Type == ActionType.ReplaceMTU ||
+                action.Type == ActionType.ReplaceMtuReplaceMeter );
 
             #region Get Meters
 
