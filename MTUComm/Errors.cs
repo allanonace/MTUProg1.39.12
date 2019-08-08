@@ -266,7 +266,7 @@ namespace MTUComm
         {
             Action currentAction = Singleton.Get.Action;
         
-            this.logger      = ( currentAction != null ) ? currentAction.logger : new Logger ();
+            this.logger      = ( currentAction != null ) ? currentAction.Logger : new Logger ();
             this.errors      = new Dictionary<int,Error> ();
             this.errorsToLog = new List<Error> ();
             this.xmlErrors   = Utils.DeserializeXml<ErrorList> ( "Error.xml", true ).List;

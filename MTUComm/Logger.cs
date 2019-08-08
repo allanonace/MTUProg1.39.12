@@ -123,9 +123,9 @@ namespace MTUComm
             Action currentAction;
             if ( ( currentAction = Singleton.Get.Action ) != null )
             {
-                base_stream += "    <Action display=\"" + Action.logDisplays[ currentAction.type ] + "\" type=\"" + Action.logTypes[ currentAction.type ] + "\" reason=\"" + Action.logReasons[ currentAction.type ] + "\">";
+                base_stream += "    <Action display=\"" + Action.logDisplays[ currentAction.Type ] + "\" type=\"" + Action.logTypes[ currentAction.Type ] + "\" reason=\"" + Action.logReasons[ currentAction.Type ] + "\">";
                 base_stream += "        <Date display=\"Date/Time\">" + DateTime.Now.ToString("MM/dd/yyyy HH:mm") + "</Date>";
-                base_stream += "        <User display=\"User\">" + currentAction.user + "</User>";
+                base_stream += "        <User display=\"User\">" + currentAction.User + "</User>";
                 base_stream += "    </Action>";
             }
             
@@ -322,7 +322,7 @@ namespace MTUComm
             // create or write in the activity log in interactive mode
             String uri = CreateFileIfNotExist();
             XDocument doc = XDocument.Load(uri);
-            PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action.type, allParamsFromInterface, mtu, isSubAction );
+            PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action.Type, allParamsFromInterface, mtu, isSubAction );
             doc.Save(uri);
 
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
@@ -331,14 +331,14 @@ namespace MTUComm
             using ( Stream BasicStruct = new MemoryStream ( Encoding.UTF8.GetBytes ( CreateBasicStructure () ) ) )
             {
                 uniDoc = XDocument.Load(BasicStruct);
-                PrepareLog_ReadMTU(uniDoc.Root.Element("Mtus"), action.type, allParamsFromInterface, mtu, isSubAction );
+                PrepareLog_ReadMTU(uniDoc.Root.Element("Mtus"), action.Type, allParamsFromInterface, mtu, isSubAction );
             }
             
             #if DEBUG
             
             // Single file for debugging purposes
             string uniUri = Path.Combine ( Mobile.LogUniPath,
-                mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
+                mtu.Id + "-" + action.Type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( BasicFileType.READ, false, uniUri );
             uniDoc.Save ( uniUri );
             
@@ -353,7 +353,7 @@ namespace MTUComm
                 
                 uri = CreateFileIfNotExist ();
                 doc = XDocument.Load( uri );
-                PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action.type, allParamsFromInterface, mtu, isSubAction );
+                PrepareLog_ReadMTU(doc.Root.Element("Mtus"), action.Type, allParamsFromInterface, mtu, isSubAction );
                 doc.Save(uri);
             }
 
@@ -586,7 +586,7 @@ namespace MTUComm
             #if DEBUG
             
             string uniUri = Path.Combine ( Mobile.LogUniPath,
-                mtu.Id + "-" + action.type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
+                mtu.Id + "-" + action.Type + ( ( mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.CreateFileIfNotExist ( BasicFileType.READ, false, uniUri );
              
             uniDoc.Save ( uniUri );
@@ -618,15 +618,15 @@ namespace MTUComm
 
             AddParameter(element, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
 
-            if ( action.user != null )
-                AddParameter(element, new Parameter("User", "User", action.user ));
+            if ( action.User != null )
+                AddParameter(element, new Parameter("User", "User", action.User ));
 
             AddParameter ( element, resultBasic.getParameters()[ 2 ] ); // MtuType ( e.g. 138 )
             AddParameter ( element, resultBasic.getParameters()[ 3 ] ); // MtuID / Serial number
 
             // Add additional parameters
-            if ( action.type == ActionType.TurnOnMtu ||
-                 action.type == ActionType.TurnOffMtu )
+            if ( action.Type == ActionType.TurnOnMtu ||
+                 action.Type == ActionType.TurnOffMtu )
                 this.AddAdditionalParameters ( element, resultBasic );
 
             parent.Add(element);
@@ -646,7 +646,7 @@ namespace MTUComm
             AddAtrribute(element, "reason", action.LogReason);
 
             AddParameter(element, new Parameter("Date", "Date/Time", DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss")));
-            AddParameter(element, new Parameter("User", "User", action.user));
+            AddParameter(element, new Parameter("User", "User", action.User));
 
             AddParameter(element, new Parameter("Cancel", "Cancel Action", cancel));
             AddParameter(element, new Parameter("Reason", "Cancel Reason", reason));

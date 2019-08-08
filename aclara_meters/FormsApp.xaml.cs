@@ -658,8 +658,8 @@ namespace aclara_meters
                 str.AppendLine ( "" );
                 str.AppendLine ( "Action" );
                 str.AppendLine ( "------" );
-                str.AppendLine ( string.Format ( "{0,-50} : {1}", "Type", action.type ) );
-                str.AppendLine ( string.Format ( "{0,-50} : {1}", "User", action.user ) );
+                str.AppendLine ( string.Format ( "{0,-50} : {1}", "Type", action.Type ) );
+                str.AppendLine ( string.Format ( "{0,-50} : {1}", "User", action.User ) );
                 
                 // Add current values in Global.xml
                 str.AppendLine ( "" );
@@ -696,7 +696,7 @@ namespace aclara_meters
                 str.AppendLine ( "---------" );
                 str.AppendLine ( exception.InnerException.ToString () );
                 
-                string errorFileName = string.Format ( "{0}_{1}_{2}.txt", "Exception", action.type, DateTime.Now.ToString ( "MM-dd-yyyy_HH-mm" ) );
+                string errorFileName = string.Format ( "{0}_{1}_{2}.txt", "Exception", action.Type, DateTime.Now.ToString ( "MM-dd-yyyy_HH-mm" ) );
                 var libraryPath      = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
                 var errorFilePath    = Path.Combine ( libraryPath, errorFileName );
                 File.WriteAllText ( errorFilePath, str.ToString () );

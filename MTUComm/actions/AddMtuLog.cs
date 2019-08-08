@@ -84,7 +84,7 @@ namespace MTUComm
             string  DISABLED = MemoryMap.MemoryMap.DISABLED;
             string  ENABLED  = MemoryMap.MemoryMap.ENABLED;
 
-            ActionType actionType = this.action.type;
+            ActionType actionType = this.action.Type;
 
             bool isReplaceMeter = actionType == ActionType.ReplaceMeter           ||
                                   actionType == ActionType.ReplaceMtuReplaceMeter ||
@@ -97,9 +97,9 @@ namespace MTUComm
             //logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
             // logger.addAtrribute ( this.addMtuAction, "type",    addMtuType    );
             // logger.addAtrribute ( this.addMtuAction, "reason",  addMtuReason  );
-            logger.AddAtrribute(this.addMtuAction, "display", Action.logDisplays[this.action.type]);
-            logger.AddAtrribute(this.addMtuAction, "type", Action.logTypes[this.action.type]);
-            logger.AddAtrribute(this.addMtuAction, "reason", Action.logReasons[this.action.type]);
+            logger.AddAtrribute(this.addMtuAction, "display", Action.logDisplays[this.action.Type]);
+            logger.AddAtrribute(this.addMtuAction, "type", Action.logTypes[this.action.Type]);
+            logger.AddAtrribute(this.addMtuAction, "reason", Action.logReasons[this.action.Type]);
 
             logger.AddParameter ( this.addMtuAction, new Parameter("Date", "Date/Time", DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss")));
 
@@ -473,7 +473,7 @@ namespace MTUComm
             uniMtus.Add(this.addMtuAction);
 #if DEBUG
             string uniUri = Path.Combine ( Mobile.LogUniPath,
-                this.mtuBasicInfo.Type + "-" + this.action.type + ( ( form.mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
+                this.mtuBasicInfo.Type + "-" + this.action.Type + ( ( form.mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.logger.CreateFileIfNotExist ( Logger.BasicFileType.READ, false, uniUri );
 
             uniDoc.Save ( uniUri );           

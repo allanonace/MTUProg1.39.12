@@ -1022,8 +1022,11 @@ namespace MTUComm
 
         /// <summary>
         /// The Node Discovery process is only performed working with OnDemand compatible MTUs,
-        /// searching for all nodes ( DCUs ) available in a specific area around the MTU, validating
-        /// all them to ensure a desired minimum.
+        /// verifying that the MTU will be able to communicate over the F1 and F2 channels with
+        /// enough DCUs to be able ensure that readings messages will be properly sent to the head-end.
+        /// <para>
+        /// The goal is to be able to get a Install Confirmation and verify the communications with in one minute.
+        /// </para>
         /// </summary>
         /// <param name="map"><see cref="MemoryMap"/> used in the Install Confirmation process</param>
         /// <returns>Task object required to execute the method asynchronously and
@@ -1067,7 +1070,6 @@ namespace MTUComm
                     if ( fullResponse.Response[ CMD_BYTE_RES ] != CMD_INIT_NODE_DISC_INI )
                     {
                         Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotInitializedException () );
-                        goto BREAK_FAIL;
                     }
                     // Node discovery mode successfully initiated in the MTU
                     else
@@ -1094,15 +1096,16 @@ namespace MTUComm
                         counter = null;
 
                         // Node discovery mode not started/ready for query
-                        if ( timeOut )
+                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_INIT_NODE_BUSY &&
+                             timeOut )
                         {
                             Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotStartedException () );
                             goto BREAK_FAIL;
                         }
 
                         // Get next node discovery response
-                        int  maxAttemptsEr   = 2;
-                        int  countAttemptsEr = 0;
+                        int maxAttemptsEr   = 2;
+                        int countAttemptsEr = 0;
                         NodeDiscoveryList nodeList = new NodeDiscoveryList ( ( NodeType )data[ 0 ] );
                         while ( true )
                         {

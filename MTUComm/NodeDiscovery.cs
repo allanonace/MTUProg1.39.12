@@ -32,7 +32,7 @@ namespace MTUComm
         * | 16..17     | Freq. Er. Rs. | Freq. Error of Node Discovery                        |
         * | 18         | TimeDelta Rq. | Time delta between req. and responder's RTC clock    |
         * | 19         | TimeDelta Rs. | Time delta between resp. and requestor's RTC clock   |
-        * | 20         | Respoder ID   | Subcomponent ID of a Node that received the request  |
+        * | 20         | Responder ID  | Subcomponent ID of a Node that received the request  |
         * | 21..22     | Freq. Ch. Rq. | Freq. channel on which the request was received      |
         * | 23         | Noise Floor   | Responding node noise floor estimate                 |
         * +------------+---------------+------------------------------------------------------+
