@@ -6,6 +6,9 @@ using NodeType = Lexi.Lexi.NodeType;
 
 namespace MTUComm
 {
+    /// <summary>
+    /// Node or DCU unit detected during the <see cref="MTUComm.NodeDiscovery"/> process.
+    /// </summary>
     public class NodeDiscovery
     {
         /*
@@ -105,16 +108,31 @@ namespace MTUComm
 
         #region Properties
 
+        /// <summary>
+        /// Index of the node/DCU in the list of units retrieved during the NodeDiscovery process.
+        /// </summary>
+        /// <remarks>
+        /// LExI command "GET NEXT NODE DISCOVERY RESPONSE": Second Response ( ACK with Node Discovery Response )
+        /// </remarks>
         public int Index
         {
             get { return this.index; }
         }
         
+        /// <summary>
+        /// The total number of units detected in the NodeDiscovery process.
+        /// </summary>
+        /// <remarks>
+        /// LExI command "GET NEXT NODE DISCOVERY RESPONSE": First response ( ACK with Node Discovery General Information )
+        /// </remarks>
         public int TotalEntries
         {
             get { return this.totalEntries; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public bool IsLast
         {
             get { return this.index >= this.totalEntries; }
@@ -125,66 +143,108 @@ namespace MTUComm
             get { return this.nodeType; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int NodeId
         {
             get { return this.nodeId; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int RSSIRequest
         {
             get { return this.rssiRequest; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int RSSIResponse
         {
             get { return this.rssiResponse; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int FreqErrorRequest
         {
             get { return this.freqErrorRequest; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int FreqErrorResponse
         {
             get { return this.freqErrorResponse; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int TimeDeltaRequest
         {
             get { return this.timeDeltaRequest; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int TimeDeltaResponse
         {
             get { return this.timeDeltaResponse; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int ResponderId
         {
             get { return this.responderId; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int FreqChannelRequest
         {
             get { return this.freqChannelRequest; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int FreqChannelResponse
         {
             get { return this.freqChannelResponse; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int NoiseFloorRequest
         {
             get { return this.noiseFloorRequest; }
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         public int NoiseFloorResponse
         {
             get { return this.noiseFloorResponse; }
         }
 
+        /// <summary>
+        /// Indicates whether the node/DCU is already validated or not.
+        /// <para>
+        /// See <see cref="SetAsValidated"/> to set a node/DCU validated.
+        /// </para>
+        /// </summary>
         public bool IsValidated
         {
             get { return this.validated; }
@@ -225,6 +285,10 @@ namespace MTUComm
 
         #endregion
 
+        /// <summary>
+        /// Marks the node as detected and validated, verifying that the channel or transmission frequency is
+        /// equal to the one way ( unidirectional ) or two way ( bidirectional ) frequency set in the MTU memory map.
+        /// </summary>
         public void SetAsValidated ()
         {
             this.validated = true;

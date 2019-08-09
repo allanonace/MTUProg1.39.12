@@ -509,14 +509,13 @@ namespace MTUComm
             this.additionalScriptParameters = new List<Parameter> ();
 
             this.logger = new Logger ( outputfile.Substring ( outputfile.LastIndexOf ( '\\' ) + 1 ) );
+            this.config = Singleton.Get.Configuration;
             
             this.type = type;
             this.user = user;
 
             this.mtucomm = new MTUComm ( serial, config );
             this.mtucomm.OnError += OnError;
-            
-            this.config = Singleton.Get.Configuration;
 
             this.additionalScriptParameters = new List<Parameter> ();
             
@@ -1078,29 +1077,55 @@ namespace MTUComm
                                     ulong meter_reading  = await map[ PORT_PREFIX + indexPort + IFACE_MREADING ].GetValue ();
                                     ulong tempReadingVal = ( ! mtu.PulseCountOnly ) ? meter_reading : meter_reading * ( ulong )meter.HiResScaling;
                                     
-                                    String tempReading = tempReadingVal.ToString ();
+                                    String tempReading    = tempReadingVal.ToString ();
+                                    bool   useDummyDigits = this.config.useDummyDigits ();
+                                    char   dummyDigit     = ( useDummyDigits ) ? 'X' : '0';
+
+                                    // If the reading number of digits is bigger than the live digits,
+                                    // remove the difference taking away the most significative digits
+                                    // e.g. Reading = 123456 , LiveDigits = 4 , Result = 3456
+                                    //
+                                    // Otherwise, fill in the left with zeros
+                                    // e.g. Reading = 123 , LiveDigits = 4 , Result = 0123
+                                    //
+                                    // If the reading has a decimal part and the number of decimal digits is
+                                    // equal to or bigger than LiveDigits, the whole integer part will be removed
+                                    // e.g. Reading = 123456.78 , LiveDigits = 6 , Result = 3456.78
+                                    // e.g. Reading = 123456.78 , LiveDigits = 4 , Result = 56.78
+                                    // e.g. Reading = 1234.5678 , LiveDigits = 4 , Result = .5678
                                     if ( meter.LiveDigits < tempReading.Length )
-                                         tempReading = tempReading.Substring ( tempReading.Length - meter.LiveDigits - ( tempReading.IndexOf ('.') > -1 ? 1 : 0 ) );
-                                    else tempReading = tempReading.PadLeft ( meter.LiveDigits, '0' );
+                                        tempReading = tempReading
+                                            .Substring ( tempReading.Length - meter.LiveDigits - ( tempReading.IndexOf ('.') > -1 ? 1 : 0 ) );
+                                    else
+                                        tempReading = tempReading
+                                            .PadLeft ( meter.LiveDigits, '0' );
                                     
+                                    // Fill in the left with the character selected ( X o 0/zero )
+                                    // e.g. Reading 123456.78 , LeadingDummy = 2 , Result = XXX23456.78
                                     if ( meter.LeadingDummy > 0 )
-                                        tempReading = tempReading.PadLeft (
-                                            tempReading.Length + meter.LeadingDummy,
-                                            this.config.useDummyDigits() ? 'X' : '0' );
-                                        
+                                        tempReading = tempReading
+                                            .PadLeft ( tempReading.Length + meter.LeadingDummy, dummyDigit );
+
+                                    // Fill in the left with the character selected ( X o 0/zero )
                                     if ( meter.DummyDigits > 0 )
-                                        tempReading = tempReading.PadRight (
-                                            tempReading.Length + meter.DummyDigits,
-                                            this.config.useDummyDigits() ? 'X' : '0' );
-                                        
+                                        tempReading = tempReading
+                                            .PadRight ( tempReading.Length + meter.DummyDigits, dummyDigit );
+                                    
+                                    // If the reading does not have a decimal part and the Meter scale is greater than
+                                    // zero, convert the number to a floating point type, adding the point/separator
+                                    // e.g. Reading 12345678 , LiveDigits = 7 , Scale = 3 , Result = 23456.78
                                     if ( meter.Scale > 0 &&
-                                         tempReading.IndexOf(".") == -1 )
-                                        tempReading = tempReading.Insert ( tempReading.Length - meter.Scale, "." );
-                                        
+                                         tempReading.IndexOf ( "." ) == -1 )
+                                        tempReading = tempReading
+                                            .Insert ( tempReading.Length - meter.Scale, "." );
+                                    
+                                    // Fill in the right with zeros and add a hyphen in between
+                                    // e.g. Reading 12345678 , LiveDigits = 7 , PaintedDigits = 2 , Result = 23456780 - 00
                                     if ( meter.PaintedDigits > 0 &&
-                                         this.config.useDummyDigits () )
-                                        tempReading = tempReading.PadRight (
-                                            tempReading.Length + meter.PaintedDigits, '0' ).Insert ( tempReading.Length, " - " );
+                                         useDummyDigits )
+                                        tempReading = tempReading
+                                            .PadRight ( tempReading.Length + meter.PaintedDigits, '0' )
+                                            .Insert ( tempReading.Length, " - " );
     
                                     if ( string.IsNullOrEmpty ( tempReading ) )
                                         tempReading = "INVALID";

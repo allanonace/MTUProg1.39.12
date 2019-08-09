@@ -6,10 +6,23 @@ using NodeType = Lexi.Lexi.NodeType;
 
 namespace MTUComm
 {
+    /// <summary>
+    /// Auxiliar class that will contain all the nodes/DCUs detected by the MTU during the
+    /// <see cref="MTUComm.NodeDiscovery"/> process.
+    /// <para>
+    /// It is used also to calculate the probability of establish
+    /// a good transmission channel between both devices ( MTU-DCU ).
+    /// </para>
+    /// </summary>
+    /// <seealso cref="NodeDiscovery"/>
     public class NodeDiscoveryList
     {
         #region Constants
 
+        /// <summary>
+        /// Table with pre-calculated values to easiest know the probability
+        /// of establish a good transmission channel, based on signal strength ( RSSI ).
+        /// </summary>
         public static (int RSSI,decimal Probability)[] RSSI_and_Probability =
         {
             ( -115, 0.002m  ), // ~0% probability
@@ -85,6 +98,27 @@ namespace MTUComm
             (  -45, 1m      )  // 100% probability
         };
 
+        /// <summary>
+        /// Result based on the last message received from the MTU
+        /// during the <see cref="MTUComm.NodeDiscovery"/> process.
+        /// <para>&#160;</para>
+        /// </para>
+        /// <list type="NodeDiscoveryQueryResult">
+        /// <item>
+        ///     <term>NodeDiscoveryQueryResult.NextRead</term>
+        ///     <description>A new node has been received and it is not the last</description>
+        /// </item>
+        /// <item>
+        ///     <term>NodeDiscoveryQueryResult.LastRead</term>
+        ///     <description>A new node has been received and it is the last</description>
+        /// </item>
+        /// <item>
+        ///     <term>NodeDiscoveryQueryResult.Empty</term>
+        ///     <description>The last response is empty and indicates that no node/DCUs was detected</description>
+        /// </item>
+        /// </list>
+        /// </para>
+        /// </summary>
         public enum NodeDiscoveryQueryResult
         {
             NextRead,
@@ -111,26 +145,52 @@ namespace MTUComm
             get { return this.nodeType; }
         }
 
+        /// <summary>
+        /// The total number of nodes/DCUs detected.
+        /// </summary>
+        /// <value></value>
         public int Count
         {
             get { return this.entries.Count; }
         }
 
+        /// <summary>
+        /// Full list with all nodes/DCUs detected.
+        /// <para>
+        /// See <see cref="NodeDiscovery"/> for the representation of the info associated to the detected nodes/DCUs.
+        /// </para>
+        /// </summary>
+        /// <value></value>
         public NodeDiscovery[] Entries
         {
             get { return this.entries.ToArray (); }
         }
 
+        /// <summary>
+        /// List of the validated nodes/DCUs only.
+        /// <para>
+        /// See <see cref="NodeDiscovery"/> for the representation of the info associated to the detected nodes/DCUs.
+        /// </para>
+        /// </summary>
+        /// <value></value>
         public NodeDiscovery[] EntriesValidated
         {
             get { return this.entries.Where ( entry => entry.IsValidated ).ToArray (); }
         }
 
+        /// <summary>
+        /// The number of the validated nodes/DCUs only.
+        /// </summary>
+        /// <value></value>
         public int CountEntriesValidated
         {
             get { return this.entries.Where ( entry => entry.IsValidated ).Count (); }
         }
 
+        /// <summary>
+        /// The total number of nodes/DCUs that should be recovered.
+        /// </summary>
+        /// <value></value>
         public int TotalEntries
         {
             get
@@ -141,6 +201,14 @@ namespace MTUComm
             }
         }
 
+        /// <summary>
+        /// Returns the last node/DCU detecten, used during the <see cref="MTUComm.NodeDiscovery"/> process.
+        /// <para>
+        /// See <see cref="NodeDiscovery"/> for the representation of the info associated to the detected nodes/DCUs.
+        /// </para>
+        /// </summary>
+        /// </summary>
+        /// <value></value>
         public NodeDiscovery LastNode
         {
             get
@@ -191,7 +259,8 @@ namespace MTUComm
         }
     
         /// <summary>
-        /// Returns the normalized [0,1] probability for the signal strength specified.
+        /// Calculates the probability of establish a good transmission channel
+        /// between the MTU and a node/DCU, based on signal strength ( RSSI ).
         /// </summary>
         /// <remarks>
         /// The signal strength -45 is very difficult to achieve, because it
@@ -204,7 +273,7 @@ namespace MTUComm
         /// </para>
         /// </remarks>
         /// <param name="rssi">Signal strength</param>
-        /// <returns>Probability of choosing the node/DCU as valid.</returns>
+        /// <returns>Normalized probability [0-1]</returns>
         public decimal GetProbability (
             int rssi )
         {

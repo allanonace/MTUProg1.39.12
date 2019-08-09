@@ -102,9 +102,13 @@ namespace MTUComm
         private const int WAIT_BTW_LOGS           = 100;
         private const int WAIT_AFTER_EVENT_LOGS   = 1000;
         private const int CMD_INIT_NODE_DISC      = 0x18; // 24 Node discovery initiation command
-        private const int CMD_INIT_NODE_DISC_INI  = 1; // Node discovery initiated
+        private const int CMD_INIT_NODE_DISC_RES  = 5; // Response ACK with result [0-4] = 5 bytes
+        private const int CMD_INIT_NODE_DISC_NOT  = 0x00; // Node discovery not initiated
+        private const int CMD_INIT_NODE_DISC_INI  = 0x01; // Node discovery initiated
         private const int CMD_QUERY_NODE_DISC     = 0x19; // 25 Start/Reset node discovery response query
-        private const int CMD_INIT_NODE_BUSY      = 0; // The MTU is busy
+        private const int CMD_QUERY_NODE_DISC_RES = 5; // Response ACK with result [0-4] = 5 bytes
+        private const int CMD_QUERY_NODE_DISC_NOT = 0x00; // The MTU is busy
+        private const int CMD_QUERY_NODE_DISC_INI = 0x01; // The MTU is ready for query
         private const int CMD_NEXT_NODE_DISC      = 0x1A; // 26 Get next node discovery response
         private const int CMD_NEXT_NODE_1         = 10; // ACK with general information [0-9] = 10 bytes
         private const int CMD_NEXT_NODE_2         = 26; // ACK with log entry [0-25] = 26 bytes
@@ -308,6 +312,7 @@ namespace MTUComm
 
         private Lexi.Lexi lexi;
         private Configuration configuration;
+        private Global global;
         private MTUBasicInfo mtuBasicInfo;
         private Mtu mtu;
         private Boolean isPulse = false;
@@ -322,6 +327,7 @@ namespace MTUComm
         public MTUComm(ISerial serial, Configuration configuration)
         {
             this.configuration = configuration;
+            this.global = this.configuration.Global;
             mtuBasicInfo = new MTUBasicInfo(new byte[BASIC_READ_1_DATA + BASIC_READ_2_DATA]);
             lexi = new Lexi.Lexi(serial, Data.Get.IsIOS ? 10000 : 20000 );
             
@@ -717,8 +723,6 @@ namespace MTUComm
         /// <seealso cref="OnDataRead"/>
         public async Task DataRead ()
         {
-            Global global = this.configuration.Global;
-
             try
             {
                 // Check if the MTU is an OnDemand MTU
@@ -915,8 +919,6 @@ namespace MTUComm
             bool force = false,
             int  time  = 0 )
         {
-            Global global = this.configuration.Global;
-        
             // DEBUG
             //this.WriteMtuBit ( 22, 0, false ); // Turn On MTU
             
@@ -1027,6 +1029,9 @@ namespace MTUComm
         /// <para>
         /// The goal is to be able to get a Install Confirmation and verify the communications with in one minute.
         /// </para>
+        /// <para>
+        /// See <see cref="NodeDiscoveryList"/> for the auxiliar class that will contain all the nodes/DCUs detected.
+        /// </para>
         /// </summary>
         /// <param name="map"><see cref="MemoryMap"/> used in the Install Confirmation process</param>
         /// <returns>Task object required to execute the method asynchronously and
@@ -1041,8 +1046,6 @@ namespace MTUComm
         {
             try
             {
-                Global global = this.configuration.Global;
-
                 Stopwatch nodeCounter = new Stopwatch ();
                 nodeCounter.Start ();
 
@@ -1059,12 +1062,21 @@ namespace MTUComm
                     data[ 4 ] = 0x00; // Target node ID MSB
                     data[ 5 ] = 0x0A; // Max dither time in seconds
                     data[ 6 ] = 0x00; // Min request send time in seconds
-                    data[ 7 ] = 0x04; // RF Channels bitmap up to 8 channels ( 4 = 0000.0100 = Channel 3 )
+                    data[ 7 ] = 0x03; // RF Channels bitmap up to 8 channels ( 4 = 0000.0100 = Channel 3 )
+                    
+                    // StarProgrammer: MtuComm.cs Line 3333
 
                     // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
                     // NOTE: Use address parameter to set the request code
                     LexiWriteResult fullResponse = await this.lexi.Write (
-                        CMD_INIT_NODE_DISC, data, null, null, LexiAction.OperationRequest );
+                        CMD_INIT_NODE_DISC,
+                        data,
+                        new uint[] { CMD_INIT_NODE_DISC_RES }, // ACK with response
+                        new LexiFiltersResponse ( new ( int,int,byte )[] {
+                            ( CMD_INIT_NODE_DISC_RES, CMD_BYTE_RES, CMD_INIT_NODE_DISC_NOT ), // Node discovery not initiated
+                            ( CMD_INIT_NODE_DISC_RES, CMD_BYTE_RES, CMD_INIT_NODE_DISC_INI )  // Node discovery initiated
+                        } ),
+                        LexiAction.OperationRequest );
 
                     // Node discovery mode NOT initiated in the MTU
                     if ( fullResponse.Response[ CMD_BYTE_RES ] != CMD_INIT_NODE_DISC_INI )
@@ -1086,9 +1098,16 @@ namespace MTUComm
                             
                             // Response: Byte 2 { 0 = The MTU is busy, 1 = The MTU is ready for query }
                             fullResponse = await this.lexi.Write (
-                                CMD_QUERY_NODE_DISC, null, null, null, LexiAction.OperationRequest );
+                                CMD_QUERY_NODE_DISC,
+                                null,
+                                new uint[] { CMD_QUERY_NODE_DISC_RES }, // ACK with response
+                                new LexiFiltersResponse ( new ( int,int,byte )[] {
+                                    ( CMD_QUERY_NODE_DISC_RES, CMD_BYTE_RES, CMD_QUERY_NODE_DISC_NOT ), // The MTU is busy
+                                    ( CMD_QUERY_NODE_DISC_RES, CMD_BYTE_RES, CMD_QUERY_NODE_DISC_INI )  // The MTU is ready for query
+                                } ),
+                                LexiAction.OperationRequest );
                         }
-                        while ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_INIT_NODE_BUSY &&
+                        while ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_DISC_NOT &&
                                 ! ( timeOut = counter.ElapsedMilliseconds > WAIT_MAX_START_NODE ) );
                         // TODO: USE SPECIFIC MAX TIME FOR THIS LEXI CMD OR USE GLOBAL.MaxTimeRFCheck FOR ALL NODE DISCOVERY PROCESS
                         
@@ -1096,7 +1115,7 @@ namespace MTUComm
                         counter = null;
 
                         // Node discovery mode not started/ready for query
-                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_INIT_NODE_BUSY &&
+                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_DISC_NOT &&
                              timeOut )
                         {
                             Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotStartedException () );
@@ -1501,12 +1520,11 @@ namespace MTUComm
         /// <exception cref="AddMtu (dynamic,string,Action) exceptions..."></exception>
         private async Task AddMtu ( Action action )
         {
-            truquitoAction     = action;
-            Parameter[] ps     = action.GetParameters ();
-            dynamic     form   = new AddMtuForm ( this.mtu );
-            Global      global = this.configuration.Global;
-            form.usePort2      = false;
-            bool scriptUseP2   = false;
+            truquitoAction   = action;
+            Parameter[] ps   = action.GetParameters ();
+            dynamic     form = new AddMtuForm ( this.mtu );
+            form.usePort2    = false;
+            bool scriptUseP2 = false;
 
             // Action is about Replace Meter
             bool isReplaceMeter = (
@@ -2111,9 +2129,7 @@ namespace MTUComm
             string user,
             Action action )
         {
-            Mtu    mtu    = form.mtu;
-            Global global = configuration.Global;
-        
+            Mtu mtu  = form.mtu;
             this.mtu = mtu;
 
             try
@@ -2698,7 +2714,11 @@ namespace MTUComm
         /// <seealso cref="MTUBasicInfo"/>
         private async Task LoadMtuAndMetersBasicInfo ()
         {
-            OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Initial Reading..." ) );
+            // Actions without form have no problem, but actions that require the user to
+            // complete a form before launch the action logic, should avoid to invoking this
+            // event the first time, when the basic loading is done to prepare the form
+            if ( OnProgress != null )
+                OnProgress ( this, new Delegates.ProgressArgs ( 0, 0, "Initial Reading..." ) );
 
             if ( await this.LoadMtuBasicInfo () )
             {
