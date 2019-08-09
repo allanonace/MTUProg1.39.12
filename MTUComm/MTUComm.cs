@@ -1063,8 +1063,6 @@ namespace MTUComm
                     data[ 5 ] = 0x0A; // Max dither time in seconds
                     data[ 6 ] = 0x00; // Min request send time in seconds
                     data[ 7 ] = 0x03; // RF Channels bitmap up to 8 channels ( 4 = 0000.0100 = Channel 3 )
-                    
-                    // StarProgrammer: MtuComm.cs Line 3333
 
                     // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
                     // NOTE: Use address parameter to set the request code
