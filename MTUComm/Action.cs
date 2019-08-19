@@ -225,7 +225,7 @@ namespace MTUComm
         public event Delegates.Empty OnError;
 
         #endregion
-
+  
         #region Args
 
         public class ActionFinishArgs : EventArgs
@@ -515,7 +515,6 @@ namespace MTUComm
             this.user = user;
 
             this.mtucomm = new MTUComm ( serial, config );
-            this.mtucomm.OnError += OnError;
 
             this.additionalScriptParameters = new List<Parameter> ();
             
@@ -629,20 +628,23 @@ namespace MTUComm
             {
                 List<object> parameters = new List<object>();
 
-                mtucomm.OnProgress -= OnProgress;
-                mtucomm.OnProgress += OnProgress;
+                this.mtucomm.OnError -= OnError;
+                this.mtucomm.OnError += OnError;
+
+                this.mtucomm.OnProgress -= OnProgress;
+                this.mtucomm.OnProgress += OnProgress;
 
                 switch (type)
                 {
                     case ActionType.ReadFabric:
-                        mtucomm.OnReadFabric -= OnReadFabric;
-                        mtucomm.OnReadFabric += OnReadFabric;
+                        this.mtucomm.OnReadFabric -= OnReadFabric;
+                        this.mtucomm.OnReadFabric += OnReadFabric;
                         break;
 
                     case ActionType.ReadMtu:
                     case ActionType.MtuInstallationConfirmation:
-                        mtucomm.OnReadMtu -= OnReadMtu;
-                        mtucomm.OnReadMtu += OnReadMtu;
+                        this.mtucomm.OnReadMtu -= OnReadMtu;
+                        this.mtucomm.OnReadMtu += OnReadMtu;
                         break;
                       
                     case ActionType.AddMtu:
@@ -651,8 +653,8 @@ namespace MTUComm
                     case ActionType.ReplaceMTU:
                     case ActionType.ReplaceMeter:
                     case ActionType.ReplaceMtuReplaceMeter:
-                        mtucomm.OnAddMtu -= OnAddMtu;
-                        mtucomm.OnAddMtu += OnAddMtu;
+                        this.mtucomm.OnAddMtu -= OnAddMtu;
+                        this.mtucomm.OnAddMtu += OnAddMtu;
                         // Interactive and Scripting
                         if ( mtuForm != null )
                              parameters.AddRange ( new object[] { (AddMtuForm)mtuForm, this.user, this } );
@@ -661,13 +663,13 @@ namespace MTUComm
 
                     case ActionType.TurnOffMtu:
                     case ActionType.TurnOnMtu:
-                        mtucomm.OnTurnOffMtu -= OnTurnOnOffMtu;
-                        mtucomm.OnTurnOffMtu += OnTurnOnOffMtu;
+                        this.mtucomm.OnTurnOffMtu -= OnTurnOnOffMtu;
+                        this.mtucomm.OnTurnOffMtu += OnTurnOnOffMtu;
                         break;
 
                     case ActionType.DataRead:
-                        mtucomm.OnDataRead -= OnDataRead;
-                        mtucomm.OnDataRead += OnDataRead;
+                        this.mtucomm.OnDataRead -= OnDataRead;
+                        this.mtucomm.OnDataRead += OnDataRead;
                         // In interactive mode value are already set in Data
                         // but in scripted mode they are stored in Action.parameters
                         if ( Data.Get.IsFromScripting )
@@ -675,14 +677,14 @@ namespace MTUComm
                         break;
 
                     case ActionType.BasicRead:
-                        mtucomm.OnBasicRead -= OnBasicRead;
-                        mtucomm.OnBasicRead += OnBasicRead;
+                        this.mtucomm.OnBasicRead -= OnBasicRead;
+                        this.mtucomm.OnBasicRead += OnBasicRead;
                         break;
                 }
 
                 // Is more easy to control one point of invokation
                 // than N, one for each action/new task to launch
-                mtucomm.LaunchActionThread(type, parameters.ToArray());
+                this.mtucomm.LaunchActionThread(type, parameters.ToArray());
             }
         }
 

@@ -37,11 +37,8 @@ namespace Xml
     /// <seealso cref="InterfaceConfig"/>
     public class Interface
     {
-        [XmlAttribute("ID")]
-        public int Id { get; set; }
-
-        [XmlAttribute("memorymap")]
-        public string Memorymap { get; set; }
+        [XmlAttribute("family")]
+        public string Family { get; set; }
 
         [XmlAttribute("memorysize")]
         public int MemorymapSize { get; set; }

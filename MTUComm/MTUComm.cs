@@ -116,7 +116,6 @@ namespace MTUComm
         private const byte CMD_NEXT_NODE_DATA     = 0x00; // ACK with node entry
         private const byte CMD_NEXT_NODE_EMPTY    = 0x01; // ACK without node entry ( query complete )
         private const int WAIT_BEFORE_START_NODE  = 1000;
-        private const int WAIT_MAX_START_NODE     = 10000;
         private const int WAIT_BTW_NODE_ERRORS    = 1000;
         private const int WAIT_BTW_NODES          = 100;
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
@@ -416,6 +415,7 @@ namespace MTUComm
             catch ( Exception e )
             {
                 Errors.LogRemainExceptions ( e );
+                
                 this.OnError ();
             }
         }
@@ -1002,7 +1002,8 @@ namespace MTUComm
             }
 
             // Node Discovery with OnDemand 1.2 MTUs
-            if ( this.mtu.MtuDemand )
+            if ( this.mtu.MtuDemand &&
+                 this.mtu.NodeDiscovery )
             {
                 // TODO: IF NODE DISCOVERY FAILS, SHOULD WE CANCEL THE INSTALLATION ( ADD/REPLACE )?
                 switch ( await this.NodeDiscovery ( map ) )
@@ -1046,6 +1047,7 @@ namespace MTUComm
         {
             try
             {
+                float     maxTimeND   = this.global.MaxTimeRFCheck * 1000;
                 Stopwatch nodeCounter = new Stopwatch ();
                 nodeCounter.Start ();
 
@@ -1087,7 +1089,7 @@ namespace MTUComm
                         #region Detection
 
                         // Start/Reset node discovery response query
-                        bool timeOut = false;
+                        bool      timeOut = false;
                         Stopwatch counter = new Stopwatch ();
                         counter.Start ();
                         do
@@ -1106,8 +1108,7 @@ namespace MTUComm
                                 LexiAction.OperationRequest );
                         }
                         while ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_DISC_NOT &&
-                                ! ( timeOut = counter.ElapsedMilliseconds > WAIT_MAX_START_NODE ) );
-                        // TODO: USE SPECIFIC MAX TIME FOR THIS LEXI CMD OR USE GLOBAL.MaxTimeRFCheck FOR ALL NODE DISCOVERY PROCESS
+                                ! ( timeOut = counter.ElapsedMilliseconds > maxTimeND ) );
                         
                         counter.Stop ();
                         counter = null;
@@ -1272,7 +1273,7 @@ namespace MTUComm
                     BREAK_FAIL:
 
                     // The max time to perform Node Discovery process has expired
-                    if ( nodeCounter.ElapsedMilliseconds > global.MaxTimeRFCheck )
+                    if ( nodeCounter.ElapsedMilliseconds > maxTimeND )
                         return NodeDiscoveryResult.NOT_ACHIEVED;
                 }
             }

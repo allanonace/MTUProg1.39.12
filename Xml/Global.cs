@@ -972,7 +972,7 @@ namespace Xml
             this.MinF2Rely                    = 50m;                  // Minimum F2 frequency threshold
             this.GoodF1Rely                   = 98.5m;                // Good F1 frequency threshold
             this.GoodF2Rely                   = 75m;                  // Good F2 frequency threshold
-            this.MaxTimeRFCheck               = 60;                   // Max time in seconds to perform the process ( Value set to NodeDiscoveryTime in STAR Programmer )
+            this.MaxTimeRFCheck               = 60;                   // Max time in seconds to perform the NodeDiscovery process ( Value set to NodeDiscoveryTime in STAR Programmer )
 
             // New parameters/tags ( Own )
             

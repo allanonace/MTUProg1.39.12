@@ -1,7 +1,8 @@
-using System.Collections.Generic;
+using System;
 using Library;
 using Library.Exceptions;
 using Xml;
+using System.Linq;
 
 namespace MTUComm
 {
@@ -12,7 +13,7 @@ namespace MTUComm
         {
             Interface iInfo = GetInterfaceBytMtuId ( mtu );
 
-            return iInfo.Memorymap;
+            return iInfo.Family;
         }
 
         public static int GetmemoryMapSizeByMtuId (
@@ -30,7 +31,7 @@ namespace MTUComm
             InterfaceConfig xmlInterfaces = config.interfaces;
             Port            port1         = mtu.Ports[ 0 ];
 
-            int interfaceIndex;
+            string family;
 
             // Gas MTUs of family 33xx should use family 31xx32xx memorymap
             if ( mtu.IsFamilly33xx &&
@@ -41,24 +42,37 @@ namespace MTUComm
                      port1.HasCertainMeterIds     &&
                      config.getMeterTypeById ( int.Parse ( port1.CertainMeterIds[ 0 ] ) ).IsForGas ) ) )
             {
-                 interfaceIndex = 1; // Family 31xx32xx
+                 family = "31xx32xx";
             }
             else
             {
-                MtuInterface iInfoMtu = xmlInterfaces.MtuInterfaces.Find ( x => x.Id == mtu.Id );
-
-                if ( iInfoMtu == null )
+                string mtuId = mtu.Id.ToString ();
+                MtuInterface iInfoMtu;
+                try
+                {
+                    iInfoMtu = xmlInterfaces.MtuInterfaces
+                        .Select ( intf => new MtuInterface
+                        {
+                            Family = intf.Family,
+                            MtuIDs = intf.MtuIDs
+                                .Where ( m => m.ID.Equals ( mtuId ) ).ToList ()
+                        })
+                        .First ( intf => intf.MtuIDs.Count > 0 );
+                }
+                catch ( Exception e )
+                {
                     throw new InterfaceNotFoundException_Internal ();
-                else
-                    interfaceIndex = iInfoMtu.Interface;
+                }
+                
+                family = iInfoMtu.Family;
             }
 
-            Interface iInfo = xmlInterfaces.Interfaces.Find(x => x.Id == interfaceIndex );
+            Interface iInfo = xmlInterfaces.Interfaces.Find ( x => x.Family.Equals ( family ) );
 
             if ( iInfo == null )
                 throw new InterfaceNotFoundException_Internal ();
             
-            InterfaceConfig.currentIndexType = interfaceIndex;
+            InterfaceConfig.currentFamily = family;
             
             return iInfo;
         }
