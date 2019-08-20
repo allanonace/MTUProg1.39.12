@@ -118,6 +118,9 @@ namespace aclara_meters
                 this.appVersion = appVersion;
                 appName        += ( Data.Get.IsAndroid ) ? "Android" : "iOS";
 
+                // Config path
+                ConfigPaths();
+
                 if ( Data.Get.IsAndroid )
                 {
                     //Task.Run(async () =>
@@ -163,8 +166,6 @@ namespace aclara_meters
 
             AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
 
-            // Config path
-            ConfigPaths();
 
             string Mode = GenericUtilsClass.ChekInstallMode();
             if (Data.Get.IsAndroid && Mode.Equals("None"))
