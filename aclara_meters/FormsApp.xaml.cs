@@ -639,28 +639,33 @@ namespace aclara_meters
             try
             {
                 StringBuilder str = new StringBuilder ();
-
-                // MTU info
-                Mtu mtu = Singleton.Get.Action.CurrentMtu;
                 
                 str.AppendLine ( DateTime.Now.ToString () );
                 str.AppendLine ( "Unhandled Exception" );
                 
-                str.AppendLine ( "" );
-                str.AppendLine ( "MTU" );
-                str.AppendLine ( "---" );
-                str.AppendLine ( string.Format ( "{0,-50} : {1}", "MTU",        mtu.Id          ) );
-                str.AppendLine ( string.Format ( "{0,-50} : {1}", "SpecialSet", mtu.SpecialSet  ) );
-                str.AppendLine ( string.Format ( "{0,-50} : {1}", "HexNumber",  mtu.HexNum      ) );
-                str.AppendLine ( string.Format ( "{0,-50} : {1}", "Num.Ports",  mtu.Ports.Count ) );
-                
-                // Action info
-                MTUComm.Action action = Singleton.Get.Action;
-                str.AppendLine ( "" );
-                str.AppendLine ( "Action" );
-                str.AppendLine ( "------" );
-                str.AppendLine ( string.Format ( "{0,-50} : {1}", "Type", action.Type ) );
-                str.AppendLine ( string.Format ( "{0,-50} : {1}", "User", action.User ) );
+                string actionType = "noActionInitialized";
+                if ( Singleton.Has<MTUComm.Action> () )
+                {
+                    // Action info
+                    MTUComm.Action action = Singleton.Get.Action;
+                    actionType = action.Type.ToString ();
+                    str.AppendLine ( "" );
+                    str.AppendLine ( "Action" );
+                    str.AppendLine ( "------" );
+                    str.AppendLine ( string.Format ( "{0,-50} : {1}", "Type", action.Type ) );
+                    str.AppendLine ( string.Format ( "{0,-50} : {1}", "User", action.User ) );
+                    
+                    // MTU info
+                    Mtu mtu = action.CurrentMtu;
+                    
+                    str.AppendLine ( "" );
+                    str.AppendLine ( "MTU" );
+                    str.AppendLine ( "---" );
+                    str.AppendLine ( string.Format ( "{0,-50} : {1}", "MTU",        mtu.Id          ) );
+                    str.AppendLine ( string.Format ( "{0,-50} : {1}", "SpecialSet", mtu.SpecialSet  ) );
+                    str.AppendLine ( string.Format ( "{0,-50} : {1}", "HexNumber",  mtu.HexNum      ) );
+                    str.AppendLine ( string.Format ( "{0,-50} : {1}", "Num.Ports",  mtu.Ports.Count ) );
+                }
                 
                 // Add current values in Global.xml
                 str.AppendLine ( "" );
@@ -687,7 +692,7 @@ namespace aclara_meters
                 var capturedTraces = typeof ( StackTrace ).GetField ( "captured_traces", BindingFlags.Instance | BindingFlags.NonPublic)
                   .GetValue ( traces ) as StackTrace[];
                 
-                string traces2 = exception.InnerException.StackTrace;
+                //string traces2 = exception.InnerException.StackTrace;
                 foreach ( StackTrace trace in capturedTraces )
                     foreach ( StackFrame frame in trace.GetFrames () )
                         str.AppendLine ( frame.GetFileName () + ".." + Environment.NewLine +
@@ -697,7 +702,7 @@ namespace aclara_meters
                 str.AppendLine ( "---------" );
                 str.AppendLine ( exception.InnerException.ToString () );
                 
-                string errorFileName = string.Format ( "{0}_{1}_{2}.txt", "Exception", action.Type, DateTime.Now.ToString ( "MM-dd-yyyy_HH-mm" ) );
+                string errorFileName = string.Format ( "{0}_{1}_{2}.txt", "Exception", actionType, DateTime.Now.ToString ( "MM-dd-yyyy_HH-mm" ) );
                 var libraryPath      = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
                 var errorFilePath    = Path.Combine ( libraryPath, errorFileName );
                 File.WriteAllText ( errorFilePath, str.ToString () );
@@ -833,6 +838,5 @@ namespace aclara_meters
             }
                
         }
-
     }
 }

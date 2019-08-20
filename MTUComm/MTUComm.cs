@@ -2383,7 +2383,7 @@ namespace MTUComm
                 #region Encryption
 
                 // Only encrypt MTUs with SpecialSet set
-                if ( mtu.SpecialSet )
+                if ( mtu.SpecialSet ) // && 1 == 2 )
                 {
                     Utils.Print ( "----ENCRYPTION_START-----" );
                 
