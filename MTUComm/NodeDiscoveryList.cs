@@ -135,6 +135,7 @@ namespace MTUComm
 
         private List<NodeDiscovery> entries;
         private NodeType nodeType;
+        private int uniqueNodeIDs;
 
         #endregion
 
@@ -219,6 +220,11 @@ namespace MTUComm
             }
         }
 
+        public int CountUniqueNodes
+        {
+            get { return this.uniqueNodeIDs; }
+        }
+
         #endregion
 
         #region Initialization
@@ -228,6 +234,7 @@ namespace MTUComm
         {
             this.entries  = new List<NodeDiscovery> ();
             this.nodeType = nodeType;
+            this.uniqueNodeIDs = 0;
         }
 
         #endregion
@@ -253,6 +260,11 @@ namespace MTUComm
                     else this.entries.Add ( node );
                     break;
             }
+
+            // Check if it is a new DCU
+            if ( node.NodeId > 0 &&
+                 ! this.entries.Any ( n => n.NodeId == node.NodeId ) )
+                uniqueNodeIDs++;
 
             return ( ( this.entries[ this.entries.Count - 1 ].IsLast ) ?
                 NodeDiscoveryQueryResult.LastRead : NodeDiscoveryQueryResult.NextRead, node.Index );

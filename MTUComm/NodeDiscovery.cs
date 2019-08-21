@@ -39,7 +39,7 @@ namespace MTUComm
         * | 21..22     | Freq. Ch. Rq. | Freq. channel on which the request was received      |
         * | 23         | Noise Floor   | Responding node noise floor estimate                 |
         * +------------+---------------+------------------------------------------------------+
-        * The first message should be and ACK with discovery general information
+        * The first message should be an ACK with discovery general information
         * +------------+---------------+------------------------------------------------------+
         * | Byte Index |  Field        |                          Notes                       |
         * +------------+---------------+------------------------------------------------------+

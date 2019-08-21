@@ -18,6 +18,7 @@ namespace MTUComm
         public enum BasicFileType
         {
             READ,
+            NODE_DISCOVERY,
             DATA_READ
         }
 
@@ -70,12 +71,12 @@ namespace MTUComm
                 case BasicFileType.READ:
                 base_stream += "<StarSystem>";
                 base_stream += "    <AppInfo>";
-                base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
-                base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
-                base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
+                base_stream += "        <AppName>"   + config.getApplicationName() + "</AppName>";
+                base_stream += "        <Version>"   + config.GetApplicationVersion() + "</Version>";
+                base_stream += "        <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
                 base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
-                base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
-                base_stream += "        <AppType>" + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
+                base_stream += "        <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
+                base_stream += "        <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
                 base_stream += "    </AppInfo>";
                 base_stream += "    <Message />";
                 base_stream += "    <Mtus />";
@@ -84,16 +85,28 @@ namespace MTUComm
                 base_stream += "</StarSystem>";
                 break;
 
+                case BasicFileType.NODE_DISCOVERY:
+                base_stream += "<NodeDiscoveryReports>";
+                base_stream += "    <AppName>"   + config.getApplicationName() + "</AppName>";
+                base_stream += "    <Version>"   + config.GetApplicationVersion() + "</Version>";
+                base_stream += "    <MtuId />";
+                base_stream += "    <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
+                base_stream += "    <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+                base_stream += "    <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
+                base_stream += "    <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
+                base_stream += "</NodeDiscoveryReports>";
+                break;
+
                 case BasicFileType.DATA_READ:
                 base_stream += "<Log>";
                 base_stream += "    <Transfer>";
-                base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
-                base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
+                base_stream += "        <AppName>"   + config.getApplicationName() + "</AppName>";
+                base_stream += "        <Version>"   + config.GetApplicationVersion() + "</Version>";
                 base_stream += "        <MtuId />";
-                base_stream += "        <Date>" + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
+                base_stream += "        <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
                 base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
-                base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
-                base_stream += "        <AppType>" + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
+                base_stream += "        <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
+                base_stream += "        <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
                 base_stream += "        <Events />";
                 base_stream += "    </Transfer>";
                 base_stream += "</Log>";
@@ -412,7 +425,7 @@ namespace MTUComm
         {
             #region Events Log
 
-            string eventsUri = Data.Get.ReadResultFileFull;
+            string eventsUri = Data.Get.ProcessResultFileFull;
             using ( Stream BasicStruct = new MemoryStream ( Encoding.UTF8.GetBytes(CreateBasicStructure ( BasicFileType.DATA_READ ) ) ) )
             {
                 XDocument eventsDoc = XDocument.Load ( BasicStruct );
@@ -551,6 +564,65 @@ namespace MTUComm
                 evnt.Add ( new XElement   ( "IsSynchronized",  Utils.FirstCharToCapital ( log.IsSynchronized ) ) );
  
                 eventsParent.Add ( evnt );
+            }
+        }
+
+        public void NodeDiscovery (
+            NodeDiscoveryList nodeList,
+            Mtu mtu )
+        {
+            string eventsUri = Data.Get.ProcessResultFileFull;
+            using ( Stream BasicStruct = new MemoryStream (
+                Encoding.UTF8.GetBytes(CreateBasicStructure ( BasicFileType.NODE_DISCOVERY ) ) ) )
+            {
+                XDocument eventsDoc = XDocument.Load ( BasicStruct );
+                XElement  nodes     = eventsDoc.Root;
+
+                // Mtu ID value
+                eventsDoc.Root.Element ( "MtuId" ).Value = Data.Get.MtuId;
+
+                // Add events to the log
+                PrepareLog_NodeDiscoveryLogs ( nodes, nodeList );
+
+                this.CreateFileIfNotExist ( BasicFileType.NODE_DISCOVERY, true, eventsUri );
+                eventsDoc.Save ( eventsUri );
+            }
+        }
+
+        private void PrepareLog_NodeDiscoveryLogs (
+            XElement nodesParent,
+            NodeDiscoveryList nodeList )
+        {
+            bool first = true;
+            foreach ( NodeDiscovery node in nodeList.Entries )
+            {
+                XElement evnt;
+
+                if ( first )
+                {
+                    first = false;
+
+                    evnt = new XElement ( "NodeDiscoveryReportGeneral" );
+                    evnt.Add ( new XElement ( "FrequencyChannelOfResponse",  node.FreqChannelResponse ) );
+                    evnt.Add ( new XElement ( "RequestorNoiseFloorEstimate", node.NoiseFloorRequest   ) );
+                }
+                else
+                {
+                    evnt = new XElement ( "NodeDiscoveryReportNode" );
+                    evnt.Add ( new XElement ( "NodeID",                      node.NodeId ) );
+                    evnt.Add ( new XElement ( "NodeType",                    node.NodeType ) );
+                    evnt.Add ( new XElement ( "RSSIOfRequest",               node.RSSIRequest ) );
+                    evnt.Add ( new XElement ( "FreqencyErrorOfRequest",      node.FreqErrorRequest ) );
+                    evnt.Add ( new XElement ( "TimeDeltaRequest",            node.TimeDeltaRequest ) );
+                    evnt.Add ( new XElement ( "RSSIOfResponse",              node.RSSIResponse ) );
+                    evnt.Add ( new XElement ( "FreqencyErrorOfResponse",     node.FreqErrorResponse ) );
+                    evnt.Add ( new XElement ( "TimeDeltaResponse",           node.TimeDeltaResponse ) );
+                    evnt.Add ( new XElement ( "ResponderReceiverID",         node.ResponderId ) );
+                    evnt.Add ( new XElement ( "FrequencyChannelOfRequest",   node.FreqChannelRequest ) );
+                    evnt.Add ( new XElement ( "ResponderNoiseFloorEstimate", node.NoiseFloorResponse ) );
+                }
+ 
+                nodesParent.Add ( evnt );
             }
         }
 

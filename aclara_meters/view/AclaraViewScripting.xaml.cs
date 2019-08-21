@@ -970,8 +970,10 @@ namespace aclara_meters.view
             }
         }
 
-        private void onStepFinish(object sender, int step, MTUComm.Action.ActionFinishArgs e)
+        private async Task onStepFinish ( object sender, MTUComm.Delegates.ActionFinishArgs args )
         {
+            // ( sender as Action ).Order
+
             Utils.Print("HI FINISH RUNNER");
             //throw new NotImplementedException();
         }
@@ -987,7 +989,7 @@ namespace aclara_meters.view
             });
         }
 
-        private void OnFinish(object sender, MTUComm.Action.ActionFinishArgs e)
+        private async Task OnFinish ( object sender, Delegates.ActionFinishArgs args )
         {
             Task.Run(() =>
             {
@@ -996,7 +998,7 @@ namespace aclara_meters.view
                     try
                     {
                         ContentView_Scripting_textScript.Text = "";
-                        Parameter[] allParams = e.Result.getParameters();
+                        Parameter[] allParams = args.Result.getParameters();
     
                         for (int k = 0; k < allParams.Length; k++)
                         {
@@ -1005,7 +1007,7 @@ namespace aclara_meters.view
                             ContentView_Scripting_textScript.Text = val + res + "\r\n";
                         }
     
-                        ActionResult[] allports = e.Result.getPorts();
+                        ActionResult[] allports = args.Result.getPorts();
     
                         for (int i = 0; i < allports.Length; i++)
                         {
@@ -1020,7 +1022,7 @@ namespace aclara_meters.view
                             }
                         }
     
-                        string xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(e.Result);
+                        string xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(args.Result);
     
                         Device.BeginInvokeOnMainThread(() =>
                         {

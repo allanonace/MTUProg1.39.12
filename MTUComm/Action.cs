@@ -199,7 +199,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Events and Delegates
+        #region Events
 
         /// <summary>
         /// Event that can be invoked during the execution of any action, for
@@ -213,8 +213,7 @@ namespace MTUComm
         /// <summary>
         /// Event invoked only if the action completes successfully, with no exceptions.
         /// </summary>
-        public event ActionFinishHandler OnFinish;
-        public delegate void ActionFinishHandler(object sender, ActionFinishArgs e);
+        public event Delegates.ActionFinishHandler OnFinish;
 
         /// <summary>
         /// Event invoked if the action does not complete successfully or if it launches an exception.
@@ -223,43 +222,6 @@ namespace MTUComm
         /// </para>
         /// </summary>
         public event Delegates.Empty OnError;
-
-        #endregion
-  
-        #region Args
-
-        public class ActionFinishArgs : EventArgs
-        {
-            public ActionResult Result { get; private set; }
-            public AddMtuLog FormLog;
-            public Mtu Mtu;
-
-            public ActionFinishArgs(ActionResult result )
-            {
-                Result = result;
-            }
-        }
-
-        public class ActionErrorArgs : EventArgs
-        {
-            public ActionErrorArgs () { }
-
-            public int Status { get; private set; }
-
-            public String Message { get; private set; }
-
-            public ActionErrorArgs(int status, String message)
-            {
-                Status = status;
-                Message = message;
-            }
-
-            public ActionErrorArgs(String message)
-            {
-                Status = -1;
-                Message = message;
-            }
-        }
 
         #endregion
 
@@ -634,6 +596,11 @@ namespace MTUComm
                 this.mtucomm.OnProgress -= OnProgress;
                 this.mtucomm.OnProgress += OnProgress;
 
+                // Can be used in all writing actions ( Add/Replace ), reading and IC,
+                // and for that reason it is easier and clearer to always register this event
+                this.mtucomm.OnNodeDiscovery -= OnNodeDiscovery;
+                this.mtucomm.OnNodeDiscovery += OnNodeDiscovery;
+
                 switch (type)
                 {
                     case ActionType.ReadFabric:
@@ -682,7 +649,7 @@ namespace MTUComm
                         break;
                 }
 
-                // Is more easy to control one point of invokation
+                // Is more easy to control one point of invocation
                 // than N, one for each action/new task to launch
                 this.mtucomm.LaunchActionThread(type, parameters.ToArray());
             }
@@ -699,54 +666,17 @@ namespace MTUComm
         #region OnEvents
 
         /// <summary>
-        /// Method invoked after have completing correctly a <see cref="ActionType"/>.DataRead
+        /// Method invoked after have completing correctly a <see cref="ActionType"/>.BasicRead
         /// action, without exceptions.
         /// <para>
-        /// See <see cref="MTUComm.OnDataRead"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// See <see cref="MTUComm.OnBasicRead"/> for the associated event ( XAML <- Action <- MTUComm ).
         /// </para>
         /// </summary>
-        /// <returns>Task object required to execute the method asynchronously and
-        /// for a correct exceptions bubbling.</returns>
-        /// <seealso cref="MTUComm.DataRead"/>
-        /// <seealso cref="MTUComm.DataRead(Action)"/>
-        private async Task OnDataRead ( object sender, MTUComm.DataReadArgs args )
+        /// <seealso cref="MTUComm.BasicRead"/>
+        private async Task OnBasicRead ( Delegates.ActionArgs args )
         {
-            try
-            {
-                // Mtu ID value formated
-                string strMtuId = Data.Get.MtuId;
-
-                // Prepare custom values
-                EventLogList eventList = args.ListEntries;
-
-                Data.Set ( "TotalDifDays", eventList.TotalDifDays );
-
-                Data.Set ( "ReadResult",
-                    $"Number of Reads {eventList.Count} for Selected Period " +
-                    $"From {eventList.DateStart.ToString ( "dd/MM/yyyy HH:mm:ss" )} " +
-                    $"Till {eventList.DateEnd  .ToString ( "dd/MM/yyyy HH:mm:ss" )}" );
-
-                // NOTE: STARProgrammer MtuComm.cs Line 5341
-                string path = Path.Combine ( Mobile.EventPath,
-                    $"MTUID{strMtuId}-{DateTime.Now.ToString ( "MMddyyyyHH" )}-" +
-                    $"{ DateTime.Now.Ticks }DataLog.xml" );
-                string subpath = path.Substring ( path.LastIndexOf ( "/" ) + 1 );
-                Data.Set ( "ReadResultFileFull", path );
-                Data.Set ( "ReadResultFile", subpath );
-
-                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu, null, ActionType.DataRead );
-                ActionResult readMtu_allParamsFromInterface  = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu );
-                this.lastLogCreated = logger.DataRead ( dataRead_allParamsFromInterface, readMtu_allParamsFromInterface, args.ListEntries, args.Mtu );
-                ActionFinishArgs finalArgs = new ActionFinishArgs ( readMtu_allParamsFromInterface );
-                finalArgs.Mtu = args.Mtu;
-                
-                this.OnFinish ( this, finalArgs );
-            }
-            catch ( Exception e )
-            {
-                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
-                this.OnError ();
-            }
+            // Show result in the screen
+            this.OnFinish ( this );
         }
 
         /// <summary>
@@ -759,9 +689,10 @@ namespace MTUComm
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="MTUComm.ReadFabric"/>
-        private async Task OnReadFabric(object sender)
+        private async Task OnReadFabric ( Delegates.ActionArgs args )
         {
-            this.OnFinish ( this, null );
+            // Show result in the screen
+            this.OnFinish ( this );
         }
 
         /// <summary>
@@ -774,41 +705,18 @@ namespace MTUComm
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="MTUComm.ReadMtu"/>
-        private async Task OnReadMtu ( object sender, MTUComm.ReadMtuArgs args )
+        private async Task OnReadMtu ( Delegates.ActionArgs args )
         {
             try
             {
-                ActionResult resultAllInterfaces = await CreateActionResultUsingInterface ( args.MemoryMap, args.Mtu );
+                // Load parameters using the interface file
+                ActionResult resultAllInterfaces = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
+
+                // Write result in the activity log
                 this.lastLogCreated = logger.ReadMTU ( this, resultAllInterfaces, args.Mtu );
-                ActionFinishArgs finalArgs = new ActionFinishArgs ( resultAllInterfaces );
-                finalArgs.Mtu = args.Mtu;
                 
-                this.OnFinish ( this, finalArgs );
-            }
-            catch ( Exception e )
-            {
-                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
-                this.OnError ();
-            }
-        }
-
-        /// <summary>
-        /// Method invoked after have completing correctly a <see cref="ActionType"/>.TurnOffMtu
-        /// or TurnOnMtu action, without exceptions.
-        /// <para>
-        /// See <see cref="MTUComm.OnTurnOffMtu"/> and <see cref="MTUComm.OnTurnOnMtu"/> for the events associated ( XAML <- Action <- MTUComm ).
-        /// </para>
-        /// </summary>
-        /// <seealso cref="MTUComm.TurnOnOffMtu"/>
-        private void OnTurnOnOffMtu ( object sender, MTUComm.TurnOffMtuArgs args )
-        {
-            try
-            {
-                ActionResult resultBasic = getBasciInfoResult ();
-                this.lastLogCreated = logger.TurnOnOff ( this, args.Mtu, resultBasic );
-                ActionFinishArgs finalArgs = new ActionFinishArgs ( resultBasic );
-
-                this.OnFinish ( this, finalArgs );
+                // Show result in the screen
+                this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultAllInterfaces, args.Mtu ) );
             }
             catch ( Exception e )
             {
@@ -828,16 +736,22 @@ namespace MTUComm
         /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="MTUComm.AddMtu(Action)"/>
         /// <seealso cref="MTUComm.AddMtu(dynamic, string, Action)"/>
-        private async Task OnAddMtu ( object sender, MTUComm.AddMtuArgs args )
+        private async Task OnAddMtu ( Delegates.ActionArgs args )
         {
             try
             {
-                ActionResult result = await CreateActionResultUsingInterface ( args.MemoryMap, args.MtuType, args.Form );
-                ActionFinishArgs finalArgs = new ActionFinishArgs ( result );
-                args.AddMtuLog.LogReadMtu ( result );
-                this.lastLogCreated = args.AddMtuLog.Save ();
+                dynamic form = args.Extra[ 0 ];
+                AddMtuLog addMtuLog = args.Extra[ 1 ];
 
-                this.OnFinish ( this, finalArgs );
+                // Load parameters using the interface file
+                ActionResult result = await CreateActionResultUsingInterface ( args.Map, args.Mtu, form );
+
+                // Write result in the activity log
+                addMtuLog.LogReadMtu ( result );
+                this.lastLogCreated = addMtuLog.Save ();
+
+                // Show result in the screen
+                this.OnFinish ( this, new Delegates.ActionFinishArgs ( result ) );
             }
             catch ( Exception e )
             {
@@ -847,19 +761,116 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// Method invoked after have completing correctly a <see cref="ActionType"/>.BasicRead
-        /// action, without exceptions.
+        /// Method invoked after have completing correctly a <see cref="ActionType"/>.TurnOffMtu
+        /// or TurnOnMtu action, without exceptions.
         /// <para>
-        /// See <see cref="MTUComm.OnBasicRead"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// See <see cref="MTUComm.OnTurnOffMtu"/> and <see cref="MTUComm.OnTurnOnMtu"/> for the events associated ( XAML <- Action <- MTUComm ).
         /// </para>
         /// </summary>
-        /// <seealso cref="MTUComm.BasicRead"/>
-        private void OnBasicRead(object sender, MTUComm.BasicReadArgs e)
+        /// <seealso cref="MTUComm.TurnOnOffMtu"/>
+        private async Task OnTurnOnOffMtu ( Delegates.ActionArgs args )
         {
-            ActionResult result = new ActionResult();
-            ActionFinishArgs finalArgs = new ActionFinishArgs(result);
+            try
+            {
+                ActionResult resultBasic = getBasciInfoResult ();
 
-            this.OnFinish ( this, finalArgs );
+                // Write result in the activity log
+                this.lastLogCreated = logger.TurnOnOff ( this, args.Mtu, resultBasic );
+
+                // Show result in the screen
+                this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultBasic ) );
+            }
+            catch ( Exception e )
+            {
+                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                this.OnError ();
+            }
+        }
+
+        /// <summary>
+        /// Method invoked after have completing correctly a <see cref="ActionType"/>.DataRead
+        /// action, without exceptions.
+        /// <para>
+        /// See <see cref="MTUComm.OnDataRead"/> for the associated event ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="MTUComm.DataRead"/>
+        /// <seealso cref="MTUComm.DataRead(Action)"/>
+        private async Task OnDataRead ( Delegates.ActionArgs args )
+        {
+            try
+            {
+                EventLogList eventList = args.Extra[ 0 ];
+
+                // Prepares custom values that will be loaded using the interface
+                Data.Set ( "TotalDifDays", eventList.TotalDifDays );
+
+                Data.Set ( "ProcessResult",
+                    $"Number of Reads {eventList.Count} for Selected Period " +
+                    $"From {eventList.DateStart.ToString ( "dd/MM/yyyy HH:mm:ss" )} " +
+                    $"Till {eventList.DateEnd  .ToString ( "dd/MM/yyyy HH:mm:ss" )}" );
+
+                // NOTE: STARProgrammer MtuComm.cs Line 5341
+                string path = Path.Combine ( Mobile.EventPath,
+                    $"MTUID{Data.Get.MtuId}-{DateTime.Now.ToString ( "MMddyyyyHH" )}-" +
+                    $"{ DateTime.Now.Ticks }DataLog.xml" );
+                string subpath = path.Substring ( path.LastIndexOf ( "/" ) + 1 );
+                Data.Set ( "ProcessResultFileFull", path );
+                Data.Set ( "ProcessResultFile", subpath );
+
+                // Load parameters using the interface file
+                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.DataRead );
+                ActionResult readMtu_allParamsFromInterface  = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
+
+                // Write result in the DataRead file
+                this.lastLogCreated = logger.DataRead ( dataRead_allParamsFromInterface, readMtu_allParamsFromInterface, eventList, args.Mtu );
+                
+                // Show result in the screen
+                this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
+            }
+            catch ( Exception e )
+            {
+                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                this.OnError ();
+            }
+        }
+
+        private async Task OnNodeDiscovery ( Delegates.ActionArgs args )
+        {
+            try
+            {
+                NodeDiscoveryList nodeList = args.Extra[ 0 ];
+                decimal ProbF1 = args.Extra[ 1 ];
+                decimal ProbF2 = args.Extra[ 2 ];
+
+                // Prepares custom values that will be loaded using the interface
+                var MtuId = await args.Map.MtuSerialNumber.GetValue ();
+                Data.Set ( "MtuId", MtuId.ToString (), true );
+
+                // QUESTION: How to know the number of different DCUs detected? or each element detected is always a different/new node?
+                // QUESTION: Are F1 and F2 reliability the values accumulated and calculated during the validation of the nodes?
+                Data.Set ( "ProcessResult",
+                    $"Fail Number of DCUs {nodeList.CountUniqueNodes} " +
+                    $"F1 Reliability {( ProbF1 * 100 ).ToString ( "F2" )} Percent " +
+                    $"F2 Reliability {( ProbF2 * 100 ).ToString ( "F2" )} Percent" );
+
+                string path = Path.Combine ( Mobile.NodePath,
+                    $"MTUID{Data.Get.MtuId}-{DateTime.Now.ToString ( "MMddyyyyHH" )}-" +
+                    $"{ DateTime.Now.Ticks }NodeDiscoveryLog.xml" );
+                string subpath = path.Substring ( path.LastIndexOf ( "/" ) + 1 );
+                Data.Set ( "ProcessResultFileFull", path );
+                Data.Set ( "ProcessResultFile", subpath );
+
+                // Write result in the NodeDiscovery file
+                logger.NodeDiscovery ( nodeList, args.Mtu );
+            }
+            catch ( Exception e )
+            {
+                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                this.OnError ();
+            }
         }
 
         #endregion

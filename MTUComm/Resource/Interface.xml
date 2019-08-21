@@ -320,8 +320,8 @@
 			<Parameter name="GPS_X" display="Long" log="true" interface="true" source="Data.GpsLon"/>
 			<Parameter name="Altitude" display="Elevation" log="true" interface="true" source="Data.GpsAlt"/>
 			<Parameter name="ReadRequest" display="Number Read Request Days" source="Data.NumOfDays" log="true" interface="true"/>
-			<Parameter name="ReadResult" display="Read Result" source="Data.ReadResult" log="true" interface="true"/>
-			<Parameter name="ReadResultFile" display="Read Result File" source="Data.ReadResultFile" log="true" interface="true"/>
+			<Parameter name="ReadResult" display="Read Result" source="Data.ProcessResult" log="true" interface="true"/>
+			<Parameter name="ReadResultFile" display="Read Result File" source="Data.ProcessResultFile" log="true" interface="true"/>
 		</Action>
 	</Interface>
 	<Interface family="35xx36xx" memorysize="1024">
@@ -379,6 +379,8 @@
 			<!-- END - Alarms -->
 			<Parameter name="DailySnap" display="Daily Snap" log="true" interface="true" conditional="MemoryMap.Shipbit=false"/>
 			<Parameter name="DailyGMTHourRead" display="Daily GMT Hour Read" log="true" interface="false" conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
+			<Parameter name="NodeDiscoveryResult" display="NodeDiscoveryResult" log="true" interface="true" source="Data.ProcessResult" conditional="Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
+			<Parameter name="NodeDiscoveryFile" display="NodeDiscoveryFile" log="true" interface="true" source="Data.ProcessResultFile" conditional="Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
 			<Parameter name="InstallationConfirmationStatus" display="Installation" log="true" interface="true" source="MemoryMap.InstallConfirmationStatus"/>
 			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
@@ -443,8 +445,8 @@
 			<Parameter name="GPS_X" display="Long" log="true" interface="true" source="Data.GpsLon"/>
 			<Parameter name="Altitude" display="Elevation" log="true" interface="true" source="Data.GpsAlt"/>
 			<Parameter name="ReadRequest" display="Number Read Request Days" source="Data.NumOfDays" log="true" interface="true"/>
-			<Parameter name="ReadResult" display="Read Result" source="Data.ReadResult" log="true" interface="true"/>
-			<Parameter name="ReadResultFile" display="Read Result File" source="Data.ReadResultFile" log="true" interface="true"/>
+			<Parameter name="ReadResult" display="Read Result" source="Data.ProcessResult" log="true" interface="true"/>
+			<Parameter name="ReadResultFile" display="Read Result File" source="Data.ProcessResultFile" log="true" interface="true"/>
 		</Action>
 	</Interface>
 </InterfaceConfig>
