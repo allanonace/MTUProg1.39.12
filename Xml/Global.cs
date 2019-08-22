@@ -815,7 +815,7 @@ namespace Xml
             this.AutoPurge                    = false;                // Enables / disables automatic purging of log files
             this.AutoPurgeSize                = 0;                    // [x-9999] Maximum size in kilobytes for log file before auto purge if AutoPurge is true
             this.AutoRegisterRecording        = false;                // Records Register selection in Activity Log based on the old meter serial number and new serial number
-            this.AutoRFCheck                  = false;                // NOT PRESENT IN THE PDF NORE KG.CODE // It will be used for 34XX series MTUs
+            this.AutoRFCheck                  = false;                // If true, it forces to execute the NodeDiscovery process even though the IC has failed
             this.ByPassAutoDetect             = false;                // Bypass F1 Ecoder/Encoder Autodetect
             this.CertPair                     = false;                // Whether a certificate pair (i.e. Public and Private) is installed ( PC only )
             this.CertPath                     = string.Empty;         // Key Store Path for certificate ( PC Only )

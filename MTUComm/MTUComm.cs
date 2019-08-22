@@ -834,7 +834,8 @@ namespace MTUComm
             dynamic map = this.GetMemoryMap ();
             MemoryRegister<bool> regICNotSynced = map.InstallConfirmationNotSynced;
             MemoryRegister<bool> regICRequest   = map.InstallConfirmationRequest;
-            
+
+            int  result = IC_OK;
             bool wasNotAboutPuck = false;
             try
             {
@@ -894,6 +895,7 @@ namespace MTUComm
                     if ( ! wasNotAboutPuck )
                          Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                     else Errors.LogErrorNowAndContinue ( e );
+
                     return IC_EXCEPTION;
                 }
             
@@ -902,16 +904,22 @@ namespace MTUComm
                 {
                     await Task.Delay ( WAIT_BTW_IC );
                     
-                    return await this.InstallConfirmation_Logic ( force, time );
+                    result = await this.InstallConfirmation_Logic ( force, time );
+
+                    // If this is not the first iteration, we need it to
+                    // returns the result up to the initial invocation
+                    if ( result > 0 )
+                        return result;
                 }
                 
                 // Finish with error
                 Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat ) + "" ) );
-                return IC_NOT_ACHIEVED;
+                result = IC_NOT_ACHIEVED;
             }
-
+            
             // Node Discovery with OnDemand 1.2 MTUs
-            if ( this.mtu.MtuDemand &&
+            if ( ( result == IC_OK || this.global.AutoRFCheck ) &&
+                 this.mtu.MtuDemand &&
                  this.mtu.NodeDiscovery )
             {
                 // TODO: IF NODE DISCOVERY FAILS, SHOULD WE CANCEL THE INSTALLATION ( ADD/REPLACE )?
@@ -928,8 +936,8 @@ namespace MTUComm
                     return IC_EXCEPTION;
                 }
             }
-            
-            return IC_OK;
+            // Result of the IC only
+            return result;
         }
 
         /// <summary>
@@ -1000,10 +1008,8 @@ namespace MTUComm
                         OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery... Step 2" ) );
 
                         // Start/Reset node discovery response query
-                        bool      lexiTimeOut;
-                        bool      timeOut = false;
-                        Stopwatch counter = new Stopwatch ();
-                        counter.Start ();
+                        bool lexiTimeOut;
+                        bool timeOut = false;
                         do
                         {
                             await Task.Delay ( WAIT_BEFORE_START_NODE );
@@ -1030,11 +1036,8 @@ namespace MTUComm
                         }
                         while ( ( lexiTimeOut ||
                                   fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_DISC_NOT ) &&
-                                ! ( timeOut = counter.ElapsedMilliseconds > maxTimeND ) );
+                                ! ( timeOut = nodeCounter.ElapsedMilliseconds > maxTimeND ) );
                         
-                        counter.Stop ();
-                        counter = null;
-
                         // Node discovery mode not started/ready for query
                         if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_DISC_NOT &&
                              timeOut )
