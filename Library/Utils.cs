@@ -284,7 +284,7 @@ namespace Library
         {
             // NOTE: C# for the moment does not allow to use mathematical operators with T as one of the operands
             // One walkaround can be to operate with longer type and the convert to target type, usually smaller
-            long value = 0L;
+            decimal value = 0m;
             for ( int i = 0; i < size; i++ )
                 value += data[ i + startAt ] << ( i * 8 );
 

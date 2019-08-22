@@ -842,8 +842,9 @@ namespace MTUComm
             try
             {
                 NodeDiscoveryList nodeList = args.Extra[ 0 ];
-                decimal ProbF1 = args.Extra[ 1 ];
-                decimal ProbF2 = args.Extra[ 2 ];
+                decimal probF1 = args.Extra[ 1 ];
+                decimal probF2 = args.Extra[ 2 ];
+                double  vswr   = args.Extra[ 3 ];
 
                 // Prepares custom values that will be loaded using the interface
                 var MtuId = await args.Map.MtuSerialNumber.GetValue ();
@@ -853,8 +854,10 @@ namespace MTUComm
                 // QUESTION: Are F1 and F2 reliability the values accumulated and calculated during the validation of the nodes?
                 Data.Set ( "ProcessResult",
                     $"Fail Number of DCUs {nodeList.CountUniqueNodes} " +
-                    $"F1 Reliability {( ProbF1 * 100 ).ToString ( "F2" )} Percent " +
-                    $"F2 Reliability {( ProbF2 * 100 ).ToString ( "F2" )} Percent" );
+                    $"F1 Reliability {( probF1 * 100 ).ToString ( "F2" )} Percent " +
+                    $"F2 Reliability {( probF2 * 100 ).ToString ( "F2" )} Percent" );
+
+                Data.Set ( "VSWR", vswr / 1000.0 );
 
                 string path = Path.Combine ( Mobile.NodePath,
                     $"MTUID{Data.Get.MtuId}-{DateTime.Now.ToString ( "MMddyyyyHH" )}-" +

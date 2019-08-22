@@ -102,6 +102,7 @@ namespace MTUComm
         private const int WAIT_BTW_LOG_ERRORS     = 1000;
         private const int WAIT_BTW_LOGS           = 100;
         private const int WAIT_AFTER_EVENT_LOGS   = 1000;
+        private const int CMD_VSWR                = 0x23; // 35 VSWR Test
         private const int CMD_INIT_NODE_DISC      = 0x18; // 24 Node discovery initiation command
         private const int CMD_INIT_NODE_DISC_RES  = 5; // Response ACK with result [0-4] = 5 bytes
         private const int CMD_INIT_NODE_DISC_NOT  = 0x00; // Node discovery not initiated
@@ -780,7 +781,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Install Confirmation
+        #region RFCheck = Install Confirmation + Node Discovery
 
         /// <summary>
         /// This method is called only executing the Installation Confirmation action but
@@ -964,6 +965,18 @@ namespace MTUComm
         {
             try
             {
+                // VSWR Test
+                // NOTE: It can take up to one second to retry an answer
+                // NOTE: If the size of the data to be answered is not specified, the accepted answer will be ACK 6 and ACK Info Size 0
+                LexiWriteResult fullResponse = await this.lexi.Write (
+                        CMD_VSWR, null,
+                        new uint[] { 6 },
+                        null,
+                        LexiAction.OperationRequest );
+
+                double vswr = Utils.GetNumericValueFromBytes<double> ( fullResponse.Response, 2, 2 );
+
+                // Node Discovery ( Initiation + Start/Reset + Get Nodes )
                 float     maxTimeND   = this.global.MaxTimeRFCheck * 1000;
                 Stopwatch nodeCounter = new Stopwatch ();
                 nodeCounter.Start ();
@@ -985,7 +998,7 @@ namespace MTUComm
 
                     // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
                     // NOTE: Use address parameter to set the request code
-                    LexiWriteResult fullResponse = await this.lexi.Write (
+                    fullResponse = await this.lexi.Write (
                         CMD_INIT_NODE_DISC,
                         data,
                         new uint[] { CMD_INIT_NODE_DISC_RES }, // ACK with response
@@ -1213,7 +1226,7 @@ namespace MTUComm
                         // Generates nodes log only if the process finished ok
                         if ( result != NodeDiscoveryResult.NOT_ACHIEVED )
                             await this.OnNodeDiscovery (
-                                new Delegates.ActionArgs ( this.mtu, map, nodeList, acumProbF1, p2Way ) );
+                                new Delegates.ActionArgs ( this.mtu, map, nodeList, acumProbF1, p2Way, vswr ) );
 
                         return result;
 
@@ -2263,12 +2276,20 @@ namespace MTUComm
                             if ( mtu.LastGasp            ) map.LastGaspAlarm           = alarms.LastGasp;
                             if ( mtu.TiltTamper          ) map.TiltAlarm               = alarms.Tilt;
                             if ( mtu.MagneticTamper      ) map.MagneticAlarm           = alarms.Magnetic;
+
+                            //if ( mtu. ) map.vswr = alarms.
+
                             if ( mtu.RegisterCoverTamper ) map.RegisterCoverAlarm      = alarms.RegisterCover;
                             if ( mtu.ReverseFlowTamper   ) map.ReverseFlowAlarm        = alarms.ReverseFlow;
                             if ( mtu.SerialCutWire       ) map.SerialCutWireAlarm      = alarms.SerialCutWire;
                             if ( mtu.TamperPort1         ) map.P1CutWireAlarm          = alarms.TamperPort1;
                             if ( form.usePort2 &&
                                  mtu.TamperPort2         ) map.P2CutWireAlarm          = alarms.TamperPort2;
+
+                            //if ( mtu.MoistureDetect ) map.MoistureAlarm = alarms.MoistureDetect;
+                            //if ( mtu.ProgramMemoryError ) map.ProgramMemoryAlarm = alarms.ProgramMemoryError;
+                            //if ( mtu.MemoryMapError ) map.MemoryMapAlarm = alarms.MemoryMapError;
+                            //if ( mtu.EnergizerLastGasp ) map.EnergizerLastGaspAlarm = alarms.EnergizerLastGasp;
 
                             // Set immediate alarms [ Alarm Message Immediate ]
                             if ( mtu.InsufficientMemoryImm ) map.InsufficientMemoryImmAlarm = alarms.InsufficientMemoryImm;

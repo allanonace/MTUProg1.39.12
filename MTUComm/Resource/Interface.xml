@@ -379,6 +379,7 @@
 			<!-- END - Alarms -->
 			<Parameter name="DailySnap" display="Daily Snap" log="true" interface="true" conditional="MemoryMap.Shipbit=false"/>
 			<Parameter name="DailyGMTHourRead" display="Daily GMT Hour Read" log="true" interface="false" conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
+			<Parameter name="VSWR" display="VSWR" log="true" interface="true" source="Data.VSWR"/>
 			<Parameter name="NodeDiscoveryResult" display="NodeDiscoveryResult" log="true" interface="true" source="Data.ProcessResult" conditional="Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
 			<Parameter name="NodeDiscoveryFile" display="NodeDiscoveryFile" log="true" interface="true" source="Data.ProcessResultFile" conditional="Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
 			<Parameter name="InstallationConfirmationStatus" display="Installation" log="true" interface="true" source="MemoryMap.InstallConfirmationStatus"/>
