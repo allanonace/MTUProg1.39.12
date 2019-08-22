@@ -641,9 +641,8 @@ namespace MTUComm
 
                 OnProgress ( this, new Delegates.ProgressArgs ( "Requesting event logs..." ) );
 
-                // NOTE: It is not clear why in STARProgrammer 86399 ( seconds ~= 60 days ) are added to calculate the end date
-                DateTime end   = DateTime.UtcNow.AddDays ( DATA_READ_END_DAYS );
-                DateTime start = DateTime.UtcNow.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
+                DateTime end   = DateTime.UtcNow;
+                DateTime start = end.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
 
                 byte[] data = new byte[ 10 ]; // 1+1+4x2
                 data[ 0 ] = ( byte )LogFilterMode.Match;    // Only return logs that matches the Log Entry Filter Field specified
