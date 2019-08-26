@@ -320,6 +320,18 @@ namespace Xml
             get { return this.HexNum.ToLower ().StartsWith ( "342" ); }
         }
 
+        [XmlIgnore]
+        public bool IsFamilly35xx36xx
+        {
+            get
+            {
+                string hexnum = this.HexNum.ToLower ();
+            
+                return hexnum.StartsWith ( "35" ) ||
+                       hexnum.StartsWith ( "36" );
+            }
+        }
+
         [XmlElement("Model")]
         public string Model { get; set; }
 
@@ -370,6 +382,9 @@ namespace Xml
         [XmlElement("CutWireDelaySetting")]
         public bool CutWireDelaySetting { get; set; }
         
+        [XmlElement("EnergizerLastGasp")]
+        public bool EnergizerLastGasp { get; set; }
+
         [XmlElement("GasCutWireAlarm")]
         public bool GasCutWireAlarm { get; set; }
         
@@ -397,6 +412,15 @@ namespace Xml
         [XmlElement("MagneticTamper")]
         public bool MagneticTamper { get; set; }
         
+        [XmlElement("MemoryMapError")]
+        public bool MemoryMapError { get; set; }
+
+        [XmlElement("MoistureDetect")]
+        public bool MoistureDetect { get; set; }
+
+        [XmlElement("ProgramMemoryError")]
+        public bool ProgramMemoryError { get; set; }
+
         [XmlElement("RegisterCoverTamper")]
         public bool RegisterCoverTamper { get; set; }
         

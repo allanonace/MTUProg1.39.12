@@ -125,6 +125,56 @@
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
+    <Overload> <!-- OK -->
+    <Id>MoistureTamperStatus</Id>
+    <Description>Moisture Detect Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>MoistureAlarm</Register>
+      <Register>MoistureTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK -->
+    <Id>ProgramMemoryTamperStatus</Id>
+    <Description>Program Memory Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>ProgramMemoryAlarm</Register>
+      <Register>ProgramMemoryTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK -->
+    <Id>MemoryMapTamperStatus</Id>
+    <Description>Memory Map Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>MemoryMapAlarm</Register>
+      <Register>MemoryMapTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK -->
+    <Id>EnergizerLastGaspTamperStatus</Id>
+    <Description>Energizer Last Gasp Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>EnergizerLastGaspAlarm</Register>
+      <Register>EnergizerLastGaspTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK -->
+    <Id>VSWRTamperStatus</Id>
+    <Description>VSWR Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>VSWRAlarm</Register>
+      <Register>VSWRTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
 
   <!-- END - Alarms -->
 
@@ -631,6 +681,56 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
+  <Register> <!-- OK -->
+    <Id>MoistureAlarm</Id>
+    <Description>Set to enable moisure detect tamper</Description>
+    <Type>bool</Type>
+    <Address>194</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>ProgramMemoryAlarm</Id>
+    <Description>Set to enable program memory tamper</Description>
+    <Type>bool</Type>
+    <Address>194</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MemoryMapAlarm</Id>
+    <Description>Set to enable memory map tamper</Description>
+    <Type>bool</Type>
+    <Address>194</Address>
+    <Size>3</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>EnergizerLastGaspAlarm</Id>
+    <Description>Set to enable energizer last gasp tamper</Description>
+    <Type>bool</Type>
+    <Address>194</Address>
+    <Size>4</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>VSWRAlarm</Id>
+    <Description>Set to enable VSWR</Description>
+    <Type>bool</Type>
+    <Address>195</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
 
   <!-- Read Alarms -->
   <Register> <!-- OK -->
@@ -749,6 +849,56 @@
     <Type>bool</Type>
     <Address>109</Address>
     <Size>7</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MoistureTamper</Id>
+    <Description>Insufficient Memory Tamper</Description>
+    <Type>bool</Type>
+    <Address>108</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>ProgramMemoryTamper</Id>
+    <Description>Insufficient Memory Tamper</Description>
+    <Type>bool</Type>
+    <Address>108</Address>
+    <Size>2</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>MemoryMapTamper</Id>
+    <Description>Insufficient Memory Tamper</Description>
+    <Type>bool</Type>
+    <Address>108</Address>
+    <Size>3</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>EnergizerLastGaspTamper</Id>
+    <Description>Insufficient Memory Tamper</Description>
+    <Type>bool</Type>
+    <Address>108</Address>
+    <Size>4</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>VSWRTamper</Id>
+    <Description>Set when VSWR</Description>
+    <Type>bool</Type>
+    <Address>109</Address>
+    <Size>2</Size>
     <Write>false</Write>
     <CustomGet/>
     <CustomSet/>
