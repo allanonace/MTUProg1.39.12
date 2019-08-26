@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <util:BasePage xmlns="http://xamarin.com/schemas/2014/forms" 
                xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
                xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" 
@@ -108,7 +108,10 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="input_functlLoctn" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="input_functlLoctn" 
+                                                            VerticalOptions="CenterAndExpand" HorizontalOptions="StartAndExpand" Placeholder="" PlaceholderColor="#7a868c" 
+                                                            FontSize="17" HorizontalTextAlignment="Start" />
+                                                        
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -155,19 +158,23 @@
                                     <StackLayout x:Name="port1view" IsVisible="true" Margin="12,0,12,0">
                                         <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" x:Name="name_of_window_port1" Text="Add MTU" />
                                         <!-- Account Number / Service Port ID -->
+                                        <StackLayout x:Name="div_AccountNumber">
                                         <Label Text="Service Port ID" Margin="0,4,0,0" x:Name="lb_AccountNumber" VerticalOptions="Center" Font="Bold,17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric" HeightRequest="40" x:Name="tbx_AccountNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17"
-                                                        HorizontalTextAlignment="Start">
+                                                    <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric" HeightRequest="40" x:Name="tbx_AccountNumber" 
+                                                                              VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" 
+                                                                              PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
                                                         <Controls:BorderlessEntry.Behaviors>
                                                             <behaviors:EntryValidatorBehavior />
                                                         </Controls:BorderlessEntry.Behaviors>
                                                     </Controls:BorderlessEntry>
+                                                    <ImageButton CommandParameter="tbx_AccountNumber" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
+                                        </StackLayout>
                                         <!-- Account Number / Service Port ID - Dual Entry -->
                                         <StackLayout x:Name="div_AccountNumber_Dual">
                                             <Label Text="Repeat Service Port ID" x:Name="lb_AccountNumber_Dual" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
@@ -180,6 +187,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_AccountNumber_Dual" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -197,6 +205,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_WorkOrder" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -213,6 +222,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                         <ImageButton CommandParameter="tbx_WorkOrder_Dual" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -229,6 +239,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                         <ImageButton CommandParameter="tbx_OldMtuId" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -244,6 +255,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                         <ImageButton CommandParameter="tbx_OldMeterSerialNumber" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -260,6 +272,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_OldMeterSerialNumber_Dual" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -285,6 +298,7 @@
                                                         <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterReading"
                                                         VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17" />
                                                     </StackLayout>
+                                                    <ImageButton CommandParameter="tbx_OldMeterReading" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                 </Frame>
                                             </Frame>
                                             <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_OldMeterReading_MeterType" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
@@ -301,6 +315,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_OldMeterReading_Dual" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -330,6 +345,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_MeterSerialNumber" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -346,6 +362,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_MeterSerialNumber_Dual" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -367,6 +384,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton x:Name="btnScanMeterReading" IsEnabled="false" CommandParameter="tbx_MeterReading" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -383,6 +401,7 @@
                                                                     <behaviors:EntryValidatorBehavior />
                                                                 </Controls:BorderlessEntry.Behaviors>
                                                             </Controls:BorderlessEntry>
+                                                            <ImageButton x:Name="btnScanMeterReadingDual" IsEnabled="false" CommandParameter="tbx_MeterReading_Dual" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                         </StackLayout>
                                                     </Frame>
                                                 </Frame>
@@ -487,6 +506,7 @@
                                                             <behaviors:EntryValidatorBehavior />
                                                         </Controls:BorderlessEntry.Behaviors>
                                                     </Controls:BorderlessEntry>
+                                                    <ImageButton CommandParameter="tbx_AccountNumber_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                 </StackLayout>
                                             </Frame>
                                         </Frame>
@@ -502,6 +522,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_AccountNumber_Dual_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -519,6 +540,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_WorkOrder_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -535,6 +557,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_WorkOrder_Dual_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -551,6 +574,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_OldMeterSerialNumber_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -566,6 +590,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_OldMeterSerialNumber_Dual_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -594,6 +619,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_OldMeterReading_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -611,6 +637,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_OldMeterReading_Dual_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -640,6 +667,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_MeterSerialNumber_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -656,6 +684,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                         <ImageButton CommandParameter="tbx_MeterSerialNumber_Dual_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -677,6 +706,7 @@
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
                                                         </Controls:BorderlessEntry>
+                                                         <ImageButton x:Name="btnScannerMeterReading_2" IsEnabled="false" CommandParameter="tbx_MeterReading_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
@@ -693,6 +723,7 @@
                                                                     <behaviors:EntryValidatorBehavior />
                                                                 </Controls:BorderlessEntry.Behaviors>
                                                             </Controls:BorderlessEntry>
+                                                            <ImageButton x:Name="btnScannerMeterReadingDual_2" IsEnabled="false" CommandParameter="tbx_MeterReading_Dual_2" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                         </StackLayout>
                                                     </Frame>
                                                 </Frame>
