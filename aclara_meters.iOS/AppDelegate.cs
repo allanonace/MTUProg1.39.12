@@ -3,7 +3,6 @@ using System.Threading;
 using Acr.UserDialogs;
 using Foundation;
 using Library;
-using Microsoft.Intune.MAM;
 using nexus.protocols.ble;
 using UIKit;
 using Xamarin.Essentials;
@@ -27,18 +26,8 @@ namespace aclara_meters.iOS
             NSDictionary  options )
         {
             global::Xamarin.Forms.Forms.Init();
-            //Distribute.DontCheckForUpdatesInDebug();
 
-            // Get Intun Parameters
-            //var Mode = GenericUtilsClass.ChekInstallMode();
-            //if (Mode.Equals("None"))
-            //{
-            //    MAMService.LoginUserMAM();
-            //    Thread.Sleep(2000);
-            //}
-
-            //Online.DownloadIntuneParameters ();
-            //Parameters.PrepareFromIntune();
+            ZXing.Net.Mobile.Forms.iOS.Platform.Init();
 
             // Core Foundation Keys:
             // https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html

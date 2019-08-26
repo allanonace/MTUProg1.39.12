@@ -619,6 +619,10 @@ namespace Xml
     ///   <description>Display or hide the “Add MTU and Replace Meter” programming option on the main menu</description>
     /// </item>
     /// <item>
+    ///   <term>ShowBarCodeButton</term>
+    ///   <description>Display or hide the scanner barcode button</description>
+    /// </item> 
+    /// <item>
     ///   <term>ShowFreq</term>
     ///   <description>Show the MTU operating frequency in the Read MTU display</description>
     /// </item>
@@ -925,6 +929,7 @@ namespace Xml
             this.ShowAddMTU                   = true;                 // Display or hide the “Add MTU” programming option on the main menu
             this.ShowAddMTUMeter              = true;                 // Display or hide the “Add MTU and Meter” programming option on the main menu
             this.ShowAddMTUReplaceMeter       = true;                 // Display or hide the “Add MTU and Replace Meter” programming option on the main menu
+            this.ShowBarCodeButton            = true;                 // Display or hide the scanner barcode button.
             this.ShowFreq                     = false;                // Show the MTU operating frequency in the Read MTU display
             this.ShowInstallConfirmation      = false;                // Show the Installation Confirmation Button on the main screen
             this.ShowMeterVendor              = false;                // Specifies whether to display vendor and model information for meters during MTU programming
@@ -1526,6 +1531,9 @@ namespace Xml
 
         [XmlElement("ShowAddMtuReplaceMeter")]
         public bool ShowAddMTUReplaceMeter { get; set; }
+
+        [XmlElement("ShowBarCodeButton")]
+        public bool ShowBarCodeButton { get; set; }
 
         [XmlElement("ShowFreq")]
         public bool ShowFreq { get; set; }

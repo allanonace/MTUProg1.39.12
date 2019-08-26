@@ -341,6 +341,7 @@
     <BundleResource Include="Resources\next_icon.png" />
     <BundleResource Include="Resources\prev_icon.png" />
     <BundleResource Include="Resources\ftp_button.png" />
+    <BundleResource Include="Resources\scanner1.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ble.net-ios">
@@ -349,6 +350,12 @@
     <Compile Include="TEST.cs" />
     <PackageReference Include="Microsoft.Intune.MAM.Xamarin.iOS">
       <Version>8.1.1.2</Version>
+    </PackageReference>
+    <PackageReference Include="ZXing.Net.Mobile.Forms">
+      <Version>2.4.1</Version>
+    </PackageReference>
+    <PackageReference Include="ZXing.Net.Mobile">
+      <Version>2.4.1</Version>
     </PackageReference>
   </ItemGroup>
   <Target Name="_CompileITunesMetadata" DependsOnTargets="_DetectSdkLocations;_DetectAppManifest;_GenerateBundleName;_CompileAppManifest">

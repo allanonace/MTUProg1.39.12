@@ -51,6 +51,8 @@
 	<string>aclara-mtu-programmer bluetooth use.</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>aclara-mtu-programmer use your calendar.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>The app needs access to camera</string>
 	<key>NSFaceIdUsageDescription</key>
 	<string>NO</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

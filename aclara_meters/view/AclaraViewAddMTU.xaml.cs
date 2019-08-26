@@ -12,7 +12,7 @@ using Plugin.Settings;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xml;
-
+using ZXing.Net.Mobile.Forms;
 using ActionType = MTUComm.Action.ActionType;
 using FIELD = MTUComm.actions.AddMtuForm.FIELD;
 
@@ -250,6 +250,17 @@ namespace aclara_meters.view
         private MTUBasicInfo mtuBasicInfo;
 
         private List<ReadMTUItem> FinalReadListView { get; set; }
+        //private  bool BarCodeEnabled { get; set; }
+        private bool barCodeEnabled;
+        public bool BarCodeEnabled
+        {
+            get => barCodeEnabled;
+            set
+            {
+                barCodeEnabled = value;
+                OnPropertyChanged();
+            }
+        }
 
         private ActionType actionType;
         private ActionType actionTypeNew;
@@ -277,7 +288,7 @@ namespace aclara_meters.view
         public AclaraViewAddMTU ( IUserDialogs dialogs, ActionType page )
         {
             InitializeComponent ();
-            
+            BindingContext = this;
             Device.BeginInvokeOnMainThread ( () =>
             {
                   backdark_bg.IsVisible = true;
@@ -304,6 +315,7 @@ namespace aclara_meters.view
                 FormsApp.credentialsService.UserName );
             
             isCancellable = false;
+           
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -317,7 +329,8 @@ namespace aclara_meters.view
                 label_read.Opacity    = 1;
                 //backdark_bg.IsVisible = false;
                 //indicator.IsVisible   = false;
-                
+                BarCodeEnabled = global.ShowBarCodeButton;
+
                 if ( Device.Idiom == TargetIdiom.Tablet )
                      LoadTabletUI ();
                 else LoadPhoneUI ();
@@ -2447,6 +2460,8 @@ namespace aclara_meters.view
                     
                     this.tbx_MeterReading        .IsEnabled = true;
                     this.tbx_MeterReading_Dual   .IsEnabled = true;
+                    this.btnScanMeterReading     .IsEnabled = true;
+                    this.btnScanMeterReadingDual .IsEnabled = true;
                     //this.tbx_OldMeterReading     .IsEnabled = true;
                     //this.tbx_OldMeterReading_Dual.IsEnabled = true;
                     
@@ -2481,8 +2496,10 @@ namespace aclara_meters.view
                     //this.divSub_OldMeterReading_2     .Opacity = OPACITY_ENABLE;
                     //this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_ENABLE;
                 
-                    this.tbx_MeterReading_2        .IsEnabled = true;
-                    this.tbx_MeterReading_Dual_2   .IsEnabled = true;
+                    this.tbx_MeterReading_2          .IsEnabled = true;
+                    this.tbx_MeterReading_Dual_2     .IsEnabled = true;
+                    this.btnScannerMeterReading_2    .IsEnabled = true;
+                    this.btnScannerMeterReadingDual_2.IsEnabled = true;
                     //this.tbx_OldMeterReading_2     .IsEnabled = true;
                     //this.tbx_OldMeterReading_Dual_2.IsEnabled = true;
                     
@@ -4659,6 +4676,41 @@ namespace aclara_meters.view
         {
             return true;
         }
+
+        private async void BarCodeScanner(object sender, EventArgs e)
+        {
+            ImageButton ctlButton = (ImageButton)sender;
+            BorderlessEntry field = (BorderlessEntry)this.FindByName((string)ctlButton.CommandParameter);
+
+
+
+           
+
+            var overlay = new ZXingDefaultOverlay
+            {
+                TopText = "Hold your device up to the barcode",
+                BottomText = "Scanning will happen automatically",
+                //ShowFlashButton = scan.IsTorchOn,
+                AutomationId = "zxingDeafultOverlay"
+            };
+
+            ZXingScannerPage scan = new ZXingScannerPage(null,overlay);
+            overlay.ShowFlashButton = scan.HasTorch;
+
+            //if (scan.HasTorch && !scan.IsTorchOn) scan.ToggleTorch();
+            
+
+            scan.OnScanResult += (result) =>
+            {
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    Navigation.PopAsync();
+                    field.Text = result.Text;
+                });
+            };
+            await Navigation.PushAsync(scan);
+        }
+
         #endregion
   
     }
