@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using Lexi.Interfaces;
+using System.Threading.Tasks;
 using Library;
 using Library.Exceptions;
 using Xml;
@@ -38,14 +39,12 @@ namespace MTUComm
         /// <summary>
         /// Event invoked only if the action completes successfully and without launches an exception.
         /// </summary>
-        public event ActionFinishHandler OnFinish;
-        public delegate void ActionFinishHandler(object sender, Action.ActionFinishArgs e);
+        public event Delegates.ActionFinishHandler OnFinish;
         
         /// <summary>
         /// Event invoked if the action does not complete successfully or if it launches an exception.
         /// </summary>        
-        public event ActionStepFinishHandler onStepFinish;
-        public delegate void ActionStepFinishHandler(object sender, int step, Action.ActionFinishArgs e);
+        public event Delegates.ActionFinishHandler onStepFinish;
 
         public delegate void ActionErrorHandler ();
         public event ActionErrorHandler OnError;
@@ -149,7 +148,8 @@ namespace MTUComm
                 throw new ScriptUserNameMissingException ();
 
             Mobile.LogUserPath = script.UserName;
-            Mobile.EventPath = script.UserName;
+            Mobile.EventPath   = script.UserName;
+            Mobile.NodePath    = script.UserName;
 
             // Using invalid log file/path
             if ( string.IsNullOrEmpty ( script.LogFile ) ||
@@ -236,20 +236,16 @@ namespace MTUComm
             OnProgress ( sender, e );
         }
 
-        private void Action_OnFinish (
+        private async Task Action_OnFinish (
             object sender,
-            Action.ActionFinishArgs e )
+            Delegates.ActionFinishArgs args )
         {
             Action act = (Action)sender;
+
+            onStepFinish ( act, args );
+
             if ( act.Order < ( actions.Count - 1 ) )
-            {
-                onStepFinish(act, act.Order, e);
                 actions.ToArray()[act.Order+1].Run();
-            }
-            else
-            {
-                OnFinish(act, e);
-            }
         }
 
         private void Action_OnError ()

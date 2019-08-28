@@ -68,7 +68,12 @@ namespace ble_library
 
             try
             {
-                for ( int i = 0; i < count; i++ )
+                // NOTE: Sometimes happens that the LExI command response with a "trash" value,
+                // NOTE: starting echo stream by other value than 0x25
+                int initFromByte = ble_port_serial.BytesReadCount () - count;
+                if ( initFromByte < 0 ) initFromByte = 0;
+
+                for ( int i = initFromByte; i < count; i++ )
                 {
                     // FIFO collection to read data frames in the same order received
                     buffer[ i+offset ] = ble_port_serial.GetBufferElement ();

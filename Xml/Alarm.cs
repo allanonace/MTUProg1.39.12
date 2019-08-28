@@ -241,6 +241,9 @@ namespace Xml
         [XmlElement("ECoderReverseFlow")]
         public bool ECoderReverseFlow { get; set; }
 
+        [XmlElement("EnergizerLastGasp")]
+        public bool EnergizerLastGasp { get; set; }
+
         [XmlElement("ImmediateAlarmTransmit")]
         public bool ImmediateAlarmTransmit { get; set; }
 
@@ -265,6 +268,15 @@ namespace Xml
         [XmlElement("Magnetic")]
         public bool Magnetic { get; set; }
         
+        [XmlElement("MemoryMapError")]
+        public bool MemoryMapError { get; set; }
+
+        [XmlElement("MoistureDetect")]
+        public bool MoistureDetect { get; set; }
+
+        [XmlElement("ProgramMemoryError")]
+        public bool ProgramMemoryError { get; set; }
+
         [XmlElement("RegisterCover")]
         public bool RegisterCover { get; set; }
         

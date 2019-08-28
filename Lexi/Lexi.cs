@@ -579,9 +579,6 @@ namespace Lexi
 
                         if ( DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit )
                         {
-                            // TODO: COMPROBAR TRABAJANDO CON OPERATIONS SI EL PENULTIMO BYTE ES 0X06,
-                            // PORQUE POR EJEMPLO GET NEXT EVENT LOG RESPONSE TIENE TRES POSIBLES RESPUESTAS
-
                             if ( bytesRead <= responseOffset )
                             {
                                 Utils.PrintDeep("Lexi.Write -> CheckResponseOk IOException");

@@ -1221,33 +1221,39 @@ namespace aclara_meters.view
                 MTUComm.Action.ActionType.TurnOffMtu,
                 FormsApp.credentialsService.UserName );
 
-            turnOffAction.OnFinish += ((s, args) =>
-            {
-                ActionResult actionResult = args.Result;
+            turnOffAction.OnFinish -= TurnOff_OnFinish;
+            turnOffAction.OnFinish += TurnOff_OnFinish;
 
-                Task.Delay(2000).ContinueWith(t =>
-                   Device.BeginInvokeOnMainThread(() =>
-                   {
-                       this.dialog_turnoff_text.Text = "MTU turned off Successfully";
-
-                       dialog_turnoff_two.IsVisible = false;
-                       dialog_turnoff_three.IsVisible = true;
-                   }));
-            });
-
-            turnOffAction.OnError += (() =>
-            {
-                Task.Delay(2000).ContinueWith(t =>
-                   Device.BeginInvokeOnMainThread(() =>
-                   {
-                       this.dialog_turnoff_text.Text = "MTU turned off Unsuccessfully";
-
-                       dialog_turnoff_two.IsVisible = false;
-                       dialog_turnoff_three.IsVisible = true;
-                   }));
-            });
+            turnOffAction.OnError  -= TurnOff_OnError;
+            turnOffAction.OnError  += TurnOff_OnError;
 
             turnOffAction.Run();
+        }
+
+        public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
+        {
+            ActionResult actionResult = args.Result;
+
+            Task.Delay(2000).ContinueWith(t =>
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    this.dialog_turnoff_text.Text = "MTU turned off Successfully";
+
+                    dialog_turnoff_two.IsVisible = false;
+                    dialog_turnoff_three.IsVisible = true;
+                }));
+        }
+
+        public void TurnOff_OnError ()
+        {
+            Task.Delay(2000).ContinueWith(t =>
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    this.dialog_turnoff_text.Text = "MTU turned off Unsuccessfully";
+
+                    dialog_turnoff_two.IsVisible = false;
+                    dialog_turnoff_three.IsVisible = true;
+                }));
         }
 
         void MeterCancelTapped(object sender, EventArgs e)
@@ -1345,54 +1351,11 @@ namespace aclara_meters.view
                MTUComm.Action.ActionType.BasicRead,
                FormsApp.credentialsService.UserName );
 
-            /*
-            basicRead.OnFinish += ((s, args) =>
-            { });
-            */
+            basicRead.OnFinish -= BasicRead_OnFinish;
+            basicRead.OnFinish += BasicRead_OnFinish;
 
-            basicRead.OnFinish += ((s, e) =>
-            {
-                Task.Delay(100).ContinueWith(t =>
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        if (actionType == ActionType.DataRead)
-                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
-                        else
-                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
-
-                        #region New Circular Progress bar Animations    
-
-                        DeviceList.IsRefreshing = false;
-                        backdark_bg.IsVisible = false;
-                        indicator.IsVisible = false;
-                        background_scan_page.IsEnabled = true;
-
-                        #endregion
-
-                    })
-                );
-            });
-
-            basicRead.OnError += (() =>
-            {
-                Task.Delay(100).ContinueWith(t =>
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            #region New Circular Progress bar Animations    
-
-                            DeviceList.IsRefreshing = false;
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                            background_scan_page.IsEnabled = true;
-
-                            #endregion
-                        });
-                    })
-                );
-            });
+            basicRead.OnError -= BasicRead_OnError;
+            basicRead.OnError += BasicRead_OnError;
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -1404,15 +1367,54 @@ namespace aclara_meters.view
                 background_scan_page.IsEnabled = true;
 
                 #endregion
-
             });
 
             basicRead.Run();
-
-           
-
         }
 
+        public async Task BasicRead_OnFinish ( object sender, Delegates.ActionFinishArgs args )
+        {
+            Task.Delay(100).ContinueWith(t =>
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    if (actionType == ActionType.DataRead)
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
+                    else
+                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
+
+                    #region New Circular Progress bar Animations    
+
+                    DeviceList.IsRefreshing = false;
+                    backdark_bg.IsVisible = false;
+                    indicator.IsVisible = false;
+                    background_scan_page.IsEnabled = true;
+
+                    #endregion
+
+                })
+            );
+        }
+
+        private void BasicRead_OnError ()
+        {
+            Task.Delay(100).ContinueWith(t =>
+                Device.BeginInvokeOnMainThread(() =>
+                {
+
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        #region New Circular Progress bar Animations    
+
+                        DeviceList.IsRefreshing = false;
+                        backdark_bg.IsVisible = false;
+                        indicator.IsVisible = false;
+                        background_scan_page.IsEnabled = true;
+
+                        #endregion
+                    });
+                })
+            );
+        }
 
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
         {

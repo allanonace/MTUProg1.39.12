@@ -3443,33 +3443,39 @@ namespace aclara_meters.view
                 MTUComm.Action.ActionType.TurnOffMtu,
                 FormsApp.credentialsService.UserName );
 
-            turnOffAction.OnFinish += ((s, args) =>
-            {
-                ActionResult actionResult = args.Result;
+            turnOffAction.OnFinish -= TurnOff_OnFinish;
+            turnOffAction.OnFinish += TurnOff_OnFinish;
 
-                Task.Delay(2000).ContinueWith(t =>
-                   Device.BeginInvokeOnMainThread(() =>
-                   {
-                       this.dialog_turnoff_text.Text = "MTU turned off Successfully";
-
-                       dialog_turnoff_two.IsVisible = false;
-                       dialog_turnoff_three.IsVisible = true;
-                   }));
-            });
-
-            turnOffAction.OnError += (() =>
-            {
-                Task.Delay(2000).ContinueWith(t =>
-                   Device.BeginInvokeOnMainThread(() =>
-                   {
-                       this.dialog_turnoff_text.Text = "MTU turned off Unsuccessfully";
-
-                       dialog_turnoff_two.IsVisible = false;
-                       dialog_turnoff_three.IsVisible = true;
-                   }));
-            });
+            turnOffAction.OnError  -= TurnOff_OnError;
+            turnOffAction.OnError  += TurnOff_OnError;
 
             turnOffAction.Run();
+        }
+
+        public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
+        {
+            ActionResult actionResult = args.Result;
+
+            Task.Delay(2000).ContinueWith(t =>
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    this.dialog_turnoff_text.Text = "MTU turned off Successfully";
+
+                    dialog_turnoff_two.IsVisible = false;
+                    dialog_turnoff_three.IsVisible = true;
+                }));
+        }
+
+        public void TurnOff_OnError ()
+        {
+            Task.Delay(2000).ContinueWith(t =>
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    this.dialog_turnoff_text.Text = "MTU turned off Unsuccessfully";
+
+                    dialog_turnoff_two.IsVisible = false;
+                    dialog_turnoff_three.IsVisible = true;
+                }));
         }
 
         #endregion
@@ -4433,11 +4439,11 @@ namespace aclara_meters.view
             });
         }
         
-        private void OnFinish ( object sender, MTUComm.Action.ActionFinishArgs e )
+        private async Task OnFinish ( object sender, MTUComm.Delegates.ActionFinishArgs args )
         {
             FinalReadListView = new List<ReadMTUItem>();
 
-            Parameter[] paramResult = e.Result.getParameters();
+            Parameter[] paramResult = args.Result.getParameters();
 
             int mtu_type = 0;
 
@@ -4459,7 +4465,7 @@ namespace aclara_meters.view
                 // Port 1 or 2 log section
                 if (iParameter.Name.Equals("Port"))
                 {
-                    ActionResult[] ports = e.Result.getPorts ();
+                    ActionResult[] ports = args.Result.getPorts ();
 
                     for ( int i = 0; i < ports.Length; i++ )
                     {
@@ -4509,7 +4515,7 @@ namespace aclara_meters.view
                 // Root log fields
                 else
                 {
-                    Parameter param = e.Result.getParameterByTag ( iParameter.Name, iParameter.Source, 0 );
+                    Parameter param = args.Result.getParameterByTag ( iParameter.Name, iParameter.Source, 0 );
 
                     if (param != null)
                     {
