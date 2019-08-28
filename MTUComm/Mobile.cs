@@ -556,7 +556,7 @@ namespace MTUComm
             get
             {
                 CreateDirectoryIfNotExist(pathCacheImages);
-                return pathCacheEvents;
+                return pathCacheImages;
             }
             set
             {
