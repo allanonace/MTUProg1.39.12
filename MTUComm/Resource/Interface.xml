@@ -373,6 +373,10 @@
 			<Parameter name="Cut2WireTamperStatus" display="Cut 2 Wire Tamp" log="true" interface="true" source="MemoryMap.P2CutWireTamperStatus" conditional="Memory.P2StatusFlag=true + MemoryMap.Shipbit=false + Mtu.TamperPort2=true"/>
 			<Parameter name="CutWireTamperStatus" display="Cut Wire Tamp" log="true" interface="true" source="MemoryMap.GasCutWireTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.GasCutWireAlarm=true"/>
 			<Parameter name="InsufficentMemory" display="Insf. Mem" log="true" interface="true" source="MemoryMap.InsufficientMemoryTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.InsufficientMemory=true"/>
+			<Parameter name="MemoryMapError" display="Memory Map Error" log="true" interface="true" source="MemoryMap.MemoryMapTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.MemoryMapError=true"/>
+			<Parameter name="ProgMemoryError" display="Prog Memory Error" log="true" interface="true" source="MemoryMap.ProgramMemoryTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.ProgramMemoryError=true"/>
+			<Parameter name="MoistureDetect" display="Moisture Detect" log="true" interface="true" source="MemoryMap.MoistureTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.MoistureDetect=true"/>
+			<Parameter name="EnergizerLastGasp" display="Energizer Last Gasp" log="true" interface="true" source="MemoryMap.EnergizerLastGaspTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.EnergizerLastGasp=true"/>
 			<Parameter name="LastGasp" display="Last Gasp" log="true" interface="true" source="MemoryMap.LastGaspTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.LastGasp=true"/>
 			<Parameter name="SerialComProblem" display="Ser. Com Prm" log="true" interface="true" source="MemoryMap.SerialComProblemTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.SerialComProblem=true"/>
 			<Parameter name="SerialCutWire" display="Ser. Cut Wire" log="true" interface="true" source="MemoryMap.SerialCutWireTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.SerialCutWire=true"/>

@@ -484,7 +484,7 @@ namespace ble_library
                     byte[] tempArray = new byte[ bytesOfData ];
         
                     // Third byte is the length of bytes to read from data frame = 16
-                    // Data frame { 2 | CipherCount | Buffer.Length | >>> Buffer_AESx16 <<< | 0 }.Length = 20
+                    // Data frame { 2 bytes | CipherCount | Buffer.Length | >>> Buffer_AESx16 <<< | 0x00 }.Length = 20
                     Array.Copy ( AES_Decrypt ( bytes.Skip ( LENGTH_HEADER ).Take ( MAX_LENGTH_DATA ).ToArray (), dynamicPass ), 0, tempArray, 0, bytesOfData );
         
                     // FIFO collection to read data frames in the same order received

@@ -305,13 +305,13 @@ namespace MTUComm
                     XElement alarmSelection = new XElement("AlarmSelection");
                     logger.AddAtrribute ( alarmSelection, "display", "Alarm Selection");
 
-                    string overlap = alarms.Overlap.ToString();
-                    logger.AddParameter ( alarmSelection,
-                    new Parameter("Overlap", "Message Overlap", overlap));
-
                     string alarmConfiguration = alarms.Name;
                     logger.AddParameter ( alarmSelection,
                     new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
+
+                    string overlap = alarms.Overlap.ToString();
+                    logger.AddParameter ( alarmSelection,
+                    new Parameter("Overlap", "Message Overlap", overlap));
 
                     string immediateAlarmTransmit = ( alarms.ImmediateAlarmTransmit ) ? "True" : "False";
                     logger.AddParameter ( alarmSelection,
@@ -320,6 +320,32 @@ namespace MTUComm
                     string urgentAlarm = ( alarms.DcuUrgentAlarm ) ? "True" : "False";
                     logger.AddParameter ( alarmSelection,
                     new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
+
+                    // TODO: Define and add to the log the immediate alarms
+
+                    if ( mtu.MemoryMapError )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter ( "MemoryMapError", "Memory Map Error", await map.MemoryMapTamperStatus.GetValue () ) );
+
+                    // TODO: Define and add to the log MemoryMapErrorImm
+
+                    if ( mtu.ProgramMemoryError )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter ( "ProgramMemoryError", "Program Memory Error", await map.ProgramMemoryTamperStatus.GetValue () ) );
+                    
+                    // TODO: Define and add to the log ProgramMemoryErrorImm
+
+                    if ( mtu.MoistureDetect )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter ( "MoistureDetect", "Moisture Detect", await map.MoistureTamperStatus.GetValue () ) );
+
+                    // TODO: Define and add to the log MoistureDetectImm
+                    
+                    if ( mtu.EnergizerLastGasp )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter ( "EnergizerLastGasp", "Energizer Last Gasp", await map.EnergizerLastGaspTamperStatus.GetValue () ) );
+                    
+                    // TODO: Define and add to the log EnergizerLastGaspImm
 
                     if ( mtu.InsufficientMemory )
                         logger.AddParameter ( alarmSelection,

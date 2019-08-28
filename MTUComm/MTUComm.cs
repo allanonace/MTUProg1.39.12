@@ -966,7 +966,7 @@ namespace MTUComm
             try
             {
                 // VSWR Test
-                // NOTE: It can take up to one second to retry an answer
+                // NOTE: It can take up to one second to return an answer with data
                 // NOTE: If the size of the data to be answered is not specified, the accepted answer will be ACK 6 and ACK Info Size 0
                 LexiWriteResult fullResponse = await this.lexi.Write (
                         CMD_VSWR, null,
@@ -1240,7 +1240,7 @@ namespace MTUComm
                         return NodeDiscoveryResult.NOT_ACHIEVED;
                 }
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 return NodeDiscoveryResult.EXCEPTION;
@@ -2268,28 +2268,20 @@ namespace MTUComm
                         try
                         {
                             // Set alarms [ Alarm Message Transmission ]
-                            if ( mtu.InsufficientMemory  ) map.InsufficientMemoryAlarm = alarms.InsufficientMemory;
-                            if ( mtu.GasCutWireAlarm     ) map.GasCutWireAlarm         = alarms.CutAlarmCable;
+                            if ( mtu.InsufficientMemory    ) map.InsufficientMemoryAlarm    = alarms.InsufficientMemory;
+                            if ( mtu.GasCutWireAlarm       ) map.GasCutWireAlarm            = alarms.CutAlarmCable;
                             if ( form.usePort2 &&
-                                 mtu.GasCutWireAlarm     ) map.P2GasCutWireAlarm       = alarms.CutAlarmCable;
-                            if ( mtu.SerialComProblem    ) map.SerialComProblemAlarm   = alarms.SerialComProblem;
-                            if ( mtu.LastGasp            ) map.LastGaspAlarm           = alarms.LastGasp;
-                            if ( mtu.TiltTamper          ) map.TiltAlarm               = alarms.Tilt;
-                            if ( mtu.MagneticTamper      ) map.MagneticAlarm           = alarms.Magnetic;
-
-                            //if ( mtu. ) map.vswr = alarms.
-
-                            if ( mtu.RegisterCoverTamper ) map.RegisterCoverAlarm      = alarms.RegisterCover;
-                            if ( mtu.ReverseFlowTamper   ) map.ReverseFlowAlarm        = alarms.ReverseFlow;
-                            if ( mtu.SerialCutWire       ) map.SerialCutWireAlarm      = alarms.SerialCutWire;
-                            if ( mtu.TamperPort1         ) map.P1CutWireAlarm          = alarms.TamperPort1;
+                                 mtu.GasCutWireAlarm       ) map.P2GasCutWireAlarm          = alarms.CutAlarmCable;
+                            if ( mtu.SerialComProblem      ) map.SerialComProblemAlarm      = alarms.SerialComProblem;
+                            if ( mtu.LastGasp              ) map.LastGaspAlarm              = alarms.LastGasp;
+                            if ( mtu.TiltTamper            ) map.TiltAlarm                  = alarms.Tilt;
+                            if ( mtu.MagneticTamper        ) map.MagneticAlarm              = alarms.Magnetic;
+                            if ( mtu.RegisterCoverTamper   ) map.RegisterCoverAlarm         = alarms.RegisterCover;
+                            if ( mtu.ReverseFlowTamper     ) map.ReverseFlowAlarm           = alarms.ReverseFlow;
+                            if ( mtu.SerialCutWire         ) map.SerialCutWireAlarm         = alarms.SerialCutWire;
+                            if ( mtu.TamperPort1           ) map.P1CutWireAlarm             = alarms.TamperPort1;
                             if ( form.usePort2 &&
-                                 mtu.TamperPort2         ) map.P2CutWireAlarm          = alarms.TamperPort2;
-
-                            //if ( mtu.MoistureDetect ) map.MoistureAlarm = alarms.MoistureDetect;
-                            //if ( mtu.ProgramMemoryError ) map.ProgramMemoryAlarm = alarms.ProgramMemoryError;
-                            //if ( mtu.MemoryMapError ) map.MemoryMapAlarm = alarms.MemoryMapError;
-                            //if ( mtu.EnergizerLastGasp ) map.EnergizerLastGaspAlarm = alarms.EnergizerLastGasp;
+                                 mtu.TamperPort2           ) map.P2CutWireAlarm             = alarms.TamperPort2;
 
                             // Set immediate alarms [ Alarm Message Immediate ]
                             if ( mtu.InsufficientMemoryImm ) map.InsufficientMemoryImmAlarm = alarms.InsufficientMemoryImm;
@@ -2309,6 +2301,16 @@ namespace MTUComm
                                 if ( mtu.ECoderDaysOfLeak           ) map.ECoderDaysOfLeak           = alarms.ECoderDaysOfLeak;
                                 if ( mtu.ECoderDaysNoFlow           ) map.ECoderDaysNoFlow           = alarms.ECoderDaysNoFlow;
                                 if ( mtu.ECoderReverseFlow          ) map.ECoderReverseFlow          = alarms.ECoderReverseFlow;
+                            }
+
+                            // OnDemand 1.2 alarms
+                            if ( mtu.MtuDemand )
+                            {
+                                //map.vswr = alarms.
+                                if ( mtu.MoistureDetect     ) map.MoistureAlarm          = alarms.MoistureDetect;
+                                if ( mtu.ProgramMemoryError ) map.ProgramMemoryAlarm     = alarms.ProgramMemoryError;
+                                if ( mtu.MemoryMapError     ) map.MemoryMapAlarm         = alarms.MemoryMapError;
+                                if ( mtu.EnergizerLastGasp  ) map.EnergizerLastGaspAlarm = alarms.EnergizerLastGasp;
                             }
 
                             // Write directly ( without conditions )

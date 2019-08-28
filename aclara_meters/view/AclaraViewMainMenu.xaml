@@ -323,7 +323,7 @@ x:Class="aclara_meters.view.AclaraViewMainMenu">
         <!--  DIALOGOS -->
         <Image BackgroundColor="Black" x:Name="dialog_open_bg" WidthRequest="1500" IsVisible="false" HeightRequest="1024" Opacity="0.5">
         </Image>
-        <ContentView Scale="1.2" IsVisible="false" HeightRequest="200" x:Name="turnoff_mtu_background" 
+        <ContentView Scale="1" IsVisible="false" HeightRequest="230" x:Name="turnoff_mtu_background" 
                      RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     
             Property=Width,&#xA;                                     
             Factor=0.19}" 

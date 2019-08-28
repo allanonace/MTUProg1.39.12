@@ -8,6 +8,8 @@ using Acr.UserDialogs;
 using Library;
 using MTUComm;
 using MTUComm.actions;
+using Plugin.Media;
+using Plugin.Media.Abstractions;
 using Plugin.Settings;
 using Xamarin.Essentials;
 using Xamarin.Forms;
@@ -241,6 +243,7 @@ namespace aclara_meters.view
 
         #region Attributes
 
+        ZXingScannerPage scanPage;
         private Configuration config;
         private MTUComm.Action add_mtu;
         private AddMtuForm addMtuForm;
@@ -261,7 +264,16 @@ namespace aclara_meters.view
                 OnPropertyChanged();
             }
         }
-
+        private bool imagesEnabled;
+        public bool ImagesEnabled
+        {
+            get => imagesEnabled;
+            set
+            {
+                imagesEnabled = value;
+                OnPropertyChanged();
+            }
+        }
         private ActionType actionType;
         private ActionType actionTypeNew;
         private bool hasTwoPorts;
@@ -330,6 +342,7 @@ namespace aclara_meters.view
                 //backdark_bg.IsVisible = false;
                 //indicator.IsVisible   = false;
                 BarCodeEnabled = global.ShowBarCodeButton;
+                ImagesEnabled = global.ShowCameraButton;
 
                 if ( Device.Idiom == TargetIdiom.Tablet )
                      LoadTabletUI ();
@@ -4579,9 +4592,9 @@ namespace aclara_meters.view
             }
         }
 
-        public static async Task<Location> GetCurrentPosition()
+        public static async Task<Xamarin.Essentials.Location> GetCurrentPosition()
 	    {
-            Location location = null;
+            Xamarin.Essentials.Location location = null;
            
             try
             {
@@ -4687,26 +4700,19 @@ namespace aclara_meters.view
         {
             ImageButton ctlButton = (ImageButton)sender;
             BorderlessEntry field = (BorderlessEntry)this.FindByName((string)ctlButton.CommandParameter);
-
-
-
-           
-
+                                   
             var overlay = new ZXingDefaultOverlay
             {
                 TopText = "Hold your device up to the barcode",
                 BottomText = "Scanning will happen automatically",
-                //ShowFlashButton = scan.IsTorchOn,
+                ShowFlashButton = true,
                 AutomationId = "zxingDeafultOverlay"
             };
+            overlay.FlashButtonClicked += delegate { scanPage.ToggleTorch(); };
 
-            ZXingScannerPage scan = new ZXingScannerPage(null,overlay);
-            overlay.ShowFlashButton = scan.HasTorch;
+            scanPage = new ZXingScannerPage(null,overlay);
 
-            //if (scan.HasTorch && !scan.IsTorchOn) scan.ToggleTorch();
-            
-
-            scan.OnScanResult += (result) =>
+            scanPage.OnScanResult += (result) =>
             {
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -4714,11 +4720,47 @@ namespace aclara_meters.view
                     field.Text = result.Text;
                 });
             };
-            await Navigation.PushAsync(scan);
+            await Navigation.PushAsync(scanPage);
         }
 
-        #endregion
-  
+        private async void TakePicture(object sender, EventArgs e)
+        {
+            try
+            {
+    
+
+                if(!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
+                {
+                    await DisplayAlert("No camera", "No camera available", "OK");
+                    return;
+                }
+
+                string user = FormsApp.credentialsService.UserName;
+
+                var file = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
+                {
+                    Directory = Mobile.PATH_LOGS + "/" + user + "/" + user + "_" + Mobile.PATH_IMAGES,//Mobile.ImagesPath,
+                    SaveToAlbum = false,
+                    CompressionQuality = 92,
+                    PhotoSize = PhotoSize.Small,
+                    DefaultCamera = CameraDevice.Rear
+
+				    });
+
+                if (file == null)
+                    return;
+                await DisplayAlert("File Location",file.Path,"OK");
+
+                file.Dispose();
+
+            }
+            catch (Exception e1)
+            {
+            }   
+
+        }
+            #endregion
+
     }
 
 }

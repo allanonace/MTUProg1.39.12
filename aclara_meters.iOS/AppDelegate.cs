@@ -16,8 +16,7 @@ namespace aclara_meters.iOS
     public partial class AppDelegate : global::Xamarin.Forms.Platform.iOS.FormsApplicationDelegate
     {
         private FormsApp appSave;
-        private string identity = "";
-
+        
         // This method is invoked when the application has loaded and is ready to run. In this 
         // method you should instantiate the window, load the UI into it and make window visible
         // NOTE: You have 17 seconds to return from this method or iOS will terminate application
@@ -41,11 +40,6 @@ namespace aclara_meters.iOS
             Data.Set("IsFromScripting", false);
             appSave = new FormsApp ( bluetoothLowEnergyAdapter, userDialogs, appversion);
                  
-
-
-            //string user = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
-            //TEST.Test ();
-
             base.LoadApplication ( appSave );
 
             return base.FinishedLaunching ( app, options );
