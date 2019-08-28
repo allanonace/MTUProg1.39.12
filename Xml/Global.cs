@@ -627,6 +627,10 @@ namespace Xml
     ///   <description>Show the MTU operating frequency in the Read MTU display</description>
     /// </item>
     /// <item>
+    ///   <term>ShowCameraButton</term>
+    ///   <description>Show or hide the camera Button on the action screen</description>
+    /// </item>
+    /// <item>
     ///   <term>ShowInstallConfirmation</term>
     ///   <description>Show the Installation Confirmation Button on the main screen</description>
     /// </item>
@@ -931,12 +935,13 @@ namespace Xml
             this.ShowAddMTUReplaceMeter       = true;                 // Display or hide the “Add MTU and Replace Meter” programming option on the main menu
             this.ShowBarCodeButton            = true;                 // Display or hide the scanner barcode button.
             this.ShowFreq                     = false;                // Show the MTU operating frequency in the Read MTU display
+            this.ShowCameraButton             = true;                 // Display or hide the camera button in the action screen
             this.ShowInstallConfirmation      = false;                // Show the Installation Confirmation Button on the main screen
             this.ShowMeterVendor              = false;                // Specifies whether to display vendor and model information for meters during MTU programming
             this.ShowReplaceMeter             = true;                 // Display or hide the “Replace Meter” programming option on the main menu
             this.ShowReplaceMTU               = true;                 // Display or hide the "Replace MTU" programming option on the main menu
             this.ShowReplaceMTUMeter          = true;                 // Display or hide the “Replace MTU And Meter” programming option on the main menu
-            this.ShowDataRead                 = true;                // Display or hide the “DataRead” programming option on the main menu
+            this.ShowDataRead                 = true;                 // Display or hide the “DataRead” programming option on the main menu
             this.ShowScriptErrorMessage       = true;                 // Specifies whether error messages are shown in scripted mode
             this.ShowTime                     = false;                // Show System time on the screen during the MTU read or install
             this.ShowTurnOff                  = true;                 // Show Turn Off MTU button on main screen
@@ -1537,6 +1542,9 @@ namespace Xml
 
         [XmlElement("ShowFreq")]
         public bool ShowFreq { get; set; }
+
+        [XmlElement("ShowCameraButton")]
+        public bool ShowCameraButton { get; set; }
 
         [XmlElement("ShowInstallConfirmation")]
         public bool ShowInstallConfirmation { get; set; }

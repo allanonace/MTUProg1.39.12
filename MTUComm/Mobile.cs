@@ -403,6 +403,7 @@ namespace MTUComm
         private const string PATH_LOGSUNI   = "LogsUni";
         public  const string PATH_BACKUP    = "Backup";
         public  const string PATH_EVENTS    = "Events";
+        public  const string PATH_IMAGES    = "Images";
 
         private const string APP_SUBF       = "com.aclara.mtu.programmer/files/";
         private const string PREFAB_PATH    = "/data/data/" + APP_SUBF;
@@ -449,6 +450,7 @@ namespace MTUComm
         private static string     pathCacheLogsUser;
         private static string     pathCacheLogsUserBackup;
         private static string     pathCacheEvents;
+        private static string     pathCacheImages;
 
         public static string ConfigPublicPath
         {
@@ -546,6 +548,21 @@ namespace MTUComm
                 string path = Path.Combine(pathCacheLogsUser, value + "_" + PATH_EVENTS);
                 CreateDirectoryIfNotExist(path);
                 pathCacheEvents = path;
+            }
+        }
+
+        public static string ImagesPath
+        {
+            get
+            {
+                CreateDirectoryIfNotExist(pathCacheImages);
+                return pathCacheEvents;
+            }
+            set
+            {
+                string path = Path.Combine(pathCacheLogsUser, value + "_" + PATH_IMAGES);
+                CreateDirectoryIfNotExist(path);
+                pathCacheImages = path;
             }
         }
 

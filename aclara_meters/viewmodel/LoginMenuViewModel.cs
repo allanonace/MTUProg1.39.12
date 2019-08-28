@@ -71,6 +71,7 @@ namespace aclara_meters.viewmodel
                 Mobile.LogUserPath = user;
             }
             Mobile.EventPath = user;
+            Mobile.ImagesPath = user;
         }
 
         public async void Load ()

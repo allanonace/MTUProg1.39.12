@@ -40,7 +40,7 @@ namespace aclara_meters
 
         public async static Task<bool> UploadFiles (Boolean UploadPrompt = true, Boolean AllLogs = true )
         {
-            Global global = FormsApp.config.Global;
+            Global global = Singleton.Get.Configuration.Global; //FormsApp.config.Global;
         
             // Path where the file should be saved once downloaded (locally)
             string path = ( AllLogs ) ? Mobile.LogPath : Mobile.LogUserPath;
@@ -129,12 +129,18 @@ namespace aclara_meters
                                         
                                         if ( ! sftp.Exists ( remotePath ) )
                                             sftp.CreateDirectory ( remotePath );
-    
-                                        // File path
+
                                         string sTick = DateTime.Now.Ticks.ToString();
-                                        string sName = file.Name.Substring(0, 10) + "-" + sTick + "Log.xml";
-                                        remotePath = Path.Combine ( remotePath, sName );
-                                    
+                                        string sName;
+
+                                        if (file.Name.Contains("jpg"))
+                                            sName = file.Name.Substring(0, file.Name.Length - 4) + "-" + sTick + ".jpg";
+                                        else if(file.Name.ToLower().Contains("mtuid"))
+                                            sName = file.Name.Substring(0, file.Name.Length - 4) + "-" + sTick + ".xml";
+                                        else
+                                            sName = file.Name.Substring(0, 10) + "-" + sTick + "Log.xml";
+                                       
+                                        remotePath = Path.Combine(remotePath, sName);
                                         sftp.UploadFile ( fileStream, remotePath, null );
                                     }
             
@@ -213,7 +219,7 @@ namespace aclara_meters
             return BackupFiles().Count;
         }
 
-        public static List<FileInfo> LogFilesToUpload(string path, bool AllFiles = false, bool Events = true )
+        public static List<FileInfo> LogFilesToUpload(string path, bool AllFiles = false, bool Events = true, bool Images = true )
         {
             List<FileInfo> local_array_files = new List<FileInfo>();
 
@@ -249,6 +255,22 @@ namespace aclara_meters
                     else local_array_files.Add(file);
                 }
             }
+
+            if ( Images )
+            {
+                FileInfo[] filesIm = info.GetFiles("*.jpg", SearchOption.AllDirectories).OrderBy(p => p.LastWriteTimeUtc).ToArray();
+
+                foreach (FileInfo file in filesIm)
+                {
+                    if (file.Directory.Name.ToLower() == Mobile.PATH_BACKUP.ToLower() ||
+                         file.Directory.Name.ToLower() == Mobile.PATH_LOGS.ToLower())
+                        continue;
+
+                    local_array_files.Add(file);
+                }
+
+            }
+
             return local_array_files;
         }
 

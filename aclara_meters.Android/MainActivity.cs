@@ -17,6 +17,7 @@ using Android.OS;
 using Android.Runtime;
 using Library;
 using nexus.protocols.ble;
+using Plugin.CurrentActivity;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 //using Application = Android.App.Application;
@@ -149,7 +150,8 @@ namespace aclara_meters.Droid
 
             UserDialogs.Init(this);
             global::Xamarin.Forms.Forms.Init(this, bundle);
-           
+            CrossCurrentActivity.Current.Init(this, bundle);
+
             try
             {
                 // If you want to enable/disable the Bluetooth adapter from code, you must call this.
@@ -192,9 +194,11 @@ namespace aclara_meters.Droid
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
         {
+            ZXing.Net.Mobile.Forms.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
+
         protected override void OnStart()
         {
             var ListPerm = new List<String>();
@@ -216,6 +220,13 @@ namespace aclara_meters.Droid
                 ListPerm.Add(Manifest.Permission.GetAccounts);
                 ListPerm.Add(Manifest.Permission.ManageAccounts);
                 ListPerm.Add(Manifest.Permission.UseCredentials);
+
+            }
+
+            if (CheckSelfPermission(Manifest.Permission.Camera) != Permission.Granted)
+            {
+                ListPerm.Add(Manifest.Permission.Camera);
+                ListPerm.Add(Manifest.Permission.Flashlight);
 
             }
 

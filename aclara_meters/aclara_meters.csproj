@@ -43,6 +43,7 @@
     <PackageReference Include="SonarAnalyzer.CSharp" Version="6.7.0.4267" />
     <PackageReference Include="ZXing.Net.Mobile.Forms" Version="2.4.1" />
     <PackageReference Include="ZXing.Net.Mobile" Version="2.4.1" />
+    <PackageReference Include="Xam.Plugin.Media" Version="4.0.1.5" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="MainPage.xaml.cs" />

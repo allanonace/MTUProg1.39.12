@@ -154,15 +154,15 @@ namespace aclara_meters.view
         {
             refresh_command = new Command(async () =>
             {
-                PrintToConsole($"----------------------REFRESH command dispositivos encontrados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
-                PrintToConsole($"-------------------------------        REFRESH command, thread: { Thread.CurrentThread.ManagedThreadId}");
+            PrintToConsole($"----------------------REFRESH command dispositivos encontrados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
+            PrintToConsole($"-------------------------------        REFRESH command, thread: { Thread.CurrentThread.ManagedThreadId}");
 
                 if (!GetAutoConnectStatus())
                 {
                     Esperando();
 
                     if (FormsApp.ble_interface.IsOpen()) FormsApp.ble_interface.Close();
-                    
+
                     //FormsApp.ble_interface= new BleSerial();
 
                     Utils.PrintDeep("----------------------------------------------  init Ble_iterface");
@@ -181,12 +181,12 @@ namespace aclara_meters.view
                     }
                     //DeviceList.IsRefreshing = true;
                     listPucks = new ObservableCollection<DeviceItem>();
-                   
+
                     FormsApp.ble_interface.SetTimeOutSeconds(TimeOutSeconds);
                     await FormsApp.ble_interface.Scan();
                     TimeOutSeconds = 3; // los siguientes escaneos son de 5 sec
 
-                    if (FormsApp.ble_interface.GetBlePeripheralList().Count>0)
+                    if (FormsApp.ble_interface.GetBlePeripheralList().Count > 0)
                     {
 
                         //await ChangeListViewData();
@@ -195,19 +195,27 @@ namespace aclara_meters.view
                         //DeviceList.IsRefreshing = false;
                         if (listPucks.Count != 0)
                         {
-                            DeviceList.ItemsSource = listPucks;
-                        }
-                        if (conectarDevice)
-                        {
-                            PairWithKnowDevice();
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                DeviceList.ItemsSource = listPucks;
+                            });
+
+                            if (conectarDevice)
+                            {
+                                PairWithKnowDevice();
+                            }
                         }
                     }
                     else
                     {
-                        DeviceList.ItemsSource = null;
-                        Application.Current.MainPage.DisplayAlert("Alert", "No device found, please, press the button to turn on the device and refresh", "Ok");
-                        Terminado();
+                        Device.BeginInvokeOnMainThread(() =>
+                        {
+                            DeviceList.ItemsSource = null;
+                            Application.Current.MainPage.DisplayAlert("Alert", "No device found, please, press the button to turn on the device and refresh", "Ok");
+                            Terminado();
+                        });
                     }
+                    
                 }
             });
         }
