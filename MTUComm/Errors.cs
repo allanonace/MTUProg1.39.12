@@ -139,6 +139,8 @@ namespace MTUComm
             //-----------
             // The MTU encryption process can't be performed after having tried it several times
             { new ActionNotAchievedEncryptionException (),      700 },
+            // The MTU encryption process can't be performed because public key is not present in Global.xml
+            { new ODEncryptionPublicKeyNotSetException (),      701 },
             
             // Configuration Files and System [ 7xx ]
             //-------------------------------

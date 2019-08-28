@@ -31,7 +31,8 @@ namespace aclara_meters.Models
         public string Height
         { get; set; }
 
-
+        public string BackgroundColor { get; set; }
+        public string FontColor { get; set; }
 
         public string Title
         { get; set; }

@@ -186,6 +186,8 @@ namespace Xml
     public class Mtu
     {
         public enum VERSION { NEW, ARCH };
+
+        public enum ENCRYPTION { NONE, AES128, AES256 };
     
         private const int DEF_FLOW = -1;
     
@@ -227,7 +229,7 @@ namespace Xml
             this.SerialComProblemImm        = false;
             this.SerialCutWire              = false;
             this.SerialCutWireImm           = false;
-            this.STAREncryptionType         = "AES256";  // [None,AES128,AES256]
+            this.STAREncryptionType         = ENCRYPTION.AES256;
             this.SpecialSet                 = false;
             this.TamperPort1                = false;
             this.TamperPort2                = false;
@@ -365,8 +367,20 @@ namespace Xml
         [XmlElement("RequiresAlarmProfile")]
         public bool RequiresAlarmProfile { get; set; }
         
+        [XmlIgnore]
+        public ENCRYPTION STAREncryptionType { get; set; }
+
         [XmlElement("STAREncryptionType")]
-        public string STAREncryptionType { get; set; }
+        public string STAREncryptionType_AllowEmptyField
+        {
+            get { return this.STAREncryptionType.ToString (); }
+            set
+            {
+                ENCRYPTION v;
+                bool ok = Enum.TryParse<ENCRYPTION>( value, true, out v );
+                this.STAREncryptionType = ( ok ) ? v : ENCRYPTION.NONE;
+            }
+        }
         
         [XmlElement("SpecialSet")]
         public bool SpecialSet { get; set; }

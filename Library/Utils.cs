@@ -260,7 +260,7 @@ namespace Library
             for ( int i = 0; i < data.Length; i++ )
                 value += data[ i ] << ( i * 8 );
             
-            return ( T )( object )value;
+            return ( T )Convert.ChangeType ( value, typeof( T ) );
         }
         
         public static string ByteArrayToString (
@@ -308,6 +308,36 @@ namespace Library
 
             string str = value.ToString ();
             return str[ 0 ].ToString ().ToUpper () + str.Substring ( 1 );
+        }
+
+        public static string StringToBase64 (
+            string text )
+        {
+            if ( ! Utils.StringIsInBase64 ( text ) )
+                 return Convert.ToBase64String ( Encoding.ASCII.GetBytes ( text ) );
+            else return text;
+        }
+
+        public static byte[] StringToByteArrayBase64 (
+            string text )
+        {
+            if ( ! Utils.StringIsInBase64 ( text ) )
+                 return Encoding.ASCII.GetBytes ( Utils.StringToBase64 ( text ) );
+            else return Encoding.ASCII.GetBytes ( text );
+        }
+
+        public static bool StringIsInBase64 (
+            string text )
+        {
+            try
+            {
+                Convert.FromBase64String ( text );
+            }
+            catch ( Exception )
+            {
+                return false;
+            }
+            return true;
         }
 
         #endregion

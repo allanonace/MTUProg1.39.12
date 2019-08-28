@@ -10,6 +10,8 @@ using Xml;
 using Library.Exceptions;
 using System.IO;
 
+using NodeDiscoveryResult = MTUComm.MTUComm.NodeDiscoveryResult;
+
 namespace MTUComm
 {
     /// <summary>
@@ -841,19 +843,28 @@ namespace MTUComm
         {
             try
             {
-                NodeDiscoveryList nodeList = args.Extra[ 0 ];
-                decimal probF1 = args.Extra[ 1 ];
-                decimal probF2 = args.Extra[ 2 ];
-                double  vswr   = args.Extra[ 3 ];
+                NodeDiscoveryResult result = args.Extra[ 0 ];
+                NodeDiscoveryList nodeList = args.Extra[ 1 ];
+                decimal probF1 = args.Extra[ 2 ];
+                decimal probF2 = args.Extra[ 3 ];
+                double  vswr   = args.Extra[ 4 ];
 
                 // Prepares custom values that will be loaded using the interface
                 var MtuId = await args.Map.MtuSerialNumber.GetValue ();
                 Data.Set ( "MtuId", MtuId.ToString (), true );
 
+                string word = "Fail";
+                switch ( result )
+                {
+                    case NodeDiscoveryResult.GOOD     : word = "Good";     break;
+                    case NodeDiscoveryResult.EXCELLENT: word = "Excelent"; break;
+                }
+
                 // QUESTION: How to know the number of different DCUs detected? or each element detected is always a different/new node?
                 // QUESTION: Are F1 and F2 reliability the values accumulated and calculated during the validation of the nodes?
                 Data.Set ( "ProcessResult",
-                    $"Fail Number of DCUs {nodeList.CountUniqueNodes} " +
+                    $"{word} " +
+                    $"Number of DCUs {nodeList.CountUniqueNodesValidated} " +
                     $"F1 Reliability {( probF1 * 100 ).ToString ( "F2" )} Percent " +
                     $"F2 Reliability {( probF2 * 100 ).ToString ( "F2" )} Percent" );
 

@@ -65,7 +65,7 @@ namespace MTUComm
         /// </list>
         /// </para>
         /// </summary>
-        private enum NodeDiscoveryResult
+        public enum NodeDiscoveryResult
         {
             GOOD,
             EXCELLENT,
@@ -117,10 +117,17 @@ namespace MTUComm
         private const int CMD_NEXT_NODE_3         = 5; // ACK without log entry [0-4] = 5 bytes
         private const byte CMD_NEXT_NODE_DATA     = 0x00; // ACK with node entry
         private const byte CMD_NEXT_NODE_EMPTY    = 0x01; // ACK without node entry ( query complete )
-        private const int WAIT_BEFORE_START_NODE  = 1000;
+        private const int WAIT_BEFORE_START_NODE  = 3000;
         private const int WAIT_BEFORE_GET_NODES   = 1000;
         private const int WAIT_BTW_NODE_ERRORS    = 1000;
         private const int WAIT_BTW_NODES          = 100;
+        private const int CMD_ENCRYP_MAX          = 3;
+        private const int CMD_ENCRYP_OLD_MAX      = 5;
+        private const int CMD_LOAD_ENCRYP         = 0x1B;
+        private const int CMD_READ_ENCRYP         = 0x1C;
+        private const int CMD_READ_ENCRYP_RES_2   = 64;
+        private const int CMD_READ_ENCRYP_RES_3   = 32;
+        private const int CMD_GEN_ENCRYP_KEYS     = 0x1D;
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
         private const string ERROR_LOADMETER      = "MeterLoadException";
         private const string ERROR_LOADMTU        = "MtuLoadException";
@@ -923,7 +930,6 @@ namespace MTUComm
                  this.mtu.MtuDemand &&
                  this.mtu.NodeDiscovery )
             {
-                // TODO: IF NODE DISCOVERY FAILS, SHOULD WE CANCEL THE INSTALLATION ( ADD/REPLACE )?
                 switch ( await this.NodeDiscovery ( map ) )
                 {
                     case NodeDiscoveryResult.EXCELLENT:
@@ -1029,7 +1035,12 @@ namespace MTUComm
                             
                             lexiTimeOut = true;
                             
-                            // NOTE: After testing several times, the MTU generally does not respond if is busy, not returning all requested bytes ( LExI timeout )
+                            // NOTE: After testing several times, the MTU generally does not respond
+                            // NOTE: if is busy, not returning all requested bytes ( LExI timeout )
+                            // ACLARA: It looks like bytes are lost.  That can happen if the MTU is busy doing something.
+                            // It is a limitation of the coil and will happen with any command.  The coil isn’t a UART and
+                            // doesn’t have any buffering so if the MTU is too busy to respond in time then the communication
+                            // is going to get garbled and he just has to handle that by trying again.
                             try
                             {
                                 // Response: Byte 2 { 0 = The MTU is busy, 1 = The MTU is ready for query }
@@ -1205,28 +1216,28 @@ namespace MTUComm
                         // Probability for two-way/fast channel
                         // NOTE: Math.Pow works with double, not decimal
                         decimal precalc = 1 - prob * acumProbF2;
-                        decimal p2Way   = 1 - precalc * precalc * precalc;
+                        acumProbF2      = 1 - precalc * precalc * precalc;
 
                         // NodeDiscovery result
                         NodeDiscoveryResult result = NodeDiscoveryResult.NOT_ACHIEVED;
                         
                         // Excellent
-                        int numNodesValidated = nodeList.CountEntriesValidated;
+                        int numNodesValidated = nodeList.CountUniqueNodesValidated;
                         if ( numNodesValidated >= global.GoodNumDCU &&
                              acumProbF1 >= global.GoodF1Rely/100 &&
-                             p2Way >= global.GoodF2Rely/100 )
+                             acumProbF2 >= global.GoodF2Rely/100 )
                             result = NodeDiscoveryResult.EXCELLENT;
                         
                         // Minimum
                         else if ( numNodesValidated >= global.MinNumDCU &&
                                   acumProbF1 >= global.MinF1Rely/100 &&
-                                  p2Way >= global.MinF2Rely/100 )
+                                  acumProbF2 >= global.MinF2Rely/100 )
                             result = NodeDiscoveryResult.GOOD;
 
                         // Generates nodes log only if the process finished ok
-                        if ( result != NodeDiscoveryResult.NOT_ACHIEVED )
-                            await this.OnNodeDiscovery (
-                                new Delegates.ActionArgs ( this.mtu, map, nodeList, acumProbF1, p2Way, vswr ) );
+                        //if ( result != NodeDiscoveryResult.NOT_ACHIEVED )
+                        await this.OnNodeDiscovery (
+                            new Delegates.ActionArgs ( this.mtu, map, result, nodeList, acumProbF1, acumProbF2, vswr ) );
 
                         return result;
 
@@ -2356,106 +2367,18 @@ namespace MTUComm
                 #region Encryption
 
                 // Only encrypt MTUs with SpecialSet set
-                // TODO: Implement encryption for the OnDemand 1.2 MTUs
-                if ( mtu.SpecialSet && ! this.mtu.NodeDiscovery )
+                if ( mtu.SpecialSet )
                 {
                     Utils.Print ( "----ENCRYPTION_START-----" );
                 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting..." ) );
-                
-                    MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
-                    MemoryRegister<bool>   regEncrypted  = map[ "Encrypted"       ];
-                    MemoryRegister<int>    regEncryIndex = map[ "EncryptionIndex" ];
-                
-                    bool   ok     = false;
-                    byte[] aesKey = new byte[ regAesKey.size    ]; // 16 bytes
-                    byte[] sha    = new byte[ regAesKey.sizeGet ]; // 32 bytes
-                    
-                    try
-                    {
-                        // Generate random key
-                        RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
-                        rng.GetBytes ( aesKey );
-                        
-                        // Calculate SHA for the new random key
-                        // Using .Net API
-                        /*
-                        using ( SHA256 mySHA256 = SHA256.Create () )
-                        {
-                            sha = mySHA256.ComputeHash ( aesKey );
-                        }
-                        */
-                        
-                        // Using Aclara/StarProgrammer class
-                        // Note: Generates different result than using .Net SHA256 class
-                        MtuSha256 crypto = new MtuSha256 ();
-                        crypto.GenerateSHAHash ( aesKey, out sha );
-                        
-                        // Try to write and validate AES encryption key up to five times
-                        for ( int i = 0; i < 5; i++ )
-                        {
-                            // Write key in the MTU
-                            Utils.Print ( "Write key to MTU" );
-                            await regAesKey.SetValueToMtu ( aesKey );
-                            
-                            Thread.Sleep ( 1000 );
-                            
-                            // Verify if the MTU is encrypted
-                            Utils.Print ( "Read Encrypted from MTU" );
-                            bool encrypted   = ( bool )await regEncrypted .GetValueFromMtu ();
-                            Utils.Print ( "Read EncryptedIndex from MTU" );
-                            int  encrypIndex = ( int  )await regEncryIndex.GetValueFromMtu ();
-                            
-                            if ( ! encrypted || encrypIndex <= -1 )
-                                continue; // Error
-                            else
-                            {
-                                Utils.Print ( "Read EncryptionKey (SHA) from MTU" );
-                                byte[] mtuSha = ( byte[] )await regAesKey.GetValueFromMtu ( true ); // 32 bytes
-                                
-                                Thread.Sleep ( 100 );
 
-                                // Compare local sha and sha generate reading key from MTU
-                                if ( ! sha.SequenceEqual ( mtuSha ) )
-                                     continue; // Error
-                                else
-                                {
-                                    ok = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    catch ( Exception )
-                    {
-                        //...
-                    }
-                    finally
-                    {
-                        if ( ok )
-                        {
-                            Mobile.ConfigData data = Mobile.configData;
-                            
-                            data.lastRandomKey    = new byte[ aesKey.Length ];
-                            data.lastRandomKeySha = new byte[ sha   .Length ];
-                        
-                            // Save data to log
-                            Array.Copy ( aesKey, data.lastRandomKey,    aesKey.Length );
-                            Array.Copy ( sha,    data.lastRandomKeySha, sha.Length    );
-                        }
-                        
-                        // Always clear temporary random key from memory, and then after generate the
-                        // activity log also will be cleared random key and its sha save in Mobile.configData
-                        Array.Clear ( aesKey, 0, aesKey.Length );
-                        Array.Clear ( sha,    0, sha.Length    );
-                    }
-                    
-                    // MTU encryption has failed
-                    if ( ! ( Mobile.configData.isMtuEncrypted = ok ) )
-                        throw new ActionNotAchievedEncryptionException ( "5" );
-                    
+                    if ( ! mtu.IsFamilly35xx36xx )
+                         await this.Encrypt_Old ( map );
+                    else await this.Encrypt_OnDemand12 ( map );
+
                     await this.CheckIsTheSameMTU ();
-                    
+
                     Utils.Print ( "----ENCRYPTION_FINISH----" );
                 }
 
@@ -2583,6 +2506,228 @@ namespace MTUComm
                 else throw e;
             }
         }
+
+        #region Encryption
+
+        private async Task Encrypt_Old (
+            dynamic map )
+        {
+            MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
+            MemoryRegister<bool>   regEncrypted  = map[ "Encrypted"       ];
+            MemoryRegister<int>    regEncryIndex = map[ "EncryptionIndex" ];
+        
+            bool   ok     = false;
+            byte[] aesKey = new byte[ regAesKey.size    ]; // 16 bytes
+            byte[] sha    = new byte[ regAesKey.sizeGet ]; // 32 bytes
+            
+            try
+            {
+                // Generate random key
+                RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
+                rng.GetBytes ( aesKey );
+                
+                // Calculate SHA for the new random key
+                // To use .Net API does not give the same result
+                /*
+                using ( SHA256 mySHA256 = SHA256.Create () )
+                {
+                    sha = mySHA256.ComputeHash ( aesKey );
+                }
+                */
+                
+                // Using Aclara/StarProgrammer class
+                // Note: Generates different result than using .Net SHA256 class
+                MtuSha256 crypto = new MtuSha256 ();
+                crypto.GenerateSHAHash ( aesKey, out sha );
+                
+                // Try to write and validate AES encryption key up to five times
+                for ( int i = 0; i < CMD_ENCRYP_OLD_MAX; i++ )
+                {
+                    // Writes key in the MTU
+                    Utils.Print ( "Write key to MTU" );
+                    await regAesKey.SetValueToMtu ( aesKey );
+                    
+                    Thread.Sleep ( 1000 );
+                    
+                    // Verifies if the MTU is encrypted
+                    Utils.Print ( "Read Encrypted from MTU" );
+                    bool encrypted   = ( bool )await regEncrypted .GetValueFromMtu ();
+                    Utils.Print ( "Read EncryptedIndex from MTU" );
+                    int  encrypIndex = ( int  )await regEncryIndex.GetValueFromMtu ();
+                    
+                    if ( ! encrypted || encrypIndex <= -1 )
+                        continue; // Error
+                    else
+                    {
+                        Utils.Print ( "Read EncryptionKey (SHA) from MTU" );
+                        byte[] mtuSha = ( byte[] )await regAesKey.GetValueFromMtu ( true ); // 32 bytes
+                        
+                        Thread.Sleep ( 100 );
+
+                        // Compare local sha and sha generate reading key from MTU
+                        if ( ! sha.SequenceEqual ( mtuSha ) )
+                                continue; // Error
+                        else
+                        {
+                            ok = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            catch ( Exception )
+            {
+                //...
+            }
+            finally
+            {
+                if ( ok )
+                {
+                    Mobile.ConfigData data = Mobile.configData;
+                    
+                    data.lastRandomKey    = new byte[ aesKey.Length ];
+                    data.lastRandomKeySha = new byte[ sha   .Length ];
+                
+                    // Save data to log
+                    Array.Copy ( aesKey, data.lastRandomKey,    aesKey.Length );
+                    Array.Copy ( sha,    data.lastRandomKeySha, sha.Length    );
+                }
+                
+                // Always clear temporary random key from memory, and then after generate the
+                // activity log also will be cleared random key and its sha save in Mobile.configData
+                Array.Clear ( aesKey, 0, aesKey.Length );
+                Array.Clear ( sha,    0, sha.Length    );
+            }
+            
+            // MTU encryption has failed
+            if ( ! ( Mobile.configData.isMtuEncrypted = ok ) )
+                throw new ActionNotAchievedEncryptionException ( CMD_ENCRYP_OLD_MAX + "" );
+        }
+
+        private async Task Encrypt_OnDemand12 (
+            dynamic map )
+        {
+            MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
+            MemoryRegister<bool>   regEncrypted  = map[ "Encrypted"       ];
+            MemoryRegister<int>    regEncryIndex = map[ "EncryptionIndex" ];
+
+            // Look for the public key
+            if ( string.IsNullOrEmpty ( this.global.PublicKey ) )
+                throw new ODEncryptionPublicKeyNotSetException ();
+
+            // Generates random number
+            byte[] key = new byte[ regAesKey.size    ]; // 16 bytes
+            byte[] sha = new byte[ regAesKey.sizeGet ]; // 32 bytes
+            new RNGCryptoServiceProvider ().GetBytes ( key );
+            new MtuSha256 ().GenerateSHAHash ( key, out sha );
+
+            string serverRND = Convert.ToBase64String ( sha );
+
+            // Prepares the data for the LExI commands "Loads Encryption Item"
+            byte[] data1 = new byte[ sha.Length + 1 ];
+            Array.Copy ( sha, 0, data1, 1, sha.Length );
+            data1[ 0 ] = 0x01; // Head End Random Number
+
+            byte[] data2 = new byte[ 65 ];
+            byte[] pki64 = Utils.StringToByteArrayBase64 ( this.global.PublicKey );
+            Array.Copy ( pki64, 0, data2, 1, pki64.Length );
+            data2[ 0 ] = 0x00; // Head End Public Key
+
+            // Prepares the data for the LExI commands "Reads Encryption Item"
+            byte[] data3 = { 0x03 }; // MTU Random Number
+            byte[] data4 = { 0x02 }; // MTU Public Key
+
+            for ( int i = 0; i < CMD_ENCRYP_MAX; i++ )
+            {
+                try
+                {
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step 1" ) );
+
+                    // Loads Encryption Item - Type 1: Head End Random Number
+                    LexiWriteResult fullResponse = await this.lexi.Write (
+                        CMD_LOAD_ENCRYP,
+                        data1,
+                        null, null,
+                        LexiAction.OperationRequest );
+                    
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step 2" ) );
+
+                    // Loads Encryption Item - Type 0: Head End Public Key
+                    fullResponse = await this.lexi.Write (
+                        CMD_LOAD_ENCRYP,
+                        data2,
+                        null, null,
+                        LexiAction.OperationRequest );
+                    
+                    Thread.Sleep ( 5000 );
+
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step 3" ) );
+
+                    // Generates Encryptions Keys
+                    fullResponse = await this.lexi.Write (
+                        CMD_GEN_ENCRYP_KEYS,
+                        null, null, null,
+                        LexiAction.OperationRequest );
+
+                    Thread.Sleep ( 1000 );
+                    
+                    // Verifies if the MTU is encrypted
+                    Utils.Print ( "Read Encrypted from MTU" );
+                    bool encrypted   = ( bool )await regEncrypted .GetValueFromMtu ();
+                    Utils.Print ( "Read EncryptedIndex from MTU" );
+                    int  encrypIndex = ( int  )await regEncryIndex.GetValueFromMtu ();
+                    
+                    if ( ! encrypted || encrypIndex <= -1 )
+                        continue; // Error
+
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step 4" ) );
+
+                    // Reads Encryption Item - Type 3: MTU Random Number
+                    fullResponse = await this.lexi.Write (
+                        CMD_READ_ENCRYP,
+                        data3,
+                        new uint[] { CMD_READ_ENCRYP_RES_3 },
+                        null,
+                        LexiAction.OperationRequest );
+
+                    string clientRnd = Convert.ToBase64String ( fullResponse.Response );
+
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step 5" ) );
+
+                    // Reads Encryption Item - Type 2: MTU Public Key
+                    fullResponse = await this.lexi.Write (
+                        CMD_READ_ENCRYP,
+                        data4,
+                        new uint[] { CMD_READ_ENCRYP_RES_2 },
+                        null,
+                        LexiAction.OperationRequest );
+
+                    string mtuPublicKey = Convert.ToBase64String ( fullResponse.Response );
+
+                    // Saves data that will be use to create the activity log
+                    Data.Set ( "ServerRND",    serverRND    );
+                    Data.Set ( "ClientRND",    clientRnd    );
+                    Data.Set ( "MtuPublicKey", mtuPublicKey );
+
+                    // Always clear temporary random key from memory
+                    Array.Clear ( key,   0, key.Length   );
+                    Array.Clear ( sha,   0, sha.Length   );
+                    Array.Clear ( data1, 0, data1.Length );
+
+                    return;
+                }
+                catch ( Exception e )
+                {
+                    // Is not own exception
+                    if ( ! Errors.IsOwnException ( e ) )
+                        throw new PuckCantCommWithMtuException ();
+                }
+            }
+
+            throw new ActionNotAchievedEncryptionException ( CMD_ENCRYP_MAX + "" );
+        }
+
+        #endregion
 
         #endregion
 

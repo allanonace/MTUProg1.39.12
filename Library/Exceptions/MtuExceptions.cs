@@ -535,6 +535,18 @@
     {
         public ActionNotAchievedEncryptionException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
+
+    /// <summary>
+    /// Exception thrown when the public key used during new encryption process
+    /// for OnDemand 1.2 MTUs is not set in global.xml file, using the PublicKey tag.
+    /// <para>
+    /// See <see cref="MTUComm.MTUComm.Encrypt_OD12 ( dynamic )"/>.
+    /// </para>
+    /// </summary>
+    public class ODEncryptionPublicKeyNotSetException : OwnExceptionsBase
+    {
+        public ODEncryptionPublicKeyNotSetException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
     
     #endregion
     

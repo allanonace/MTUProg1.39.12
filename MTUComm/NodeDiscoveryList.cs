@@ -149,7 +149,6 @@ namespace MTUComm
         /// <summary>
         /// The total number of nodes/DCUs detected.
         /// </summary>
-        /// <value></value>
         public int Count
         {
             get { return this.entries.Count; }
@@ -161,37 +160,34 @@ namespace MTUComm
         /// See <see cref="NodeDiscovery"/> for the representation of the info associated to the detected nodes/DCUs.
         /// </para>
         /// </summary>
-        /// <value></value>
         public NodeDiscovery[] Entries
         {
             get { return this.entries.ToArray (); }
         }
 
         /// <summary>
-        /// List of the validated nodes/DCUs only.
-        /// <para>
-        /// See <see cref="NodeDiscovery"/> for the representation of the info associated to the detected nodes/DCUs.
-        /// </para>
-        /// </summary>
-        /// <value></value>
-        public NodeDiscovery[] EntriesValidated
-        {
-            get { return this.entries.Where ( entry => entry.IsValidated ).ToArray (); }
-        }
-
-        /// <summary>
         /// The number of the validated nodes/DCUs only.
         /// </summary>
-        /// <value></value>
-        public int CountEntriesValidated
+        /// <remarks>
+        /// Only count once each DCU ( node ID ), not once per DCU channel ( F1 and F2 ).
+        /// <para>
+        /// The returned value should be equal or lower than <see cref="CountUniqueNodes"/>.
+        /// </para>
+        /// </remarks>
+        public int CountUniqueNodesValidated
         {
-            get { return this.entries.Where ( entry => entry.IsValidated ).Count (); }
+            get
+            {
+                return this.entries
+                    .Where ( entry => entry.IsValidated )
+                    .GroupBy ( entry => entry.NodeId )
+                    .Count ();
+            }
         }
 
         /// <summary>
         /// The total number of nodes/DCUs that should be recovered.
         /// </summary>
-        /// <value></value>
         public int TotalEntries
         {
             get
@@ -209,7 +205,6 @@ namespace MTUComm
         /// </para>
         /// </summary>
         /// </summary>
-        /// <value></value>
         public NodeDiscovery LastNode
         {
             get

@@ -493,7 +493,7 @@ namespace Lexi
                 "0x" + info.Header + " ( " + Convert.ToInt32 ( info.Header, 16 ) + " ) + " +
                 "WriteCmd 0x" + info.Cmd + " ( " + Convert.ToInt32 ( info.Cmd, 16 ) + " ) + " +
                 "Address 0x" + info.StartAddress + " ( " + Convert.ToInt32 ( info.StartAddress, 16 ) + " ) + " +
-                "NumBytesToWrite 0x" + data.Length + " ( " + data.Length + " ) + " +
+                "NumBytesToWrite 0x" + data.Length + " ( " + Convert.ToInt32 ( data.Length + "", 16 ) + " ) + " +
                 "Checksum 0x" + info.Checksum + " ( " + Convert.ToInt32 ( info.Checksum, 16 ) + " ) + " +
                 "Data [ " + Utils.ByteArrayToString ( data ) + " ] + " +
                 "CRC [ " + Utils.ByteArrayToString ( info.CRC.Take ( 2 ).ToArray () ) + " ]" );

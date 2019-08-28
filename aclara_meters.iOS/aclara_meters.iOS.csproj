@@ -77,15 +77,15 @@
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <BuildIpa>true</BuildIpa>
     <IpaIncludeArtwork>false</IpaIncludeArtwork>
-    <MtouchLink>SdkOnly</MtouchLink>
+    <MtouchLink>None</MtouchLink>
     <OnDemandResourcesInitialInstallTags />
     <MtouchArch>ARM64</MtouchArch>
     <OptimizePNGs>false</OptimizePNGs>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
     <MtouchFastDev>true</MtouchFastDev>
-    <DeviceSpecificBuild>false</DeviceSpecificBuild>
+    <DeviceSpecificBuild>true</DeviceSpecificBuild>
     <CodesignProvision>bizintekdist</CodesignProvision>
-    <MtouchFloat32>true</MtouchFloat32>
+    <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
