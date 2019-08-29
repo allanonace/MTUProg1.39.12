@@ -33,17 +33,17 @@ namespace aclara_meters.Droid
         /// you don't need to implement this -- you can still query the state of the adapter, the observable just won't work. See
         /// <see cref="IBluetoothLowEnergyAdapter.State" />
         /// </remarks>
-        protected override void OnMAMActivityResult(Int32 requestCode, Result resultCode, Intent data)
+        protected override void OnActivityResult(Int32 requestCode, Result resultCode, Intent data)
         {
             BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
         }
 
-        protected override void OnMAMCreate(Bundle bundle)
+        protected override void OnCreate(Bundle bundle)
         {
             //TabLayoutResource = Resource.Layout.Tabbar;
             // ToolbarResource = Resource.Layout.Toolbar;
 
-            base.OnMAMCreate(bundle);
+            base.OnCreate(bundle);
 
             UserDialogs.Init(this);
             global::Xamarin.Forms.Forms.Init(this, bundle);
@@ -136,22 +136,23 @@ namespace aclara_meters.Droid
         /// you don't need to implement this -- you can still query the state of the adapter, the observable just won't work. See
         /// <see cref="IBluetoothLowEnergyAdapter.State" />
         /// </remarks>
-        protected override void OnMAMActivityResult(Int32 requestCode, Result resultCode, Intent data)
+        protected override void OnActivityResult(Int32 requestCode, Result resultCode, Intent data)
         {
             BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
         }
 
-        protected override void OnMAMCreate(Bundle bundle)
+        protected override void OnCreate(Bundle bundle)
         {
             //TabLayoutResource = Resource.Layout.Tabbar;
            // ToolbarResource = Resource.Layout.Toolbar;
 
-            base.OnMAMCreate(bundle);
+            base.OnCreate(bundle);
 
             UserDialogs.Init(this);
             global::Xamarin.Forms.Forms.Init(this, bundle);
             CrossCurrentActivity.Current.Init(this, bundle);
-
+            ZXing.Net.Mobile.Forms.Android.Platform.Init();
+            CrossCurrentActivity.Current.Activity = this;
             try
             {
                 // If you want to enable/disable the Bluetooth adapter from code, you must call this.
@@ -174,9 +175,6 @@ namespace aclara_meters.Droid
             {
                 RequestedOrientation = ScreenOrientation.Landscape;
             }
-
-            //CrossCurrentActivity.Current.Init(this, bundle);
-
 
             var context = Android.App.Application.Context;
             var info = context.PackageManager.GetPackageInfo(context.PackageName, 0);

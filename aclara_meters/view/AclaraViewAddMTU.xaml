@@ -106,7 +106,7 @@
                                     <StackLayout x:Name="port1view" IsVisible="true" Margin="12,0,12,0">
                                         <StackLayout Orientation="Horizontal">
                                             <Label Margin="0,16,0,8" FontSize="22" HorizontalOptions="StartAndExpand" TextColor="#6aa2b8" x:Name="name_of_window_port1" Text="Add MTU" />
-                                            <ImageButton CommandParameter="Port1" IsVisible="{Binding ImagesEnabled}" HeightRequest="56" Source="camera3.png" Clicked="TakePicture" />
+                                            <ImageButton CommandParameter="1" IsVisible="{Binding ImagesEnabled}" HeightRequest="56" Source="camera3.png" Clicked="TakePicture" />
                                         </StackLayout>
                                         <!-- Account Number / Service Port ID -->
                                         <StackLayout x:Name="div_AccountNumber">
@@ -447,7 +447,7 @@
                                     <StackLayout x:Name="block_view_port2" IsVisible="false">
                                         <StackLayout Orientation="Horizontal">
                                             <Label Margin="0,16,0,8" FontSize="22" HorizontalOptions="StartAndExpand" TextColor="#6aa2b8" x:Name="name_of_window_port2" Text="Add MTU" />
-                                            <ImageButton HorizontalOptions="EndAndExpand" CommandParameter="Port2" IsVisible="{Binding ImagesEnabled}" HeightRequest="56" Source="camera3.png" Clicked="TakePicture"/>
+                                            <ImageButton HorizontalOptions="EndAndExpand" CommandParameter="2" IsVisible="{Binding ImagesEnabled}" HeightRequest="56" Source="camera3.png" Clicked="TakePicture"/>
                                         </StackLayout>
                                         <StackLayout x:Name="div_AccountNumber_2">
                                         <!-- Account Number / Service Port ID -->

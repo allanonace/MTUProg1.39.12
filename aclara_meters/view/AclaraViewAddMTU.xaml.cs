@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using aclara_meters.Behaviors;
 using aclara_meters.Helpers;
@@ -253,7 +254,8 @@ namespace aclara_meters.view
         private MTUBasicInfo mtuBasicInfo;
 
         private List<ReadMTUItem> FinalReadListView { get; set; }
-        //private  bool BarCodeEnabled { get; set; }
+        private List<FileInfo> PicturesMTU;
+
         private bool barCodeEnabled;
         public bool BarCodeEnabled
         {
@@ -327,7 +329,8 @@ namespace aclara_meters.view
                 FormsApp.credentialsService.UserName );
             
             isCancellable = false;
-           
+
+            PicturesMTU = new List<FileInfo>();
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -4531,10 +4534,18 @@ namespace aclara_meters.view
                     }
                 }
             }
+            // copy the pictures from MTU to user images folder
 
-            Task.Delay(100).ContinueWith(t =>
+            
+            await Task.Delay(100).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
+                if (PicturesMTU.Count != 0)
+                {
+                    label_read.Text = "Saving pictures...";
+                    CopyPicturesToUserImagesFolder();
+                }
+
                 _userTapped = false;
                 bg_read_mtu_button.NumberOfTapsRequired = 1;
                 ChangeLowerButtonImage(false);
@@ -4727,31 +4738,60 @@ namespace aclara_meters.view
         {
             try
             {
-    
+                ImageButton ctlButton = (ImageButton)sender;
+                string port = (string)ctlButton.CommandParameter;
+                string AccFieldName = port == "1" ?"tbx_AccountNumber": $"tbx_AccountNumber_{port}";
 
-                if(!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
+                BorderlessEntry field = (BorderlessEntry)this.FindByName(AccFieldName);
+
+                await CrossMedia.Current.Initialize();
+
+                if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
                 {
                     await DisplayAlert("No camera", "No camera available", "OK");
                     return;
                 }
 
-                string user = FormsApp.credentialsService.UserName;
+                
+                int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
+                var MtuId = await Data.Get.MemoryMap.MtuSerialNumber.GetValue();
+               // var accName1 = await Data.Get.MemoryMap.P1MeterId.GetValue();
+               // var accName2 = await Data.Get.MemoryMap.P2MeterId.GetValue();
 
-                var file = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
+                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0')+"_"+ field.Text+ "_Port"+ port;
+                
+                Device.BeginInvokeOnMainThread(async () =>
                 {
-                    Directory = Mobile.PATH_LOGS + "/" + user + "/" + user + "_" + Mobile.PATH_IMAGES,//Mobile.ImagesPath,
-                    SaveToAlbum = false,
-                    CompressionQuality = 92,
-                    PhotoSize = PhotoSize.Small,
-                    DefaultCamera = CameraDevice.Rear
+                    MediaFile file = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
+                    {
+                       // Directory =  user + "_" + Mobile.PATH_IMAGES,//Mobile.ImagesPath,
+                        Name=nameFile,
+                        SaveToAlbum = false,
+                        CompressionQuality = 92,
+                        PhotoSize = PhotoSize.Small,
+                        DefaultCamera = CameraDevice.Rear
 
-				    });
+                    });
 
-                if (file == null)
-                    return;
-                await DisplayAlert("File Location",file.Path,"OK");
+                    if (file == null)
+                        return;
+                   
 
-                file.Dispose();
+                    string[] fileName = file.Path.Split('/');
+                    nameFile = fileName[fileName.Length-1];
+                    DirectoryInfo dir = new DirectoryInfo(file.Path.Substring(0,file.Path.Length-(nameFile.Length+1)));
+                    
+                    FileInfo[]  imagefiles = dir.GetFiles(nameFile);
+                                                       
+                    PicturesMTU.Add(imagefiles[0]);
+                   
+                    //imagefiles[0].CopyTo(Path.Combine(Mobile.ImagesPath, nameFile));
+                    //imagefiles[0].Delete();
+                    
+                    //await DisplayAlert("File Location", file.Path, "OK");
+
+                    file.Dispose();
+                });
 
             }
             catch (Exception e1)
@@ -4759,7 +4799,25 @@ namespace aclara_meters.view
             }   
 
         }
-            #endregion
+
+        private void CopyPicturesToUserImagesFolder()
+        {
+           
+            string nameFile, newFile;
+
+            foreach (FileInfo file in PicturesMTU)
+            {
+                nameFile = file.Name;
+                newFile=Path.Combine(Mobile.ImagesPath, nameFile);
+                if (File.Exists(newFile))
+                    File.Delete(newFile);
+                
+                file.CopyTo(Path.Combine(Mobile.ImagesPath, nameFile));
+                file.Delete();
+            }
+        }
+
+        #endregion
 
     }
 
