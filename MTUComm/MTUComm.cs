@@ -2627,15 +2627,18 @@ namespace MTUComm
             if ( string.IsNullOrEmpty ( this.global.PublicKey ) )
                 throw new ODEncryptionPublicKeyNotSetException ();
             
-            // Look for the public key
+            // Look for the broadcast key
             if ( this.mtu.BroadCast &&
                  string.IsNullOrEmpty ( this.global.BroadcastSet ) )
-                throw new ODEncryptionPublicKeyNotSetException ();
+                throw new ODEncryptionBroadcastKeyNotSetException ();
 
             bool publicKeyInBase64;
             bool broadKeyInBase64;
             string publicKey = Utils.StringFromBase64 ( this.global.PublicKey,    out publicKeyInBase64 );
             string broadKey  = Utils.StringFromBase64 ( this.global.BroadcastSet, out broadKeyInBase64  );
+
+            // Removes first eight characters and there should be exactly 64 remaining
+            publicKey = publicKey.Substring ( 8 );
 
             // Checks public key format
             if ( ! publicKeyInBase64 ||
@@ -2685,11 +2688,9 @@ namespace MTUComm
                 {
                     int step = 1;
 
-                    // Generates the random number
+                    // Generates the random number and prepares LExI array
                     rng.GetBytes ( key );
                     mtusha.GenerateSHAHash ( key, out sha );
-
-                    // Copies random number to the LExI data array
                     Array.Copy ( sha, 0, data1, 1, sha.Length );
 
                     if ( this.mtu.BroadCast )
