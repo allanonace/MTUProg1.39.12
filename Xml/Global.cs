@@ -159,6 +159,10 @@ namespace Xml
     ///   <description>Bypass F1 Ecoder/Encoder Autodetect</description>
     /// </item>
     /// <item>
+    ///   <term>BroadcastSet</term>
+    ///   <description>Broadcast key used during the OnDemand 1.2 MTUs new encryption process</description>
+    /// </item>
+    /// <item>
     ///   <term>CertPair</term>
     ///   <description>Whether a certificate pair (i.e. Public andPrivate) is installed ( PC only )</description>
     /// </item>
@@ -612,31 +616,35 @@ namespace Xml
     /// </item>
     /// <item>
     ///   <term>ShowAddMTU</term>
-    ///   <description>Display or hide the “Add MTU” programming option on the main menu</description>
+    ///   <description>Show the Add MTU button on the main menu or not</description>
     /// </item>
     /// <item>
     ///   <term>ShowAddMTUMeter</term>
-    ///   <description>Display or hide the “Add MTU and Meter” programming option on the main menu</description>
+    ///   <description>Show the Add MTU and Meter button on the main menu or not</description>
     /// </item>
     /// <item>
     ///   <term>ShowAddMTUReplaceMeter</term>
-    ///   <description>Display or hide the “Add MTU and Replace Meter” programming option on the main menu</description>
+    ///   <description>Show the Add MTU and Replace Meter button on the main menu or not</description>
     /// </item>
     /// <item>
     ///   <term>ShowBarCodeButton</term>
-    ///   <description>Display or hide the scanner barcode button</description>
+    ///   <description>Show the Barcode Scanner button on the main menu or not</description>
     /// </item> 
+    /// <item>
+    ///   <term>ShowCameraButton</term>
+    ///   <description>Show the Camera button on the action screen or not</description>
+    /// </item>
+    /// <item>
+    ///   <term>ShowDataRead</term>
+    ///   <description>Show the Data Read button or not</description>
+    /// </item>
     /// <item>
     ///   <term>ShowFreq</term>
     ///   <description>Show the MTU operating frequency in the Read MTU display</description>
     /// </item>
     /// <item>
-    ///   <term>ShowCameraButton</term>
-    ///   <description>Show or hide the camera Button on the action screen</description>
-    /// </item>
-    /// <item>
     ///   <term>ShowInstallConfirmation</term>
-    ///   <description>Show the Installation Confirmation Button on the main screen</description>
+    ///   <description>Show the Installation Confirmation button on the main menu or not</description>
     /// </item>
     /// <item>
     ///   <term>ShowMeterVendor</term>
@@ -644,19 +652,15 @@ namespace Xml
     /// </item>
     /// <item>
     ///   <term>ShowReplaceMeter</term>
-    ///   <description>Display or hide the “Replace Meter” programming option on the main menu</description>
+    ///   <description>Show the Replace Meter button on the main menu or not</description>
     /// </item>
     /// <item>
     ///   <term>ShowReplaceMTU</term>
-    ///   <description>Display or hide the Replace MTU programmingoption on the main menu</description>
+    ///   <description>Show the Replace MTU button on the main menu or not</description>
     /// </item>
     /// <item>
     ///   <term>ShowReplaceMTUMeter</term>
-    ///   <description>Display or hide the “Replace MTU And Meter”programming option on the main menu</description>
-    /// </item>
-    /// <item>
-    ///   <term>ShowDataRead</term>
-    ///   <description>Display or hide the “DataRead” programming option on the main menu</description>
+    ///   <description>Show the Replace MTU And Meter button on the main menu or not</description>
     /// </item>
     /// <item>
     ///   <term>ShowScriptErrorMessage</term>
@@ -668,7 +672,11 @@ namespace Xml
     /// </item>
     /// <item>
     ///   <term>ShowTurnOff</term>
-    ///   <description>Show Turn Off MTU button on main screen</description>
+    ///   <description>Show the Turn Off MTU button on the main menu or not</description>
+    /// </item>
+    /// <item>
+    ///   <term>ShowValvePosition</term>
+    ///   <description>Show the Remote Disconnect button on the main menu or not</description>
     /// </item>
     /// <item>
     ///   <term>Siesta</term>
@@ -828,6 +836,7 @@ namespace Xml
             this.AutoPurgeSize                = 0;                    // [x-9999] Maximum size in kilobytes for log file before auto purge if AutoPurge is true
             this.AutoRegisterRecording        = false;                // Records Register selection in Activity Log based on the old meter serial number and new serial number
             this.AutoRFCheck                  = false;                // If true, it forces to execute the NodeDiscovery process even though the IC has failed
+            this.BroadcastSet                 = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="; // 12345678901234567890123456789012 = 32 bytes //string.Empty; // Broadcast key used during the OnDemand 1.2 MTUs new encryption process
             this.ByPassAutoDetect             = false;                // Bypass F1 Ecoder/Encoder Autodetect
             this.CertPair                     = false;                // Whether a certificate pair (i.e. Public and Private) is installed ( PC only )
             this.CertPath                     = string.Empty;         // Key Store Path for certificate ( PC Only )
@@ -935,21 +944,22 @@ namespace Xml
             this.SecondNormXmitField          = string.Empty;         // [Custom] Corresponding Field in Appointment File
             this.SecondNormXmitInterval       = string.Empty;         // [Custom] Alternate transmit interval in hours or minutes. Works for F1 only. The same values as regular read interval
             this.SerialNumLabel               = "Meter #";            // [1-20] Labels the Serial Number from Appointment
-            this.ShowAddMTU                   = true;                 // Display or hide the “Add MTU” programming option on the main menu
-            this.ShowAddMTUMeter              = true;                 // Display or hide the “Add MTU and Meter” programming option on the main menu
-            this.ShowAddMTUReplaceMeter       = true;                 // Display or hide the “Add MTU and Replace Meter” programming option on the main menu
-            this.ShowBarCodeButton            = true;                 // Display or hide the scanner barcode button.
+            this.ShowAddMTU                   = false;                // Show the Add MTU button on the main menu or not
+            this.ShowAddMTUMeter              = false;                // Show the Add MTU and Meter button on the main menu or not
+            this.ShowAddMTUReplaceMeter       = false;                // Show the Add MTU and Replace Meter button on the main menu or not
+            this.ShowBarCodeButton            = true;                 // Show the Barcode Scanner button on the main menu or not
+            this.ShowCameraButton             = true;                 // Show the Camera button on the action screen or not
+            this.ShowDataRead                 = false;                // Show the Data Read button or not
             this.ShowFreq                     = false;                // Show the MTU operating frequency in the Read MTU display
-            this.ShowCameraButton             = true;                 // Display or hide the camera button in the action screen
-            this.ShowInstallConfirmation      = false;                // Show the Installation Confirmation Button on the main screen
+            this.ShowInstallConfirmation      = false;                // Show the Installation Confirmation button on the main menu or not
             this.ShowMeterVendor              = false;                // Specifies whether to display vendor and model information for meters during MTU programming
-            this.ShowReplaceMeter             = true;                 // Display or hide the “Replace Meter” programming option on the main menu
-            this.ShowReplaceMTU               = true;                 // Display or hide the "Replace MTU" programming option on the main menu
-            this.ShowReplaceMTUMeter          = true;                 // Display or hide the “Replace MTU And Meter” programming option on the main menu
-            this.ShowDataRead                 = true;                 // Display or hide the “DataRead” programming option on the main menu
-            this.ShowScriptErrorMessage       = true;                 // Specifies whether error messages are shown in scripted mode
+            this.ShowReplaceMeter             = false;                // Show the Replace Meter button on the main menu or not
+            this.ShowReplaceMTU               = false;                // Show the Replace MTU button on the main menu or not
+            this.ShowReplaceMTUMeter          = false;                // Show the Replace MTU And Meter button on the main menu or not
+            this.ShowScriptErrorMessage       = false;                // Specifies whether error messages are shown in scripted mode
             this.ShowTime                     = false;                // Show System time on the screen during the MTU read or install
-            this.ShowTurnOff                  = true;                 // Show Turn Off MTU button on main screen
+            this.ShowTurnOff                  = false;                // Show the Turn Off MTU button on the main menu or not
+            this.ShowValvePosition            = false;                // Show the Remote Disconnect button on the main menu or not
             this.Siesta                       = false;                // Turn off wake up during installation for F1 Flatpack
             this.SpecialSet                   = "SOLONROCKSACLARA";   // [NOT NEED TO SUPPORT = NOT CONFIRMED][16bytes] Encryption Initial Vector
             this.StartPoint                   = string.Empty;         // Tag name in Appointments file that contains the Start Date
@@ -1180,6 +1190,9 @@ namespace Xml
 
         [XmlElement("ByPassAutoDetect")]
         public bool ByPassAutoDetect { get; set; }
+
+        [XmlElement("BroadcastSet")]
+        public string BroadcastSet { get; set; }
 
         [XmlElement("CertPair")]
         public bool CertPair { get; set; }
@@ -1548,11 +1561,14 @@ namespace Xml
         [XmlElement("ShowBarCodeButton")]
         public bool ShowBarCodeButton { get; set; }
 
-        [XmlElement("ShowFreq")]
-        public bool ShowFreq { get; set; }
-
         [XmlElement("ShowCameraButton")]
         public bool ShowCameraButton { get; set; }
+
+        [XmlElement("ShowDataRead")]
+        public bool ShowDataRead { get; set; }
+
+        [XmlElement("ShowFreq")]
+        public bool ShowFreq { get; set; }
 
         [XmlElement("ShowInstallConfirmation")]
         public bool ShowInstallConfirmation { get; set; }
@@ -1569,9 +1585,6 @@ namespace Xml
         [XmlElement("ShowReplaceMtuMeter")]
         public bool ShowReplaceMTUMeter { get; set; }
 
-        [XmlElement("ShowDataRead")]
-        public bool ShowDataRead { get; set; }
-
         [XmlElement("ShowScriptErrorMessage")]
         public bool ShowScriptErrorMessage { get; set; }
 
@@ -1580,6 +1593,9 @@ namespace Xml
 
         [XmlElement("ShowTurnOff")]
         public bool ShowTurnOff { get; set; }
+
+        [XmlElement("ShowValvePosition")]
+        public bool ShowValvePosition { get; set; }
 
         [XmlElement("Siesta")]
         public bool Siesta { get; set; }

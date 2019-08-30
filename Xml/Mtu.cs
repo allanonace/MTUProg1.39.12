@@ -11,6 +11,10 @@ namespace Xml
     /// Properties
     /// <list type="Mtu">
     /// <item>
+    ///   <term>BroadCast</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
     ///   <term>CutWireDelaySetting</term>
     ///   <description></description>
     /// </item>
@@ -199,6 +203,7 @@ namespace Xml
             //this.MagneticTamper           = ¿?
             //this.Model                    = SET BY ACLARA
 
+            this.BroadCast                  = false;
             this.CutWireDelaySetting        = false;
             this.DataRead                   = false;
             this.DailyReads                 = true;
@@ -240,6 +245,9 @@ namespace Xml
         }
 
         #region Elements
+
+        [XmlElement("BroadCast")]
+        public bool BroadCast { get; set; }
 
         // NOTE: Is the Mtu Type ( 171, 177,... ) and not the Serial Number or Mtu ID
         [XmlAttribute("ID")]

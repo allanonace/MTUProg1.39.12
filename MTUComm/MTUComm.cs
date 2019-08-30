@@ -21,6 +21,7 @@ using FIELD                    = MTUComm.actions.AddMtuForm.FIELD;
 using APP_FIELD                = MTUComm.ScriptAux.APP_FIELD;
 using EventLogQueryResult      = MTUComm.EventLogList.EventLogQueryResult;
 using ParameterType            = MTUComm.Parameter.ParameterType;
+using ENCRYPTION               = Xml.Mtu.ENCRYPTION;
 using LexiAction               = Lexi.Lexi.LexiAction;
 using LogFilterMode            = Lexi.Lexi.LogFilterMode;
 using LogEntryType             = Lexi.Lexi.LogEntryType;
@@ -363,7 +364,7 @@ namespace MTUComm
         /// <exception cref="EncoderAutodetectNotAchievedException">( Used internally, not bubbling up )</exception>
         /// <exception cref="EncoderAutodetectException">( Used internally, not bubbling up )</exception>
         /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
-        public async Task<bool> AutodetectMetersEcoders (
+        public async Task<bool> AutodetectMeterEncoders (
             Mtu mtu,
             int portIndex = 1 )
         {
@@ -457,7 +458,7 @@ namespace MTUComm
         /// Logic of Meters auto-detection process extracted from AutodetectMetersEcoders
         /// method, for an easy and readable reuse of the code for the two MTUs ports.
         /// <para>
-        /// See <see cref="AutodetectMetersEcoders(Mtu,int)"/> to detect automatically
+        /// See <see cref="AutodetectMeterEncoders(Mtu,int)"/> to detect automatically
         /// the Meter protocol and live digits of compatible Meters for current MTU.
         /// </para>
         /// </summary>
@@ -2369,17 +2370,11 @@ namespace MTUComm
                 // Only encrypt MTUs with SpecialSet set
                 if ( mtu.SpecialSet )
                 {
-                    Utils.Print ( "----ENCRYPTION_START-----" );
-                
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting..." ) );
-
                     if ( ! mtu.IsFamilly35xx36xx )
-                         await this.Encrypt_Old ( map );
-                    else await this.Encrypt_OnDemand12 ( map );
-
-                    await this.CheckIsTheSameMTU ();
-
-                    Utils.Print ( "----ENCRYPTION_FINISH----" );
+                        await this.Encrypt_Old ( map );
+                    
+                    else if ( mtu.STAREncryptionType != ENCRYPTION.NONE )
+                        await this.Encrypt_OnDemand12 ( map );
                 }
 
                 #endregion
@@ -2512,6 +2507,10 @@ namespace MTUComm
         private async Task Encrypt_Old (
             dynamic map )
         {
+            Utils.Print ( "----ENCRYPTION_START-----" );
+                
+            OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting..." ) );
+
             MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
             MemoryRegister<bool>   regEncrypted  = map[ "Encrypted"       ];
             MemoryRegister<int>    regEncryIndex = map[ "EncryptionIndex" ];
@@ -2539,6 +2538,9 @@ namespace MTUComm
                 // Note: Generates different result than using .Net SHA256 class
                 MtuSha256 crypto = new MtuSha256 ();
                 crypto.GenerateSHAHash ( aesKey, out sha );
+
+                // Current encrypted index
+                int curEncrypIndex = ( int )await regEncryIndex.GetValueFromMtu ();
                 
                 // Try to write and validate AES encryption key up to five times
                 for ( int i = 0; i < CMD_ENCRYP_OLD_MAX; i++ )
@@ -2555,7 +2557,9 @@ namespace MTUComm
                     Utils.Print ( "Read EncryptedIndex from MTU" );
                     int  encrypIndex = ( int  )await regEncryIndex.GetValueFromMtu ();
                     
-                    if ( ! encrypted || encrypIndex <= -1 )
+                    if ( ! encrypted ||
+                         encrypIndex <= 0 ||
+                         encrypIndex <= curEncrypIndex )
                         continue; // Error
                     else
                     {
@@ -2602,11 +2606,19 @@ namespace MTUComm
             // MTU encryption has failed
             if ( ! ( Mobile.configData.isMtuEncrypted = ok ) )
                 throw new ActionNotAchievedEncryptionException ( CMD_ENCRYP_OLD_MAX + "" );
+            
+            await this.CheckIsTheSameMTU ();
+
+            Utils.Print ( "----ENCRYPTION_FINISH----" );
         }
 
         private async Task Encrypt_OnDemand12 (
             dynamic map )
         {
+            Utils.Print ( "----ENCRYPTION_START-----" );
+                
+            OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting..." ) );
+
             MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
             MemoryRegister<bool>   regEncrypted  = map[ "Encrypted"       ];
             MemoryRegister<int>    regEncryIndex = map[ "EncryptionIndex" ];
@@ -2614,54 +2626,105 @@ namespace MTUComm
             // Look for the public key
             if ( string.IsNullOrEmpty ( this.global.PublicKey ) )
                 throw new ODEncryptionPublicKeyNotSetException ();
+            
+            // Look for the public key
+            if ( this.mtu.BroadCast &&
+                 string.IsNullOrEmpty ( this.global.BroadcastSet ) )
+                throw new ODEncryptionPublicKeyNotSetException ();
 
-            // Generates random number
+            bool publicKeyInBase64;
+            bool broadKeyInBase64;
+            string publicKey = Utils.StringFromBase64 ( this.global.PublicKey,    out publicKeyInBase64 );
+            string broadKey  = Utils.StringFromBase64 ( this.global.BroadcastSet, out broadKeyInBase64  );
+
+            // Checks public key format
+            if ( ! publicKeyInBase64 ||
+                 publicKey.Length != 64 )
+                throw new ODEncryptionPublicKeyFormatException ();
+            
+            // Checks broadcast key format
+            if ( this.mtu.BroadCast &&
+                 ( ! broadKeyInBase64 ||
+                   broadKey.Length != 32 ) )
+                throw new ODEncryptionBroadcastKeyFormatException ();
+
+            // Prepares all for random number generation
             byte[] key = new byte[ regAesKey.size    ]; // 16 bytes
             byte[] sha = new byte[ regAesKey.sizeGet ]; // 32 bytes
-            new RNGCryptoServiceProvider ().GetBytes ( key );
-            new MtuSha256 ().GenerateSHAHash ( key, out sha );
-
-            string serverRND = Convert.ToBase64String ( sha );
+            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
+            MtuSha256 mtusha = new MtuSha256 ();
 
             // Prepares the data for the LExI commands "Loads Encryption Item"
+            byte[] data4 = new byte[ 32 + 1 ];
+            if ( this.mtu.BroadCast )
+            {
+                byte[] arBRK = Encoding.UTF8.GetBytes ( broadKey );
+                Array.Copy ( arBRK, 0, data4, 1, arBRK.Length );
+                data4[ 0 ] = 0x04; // Broadcast Key
+            }
+
             byte[] data1 = new byte[ sha.Length + 1 ];
-            Array.Copy ( sha, 0, data1, 1, sha.Length );
             data1[ 0 ] = 0x01; // Head End Random Number
 
-            byte[] data2 = new byte[ 65 ];
-            byte[] pki64 = Utils.StringToByteArrayBase64 ( this.global.PublicKey );
-            Array.Copy ( pki64, 0, data2, 1, pki64.Length );
-            data2[ 0 ] = 0x00; // Head End Public Key
+            byte[] data0 = new byte[ 64 + 1 ];
+            byte[] arPKI = Encoding.UTF8.GetBytes ( publicKey );
+            Array.Copy ( arPKI, 0, data0, 1, arPKI.Length );
+            data0[ 0 ] = 0x00; // Head End Public Key
 
             // Prepares the data for the LExI commands "Reads Encryption Item"
             byte[] data3 = { 0x03 }; // MTU Random Number
-            byte[] data4 = { 0x02 }; // MTU Public Key
+            byte[] data2 = { 0x02 }; // MTU Public Key
 
+            // Current encrypted index
+            int curEncrypIndex = ( int )await regEncryIndex.GetValueFromMtu ();
+
+            LexiWriteResult fullResponse;
             for ( int i = 0; i < CMD_ENCRYP_MAX; i++ )
             {
                 try
                 {
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step 1" ) );
+                    int step = 1;
+
+                    // Generates the random number
+                    rng.GetBytes ( key );
+                    mtusha.GenerateSHAHash ( key, out sha );
+
+                    // Copies random number to the LExI data array
+                    Array.Copy ( sha, 0, data1, 1, sha.Length );
+
+                    if ( this.mtu.BroadCast )
+                    {
+                        OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+
+                        // Loads Encryption Item - Type 4: Broadcast Key 
+                        fullResponse = await this.lexi.Write (
+                            CMD_LOAD_ENCRYP,
+                            data4,
+                            null, null,
+                            LexiAction.OperationRequest );
+                    }
+
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
 
                     // Loads Encryption Item - Type 1: Head End Random Number
-                    LexiWriteResult fullResponse = await this.lexi.Write (
+                    fullResponse = await this.lexi.Write (
                         CMD_LOAD_ENCRYP,
                         data1,
                         null, null,
                         LexiAction.OperationRequest );
                     
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step 2" ) );
+                    string serverRND = Convert.ToBase64String ( sha );
+                    
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
 
                     // Loads Encryption Item - Type 0: Head End Public Key
                     fullResponse = await this.lexi.Write (
                         CMD_LOAD_ENCRYP,
-                        data2,
+                        data0,
                         null, null,
                         LexiAction.OperationRequest );
                     
-                    Thread.Sleep ( 5000 );
-
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step 3" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
 
                     // Generates Encryptions Keys
                     fullResponse = await this.lexi.Write (
@@ -2669,18 +2732,18 @@ namespace MTUComm
                         null, null, null,
                         LexiAction.OperationRequest );
 
-                    Thread.Sleep ( 1000 );
-                    
                     // Verifies if the MTU is encrypted
                     Utils.Print ( "Read Encrypted from MTU" );
                     bool encrypted   = ( bool )await regEncrypted .GetValueFromMtu ();
                     Utils.Print ( "Read EncryptedIndex from MTU" );
                     int  encrypIndex = ( int  )await regEncryIndex.GetValueFromMtu ();
                     
-                    if ( ! encrypted || encrypIndex <= -1 )
+                    if ( ! encrypted ||
+                         encrypIndex <= 0 ||
+                         encrypIndex <= curEncrypIndex )
                         continue; // Error
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step 4" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
 
                     // Reads Encryption Item - Type 3: MTU Random Number
                     fullResponse = await this.lexi.Write (
@@ -2692,12 +2755,12 @@ namespace MTUComm
 
                     string clientRnd = Convert.ToBase64String ( fullResponse.Response );
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step 5" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
 
                     // Reads Encryption Item - Type 2: MTU Public Key
                     fullResponse = await this.lexi.Write (
                         CMD_READ_ENCRYP,
-                        data4,
+                        data2,
                         new uint[] { CMD_READ_ENCRYP_RES_2 },
                         null,
                         LexiAction.OperationRequest );
@@ -2712,7 +2775,11 @@ namespace MTUComm
                     // Always clear temporary random key from memory
                     Array.Clear ( key,   0, key.Length   );
                     Array.Clear ( sha,   0, sha.Length   );
-                    Array.Clear ( data1, 0, data1.Length );
+                    Array.Clear ( data0, 0, data0.Length );
+
+                    await this.CheckIsTheSameMTU ();
+
+                    Utils.Print ( "----ENCRYPTION_FINISH----" );
 
                     return;
                 }

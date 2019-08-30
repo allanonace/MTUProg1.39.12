@@ -504,7 +504,7 @@ namespace aclara_meters.view
             // Ecoder/Encoder
             if ( currentMtu.Port1.IsForEncoderOrEcoder )
             {
-                bool autoDetect = await this.add_mtu.MTUComm.AutodetectMetersEcoders ( currentMtu );
+                bool autoDetect = await this.add_mtu.MTUComm.AutodetectMeterEncoders ( currentMtu );
                 if ( autoDetect )
                     this.list_MeterTypesForMtu = this.config.meterTypes.FindByEncoderTypeAndLiveDigits (
                         currentMtu.Port1.MeterProtocol,
@@ -524,7 +524,7 @@ namespace aclara_meters.view
                 // Ecoder/Encoder
                 if ( currentMtu.Port2.IsForEncoderOrEcoder )
                 {
-                    bool autoDetect = await this.add_mtu.MTUComm.AutodetectMetersEcoders ( currentMtu, 2 );
+                    bool autoDetect = await this.add_mtu.MTUComm.AutodetectMeterEncoders ( currentMtu, 2 );
                     if ( autoDetect )
                         this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByEncoderTypeAndLiveDigits (
                             currentMtu.Port2.MeterProtocol,
