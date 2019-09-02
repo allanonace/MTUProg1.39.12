@@ -139,6 +139,10 @@ namespace MTUComm
                            await map.MtuSoftVersion.GetValue () >= 19 ) ? "Set" : "OFF";
             logger.AddParameter ( this.addMtuAction, new Parameter ( "AFC", "AFC", afc ) );
 
+            // QUESTION: ESTOS ERAN LOS QUE SOLO ESTABAN EN MODO DEBUG Y PODEMOS PASAR DE ELLOS?
+            // <InstallationConfirmation display="ICSet">63</InstallationConfirmation>
+            // <InstallationConfirmation display="ICCount">5</InstallationConfirmation>
+
             #endregion
 
             #region Additional tags
@@ -310,113 +314,275 @@ namespace MTUComm
 
             if ( mtu.RequiresAlarmProfile )
             {
-                Alarm alarms = (Alarm)form.Alarm.Value;
+                Alarm alarms = ( Alarm )form.Alarm.Value;
                 if ( alarms != null )
                 {
-                    XElement alarmSelection = new XElement("AlarmSelection");
-                    logger.AddAtrribute ( alarmSelection, "display", "Alarm Selection");
+                    XElement alarmSelection = new XElement ( "AlarmSelection" );
+                    logger.AddAtrribute ( alarmSelection, "display", "Alarm Selection" );
 
                     string alarmConfiguration = alarms.Name;
                     logger.AddParameter ( alarmSelection,
-                    new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
+                    new Parameter (
+                        "AlarmConfiguration",
+                        "Alarm Configuration Name",
+                        alarmConfiguration ) );
 
                     string overlap = alarms.Overlap.ToString();
                     logger.AddParameter ( alarmSelection,
-                    new Parameter("Overlap", "Message Overlap", overlap));
+                    new Parameter (
+                        "Overlap",
+                        "Message Overlap",
+                        overlap ) );
 
                     string immediateAlarmTransmit = ( alarms.ImmediateAlarmTransmit ) ? "True" : "False";
                     logger.AddParameter ( alarmSelection,
-                    new Parameter("ImmediateAlarm", "Immediate Alarm Transmit", immediateAlarmTransmit));
+                    new Parameter (
+                        "ImmediateAlarm",
+                        "Immediate Alarm Transmit",
+                        immediateAlarmTransmit ) );
 
                     string urgentAlarm = ( alarms.DcuUrgentAlarm ) ? "True" : "False";
                     logger.AddParameter ( alarmSelection,
-                    new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
-
-                    // TODO: Define and add to the log the immediate alarms
+                    new Parameter (
+                        "UrgentAlarm",
+                        "DCU Urgent Alarm Transmit",
+                        urgentAlarm ) );
 
                     if ( mtu.MemoryMapError )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "MemoryMapError", "Memory Map Error", await map.MemoryMapTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "MemoryMapError",
+                            "Memory Map Error",
+                            await map.MemoryMapTamperStatus.GetValue () ) );
 
-                    // TODO: Define and add to the log MemoryMapErrorImm
+                    if ( mtu.MemoryMapErrorImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "MemoryMapErrorImm",
+                            "Memory Map Error Imm",
+                            await map.MemoryMapImmTamperStatus.GetValue () ) );
 
                     if ( mtu.ProgramMemoryError )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "ProgramMemoryError", "Program Memory Error", await map.ProgramMemoryTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "ProgramMemoryError",
+                            "Program Memory Error",
+                            await map.ProgramMemoryTamperStatus.GetValue () ) );
                     
-                    // TODO: Define and add to the log ProgramMemoryErrorImm
+                    if ( mtu.ProgramMemoryErrorImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "ProgramMemoryErrorImm",
+                            "Program Memory Error Imm",
+                            await map.ProgramMemoryImmTamperStatus.GetValue () ) );
 
                     if ( mtu.MoistureDetect )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "MoistureDetect", "Moisture Detect", await map.MoistureTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "MoistureDetect",
+                            "Moisture Detect",
+                            await map.MoistureTamperStatus.GetValue () ) );
 
-                    // TODO: Define and add to the log MoistureDetectImm
+                    if ( mtu.MoistureDetectImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "MoistureDetectImm",
+                            "Moisture Detect Imm",
+                            await map.MoistureImmTamperStatus.GetValue () ) );
                     
                     if ( mtu.EnergizerLastGasp )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "EnergizerLastGasp", "Energizer Last Gasp", await map.EnergizerLastGaspTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "EnergizerLastGasp",
+                            "Energizer Last Gasp",
+                            await map.EnergizerLastGaspTamperStatus.GetValue () ) );
                     
-                    // TODO: Define and add to the log EnergizerLastGaspImm
+                    if ( mtu.EnergizerLastGaspImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "EnergizerLastGaspImm",
+                            "Energizer Last Gasp Imm",
+                            await map.EnergizerLastGaspImmTamperStatus.GetValue () ) );
 
                     if ( mtu.InsufficientMemory )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "InsufficentMemory", "Insufficent Memory", await map.InsufficientMemoryTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "InsufficentMemory",
+                            "Insufficent Memory",
+                            await map.InsufficientMemoryTamperStatus.GetValue () ) );
+                    
+                    if ( mtu.InsufficientMemoryImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "InsufficentMemoryImm",
+                            "Insufficent Memory Imm",
+                            await map.InsufficientMemoryImmTamperStatus.GetValue () ) );
 
                     if ( mtu.GasCutWireAlarm )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "CutAlarmCable", "Cut Alarm Cable", await map.GasCutWireTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "CutAlarmCable",
+                            "Cut Alarm Cable",
+                            await map.GasCutWireTamperStatus.GetValue () ) );
 
                     if ( form.usePort2 &&
                          mtu.GasCutWireAlarm )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "Cut2AlarmCable", "Cut Port2 Alarm Cable", await map.P2GasCutWireTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "Cut2AlarmCable",
+                            "Cut Port2 Alarm Cable",
+                            await map.P2GasCutWireTamperStatus.GetValue () ) );
 
                     if ( mtu.SerialComProblem )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "SerialComProblem", "Serial Com Problem", await map.SerialComProblemTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "SerialComProblem",
+                            "Serial Com Problem",
+                            await map.SerialComProblemTamperStatus.GetValue () ) );
+                    
+                    if ( mtu.SerialComProblemImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "SerialComProblemImm",
+                            "Serial Com Problem Imm",
+                            await map.SerialComProblemImmTamperStatus.GetValue () ) );
 
                     if ( mtu.LastGasp )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "LastGasp", "Last Gasp", await map.LastGaspTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "LastGasp",
+                            "Last Gasp",
+                            await map.LastGaspTamperStatus.GetValue () ) );
+
+                    if ( mtu.LastGaspImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "LastGaspImm",
+                            "Last Gasp Imm",
+                            await map.LastGaspImmTamperStatus.GetValue () ) );
 
                     if ( mtu.TiltTamper )
                         logger.AddParameter( alarmSelection,
-                        new Parameter("TiltTamper", "Tilt Tamper", await map.TiltTamperStatus.GetValue () ));
+                        new Parameter ( 
+                            "TiltTamper",
+                            "Tilt Tamper",
+                            await map.TiltTamperStatus.GetValue () ) );
+
+                    if ( mtu.TiltTamperImm )
+                        logger.AddParameter( alarmSelection,
+                        new Parameter (
+                            "TiltTamperImm",
+                            "Tilt Tamper Imm",
+                            await map.TiltImmTamperStatus.GetValue () ) );
 
                     if ( mtu.MagneticTamper )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter("MagneticTamper", "Magnetic Tamper", await map.MagneticTamperStatus.GetValue () ));
+                        new Parameter (
+                            "MagneticTamper",
+                            "Magnetic Tamper",
+                            await map.MagneticTamperStatus.GetValue () ) );
+
+                    if ( mtu.MagneticTamperImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "MagneticTamperImm",
+                            "Magnetic Tamper Imm",
+                            await map.MagneticImmTamperStatus.GetValue () ) );
 
                     if ( mtu.InterfaceTamper)
                         logger.AddParameter ( alarmSelection,
-                        new Parameter("InterfaceTamper", "Interface Tamper", await map.InterfaceTamperStatus.GetValue () ));
+                        new Parameter (
+                            "InterfaceTamper",
+                            "Interface Tamper",
+                            await map.InterfaceTamperStatus.GetValue () ) );
+                    
+                    if ( mtu.InterfaceTamperImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "InterfaceTamperImm",
+                            "Interface Tamper Imm",
+                            await map.InterfaceImmTamperStatus.GetValue () ) );
 
                     if ( mtu.RegisterCoverTamper )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter("RegisterCoverTamper", "Register Cover Tamper", await map.RegisterCoverTamperStatus.GetValue () ));
+                        new Parameter (
+                            "RegisterCoverTamper",
+                            "Register Cover Tamper",
+                            await map.RegisterCoverTamperStatus.GetValue () ) );
+
+                    if ( mtu.RegisterCoverTamperImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter ( 
+                            "RegisterCoverTamperImm",
+                            "Register Cover Tamper Imm",
+                            await map.RegisterCoverImmTamperStatus.GetValue () ) );
 
                     if ( mtu.ReverseFlowTamper )
                     {
                         logger.AddParameter ( alarmSelection,
-                        new Parameter("ReverseFlow", "Reverse Flow Tamper", await map.ReverseFlowTamperStatus.GetValue () ));
+                        new Parameter (
+                            "ReverseFlow",
+                            "Reverse Flow Tamper",
+                            await map.ReverseFlowTamperStatus.GetValue () ) );
+                        
                         logger.AddParameter ( alarmSelection,
-                        new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
+                        new Parameter (
+                            "FlowDirection",
+                            "Flow Direction",
+                            meter.Flow.ToString() ));
                     }
+
+                    if ( mtu.ReverseFlowTamperImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "ReverseFlowTamperImm",
+                            "Reverse Flow Tamper Imm",
+                            await map.ReverseFlowImmTamperStatus.GetValue () ) );
 
                     if ( mtu.SerialCutWire )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "SerialCutWire", "Serial Cut Wire", await map.SerialCutWireTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "SerialCutWire",
+                            "Serial Cut Wire",
+                            await map.SerialCutWireTamperStatus.GetValue () ) );
+
+                    if ( mtu.SerialCutWireImm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "SerialCutWire",
+                            "Serial Cut Wire",
+                            await map.SerialCutWireImmATamperStatus.GetValue () ) );
 
                     if ( mtu.TamperPort1 )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "Cut1WireTamper", "Cut Port1 Wire Tamper", await map.P1CutWireTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "Cut1WireTamper",
+                            "Cut Port1 Wire Tamper",
+                            await map.P1CutWireTamperStatus.GetValue () ) );
+                    
+                    if ( mtu.TamperPort1Imm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter ( 
+                            "Cut1WireTamperImm",
+                            "Cut Port1 Wire Tamper Imm",
+                            await map.P1CutWireImmTamperStatus.GetValue () ) );
 
                     if ( form.usePort2 &&
                          mtu.TamperPort2 )
                         logger.AddParameter ( alarmSelection,
-                        new Parameter ( "Cut2WireTamper", "Cut Port2 Wire Tamper", await map.P2CutWireTamperStatus.GetValue () ) );
+                        new Parameter (
+                            "Cut2WireTamper",
+                            "Cut Port2 Wire Tamper",
+                            await map.P2CutWireTamperStatus.GetValue () ) );
+                    
+                    if ( mtu.TamperPort2Imm )
+                        logger.AddParameter ( alarmSelection,
+                        new Parameter (
+                            "Cut2WireTamperImm",
+                            "Cut Port2 Wire Tamper Imm",
+                            await map.P2CutWireImmTamperStatus.GetValue () ) );
 
-                    this.addMtuAction.Add(alarmSelection);
+                    this.addMtuAction.Add ( alarmSelection );
                 }
             }
 

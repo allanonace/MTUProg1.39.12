@@ -198,6 +198,11 @@ namespace MTUComm.MemoryMap
                                      await MemoryRegisters[ 1 ].GetValue () ); // Tamper
         }
 
+        public async Task<string> TamperImmStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic[] MemoryRegisters )
+        {
+            return GetTamperStatus ( await MemoryRegisters[ 0 ].GetValue () ); // Alarm
+        }
+
         public async Task<string> LastGasp_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
             return ( await MemoryRegisters.LastGaspTamper.GetValue () ) ? ENABLED : TRIGGERED;
@@ -474,7 +479,7 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        private string GetTamperStatus ( bool alarm, bool tamper )
+        private string GetTamperStatus ( bool alarm, bool tamper = false )
         {
             if ( alarm )
                 return ( tamper ) ? TRIGGERED : ENABLED;

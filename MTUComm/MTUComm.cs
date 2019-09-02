@@ -2304,31 +2304,39 @@ namespace MTUComm
                         try
                         {
                             // Set alarms [ Alarm Message Transmission ]
-                            if ( mtu.InsufficientMemory    ) map.InsufficientMemoryAlarm    = alarms.InsufficientMemory;
-                            if ( mtu.GasCutWireAlarm       ) map.GasCutWireAlarm            = alarms.CutAlarmCable;
+                            if ( mtu.InsufficientMemory     ) map.InsufficientMemoryAlarm    = alarms.InsufficientMemory;
+                            if ( mtu.GasCutWireAlarm        ) map.GasCutWireAlarm            = alarms.CutAlarmCable;
                             if ( form.usePort2 &&
-                                 mtu.GasCutWireAlarm       ) map.P2GasCutWireAlarm          = alarms.CutAlarmCable;
-                            if ( mtu.SerialComProblem      ) map.SerialComProblemAlarm      = alarms.SerialComProblem;
-                            if ( mtu.LastGasp              ) map.LastGaspAlarm              = alarms.LastGasp;
-                            if ( mtu.TiltTamper            ) map.TiltAlarm                  = alarms.Tilt;
-                            if ( mtu.MagneticTamper        ) map.MagneticAlarm              = alarms.Magnetic;
-                            if ( mtu.RegisterCoverTamper   ) map.RegisterCoverAlarm         = alarms.RegisterCover;
-                            if ( mtu.ReverseFlowTamper     ) map.ReverseFlowAlarm           = alarms.ReverseFlow;
-                            if ( mtu.SerialCutWire         ) map.SerialCutWireAlarm         = alarms.SerialCutWire;
-                            if ( mtu.TamperPort1           ) map.P1CutWireAlarm             = alarms.TamperPort1;
+                                 mtu.GasCutWireAlarm        ) map.P2GasCutWireAlarm          = alarms.CutAlarmCable;
+                            if ( mtu.SerialComProblem       ) map.SerialComProblemAlarm      = alarms.SerialComProblem;
+                            if ( mtu.LastGasp               ) map.LastGaspAlarm              = alarms.LastGasp;
+                            if ( mtu.TiltTamper             ) map.TiltAlarm                  = alarms.Tilt;
+                            if ( mtu.MagneticTamper         ) map.MagneticAlarm              = alarms.Magnetic;
+                            if ( mtu.RegisterCoverTamper    ) map.RegisterCoverAlarm         = alarms.RegisterCover;
+                            if ( mtu.ReverseFlowTamper      ) map.ReverseFlowAlarm           = alarms.ReverseFlow;
+                            if ( mtu.SerialCutWire          ) map.SerialCutWireAlarm         = alarms.SerialCutWire;
+                            if ( mtu.TamperPort1            ) map.P1CutWireAlarm             = alarms.TamperPort1;
                             if ( form.usePort2 &&
-                                 mtu.TamperPort2           ) map.P2CutWireAlarm             = alarms.TamperPort2;
+                                 mtu.TamperPort2            ) map.P2CutWireAlarm             = alarms.TamperPort2;
 
                             // Set immediate alarms [ Alarm Message Immediate ]
-                            if ( mtu.InsufficientMemoryImm ) map.InsufficientMemoryImmAlarm = alarms.InsufficientMemoryImm;
-                            if ( mtu.GasCutWireAlarmImm    ) map.GasCutWireImmAlarm         = alarms.CutWireAlarmImm;
-                            if ( mtu.SerialComProblemImm   ) map.SerialComProblemImmAlarm   = alarms.SerialComProblemImm;
-                            if ( mtu.LastGaspImm           ) map.LastGaspImmAlarm           = alarms.LastGaspImm;
-                            if ( mtu.InterfaceTamperImm    ) map.InterfaceImmAlarm          = alarms.InterfaceTamperImm;
-                            if ( mtu.SerialCutWireImm      ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;
-                            if ( mtu.TamperPort1Imm        ) map.P1CutWireImmAlarm          = alarms.TamperPort1Imm;
+                            if ( mtu.InsufficientMemoryImm  ) map.InsufficientMemoryImmAlarm = alarms.InsufficientMemoryImm;
+                            if ( mtu.MoistureDetectImm      ) map.MoistureImmAlarm           = alarms.MoistureDetectImm;
+                            if ( mtu.ProgramMemoryErrorImm  ) map.ProgramMemoryImmAlarm      = alarms.ProgramMemoryErrorImm;
+                            if ( mtu.MemoryMapErrorImm      ) map.MemoryMapImmAlarm          = alarms.MemoryMapErrorImm;
+                            if ( mtu.EnergizerLastGaspImm   ) map.EnergizerLastGaspImmAlarm  = alarms.EnergizerLastGaspImm;
+                            if ( mtu.GasCutWireAlarmImm     ) map.GasCutWireImmAlarm         = alarms.CutWireAlarmImm;
+                            if ( mtu.SerialComProblemImm    ) map.SerialComProblemImmAlarm   = alarms.SerialComProblemImm;
+                            if ( mtu.LastGaspImm            ) map.LastGaspImmAlarm           = alarms.LastGaspImm;
+                            if ( mtu.TiltTamperImm          ) map.TiltImmAlarm               = alarms.TiltTamperImm;
+                            if ( mtu.MagneticTamperImm      ) map.MagneticImmAlarm           = alarms.MagneticTamperImm;
+                            if ( mtu.InterfaceTamperImm     ) map.InterfaceImmAlarm          = alarms.InterfaceTamperImm;
+                            if ( mtu.RegisterCoverTamperImm ) map.RegisterCoverImmAlarm      = alarms.RegisterCoverTamperImm;
+                            if ( mtu.ReverseFlowTamperImm   ) map.ReverseFlowImmAlarm        = alarms.ReverseFlowTamperImm;
+                            if ( mtu.SerialCutWireImm       ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;
+                            if ( mtu.TamperPort1Imm         ) map.P1CutWireImmAlarm          = alarms.TamperPort1Imm;
                             if ( form.usePort2 &&
-                                 mtu.TamperPort2Imm        ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;
+                                 mtu.TamperPort2Imm         ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;
 
                             // Ecoder alarms
                             if ( mtu.Ecoder )
@@ -2342,7 +2350,6 @@ namespace MTUComm
                             // OnDemand 1.2 alarms
                             if ( mtu.MtuDemand )
                             {
-                                //map.vswr = alarms.
                                 if ( mtu.MoistureDetect     ) map.MoistureAlarm          = alarms.MoistureDetect;
                                 if ( mtu.ProgramMemoryError ) map.ProgramMemoryAlarm     = alarms.ProgramMemoryError;
                                 if ( mtu.MemoryMapError     ) map.MemoryMapAlarm         = alarms.MemoryMapError;

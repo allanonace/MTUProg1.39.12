@@ -371,7 +371,6 @@
 			<Parameter name="ReverseFlowTamperStatus" display="Rev. Fl Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.ReverseFlowTamper=true"/>
 			<Parameter name="Cut1WireTamperStatus" display="Cut 1 Wire Tamp" log="true" interface="true" source="MemoryMap.P1CutWireTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.TamperPort1=true"/>
 			<Parameter name="Cut2WireTamperStatus" display="Cut 2 Wire Tamp" log="true" interface="true" source="MemoryMap.P2CutWireTamperStatus" conditional="Memory.P2StatusFlag=true + MemoryMap.Shipbit=false + Mtu.TamperPort2=true"/>
-			<Parameter name="CutWireTamperStatus" display="Cut Wire Tamp" log="true" interface="true" source="MemoryMap.GasCutWireTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.GasCutWireAlarm=true"/>
 			<Parameter name="InsufficentMemory" display="Insf. Mem" log="true" interface="true" source="MemoryMap.InsufficientMemoryTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.InsufficientMemory=true"/>
 			<Parameter name="MemoryMapError" display="Memory Map Error" log="true" interface="true" source="MemoryMap.MemoryMapTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.MemoryMapError=true"/>
 			<Parameter name="ProgMemoryError" display="Prog Memory Error" log="true" interface="true" source="MemoryMap.ProgramMemoryTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.ProgramMemoryError=true"/>
