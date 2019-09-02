@@ -134,6 +134,7 @@ namespace MTUComm
         #region Attributes
 
         private List<NodeDiscovery> entries;
+        private List<List<NodeDiscovery>> attempts;
         private NodeType nodeType;
         private int uniqueNodeIDs;
 
@@ -160,9 +161,14 @@ namespace MTUComm
         /// See <see cref="NodeDiscovery"/> for the representation of the info associated to the detected nodes/DCUs.
         /// </para>
         /// </summary>
-        public NodeDiscovery[] Entries
+        public List<List<NodeDiscovery>> AllEntries
         {
-            get { return this.entries.ToArray (); }
+            get { return this.attempts; }
+        }
+
+        public NodeDiscovery[] LastAttemptEntries
+        {
+            get { return this.attempts[ this.attempts.Count - 1 ].ToArray (); }
         }
 
         /// <summary>
@@ -228,11 +234,26 @@ namespace MTUComm
             NodeType nodeType )
         {
             this.entries  = new List<NodeDiscovery> ();
+            this.attempts = new List<List<NodeDiscovery>> ();
             this.nodeType = nodeType;
             this.uniqueNodeIDs = 0;
         }
 
         #endregion
+
+        public void StartNewAttempt ()
+        {
+            if ( this.entries.Count > 0 )
+            {
+                List<NodeDiscovery> copy = new List<NodeDiscovery> ();
+                foreach ( NodeDiscovery node in this.entries )
+                    copy.Add ( node.Clone () as NodeDiscovery );
+                
+                this.attempts.Add ( copy );
+            }
+
+            this.entries.Clear ();
+        }
 
         public ( NodeDiscoveryQueryResult Result, int Index ) TryToAdd (
             byte[] response )

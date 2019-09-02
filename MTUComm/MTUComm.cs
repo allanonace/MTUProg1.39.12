@@ -927,8 +927,9 @@ namespace MTUComm
             }
             
             // Node Discovery with OnDemand 1.2 MTUs
-            if ( ( result == IC_OK || this.global.AutoRFCheck ) &&
-                 this.mtu.MtuDemand &&
+            if ( result == IC_OK         &&
+                 this.global.AutoRFCheck &&
+                 this.mtu.MtuDemand      &&
                  this.mtu.NodeDiscovery )
             {
                 switch ( await this.NodeDiscovery ( map ) )
@@ -1079,6 +1080,7 @@ namespace MTUComm
                         int maxAttemptsEr   = 2;
                         int countAttemptsEr = 0;
                         NodeDiscoveryList nodeList = new NodeDiscoveryList ( ( NodeType )data[ 0 ] );
+                        nodeList.StartNewAttempt (); // Saves nodes from the previous attempt for the log
                         while ( true )
                         {
                             try
@@ -1155,8 +1157,8 @@ namespace MTUComm
                         bool    first           = true;
                         bool    isF1;
                         decimal prob            = 0m;
-                        decimal acumProbF1      = 0m;
-                        decimal acumProbF2      = 0m;
+                        decimal acumProbF1      = 1m;
+                        decimal acumProbF2      = 1m;
                         int     maxRSSIResponse = -150;
                         string  freq1wayStr     = await map.Frequency1Way  .GetValue ();
                         string  freq2wayTxStr   = await map.Frequency2WayTx.GetValue ();
@@ -1165,7 +1167,7 @@ namespace MTUComm
                         CultureInfo usCulture   = new CultureInfo("en-US");
                         double  freq1way        = double.Parse ( freq1wayStr  .Replace ( ',', '.' ), usCulture.NumberFormat );
                         double  freq2wayTx      = double.Parse ( freq2wayTxStr.Replace ( ',', '.' ), usCulture.NumberFormat );
-                        foreach ( NodeDiscovery node in nodeList.Entries )
+                        foreach ( NodeDiscovery node in nodeList.LastAttemptEntries )
                         {
                             // The first entry is general information
                             if ( first )
@@ -1186,35 +1188,57 @@ namespace MTUComm
 
                             // Calculates the probability based on the signal strength
                             // Probability value is normalized [0,1] where 1 is 100%
-                            prob = nodeList.GetProbability ( node.RSSIRequest );
 
-                            // Total probability, accumulated using the probability of each validated node
-                            // Channel F1 = Slow
+                            // Document "RF_Connectivity_Test.docx"
+                            // F1 Reliability estimate ( Page 14 )
+                            // · P( packet transmitted by the MTU on F1 is received by any DCU ) = P( MTU TX Success )
+                            //   · P( packet transmitted by the MTU on F1 is received by DCU_1 ) = f_rssi( RSSI_1 )
+                            //   · P( packet transmitted by the MTU on F1 is received by DCU_2 ) = f_rssi( RSSI_2 )
+                            //   · P( packet transmitted by the MTU on F1 is received by DCU_N ) = f_rssi( RSSI_N )
+                            //   · P( MTU TX Success ) = 100% - ( 100% - f_rssi( RSSI_1 ) ) * ( 100% - f_rssi( RSSI_2 ) ) * ... * ( 100% - f_rssi( RSSI_N ) )
+                            // F2 Reliability estimate ( Page 17 )
+                            // · P( packet sent by the DCU with the strongest RSSI on F2 is received by the MTU ) = P( DCU TX Success )
+                            //   · P( DCU TX Success ) = f_rssi ( RSSI_Best_DCU )
+                            // · P( packet transmitted by the MTU on F2 is received by any DCU ) = P( MTU TX Success )
+                            //   · P( packet transmitted by the MTU on F2 is received by DCU_1 ) = f_rssi( RSSI_1 )
+                            //   · P( packet transmitted by the MTU on F2 is received by DCU_2 ) = f_rssi( RSSI_2 )
+                            //   · P( packet transmitted by the MTU on F2 is received by DCU_N ) = f_rssi( RSSI_N )
+                            //   · P( MTU TX Success ) = 100% - ( 100% - f_rssi( RSSI_1 ) ) * ( 100% - f_rssi( RSSI_2 ) ) * ... * ( 100% - f_rssi( RSSI_N ) )
+                            // · P( two way transaction is successful ) = P( TWO WAY )
+                            //   · P( TWO WAY ) = 100% - { 100% - [ P( DCU TX Success ) * P( MTU TX Success ) ] } ^ 3
+
+                            // Example..
+                            // RSSI  -45 = Prob 1     -> 1 - 1     = 0     -> It forces "acumProbFx" to be zero = no penalty
+                            // RSSI  -90 = Prob 0.884 -> 1 - 0.884 = 0.116
+                            // RSSI -116 = Prob 0     -> 1 - 0     = 1
+                            prob = 1 - nodeList.GetProbability ( node.RSSIRequest ); // 100% - f_rssi( RSSI_N )
+
+                            // Channel F1
                             if ( isF1 )
                             {
-                                if ( acumProbF1 == 0 )
-                                    acumProbF1 = 1;
-
+                                // P( packet transmitted by the MTU on F1 is received by DCU_N )
                                 acumProbF1 *= prob;
                             }
-                            // Channel F2 = Fast
+                            // Channel F2
                             else
                             {
-                                if ( acumProbF2 == 0 )
-                                    acumProbF2 = 1;
-
+                                // P( packet transmitted by the MTU on F2 is received by DCU_N )
                                 acumProbF2 *= prob;
 
-                                // Save the highest RSSI detected and validated
+                                // Highest signal strength validated for F2
                                 if ( node.RSSIResponse > maxRSSIResponse )
                                     maxRSSIResponse = node.RSSIResponse;
                             }
                         }
 
-                        // DCU probability from the highest signal strength validated
+                        // P( MTU TX Success )
+                        acumProbF1 = 1 - acumProbF1;
+                        acumProbF2 = 1 - acumProbF2;
+
+                        // P( DCU TX Success )
                         prob = nodeList.GetProbability ( maxRSSIResponse );
 
-                        // Probability for two-way/fast channel
+                        // P( TWO WAY )
                         // NOTE: Math.Pow works with double, not decimal
                         decimal precalc = 1 - prob * acumProbF2;
                         acumProbF2      = 1 - precalc * precalc * precalc;
@@ -1462,7 +1486,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Write MTU
+        #region Write MTU ( + Encryption )
 
         private Action truquitoAction;
 

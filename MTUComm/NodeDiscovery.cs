@@ -9,7 +9,7 @@ namespace MTUComm
     /// <summary>
     /// Node or DCU unit detected during the <see cref="MTUComm.NodeDiscovery"/> process.
     /// </summary>
-    public class NodeDiscovery
+    public class NodeDiscovery : ICloneable
     {
         /*
         * +------------+---------------+------------------------------------------------------+
@@ -292,6 +292,12 @@ namespace MTUComm
         public void SetAsValidated ()
         {
             this.validated = true;
+        }
+    
+        public object Clone ()
+        {
+            // All attributes are by value
+            return this.MemberwiseClone ();
         }
     }
 }

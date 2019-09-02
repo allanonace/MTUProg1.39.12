@@ -593,36 +593,40 @@ namespace MTUComm
             XElement nodesParent,
             NodeDiscoveryList nodeList )
         {
-            bool first = true;
-            foreach ( NodeDiscovery node in nodeList.Entries )
+            bool first;
+            foreach ( List<NodeDiscovery> listNodes in nodeList.AllEntries )
             {
-                XElement evnt;
-
-                if ( first )
+                first = true;
+                foreach ( NodeDiscovery node in listNodes )
                 {
-                    first = false;
+                    XElement evnt;
 
-                    evnt = new XElement ( "NodeDiscoveryReportGeneral" );
-                    evnt.Add ( new XElement ( "FrequencyChannelOfResponse",  node.FreqChannelResponse ) );
-                    evnt.Add ( new XElement ( "RequestorNoiseFloorEstimate", node.NoiseFloorRequest   ) );
+                    if ( first )
+                    {
+                        first = false;
+
+                        evnt = new XElement ( "NodeDiscoveryReportGeneral" );
+                        evnt.Add ( new XElement ( "FrequencyChannelOfResponse",  node.FreqChannelResponse ) );
+                        evnt.Add ( new XElement ( "RequestorNoiseFloorEstimate", node.NoiseFloorRequest   ) );
+                    }
+                    else
+                    {
+                        evnt = new XElement ( "NodeDiscoveryReportNode" );
+                        evnt.Add ( new XElement ( "NodeID",                      node.NodeId ) );
+                        evnt.Add ( new XElement ( "NodeType",                    node.NodeType ) );
+                        evnt.Add ( new XElement ( "RSSIOfRequest",               node.RSSIRequest ) );
+                        evnt.Add ( new XElement ( "FreqencyErrorOfRequest",      node.FreqErrorRequest ) );
+                        evnt.Add ( new XElement ( "TimeDeltaRequest",            node.TimeDeltaRequest ) );
+                        evnt.Add ( new XElement ( "RSSIOfResponse",              node.RSSIResponse ) );
+                        evnt.Add ( new XElement ( "FreqencyErrorOfResponse",     node.FreqErrorResponse ) );
+                        evnt.Add ( new XElement ( "TimeDeltaResponse",           node.TimeDeltaResponse ) );
+                        evnt.Add ( new XElement ( "ResponderReceiverID",         node.ResponderId ) );
+                        evnt.Add ( new XElement ( "FrequencyChannelOfRequest",   node.FreqChannelRequest ) );
+                        evnt.Add ( new XElement ( "ResponderNoiseFloorEstimate", node.NoiseFloorResponse ) );
+                    }
+    
+                    nodesParent.Add ( evnt );
                 }
-                else
-                {
-                    evnt = new XElement ( "NodeDiscoveryReportNode" );
-                    evnt.Add ( new XElement ( "NodeID",                      node.NodeId ) );
-                    evnt.Add ( new XElement ( "NodeType",                    node.NodeType ) );
-                    evnt.Add ( new XElement ( "RSSIOfRequest",               node.RSSIRequest ) );
-                    evnt.Add ( new XElement ( "FreqencyErrorOfRequest",      node.FreqErrorRequest ) );
-                    evnt.Add ( new XElement ( "TimeDeltaRequest",            node.TimeDeltaRequest ) );
-                    evnt.Add ( new XElement ( "RSSIOfResponse",              node.RSSIResponse ) );
-                    evnt.Add ( new XElement ( "FreqencyErrorOfResponse",     node.FreqErrorResponse ) );
-                    evnt.Add ( new XElement ( "TimeDeltaResponse",           node.TimeDeltaResponse ) );
-                    evnt.Add ( new XElement ( "ResponderReceiverID",         node.ResponderId ) );
-                    evnt.Add ( new XElement ( "FrequencyChannelOfRequest",   node.FreqChannelRequest ) );
-                    evnt.Add ( new XElement ( "ResponderNoiseFloorEstimate", node.NoiseFloorResponse ) );
-                }
- 
-                nodesParent.Add ( evnt );
             }
         }
 
