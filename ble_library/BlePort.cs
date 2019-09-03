@@ -1082,7 +1082,7 @@ namespace ble_library
 									//Utils.PrintDeep("-------" + adv.DeviceName);
 									if (adv.DeviceName.Equals("Aclara"))
                                     {
-										Utils.PrintDeep("--------" + Utils.ByteArrayToString(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()));
+										//Utils.PrintDeep("--------" + Utils.ByteArrayToString(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()));
 										if (BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
                                         {
 											BlePeripheralList[BlePeripheralList.FindIndex(f => f.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()))] = peripheral;

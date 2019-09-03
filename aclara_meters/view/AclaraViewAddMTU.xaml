@@ -74,11 +74,11 @@
                         <StackLayout Margin="0,0,0,0">
                             <Grid Margin="0,0,0,0" HeightRequest="48">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*">
+                                    <ColumnDefinition Width="auto">
                                     </ColumnDefinition>
                                     <ColumnDefinition Width="*">
                                     </ColumnDefinition>
-                                    <ColumnDefinition Width="*">
+                                    <ColumnDefinition Width="auto">
                                     </ColumnDefinition>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
@@ -91,7 +91,7 @@
                                 <Label x:Name="port2label" WidthRequest="100" HeightRequest="46" Margin="0,0,0,0" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19"
                                     TextColor="#6aa2b8" Opacity="0.5">
                                 </Label>
-                                <Label x:Name="misclabel" HeightRequest="46" Margin="0,0,0,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19" TextColor="#6aa2b8"
+                                <Label x:Name="misclabel" HeightRequest="46" Margin="0,0,10,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="EndAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19" TextColor="#6aa2b8"
                                     Opacity="0.5">
                                 </Label>
                             </Grid>
@@ -105,8 +105,7 @@
                                 <StackLayout IsVisible="true" Margin="0,0,0,0">
                                     <StackLayout x:Name="port1view" IsVisible="true" Margin="12,0,12,0">
                                         <StackLayout Orientation="Horizontal">
-                                            <Label Margin="0,16,0,8" FontSize="22" HorizontalOptions="StartAndExpand" TextColor="#6aa2b8" x:Name="name_of_window_port1" Text="Add MTU" />
-                                            <ImageButton CommandParameter="1" IsVisible="{Binding ImagesEnabled}" HeightRequest="56" Source="camera3.png" Clicked="TakePicture" />
+                                           <Label Margin="0,16,0,8" FontSize="22" HorizontalOptions="StartAndExpand" TextColor="#6aa2b8" x:Name="name_of_window_port1" Text="Add MTU" />
                                         </StackLayout>
                                         <!-- Account Number / Service Port ID -->
                                         <StackLayout x:Name="div_AccountNumber">
@@ -446,8 +445,7 @@
                                     </StackLayout>
                                     <StackLayout x:Name="block_view_port2" IsVisible="false">
                                         <StackLayout Orientation="Horizontal">
-                                            <Label Margin="0,16,0,8" FontSize="22" HorizontalOptions="StartAndExpand" TextColor="#6aa2b8" x:Name="name_of_window_port2" Text="Add MTU" />
-                                            <ImageButton HorizontalOptions="EndAndExpand" CommandParameter="2" IsVisible="{Binding ImagesEnabled}" HeightRequest="56" Source="camera3.png" Clicked="TakePicture"/>
+                                           <Label Margin="0,16,0,8" FontSize="22" HorizontalOptions="StartAndExpand" TextColor="#6aa2b8" x:Name="name_of_window_port2" Text="Add MTU" />
                                         </StackLayout>
                                         <StackLayout x:Name="div_AccountNumber_2">
                                         <!-- Account Number / Service Port ID -->
@@ -744,19 +742,19 @@
                         <RowDefinition Height="48">
                         </RowDefinition>
                     </Grid.RowDefinitions>
-                    <StackLayout Margin="0,46,0,0" InputTransparent="true" VerticalOptions="End">
-                        <!-- LOWER BAR -->
-                        <StackLayout IsVisible="true" Margin="0,40,0,0" HeightRequest="128" BackgroundColor="#6aa2b8">
-                            <Label InputTransparent="true" x:Name="label_read" LineBreakMode="TailTruncation" Margin="17,18,0,44" FontSize="20" TextColor="White" Text="Push Button to START">
-                            </Label>
+                    <StackLayout Margin="0,46,0,0"  VerticalOptions="End">   
+                        <StackLayout IsVisible="true" Margin="0,40,0,0" HeightRequest="128" BackgroundColor="#6aa2b8" Orientation="Horizontal" >
+                            <Label  x:Name="label_read" LineBreakMode="TailTruncation" Margin="17,18,0,44" FontSize="20" TextColor="White" Text="Push Button to START" >
+                            </Label>                        
                         </StackLayout>
                     </StackLayout>
-                    <StackLayout Margin="0,-12,0,-96" VerticalOptions="CenterAndExpand" HeightRequest="128" HorizontalOptions="EndAndExpand">
-                        <Image IsVisible="true" IsEnabled="true" InputTransparent="false" x:Name="bg_read_mtu_button_img" HeightRequest="96" Margin="0,-4,20,20" Scale="1" Source="add_mtu_btn.png" HorizontalOptions="End">
+                    <StackLayout Margin="0,0,0,-96" VerticalOptions="CenterAndExpand" HorizontalOptions="EndAndExpand">
+                        <Image IsVisible="true" IsEnabled="true"  x:Name="bg_read_mtu_button_img" HeightRequest="96" Margin="0,0,20,0" Scale="1" Source="add_mtu_btn.png" HorizontalOptions="End">
                             <Image.GestureRecognizers>
                                 <TapGestureRecognizer x:Name="bg_read_mtu_button" NumberOfTapsRequired="1" />
                             </Image.GestureRecognizers>
                         </Image>
+                        <ImageButton Margin="0,-12,10,0"  IsVisible="{Binding ImagesEnabled}" IsEnabled="True" HeightRequest="45" WidthRequest="45" Source="camera2.png" Clicked="TakePicture" HorizontalOptions="End" />
                     </StackLayout>
                 </Grid>
             </Grid>

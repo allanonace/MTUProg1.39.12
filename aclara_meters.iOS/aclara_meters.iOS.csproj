@@ -344,6 +344,7 @@
     <BundleResource Include="Resources\scanner1.png" />
     <BundleResource Include="Resources\camera1.png" />
     <BundleResource Include="Resources\camera3.png" />
+    <BundleResource Include="Resources\camera2.png" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ble.net-ios">

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using aclara_meters.Behaviors;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
+using aclara_meters.util;
 using Acr.UserDialogs;
 using Library;
 using MTUComm;
@@ -4735,44 +4736,35 @@ namespace aclara_meters.view
         }
 
         private async void TakePicture(object sender, EventArgs e)
-        {
+        { 
             try
             {
-                ImageButton ctlButton = (ImageButton)sender;
-                string port = (string)ctlButton.CommandParameter;
-                string AccFieldName = port == "1" ?"tbx_AccountNumber": $"tbx_AccountNumber_{port}";
+                //ImageButton ctlButton = (ImageButton)sender;
+                string port; //= (string)ctlButton.CommandParameter;
 
-                BorderlessEntry field = (BorderlessEntry)this.FindByName(AccFieldName);
-
-                await CrossMedia.Current.Initialize();
-
-                if (!CrossMedia.Current.IsCameraAvailable || !CrossMedia.Current.IsTakePhotoSupported)
-                {
-                    await DisplayAlert("No camera", "No camera available", "OK");
-                    return;
-                }
-
-                
                 int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
                 var MtuId = await Data.Get.MemoryMap.MtuSerialNumber.GetValue();
-               // var accName1 = await Data.Get.MemoryMap.P1MeterId.GetValue();
-               // var accName2 = await Data.Get.MemoryMap.P2MeterId.GetValue();
+                // var accName1 = await Data.Get.MemoryMap.P1MeterId.GetValue();
+               
+                string sTick = DateTime.Now.Ticks.ToString();
 
-                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0')+"_"+ field.Text+ "_Port"+ port;
+                if (hasTwoPorts)
+                {
+                    bool bResp = await DisplayAlert("Select port", "Select the port for the picture", "Port 1", "Port 2");
+                    port = bResp == true ? "1" : "2";
+                }
+                else
+                    port = "1";
+
+                string AccFieldName = port == "1" ? "tbx_AccountNumber" : $"tbx_AccountNumber_{port}";
+                BorderlessEntry field = (BorderlessEntry)this.FindByName(AccFieldName);
+
+                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0')+"_"+ field.Text+ sTick + "_Port"+ port;
                 
                 Device.BeginInvokeOnMainThread(async () =>
                 {
-                    MediaFile file = await CrossMedia.Current.TakePhotoAsync(new Plugin.Media.Abstractions.StoreCameraMediaOptions
-                    {
-                       // Directory =  user + "_" + Mobile.PATH_IMAGES,//Mobile.ImagesPath,
-                        Name=nameFile,
-                        SaveToAlbum = false,
-                        CompressionQuality = 92,
-                        PhotoSize = PhotoSize.Small,
-                        DefaultCamera = CameraDevice.Rear
-
-                    });
-
+                    MediaFile file = await PictureService.TakePictureService(nameFile);
+                   
                     if (file == null)
                         return;
                    
@@ -4783,10 +4775,10 @@ namespace aclara_meters.view
                     
                     FileInfo[]  imagefiles = dir.GetFiles(nameFile);
                                                        
-                    PicturesMTU.Add(imagefiles[0]);
+                    //PicturesMTU.Add(imagefiles[0]);
                    
-                    //imagefiles[0].CopyTo(Path.Combine(Mobile.ImagesPath, nameFile));
-                    //imagefiles[0].Delete();
+                    imagefiles[0].CopyTo(Path.Combine(Mobile.ImagesPath, nameFile));
+                    imagefiles[0].Delete();
                     
                     //await DisplayAlert("File Location", file.Path, "OK");
 
