@@ -6,7 +6,7 @@
   <!-- INIT - Alarms -->
 
   <!-- Alarm -->
-  <Overload> 
+  <Overload> <!-- OK - InsufficientMemory -->
     <Id>InsufficientMemoryTamperStatus</Id>
     <Description>Insufficient Memory Tamper Status</Description>
     <Type>string</Type>
@@ -16,117 +16,7 @@
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
-  <Overload> 
-    <Id>GasCutWireTamperStatus</Id>
-    <Description>Gas Cut Wire Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>GasCutWireAlarm</Register>
-      <Register>GasCutWireTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> 
-    <Id>SerialComProblemTamperStatus</Id>
-    <Description>Serial Com Port Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>SerialComProblemAlarm</Register>
-      <Register>SerialComProblemTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> 
-    <Id>LastGaspTamperStatus</Id>
-    <Description>Last Gasp Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>LastGaspAlarm</Register>
-      <Register>LastGaspTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> 
-    <Id>TiltTamperStatus</Id>
-    <Description>Tilt Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>TiltAlarm</Register>
-      <Register>TiltTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> 
-    <Id>MagneticTamperStatus</Id>
-    <Description>Magnetic Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>MagneticAlarm</Register>
-      <Register>MagneticTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> 
-    <Id>InterfaceTamperStatus</Id>
-    <Description>Interface Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>InterfaceAlarm</Register>
-      <Register>InterfaceTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> 
-    <Id>RegisterCoverTamperStatus</Id>
-    <Description>Register Cover Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>RegisterCoverAlarm</Register>
-      <Register>RegisterCoverTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> 
-    <Id>ReverseFlowTamperStatus</Id>
-    <Description>Reverse Flow Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>ReverseFlowAlarm</Register>
-      <Register>ReverseFlowTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> 
-    <Id>SerialCutWireTamperStatus</Id>
-    <Description>Serial Cut Wire Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>SerialCutWireAlarm</Register>
-      <Register>SerialCutWireTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> 
-    <Id>P1CutWireTamperStatus</Id>
-    <Description>Port 1 CutWire Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P1CutWireAlarm</Register>
-      <Register>P1CutWireTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> 
-    <Id>P2CutWireTamperStatus</Id>
-    <Description>Port 2 Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>P2CutWireAlarm</Register>
-      <Register>P2CutWireTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> <!-- OK -->
+  <Overload> <!-- OK - Moisture -->
     <Id>MoistureTamperStatus</Id>
     <Description>Moisture Detect Tamper Status</Description>
     <Type>string</Type>
@@ -136,7 +26,7 @@
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
-  <Overload> <!-- OK -->
+  <Overload> <!-- OK - ProgramMemory -->
     <Id>ProgramMemoryTamperStatus</Id>
     <Description>Program Memory Tamper Status</Description>
     <Type>string</Type>
@@ -146,7 +36,7 @@
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
-  <Overload> <!-- OK -->
+  <Overload> <!-- OK - MemoryMap -->
     <Id>MemoryMapTamperStatus</Id>
     <Description>Memory Map Tamper Status</Description>
     <Type>string</Type>
@@ -156,7 +46,17 @@
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
-  <Overload> <!-- OK -->
+  <Overload> <!-- OK - VSWR - NOT USED -->
+    <Id>VSWRTamperStatus</Id>
+    <Description>VSWR Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>VSWRAlarm</Register>
+      <Register>VSWRTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - EnergizerLastGasp -->
     <Id>EnergizerLastGaspTamperStatus</Id>
     <Description>Energizer Last Gasp Tamper Status</Description>
     <Type>string</Type>
@@ -166,13 +66,103 @@
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
-  <Overload> <!-- OK -->
-    <Id>VSWRTamperStatus</Id>
-    <Description>VSWR Tamper Status</Description>
+  <Overload> <!-- OK - SerialComProblem --> 
+    <Id>SerialComProblemTamperStatus</Id>
+    <Description>Serial Com Port Tamper Status</Description>
     <Type>string</Type>
     <Registers>
-      <Register>VSWRAlarm</Register>
-      <Register>VSWRTamper</Register>
+      <Register>SerialComProblemAlarm</Register>
+      <Register>SerialComProblemTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - LastGasp --> 
+    <Id>LastGaspTamperStatus</Id>
+    <Description>Last Gasp Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>LastGaspAlarm</Register>
+      <Register>LastGaspTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - Tilt --> 
+    <Id>TiltTamperStatus</Id>
+    <Description>Tilt Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>TiltAlarm</Register>
+      <Register>TiltTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - Magnetic --> 
+    <Id>MagneticTamperStatus</Id>
+    <Description>Magnetic Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>MagneticAlarm</Register>
+      <Register>MagneticTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - P2CutWire --> 
+    <Id>P2CutWireTamperStatus</Id>
+    <Description>Port 2 Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2CutWireAlarm</Register>
+      <Register>P2CutWireTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - Interface/PCI --> 
+    <Id>InterfaceTamperStatus</Id>
+    <Description>Interface Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>InterfaceAlarm</Register>
+      <Register>InterfaceTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - RegisterCover --> 
+    <Id>RegisterCoverTamperStatus</Id>
+    <Description>Register Cover Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>RegisterCoverAlarm</Register>
+      <Register>RegisterCoverTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - ReverseFlow --> 
+    <Id>ReverseFlowTamperStatus</Id>
+    <Description>Reverse Flow Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>ReverseFlowAlarm</Register>
+      <Register>ReverseFlowTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - SerialCutWire --> 
+    <Id>SerialCutWireTamperStatus</Id>
+    <Description>Serial Cut Wire Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>SerialCutWireAlarm</Register>
+      <Register>SerialCutWireTamper</Register>
+    </Registers>
+    <CustomGet>method:TamperStatus_Get</CustomGet>
+  </Overload>
+  <Overload> <!-- OK - P1CutWire --> 
+    <Id>P1CutWireTamperStatus</Id>
+    <Description>Port 1 CutWire Tamper Status</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1CutWireAlarm</Register>
+      <Register>P1CutWireTamper</Register>
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
@@ -268,7 +258,7 @@
     </Registers>
     <CustomGet>method:TamperImmStatus_Get</CustomGet>
   </Overload>
-  <Overload> <!-- OK - Interface -->
+  <Overload> <!-- OK - Interface/PCI -->
     <Id>InterfaceImmTamperStatus</Id>
     <Description>Interface Imm Tamper Status</Description>
     <Type>string</Type>
@@ -707,7 +697,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK - Interface -->
+  <Register> <!-- OK - Interface/PCI -->
     <Id>InterfaceImmAlarm</Id>
     <Description>Set for enable  tamper</Description>
     <Type>bool</Type>
@@ -849,7 +839,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK - VSWR -->
+  <Register> <!-- OK - VSWR - NOT USED -->
     <Id>VSWRAlarm</Id>
     <Description>Set to enable VSWR</Description>
     <Type>bool</Type>
@@ -1011,7 +1001,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK - VSWR -->
+  <Register> <!-- OK - VSWR - NOT USED -->
     <Id>VSWRTamper</Id>
     <Description>Set when VSWR</Description>
     <Type>bool</Type>
@@ -1083,7 +1073,7 @@
   </Register>
 
   <!-- Set Ecoder alarms -->
-  <Register> <!-- OK -->
+  <Register> <!-- OK - LeakDetection -->
     <Id>ECoderLeakDetectionCurrent</Id>
     <Description>Leak Detection Current Alarm</Description>
     <Type>bool</Type>
@@ -1093,7 +1083,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - DaysOfLeak -->
     <Id>ECoderDaysOfLeak</Id>
     <Description>Days of Leak Alarm</Description>
     <Type>bool</Type>
@@ -1103,7 +1093,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - DaysOfLeak -->
     <Id>ECoderDaysNoFlow</Id>
     <Description>Days No Flow Alarm</Description>
     <Type>bool</Type>
@@ -1113,7 +1103,7 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK -->
+  <Register> <!-- OK - ReverseFlow -->
     <Id>ECoderReverseFlow</Id>
     <Description>Reverse Flow Alarm</Description>
     <Type>bool</Type>
@@ -1187,7 +1177,8 @@
   </Register>
   
   <!-- Protocol + LiveDigits -->
-  <!-- CoilCMD: 129 65 64 | 128 30 y 128 32 -->
+  <!-- CoilCMD: Write - 129 65 64 ( Set bit 6 -> P1EncoderAutodetect ) -->
+  <!-- CoilCMD: Read  - 128 30 y 128 32 ( Protocol and LiveDigits ) -->
   <Register> <!-- ¿1 or 2 bytes? -->
     <Id>P1EncoderProtocol</Id>
     <Description>P1 Encoder auto-detection protocol/encoder type</Description>

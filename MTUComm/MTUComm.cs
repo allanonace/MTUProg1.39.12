@@ -87,6 +87,7 @@ namespace MTUComm
         private const int IC_EXCEPTION            = 2;
         private const int WAIT_BTW_TURNOFF        = 500;
         private const int WAIT_BTW_IC             = 1000;
+        private const int WAIT_IC_FAILS           = 4000;
         private const int WAIT_BEFORE_READ        = 1000;
         private const int TIMES_TURNOFF           = 3;
         private const int DATA_READ_END_DAYS      = 60; // In STARProgrammer code is used .AddSeconds ( 86399 ) -> 86399 / 60 / 24 = 59,999 = 60 days
@@ -2350,6 +2351,7 @@ namespace MTUComm
                             // OnDemand 1.2 alarms
                             if ( mtu.MtuDemand )
                             {
+                                // QUESTION: is map.VSWRAlarm not used?
                                 if ( mtu.MoistureDetect     ) map.MoistureAlarm          = alarms.MoistureDetect;
                                 if ( mtu.ProgramMemoryError ) map.ProgramMemoryAlarm     = alarms.ProgramMemoryError;
                                 if ( mtu.MemoryMapError     ) map.MemoryMapAlarm         = alarms.MemoryMapError;
@@ -2358,7 +2360,8 @@ namespace MTUComm
 
                             // Write directly ( without conditions )
                             map.ImmediateAlarm = alarms.ImmediateAlarmTransmit;
-                            map.UrgentAlarm    = alarms.DcuUrgentAlarm;
+                            if ( map.ContainsMember ( "UrgentAlarm" ) )
+                                map.UrgentAlarm = alarms.DcuUrgentAlarm;
                             
                             // Overlap count
                             map.MessageOverlapCount = alarms.Overlap;
@@ -2479,7 +2482,7 @@ namespace MTUComm
                     {
                         // If IC fails by any reason, add 4 seconds delay before
                         // reading MTU Tamper Memory settings for Tilt Alarm
-                        await Task.Delay ( 4000 );
+                        await Task.Delay ( WAIT_IC_FAILS );
                     }
                     
                     Utils.Print ( "--------IC_FINISH--------" );
