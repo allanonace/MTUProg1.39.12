@@ -149,18 +149,18 @@ namespace MTUComm
 
             #endregion
 
-            #region Certificate
-            
-            Mobile.ConfigData data = Mobile.configData;
+            #region Encryption
 
             // Avoid try to log encryption info when not it has not been performed
-            if ( data.isMtuEncrypted )
+            if ( await map.Encrypted.GetValue () )
             {
                 //logger.Parameter ( this.addMtuAction, new Parameter ( "Encryption", "Encrypted", map.Encryption.GetValue () ) );
                 logger.AddParameter ( this.addMtuAction, new Parameter ( "EncryptionIndex", "Encryption Index", await map.EncryptionIndex.GetValue () ) );
             
                 if ( ! mtu.IsFamilly35xx36xx )
                 {
+                    Mobile.ConfigData data = Mobile.configData;
+
                     // Using certificate with public key
                     if ( data.IsCertLoaded )
                     {

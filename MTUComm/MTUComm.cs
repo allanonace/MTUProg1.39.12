@@ -790,7 +790,7 @@ namespace MTUComm
 
         #endregion
 
-        #region RFCheck = Install Confirmation + Node Discovery
+        #region RFCheck
 
         /// <summary>
         /// This method is called only executing the Installation Confirmation action but
@@ -1487,7 +1487,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Write MTU ( + Encryption )
+        #region Write MTU
 
         private Action truquitoAction;
 
@@ -2804,9 +2804,9 @@ namespace MTUComm
                     string mtuPublicKey = Convert.ToBase64String ( fullResponse.Response );
 
                     // Saves data that will be use to create the activity log
-                    Data.Set ( "ServerRND",    serverRND    );
-                    Data.Set ( "ClientRND",    clientRnd    );
-                    Data.Set ( "MtuPublicKey", mtuPublicKey );
+                    Data.Set ( "ServerRND",    serverRND,    true );
+                    Data.Set ( "ClientRND",    clientRnd,    true );
+                    Data.Set ( "MtuPublicKey", mtuPublicKey, true );
 
                     // Always clear temporary random key from memory
                     Array.Clear ( key,   0, key.Length   );

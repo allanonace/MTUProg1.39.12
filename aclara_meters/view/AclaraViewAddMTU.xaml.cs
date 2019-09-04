@@ -953,6 +953,9 @@ namespace aclara_meters.view
             tbx_MeterReading_Dual          .MaxLength = MAX_METERREADING;
             tbx_MeterReading_Dual_2        .MaxLength = MAX_METERREADING;
 
+            tbx_MtuGeolocationLat          .MaxLength = 20;
+            tbx_MtuGeolocationLong         .MaxLength = 20;
+
             #endregion
 
             #region Labels

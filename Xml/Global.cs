@@ -925,7 +925,7 @@ namespace Xml
             this.Port2DisableNo               = false;                // Disable ability to click on Display checkbox to disable Port2
             this.Port2MeterTypeTheSameWarning = false;                // Display a warning if Meter types are the same for dual port MTU
             this.PowerPolicy                  = true;                 // Disable/Enable USB Power programatically
-            this.PublicKey                    = "dGV4dG9kZXBydWViYQ=="; // = "textodeprueba" //string.Empty;         // Public key used during the OnDemand 1.2 MTUs new encryption process
+            this.PublicKey                    = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy"; // 123456789012345678901234567890123456789012345678901234567890123456789012 = 72 bytes //string.Empty;         // Public key used during the OnDemand 1.2 MTUs new encryption process
             this.ReadDelay                    = 5;                    // [1-10] Number of seconds of wait time before reading or writing the MTU
             this.ReadingDualEntry             = true;                 // Enables or disables dual entry of the meter reading during programming
             this.RegisterRecording            = true;                 // Enables or disables display of the Register/Meter change question during programming

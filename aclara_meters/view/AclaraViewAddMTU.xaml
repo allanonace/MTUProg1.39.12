@@ -114,6 +114,9 @@
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                    <!-- Debug -->
+                                                    <ImageButton IsVisible="{Binding DebugMode}"
+                                                    HeightRequest="60" Source="auto.png" Clicked="AutoFillTextbox" />
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric" HeightRequest="40" x:Name="tbx_AccountNumber" 
                                                                               VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" 
                                                                               PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
