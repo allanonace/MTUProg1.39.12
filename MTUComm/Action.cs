@@ -853,18 +853,16 @@ namespace MTUComm
                 var MtuId = await args.Map.MtuSerialNumber.GetValue ();
                 Data.Set ( "MtuId", MtuId.ToString (), true );
 
-                string word = "Fail";
+                string word = "Fail"; // NOT_ACHIEVED and EXCEPTION
                 switch ( result )
                 {
                     case NodeDiscoveryResult.GOOD     : word = "Good";     break;
                     case NodeDiscoveryResult.EXCELLENT: word = "Excelent"; break;
                 }
 
-                // QUESTION: How to know the number of different DCUs detected? or each element detected is always a different/new node?
-                // QUESTION: Are F1 and F2 reliability the values accumulated and calculated during the validation of the nodes?
                 Data.Set ( "ProcessResult",
-                    $"{word} " +
-                    $"Number of DCUs {nodeList.CountUniqueNodesValidated} " +
+                    $"{ word } " +
+                    $"Number of DCUs { nodeList.CountUniqueNodesValidated } " +
                     $"F1 Reliability {( probF1 * 100 ).ToString ( "F2" )} Percent " +
                     $"F2 Reliability {( probF2 * 100 ).ToString ( "F2" )} Percent" );
 
@@ -1317,6 +1315,10 @@ namespace MTUComm
                         case IFACE_MTU   : currentValue = mtu  .GetProperty ( condProperty ); break; // Mtu class
                         case IFACE_METER : currentValue = meter.GetProperty ( condProperty ); break; // Meter
                         case IFACE_GLOBAL: currentValue = gType.GetProperty ( condProperty ).GetValue ( global, null ).ToString(); break; // Global class
+                        case IFACE_DATA  : if ( ! Data.Contains ( condProperty ) || // Library.Data class
+                                                string.IsNullOrEmpty ( currentValue = Data.Get[ condProperty ].ToString () ) )
+                                               currentValue = string.Empty;
+                                           break;
                         default: // Dynamic MemoryMap
                             // Recover register from MTU memory map
                             // Some registers have port sufix but other not

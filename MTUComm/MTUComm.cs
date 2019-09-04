@@ -972,6 +972,13 @@ namespace MTUComm
         private async Task<NodeDiscoveryResult> NodeDiscovery (
             dynamic map )
         {
+            // List of all nodes detected for each attempt performed
+            NodeDiscoveryList nodeList = new NodeDiscoveryList ( NodeType.DCUsOnly );
+            NodeDiscoveryResult result = NodeDiscoveryResult.NOT_ACHIEVED;
+            double  vswr        = -1;
+            decimal finalProbF1 = 0m;
+            decimal finalProbF2 = 0m;
+
             try
             {
                 // VSWR Test
@@ -983,7 +990,7 @@ namespace MTUComm
                         null,
                         LexiAction.OperationRequest );
 
-                double vswr = Utils.GetNumericValueFromBytes<double> ( fullResponse.Response, 2, 2 );
+                vswr = Utils.GetNumericValueFromBytes<double> ( fullResponse.Response, 2, 2 );
 
                 // Node Discovery ( Initiation + Start/Reset + Get Nodes )
                 float     maxTimeND   = this.global.MaxTimeRFCheck * 1000;
@@ -1080,7 +1087,6 @@ namespace MTUComm
                         // Get next node discovery response
                         int maxAttemptsEr   = 2;
                         int countAttemptsEr = 0;
-                        NodeDiscoveryList nodeList = new NodeDiscoveryList ( ( NodeType )data[ 0 ] );
                         nodeList.StartNewAttempt (); // Saves nodes from the previous attempt for the log
                         while ( true )
                         {
@@ -1102,12 +1108,9 @@ namespace MTUComm
                             }
                             catch ( Exception e )
                             {
-                                // Is not own exception
+                                // Finish because it is not own exception
                                 if ( ! Errors.IsOwnException ( e ) )
-                                {
-                                    Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
-                                    return NodeDiscoveryResult.EXCEPTION;
-                                }
+                                    throw new Exception (); // In the catch block it is changed for PuckCantCommWithMtuException
 
                                 // Finish without perform the action
                                 else if ( ++countAttemptsEr >= maxAttemptsEr )
@@ -1145,7 +1148,7 @@ namespace MTUComm
                                 case NodeDiscoveryQueryResult.LastRead:
                                 case NodeDiscoveryQueryResult.Empty:
                                     OnProgress ( this, new Delegates.ProgressArgs ( "All nodes requested" ) );
-                                    goto BREAK_OK; // Exit from infinite while
+                                    goto BREAK_OK; // Exit from switch + infinite while
                             }
                         }
 
@@ -1233,39 +1236,31 @@ namespace MTUComm
                         }
 
                         // P( MTU TX Success )
-                        acumProbF1 = 1 - acumProbF1;
-                        acumProbF2 = 1 - acumProbF2;
+                        finalProbF1 = 1 - acumProbF1;
+                        finalProbF2 = 1 - acumProbF2;
 
                         // P( DCU TX Success )
                         prob = nodeList.GetProbability ( maxRSSIResponse );
 
                         // P( TWO WAY )
                         // NOTE: Math.Pow works with double, not decimal
-                        decimal precalc = 1 - prob * acumProbF2;
-                        acumProbF2      = 1 - precalc * precalc * precalc;
-
-                        // NodeDiscovery result
-                        NodeDiscoveryResult result = NodeDiscoveryResult.NOT_ACHIEVED;
+                        decimal precalc = 1 - prob * finalProbF2;
+                        finalProbF2     = 1 - precalc * precalc * precalc;
                         
                         // Excellent
                         int numNodesValidated = nodeList.CountUniqueNodesValidated;
                         if ( numNodesValidated >= global.GoodNumDCU &&
-                             acumProbF1 >= global.GoodF1Rely/100 &&
-                             acumProbF2 >= global.GoodF2Rely/100 )
+                             finalProbF1 >= global.GoodF1Rely/100 &&
+                             finalProbF2 >= global.GoodF2Rely/100 )
                             result = NodeDiscoveryResult.EXCELLENT;
                         
                         // Minimum
                         else if ( numNodesValidated >= global.MinNumDCU &&
-                                  acumProbF1 >= global.MinF1Rely/100 &&
-                                  acumProbF2 >= global.MinF2Rely/100 )
+                                  finalProbF1 >= global.MinF1Rely/100 &&
+                                  finalProbF2 >= global.MinF2Rely/100 )
                             result = NodeDiscoveryResult.GOOD;
 
-                        // Generates nodes log only if the process finished ok
-                        //if ( result != NodeDiscoveryResult.NOT_ACHIEVED )
-                        await this.OnNodeDiscovery (
-                            new Delegates.ActionArgs ( this.mtu, map, result, nodeList, acumProbF1, acumProbF2, vswr ) );
-
-                        return result;
+                        break; // Exit from infinite while
 
                         #endregion
                     }
@@ -1274,14 +1269,24 @@ namespace MTUComm
 
                     // The max time to perform Node Discovery process has expired
                     if ( nodeCounter.ElapsedMilliseconds > maxTimeND )
-                        return NodeDiscoveryResult.NOT_ACHIEVED;
+                    {
+                        result = NodeDiscoveryResult.NOT_ACHIEVED;
+
+                        break; // Exit from infinite while
+                    }
                 }
             }
             catch ( Exception e )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
-                return NodeDiscoveryResult.EXCEPTION;
+                
+                result = NodeDiscoveryResult.EXCEPTION;
             }
+
+            await this.OnNodeDiscovery (
+                new Delegates.ActionArgs ( this.mtu, map, result, nodeList, finalProbF1, finalProbF2, vswr ) );
+
+            return result;
         }
 
         #endregion
@@ -2460,7 +2465,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Install Confirmation | RF Check for OnDemand 1.2 MTUs
+                #region RFCheck
 
                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true

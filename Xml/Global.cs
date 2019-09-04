@@ -836,7 +836,7 @@ namespace Xml
             this.AutoPurgeSize                = 0;                    // [x-9999] Maximum size in kilobytes for log file before auto purge if AutoPurge is true
             this.AutoRegisterRecording        = false;                // Records Register selection in Activity Log based on the old meter serial number and new serial number
             this.AutoRFCheck                  = false;                // If true, it forces to execute the NodeDiscovery process even though the IC has failed
-            this.BroadcastSet                 = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="; // 12345678901234567890123456789012 = 32 bytes //string.Empty; // Broadcast key used during the OnDemand 1.2 MTUs new encryption process
+            this.BroadcastSet                 = string.Empty;         // Broadcast key used during the OnDemand 1.2 MTUs new encryption process
             this.ByPassAutoDetect             = false;                // Bypass F1 Ecoder/Encoder Autodetect
             this.CertPair                     = false;                // Whether a certificate pair (i.e. Public and Private) is installed ( PC only )
             this.CertPath                     = string.Empty;         // Key Store Path for certificate ( PC Only )
@@ -925,7 +925,7 @@ namespace Xml
             this.Port2DisableNo               = false;                // Disable ability to click on Display checkbox to disable Port2
             this.Port2MeterTypeTheSameWarning = false;                // Display a warning if Meter types are the same for dual port MTU
             this.PowerPolicy                  = true;                 // Disable/Enable USB Power programatically
-            this.PublicKey                    = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy"; // 123456789012345678901234567890123456789012345678901234567890123456789012 = 72 bytes //string.Empty;         // Public key used during the OnDemand 1.2 MTUs new encryption process
+            this.PublicKey                    = string.Empty;         // Public key used during the OnDemand 1.2 MTUs new encryption process
             this.ReadDelay                    = 5;                    // [1-10] Number of seconds of wait time before reading or writing the MTU
             this.ReadingDualEntry             = true;                 // Enables or disables dual entry of the meter reading during programming
             this.RegisterRecording            = true;                 // Enables or disables display of the Register/Meter change question during programming
@@ -998,6 +998,12 @@ namespace Xml
             this.GoodF1Rely                   = 98.5m;                // Good F1 frequency threshold
             this.GoodF2Rely                   = 75m;                  // Good F2 frequency threshold
             this.MaxTimeRFCheck               = 60;                   // Max time in seconds to perform the NodeDiscovery process ( Value set to NodeDiscoveryTime in STAR Programmer )
+
+            // New Encryption ( OD 1.2 )
+            #if DEBUG
+            this.BroadcastSet                 = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="; // 12345678901234567890123456789012 = 32 bytes
+            this.PublicKey                    = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy"; // 123456789012345678901234567890123456789012345678901234567890123456789012 = 72 bytes
+            #endif
 
             // New parameters/tags ( Own )
             
