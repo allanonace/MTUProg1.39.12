@@ -46,16 +46,6 @@
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
-  <Overload> <!-- OK - VSWR - NOT USED -->
-    <Id>VSWRTamperStatus</Id>
-    <Description>VSWR Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>VSWRAlarm</Register>
-      <Register>VSWRTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
   <Overload> <!-- OK - EnergizerLastGasp -->
     <Id>EnergizerLastGaspTamperStatus</Id>
     <Description>Energizer Last Gasp Tamper Status</Description>
@@ -143,16 +133,6 @@
     <Registers>
       <Register>ReverseFlowAlarm</Register>
       <Register>ReverseFlowTamper</Register>
-    </Registers>
-    <CustomGet>method:TamperStatus_Get</CustomGet>
-  </Overload>
-  <Overload> <!-- OK - SerialCutWire --> 
-    <Id>SerialCutWireTamperStatus</Id>
-    <Description>Serial Cut Wire Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>SerialCutWireAlarm</Register>
-      <Register>SerialCutWireTamper</Register>
     </Registers>
     <CustomGet>method:TamperStatus_Get</CustomGet>
   </Overload>
@@ -282,15 +262,6 @@
     <Type>string</Type>
     <Registers>
       <Register>ReverseFlowImmAlarm</Register>
-    </Registers>
-    <CustomGet>method:TamperImmStatus_Get</CustomGet>
-  </Overload>
-  <Overload> <!-- OK - SerialCutWire -->
-    <Id>SerialCutWireImmATamperStatus</Id>
-    <Description>Serial Cut Wire Imm Tamper Status</Description>
-    <Type>string</Type>
-    <Registers>
-      <Register>SerialCutWireImmAlarm</Register>
     </Registers>
     <CustomGet>method:TamperImmStatus_Get</CustomGet>
   </Overload>
@@ -584,7 +555,7 @@
   
   <!-- INIT - Alarms -->
 
-  <!-- Immediate + Urgent -->
+  <!-- Immediate -->
   <Register> <!-- OK - Immediate -->
     <Id>ImmediateAlarm</Id>
     <Description>Set to transmit an immediate alarm</Description>
@@ -596,7 +567,8 @@
     <CustomSet/>
   </Register>
 
-  <!-- Set Alarms Imm -->
+  <!-- Set and Read Alarms Imm -->
+  <!-- The same register is used in the case of immediate alarms -->
   <Register> <!-- OK - InsufficientMemory -->
     <Id>InsufficientMemoryImmAlarm</Id>
     <Description>Set for enable  tamper</Description>
@@ -727,16 +699,6 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK - SerialCutWire -->
-    <Id>SerialCutWireImmAlarm</Id>
-    <Description>Set for enable  tamper</Description>
-    <Type>bool</Type>
-    <Address>193</Address>
-    <Size>7</Size>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
   <Register> <!-- OK - P1CutWire -->
     <Id>P1CutWireImmAlarm</Id>
     <Description>Set for enable  tamper</Description>
@@ -839,16 +801,6 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK - VSWR - NOT USED -->
-    <Id>VSWRAlarm</Id>
-    <Description>Set to enable VSWR</Description>
-    <Type>bool</Type>
-    <Address>195</Address>
-    <Size>2</Size>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
   <Register> <!-- OK - P2CutWire -->
     <Id>P2CutWireAlarm</Id>
     <Description> P2 Set to enable port 2 alarm (cut or corrector)</Description>
@@ -892,16 +844,6 @@
   <Register> <!-- OK - P1CutWire -->
     <Id>P1CutWireAlarm</Id>
     <Description>Set to enable cut wire tamper</Description>
-    <Type>bool</Type>
-    <Address>195</Address>
-    <Size>7</Size>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK - SerialCutWire -->
-    <Id>SerialCutWireAlarm</Id>
-    <Description>Set to enable serial cut wire tamper</Description>
     <Type>bool</Type>
     <Address>195</Address>
     <Size>7</Size>
@@ -1001,16 +943,6 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
-  <Register> <!-- OK - VSWR - NOT USED -->
-    <Id>VSWRTamper</Id>
-    <Description>Set when VSWR</Description>
-    <Type>bool</Type>
-    <Address>109</Address>
-    <Size>2</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
   <Register> <!-- OK - P2CutWire -->
     <Id>P2CutWireTamper</Id>
     <Description>Set when port 2 tamper</Description>
@@ -1054,16 +986,6 @@
   <Register> <!-- OK - P1CutWire -->
     <Id>P1CutWireTamper</Id>
     <Description>Set when cut wire tamper</Description>
-    <Type>bool</Type>
-    <Address>109</Address>
-    <Size>7</Size>
-    <Write>false</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK - SerialCutWire -->
-    <Id>SerialCutWireTamper</Id>
-    <Description>Serial Cut Wire tamper</Description>
     <Type>bool</Type>
     <Address>109</Address>
     <Size>7</Size>

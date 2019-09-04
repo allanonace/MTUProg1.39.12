@@ -2331,7 +2331,6 @@ namespace MTUComm
                             if ( mtu.LastGaspImm            ) map.LastGaspImmAlarm           = alarms.LastGaspImm;
                             if ( mtu.TiltTamperImm          ) map.TiltImmAlarm               = alarms.TiltTamperImm;
                             if ( mtu.MagneticTamperImm      ) map.MagneticImmAlarm           = alarms.MagneticTamperImm;
-                            if ( mtu.InterfaceTamperImm     ) map.InterfaceImmAlarm          = alarms.InterfaceTamperImm;
                             if ( mtu.RegisterCoverTamperImm ) map.RegisterCoverImmAlarm      = alarms.RegisterCoverTamperImm;
                             if ( mtu.ReverseFlowTamperImm   ) map.ReverseFlowImmAlarm        = alarms.ReverseFlowTamperImm;
                             if ( mtu.SerialCutWireImm       ) map.SerialCutWireImmAlarm      = alarms.SerialCutWireImm;
@@ -2340,6 +2339,7 @@ namespace MTUComm
                                  mtu.TamperPort2Imm         ) map.P2CutWireImmAlarm          = alarms.TamperPort2Imm;
 
                             // Ecoder alarms
+                            // NOTE: Same register is used to set both ports working with E-coder alarms
                             if ( mtu.Ecoder )
                             {
                                 if ( mtu.ECoderLeakDetectionCurrent ) map.ECoderLeakDetectionCurrent = alarms.ECoderLeakDetectionCurrent;
@@ -2351,7 +2351,7 @@ namespace MTUComm
                             // OnDemand 1.2 alarms
                             if ( mtu.MtuDemand )
                             {
-                                // QUESTION: is map.VSWRAlarm not used?
+                                // NOTE: VSWR alarm is set in the factory
                                 if ( mtu.MoistureDetect     ) map.MoistureAlarm          = alarms.MoistureDetect;
                                 if ( mtu.ProgramMemoryError ) map.ProgramMemoryAlarm     = alarms.ProgramMemoryError;
                                 if ( mtu.MemoryMapError     ) map.MemoryMapAlarm         = alarms.MemoryMapError;
@@ -2454,7 +2454,8 @@ namespace MTUComm
                     
                     // PCI Alarm needs to be set after MTU is turned on, just before the read MTU
                     // The Status will show enabled during install and actual status (triggered) during the read
-                    if ( mtu.InterfaceTamper ) await map.InterfaceAlarm.SetValueToMtu ( alarms.InterfaceTamper );
+                    if ( mtu.InterfaceTamper    ) await map.InterfaceAlarm   .SetValueToMtu ( alarms.InterfaceTamper    );
+                    if ( mtu.InterfaceTamperImm ) await map.InterfaceImmAlarm.SetValueToMtu ( alarms.InterfaceTamperImm );
                 }
 
                 #endregion

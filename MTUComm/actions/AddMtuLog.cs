@@ -331,7 +331,7 @@ namespace MTUComm
                     AddParameter ( "AlarmConfiguration",        "Alarm Configuration Name",     alarmConfiguration );
                     AddParameter ( "Overlap",                   "Message Overlap",              alarms.Overlap.ToString () );
                     AddParameter ( "ImmediateAlarm",            "Immediate Alarm Transmit",     alarms.ImmediateAlarmTransmit.ToString () );
-                    AddParameter ( "UrgentAlarm",               "DCU Urgent Alarm Transmit",    alarms.DcuUrgentAlarm.ToString () );
+                    AddParamCond ( "UrgentAlarm",               "DCU Urgent Alarm Transmit",    alarms.DcuUrgentAlarm.ToString (),                          map.ContainsMember ( "UrgentAlarm" ) );
                     AddParamCond ( "MemoryMapError",            "Memory Map Error",             await map.MemoryMapTamperStatus.GetValue (),                mtu.MemoryMapError );
                     AddParamCond ( "MemoryMapErrorImm",         "Memory Map Error Imm",         await map.MemoryMapImmTamperStatus.GetValue (),             mtu.MemoryMapErrorImm );
                     AddParamCond ( "ProgramMemoryError",        "Program Memory Error",         await map.ProgramMemoryTamperStatus.GetValue (),            mtu.ProgramMemoryError );
