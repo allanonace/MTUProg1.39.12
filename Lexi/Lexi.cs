@@ -326,9 +326,9 @@ namespace Lexi
             uint data )
         {
             if ( m_serial == null )
-                throw new ArgumentNullException("No Serial interface defined");
+                throw new ArgumentNullException ( "No Serial interface defined" );
 
-            return await Read(m_serial, addres, data, m_timeout);
+            return await Read ( m_serial, addres, data, m_timeout );
         }
 
         private async Task<byte[]> Read (
@@ -445,28 +445,62 @@ namespace Lexi
         /// <returns>Response from the MTU.</returns>
         /// <seealso cref="Read(uint, uint)"/>
         public async Task<LexiWriteResult> Write (
-            uint   address,
-            byte[] data           = null,
-            uint[] bytesResponse  = null, // By default is +2 ACK
+            uint   addressOrLexiCmd,
+            byte[] data            = null,
+            int    attempts        = 1,
+            int    secsBtwAttempts = 1,
+            uint[] bytesResponse   = null, // By default is +2 ACK
             LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
-            LexiAction lexiAction = LexiAction.Write )
+            LexiAction lexiAction  = LexiAction.Write )
         {
             if ( m_serial == null )
-                throw new ArgumentNullException("No Serial interface defined");
+                throw new ArgumentNullException ( "No Serial interface defined" );
 
             if ( bytesResponse == null )
-                bytesResponse = new uint[] { 2 }; // ACK
+                bytesResponse = new uint[] { 2 }; // ACK + ACK Info Size
 
             // Some Operation Request commands do not have more data than the header
             if ( data is null )
                 data = new byte[ 0 ]; // Empty data array
 
-            return await Write ( m_serial, address, data, bytesResponse, filtersResponse, m_timeout, lexiAction );
+            // Try the specified time of attempts
+            LexiWriteResult result = null;
+            if ( attempts        <= 0 ) attempts        = 1;
+            if ( secsBtwAttempts <= 0 ) secsBtwAttempts = 1;
+            int count = 0;
+            do
+            {
+                Utils.PrintDeep ( Environment.NewLine + "-------LEXI_WRITE--------| Attempt " + ++count );
+
+                try
+                {
+                    result = await Write (
+                        m_serial,
+                        addressOrLexiCmd,
+                        data,
+                        bytesResponse,
+                        filtersResponse,
+                        m_timeout,
+                        lexiAction );
+
+                    break;
+                }
+                catch ( Exception e )
+                {
+                    if ( --attempts > 0 )
+                        await Task.Delay ( secsBtwAttempts * 1000 );
+                    else
+                        throw e;
+                }
+            }
+            while ( attempts > 0 );
+
+            return result;
         }
         
         private async Task<LexiWriteResult> Write (
             ISerial serial,
-            UInt32 address,
+            UInt32 addressOrLexiCmd,
             byte[] data,
             uint[] bytesResponse,
             LexiFiltersResponse filtersResponse,
@@ -486,7 +520,7 @@ namespace Lexi
                 // Operation 20: 25, 0xFE, OpCmd ( 0x14 ), Data.Length ( 0 ), Checksum
                 //   Response: PACKAGE + ACK [ + Data ( 21 bytes ) ]
                 byte[] stream;
-                var info = GeneratePackage ( lexiAction, out stream, address, data );
+                var info = GeneratePackage ( lexiAction, out stream, addressOrLexiCmd, data );
 
                 Utils.PrintDeep ( "Lexi.Write.. " +
                 "Stream = " +

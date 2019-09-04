@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xamarin.Forms;
 using MTUComm;
 using Library;
@@ -43,14 +44,39 @@ namespace aclara_meters.util
 
         protected async void AutoFillTextbox ( object sender, EventArgs e )
         {
-            //ImageButton ctlButton = (ImageButton)sender;
-            //BorderlessEntry field = (BorderlessEntry)this.FindByName((string)ctlButton.CommandParameter);
-
             StackLayout main = ( StackLayout )this.FindByName ( "ReadMTUChangeView" );
 
+            AutoFillTextbox_Logic ( main );
+
+            await Task.Delay ( 1000 );
+
+            // NOTE: First fill pickrs because some textbox ( e.g. MeterReading ) need it
+            AutoFillTextbox_Logic ( main );
+        }
+
+        protected void AutoFillTextbox_Logic (
+            StackLayout mainElement )
+        {
             List<BorderlessEntry>  listTbx = new List<BorderlessEntry> ();
             List<BorderlessPicker> listPck = new List<BorderlessPicker> ();
-            GetChildrensTextbox ( main, listTbx, listPck );
+
+            GetChildrensTextbox ( mainElement, listTbx, listPck );
+            
+            foreach ( BorderlessPicker pck in listPck
+                .Where ( pck =>
+                    pck.IsEnabled &&
+                    pck.IsVisible &&
+                    ( pck as BorderlessPicker ).SelectedIndex <= -1 ) )
+            {
+                try
+                {
+                    pck.SelectedIndex = 0;
+                }
+                catch ( Exception ex )
+                {
+                    
+                }
+            }
 
             foreach ( BorderlessEntry tbx in listTbx
                 .Where ( tbx =>
@@ -65,22 +91,6 @@ namespace aclara_meters.util
                 catch ( Exception ex )
                 {
                     // NOTE: Can fail if the control does not have set a max length value
-                }
-            }
-
-            foreach ( BorderlessPicker pck in listPck
-                .Where ( pck =>
-                    pck.IsEnabled &&
-                    pck.IsVisible &&
-                    ( pck as BorderlessPicker ).SelectedIndex <= -1 ) )
-            {
-                try
-                {
-                    pck.SelectedIndex = 0;
-                }
-                catch ( Exception ex )
-                {
-                    
                 }
             }
         }

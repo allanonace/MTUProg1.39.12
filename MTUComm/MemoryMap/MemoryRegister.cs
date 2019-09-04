@@ -378,7 +378,11 @@ namespace MTUComm.MemoryMap
                 Utils.Print ( "Register -> ResetByte -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
             
                 // Reset full byte ( all flags to zero/disable )
-                await this.lexi.Write ( ( uint )this.address, new byte[] { default ( byte ) } );
+                await this.lexi.Write (
+                    ( uint )this.address,
+                    new byte[] { default ( byte ) },
+                    MTUComm.N_ATTEMPTS_LEXI,
+                    MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
                 
                 // Write flag for this register
                 await this.SetValueToMtu ( value );
@@ -419,7 +423,11 @@ namespace MTUComm.MemoryMap
             {
                 // Recover byte array with length equals to the value to set,
                 // not the length ( sizeGet ) that will be used to recover/get
-                await this.lexi.Write ( ( uint )this.address, this.funcGetByteArray ( false ) );
+                await this.lexi.Write (
+                    ( uint )this.address,
+                    this.funcGetByteArray ( false ),
+                    MTUComm.N_ATTEMPTS_LEXI,
+                    MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
             }
             
             Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );
@@ -451,7 +459,11 @@ namespace MTUComm.MemoryMap
             
             Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Write full byte to MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ] to bit: " + bit );
             
-            await this.lexi.Write ( ( uint )this.address, new byte[] { systemFlags } );
+            await this.lexi.Write (
+                ( uint )this.address,
+                new byte[] { systemFlags },
+                MTUComm.N_ATTEMPTS_LEXI,
+                MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
         }
 
         /// <summary>

@@ -90,6 +90,11 @@ namespace MTUComm
         private const int WAIT_IC_FAILS           = 4000;
         private const int WAIT_BEFORE_READ        = 1000;
         private const int TIMES_TURNOFF           = 3;
+        public static readonly int N_ATTEMPTS_LEXI        = 2;
+        public static readonly int WAIT_BTW_ATTEMPTS_LEXI = 1;
+        private const int ONLY_ONE_ATTEMPT_CMD    = 1;
+        private const int N_ATTEMPTS_CMD          = 2;
+        private const int WAIT_BTW_ATTEMPTS_CMD   = 1;
         private const int DATA_READ_END_DAYS      = 60; // In STARProgrammer code is used .AddSeconds ( 86399 ) -> 86399 / 60 / 24 = 59,999 = 60 days
         private const byte CMD_INIT_EVENT_LOGS    = 0x13; // 19
         private const byte CMD_NEXT_EVENT_LOG     = 0x14; // 20
@@ -661,8 +666,14 @@ namespace MTUComm
                 Array.Copy ( Utils.GetTimeSinceDate ( end   ), 0, data, 6, 4 ); // Stop time
 
                 // Start new event log query
-                // NOTE: Use address parameter to set request code
-                await this.lexi.Write ( CMD_INIT_EVENT_LOGS, data, null, null, LexiAction.OperationRequest ); // Return +2 ACK
+                await this.lexi.Write (
+                    CMD_INIT_EVENT_LOGS,
+                    data,
+                    N_ATTEMPTS_CMD,
+                    WAIT_BTW_ATTEMPTS_CMD,
+                    null,
+                    null,
+                    LexiAction.OperationRequest );
 
                 await Task.Delay ( WAIT_BEFORE_LOGS );
 
@@ -681,11 +692,13 @@ namespace MTUComm
                     {
                         // Get next event log response command or Get repeat last event log response command
                         // NOTE: In MTU_Datalogging ( DataRead 3.4 ) indicates that Get repeat command has only two
-                        // possible responses, but if it is the same as relaunch the last Get next, should be has three
+                        // NOTE: possible responses, but if it is the same as relaunch the last Get next, should be has three
                         fullResponse =
                             await this.lexi.Write (
                                 ( ! retrying ) ? CMD_NEXT_EVENT_LOG : CMD_REPE_EVENT_LOG,
                                 null,
+                                ONLY_ONE_ATTEMPT_CMD,
+                                WAIT_BTW_ATTEMPTS_CMD,
                                 new uint[]{ CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_RES_2 }, // ACK with log entry or without
                                 new LexiFiltersResponse ( new ( int,int,byte )[] {
                                     ( CMD_NEXT_EVENT_RES_1, CMD_BYTE_RES, CMD_NEXT_EVENT_DATA  ), // Entry data included
@@ -985,7 +998,10 @@ namespace MTUComm
                 // NOTE: It can take up to one second to return an answer with data
                 // NOTE: If the size of the data to be answered is not specified, the accepted answer will be ACK 6 and ACK Info Size 0
                 LexiWriteResult fullResponse = await this.lexi.Write (
-                        CMD_VSWR, null,
+                        CMD_VSWR,
+                        null,
+                        N_ATTEMPTS_CMD,
+                        WAIT_BTW_ATTEMPTS_CMD,
                         new uint[] { 6 },
                         null,
                         LexiAction.OperationRequest );
@@ -1013,10 +1029,11 @@ namespace MTUComm
                     data[ 7 ] = 0x03; // RF Channels bitmap up to 8 channels ( 4 = 0000.0100 = Channel 3 )
 
                     // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
-                    // NOTE: Use address parameter to set the request code
                     fullResponse = await this.lexi.Write (
                         CMD_INIT_NODE_DISC,
                         data,
+                        N_ATTEMPTS_CMD,
+                        WAIT_BTW_ATTEMPTS_CMD,
                         new uint[] { CMD_INIT_NODE_DISC_RES }, // ACK with response
                         new LexiFiltersResponse ( new ( int,int,byte )[] {
                             ( CMD_INIT_NODE_DISC_RES, CMD_BYTE_RES, CMD_INIT_NODE_DISC_NOT ), // Node discovery not initiated
@@ -1057,6 +1074,8 @@ namespace MTUComm
                                 fullResponse = await this.lexi.Write (
                                     CMD_QUERY_NODE_DISC,
                                     null,
+                                    N_ATTEMPTS_CMD,
+                                    WAIT_BTW_ATTEMPTS_CMD,
                                     new uint[] { CMD_QUERY_NODE_DISC_RES }, // ACK with response
                                     new LexiFiltersResponse ( new ( int,int,byte )[] {
                                         ( CMD_QUERY_NODE_DISC_RES, CMD_BYTE_RES, CMD_QUERY_NODE_DISC_NOT ), // The MTU is busy
@@ -1095,6 +1114,8 @@ namespace MTUComm
                                 fullResponse = await this.lexi.Write (
                                     CMD_NEXT_NODE_DISC,
                                     null,
+                                    ONLY_ONE_ATTEMPT_CMD,
+                                    WAIT_BTW_ATTEMPTS_CMD,
                                     new uint[] {
                                         CMD_NEXT_NODE_1,
                                         CMD_NEXT_NODE_2,
@@ -2741,7 +2762,10 @@ namespace MTUComm
                         fullResponse = await this.lexi.Write (
                             CMD_LOAD_ENCRYP,
                             data4,
-                            null, null,
+                            N_ATTEMPTS_CMD,
+                            WAIT_BTW_ATTEMPTS_CMD,
+                            null,
+                            null,
                             LexiAction.OperationRequest );
                     }
 
@@ -2751,7 +2775,10 @@ namespace MTUComm
                     fullResponse = await this.lexi.Write (
                         CMD_LOAD_ENCRYP,
                         data1,
-                        null, null,
+                        N_ATTEMPTS_CMD,
+                        WAIT_BTW_ATTEMPTS_CMD,
+                        null,
+                        null,
                         LexiAction.OperationRequest );
                     
                     string serverRND = Convert.ToBase64String ( sha );
@@ -2762,7 +2789,10 @@ namespace MTUComm
                     fullResponse = await this.lexi.Write (
                         CMD_LOAD_ENCRYP,
                         data0,
-                        null, null,
+                        N_ATTEMPTS_CMD,
+                        WAIT_BTW_ATTEMPTS_CMD,
+                        null,
+                        null,
                         LexiAction.OperationRequest );
                     
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
@@ -2770,7 +2800,11 @@ namespace MTUComm
                     // Generates Encryptions Keys
                     fullResponse = await this.lexi.Write (
                         CMD_GEN_ENCRYP_KEYS,
-                        null, null, null,
+                        null,
+                        N_ATTEMPTS_CMD,
+                        WAIT_BTW_ATTEMPTS_CMD,
+                        null,
+                        null,
                         LexiAction.OperationRequest );
 
                     // Verifies if the MTU is encrypted
@@ -2790,6 +2824,8 @@ namespace MTUComm
                     fullResponse = await this.lexi.Write (
                         CMD_READ_ENCRYP,
                         data3,
+                        N_ATTEMPTS_CMD,
+                        WAIT_BTW_ATTEMPTS_CMD,
                         new uint[] { CMD_READ_ENCRYP_RES_3 },
                         null,
                         LexiAction.OperationRequest );
@@ -2802,6 +2838,8 @@ namespace MTUComm
                     fullResponse = await this.lexi.Write (
                         CMD_READ_ENCRYP,
                         data2,
+                        N_ATTEMPTS_CMD,
+                        WAIT_BTW_ATTEMPTS_CMD,
                         new uint[] { CMD_READ_ENCRYP_RES_2 },
                         null,
                         LexiAction.OperationRequest );
@@ -2906,7 +2944,11 @@ namespace MTUComm
                  systemFlags = ( byte ) ( systemFlags |    1 << ( int )bit   );
             else systemFlags = ( byte ) ( systemFlags & ~( 1 << ( int )bit ) );
             
-            await lexi.Write ( address, new byte[] { systemFlags } );
+            await lexi.Write (
+                address,
+                new byte[] { systemFlags },
+                N_ATTEMPTS_LEXI,
+                WAIT_BTW_ATTEMPTS_LEXI );
 
             // Read new written value to verify modification
             if ( verify )
