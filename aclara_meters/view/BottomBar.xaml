@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Grid xmlns="http://xamarin.com/schemas/2014/forms" 
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             x:Class="aclara_meters.view.BottomBar"
+            Grid.Column="1" InputTransparent="false" Grid.Row="0" Margin="-12,0,0,0" VerticalOptions="End" HeightRequest="148">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*">
+            </ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48">
+            </RowDefinition>
+        </Grid.RowDefinitions>
+        <StackLayout Margin="0,46,0,0"  VerticalOptions="End">
+            <StackLayout IsVisible="true" Margin="0,40,0,0" HeightRequest="128" BackgroundColor="#6aa2b8" Orientation="Horizontal" >
+                <Label  x:Name="label_read" LineBreakMode="TailTruncation" Margin="17,18,0,44" FontSize="20" TextColor="White" Text="Push Button to START" >
+                </Label>
+            </StackLayout>
+        </StackLayout>
+        <StackLayout Margin="0,0,0,-96" VerticalOptions="CenterAndExpand" HorizontalOptions="EndAndExpand">
+            <Image IsVisible="true" IsEnabled="true"  x:Name="bg_action_button_img" HeightRequest="96" Margin="0,0,20,0" Scale="1" Source="add_mtu_btn.png" HorizontalOptions="End">
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer x:Name="bg_action_button" NumberOfTapsRequired="1" />
+                </Image.GestureRecognizers>
+            </Image>
+            <ImageButton x:Name="btnTakePicture" Margin="0,-12,10,0" BackgroundColor="Transparent"  IsVisible="false" IsEnabled="True" HeightRequest="45" WidthRequest="45" Source="camera2.png" HorizontalOptions="End" />
+        </StackLayout>
+    </Grid>

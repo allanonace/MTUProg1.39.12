@@ -33,6 +33,8 @@ namespace aclara_meters.view
         private bool conectarDevice;
         private bool bAlertBatt = true;
         private bool bAlertBatt10 = true;
+        private MenuView menuOptions;
+        private DialogsView dialogView;
 
         private ActionType actionType;
 
@@ -76,6 +78,9 @@ namespace aclara_meters.view
             PrintToConsole($"-------------------------------   AclaraViewMainMenu     , thread: { Thread.CurrentThread.ManagedThreadId}");
             Settings.IsConnectedBLE = false;
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
+            menuOptions = this.MenuOptions;
+            dialogView = this.DialogView;
+
             TappedListeners();
             LoadPreUIGFX();
 
@@ -94,12 +99,11 @@ namespace aclara_meters.view
             //Change username textview to Prefs. String
             if (FormsApp.credentialsService.UserName != null)
             {
-                userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
+               // userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
                 CrossSettings.Current.AddOrUpdateValue("session_username", FormsApp.credentialsService.UserName);
             }
 
-            LoadSideMenuElements();
-
+        
             if (Device.Idiom == TargetIdiom.Phone)
             {
                 background_scan_page.Opacity = 0;
@@ -108,7 +112,7 @@ namespace aclara_meters.view
 
             if (Device.RuntimePlatform == Device.Android)
             {
-                backmenu.Scale = 1.42;
+                menuOptions.GetImageElement("backmenu").Scale = 1.42;
 
             }
 
@@ -296,57 +300,6 @@ namespace aclara_meters.view
             });
         }
 
-        private void LoadSideMenuElements()
-        {
-            // Creating our pages for menu navigation
-            // Here you can define title for item, 
-            // icon on the left side, and page that you want to open after selection
-
-            MenuList = new List<PageItem>();
-
-            // Adding menu items to MenuList
-
-            MenuList.Add(new PageItem() { Title = "Read MTU", Icon = "readmtu_icon.png",Color= "White", TargetType = ActionType.ReadMtu }); 
-
-            if (FormsApp.config.Global.ShowTurnOff)
-                MenuList.Add(new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", Color = "White", TargetType = ActionType.TurnOffMtu });
-
-            if (FormsApp.config.Global.ShowAddMTU)
-                MenuList.Add(new PageItem() { Title = "Add MTU", Icon = "addMTU.png", Color = "White", TargetType = ActionType.AddMtu });
-
-            if (FormsApp.config.Global.ShowReplaceMTU)
-                MenuList.Add(new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", Color = "White", TargetType = ActionType.ReplaceMTU });
-
-            if (FormsApp.config.Global.ShowReplaceMeter)
-                MenuList.Add(new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", Color = "White", TargetType = ActionType.ReplaceMeter });
-
-            if (FormsApp.config.Global.ShowAddMTUMeter)
-                MenuList.Add(new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", Color = "White", TargetType = ActionType.AddMtuAddMeter });
-
-            if (FormsApp.config.Global.ShowAddMTUReplaceMeter)
-                MenuList.Add(new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", Color = "White", TargetType = ActionType.AddMtuReplaceMeter });
-
-            if (FormsApp.config.Global.ShowReplaceMTUMeter)
-                MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", Color = "White", TargetType = ActionType.ReplaceMtuReplaceMeter });
-
-            if (FormsApp.config.Global.ShowInstallConfirmation)
-                MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
-
-            if (FormsApp.config.Global.ShowDataRead)
-                MenuList.Add(new PageItem() { Title = "Data Read", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.DataRead });
-#if DEBUG
-           // MenuList.Add(new PageItem() { Title = "Read Fabric", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadFabric });
-#endif
-
-
-            // ListView needs to be at least  elements for UI Purposes, even empty ones
-            while (MenuList.Count < 9)
-                MenuList.Add(new PageItem() { Title = "", Color = "#6aa2b8", Icon = "" });
-
-            // Setting our list to be ItemSource for ListView in MainPage.xaml
-            navigationDrawerList.ItemsSource = MenuList;
-
-        }
 
         private void OnSwiped(object sender, SwipedEventArgs e)
         {
@@ -404,8 +357,8 @@ namespace aclara_meters.view
             background_scan_page_detail.IsVisible = true;
             background_scan_page_detail.IsVisible = false;
             background_scan_page.IsVisible = true;
-            navigationDrawerList.IsEnabled = true;
-            navigationDrawerList.Opacity = 0.65;
+            menuOptions.GetListElement("navigationDrawerList").IsEnabled = true;
+            menuOptions.GetListElement("navigationDrawerList").Opacity = 0.65;
 
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -428,18 +381,18 @@ namespace aclara_meters.view
         {
             background_scan_page.Margin = new Thickness(0, 0, 0, 0);
             background_scan_page_detail.Margin = new Thickness(0, 0, 0, 0);
-            close_menu_icon.Opacity = 1;
+         //   close_menu_icon.Opacity = 1;
             hamburger_icon.IsVisible = true;
             hamburger_icon_detail.IsVisible = true;
             aclara_detail_logo.IsVisible = true;
             aclara_logo.IsVisible = true;
-            tablet_user_view.TranslationY = 0;
-            tablet_user_view.Scale = 1;
+         //   tablet_user_view.TranslationY = 0;
+         //   tablet_user_view.Scale = 1;
             aclara_logo.IsVisible = true;
-            logo_tablet_aclara.Opacity = 0;
+         //   logo_tablet_aclara.Opacity = 0;
             aclara_detail_logo.IsVisible = true;
-            tablet_user_view.TranslationY = -22;
-            tablet_user_view.Scale = 1.2;
+         //   tablet_user_view.TranslationY = -22;
+         //   tablet_user_view.Scale = 1.2;
             ContentNav.TranslationX = -310;
             shadoweffect.TranslationX = -310;
             ContentNav.IsVisible = true;
@@ -453,16 +406,16 @@ namespace aclara_meters.view
             ContentNav.IsVisible = true;
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
-            close_menu_icon.Opacity = 0;
+            //close_menu_icon.Opacity = 0;
             hamburger_icon.IsVisible = false;
             hamburger_icon_detail.IsVisible = false;
             background_scan_page.Margin = new Thickness(310, 0, 0, 0);
             background_scan_page_detail.Margin = new Thickness(310, 0, 0, 0);
             aclara_logo.IsVisible = true;
-            logo_tablet_aclara.Opacity = 0;
+            //logo_tablet_aclara.Opacity = 0;
             aclara_detail_logo.IsVisible = true;
-            tablet_user_view.TranslationY = -22;
-            tablet_user_view.Scale = 1.2;
+            //tablet_user_view.TranslationY = -22;
+            //tablet_user_view.Scale = 1.2;
             shadoweffect.IsVisible = true;
             aclara_logo.Scale = 1.2;
             aclara_detail_logo.Scale = 1.2;
@@ -475,40 +428,44 @@ namespace aclara_meters.view
 
         private void TappedListeners()
         {
-            turnoffmtu_ok.Tapped += TurnOffMTUOkTapped;
-            turnoffmtu_no.Tapped += TurnOffMTUNoTapped;
-            turnoffmtu_ok_close.Tapped += TurnOffMTUCloseTapped;
-            replacemeter_ok.Tapped += ReplaceMtuOkTapped;
-            replacemeter_cancel.Tapped += ReplaceMtuCancelTapped;
-            meter_ok.Tapped += MeterOkTapped;
-            meter_cancel.Tapped += MeterCancelTapped;
 
-            dialog_AddMTUAddMeter_ok.Tapped += dialog_AddMTUAddMeter_okTapped;
-            dialog_AddMTUAddMeter_cancel.Tapped += dialog_AddMTUAddMeter_cancelTapped;
+            dialogView.GetTGRElement("turnoffmtu_ok").Tapped += TurnOffMTUOkTapped;
+            dialogView.GetTGRElement("turnoffmtu_no").Tapped += TurnOffMTUNoTapped;
+            dialogView.GetTGRElement("turnoffmtu_ok_close").Tapped += dialog_cancelTapped;
+            dialogView.GetTGRElement("replacemeter_ok").Tapped += dialog_OKBasicTapped;
+            dialogView.GetTGRElement("replacemeter_cancel").Tapped += dialog_cancelTapped;
+            dialogView.GetTGRElement("meter_ok").Tapped += dialog_OKBasicTapped;
+            dialogView.GetTGRElement("meter_cancel").Tapped += dialog_cancelTapped;
+                 
 
-            dialog_AddMTUReplaceMeter_ok.Tapped += dialog_AddMTUReplaceMeter_okTapped;
-            dialog_AddMTUReplaceMeter_cancel.Tapped += dialog_AddMTUReplaceMeter_cancelTapped;
-
-            dialog_ReplaceMTUReplaceMeter_ok.Tapped += dialog_ReplaceMTUReplaceMeter_okTapped;
-            dialog_ReplaceMTUReplaceMeter_cancel.Tapped += dialog_ReplaceMTUReplaceMeter_cancelTapped;
+            menuOptions.GetListElement("navigationDrawerList").ItemTapped += OnMenuItemSelected;
 
 
-            dialog_AddMTU_ok.Tapped += dialog_AddMTU_okTapped;
-            dialog_AddMTU_cancel.Tapped += dialog_AddMTU_cancelTapped;
+            dialogView.GetTGRElement("logoff_no").Tapped += dialog_cancelTapped;
+            dialogView.GetTGRElement("logoff_ok").Tapped += LogOffOkTapped;
 
+            dialogView.GetTGRElement("dialog_AddMTUAddMeter_ok").Tapped += dialog_OKBasicTapped;
+            dialogView.GetTGRElement("dialog_AddMTUAddMeter_cancel").Tapped += dialog_cancelTapped;
+
+            dialogView.GetTGRElement("dialog_AddMTUReplaceMeter_ok").Tapped += dialog_OKBasicTapped;
+            dialogView.GetTGRElement("dialog_AddMTUReplaceMeter_cancel").Tapped += dialog_cancelTapped;
+
+            dialogView.GetTGRElement("dialog_ReplaceMTUReplaceMeter_ok").Tapped += dialog_OKBasicTapped;
+            dialogView.GetTGRElement("dialog_ReplaceMTUReplaceMeter_cancel").Tapped += dialog_cancelTapped;
+
+
+            dialogView.GetTGRElement("dialog_AddMTU_ok").Tapped += dialog_OKBasicTapped;
+            dialogView.GetTGRElement("dialog_AddMTU_cancel").Tapped += dialog_cancelTapped;
 
 
             disconnectDevice.Tapped += BluetoothPeripheralDisconnect;
             back_button.Tapped += SideMenuOpen;
-            back_button_menu.Tapped += SideMenuClose;
-            logout_button.Tapped += LogoutTapped;
+            menuOptions.GetTGRElement("back_button_menu").Tapped += SideMenuClose;
+            menuOptions.GetTGRElement("logout_button").Tapped += LogoutTapped;
             back_button_detail.Tapped += SideMenuOpen;
-            settings_button.Tapped += OpenSettingsTapped;
+            menuOptions.GetTGRElement("settings_button").Tapped += OpenSettingsTapped;
 
-            logoff_no.Tapped += LogOffNoTapped;
-            logoff_ok.Tapped += LogOffOkTapped;
-
-
+   
             if (Device.Idiom == TargetIdiom.Tablet)
             {
                 hamburger_icon_home.IsVisible = true;
@@ -523,71 +480,33 @@ namespace aclara_meters.view
 
 
         }
+        void dialog_cancelTapped(object sender, EventArgs e)
+        {
+            Label obj = (Label)sender;
+            StackLayout parent = (StackLayout)obj.Parent;
+            StackLayout dialog = (StackLayout)parent.Parent;
+            dialog.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            //Navigation.PopToRootAsync(false);
+        }
+        private void dialog_OKBasicTapped(object sender, EventArgs e)
+        {
+            Label obj = (Label)sender;
+            StackLayout parent = (StackLayout)obj.Parent;
+            StackLayout dialog = (StackLayout)parent.Parent;
+            dialog.IsVisible = false;
+            dialog_open_bg.IsVisible = false;
+            turnoff_mtu_background.IsVisible = false;
+            //this.actionType = this.actionTypeNew;
+            DoBasicRead();
 
+        }
         private void refreshBleData(object sender, EventArgs e)
         {
             DeviceList.RefreshCommand.Execute(true);
         }
-
-
-        /***
-         * 
-         *  //Dynamic battery detection when connected
-         * 
-         * 
-            try
-            {
-                battery = FormsApp.ble_interface.GetBatteryLevel();
-
-                if(battery != null)
-                {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        
-                        if(battery[0] < 101 && battery[0] > 1 )
-                        {
-                            batteryLevel.Text = battery[0].ToString() + " %";
-
-                            if (battery[0] > 75)
-                            {
-
-                                imageBattery.Source = "battery_toolbar_high";
-                                battery_level.Source = "battery_toolbar_high_white";
-                                battery_level_detail.Source = "battery_toolbar_high_white";
-                            }
-
-                            if (battery[0] > 45 && battery[0] < 75)
-                            {
-
-                                imageBattery.Source = "battery_toolbar_mid";
-                                battery_level.Source = "battery_toolbar_mid_white";
-                                battery_level_detail.Source = "battery_toolbar_mid_white";
-                            }
-
-                            if (battery[0] > 15 && battery[0] < 45)
-                            {
-
-                                imageBattery.Source = "battery_toolbar_low";
-                                battery_level.Source = "battery_toolbar_low_white";
-                                battery_level_detail.Source = "battery_toolbar_low_white";
-                            }
-
-                            if (battery[0] < 15)
-                            {
-
-                                imageBattery.Source = "battery_toolbar_empty";
-                                battery_level.Source = "battery_toolbar_empty_white";
-                                battery_level_detail.Source = "battery_toolbar_empty_white";
-                            }
-
-                        }
-                    });
-                }
-            }catch (Exception e5){
                 
-            }
-         *
-         ***/
 
         private void RefreshPuckData(bool Firtstime = false)
         {
@@ -901,8 +820,8 @@ namespace aclara_meters.view
                 block_ble.Opacity = 0;
                 block_ble.FadeTo(1, 250);
                 background_scan_page.IsVisible = false;
-                navigationDrawerList.IsEnabled = true;
-                navigationDrawerList.Opacity = 1;
+                menuOptions.GetListElement("navigationDrawerList").IsEnabled = true;
+                menuOptions.GetListElement("navigationDrawerList").Opacity = 1;
 
                 #region Disable Circular Progress bar Animations when done
 
@@ -917,8 +836,8 @@ namespace aclara_meters.view
             else
             {
                 background_scan_page_detail.IsVisible = false;
-                navigationDrawerList.Opacity = 0.65;
-                navigationDrawerList.IsEnabled = true;
+                menuOptions.GetListElement("navigationDrawerList").Opacity = 0.65;
+                menuOptions.GetListElement("navigationDrawerList").IsEnabled = true;
                 background_scan_page.IsVisible = true;
                 refresh_command.Execute(true);
                 Navigation.PopToRootAsync();
@@ -1151,7 +1070,7 @@ namespace aclara_meters.view
             if (FormsApp.config.Global.UploadPrompt)
                 await GenericUtilsClass.UploadFiles ();
 
-            dialog_logoff.IsVisible = false;
+            dialogView.OpenCloseDialog("dialog_logoff", false);
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
@@ -1167,31 +1086,7 @@ namespace aclara_meters.view
 
         }
 
-        private void LogOffNoTapped(object sender, EventArgs e)
-        {
-            dialog_logoff.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        private void ReplaceMtuCancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        private void ReplaceMtuOkTapped(object sender, EventArgs e)
-        {
-            dialog_replacemeter_one.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-            DoBasicRead();
-
-        }
-
-
-
+        
 
         private void TurnOffMTUCloseTapped(object sender, EventArgs e)
         {
@@ -1207,8 +1102,9 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
-            dialog_turnoff_one.IsVisible = false;
-            dialog_turnoff_two.IsVisible = true;
+
+            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
+            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
 
             Task.Factory.StartNew(TurnOffMethod);
         }
@@ -1237,10 +1133,11 @@ namespace aclara_meters.view
             Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    this.dialog_turnoff_text.Text = "MTU turned off Successfully";
+                    Label textResult = (Label)dialogView.FindByName("dialog_turnoff_text");
+                    textResult.Text = "MTU turned off Successfully";
 
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = true;
+                    dialogView.OpenCloseDialog("dialog_turnoff_two", false);
+                    dialogView.OpenCloseDialog("dialog_turnoff_three", true);
                 }));
         }
 
@@ -1249,101 +1146,16 @@ namespace aclara_meters.view
             Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    this.dialog_turnoff_text.Text = "MTU turned off Unsuccessfully";
+                    Label textResult = (Label)dialogView.FindByName("dialog_turnoff_text");
+                    textResult.Text = "MTU turned off Unsuccessfully";
 
-                    dialog_turnoff_two.IsVisible = false;
-                    dialog_turnoff_three.IsVisible = true;
+                    dialogView.OpenCloseDialog("dialog_turnoff_two", false);
+                    dialogView.OpenCloseDialog("dialog_turnoff_three", true);
                 }));
         }
 
-        void MeterCancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_meter_replace_one.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        void MeterOkTapped(object sender, EventArgs e)
-        {
-            dialog_meter_replace_one.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-            DoBasicRead();
-
-
-        }
-
-        void dialog_AddMTUAddMeter_cancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_AddMTUAddMeter.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        void dialog_AddMTUAddMeter_okTapped(object sender, EventArgs e)
-        {
-            dialog_AddMTUAddMeter.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-            DoBasicRead();
-
-
-        }
-
-        void dialog_AddMTUReplaceMeter_cancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_AddMTUReplaceMeter.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        void dialog_AddMTUReplaceMeter_okTapped(object sender, EventArgs e)
-        {
-            dialog_AddMTUReplaceMeter.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-            DoBasicRead();
-
-        }
-
-        void dialog_ReplaceMTUReplaceMeter_cancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        void dialog_ReplaceMTUReplaceMeter_okTapped(object sender, EventArgs e)
-        {
-            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-            DoBasicRead();
-
-
-        }
-
-        void dialog_AddMTU_cancelTapped(object sender, EventArgs e)
-        {
-            dialog_open_bg.IsVisible = false;
-            dialog_AddMTU.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-        }
-
-        void dialog_AddMTU_okTapped(object sender, EventArgs e)
-        {
-            dialog_AddMTU.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-            DoBasicRead();
-
-        }
-
+       
+     
         void BasicReadThread()
         {
             MTUComm.Action basicRead = new MTUComm.Action (
@@ -1433,13 +1245,9 @@ namespace aclara_meters.view
         {
             Device.BeginInvokeOnMainThread(() =>
             {
-                dialog_turnoff_one.IsVisible = false;
-                dialog_open_bg.IsVisible = true;
-                dialog_meter_replace_one.IsVisible = false;
-                dialog_turnoff_two.IsVisible = false;
-                dialog_turnoff_three.IsVisible = false;
-                dialog_replacemeter_one.IsVisible = false;
-                dialog_logoff.IsVisible = true;
+                dialogView.CloseDialogs();
+                dialogView.OpenCloseDialog("dialog_logoff", true);
+
                 dialog_open_bg.IsVisible = true;
                 turnoff_mtu_background.IsVisible = true;
             });
@@ -1546,7 +1354,7 @@ namespace aclara_meters.view
             }
             if (FormsApp.ble_interface.IsOpen())
             {
-                navigationDrawerList.SelectedItem = null;
+                menuOptions.GetListElement("navigationDrawerList").SelectedItem = null;
                 try
                 {
                     //var item = (PageItem)e.Item;
@@ -1600,8 +1408,6 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            navigationDrawerList.SelectedItem = null;
-
                             //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,page), false);
                             DoBasicRead();
 
@@ -1662,8 +1468,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            navigationDrawerList.SelectedItem = null;
-
+ 
                             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved,page), false);
 
                             background_scan_page.Opacity = 1;
@@ -1723,8 +1528,6 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            navigationDrawerList.SelectedItem = null;
-
                             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, page), false);
 
                             background_scan_page.Opacity = 1;
@@ -1778,22 +1581,14 @@ namespace aclara_meters.view
                         {
                             dialog_open_bg.IsVisible = true;
                             turnoff_mtu_background.IsVisible = true;
-                            dialog_turnoff_one.IsVisible = false;
-                            dialog_turnoff_two.IsVisible = false;
-                            dialog_turnoff_three.IsVisible = false;
-                            dialog_replacemeter_one.IsVisible = false;
-                            dialog_meter_replace_one.IsVisible = false;
-
-                            dialog_AddMTUAddMeter.IsVisible = false;
-                            dialog_AddMTUReplaceMeter.IsVisible = false;
-                            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
+                            dialogView.CloseDialogs();
 
                             #region Check ActionVerify
 
                             if (FormsApp.config.Global.ActionVerify)
-                                dialog_AddMTU.IsVisible = true;
+                                dialogView.GetStackLayoutElement("dialog_AddMTU").IsVisible=true;
                             else
-                                CallLoadViewAddMtu();
+                                CallLoadPage();
 
                             #endregion
 
@@ -1841,21 +1636,18 @@ namespace aclara_meters.view
                         {
                             dialog_open_bg.IsVisible = true;
                             turnoff_mtu_background.IsVisible = true;
-                            dialog_meter_replace_one.IsVisible = false;
+                            dialogView.CloseDialogs();
 
                             #region Check ActionVerify
 
                             if (FormsApp.config.Global.ActionVerify)
-                                dialog_turnoff_one.IsVisible = true;
+                                dialogView.OpenCloseDialog("dialog_turnoff_one",true);
                             else
                                 CallLoadViewTurnOff();
 
                             #endregion
 
-                            dialog_turnoff_two.IsVisible = false;
-                            dialog_turnoff_three.IsVisible = false;
-                            dialog_replacemeter_one.IsVisible = false;
-
+                           
                             background_scan_page.Opacity = 1;
                             background_scan_page_detail.Opacity = 1;
 
@@ -1898,8 +1690,6 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            navigationDrawerList.SelectedItem = null;
-
                             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewInstallConfirmation(dialogsSaved), false);
 
                             background_scan_page.Opacity = 1;
@@ -1945,17 +1735,14 @@ namespace aclara_meters.view
                         {
                             dialog_open_bg.IsVisible = true;
                             turnoff_mtu_background.IsVisible = true;
-                            dialog_meter_replace_one.IsVisible = false;
-                            dialog_turnoff_one.IsVisible = false;
-                            dialog_turnoff_two.IsVisible = false;
-                            dialog_turnoff_three.IsVisible = false;
+                            dialogView.CloseDialogs();
 
                             #region Check ActionVerify
 
                             if (FormsApp.config.Global.ActionVerify)
-                                dialog_replacemeter_one.IsVisible = true;
+                                dialogView.OpenCloseDialog("dialog_replacemeter_one",true);
                             else
-                                CallLoadViewReplaceMtu();
+                                CallLoadPage();
 
                             #endregion
 
@@ -2002,18 +1789,15 @@ namespace aclara_meters.view
                         {
                             dialog_open_bg.IsVisible = true;
                             turnoff_mtu_background.IsVisible = true;
-                            dialog_turnoff_one.IsVisible = false;
-                            dialog_turnoff_two.IsVisible = false;
-                            dialog_turnoff_three.IsVisible = false;
-                            dialog_replacemeter_one.IsVisible = false;
+                            dialogView.CloseDialogs();
 
 
                             #region Check ActionVerify
 
                             if (FormsApp.config.Global.ActionVerify)
-                                dialog_meter_replace_one.IsVisible = true;
+                                dialogView.OpenCloseDialog("dialog_meter_replace_one",true);
                             else
-                                CallLoadViewReplaceMeter();
+                                CallLoadPage();
 
                             #endregion
 
@@ -2060,18 +1844,14 @@ namespace aclara_meters.view
                         {
                             dialog_open_bg.IsVisible = true;
                             turnoff_mtu_background.IsVisible = true;
-                            dialog_turnoff_one.IsVisible = false;
-                            dialog_turnoff_two.IsVisible = false;
-                            dialog_turnoff_three.IsVisible = false;
-                            dialog_replacemeter_one.IsVisible = false;
-                            dialog_meter_replace_one.IsVisible = false;
+                            dialogView.CloseDialogs();
 
                             #region Check ActionVerify
 
                             if (FormsApp.config.Global.ActionVerify)
-                                dialog_AddMTUAddMeter.IsVisible = true;
+                                dialogView.OpenCloseDialog("dialog_AddMTUAddMeter",true);
                             else
-                                CallLoadViewAddMTUAddMeter();
+                                CallLoadPage();
 
                             #endregion
 
@@ -2118,19 +1898,14 @@ namespace aclara_meters.view
                         {
                             dialog_open_bg.IsVisible = true;
                             turnoff_mtu_background.IsVisible = true;
-                            dialog_turnoff_one.IsVisible = false;
-                            dialog_turnoff_two.IsVisible = false;
-                            dialog_turnoff_three.IsVisible = false;
-                            dialog_replacemeter_one.IsVisible = false;
-                            dialog_meter_replace_one.IsVisible = false;
-                            dialog_AddMTUAddMeter.IsVisible = false;
+                            dialogView.CloseDialogs();
 
                             #region Check ActionVerify
 
                             if (FormsApp.config.Global.ActionVerify)
-                                dialog_AddMTUReplaceMeter.IsVisible = true;
+                                dialogView.OpenCloseDialog("dialog_AddMTUReplaceMeter",true);
                             else
-                                CallLoadViewAddMTUReplaceMeter();
+                                CallLoadPage();
 
                             #endregion
 
@@ -2177,20 +1952,14 @@ namespace aclara_meters.view
                         {
                             dialog_open_bg.IsVisible = true;
                             turnoff_mtu_background.IsVisible = true;
-                            dialog_turnoff_one.IsVisible = false;
-                            dialog_turnoff_two.IsVisible = false;
-                            dialog_turnoff_three.IsVisible = false;
-                            dialog_replacemeter_one.IsVisible = false;
-                            dialog_meter_replace_one.IsVisible = false;
-                            dialog_AddMTUAddMeter.IsVisible = false;
-                            dialog_AddMTUReplaceMeter.IsVisible = false;
+                            dialogView.CloseDialogs();
 
                             #region Check ActionVerify
 
                             if (FormsApp.config.Global.ActionVerify)
-                                dialog_ReplaceMTUReplaceMeter.IsVisible = true;
+                                dialogView.OpenCloseDialog("dialog_ReplaceMTUReplaceMeter",true);
                             else
-                                CallLoadViewReplaceMTUReplaceMeter();
+                                CallLoadPage();
 
                             #endregion
 
@@ -2218,74 +1987,23 @@ namespace aclara_meters.view
 
             }
         }
-
-        private void CallLoadViewReplaceMTUReplaceMeter()
+        private void CallLoadPage()
         {
-            dialog_ReplaceMTUReplaceMeter.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
             DoBasicRead();
 
         }
-
-        private void CallLoadViewAddMTUReplaceMeter()
-        {
-            dialog_AddMTUReplaceMeter.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-            DoBasicRead();
-        }
-
-        private void CallLoadViewAddMTUAddMeter()
-        {
-
-            dialog_AddMTUAddMeter.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-            DoBasicRead();
-
-        }
-
-        private void CallLoadViewReplaceMeter()
-        {
-            dialog_meter_replace_one.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-            DoBasicRead();
-        }
-
-        private void CallLoadViewReplaceMtu()
-        {
-            dialog_replacemeter_one.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-
-            DoBasicRead();
-
-        }
-
+  
         private void CallLoadViewTurnOff()
         {
-            dialog_turnoff_one.IsVisible = false;
-            dialog_turnoff_two.IsVisible = true;
+            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
+            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
 
             Task.Factory.StartNew(TurnOffMethod);
         }
 
-        private void CallLoadViewAddMtu()
-        {
-            dialog_AddMTU.IsVisible = false;
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-
-            DoBasicRead();
-        }
-       
         private void OpenSettingsTapped(object sender, EventArgs e)
         {
             //printer.Suspend();

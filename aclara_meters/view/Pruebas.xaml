@@ -6,19 +6,33 @@
              mc:Ignorable="d"
              x:Class="aclara_meters.view.Pruebas">
     <RelativeLayout IsVisible="true">
-        <ContentView Scale="1.1" IsVisible="true" VerticalOptions="CenterAndExpand" x:Name="turnoff_mtu_background" 
+        <ContentView IsVisible="true" x:Name="background_scan_page" 
                      RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     
             Property=Width,&#xA;                                     
-            Factor=0.19}" 
+            Factor=0}" 
                      RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     
             Property=Width,&#xA;                                     
-            Factor=0.620}" 
-                     RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                    
+            Factor=1}" 
+                     RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     
             Property=Height,&#xA;                                     
-            Factor=0.4}">
-        <!--    <Frame CornerRadius="6" IsVisible="true" HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">-->
-                <StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
-                    <!--  dialog_logoff-->
+            Factor=0}" 
+                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     
+            Property=Height,&#xA;                                     
+            Factor=1}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="menu_controller_width" Width="0" />
+                </Grid.ColumnDefinitions>
+                <StackLayout Opacity="1" BackgroundColor="White" Grid.Row="0" Grid.Column="1" Margin="-6,0,0,0" Orientation="Vertical">
+                    <StackLayout BackgroundColor="White" Margin="0">
+                        <!--    <Frame CornerRadius="6" IsVisible="true" HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">-->
+                        <!--<StackLayout Margin="0,0,0,0" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand">
+                    -->
+                        <!--  dialog_logoff-->
+                        <!--
                     <Frame CornerRadius="6" IsVisible="false" HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">
                         <StackLayout x:Name="dialog_logoff" IsVisible="false" Margin="0" Opacity="1">
                             <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="Are you sure you want to Log off?">
@@ -37,7 +51,9 @@
                             </StackLayout>
                         </StackLayout>
                     </Frame>
-                    <!--  dialog_turnoff_one-->
+                    -->
+                        <!--  dialog_turnoff_one-->
+                        <!--
                     <StackLayout x:Name="dialog_turnoff_one" IsVisible="false" Margin="0" Opacity="1">
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="Are you sure you want to turn off MTU?">
                         </Label>
@@ -54,7 +70,9 @@
                             </Label>
                         </StackLayout>
                     </StackLayout>
-                    <!--  dialog_turnoff_two-->
+                    -->
+                        <!--  dialog_turnoff_two-->
+                        <!--
                     <StackLayout x:Name="dialog_turnoff_two" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" TextColor="#6aa2b8" FontSize="20" Text="Turning off MTU">
                         </Label>
@@ -63,7 +81,9 @@
                             </Label>
                         </StackLayout>
                     </StackLayout>
-                    <!--  dialog_turnoff_three-->
+                    -->
+                        <!--  dialog_turnoff_three-->
+                        <!--
                     <StackLayout x:Name="dialog_turnoff_three" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
                         <Label x:Name="dialog_turnoff_text" Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="MTU turned off Successfully">
                         </Label>
@@ -75,7 +95,9 @@
                             </Label>
                         </StackLayout>
                     </StackLayout>
-                    <!--  dialog_replacemeter_one-->
+                    -->
+                        <!--  dialog_replacemeter_one-->
+                        <!--
                     <StackLayout x:Name="dialog_replacemeter_one" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="Replace MTU and prepare for reading new MTU">
                         </Label>
@@ -92,7 +114,9 @@
                             </Label>
                         </StackLayout>
                     </StackLayout>
-                    <!--  dialog_meter_replace_one-->
+                    -->
+                        <!--  dialog_meter_replace_one-->
+                        <!--
                     <StackLayout x:Name="dialog_meter_replace_one" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="Replace Meter and prepare for reading MTU">
                         </Label>
@@ -109,7 +133,9 @@
                             </Label>
                         </StackLayout>
                     </StackLayout>
-                    <!--  dialog_AddMTUAddMeter-->
+                    -->
+                        <!--  dialog_AddMTUAddMeter-->
+                        <!--
                     <StackLayout x:Name="dialog_AddMTUAddMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="Install new MTU / Add Meter, and prepare for reading MTU">
                         </Label>
@@ -126,7 +152,9 @@
                             </Label>
                         </StackLayout>
                     </StackLayout>
-                    <!--  dialog_AddMTUReplaceMeter-->
+                    -->
+                        <!--  dialog_AddMTUReplaceMeter-->
+                        <!--
                 <Frame CornerRadius="6" IsVisible="true" HasShadow="true" OutlineColor="White" Padding="1, 1, 1, 1" Opacity="1" BackgroundColor="White">
                     <StackLayout x:Name="dialog_AddMTUReplaceMeter" IsVisible="true" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="Install new MTU / Replace Meter, and prepare for reading MTU">
@@ -145,7 +173,9 @@
                         </StackLayout>
                     </StackLayout>
                 </Frame>
-                <!--  dialog_ReplaceMTUReplaceMeter-->
+                -->
+                        <!--  dialog_ReplaceMTUReplaceMeter-->
+                        <!--
                     <StackLayout x:Name="dialog_ReplaceMTUReplaceMeter" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="Replace MTU / Replace Meter, and prepare for reading MTU">
                         </Label>
@@ -162,7 +192,9 @@
                             </Label>
                         </StackLayout>
                     </StackLayout>
-                    <!--  dialog_AddMTU-->
+                    -->
+                        <!--  dialog_AddMTU-->
+                        <!--
                     <StackLayout x:Name="dialog_AddMTU" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
                         <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="Install new MTU, and prepare for reading MTU">
                         </Label>
@@ -179,8 +211,25 @@
                             </Label>
                         </StackLayout>
                     </StackLayout>
+                </StackLayout>-->
+                        <!--  </Frame>-->
+                    </StackLayout>
+                    <StackLayout>
+                        <StackLayout IsVisible="true" HeightRequest="108" BackgroundColor="#6aa2b8">
+                            <Label x:Name="label_read" Margin="17,22,0,0" FontSize="20" TextColor="White" LineBreakMode="TailTruncation" Text="Push Button to START">
+                            </Label>
+                        </StackLayout>
+                        <StackLayout Margin="0,-174,0,20" HorizontalOptions="End">
+                            <Image IsVisible="true" IsEnabled="true" InputTransparent="false" x:Name="img_btn_ic" HeightRequest="96"
+                            Margin="0,-10,20,40" Scale="1" Source="installConfirm_btn.png" HorizontalOptions="End">
+                                <Image.GestureRecognizers>
+                                    <TapGestureRecognizer x:Name="btn_ic" NumberOfTapsRequired="1" />
+                                </Image.GestureRecognizers>
+                            </Image>
+                        </StackLayout>
+                    </StackLayout>
                 </StackLayout>
-          <!--  </Frame>-->
+            </Grid>
         </ContentView>
     </RelativeLayout>
 </ContentView>
