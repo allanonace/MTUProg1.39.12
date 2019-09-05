@@ -2713,9 +2713,7 @@ namespace MTUComm
                 throw new ODEncryptionBroadcastKeyFormatException ();
 
             // Prepares all for random number generation
-            byte[] key = new byte[ regAesKey.size    ]; // 16 bytes
-            byte[] sha = new byte[ regAesKey.sizeGet ]; // 32 bytes
-            RNGCryptoServiceProvider rng = new RNGCryptoServiceProvider ();
+            byte[] randomKey = new byte[ regAesKey.sizeGet ]; // 32 bytes
             MtuSha256 mtusha = new MtuSha256 ();
 
             // Prepares the data for the LExI commands "Loads Encryption Item"
@@ -2727,7 +2725,7 @@ namespace MTUComm
                 data4[ 0 ] = 0x04; // Broadcast Key
             }
 
-            byte[] data1 = new byte[ sha.Length + 1 ];
+            byte[] data1 = new byte[ randomKey.Length + 1 ];
             data1[ 0 ] = 0x01; // Head End Random Number
 
             byte[] data0 = new byte[ 64 + 1 ];
@@ -2750,9 +2748,8 @@ namespace MTUComm
                     int step = 1;
 
                     // Generates the random number and prepares LExI array
-                    rng.GetBytes ( key );
-                    mtusha.GenerateSHAHash ( key, out sha );
-                    Array.Copy ( sha, 0, data1, 1, sha.Length );
+                    randomKey = mtusha.RandomBytes ( randomKey.Length );
+                    Array.Copy ( randomKey, 0, data1, 1, randomKey.Length );
 
                     if ( this.mtu.BroadCast )
                     {
@@ -2781,7 +2778,7 @@ namespace MTUComm
                         null,
                         LexiAction.OperationRequest );
                     
-                    string serverRND = Convert.ToBase64String ( sha );
+                    string serverRND = Convert.ToBase64String ( randomKey );
                     
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
 
@@ -2852,9 +2849,8 @@ namespace MTUComm
                     Data.Set ( "MtuPublicKey", mtuPublicKey, true );
 
                     // Always clear temporary random key from memory
-                    Array.Clear ( key,   0, key.Length   );
-                    Array.Clear ( sha,   0, sha.Length   );
-                    Array.Clear ( data0, 0, data0.Length );
+                    Array.Clear ( randomKey, 0, randomKey.Length );
+                    Array.Clear ( data0,     0, data0.Length     );
 
                     await this.CheckIsTheSameMTU ();
 
