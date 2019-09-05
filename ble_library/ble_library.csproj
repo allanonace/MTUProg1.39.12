@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageReference Include="ble.net" Version="1.2.1" />
     <PackageReference Include="Acr.UserDialogs" Version="7.0.4" />
-    <PackageReference Include="Xamarin.Forms" Version="3.6.0.220655" />
+    <PackageReference Include="Xamarin.Forms" Version="4.2.0.709249" />
     <PackageReference Include="nexus.core" Version="0.35.0" />
     <PackageReference Include="System.IO.Ports" Version="4.5.0" />
     <PackageReference Include="Xam.Plugins.Settings" Version="3.1.1" />

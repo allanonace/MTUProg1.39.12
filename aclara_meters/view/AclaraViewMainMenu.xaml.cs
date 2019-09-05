@@ -110,11 +110,7 @@ namespace aclara_meters.view
                 background_scan_page.FadeTo(1, 250);
             }
 
-            if (Device.RuntimePlatform == Device.Android)
-            {
-                menuOptions.GetImageElement("backmenu").Scale = 1.42;
-
-            }
+        
 
             // Upload log files and then start pucks detection
             this.UploadFilesAndCheckCertificate ();
@@ -419,8 +415,8 @@ namespace aclara_meters.view
             shadoweffect.IsVisible = true;
             aclara_logo.Scale = 1.2;
             aclara_detail_logo.Scale = 1.2;
-            aclara_detail_logo.TranslationX = 42;
-            aclara_logo.TranslationX = 42;
+            //aclara_detail_logo.TranslationX = 42;
+            //aclara_logo.TranslationX = 42;
 
             shadoweffect.Source = "shadow_effect_tablet";
 

@@ -77,34 +77,34 @@
                     </StackLayout>
                 </StackLayout>
                 <StackLayout x:Name="Block_upper" IsVisible="true" Margin="-4,0,0,0" Orientation="Vertical" WidthRequest="310" HorizontalOptions="Center">
-                    <StackLayout Margin="4,-12,0,0" Orientation="Horizontal">
+                    <StackLayout Margin="4,-12,0,0" Orientation="Horizontal"  WidthRequest="216" HeightRequest="118">
                         <Image IsVisible="true" x:Name="close_menu_icon" Margin="0,0,0,0" HeightRequest="56" Scale="1" Source="back_arrow.png" HorizontalOptions="Start">
                             <Image.GestureRecognizers>
                                 <TapGestureRecognizer x:Name="back_button_menu" NumberOfTapsRequired="1" />
                             </Image.GestureRecognizers>
                         </Image>
-                        <Image x:Name="logo_tablet_aclara" WidthRequest="216" HeightRequest="128" IsEnabled="false" Margin="-32,-12,0,4" Scale="1" Opacity="1" Source="aclara_logo_menu.png">
-                        </Image>
+                        <!--<Image x:Name="logo_tablet_aclara" WidthRequest="216" HeightRequest="128" IsEnabled="false" Margin="-32,-12,0,4" Scale="1" Opacity="1" Source="aclara_logo_menu.png">
+                        </Image>-->
                     </StackLayout>
                     <StackLayout Margin="0,-40,0,0" x:Name="tablet_user_view" HorizontalOptions="Center">
                         <Label x:Name="userName" Margin="0,-12,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" FontSize="20">
                         </Label>
                     </StackLayout>
                 </StackLayout>
-                <StackLayout VerticalOptions="Start" InputTransparent="true">
-                    <StackLayout.HeightRequest>
-                        <OnPlatform x:TypeArguments="x:Double">
-                            <On Platform="iOS" Value="114" />
-                            <On Platform="Android" Value="96" />
-                        </OnPlatform>
-                    </StackLayout.HeightRequest>
-                    <Image Margin="0,0,0,0" x:Name="backmenu" Source="background_menu" Opacity="0.1" InputTransparent="true">
-                        <Image.HeightRequest>
-                            <OnPlatform x:TypeArguments="x:Double">
-                                <On Platform="iOS" Value="94" />
-                                <On Platform="Android" Value="76" />
-                            </OnPlatform>
-                        </Image.HeightRequest>
-                    </Image>
-                </StackLayout>
+    <StackLayout VerticalOptions="Start" InputTransparent="true">
+        <StackLayout.HeightRequest>
+            <OnPlatform x:TypeArguments="x:Double">
+                <On Platform="iOS" Value="114" />
+                <On Platform="Android" Value="96" />
+            </OnPlatform>
+        </StackLayout.HeightRequest>
+        <Image Margin="0,0,0,0" x:Name="backmenu" Source="background_menu.png" Opacity="0.1" InputTransparent="true">
+            <Image.HeightRequest>
+                <OnPlatform x:TypeArguments="x:Double">
+                    <On Platform="iOS" Value="94" />
+                    <On Platform="Android" Value="76" />
+                </OnPlatform>
+            </Image.HeightRequest>
+        </Image>
+    </StackLayout>
 </RelativeLayout>

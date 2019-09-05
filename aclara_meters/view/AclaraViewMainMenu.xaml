@@ -27,7 +27,7 @@
                         <StackLayout Margin="0,0,0,0">
                             <StackLayout Margin="0,0,0,0" HeightRequest="92" BackgroundColor="#6aa2b8">
                                 <StackLayout Orientation="Horizontal">
-                                    <StackLayout Margin="0,0,0,0" Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                    <StackLayout Margin="0,0,0,0" Orientation="Horizontal" HorizontalOptions="Start">
                                         <Image x:Name="hamburger_icon_detail" Margin="4,24,0,0" HeightRequest="56" Scale="1" Source="hamburger_icon.png" HorizontalOptions="Start">
                                             <Image.GestureRecognizers>
                                                 <TapGestureRecognizer x:Name="back_button_detail" NumberOfTapsRequired="1" />
@@ -39,11 +39,15 @@
                                             </Image.GestureRecognizers>
                                         </Image>
                                     </StackLayout>
-                                    <StackLayout Margin="-20,34,-20,-44" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
-                                        <Image x:Name="aclara_detail_logo" Scale="1" WidthRequest="256" HeightRequest="128" IsEnabled="false" Margin="0,-64,0,0" Source="aclara_logo_menu.png">
+                                    <StackLayout   Margin="0,24,0,0" HorizontalOptions="CenterAndExpand"  Orientation="Vertical">
+                                        <Image x:Name="aclara_detail_logo" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" Scale="1" WidthRequest="149" HeightRequest="35" IsEnabled="false" Source="logo.png">
                                         </Image>
                                     </StackLayout>
-                                    <StackLayout Margin="0,24,10,0" Orientation="Horizontal" HorizontalOptions="EndAndExpand">
+                                    <!--<StackLayout Margin="-20,34,-20,-44" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+                                        <Image x:Name="aclara_detail_logo" Scale="1" WidthRequest="256" HeightRequest="128" IsEnabled="false" Margin="0,-64,0,0" Source="aclara_logo_menu.png">
+                                        </Image>
+                                    </StackLayout>-->
+                                    <StackLayout Margin="0,24,10,0" Orientation="Horizontal" HorizontalOptions="End">
                                         <Image x:Name="battery_level_detail" Margin="0,4,0,0" HeightRequest="32" WidthRequest="32" Scale="1" Source="battery_toolbar_high_white.png">
                                         </Image>
                                         <Image x:Name="rssi_level_detail" Margin="6,4,0,0" HeightRequest="20" WidthRequest="20" Scale="1" Source="rssi_toolbar_high_white.png">
@@ -126,24 +130,28 @@
                     <StackLayout BackgroundColor="White" Margin="0">
                         <StackLayout Margin="0,0,0,0">
                             <StackLayout Margin="0,0,0,0" HeightRequest="92" BackgroundColor="#6aa2b8">
-                                <StackLayout Orientation="Horizontal">
-                                    <StackLayout Margin="0,0,0,0" Orientation="Horizontal" HorizontalOptions="StartAndExpand">
+                                <StackLayout Orientation="Horizontal" >
+                                    <StackLayout Margin="0,0,0,0" Orientation="Horizontal" HorizontalOptions="Start">
                                         <Image x:Name="hamburger_icon" Margin="4,24,0,0" HeightRequest="56" Scale="1" Source="hamburger_icon.png" HorizontalOptions="Start">
                                             <Image.GestureRecognizers>
                                                 <TapGestureRecognizer x:Name="back_button" NumberOfTapsRequired="1" />
                                             </Image.GestureRecognizers>
                                         </Image>
-                                        <Image x:Name="hamburger_icon_home" IsVisible="false" Margin="4,24,0,0" HeightRequest="56" WidthRequest="1" Scale="1" Source="back_menu_puck.png" HorizontalOptions="Start">
+                                        <Image x:Name="hamburger_icon_home" IsVisible="true" Margin="4,24,0,0" HeightRequest="56" WidthRequest="1" Scale="1" Source="back_menu_puck.png" HorizontalOptions="Start">
                                             <Image.GestureRecognizers>
                                                 <TapGestureRecognizer x:Name="back_button_home" NumberOfTapsRequired="1" />
                                             </Image.GestureRecognizers>
                                         </Image>
                                     </StackLayout>
-                                    <StackLayout Margin="-20,34,-20,-44" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
-                                        <Image x:Name="aclara_logo" Scale="1" WidthRequest="256" HeightRequest="128" IsEnabled="false" Margin="0,-64,0,0" Source="aclara_logo_menu.png">
+                                    <StackLayout Margin="0,24,0,0"  HorizontalOptions="CenterAndExpand" Orientation="Vertical">
+                                        <Image x:Name="aclara_logo" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" Scale="1" WidthRequest="149" HeightRequest="35" IsEnabled="false" Source="logo.png">
                                         </Image>
                                     </StackLayout>
-                                    <StackLayout Margin="0,24,10,0" Opacity="1" Orientation="Horizontal" HorizontalOptions="EndAndExpand">
+                                    <!--<StackLayout Margin="-20,34,-20,-44" Orientation="Horizontal" HorizontalOptions="CenterAndExpand">
+                                        <Image x:Name="aclara_logo" Scale="1" WidthRequest="256" HeightRequest="128" IsEnabled="false" Margin="0,-64,0,0" Source="aclara_logo_menu.png">
+                                        </Image>
+                                    </StackLayout>-->
+                                    <StackLayout Margin="0,24,10,0" Opacity="1" Orientation="Horizontal" HorizontalOptions="End">
                                         <Image Margin="8,4,0,0" HeightRequest="56" Scale="1" Opacity="0.95" Source="refreshsignal.png">
                                             <Image.GestureRecognizers>
                                                 <TapGestureRecognizer x:Name="refresh_signal" NumberOfTapsRequired="1" />
@@ -187,15 +195,16 @@
         <Image Source="shadoweffect" Margin="298,0,0,0" Opacity="0.75" IsVisible="false" WidthRequest="29" HeightRequest="1024" x:Name="shadoweffect">
         </Image>
         <!--  backdark_bg  -->
-        <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Gray" HeightRequest="1024" Margin="0,92,0,0" IsVisible="true" WidthRequest="1500" Opacity="0.6">
+        <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Gray" HeightRequest="1024" Margin="0,92,0,0" IsVisible="false" WidthRequest="1500" Opacity="0.6">
         </StackLayout>
   
         <!--  indicator -->
         <StackLayout InputTransparent="true" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=1}" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Width,&#xA;                                 Factor=1}">
-            <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+            <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="false" IsRunning="true" Scale="2" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
         </StackLayout>
         <!-- Menu desplegable ContentNav   -->
-        <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" IsVisible="false" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=1}">
+        <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" IsVisible="true" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,Property=Height,Factor=0}"
+                     RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Height, Factor=1}">
             <views:MenuView x:Name="MenuOptions" />
         </ContentView>
         <!--  DIALOGOS -->

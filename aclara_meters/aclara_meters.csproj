@@ -21,7 +21,7 @@
     <DefineConstants>TRACE;RELEASE;NETSTANDARD;NETSTANDARD2_0</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Xamarin.Forms" Version="3.6.0.344457" />
+    <PackageReference Include="Xamarin.Forms" Version="4.2.0.709249" />
     <PackageReference Include="Xamarin.CustomControls.AccordionView" Version="1.1.6" />
     <PackageReference Include="Xamarin.CustomControls.StateButton" Version="1.1.0" />
     <PackageReference Include="Refractored.MvvmHelpers" Version="1.3.2.47-beta" />

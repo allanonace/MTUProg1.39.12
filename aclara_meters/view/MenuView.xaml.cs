@@ -41,6 +41,11 @@ namespace aclara_meters.view
                     Device.BeginInvokeOnMainThread(LoadPhoneUI);
                 });
             }
+            if (Device.RuntimePlatform == Device.Android)
+            {
+               backmenu.Scale = 1.42;
+
+            }
         }
 
         public TapGestureRecognizer GetTGRElement(string buttonName)
@@ -112,29 +117,22 @@ namespace aclara_meters.view
 
         private void LoadPhoneUI()
         {
-            //  background_scan_page.Margin = new Thickness(0, 0, 0, 0);
+        
             close_menu_icon.Opacity = 1;
-            //  hamburger_icon.IsVisible = true;
-            tablet_user_view.TranslationY = 0;
+           
+            tablet_user_view.TranslationY = -22;
             tablet_user_view.Scale = 1;
-            logo_tablet_aclara.Opacity = 1;
+           
         }
 
         private void LoadTabletUI()
         {
-            //  ContentNav.IsVisible = true;
-            //   background_scan_page.Opacity = 1;
+          
             close_menu_icon.Opacity = 0;
-            //   hamburger_icon.IsVisible = true;
-            //    background_scan_page.Margin = new Thickness(310, 0, 0, 0);
+      
             tablet_user_view.TranslationY = -22;
             tablet_user_view.Scale = 1.2;
-            logo_tablet_aclara.Opacity = 0;
-            //     shadoweffect.IsVisible = true;
-            //     aclara_logo.Scale = 1.2;
-            //    aclara_logo.TranslationX = 42;
-            //      aclara_logo.TranslationX = 42;
-            //      shadoweffect.Source = "shadow_effect_tablet";
+         
         }
         
     }
