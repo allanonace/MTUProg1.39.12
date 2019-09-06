@@ -50,10 +50,12 @@ namespace aclara_meters.iOS
             }
         
             base.OnElementPropertyChanged ( sender, e );
-
-            Control.Layer.BorderWidth = 0;
-            Control.BorderStyle       = UITextBorderStyle.None;
-            //Control.TextAlignment     = ( alignRight ) ? UITextAlignment.Right : UITextAlignment.Left;
+            if (Control != null)
+            {
+                Control.Layer.BorderWidth = 0;
+                Control.BorderStyle = UITextBorderStyle.None;
+                //Control.TextAlignment     = ( alignRight ) ? UITextAlignment.Right : UITextAlignment.Left;
+            }
         }
     }
 }

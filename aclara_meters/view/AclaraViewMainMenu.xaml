@@ -27,7 +27,7 @@
                         <StackLayout Margin="0,0,0,0">
                             <StackLayout Margin="0,0,0,0" HeightRequest="92" BackgroundColor="#6aa2b8">
                                 <StackLayout Orientation="Horizontal">
-                                    <StackLayout Margin="0,0,0,0" Orientation="Horizontal" HorizontalOptions="Start">
+                                    <StackLayout Margin="0,0,0,0" WidthRequest="60" Orientation="Horizontal" HorizontalOptions="Start">
                                         <Image x:Name="hamburger_icon_detail" Margin="4,24,0,0" HeightRequest="56" Scale="1" Source="hamburger_icon.png" HorizontalOptions="Start">
                                             <Image.GestureRecognizers>
                                                 <TapGestureRecognizer x:Name="back_button_detail" NumberOfTapsRequired="1" />
@@ -131,7 +131,7 @@
                         <StackLayout Margin="0,0,0,0">
                             <StackLayout Margin="0,0,0,0" HeightRequest="92" BackgroundColor="#6aa2b8">
                                 <StackLayout Orientation="Horizontal" >
-                                    <StackLayout Margin="0,0,0,0" Orientation="Horizontal" HorizontalOptions="Start">
+                                    <StackLayout Margin="0,0,0,0" WidthRequest="60" Orientation="Horizontal" HorizontalOptions="Start">
                                         <Image x:Name="hamburger_icon" Margin="4,24,0,0" HeightRequest="56" Scale="1" Source="hamburger_icon.png" HorizontalOptions="Start">
                                             <Image.GestureRecognizers>
                                                 <TapGestureRecognizer x:Name="back_button" NumberOfTapsRequired="1" />

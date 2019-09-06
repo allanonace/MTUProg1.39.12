@@ -47,9 +47,9 @@
                         <StackLayout Margin="0,0,0,0">
                             <Grid Margin="0,0,0,0" HeightRequest="48">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*">
+                                    <ColumnDefinition Width="auto">
                                     </ColumnDefinition>
-                                    <ColumnDefinition Width="*">
+                                    <ColumnDefinition Width="auto">
                                     </ColumnDefinition>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
@@ -59,7 +59,7 @@
                                 <Label WidthRequest="100" HeightRequest="46" x:Name="port1label" Margin="0,0,0,0" Grid.Column="0" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="22"
                                     TextColor="#6aa2b8" Opacity="1">
                                 </Label>
-                                <Label x:Name="misclabel" HeightRequest="46" Margin="0,0,0,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19" TextColor="#6aa2b8"
+                                <Label x:Name="misclabel" HeightRequest="46" Margin="0,0,10,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="EndAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19" TextColor="#6aa2b8"
                                     Opacity="0.5">
                                 </Label>
                             </Grid>

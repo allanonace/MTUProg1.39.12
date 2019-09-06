@@ -377,18 +377,12 @@ namespace aclara_meters.view
         {
             background_scan_page.Margin = new Thickness(0, 0, 0, 0);
             background_scan_page_detail.Margin = new Thickness(0, 0, 0, 0);
-         //   close_menu_icon.Opacity = 1;
+ 
             hamburger_icon.IsVisible = true;
             hamburger_icon_detail.IsVisible = true;
             aclara_detail_logo.IsVisible = true;
             aclara_logo.IsVisible = true;
-         //   tablet_user_view.TranslationY = 0;
-         //   tablet_user_view.Scale = 1;
-            aclara_logo.IsVisible = true;
-         //   logo_tablet_aclara.Opacity = 0;
-            aclara_detail_logo.IsVisible = true;
-         //   tablet_user_view.TranslationY = -22;
-         //   tablet_user_view.Scale = 1.2;
+
             ContentNav.TranslationX = -310;
             shadoweffect.TranslationX = -310;
             ContentNav.IsVisible = true;

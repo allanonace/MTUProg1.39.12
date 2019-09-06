@@ -120,8 +120,8 @@ namespace aclara_meters.view
         
             close_menu_icon.Opacity = 1;
            
-            tablet_user_view.TranslationY = -22;
-            tablet_user_view.Scale = 1;
+            //tablet_user_view.TranslationY = -22;
+            userName.Scale = 1;
            
         }
 
@@ -130,8 +130,8 @@ namespace aclara_meters.view
           
             close_menu_icon.Opacity = 0;
       
-            tablet_user_view.TranslationY = -22;
-            tablet_user_view.Scale = 1.2;
+           //tablet_user_view.TranslationY = -22;
+           userName.Scale = 1.2;
          
         }
         

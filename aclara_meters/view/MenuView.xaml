@@ -19,7 +19,7 @@
                 <Image x:Name="efecto1" Margin="310,0,0,0" Opacity="0" WidthRequest="1" HeightRequest="2048" BackgroundColor="Black" HorizontalOptions="EndAndExpand">
                 </Image>
 
-                <StackLayout VerticalOptions="EndAndExpand" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,																			 
+    <StackLayout BackgroundColor="#6aa2b8" VerticalOptions="EndAndExpand" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,																			 
                     Property=Height,
                     Factor=0}" 
                              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,
@@ -77,7 +77,7 @@
                     </StackLayout>
                 </StackLayout>
                 <StackLayout x:Name="Block_upper" IsVisible="true" Margin="-4,0,0,0" Orientation="Vertical" WidthRequest="310" HorizontalOptions="Center">
-                    <StackLayout Margin="4,-12,0,0" Orientation="Horizontal"  WidthRequest="216" HeightRequest="118">
+                    <StackLayout  Margin="4,-12,0,0" Orientation="Horizontal"  WidthRequest="216" HeightRequest="118">
                         <Image IsVisible="true" x:Name="close_menu_icon" Margin="0,0,0,0" HeightRequest="56" Scale="1" Source="back_arrow.png" HorizontalOptions="Start">
                             <Image.GestureRecognizers>
                                 <TapGestureRecognizer x:Name="back_button_menu" NumberOfTapsRequired="1" />
@@ -85,12 +85,16 @@
                         </Image>
                         <!--<Image x:Name="logo_tablet_aclara" WidthRequest="216" HeightRequest="128" IsEnabled="false" Margin="-32,-12,0,4" Scale="1" Opacity="1" Source="aclara_logo_menu.png">
                         </Image>-->
-                    </StackLayout>
-                    <StackLayout Margin="0,-40,0,0" x:Name="tablet_user_view" HorizontalOptions="Center">
-                        <Label x:Name="userName" Margin="0,-12,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" FontSize="20">
+                        
+                        <Label x:Name="userName" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" FontSize="20">
                         </Label>
+
                     </StackLayout>
-                </StackLayout>
+        <!--<StackLayout Margin="0,-40,0,0" x:Name="tablet_user_view" HorizontalOptions="Center">
+            <Label x:Name="userName" Margin="0,-12,0,0" TextColor="White" HorizontalTextAlignment="Center" InputTransparent="true" Text="Username" FontSize="20">
+            </Label>
+        </StackLayout>-->
+    </StackLayout>
     <StackLayout VerticalOptions="Start" InputTransparent="true">
         <StackLayout.HeightRequest>
             <OnPlatform x:TypeArguments="x:Double">
