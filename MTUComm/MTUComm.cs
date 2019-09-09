@@ -533,7 +533,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Data Read
+        #region Historical Read ( previously Data Read )
 
         /// <summary>
         /// In scripted mode this method overload is called before the main method,
@@ -803,7 +803,7 @@ namespace MTUComm
 
         #endregion
 
-        #region RFCheck
+        #region RFCheck ( previously Install Confirmation )
 
         /// <summary>
         /// This method is called only executing the Installation Confirmation action but
@@ -922,7 +922,7 @@ namespace MTUComm
                     return IC_EXCEPTION;
                 }
             
-                // Retry action ( three times = first plus two replies )
+                // Retry action
                 if ( ++time < global.TimeSyncCountRepeat )
                 {
                     await Task.Delay ( WAIT_BTW_IC );
@@ -988,9 +988,10 @@ namespace MTUComm
             // List of all nodes detected for each attempt performed
             NodeDiscoveryList nodeList = new NodeDiscoveryList ( NodeType.DCUsOnly );
             NodeDiscoveryResult result = NodeDiscoveryResult.NOT_ACHIEVED;
-            double  vswr        = -1;
-            decimal finalProbF1 = 0m;
-            decimal finalProbF2 = 0m;
+            double  vswr          = -1;
+            decimal successF1     = 0m;
+            decimal successF2     = 0m;
+            Stopwatch nodeCounter = null;
 
             try
             {
@@ -1009,13 +1010,15 @@ namespace MTUComm
                 vswr = Utils.GetNumericValueFromBytes<double> ( fullResponse.Response, 2, 2 );
 
                 // Node Discovery ( Initiation + Start/Reset + Get Nodes )
-                float     maxTimeND   = this.global.MaxTimeRFCheck * 1000;
-                Stopwatch nodeCounter = new Stopwatch ();
+                float maxTimeND = this.global.MaxTimeRFCheck * 1000;
+                nodeCounter     = new Stopwatch ();
                 nodeCounter.Start ();
 
                 while ( true )
                 {
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery... Step 1" ) );
+                    #region Step 1 - Init
+
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery... Init" ) );
                 
                     // Node discovery initiation command
                     byte[] data = new byte[ 8 ]; // 1+4+1+1+1
@@ -1040,18 +1043,21 @@ namespace MTUComm
                             ( CMD_INIT_NODE_DISC_RES, CMD_BYTE_RES, CMD_INIT_NODE_DISC_INI )  // Node discovery initiated
                         } ),
                         LexiAction.OperationRequest );
+                    
+                    #endregion
 
                     // Node discovery mode NOT initiated in the MTU
                     if ( fullResponse.Response[ CMD_BYTE_RES ] != CMD_INIT_NODE_DISC_INI )
                     {
                         Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotInitializedException () );
+                        goto BREAK_FAIL;
                     }
                     // Node discovery mode successfully initiated in the MTU
                     else
                     {
-                        #region Detection
+                        #region Step 2 - Start/Reset
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery... Step 2" ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery... Start/Reset" ) );
 
                         // Start/Reset node discovery response query
                         bool lexiTimeOut;
@@ -1089,7 +1095,7 @@ namespace MTUComm
                         }
                         while ( ( lexiTimeOut ||
                                   fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_DISC_NOT ) &&
-                                ! ( timeOut = nodeCounter.ElapsedMilliseconds > maxTimeND ) );
+                                ! ( timeOut = nodeCounter.ElapsedMilliseconds >= maxTimeND ) );
                         
                         // Node discovery mode not started/ready for query
                         if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_DISC_NOT &&
@@ -1099,7 +1105,11 @@ namespace MTUComm
                             goto BREAK_FAIL;
                         }
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery... Step 3" ) );
+                        #endregion
+
+                        #region Step 3 - Get Next
+
+                        OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery... Get Next" ) );
 
                         await Task.Delay ( WAIT_BEFORE_GET_NODES );
 
@@ -1131,7 +1141,7 @@ namespace MTUComm
                             {
                                 // Finish because it is not own exception
                                 if ( ! Errors.IsOwnException ( e ) )
-                                    throw new Exception (); // In the catch block it is changed for PuckCantCommWithMtuException
+                                    throw new PuckCantCommWithMtuException ();
 
                                 // Finish without perform the action
                                 else if ( ++countAttemptsEr >= maxAttemptsEr )
@@ -1160,7 +1170,7 @@ namespace MTUComm
                                 // Wait a bit and try to read/recover the next node
                                 case NodeDiscoveryQueryResult.NextRead:
                                     OnProgress ( this, new Delegates.ProgressArgs ( 
-                                        "Requesting nodes... " + queryResult.Index + "/" + nodeList.TotalEntries ) );
+                                        "Requesting nodes... " + queryResult.Index + "/" + nodeList.CurrentAttemptTotalEntries ) );
                                     
                                     await Task.Delay ( WAIT_BTW_NODES );
                                     break;
@@ -1179,22 +1189,20 @@ namespace MTUComm
 
                         #region Validation
 
-                        bool    first           = true;
                         bool    isF1;
-                        decimal prob            = 0m;
-                        decimal acumProbF1      = 1m;
-                        decimal acumProbF2      = 1m;
-                        int     maxRSSIResponse = -150;
+                        bool    first           = true;
+                        int     bestRssiResponse = -150;
                         string  freq1wayStr     = await map.Frequency1Way  .GetValue ();
                         string  freq2wayTxStr   = await map.Frequency2WayTx.GetValue ();
                         // NOTE: Parsing to double is important to take into account the separator symbol ( . or , ),
                         // NOTE: because parse "123,456" returns "123456" and use CultureInfo.InvariantCulture is not an universal solution
                         CultureInfo usCulture   = new CultureInfo("en-US");
-                        double  freq1way        = double.Parse ( freq1wayStr  .Replace ( ',', '.' ), usCulture.NumberFormat );
-                        double  freq2wayTx      = double.Parse ( freq2wayTxStr.Replace ( ',', '.' ), usCulture.NumberFormat );
-                        foreach ( NodeDiscovery node in nodeList.LastAttemptEntries )
+                        double  freq1           = double.Parse ( freq1wayStr  .Replace ( ',', '.' ), usCulture.NumberFormat );
+                        double  freq2           = double.Parse ( freq2wayTxStr.Replace ( ',', '.' ), usCulture.NumberFormat );
+                        foreach ( NodeDiscovery node in nodeList.CurrentAttemptEntries )
                         {
-                            // The first entry is general information
+                            // The first entry is only a LExI response
+                            // with general information of the process
                             if ( first )
                             {
                                 first = false;
@@ -1203,85 +1211,64 @@ namespace MTUComm
                         
                             // Channel / Frequency
                             // NOTE: In the custom methods Frequency1Way_Get and Frequency2WayTx_Get the value returned is trimmed to three decimal digits
-                            // NOTE: In the values ​​read from the MTU, the decimal point is converted to ".", because if not, parsing to double will be treated as integers
                             double freq = double.Parse ( ( ( node.FreqChannelRequest * 6250 + 450000000 ) / 1000000.0 ).ToString ( "F3" ) );
-                            if ( ! ( isF1 = freq.Equals ( freq1way ) ) &&
-                                 ! freq.Equals ( freq2wayTx ) )
+                            if ( ! ( isF1 = freq.Equals ( freq1 ) ) &&
+                                 ! freq.Equals ( freq2 ) )
                                 continue;
 
-                            node.SetAsValidated ();
-
-                            // Calculates the probability based on the signal strength
-                            // Probability value is normalized [0,1] where 1 is 100%
+                            node.SetAsValidated ( isF1 );
 
                             // Document "RF_Connectivity_Test.docx"
                             // F1 Reliability estimate ( Page 14 )
-                            // · P( packet transmitted by the MTU on F1 is received by any DCU ) = P( MTU TX Success )
-                            //   · P( packet transmitted by the MTU on F1 is received by DCU_1 ) = f_rssi( RSSI_1 )
-                            //   · P( packet transmitted by the MTU on F1 is received by DCU_2 ) = f_rssi( RSSI_2 )
-                            //   · P( packet transmitted by the MTU on F1 is received by DCU_N ) = f_rssi( RSSI_N )
+                            // · The F1 Reliability Estimate is a calculation of the probability that a single
+                            //   packet transmitted by the MTU will be received by at least one DCU on the F1 frequency
+                            // · MTU -> DCU
+                            //   · P( packet transmitted by the MTU on F1 is received by any DCU ) = P( MTU TX Success )
+                            //     · P( packet transmitted by the MTU on F1 is received by DCU_1 ) = f_rssi( RSSI_1 )
+                            //     · P( packet transmitted by the MTU on F1 is received by DCU_2 ) = f_rssi( RSSI_2 )
+                            //     · P( packet transmitted by the MTU on F1 is received by DCU_N ) = f_rssi( RSSI_N )
                             //   · P( MTU TX Success ) = 100% - ( 100% - f_rssi( RSSI_1 ) ) * ( 100% - f_rssi( RSSI_2 ) ) * ... * ( 100% - f_rssi( RSSI_N ) )
                             // F2 Reliability estimate ( Page 17 )
-                            // · P( packet sent by the DCU with the strongest RSSI on F2 is received by the MTU ) = P( DCU TX Success )
-                            //   · P( DCU TX Success ) = f_rssi ( RSSI_Best_DCU )
-                            // · P( packet transmitted by the MTU on F2 is received by any DCU ) = P( MTU TX Success )
-                            //   · P( packet transmitted by the MTU on F2 is received by DCU_1 ) = f_rssi( RSSI_1 )
-                            //   · P( packet transmitted by the MTU on F2 is received by DCU_2 ) = f_rssi( RSSI_2 )
-                            //   · P( packet transmitted by the MTU on F2 is received by DCU_N ) = f_rssi( RSSI_N )
+                            // · DCU -> MTU
+                            //   · P( packet sent by the DCU with the strongest RSSI on F2 is received by the MTU ) = P( DCU TX Success )
+                            //     · P( DCU TX Success ) = f_rssi ( RSSI_Best_DCU )
+                            // · MTU -> DCU
+                            //   · P( packet transmitted by the MTU on F2 is received by any DCU ) = P( MTU TX Success )
+                            //     · P( packet transmitted by the MTU on F2 is received by DCU_1 ) = f_rssi( RSSI_1 )
+                            //     · P( packet transmitted by the MTU on F2 is received by DCU_2 ) = f_rssi( RSSI_2 )
+                            //     · P( packet transmitted by the MTU on F2 is received by DCU_N ) = f_rssi( RSSI_N )
                             //   · P( MTU TX Success ) = 100% - ( 100% - f_rssi( RSSI_1 ) ) * ( 100% - f_rssi( RSSI_2 ) ) * ... * ( 100% - f_rssi( RSSI_N ) )
                             // · P( two way transaction is successful ) = P( TWO WAY )
-                            //   · P( TWO WAY ) = 100% - { 100% - [ P( DCU TX Success ) * P( MTU TX Success ) ] } ^ 3
+                            //   · P( TWO WAY ) = 100% - { 100% - [ P( DCU TX Success ) * P( MTU TX Success ) ] }^3
 
-                            // Example..
-                            // RSSI  -45 = Prob 1     -> 1 - 1     = 0     -> It forces "acumProbFx" to be zero = no penalty
-                            // RSSI  -90 = Prob 0.884 -> 1 - 0.884 = 0.116
-                            // RSSI -116 = Prob 0     -> 1 - 0     = 1
-                            prob = 1 - nodeList.GetProbability ( node.RSSIRequest ); // 100% - f_rssi( RSSI_N )
-
-                            // Channel F1
-                            if ( isF1 )
-                            {
-                                // P( packet transmitted by the MTU on F1 is received by DCU_N )
-                                acumProbF1 *= prob;
-                            }
-                            // Channel F2
-                            else
-                            {
-                                // P( packet transmitted by the MTU on F2 is received by DCU_N )
-                                acumProbF2 *= prob;
-
-                                // Highest signal strength validated for F2
-                                if ( node.RSSIResponse > maxRSSIResponse )
-                                    maxRSSIResponse = node.RSSIResponse;
-                            }
+                            // Highest signal strength ( DCU -> MTU )
+                            if ( ! isF1 &&
+                                 node.RSSIResponse > bestRssiResponse )
+                                bestRssiResponse = node.RSSIResponse;
                         }
 
-                        // P( MTU TX Success )
-                        finalProbF1 = 1 - acumProbF1;
-                        finalProbF2 = 1 - acumProbF2;
+                        // Calculate validation success using the average RSSI for each DCU
+                        successF1 = nodeList.CalculateMtuSuccess ( true );
+                        successF2 = nodeList.CalculateTwoWaySuccess ( bestRssiResponse );
 
-                        // P( DCU TX Success )
-                        prob = nodeList.GetProbability ( maxRSSIResponse );
-
-                        // P( TWO WAY )
-                        // NOTE: Math.Pow works with double, not decimal
-                        decimal precalc = 1 - prob * finalProbF2;
-                        finalProbF2     = 1 - precalc * precalc * precalc;
-                        
-                        // Excellent
+                        // Number of nodes validated so far, those discovered in any iteration
                         int numNodesValidated = nodeList.CountUniqueNodesValidated;
+
+                        // Excellent
                         if ( numNodesValidated >= global.GoodNumDCU &&
-                             finalProbF1 >= global.GoodF1Rely/100 &&
-                             finalProbF2 >= global.GoodF2Rely/100 )
+                             successF1 >= global.GoodF1Rely/100 &&
+                             successF2 >= global.GoodF2Rely/100 )
                             result = NodeDiscoveryResult.EXCELLENT;
                         
                         // Minimum
                         else if ( numNodesValidated >= global.MinNumDCU &&
-                                  finalProbF1 >= global.MinF1Rely/100 &&
-                                  finalProbF2 >= global.MinF2Rely/100 )
+                                  successF1 >= global.MinF1Rely/100 &&
+                                  successF2 >= global.MinF2Rely/100 )
                             result = NodeDiscoveryResult.GOOD;
 
-                        break; // Exit from infinite while
+                        // Finish process only if the result is excellent or time is over
+                        if ( result == NodeDiscoveryResult.EXCELLENT )
+                            break; // Exit from infinite while
 
                         #endregion
                     }
@@ -1289,9 +1276,12 @@ namespace MTUComm
                     BREAK_FAIL:
 
                     // The max time to perform Node Discovery process has expired
-                    if ( nodeCounter.ElapsedMilliseconds > maxTimeND )
+                    if ( nodeCounter.ElapsedMilliseconds >= maxTimeND )
                     {
-                        result = NodeDiscoveryResult.NOT_ACHIEVED;
+                        // Finish process only if the result is excellent or time is over,
+                        // and it can end after consuming all time but with "good" as result
+                        if ( result > NodeDiscoveryResult.EXCELLENT )
+                            result = NodeDiscoveryResult.NOT_ACHIEVED;
 
                         break; // Exit from infinite while
                     }
@@ -1299,15 +1289,159 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNowAndContinue ( e );
                 
                 result = NodeDiscoveryResult.EXCEPTION;
             }
+            finally
+            {
+                if ( nodeCounter != null )
+                {
+                    nodeCounter.Stop ();
+                    nodeCounter = null;
+                }
+            }
 
+            // Generates entries for activity log and nodes log file
             await this.OnNodeDiscovery (
-                new Delegates.ActionArgs ( this.mtu, map, result, nodeList, finalProbF1, finalProbF2, vswr ) );
+                new Delegates.ActionArgs ( this.mtu, map, result, nodeList, successF1, successF2, vswr ) );
 
             return result;
+        }
+
+        #endregion
+
+        #region Valve Operation ( previously Remote Disconnect )
+
+        private void RemoteDisconnect ()
+        {
+            // TODO: Crear clase RDDResult a la que pasar la respuesta del LExI write ( fullResponse.Response )
+            // TODO: Crear todas las constantes necesarias para la lógica
+            // TODO: Terminar de implementar el pseudocodigo
+            // TODO: Añadir una nueva accion a la lista de posibles
+
+            /*
+            Aclara:
+            - STAR Programmer MtuComm.cs Line 833
+            - Lexi Mtu.cs Line 1268 -> Y61063 Page 52 Request RDD Action
+            - Lexi Mtu.cs Line 1283 -> Y61063 Page 53 Request RDD Status
+
+            try
+            {
+                Stopwatch nodeCounter = null;
+
+                if ( Port1|2.type == "SETFLOW" )
+                {
+                    // Reads RDD Status
+                    int status = -1;
+                    MemoryRegister<int> rddStatus = map.RddStatus;
+
+                    Action CheckStatus = (() =>
+                    {
+                        for ( int i = 0; i < RDD_MAX_ATTEMPS; i++ )
+                        {
+                            status = await rddStatus.GetValueFromMtu ();
+                            switch ( status )
+                            {
+                                case RDD_DISABLED: // 0
+                                await Task.Delay ( WAIT_RDD_DISABLED ); // 5000
+                                message = "The RDD is disabled";
+                                goto END_LOOP;
+
+                                case RDD_BUSY: // 1
+                                await Task.Delay ( WAIT_RDD_BUSY ); // 1000
+                                message = "Remote Disconnect..." + ( ( i > 0 ) ? " Attempt " + ( i + 1 ) : string.Empty );
+                                continue;
+
+                                case RDD_ERROR: // 2
+                                case RDD_IDLE: // 3
+                                goto END_LOOP;
+                            }
+                        }
+
+                        END_LOOP:
+
+                        // The RDD Meter is not configured/installed
+                        if ( status == RDD_DISABLED )
+                            throw new Exception ();
+                    });
+
+                    // Checks current status
+                    CheckStatus ();
+
+                    // Request an action to the RDD 
+                    await this.lexi.Write (
+                        CMD_REQUEST_RDD, // 0x21
+                        new byte[] { Data.RddActionType }, // 1 Close, 2 Open, 3 Partial Open
+                        N_ATTEMPTS_CMD,
+                        WAIT_BTW_ATTEMPTS_CMD,
+                        null,
+                        null,
+                        LexiAction.OperationRequest );
+                    
+                    // Checks status after launsh the LExI command
+                    CheckStatus ();
+
+                    // Waits until the status of the RDD changes
+                    bool lexiTimeOut;
+                    bool timeOut = false;
+                    nodeCounter  = new Stopwatch ();
+                    nodeCounter.Start ();
+                    do
+                    {
+                        await Task.Delay ( WAIT_BEFORE_RDD_STATUS );
+                        
+                        lexiTimeOut = true;
+                        
+                        try
+                        {
+                            fullResponse = await this.lexi.Write (
+                                CMD_REQUEST_RDD, // 0x22
+                                null,
+                                N_ATTEMPTS_CMD,
+                                WAIT_BTW_ATTEMPTS_CMD,
+                                new uint[] { 18 },
+                                null,
+                                LexiAction.OperationRequest );
+                            
+                            lexiTimeOut = false;
+                        }
+                        catch ( Exception ) { }
+                    }
+                    while ( ( lexiTimeOut ||
+                            fullResponse.Response[ CMD_BYTE_RES ] == CMD_RSS_IN_TRANS ) &&
+                            ! ( timeOut = nodeCounter.ElapsedMilliseconds > CMD_RSS_MAX_TIME ) );
+                    
+                    RDDResponse response = new RDDResponse ( fullResponse.Response );
+                    if ( response.PrevCmdStatus != CMD_RDD_SUCCESS &&
+                        timeOut )
+                    {
+                        throw new Exception ();
+                    }
+
+                    // The status of the RDD has changed correctly
+                    
+                }
+            }
+            catch ( Exception e )
+            {
+                // Is not own exception
+                if ( ! Errors.IsOwnException ( e ) )
+                     throw new PuckCantCommWithMtuException ();
+                else throw e;
+            }
+            finally
+            {
+                if ( nodeCounter != null )
+                {
+                    nodeCounter.Stop ();
+                    nodeCounter = null;
+                }
+            }
+
+            */
         }
 
         #endregion

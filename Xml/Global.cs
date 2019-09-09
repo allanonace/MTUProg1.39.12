@@ -967,7 +967,7 @@ namespace Xml
             this.TempXmitCount                = 0;                    // Default temporary reading transmit duration in days. Available for Legacy Flatpack Only
             this.TempXmitInterval             = string.Empty;         // Default temporary transmit/read intervals in hours or minutes
             this.TimeSyncCountDefault         = 63;                   // [0-255] How long to check (in seconds) after requesting Time Sync
-            this.TimeSyncCountRepeat          = 1;                    // NOT PRESENT IN THE PDF // [1-3] Number of attempts to for the installation confirmation process
+            this.TimeSyncCountRepeat          = 3;                    // NOT PRESENT IN THE PDF // [1-3] Number of attempts to for the installation confirmation process
             this.TimeToSync                   = false;                // Enable MTU time sync
             this.TimeToSyncHR                 = 0;                    // [0-23] Hour at which MTU listens for time sync
             this.TimeToSyncMin                = 0;                    // [0-59] Minute at which MTU listens for time sync

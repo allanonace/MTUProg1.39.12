@@ -594,7 +594,7 @@ namespace MTUComm
             NodeDiscoveryList nodeList )
         {
             bool first;
-            foreach ( List<NodeDiscovery> listNodes in nodeList.AllEntries )
+            foreach ( List<NodeDiscovery> listNodes in nodeList.AllAttempts )
             {
                 first = true;
                 foreach ( NodeDiscovery node in listNodes )

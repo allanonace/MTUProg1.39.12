@@ -88,11 +88,12 @@ namespace MTUComm
         #region Attributes
         
         private int         index;
+        private bool        isF1;
         private int         totalEntries;
         private NodeType    nodeType;
         private int         nodeId;
-        private int         rssiRequest;
-        private int         rssiResponse;
+        private int         rssiRequest;            // MTU -> DCU
+        private int         rssiResponse;           // DCU -> MTU
         private int         freqErrorRequest;
         private int         freqErrorResponse;
         private int         timeDeltaRequest;
@@ -119,6 +120,16 @@ namespace MTUComm
             get { return this.index; }
         }
         
+        public bool IsF1
+        {
+            get { return this.isF1; }
+        }
+
+        public bool IsF2
+        {
+            get { return ! this.isF1; }
+        }
+
         /// <summary>
         /// The total number of units detected in the NodeDiscovery process.
         /// </summary>
@@ -289,9 +300,11 @@ namespace MTUComm
         /// Marks the node as detected and validated, verifying that the channel or transmission frequency is
         /// equal to the one way ( unidirectional ) or two way ( bidirectional ) frequency set in the MTU memory map.
         /// </summary>
-        public void SetAsValidated ()
+        public void SetAsValidated (
+            bool isF1 )
         {
             this.validated = true;
+            this.isF1      = isF1;
         }
     
         public object Clone ()
