@@ -2881,10 +2881,6 @@ namespace MTUComm
                 {
                     int step = 1;
 
-                    // Generates the random number and prepares LExI array
-                    randomKey = mtusha.RandomBytes ( randomKey.Length );
-                    Array.Copy ( randomKey, 0, data1, 1, randomKey.Length );
-
                     if ( this.mtu.BroadCast )
                     {
                         OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
@@ -2901,6 +2897,10 @@ namespace MTUComm
                     }
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+
+                    // Generates the random number and prepares LExI array
+                    randomKey = mtusha.RandomBytes ( randomKey.Length );
+                    Array.Copy ( randomKey, 0, data1, 1, randomKey.Length );
 
                     // Loads Encryption Item - Type 1: Head End Random Number
                     fullResponse = await this.lexi.Write (

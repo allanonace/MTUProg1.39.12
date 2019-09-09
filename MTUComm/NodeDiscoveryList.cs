@@ -276,11 +276,6 @@ namespace MTUComm
                     break;
             }
 
-            // Check if it is a new DCU
-            //if ( node.NodeId > 0 &&
-            //     ! this.entries.Any ( n => n.NodeId == node.NodeId ) )
-            //    uniqueNodeIDs++;
-
             return ( ( this.CurrentAttemptLastEntry.IsLast ) ?
                 NodeDiscoveryQueryResult.LastRead : NodeDiscoveryQueryResult.NextRead, node.Index );
         }
@@ -350,7 +345,7 @@ namespace MTUComm
             // P( MTU TX Success )
             decimal mtuTxSuccess = this.CalculateMtuSuccess ( false );
 
-            // P( TWO WAY ) = 100% - { 100% - [ P( DCU TX Success ) * P( MTU TX Success ) ] }^3
+            // P( TWO WAY ) = 100% - ( 100% - P( DCU TX Success ) * P( MTU TX Success ) ) ^ 3
             decimal precalc = 1 - this.GetProbability ( bestRssiResponse ) * mtuTxSuccess;
             return 1 - precalc * precalc * precalc;
         }

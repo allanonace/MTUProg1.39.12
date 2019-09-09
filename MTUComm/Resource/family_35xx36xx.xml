@@ -1166,6 +1166,61 @@
   
   <!-- END - Encoders auto-detect Meters -->
   
+  <!-- INIT - Remote Disonnect -->
+
+  <Register>
+    <Id>RDDPortNumber</Id>
+    <Description>RDD Port Number, used in conjunction with the ports enabled</Description>
+    <Type>int</Type>
+    <Address>492</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>RDDStatus/Id>
+    <Description>The status reported by the RDD</Description>
+    <Type>int</Type>
+    <Address>612</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>RDDValvePosition</Id>
+    <Description>The valve position reported by the RDD</Description>
+    <Type>int</Type>
+    <Address>613</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>RDDBatteryStatus</Id>
+    <Description>The battery status reported by the RDD</Description>
+    <Type>int</Type>
+    <Address>614</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>RDDSerialNumber</Id>
+    <Description>RDD Serial Number</Description>
+    <Type>ulong</Type>
+    <Address>617</Address>
+    <Size>9</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+
+  <!-- END - Remote Disonnect -->
+
   <!-- INIT - Registers -->
   
   <Register> <!-- OK -->
