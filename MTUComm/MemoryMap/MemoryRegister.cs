@@ -145,8 +145,12 @@ namespace MTUComm.MemoryMap
         // Value size ( number of consecutive bytes ) is also used for bit with bool type
         public int bit { get { return this.size; } }
 
+        #region Custom Operation
+
         public string mathExpression_Get { get { return this.custom_Get; } }
         public string mathExpression_Set { get { return this.custom_Set; } }
+
+        #endregion
 
         #region Custom Get
 
@@ -287,6 +291,75 @@ namespace MTUComm.MemoryMap
             }
         }
 
+        #endregion
+
+        #region Initialization
+
+        public MemoryRegister () { }
+
+        /// <param name="id">Identifier of the register</param>
+        /// <param name="type">Type of the register ( int, uint, ulong, bool or string )</param>
+        /// <param name="description">Additional information about the register and its purpose</param>
+        /// <param name="address">First byte in the MTU memory used by the register</param>
+        /// <param name="size">Number of consecutive bytes from the initial <see cref="address"/> that takes the register</param>
+        /// <param name="sizeGet">Some special cases ( e.g. Encryption Key ) have a different <see cref="size"/> writing than reading from the MTU</param>
+        /// <param name="write"><see langword="false"/> if it is read-only register</param>
+        /// <param name="custom_Get">Identifier of the custom method used recovering the value of the register</param>
+        /// <param name="custom_Set">Identifier of the custom method used writing a new value in the register</param>
+        public MemoryRegister (
+            string id,
+            RegType type,
+            string description,
+            int address,
+            int size = MemRegister.DEF_SIZE,
+            int sizeGet = MemRegister.DEF_SIZE,
+            bool write = MemRegister.DEF_WRITE,
+            string custom_Get = "",
+            string custom_Set = "" )
+        {
+            this.id           = id;
+            this.valueType    = type;
+            this.description  = description;
+            this.address      = address;
+            this.size         = size;
+            this.sizeGet      = ( sizeGet > 1 || type == RegType.BOOL ) ? sizeGet : size; // sizeGet by default is 1
+            this.write        = write;
+            this.custom_Get   = custom_Get.Replace ( " ", string.Empty );
+            this.custom_Set   = custom_Set.Replace ( " ", string.Empty );
+            this.registerType = REGISTER_TYPE.REGISTER;
+            this.lexi         = Singleton.Get.Lexi;
+
+            // Custom Get
+            if      ( this._HasCustomMethod_Get    ) this.customType_Get = CUSTOM_TYPE.METHOD;
+            else if ( this._HasCustomOperation_Get ) this.customType_Get = CUSTOM_TYPE.OPERATION;
+            else                                     this.customType_Get = CUSTOM_TYPE.EMPTY;
+
+            if ( this.HasCustomMethod_Get )
+            {
+                if ( this._HasCustomMethodId_Get )
+                     this.methodId_Get = this.custom_Get.Substring ( MemoryMap.METHOD_KEY.Length );
+                else this.methodId_Get = this.id + MemoryMap.METHOD_SUFIX_GET;
+            }
+
+            // Custom Set
+            if      ( this._HasCustomMethod_Set    ) this.customType_Set = CUSTOM_TYPE.METHOD;
+            else if ( this._HasCustomOperation_Set ) this.customType_Set = CUSTOM_TYPE.OPERATION;
+            else                                     this.customType_Set = CUSTOM_TYPE.EMPTY;
+
+            if ( this.HasCustomMethod_Set )
+            {
+                if ( this._HasCustomMethodId_Set )
+                     this.methodId_Set = this.custom_Set.Substring ( MemoryMap.METHOD_KEY.Length );
+                else this.methodId_Set = this.id + MemoryMap.METHOD_SUFIX_SET;
+            }
+        }
+
+        #endregion
+    
+        #region Logic
+
+        #region Get
+
         /// <summary>
         /// Returns asynchronously the value stored in the register without applying
         /// any post-process to the data ( raw ) in byte array format.
@@ -349,46 +422,53 @@ namespace MTUComm.MemoryMap
             	 return result;
           	else return this.lastRead;
         }
-        
+
         /// <summary>
-        /// Set to zero/0 the value of the register, reseting all its bits.
-        /// If the argument is not null, set the bit referenced by the register to desired value and
-        /// finally writes current byte value to the physical memory of the MTU.
-        /// <para>
-        /// See <see cref="SetValueToMtu(dynamic)"/> to modify the value of the register and write it to the physical memory of the MTU.
-        /// </para>
+        /// Returns asynchronously the value cached in the register, without accesing
+        /// the physical memory of the MTU, at least for this register because using custom
+        /// methods could be necessary to recover other registers from the MTU.
         /// </summary>
-        /// <remarks>
-        /// NOTE: This method should only be used working with bool registers.
-        /// <para>
-        /// TODO: Rename to "ResetByteAndSetBitToMtu"
-        /// </para>
-        /// </remarks>
-        /// <param name="value">New value that will be set to the bit pointed by the register and then written to the physical memory of the MTU</param>
         /// <returns>Task object required to execute the method asynchronously and
-        /// for a correct exceptions bubbling.</returns>
-        /// <seealso cref="SetBitToMtu"/>
-        /// <seealso cref="SetValue(dynamic)"/>
-        /// <seealso cref="SetValueToMtu(dynamic)"/>
-        public async Task ResetByteAndSetValueToMtu (
-            dynamic value = null )
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// Current ( cached ) value of the register.
+        /// </para>
+        /// </returns>
+        /// <seealso cref="ValueRaw"/>
+        /// <seealso cref="ValueByteArrayRaw"/>
+        /// <seealso cref="GetValueFromMtu(bool)"/>
+        /// <seealso cref="GetValueByteArray(bool)"/>
+        public async Task<T> GetValue ()
         {
-            if ( this.valueType == RegType.BOOL )
-            {
-                Utils.Print ( "Register -> ResetByte -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
-            
-                // Reset full byte ( all flags to zero/disable )
-                await this.lexi.Write (
-                    ( uint )this.address,
-                    new byte[] { default ( byte ) },
-                    MTUComm.N_ATTEMPTS_LEXI,
-                    MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
-                
-                // Write flag for this register
-                await this.SetValueToMtu ( value );
-            }
+            // If register has not customized get method, use normal/direct get raw value
+            if ( ! this.HasCustomMethod_Get )
+                return await this.funcGet ();
+
+            return await this.funcGetCustom ();
         }
-        
+
+        public async Task<string> GetValueXMask (
+            string xMask,
+            int digits )
+        {
+            string value = ( await this.GetValue () ).ToString ();
+
+            // Ejemplo: num 1234 mask X00 digits 6
+            // 1. 4 < 6
+            // 2. 6 - 4 == 3 - 1
+            if ( value.Length < digits &&
+                 digits - value.Length == xMask.Length - 1 )
+            {
+                value = xMask.Substring ( 1, xMask.Length - 1 ) + value;
+            }
+
+            throw new Exception ();
+        }
+
+        #endregion
+
+        #region Set
+
         /// <summary>
         /// Writes zero/0 to the specified byte, set the value passed as argument
         /// if it is not null, and writes it to the physical memory of the MTU.
@@ -467,30 +547,6 @@ namespace MTUComm.MemoryMap
         }
 
         /// <summary>
-        /// Returns asynchronously the value cached in the register, without accesing
-        /// the physical memory of the MTU, at least for this register because using custom
-        /// methods could be necessary to recover other registers from the MTU.
-        /// </summary>
-        /// <returns>Task object required to execute the method asynchronously and
-        /// for a correct exceptions bubbling.
-        /// <para>
-        /// Current ( cached ) value of the register.
-        /// </para>
-        /// </returns>
-        /// <seealso cref="ValueRaw"/>
-        /// <seealso cref="ValueByteArrayRaw"/>
-        /// <seealso cref="GetValueFromMtu(bool)"/>
-        /// <seealso cref="GetValueByteArray(bool)"/>
-        public async Task<T> GetValue ()
-        {
-            // If register has not customized get method, use normal/direct get raw value
-            if ( ! this.HasCustomMethod_Get )
-                return await this.funcGet ();
-
-            return await this.funcGetCustom ();
-        }
-
-        /// <summary>
         /// Updates value of the register and writes it to the physical memory of the MTU.
         /// <para>
         /// If no argument is passed, the current ( cached ) value of the register
@@ -550,87 +606,47 @@ namespace MTUComm.MemoryMap
                     throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
             }
         }
-
-        public async Task<string> GetValueXMask (
-            string xMask,
-            int digits )
+                
+        /// <summary>
+        /// Set to zero/0 the value of the register, reseting all its bits.
+        /// If the argument is not null, set the bit referenced by the register to desired value and
+        /// finally writes current byte value to the physical memory of the MTU.
+        /// <para>
+        /// See <see cref="SetValueToMtu(dynamic)"/> to modify the value of the register and write it to the physical memory of the MTU.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// NOTE: This method should only be used working with bool registers.
+        /// <para>
+        /// TODO: Rename to "ResetByteAndSetBitToMtu"
+        /// </para>
+        /// </remarks>
+        /// <param name="value">New value that will be set to the bit pointed by the register and then written to the physical memory of the MTU</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="SetBitToMtu"/>
+        /// <seealso cref="SetValue(dynamic)"/>
+        /// <seealso cref="SetValueToMtu(dynamic)"/>
+        public async Task ResetByteAndSetValueToMtu (
+            dynamic value = null )
         {
-            string value = ( await this.GetValue () ).ToString ();
-
-            // Ejemplo: num 1234 mask X00 digits 6
-            // 1. 4 < 6
-            // 2. 6 - 4 == 3 - 1
-            if ( value.Length < digits &&
-                 digits - value.Length == xMask.Length - 1 )
+            if ( this.valueType == RegType.BOOL )
             {
-                value = xMask.Substring ( 1, xMask.Length - 1 ) + value;
+                Utils.Print ( "Register -> ResetByte -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
+            
+                // Reset full byte ( all flags to zero/disable )
+                await this.lexi.Write (
+                    ( uint )this.address,
+                    new byte[] { default ( byte ) },
+                    MTUComm.N_ATTEMPTS_LEXI,
+                    MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
+                
+                // Write flag for this register
+                await this.SetValueToMtu ( value );
             }
-
-            throw new Exception ();
         }
 
         #endregion
-
-        #region Initialization
-
-        public MemoryRegister () { }
-
-        /// <param name="id">Identifier of the register</param>
-        /// <param name="type">Type of the register ( int, uint, ulong, bool or string )</param>
-        /// <param name="description">Additional information about the register and its purpose</param>
-        /// <param name="address">First byte in the MTU memory used by the register</param>
-        /// <param name="size">Number of consecutive bytes from the initial <see cref="address"/> that takes the register</param>
-        /// <param name="sizeGet">Some special cases ( e.g. Encryption Key ) have a different <see cref="size"/> writing than reading from the MTU</param>
-        /// <param name="write"><see langword="false"/> if it is read-only register</param>
-        /// <param name="custom_Get">Identifier of the custom method used recovering the value of the register</param>
-        /// <param name="custom_Set">Identifier of the custom method used writing a new value in the register</param>
-        public MemoryRegister (
-            string id,
-            RegType type,
-            string description,
-            int address,
-            int size = MemRegister.DEF_SIZE,
-            int sizeGet = MemRegister.DEF_SIZE,
-            bool write = MemRegister.DEF_WRITE,
-            string custom_Get = "",
-            string custom_Set = "" )
-        {
-            this.id           = id;
-            this.valueType    = type;
-            this.description  = description;
-            this.address      = address;
-            this.size         = size;
-            this.sizeGet      = ( sizeGet > 1 || type == RegType.BOOL ) ? sizeGet : size; // sizeGet by default is 1
-            this.write        = write;
-            this.custom_Get   = custom_Get.Replace ( " ", string.Empty );
-            this.custom_Set   = custom_Set.Replace ( " ", string.Empty );
-            this.registerType = REGISTER_TYPE.REGISTER;
-            this.lexi         = Singleton.Get.Lexi;
-
-            // Custom Get
-            if      ( this._HasCustomMethod_Get    ) this.customType_Get = CUSTOM_TYPE.METHOD;
-            else if ( this._HasCustomOperation_Get ) this.customType_Get = CUSTOM_TYPE.OPERATION;
-            else                                     this.customType_Get = CUSTOM_TYPE.EMPTY;
-
-            if ( this.HasCustomMethod_Get )
-            {
-                if ( this._HasCustomMethodId_Get )
-                     this.methodId_Get = this.custom_Get.Substring ( MemoryMap.METHOD_KEY.Length );
-                else this.methodId_Get = this.id + MemoryMap.METHOD_SUFIX_GET;
-            }
-
-            // Custom Set
-            if      ( this._HasCustomMethod_Set    ) this.customType_Set = CUSTOM_TYPE.METHOD;
-            else if ( this._HasCustomOperation_Set ) this.customType_Set = CUSTOM_TYPE.OPERATION;
-            else                                     this.customType_Set = CUSTOM_TYPE.EMPTY;
-
-            if ( this.HasCustomMethod_Set )
-            {
-                if ( this._HasCustomMethodId_Set )
-                     this.methodId_Set = this.custom_Set.Substring ( MemoryMap.METHOD_KEY.Length );
-                else this.methodId_Set = this.id + MemoryMap.METHOD_SUFIX_SET;
-            }
-        }
 
         #endregion
 

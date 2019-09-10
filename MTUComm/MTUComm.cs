@@ -2550,6 +2550,7 @@ namespace MTUComm
                      mtu.IsNewVersion &&
                      await map.MtuSoftVersion.GetValue () >= 19 )
                 {
+                    // Registers only present in 31xx32xx and 33xx MTUs
                     map.F12WAYRegister1Int  = global.F12WAYRegister1;
                     map.F12WAYRegister10Int = global.F12WAYRegister10;
                     map.F12WAYRegister14Int = global.F12WAYRegister14;
@@ -2687,6 +2688,11 @@ namespace MTUComm
 
                 // Generate log to show on device screen
                 await this.OnAddMtu ( new Delegates.ActionArgs ( this.mtu, map, form, addMtuLog ) );
+
+                // Show all registers read from the MTU and modified/write to the MTU
+                #if DEBUG
+                map.LogFullMemory ();
+                #endif
             }
             catch ( Exception e )
             {

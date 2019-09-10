@@ -1431,12 +1431,12 @@ namespace aclara_meters.view
             customers_copyr  .Text = TEXT_COPYR;
             customers_support.Text = TEXT_SUPPORT;
             customers_version.Text = TEXT_VERSION + Singleton.Get.Configuration.GetApplicationVersion () + ( ( Mobile.configData.HasIntune ) ? TEXT_INTUNE : string.Empty );
-            config_version.Text = TEXT_CONFVER + SecureStorage.GetAsync("ConfigVersion").Result;
+            config_version   .Text = TEXT_CONFVER + SecureStorage.GetAsync("ConfigVersion").Result;
 
             if ( Mobile.configData.IsCertLoaded )
             {
-                certificate_name.Text = $"Certificate: {Mobile.configData.certificate.Subject}";
-                certificate_exp .Text = $"Expiration date: {Mobile.configData.certificate.NotAfter.ToString("MM/dd/yyyy hh:mm:ss")}";
+                certificate_name.Text = "Certificate: " + Mobile.configData.certificate.Subject;
+                certificate_exp .Text = $"Expiration date: " + Mobile.configData.certificate.NotAfter.ToString ( "MM/dd/yyyy hh:mm:ss" );
             }
             else
             {
@@ -1453,7 +1453,7 @@ namespace aclara_meters.view
                                      .ObjectForInfoDictionary ( "CFBundleShortVersionString" ).ToString ();
             #endif
             */
-            customers_name   .Text = TEXT_LICENSE + FormsApp.config.Global.CustomerName;
+            customers_name.Text = TEXT_LICENSE + FormsApp.config.Global.CustomerName;
 
             #endregion
             about_block.Opacity = 0;
@@ -1462,7 +1462,6 @@ namespace aclara_meters.view
             ftp_block.Opacity = 0;
             TitleGen.IsVisible = true;
             TitleLog.IsVisible = false;
-            
 
             switch (valor)
             {

@@ -1078,6 +1078,22 @@ namespace MTUComm.MemoryMap
             else this.memory[address] = ( byte ) ( this.memory[address] & ~( 1 << bit_index ) );
         }
 
+        private void SetBoolToMem (
+            string value,
+            int address,
+            int bit_index = MemRegister.DEF_BIT )
+        {
+            bool vCasted;
+            if (!bool.TryParse(value, out vCasted)) // It is not case sensitive
+                throw new SetMemoryFormatException ( value + ".Bool" );
+            else
+            {
+                if ( vCasted )
+                     this.memory[address] = ( byte ) ( this.memory[address] |    1 << bit_index   );
+                else this.memory[address] = ( byte ) ( this.memory[address] & ~( 1 << bit_index ) );
+            }
+        }
+
         private void SetCharToMem (
             char value, 
             int address )
@@ -1092,7 +1108,7 @@ namespace MTUComm.MemoryMap
         {
             TypeCode type = Type.GetTypeCode( typeof( T ) );
 
-            // If value to set is "real" string
+            // If value to set is a "real" string
             if ( type is TypeCode.String )
             {
                 foreach(char c in value)
@@ -1107,6 +1123,7 @@ namespace MTUComm.MemoryMap
                     case TypeCode.UInt32 : this.SetUIntToMem  (value, address, size); break;
                     case TypeCode.UInt64 : this.SetULongToMem (value, address, size); break;
                     case TypeCode.Char   : this.SetCharToMem  (value[ 0 ], address);  break;
+                    case TypeCode.Boolean: this.SetBoolToMem  (value, address, size); break;
                 }
             }
         }
@@ -1364,5 +1381,67 @@ namespace MTUComm.MemoryMap
         {
             this.readFromMtuOnlyOnce = ok;
         }
+    
+        #region Unit Test
+
+        public void FillMemory (
+            UnitTestRegisters registers )
+        {
+            // The generic dictionary does not allow duplicate keys
+            if ( registers.List.Length > this.registersObjs.Count )
+            {
+                Utils.PrintDeep ( "ERROR! FillMemory: Has passed more entries than registers has the memory map" );
+
+                throw new Exception ();
+            }
+
+            foreach ( UnitTestRegister reg in registers.List )
+            {
+                try
+                {
+                    if ( base.ContainsMember ( reg.Id ) )
+                        base[ reg.Id ].SetValue ( reg.Value );
+                    else
+                        Utils.PrintDeep ( "ERROR! FillMemory: Register '" + reg.Id + "' is not present" ); 
+                }
+                catch ( Exception e )
+                {
+                    Utils.PrintDeep ( "ERROR! FillMemory: Set register '" + reg.Id + "'" );
+                }
+            }
+
+            // TODO: No solo se leen valores del MTU, tambien se recuperan valores de Data o de AddMtuForm, seteados en el formulario
+            // TODO: Esto tiene que hacerse con un fichero dividido en dos, una parte para rellenar la memoria del MTU y otra con los
+            // TODO: valores a usar para simular el rellenado del formulario
+            // TODO: Para rellenar el formulario de las instalaciones (Add/Replace) se pueden usar los metodos ContainsParameter y FindById
+            // TODO: Despues para otras acciones habra que usar data, siendo facil añadir un atributo en el xml ( isdata ) para usar AddMtuForm o Data
+        }
+
+        public async Task LogFullMemory ()
+        {
+            StringBuilder str = new StringBuilder ();
+            const string sentence = "\t<Register id=\"#1#\" value=\"#2#\" readmtu=\"#3#\" used=\"#4#\"/>";
+
+            str.AppendLine ( "<Registers>" );
+            foreach ( KeyValuePair<string,dynamic> entry in this.registersObjs )
+            {
+                var reg = entry.Value;
+                if ( reg.readedFromMtu || reg.used )
+                    str.AppendLine (
+                        sentence
+                            .Replace ( "#1#", entry.Key )
+                            .Replace ( "#2#", await entry.Value.GetValue () )
+                            .Replace ( "#3#", reg.readedFromMtu )
+                            .Replace ( "#4#", reg.used )
+                    );
+            }
+            str.AppendLine ( "</Registers>" );
+            Utils.Print ( str.ToString () );
+
+            str.Clear ();
+            str = null;
+        }
+
+        #endregion
     }
 }
