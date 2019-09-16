@@ -560,10 +560,11 @@ namespace MTUComm.MemoryMap
         /// <seealso cref="SetValue(dynamic)"/>
         /// <seealso cref="SetValueToMtu(dynamic)"/>
         public async Task SetValue (
-            dynamic value )
+            dynamic value,
+            bool force = false ) // Force is to prepare the virtual MTU for unit testing
         {
             // Register with read and write
-            if ( this.write )
+            if ( this.write || force )
             {
                 Utils.Print ( "Register -> SetValue: " + this.id + " = " + value );
             

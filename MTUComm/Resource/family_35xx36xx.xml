@@ -1179,7 +1179,7 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>RDDStatus/Id>
+    <Id>RDDStatus</Id>
     <Description>The status reported by the RDD</Description>
     <Type>int</Type>
     <Address>612</Address>

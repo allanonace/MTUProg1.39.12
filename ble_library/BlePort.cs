@@ -314,6 +314,8 @@ namespace ble_library
                 // Will also stop listening when gattServer
                 // is disconnected, so if that is acceptable,
                 // you don't need to store this disposable.
+                // NOTE: Service UUID 2000 - Virtual UART
+                // NOTE: Characteristic UUID 03 - TX ( 20 bytes, Read+Indicate )
                 Listen_Characteristic_Notification_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                    new Guid("00000003-0000-1000-8000-00805f9b34fb"),
@@ -330,6 +332,8 @@ namespace ble_library
                 // Will also stop listening when gattServer
                 // is disconnected, so if that is acceptable,
                 // you don't need to store this disposable.
+                // NOTE: Service UUID 2000 - Virtual UART
+                // NOTE: Characteristic UUID 02 - RX ( 20 bytes, Read+Write+Notify )
                 Listen_ack_response_Handler = gattServer_connection.NotifyCharacteristicValue(
                    new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                    new Guid("00000002-0000-1000-8000-00805f9b34fb"),
@@ -444,6 +448,8 @@ namespace ble_library
                 // Controls exception inside method UpdateACKBuffer
                 ackException = new TaskCompletionSource<bool> ();
 
+                // NOTE: Service UUID 2000 - 
+                // NOTE: Characteristic UUID __ - __ ( __ bytes, __ )
                 await gattServer_connection.WriteCharacteristicValue(
                     new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
                     new Guid("00000002-0000-1000-8000-00805f9b34fb"),
@@ -845,6 +851,8 @@ namespace ble_library
                     Array.Copy(ticks, 0, say_hi, 12, 4);
                     hi_msg = AES_Encrypt(say_hi, dynamicPass);
 
+                    // NOTE: Service UUID 2500 - Connection Control
+                    // NOTE: Characteristic UUID 41 - Frame ( 16 bytes, Read+Write+Notify )
                     await gattServer_connection.WriteCharacteristicValue(
                       new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                       new Guid("00000041-0000-1000-8000-00805f9b34fb"),
@@ -871,22 +879,7 @@ namespace ble_library
                         return;
                     }
                     byte[] hi_msg;
-                    /*
-                    byte[] PassH_crypt = new byte[] { };
-                    byte[] PassL_crypt = new byte[] { };
 
-                    //Read Pass H data from Characteristic
-                    PassH_crypt = await gattServer_connection.ReadCharacteristicValue(
-                        new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                        new Guid("00000040-0000-1000-8000-00805f9b34fb")
-                    );
-
-                    //Read Pass L data from Characteristic
-                    PassL_crypt = await gattServer_connection.ReadCharacteristicValue(
-                        new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                        new Guid("00000042-0000-1000-8000-00805f9b34fb")
-                    );
-                    */
                     byte[] PassH_decrypt = AES_Decrypt(PassH_crypt, static_pass);
                     byte[] PassL_decrypt = AES_Decrypt(PassL_crypt, static_pass);
 
@@ -899,6 +892,8 @@ namespace ble_library
                     Array.Copy(ticks, 0, say_hi, 12, 4);
                     hi_msg = AES_Encrypt(say_hi, dynamicPass);
 
+                    // NOTE: Service UUID 2500 - Connection Control
+                    // NOTE: Characteristic UUID 41 - Frame ( 16 bytes, Read+Write+Notify )
                     await gattServer_connection.WriteCharacteristicValue(
                       new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
                       new Guid("00000041-0000-1000-8000-00805f9b34fb"),
@@ -907,12 +902,18 @@ namespace ble_library
                 }
                 Thread.Sleep(400);
 
+                /* NOTE: Service UUID 2100 - Device Information
+                Characteristic UUID 0C Battery Level ( 1 byte, Read+Notify )*/
+                // NOTE: Method "NotifyCharacteristicValue" is to listen for notifications on a
+                // NOTE: characteristic and will stop listening when GATT server is disconnected
+                // NOTE: It implements the standard form used in bluetooth to notify about
+                // NOTE: characteristic value changes, and is limited to 20 bytes
+                // URL: https://github.com/Polidea/react-native-ble-plx/wiki/Characteristic-Notifying
                 Listen_Battery_level = gattServer_connection.NotifyCharacteristicValue(
                     new Guid("1d632100-dc5a-41ab-bdbb-7cff9901210d"),
                     new Guid("0000000c-0000-1000-8000-00805f9b34fb"),
                     UpdateBatteryLevel
-                 );
-
+                );
                 batteryLevel = await gattServer_connection.ReadCharacteristicValue(
                     new Guid("1d632100-dc5a-41ab-bdbb-7cff9901210d"),
                     new Guid("0000000c-0000-1000-8000-00805f9b34fb")
@@ -1061,7 +1062,7 @@ namespace ble_library
 					isScanning = true;
                     ScanFilter filter = new ScanFilter
                     {
-						AdvertisedDeviceName = "Aclara",
+						//AdvertisedDeviceName = "Aclara",
 						IgnoreRepeatBroadcasts = false
 					};
                     await adapter.ScanForBroadcasts(
@@ -1080,7 +1081,7 @@ namespace ble_library
 								if (adv.DeviceName != null)
 								{
 									//Utils.PrintDeep("-------" + adv.DeviceName);
-									if (adv.DeviceName.Equals("Aclara"))
+									if (adv.DeviceName.StartsWith("Aclara"))
                                     {
 										Utils.PrintDeep("--------" + Utils.ByteArrayToString(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()));
 										if (BlePeripheralList.Any(p => p.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray().SequenceEqual(peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray())))
@@ -1118,16 +1119,5 @@ namespace ble_library
             //Task.Factory.StartNew(GetBatteryLevelAsync);
             return batteryLevel;
         }
-
-        /*
-        private async Task GetBatteryLevelAsync()
-        {
-            //Read Pass H data from Characteristic
-            batteryLevel = await gattServer_connection.ReadCharacteristicValue(
-                    new Guid("00002100-13d9-409b-8abb-48893a06dc7d"),
-                    new Guid("0000000c-0000-1000-8000-00805f9b34fb")
-                );
-        }
-        */
     }
 }

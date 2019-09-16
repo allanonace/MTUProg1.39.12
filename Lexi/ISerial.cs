@@ -57,5 +57,7 @@ namespace Lexi.Interfaces
         byte[] BytesRead ();
 
         Boolean isEcho();
+
+        byte[] GetBatteryLevel ();
     }
 }

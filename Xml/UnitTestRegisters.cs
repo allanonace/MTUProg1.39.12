@@ -6,6 +6,9 @@ namespace Xml
     public class UnitTestRegisters
     {
         [XmlElement("Register")]
-        public UnitTestRegister[] List { get; set; }
+        public UnitTestRegister[] ListRegisters { get; set; }
+
+        [XmlElement("Value")]
+        public UnitTestValue[] ListValues { get; set; }
     }
 }

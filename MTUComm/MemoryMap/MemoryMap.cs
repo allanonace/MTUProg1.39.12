@@ -1388,19 +1388,19 @@ namespace MTUComm.MemoryMap
             UnitTestRegisters registers )
         {
             // The generic dictionary does not allow duplicate keys
-            if ( registers.List.Length > this.registersObjs.Count )
+            if ( registers.ListRegisters.Length > this.registersObjs.Count )
             {
                 Utils.PrintDeep ( "ERROR! FillMemory: Has passed more entries than registers has the memory map" );
 
                 throw new Exception ();
             }
 
-            foreach ( UnitTestRegister reg in registers.List )
+            foreach ( UnitTestRegister reg in registers.ListRegisters )
             {
                 try
                 {
                     if ( base.ContainsMember ( reg.Id ) )
-                        base[ reg.Id ].SetValue ( reg.Value );
+                        base[ reg.Id ].SetValue ( reg.Value, true );
                     else
                         Utils.PrintDeep ( "ERROR! FillMemory: Register '" + reg.Id + "' is not present" ); 
                 }

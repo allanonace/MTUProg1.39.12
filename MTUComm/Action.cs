@@ -876,7 +876,8 @@ namespace MTUComm
                 Data.Set ( "ProcessResultFile", subpath );
 
                 // Write result in the NodeDiscovery file
-                logger.NodeDiscovery ( nodeList, args.Mtu );
+                if ( result != NodeDiscoveryResult.EXCEPTION )
+                    logger.NodeDiscovery ( nodeList, args.Mtu );
             }
             catch ( Exception e )
             {

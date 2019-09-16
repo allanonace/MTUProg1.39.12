@@ -165,7 +165,7 @@ namespace MTUComm
 
         public NodeDiscovery[] CurrentAttemptEntries
         {
-            get { return this.attempts[ this.attempts.Count - 1 ].ToArray (); }
+            get { return this.entries.ToArray (); }
         }
 
         /// <summary>
@@ -198,14 +198,21 @@ namespace MTUComm
             }
         }
 
+        public List<NodeDiscovery> CurrentAttempt
+        {
+            get { return this.entries; }
+        }
+
         private IEnumerable<IGrouping<int,NodeDiscovery>> UniqueNodesValidated
         {
             get
             {
                 return this.AllAttempts
+                    // Converts a multi-dimensional array into a flat list with only validated nodes
                     .SelectMany ( list => list
                         .Where ( entry => entry.IsValidated )
                     )
+                    // Avoids counting the same node multiple times
                     .GroupBy ( entry => entry.NodeId );
             }
         }
@@ -343,23 +350,22 @@ namespace MTUComm
             int bestRssiResponse )
         {
             // P( MTU TX Success )
-            decimal mtuTxSuccess = this.CalculateMtuSuccess ( false );
+            decimal mtuTxSuccess = this.CalculateMtuSuccess ( false ); // false indicates F2
 
             // P( TWO WAY ) = 100% - ( 100% - P( DCU TX Success ) * P( MTU TX Success ) ) ^ 3
             decimal precalc = 1 - this.GetProbability ( bestRssiResponse ) * mtuTxSuccess;
             return 1 - precalc * precalc * precalc;
         }
 
-        private IEnumerable<NodeDiscovery> NodesValidatedForFreq (
+        private IEnumerable<IGrouping<int,NodeDiscovery>> NodesValidatedForFreq (
             bool isF1 )
         {
             return this.AllAttempts
                 .SelectMany ( list => list
                     .Where ( entry =>
                         entry.IsValidated &&
-                        entry.IsF1 == isF1
-                    )
-                );
+                        entry.IsF1 == isF1 )
+                ).GroupBy ( entry => entry.NodeId );
         }
 
         #endregion

@@ -726,8 +726,7 @@ namespace aclara_meters.view
                             {
                                 if (blePeripherals[i] != null)
                                 {
-                                    Puck puck = new Puck(blePeripherals[i]);
-                                    //puck.BlInterfaz= FormsApp.ble_interface;
+                                    Puck puck = new Puck ( blePeripherals[ i ] );
 
                                     byte_now = puck.ManofacturerData;
 
@@ -783,9 +782,8 @@ namespace aclara_meters.view
 
                                                     #region Autoconnect to stored device 
     
-                                                    Singleton.Set = new Puck();
-                                                    Singleton.Get.Puck.Device = blePeripherals[i];
-                                                    Singleton.Get.Puck.BlInterfaz = FormsApp.ble_interface;
+                                                    Singleton.Set = new Puck ( blePeripherals[ i ], FormsApp.ble_interface );
+
                                                     peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                                                     peripheralManualDisconnection = false;
 
@@ -1162,11 +1160,10 @@ namespace aclara_meters.view
 
             try
             {
-                Singleton.Set = new Puck();
-                Singleton.Get.Puck.Device = item.Peripheral;
+                Singleton.Set = new Puck ( item.Peripheral, FormsApp.ble_interface );
+
                 FormsApp.ble_interface.Open(Singleton.Get.Puck.Device, reassociate);
-                Singleton.Get.Puck.BlInterfaz = FormsApp.ble_interface;
-                bAlertBatt = true;
+                bAlertBatt   = true;
                 bAlertBatt10 = true;
 
                 Device.BeginInvokeOnMainThread(() =>

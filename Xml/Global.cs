@@ -181,7 +181,12 @@ namespace Xml
     /// </item>
     /// <item>
     ///   <term>Compression</term>
-    ///   <description>Indicates whether or not ( by default ) to compress the result data sent in scripted mode ( nothing, deflate or gzip )</description>
+    ///   <description>
+    /// Indicates whether or not ( by default ) to compress the result data sent in scripted mode ( nothing, deflate or gzip )
+    /// <para>
+    /// See <see cref="MTUComm.Compression"/>
+    /// </para>
+    ///   </description>
     /// </item>
     /// <item>
     ///   <term>NewMeterPort2isTheSame</term>

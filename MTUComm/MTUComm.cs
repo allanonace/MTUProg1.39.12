@@ -116,7 +116,7 @@ namespace MTUComm
         private const int CMD_INIT_NODE_DISC_INI  = 0x01; // Node discovery initiated
         private const int CMD_QUERY_NODE_DISC     = 0x19; // 25 Start/Reset node discovery response query
         private const int CMD_QUERY_NODE_DISC_RES = 5; // Response ACK with result [0-4] = 5 bytes
-        private const int CMD_QUERY_NODE_DISC_NOT = 0x00; // The MTU is busy
+        private const int CMD_QUERY_NODE_BUSY     = 0x00; // The MTU is busy
         private const int CMD_QUERY_NODE_DISC_INI = 0x01; // The MTU is ready for query
         private const int CMD_NEXT_NODE_DISC      = 0x1A; // 26 Get next node discovery response
         private const int CMD_NEXT_NODE_1         = 10; // ACK with general information [0-9] = 10 bytes
@@ -128,6 +128,7 @@ namespace MTUComm
         private const int WAIT_BEFORE_GET_NODES   = 1000;
         private const int WAIT_BTW_NODE_ERRORS    = 1000;
         private const int WAIT_BTW_NODES          = 100;
+        private const int WAIT_BTW_NODE_FAILS     = 1000;
         private const int CMD_ENCRYP_MAX          = 3;
         private const int CMD_ENCRYP_OLD_MAX      = 5;
         private const int CMD_LOAD_ENCRYP         = 0x1B;
@@ -284,7 +285,7 @@ namespace MTUComm
         /// <seealso cref="ReadFabric"/>
         /// <seealso cref="ReadMtu"/>
         /// <seealso cref="TurnOnOffMtu(bool)"/>
-        public async void LaunchActionThread (
+        public async Task LaunchActionThread (
             ActionType type,
             params object[] args )
         {
@@ -533,7 +534,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Historical Read ( previously Data Read )
+        #region Historical Read ( prev. Data Read )
 
         /// <summary>
         /// In scripted mode this method overload is called before the main method,
@@ -654,7 +655,7 @@ namespace MTUComm
                 if ( ! this.mtu.MtuDemand )
                     throw new MtuIsNotOnDemandCompatibleDevice ();
 
-                OnProgress ( this, new Delegates.ProgressArgs ( "Requesting event logs..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "DataRead: Requesting logs..." ) );
 
                 DateTime end   = DateTime.UtcNow;
                 DateTime start = end.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
@@ -760,7 +761,7 @@ namespace MTUComm
 
                         // Wait a bit and try to read/recover the next log
                         case EventLogQueryResult.NextRead:
-                            OnProgress ( this, new Delegates.ProgressArgs ( "Requesting event logs... " + queryResult.Index + "/" + eventLogList.TotalEntries ) );
+                            OnProgress ( this, new Delegates.ProgressArgs ( "DataRead: Requesting logs... " + queryResult.Index + "/" + eventLogList.TotalEntries ) );
                             
                             await Task.Delay ( WAIT_BTW_LOGS );
                             countAttempts = 0; // Reset accumulated fails after reading ok
@@ -769,7 +770,7 @@ namespace MTUComm
 
                         // Was last event log
                         case EventLogQueryResult.LastRead:
-                            OnProgress ( this, new Delegates.ProgressArgs ( "All event logs requested" ) );
+                            OnProgress ( this, new Delegates.ProgressArgs ( "DataRead: All logs requested" ) );
                             goto BREAK; // Exit from infinite while
                     }
                 }
@@ -803,7 +804,7 @@ namespace MTUComm
 
         #endregion
 
-        #region RFCheck ( previously Install Confirmation )
+        #region RFCheck ( prev. Install Confirmation )
 
         /// <summary>
         /// This method is called only executing the Installation Confirmation action but
@@ -818,6 +819,9 @@ namespace MTUComm
         /// <seealso cref="OnReadMtu"/>
         public async Task InstallConfirmation ()
         {
+            // DEBUG
+            this.WriteMtuBitAndVerify ( 22, 0, false ); // Turn On MTU
+
             if ( await this.InstallConfirmation_Logic () < IC_EXCEPTION )
                  await this.ReadMtu ();
             else this.OnError ();
@@ -1018,7 +1022,7 @@ namespace MTUComm
                 {
                     #region Step 1 - Init
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery... Init" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery: Step 1 Init" ) );
                 
                     // Node discovery initiation command
                     byte[] data = new byte[ 8 ]; // 1+4+1+1+1
@@ -1029,7 +1033,7 @@ namespace MTUComm
                     data[ 4 ] = 0x00; // Target node ID MSB
                     data[ 5 ] = 0x0A; // Max dither time in seconds
                     data[ 6 ] = 0x00; // Min request send time in seconds
-                    data[ 7 ] = 0x03; // RF Channels bitmap up to 8 channels ( 4 = 0000.0100 = Channel 3 )
+                    data[ 7 ] = 0x03; // RF Channels bitmap up to 8 channels
 
                     // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
                     fullResponse = await this.lexi.Write (
@@ -1057,7 +1061,7 @@ namespace MTUComm
                     {
                         #region Step 2 - Start/Reset
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery... Start/Reset" ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery: Step 2 Start/Reset" ) );
 
                         // Start/Reset node discovery response query
                         bool lexiTimeOut;
@@ -1084,7 +1088,7 @@ namespace MTUComm
                                     WAIT_BTW_ATTEMPTS_CMD,
                                     new uint[] { CMD_QUERY_NODE_DISC_RES }, // ACK with response
                                     new LexiFiltersResponse ( new ( int,int,byte )[] {
-                                        ( CMD_QUERY_NODE_DISC_RES, CMD_BYTE_RES, CMD_QUERY_NODE_DISC_NOT ), // The MTU is busy
+                                        ( CMD_QUERY_NODE_DISC_RES, CMD_BYTE_RES, CMD_QUERY_NODE_BUSY ), // The MTU is busy
                                         ( CMD_QUERY_NODE_DISC_RES, CMD_BYTE_RES, CMD_QUERY_NODE_DISC_INI )  // The MTU is ready for query
                                     } ),
                                     LexiAction.OperationRequest );
@@ -1094,11 +1098,11 @@ namespace MTUComm
                             catch ( Exception ) { }
                         }
                         while ( ( lexiTimeOut ||
-                                  fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_DISC_NOT ) &&
+                                  fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_BUSY ) &&
                                 ! ( timeOut = nodeCounter.ElapsedMilliseconds >= maxTimeND ) );
                         
                         // Node discovery mode not started/ready for query
-                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_DISC_NOT &&
+                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_BUSY &&
                              timeOut )
                         {
                             Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotStartedException () );
@@ -1109,7 +1113,7 @@ namespace MTUComm
 
                         #region Step 3 - Get Next
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery... Get Next" ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery: Step 3 Get Next" ) );
 
                         await Task.Delay ( WAIT_BEFORE_GET_NODES );
 
@@ -1170,7 +1174,7 @@ namespace MTUComm
                                 // Wait a bit and try to read/recover the next node
                                 case NodeDiscoveryQueryResult.NextRead:
                                     OnProgress ( this, new Delegates.ProgressArgs ( 
-                                        "Requesting nodes... " + queryResult.Index + "/" + nodeList.CurrentAttemptTotalEntries ) );
+                                        "Node Discovery: Requesting nodes... " + queryResult.Index + "/" + nodeList.CurrentAttemptTotalEntries ) );
                                     
                                     await Task.Delay ( WAIT_BTW_NODES );
                                     break;
@@ -1178,7 +1182,7 @@ namespace MTUComm
                                 // Was the last node or no node was recovered
                                 case NodeDiscoveryQueryResult.LastRead:
                                 case NodeDiscoveryQueryResult.Empty:
-                                    OnProgress ( this, new Delegates.ProgressArgs ( "All nodes requested" ) );
+                                    OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery: All nodes requested" ) );
                                     goto BREAK_OK; // Exit from switch + infinite while
                             }
                         }
@@ -1190,24 +1194,20 @@ namespace MTUComm
                         #region Validation
 
                         bool    isF1;
-                        bool    first           = true;
                         int     bestRssiResponse = -150;
-                        string  freq1wayStr     = await map.Frequency1Way  .GetValue ();
-                        string  freq2wayTxStr   = await map.Frequency2WayTx.GetValue ();
+                        string  freq1wayStr      = await map.Frequency1Way  .GetValue ();
+                        string  freq2wayTxStr    = await map.Frequency2WayTx.GetValue ();
                         // NOTE: Parsing to double is important to take into account the separator symbol ( . or , ),
                         // NOTE: because parse "123,456" returns "123456" and use CultureInfo.InvariantCulture is not an universal solution
-                        CultureInfo usCulture   = new CultureInfo("en-US");
-                        double  freq1           = double.Parse ( freq1wayStr  .Replace ( ',', '.' ), usCulture.NumberFormat );
-                        double  freq2           = double.Parse ( freq2wayTxStr.Replace ( ',', '.' ), usCulture.NumberFormat );
+                        CultureInfo usCulture    = new CultureInfo("en-US");
+                        double  freq1            = double.Parse ( freq1wayStr  .Replace ( ',', '.' ), usCulture.NumberFormat );
+                        double  freq2            = double.Parse ( freq2wayTxStr.Replace ( ',', '.' ), usCulture.NumberFormat );
                         foreach ( NodeDiscovery node in nodeList.CurrentAttemptEntries )
                         {
                             // The first entry is only a LExI response
                             // with general information of the process
-                            if ( first )
-                            {
-                                first = false;
+                            if ( node.Index == 1 )
                                 continue;
-                            }
                         
                             // Channel / Frequency
                             // NOTE: In the custom methods Frequency1Way_Get and Frequency2WayTx_Get the value returned is trimmed to three decimal digits
@@ -1241,7 +1241,7 @@ namespace MTUComm
                             // · P( two way transaction is successful ) = P( TWO WAY )
                             //   · P( TWO WAY ) = 100% - { 100% - [ P( DCU TX Success ) * P( MTU TX Success ) ] }^3
 
-                            // Highest signal strength ( DCU -> MTU )
+                            // Highest signal strength in channel F2 ( DCU -> MTU )
                             if ( ! isF1 &&
                                  node.RSSIResponse > bestRssiResponse )
                                 bestRssiResponse = node.RSSIResponse;
@@ -1260,7 +1260,7 @@ namespace MTUComm
                              successF2 >= global.GoodF2Rely/100 )
                             result = NodeDiscoveryResult.EXCELLENT;
                         
-                        // Minimum
+                        // Good/Minimum
                         else if ( numNodesValidated >= global.MinNumDCU &&
                                   successF1 >= global.MinF1Rely/100 &&
                                   successF2 >= global.MinF2Rely/100 )
@@ -1285,6 +1285,8 @@ namespace MTUComm
 
                         break; // Exit from infinite while
                     }
+                    else
+                        await Task.Delay ( WAIT_BTW_NODE_FAILS );
                 }
             }
             catch ( Exception e )
@@ -1313,7 +1315,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Valve Operation ( previously Remote Disconnect )
+        #region Valve Operation ( prev. Remote Disconnect )
 
         private void RemoteDisconnect ()
         {
@@ -1445,6 +1447,7 @@ namespace MTUComm
         }
 
         #endregion
+
 
         #region Turn On|Off
 

@@ -2,7 +2,7 @@
 
 namespace Xml
 {
-    public class UnitTestRegister
+    public class UnitTestValue
     {
         [XmlAttribute("id")]
         public string Id { get; set; }
