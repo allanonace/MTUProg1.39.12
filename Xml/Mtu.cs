@@ -11,6 +11,10 @@ namespace Xml
     /// Properties
     /// <list type="Mtu">
     /// <item>
+    ///   <term>BroadCast</term>
+    ///   <description></description>
+    /// </item>
+    /// <item>
     ///   <term>CutWireDelaySetting</term>
     ///   <description></description>
     /// </item>
@@ -186,17 +190,14 @@ namespace Xml
     public class Mtu
     {
         public enum VERSION { NEW, ARCH };
+
+        public enum ENCRYPTION { NONE, AES128, AES256 };
     
         private const int DEF_FLOW = -1;
     
         public Mtu ()
         {
-            //this.Description              = SET BY ACLARA
-            //this.Flow                     = SET BY ACLARA [0,1]
-            //this.IsEcoder                 = Konstantin: Please use Ecoder only,  isEcoder is for legacy MTUs
-            //this.MagneticTamper           = ¿?
-            //this.Model                    = SET BY ACLARA
-
+            this.BroadCast                  = false;
             this.CutWireDelaySetting        = false;
             this.DataRead                   = false;
             this.DailyReads                 = true;
@@ -206,6 +207,8 @@ namespace Xml
             this.ECoderDaysOfLeak           = false;
             this.ECoderLeakDetectionCurrent = false;
             this.ECoderReverseFlow          = false;
+            this.EnergizerLastGasp          = false;
+            this.EnergizerLastGaspImm       = false;
             this.FastMessageConfig          = false;
             this.Flow                       = DEF_FLOW;
             this.GasCutWireAlarm            = false;
@@ -216,28 +219,42 @@ namespace Xml
             this.InterfaceTamperImm         = false;
             this.LastGasp                   = false;
             this.LastGaspImm                = false;
+            this.MagneticTamper             = false;
+            this.MagneticTamperImm          = false;
+            this.MemoryMapError             = false;
+            this.MemoryMapErrorImm          = false;
             this.MtuDemand                  = false;
+            this.MoistureDetect             = false;
+            this.MoistureDetectImm          = false;
             this.NodeDiscovery              = false;
             this.OnTimeSync                 = false;
+            this.ProgramMemoryError         = false;
+            this.ProgramMemoryErrorImm      = false;
             this.PulseCountOnly             = false;
             this.RegisterCoverTamper        = false;
+            this.RegisterCoverTamperImm     = false;
             this.RequiresAlarmProfile       = false;
             this.ReverseFlowTamper          = false;
+            this.ReverseFlowTamperImm       = false;
             this.SerialComProblem           = false;
             this.SerialComProblemImm        = false;
             this.SerialCutWire              = false;
             this.SerialCutWireImm           = false;
-            this.STAREncryptionType         = "AES256";  // [None,AES128,AES256]
+            this.STAREncryptionType         = ENCRYPTION.AES256;
             this.SpecialSet                 = false;
             this.TamperPort1                = false;
-            this.TamperPort2                = false;
             this.TamperPort1Imm             = false;
+            this.TamperPort2                = false;
             this.TamperPort2Imm             = false;
             this.TiltTamper                 = false;
+            this.TiltTamperImm              = false;
             this.TimeToSync                 = false;
         }
 
         #region Elements
+
+        [XmlElement("BroadCast")]
+        public bool BroadCast { get; set; }
 
         // NOTE: Is the Mtu Type ( 171, 177,... ) and not the Serial Number or Mtu ID
         [XmlAttribute("ID")]
@@ -365,8 +382,20 @@ namespace Xml
         [XmlElement("RequiresAlarmProfile")]
         public bool RequiresAlarmProfile { get; set; }
         
+        [XmlIgnore]
+        public ENCRYPTION STAREncryptionType { get; set; }
+
         [XmlElement("STAREncryptionType")]
-        public string STAREncryptionType { get; set; }
+        public string STAREncryptionType_AllowEmptyField
+        {
+            get { return this.STAREncryptionType.ToString (); }
+            set
+            {
+                ENCRYPTION v;
+                bool ok = Enum.TryParse<ENCRYPTION>( value, true, out v );
+                this.STAREncryptionType = ( ok ) ? v : ENCRYPTION.NONE;
+            }
+        }
         
         [XmlElement("SpecialSet")]
         public bool SpecialSet { get; set; }
@@ -384,6 +413,9 @@ namespace Xml
         
         [XmlElement("EnergizerLastGasp")]
         public bool EnergizerLastGasp { get; set; }
+
+        [XmlElement("EnergizerLastGaspImm")]
+        public bool EnergizerLastGaspImm { get; set; }
 
         [XmlElement("GasCutWireAlarm")]
         public bool GasCutWireAlarm { get; set; }
@@ -412,20 +444,38 @@ namespace Xml
         [XmlElement("MagneticTamper")]
         public bool MagneticTamper { get; set; }
         
+        [XmlElement("MagneticTamperImm")]
+        public bool MagneticTamperImm { get; set; }
+
         [XmlElement("MemoryMapError")]
         public bool MemoryMapError { get; set; }
+
+        [XmlElement("MemoryMapErrorImm")]
+        public bool MemoryMapErrorImm { get; set; }
 
         [XmlElement("MoistureDetect")]
         public bool MoistureDetect { get; set; }
 
+        [XmlElement("MoistureDetectImm")]
+        public bool MoistureDetectImm { get; set; }
+
         [XmlElement("ProgramMemoryError")]
         public bool ProgramMemoryError { get; set; }
 
+        [XmlElement("ProgramMemoryErrorImm")]
+        public bool ProgramMemoryErrorImm { get; set; }
+
         [XmlElement("RegisterCoverTamper")]
         public bool RegisterCoverTamper { get; set; }
+
+        [XmlElement("RegisterCoverTamperImm")]
+        public bool RegisterCoverTamperImm { get; set; }
         
         [XmlElement("ReverseFlowTamper")]
         public bool ReverseFlowTamper { get; set; }
+
+        [XmlElement("ReverseFlowTamperImm")]
+        public bool ReverseFlowTamperImm { get; set; }
         
         [XmlElement("SerialComProblem")]
         public bool SerialComProblem { get; set; }
@@ -453,6 +503,9 @@ namespace Xml
         
         [XmlElement("TiltTamper")]
         public bool TiltTamper { get; set; }
+
+        [XmlElement("TiltTamperImm")]
+        public bool TiltTamperImm { get; set; }
 
         #endregion
 

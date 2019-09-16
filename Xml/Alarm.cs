@@ -148,25 +148,36 @@ namespace Xml
             this.ECoderDaysOfLeak           = false;
             this.ECoderLeakDetectionCurrent = false;
             this.ECoderReverseFlow          = false;
+            this.EnergizerLastGasp          = false;
+            this.EnergizerLastGaspImm       = false;
             this.ImmediateAlarmTransmit     = false;
             this.InsufficientMemory         = false;
             this.InsufficientMemoryImm      = false;
-            this.InterfaceTamper            = true;
+            this.InterfaceTamper            = false;
+            this.InterfaceTamperImm         = false;
             this.InterfaceTamperImm         = false;
             this.LastGasp                   = false;
             this.LastGaspImm                = false;
-            this.Magnetic                   = true;
+            this.Magnetic                   = false;
+            this.MagneticTamperImm          = false;
+            this.MemoryMapError             = false;
+            this.MemoryMapErrorImm          = false;
+            this.MoistureDetect             = false;
+            this.MoistureDetectImm          = false;
             this.Overlap                    = DEF_OVERLAP;  // [1-11]
-            this.RegisterCover              = true;
-            this.ReverseFlow                = true;
+            this.RegisterCover              = false;
+            this.RegisterCoverTamperImm     = false;
+            this.ReverseFlow                = false;
+            this.ReverseFlowTamperImm       = false;
             this.SerialComProblem           = false;
             this.SerialComProblemImm        = false;
             this.SerialCutWire              = false;
             this.SerialCutWireImm           = false;
-            this.Tilt                       = true;
+            this.Tilt                       = false;
+            this.TiltTamperImm              = false;
             this.TamperPort1                = false;
-            this.TamperPort2                = false;
             this.TamperPort1Imm             = false;
+            this.TamperPort2                = false;
             this.TamperPort2Imm             = false;
         }
 
@@ -244,6 +255,9 @@ namespace Xml
         [XmlElement("EnergizerLastGasp")]
         public bool EnergizerLastGasp { get; set; }
 
+        [XmlElement("EnergizerLastGaspImm")]
+        public bool EnergizerLastGaspImm { get; set; }
+
         [XmlElement("ImmediateAlarmTransmit")]
         public bool ImmediateAlarmTransmit { get; set; }
 
@@ -267,21 +281,39 @@ namespace Xml
 
         [XmlElement("Magnetic")]
         public bool Magnetic { get; set; }
+
+        [XmlElement("MagneticTamperImm")]
+        public bool MagneticTamperImm { get; set; }
         
         [XmlElement("MemoryMapError")]
         public bool MemoryMapError { get; set; }
 
+        [XmlElement("MemoryMapErrorImm")]
+        public bool MemoryMapErrorImm { get; set; }
+
         [XmlElement("MoistureDetect")]
         public bool MoistureDetect { get; set; }
+
+        [XmlElement("MoistureDetectImm")]
+        public bool MoistureDetectImm { get; set; }
 
         [XmlElement("ProgramMemoryError")]
         public bool ProgramMemoryError { get; set; }
 
+        [XmlElement("ProgramMemoryErrorImm")]
+        public bool ProgramMemoryErrorImm { get; set; }
+
         [XmlElement("RegisterCover")]
         public bool RegisterCover { get; set; }
+
+        [XmlElement("RegisterCoverTamperImm")]
+        public bool RegisterCoverTamperImm { get; set; }
         
         [XmlElement("ReverseFlow")]
         public bool ReverseFlow { get; set; }
+
+        [XmlElement("ReverseFlowTamperImm")]
+        public bool ReverseFlowTamperImm { get; set; }
         
         [XmlElement("SerialComProblem")]
         public bool SerialComProblem { get; set; }
@@ -297,6 +329,9 @@ namespace Xml
         
         [XmlElement("Tilt")]
         public bool Tilt { get; set; }
+
+        [XmlElement("TiltTamperImm")]
+        public bool TiltTamperImm { get; set; }
 
         [XmlElement("TamperPort1")]
         public bool TamperPort1 { get; set; }

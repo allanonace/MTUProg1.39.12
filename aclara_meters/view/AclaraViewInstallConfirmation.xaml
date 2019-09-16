@@ -52,7 +52,8 @@
                                             </StackLayout>
                                             <StackLayout IsVisible="{Binding isMTU}">
                                                 <Label Text="{Binding Title}" Margin="14,0,0,0" VerticalOptions="Center" Font="Bold,20" />
-                                                <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" VerticalOptions="Center" />
+                                                <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" VerticalOptions="Center"
+                                                       BackgroundColor="{Binding BackgroundColor}" TextColor="{Binding FontColor}" />
                                             </StackLayout>
                                             <StackLayout IsVisible="{Binding isDetailMeter}">
                                                 <Label Text="{Binding Title}" Margin="36,0,0,0" VerticalOptions="Center" Font="Bold,19" />

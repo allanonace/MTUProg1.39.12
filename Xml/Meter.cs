@@ -197,6 +197,16 @@ namespace Xml
             }
         }
 
+        [XmlIgnore]
+        public bool IsForWater
+        {
+            get
+            {
+                return ! string.IsNullOrEmpty ( this.Utility ) &&
+                         this.Utility.ToLower ().Equals ( "water" );
+            }
+        }
+
         [XmlElement("Vendor")]
         public string Vendor { get; set; }
 

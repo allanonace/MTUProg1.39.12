@@ -1,0 +1,242 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<util:BasePage xmlns="http://xamarin.com/schemas/2014/forms" 
+               xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+               xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" 
+               Title="{Binding PageTitle}" 
+               NavigationPage.HasBackButton="false" 
+               xmlns:local="clr-namespace:aclara_meters;assembly=aclara_meters" 
+               xmlns:Controls="clr-namespace:aclara_meters" 
+               xmlns:behaviors="clr-namespace:aclara_meters.Behaviors" 
+               x:Class="aclara_meters.view.AclaraViewRemoteDisconnect"
+                xmlns:views="clr-namespace:aclara_meters.view;assembly=aclara_meters">
+    <RelativeLayout IsVisible="true">
+        <ContentView IsVisible="true" x:Name="background_scan_page" RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=0}" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=1}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Height,&#xA;                                     Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Height,&#xA;                                     Factor=1}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition x:Name="menu_controller_width" Width="0" />
+                </Grid.ColumnDefinitions>
+                <StackLayout Opacity="1" BackgroundColor="White" Grid.Row="0" Grid.Column="1" Margin="-6,0,0,0" Orientation="Vertical">
+                    <views:TopBar x:Name="TopBar"/>
+                    <ListView Margin="0,0,0,58" x:Name="listaMTUread" IsVisible="false" HasUnevenRows="true" SeparatorVisibility="None" SeparatorColor="#6aa2b8">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <ViewCell>
+                                    <StackLayout IsVisible="{Binding isDisplayed}" Orientation="Vertical" Margin="0,5,5,0">
+                                        <!--HeightRequest="{Binding Height}"-->
+                                        <StackLayout IsVisible="{Binding isMeter}" Margin="0,5,5,0">
+                                            <Label Text="{Binding Description}" Margin="14,4,0,0" VerticalOptions="Center" Font="Bold,20" />
+                                            <BoxView BackgroundColor="#7a868c" HeightRequest="1" Margin="8,-4,24,0" />
+                                        </StackLayout>
+                                        <StackLayout IsVisible="{Binding isMTU}">
+                                            <Label Text="{Binding Title}" Margin="14,0,0,0" VerticalOptions="Center" Font="Bold,20" />
+                                            <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" VerticalOptions="Center" />
+                                        </StackLayout>
+                                        <StackLayout IsVisible="{Binding isDetailMeter}">
+                                            <Label Text="{Binding Title}" Margin="36,0,0,0" VerticalOptions="Center" Font="Bold,19" />
+                                            <Label Text="{Binding Description}" Margin="36,-4,0,0" FontSize="17" VerticalOptions="Center" />
+                                        </StackLayout>
+                                    </StackLayout>
+                                </ViewCell>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                    <StackLayout Orientation="Vertical" x:Name="ReadMTUChangeView" IsVisible="true" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                        <StackLayout Margin="0,0,0,0">
+                            <Grid Margin="0,0,0,0" HeightRequest="48">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto">
+                                    </ColumnDefinition>
+                                    <ColumnDefinition Width="auto">
+                                    </ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="48">
+                                    </RowDefinition>
+                                </Grid.RowDefinitions>
+                                <Label WidthRequest="100" HeightRequest="46" x:Name="port1label" Margin="0,0,0,0" Grid.Column="0" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="22"
+                                    TextColor="#6aa2b8" Opacity="1">
+                                </Label>
+                            </Grid>
+                            <Image Margin="-16,-4,-16,0" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
+                        </StackLayout>
+                        <ScrollView Margin="0,-6,0,-6">
+                            <StackLayout>
+                                <StackLayout IsVisible="false" Margin="12,0,12,0">
+                                    <Label Margin="0,16,0,0" FontSize="22" TextColor="#6aa2b8" Text="Add MTU" />
+                                </StackLayout>
+                                <!--                   -->
+                                <!--      Port 1       -->
+                                <!--                   -->
+                                <StackLayout IsVisible="true" Margin="0,0,0,0">
+                                    <StackLayout x:Name="port1view" IsVisible="true" Margin="12,0,12,0">
+                                        <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" x:Name="name_of_window_port1" Text="Add MTU" />
+                                        <!-- Account Number / Service Port ID -->
+                                        <Label Text="Service Port ID" Margin="0,4,0,0" x:Name="lb_AccountNumber" VerticalOptions="Center" Font="Bold,17" />
+                                        <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                            <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                    <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" Keyboard="Numeric" HeightRequest="40" x:Name="tbx_AccountNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17"
+                                                        HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry.Behaviors>
+                                                            <behaviors:EntryValidatorBehavior />
+                                                        </Controls:BorderlessEntry.Behaviors>
+                                                    </Controls:BorderlessEntry>
+                                                </StackLayout>
+                                            </Frame>
+                                        </Frame>
+                                        <!-- Field Order -->
+                                        <StackLayout x:Name="div_FieldOrder">
+                                            <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_FieldOrder" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_FieldOrder" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+                                        <!-- MTU ID -->
+                                        <StackLayout x:Name="div_MtuId">
+                                            <Label Text="MTU ID" Margin="0,4,0,0" x:Name="lb_MtuId" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MtuId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+                                        <!-- MTU status -->
+                                        <StackLayout x:Name="div_Mtu_Status">
+                                            <Label Text="MTU Status" Margin="0,4,0,0" x:Name="lb_Mtu_Status" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_Mtu_Status" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+                                        <!-- RDD Position -->
+                                        <StackLayout x:Name="div_RDDPosition">
+                                            <Label Text="RDD Position" Margin="0,4,0,0" x:Name="lb_RDDPosition" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_RDDPosition" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                         </StackLayout>
+                                        <!-- RDD Serial Number -->
+                                        <StackLayout x:Name="div_RDDSerialNumber">
+                                            <Label Text="RDD Serial Number" Margin="0,4,0,0" x:Name="lb_RDDSerialNumber" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_RDDSerialNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                         </StackLayout>     
+                                       <!-- Battery -->
+                                        <StackLayout x:Name="div_Battery">
+                                            <Label Text="Battery" Margin="0,4,0,0" x:Name="lb_Battery" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_Battery" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                         </StackLayout>
+                                        <!-- RDD Firmware Version -->
+                                        <StackLayout x:Name="div_RDDFirmwareVersion">
+                                            <Label Text="RDD Serial Number" Margin="0,4,0,0" x:Name="lb_RDDFirmwareVersion" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_RDDFirmwareVersion" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                         </StackLayout>     
+                                        <!-- Valve Position -->
+                                        <StackLayout x:Name="div_ValvePosition" IsVisible="true">
+                                            <Label Text="Valve Position" x:Name="lb_ValvePosition" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessPicker x:Name="pck_ValvePosition" Title="" HorizontalOptions="FillAndExpand" FontSize="17" HeightRequest="40" />
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+                                        <StackLayout Margin="0,4,0,148" />
+                                    </StackLayout>
+                                </StackLayout>       
+                            </StackLayout>
+                        </ScrollView>
+                    </StackLayout>
+                </StackLayout>
+                <views:BottomBar x:Name="BottomBar"/>
+            </Grid>
+        </ContentView>
+        <Image Source="shadoweffect" Margin="298,0,0,0" Opacity="0.75" IsVisible="false" WidthRequest="29" HeightRequest="1024" x:Name="shadoweffect">
+        </Image>
+        <!-- Menu desplegable -->
+        <ContentView x:Name="ContentNav" BackgroundColor="#6aa2b8" WidthRequest="310" IsVisible="false" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                 Property=Height,&#xA;                                 Factor=1}">
+            <views:MenuView x:Name="MenuOptions"/>
+        </ContentView>
+        <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" IsVisible="true" WidthRequest="1500" Opacity="0.6">
+        </StackLayout>
+        <StackLayout InputTransparent="true" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                                     Property=Height,&#xA;                                                     Factor=0}" RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                                     Property=Height,&#xA;                                                     Factor=1}" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                                     Property=Width,&#xA;                                                     Factor=1}">
+            <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" IsVisible="true" IsRunning="true" Scale="2" VerticalOptions="CenterAndExpand" HorizontalOptions="CenterAndExpand" />
+        </StackLayout>
+        <!--   DIALOGS   -->
+        <Image BackgroundColor="Black" x:Name="dialog_open_bg" WidthRequest="1500" IsVisible="false" HeightRequest="1024" Opacity="0.5">
+        </Image>
+        <ContentView Scale="1.2" IsVisible="false" HeightRequest="200" x:Name="turnoff_mtu_background" RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=0.19}" RelativeLayout.WidthConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Width,&#xA;                                     Factor=0.620}" RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent,&#xA;                                     Property=Height,&#xA;                                     Factor=0.4}">
+            <views:DialogsView x:Name="DialogView"/>
+        </ContentView>
+        <!--  END DIALOGS   -->
+    </RelativeLayout>
+</util:BasePage>

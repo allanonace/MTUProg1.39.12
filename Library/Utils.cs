@@ -144,7 +144,7 @@ namespace Library
             string key,
             byte[] iv = null )
         {
-            byte[] arKey = Encoding.ASCII.GetBytes ( key );
+            byte[] arKey = Encoding.UTF8.GetBytes ( key );
             byte[] encrypted = EncryptStringToBytes_Aes ( text, arKey, iv );
             return Convert.ToBase64String ( encrypted );
         }
@@ -155,7 +155,7 @@ namespace Library
             byte[] iv = null )
         {
             byte[] arText = Convert.FromBase64String ( encryptedText );
-            byte[] arKey  = Encoding.ASCII.GetBytes ( key );
+            byte[] arKey  = Encoding.UTF8.GetBytes ( key );
             return DecryptStringFromBytes_Aes ( arText, arKey, iv );
         }
     
@@ -260,7 +260,7 @@ namespace Library
             for ( int i = 0; i < data.Length; i++ )
                 value += data[ i ] << ( i * 8 );
             
-            return ( T )( object )value;
+            return ( T )Convert.ChangeType ( value, typeof( T ) );
         }
         
         public static string ByteArrayToString (
@@ -308,6 +308,51 @@ namespace Library
 
             string str = value.ToString ();
             return str[ 0 ].ToString ().ToUpper () + str.Substring ( 1 );
+        }
+
+        public static string StringToBase64 (
+            string text )
+        {
+            if ( ! Utils.StringIsInBase64 ( text ) )
+                 return Convert.ToBase64String ( Encoding.UTF8.GetBytes ( text ) );
+            else return text;
+        }
+
+        public static byte[] StringToByteArrayBase64 (
+            string text )
+        {
+            if ( ! Utils.StringIsInBase64 ( text ) )
+                 return Encoding.UTF8.GetBytes ( Utils.StringToBase64 ( text ) );
+            else return Encoding.UTF8.GetBytes ( text );
+        }
+
+        public static bool StringIsInBase64 (
+            string text )
+        {
+            try
+            {
+                Convert.FromBase64String ( text );
+            }
+            catch ( Exception )
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static string StringFromBase64 (
+            string text,
+            out bool wasInBase64 )
+        {
+            if ( ( wasInBase64 = Utils.StringIsInBase64 ( text ) ) )
+                return Encoding.UTF8.GetString ( Convert.FromBase64String ( text ) );
+            return text;
+        }
+
+        public static string StringFromBase64 (
+            string text )
+        {
+            return Utils.StringFromBase64 ( text, out bool wasInBase64 );
         }
 
         #endregion

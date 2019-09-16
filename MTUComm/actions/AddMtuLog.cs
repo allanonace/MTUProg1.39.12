@@ -149,32 +149,43 @@ namespace MTUComm
 
             #endregion
 
-            #region Certificate
-            
-            Mobile.ConfigData data = Mobile.configData;
+            #region Encryption
 
             // Avoid try to log encryption info when not it has not been performed
-            if ( data.isMtuEncrypted )
+            if ( await map.Encrypted.GetValue () )
             {
                 //logger.Parameter ( this.addMtuAction, new Parameter ( "Encryption", "Encrypted", map.Encryption.GetValue () ) );
                 logger.AddParameter ( this.addMtuAction, new Parameter ( "EncryptionIndex", "Encryption Index", await map.EncryptionIndex.GetValue () ) );
             
-                // Using certificate with public key
-                if ( data.IsCertLoaded )
+                if ( ! mtu.IsFamilly35xx36xx )
                 {
-                    Utils.Print ( "Using certificate creating activity log" );
+                    Mobile.ConfigData data = Mobile.configData;
+
+                    // Using certificate with public key
+                    if ( data.IsCertLoaded )
+                    {
+                        Utils.Print ( "Using certificate creating activity log" );
+                        
+                        logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuSymKey",            "MtuSymKey",             data.RandomKeyAndShaEncryptedInBase64 ) );
+                        logger.AddParameter ( this.addMtuAction, new Parameter ( "HeadendCertThumb",     "HeadendCertThumb",      data.certificate.Thumbprint ) );
+                        logger.AddParameter ( this.addMtuAction, new Parameter ( "HeadendCertValidTill", "HeadendCertExpiration", data.certificate.NotAfter.ToString ( "MM/dd/yy hh:mm:ss tt" ) ) );
+                        logger.AddParameter ( this.addMtuAction, new Parameter ( "DeviceCertSubject",    "DeviceCertSubject",     data.certificate.Subject    ) );
+                    }
+                    // No certificate present
+                    else
+                    {
+                        Utils.Print ( "Not using certificate creating activity log" );
                     
-                    logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaEncryptedInBase64 ) );
-                    logger.AddParameter ( this.addMtuAction, new Parameter ( "HeadendCertThumb",     "HeadendCertThumb",      data.certificate.Thumbprint ) );
-                    logger.AddParameter ( this.addMtuAction, new Parameter ( "HeadendCertValidTill", "HeadendCertExpiration", data.certificate.NotAfter.ToString ( "MM/dd/yy hh:mm:ss tt" ) ) );
-                    logger.AddParameter ( this.addMtuAction, new Parameter ( "DeviceCertSubject",    "DeviceCertSubject",     data.certificate.Subject    ) );
+                        logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaInBase64 ) );
+                    }
                 }
-                // No certificate present
+                // OnDemand 1.2 MTUs
                 else
                 {
-                    Utils.Print ( "Not using certificate creating activity log" );
-                
-                    logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuSymKey", "MtuSymKey", data.RandomKeyAndShaInBase64 ) );
+                    logger.AddParameter ( this.addMtuAction, new Parameter ( "serverRND",          "serverRND",          Data.Get.ServerRND     ) );
+                    logger.AddParameter ( this.addMtuAction, new Parameter ( "clientRND",          "clientRND",          Data.Get.ClientRND     ) );
+                    logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuPublicKey",       "MtuPublicKey",       Data.Get.MtuPublicKey  ) );
+                    logger.AddParameter ( this.addMtuAction, new Parameter ( "STAREncryptionType", "STAREncryptionType", mtu.STAREncryptionType ) );
                 }
             }
 
@@ -299,113 +310,63 @@ namespace MTUComm
 
             if ( mtu.RequiresAlarmProfile )
             {
-                Alarm alarms = (Alarm)form.Alarm.Value;
+                Alarm alarms = ( Alarm )form.Alarm.Value;
                 if ( alarms != null )
                 {
-                    XElement alarmSelection = new XElement("AlarmSelection");
-                    logger.AddAtrribute ( alarmSelection, "display", "Alarm Selection");
+                    XElement alarmSelection = new XElement ( "AlarmSelection" );
+                    logger.AddAtrribute ( alarmSelection, "display", "Alarm Selection" );
+
+                    dynamic AddParamCond = new Action<string,string,string,bool> (
+                        ( tag, display, value, condition ) => {
+                            if ( condition )
+                                logger.AddParameter ( alarmSelection,
+                                    new Parameter ( tag, display, value ) );
+                        });
+                    
+                    dynamic AddParameter = new Action<string,string,string> (
+                        ( tag, display, value ) =>
+                            AddParamCond ( tag, display, value, true ) );
 
                     string alarmConfiguration = alarms.Name;
-                    logger.AddParameter ( alarmSelection,
-                    new Parameter("AlarmConfiguration", "Alarm Configuration Name", alarmConfiguration));
+                    AddParameter ( "AlarmConfiguration",        "Alarm Configuration Name",     alarmConfiguration );
+                    AddParameter ( "Overlap",                   "Message Overlap",              alarms.Overlap.ToString () );
+                    AddParameter ( "ImmediateAlarm",            "Immediate Alarm Transmit",     alarms.ImmediateAlarmTransmit.ToString () );
+                    AddParamCond ( "UrgentAlarm",               "DCU Urgent Alarm Transmit",    alarms.DcuUrgentAlarm.ToString (),                          map.ContainsMember ( "UrgentAlarm" ) );
+                    AddParamCond ( "MemoryMapError",            "Memory Map Error",             await map.MemoryMapTamperStatus.GetValue (),                mtu.MemoryMapError );
+                    AddParamCond ( "MemoryMapErrorImm",         "Memory Map Error Imm",         await map.MemoryMapImmTamperStatus.GetValue (),             mtu.MemoryMapErrorImm );
+                    AddParamCond ( "ProgramMemoryError",        "Program Memory Error",         await map.ProgramMemoryTamperStatus.GetValue (),            mtu.ProgramMemoryError );
+                    AddParamCond ( "ProgramMemoryErrorImm",     "Program Memory Error Imm",     await map.ProgramMemoryImmTamperStatus.GetValue (),         mtu.ProgramMemoryErrorImm );
+                    AddParamCond ( "MoistureDetect",            "Moisture Detect",              await map.MoistureTamperStatus.GetValue (),                 mtu.MoistureDetect );
+                    AddParamCond ( "MoistureDetectImm",         "Moisture Detect Imm",          await map.MoistureImmTamperStatus.GetValue (),              mtu.MoistureDetectImm );
+                    AddParamCond ( "EnergizerLastGasp",         "Energizer Last Gasp",          await map.EnergizerLastGaspTamperStatus.GetValue (),        mtu.EnergizerLastGasp );
+                    AddParamCond ( "EnergizerLastGaspImm",      "Energizer Last Gasp Imm",      await map.EnergizerLastGaspImmTamperStatus.GetValue (),     mtu.EnergizerLastGaspImm );
+                    AddParamCond ( "InsufficentMemory",         "Insufficent Memory",           await map.InsufficientMemoryTamperStatus.GetValue (),       mtu.InsufficientMemory );
+                    AddParamCond ( "InsufficentMemoryImm",      "Insufficent Memory Imm",       await map.InsufficientMemoryImmTamperStatus.GetValue (),    mtu.InsufficientMemoryImm );
+                    AddParamCond ( "CutAlarmCable",             "Cut Alarm Cable",              await map.GasCutWireTamperStatus.GetValue (),               mtu.GasCutWireAlarm );
+                    AddParamCond ( "Cut2AlarmCable",            "Cut Port2 Alarm Cable",        await map.P2GasCutWireTamperStatus.GetValue (),             form.usePort2 && mtu.GasCutWireAlarm );
+                    AddParamCond ( "SerialComProblem",          "Serial Com Problem",           await map.SerialComProblemTamperStatus.GetValue (),         mtu.SerialComProblem );
+                    AddParamCond ( "SerialComProblemImm",       "Serial Com Problem Imm",       await map.SerialComProblemImmTamperStatus.GetValue (),      mtu.SerialComProblemImm );
+                    AddParamCond ( "LastGasp",                  "Last Gasp",                    await map.LastGaspTamperStatus.GetValue (),                 mtu.LastGasp );
+                    AddParamCond ( "LastGaspImm",               "Last Gasp Imm",                await map.LastGaspImmTamperStatus.GetValue (),              mtu.LastGaspImm );
+                    AddParamCond ( "TiltTamper",                "Tilt Tamper",                  await map.TiltTamperStatus.GetValue (),                     mtu.TiltTamper );
+                    AddParamCond ( "TiltTamperImm",             "Tilt Tamper Imm",              await map.TiltImmTamperStatus.GetValue (),                  mtu.TiltTamperImm );
+                    AddParamCond ( "MagneticTamper",            "Magnetic Tamper",              await map.MagneticTamperStatus.GetValue (),                 mtu.MagneticTamper );
+                    AddParamCond ( "MagneticTamperImm",         "Magnetic Tamper Imm",          await map.MagneticImmTamperStatus.GetValue (),              mtu.MagneticTamperImm );
+                    AddParamCond ( "InterfaceTamper",           "Interface Tamper",             await map.InterfaceTamperStatus.GetValue (),                mtu.InterfaceTamper );
+                    AddParamCond ( "InterfaceTamperImm",        "Interface Tamper Imm",         await map.InterfaceImmTamperStatus.GetValue (),             mtu.InterfaceTamperImm );
+                    AddParamCond ( "RegisterCoverTamper",       "Register Cover Tamper",        await map.RegisterCoverTamperStatus.GetValue (),            mtu.RegisterCoverTamper );
+                    AddParamCond ( "RegisterCoverTamperImm",    "Register Cover Tamper Imm",    await map.RegisterCoverImmTamperStatus.GetValue (),         mtu.RegisterCoverTamperImm );
+                    AddParamCond ( "ReverseFlow",               "Reverse Flow Tamper",          await map.ReverseFlowTamperStatus.GetValue (),              mtu.ReverseFlowTamper );
+                    AddParamCond ( "FlowDirection",             "Flow Direction",               meter.Flow.ToString (),                                     mtu.ReverseFlowTamper );
+                    AddParamCond ( "ReverseFlowTamperImm",      "Reverse Flow Tamper Imm",      await map.ReverseFlowImmTamperStatus.GetValue (),           mtu.ReverseFlowTamperImm );
+                    AddParamCond ( "SerialCutWire",             "Serial Cut Wire",              await map.SerialCutWireTamperStatus.GetValue (),            mtu.SerialCutWire );
+                    AddParamCond ( "SerialCutWire",             "Serial Cut Wire",              await map.SerialCutWireImmATamperStatus.GetValue (),        mtu.SerialCutWireImm );
+                    AddParamCond ( "Cut1WireTamper",            "Cut Port1 Wire Tamper",        await map.P1CutWireTamperStatus.GetValue (),                mtu.TamperPort1 );
+                    AddParamCond ( "Cut1WireTamperImm",         "Cut Port1 Wire Tamper Imm",    await map.P1CutWireImmTamperStatus.GetValue (),             mtu.TamperPort1Imm );
+                    AddParamCond ( "Cut2WireTamper",            "Cut Port2 Wire Tamper",        await map.P2CutWireTamperStatus.GetValue (),                form.usePort2 && mtu.TamperPort2 );
+                    AddParamCond ( "Cut2WireTamperImm",         "Cut Port2 Wire Tamper Imm",    await map.P2CutWireImmTamperStatus.GetValue (),             form.usePort2 && mtu.TamperPort2Imm );
 
-                    string overlap = alarms.Overlap.ToString();
-                    logger.AddParameter ( alarmSelection,
-                    new Parameter("Overlap", "Message Overlap", overlap));
-
-                    string immediateAlarmTransmit = ( alarms.ImmediateAlarmTransmit ) ? "True" : "False";
-                    logger.AddParameter ( alarmSelection,
-                    new Parameter("ImmediateAlarm", "Immediate Alarm Transmit", immediateAlarmTransmit));
-
-                    string urgentAlarm = ( alarms.DcuUrgentAlarm ) ? "True" : "False";
-                    logger.AddParameter ( alarmSelection,
-                    new Parameter("UrgentAlarm", "DCU Urgent Alarm Transmit", urgentAlarm));
-
-                    // TODO: Define and add to the log the immediate alarms
-
-                    if ( mtu.MemoryMapError )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "MemoryMapError", "Memory Map Error", await map.MemoryMapTamperStatus.GetValue () ) );
-
-                    // TODO: Define and add to the log MemoryMapErrorImm
-
-                    if ( mtu.ProgramMemoryError )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "ProgramMemoryError", "Program Memory Error", await map.ProgramMemoryTamperStatus.GetValue () ) );
-                    
-                    // TODO: Define and add to the log ProgramMemoryErrorImm
-
-                    if ( mtu.MoistureDetect )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "MoistureDetect", "Moisture Detect", await map.MoistureTamperStatus.GetValue () ) );
-
-                    // TODO: Define and add to the log MoistureDetectImm
-                    
-                    if ( mtu.EnergizerLastGasp )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "EnergizerLastGasp", "Energizer Last Gasp", await map.EnergizerLastGaspTamperStatus.GetValue () ) );
-                    
-                    // TODO: Define and add to the log EnergizerLastGaspImm
-
-                    if ( mtu.InsufficientMemory )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "InsufficentMemory", "Insufficent Memory", await map.InsufficientMemoryTamperStatus.GetValue () ) );
-
-                    if ( mtu.GasCutWireAlarm )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "CutAlarmCable", "Cut Alarm Cable", await map.GasCutWireTamperStatus.GetValue () ) );
-
-                    if ( form.usePort2 &&
-                         mtu.GasCutWireAlarm )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "Cut2AlarmCable", "Cut Port2 Alarm Cable", await map.P2GasCutWireTamperStatus.GetValue () ) );
-
-                    if ( mtu.SerialComProblem )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "SerialComProblem", "Serial Com Problem", await map.SerialComProblemTamperStatus.GetValue () ) );
-
-                    if ( mtu.LastGasp )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "LastGasp", "Last Gasp", await map.LastGaspTamperStatus.GetValue () ) );
-
-                    if ( mtu.TiltTamper )
-                        logger.AddParameter( alarmSelection,
-                        new Parameter("TiltTamper", "Tilt Tamper", await map.TiltTamperStatus.GetValue () ));
-
-                    if ( mtu.MagneticTamper )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter("MagneticTamper", "Magnetic Tamper", await map.MagneticTamperStatus.GetValue () ));
-
-                    if ( mtu.InterfaceTamper)
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter("InterfaceTamper", "Interface Tamper", await map.InterfaceTamperStatus.GetValue () ));
-
-                    if ( mtu.RegisterCoverTamper )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter("RegisterCoverTamper", "Register Cover Tamper", await map.RegisterCoverTamperStatus.GetValue () ));
-
-                    if ( mtu.ReverseFlowTamper )
-                    {
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter("ReverseFlow", "Reverse Flow Tamper", await map.ReverseFlowTamperStatus.GetValue () ));
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter("FlowDirection", "Flow Direction", meter.Flow.ToString() ));
-                    }
-
-                    if ( mtu.SerialCutWire )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "SerialCutWire", "Serial Cut Wire", await map.SerialCutWireTamperStatus.GetValue () ) );
-
-                    if ( mtu.TamperPort1 )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "Cut1WireTamper", "Cut Port1 Wire Tamper", await map.P1CutWireTamperStatus.GetValue () ) );
-
-                    if ( form.usePort2 &&
-                         mtu.TamperPort2 )
-                        logger.AddParameter ( alarmSelection,
-                        new Parameter ( "Cut2WireTamper", "Cut Port2 Wire Tamper", await map.P2CutWireTamperStatus.GetValue () ) );
-
-                    this.addMtuAction.Add(alarmSelection);
+                    this.addMtuAction.Add ( alarmSelection );
                 }
             }
 

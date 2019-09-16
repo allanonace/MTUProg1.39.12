@@ -145,8 +145,12 @@ namespace MTUComm.MemoryMap
         // Value size ( number of consecutive bytes ) is also used for bit with bool type
         public int bit { get { return this.size; } }
 
+        #region Custom Operation
+
         public string mathExpression_Get { get { return this.custom_Get; } }
         public string mathExpression_Set { get { return this.custom_Set; } }
+
+        #endregion
 
         #region Custom Get
 
@@ -287,276 +291,6 @@ namespace MTUComm.MemoryMap
             }
         }
 
-        /// <summary>
-        /// Returns asynchronously the value stored in the register without applying
-        /// any post-process to the data ( raw ) in byte array format.
-        /// <para>
-        /// See <see cref="GetValueFromMtu(bool)"/> to recover data in register format.
-        /// </para>
-        /// </summary>
-        /// <remarks>
-        /// TODO: Rename to "GetValueByteArrayFromMtu"
-        /// </remarks>
-        /// <param name="useSizeGet"><see langword="false"/> to recover register data using the same size as writing</param>
-        /// <returns>Task object required to execute the method asynchronously and
-        /// for a correct exceptions bubbling.
-        /// <para>
-        /// Current value stored in the register in byte array format.
-        /// </para>
-        /// </returns>
-        /// <seealso cref="ValueRaw"/>
-        /// <seealso cref="ValueByteArrayRaw"/>
-        /// <seealso cref="GetValue"/>
-        public async Task<byte[]> GetValueByteArray (
-            bool useSizeGet = true )
-        {
-            // Read value from MTU if is necessary
-            await this.funcGet ();
-        
-            return this.funcGetByteArray ( useSizeGet );
-        }
-
-        /// <summary>
-        /// Returns asynchronously the value stored in the register without
-        /// applying any post-process to the data ( raw ).
-        /// <para>
-        /// See <see cref="GetValueByteArray(bool)"/> to recover data in byte array format.
-        /// </para>
-        /// </summary>
-        /// <param name="returnByteArray"><see langword="true"/> to recover data in byte array format</param>
-        /// <returns>Task object required to execute the method asynchronously and
-        /// for a correct exceptions bubbling.
-        /// <para>
-        /// Current value stored in the register in register format or byte array format-
-        /// </para>
-        /// </returns>
-        /// <seealso cref="ValueRaw"/>
-        /// <seealso cref="ValueByteArrayRaw"/>
-        /// <seealso cref="GetValue"/>
-        public async Task<dynamic> GetValueFromMtu (
-            bool returnByteArray = false )
-        {
-            Utils.PrintDeep ( Environment.NewLine + "------LOAD_FROM_MTU------" );
-            Utils.Print ( "Register -> GetValueFromMtu -> " + this.id + " [ Return byte array: " + returnByteArray + " ]" );
-        
-            // Reset flag that will be used in funcGet to invoke funcGetFromMtu
-            this.readedFromMtu = false;
-            var result = await this.GetValue ();
-            
-            Utils.PrintDeep ( "---LOAD_FROM_MTU_FINISH--" + Environment.NewLine );
-            
-            if ( ! returnByteArray )
-            	 return result;
-          	else return this.lastRead;
-        }
-        
-        /// <summary>
-        /// Set to zero/0 the value of the register, reseting all its bits.
-        /// If the argument is not null, set the bit referenced by the register to desired value and
-        /// finally writes current byte value to the physical memory of the MTU.
-        /// <para>
-        /// See <see cref="SetValueToMtu(dynamic)"/> to modify the value of the register and write it to the physical memory of the MTU.
-        /// </para>
-        /// </summary>
-        /// <remarks>
-        /// NOTE: This method should only be used working with bool registers.
-        /// <para>
-        /// TODO: Rename to "ResetByteAndSetBitToMtu"
-        /// </para>
-        /// </remarks>
-        /// <param name="value">New value that will be set to the bit pointed by the register and then written to the physical memory of the MTU</param>
-        /// <returns>Task object required to execute the method asynchronously and
-        /// for a correct exceptions bubbling.</returns>
-        /// <seealso cref="SetBitToMtu"/>
-        /// <seealso cref="SetValue(dynamic)"/>
-        /// <seealso cref="SetValueToMtu(dynamic)"/>
-        public async Task ResetByteAndSetValueToMtu (
-            dynamic value = null )
-        {
-            if ( this.valueType == RegType.BOOL )
-            {
-                Utils.Print ( "Register -> ResetByte -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
-            
-                // Reset full byte ( all flags to zero/disable )
-                await this.lexi.Write ( ( uint )this.address, new byte[] { default ( byte ) } );
-                
-                // Write flag for this register
-                await this.SetValueToMtu ( value );
-            }
-        }
-        
-        /// <summary>
-        /// Writes zero/0 to the specified byte, set the value passed as argument
-        /// if it is not null, and writes it to the physical memory of the MTU.
-        /// <para>
-        /// If no argument is passed, the current ( cached ) value of the register
-        /// will be used to write to the physical memory of the MTU.
-        /// </para>
-        /// <para>
-        /// See <see cref="SetBitToMtu"/> to modify only the bit pointed by the register in the physical memory of the MTU.
-        /// </para>
-        /// </summary>
-        /// <param name="value">New value that will be set to the register and then written to the physical memory of the MTU</param>
-        /// <returns>Task object required to execute the method asynchronously and
-        /// for a correct exceptions bubbling.</returns>
-        /// <seealso cref="ResetByteAndSetValueToMtu(dynamic)"/>
-        /// <seealso cref="SetBitToMtu"/>
-        /// <seealso cref="SetValue(dynamic)"/>
-        public async Task SetValueToMtu (
-            dynamic value = null )
-        {
-            Utils.PrintDeep ( Environment.NewLine + "------WRITE_TO_MTU-------" );
-            Utils.Print ( "Register -> SetValueToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
-        
-            // Set value in temporary memory map before write it to the MTU
-            if ( value != null )
-                await this.SetValue ( value );
-            
-            // Write value set in memory map to the MTU
-            if ( valueType == RegType.BOOL )
-                await this.SetBitToMtu ();
-            else
-            {
-                // Recover byte array with length equals to the value to set,
-                // not the length ( sizeGet ) that will be used to recover/get
-                await this.lexi.Write ( ( uint )this.address, this.funcGetByteArray ( false ) );
-            }
-            
-            Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );
-        }
-        
-        /// <summary>
-        /// Writes current value of the register in the physical memory of the MTU, only modifying the bit pointed.
-        /// </summary>
-        /// <remarks>
-        /// NOTE: This method should only be used working with bool registers.
-        /// </remarks>
-        /// <returns>Task object required to execute the method asynchronously and
-        /// for a correct exceptions bubbling.</returns>
-        /// <seealso cref="ResetByteAndSetValueToMtu"/>
-        private async Task SetBitToMtu ()
-        {
-            // Read current value
-            byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1 ) )[ 0 ];
-
-            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
-            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ]" );
-
-            bool valueInMap = ( bool )( object )this.ValueRaw;
-
-            // Modify bit and write to MTU
-            if ( valueInMap )
-                 systemFlags = ( byte ) ( systemFlags |    1 << ( int )bit   );
-            else systemFlags = ( byte ) ( systemFlags & ~( 1 << ( int )bit ) );
-            
-            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Write full byte to MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ] to bit: " + bit );
-            
-            await this.lexi.Write ( ( uint )this.address, new byte[] { systemFlags } );
-        }
-
-        /// <summary>
-        /// Returns asynchronously the value cached in the register, without accesing
-        /// the physical memory of the MTU, at least for this register because using custom
-        /// methods could be necessary to recover other registers from the MTU.
-        /// </summary>
-        /// <returns>Task object required to execute the method asynchronously and
-        /// for a correct exceptions bubbling.
-        /// <para>
-        /// Current ( cached ) value of the register.
-        /// </para>
-        /// </returns>
-        /// <seealso cref="ValueRaw"/>
-        /// <seealso cref="ValueByteArrayRaw"/>
-        /// <seealso cref="GetValueFromMtu(bool)"/>
-        /// <seealso cref="GetValueByteArray(bool)"/>
-        public async Task<T> GetValue ()
-        {
-            // If register has not customized get method, use normal/direct get raw value
-            if ( ! this.HasCustomMethod_Get )
-                return await this.funcGet ();
-
-            return await this.funcGetCustom ();
-        }
-
-        /// <summary>
-        /// Updates value of the register and writes it to the physical memory of the MTU.
-        /// <para>
-        /// If no argument is passed, the current ( cached ) value of the register
-        /// will be used to write to the physical memory of the MTU.
-        /// </para>
-        /// </summary>
-        /// <param name="value">Value that will be set to the register and then written to the physical memory of the MTU</param>
-        /// <returns>Task object required to execute the method asynchronously and
-        /// for a correct exceptions bubbling.</returns>
-        /// <seealso cref="ResetByteAndSetValueToMtu(dynamic)"/>
-        /// <seealso cref="SetValue(dynamic)"/>
-        /// <seealso cref="SetValueToMtu(dynamic)"/>
-        public async Task SetValue (
-            dynamic value )
-        {
-            // Register with read and write
-            if ( this.write )
-            {
-                Utils.Print ( "Register -> SetValue: " + this.id + " = " + value );
-            
-                try
-                {
-                    // Method will modify passed value before set in byte array
-                    // If XML custom field is "method" or "method:id"
-                    if ( this.HasCustomMethod_Set )
-                        value = await this.funcSetCustom ( value );
-    
-                    // Try to set string value after read form control
-                    // If XML custom field is...
-                    if ( value is string )
-                        this.funcSetString ( value ); 
-    
-                    // Try to set string but using byte array ( AES )
-                    else if ( value is byte[] )
-                        this.funcSetByteArray ( value );
-    
-                    // Try to set value of waited type
-                    // If XML custom field is a math expression ( e.g. _val_ * 2 / 5 )
-                    else
-                        this.funcSet ( ( T )value );
-                    
-                    // Flag is used to know what registers should be written in the MTU
-                    this.used = true;
-                }
-                catch ( Exception e )
-                {
-                     Console.WriteLine ( "Register -> SetValue [ ERROR ]: " + e.Message );
-                     Console.WriteLine ( e.StackTrace );
-                }
-            }
-            // Register is readonly
-            else
-            {
-                Utils.Print ( "Set " + id + ": Error - Can't write to this register because is readonly" );
-
-                if ( ! MemoryMap.isUnityTest )
-                    throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
-            }
-        }
-
-        public async Task<string> GetValueXMask (
-            string xMask,
-            int digits )
-        {
-            string value = ( await this.GetValue () ).ToString ();
-
-            // Ejemplo: num 1234 mask X00 digits 6
-            // 1. 4 < 6
-            // 2. 6 - 4 == 3 - 1
-            if ( value.Length < digits &&
-                 digits - value.Length == xMask.Length - 1 )
-            {
-                value = xMask.Substring ( 1, xMask.Length - 1 ) + value;
-            }
-
-            throw new Exception ();
-        }
-
         #endregion
 
         #region Initialization
@@ -619,6 +353,301 @@ namespace MTUComm.MemoryMap
                 else this.methodId_Set = this.id + MemoryMap.METHOD_SUFIX_SET;
             }
         }
+
+        #endregion
+    
+        #region Logic
+
+        #region Get
+
+        /// <summary>
+        /// Returns asynchronously the value stored in the register without applying
+        /// any post-process to the data ( raw ) in byte array format.
+        /// <para>
+        /// See <see cref="GetValueFromMtu(bool)"/> to recover data in register format.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// TODO: Rename to "GetValueByteArrayFromMtu"
+        /// </remarks>
+        /// <param name="useSizeGet"><see langword="false"/> to recover register data using the same size as writing</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// Current value stored in the register in byte array format.
+        /// </para>
+        /// </returns>
+        /// <seealso cref="ValueRaw"/>
+        /// <seealso cref="ValueByteArrayRaw"/>
+        /// <seealso cref="GetValue"/>
+        public async Task<byte[]> GetValueByteArray (
+            bool useSizeGet = true )
+        {
+            // Read value from MTU if is necessary
+            await this.funcGet ();
+        
+            return this.funcGetByteArray ( useSizeGet );
+        }
+
+        /// <summary>
+        /// Returns asynchronously the value stored in the register without
+        /// applying any post-process to the data ( raw ).
+        /// <para>
+        /// See <see cref="GetValueByteArray(bool)"/> to recover data in byte array format.
+        /// </para>
+        /// </summary>
+        /// <param name="returnByteArray"><see langword="true"/> to recover data in byte array format</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// Current value stored in the register in register format or byte array format-
+        /// </para>
+        /// </returns>
+        /// <seealso cref="ValueRaw"/>
+        /// <seealso cref="ValueByteArrayRaw"/>
+        /// <seealso cref="GetValue"/>
+        public async Task<dynamic> GetValueFromMtu (
+            bool returnByteArray = false )
+        {
+            Utils.PrintDeep ( Environment.NewLine + "------LOAD_FROM_MTU------" );
+            Utils.Print ( "Register -> GetValueFromMtu -> " + this.id + " [ Return byte array: " + returnByteArray + " ]" );
+        
+            // Reset flag that will be used in funcGet to invoke funcGetFromMtu
+            this.readedFromMtu = false;
+            var result = await this.GetValue ();
+            
+            Utils.PrintDeep ( "---LOAD_FROM_MTU_FINISH--" + Environment.NewLine );
+            
+            if ( ! returnByteArray )
+            	 return result;
+          	else return this.lastRead;
+        }
+
+        /// <summary>
+        /// Returns asynchronously the value cached in the register, without accesing
+        /// the physical memory of the MTU, at least for this register because using custom
+        /// methods could be necessary to recover other registers from the MTU.
+        /// </summary>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.
+        /// <para>
+        /// Current ( cached ) value of the register.
+        /// </para>
+        /// </returns>
+        /// <seealso cref="ValueRaw"/>
+        /// <seealso cref="ValueByteArrayRaw"/>
+        /// <seealso cref="GetValueFromMtu(bool)"/>
+        /// <seealso cref="GetValueByteArray(bool)"/>
+        public async Task<T> GetValue ()
+        {
+            // If register has not customized get method, use normal/direct get raw value
+            if ( ! this.HasCustomMethod_Get )
+                return await this.funcGet ();
+
+            return await this.funcGetCustom ();
+        }
+
+        public async Task<string> GetValueXMask (
+            string xMask,
+            int digits )
+        {
+            string value = ( await this.GetValue () ).ToString ();
+
+            // Ejemplo: num 1234 mask X00 digits 6
+            // 1. 4 < 6
+            // 2. 6 - 4 == 3 - 1
+            if ( value.Length < digits &&
+                 digits - value.Length == xMask.Length - 1 )
+            {
+                value = xMask.Substring ( 1, xMask.Length - 1 ) + value;
+            }
+
+            throw new Exception ();
+        }
+
+        #endregion
+
+        #region Set
+
+        /// <summary>
+        /// Writes zero/0 to the specified byte, set the value passed as argument
+        /// if it is not null, and writes it to the physical memory of the MTU.
+        /// <para>
+        /// If no argument is passed, the current ( cached ) value of the register
+        /// will be used to write to the physical memory of the MTU.
+        /// </para>
+        /// <para>
+        /// See <see cref="SetBitToMtu"/> to modify only the bit pointed by the register in the physical memory of the MTU.
+        /// </para>
+        /// </summary>
+        /// <param name="value">New value that will be set to the register and then written to the physical memory of the MTU</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="ResetByteAndSetValueToMtu(dynamic)"/>
+        /// <seealso cref="SetBitToMtu"/>
+        /// <seealso cref="SetValue(dynamic)"/>
+        public async Task SetValueToMtu (
+            dynamic value = null )
+        {
+            Utils.PrintDeep ( Environment.NewLine + "------WRITE_TO_MTU-------" );
+            Utils.Print ( "Register -> SetValueToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
+        
+            // Set value in temporary memory map before write it to the MTU
+            if ( value != null )
+                await this.SetValue ( value );
+            
+            // Write value set in memory map to the MTU
+            if ( valueType == RegType.BOOL )
+                await this.SetBitToMtu ();
+            else
+            {
+                // Recover byte array with length equals to the value to set,
+                // not the length ( sizeGet ) that will be used to recover/get
+                await this.lexi.Write (
+                    ( uint )this.address,
+                    this.funcGetByteArray ( false ),
+                    MTUComm.N_ATTEMPTS_LEXI,
+                    MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
+            }
+            
+            Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );
+        }
+        
+        /// <summary>
+        /// Writes current value of the register in the physical memory of the MTU, only modifying the bit pointed.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: This method should only be used working with bool registers.
+        /// </remarks>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="ResetByteAndSetValueToMtu"/>
+        private async Task SetBitToMtu ()
+        {
+            // Read current value
+            byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1 ) )[ 0 ];
+
+            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
+            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ]" );
+
+            bool valueInMap = ( bool )( object )this.ValueRaw;
+
+            // Modify bit and write to MTU
+            if ( valueInMap )
+                 systemFlags = ( byte ) ( systemFlags |    1 << ( int )bit   );
+            else systemFlags = ( byte ) ( systemFlags & ~( 1 << ( int )bit ) );
+            
+            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Write full byte to MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ] to bit: " + bit );
+            
+            await this.lexi.Write (
+                ( uint )this.address,
+                new byte[] { systemFlags },
+                MTUComm.N_ATTEMPTS_LEXI,
+                MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
+        }
+
+        /// <summary>
+        /// Updates value of the register and writes it to the physical memory of the MTU.
+        /// <para>
+        /// If no argument is passed, the current ( cached ) value of the register
+        /// will be used to write to the physical memory of the MTU.
+        /// </para>
+        /// </summary>
+        /// <param name="value">Value that will be set to the register and then written to the physical memory of the MTU</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="ResetByteAndSetValueToMtu(dynamic)"/>
+        /// <seealso cref="SetValue(dynamic)"/>
+        /// <seealso cref="SetValueToMtu(dynamic)"/>
+        public async Task SetValue (
+            dynamic value,
+            bool force = false ) // Force is to prepare the virtual MTU for unit testing
+        {
+            // Register with read and write
+            if ( this.write || force )
+            {
+                Utils.Print ( "Register -> SetValue: " + this.id + " = " + value );
+            
+                try
+                {
+                    // Method will modify passed value before set in byte array
+                    // If XML custom field is "method" or "method:id"
+                    if ( this.HasCustomMethod_Set )
+                        value = await this.funcSetCustom ( value );
+    
+                    // Try to set string value after read form control
+                    // If XML custom field is...
+                    if ( value is string )
+                        this.funcSetString ( value ); 
+    
+                    // Try to set string but using byte array ( AES )
+                    else if ( value is byte[] )
+                        this.funcSetByteArray ( value );
+    
+                    // Try to set value of waited type
+                    // If XML custom field is a math expression ( e.g. _val_ * 2 / 5 )
+                    else
+                        this.funcSet ( ( T )value );
+                    
+                    // Flag is used to know what registers should be written in the MTU
+                    this.used = true;
+                }
+                catch ( Exception e )
+                {
+                     Console.WriteLine ( "Register -> SetValue [ ERROR ]: " + e.Message );
+                     Console.WriteLine ( e.StackTrace );
+                }
+            }
+            // Register is readonly
+            else
+            {
+                Utils.Print ( "Set " + id + ": Error - Can't write to this register because is readonly" );
+
+                if ( ! MemoryMap.isUnityTest )
+                    throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
+            }
+        }
+                
+        /// <summary>
+        /// Set to zero/0 the value of the register, reseting all its bits.
+        /// If the argument is not null, set the bit referenced by the register to desired value and
+        /// finally writes current byte value to the physical memory of the MTU.
+        /// <para>
+        /// See <see cref="SetValueToMtu(dynamic)"/> to modify the value of the register and write it to the physical memory of the MTU.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// NOTE: This method should only be used working with bool registers.
+        /// <para>
+        /// TODO: Rename to "ResetByteAndSetBitToMtu"
+        /// </para>
+        /// </remarks>
+        /// <param name="value">New value that will be set to the bit pointed by the register and then written to the physical memory of the MTU</param>
+        /// <returns>Task object required to execute the method asynchronously and
+        /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="SetBitToMtu"/>
+        /// <seealso cref="SetValue(dynamic)"/>
+        /// <seealso cref="SetValueToMtu(dynamic)"/>
+        public async Task ResetByteAndSetValueToMtu (
+            dynamic value = null )
+        {
+            if ( this.valueType == RegType.BOOL )
+            {
+                Utils.Print ( "Register -> ResetByte -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
+            
+                // Reset full byte ( all flags to zero/disable )
+                await this.lexi.Write (
+                    ( uint )this.address,
+                    new byte[] { default ( byte ) },
+                    MTUComm.N_ATTEMPTS_LEXI,
+                    MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
+                
+                // Write flag for this register
+                await this.SetValueToMtu ( value );
+            }
+        }
+
+        #endregion
 
         #endregion
 

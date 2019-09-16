@@ -139,6 +139,14 @@ namespace MTUComm
             //-----------
             // The MTU encryption process can't be performed after having tried it several times
             { new ActionNotAchievedEncryptionException (),      700 },
+            // The MTU encryption process can't be performed because public key is not present in Global.xml
+            { new ODEncryptionPublicKeyNotSetException (),      701 },
+            // The MTU encryption process can't be performed because public key does not have the correct format
+            { new ODEncryptionPublicKeyFormatException (),      702 },
+            // The MTU encryption process can't be performed because broadcast key is not present in Global.xml
+            { new ODEncryptionBroadcastKeyNotSetException (),   703 },
+            // The MTU encryption process can't be performed because broadcast key does not have the correct format
+            { new ODEncryptionBroadcastKeyFormatException (),   704 },
             
             // Configuration Files and System [ 7xx ]
             //-------------------------------

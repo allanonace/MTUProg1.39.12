@@ -9,7 +9,7 @@ using System.Web;
 namespace MTUComm
 {
     /// <summary>
-    /// Compresses strings using the algorithm Deflate or  GZip and encoding
+    /// Compresses strings using the algorithm Deflate or GZip and encoding
     /// the result to URL format, to allow to send data directly within the URL.
     /// </summary>
     public sealed class Compression
@@ -86,7 +86,9 @@ namespace MTUComm
 
         /// <summary>
         /// Compresses a string using the algorithm indicated in the Global.xml configuration file.
+        /// <para>
         /// See <see cref="Xml.Global"/> to show the class used to map Global.xml file.
+        /// </para>
         /// </summary>
         /// <remarks>
         /// By default, the Compression tag in Global.xml is set to an empty string, NO compression.

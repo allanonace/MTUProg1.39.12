@@ -134,8 +134,8 @@ namespace MTUComm
         #region Attributes
 
         private List<NodeDiscovery> entries;
+        private List<List<NodeDiscovery>> attempts;
         private NodeType nodeType;
-        private int uniqueNodeIDs;
 
         #endregion
 
@@ -147,52 +147,31 @@ namespace MTUComm
         }
 
         /// <summary>
-        /// The total number of nodes/DCUs detected.
-        /// </summary>
-        /// <value></value>
-        public int Count
-        {
-            get { return this.entries.Count; }
-        }
-
-        /// <summary>
         /// Full list with all nodes/DCUs detected.
         /// <para>
         /// See <see cref="NodeDiscovery"/> for the representation of the info associated to the detected nodes/DCUs.
         /// </para>
         /// </summary>
-        /// <value></value>
-        public NodeDiscovery[] Entries
+        public List<List<NodeDiscovery>> AllAttempts
+        {
+            get
+            {
+                List<List<NodeDiscovery>> mix = new List<List<NodeDiscovery>> ( this.attempts );
+                mix.Add ( this.entries );
+
+                return mix;
+            }
+        }
+
+        public NodeDiscovery[] CurrentAttemptEntries
         {
             get { return this.entries.ToArray (); }
         }
 
         /// <summary>
-        /// List of the validated nodes/DCUs only.
-        /// <para>
-        /// See <see cref="NodeDiscovery"/> for the representation of the info associated to the detected nodes/DCUs.
-        /// </para>
-        /// </summary>
-        /// <value></value>
-        public NodeDiscovery[] EntriesValidated
-        {
-            get { return this.entries.Where ( entry => entry.IsValidated ).ToArray (); }
-        }
-
-        /// <summary>
-        /// The number of the validated nodes/DCUs only.
-        /// </summary>
-        /// <value></value>
-        public int CountEntriesValidated
-        {
-            get { return this.entries.Where ( entry => entry.IsValidated ).Count (); }
-        }
-
-        /// <summary>
         /// The total number of nodes/DCUs that should be recovered.
         /// </summary>
-        /// <value></value>
-        public int TotalEntries
+        public int CurrentAttemptTotalEntries
         {
             get
             {
@@ -209,8 +188,7 @@ namespace MTUComm
         /// </para>
         /// </summary>
         /// </summary>
-        /// <value></value>
-        public NodeDiscovery LastNode
+        public NodeDiscovery CurrentAttemptLastEntry
         {
             get
             {
@@ -220,9 +198,37 @@ namespace MTUComm
             }
         }
 
-        public int CountUniqueNodes
+        public List<NodeDiscovery> CurrentAttempt
         {
-            get { return this.uniqueNodeIDs; }
+            get { return this.entries; }
+        }
+
+        private IEnumerable<IGrouping<int,NodeDiscovery>> UniqueNodesValidated
+        {
+            get
+            {
+                return this.AllAttempts
+                    // Converts a multi-dimensional array into a flat list with only validated nodes
+                    .SelectMany ( list => list
+                        .Where ( entry => entry.IsValidated )
+                    )
+                    // Avoids counting the same node multiple times
+                    .GroupBy ( entry => entry.NodeId );
+            }
+        }
+
+        /// <summary>
+        /// The number of the validated nodes/DCUs only.
+        /// </summary>
+        /// <remarks>
+        /// Only count once each DCU ( node ID ), not once per DCU channel ( F1 and F2 ).
+        /// <para>
+        /// The returned value should be equal or lower than <see cref="CountUniqueNodes"/>.
+        /// </para>
+        /// </remarks>
+        public int CountUniqueNodesValidated
+        {
+            get { return this.UniqueNodesValidated.Count (); }
         }
 
         #endregion
@@ -233,11 +239,27 @@ namespace MTUComm
             NodeType nodeType )
         {
             this.entries  = new List<NodeDiscovery> ();
+            this.attempts = new List<List<NodeDiscovery>> ();
             this.nodeType = nodeType;
-            this.uniqueNodeIDs = 0;
         }
 
         #endregion
+
+        #region Logic
+
+        public void StartNewAttempt ()
+        {
+            if ( this.entries.Count > 0 )
+            {
+                List<NodeDiscovery> copy = new List<NodeDiscovery> ();
+                foreach ( NodeDiscovery node in this.entries )
+                    copy.Add ( node.Clone () as NodeDiscovery );
+                
+                this.attempts.Add ( copy );
+            }
+
+            this.entries.Clear ();
+        }
 
         public ( NodeDiscoveryQueryResult Result, int Index ) TryToAdd (
             byte[] response )
@@ -261,12 +283,7 @@ namespace MTUComm
                     break;
             }
 
-            // Check if it is a new DCU
-            if ( node.NodeId > 0 &&
-                 ! this.entries.Any ( n => n.NodeId == node.NodeId ) )
-                uniqueNodeIDs++;
-
-            return ( ( this.entries[ this.entries.Count - 1 ].IsLast ) ?
+            return ( ( this.CurrentAttemptLastEntry.IsLast ) ?
                 NodeDiscoveryQueryResult.LastRead : NodeDiscoveryQueryResult.NextRead, node.Index );
         }
     
@@ -290,7 +307,8 @@ namespace MTUComm
             int rssi )
         {
             ( int RSSI, decimal Probability )[] entries = RSSI_and_Probability
-                .Where ( entry => entry.RSSI == rssi ).ToArray ();
+                .Where ( entry => entry.RSSI == rssi )
+                .ToArray ();
 
             if ( entries.Length > 0 )
                 return entries[ 0 ].Probability;
@@ -301,5 +319,55 @@ namespace MTUComm
                 else return 0m; // rssi <= -115, 0% probability because the signal strength is very small
             }
         }
+    
+        public decimal CalculateMtuSuccess (
+            bool isF1 )
+        {
+            decimal acumRssi;
+            int     averageRssi;
+            decimal acumProb = 1m;
+            foreach ( IGrouping<int,NodeDiscovery> group in this.NodesValidatedForFreq ( isF1 ) )
+            {
+                acumRssi = 0;
+                
+                // Sum RSSI values to calculate the average value for each DCU
+                foreach ( NodeDiscovery entry in group )
+                    acumRssi += entry.RSSIRequest;
+
+                // NOTE: RSSI values in RSSI_and_Probability table are integers,
+                // NOTE: and the more logic approach is to round the average RSSI
+                averageRssi = ( int )Math.Round ( acumRssi / group.Count (), 0 );
+
+                // Calculate half of P( MTU TX Success ) operation
+                acumProb *= ( 1 - this.GetProbability ( averageRssi ) );
+            }
+
+            // P( MTU TX Success )
+            return 1 - acumProb;
+        }
+
+        public decimal CalculateTwoWaySuccess (
+            int bestRssiResponse )
+        {
+            // P( MTU TX Success )
+            decimal mtuTxSuccess = this.CalculateMtuSuccess ( false ); // false indicates F2
+
+            // P( TWO WAY ) = 100% - ( 100% - P( DCU TX Success ) * P( MTU TX Success ) ) ^ 3
+            decimal precalc = 1 - this.GetProbability ( bestRssiResponse ) * mtuTxSuccess;
+            return 1 - precalc * precalc * precalc;
+        }
+
+        private IEnumerable<IGrouping<int,NodeDiscovery>> NodesValidatedForFreq (
+            bool isF1 )
+        {
+            return this.AllAttempts
+                .SelectMany ( list => list
+                    .Where ( entry =>
+                        entry.IsValidated &&
+                        entry.IsF1 == isF1 )
+                ).GroupBy ( entry => entry.NodeId );
+        }
+
+        #endregion
     }
 }

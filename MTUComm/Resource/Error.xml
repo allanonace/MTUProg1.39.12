@@ -60,6 +60,10 @@
 
     <!-- Encryption -->
     <Error id="700" message="The MTU encryption process can't be performed after having tried it _var_ times" footer="Encryption not achieved" />
+    <Error id="701" message="The MTU encryption process can't be performed because public key is not present in Global.xml" footer="Encryption public key missed" />
+    <Error id="702" message="The MTU encryption process can't be performed because public key does not have the correct format" footer="Encryption public key format" />
+    <Error id="703" message="The MTU encryption process can't be performed because broadcast key is not present in Global.xml" footer="Encryption broadcast key missed" />
+    <Error id="704" message="The MTU encryption process can't be performed because broadcast key does not have the correct format" footer="Encryption broadcast key format" />
 
     <!-- Configuration Files -->
     <Error id="800" message="Some of the configuration files are not present in the root folder. Contact your IT administrator" />

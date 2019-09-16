@@ -364,16 +364,33 @@ namespace aclara_meters.view
                 {
                     Parameter param = args.Result.getParameterByTag ( parameter.Name, parameter.Source, 0 );
 
-                    if (param != null)
+                    if ( param != null )
+                    {
+                        string bgcolor = "#FFF";
+                        string fcolor  = "#000";
+
+                        if ( param.CustomParameter.Equals ( "NodeDiscoveryResult" ) )
+                        {
+                            switch ( param.Value.ToString ().Split ( ' ' )[ 0 ].ToLower () )
+                            {
+                                case "fail"    : bgcolor = "#F00"; fcolor = "#FFF"; break;
+                                case "good"    : bgcolor = "#FF0"; break;
+                                case "excelent": bgcolor = "#0F0"; break;
+                            }
+                        }
+
                         FinalReadListView.Add(new ReadMTUItem()
                         {
-                            Title = param.getLogDisplay() + ":",
-                            isDisplayed = "true",
-                            Height = "64",
-                            isMTU = "true",
-                            isMeter = "false",
-                            Description = param.Value
+                            Title           = param.getLogDisplay() + ":",
+                            isDisplayed     = "true",
+                            Height          = "64",
+                            isMTU           = "true",
+                            isMeter         = "false",
+                            Description     = param.Value,
+                            BackgroundColor = bgcolor,
+                            FontColor       = fcolor
                         });
+                    }
                 }
             }
 
