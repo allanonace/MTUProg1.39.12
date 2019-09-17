@@ -192,12 +192,31 @@ namespace MTUComm
             MtuInstallationConfirmation,
             Diagnosis,
             BasicRead,
-            ReadFabric
+            ReadFabric,
+            RemoteDisconnect
         }
+
+        public enum MTUStatus
+        {
+            ReadingMtuShortTime,
+            ReadingMtuData,
+            Autodetect,
+            CheckingEnconderLongTime,
+            ProgramingMtuShortTime,
+            PreparingToProgram,
+            TurningOffMtu,
+            ReadingMtuAgain,
+            ProgramingMtu,
+            VerifyingMtuData,
+            CheckingEnconderShortTime,
+            TurningOnMtu,
+            ReadingMtu,
+        };
 
         public static Dictionary<ActionType, String> logDisplays;
         public static Dictionary<ActionType, String> logTypes;
         public static Dictionary<ActionType, String> logReasons;
+        public static Dictionary<ActionType, string[]> actionsTexts;
 
         #endregion
 
@@ -404,7 +423,85 @@ namespace MTUComm
 
         static Action ()
         {
-            logDisplays = new Dictionary<ActionType,String> ()
+            actionsTexts =
+            new Dictionary<ActionType, string[]>()
+            {   
+            { ActionType.RemoteDisconnect,
+                new string[]
+                {
+                   "Valve Operation",
+                   "Valve Operation",
+                   "Valve Operation",
+                   "read_mtu_btn.png"
+                }
+            },
+            { ActionType.DataRead,
+                new string[]
+                {
+                   "Data Read",
+                   "Data Read",
+                   "Data Read",
+                   "read_mtu_btn.png"
+                }
+            },
+            { ActionType.AddMtu,
+                new string[]
+                {
+                   "Add MTU",
+                   "Add MTU",
+                   "Add MTU",
+                   "add_mtu_btn.png"
+                }
+            },
+            { ActionType.ReplaceMTU,
+                new string[]
+                {
+                   "Replace MTU",
+                   "Replace MTU",
+                   "Replace MTU",
+                   "rep_mtu_btn.png"
+                }
+            },
+            { ActionType.ReplaceMeter,
+                new string[]
+                {
+                   "Replace Meter",
+                   "Replace Meter",
+                   "Replace Meter",
+                   "rep_meter_btn.png"
+                }
+            },
+            { ActionType.AddMtuAddMeter,
+                new string[]
+                {
+                   "Add MTU / Add Meter",
+                   "Add MTU / Add Meter",
+                   "Add MTU / Add Meter",
+                   "add_mtu_meter_btn.png"
+                }
+            },
+            { ActionType.AddMtuReplaceMeter,
+                new string[]
+                {
+                   "Add MTU / Replace Meter",
+                   "Add MTU / Replace Meter",
+                   "Add MTU / Replace Meter",
+                   "add_mtu_rep_meter_btn.png"
+                }
+            },
+            { ActionType.ReplaceMtuReplaceMeter,
+                new string[]
+                {
+                   "Replace MTU / Replace Meter",
+                   "Replace MTU / Replace Meter",
+                   "Replace MTU / Replace Meter",
+                   "rep_mtu_rep_meter_btn.png"
+                }
+            },
+        };
+
+
+        logDisplays = new Dictionary<ActionType,String> ()
             {
                 {ActionType.BasicRead,                      "Basic Read" },
                 {ActionType.ReadMtu,                        "Read MTU" },
@@ -419,7 +516,8 @@ namespace MTUComm
                 {ActionType.DataRead,                       "Read Data Log" },
                 {ActionType.MtuInstallationConfirmation,    "Install Confirmation" },
                 {ActionType.Diagnosis,                      string.Empty },
-                {ActionType.ReadFabric,                     "Read Fabric" }
+                {ActionType.ReadFabric,                     "Read Fabric" },
+                {ActionType.RemoteDisconnect,               "Valve Operation" }
             };
 
             logTypes = new Dictionary<ActionType,String> ()
@@ -437,7 +535,8 @@ namespace MTUComm
                 {ActionType.DataRead,                       "ReadDataLog" },
                 {ActionType.MtuInstallationConfirmation,    "InstallConfirmation" },
                 {ActionType.Diagnosis,                      string.Empty },
-                {ActionType.ReadFabric,                     "ReadFabric" }
+                {ActionType.ReadFabric,                     "ReadFabric" },
+                {ActionType.RemoteDisconnect,               "Valve Operation" }
             };
 
             logReasons = new Dictionary<ActionType,String> ()
@@ -455,7 +554,8 @@ namespace MTUComm
                 {ActionType.DataRead,                       "DataRead" },
                 {ActionType.MtuInstallationConfirmation,    "InstallConfirmation" },
                 {ActionType.Diagnosis,                      string.Empty },
-                {ActionType.ReadFabric,                     "ReadFabric" }
+                {ActionType.ReadFabric,                     "ReadFabric" },
+                {ActionType.RemoteDisconnect,               "ValveOperation" }
             };
         }
 

@@ -19,6 +19,7 @@ using Xml;
 using ZXing.Net.Mobile.Forms;
 using ActionType = MTUComm.Action.ActionType;
 using FIELD = MTUComm.actions.AddMtuForm.FIELD;
+using MTUStatus = MTUComm.Action.MTUStatus;
 
 namespace aclara_meters.view
 {
@@ -79,81 +80,6 @@ namespace aclara_meters.view
 
         #region Constants
 
-        public enum MTUStatus
-        {
-            ReadingMtuShortTime,
-            ReadingMtuData,
-            Autodetect,
-            CheckingEnconderLongTime,
-            ProgramingMtuShortTime,
-            PreparingToProgram,
-            TurningOffMtu,
-            ReadingMtuAgain,
-            ProgramingMtu,
-            VerifyingMtuData,
-            CheckingEnconderShortTime,
-            TurningOnMtu,
-            ReadingMtu,
-        };
-
-        private Dictionary<ActionType,string[]> actionsTexts =
-        new Dictionary<ActionType,string[]> ()
-        {
-            { ActionType.AddMtu,
-                new string[]
-                {
-                   "Add MTU",
-                   "Add MTU",
-                   "Add MTU",
-                   "add_mtu_btn.png"
-                }
-            },
-            { ActionType.ReplaceMTU,
-                new string[]
-                {
-                   "Replace MTU",
-                   "Replace MTU",
-                   "Replace MTU",
-                   "rep_mtu_btn.png"
-                }
-            },
-            { ActionType.ReplaceMeter,
-                new string[]
-                {
-                   "Replace Meter",
-                   "Replace Meter",
-                   "Replace Meter",
-                   "rep_meter_btn.png"
-                }
-            },
-            { ActionType.AddMtuAddMeter,
-                new string[]
-                {
-                   "Add MTU / Add Meter",
-                   "Add MTU / Add Meter",
-                   "Add MTU / Add Meter",
-                   "add_mtu_meter_btn.png"
-                }
-            },
-            { ActionType.AddMtuReplaceMeter,
-                new string[]
-                {
-                   "Add MTU / Replace Meter",
-                   "Add MTU / Replace Meter",
-                   "Add MTU / Replace Meter",
-                   "add_mtu_rep_meter_btn.png"
-                }
-            },
-            { ActionType.ReplaceMtuReplaceMeter,
-                new string[]
-                {
-                   "Replace MTU / Replace Meter",
-                   "Replace MTU / Replace Meter",
-                   "Replace MTU / Replace Meter",
-                   "rep_mtu_rep_meter_btn.png"
-                }
-            },
-        };
 
         public  const string TWOWAY_FAST     = "Fast";
         public  const string TWOWAY_SLOW     = "Slow";
@@ -342,7 +268,7 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                string[] texts = this.actionsTexts[ this.actionType ];
+                string[] texts = MTUComm.Action.actionsTexts[ this.actionType ];
             
                 name_of_window_port1  .Text   = texts[ 0 ] + " - " + LB_PORT1;
                 name_of_window_port2  .Text   = texts[ 1 ] + " - " + LB_PORT2;

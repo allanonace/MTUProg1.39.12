@@ -22,15 +22,12 @@ using MTUStatus = MTUComm.Action.MTUStatus;
 
 namespace aclara_meters.view
 {
-    public partial class AclaraViewDataRead
+    public partial class AclaraViewRemoteDisconnect
     {
 
         #region Constants
         private const bool   DEBUG_AUTO_MODE_ON  = false;
- 
-
-
-
+       
         private Color COL_MANDATORY = Color.FromHex("#FF0000");
         private const float  OPACITY_ENABLE  = 1;
         private const float  OPACITY_DISABLE = 0.8f;
@@ -47,25 +44,12 @@ namespace aclara_meters.view
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
 
-        
-        // Miscelanea
-        private List<BorderlessPicker> optionalPickers;
-        private List<BorderlessEntry>  optionalEntries;
-        private List<BorderlessDatePicker> optionalDates;
-        private List<BorderlessTimePicker> optionalTimes;
-        private List<Tuple<BorderlessPicker,Label>> optionalMandatoryPickers;
-        private List<Tuple<BorderlessEntry,Label>> optionalMandatoryEntries;
-        private List<Tuple<BorderlessDatePicker, Label>> optionalMandatoryDates;
-        private List<Tuple<BorderlessTimePicker, Label>> optionalMandatoryTimes;
-
-     
-
         #endregion
 
         #region Attributes
 
         private Configuration config;
-        private MTUComm.Action Data_read;
+        private MTUComm.Action remote_disconnect;
       
         private int detectedMtuType;
         private Mtu currentMtu;
@@ -90,12 +74,12 @@ namespace aclara_meters.view
 
         #region Initialization
 
-        public AclaraViewDataRead ()
+        public AclaraViewRemoteDisconnect()
         {
             InitializeComponent ();
         }
 
-        public AclaraViewDataRead ( IUserDialogs dialogs, ActionType page )
+        public AclaraViewRemoteDisconnect ( IUserDialogs dialogs, ActionType page )
         {
             InitializeComponent ();
             
@@ -122,7 +106,7 @@ namespace aclara_meters.view
             
            // this.addMtuForm = new AddMtuForm ( currentMtu );
             
-            this.Data_read = new MTUComm.Action (
+            this.remote_disconnect = new MTUComm.Action (
                 FormsApp.ble_interface,
                 this.actionType,
                 FormsApp.credentialsService.UserName );
@@ -134,7 +118,7 @@ namespace aclara_meters.view
                 string[] texts = MTUComm.Action.actionsTexts[ this.actionType ];
             
                 name_of_window_port1  .Text   = texts[ 0 ] + " - " + LB_PORT1;
-                name_of_window_misc   .Text   = texts[ 2 ] + " - " + LB_MISC;
+                //name_of_window_misc   .Text   = texts[ 2 ] + " - " + LB_MISC;
                 bottomBar.GetImageElement("bg_action_button_img").Source = texts[ 3 ];
 
                 bottomBar.GetLabelElement("label_read").Opacity    = 1;
@@ -156,7 +140,7 @@ namespace aclara_meters.view
             TappedListeners ();
             InitializeLowerbarLabel();
 
-            Task.Run(async () => await InitializeDataReadForm ())
+            Task.Run(async () => await InitializeValveOperationForm())
                 .ContinueWith ( t =>
                 Device.BeginInvokeOnMainThread ( () =>
                 {
@@ -178,32 +162,32 @@ namespace aclara_meters.view
 
         }
         
-        
-        private async Task InitializeDataReadForm ()
+
+        private async Task InitializeValveOperationForm ()
         {
             #region Initialize data
 
             this.div_MtuId.IsVisible=true;
             this.div_Mtu_Status.IsVisible=true;
-            this.div_MtuId.IsVisible=true;
+
 
             List<string> list = new List<string> ()
             {
-                "1", "8", "32", "64", "96"
+                "Close", "Open", "Partial Open"
             };
            
             //Now I am given ItemsSorce to the Pickers
-            pck_DaysOfRead.ItemsSource   = list;
+            pck_ValvePosition.ItemsSource   = list;
              
             #endregion
 
-            #region Misc
+            //#region Misc
 
-            if ( this.global.Options.Count>0)
-                InitializeOptionalFields ();
+            //if ( this.global.Options.Count>0)
+            //    InitializeOptionalFields ();
             
 
-            #endregion
+            //#endregion
 
             #region Labels
 
@@ -215,7 +199,7 @@ namespace aclara_meters.view
             #region Labels
             
             this.port1label.Text = LB_PORT1;
-            this.misclabel .Text = LB_MISC;
+            //this.misclabel .Text = LB_MISC;
                         
             #endregion
             int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
@@ -294,203 +278,14 @@ namespace aclara_meters.view
 
         #region GUI Initialization
 
-        private void InitializeOptionalFields()
-        {
-           
-            optionalPickers = new List<BorderlessPicker>();
-            optionalEntries = new List<BorderlessEntry>();
-            optionalDates = new List<BorderlessDatePicker>();
-            optionalTimes = new List<BorderlessTimePicker>();
-            optionalMandatoryPickers = new List<Tuple<BorderlessPicker,Label>> ();
-            optionalMandatoryEntries = new List<Tuple<BorderlessEntry,Label>> ();
-            optionalMandatoryDates = new List<Tuple<BorderlessDatePicker, Label>>();
-            optionalMandatoryTimes = new List<Tuple<BorderlessTimePicker, Label>>();
-            foreach ( Option optionalField in this.global.Options )
-            {
-                Frame optionalContainerB = new Frame()
-                {
-                    CornerRadius = 6,
-                    HeightRequest = 30,
-                    Margin = new Thickness(0, 4, 0, 0),
-                    BackgroundColor = Color.FromHex("#7a868c")
-                };
-
-                Frame optionalContainerC = new Frame()
-                {
-                    CornerRadius = 6,
-                    HeightRequest = 30,
-                    Margin = new Thickness(-7, -7, -7, -7),
-                    BackgroundColor = Color.White
-                };
-
-                StackLayout optionalContainerD = new StackLayout()
-                {
-                    Orientation = StackOrientation.Horizontal,
-                    HorizontalOptions = LayoutOptions.FillAndExpand,
-                    Margin = new Thickness(1, 1, 1, 1),
-                    BackgroundColor = Color.White
-                };
-
-                StackLayout optionalContainerA = new StackLayout()
-                {
-                    StyleId = "bloque" + 1
-                };
-
-                Label optionalLabel = new Label()
-                {
-                    Text = optionalField.Display,
-                    Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
-                    Margin = new Thickness(0, 4, 0, 0)
-                };
-
-                BorderlessPicker optionalPicker = null;
-                BorderlessEntry  optionalEntry  = null;
-                BorderlessDatePicker optionalDate = null;
-                BorderlessTimePicker optionalTime = null;
-
-                bool isList = optionalField.Type.Equals("list");
-                if ( isList )
-                {
-                    List<string> optionalFieldOptions = optionalField.OptionList;
-                    optionalPicker = new BorderlessPicker()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                        HeightRequest = 40,
-                        FontSize = 17,
-                        ItemsSource = optionalFieldOptions
-                    };
-                    optionalPicker.Name = optionalField.Name.Replace(" ", "_");
-                    optionalPicker.Display = optionalField.Display;
-
-                    optionalPickers.Add(optionalPicker);
-
-                    optionalContainerD.Children.Add(optionalPicker);
-                    optionalContainerC.Content = optionalContainerD;
-                    optionalContainerB.Content = optionalContainerC;
-                    optionalContainerA.Children.Add(optionalLabel);
-                    optionalContainerA.Children.Add(optionalContainerB);
-
-                    this.optionalFields.Children.Add(optionalContainerA);
-                }
-                else if(optionalField.Format=="date")
-                {
-                    bool required = optionalField.Required;
-                    optionalDate = new BorderlessDatePicker()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                       // HeightRequest = 70,
-                        FontSize = 17
-                    };
-                    optionalDate.Name = optionalField.Name.Replace(" ", "_");
-                    optionalDate.Display = optionalField.Display;
-
-                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    //behavior.MaxLength = optionalField.Len;
-
-                    //optionalEntry.Behaviors.Add(behavior);
-
-                    optionalDates.Add(optionalDate);
-
-                    optionalContainerD.Children.Add(optionalDate);
-                    optionalContainerC.Content = optionalContainerD;
-                    optionalContainerB.Content = optionalContainerC;
-                    optionalContainerA.Children.Add(optionalLabel);
-                    optionalContainerA.Children.Add(optionalContainerB);
-
-                    this.optionalFields.Children.Add(optionalContainerA);
-                }
-                else if (optionalField.Format == "time")
-                {
-                    bool required = optionalField.Required;
-                    optionalTime = new BorderlessTimePicker()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                        // HeightRequest = 70,
-                        FontSize = 17
-                    };
-                    optionalTime.Name = optionalField.Name.Replace(" ", "_");
-                    optionalTime.Display = optionalField.Display;
-
-                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    //behavior.MaxLength = optionalField.Len;
-
-                    //optionalEntry.Behaviors.Add(behavior);
-
-                    optionalTimes.Add(optionalTime);
-
-                    optionalContainerD.Children.Add(optionalTime);
-                    optionalContainerC.Content = optionalContainerD;
-                    optionalContainerB.Content = optionalContainerC;
-                    optionalContainerA.Children.Add(optionalLabel);
-                    optionalContainerA.Children.Add(optionalContainerB);
-
-                    this.optionalFields.Children.Add(optionalContainerA);
-                }
-                else // Text
-                {
-                    string format = optionalField.Format;
-                    int maxLen = optionalField.Len;
-                    int minLen = optionalField.MinLen;
-                    bool required = optionalField.Required;
-
-                    Keyboard keyboard = Keyboard.Default;
-                    //if      ( format.Equals ( "alpha"        ) ) keyboard = Keyboard.Default;
-                    //else if ( format.Equals ( "date"         ) ) keyboard = Keyboard.Default;
-                    if      ( format.Equals ( "alphanumeric" ) ) keyboard = Keyboard.Numeric;
-                    else if ( format.Equals ( "time"         ) ) keyboard = Keyboard.Numeric;
-
-                    optionalEntry = new BorderlessEntry()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                        HeightRequest = 40,
-                        Keyboard = keyboard,
-                        FontSize = 17
-                    };
-                    optionalEntry.Name = optionalField.Name.Replace(" ", "_");
-                    optionalEntry.Display = optionalField.Display;
-
-                    CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    behavior.MaxLength = optionalField.Len;
-
-                    optionalEntry.Behaviors.Add(behavior);
-
-                    optionalEntries.Add(optionalEntry);
-
-                    optionalContainerD.Children.Add(optionalEntry);
-                    optionalContainerC.Content = optionalContainerD;
-                    optionalContainerB.Content = optionalContainerC;
-                    optionalContainerA.Children.Add(optionalLabel);
-                    optionalContainerA.Children.Add(optionalContainerB);
-
-                    this.optionalFields.Children.Add(optionalContainerA);
-                }
-
-                // Mandatory fields
-                if ( optionalField.Required )
-                {
-                    if ( isList )
-                         this.optionalMandatoryPickers.Add ( new Tuple<BorderlessPicker,Label> ( optionalPicker, optionalLabel ) );
-                    else if (optionalField.Format=="date")
-                        this.optionalMandatoryDates.Add(new Tuple<BorderlessDatePicker, Label>(optionalDate, optionalLabel));
-                    else if (optionalField.Format == "time")
-                        this.optionalMandatoryTimes.Add(new Tuple<BorderlessTimePicker, Label>(optionalTime, optionalLabel));
-                    else this.optionalMandatoryEntries.Add ( new Tuple<BorderlessEntry,Label>  ( optionalEntry,  optionalLabel ) );
-                    
-                    if ( global.ColorEntry )
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            optionalLabel.TextColor = COL_MANDATORY;
-                        });
-                }
-            }
-        }
+     
 
         private void TappedListeners ()
         {
             bottomBar.GetImageButtonElement("btnTakePicture").Clicked += TakePicture;
             bottomBar.GetImageButtonElement("btnTakePicture").IsVisible = global.ShowCameraButton;
             TopBar.GetTGRElement("back_button").Tapped += ReturnToMainView;
-            bottomBar.GetTGRElement("bg_action_button").Tapped += DataReadMtu;
+            bottomBar.GetTGRElement("bg_action_button").Tapped += ValveOperationCommand;
 
             dialogView.GetTGRElement("turnoffmtu_ok").Tapped += TurnOffMTUOkTapped;
             dialogView.GetTGRElement("turnoffmtu_no").Tapped += TurnOffMTUNoTapped;
@@ -522,7 +317,7 @@ namespace aclara_meters.view
 
             dialogView.GetTGRElement("dialog_AddMTU_ok").Tapped += dialog_OKBasicTapped;
             dialogView.GetTGRElement("dialog_AddMTU_cancel").Tapped += dialog_cancelTapped;
-
+            /*
             port1label.GestureRecognizers.Add(new TapGestureRecognizer
             {
                 Command = new Command(() => port1_command()),
@@ -533,7 +328,7 @@ namespace aclara_meters.view
             });
           
             gps_icon_button.Tapped += GpsUpdateButton;
-         
+         */
         }
 
         #region Dialogs
@@ -1231,9 +1026,9 @@ namespace aclara_meters.view
 
         public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
         {
-            ActionResult actionResult = args.Result;
+            //ActionResult actionResult = args.Result;
 
-            Task.Delay(2000).ContinueWith(t =>
+            await Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     Label textResult = (Label)dialogView.FindByName("dialog_turnoff_text");
@@ -1290,7 +1085,7 @@ namespace aclara_meters.view
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
             //Navigation.PopToRootAsync(false);
         }
-
+        /*
         private void misc_command()
         {
             miscview.Opacity = 0;
@@ -1324,9 +1119,8 @@ namespace aclara_meters.view
             miscview.IsVisible = false;
 
             port1view.FadeTo(1, 200);
-
-
         }
+        */       
 
         private void ReturnToMainView(object sender, EventArgs e)
         {
@@ -1359,65 +1153,22 @@ namespace aclara_meters.view
         {
             lb.IsVisible = ! tbx1.Text.Equals ( tbx2.Text );
         }
-
-        private bool ValidateFields ( ref string msgError )
-        {
-
-
-            #region Miscelanea
-            dynamic NoValNOrEmpty = new Func<string,bool> ( ( value ) =>
-                                        ! string.IsNullOrEmpty ( value ) &&
-                                        ! Validations.IsNumeric ( value ) );
-                  
-
-            if ( NoValNOrEmpty ( this.tbx_MtuGeolocationLat .Text ) ||
-                 NoValNOrEmpty ( this.tbx_MtuGeolocationLong.Text ) )
-            {
-                msgError = "Field 'GPS Coordinates' are incorrectly filled";
-                return false;
-            }
-            string FILL_ERROR = String.Empty;
-            FILL_ERROR = "Miscellaneous field '_' is incorrectly filled";
-
-            foreach ( Tuple<BorderlessPicker,Label> tuple in optionalMandatoryPickers )
-                if ( tuple.Item1.SelectedIndex <= -1 )
-                {
-                    msgError = FILL_ERROR.Replace ( "_", tuple.Item2.Text );
-                    return false;
-                }
-
-            foreach ( Tuple<BorderlessEntry,Label> tuple in optionalMandatoryEntries )
-                if ( string.IsNullOrEmpty ( tuple.Item1.Text ) )
-                {
-                    msgError = FILL_ERROR.Replace ( "_", tuple.Item2.Text );
-                    return false;
-                }
-
-            foreach (Tuple<BorderlessDatePicker, Label> tuple in optionalMandatoryDates)
-                if (string.IsNullOrEmpty(tuple.Item1.Date.ToShortDateString()))
-                {
-                    msgError = FILL_ERROR.Replace("_", tuple.Item2.Text);
-                    return false;
-                }
-            #endregion
-
-            return true;
-        }
-
         #endregion
+
 
         #region Action
 
-        private void DataReadMtu ( object sender, EventArgs e )
+        private void ValveOperationCommand ( object sender, EventArgs e )
         {
             string msgError = string.Empty;
+            /*
             if ( ! DEBUG_AUTO_MODE_ON &&
                  ! this.ValidateFields ( ref msgError ) )
             {
                 DisplayAlert ( "Error", msgError, "OK" );
                 return;
             }
-
+            */
             isCancellable =true;
 
             if (!_userTapped)
@@ -1433,86 +1184,39 @@ namespace aclara_meters.view
                     background_scan_page.IsEnabled = false;
                     ChangeLowerButtonImage(true);
 
-                    Task.Factory.StartNew(DataRead_Action);
+                    Task.Factory.StartNew(ValveOperation_Action);
                 });
             }
         }
 
-        private void DataRead_Action ()
+        private void ValveOperation_Action ()
         { 
             #region Get values from form
 
             Data.Set("AccountNumber", tbx_AccountNumber.Text,true);
             Data.Set("MtuId", tbx_MtuId.Text, true);
             Data.Set("MtuStatus", tbx_Mtu_Status.Text,true);
-            Data.Set("NumOfDays", pck_DaysOfRead.SelectedItem.ToString(),true);
-
-            // GPS
-            string value_lat = this.tbx_MtuGeolocationLat .Text;
-            string value_lon = this.tbx_MtuGeolocationLong.Text;
-            string value_alt = this.mtuGeolocationAlt;
-   
-
-            // Gps
-            if ( ! string.IsNullOrEmpty ( value_lat ) &&
-                 ! string.IsNullOrEmpty ( value_lon ) )
-            {
-                double lat = Convert.ToDouble ( value_lat );
-                double lon = Convert.ToDouble ( value_lon );
-        
-                Data.Set ( "GpsLat", lat, true );
-                Data.Set ( "GpsLon", lon, true );
-                Data.Set ( "GpsAlt", value_alt, true );
-                
-            }
-            else
-            {
-                Data.Set("GpsLat", string.Empty, true);
-                Data.Set("GpsLon", string.Empty, true);
-                Data.Set("GpsAlt", string.Empty, true);
-            }
+            Data.Set("ValvePosition", pck_ValvePosition.SelectedItem.ToString(),true);
 
 
-            //List<Parameter> optionalParams = new List<Parameter>();
-            Data.Set("Options", new List<Parameter>(), true);
-
-            foreach (BorderlessPicker p in optionalPickers)
-                if (p.SelectedItem != null)
-                    Data.Get.Options.Add(new Parameter(p.Name, p.Display, p.SelectedItem,"",0,true));
- 
-            foreach ( BorderlessEntry e in optionalEntries )
-                if( ! string.IsNullOrEmpty ( e.Text ) )
-                    Data.Get.Options.Add(new Parameter(e.Name, e.Display, e.Text, "", 0, true));
-
-            foreach (BorderlessDatePicker d in optionalDates)
-                if (!string.IsNullOrEmpty(d.Date.ToShortDateString()))
-                    Data.Get.Options.Add(new Parameter(d.Name, d.Display, $"{d.Date.ToShortDateString()} 12:00:00", "", 0, true));
-
-            foreach (BorderlessTimePicker t in optionalTimes)
-                if (!string.IsNullOrEmpty(t.Time.ToString()))
-                    Data.Get.Options.Add(new Parameter(t.Name, t.Display, $"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}", "", 0, true));
-
-            //if ( optionalParams.Count > 0 )
-            //    Data.Set("Miscelanea",optionalParams, true);
-            //    //this.addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );
 
             #endregion
 
             #region Events
 
-            this.Data_read.OnProgress -= OnProgress;
-            this.Data_read.OnProgress += OnProgress;
+            this.remote_disconnect.OnProgress -= OnProgress;
+            this.remote_disconnect.OnProgress += OnProgress;
 
-            this.Data_read.OnFinish -= OnFinish;
-            this.Data_read.OnFinish += OnFinish;
+            this.remote_disconnect.OnFinish -= OnFinish;
+            this.remote_disconnect.OnFinish += OnFinish;
 
-            this.Data_read.OnError -= OnError;
-            this.Data_read.OnError += OnError;
+            this.remote_disconnect.OnError -= OnError;
+            this.remote_disconnect.OnError += OnError;
 
             #endregion
 
             // Launch action!
-            Data_read.Run ();
+            remote_disconnect.Run ();
         }
 
         private void OnProgress ( object sender, MTUComm.Delegates.ProgressArgs e )
@@ -1545,7 +1249,7 @@ namespace aclara_meters.view
             Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
             InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface( mtu, ActionType.ReadMtu );
             
-            Mtu currentMtu = Singleton.Get.Action.CurrentMtu;
+            currentMtu = Singleton.Get.Action.CurrentMtu;
 
             foreach (InterfaceParameters iParameter in interfacesParams)
             {
@@ -1664,71 +1368,7 @@ namespace aclara_meters.view
 
         #endregion
 
-        #region Location
-
-        private async void GpsUpdateButton ( object sender, EventArgs e )
-        {
-             Device.BeginInvokeOnMainThread(() =>
-                {
-                    backdark_bg.IsVisible = true;              
-                    indicator.IsVisible = true;   
-                    background_scan_page.IsEnabled = false;
-                    ContentNav.IsEnabled = false;
-                });
-            var position = await GetCurrentPosition();
-            if (position==null)
-                await dialogsSaved.AlertAsync("You must activate the GPS on the device to return coordinates","Alert");
-            else
-            {
-                this.tbx_MtuGeolocationLat .Text = position.Latitude .ToString ();
-                this.tbx_MtuGeolocationLong.Text = position.Longitude.ToString ();
-                this.mtuGeolocationAlt           = position.Altitude .ToString ();
-            }
-            Device.BeginInvokeOnMainThread(() =>
-                {
-                    backdark_bg.IsVisible = false;              
-                    indicator.IsVisible = false;   
-                    background_scan_page.IsEnabled = true;
-                    ContentNav.IsEnabled = true;
-                });
-        }
-
-        public static async Task<Xamarin.Essentials.Location> GetCurrentPosition()
-	    {
-            Xamarin.Essentials.Location location = null;
-           
-            try
-            {
-                var request = new GeolocationRequest(GeolocationAccuracy.Medium);
-                location = await Geolocation.GetLocationAsync(request);
-            }
-            catch (FeatureNotSupportedException fnsEx)
-            {
-                // Handle not supported on device exception
-            }
-            catch (FeatureNotEnabledException fneEx)
-            {
-               return null; // Handle not enabled on device exception
-            }
-            catch (PermissionException pEx)
-            {
-                // Handle permission exception
-            }
-            catch (Exception ex)
-            {
-                // Unable to get location
-            }
-
-            if (location != null)
-            {
-                Console.WriteLine($"Latitude: {location.Latitude}, Longitude: {location.Longitude}, Altitude: {location.Altitude}");
-            }
-
-            return location;
-            
-	    }
-        #endregion
-
+ 
         #region Other methods
 
   
