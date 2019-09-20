@@ -180,6 +180,8 @@ namespace MTUComm
             { new ConfigurationFilesNewVersionException (),     813 },
             // Intune credentials missing
             { new IntuneCredentialsException (),                814 },
+            // Exception with camera
+            { new CameraException (),                           815 },
 
             // DEBUG - Configuration Files and System [ 85x ]
             //-------------------------------

@@ -5,18 +5,13 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Acr.UserDialogs;
 using aclara_meters.Models;
 using Xamarin.Forms;
 using aclara.ViewModels;
-using Plugin.Settings;
 using MTUComm;
 using Library.Exceptions;
-
-using Renci.SshNet;
-
 using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
@@ -71,7 +66,7 @@ namespace aclara_meters.view
             dialogView = this.DialogView;
 
             global = FormsApp.config.Global;
-            //Settings.IsNotConnectedInSettings = true;
+            
             if (Device.Idiom == TargetIdiom.Tablet)
             {
                 Task.Run(() =>
@@ -92,9 +87,7 @@ namespace aclara_meters.view
    
             menuOptions.GetListElement("navigationDrawerList").IsEnabled = false;
             menuOptions.GetListElement("navigationDrawerList").Opacity = 0.65;
-
-
-            //List<FileInfo> ListFiles = GenericUtilsClass.LogFilesToUpload(Mobile.LogPath, true);
+                               
             // portrait
             Task.Run(async () =>
             {
@@ -103,7 +96,7 @@ namespace aclara_meters.view
                 {
                      ChangeLogFile(viewModelTabLog.TotalFiles, false);
                 });
-           });
+            });
 
             ButtonListeners();
             InitLayout(1); 
@@ -176,10 +169,6 @@ namespace aclara_meters.view
                 });
             });
 
-
-            //battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-            //rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
-
         }
 
         private void LoadPhoneUIConnected()
@@ -220,19 +209,7 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOKTapped(object sender, EventArgs e)
         {
-            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
-            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
-
-            Task.Factory.StartNew(TurnOffMethod);
-
-            //Task.Run(async () =>
-            //{
-            //    await Task.Delay(2000); Device.BeginInvokeOnMainThread(() =>
-            //    {
-            //        dialog_turnoff_two.IsVisible = false;
-            //        dialog_turnoff_three.IsVisible = true;
-            //    });
-            //});
+            CallLoadViewTurnOff();
         }
 
 
@@ -279,15 +256,9 @@ namespace aclara_meters.view
                     var item = (PageItem)e.Item;
                     ActionType page = item.TargetType;
                     ((ListView)sender).SelectedItem = null;
-                 // MRA   la pagina de settings tiene como actiontype ReadMtu
-                 //   if (this.actionType != page)
-                 //   {
-                        this.actionType = page;
-                        NavigationController(page);
-                 //   }
-                   
-                   
-
+                    this.actionType = page;
+                    NavigationController(page);
+ 
                 }
                 catch (Exception w2)
                 {
@@ -324,8 +295,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                         
-                            //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved, page), false);
+ 
                             DoBasicRead();
 
                             background_scan_page.Opacity = 1;
@@ -842,7 +812,7 @@ namespace aclara_meters.view
 
         public async Task BasicRead_OnFinish ( object sender, Delegates.ActionFinishArgs args )
         {
-            Task.Delay(100).ContinueWith(t =>
+            await Task.Delay(100).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     if (actionType == ActionType.DataRead)
@@ -899,8 +869,7 @@ namespace aclara_meters.view
 
         public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
         {
-            ActionResult actionResult = args.Result;
-
+ 
             await Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -979,12 +948,9 @@ namespace aclara_meters.view
             dialogView.GetTGRElement("meter_cancel").Tapped += dialog_cancelTapped;
 
             menuOptions.GetTGRElement("logout_button").Tapped += LogoutTapped;
-           // menuOptions.GetTGRElement("settings_button").Tapped += OpenSettingsView;
-
-
+ 
             menuOptions.GetListElement("navigationDrawerList").ItemTapped += OnMenuItemSelected;
-
-
+            
             dialogView.GetTGRElement("logoff_no").Tapped += LogOffNoTapped;
             dialogView.GetTGRElement("logoff_ok").Tapped += LogOffOkTapped;
 
@@ -996,6 +962,9 @@ namespace aclara_meters.view
 
             dialogView.GetTGRElement("dialog_ReplaceMTUReplaceMeter_ok").Tapped += dialog_OKBasicTapped;
             dialogView.GetTGRElement("dialog_ReplaceMTUReplaceMeter_cancel").Tapped += dialog_cancelTapped;
+
+            dialogView.GetTGRElement("dialog_AddMTU_ok").Tapped += dialog_OKBasicTapped;
+            dialogView.GetTGRElement("dialog_AddMTU_cancel").Tapped += dialog_cancelTapped;
 
         }
 
@@ -1017,9 +986,8 @@ namespace aclara_meters.view
             dialog.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            //this.actionType = this.actionTypeNew;
             DoBasicRead();
-
+         
         }
 
         public async void Btn_DownloadConf_Clicked(object sender, EventArgs e)
@@ -1036,7 +1004,7 @@ namespace aclara_meters.view
                     {
                         await SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
                         await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "OK");
-                        //Errors.LogErrorNowAndKill(new ConfigFilesChangedException());
+                        
                         System.Diagnostics.Process.GetCurrentProcess().Kill();
                     }
                     else
@@ -1147,8 +1115,7 @@ namespace aclara_meters.view
             background_scan_page.IsEnabled = true;
 
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
-            //Navigation.PopToRootAsync(false);
-
+ 
         }
 
         private void LogOffNoTapped(object sender, EventArgs e)
@@ -1200,15 +1167,6 @@ namespace aclara_meters.view
                 certificate_exp .Text = string.Empty;
             }
 
-            /*
-            #if __IOS__
-            customers_version.Text = TEXT_VERSION + NSBundle.MainBundle
-                                     .ObjectForInfoDictionary ( "CFBundleShortVersionString" ).ToString ();
-            #elif __ANDROID__
-            customers_version.Text = TEXT_VERSION + NSBundle.MainBundle
-                                     .ObjectForInfoDictionary ( "CFBundleShortVersionString" ).ToString ();
-            #endif
-            */
             customers_name.Text = TEXT_LICENSE + FormsApp.config.Global.CustomerName;
 
             #endregion
@@ -1452,13 +1410,11 @@ namespace aclara_meters.view
                 {
                     bool result = false;
                     TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-                    // Console.WriteLine($"------------------------------------FTP  Thread: {Thread.CurrentThread.ManagedThreadId}");
+               
                     Device.BeginInvokeOnMainThread(async () =>
                     {
 
-                        //MainPage = new NavigationPage(new FtpDownloadSettings());
                         await Application.Current.MainPage.Navigation.PushAsync(new FtpDownloadSettings(tcs));
-                        //PopupNavigation.Instance.PushAsync(new FtpDownloadSettings());
 
                         result = await tcs.Task;
 
@@ -1468,7 +1424,7 @@ namespace aclara_meters.view
                             {
                                 await SecureStorage.SetAsync("ConfigVersion", GenericUtilsClass.CheckFTPConfigVersion());
                                 await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "ok");
-                                //Errors.LogErrorNowAndKill(new ConfigFilesChangedException());
+                                
                                 System.Diagnostics.Process.GetCurrentProcess().Kill();
                             }
                             else
@@ -1478,7 +1434,7 @@ namespace aclara_meters.view
                                      "The new version configuration files are corrupted, the app will continues with the actual files. Contact your IT administratorn", "OK"); 
                             }
                         }
-                        //return result;
+
                     });
 
                     return false; 
@@ -1493,7 +1449,7 @@ namespace aclara_meters.view
             {
                 // Check if all configuration files are available in public folder
                 bool HasPublicFiles = GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath);
-                //this.abortMission = !this.HasDeviceAllXmls(Mobile.ConfigPublicPath);
+                
                 if (HasPublicFiles)
                 {
 

@@ -105,7 +105,7 @@ namespace aclara_meters.view
             if (FormsApp.config.Global.ShowDataRead)
                 MenuList.Add(new PageItem() { Title = "Historical Read", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.DataRead });
 #if DEBUG
-            // MenuList.Add(new PageItem() { Title = "Read Fabric", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadFabric });
+            MenuList.Add(new PageItem() { Title = "Read Fabric", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadFabric });
 #endif
 
 
@@ -119,23 +119,15 @@ namespace aclara_meters.view
         }
 
         private void LoadPhoneUI()
-        {
-        
+        {       
             close_menu_icon.Opacity = 1;
-           
-            //tablet_user_view.TranslationY = -22;
-            userName.Scale = 1;
-           
+            userName.Scale = 1;  
         }
 
         private void LoadTabletUI()
         {
-          
             close_menu_icon.Opacity = 0;
-      
-           //tablet_user_view.TranslationY = -22;
-           userName.Scale = 1.2;
-         
+            userName.Scale = 1.2;
         }
         
     }

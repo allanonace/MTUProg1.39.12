@@ -17,13 +17,10 @@ using Library;
 using MTUComm;
 using nexus.protocols.ble.scan;
 using Plugin.Settings;
-
-
-using System.Security.Cryptography.X509Certificates;
 using Xamarin.Forms;
 
 using ActionType = MTUComm.Action.ActionType;
-using ble_library;
+
 
 namespace aclara_meters.view
 {
@@ -40,7 +37,6 @@ namespace aclara_meters.view
 
         public DeviceItem last_item;
 
-        private List<PageItem> MenuList { get; set; }
         private IUserDialogs dialogsSaved;
         private ObservableCollection<DeviceItem> listPucks;
 
@@ -99,7 +95,6 @@ namespace aclara_meters.view
             //Change username textview to Prefs. String
             if (FormsApp.credentialsService.UserName != null)
             {
-               // userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
                 CrossSettings.Current.AddOrUpdateValue("session_username", FormsApp.credentialsService.UserName);
             }
 
@@ -113,7 +108,7 @@ namespace aclara_meters.view
         
 
             // Upload log files and then start pucks detection
-            this.UploadFilesAndCheckCertificate ();
+            UploadFilesAndCheckCertificate ();
         }
 
         public async void UploadFilesAndCheckCertificate()
@@ -122,7 +117,7 @@ namespace aclara_meters.view
             {
                if (Mobile.configData.certificate.NotAfter.AddMonths(-2) <= DateTime.Today)
                 {
-                   await Application.Current.MainPage.DisplayAlert("Alert", $"The installed certificate will expire on: {Mobile.configData.certificate.NotAfter.ToShortDateString()}", "OK");
+                   await DisplayAlert("Alert", $"The installed certificate will expire on: {Mobile.configData.certificate.NotAfter.ToShortDateString()}", "OK");
                 }
             }
             // Upload log files
@@ -132,6 +127,7 @@ namespace aclara_meters.view
             // Init pucks detection
             InitRefreshCommand();
             Interface_background_scan_page();
+           
         }
 
         public string GZipCompress ( string input )
@@ -163,8 +159,6 @@ namespace aclara_meters.view
 
                     if (FormsApp.ble_interface.IsOpen()) FormsApp.ble_interface.Close();
 
-                    //FormsApp.ble_interface= new BleSerial();
-
                     Utils.PrintDeep("----------------------------------------------  init Ble_iterface");
                     if (printer.ThreadState == ThreadState.Suspended)
                     {
@@ -179,7 +173,7 @@ namespace aclara_meters.view
                             Utils.Print(e11.StackTrace);
                         }
                     }
-                    //DeviceList.IsRefreshing = true;
+                    
                     listPucks = new ObservableCollection<DeviceItem>();
 
                     FormsApp.ble_interface.SetTimeOutSeconds(TimeOutSeconds);
@@ -224,13 +218,9 @@ namespace aclara_meters.view
         {
             autoConnect = false;
             conectarDevice = false;
-            #region Autoconnect to stored device 
-
-            //Utils.Print($"-----------------------------------va a conectar con : { Singleton.Get.Puck.Name }");
-            //Task.Factory.StartNew(NewOpenConnectionWithDevice);
+        
             NewOpenConnectionWithDevice();
-            #endregion
-
+  
         }
         private void Esperando()
         {
@@ -789,10 +779,10 @@ namespace aclara_meters.view
 
         }
 
-        private void IsConnectedUIChange(bool v)
+        private void IsConnectedUIChange(bool puckConnected)
         {
             //Utils.Print($"---------------------------------IsConnectedUIChange param: {v} ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
-            if (v)
+            if (puckConnected)
             {
                 try
                 {
@@ -819,9 +809,6 @@ namespace aclara_meters.view
                 indicator.IsVisible = false;
 
                 #endregion
-
-
-
             }
             else
             {
@@ -839,150 +826,133 @@ namespace aclara_meters.view
         //private async Task ChangeListViewData()
         private  void ChangeListViewData()
         {
-            //await Task.Factory.StartNew(() =>
-            // {
-            // wait until scan finish
-            //Utils.Print($"-------------------------------    ChangeListViewData, thread: {Thread.CurrentThread.ManagedThreadId}");
-              //  while (FormsApp.ble_interface.IsScanning())
-              //  {
+ 
+            try
+            {
+                // Utils.Print($"------------------------------- ChangeListViewData while IsScanning, thread: {Thread.CurrentThread.ManagedThreadId}");
+                List<IBlePeripheral> blePeripherals;
+                blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
+
+                // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
+                byte[] bytesDev = System.Convert.FromBase64String(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty));
+
+                byte[] byte_now;
+
+                int sizeList = blePeripherals.Count;
+
+                for (int i = 0; i < sizeList; i++)
+                {
                     try
                     {
-                       // Utils.Print($"------------------------------- ChangeListViewData while IsScanning, thread: {Thread.CurrentThread.ManagedThreadId}");
-                        List<IBlePeripheral> blePeripherals;
-                        blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
-
-                        // YOU CAN RETURN THE PASS BY GETTING THE STRING AND CONVERTING IT TO BYTE ARRAY TO AUTO-PAIR
-                        byte[] bytes = System.Convert.FromBase64String(CrossSettings.Current.GetValueOrDefault("session_peripheral_DeviceId", string.Empty));
-
-                        byte[] byte_now = new byte[] { };
-
-                        int sizeList = blePeripherals.Count;
-
-                        for (int i = 0; i < sizeList; i++)
+                        if (blePeripherals[i] != null)
                         {
-                            try
+                            Puck puck = new Puck ( blePeripherals[ i ] );
+
+                            byte_now = puck.ManofacturerData;
+
+                            bool enc = false;
+                            int sizeListTemp = listPucks.Count;
+
+                            for (int j = 0; j < sizeListTemp; j++)
                             {
-                                if (blePeripherals[i] != null)
+                                if ( listPucks[j].Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
+                                        .SequenceEqual ( puck.ManofacturerData ) )
+                                    enc = true;
+                            }
+
+                            if (!enc)
+                            {
+                                string iconBattery = puck.BatteryLevelIcon;                                 
+                                string iconRSSI = puck.RSSIIcon;
+
+                                DeviceItem device = new DeviceItem
                                 {
-                                    Puck puck = new Puck ( blePeripherals[ i ] );
+                                    deviceMacAddress  = puck.SerialNumber,
+                                    deviceName        = puck.Name,
+                                    deviceBattery     = puck.BatteryLevel + "%",
+                                    deviceRssi        = puck.RSSI + " dBm",
+                                    deviceBatteryIcon = iconBattery,
+                                    deviceRssiIcon    = iconRSSI,
+                                    Peripheral        = puck.Device
+                                };
 
-                                    byte_now = puck.ManofacturerData;
+                                listPucks.Add(device);
 
-                                    bool enc = false;
-                                    int sizeListTemp = listPucks.Count;
-
-                                    for (int j = 0; j < sizeListTemp; j++)
+                                //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
+                                if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
+                                    FormsApp.credentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
+                                    bytesDev.Take(4).ToArray().SequenceEqual(byte_now) &&
+                                    puck.Name.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
+                                    ! peripheralManualDisconnection &&
+                                    ! Singleton.Has<Puck>() )
+                                {
+                                    if (!FormsApp.ble_interface.IsOpen())
                                     {
-                                        if ( listPucks[j].Peripheral.Advertisement.ManufacturerSpecificData.ElementAt(0).Data.Take(4).ToArray()
-                                                .SequenceEqual ( puck.ManofacturerData ) )
-                                            enc = true;
-                                    }
-
-                                    if (!enc)
-                                    {
-                                        int    bateria     = puck.BatteryLevel;
-                                        string iconBattery = puck.BatteryLevelIcon;
-
-                                        int    rssi     = puck.RSSI;
-                                        string iconRSSI = puck.RSSIIcon;
-
-                                        DeviceItem device = new DeviceItem
+                                        try
                                         {
-                                            deviceMacAddress  = puck.SerialNumber,
-                                            deviceName        = puck.Name,
-                                            deviceBattery     = bateria + "%",
-                                            deviceRssi        = rssi + " dBm",
-                                            deviceBatteryIcon = iconBattery,
-                                            deviceRssiIcon    = iconRSSI,
-                                            Peripheral        = puck.Device
-                                        };
-
-                                        listPucks.Add(device);
-
-                                        //VERIFY IF PREVIOUSLY BOUNDED DEVICES WITH THE RIGHT USERNAME
-                                        if (CrossSettings.Current.GetValueOrDefault("session_dynamicpass", string.Empty) != string.Empty &&
-                                            FormsApp.credentialsService.UserName.Equals(CrossSettings.Current.GetValueOrDefault("session_username", string.Empty)) &&
-                                            bytes.Take(4).ToArray().SequenceEqual(byte_now) &&
-                                            puck.Name.Equals(CrossSettings.Current.GetValueOrDefault("session_peripheral", string.Empty)) &&
-                                            ! peripheralManualDisconnection &&
-                                            ! Singleton.Has<Puck>() )
-                                        {
-                                            if (!FormsApp.ble_interface.IsOpen())
-                                            {
-                                                try
-                                                {
-                                                    Singleton.Set = new Puck ( blePeripherals[ i ], FormsApp.ble_interface );
+                                            Singleton.Set = new Puck ( blePeripherals[ i ], FormsApp.ble_interface );
                                                     
-                                                    peripheralConnected = ble_library.BlePort.NO_CONNECTED;
-                                                    peripheralManualDisconnection = false;
+                                            peripheralConnected = ble_library.BlePort.NO_CONNECTED;
+                                            peripheralManualDisconnection = false;
 
-                                                    #region Autoconnect to stored device 
+                                            #region Autoconnect to stored device 
 
-                                                    conectarDevice = true;
+                                            conectarDevice = true;
 
-                                                    autoConnect = true;
+                                            autoConnect = true;
 
-                                                    #endregion
-                                                }
-                                                catch (Exception e)
-                                                {
-                                                    Utils.Print(e.StackTrace);
-                                                }
-
-                                            }
-                                            else
-                                            {
-                                                if (autoConnect)
-                                                {
-                                                    Device.BeginInvokeOnMainThread(() =>
-                                                    {
-                                                        #region Disable Circular Progress bar Animations when done
-
-                                                        backdark_bg.IsVisible = false;
-                                                        indicator.IsVisible = false;
-                                                        background_scan_page.IsEnabled = true;
-
-                                                        #endregion
-                                                    });
-                                                }
-                                            }
+                                            #endregion
                                         }
-                                        else
+                                        catch (Exception e)
                                         {
-                                            // if (autoConnect)
-                                            //  {
+                                            Utils.Print(e.StackTrace);
+                                        }
 
+                                    }
+                                    else
+                                    {
+                                        if (autoConnect)
+                                        {
                                             Device.BeginInvokeOnMainThread(() =>
                                             {
                                                 #region Disable Circular Progress bar Animations when done
 
-                                                DeviceList.IsRefreshing = false;
                                                 backdark_bg.IsVisible = false;
                                                 indicator.IsVisible = false;
                                                 background_scan_page.IsEnabled = true;
 
                                                 #endregion
-
                                             });
-
-                                            //  }
-
                                         }
                                     }
                                 }
                             }
-                            catch (Exception er)
-                            {
-                                Utils.Print(er.StackTrace); //2018-09-21 13:08:25.918 aclara_meters.iOS[505:190980] System.NullReferenceException: Object reference not set to an instance of an object
-                            }
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception er)
                     {
-                        Utils.Print(e);
+                        Utils.Print(er.StackTrace); //2018-09-21 13:08:25.918 aclara_meters.iOS[505:190980] System.NullReferenceException: Object reference not set to an instance of an object
                     }
-                //}
-           // });
+                }
+                if (!autoConnect)
+                {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        #region Disable Circular Progress bar Animations when done
+
+                        backdark_bg.IsVisible = false;
+                        indicator.IsVisible = false;
+                        background_scan_page.IsEnabled = true;
+
+                        #endregion
+                    });
+                }
+            }
+            catch (Exception e)
+            {
+                Utils.Print(e);
+            }
+
         }
 
 
@@ -1022,11 +992,7 @@ namespace aclara_meters.view
                                 //Utils.Print("A esperar 100 ms en bucle - NewOpenConnectionWithDevice");
                                 Thread.Sleep(100);
                             }
-                            /* MRA
-                            while(FormsApp.ble_interface.GetConnectionStatus() != ble_library.BlePort.CONNECTING)
-                            {
 
-                            }*/
                             // call your method to check for notifications here
                             FormsApp.ble_interface.Open ( Singleton.Get.Puck.Device, true );
                         }

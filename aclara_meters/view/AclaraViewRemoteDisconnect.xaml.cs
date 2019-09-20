@@ -2,22 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using aclara_meters.Behaviors;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
 using aclara_meters.util;
 using Acr.UserDialogs;
 using Library;
+using Library.Exceptions;
 using MTUComm;
-using MTUComm.actions;
 using Plugin.Media.Abstractions;
-using Plugin.Settings;
-using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
-using FIELD = MTUComm.actions.AddMtuForm.FIELD;
 using MTUStatus = MTUComm.Action.MTUStatus;
 
 namespace aclara_meters.view
@@ -25,36 +21,18 @@ namespace aclara_meters.view
     public partial class AclaraViewRemoteDisconnect
     {
 
-        #region Constants
-        private const bool   DEBUG_AUTO_MODE_ON  = false;
-       
-        private Color COL_MANDATORY = Color.FromHex("#FF0000");
-        private const float  OPACITY_ENABLE  = 1;
-        private const float  OPACITY_DISABLE = 0.8f;
-        
-        private const string LB_PORT1 = "MTU";
-        private const string LB_MISC  = "Miscellaneous";
-
-        #endregion
-
-        #region GUI Elements
-
-        private List<PageItem> MenuList;
+        private const string LB_PORT1 = "Valve";
 
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
 
-        #endregion
 
         #region Attributes
 
         private Configuration config;
         private MTUComm.Action remote_disconnect;
-      
-        private int detectedMtuType;
         private Mtu currentMtu;
         private Global global;
-        private MTUBasicInfo mtuBasicInfo;
         private MenuView menuOptions;
         private DialogsView dialogView;
         private BottomBar bottomBar;
@@ -68,7 +46,6 @@ namespace aclara_meters.view
         private bool isLogout;
         private bool isReturn;
         private bool isSettings;
-        private string mtuGeolocationAlt;
 
         #endregion
 
@@ -100,12 +77,7 @@ namespace aclara_meters.view
             dialogsSaved = dialogs;
 
             this.config = Singleton.Get.Configuration;
-            
-           // this.detectedMtuType = ( int )this.mtuBasicInfo.Type;
-           // currentMtu = this.config.GetMtuTypeById ( this.detectedMtuType );
-            
-           // this.addMtuForm = new AddMtuForm ( currentMtu );
-            
+         
             this.remote_disconnect = new MTUComm.Action (
                 FormsApp.ble_interface,
                 this.actionType,
@@ -118,7 +90,7 @@ namespace aclara_meters.view
                 string[] texts = MTUComm.Action.actionsTexts[ this.actionType ];
             
                 name_of_window_port1  .Text   = texts[ 0 ] + " - " + LB_PORT1;
-                //name_of_window_misc   .Text   = texts[ 2 ] + " - " + LB_MISC;
+                
                 bottomBar.GetImageElement("bg_action_button_img").Source = texts[ 3 ];
 
                 bottomBar.GetLabelElement("label_read").Opacity    = 1;
@@ -128,9 +100,6 @@ namespace aclara_meters.view
                 else LoadPhoneUI ();
                 
                 NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-                
-              //  battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-              //  rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
                 
   
             });
@@ -180,27 +149,15 @@ namespace aclara_meters.view
             pck_ValvePosition.ItemsSource   = list;
              
             #endregion
-
-            //#region Misc
-
-            //if ( this.global.Options.Count>0)
-            //    InitializeOptionalFields ();
             
-
-            //#endregion
 
             #region Labels
 
             // Account Number
             this.lb_AccountNumber.Text = global.AccountLabel;      
-
-            #endregion
-             
-            #region Labels
             
             this.port1label.Text = LB_PORT1;
-            //this.misclabel .Text = LB_MISC;
-                        
+                 
             #endregion
             int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
             var MtuId       = await Data.Get.MemoryMap.MtuSerialNumber.GetValue();
@@ -278,8 +235,6 @@ namespace aclara_meters.view
 
         #region GUI Initialization
 
-     
-
         private void TappedListeners ()
         {
             bottomBar.GetImageButtonElement("btnTakePicture").Clicked += TakePicture;
@@ -317,18 +272,7 @@ namespace aclara_meters.view
 
             dialogView.GetTGRElement("dialog_AddMTU_ok").Tapped += dialog_OKBasicTapped;
             dialogView.GetTGRElement("dialog_AddMTU_cancel").Tapped += dialog_cancelTapped;
-            /*
-            port1label.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = new Command(() => port1_command()),
-            });
-            misclabel.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = new Command(() => misc_command()),
-            });
-          
-            gps_icon_button.Tapped += GpsUpdateButton;
-         */
+ 
         }
 
         #region Dialogs
@@ -390,8 +334,7 @@ namespace aclara_meters.view
                 {
                     isLogout = true;
                     dialog_open_bg.IsVisible = true;
-                   // Popup_start.IsVisible = true;
-                   // Popup_start.IsEnabled = true;
+               
                 }
                 else DoLogoff();
             });
@@ -403,7 +346,7 @@ namespace aclara_meters.view
             dialogView.GetStackLayoutElement("dialog_logoff").IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            //Navigation.PopToRootAsync(false);
+            
         }
 
         #endregion
@@ -444,9 +387,6 @@ namespace aclara_meters.view
 
         #region Menu options
 
-    //    object menu_sender;
-    //    ItemTappedEventArgs menu_tappedevents;
-
         private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e )
         {
             ((ListView)sender).SelectedItem = null;
@@ -458,12 +398,7 @@ namespace aclara_meters.view
         {
             if (Device.Idiom == TargetIdiom.Tablet)
             {
-                
-                //menu_sender = sender;
-                //menu_tappedevents = e;
-
-            
-                //Application.Current.MainPage.Navigation.PopAsync(false);0
+          
                 if (!FormsApp.ble_interface.IsOpen())
                 {
                     // don't do anything if we just de-selected the row.
@@ -495,10 +430,8 @@ namespace aclara_meters.view
                                // Popup_start.IsEnabled = true;
                             }
                             else
-                            {
-                                //this.actionType = page;
-                                NavigationController(page);
-                            }
+                              NavigationController(page);
+
                         }
                     }
                     catch (Exception w1)
@@ -841,7 +774,7 @@ namespace aclara_meters.view
                         ContentNav.Opacity = 0;
                         ContentNav.IsVisible = false;
                     }
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
                 })
             );
         }
@@ -875,7 +808,7 @@ namespace aclara_meters.view
               //  Popup_start.IsEnabled = true;
                 return;
             }
-            //printer.Suspend();
+            
             background_scan_page.Opacity = 1;
             background_scan_page.IsEnabled = true;
 
@@ -885,96 +818,96 @@ namespace aclara_meters.view
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
-            Task.Delay(200).ContinueWith(t =>
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                try
-                {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
+            _ = Task.Delay(200).ContinueWith(t =>
+              Device.BeginInvokeOnMainThread(() =>
+              {
+                  try
+                  {
+                      Device.BeginInvokeOnMainThread(() =>
+                      {
                         #region New Circular Progress bar Animations    
 
-                    
+
                         backdark_bg.IsVisible = true;
-                        indicator.IsVisible = true;
-                        background_scan_page.IsEnabled = false;
+                          indicator.IsVisible = true;
+                          background_scan_page.IsEnabled = false;
 
                         #endregion
 
                     });
 
-                    if (FormsApp.ble_interface.IsOpen())
-                    {
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
-                        if (Device.Idiom == TargetIdiom.Tablet)
-                        {
-                            ContentNav.Opacity = 1;
-                            ContentNav.IsVisible = true;
-                        }
-                        else
-                        {
-                            ContentNav.Opacity = 0;
-                            ContentNav.IsVisible = false;
-                        }
-                        background_scan_page.Opacity = 1;
-   
+                      if (FormsApp.ble_interface.IsOpen())
+                      {
+                          Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
+                          if (Device.Idiom == TargetIdiom.Tablet)
+                          {
+                              ContentNav.Opacity = 1;
+                              ContentNav.IsVisible = true;
+                          }
+                          else
+                          {
+                              ContentNav.Opacity = 0;
+                              ContentNav.IsVisible = false;
+                          }
+                          background_scan_page.Opacity = 1;
 
-                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //   if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+
+                          shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
 
                         Device.BeginInvokeOnMainThread(() =>
-                        {
+                          {
                             #region New Circular Progress bar Animations    
 
                             backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                            background_scan_page.IsEnabled = true;
+                              indicator.IsVisible = false;
+                              background_scan_page.IsEnabled = true;
 
                             #endregion
                         });
 
-                        return;
-                    }
-                    else
-                    {
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(true), false);
+                          return;
+                      }
+                      else
+                      {
+                          Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(true), false);
 
-                        if (Device.Idiom == TargetIdiom.Tablet)
-                        {
-                            ContentNav.Opacity = 1;
-                            ContentNav.IsVisible = true;
-                        }
-                        else
-                        {
-                            ContentNav.Opacity = 0;
-                            ContentNav.IsVisible = false;
-                        }
+                          if (Device.Idiom == TargetIdiom.Tablet)
+                          {
+                              ContentNav.Opacity = 1;
+                              ContentNav.IsVisible = true;
+                          }
+                          else
+                          {
+                              ContentNav.Opacity = 0;
+                              ContentNav.IsVisible = false;
+                          }
 
-                        background_scan_page.Opacity = 1;
-            
+                          background_scan_page.Opacity = 1;
 
-                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false; 
+
+                          shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
 
                         Device.BeginInvokeOnMainThread(() =>
-                        {
+                          {
                             #region New Circular Progress bar Animations    
 
-                          
+
                             backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                            background_scan_page.IsEnabled = true;
+                              indicator.IsVisible = false;
+                              background_scan_page.IsEnabled = true;
 
                             #endregion
                         });
-                    }
-                }
-                catch (Exception i2)
-                {
-                    Utils.Print(i2.StackTrace);
-                }
-            }));
+                      }
+                  }
+                  catch (Exception i2)
+                  {
+                      Utils.Print(i2.StackTrace);
+                  }
+              }));
         }
 
-        private async void LogoutTapped(object sender, EventArgs e)
+        private void LogoutTapped(object sender, EventArgs e)
         {
             #region Check if no action done
 
@@ -1026,8 +959,6 @@ namespace aclara_meters.view
 
         public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
         {
-            //ActionResult actionResult = args.Result;
-
             await Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -1072,9 +1003,7 @@ namespace aclara_meters.view
             try
             {
                 FormsApp.DoLogOff();
-                //FormsApp.credentialsService.DeleteCredentials();
-                //FormsApp.ble_interface.Close();
-                //Singleton.Remove<Puck>();
+              
             }
             catch (Exception e25)
             {
@@ -1083,44 +1012,9 @@ namespace aclara_meters.view
 
             background_scan_page.IsEnabled = true;
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
-            //Navigation.PopToRootAsync(false);
+          
         }
-        /*
-        private void misc_command()
-        {
-            miscview.Opacity = 0;
-
-            port1label.Opacity = 0.5;
-            misclabel.Opacity = 1;
-            
-            port1label.FontSize = 19;
-            misclabel.FontSize = 22;
-            
-
-            port1view.IsVisible = false;
-            miscview.IsVisible = true;
-
-            miscview.FadeTo(1, 200);
-
-        }
-
-        private void port1_command()
-        {
-            port1view.Opacity = 0;
-
-            port1label.Opacity = 1;
-            misclabel.Opacity = 0.5;
-            
-            port1label.FontSize = 22;
-            misclabel.FontSize = 19;
-                 
-
-            port1view.IsVisible = true;
-            miscview.IsVisible = false;
-
-            port1view.FadeTo(1, 200);
-        }
-        */       
+         
 
         private void ReturnToMainView(object sender, EventArgs e)
         {
@@ -1144,31 +1038,12 @@ namespace aclara_meters.view
 
         #endregion
 
-        #region Validation
-
-        private void ValidateEqualityOnFocus (
-            BorderlessEntry tbx1,
-            BorderlessEntry tbx2,
-            Label lb )
-        {
-            lb.IsVisible = ! tbx1.Text.Equals ( tbx2.Text );
-        }
-        #endregion
-
-
+     
         #region Action
 
         private void ValveOperationCommand ( object sender, EventArgs e )
         {
-            string msgError = string.Empty;
-            /*
-            if ( ! DEBUG_AUTO_MODE_ON &&
-                 ! this.ValidateFields ( ref msgError ) )
-            {
-                DisplayAlert ( "Error", msgError, "OK" );
-                return;
-            }
-            */
+            
             isCancellable =true;
 
             if (!_userTapped)
@@ -1197,8 +1072,6 @@ namespace aclara_meters.view
             Data.Set("MtuId", tbx_MtuId.Text, true);
             Data.Set("MtuStatus", tbx_Mtu_Status.Text,true);
             Data.Set("ValvePosition", pck_ValvePosition.SelectedItem.ToString(),true);
-
-
 
             #endregion
 
@@ -1386,8 +1259,7 @@ namespace aclara_meters.view
         {
             try
             {
-                //ImageButton ctlButton = (ImageButton)sender;
-                string port; //= (string)ctlButton.CommandParameter;
+                string port; 
 
                 int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
                 var MtuId = await Data.Get.MemoryMap.MtuSerialNumber.GetValue();
@@ -1421,20 +1293,16 @@ namespace aclara_meters.view
 
                     FileInfo[] imagefiles = dir.GetFiles(nameFile);
 
-                    //PicturesMTU.Add(imagefiles[0]);
-
                     imagefiles[0].CopyTo(Path.Combine(Mobile.ImagesPath, nameFile));
                     imagefiles[0].Delete();
-
-                    //await DisplayAlert("File Location", file.Path, "OK");
 
                     file.Dispose();
                 });
 
             }
-            catch (Exception e1)
+            catch (Exception ex)
             {
-                throw;
+                await Errors.ShowAlert(new CameraException(ex.Message));
             }
 
         }

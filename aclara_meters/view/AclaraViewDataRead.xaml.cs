@@ -2,22 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using aclara_meters.Behaviors;
 using aclara_meters.Helpers;
 using aclara_meters.Models;
 using aclara_meters.util;
 using Acr.UserDialogs;
 using Library;
+using Library.Exceptions;
 using MTUComm;
-using MTUComm.actions;
 using Plugin.Media.Abstractions;
-using Plugin.Settings;
-using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xml;
-
 using ActionType = MTUComm.Action.ActionType;
-using FIELD = MTUComm.actions.AddMtuForm.FIELD;
 using MTUStatus = MTUComm.Action.MTUStatus;
 
 namespace aclara_meters.view
@@ -26,39 +21,15 @@ namespace aclara_meters.view
     {
 
         #region Constants
-        private const bool   DEBUG_AUTO_MODE_ON  = false;
- 
-
-
-
-        private Color COL_MANDATORY = Color.FromHex("#FF0000");
-        private const float  OPACITY_ENABLE  = 1;
-        private const float  OPACITY_DISABLE = 0.8f;
-        
+      
         private const string LB_PORT1 = "MTU";
-        private const string LB_MISC  = "Miscellaneous";
-
+   
         #endregion
 
         #region GUI Elements
 
-        private List<PageItem> MenuList;
-
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
-
-        
-        // Miscelanea
-        private List<BorderlessPicker> optionalPickers;
-        private List<BorderlessEntry>  optionalEntries;
-        private List<BorderlessDatePicker> optionalDates;
-        private List<BorderlessTimePicker> optionalTimes;
-        private List<Tuple<BorderlessPicker,Label>> optionalMandatoryPickers;
-        private List<Tuple<BorderlessEntry,Label>> optionalMandatoryEntries;
-        private List<Tuple<BorderlessDatePicker, Label>> optionalMandatoryDates;
-        private List<Tuple<BorderlessTimePicker, Label>> optionalMandatoryTimes;
-
-     
 
         #endregion
 
@@ -67,10 +38,7 @@ namespace aclara_meters.view
         private Configuration config;
         private MTUComm.Action Data_read;
       
-        private int detectedMtuType;
-        private Mtu currentMtu;
         private Global global;
-        private MTUBasicInfo mtuBasicInfo;
         private MenuView menuOptions;
         private DialogsView dialogView;
         private BottomBar bottomBar;
@@ -84,7 +52,7 @@ namespace aclara_meters.view
         private bool isLogout;
         private bool isReturn;
         private bool isSettings;
-        private string mtuGeolocationAlt;
+
 
         #endregion
 
@@ -116,12 +84,7 @@ namespace aclara_meters.view
             dialogsSaved = dialogs;
 
             this.config = Singleton.Get.Configuration;
-            
-           // this.detectedMtuType = ( int )this.mtuBasicInfo.Type;
-           // currentMtu = this.config.GetMtuTypeById ( this.detectedMtuType );
-            
-           // this.addMtuForm = new AddMtuForm ( currentMtu );
-            
+                
             this.Data_read = new MTUComm.Action (
                 FormsApp.ble_interface,
                 this.actionType,
@@ -134,7 +97,7 @@ namespace aclara_meters.view
                 string[] texts = MTUComm.Action.actionsTexts[ this.actionType ];
             
                 name_of_window_port1  .Text   = texts[ 0 ] + " - " + LB_PORT1;
-                name_of_window_misc   .Text   = texts[ 2 ] + " - " + LB_MISC;
+               
                 bottomBar.GetImageElement("bg_action_button_img").Source = texts[ 3 ];
 
                 bottomBar.GetLabelElement("label_read").Opacity    = 1;
@@ -144,10 +107,7 @@ namespace aclara_meters.view
                 else LoadPhoneUI ();
                 
                 NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-                
-              //  battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-              //  rssi_level.Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
-                
+        
   
             });
 
@@ -197,25 +157,15 @@ namespace aclara_meters.view
              
             #endregion
 
-            #region Misc
-
-            if ( this.global.Options.Count>0)
-                InitializeOptionalFields ();
-            
-
-            #endregion
 
             #region Labels
 
             // Account Number
             this.lb_AccountNumber.Text = global.AccountLabel;      
 
-            #endregion
-             
-            #region Labels
             
             this.port1label.Text = LB_PORT1;
-            this.misclabel .Text = LB_MISC;
+
                         
             #endregion
             int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
@@ -290,201 +240,6 @@ namespace aclara_meters.view
             return "Error Detected";
         }
 
-        #endregion
-
-        #region GUI Initialization
-
-        private void InitializeOptionalFields()
-        {
-           
-            optionalPickers = new List<BorderlessPicker>();
-            optionalEntries = new List<BorderlessEntry>();
-            optionalDates = new List<BorderlessDatePicker>();
-            optionalTimes = new List<BorderlessTimePicker>();
-            optionalMandatoryPickers = new List<Tuple<BorderlessPicker,Label>> ();
-            optionalMandatoryEntries = new List<Tuple<BorderlessEntry,Label>> ();
-            optionalMandatoryDates = new List<Tuple<BorderlessDatePicker, Label>>();
-            optionalMandatoryTimes = new List<Tuple<BorderlessTimePicker, Label>>();
-            foreach ( Option optionalField in this.global.Options )
-            {
-                Frame optionalContainerB = new Frame()
-                {
-                    CornerRadius = 6,
-                    HeightRequest = 30,
-                    Margin = new Thickness(0, 4, 0, 0),
-                    BackgroundColor = Color.FromHex("#7a868c")
-                };
-
-                Frame optionalContainerC = new Frame()
-                {
-                    CornerRadius = 6,
-                    HeightRequest = 30,
-                    Margin = new Thickness(-7, -7, -7, -7),
-                    BackgroundColor = Color.White
-                };
-
-                StackLayout optionalContainerD = new StackLayout()
-                {
-                    Orientation = StackOrientation.Horizontal,
-                    HorizontalOptions = LayoutOptions.FillAndExpand,
-                    Margin = new Thickness(1, 1, 1, 1),
-                    BackgroundColor = Color.White
-                };
-
-                StackLayout optionalContainerA = new StackLayout()
-                {
-                    StyleId = "bloque" + 1
-                };
-
-                Label optionalLabel = new Label()
-                {
-                    Text = optionalField.Display,
-                    Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
-                    Margin = new Thickness(0, 4, 0, 0)
-                };
-
-                BorderlessPicker optionalPicker = null;
-                BorderlessEntry  optionalEntry  = null;
-                BorderlessDatePicker optionalDate = null;
-                BorderlessTimePicker optionalTime = null;
-
-                bool isList = optionalField.Type.Equals("list");
-                if ( isList )
-                {
-                    List<string> optionalFieldOptions = optionalField.OptionList;
-                    optionalPicker = new BorderlessPicker()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                        HeightRequest = 40,
-                        FontSize = 17,
-                        ItemsSource = optionalFieldOptions
-                    };
-                    optionalPicker.Name = optionalField.Name.Replace(" ", "_");
-                    optionalPicker.Display = optionalField.Display;
-
-                    optionalPickers.Add(optionalPicker);
-
-                    optionalContainerD.Children.Add(optionalPicker);
-                    optionalContainerC.Content = optionalContainerD;
-                    optionalContainerB.Content = optionalContainerC;
-                    optionalContainerA.Children.Add(optionalLabel);
-                    optionalContainerA.Children.Add(optionalContainerB);
-
-                    this.optionalFields.Children.Add(optionalContainerA);
-                }
-                else if(optionalField.Format=="date")
-                {
-                    bool required = optionalField.Required;
-                    optionalDate = new BorderlessDatePicker()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                       // HeightRequest = 70,
-                        FontSize = 17
-                    };
-                    optionalDate.Name = optionalField.Name.Replace(" ", "_");
-                    optionalDate.Display = optionalField.Display;
-
-                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    //behavior.MaxLength = optionalField.Len;
-
-                    //optionalEntry.Behaviors.Add(behavior);
-
-                    optionalDates.Add(optionalDate);
-
-                    optionalContainerD.Children.Add(optionalDate);
-                    optionalContainerC.Content = optionalContainerD;
-                    optionalContainerB.Content = optionalContainerC;
-                    optionalContainerA.Children.Add(optionalLabel);
-                    optionalContainerA.Children.Add(optionalContainerB);
-
-                    this.optionalFields.Children.Add(optionalContainerA);
-                }
-                else if (optionalField.Format == "time")
-                {
-                    bool required = optionalField.Required;
-                    optionalTime = new BorderlessTimePicker()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                        // HeightRequest = 70,
-                        FontSize = 17
-                    };
-                    optionalTime.Name = optionalField.Name.Replace(" ", "_");
-                    optionalTime.Display = optionalField.Display;
-
-                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    //behavior.MaxLength = optionalField.Len;
-
-                    //optionalEntry.Behaviors.Add(behavior);
-
-                    optionalTimes.Add(optionalTime);
-
-                    optionalContainerD.Children.Add(optionalTime);
-                    optionalContainerC.Content = optionalContainerD;
-                    optionalContainerB.Content = optionalContainerC;
-                    optionalContainerA.Children.Add(optionalLabel);
-                    optionalContainerA.Children.Add(optionalContainerB);
-
-                    this.optionalFields.Children.Add(optionalContainerA);
-                }
-                else // Text
-                {
-                    string format = optionalField.Format;
-                    int maxLen = optionalField.Len;
-                    int minLen = optionalField.MinLen;
-                    bool required = optionalField.Required;
-
-                    Keyboard keyboard = Keyboard.Default;
-                    //if      ( format.Equals ( "alpha"        ) ) keyboard = Keyboard.Default;
-                    //else if ( format.Equals ( "date"         ) ) keyboard = Keyboard.Default;
-                    if      ( format.Equals ( "alphanumeric" ) ) keyboard = Keyboard.Numeric;
-                    else if ( format.Equals ( "time"         ) ) keyboard = Keyboard.Numeric;
-
-                    optionalEntry = new BorderlessEntry()
-                    {
-                        HorizontalOptions = LayoutOptions.FillAndExpand,
-                        HeightRequest = 40,
-                        Keyboard = keyboard,
-                        FontSize = 17
-                    };
-                    optionalEntry.Name = optionalField.Name.Replace(" ", "_");
-                    optionalEntry.Display = optionalField.Display;
-
-                    CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    behavior.MaxLength = optionalField.Len;
-
-                    optionalEntry.Behaviors.Add(behavior);
-
-                    optionalEntries.Add(optionalEntry);
-
-                    optionalContainerD.Children.Add(optionalEntry);
-                    optionalContainerC.Content = optionalContainerD;
-                    optionalContainerB.Content = optionalContainerC;
-                    optionalContainerA.Children.Add(optionalLabel);
-                    optionalContainerA.Children.Add(optionalContainerB);
-
-                    this.optionalFields.Children.Add(optionalContainerA);
-                }
-
-                // Mandatory fields
-                if ( optionalField.Required )
-                {
-                    if ( isList )
-                         this.optionalMandatoryPickers.Add ( new Tuple<BorderlessPicker,Label> ( optionalPicker, optionalLabel ) );
-                    else if (optionalField.Format=="date")
-                        this.optionalMandatoryDates.Add(new Tuple<BorderlessDatePicker, Label>(optionalDate, optionalLabel));
-                    else if (optionalField.Format == "time")
-                        this.optionalMandatoryTimes.Add(new Tuple<BorderlessTimePicker, Label>(optionalTime, optionalLabel));
-                    else this.optionalMandatoryEntries.Add ( new Tuple<BorderlessEntry,Label>  ( optionalEntry,  optionalLabel ) );
-                    
-                    if ( global.ColorEntry )
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            optionalLabel.TextColor = COL_MANDATORY;
-                        });
-                }
-            }
-        }
-
         private void TappedListeners ()
         {
             bottomBar.GetImageButtonElement("btnTakePicture").Clicked += TakePicture;
@@ -519,7 +274,6 @@ namespace aclara_meters.view
             dialogView.GetTGRElement("dialog_ReplaceMTUReplaceMeter_ok").Tapped += dialog_OKBasicTapped;
             dialogView.GetTGRElement("dialog_ReplaceMTUReplaceMeter_cancel").Tapped += dialog_cancelTapped;
 
-
             dialogView.GetTGRElement("dialog_AddMTU_ok").Tapped += dialog_OKBasicTapped;
             dialogView.GetTGRElement("dialog_AddMTU_cancel").Tapped += dialog_cancelTapped;
 
@@ -527,13 +281,7 @@ namespace aclara_meters.view
             {
                 Command = new Command(() => port1_command()),
             });
-            misclabel.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = new Command(() => misc_command()),
-            });
-          
-            gps_icon_button.Tapped += GpsUpdateButton;
-         
+           
         }
 
         #region Dialogs
@@ -608,7 +356,7 @@ namespace aclara_meters.view
             dialogView.GetStackLayoutElement("dialog_logoff").IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            //Navigation.PopToRootAsync(false);
+       
         }
 
         #endregion
@@ -617,10 +365,7 @@ namespace aclara_meters.view
         {
             bottomBar.GetLabelElement("label_read").Text = "Push Button to START";
         }
-
- 
-
-    
+   
         #region Phone/Tablet
 
         private void LoadPhoneUI()
@@ -649,9 +394,6 @@ namespace aclara_meters.view
 
         #region Menu options
 
-    //    object menu_sender;
-    //    ItemTappedEventArgs menu_tappedevents;
-
         private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e )
         {
             ((ListView)sender).SelectedItem = null;
@@ -664,11 +406,6 @@ namespace aclara_meters.view
             if (Device.Idiom == TargetIdiom.Tablet)
             {
                 
-                //menu_sender = sender;
-                //menu_tappedevents = e;
-
-            
-                //Application.Current.MainPage.Navigation.PopAsync(false);0
                 if (!FormsApp.ble_interface.IsOpen())
                 {
                     // don't do anything if we just de-selected the row.
@@ -701,7 +438,7 @@ namespace aclara_meters.view
                             }
                             else
                             {
-                                //this.actionType = page;
+                               
                                 NavigationController(page);
                             }
                         }
@@ -835,7 +572,7 @@ namespace aclara_meters.view
                                 ContentNav.Opacity = 0;
                                 ContentNav.IsVisible = false;
                             }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
 
                             #region New Circular Progress bar Animations    
 
@@ -1046,7 +783,7 @@ namespace aclara_meters.view
                         ContentNav.Opacity = 0;
                         ContentNav.IsVisible = false;
                     }
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
                 })
             );
         }
@@ -1080,7 +817,7 @@ namespace aclara_meters.view
               //  Popup_start.IsEnabled = true;
                 return;
             }
-            //printer.Suspend();
+         
             background_scan_page.Opacity = 1;
             background_scan_page.IsEnabled = true;
 
@@ -1124,7 +861,7 @@ namespace aclara_meters.view
                         background_scan_page.Opacity = 1;
    
 
-                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //   if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
@@ -1157,7 +894,7 @@ namespace aclara_meters.view
                         background_scan_page.Opacity = 1;
             
 
-                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false; 
+                        shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
@@ -1231,9 +968,8 @@ namespace aclara_meters.view
 
         public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
         {
-            ActionResult actionResult = args.Result;
-
-            Task.Delay(2000).ContinueWith(t =>
+           
+           await  Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     Label textResult = (Label)dialogView.FindByName("dialog_turnoff_text");
@@ -1277,9 +1013,6 @@ namespace aclara_meters.view
             try
             {
                 FormsApp.DoLogOff();
-                //FormsApp.credentialsService.DeleteCredentials();
-                //FormsApp.ble_interface.Close();
-                //Singleton.Remove<Puck>();
             }
             catch (Exception e25)
             {
@@ -1288,25 +1021,7 @@ namespace aclara_meters.view
 
             background_scan_page.IsEnabled = true;
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
-            //Navigation.PopToRootAsync(false);
-        }
-
-        private void misc_command()
-        {
-            miscview.Opacity = 0;
-
-            port1label.Opacity = 0.5;
-            misclabel.Opacity = 1;
-            
-            port1label.FontSize = 19;
-            misclabel.FontSize = 22;
-            
-
-            port1view.IsVisible = false;
-            miscview.IsVisible = true;
-
-            miscview.FadeTo(1, 200);
-
+          
         }
 
         private void port1_command()
@@ -1314,14 +1029,14 @@ namespace aclara_meters.view
             port1view.Opacity = 0;
 
             port1label.Opacity = 1;
-            misclabel.Opacity = 0.5;
+           // misclabel.Opacity = 0.5;
             
             port1label.FontSize = 22;
-            misclabel.FontSize = 19;
+          //  misclabel.FontSize = 19;
                  
 
             port1view.IsVisible = true;
-            miscview.IsVisible = false;
+           // miscview.IsVisible = false;
 
             port1view.FadeTo(1, 200);
 
@@ -1350,75 +1065,19 @@ namespace aclara_meters.view
 
         #endregion
 
-        #region Validation
-
-        private void ValidateEqualityOnFocus (
-            BorderlessEntry tbx1,
-            BorderlessEntry tbx2,
-            Label lb )
-        {
-            lb.IsVisible = ! tbx1.Text.Equals ( tbx2.Text );
-        }
-
-        private bool ValidateFields ( ref string msgError )
-        {
-
-
-            #region Miscelanea
-            dynamic NoValNOrEmpty = new Func<string,bool> ( ( value ) =>
-                                        ! string.IsNullOrEmpty ( value ) &&
-                                        ! Validations.IsNumeric ( value ) );
-                  
-
-            if ( NoValNOrEmpty ( this.tbx_MtuGeolocationLat .Text ) ||
-                 NoValNOrEmpty ( this.tbx_MtuGeolocationLong.Text ) )
-            {
-                msgError = "Field 'GPS Coordinates' are incorrectly filled";
-                return false;
-            }
-            string FILL_ERROR = String.Empty;
-            FILL_ERROR = "Miscellaneous field '_' is incorrectly filled";
-
-            foreach ( Tuple<BorderlessPicker,Label> tuple in optionalMandatoryPickers )
-                if ( tuple.Item1.SelectedIndex <= -1 )
-                {
-                    msgError = FILL_ERROR.Replace ( "_", tuple.Item2.Text );
-                    return false;
-                }
-
-            foreach ( Tuple<BorderlessEntry,Label> tuple in optionalMandatoryEntries )
-                if ( string.IsNullOrEmpty ( tuple.Item1.Text ) )
-                {
-                    msgError = FILL_ERROR.Replace ( "_", tuple.Item2.Text );
-                    return false;
-                }
-
-            foreach (Tuple<BorderlessDatePicker, Label> tuple in optionalMandatoryDates)
-                if (string.IsNullOrEmpty(tuple.Item1.Date.ToShortDateString()))
-                {
-                    msgError = FILL_ERROR.Replace("_", tuple.Item2.Text);
-                    return false;
-                }
-            #endregion
-
-            return true;
-        }
-
-        #endregion
-
+     
         #region Action
 
         private void DataReadMtu ( object sender, EventArgs e )
         {
-            string msgError = string.Empty;
-            if ( ! DEBUG_AUTO_MODE_ON &&
-                 ! this.ValidateFields ( ref msgError ) )
-            {
-                DisplayAlert ( "Error", msgError, "OK" );
-                return;
-            }
+            //string msgError = string.Empty;
+            //if ( ! DEBUG_AUTO_MODE_ON )
+            //{
+            //    DisplayAlert ( "Error", msgError, "OK" );
+            //    return;
+            //}
 
-            isCancellable =true;
+            isCancellable = true;
 
             if (!_userTapped)
             {
@@ -1446,55 +1105,6 @@ namespace aclara_meters.view
             Data.Set("MtuId", tbx_MtuId.Text, true);
             Data.Set("MtuStatus", tbx_Mtu_Status.Text,true);
             Data.Set("NumOfDays", pck_DaysOfRead.SelectedItem.ToString(),true);
-
-            // GPS
-            string value_lat = this.tbx_MtuGeolocationLat .Text;
-            string value_lon = this.tbx_MtuGeolocationLong.Text;
-            string value_alt = this.mtuGeolocationAlt;
-   
-
-            // Gps
-            if ( ! string.IsNullOrEmpty ( value_lat ) &&
-                 ! string.IsNullOrEmpty ( value_lon ) )
-            {
-                double lat = Convert.ToDouble ( value_lat );
-                double lon = Convert.ToDouble ( value_lon );
-        
-                Data.Set ( "GpsLat", lat, true );
-                Data.Set ( "GpsLon", lon, true );
-                Data.Set ( "GpsAlt", value_alt, true );
-                
-            }
-            else
-            {
-                Data.Set("GpsLat", string.Empty, true);
-                Data.Set("GpsLon", string.Empty, true);
-                Data.Set("GpsAlt", string.Empty, true);
-            }
-
-
-            //List<Parameter> optionalParams = new List<Parameter>();
-            Data.Set("Options", new List<Parameter>(), true);
-
-            foreach (BorderlessPicker p in optionalPickers)
-                if (p.SelectedItem != null)
-                    Data.Get.Options.Add(new Parameter(p.Name, p.Display, p.SelectedItem,"",0,true));
- 
-            foreach ( BorderlessEntry e in optionalEntries )
-                if( ! string.IsNullOrEmpty ( e.Text ) )
-                    Data.Get.Options.Add(new Parameter(e.Name, e.Display, e.Text, "", 0, true));
-
-            foreach (BorderlessDatePicker d in optionalDates)
-                if (!string.IsNullOrEmpty(d.Date.ToShortDateString()))
-                    Data.Get.Options.Add(new Parameter(d.Name, d.Display, $"{d.Date.ToShortDateString()} 12:00:00", "", 0, true));
-
-            foreach (BorderlessTimePicker t in optionalTimes)
-                if (!string.IsNullOrEmpty(t.Time.ToString()))
-                    Data.Get.Options.Add(new Parameter(t.Name, t.Display, $"{System.DateTime.Today.ToShortDateString()} {t.Time.ToString()}", "", 0, true));
-
-            //if ( optionalParams.Count > 0 )
-            //    Data.Set("Miscelanea",optionalParams, true);
-            //    //this.addMtuForm.AddParameter ( FIELD.OPTIONAL_PARAMS, optionalParams );
 
             #endregion
 
@@ -1664,71 +1274,7 @@ namespace aclara_meters.view
 
         #endregion
 
-        #region Location
-
-        private async void GpsUpdateButton ( object sender, EventArgs e )
-        {
-             Device.BeginInvokeOnMainThread(() =>
-                {
-                    backdark_bg.IsVisible = true;              
-                    indicator.IsVisible = true;   
-                    background_scan_page.IsEnabled = false;
-                    ContentNav.IsEnabled = false;
-                });
-            var position = await GetCurrentPosition();
-            if (position==null)
-                await dialogsSaved.AlertAsync("You must activate the GPS on the device to return coordinates","Alert");
-            else
-            {
-                this.tbx_MtuGeolocationLat .Text = position.Latitude .ToString ();
-                this.tbx_MtuGeolocationLong.Text = position.Longitude.ToString ();
-                this.mtuGeolocationAlt           = position.Altitude .ToString ();
-            }
-            Device.BeginInvokeOnMainThread(() =>
-                {
-                    backdark_bg.IsVisible = false;              
-                    indicator.IsVisible = false;   
-                    background_scan_page.IsEnabled = true;
-                    ContentNav.IsEnabled = true;
-                });
-        }
-
-        public static async Task<Xamarin.Essentials.Location> GetCurrentPosition()
-	    {
-            Xamarin.Essentials.Location location = null;
-           
-            try
-            {
-                var request = new GeolocationRequest(GeolocationAccuracy.Medium);
-                location = await Geolocation.GetLocationAsync(request);
-            }
-            catch (FeatureNotSupportedException fnsEx)
-            {
-                // Handle not supported on device exception
-            }
-            catch (FeatureNotEnabledException fneEx)
-            {
-               return null; // Handle not enabled on device exception
-            }
-            catch (PermissionException pEx)
-            {
-                // Handle permission exception
-            }
-            catch (Exception ex)
-            {
-                // Unable to get location
-            }
-
-            if (location != null)
-            {
-                Console.WriteLine($"Latitude: {location.Latitude}, Longitude: {location.Longitude}, Altitude: {location.Altitude}");
-            }
-
-            return location;
-            
-	    }
-        #endregion
-
+  
         #region Other methods
 
   
@@ -1746,8 +1292,7 @@ namespace aclara_meters.view
         {
             try
             {
-                //ImageButton ctlButton = (ImageButton)sender;
-                string port; //= (string)ctlButton.CommandParameter;
+                string port; 
 
                 int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
                 var MtuId = await Data.Get.MemoryMap.MtuSerialNumber.GetValue();
@@ -1781,20 +1326,16 @@ namespace aclara_meters.view
 
                     FileInfo[] imagefiles = dir.GetFiles(nameFile);
 
-                    //PicturesMTU.Add(imagefiles[0]);
-
                     imagefiles[0].CopyTo(Path.Combine(Mobile.ImagesPath, nameFile));
                     imagefiles[0].Delete();
-
-                    //await DisplayAlert("File Location", file.Path, "OK");
 
                     file.Dispose();
                 });
 
             }
-            catch (Exception e1)
+            catch (Exception ex)
             {
-                throw;
+                await Errors.ShowAlert(new CameraException(ex.Message));
             }
 
         }

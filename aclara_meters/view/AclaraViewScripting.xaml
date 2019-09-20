@@ -166,14 +166,7 @@
                         <Label x:Name="ContentView_Scripting_label_read" LineBreakMode="TailTruncation" Margin="17,22,0,0" FontSize="20" TextColor="White" Text="Push Button to START">
                         </Label>
                     </StackLayout>
-                    <StackLayout Margin="0,-134,0,20" IsClippedToBounds="true" HorizontalOptions="End">
-                        <Image IsVisible="true" IsEnabled="true" InputTransparent="false" x:Name="ContentView_Scripting_bg_read_mtu_button_img" HeightRequest="96" Margin="0,0,20,10" Scale="1" Source="read_mtu_btn.png" HorizontalOptions="End">
-                            <Image.GestureRecognizers>
-                                <TapGestureRecognizer x:Name="ContentView_Scripting_bg_read_mtu_button" NumberOfTapsRequired="1" />
-                            </Image.GestureRecognizers>
-                        </Image>
-                    </StackLayout>
-                </StackLayout>
+                 </StackLayout>
             </Grid>
         </ContentView>
         <!--                                                                                                                         -->
@@ -182,9 +175,9 @@
         <!--                                                                                                                         -->
         <!--                                                                                                                         -->
         <!--                                                                                                                         -->
-        <StackLayout InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" IsVisible="true" WidthRequest="1500" Opacity="0.6">
+        <StackLayout  IsVisible="true" InputTransparent="true" x:Name="backdark_bg" BackgroundColor="Black" HeightRequest="1024" WidthRequest="1500" Opacity="0.6">
         </StackLayout>
-        <StackLayout Orientation="Vertical" InputTransparent="true" VerticalOptions="Center" HorizontalOptions="Center" 
+        <StackLayout IsVisible="true" Orientation="Vertical" InputTransparent="true" VerticalOptions="Center" HorizontalOptions="Center" 
                      RelativeLayout.YConstraint="{ConstraintExpression 
             Type=RelativeToParent,
             Property=Height,
@@ -200,7 +193,7 @@
             <ActivityIndicator Color="#6aa2b8" Opacity="1" x:Name="indicator" 
                                IsVisible="true" 
                                IsRunning="true" 
-                               Scale="3" 
+                               Scale="2" 
                                VerticalOptions="Center"
                                HorizontalOptions="Center" />
             <Label  x:Name="txtBuscando"

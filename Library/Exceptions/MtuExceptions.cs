@@ -693,5 +693,9 @@
         public ConfigFilesChangedException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
 
+    public class CameraException : OwnExceptionsBase
+    {
+        public CameraException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+    }
     #endregion
 }

@@ -8,6 +8,7 @@ using aclara_meters.Models;
 using aclara_meters.util;
 using Acr.UserDialogs;
 using Library;
+using Library.Exceptions;
 using MTUComm;
 using MTUComm.actions;
 using Plugin.Media;
@@ -4426,29 +4427,36 @@ namespace aclara_meters.view
 
         private async void BarCodeScanner(object sender, EventArgs e)
         {
-            ImageButton ctlButton = (ImageButton)sender;
-            BorderlessEntry field = (BorderlessEntry)this.FindByName((string)ctlButton.CommandParameter);
+            try
+            {
+                ImageButton ctlButton = (ImageButton)sender;
+                BorderlessEntry field = (BorderlessEntry)this.FindByName((string)ctlButton.CommandParameter);
                                    
-            var overlay = new ZXingDefaultOverlay
-            {
-                TopText = "Hold your device up to the barcode",
-                BottomText = "Scanning will happen automatically",
-                ShowFlashButton = true,
-                AutomationId = "zxingDeafultOverlay"
-            };
-            overlay.FlashButtonClicked += delegate { scanPage.ToggleTorch(); };
-
-            scanPage = new ZXingScannerPage(null,overlay);
-
-            scanPage.OnScanResult += (result) =>
-            {
-                Device.BeginInvokeOnMainThread(() =>
+                var overlay = new ZXingDefaultOverlay
                 {
-                    Navigation.PopAsync();
-                    field.Text = result.Text;
-                });
-            };
-            await Navigation.PushAsync(scanPage);
+                    TopText = "Hold your device up to the barcode",
+                    BottomText = "Scanning will happen automatically",
+                    ShowFlashButton = true,
+                    AutomationId = "zxingDeafultOverlay"
+                };
+                overlay.FlashButtonClicked += delegate { scanPage.ToggleTorch(); };
+
+                scanPage = new ZXingScannerPage(null,overlay);
+
+                scanPage.OnScanResult += (result) =>
+                {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        Navigation.PopAsync();
+                        field.Text = result.Text;
+                    });
+                };
+                await Navigation.PushAsync(scanPage);
+            }
+            catch (Exception ex)
+            {
+                await Errors.ShowAlert(new CameraException(ex.Message));
+            }
         }
 
         private async void TakePicture(object sender, EventArgs e)
@@ -4502,8 +4510,9 @@ namespace aclara_meters.view
                 });
 
             }
-            catch (Exception e1)
+            catch (Exception)
             {
+                await Errors.ShowAlert(new CameraException());
             }   
 
         }

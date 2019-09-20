@@ -53,7 +53,9 @@
     <Compile Remove="viewmodel\BleGattServerViewModel.cs" />
     <Compile Remove="viewmodel\BleGattServiceViewModel.cs" />
     <Compile Remove="viewmodel\BlePeripheralViewModel.cs" />
+    <Compile Remove="view\AclaraViewGlobalUIController.xaml.cs" />
     <Compile Remove="view\BleGattServerPage.xaml.cs" />
+    <Compile Remove="view\LogsPage.xaml.cs" />
     <Compile Remove="view\MyPage.xaml.cs" />
     <Compile Remove="view\testingui.xaml.cs" />
     <Compile Remove="Xml_Files\XmlResources.Designer.cs" />
@@ -69,9 +71,6 @@
     </Compile>
     <Compile Update="view\LoginMenuPage.xaml.cs">
       <DependentUpon>AclaraViewLogin.xaml</DependentUpon>
-    </Compile>
-    <Compile Update="view\LogsPage.xaml.cs">
-      <DependentUpon>LogsPage.xaml</DependentUpon>
     </Compile>
     <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="App.xaml.cs">
       <DependentUpon>FormsApp.xaml</DependentUpon>
@@ -115,6 +114,8 @@
     <ProjectReference Include="..\Library\Library.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Remove="view\AclaraViewGlobalUIController.xaml" />
+    <EmbeddedResource Remove="view\LogsPage.xaml" />
     <EmbeddedResource Remove="view\MyPage.xaml" />
     <EmbeddedResource Remove="view\testingui.xaml" />
     <EmbeddedResource Remove="Xml_Files\XmlResources.resx" />

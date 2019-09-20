@@ -8,17 +8,15 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using aclara_meters.Helpers;
 using aclara_meters.Models;
 using aclara_meters.util;
 using Acr.UserDialogs;
 using Library;
+using Library.Exceptions;
 using MTUComm;
 using Plugin.Media.Abstractions;
-using Plugin.Settings;
 using Xamarin.Forms;
 using Xml;
-
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -34,7 +32,7 @@ namespace aclara_meters.view
         private Global global;
         private List<ReadMTUItem> MTUDataListView { get; set; }
         private List<ReadMTUItem> FinalReadListView { get; set; }
-       // private List<PageItem> MenuList { get; set; }
+       
         private bool _userTapped;
         private IUserDialogs dialogsSaved;
 
@@ -137,28 +135,16 @@ namespace aclara_meters.view
             }
             this.global = Singleton.Get.Configuration.Global;
             dialogsSaved = dialogs;
-            //LoadMTUData();
-         
+          
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
 
 
             bottomBar.GetLabelElement("label_read").Text = "Push Button to START";
 
             _userTapped = false;
-
-
+            
             TappedListeners();
-      
-            //Change username textview to Prefs. String
-            //if (FormsApp.credentialsService.UserName != null)
-            //{
-            //    userName.Text = FormsApp.credentialsService.UserName; //"Kartik";
-              
-            //}
-
-            //TopBar.GetImageElement("battery_level").Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-            //TopBar.GetImageElement("rssi_level").Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
-
+ 
             Task.Run(async () =>
             {
                 await Task.Delay(250); Device.BeginInvokeOnMainThread(() =>
@@ -201,18 +187,9 @@ namespace aclara_meters.view
 
             dialogView.GetTGRElement("dialog_ReplaceMTUReplaceMeter_ok").Tapped += dialog_OKBasicTapped;
             dialogView.GetTGRElement("dialog_ReplaceMTUReplaceMeter_cancel").Tapped += dialog_cancelTapped;
-
-
+            
             dialogView.GetTGRElement("dialog_AddMTU_ok").Tapped += dialog_OKBasicTapped;
             dialogView.GetTGRElement("dialog_AddMTU_cancel").Tapped += dialog_cancelTapped;
-
-
-            //if (Device.Idiom == TargetIdiom.Tablet)
-            //{
-            //    hamburger_icon_home.IsVisible = true;
-            //    back_button_home.Tapped += TapToHome_Tabletmode;
-            //}
-
 
         }
 
@@ -231,8 +208,6 @@ namespace aclara_meters.view
             background_scan_page.IsEnabled = true;
 
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
-            //Navigation.PopToRootAsync(false);
-
 
         }
 
@@ -338,6 +313,7 @@ namespace aclara_meters.view
 
         private void LoadPhoneUI()
         {
+            ContentNav.IsVisible = false;
             background_scan_page.Margin = new Thickness(0, 0, 0, 0);
         }
 
@@ -387,8 +363,7 @@ namespace aclara_meters.view
 
         public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
         {
-            ActionResult actionResult = args.Result;
-
+          
             await Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -430,7 +405,7 @@ namespace aclara_meters.view
         private void ReturnToMainView(object sender, EventArgs e)
         {
             Navigation.PopToRootAsync(false);
-            //Application.Current.MainPage.Navigation.PopAsync(false); 
+         
         }
 
         // Event for Menu Item selection, here we are going to handle navigation based
@@ -456,12 +431,8 @@ namespace aclara_meters.view
 
                     if (this.actionType != page)
                     {
-                        //this.actionType = page;
                         NavigationController(page);
                     }
-                  
-
-               
                 }
                 catch (Exception w1)
                 {
@@ -500,9 +471,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            //navigationDrawerList.SelectedItem = null;
-
-                            //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved, page), false);
+ 
                             DoBasicRead();
 
                             background_scan_page.Opacity = 1;
@@ -518,7 +487,7 @@ namespace aclara_meters.view
                                 ContentNav.Opacity = 0;
                                 ContentNav.IsVisible = false;
                             }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
                         })
                     );
 
@@ -547,8 +516,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            //navigationDrawerList.SelectedItem = null;
-
+                            
                             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, page), false);
 
                             background_scan_page.Opacity = 1;
@@ -564,7 +532,7 @@ namespace aclara_meters.view
                                 ContentNav.Opacity = 0;
                                 ContentNav.IsVisible = false;
                             }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
                         })
                     );
 
@@ -657,7 +625,7 @@ namespace aclara_meters.view
 
                             if (FormsApp.config.Global.ActionVerify)
                                 dialogView.OpenCloseDialog("dialog_turnoff_one", true);
-                                //dialog_turnoff_one.IsVisible = true;
+                               
                             else
                             {
                                 this.actionType = page;
@@ -706,8 +674,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            //navigationDrawerList.SelectedItem = null;
-
+                            
                             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewInstallConfirmation(dialogsSaved), false);
 
                             background_scan_page.Opacity = 1;
@@ -756,7 +723,7 @@ namespace aclara_meters.view
 
                             if (FormsApp.config.Global.ActionVerify)
                                 dialogView.OpenCloseDialog("dialog_replacemeter_one", true);
-                            //dialog_replacemeter_one.IsVisible = true;
+                            
                             else
                             {
                                 this.actionType = page;
@@ -777,7 +744,7 @@ namespace aclara_meters.view
                                 ContentNav.IsVisible = false;
                             }
 
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; //if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
                         })
                     );
 
@@ -810,7 +777,7 @@ namespace aclara_meters.view
 
                             if (FormsApp.config.Global.ActionVerify)
                                 dialogView.OpenCloseDialog("dialog_meter_replace_one", true);
-                            //dialog_meter_replace_one.IsVisible = true;
+                           
                             else
                             {
                                 this.actionType = page;
@@ -830,7 +797,7 @@ namespace aclara_meters.view
                                 ContentNav.Opacity = 0;
                                 ContentNav.IsVisible = false;
                             }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
                         })
                     );
 
@@ -864,7 +831,7 @@ namespace aclara_meters.view
 
                             if (FormsApp.config.Global.ActionVerify)
                                 dialogView.OpenCloseDialog("dialog_AddMTUAddMeter", true);
-                            //dialog_AddMTUAddMeter.IsVisible = true;
+                           
                             else
                             {
                                 this.actionType = page;
@@ -884,7 +851,7 @@ namespace aclara_meters.view
                                 ContentNav.Opacity = 0;
                                 ContentNav.IsVisible = false;
                             }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
                         })
                     );
 
@@ -918,7 +885,7 @@ namespace aclara_meters.view
 
                             if (FormsApp.config.Global.ActionVerify)
                                 dialogView.OpenCloseDialog("dialog_AddMTUReplaceMeter", true);
-                                //dialog_AddMTUReplaceMeter.IsVisible = true;
+                               
                             else
                             {
                                 this.actionType = page;
@@ -938,7 +905,7 @@ namespace aclara_meters.view
                                 ContentNav.Opacity = 0;
                                 ContentNav.IsVisible = false;
                             }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
                         })
                     );
 
@@ -972,7 +939,7 @@ namespace aclara_meters.view
 
                             if (FormsApp.config.Global.ActionVerify)
                                 dialogView.OpenCloseDialog("dialog_ReplaceMTUReplaceMeter", true);
-                            //dialog_ReplaceMTUReplaceMeter.IsVisible = true;
+                           
                             else
                             {
                                 this.actionType = page;
@@ -993,7 +960,7 @@ namespace aclara_meters.view
                                 ContentNav.Opacity = 0;
                                 ContentNav.IsVisible = false;
                             }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; // if (Device.Idiom == TargetIdiom.Phone) shadoweffect.IsVisible = false;
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
                         })
                     );
 
@@ -1025,16 +992,11 @@ namespace aclara_meters.view
         private void ThreadProcedureMTUCOMMAction()
         {
             //Create Ation when opening Form
-            //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
             MTUComm.Action add_mtu = new MTUComm.Action (
                 FormsApp.ble_interface,
                 MTUComm.Action.ActionType.ReadMtu,
                 FormsApp.credentialsService.UserName );
-
-            //Define finish and error event handler
-            //add_mtu.OnFinish += Add_mtu_OnFinish;
-            //add_mtu.OnError += Add_mtu_OnError;
-
+  
             add_mtu.OnProgress += ((s, e) =>
             {
                 string mensaje = e.Message;
@@ -1058,24 +1020,7 @@ namespace aclara_meters.view
         public async Task OnFinish ( object sender, Delegates.ActionFinishArgs args )
         {
             FinalReadListView = new List<ReadMTUItem>();
-
-            Parameter[] paramResult = args.Result.getParameters ();
-            
-            /*
-            int mtu_type = 0;
-
-            // Get MtuType = MtuID
-            foreach ( Parameter p in paramResult)
-            {
-                if ( ! string.IsNullOrEmpty ( p.CustomParameter ) &&
-                        p.CustomParameter.Equals ( "MtuType" ) )
-                {
-                    mtu_type = Int32.Parse(p.Value.ToString());
-                    break;
-                }
-            }
-            */
-
+ 
             Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( args.Mtu.Id );
             InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface( mtu, ActionType.ReadMtu );
             
@@ -1193,15 +1138,10 @@ namespace aclara_meters.view
         private void ThreadProcedureMTUReadFabric()
         {
             //Create Ation when opening Form
-            //Action add_mtu = new Action(new Configuration(@"C:\Users\i.perezdealbeniz.BIZINTEK\Desktop\log_parse\codelog"),  new USBSerial("COM9"), Action.ActionType.AddMtu, "iker");
             MTUComm.Action add_mtu = new MTUComm.Action (
                 FormsApp.ble_interface,
                 actionType,
                 FormsApp.credentialsService.UserName );
-
-            //Define finish and error event handler
-            //add_mtu.OnFinish += Add_mtu_OnFinish;
-            //add_mtu.OnError += Add_mtu_OnError;
 
             add_mtu.OnProgress += ((s, e) =>
             {
@@ -1241,9 +1181,8 @@ namespace aclara_meters.view
         private async void TakePicture(object sender, EventArgs e)
         {
             try
-            {
-                //ImageButton ctlButton = (ImageButton)sender;
-                string port; //= (string)ctlButton.CommandParameter;
+            {                
+                string port; 
 
                 int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
                 var MtuId = await Data.Get.MemoryMap.MtuSerialNumber.GetValue();
@@ -1277,19 +1216,16 @@ namespace aclara_meters.view
 
                     FileInfo[] imagefiles = dir.GetFiles(nameFile);
 
-                    //PicturesMTU.Add(imagefiles[0]);
-
                     imagefiles[0].CopyTo(Path.Combine(Mobile.ImagesPath, nameFile));
                     imagefiles[0].Delete();
-
-                    //await DisplayAlert("File Location", file.Path, "OK");
 
                     file.Dispose();
                 });
 
             }
-            catch (Exception e1)
+            catch (Exception ex)
             {
+                await Errors.ShowAlert(new CameraException(ex.Message));
             }
 
         }

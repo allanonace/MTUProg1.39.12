@@ -29,6 +29,7 @@ sonar-project.properties
 gulp-tsc-tmp*
 Resource.Designer.cs
 
+lazygit.exe
 *.DS_Store
 *.tmp.txt
 *.userprefs

@@ -242,10 +242,16 @@ namespace MTUComm
         {
             Action act = (Action)sender;
 
-            onStepFinish ( act, args );
+            if (act.Order < (actions.Count - 1))
+            {
+                onStepFinish(act, args);
+                actions.ToArray()[act.Order + 1].Run();
+            }
+            else
+            {
+                OnFinish(act, args);
+            }
 
-            if ( act.Order < ( actions.Count - 1 ) )
-                actions.ToArray()[act.Order+1].Run();
         }
 
         private void Action_OnError ()
