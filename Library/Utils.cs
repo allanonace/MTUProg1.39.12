@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -133,6 +134,49 @@ namespace Library
                     return new X509Certificate2 ( memStream.ToArray () );
                 }
             }
+        }
+
+        #endregion
+
+        #region Color
+
+        public static byte[] ConvertHexToRGB (
+            string hex )
+        {
+            string r, g, b;
+            byte[] rgb = new byte[ 3 ];
+
+            hex = hex.Replace ( "#", string.Empty );
+
+            switch ( hex.Length )
+            {
+                case 1:
+                    r = g = b = hex + hex;
+                    break;
+                case 2:
+                    r = g = b = hex;
+                    break;
+                case 3:
+                    r = hex.Substring ( 0, 1 );
+                    g = hex.Substring ( 1, 1 );
+                    b = hex.Substring ( 2, 1 );
+                    r = r + r;
+                    g = g + g;
+                    b = b + b;
+                    break;
+                case 6:
+                    r = hex.Substring ( 0, 2 );
+                    g = hex.Substring ( 2, 2 );
+                    b = hex.Substring ( 4, 2 );
+                    break;
+                default:
+                    return null;
+            }
+
+            return new byte[] {
+                byte.Parse ( r, NumberStyles.AllowHexSpecifier ),
+                byte.Parse ( g, NumberStyles.AllowHexSpecifier ),
+                byte.Parse ( b, NumberStyles.AllowHexSpecifier ) };
         }
 
         #endregion
@@ -338,6 +382,15 @@ namespace Library
                 return false;
             }
             return true;
+        }
+
+        public static byte[] ByteArrayFromBase64 (
+            string text,
+            out bool wasInBase64 )
+        {
+            if ( ( wasInBase64 = Utils.StringIsInBase64 ( text ) ) )
+                return Convert.FromBase64String ( text );
+            return null;
         }
 
         public static string StringFromBase64 (

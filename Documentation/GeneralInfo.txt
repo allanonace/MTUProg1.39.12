@@ -1,0 +1,77 @@
+Title: General Information
+
+This document explains some topics that may require more than the source code documentation to understand them correctly, such as compression of the output data or how to use Aclara MTU Programmer app from another app.
+
+Section: Third-party app Integration
+
+The approach implemented to allow the integration of the Aclara MTU Programmer app into third-party apps is through the use of custom URL schemes.
+
+More info: https://xamarinhelp.com/uri-scheme
+
+The parameters *message* and *output_data* are encoded using only characters compatible with the URI, replacing special/unsafe characters for a *%* followed by two hex digits.
+
+Schema:
+    
+    - {url}?param1=...&param2=...&paramN=...
+
+        - For the *url* the value used is the app UID 'aclara-mtu-programmer://'.
+
+Arguments:
+
+    - *status* = { success|error }
+
+    - *output_filename* = { plain_text }
+
+        - It is the value of the *<logFile>* parameter/tag in the scripts/trigger files.
+
+    - *message* = { error_message }
+
+        - It is the pop-up message and only appears when *status = error*.
+
+    - *output_data* = { result_log }
+
+    - *compress* = { deflate|gzip|<empty> } [ Optional ]
+
+        - If it is present, *message* and *output_data* will be compressed with Deflate or GZip, otherwise they will be in base64.
+
+Section: Compression
+
+Passing information/data using the *URI has a limit stablished by each web browser*, but in general is around 2k characters.
+
+More info: https://stackoverflow.com/a/417184
+
+Seems enough but for composed actions as Add/Replace, and more specifically for two ports MTUs, generated logs usually are longer than that and the browser shows an error message saying that the URI has exceded the allowed length.
+
+Group: Output
+
+Only the parameters *message* and *output_data* of the output/result generated are compressed to be sent back to the third-party app, who launched/passed the script file to the Aclara MTU Programmer app.
+
+The files stored in the app sandbox, which will be uploaded to the FTP, are neither compressed nor encoded to base64.
+
+Group: Implementation
+
+A class to work with two different compression methods is implemented in the project, whichs allows choosing between *Deflate* and *GZip* algorithms. The Deflate algorithm is the one used by default.
+
+The *Deflate* algorithm is a lossless data compression algorithm that is used as standard, for example, in the PNG and ZIP formats, and GZip is a file format that uses Deflate by adding a checksum and a header/footer to analyze the data looking for some kind of corruption.
+
+More info: <MTUComm.Compression> class
+
+Group: Output workflow
+
+- *Aclara MTU Programmer*
+
+    - Log result is generated
+
+    - Encode to Base64
+
+    - Compress [ Optional ]
+
+    - Set to output_data parameter in the URI
+
+- *Third-party app*
+
+    - Uncompress [ Optional ]
+
+    - Decode from Base64
+
+    - Log result is re-generated

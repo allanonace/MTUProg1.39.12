@@ -59,6 +59,9 @@
     <Compile Remove="Xml_Files\XmlResources.Designer.cs" />
     <Compile Remove="EntryLengthValidatorBehavior.cs" />
     <Compile Remove="Constants.cs" />
+    <Compile Remove="view\MainPage.cs" />
+    <Compile Remove="Container.cs" />
+    <Compile Remove="view\MainPage.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="view\BleGattServicePage.xaml.cs">
@@ -118,6 +121,7 @@
     <EmbeddedResource Remove="view\MyPage.xaml" />
     <EmbeddedResource Remove="view\testingui.xaml" />
     <EmbeddedResource Remove="Xml_Files\XmlResources.resx" />
+    <EmbeddedResource Remove="view\MainPage.xaml" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="view\BottomBar.xaml">

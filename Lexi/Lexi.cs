@@ -555,7 +555,9 @@ namespace Lexi
                 
                 Utils.PrintDeep ( "Lexi.Write.. " +
                     "Echo " + serial.isEcho ().ToString ().ToUpper () +
-                    " | StreamFromMTU = Stream x" + stream.Length + " + Max.Response x" + maxByteResponse + " = " + rawBuffer.Length + " bytes" );
+                    " | StreamFromMTU = Echo x" + stream.Length +
+                    " + Max.Response x" + maxByteResponse +
+                    " = " + rawBuffer.Length + " bytes" );
     
                 // Wait until the response buffer data is available or timeout limit is reached
                 int  bytesRead = 0;

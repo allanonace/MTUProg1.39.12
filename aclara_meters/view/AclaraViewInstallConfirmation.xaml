@@ -57,7 +57,8 @@
                                             </StackLayout>
                                             <StackLayout IsVisible="{Binding isDetailMeter}">
                                                 <Label Text="{Binding Title}" Margin="36,0,0,0" VerticalOptions="Center" Font="Bold,19" />
-                                                <Label Text="{Binding Description}" Margin="36,-4,0,0" FontSize="17" VerticalOptions="Center" />
+                                                <Label Text="{Binding Description}" Margin="36,-4,0,0" FontSize="17" VerticalOptions="Center"
+                                                       BackgroundColor="{Binding BackgroundColor}" TextColor="{Binding FontColor}" />
                                             </StackLayout>
                                         </StackLayout>
                                     </ViewCell>

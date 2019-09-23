@@ -110,6 +110,7 @@ namespace MTUComm
         private const int WAIT_BTW_LOGS           = 100;
         private const int WAIT_AFTER_EVENT_LOGS   = 1000;
         private const int CMD_VSWR                = 0x23; // 35 VSWR Test
+        private const int CMD_VSWR_RES            = 6;
         private const int CMD_INIT_NODE_DISC      = 0x18; // 24 Node discovery initiation command
         private const int CMD_INIT_NODE_DISC_RES  = 5; // Response ACK with result [0-4] = 5 bytes
         private const int CMD_INIT_NODE_DISC_NOT  = 0x00; // Node discovery not initiated
@@ -124,6 +125,7 @@ namespace MTUComm
         private const int CMD_NEXT_NODE_3         = 5; // ACK without log entry [0-4] = 5 bytes
         private const byte CMD_NEXT_NODE_DATA     = 0x00; // ACK with node entry
         private const byte CMD_NEXT_NODE_EMPTY    = 0x01; // ACK without node entry ( query complete )
+        private const int WAIT_BEFORE_INIT_NODE   = 1000;
         private const int WAIT_BEFORE_START_NODE  = 3000;
         private const int WAIT_BEFORE_GET_NODES   = 1000;
         private const int WAIT_BTW_NODE_ERRORS    = 1000;
@@ -132,9 +134,10 @@ namespace MTUComm
         private const int CMD_ENCRYP_MAX          = 3;
         private const int CMD_ENCRYP_OLD_MAX      = 5;
         private const int CMD_LOAD_ENCRYP         = 0x1B;
+        private const int WAIT_AFTER_GEN_KEYS     = 1000;
         private const int CMD_READ_ENCRYP         = 0x1C;
-        private const int CMD_READ_ENCRYP_RES_2   = 64;
-        private const int CMD_READ_ENCRYP_RES_3   = 32;
+        private const int CMD_READ_ENCRYP_RES_2   = 68; // ACK + 64 + CRC = 2 + 64 + 2 = 68
+        private const int CMD_READ_ENCRYP_RES_3   = 36; // ACK + 32 + CRC = 2 + 32 + 2 = 36
         private const int CMD_GEN_ENCRYP_KEYS     = 0x1D;
         private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
         private const string ERROR_LOADMETER      = "MeterLoadException";
@@ -700,7 +703,7 @@ namespace MTUComm
                                 null,
                                 ONLY_ONE_ATTEMPT_CMD,
                                 WAIT_BTW_ATTEMPTS_CMD,
-                                new uint[]{ CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_RES_2 }, // ACK with log entry or without
+                                new uint[]{ CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_RES_2 },
                                 new LexiFiltersResponse ( new ( int,int,byte )[] {
                                     ( CMD_NEXT_EVENT_RES_1, CMD_BYTE_RES, CMD_NEXT_EVENT_DATA  ), // Entry data included
                                     ( CMD_NEXT_EVENT_RES_2, CMD_BYTE_RES, CMD_NEXT_EVENT_EMPTY ), // Complete but without data
@@ -819,8 +822,9 @@ namespace MTUComm
         /// <seealso cref="OnReadMtu"/>
         public async Task InstallConfirmation ()
         {
-            // DEBUG
-            this.WriteMtuBitAndVerify ( 22, 0, false ); // Turn On MTU
+            #if DEBUG
+            await this.WriteMtuBitAndVerify ( 22, 0, false ); // Turn On MTU
+            #endif
 
             if ( await this.InstallConfirmation_Logic () < IC_EXCEPTION )
                  await this.ReadMtu ();
@@ -968,9 +972,12 @@ namespace MTUComm
         }
 
         /// <summary>
+        /// NOTE: Project 2nd part - OnDemand 1.2
+        /// <para>
         /// The Node Discovery process is only performed working with OnDemand compatible MTUs,
         /// verifying that the MTU will be able to communicate over the F1 and F2 channels with
         /// enough DCUs to be able ensure that readings messages will be properly sent to the head-end.
+        /// </para>
         /// <para>
         /// The goal is to be able to get a Install Confirmation and verify the communications with in one minute.
         /// </para>
@@ -1007,11 +1014,13 @@ namespace MTUComm
                         null,
                         N_ATTEMPTS_CMD,
                         WAIT_BTW_ATTEMPTS_CMD,
-                        new uint[] { 6 },
+                        new uint[] { CMD_VSWR_RES },
                         null,
                         LexiAction.OperationRequest );
 
                 vswr = Utils.GetNumericValueFromBytes<double> ( fullResponse.Response, 2, 2 );
+
+                await Task.Delay ( WAIT_BEFORE_INIT_NODE );
 
                 // Node Discovery ( Initiation + Start/Reset + Get Nodes )
                 float maxTimeND = this.global.MaxTimeRFCheck * 1000;
@@ -1041,7 +1050,7 @@ namespace MTUComm
                         data,
                         N_ATTEMPTS_CMD,
                         WAIT_BTW_ATTEMPTS_CMD,
-                        new uint[] { CMD_INIT_NODE_DISC_RES }, // ACK with response
+                        new uint[] { CMD_INIT_NODE_DISC_RES },
                         new LexiFiltersResponse ( new ( int,int,byte )[] {
                             ( CMD_INIT_NODE_DISC_RES, CMD_BYTE_RES, CMD_INIT_NODE_DISC_NOT ), // Node discovery not initiated
                             ( CMD_INIT_NODE_DISC_RES, CMD_BYTE_RES, CMD_INIT_NODE_DISC_INI )  // Node discovery initiated
@@ -1307,6 +1316,7 @@ namespace MTUComm
             }
 
             // Generates entries for activity log and nodes log file
+            // NOTE: Logs file won't be generated if the result Exception
             await this.OnNodeDiscovery (
                 new Delegates.ActionArgs ( this.mtu, map, result, nodeList, successF1, successF2, vswr ) );
 
@@ -1448,7 +1458,6 @@ namespace MTUComm
 
         #endregion
 
-
         #region Turn On|Off
 
         /// <summary>
@@ -1475,8 +1484,8 @@ namespace MTUComm
             if ( await this.TurnOnOffMtu_Logic ( on ) )
             {
                 if ( on )
-                     this.OnTurnOnMtu  ( new Delegates.ActionArgs ( this.mtu ) );
-                else this.OnTurnOffMtu ( new Delegates.ActionArgs ( this.mtu ) );
+                     await this.OnTurnOnMtu  ( new Delegates.ActionArgs ( this.mtu ) );
+                else await this.OnTurnOffMtu ( new Delegates.ActionArgs ( this.mtu ) );
             }
         }
 
@@ -1544,9 +1553,12 @@ namespace MTUComm
         #region Read Fabric
 
         /// <summary>
+        /// NOTE: For internal use only
+        /// <para>
         /// Simple and quick method to verify if the app can read from an MTU,
         /// reading from the physical memory only the first register, that corresponds
         /// to the MTU type, and the process is successful if no exception is launched.
+        /// </para>
         /// <para>
         /// See <see cref="ReadMtu"/> to perform a full read of the MTU.
         /// </para>
@@ -2838,15 +2850,12 @@ namespace MTUComm
 
             bool publicKeyInBase64;
             bool broadKeyInBase64;
-            string publicKey = Utils.StringFromBase64 ( this.global.PublicKey,    out publicKeyInBase64 );
-            string broadKey  = Utils.StringFromBase64 ( this.global.BroadcastSet, out broadKeyInBase64  );
-
-            // Removes first eight characters and there should be exactly 64 remaining
-            publicKey = publicKey.Substring ( 8 );
+            byte[] publicKey = Utils.ByteArrayFromBase64 ( this.global.PublicKey,    out publicKeyInBase64 );
+            byte[] broadKey  = Utils.ByteArrayFromBase64 ( this.global.BroadcastSet, out broadKeyInBase64  );
 
             // Checks public key format
             if ( ! publicKeyInBase64 ||
-                 publicKey.Length != 64 )
+                 publicKey.Length - 8 != 64 )
                 throw new ODEncryptionPublicKeyFormatException ();
             
             // Checks broadcast key format
@@ -2863,17 +2872,16 @@ namespace MTUComm
             byte[] data4 = new byte[ 32 + 1 ];
             if ( this.mtu.BroadCast )
             {
-                byte[] arBRK = Encoding.UTF8.GetBytes ( broadKey );
-                Array.Copy ( arBRK, 0, data4, 1, arBRK.Length );
+                Array.Copy ( broadKey, 0, data4, 1, broadKey.Length );
                 data4[ 0 ] = 0x04; // Broadcast Key
             }
 
             byte[] data1 = new byte[ randomKey.Length + 1 ];
             data1[ 0 ] = 0x01; // Head End Random Number
 
+            // Removes first eight characters and there should be exactly 64 remaining
             byte[] data0 = new byte[ 64 + 1 ];
-            byte[] arPKI = Encoding.UTF8.GetBytes ( publicKey );
-            Array.Copy ( arPKI, 0, data0, 1, arPKI.Length );
+            Array.Copy ( publicKey, 8, data0, 1, 64 );
             data0[ 0 ] = 0x00; // Head End Public Key
 
             // Prepares the data for the LExI commands "Reads Encryption Item"
@@ -2888,11 +2896,9 @@ namespace MTUComm
             {
                 try
                 {
-                    int step = 1;
-
                     if ( this.mtu.BroadCast )
                     {
-                        OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Broadcast Key" ) );
 
                         // Loads Encryption Item - Type 4: Broadcast Key 
                         fullResponse = await this.lexi.Write (
@@ -2905,7 +2911,7 @@ namespace MTUComm
                             LexiAction.OperationRequest );
                     }
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Head-End Random Number" ) );
 
                     // Generates the random number and prepares LExI array
                     randomKey = mtusha.RandomBytes ( randomKey.Length );
@@ -2923,7 +2929,7 @@ namespace MTUComm
                     
                     string serverRND = Convert.ToBase64String ( randomKey );
                     
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Head-End Public Key" ) );
 
                     // Loads Encryption Item - Type 0: Head End Public Key
                     fullResponse = await this.lexi.Write (
@@ -2935,7 +2941,7 @@ namespace MTUComm
                         null,
                         LexiAction.OperationRequest );
                     
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Generate Keys" ) );
 
                     // Generates Encryptions Keys
                     fullResponse = await this.lexi.Write (
@@ -2946,6 +2952,8 @@ namespace MTUComm
                         null,
                         null,
                         LexiAction.OperationRequest );
+
+                    await Task.Delay ( WAIT_AFTER_GEN_KEYS );
 
                     // Verifies if the MTU is encrypted
                     Utils.Print ( "Read Encrypted from MTU" );
@@ -2958,7 +2966,7 @@ namespace MTUComm
                          encrypIndex <= curEncrypIndex )
                         continue; // Error
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: MTU Random Number" ) );
 
                     // Reads Encryption Item - Type 3: MTU Random Number
                     fullResponse = await this.lexi.Write (
@@ -2972,7 +2980,7 @@ namespace MTUComm
 
                     string clientRnd = Convert.ToBase64String ( fullResponse.Response );
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: MTU Public Key" ) );
 
                     // Reads Encryption Item - Type 2: MTU Public Key
                     fullResponse = await this.lexi.Write (
