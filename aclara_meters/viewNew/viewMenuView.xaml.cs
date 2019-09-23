@@ -13,10 +13,10 @@ using aclara_meters.view;
 namespace aclara_meters.view
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class MenuView : Grid
+    public partial class viewMenuView : Grid
     {
         private List<PageItem> MenuList { get; set; }
-        public MenuView()
+        public viewMenuView()
         {
             InitializeComponent();
 

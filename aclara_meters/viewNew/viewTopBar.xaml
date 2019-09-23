@@ -8,7 +8,7 @@
     xmlns:d="http://xamarin.com/schemas/2014/forms/design"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    x:Class="aclara_meters.view.TopBar">
+    x:Class="aclara_meters.view.viewTopBar">
 
     <Grid.RowDefinitions>
         <RowDefinition Height="92"/>

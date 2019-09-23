@@ -5,9 +5,9 @@ using Xamarin.Forms;
 
 namespace aclara_meters.view
 {
-    public partial class Container
+    public partial class viewContainer
     {
-        public Container()
+        public viewContainer()
         {
             InitializeComponent();
         }

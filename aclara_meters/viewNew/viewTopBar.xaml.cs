@@ -11,9 +11,9 @@ using Xamarin.Forms.Xaml;
 namespace aclara_meters.view
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class TopBar : Grid
+    public partial class viewTopBar : Grid
     {
-        public TopBar()
+        public viewTopBar()
         {
             InitializeComponent();
             battery_level.Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");

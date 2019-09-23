@@ -10,9 +10,9 @@ using Xamarin.Forms.Xaml;
 namespace aclara_meters.view
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
-    public partial class BottomBar : Grid
+    public partial class viewBottomBar : Grid
     {
-        public BottomBar()
+        public viewBottomBar()
         {
             InitializeComponent();
         }

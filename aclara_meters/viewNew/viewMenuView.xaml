@@ -8,7 +8,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     IsVisible="true"
-    x:Class="aclara_meters.view.MenuView">
+    x:Class="aclara_meters.view.viewMenuView">
 
     <Grid.RowDefinitions>
         <RowDefinition Height="92"/>
