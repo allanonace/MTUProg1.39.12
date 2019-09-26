@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -8,12 +7,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Lexi;
 using Lexi.Interfaces;
 using Library;
-using MTUComm.actions;
 using Library.Exceptions;
+using MTUComm.actions;
 using MTUComm.MemoryMap;
-using Lexi;
 using Xml;
 
 using ActionType               = MTUComm.Action.ActionType;
@@ -27,6 +26,8 @@ using LogFilterMode            = Lexi.Lexi.LogFilterMode;
 using LogEntryType             = Lexi.Lexi.LogEntryType;
 using NodeType                 = Lexi.Lexi.NodeType;
 using NodeDiscoveryQueryResult = MTUComm.NodeDiscoveryList.NodeDiscoveryQueryResult;
+using RDDStatus                = MTUComm.RDDStatusResult.RDDStatus;
+using RDDValveStatus           = MTUComm.RDDStatusResult.RDDValveStatus;
 
 namespace MTUComm
 {
@@ -42,30 +43,12 @@ namespace MTUComm
     {
         #region Constants
 
-        /// <summary>
-        /// All possible results for the Node Discovery process.
-        /// <para>&#160;</para>
-        /// </para>
-        /// <list type="NodeDiscoveryResult">
-        /// <item>
-        ///     <term>NodeDiscoveryResult.GOOD</term>
-        ///     <description>The Node Discovery process was completed validating at least the minimum nodes/DCUs required</description>
-        /// </item>
-        /// <item>
-        ///     <term>NodeDiscoveryResult.EXCELLENT</term>
-        ///     <description>The Node Discovery process was completed validating the same or more than the desired nodes/DCUs</description>
-        /// </item>
-        /// <item>
-        ///     <term>NodeDiscoveryResult.NOT_ACHIEVED</term>
-        ///     <description>The Node Discovery process has finished validating fewer nodes/DCUs than the minimum required</description>
-        /// </item>
-        ///  <item>
-        ///     <term>NodeDiscoveryResult.EXCEPTION</term>
-        ///     <description>Some uncontrollable exception occurred during the execution of the Node Discovery process</description>
-        /// </item>
-        /// </list>
-        /// </para>
-        /// </summary>
+        /* Enum: NodeDiscoveryResult
+            GOOD         - The Node Discovery process was completed validating at least the minimum nodes/DCUs required
+            EXCELLENT    - The Node Discovery process was completed validating the same or more than the desired nodes/DCUs
+            NOT_ACHIEVED - The Node Discovery process has finished validating fewer nodes/DCUs than the minimum required
+            EXCEPTION    - Some uncontrollable exception occurred during the execution of the Node Discovery process
+        */
         public enum NodeDiscoveryResult
         {
             GOOD,
@@ -74,76 +57,172 @@ namespace MTUComm
             EXCEPTION
         }
 
-        private const int BASIC_READ_1_ADDRESS    = 0;
-        private const int BASIC_READ_1_DATA       = 32;
-        private const int BASIC_READ_2_ADDRESS    = 244;
-        private const int BASIC_READ_2_DATA       = 1;
-        private const int DEFAULT_OVERLAP         = 6;
-        private const int DEFAULT_LENGTH_AES      = 16;
-        private const int SAME_MTU_ADDRESS        = 0;
-        private const int SAME_MTU_DATA           = 10;
-        private const int IC_OK                   = 0;
-        private const int IC_NOT_ACHIEVED         = 1;
-        private const int IC_EXCEPTION            = 2;
-        private const int WAIT_BTW_TURNOFF        = 500;
-        private const int WAIT_BTW_IC             = 1000;
-        private const int WAIT_IC_FAILS           = 4000;
-        private const int WAIT_BEFORE_READ        = 1000;
-        private const int TIMES_TURNOFF           = 3;
-        public static readonly int N_ATTEMPTS_LEXI        = 2;
-        public static readonly int WAIT_BTW_ATTEMPTS_LEXI = 1;
-        private const int ONLY_ONE_ATTEMPT_CMD    = 1;
-        private const int N_ATTEMPTS_CMD          = 2;
-        private const int WAIT_BTW_ATTEMPTS_CMD   = 1;
-        private const int DATA_READ_END_DAYS      = 60; // In STARProgrammer code is used .AddSeconds ( 86399 ) -> 86399 / 60 / 24 = 59,999 = 60 days
-        private const byte CMD_INIT_EVENT_LOGS    = 0x13; // 19
-        private const byte CMD_NEXT_EVENT_LOG     = 0x14; // 20
-        private const byte CMD_REPE_EVENT_LOG     = 0x15; // 21
-        private const int CMD_NEXT_EVENT_RES_1    = 25;   // Response ACK with log entry [0-24] = 25 bytes
-        private const int CMD_NEXT_EVENT_RES_2    = 5;    // Response ACK with no data [0-4] = 5 bytes
-        private const int CMD_BYTE_RES            = 2;    // Response second byte is result or status ( 0 = Log entry, 1 or 2 = No data )
-        private const byte CMD_NEXT_EVENT_DATA    = 0x00; // ACK with log entry
-        private const byte CMD_NEXT_EVENT_EMPTY   = 0x01; // ACK without log entry ( query complete )
-        private const byte CMD_NEXT_EVENT_BUSY    = 0x02; // ACK without log entry ( MTU is busy or some error trying to recover next log entry )
-        private const int WAIT_BEFORE_LOGS        = 10000; // The host device should delay for at least 2 seconds to give the MTU time to begin the query
-        private const int WAIT_BTW_LOG_ERRORS     = 1000;
-        private const int WAIT_BTW_LOGS           = 100;
-        private const int WAIT_AFTER_EVENT_LOGS   = 1000;
-        private const int CMD_VSWR                = 0x23; // 35 VSWR Test
-        private const int CMD_INIT_NODE_DISC      = 0x18; // 24 Node discovery initiation command
-        private const int CMD_INIT_NODE_DISC_RES  = 5; // Response ACK with result [0-4] = 5 bytes
-        private const int CMD_INIT_NODE_DISC_NOT  = 0x00; // Node discovery not initiated
-        private const int CMD_INIT_NODE_DISC_INI  = 0x01; // Node discovery initiated
-        private const int CMD_QUERY_NODE_DISC     = 0x19; // 25 Start/Reset node discovery response query
-        private const int CMD_QUERY_NODE_DISC_RES = 5; // Response ACK with result [0-4] = 5 bytes
-        private const int CMD_QUERY_NODE_BUSY     = 0x00; // The MTU is busy
-        private const int CMD_QUERY_NODE_DISC_INI = 0x01; // The MTU is ready for query
-        private const int CMD_NEXT_NODE_DISC      = 0x1A; // 26 Get next node discovery response
-        private const int CMD_NEXT_NODE_1         = 10; // ACK with general information [0-9] = 10 bytes
-        private const int CMD_NEXT_NODE_2         = 26; // ACK with log entry [0-25] = 26 bytes
-        private const int CMD_NEXT_NODE_3         = 5; // ACK without log entry [0-4] = 5 bytes
-        private const byte CMD_NEXT_NODE_DATA     = 0x00; // ACK with node entry
-        private const byte CMD_NEXT_NODE_EMPTY    = 0x01; // ACK without node entry ( query complete )
-        private const int WAIT_BEFORE_START_NODE  = 3000;
-        private const int WAIT_BEFORE_GET_NODES   = 1000;
-        private const int WAIT_BTW_NODE_ERRORS    = 1000;
-        private const int WAIT_BTW_NODES          = 100;
-        private const int WAIT_BTW_NODE_FAILS     = 1000;
+        private const int BASIC_READ_1_ADDRESS     = 0;
+        private const int BASIC_READ_1_DATA        = 32;
+        private const int BASIC_READ_2_ADDRESS     = 244;
+        private const int BASIC_READ_2_DATA        = 1;
+        private const int DEFAULT_OVERLAP          = 6;
+        private const int DEFAULT_LENGTH_AES       = 16;
+        private const int SAME_MTU_ADDRESS         = 0;
+        private const int SAME_MTU_DATA            = 10;
+        private const int WAIT_BTW_TURNOFF         = 500;
+        private const int TIMES_TURNOFF            = 3;
+
+        /* Constants: LExI Read
+            WAIT_BEFORE_PREPARE_MTU - Waiting time before preparing the MTU to perform the final reading
+            WAIT_BEFORE_READ_MTU    - Waiting time after setting the ReadMeter flag before starting to read the MTU = 1s
+        */
+        private const int WAIT_BEFORE_PREPARE_MTU  = 1000;
+        private const int WAIT_BEFORE_READ_MTU     = 1000;
+
+        /* Constants: LExI Write
+            LEXI_ATTEMPTS_N        - Number of attempts to perform an LExI write before returning an error = 2
+            WAIT_BTW_LEXI_ATTEMPTS - Waiting time before making a new LExI write attempt after an error = 1
+        */
+        public  const int LEXI_ATTEMPTS_N          = 2;
+        public  const int WAIT_BTW_LEXI_ATTEMPTS   = 1;
+        
+        /* Constants: LExI commands
+            CMD_ATTEMPTS_ONE      - LExI commands that return a list of items should not have multiple attempts = 1
+            CMD_ATTEMPTS_N        - Almost all LExI commands are attempted to execute more than once = 2
+            WAIT_BTW_CMD_ATTEMPTS - Waiting time between attempts after an LExI command fails = 1
+            CMD_BYTE_RES          - Byte index in the LExI commands response containing the result = 2
+        */
+        private const int CMD_ATTEMPTS_ONE         = 1;
+        private const int CMD_ATTEMPTS_N           = 2;
+        private const int WAIT_BTW_CMD_ATTEMPTS    = 1;
+        private const int CMD_BYTE_RES             = 2;
+
+        /* Constants: Data Read
+            CMD_INIT_EVENT_LOGS   - Request code of the LExI command "START EVENT LOG QUERY" = 0x13 = 19
+            WAIT_BEFORE_LOGS      - Waiting time before start retrieving the logs stored in the MTU = 10s
+            CMD_NEXT_EVENT_LOG    - Request code of the LExI command "GET NEXT EVENT LOG RESPONSE" = 0x14 = 20
+            CMD_REPE_EVENT_LOG    - Request code of the LExI command "GET REPEAT LAST EVENT LOG RESPONSE" = 0x15 = 21
+            CMD_NEXT_EVENT_RES_1  - Number of bytes when the response, trying to request logs, includes data = 25
+            CMD_NEXT_EVENT_RES_2  - Number of bytes when the response, trying to request logs, does not include data = 5
+            CMD_NEXT_EVENT_DATA   - Value of the result byte when trying to request logs, the response includes data = 0
+            CMD_NEXT_EVENT_EMPTY  - Value of the result byte when trying to request logs, the response does not contain data = 1
+            CMD_NEXT_EVENT_BUSY   - Value of the result byte when trying to request logs, the MTU is busy = 2
+            WAIT_BTW_LOG_ERROR    - Waiting time between attempts to retrieve all logs stored in the MTU = 1s
+            WAIT_BTW_LOGS         - Waiting time between after retrieving one record and requesting the next one = 0.1s
+            WAIT_AFTER_EVENT_LOGS - Waiting time after having finished retrieving all logs stored in the MTU = 1s
+        */
+        private const byte CMD_INIT_EVENT_LOGS     = 0x13; // 19
+        private const int  WAIT_BEFORE_LOGS        = 10000; // The host device should delay for at least 2 seconds to give the MTU time to begin the query
+        private const byte CMD_NEXT_EVENT_LOG      = 0x14; // 20
+        private const byte CMD_REPE_EVENT_LOG      = 0x15; // 21
+        private const int CMD_NEXT_EVENT_RES_1     = 25;   // Response ACK with log entry [0-24] = 25 bytes
+        private const int CMD_NEXT_EVENT_RES_2     = 5;    // Response ACK with no data [0-4] = 5 bytes
+        private const byte CMD_NEXT_EVENT_DATA     = 0x00; // ACK with log entry
+        private const byte CMD_NEXT_EVENT_EMPTY    = 0x01; // ACK without log entry ( query complete )
+        private const byte CMD_NEXT_EVENT_BUSY     = 0x02; // ACK without log entry ( MTU is busy or some error trying to recover next log entry )
+        private const int WAIT_BTW_LOG_ERROR       = 1000;
+        private const int WAIT_BTW_LOGS            = 100;
+        private const int WAIT_AFTER_EVENT_LOGS    = 1000;
+
+        /* Constants: RF-Check
+            WAIT_BTW_IC_ERROR   - Waiting time between attempts to perform the Install Confirmation process = 1s
+            IC_OK               - The Install Confirmation process has been completed successfully = 0
+            IC_NOT_ACHIEVED     - The Install Confirmation process has not completed successfully = 1
+            IC_EXCEPTION        - The Install Confirmation process has ended due to an exception = 2
+            WAIT_AFTER_IC_ERROR - During installation, if the RF-Check process fails, a wait must be made before continuing = 4s
+        */
+        private const int WAIT_BTW_IC_ERROR        = 1000;
+        private const int IC_OK                    = 0;
+        private const int IC_NOT_ACHIEVED          = 1;
+        private const int IC_EXCEPTION             = 2;
+        private const int WAIT_AFTER_IC_ERROR      = 4000;
+
+        /* Constants: Node Discovery
+            CMD_VSWR                 - ... = 0x23 = 35
+            CMD_VSWR_RES             - ... = 6
+            WAIT_BEFORE_NODE_INIT    - ... = 1s
+            CMD_NODE_INIT            - ... = 0x18 = 24
+            CMD_NODE_INIT_RES        - ... = 5
+            CMD_NODE_INIT_NOT        - ... = 0
+            CMD_NODE_INIT_OK         - ... = 1
+            WAIT_BEFORE_NODE_START   - ... = 3s
+            CMD_NODE_QUERY           - ... = 0x19 = 25
+            CMD_NODE_QUERY_RES       - ... = 5
+            CMD_NODE_QUERY_BUSY      - ... = 0
+            CMD_NODE_QUERY_OK        - ... = 1
+            WAIT_BEFORE_NODE_NEXT    - ... = 1s
+            CMD_NODE_NEXT            - ... = 0x1A = 26
+            CMD_NODE_NEXT_RES_1      - ... = 10
+            CMD_NODE_NEXT_RES_2      - ... = 26
+            CMD_NODE_NEXT_RES_3      - ... = 5
+            CMD_NODE_NEXT_DATA       - ... = 0
+            CMD_NODE_NEXT_EMPTY      - ... = 1
+            WAIT_BTW_NODE_NEXT_ERROR - ... = 1s
+            WAIT_BTW_NODE_NEXT       - ... = 0.1s
+            WAIT_BTW_NODE_ERROR      - ... = 1s
+        */
+        private const int CMD_VSWR                 = 0x23;  // 35 VSWR Test
+        private const int CMD_VSWR_RES             = 6;
+        private const int WAIT_BEFORE_NODE_INIT    = 1000;
+        private const int CMD_NODE_INIT            = 0x18;  // 24 Node discovery initiation command
+        private const int CMD_NODE_INIT_RES        = 5;     // Response ACK with result [0-4] = 5 bytes
+        private const int CMD_NODE_INIT_NOT        = 0x00;  // Node discovery not initiated
+        private const int CMD_NODE_INIT_OK         = 0x01;  // Node discovery initiated
+        private const int WAIT_BEFORE_NODE_START   = 3000;
+        private const int CMD_NODE_QUERY           = 0x19;  // 25 Start/Reset node discovery response query
+        private const int CMD_NODE_QUERY_RES       = 5;     // Response ACK with result [0-4] = 5 bytes
+        private const int CMD_NODE_QUERY_BUSY      = 0x00;  // The MTU is busy
+        private const int CMD_NODE_QUERY_OK        = 0x01;  // The MTU is ready for query
+        private const int WAIT_BEFORE_NODE_NEXT    = 1000;
+        private const int CMD_NODE_NEXT            = 0x1A;  // 26 Get next node discovery response
+        private const int CMD_NODE_NEXT_RES_1      = 10;    // ACK with general information [0-9] = 10 bytes
+        private const int CMD_NODE_NEXT_RES_2      = 26;    // ACK with log entry [0-25] = 26 bytes
+        private const int CMD_NODE_NEXT_RES_3      = 5;     // ACK without log entry [0-4] = 5 bytes
+        private const byte CMD_NODE_NEXT_DATA      = 0x00;  // ACK with node entry
+        private const byte CMD_NODE_NEXT_EMPTY     = 0x01;  // ACK without node entry ( query complete )
+        private const int WAIT_BTW_NODE_NEXT_ERROR = 1000;
+        private const int WAIT_BTW_NODE_NEXT       = 100;
+        private const int WAIT_BTW_NODE_ERROR      = 1000;
+
+        /* Constants: Encryption
+            CMD_ENCRYP_MAX         - ... = 3
+            CMD_ENCRYP_OLD_MAX     - ... = 5
+            CMD_ENCRYP_LOAD        - ... = 0x1B = 27
+            CMD_ENCRYP_KEYS        - ... = 0x1D = 29
+            WAIT_AFTER_ENCRYP_KEYS - ... = 1s
+            CMD_ENCRYP_READ        - ... = 0x1C = 28
+            CMD_ENCRYP_READ_RES_2  - ... = 68
+            CMD_ENCRYP_READ_RES_3  - ... = 36
+        */
         private const int CMD_ENCRYP_MAX          = 3;
         private const int CMD_ENCRYP_OLD_MAX      = 5;
-        private const int CMD_LOAD_ENCRYP         = 0x1B;
-        private const int CMD_READ_ENCRYP         = 0x1C;
-        private const int CMD_READ_ENCRYP_RES_2   = 64;
-        private const int CMD_READ_ENCRYP_RES_3   = 32;
-        private const int CMD_GEN_ENCRYP_KEYS     = 0x1D;
-        private const string ERROR_LOADDEMANDCONF = "DemandConfLoadException";
-        private const string ERROR_LOADMETER      = "MeterLoadException";
-        private const string ERROR_LOADMTU        = "MtuLoadException";
-        private const string ERROR_LOADALARM      = "AlarmLoadException";
-        private const string ERROR_NOTFOUNDMTU    = "MtuNotFoundException";
-        private const string ERROR_LOADINTERFACE  = "InterfaceLoadException";
-        private const string ERROR_LOADGLOBAL     = "GlobalLoadException";
-        private const string ERROR_NOTFOUNDMETER  = "MeterNotFoundException";
+        private const int CMD_ENCRYP_LOAD         = 0x1B;
+        private const int CMD_ENCRYP_KEYS         = 0x1D;
+        private const int WAIT_AFTER_ENCRYP_KEYS  = 1000;
+        private const int CMD_ENCRYP_READ         = 0x1C;
+        private const int CMD_ENCRYP_READ_RES_2   = 68; // ACK + 64 + CRC = 2 + 64 + 2 = 68
+        private const int CMD_ENCRYP_READ_RES_3   = 36; // ACK + 32 + CRC = 2 + 32 + 2 = 36
+
+        /* Constants: Remote Disconnect
+            RDD_MAX_ATTEMPTS   - ... = 5
+            RDD_DISABLED       - ... = 0
+            RDD_BUSY           - ... = 1
+            RDD_ERROR          - ... = 2
+            RDD_IDLE           - ... = 3
+            WAIT_BTW_RDD       - ... = 2s
+            CMD_RDD_ACTION     - ... = 0x21 = 33
+            WAIT_RDD_MAX       - ... = 45s
+            CMD_RDD_STATUS     - ... = 0x22 = 34
+            CMD_RDD_STATUS_RES - ... = 18
+            WAIT_BTW_CMD_RDD   - ... = 1s
+        */
+        private const int RDD_MAX_ATTEMPTS        = 5;
+        private const int RDD_DISABLED            = 0;
+        private const int RDD_BUSY                = 1;
+        private const int RDD_ERROR               = 2;
+        private const int RDD_IDLE                = 3;
+        private const int WAIT_BTW_RDD            = 2000;
+        private const int CMD_RDD_ACTION          = 0x21; // 33
+        private const int WAIT_RDD_MAX            = 45000;
+        private const int CMD_RDD_STATUS          = 0x22; // 34
+        private const int CMD_RDD_STATUS_RES      = 18;
+        private const int WAIT_BTW_CMD_RDD        = 1000;
 
         #endregion
 
@@ -204,6 +283,15 @@ namespace MTUComm
         /// </para>
         /// </summary>
         public event Delegates.ActionHandler OnDataRead;
+
+        /// <summary>
+        /// Event invoked only if the <see cref="Action.ActionType"/>.RemoteDisonnect
+        /// action completes successfully, with no exceptions.
+        /// <para>
+        /// See <see cref="Action.OnRemoteDisconnect"/> for the associated method ( XAML <- Action <- MTUComm ).
+        /// </para>
+        /// </summary>
+        public event Delegates.ActionHandler OnRemoteDisconnect;
 
         /// <summary>
         /// Event invoked only if the writing ( <see cref="ActionType"/>.Add|Replace )
@@ -273,8 +361,11 @@ namespace MTUComm
         /// <para>
         /// See <see cref="LoadMtuAndMetersBasicInfo"/> to recover basic data from the MTU.
         /// </para>
+        /// <para>
+        /// See <see cref="Action.ActionType"/> for the full list of available actions.
+        /// </para>
         /// </summary>
-        /// <param name="type">Current action type ( AddMtu, ReplaceMeter,.. )</param>
+        /// <param name="type">Action to be performed</param>
         /// <param name="args">Arguments required for some actions</param>
         /// <seealso cref="AddMtu(Action)"/>
         /// <seealso cref="AddMtu(dynamic, string, Action)"/>
@@ -282,6 +373,7 @@ namespace MTUComm
         /// <seealso cref="DataRead"/>
         /// <seealso cref="DataRead(Action)"/>
         /// <seealso cref="InstallConfirmation"/>
+        /// <seealso cref="RemoteDisconnect"/>
         /// <seealso cref="ReadFabric"/>
         /// <seealso cref="ReadMtu"/>
         /// <seealso cref="TurnOnOffMtu(bool)"/>
@@ -326,8 +418,10 @@ namespace MTUComm
                         else await Task.Run ( () => DataRead () );
                         break;
                     case ActionType.MtuInstallationConfirmation: await Task.Run ( () => InstallConfirmation () ); break;
+                    case ActionType.RemoteDisconnect: await Task.Run ( () => RemoteDisconnect () ); break;
                     case ActionType.ReadFabric : await Task.Run ( () => ReadFabric () ); break;
                     case ActionType.ReadMtu    : await Task.Run ( () => ReadMtu () ); break;
+                    //case ActionType.ReadMtu    : await Task.Run ( () => RemoteDisconnect () ); break;
                     case ActionType.TurnOffMtu : await Task.Run ( () => TurnOnOffMtu ( false ) ); break;
                     case ActionType.TurnOnMtu  : await Task.Run ( () => TurnOnOffMtu ( true  ) ); break;
                     case ActionType.BasicRead  : await Task.Run ( () => BasicRead () ); break;
@@ -504,7 +598,7 @@ namespace MTUComm
                 // Activates flag to read Meter
                 await map.ReadMeter.SetValueToMtu ( true );
                 
-                await Task.Delay ( WAIT_BEFORE_READ );
+                await Task.Delay ( WAIT_BEFORE_READ_MTU );
                 
                 // Check for errors
                 byte erCode;
@@ -580,15 +674,15 @@ namespace MTUComm
 
                 // Add parameters to Library.Data
                 foreach ( var entry in psSelected )
-                    Data.Set ( entry.Key.ToString (), entry.Value, true );
+                    Data.SetTemp ( entry.Key.ToString (), entry.Value );
 
                 var MtuId = await map.MtuSerialNumber.GetValue();
                 var MtuStatus = await map.MtuStatus.GetValue();
                 var accName = await map.P1MeterId.GetValue();
 
-                Data.Set("AccountNumber", accName, true);
-                Data.Set("MtuId", MtuId.ToString(), true);
-                Data.Set("MtuStatus", MtuStatus, true);
+                Data.SetTemp ( "AccountNumber", accName );
+                Data.SetTemp ( "MtuId", MtuId.ToString() );
+                Data.SetTemp ( "MtuStatus", MtuStatus );
 
                 // Init DataRead logic using translated parameters
                 await this.DataRead ();
@@ -670,8 +764,8 @@ namespace MTUComm
                 await this.lexi.Write (
                     CMD_INIT_EVENT_LOGS,
                     data,
-                    N_ATTEMPTS_CMD,
-                    WAIT_BTW_ATTEMPTS_CMD,
+                    CMD_ATTEMPTS_N,
+                    WAIT_BTW_CMD_ATTEMPTS,
                     null,
                     null,
                     LexiAction.OperationRequest );
@@ -698,9 +792,9 @@ namespace MTUComm
                             await this.lexi.Write (
                                 ( ! retrying ) ? CMD_NEXT_EVENT_LOG : CMD_REPE_EVENT_LOG,
                                 null,
-                                ONLY_ONE_ATTEMPT_CMD,
-                                WAIT_BTW_ATTEMPTS_CMD,
-                                new uint[]{ CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_RES_2 }, // ACK with log entry or without
+                                CMD_ATTEMPTS_ONE,
+                                WAIT_BTW_CMD_ATTEMPTS,
+                                new uint[]{ CMD_NEXT_EVENT_RES_1, CMD_NEXT_EVENT_RES_2 },
                                 new LexiFiltersResponse ( new ( int,int,byte )[] {
                                     ( CMD_NEXT_EVENT_RES_1, CMD_BYTE_RES, CMD_NEXT_EVENT_DATA  ), // Entry data included
                                     ( CMD_NEXT_EVENT_RES_2, CMD_BYTE_RES, CMD_NEXT_EVENT_EMPTY ), // Complete but without data
@@ -718,7 +812,7 @@ namespace MTUComm
                         else if ( ++countAttemptsEr >= maxAttemptsEr )
                             throw new ActionNotAchievedGetEventsLogException ();
 
-                        await Task.Delay ( WAIT_BTW_LOG_ERRORS );
+                        await Task.Delay ( WAIT_BTW_LOG_ERROR );
 
                         Utils.Print ( "DataRead: Error trying to recover an event [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
 
@@ -752,7 +846,7 @@ namespace MTUComm
                             {
                                 //Errors.AddError ( new MtuIsBusyToGetEventsLogException () );
 
-                                await Task.Delay ( WAIT_BTW_LOG_ERRORS );
+                                await Task.Delay ( WAIT_BTW_LOG_ERROR );
 
                                 // Try again, using this time Get Repeat Last Event Log Response command
                                 retrying = true;
@@ -819,8 +913,9 @@ namespace MTUComm
         /// <seealso cref="OnReadMtu"/>
         public async Task InstallConfirmation ()
         {
-            // DEBUG
-            this.WriteMtuBitAndVerify ( 22, 0, false ); // Turn On MTU
+            #if DEBUG
+            await this.WriteMtuBitAndVerify ( 22, 0, false ); // Turn On MTU
+            #endif
 
             if ( await this.InstallConfirmation_Logic () < IC_EXCEPTION )
                  await this.ReadMtu ();
@@ -898,7 +993,7 @@ namespace MTUComm
                 {
                     // Update interface text to look the progress
                     int progress = ( int )Math.Round ( ( decimal )( ( count * 100.0 ) / max ) );
-                    OnProgress ( this, new Delegates.ProgressArgs ( count, max, "Checking IC... "+ progress.ToString() + "%" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Checking IC... " + progress.ToString () + "%" ) );
                     
                     await Task.Delay ( wait * 1000 );
                     
@@ -929,7 +1024,7 @@ namespace MTUComm
                 // Retry action
                 if ( ++time < global.TimeSyncCountRepeat )
                 {
-                    await Task.Delay ( WAIT_BTW_IC );
+                    await Task.Delay ( WAIT_BTW_IC_ERROR );
                     
                     result = await this.InstallConfirmation_Logic ( force, time );
 
@@ -968,9 +1063,12 @@ namespace MTUComm
         }
 
         /// <summary>
+        /// NOTE: Project 2nd part - OnDemand 1.2
+        /// <para>
         /// The Node Discovery process is only performed working with OnDemand compatible MTUs,
         /// verifying that the MTU will be able to communicate over the F1 and F2 channels with
         /// enough DCUs to be able ensure that readings messages will be properly sent to the head-end.
+        /// </para>
         /// <para>
         /// The goal is to be able to get a Install Confirmation and verify the communications with in one minute.
         /// </para>
@@ -1005,13 +1103,15 @@ namespace MTUComm
                 LexiWriteResult fullResponse = await this.lexi.Write (
                         CMD_VSWR,
                         null,
-                        N_ATTEMPTS_CMD,
-                        WAIT_BTW_ATTEMPTS_CMD,
-                        new uint[] { 6 },
+                        CMD_ATTEMPTS_N,
+                        WAIT_BTW_CMD_ATTEMPTS,
+                        new uint[] { CMD_VSWR_RES },
                         null,
                         LexiAction.OperationRequest );
 
                 vswr = Utils.GetNumericValueFromBytes<double> ( fullResponse.Response, 2, 2 );
+
+                await Task.Delay ( WAIT_BEFORE_NODE_INIT );
 
                 // Node Discovery ( Initiation + Start/Reset + Get Nodes )
                 float maxTimeND = this.global.MaxTimeRFCheck * 1000;
@@ -1037,21 +1137,21 @@ namespace MTUComm
 
                     // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
                     fullResponse = await this.lexi.Write (
-                        CMD_INIT_NODE_DISC,
+                        CMD_NODE_INIT,
                         data,
-                        N_ATTEMPTS_CMD,
-                        WAIT_BTW_ATTEMPTS_CMD,
-                        new uint[] { CMD_INIT_NODE_DISC_RES }, // ACK with response
+                        CMD_ATTEMPTS_N,
+                        WAIT_BTW_CMD_ATTEMPTS,
+                        new uint[] { CMD_NODE_INIT_RES },
                         new LexiFiltersResponse ( new ( int,int,byte )[] {
-                            ( CMD_INIT_NODE_DISC_RES, CMD_BYTE_RES, CMD_INIT_NODE_DISC_NOT ), // Node discovery not initiated
-                            ( CMD_INIT_NODE_DISC_RES, CMD_BYTE_RES, CMD_INIT_NODE_DISC_INI )  // Node discovery initiated
+                            ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_NOT ), // Node discovery not initiated
+                            ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_OK )  // Node discovery initiated
                         } ),
                         LexiAction.OperationRequest );
                     
                     #endregion
 
                     // Node discovery mode NOT initiated in the MTU
-                    if ( fullResponse.Response[ CMD_BYTE_RES ] != CMD_INIT_NODE_DISC_INI )
+                    if ( fullResponse.Response[ CMD_BYTE_RES ] != CMD_NODE_INIT_OK )
                     {
                         Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotInitializedException () );
                         goto BREAK_FAIL;
@@ -1068,7 +1168,7 @@ namespace MTUComm
                         bool timeOut = false;
                         do
                         {
-                            await Task.Delay ( WAIT_BEFORE_START_NODE );
+                            await Task.Delay ( WAIT_BEFORE_NODE_START );
                             
                             lexiTimeOut = true;
                             
@@ -1082,14 +1182,14 @@ namespace MTUComm
                             {
                                 // Response: Byte 2 { 0 = The MTU is busy, 1 = The MTU is ready for query }
                                 fullResponse = await this.lexi.Write (
-                                    CMD_QUERY_NODE_DISC,
+                                    CMD_NODE_QUERY,
                                     null,
-                                    N_ATTEMPTS_CMD,
-                                    WAIT_BTW_ATTEMPTS_CMD,
-                                    new uint[] { CMD_QUERY_NODE_DISC_RES }, // ACK with response
+                                    CMD_ATTEMPTS_N,
+                                    WAIT_BTW_CMD_ATTEMPTS,
+                                    new uint[] { CMD_NODE_QUERY_RES }, // ACK with response
                                     new LexiFiltersResponse ( new ( int,int,byte )[] {
-                                        ( CMD_QUERY_NODE_DISC_RES, CMD_BYTE_RES, CMD_QUERY_NODE_BUSY ), // The MTU is busy
-                                        ( CMD_QUERY_NODE_DISC_RES, CMD_BYTE_RES, CMD_QUERY_NODE_DISC_INI )  // The MTU is ready for query
+                                        ( CMD_NODE_QUERY_RES, CMD_BYTE_RES, CMD_NODE_QUERY_BUSY ), // The MTU is busy
+                                        ( CMD_NODE_QUERY_RES, CMD_BYTE_RES, CMD_NODE_QUERY_OK )  // The MTU is ready for query
                                     } ),
                                     LexiAction.OperationRequest );
                                 
@@ -1098,11 +1198,11 @@ namespace MTUComm
                             catch ( Exception ) { }
                         }
                         while ( ( lexiTimeOut ||
-                                  fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_BUSY ) &&
+                                  fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY ) &&
                                 ! ( timeOut = nodeCounter.ElapsedMilliseconds >= maxTimeND ) );
                         
                         // Node discovery mode not started/ready for query
-                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_QUERY_NODE_BUSY &&
+                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY &&
                              timeOut )
                         {
                             Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotStartedException () );
@@ -1115,7 +1215,7 @@ namespace MTUComm
 
                         OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery: Step 3 Get Next" ) );
 
-                        await Task.Delay ( WAIT_BEFORE_GET_NODES );
+                        await Task.Delay ( WAIT_BEFORE_NODE_NEXT );
 
                         // Get next node discovery response
                         int maxAttemptsEr   = 2;
@@ -1126,18 +1226,18 @@ namespace MTUComm
                             try
                             {
                                 fullResponse = await this.lexi.Write (
-                                    CMD_NEXT_NODE_DISC,
+                                    CMD_NODE_NEXT,
                                     null,
-                                    ONLY_ONE_ATTEMPT_CMD,
-                                    WAIT_BTW_ATTEMPTS_CMD,
+                                    CMD_ATTEMPTS_ONE,
+                                    WAIT_BTW_CMD_ATTEMPTS,
                                     new uint[] {
-                                        CMD_NEXT_NODE_1,
-                                        CMD_NEXT_NODE_2,
-                                        CMD_NEXT_NODE_3 },
+                                        CMD_NODE_NEXT_RES_1,
+                                        CMD_NODE_NEXT_RES_2,
+                                        CMD_NODE_NEXT_RES_3 },
                                     new LexiFiltersResponse ( new ( int,int,byte )[] {
-                                        ( CMD_NEXT_NODE_1, CMD_BYTE_RES, CMD_NEXT_NODE_DATA  ), // General information
-                                        ( CMD_NEXT_NODE_2, CMD_BYTE_RES, CMD_NEXT_NODE_DATA  ), // Entry data included
-                                        ( CMD_NEXT_NODE_3, CMD_BYTE_RES, CMD_NEXT_NODE_EMPTY )  // Complete but without data
+                                        ( CMD_NODE_NEXT_RES_1, CMD_BYTE_RES, CMD_NODE_NEXT_DATA  ), // General information
+                                        ( CMD_NODE_NEXT_RES_2, CMD_BYTE_RES, CMD_NODE_NEXT_DATA  ), // Entry data included
+                                        ( CMD_NODE_NEXT_RES_3, CMD_BYTE_RES, CMD_NODE_NEXT_EMPTY )  // Complete but without data
                                     } ),
                                     LexiAction.OperationRequest );
                             }
@@ -1154,7 +1254,7 @@ namespace MTUComm
                                     goto BREAK_FAIL;
                                 }
 
-                                await Task.Delay ( WAIT_BTW_NODE_ERRORS );
+                                await Task.Delay ( WAIT_BTW_NODE_NEXT_ERROR );
 
                                 Utils.Print ( "Node Discovery: Error trying to recover a node [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
 
@@ -1176,7 +1276,7 @@ namespace MTUComm
                                     OnProgress ( this, new Delegates.ProgressArgs ( 
                                         "Node Discovery: Requesting nodes... " + queryResult.Index + "/" + nodeList.CurrentAttemptTotalEntries ) );
                                     
-                                    await Task.Delay ( WAIT_BTW_NODES );
+                                    await Task.Delay ( WAIT_BTW_NODE_NEXT );
                                     break;
 
                                 // Was the last node or no node was recovered
@@ -1286,7 +1386,7 @@ namespace MTUComm
                         break; // Exit from infinite while
                     }
                     else
-                        await Task.Delay ( WAIT_BTW_NODE_FAILS );
+                        await Task.Delay ( WAIT_BTW_NODE_ERROR );
                 }
             }
             catch ( Exception e )
@@ -1307,6 +1407,7 @@ namespace MTUComm
             }
 
             // Generates entries for activity log and nodes log file
+            // NOTE: Logs file won't be generated if the result Exception
             await this.OnNodeDiscovery (
                 new Delegates.ActionArgs ( this.mtu, map, result, nodeList, successF1, successF2, vswr ) );
 
@@ -1317,114 +1418,196 @@ namespace MTUComm
 
         #region Valve Operation ( prev. Remote Disconnect )
 
-        private void RemoteDisconnect ()
-        {
-            // TODO: Crear clase RDDResult a la que pasar la respuesta del LExI write ( fullResponse.Response )
-            // TODO: Crear todas las constantes necesarias para la lógica
-            // TODO: Terminar de implementar el pseudocodigo
-            // TODO: Añadir una nueva accion a la lista de posibles
+        public static RDDValveStatus TESTRDD = RDDValveStatus.OPEN;
 
-            /*
-            Aclara:
-            - STAR Programmer MtuComm.cs Line 833
-            - Lexi Mtu.cs Line 1268 -> Y61063 Page 52 Request RDD Action
-            - Lexi Mtu.cs Line 1283 -> Y61063 Page 53 Request RDD Status
+        private async Task RemoteDisconnect ()
+        {
+            // Aclara:
+            // - STAR Programmer MtuComm.cs Line 833
+            // - Lexi Mtu.cs Line 1268 -> Y61063 Page 52 Request RDD Action
+            // - Lexi Mtu.cs Line 1283 -> Y61063 Page 53 Request RDD Status
+
+            // TODO: ONLY FOR DEBUG
+            Data.SetTemp ( "RDDFirmwareVersion", 1234 );
+            Data.SetTemp ( "RDDActionType", TESTRDD );
+
+            Stopwatch nodeCounter = null;
 
             try
             {
-                Stopwatch nodeCounter = null;
-
-                if ( Port1|2.type == "SETFLOW" )
+                bool isPort1 = false;
+                if ( ( isPort1 = this.mtu.Port1.IsSetFlow ) ||
+                     this.mtu.Port2.IsSetFlow )
                 {
-                    // Reads RDD Status
-                    int status = -1;
-                    MemoryRegister<int> rddStatus = map.RddStatus;
+                    dynamic map = this.GetMemoryMap ();
+                    MemoryRegister<int> rddStatus = map.RDDStatusInt;
 
-                    Action CheckStatus = (() =>
-                    {
-                        for ( int i = 0; i < RDD_MAX_ATTEMPS; i++ )
+                    Func<int,bool,bool,bool,Task<RDDStatus>> CheckStatus = (
+                        async (
+                            int  step,
+                            bool okBusy,
+                            bool okError,
+                            bool okIdle ) =>
                         {
-                            status = await rddStatus.GetValueFromMtu ();
-                            switch ( status )
+                            RDDStatus status = RDDStatus.DISABLED;
+                            for ( int i = 0; i < RDD_MAX_ATTEMPTS; i++ )
                             {
-                                case RDD_DISABLED: // 0
-                                await Task.Delay ( WAIT_RDD_DISABLED ); // 5000
-                                message = "The RDD is disabled";
-                                goto END_LOOP;
+                                switch ( status = Utils.ParseIntToEnum<RDDStatus> ( await rddStatus.GetValueFromMtu (), RDDStatus.DISABLED ) )
+                                {
+                                    case RDDStatus.BUSY:
+                                    if ( okBusy )
+                                        goto END_LOOP;
+                                    break;
 
-                                case RDD_BUSY: // 1
-                                await Task.Delay ( WAIT_RDD_BUSY ); // 1000
-                                message = "Remote Disconnect..." + ( ( i > 0 ) ? " Attempt " + ( i + 1 ) : string.Empty );
-                                continue;
+                                    case RDDStatus.ERROR_ON_LAST_OPERATION:
+                                    if ( okError )
+                                        goto END_LOOP;
+                                    break;
 
-                                case RDD_ERROR: // 2
-                                case RDD_IDLE: // 3
-                                goto END_LOOP;
+                                    case RDDStatus.IDLE:
+                                    if ( ! okIdle )
+                                         goto END_LOOP;
+                                    break;
+
+                                    // Error in all cases
+                                    case RDDStatus.DISABLED:
+                                    goto END_LOOP;
+                                }
+
+                                OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step " + step + " Check RDD attempt " + ( i + 1 ) ) );
+
+                                await Task.Delay ( WAIT_BTW_RDD );
                             }
-                        }
 
-                        END_LOOP:
+                            END_LOOP:
 
-                        // The RDD Meter is not configured/installed
-                        if ( status == RDD_DISABLED )
-                            throw new Exception ();
-                    });
+                            return status;
+                        });
 
-                    // Checks current status
-                    CheckStatus ();
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 1 Check RDD" ) );
+
+                    // Checks if the RDD is not configured/installed
+                    var a = await CheckStatus ( /*step*/1, /*okBusy*/false, /*okError*/true, /*okIdle*/true );
+
+                    Console.WriteLine ( "----> 1: " + a );
+
+                    if ( a == RDDStatus.DISABLED )
+                        throw new Exception ();
+
+                    await Task.Delay ( 1000 );
+
+                    // Prepare some data for the final log
+                    // FIXME: Register 492 does not work, always returns zero with the RDD connected
+                    //int rddPortNumber = await map.RDDPortNumber.GetValueFromMtu ();
+                    //int numPort = ( isPort1 && rddPortNumber == 1 ) ? 1 :
+                    //    ( ( ! isPort1 && rddPortNumber == 2 ) ? 2 : -1 );
+
+                    Data.SetTemp ( "PrevRDDValvePosition", await map.RDDValvePosition.GetValue () );
+
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 2 Request Position" ) );
 
                     // Request an action to the RDD 
                     await this.lexi.Write (
-                        CMD_REQUEST_RDD, // 0x21
-                        new byte[] { Data.RddActionType }, // 1 Close, 2 Open, 3 Partial Open
-                        N_ATTEMPTS_CMD,
-                        WAIT_BTW_ATTEMPTS_CMD,
+                        CMD_RDD_ACTION,
+                        new byte[] { ( byte )Data.Get.RDDActionType }, // 1 Close, 2 Open, 3 Partial Open
+                        CMD_ATTEMPTS_N,
+                        WAIT_BTW_CMD_ATTEMPTS,
                         null,
                         null,
                         LexiAction.OperationRequest );
-                    
-                    // Checks status after launsh the LExI command
-                    CheckStatus ();
+
+                    await Task.Delay ( 2000 );
+
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 3 Check RDD" ) );
+
+                    // Checks status after requesting the desired action
+                    switch ( ( a = await CheckStatus ( /*step*/3, /*okBusy*/true, /*okError*/false, /*okIdle*/false ) ) )
+                    {
+                        case RDDStatus.BUSY:
+                        Console.WriteLine ( "----> 3: Busy" );
+                        break;
+
+                        case RDDStatus.IDLE:
+                        case RDDStatus.DISABLED:
+                        case RDDStatus.ERROR_ON_LAST_OPERATION:
+                        Console.WriteLine ( "----> 3: " + a );
+                        throw new Exception ();
+                    }
+
+                    await Task.Delay ( 1000 );
+
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 4 In Transition" ) );
 
                     // Waits until the status of the RDD changes
-                    bool lexiTimeOut;
                     bool timeOut = false;
-                    nodeCounter  = new Stopwatch ();
+                    RDDStatusResult response     = null;
+                    LexiWriteResult fullResponse = null;
+                    nodeCounter = new Stopwatch ();
                     nodeCounter.Start ();
                     do
                     {
-                        await Task.Delay ( WAIT_BEFORE_RDD_STATUS );
+                        await Task.Delay ( WAIT_BTW_CMD_RDD );
                         
-                        lexiTimeOut = true;
+                        response = null;
                         
                         try
                         {
                             fullResponse = await this.lexi.Write (
-                                CMD_REQUEST_RDD, // 0x22
+                                CMD_RDD_STATUS,
                                 null,
-                                N_ATTEMPTS_CMD,
-                                WAIT_BTW_ATTEMPTS_CMD,
-                                new uint[] { 18 },
+                                CMD_ATTEMPTS_N,
+                                WAIT_BTW_CMD_ATTEMPTS,
+                                new uint[] { CMD_RDD_STATUS_RES },
                                 null,
                                 LexiAction.OperationRequest );
                             
-                            lexiTimeOut = false;
+                            response = new RDDStatusResult ( fullResponse.Response );
+
+                            Console.WriteLine ( "----> 3: " +
+                                response.PreviousCmd + " " +
+                                response.PreviousCmdSuccess + " " +
+                                response.ValvePosition );
                         }
-                        catch ( Exception ) { }
+                        catch ( Exception )
+                        {
+
+                        }
                     }
-                    while ( ( lexiTimeOut ||
-                            fullResponse.Response[ CMD_BYTE_RES ] == CMD_RSS_IN_TRANS ) &&
-                            ! ( timeOut = nodeCounter.ElapsedMilliseconds > CMD_RSS_MAX_TIME ) );
+                    while ( ( response == null ||
+                              response.ValvePosition == RDDValveStatus.IN_TRANSITION ||
+                              response.ValvePosition != Data.Get.RDDActionType ) &&
+                            ! ( timeOut = nodeCounter.ElapsedMilliseconds > WAIT_RDD_MAX ) );
                     
-                    RDDResponse response = new RDDResponse ( fullResponse.Response );
-                    if ( response.PrevCmdStatus != CMD_RDD_SUCCESS &&
-                        timeOut )
+                    // The process has failed
+                    if ( ! response.PreviousCmdSuccess ||
+                         response.ValvePosition != Data.Get.RDDActionType )
                     {
-                        throw new Exception ();
+                        switch ( response.ValvePosition )
+                        {
+                            // Process continue but the times is out
+                            case RDDValveStatus.IN_TRANSITION:
+                                throw new Exception ();
+
+                            // Unknown current position of the valve
+                            case RDDValveStatus.UNKNOWN:
+                                throw new Exception ();
+
+                            // the current position of the valve is different from the specified
+                            default:
+                                throw new Exception ();
+                        }
                     }
 
+                    TESTRDD = ( TESTRDD == RDDValveStatus.OPEN ) ? RDDValveStatus.CLOSED : RDDValveStatus.OPEN;
+
                     // The status of the RDD has changed correctly
-                    
+                    //await this.OnRemoteDisconnect (
+                    //    new Delegates.ActionArgs ( this.mtu, map, response ) );
+
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Reading from MTU..." ) );
+
+                    await this.ReadMtu_Logic ( map );
+                    await this.OnReadMtu ( new Delegates.ActionArgs ( this.mtu, map ) );
                 }
             }
             catch ( Exception e )
@@ -1442,12 +1625,9 @@ namespace MTUComm
                     nodeCounter = null;
                 }
             }
-
-            */
         }
 
         #endregion
-
 
         #region Turn On|Off
 
@@ -1475,8 +1655,8 @@ namespace MTUComm
             if ( await this.TurnOnOffMtu_Logic ( on ) )
             {
                 if ( on )
-                     this.OnTurnOnMtu  ( new Delegates.ActionArgs ( this.mtu ) );
-                else this.OnTurnOffMtu ( new Delegates.ActionArgs ( this.mtu ) );
+                     await this.OnTurnOnMtu  ( new Delegates.ActionArgs ( this.mtu ) );
+                else await this.OnTurnOffMtu ( new Delegates.ActionArgs ( this.mtu ) );
             }
         }
 
@@ -1544,9 +1724,12 @@ namespace MTUComm
         #region Read Fabric
 
         /// <summary>
+        /// NOTE: For internal use only
+        /// <para>
         /// Simple and quick method to verify if the app can read from an MTU,
         /// reading from the physical memory only the first register, that corresponds
         /// to the MTU type, and the process is successful if no exception is launched.
+        /// </para>
         /// <para>
         /// See <see cref="ReadMtu"/> to perform a full read of the MTU.
         /// </para>
@@ -1635,15 +1818,24 @@ namespace MTUComm
         /// </para>
         /// </returns>
         /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
-        private async Task<dynamic> ReadMtu_Logic ()
+        private async Task<dynamic> ReadMtu_Logic (
+            dynamic map = null )
         {
             // Only read all required registers once
-            var map = this.GetMemoryMap ( true );
+            if ( map == null )
+                map = this.GetMemoryMap ( true );
+            else
+            {
+                map.ResetReadFlags ();
+                map.SetReadFromMtuOnlyOnce ( true );
+            }
+
+            await Task.Delay ( WAIT_BEFORE_PREPARE_MTU );
             
             // Activates flag to read Meter
-            await map.ReadMeter.SetValueToMtu ( true );
+            await map.ReadMeter.SetValueToMtu ( true, LEXI_ATTEMPTS_N * 2 );
             
-            await Task.Delay ( WAIT_BEFORE_READ );
+            await Task.Delay ( WAIT_BEFORE_READ_MTU );
 
             return map;
         }
@@ -2647,7 +2839,7 @@ namespace MTUComm
                     {
                         // If IC fails by any reason, add 4 seconds delay before
                         // reading MTU Tamper Memory settings for Tilt Alarm
-                        await Task.Delay ( WAIT_IC_FAILS );
+                        await Task.Delay ( WAIT_AFTER_IC_ERROR );
                     }
                     
                     Utils.Print ( "--------IC_FINISH--------" );
@@ -2680,7 +2872,7 @@ namespace MTUComm
                     // Activates flag to read Meter
                     await map.ReadMeter.SetValueToMtu ( true );
                     
-                    await Task.Delay ( WAIT_BEFORE_READ );
+                    await Task.Delay ( WAIT_BEFORE_READ_MTU );
                 }
 
                 Utils.Print ( "----FINAL_READ_FINISH----" );
@@ -2838,15 +3030,12 @@ namespace MTUComm
 
             bool publicKeyInBase64;
             bool broadKeyInBase64;
-            string publicKey = Utils.StringFromBase64 ( this.global.PublicKey,    out publicKeyInBase64 );
-            string broadKey  = Utils.StringFromBase64 ( this.global.BroadcastSet, out broadKeyInBase64  );
-
-            // Removes first eight characters and there should be exactly 64 remaining
-            publicKey = publicKey.Substring ( 8 );
+            byte[] publicKey = Utils.ByteArrayFromBase64 ( this.global.PublicKey,    out publicKeyInBase64 );
+            byte[] broadKey  = Utils.ByteArrayFromBase64 ( this.global.BroadcastSet, out broadKeyInBase64  );
 
             // Checks public key format
             if ( ! publicKeyInBase64 ||
-                 publicKey.Length != 64 )
+                 publicKey.Length - 8 != 64 )
                 throw new ODEncryptionPublicKeyFormatException ();
             
             // Checks broadcast key format
@@ -2863,17 +3052,16 @@ namespace MTUComm
             byte[] data4 = new byte[ 32 + 1 ];
             if ( this.mtu.BroadCast )
             {
-                byte[] arBRK = Encoding.UTF8.GetBytes ( broadKey );
-                Array.Copy ( arBRK, 0, data4, 1, arBRK.Length );
+                Array.Copy ( broadKey, 0, data4, 1, broadKey.Length );
                 data4[ 0 ] = 0x04; // Broadcast Key
             }
 
             byte[] data1 = new byte[ randomKey.Length + 1 ];
             data1[ 0 ] = 0x01; // Head End Random Number
 
+            // Removes first eight characters and there should be exactly 64 remaining
             byte[] data0 = new byte[ 64 + 1 ];
-            byte[] arPKI = Encoding.UTF8.GetBytes ( publicKey );
-            Array.Copy ( arPKI, 0, data0, 1, arPKI.Length );
+            Array.Copy ( publicKey, 8, data0, 1, 64 );
             data0[ 0 ] = 0x00; // Head End Public Key
 
             // Prepares the data for the LExI commands "Reads Encryption Item"
@@ -2888,24 +3076,22 @@ namespace MTUComm
             {
                 try
                 {
-                    int step = 1;
-
                     if ( this.mtu.BroadCast )
                     {
-                        OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Broadcast Key" ) );
 
                         // Loads Encryption Item - Type 4: Broadcast Key 
                         fullResponse = await this.lexi.Write (
-                            CMD_LOAD_ENCRYP,
+                            CMD_ENCRYP_LOAD,
                             data4,
-                            N_ATTEMPTS_CMD,
-                            WAIT_BTW_ATTEMPTS_CMD,
+                            CMD_ATTEMPTS_N,
+                            WAIT_BTW_CMD_ATTEMPTS,
                             null,
                             null,
                             LexiAction.OperationRequest );
                     }
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Head-End Random Number" ) );
 
                     // Generates the random number and prepares LExI array
                     randomKey = mtusha.RandomBytes ( randomKey.Length );
@@ -2913,39 +3099,41 @@ namespace MTUComm
 
                     // Loads Encryption Item - Type 1: Head End Random Number
                     fullResponse = await this.lexi.Write (
-                        CMD_LOAD_ENCRYP,
+                        CMD_ENCRYP_LOAD,
                         data1,
-                        N_ATTEMPTS_CMD,
-                        WAIT_BTW_ATTEMPTS_CMD,
+                        CMD_ATTEMPTS_N,
+                        WAIT_BTW_CMD_ATTEMPTS,
                         null,
                         null,
                         LexiAction.OperationRequest );
                     
                     string serverRND = Convert.ToBase64String ( randomKey );
                     
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Head-End Public Key" ) );
 
                     // Loads Encryption Item - Type 0: Head End Public Key
                     fullResponse = await this.lexi.Write (
-                        CMD_LOAD_ENCRYP,
+                        CMD_ENCRYP_LOAD,
                         data0,
-                        N_ATTEMPTS_CMD,
-                        WAIT_BTW_ATTEMPTS_CMD,
+                        CMD_ATTEMPTS_N,
+                        WAIT_BTW_CMD_ATTEMPTS,
                         null,
                         null,
                         LexiAction.OperationRequest );
                     
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Generate Keys" ) );
 
                     // Generates Encryptions Keys
                     fullResponse = await this.lexi.Write (
-                        CMD_GEN_ENCRYP_KEYS,
+                        CMD_ENCRYP_KEYS,
                         null,
-                        N_ATTEMPTS_CMD,
-                        WAIT_BTW_ATTEMPTS_CMD,
+                        CMD_ATTEMPTS_N,
+                        WAIT_BTW_CMD_ATTEMPTS,
                         null,
                         null,
                         LexiAction.OperationRequest );
+
+                    await Task.Delay ( WAIT_AFTER_ENCRYP_KEYS );
 
                     // Verifies if the MTU is encrypted
                     Utils.Print ( "Read Encrypted from MTU" );
@@ -2958,38 +3146,38 @@ namespace MTUComm
                          encrypIndex <= curEncrypIndex )
                         continue; // Error
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: MTU Random Number" ) );
 
                     // Reads Encryption Item - Type 3: MTU Random Number
                     fullResponse = await this.lexi.Write (
-                        CMD_READ_ENCRYP,
+                        CMD_ENCRYP_READ,
                         data3,
-                        N_ATTEMPTS_CMD,
-                        WAIT_BTW_ATTEMPTS_CMD,
-                        new uint[] { CMD_READ_ENCRYP_RES_3 },
+                        CMD_ATTEMPTS_N,
+                        WAIT_BTW_CMD_ATTEMPTS,
+                        new uint[] { CMD_ENCRYP_READ_RES_3 },
                         null,
                         LexiAction.OperationRequest );
 
                     string clientRnd = Convert.ToBase64String ( fullResponse.Response );
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting... Step " + step++ ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: MTU Public Key" ) );
 
                     // Reads Encryption Item - Type 2: MTU Public Key
                     fullResponse = await this.lexi.Write (
-                        CMD_READ_ENCRYP,
+                        CMD_ENCRYP_READ,
                         data2,
-                        N_ATTEMPTS_CMD,
-                        WAIT_BTW_ATTEMPTS_CMD,
-                        new uint[] { CMD_READ_ENCRYP_RES_2 },
+                        CMD_ATTEMPTS_N,
+                        WAIT_BTW_CMD_ATTEMPTS,
+                        new uint[] { CMD_ENCRYP_READ_RES_2 },
                         null,
                         LexiAction.OperationRequest );
 
                     string mtuPublicKey = Convert.ToBase64String ( fullResponse.Response );
 
                     // Saves data that will be use to create the activity log
-                    Data.Set ( "ServerRND",    serverRND,    true );
-                    Data.Set ( "ClientRND",    clientRnd,    true );
-                    Data.Set ( "MtuPublicKey", mtuPublicKey, true );
+                    Data.SetTemp ( "ServerRND",    serverRND );
+                    Data.SetTemp ( "ClientRND",    clientRnd );
+                    Data.SetTemp ( "MtuPublicKey", mtuPublicKey );
 
                     // Always clear temporary random key from memory
                     Array.Clear ( randomKey, 0, randomKey.Length );
@@ -3086,8 +3274,8 @@ namespace MTUComm
             await lexi.Write (
                 address,
                 new byte[] { systemFlags },
-                N_ATTEMPTS_LEXI,
-                WAIT_BTW_ATTEMPTS_LEXI );
+                LEXI_ATTEMPTS_N,
+                WAIT_BTW_LEXI_ATTEMPTS );
 
             // Read new written value to verify modification
             if ( verify )
@@ -3159,7 +3347,7 @@ namespace MTUComm
                 //for ( int i = 0; i < this.mtu.Ports.Count; i++ )
                 //    mtuBasicInfo.setPortType ( i, this.mtu.Ports[ i ].TypeString );
                 
-                Data.Set("MemoryMap",GetMemoryMap(true),false);
+                Data.SetTemp ( "MemoryMap", GetMemoryMap ( true ) );
             }
         }
 

@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<util:BasePage
+    x:Class="aclara_meters.view.viewContainer"
+    xmlns="http://xamarin.com/schemas/2014/forms" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+    xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" 
+    Title="{Binding PageTitle}" 
+    NavigationPage.HasBackButton="false"
+    xmlns:i18n="clr-namespace:aclara_meters.Helpers" 
+    xmlns:views="clr-namespace:aclara_meters.view;assembly=aclara_meters">
+
+    <AbsoluteLayout
+        HorizontalOptions="FillAndExpand"
+        VerticalOptions="FillAndExpand">
+
+        <StackLayout
+            AbsoluteLayout.LayoutBounds="0,0,1,1"
+            AbsoluteLayout.LayoutFlags="All">
+
+            <Grid
+                RowSpacing="0"
+                ColumnSpacing="0"
+                BackgroundColor="#000"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="FillAndExpand">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.35*"/> <!-- El 35% de la mitad -->
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <views:MenuView
+                    x:Name="stack_SideMenu"
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Grid.RowSpan="3"
+                    HorizontalOptions="Start"/>
+
+                <views:TopBar
+                    x:Name="stack_TopBar"
+                    Grid.Row="0"
+                    Grid.Column="1"/>
+
+                <StackLayout
+                    x:Name="stack_ActionBody"
+                    BackgroundColor="green"
+                    Grid.Row="1"
+                    Grid.Column="1"/>
+
+                <views:BottomBar
+                    x:Name="stack_BottomBar"
+                    Grid.Row="2"
+                    Grid.Column="1"/>
+                    
+            </Grid>
+
+        </StackLayout>
+
+        <StackLayout
+            x:Name="stack_SideMenuMobile"
+            BackgroundColor="blue"
+            AbsoluteLayout.LayoutBounds="0,0,1,1"
+            AbsoluteLayout.LayoutFlags="All"
+            HorizontalOptions="StartAndExpand"
+            VerticalOptions="FillAndExpand"
+            WidthRequest="100"
+            IsVisible="false"/>
+
+    </AbsoluteLayout>
+
+</util:BasePage>

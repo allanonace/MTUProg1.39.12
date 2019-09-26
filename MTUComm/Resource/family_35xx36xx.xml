@@ -548,6 +548,51 @@
     </Registers>
     <CustomGet>method</CustomGet>
   </Overload>
+  <Overload>
+    <Id>RDDStatus</Id>
+    <Description>The status reported by the RDD</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>RDDStatusInt</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>RDDValvePosition</Id>
+    <Description>The valve position reported by the RDD</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>RDDValvePositionInt</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>RDDBatteryStatus</Id>
+    <Description>The battery status reported by the RDD</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>RDDBatteryStatusInt</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>RDDPreviousCmd</Id>
+    <Description>The previous command reported by the RDD</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>RDDPreviousCmdInt</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>RDDLastCmdSuccess</Id>
+    <Description>The previous command status reported by the RDD</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>RDDLastCmdSuccessInt</Register>
+    </Registers>
+    <CustomGet>method</CustomGet>
+  </Overload>
 
   <!-- END - Overloads -->
   
@@ -1179,7 +1224,7 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>RDDStatus</Id>
+    <Id>RDDStatusInt</Id>
     <Description>The status reported by the RDD</Description>
     <Type>int</Type>
     <Address>612</Address>
@@ -1189,7 +1234,7 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>RDDValvePosition</Id>
+    <Id>RDDValvePositionInt</Id>
     <Description>The valve position reported by the RDD</Description>
     <Type>int</Type>
     <Address>613</Address>
@@ -1199,10 +1244,30 @@
     <CustomSet/>
   </Register>
   <Register>
-    <Id>RDDBatteryStatus</Id>
+    <Id>RDDBatteryStatusInt</Id>
     <Description>The battery status reported by the RDD</Description>
     <Type>int</Type>
     <Address>614</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>RDDPreviousCmdInt</Id>
+    <Description>The previous command reported by the RDD</Description>
+    <Type>int</Type>
+    <Address>615</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register>
+    <Id>RDDLastCmdSuccessInt</Id>
+    <Description>The previous command status reported by the RDD</Description>
+    <Type>int</Type>
+    <Address>616</Address>
     <Size>1</Size>
     <Write>false</Write>
     <CustomGet/>

@@ -294,8 +294,15 @@ namespace aclara_meters.view
             }
 
             Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
-            
+
+            string bgcolor  = "#FFF";
+            string fcolor   = "#000";
+            string ndresult = string.Empty;
             InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
+
+            try
+            {
+
             foreach (InterfaceParameters parameter in interfacesParams)
             {
                 if (parameter.Name.Equals("Port"))
@@ -319,12 +326,14 @@ namespace aclara_meters.view
 
                                 FinalReadListView.Add(new ReadMTUItem()
                                 {
-                                    Title = "Here lies the Port title...",
-                                    isDisplayed = "true",
-                                    Height = "40",
-                                    isMTU = "false",
-                                    isMeter = "true",
-                                    Description = "Port " + (i+1) + ": " + description //parameter.Value
+                                    Title           = "Here lies the Port title...",
+                                    isDisplayed     = "true",
+                                    Height          = "40",
+                                    isMTU           = "false",
+                                    isMeter         = "true",
+                                    Description     = "Port " + (i+1) + ": " + description,
+                                    BackgroundColor = bgcolor,
+                                    FontColor       = fcolor
                                 });
                             }
                             else
@@ -333,13 +342,15 @@ namespace aclara_meters.view
                                 {
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
-                                        Title = param.getLogDisplay() + ":",
-                                        isDisplayed = "true",
-                                        Height = "70",
-                                        isMTU = "false",
-                                        isDetailMeter = "true",
-                                        isMeter = "false",
-                                        Description = param.Value //parameter.Value
+                                        Title           = param.getLogDisplay() + ":",
+                                        isDisplayed     = "true",
+                                        Height          = "70",
+                                        isMTU           = "false",
+                                        isDetailMeter   = "true",
+                                        isMeter         = "false",
+                                        Description     = param.Value,
+                                        BackgroundColor = bgcolor,
+                                        FontColor       = fcolor
                                     });
                                 }
                             }
@@ -352,17 +363,26 @@ namespace aclara_meters.view
 
                     if ( param != null )
                     {
-                        string bgcolor = "#FFF";
-                        string fcolor  = "#000";
+                        string bgcolorEntry = bgcolor;
+                        string fcolorEntry  = fcolor;
 
                         if ( param.CustomParameter.Equals ( "NodeDiscoveryResult" ) )
                         {
-                            switch ( param.Value.ToString ().Split ( ' ' )[ 0 ].ToLower () )
+                            ndresult = param.Value.ToString ().Split ( ' ' )[ 0 ].ToLower ();
+                            switch ( ndresult )
                             {
-                                case "fail"    : bgcolor = "#F00"; fcolor = "#FFF"; break;
-                                case "good"    : bgcolor = "#FF0"; break;
-                                case "excelent": bgcolor = "#0F0"; break;
+                                case "fail"    : bgcolorEntry = "#F00"; fcolorEntry = "#FFF"; break;
+                                case "good"    : bgcolorEntry = "#FF0"; break;
+                                case "excelent": bgcolorEntry = "#0F0"; break;
                             }
+
+                            /*
+                            if ( ! ndresult.Equals ( "fail" ) )
+                            {
+                                byte[] rgb = Utils.ConvertHexToRGB ( bgcolorEntry );
+                                barcolor = new Color ( rgb[ 0 ], rgb[ 1 ], rgb[ 2 ] );
+                            }
+                            */
                         }
 
                         FinalReadListView.Add(new ReadMTUItem()
@@ -373,11 +393,17 @@ namespace aclara_meters.view
                             isMTU           = "true",
                             isMeter         = "false",
                             Description     = param.Value,
-                            BackgroundColor = bgcolor,
-                            FontColor       = fcolor
+                            BackgroundColor = bgcolorEntry,
+                            FontColor       = fcolorEntry
                         });
                     }
                 }
+            }
+
+            }
+            catch ( Exception e )
+            {
+
             }
 
             bool ok = false;
@@ -403,6 +429,14 @@ namespace aclara_meters.view
             await Task.Delay(100).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
+                if ( ! string.IsNullOrEmpty ( ndresult ) )
+                {
+                    //bottomBar.GetLabelStack ( "div_label" ).BackgroundColor = barcolor;
+                    Image imgNdResult     = bottomBar.GetImageElement ( "img_ndresult" );
+                    imgNdResult.Source    = "nd_" + ndresult;
+                    imgNdResult.IsVisible = true;
+                }
+
                 listaMTUread.ItemsSource = FinalReadListView;
                 bottomBar.GetLabelElement("label_read").Text = resultMsg;
                 _userTapped = false;

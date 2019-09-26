@@ -597,7 +597,7 @@ namespace Xml
             this.PublicKey                    = string.Empty;         // Public key used during the OnDemand 1.2 MTUs new encryption process
             #if DEBUG
             this.BroadcastSet                 = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="; // 12345678901234567890123456789012 = 32 bytes
-            this.PublicKey                    = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTIzNDU2Nzg5MDEy"; // 123456789012345678901234567890123456789012345678901234567890123456789012 = 72 bytes
+            this.PublicKey                    = "RUNLMSAAAACyuwIi50PTmsr1fy5RpVqEpM1jXUyXVN61xPKbj9ivQItW+Hei0TPa1fur/X7k7fy36seQ7jNdz5/iLnxrqlZT"; // = 72 - 8 = 64 bytes
             #endif
 
             // New parameters/tags ( Own )

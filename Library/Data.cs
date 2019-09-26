@@ -69,14 +69,24 @@ namespace Library
 
         public static dynamic Set (
             string name,
-            object value,
-            bool   forReset = false )
+            object value )
         {
             Data d = Get;
             
-            return d.GetType()
+            return d.GetType ()
                .GetMethod ( "AddElement", BindingFlags.NonPublic | BindingFlags.Instance )
-               .Invoke ( d, new object[] { name, value, forReset } );
+               .Invoke ( d, new object[] { name, value, false } );
+        }
+
+        public static dynamic SetTemp (
+            string name,
+            object value )
+        {
+            Data d = Get;
+            
+            return d.GetType ()
+               .GetMethod ( "AddElement", BindingFlags.NonPublic | BindingFlags.Instance )
+               .Invoke ( d, new object[] { name, value, true } );
         }
 
         public static void ResetAll ()

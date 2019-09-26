@@ -4,6 +4,11 @@ using System.Threading.Tasks;
 using Library;
 using Xml;
 
+using RDDStatus        = MTUComm.RDDStatusResult.RDDStatus;
+using RDDValveStatus   = MTUComm.RDDStatusResult.RDDValveStatus;
+using RDDBatteryStatus = MTUComm.RDDStatusResult.RDDBatteryStatus;
+using RDDCmd           = MTUComm.RDDStatusResult.RDDCmd;
+
 namespace MTUComm.MemoryMap
 {
     public partial class MemoryMap : AMemoryMap
@@ -311,6 +316,35 @@ namespace MTUComm.MemoryMap
         public async Task<string> FastMessagingFrequency_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
             return ( await MemoryRegisters.FastMessagingConfigFreq.GetValue () ) ? MESAG_FAST : MESAG_SLOW;
+        }
+
+        public async Task<string> RDDStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        {
+            int val = await MemoryRegisters.RDDStatusInt.GetValue ();
+            return Utils.ParseIntToEnum<RDDStatus> ( val, RDDStatus.DISABLED ).ToString ();
+        }
+
+        public async Task<string> RDDValvePosition_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        {
+            int val = await MemoryRegisters.RDDValvePositionInt.GetValue ();
+            return Utils.ParseIntToEnum<RDDValveStatus> ( val, RDDValveStatus.UNKNOWN ).ToString ();
+        }
+
+        public async Task<string> RDDBatteryStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        {
+            int val = await MemoryRegisters.RDDBatteryStatusInt.GetValue ();
+            return Utils.ParseIntToEnum<RDDBatteryStatus> ( val, RDDBatteryStatus.UNKNOWN ).ToString ();
+        }
+
+        public async Task<string> RDDPreviousCmd_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        {
+            int val = await MemoryRegisters.RDDPreviousCmdInt.GetValue ();
+            return Utils.ParseIntToEnum<RDDCmd> ( val, RDDCmd.UNKNOWN ).ToString ();
+        }
+
+        public async Task<string> RDDLastCmdSuccess_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
+        {
+            return ( await MemoryRegisters.RDDLastCmdSuccessInt.GetValue () == 1 ) ? YES : NO;
         }
 
         #endregion

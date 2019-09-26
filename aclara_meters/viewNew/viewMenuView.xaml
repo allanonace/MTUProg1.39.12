@@ -1,0 +1,270 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Grid
+    RowSpacing="0"
+    ColumnSpacing="0"
+    xmlns="http://xamarin.com/schemas/2014/forms" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    IsVisible="true"
+    x:Class="aclara_meters.view.viewMenuView">
+
+    <Grid.RowDefinitions>
+        <RowDefinition Height="92"/>
+        <RowDefinition Height="*"/>
+        <RowDefinition Height="64"/>
+        <RowDefinition Height="64"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*"/>
+    </Grid.ColumnDefinitions>
+
+    <!-- LOGO ACLARA -->
+    <StackLayout
+        x:Name="stack_TopInfo"
+        BackgroundColor="#6aa2b8"
+        Grid.Row="0"
+        Grid.Column="0">
+        <Image
+            x:Name="img_LogoACL"
+            Source="background_menu.png"
+            HeightRequest="92"
+            Opacity="0.2"
+            InputTransparent="true"
+            HorizontalOptions="Start"/>
+    </StackLayout>
+
+    <!-- MENU SCROLL -->
+    <StackLayout
+        x:Name="stack_Body"
+        Grid.Row="1"
+        Grid.Column="0">
+
+        <ListView
+            Margin="-16,0,-2,0"
+            x:Name="navigationDrawerList"
+            RowHeight="64"
+            SeparatorVisibility="Default" 
+            SeparatorColor="#6aa2b8"
+            BackgroundColor="white">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <StackLayout
+                            VerticalOptions="FillAndExpand"
+                            Orientation="Vertical">
+                            <StackLayout
+                                Orientation="Horizontal">
+                                <Image
+                                    Margin="3,4,0,0"
+                                    WidthRequest="40"
+                                    HeightRequest="40"
+                                    Scale="1.1"
+                                    VerticalOptions="CenterAndExpand"
+                                    Source="{Binding Icon}"/>
+                                <Label
+                                    x:Name="textListColor"
+                                    Margin="4,6,0,0"
+                                    FontSize="22"
+                                    VerticalOptions="CenterAndExpand"
+                                    TextColor="#6aa2b8"
+                                    Text="{Binding Title}"/>
+                            </StackLayout>
+                            <StackLayout Margin="-40,-12,0,40" HeightRequest="80">
+                                <Image HeightRequest="2" BackgroundColor="#6aa2b8" />
+                            </StackLayout>
+                        </StackLayout>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+    </StackLayout>
+
+    <!-- SETTINGS -->
+    <StackLayout
+        x:Name="stack_Settings"
+        BackgroundColor="#6aa2b8"
+        Grid.Row="2"
+        Grid.Column="0">
+        <StackLayout
+            Margin="10,0,0,0"
+            Orientation="Horizontal"
+            VerticalOptions="CenterAndExpand">
+
+            <Image
+                Source="settings_icon.png"
+                WidthRequest="40"
+                HeightRequest="36"
+                Scale="0.95"/>
+            <Label
+                FontSize="23"
+                Text="Settings"
+                TextColor="White"
+                VerticalTextAlignment="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        x:Name="settings_button"
+                        NumberOfTapsRequired="1" />
+                </Label.GestureRecognizers>
+            </Label>
+
+        </StackLayout>
+    </StackLayout>
+
+    <!-- LOG OFF -->
+    <StackLayout
+        x:Name="stack_LogOff"
+        BackgroundColor="#6aa2b8"
+        Grid.Row="3"
+        Grid.Column="0">
+        <StackLayout
+            Margin="10,0,0,0"
+            Orientation="Horizontal"
+            VerticalOptions="CenterAndExpand">
+
+            <Image
+                Source="logoff_icon.png"
+                WidthRequest="40"
+                HeightRequest="36"
+                Scale="0.95"/>
+            <Label
+                FontSize="23"
+                Text="Loff Off"
+                TextColor="White"
+                VerticalTextAlignment="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer
+                        x:Name="logout_button"
+                        NumberOfTapsRequired="1" />
+                </Label.GestureRecognizers>
+            </Label>
+
+        </StackLayout>
+    </StackLayout>
+
+    <!--
+    <StackLayout
+        BackgroundColor="#6aa2b8"
+        VerticalOptions="EndAndExpand"
+        RelativeLayout.YConstraint=
+        "{ConstraintExpression
+            Type=RelativeToParent,																			 
+            Property=Height,
+            Factor=0}" 
+        RelativeLayout.HeightConstraint=
+        "{ConstraintExpression
+            Type=RelativeToParent,
+            Property=Height,
+            Factor=1}" 
+        RelativeLayout.WidthConstraint=
+        "{ConstraintExpression
+            Type=RelativeToParent,
+            Property=Width,
+            Factor=0.99}">
+        
+        <ContentView
+            Margin="0,92,0,-20"
+            RelativeLayout.YConstraint=
+            "{ConstraintExpression
+                Type=RelativeToParent,
+                Property=Height,
+                Factor=0}" 
+            RelativeLayout.HeightConstraint=
+            "{ConstraintExpression
+                Type=RelativeToParent,
+                Property=Height,
+                Factor=1}">
+
+            <ListView
+                Margin="-16,0,-2,0"
+                x:Name="navigationDrawerList"
+                Opacity="1"
+                RowHeight="64"
+                SeparatorVisibility="Default" 
+                SeparatorColor="#6aa2b8"
+                BackgroundColor="White">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <ViewCell>
+                            <!- Main design for our menu items ->
+                            <StackLayout VerticalOptions="FillAndExpand" Orientation="Vertical" Padding="24,10,0,10" Spacing="20" BackgroundColor="{Binding Color}">
+                                <StackLayout Opacity="1" Orientation="Horizontal" BackgroundColor="{Binding Color}">
+                                    <Image Source="{Binding Icon}" Margin="3,4,0,0" WidthRequest="40" HeightRequest="40" Scale="1.1" VerticalOptions="CenterAndExpand" />
+                                    <Label Text="{Binding Title}" x:Name="textListColor" Margin="4,6,0,0" FontSize="22" VerticalOptions="CenterAndExpand" TextColor="#6aa2b8" />
+                                </StackLayout>
+                                <StackLayout Margin="-40,-12,0,40" HeightRequest="80">
+                                    <Image HeightRequest="2" BackgroundColor="#6aa2b8" />
+                                </StackLayout>
+                            </StackLayout>
+                        </ViewCell>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+        </ContentView>
+
+    </StackLayout>
+
+    <StackLayout
+        x:Name="Block_upper"
+        IsVisible="true"
+        Margin="-4,0,0,0"
+        Orientation="Vertical"
+        WidthRequest="310"
+        HorizontalOptions="Center">
+
+        <StackLayout
+            Margin="4,-12,0,0"
+            Orientation="Horizontal"
+            WidthRequest="216"
+            HeightRequest="118">
+            <Image
+                IsVisible="true"
+                x:Name="close_menu_icon"
+                Margin="0,0,0,0"
+                HeightRequest="56"
+                Scale="1"
+                Source="back_arrow.png"
+                HorizontalOptions="Start">
+                <Image.GestureRecognizers>
+                    <TapGestureRecognizer x:Name="back_button_menu" NumberOfTapsRequired="1" />
+                </Image.GestureRecognizers>
+            </Image>
+                        
+            <Label
+                x:Name="userName"
+                VerticalOptions="Center"
+                HorizontalOptions="CenterAndExpand"
+                TextColor="White"
+                HorizontalTextAlignment="Center"
+                InputTransparent="true"
+                Text="Username"
+                FontSize="20"/>
+        </StackLayout>
+        
+    </StackLayout>
+    -->
+
+    <!--
+    <StackLayout VerticalOptions="Start" InputTransparent="true">
+        <StackLayout.HeightRequest>
+            <OnPlatform x:TypeArguments="x:Double">
+                <On Platform="iOS" Value="114" />
+                <On Platform="Android" Value="96" />
+            </OnPlatform>
+        </StackLayout.HeightRequest>
+        <Image Margin="0,0,0,0" x:Name="backmenu" Source="background_menu.png" Opacity="0.1" InputTransparent="true">
+            <Image.HeightRequest>
+                <OnPlatform x:TypeArguments="x:Double">
+                    <On Platform="iOS" Value="94" />
+                    <On Platform="Android" Value="76" />
+                </OnPlatform>
+            </Image.HeightRequest>
+        </Image>
+    </StackLayout>
+    -->
+
+    <!--</StackLayout>-->
+</Grid>

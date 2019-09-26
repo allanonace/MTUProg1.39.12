@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Grid
+    BackgroundColor="#6aa2b8"
+    RowSpacing="0"
+    ColumnSpacing="0"
+    xmlns="http://xamarin.com/schemas/2014/forms" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:d="http://xamarin.com/schemas/2014/forms/design"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    x:Class="aclara_meters.view.viewTopBar">
+
+    <Grid.RowDefinitions>
+        <RowDefinition Height="92"/>
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="auto"/>
+        <ColumnDefinition Width="*"/>
+        <ColumnDefinition Width="auto"/>
+    </Grid.ColumnDefinitions>
+
+    <StackLayout Grid.Column="0" Margin="0,0,0,0" Orientation="Horizontal" HorizontalOptions="Start">
+        <Image x:Name="hamburger_icon" Margin="4,24,0,0" HeightRequest="56" Scale="1" Source="back_arrow.png" HorizontalOptions="Start">
+            <Image.GestureRecognizers>
+                <TapGestureRecognizer x:Name="back_button" NumberOfTapsRequired="1" />
+            </Image.GestureRecognizers>
+        </Image>
+        <Image x:Name="hamburger_icon_home" IsVisible="false" Margin="4,24,0,0" HeightRequest="56" Scale="1" Source="back_menu_puck.png" HorizontalOptions="Start">
+            <Image.GestureRecognizers>
+                <TapGestureRecognizer x:Name="back_button_home" NumberOfTapsRequired="1" />
+            </Image.GestureRecognizers>
+        </Image>
+    </StackLayout>
+    <StackLayout  Grid.Column="1" Margin="0,20,0,0" Orientation="Vertical">
+        <Image x:Name="aclara_logo" HorizontalOptions="Center" VerticalOptions="CenterAndExpand" Scale="1" WidthRequest="149" HeightRequest="35" IsEnabled="false" Source="logo.png">
+        </Image>
+    </StackLayout>
+    <StackLayout  Grid.Column="2"  Margin="0,24,10,0" Orientation="Horizontal" HorizontalOptions="End">
+        <Image x:Name="battery_level" Margin="0,4,0,0" HeightRequest="32" WidthRequest="32" Scale="1" Source="battery_toolbar_high_white.png" />
+        <Image x:Name="rssi_level" Margin="6,4,0,0" HeightRequest="20" WidthRequest="20" Scale="1" Source="rssi_toolbar_high_white.png" />
+    </StackLayout>
+</Grid>
