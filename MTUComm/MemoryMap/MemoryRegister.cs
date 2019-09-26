@@ -487,7 +487,8 @@ namespace MTUComm.MemoryMap
         /// <seealso cref="SetBitToMtu"/>
         /// <seealso cref="SetValue(dynamic)"/>
         public async Task SetValueToMtu (
-            dynamic value = null )
+            dynamic value = null,
+            int numAttempts = MTUComm.LEXI_ATTEMPTS_N )
         {
             Utils.PrintDeep ( Environment.NewLine + "------WRITE_TO_MTU-------" );
             Utils.Print ( "Register -> SetValueToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
@@ -498,7 +499,7 @@ namespace MTUComm.MemoryMap
             
             // Write value set in memory map to the MTU
             if ( valueType == RegType.BOOL )
-                await this.SetBitToMtu ();
+                await this.SetBitToMtu ( numAttempts );
             else
             {
                 // Recover byte array with length equals to the value to set,
@@ -506,8 +507,8 @@ namespace MTUComm.MemoryMap
                 await this.lexi.Write (
                     ( uint )this.address,
                     this.funcGetByteArray ( false ),
-                    MTUComm.N_ATTEMPTS_LEXI,
-                    MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
+                    numAttempts,
+                    MTUComm.WAIT_BTW_LEXI_ATTEMPTS );
             }
             
             Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );
@@ -522,7 +523,8 @@ namespace MTUComm.MemoryMap
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="ResetByteAndSetValueToMtu"/>
-        private async Task SetBitToMtu ()
+        private async Task SetBitToMtu (
+            int numAttempts )
         {
             // Read current value
             byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1 ) )[ 0 ];
@@ -542,8 +544,8 @@ namespace MTUComm.MemoryMap
             await this.lexi.Write (
                 ( uint )this.address,
                 new byte[] { systemFlags },
-                MTUComm.N_ATTEMPTS_LEXI,
-                MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
+                numAttempts,
+                MTUComm.WAIT_BTW_LEXI_ATTEMPTS );
         }
 
         /// <summary>
@@ -639,8 +641,8 @@ namespace MTUComm.MemoryMap
                 await this.lexi.Write (
                     ( uint )this.address,
                     new byte[] { default ( byte ) },
-                    MTUComm.N_ATTEMPTS_LEXI,
-                    MTUComm.WAIT_BTW_ATTEMPTS_LEXI );
+                    MTUComm.LEXI_ATTEMPTS_N,
+                    MTUComm.WAIT_BTW_LEXI_ATTEMPTS );
                 
                 // Write flag for this register
                 await this.SetValueToMtu ( value );

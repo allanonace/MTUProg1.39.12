@@ -72,30 +72,46 @@ namespace MTUComm
         /// </summary>
         private class ConditionObjet
         {
-            public String Condition { get; private set; }
-            public String Operator  { get; private set; }
-            public String Key       { get; private set; } // Can be Id or Id.Property
-            public String Value     { get; private set; }
+            public String CondConcatenate { get; private set; }
+            public String CondOperation  { get; private set; }
+            public String Key        { get; private set; } // Type/Class.Property
+            public String Value      { get; private set; }
 
-            public bool IsEqual   { get { return this.Operator.Equals ( "=" ); } }
-            public bool IsLess   { get { return this.Operator.Equals ( "lt" ); } }
-            public bool IsGreater { get { return this.Operator.Equals ( "gt" ); } }
-            public bool IsNot     { get { return this.Operator.Equals ( "!" ); } }
+            public bool IsAnd        { get { return this.CondConcatenate.Equals ( IFACE_AND ); } }
+            public bool IsOr         { get { return this.CondConcatenate.Equals ( IFACE_OR  ); } }
+            public bool IsEqual      { get { return this.CondOperation.Equals ( "="  ); } }
+            public bool IsLess       { get { return this.CondOperation.Equals ( "lt" ); } }
+            public bool IsGreater    { get { return this.CondOperation.Equals ( "gt" ); } }
+            public bool IsNot        { get { return this.CondOperation.Equals ( "!"  ); } }
+            public bool InitNewBlock { private set; get; }
+		    public bool FinishBlock  { private set; get; }
 
             public ConditionObjet (
-                string condition,
+                string condConcatenate,
+                string openBlock,
+                string closeBlock,
                 string key,
-                string conditionOperator,
+                string condOperation,
                 string value )
             {
-                if ( ! condition.Equals ( IFACE_AND ) &&
-                     ! condition.Equals ( IFACE_OR ) )
-                     Condition = IFACE_OR;
-                else Condition = condition;
+                this.InitNewBlock = openBlock .Equals ( "(" );
+			    this.FinishBlock  = closeBlock.Equals ( ")" );
 
-                this.Operator = conditionOperator;
-                this.Key      = key;
-                this.Value    = value;
+                if ( ! condConcatenate.Equals ( IFACE_AND ) &&
+                     ! condConcatenate.Equals ( IFACE_OR ) )
+                     CondConcatenate = IFACE_OR;
+                else CondConcatenate = condConcatenate;
+
+                if ( ! this.InitNewBlock &&
+                     ! this.FinishBlock )
+                {
+                    this.CondOperation = condOperation;
+                    this.Key   = key;
+                    this.Value = value;
+
+                    if ( this.Value.StartsWith ( "Data." ) )
+                        this.Value = Data.Get[ this.Value.Split ( '.' )[ 1 ] ];
+                }
             }
         }
 
@@ -103,9 +119,10 @@ namespace MTUComm
 
         #region Constants
 
-        private const string NET_IDS         = @"[_a-zA-Z][_a-zA-Z0-9]+";
-        // [ + or | ] Type/Class[.Property] +|<|>|! Value -> e.g. MemoryMap.ShipBit=false|Mtu.InterfaceTamper=true
-        private const string REGEX_IFS       = @"(\+|\|)?(" + NET_IDS + @"(?:." + NET_IDS + @")?)(=|lt|gt|!)(-?[0-9]+|[_a-zA-Z0-9]+)";
+        private const string DOTNET_IDS      = @"[_a-zA-Z][_a-zA-Z0-9]+";
+        private const string REGEX_VALUES    = @"-?[0-9]+|[_a-zA-Z0-9]+";
+        //private const string REGEX_IFS       = @"(\+|\|)?\s*(\()?\s*(" + DOTNET_IDS + @"." + DOTNET_IDS + @")\s*(=|lt|gt|!)\s*(" + REGEX_VALUES + @")\s*(\))?";
+        private const string REGEX_IFS       = @"\s*(\+|\|)?\s*(?:(\()|(\))|(" + DOTNET_IDS + @"." + DOTNET_IDS + @")\s*(=|lt|gt|!)\s*(" + REGEX_VALUES + @"))";
         private const string IFACE_AND       = "+";
         private const string IFACE_OR        = "|";
         private const string PORT_PREFIX     = "P";
@@ -189,6 +206,7 @@ namespace MTUComm
             TurnOffMtu,
             TurnOnMtu,
             DataRead,
+            RemoteDisconnect,
             MtuInstallationConfirmation,
             Diagnosis,
             BasicRead,
@@ -582,15 +600,15 @@ namespace MTUComm
         /// TODO: Modify all the write logic ( Add/Replace ) to use the log interface.
         /// </remarks>
         /// <param name="mtuForm">Write actions stores the set data in an intermediate form object</param>
-        public void Run(MtuForm mtuForm = null)
+        public void Run ( MtuForm mtuForm = null )
         {
-            if (canceled)
+            if ( canceled )
             {
-                throw new Exception("Canceled Action can not be Executed");
+                throw new Exception ( "Canceled Action can not be Executed" );
             }
             else
             {
-                List<object> parameters = new List<object>();
+                List<object> parameters = new List<object> ();
 
                 this.mtucomm.OnError -= OnError;
                 this.mtucomm.OnError += OnError;
@@ -603,7 +621,7 @@ namespace MTUComm
                 this.mtucomm.OnNodeDiscovery -= OnNodeDiscovery;
                 this.mtucomm.OnNodeDiscovery += OnNodeDiscovery;
 
-                switch (type)
+                switch ( type )
                 {
                     case ActionType.ReadFabric:
                         this.mtucomm.OnReadFabric -= OnReadFabric;
@@ -644,6 +662,11 @@ namespace MTUComm
                         if ( Data.Get.IsFromScripting )
                             parameters.Add ( this );
                         break;
+                    
+                    case ActionType.RemoteDisconnect:
+                        this.mtucomm.OnRemoteDisconnect -= OnRemoteDisconnect;
+                        this.mtucomm.OnRemoteDisconnect += OnRemoteDisconnect;
+                        break;
 
                     case ActionType.BasicRead:
                         this.mtucomm.OnBasicRead -= OnBasicRead;
@@ -657,7 +680,7 @@ namespace MTUComm
             }
         }
 
-        public void Cancel(string cancelReason = "410 DR Defective Register")
+        public void Cancel ( string cancelReason = "410 DR Defective Register" )
         {
             canceled = true;
             logger.Cancel ( this, "User Cancelled", cancelReason );
@@ -807,9 +830,9 @@ namespace MTUComm
                 EventLogList eventList = args.Extra[ 0 ];
 
                 // Prepares custom values that will be loaded using the interface
-                Data.Set ( "TotalDifDays", eventList.TotalDifDays );
+                Data.SetTemp ( "TotalDifDays", eventList.TotalDifDays );
 
-                Data.Set ( "ProcessResult",
+                Data.SetTemp ( "ProcessResult",
                     $"Number of Reads {eventList.Count} for Selected Period " +
                     $"From {eventList.DateStart.ToString ( "dd/MM/yyyy HH:mm:ss" )} " +
                     $"Till {eventList.DateEnd  .ToString ( "dd/MM/yyyy HH:mm:ss" )}" );
@@ -819,8 +842,8 @@ namespace MTUComm
                     $"MTUID{Data.Get.MtuId}-{DateTime.Now.ToString ( "MMddyyyyHH" )}-" +
                     $"{ DateTime.Now.Ticks }DataLog.xml" );
                 string subpath = path.Substring ( path.LastIndexOf ( "/" ) + 1 );
-                Data.Set ( "ProcessResultFileFull", path );
-                Data.Set ( "ProcessResultFile", subpath );
+                Data.SetTemp ( "ProcessResultFileFull", path );
+                Data.SetTemp ( "ProcessResultFile", subpath );
 
                 // Load parameters using the interface file
                 ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.DataRead );
@@ -839,6 +862,11 @@ namespace MTUComm
             }
         }
 
+        private async Task OnRemoteDisconnect ( Delegates.ActionArgs args )
+        {
+
+        }
+
         private async Task OnNodeDiscovery ( Delegates.ActionArgs args )
         {
             try
@@ -851,7 +879,7 @@ namespace MTUComm
 
                 // Prepares custom values that will be loaded using the interface
                 var MtuId = await args.Map.MtuSerialNumber.GetValue ();
-                Data.Set ( "MtuId", MtuId.ToString (), true );
+                Data.SetTemp ( "MtuId", MtuId.ToString () );
 
                 string word = "Fail"; // NOT_ACHIEVED and EXCEPTION
                 switch ( result )
@@ -860,20 +888,20 @@ namespace MTUComm
                     case NodeDiscoveryResult.EXCELLENT: word = "Excelent"; break;
                 }
 
-                Data.Set ( "ProcessResult",
+                Data.SetTemp ( "ProcessResult",
                     $"{ word } " +
                     $"Number of DCUs { nodeList.CountUniqueNodesValidated } " +
                     $"F1 Reliability {( probF1 * 100 ).ToString ( "F2" )} Percent " +
                     $"F2 Reliability {( probF2 * 100 ).ToString ( "F2" )} Percent" );
 
-                Data.Set ( "VSWR", vswr / 1000.0 );
+                Data.SetTemp ( "VSWR", vswr / 1000.0 );
 
                 string path = Path.Combine ( Mobile.NodePath,
                     $"MTUID{Data.Get.MtuId}-{DateTime.Now.ToString ( "MMddyyyyHH" )}-" +
                     $"{ DateTime.Now.Ticks }NodeDiscoveryLog.xml" );
                 string subpath = path.Substring ( path.LastIndexOf ( "/" ) + 1 );
-                Data.Set ( "ProcessResultFileFull", path );
-                Data.Set ( "ProcessResultFile", subpath );
+                Data.SetTemp ( "ProcessResultFileFull", path );
+                Data.SetTemp ( "ProcessResultFile", subpath );
 
                 // Write result in the NodeDiscovery file
                 if ( result != NodeDiscoveryResult.EXCEPTION )
@@ -942,74 +970,81 @@ namespace MTUComm
             
             foreach ( InterfaceParameters parameter in parameters )
             {
-                if ( parameter.Name.Equals ( IFACE_PORT ) )
-                    for ( int i = 0; i < mtu.Ports.Count; i++ )
-                        result.addPort ( await ReadPort ( i + 1, parameter.Parameters.ToArray (), map, mtu ) );
-                else
+                try
                 {
-                    if ( await ValidateCondition ( parameter.Conditional, map, mtu ) )
+                    if ( parameter.Name.Equals ( IFACE_PORT ) )
+                        for ( int i = 0; i < mtu.Ports.Count; i++ )
+                            result.addPort ( await ReadPort ( i + 1, parameter.Parameters.ToArray (), map, mtu ) );
+                    else
                     {
-                        string value          = string.Empty;
-                        string sourceWhere    = string.Empty;
-                        string sourceProperty = parameter.Name;
-
-                        if ( ! string.IsNullOrEmpty ( parameter.Source ) &&
-                                Regex.IsMatch ( parameter.Source, NET_IDS + "." + NET_IDS ) )
+                        if ( await ValidateCondition ( parameter.Conditional, map, mtu ) )
                         {
-                            string[] sources = parameter.Source.Split(new char[] { '.' });
-                            sourceWhere      = sources[ 0 ];
-                            sourceProperty   = sources[ 1 ];
-                        }
+                            string value          = string.Empty;
+                            string sourceWhere    = string.Empty;
+                            string sourceProperty = parameter.Name;
 
-                        paramToAdd = null;
-                        try
-                        {
-                            switch ( sourceWhere )
+                            if ( ! string.IsNullOrEmpty ( parameter.Source ) &&
+                                    Regex.IsMatch ( parameter.Source, DOTNET_IDS + "." + DOTNET_IDS ) )
                             {
-                                case IFACE_ACTION: value      = this .GetProperty  ( sourceProperty ); break; // Current action
-                                case IFACE_MTU   : value      = mtu  .GetProperty  ( sourceProperty ); break; // Current MTU
-                                case IFACE_PUCK  : value      = puck .GetProperty  ( sourceProperty ); break;
-                                case IFACE_FORM  : paramToAdd = form .GetParameter ( sourceProperty ); break; // actions.AddMtuForm class
-                                case IFACE_GLOBAL: value      = gType.GetProperty  ( sourceProperty ).GetValue ( global, null ).ToString(); break; // Global class
-                                case IFACE_DATA  : if ( ! Data.Contains ( sourceProperty ) || // Library.Data class
-                                                        string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) )
-                                                     value = string.Empty;
-                                                   break; 
-                                default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
+                                string[] sources = parameter.Source.Split(new char[] { '.' });
+                                sourceWhere      = sources[ 0 ];
+                                sourceProperty   = sources[ 1 ];
                             }
-                        }
-                        catch ( Exception e )
-                        {
-                            Utils.Print ( "Interface: Map Error: " + sourceProperty );
-                            throw new Exception ();
-                        }
-                        if (!string.IsNullOrEmpty(value))
-                        {
 
-                            if (!sourceWhere.Equals(IFACE_FORM))
+                            paramToAdd = null;
+                            try
                             {
-                                string display = (parameter.Display.ToLower().StartsWith("global.")) ?
-                                                    gType.GetProperty(parameter.Display.Split(new char[] { '.' })[1]).GetValue(global, null).ToString() :
-                                                    parameter.Display;
+                                switch ( sourceWhere )
+                                {
+                                    case IFACE_ACTION: value      = this .GetProperty  ( sourceProperty ); break; // Current action
+                                    case IFACE_MTU   : value      = mtu  .GetProperty  ( sourceProperty ); break; // Current MTU
+                                    case IFACE_PUCK  : value      = puck .GetProperty  ( sourceProperty ); break;
+                                    case IFACE_FORM  : paramToAdd = form .GetParameter ( sourceProperty ); break; // actions.AddMtuForm class
+                                    case IFACE_GLOBAL: value      = gType.GetProperty  ( sourceProperty ).GetValue ( global, null ).ToString(); break; // Global class
+                                    case IFACE_DATA  : if ( ! Data.Contains ( sourceProperty ) || // Library.Data class
+                                                            string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) )
+                                                         value = string.Empty;
+                                                       break; 
+                                    default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
+                                }
+                            }
+                            catch ( Exception e )
+                            {
+                                Utils.Print ( "Interface: Map Error: " + sourceProperty );
+                                throw new Exception ();
+                            }
+                            if (!string.IsNullOrEmpty(value))
+                            {
 
-                                paramToAdd = new Parameter(parameter.Name, display, value, parameter.Source);
+                                if (!sourceWhere.Equals(IFACE_FORM))
+                                {
+                                    string display = (parameter.Display.ToLower().StartsWith("global.")) ?
+                                                        gType.GetProperty(parameter.Display.Split(new char[] { '.' })[1]).GetValue(global, null).ToString() :
+                                                        parameter.Display;
+
+                                    paramToAdd = new Parameter(parameter.Name, display, value, parameter.Source);
+                                }
+                                // To change "name" attribute to show in IFACE_FORM case
+                                else
+                                {
+                                    paramToAdd.CustomParameter = parameter.Name;
+                                    paramToAdd.source = parameter.Source;
+                                }
                             }
-                            // To change "name" attribute to show in IFACE_FORM case
-                            else
-                            {
-                                paramToAdd.CustomParameter = parameter.Name;
-                                paramToAdd.source = parameter.Source;
-                            }
-                        }
                         
-                        if ( paramToAdd != null )
-                        {
-                            if ( Utils.IsBool ( paramToAdd.Value ) )
-                                 paramToAdd.Value = Utils.FirstCharToCapital ( paramToAdd.Value );
-                            else paramToAdd.Value = this.FormatLength ( paramToAdd.Value, parameter.Length, parameter.Fill );
-                            result.AddParameter ( paramToAdd );
+                            if ( paramToAdd != null )
+                            {
+                                if ( Utils.IsBool ( paramToAdd.Value ) )
+                                     paramToAdd.Value = Utils.FirstCharToCapital ( paramToAdd.Value );
+                                else paramToAdd.Value = this.FormatLength ( paramToAdd.Value, parameter.Length, parameter.Fill );
+                                result.AddParameter ( paramToAdd );
+                            }
                         }
                     }
+                }
+                catch ( Exception e )
+                {
+                    Utils.PrintDeep ( "Error: Interface parameter '" + parameter.Name + "'" );
                 }
             }
             
@@ -1176,7 +1211,7 @@ namespace MTUComm
                             string sourceProperty = parameter.Name;
 
                             if ( ! string.IsNullOrEmpty ( parameter.Source ) &&
-                                    Regex.IsMatch ( parameter.Source, NET_IDS + "." + NET_IDS ) )
+                                    Regex.IsMatch ( parameter.Source, DOTNET_IDS + "." + DOTNET_IDS ) )
                             {
                                 string[] sources = parameter.Source.Split(new char[] { '.' });
                                 sourceWhere      = sources[ 0 ];
@@ -1195,7 +1230,12 @@ namespace MTUComm
                                                             string.IsNullOrEmpty ( value = Data.Get[ sourceProperty ].ToString () ) )
                                                          value = string.Empty;
                                                        break;
-                                    default          : value = ( await map[ sourceProperty = PORT_PREFIX + indexPort + sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
+                                    default          : // MemoryMap.ParameterName
+                                                       // Some registers ( e.g. RDD-related ) do not have port prefix because the MTU can only have one connnected
+                                                       if ( map.ContainsMember ( sourceProperty ) )
+                                                            value = ( await map[ sourceProperty ].GetValue () ).ToString ();
+                                                       else value = ( await map[ sourceProperty = PORT_PREFIX + indexPort + sourceProperty ].GetValue () ).ToString ();
+                                                       break;
                                 }
                             }
                             catch ( Exception e )
@@ -1282,33 +1322,88 @@ namespace MTUComm
 
             try
             {
+                /* Por no liar mucho el tema, no se tendra en cuenta el orden de las operaciones, sino unicamente
+                   el anidamiento, si bien al calcular el resultado de cada nivel se operara de izquierda a derecha
+                   pej. A + ( B x ( C x D ) + E ) --se-tratara-asi--> A + ( B + E x ( C x D ) )
+                   Primero se calculan los valores por cada nivel de anidamiento
+                   1º A | 2º B + E | 3º C x D
+                   Y despues se empiezan operar de dentro hacia fuera
+                   1º CD x BE | 2º CDBE + A
+                  
+                   Orden esperado       : B x CD + E -> 1 x 0 + 1 = 0 + 1 = 1
+                   Orden por anidamiento: B + E x CD -> 1 + 1 x 0 = 2 x 0 = 0
+                  
+                   Pero la manera de solucionarlo es facil, haciendo uso de los parentesis
+                   A + ( ( B x ( C x D ) ) + E )
+                   Calculo de valores por anidamiento
+                   1º A | 2º E | 3º B | 4º C x D
+                   Operar de dentro hacia afuera
+                   1º CD x B | 2º CDB + E | 3º CDBE + A
+                */
+                
                 List<ConditionObjet> conditions = new List<ConditionObjet> ();
-
-                string test = conditionStr.Trim ().Replace ( " ", string.Empty );
-
                 MatchCollection matches = Regex.Matches ( conditionStr.Trim ().Replace ( " ", string.Empty ), REGEX_IFS, RegexOptions.Compiled );
                 foreach ( Match m in matches.Cast<Match> ().ToList () )
                     conditions.Add (
                         new ConditionObjet (
-                            Uri.UnescapeDataString ( m.Groups[ 1 ].Value ),     // + or |
-                            Uri.UnescapeDataString ( m.Groups[ 2 ].Value ),     // Type/Class[.Property]
-                            Uri.UnescapeDataString ( m.Groups[ 3 ].Value ),     // = , < , > or !
-                            Uri.UnescapeDataString ( m.Groups[ 4 ].Value ) ) ); // Value
+                            Uri.UnescapeDataString ( m.Groups[ 1 ].Value ),     // + , |
+                            Uri.UnescapeDataString ( m.Groups[ 2 ].Value ),     // (
+                            Uri.UnescapeDataString ( m.Groups[ 3 ].Value ),     // )
+                            Uri.UnescapeDataString ( m.Groups[ 4 ].Value ),     // Type/Class.Property
+                            Uri.UnescapeDataString ( m.Groups[ 5 ].Value ),     // = , lt , gt , !
+                            Uri.UnescapeDataString ( m.Groups[ 6 ].Value ) ) ); // Value
+                
+                #region Calculate using nesting
 
-                int    finalResult = 0;
+                // Calculates result for each level nesting
+                // Types and info necessary to get value for each property
                 string port   = PORT_PREFIX + portIndex;
                 Global global = this.config.Global;
                 Type   gType  = global.GetType ();
                 Type   pType  = typeof ( Port );
-                
+                // Variables used to calculate each result
+                int currentNestedLevel = 0;
+                int currentFinalResult = 0;
+                int prevFinalResult    = 0;
+                List<int>  finalResults   = new List<int>  () { 0 };
+                List<bool> blockCondition = new List<bool> () { false };
+                List<int>  blockParent    = new List<int>  () { 0 };
                 foreach ( ConditionObjet condition in conditions )
                 {
+                    // Init a new nested block "("...
+                    if ( condition.InitNewBlock )
+                    {
+                        blockCondition.Add ( ! condition.CondConcatenate.Equals ( IFACE_OR ) ); // True AND'+', False OR'|'
+                        finalResults  .Add ( 0 );
+                        blockParent   .Add ( currentNestedLevel );
+                        currentNestedLevel++;
+                        prevFinalResult    = currentFinalResult;
+                        currentFinalResult = finalResults.Count - 1;
+                        
+                        Console.WriteLine (
+                            "INIT block [ New Parent: " + currentNestedLevel + " , New FinalResultIndex: " + currentFinalResult + " ] " +
+                            "-> And: " + condition.IsAnd + " Or: " + condition.IsOr );
+                        
+                        continue;
+                    }
+                    // Finish current nested block ...")"
+                    else if ( condition.FinishBlock )
+                    {
+                        currentNestedLevel--;
+                        currentFinalResult = prevFinalResult--;
+                        
+                        Console.WriteLine ( "FINISH [ Return to Parent: " + currentNestedLevel + " , Return to FinalResultIndex: " + currentFinalResult + " ]" );
+                        
+                        continue;
+                    }
+                    
                     int      result       = 0;
                     string   currentValue = string.Empty;
                     string[] condMembers  = condition.Key.Split ( new char[]{ '.' } ); // Class.Property
                     string   condProperty = ( condMembers.Length > 1 ) ? condMembers[ 1 ] : condMembers[ 0 ]; // Property
 
-                    // Class or Type
+                    #region Get value
+
                     switch ( condMembers[ 0 ] )
                     {
                         case IFACE_PORT  : currentValue = pType.GetProperty ( condProperty ).GetValue ( mtu.Ports[ portIndex - 1 ] ).ToString (); break;
@@ -1318,8 +1413,8 @@ namespace MTUComm
                         case IFACE_GLOBAL: currentValue = gType.GetProperty ( condProperty ).GetValue ( global, null ).ToString(); break; // Global class
                         case IFACE_DATA  : if ( ! Data.Contains ( condProperty ) || // Library.Data class
                                                 string.IsNullOrEmpty ( currentValue = Data.Get[ condProperty ].ToString () ) )
-                                               currentValue = string.Empty;
-                                           break;
+                                            currentValue = string.Empty;
+                                        break;
                         default: // Dynamic MemoryMap
                             // Recover register from MTU memory map
                             // Some registers have port sufix but other not
@@ -1347,15 +1442,126 @@ namespace MTUComm
                             result = 1; // Ok
                     }
 
+                    #endregion
+
+                    Console.WriteLine ( "   " + condition.Key + " == " + condition.Value + " -> " + result +
+                        " [ Parent: " + ( currentNestedLevel - 1 ) + " , FinalResultIndex: " + currentFinalResult + " ]" );
+
                     // Concatenate results
-                    if      ( condition.Condition.Equals ( IFACE_OR  ) ) finalResult += result; // If one condition validate, pass
-                    else if ( condition.Condition.Equals ( IFACE_AND ) ) finalResult *= result; // All conditions have to validate
-                }
+                    if ( ! condition.InitNewBlock )
+                    {
+                        if      ( condition.IsOr  ) finalResults[ currentFinalResult ] += result; // If one condition validate, pass
+                        else if ( condition.IsAnd ) finalResults[ currentFinalResult ] *= result; // All conditions have to validate
+                    }
+                    else finalResults[ currentFinalResult ]  = result;
 
-                if ( finalResult <= 0 )
+                    Console.WriteLine ( "   Final = " + result + " -> FinalResult[" + currentFinalResult + "] = " + finalResults[ currentFinalResult ] );
+                }
+                
+                #endregion
+
+                #region Calculate inside out
+
+                Console.WriteLine ( "----" );
+
+                Console.WriteLine ( conditionStr );
+		
+		        Console.WriteLine ();
+		
+		        for ( int i = 0; i < finalResults.Count; i++ )
+		        {
+		            Console.WriteLine (
+		                "Group: " + i +
+		                " Parent: " + blockParent[ i ] +
+		                " -> FinalResult: " + finalResults[ i ] +
+		                " PreCondition: " + ( ( blockCondition[ i ] ) ? "AND" : "OR" ) );
+		        }
+		
+		        Console.WriteLine ();
+
+                /*
+                e.g. "Level0.P1=true | ( Level1.P1=3 + ( Level2.P1=1 + Level2.P2=1 ) | ( Level2.P3=2 + Level2.P3=2 ) | Level1.P2=4 )"
+                Level: 0 Parent: 0 -> FinalResult: 1 PreCondition: |
+                Level: 1 Parent: 0 -> FinalResult: 2 PreCondition: |
+                Level: 2 Parent: 1 -> FinalResult: 1 PreCondition: +
+                Level: 3 Parent: 1 -> FinalResult: 1 PreCondition: |
+                FinalResults = 1 | ( 1 + ( 1 ) | ( 1 ) | 1 ) = 1 | ( 2 + ( 1 ) | ( 1 ) )
+                
+                Max possible group parent n-1
+                e.g. 1 + ( 1 + ( 1 + ( 1 + ( 1 + ) ) ) )
+                5 niveles de animdamiento [MinIndex 0, MaxIndex 4] -> MaxParent = MaxIndex-1 = 4-1 = 3 -> Count-2 = 5-2 = 3
+                
+                Max parent: NumIndex 4 - 2 = 2
+                Parent 2 -> ...
+                Parent 1 -> 2 + 1 | 1 = 2 * 1 + 1 = 3 => Remove all entries with Parent1 as parent and modify Index1.FinalResult
+                Parent 0 -> 1 | 3 = 1 + 3 = 4
+                */
+                
+                int used        = 0;
+                int finalResult = 0;
+                int topParent   = ( finalResults.Count - 2 < 0 ) ? 0 : finalResults.Count - 2;
+                for ( int parent = topParent; parent >= 0; parent-- )
                 {
-
+                    used        = 0;
+                    finalResult = 0;
+                    
+                    Console.WriteLine ( "Parent: " + parent + " [ For " + parent + " >= 0 ]" );
+                    
+                    // Iterates all groups, first finding current parent ( travels the sentence from left to right )
+                    int groupLimit = finalResults.Count;
+                    for ( int group = 0; group < groupLimit; group++ )
+                    {
+                        Console.WriteLine ( "    Group: " + group + " [ For 0 < " + groupLimit + " ]" );
+                        
+                        if ( group == parent )
+                        {
+                            finalResult = finalResults[ group ];
+                            
+                            Console.WriteLine ( "        Parent: FinalResult = " + finalResult );
+                        }
+                        else if ( blockParent[ group ] == parent )
+                        {
+                            used++;
+                            
+                            int  entryFinalResult = finalResults  [ group ];
+                            bool andCondition     = blockCondition[ group ];
+                            
+                            int preFinalResult = finalResult; // ONLY FOR DEBUG
+                            
+                            if ( ! andCondition ) finalResult += entryFinalResult; // If one condition validate, pass
+                            else                  finalResult *= entryFinalResult; // All conditions have to validate
+                            
+                            Console.WriteLine (
+                                "        Child: FinalResult = " + preFinalResult +
+                                ( ( andCondition ) ? " x" : " +" ) +
+                                " " + entryFinalResult + " = " +
+                                finalResult + " [ Used: " + used + " ]" );
+                        }
+                    }
+                    
+                    if ( parent > 0 &&
+                        used   > 0 )
+                    {
+                        Console.WriteLine ( "    Remove elements: " + ( finalResults.Count - 1 - used ) + " / " + finalResults.Count );
+                        
+                        finalResults.RemoveRange ( finalResults.Count - 1 - used, used );
+                        finalResults[ parent ] = finalResult;
+                        
+                        Console.WriteLine (
+                            "    FinalResult = " + finalResult +
+                            " | FinalResults.Count = " + finalResults.Count );
+                
+                        int i = 0;
+                        foreach ( int result in finalResults )
+                            Console.WriteLine ( "        · Group " + i++ + " = " + result );
+                    }
                 }
+                
+                #endregion
+
+                Console.WriteLine ( "----" );
+                
+                Console.WriteLine ( finalResult );
 
                 return ( finalResult > 0 );
             }

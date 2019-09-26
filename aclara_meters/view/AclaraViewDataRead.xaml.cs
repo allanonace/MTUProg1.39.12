@@ -1522,10 +1522,10 @@ namespace aclara_meters.view
         { 
             #region Get values from form
 
-            Data.Set("AccountNumber", tbx_AccountNumber.Text,true);
-            Data.Set("MtuId", tbx_MtuId.Text, true);
-            Data.Set("MtuStatus", tbx_Mtu_Status.Text,true);
-            Data.Set("NumOfDays", pck_DaysOfRead.SelectedItem.ToString(),true);
+            Data.SetTemp ( "AccountNumber", tbx_AccountNumber.Text );
+            Data.SetTemp ( "MtuId", tbx_MtuId.Text );
+            Data.SetTemp ( "MtuStatus", tbx_Mtu_Status.Text );
+            Data.SetTemp ( "NumOfDays", pck_DaysOfRead.SelectedItem.ToString() );
 
             // GPS
             string value_lat = this.tbx_MtuGeolocationLat .Text;
@@ -1540,21 +1540,21 @@ namespace aclara_meters.view
                 double lat = Convert.ToDouble ( value_lat );
                 double lon = Convert.ToDouble ( value_lon );
         
-                Data.Set ( "GpsLat", lat, true );
-                Data.Set ( "GpsLon", lon, true );
-                Data.Set ( "GpsAlt", value_alt, true );
+                Data.SetTemp ( "GpsLat", lat );
+                Data.SetTemp ( "GpsLon", lon );
+                Data.SetTemp ( "GpsAlt", value_alt );
                 
             }
             else
             {
-                Data.Set("GpsLat", string.Empty, true);
-                Data.Set("GpsLon", string.Empty, true);
-                Data.Set("GpsAlt", string.Empty, true);
+                Data.SetTemp ( "GpsLat", string.Empty );
+                Data.SetTemp ( "GpsLon", string.Empty );
+                Data.SetTemp ( "GpsAlt", string.Empty );
             }
 
 
             //List<Parameter> optionalParams = new List<Parameter>();
-            Data.Set("Options", new List<Parameter>(), true);
+            Data.SetTemp ( "Options", new List<Parameter>() );
 
             foreach (BorderlessPicker p in optionalPickers)
                 if (p.SelectedItem != null)

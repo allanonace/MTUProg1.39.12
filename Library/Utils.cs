@@ -425,6 +425,15 @@ namespace Library
             return bool.TryParse ( value.ToString (), out ok );
         }
 
+        public static T ParseIntToEnum<T> ( int index, T defaultValue )
+        {
+            Type typeEnum = typeof ( T );
+            
+            if ( Enum.IsDefined ( typeEnum, index ) )
+                return ( T )Enum.Parse ( typeEnum, index.ToString () );
+            return defaultValue;
+        }
+
         #endregion        
     }
 }

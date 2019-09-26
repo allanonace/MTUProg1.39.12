@@ -131,6 +131,12 @@ namespace Xml
         {
             get { return ! this.TypeString.Equals ( "E" ); }
         }
+
+        [XmlIgnore]
+        public bool IsSetFlow
+        {
+            get { return this.TypeString.Equals ( "SETFLOW" ); }
+        }
         
         [XmlIgnore]
         public int MeterProtocol { get; set; }
