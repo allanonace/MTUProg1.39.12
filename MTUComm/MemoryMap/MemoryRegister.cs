@@ -131,10 +131,16 @@ namespace MTUComm.MemoryMap
         private CUSTOM_TYPE customType_Set;
         public REGISTER_TYPE registerType { get; }
         /// <summary>
-        /// Indicates if the value of the memory register has been modified ( write/set ).
+        /// Indicates whether the value of the memory register has been modified/set and if it should be written to the MTU.
         /// </summary>
-        public bool used { private set; get; }  // Flag is used to know what registers should be written in the MTU
-        public bool readedFromMtu; // Loaded at least one time reading from the MTU
+        /// <remarks>
+        /// NOTE: This flag only indicates that the memory register has updated its value, not if it has been written in the MTU.
+        /// </remarks>
+        public bool modified { private set; get; }
+        /// <summary>
+        /// Indicates whether the memory register has obtained its value from the MTU at least once or not.
+        /// </summary>
+        public bool readedFromMtu;
         private Lexi.Lexi lexi;
         public byte[] lastRead;
 
@@ -470,8 +476,7 @@ namespace MTUComm.MemoryMap
         #region Set
 
         /// <summary>
-        /// Writes zero/0 to the specified byte, set the value passed as argument
-        /// if it is not null, and writes it to the physical memory of the MTU.
+        /// Writes passed value first in the register and then in the physical memory of the MTU.
         /// <para>
         /// If no argument is passed, the current ( cached ) value of the register
         /// will be used to write to the physical memory of the MTU.
@@ -515,7 +520,7 @@ namespace MTUComm.MemoryMap
         }
         
         /// <summary>
-        /// Writes current value of the register in the physical memory of the MTU, only modifying the bit pointed.
+        /// Writes current value of the register in the physical memory of the MTU, only by modifying the specified bit.
         /// </summary>
         /// <remarks>
         /// NOTE: This method should only be used working with bool registers.
@@ -549,13 +554,10 @@ namespace MTUComm.MemoryMap
         }
 
         /// <summary>
-        /// Updates value of the register and writes it to the physical memory of the MTU.
-        /// <para>
-        /// If no argument is passed, the current ( cached ) value of the register
-        /// will be used to write to the physical memory of the MTU.
-        /// </para>
+        /// Updates only the memory register value, but does not write it in the physical memory of the MTU.
         /// </summary>
-        /// <param name="value">Value that will be set to the register and then written to the physical memory of the MTU</param>
+        /// <param name="value">Value that will be set to the register</param>
+        /// <param name="force">Used to allow fill in a memory map while executing unit tests</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
         /// <seealso cref="ResetByteAndSetValueToMtu(dynamic)"/>
@@ -563,7 +565,7 @@ namespace MTUComm.MemoryMap
         /// <seealso cref="SetValueToMtu(dynamic)"/>
         public async Task SetValue (
             dynamic value,
-            bool force = false ) // Force is to prepare the virtual MTU for unit testing
+            bool force = false )
         {
             // Register with read and write
             if ( this.write || force )
@@ -592,7 +594,7 @@ namespace MTUComm.MemoryMap
                         this.funcSet ( ( T )value );
                     
                     // Flag is used to know what registers should be written in the MTU
-                    this.used = true;
+                    this.modified = true;
                 }
                 catch ( Exception e )
                 {
@@ -609,7 +611,7 @@ namespace MTUComm.MemoryMap
                     throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
             }
         }
-                
+
         /// <summary>
         /// Set to zero/0 the value of the register, reseting all its bits.
         /// If the argument is not null, set the bit referenced by the register to desired value and
