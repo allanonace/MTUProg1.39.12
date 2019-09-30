@@ -209,7 +209,7 @@ namespace MTUComm
             RemoteDisconnect,
             MtuInstallationConfirmation,
             BasicRead,
-            ReadFabric
+            ReadFabric,
         }
 
         public enum MTUStatus
