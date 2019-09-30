@@ -159,15 +159,28 @@ namespace aclara_meters.view
             this.port1label.Text = LB_PORT1;
                  
             #endregion
-            int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
-            var MtuId       = await Data.Get.MemoryMap.MtuSerialNumber.GetValue();
-            var MtuStatus   = await Data.Get.MemoryMap.MtuStatus.GetValue();
-            var accName     = await  Data.Get.MemoryMap.P1MeterId.GetValue();
 
-            Device.BeginInvokeOnMainThread(()=>{
-            this.tbx_MtuId.Text         = MtuId.ToString().PadLeft ( mtuIdLength, '0' );
-            this.tbx_Mtu_Status.Text    = MtuStatus;
-            this.tbx_AccountNumber.Text = accName.ToString();
+            dynamic map = Data.Get.MemoryMap;
+            Mtu     mtu = Singleton.Get.Action.CurrentMtu;
+
+            int    mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
+
+            ulong  AccountNum  = ( mtu.Port1.IsSetFlow ) ? await map.P1MeterId.GetValue () : await map.P2MeterId.GetValue ();
+            int    MtuId       = await map.MtuSerialNumber .GetValue ();
+            string MtuStatus   = await map.MtuStatus       .GetValue ();
+            string rddPosition = await map.RDDValvePosition.GetValue ();
+            ulong  rddSerial   = await map.RDDSerialNumber .GetValue ();
+            string rddBattery  = await map.RDDBatteryStatus.GetValue ();
+
+            Device.BeginInvokeOnMainThread ( () =>
+            {
+                this.tbx_MtuId          .Text = MtuId.ToString ().PadLeft ( mtuIdLength, '0' );
+                this.tbx_Mtu_Status     .Text = MtuStatus;
+                this.tbx_AccountNumber  .Text = AccountNum.ToString ();
+                this.tbx_RDDPosition    .Text = rddPosition;
+                this.tbx_RDDSerialNumber.Text = rddSerial.ToString ();
+                this.tbx_Battery        .Text = rddBattery;
+                
             });
         }
 
@@ -1070,10 +1083,9 @@ namespace aclara_meters.view
         { 
             #region Get values from form
 
-            Data.SetTemp ( "AccountNumber", tbx_AccountNumber.Text );
-            Data.SetTemp ( "MtuId", tbx_MtuId.Text );
-            Data.SetTemp ( "MtuStatus", tbx_Mtu_Status.Text );
-            Data.SetTemp ( "ValvePosition", pck_ValvePosition.SelectedItem.ToString() );
+            Data.SetTemp ( "WorkOrder",          tbx_FieldOrder.Text );
+            Data.SetTemp ( "RDDActionType",      pck_ValvePosition.SelectedItem.ToString ().ToUpper () );
+            Data.SetTemp ( "RDDFirmwareVersion", tbx_RDDFirmwareVersion.Text );
 
             #endregion
 

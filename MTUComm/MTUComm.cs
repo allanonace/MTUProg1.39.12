@@ -28,6 +28,7 @@ using NodeType                 = Lexi.Lexi.NodeType;
 using NodeDiscoveryQueryResult = MTUComm.NodeDiscoveryList.NodeDiscoveryQueryResult;
 using RDDStatus                = MTUComm.RDDStatusResult.RDDStatus;
 using RDDValveStatus           = MTUComm.RDDStatusResult.RDDValveStatus;
+using RDDCmd                   = MTUComm.RDDStatusResult.RDDCmd;
 
 namespace MTUComm
 {
@@ -423,20 +424,15 @@ namespace MTUComm
                 // that cancel the action but not move to the main menu and could be happen
                 // that perform the basic read with a different MTU
                 if ( ! this.basicInfoLoaded )
-                {
                     await this.LoadMtuBasicInfo ();
-                    
-                    if ( Singleton.Has<Action> () )
-                        Singleton.Get.Action.SetCurrentMtu ();
-                }
 
                 switch ( type )
                 {
-                    case ActionType.AddMtu:
-                    case ActionType.AddMtuAddMeter:
-                    case ActionType.AddMtuReplaceMeter:
-                    case ActionType.ReplaceMTU:
-                    case ActionType.ReplaceMeter:
+                    case ActionType.AddMtu                :
+                    case ActionType.AddMtuAddMeter        :
+                    case ActionType.AddMtuReplaceMeter    :
+                    case ActionType.ReplaceMTU            :
+                    case ActionType.ReplaceMeter          :
                     case ActionType.ReplaceMtuReplaceMeter:
                         // Interactive and Scripting
                         if ( args.Length > 1 )
@@ -450,13 +446,12 @@ namespace MTUComm
                         else await Task.Run ( () => DataRead () );
                         break;
                     case ActionType.MtuInstallationConfirmation: await Task.Run ( () => InstallConfirmation () ); break;
-                    case ActionType.RemoteDisconnect: await Task.Run ( () => RemoteDisconnect () ); break;
-                    case ActionType.ReadFabric : await Task.Run ( () => ReadFabric () ); break;
-                    case ActionType.ReadMtu    : await Task.Run ( () => ReadMtu () ); break;
-                    //case ActionType.ReadMtu    : await Task.Run ( () => RemoteDisconnect () ); break;
-                    case ActionType.TurnOffMtu : await Task.Run ( () => TurnOnOffMtu ( false ) ); break;
-                    case ActionType.TurnOnMtu  : await Task.Run ( () => TurnOnOffMtu ( true  ) ); break;
-                    case ActionType.BasicRead  : await Task.Run ( () => BasicRead () ); break;
+                    case ActionType.RemoteDisconnect           : await Task.Run ( () => RemoteDisconnect () ); break;
+                    case ActionType.ReadFabric                 : await Task.Run ( () => ReadFabric () ); break;
+                    case ActionType.ReadMtu                    : await Task.Run ( () => ReadMtu () ); break;
+                    case ActionType.TurnOffMtu                 : await Task.Run ( () => TurnOnOffMtu ( false ) ); break;
+                    case ActionType.TurnOnMtu                  : await Task.Run ( () => TurnOnOffMtu ( true  ) ); break;
+                    case ActionType.BasicRead                  : await Task.Run ( () => BasicRead () ); break;
                     default: break;
                 }
 
@@ -1503,29 +1498,35 @@ namespace MTUComm
 
         #region Valve Operation ( prev. Remote Disconnect )
 
-        public static RDDValveStatus TESTRDD = RDDValveStatus.OPEN;
-
         private async Task RemoteDisconnect ()
         {
-            // Aclara:
-            // - STAR Programmer MtuComm.cs Line 833
-            // - Lexi Mtu.cs Line 1268 -> Y61063 Page 52 Request RDD Action
-            // - Lexi Mtu.cs Line 1283 -> Y61063 Page 53 Request RDD Status
-
-            // TODO: ONLY FOR DEBUG
-            Data.SetTemp ( "RDDFirmwareVersion", 1234 );
-            Data.SetTemp ( "RDDActionType", TESTRDD );
-
             Stopwatch nodeCounter = null;
 
             try
             {
                 bool isPort1 = false;
                 if ( ( isPort1 = this.mtu.Port1.IsSetFlow ) ||
-                     this.mtu.Port2.IsSetFlow )
+                     this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow )
                 {
                     dynamic map = this.GetMemoryMap ();
                     MemoryRegister<int> rddStatus = map.RDDStatusInt;
+
+                    // Convert from RDD command to RDD desired status
+                    RDDValveStatus rddValveStatus = RDDValveStatus.UNKNOWN;
+                    switch ( ( RDDCmd )Enum.Parse ( typeof ( RDDCmd ),
+                              Data.Get.RDDActionType.Replace ( " ", "_" ) ) )
+                    {
+                        case RDDCmd.CLOSE       : rddValveStatus = RDDValveStatus.CLOSED;       break;
+                        case RDDCmd.OPEN        : rddValveStatus = RDDValveStatus.OPEN;         break;
+                        case RDDCmd.PARTIAL_OPEN: rddValveStatus = RDDValveStatus.PARTIAL_OPEN; break;
+                    }
+
+                    if ( rddValveStatus == RDDValveStatus.UNKNOWN )
+                        throw new Exception ();
+
+                    // Values previous to execute the process
+                    Data.SetTemp ( "RDDBattery", await map.RDDBatteryStatus.GetValue () ); // Overload
+                    Data.SetTemp ( "PrevRDDValvePosition", await map.RDDValvePosition.GetValue () ); // Overload
 
                     Func<int,bool,bool,bool,Task<RDDStatus>> CheckStatus = (
                         async (
@@ -1572,29 +1573,17 @@ namespace MTUComm
                     OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 1 Check RDD" ) );
 
                     // Checks if the RDD is not configured/installed
-                    var a = await CheckStatus ( /*step*/1, /*okBusy*/false, /*okError*/true, /*okIdle*/true );
-
-                    Console.WriteLine ( "----> 1: " + a );
-
-                    if ( a == RDDStatus.DISABLED )
+                    if ( await CheckStatus ( /*step*/1, /*okBusy*/false, /*okError*/true, /*okIdle*/true ) == RDDStatus.DISABLED )
                         throw new Exception ();
 
                     await Task.Delay ( 1000 );
-
-                    // Prepare some data for the final log
-                    // FIXME: Register 492 does not work, always returns zero with the RDD connected
-                    //int rddPortNumber = await map.RDDPortNumber.GetValueFromMtu ();
-                    //int numPort = ( isPort1 && rddPortNumber == 1 ) ? 1 :
-                    //    ( ( ! isPort1 && rddPortNumber == 2 ) ? 2 : -1 );
-
-                    Data.SetTemp ( "PrevRDDValvePosition", await map.RDDValvePosition.GetValue () );
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 2 Request Position" ) );
 
                     // Request an action to the RDD 
                     await this.lexi.Write (
                         CMD_RDD_ACTION,
-                        new byte[] { ( byte )Data.Get.RDDActionType }, // 1 Close, 2 Open, 3 Partial Open
+                        new byte[] { ( byte )rddValveStatus }, // 1 Close, 2 Open, 3 Partial Open
                         CMD_ATTEMPTS_N,
                         WAIT_BTW_CMD_ATTEMPTS,
                         null,
@@ -1606,16 +1595,11 @@ namespace MTUComm
                     OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 3 Check RDD" ) );
 
                     // Checks status after requesting the desired action
-                    switch ( ( a = await CheckStatus ( /*step*/3, /*okBusy*/true, /*okError*/false, /*okIdle*/false ) ) )
+                    switch ( await CheckStatus ( /*step*/3, /*okBusy*/true, /*okError*/false, /*okIdle*/false ) )
                     {
-                        case RDDStatus.BUSY:
-                        Console.WriteLine ( "----> 3: Busy" );
-                        break;
-
                         case RDDStatus.IDLE:
                         case RDDStatus.DISABLED:
                         case RDDStatus.ERROR_ON_LAST_OPERATION:
-                        Console.WriteLine ( "----> 3: " + a );
                         throw new Exception ();
                     }
 
@@ -1660,12 +1644,12 @@ namespace MTUComm
                     }
                     while ( ( response == null ||
                               response.ValvePosition == RDDValveStatus.IN_TRANSITION ||
-                              response.ValvePosition != Data.Get.RDDActionType ) &&
+                              response.ValvePosition != rddValveStatus ) &&
                             ! ( timeOut = nodeCounter.ElapsedMilliseconds > WAIT_RDD_MAX ) );
                     
                     // The process has failed
                     if ( ! response.PreviousCmdSuccess ||
-                         response.ValvePosition != Data.Get.RDDActionType )
+                         response.ValvePosition != rddValveStatus )
                     {
                         switch ( response.ValvePosition )
                         {
@@ -1683,16 +1667,10 @@ namespace MTUComm
                         }
                     }
 
-                    TESTRDD = ( TESTRDD == RDDValveStatus.OPEN ) ? RDDValveStatus.CLOSED : RDDValveStatus.OPEN;
-
-                    // The status of the RDD has changed correctly
-                    //await this.OnRemoteDisconnect (
-                    //    new Delegates.ActionArgs ( this.mtu, map, response ) );
-
                     OnProgress ( this, new Delegates.ProgressArgs ( "Reading from MTU..." ) );
 
                     await this.ReadMtu_Logic ( map );
-                    await this.OnReadMtu ( new Delegates.ActionArgs ( this.mtu, map ) );
+                    await this.OnRemoteDisconnect ( new Delegates.ActionArgs ( this.mtu, map ) );
                 }
             }
             catch ( Exception e )
