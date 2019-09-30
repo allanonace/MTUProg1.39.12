@@ -1299,7 +1299,7 @@ namespace MTUComm.MemoryMap
         /// See <see cref="MTUComm.WriteMtuModifiedRegisters"/> to write to the phisical memory of the MTU only the memory registers modified.
         /// </para>
         /// <para>
-        /// See <see cref="MemoryRegister.used"/> that is the flag modified when a memory register value is set.
+        /// See <see cref="MemoryRegister.modified"/> that is the flag modified when a memory register value is set.
         /// </para>
         /// </summary>
         /// <returns></returns>
@@ -1308,7 +1308,7 @@ namespace MTUComm.MemoryMap
             MemoryRegisterDictionary changes = new MemoryRegisterDictionary ();
 
             Dictionary<string,dynamic> mixedRegisters =
-                this.registersObjs.Where ( reg => reg.Value.used )
+                this.registersObjs.Where ( reg => reg.Value.modified )
                 .ToDictionary ( reg => reg.Key, reg => reg.Value );
 
             this.GetModifiedRegisters<int   > ( changes, mixedRegisters );
@@ -1420,19 +1420,19 @@ namespace MTUComm.MemoryMap
         public async Task LogFullMemory ()
         {
             StringBuilder str = new StringBuilder ();
-            const string sentence = "\t<Register id=\"#1#\" value=\"#2#\" readmtu=\"#3#\" used=\"#4#\"/>";
+            const string sentence = "\t<Register id=\"#1#\" value=\"#2#\" readmtu=\"#3#\" modified=\"#4#\"/>";
 
             str.AppendLine ( "<Registers>" );
             foreach ( KeyValuePair<string,dynamic> entry in this.registersObjs )
             {
                 var reg = entry.Value;
-                if ( reg.readedFromMtu || reg.used )
+                if ( reg.readedFromMtu || reg.modified )
                     str.AppendLine (
                         sentence
                             .Replace ( "#1#", entry.Key )
                             .Replace ( "#2#", await entry.Value.GetValue () )
                             .Replace ( "#3#", reg.readedFromMtu )
-                            .Replace ( "#4#", reg.used )
+                            .Replace ( "#4#", reg.modified )
                     );
             }
             str.AppendLine ( "</Registers>" );

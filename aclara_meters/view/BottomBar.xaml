@@ -16,6 +16,7 @@
         </Grid.RowDefinitions>
         <StackLayout Margin="0,46,0,0"  VerticalOptions="End">
             <StackLayout IsVisible="true" Margin="0,40,0,0" HeightRequest="128" BackgroundColor="#6aa2b8" Orientation="Horizontal" >
+                <Image  x:Name="img_ndresult" Source="nd_good.png" Margin="20,13,0,44" IsVisible="false" HeightRequest="40"/>
                 <Label  x:Name="label_read" LineBreakMode="TailTruncation" Margin="17,18,0,44" FontSize="20" TextColor="White" Text="Push Button to START" >
                 </Label>
             </StackLayout>

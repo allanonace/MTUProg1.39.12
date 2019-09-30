@@ -42,6 +42,10 @@ namespace MTUComm
             TaskFlag   // Bit set using the coil interface
         }
 
+        // Maximum lengths
+        public  const int BYTES_REQUIRED_DATA    = 18;
+
+        // ACK with Remote Disconnect Response
         private const int BYTE_RESULT            = 2;
         private const int BYTE_NUMLOGS           = 3; // and 4
         private const int NUM_BYTES_NUMLOGS      = 2;

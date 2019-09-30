@@ -19,7 +19,8 @@ namespace MTUComm
         {
             READ,
             NODE_DISCOVERY,
-            DATA_READ
+            DATA_READ,
+            REMOTE_DISCONNECT
         }
 
         #endregion
@@ -110,6 +111,10 @@ namespace MTUComm
                 base_stream += "        <Events />";
                 base_stream += "    </Transfer>";
                 base_stream += "</Log>";
+                break;
+
+                case BasicFileType.REMOTE_DISCONNECT:
+                
                 break;
             }
             
@@ -426,7 +431,8 @@ namespace MTUComm
             #region Events Log
 
             string eventsUri = Data.Get.ProcessResultFileFull;
-            using ( Stream BasicStruct = new MemoryStream ( Encoding.UTF8.GetBytes(CreateBasicStructure ( BasicFileType.DATA_READ ) ) ) )
+            using ( Stream BasicStruct = new MemoryStream (
+                Encoding.UTF8.GetBytes ( CreateBasicStructure ( BasicFileType.DATA_READ ) ) ) )
             {
                 XDocument eventsDoc = XDocument.Load ( BasicStruct );
                 XElement  events    = eventsDoc.Root.Element ( "Transfer" ).Element ( "Events" );
@@ -465,7 +471,8 @@ namespace MTUComm
             // Launching multiple times scripts with the same output path, concatenates the actions logs,
             // but the log send to the explorer should be only the last action performed
             XDocument uniDoc;
-            using ( Stream BasicStruct = new MemoryStream ( Encoding.UTF8.GetBytes ( CreateBasicStructure () ) ) )
+            using ( Stream BasicStruct = new MemoryStream (
+                        Encoding.UTF8.GetBytes ( CreateBasicStructure () ) ) )
             {
                 uniDoc = XDocument.Load(BasicStruct);
                 PrepareLog_DataRead (

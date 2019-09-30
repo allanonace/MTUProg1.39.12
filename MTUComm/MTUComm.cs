@@ -326,10 +326,7 @@ namespace MTUComm
         private Lexi.Lexi lexi;
         private Configuration configuration;
         private Global global;
-        private MTUBasicInfo mtuBasicInfo;
         private Mtu mtu;
-        private Boolean isPulse = false;
-        private Boolean mtuHasChanged;
         private bool basicInfoLoaded = false;
         private AddMtuLog addMtuLog;
 
@@ -341,7 +338,6 @@ namespace MTUComm
         {
             this.configuration = configuration;
             this.global = this.configuration.Global;
-            mtuBasicInfo = new MTUBasicInfo(new byte[BASIC_READ_1_DATA + BASIC_READ_2_DATA]);
             lexi = new Lexi.Lexi(serial, Data.Get.IsIOS ? 10000 : 20000 );
             
             Singleton.Set = lexi;
@@ -359,7 +355,7 @@ namespace MTUComm
         /// it is easier to control how to manage exceptions at a single point in the app.
         /// </para>
         /// <para>
-        /// See <see cref="LoadMtuAndMetersBasicInfo"/> to recover basic data from the MTU.
+        /// See <see cref="LoadMtuBasicInfo"/> to recover basic data from the MTU.
         /// </para>
         /// <para>
         /// See <see cref="Action.ActionType"/> for the full list of available actions.
@@ -392,10 +388,10 @@ namespace MTUComm
                 // that perform the basic read with a different MTU
                 if ( ! this.basicInfoLoaded )
                 {
-                    await this.LoadMtuAndMetersBasicInfo ();
+                    await this.LoadMtuBasicInfo ();
                     
                     if ( Singleton.Has<Action> () )
-                        Singleton.Get.Action.SetCurrentMtu ( this.mtuBasicInfo );
+                        Singleton.Get.Action.SetCurrentMtu ();
                 }
 
                 switch ( type )
@@ -670,7 +666,7 @@ namespace MTUComm
 
                 // Validate script parameters ( removing the unnecessary ones )
                 Dictionary<APP_FIELD,string> psSelected = ScriptAux.ValidateParams (
-                    port2enabled, this.mtu, this.mtuBasicInfo, action, translatedParams );
+                    port2enabled, this.mtu, Data.Get.MtuBasicInfo, action, translatedParams );
 
                 // Add parameters to Library.Data
                 foreach ( var entry in psSelected )
@@ -831,7 +827,18 @@ namespace MTUComm
                     countAttemptsEr = 0;
 
                     // Check if some event log was recovered
-                    var queryResult = eventLogList.TryToAdd ( fullResponse.Response );
+                    bool ok = false;
+                    var queryResult = eventLogList.TryToAdd ( fullResponse.Response, ref ok );
+
+                    // NOTE: It happened once LExI returned an array of bytes without the required amount of data
+                    if ( ! ok )
+                    {
+                        await Task.Delay ( WAIT_BTW_LOG_ERROR );
+
+                        // Try again, using this time Get Repeat Last Event Log Response command
+                        retrying = true;
+                    }
+
                     switch ( queryResult.Result )
                     {
                         // Finish because the MTU has not event logs for specified date range
@@ -967,7 +974,7 @@ namespace MTUComm
 
                 // MTU is turned off
                 if ( ! force &&
-                     this.mtuBasicInfo.Shipbit )
+                     Data.Get.MtuBasicInfo.Shipbit )
                 {
                     wasNotAboutPuck = true;
                     throw new MtuIsAlreadyTurnedOffICException ();
@@ -1268,7 +1275,12 @@ namespace MTUComm
                             countAttemptsEr = 0;
 
                             // Check if some node was recovered
-                            var queryResult = nodeList.TryToAdd ( fullResponse.Response );
+                            bool ok = false;
+                            var queryResult = nodeList.TryToAdd ( fullResponse.Response, ref ok );
+
+                            // NOTE: It happened once that LExI returned an array of bytes without the required amount of data
+                            if ( ok ) goto BREAK_FAIL;
+                            
                             switch ( queryResult.Result )
                             {
                                 // Wait a bit and try to read/recover the next node
@@ -2305,7 +2317,7 @@ namespace MTUComm
                             }
 
                             List<string> readIntervalList;
-                            if ( MtuForm.mtuBasicInfo.version >= global.LatestVersion )
+                            if ( Data.Get.MtuBasicInfo.version >= global.LatestVersion )
                             {
                                 readIntervalList = new List<string>()
                                 {
@@ -2354,7 +2366,7 @@ namespace MTUComm
                             // Do not use
                             if ( ! global.AllowDailyReads ||
                                  ! mtu.DailyReads ||
-                                 mtu.IsFamilly33xx )
+                                 mtu.IsFamily33xx )
                             {
                                 form.RemoveParameter ( FIELD.SNAP_READS );
 
@@ -2435,7 +2447,7 @@ namespace MTUComm
                 #region Auto-detect Alarm
     
                 // Auto-detect scripting Alarm profile
-                List<Alarm> alarms = configuration.alarms.FindByMtuType ( (int)MtuForm.mtuBasicInfo.Type );
+                List<Alarm> alarms = configuration.alarms.FindByMtuType ( (int)Data.Get.MtuBasicInfo.Type );
                 if ( alarms.Count > 0 )
                 {
                     Alarm alarm = alarms.Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
@@ -2760,10 +2772,12 @@ namespace MTUComm
                 // Only encrypt MTUs with SpecialSet set
                 if ( mtu.SpecialSet )
                 {
-                    if ( ! mtu.IsFamilly35xx36xx )
+                    if ( mtu.IsFamily31xx32xx ||
+                         mtu.IsFamily342x )
                         await this.Encrypt_Old ( map );
                     
-                    else if ( mtu.STAREncryptionType != ENCRYPTION.NONE )
+                    else if ( mtu.IsFamily35xx36xx &&
+                              mtu.STAREncryptionType != ENCRYPTION.NONE )
                         await this.Encrypt_OnDemand12 ( map );
                 }
 
@@ -2975,7 +2989,7 @@ namespace MTUComm
                     }
                 }
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
                 //...
             }
@@ -3317,7 +3331,7 @@ namespace MTUComm
         /// the forms of the UI with the correct values ( compatible Meters,.. ), but the logic
         /// is in another method to create a more readable and easy to maintain source code.
         /// <para>
-        /// See <see cref="LoadMtuBasicInfo"/> to recover basic data from the MTU.
+        /// See <see cref="LoadMtuBasicInfo_Logic"/> to recover basic data from the MTU.
         /// </para>
         /// </summary>
         /// <returns>Task object required to execute the method asynchronously and
@@ -3325,7 +3339,7 @@ namespace MTUComm
         /// <exception cref="MtuMissingException">( From Configuration.GetMtuTypeById )</exception>
         /// <exception cref="MemoryMapParseXmlException">( From GetMemoryMap )</exception>
         /// <seealso cref="MTUBasicInfo"/>
-        private async Task LoadMtuAndMetersBasicInfo ()
+        private async Task LoadMtuBasicInfo ()
         {
             // Actions without form have no problem, but actions that require the user to
             // complete a form before launch the action logic, should avoid to invoking this
@@ -3333,21 +3347,19 @@ namespace MTUComm
             if ( OnProgress != null )
                 OnProgress ( this, new Delegates.ProgressArgs ( "Initial Reading..." ) );
 
-            if ( await this.LoadMtuBasicInfo () )
+            bool mtuHasChanged = await this.LoadMtuBasicInfo_Logic ();
+
+            if ( this.mtu == null )
+            {
+                // Get Mtu entry using numeric ID ( e.g. 138 )
+                this.mtu = configuration.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
+            }
+
+            if ( mtuHasChanged )
             {
                 this.basicInfoLoaded = true;
-            
-                MtuForm.SetBasicInfo ( mtuBasicInfo );
                 
-                // Launches exception 'MtuTypeIsNotFoundException'
-
-                // Get Mtu entry using numeric ID ( e.g. 138 )
-                this.mtu = configuration.GetMtuTypeById ( ( int )this.mtuBasicInfo.Type );
-               
-                //for ( int i = 0; i < this.mtu.Ports.Count; i++ )
-                //    mtuBasicInfo.setPortType ( i, this.mtu.Ports[ i ].TypeString );
-                
-                Data.SetTemp ( "MemoryMap", GetMemoryMap ( true ) );
+                Data.Set ( "MemoryMap", GetMemoryMap ( true ) );
             }
         }
 
@@ -3362,7 +3374,7 @@ namespace MTUComm
         /// </para>
         /// </returns>
         /// <seealso cref="MTUBasicInfo"/>
-        private async Task<bool> LoadMtuBasicInfo ()
+        private async Task<bool> LoadMtuBasicInfo_Logic ()
         //    bool isAfterWriting = false )
         {
             List<byte> finalRead = new List<byte> ();
@@ -3385,14 +3397,21 @@ namespace MTUComm
             }
 
             MTUBasicInfo basicInfo = new MTUBasicInfo ( finalRead.ToArray () );
-            this.mtuHasChanged = ( mtuBasicInfo.Id   == 0 ||
-                                   mtuBasicInfo.Type == 0 ||
-                                   basicInfo.Id   != mtuBasicInfo.Id ||
-                                   basicInfo.Type != mtuBasicInfo.Type );
-            
-            mtuBasicInfo = basicInfo;
-            
-            return this.mtuHasChanged;
+
+            bool mtuHasChanged = true;
+            if ( Data.Contains ( "MtuBasicInfo" ) )
+            {
+                MTUBasicInfo currentBasicInfo = Data.Get.MtuBasicInfo;
+                mtuHasChanged = ( currentBasicInfo.Id   == 0 ||
+                                       currentBasicInfo.Type == 0 ||
+                                       basicInfo.Id   != currentBasicInfo.Id ||
+                                       basicInfo.Type != currentBasicInfo.Type );
+            }
+
+            if ( mtuHasChanged )
+                Data.Set ( "MtuBasicInfo", basicInfo );
+
+            return mtuHasChanged;
         }
 
         /// <summary>
@@ -3421,22 +3440,9 @@ namespace MTUComm
             Array.Copy ( read, 6, id_stream, 0, 4 );
             uint mtuId = BitConverter.ToUInt32 ( id_stream, 0 );
 
-            if ( mtuType != mtuBasicInfo.Type ||
-                   mtuId != mtuBasicInfo.Id )
+            if ( mtuType != Data.Get.MtuBasicInfo.Type ||
+                   mtuId != Data.Get.MtuBasicInfo.Id )
                 throw new MtuHasChangeBeforeFinishActionException ();
-        }
-
-        /// <summary>
-        /// Returns the basic information loaded of the current MTU.
-        /// <para>
-        /// See <see cref="LoadMtuAndMetersBasicInfo"/> to recover basic data from the MTU.
-        /// </para>
-        /// </summary>
-        /// <returns>Instance of the MTU basic information</returns>
-        /// <seealso cref="MTUBasicInfo"/>
-        public MTUBasicInfo GetBasicInfo ()
-        {
-            return this.mtuBasicInfo;
         }
 
         #endregion

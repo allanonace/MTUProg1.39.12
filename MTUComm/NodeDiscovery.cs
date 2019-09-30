@@ -55,7 +55,11 @@ namespace MTUComm
         */
 
         #region Constants
-        
+
+        // Maximum lengths
+        public  const int BYTES_REQUIRED_DATA_1  = 10;
+        public  const int BYTES_REQUIRED_DATA_2  = 26;
+
         // ACK with Node Discovery Response
         private const int BYTE_RESULT            = 2;
         private const int BYTE_NUMRESULTS        = 3;

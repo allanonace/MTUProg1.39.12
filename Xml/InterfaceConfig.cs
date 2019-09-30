@@ -31,8 +31,6 @@ namespace Xml
     [XmlRoot("InterfaceConfig")]
     public class InterfaceConfig
     {
-        public static string currentFamily;
-    
         [XmlElement("MtuInterface")]
         public List<MtuInterface> MtuInterfaces { get; set; }
 
@@ -41,7 +39,7 @@ namespace Xml
 
         public ActionInterface GetInterfaceByMtuIdAndAction ( Mtu mtu, string actionType )
         {
-            Interface mtu_interface = Interfaces.Find ( x => x.Family.Equals ( currentFamily ) );
+            Interface mtu_interface = Interfaces.Find ( x => x.Family.Equals ( mtu.GetFamily () ) );
             
             if ( mtu_interface == null )
                 throw new ActionInterfaceNotFoundException_Internal ();

@@ -106,6 +106,15 @@ namespace Library
                 .ToDictionary ( entry => entry.Key, entry => entry.Value );
         }
 
+        public static void Reset (
+            string id )
+        {
+            Data d = Get;
+
+            if ( d.dictionary.ContainsKey ( id ) )
+                d.dictionary.Remove ( id );
+        }
+
         public static bool Contains (
             string name )
         {

@@ -189,11 +189,41 @@ namespace Xml
     /// <seealso cref="MtuTypes"/>
     public class Mtu
     {
-        public enum VERSION { NEW, ARCH };
+        #region Constants
 
-        public enum ENCRYPTION { NONE, AES128, AES256 };
-    
+        public enum VERSION
+        {
+            NEW,
+            ARCH
+        };
+
+        public enum ENCRYPTION
+        {
+            NONE,
+            AES128,
+            AES256
+        };
+
+        public enum Family
+        {
+            NOTHING,
+            _31xx32xx,
+            _33xx,
+            _342x,
+            _35xx36xx
+        }
+
         private const int DEF_FLOW = -1;
+
+        #endregion
+
+        #region Attributes
+
+        private Family    family;
+
+        private Interface iInfo;
+
+        #endregion
     
         public Mtu ()
         {
@@ -312,12 +342,15 @@ namespace Xml
 
         [XmlElement("HexNum")]
         public string HexNum { get; set; }
-        
+
         [XmlIgnore]
-        public bool IsFamilly31xx32xx
+        public bool IsFamily31xx32xx
         {
             get
             {
+                if ( this.HasFamilySet )
+                    return this.family == Family._31xx32xx;
+
                 string hexnum = this.HexNum.ToLower ();
             
                 return hexnum.StartsWith ( "31" ) ||
@@ -326,22 +359,37 @@ namespace Xml
         }
         
         [XmlIgnore]
-        public bool IsFamilly33xx
-        {
-            get { return this.HexNum.ToLower ().StartsWith ( "33" ); }
-        }
-        
-        [XmlIgnore]
-        public bool IsFamilly342x
-        {
-            get { return this.HexNum.ToLower ().StartsWith ( "342" ); }
-        }
-
-        [XmlIgnore]
-        public bool IsFamilly35xx36xx
+        public bool IsFamily33xx
         {
             get
             {
+                if ( this.HasFamilySet )
+                    return this.family == Family._33xx;
+
+                return this.HexNum.ToLower ().StartsWith ( "33" );
+            }
+        }
+        
+        [XmlIgnore]
+        public bool IsFamily342x
+        {
+            get
+            {
+                if ( this.HasFamilySet )
+                    return this.family == Family._342x;
+
+                return this.HexNum.ToLower ().StartsWith ( "342" );
+            }
+        }
+
+        [XmlIgnore]
+        public bool IsFamily35xx36xx
+        {
+            get
+            {
+                if ( this.HasFamilySet )
+                    return this.family == Family._35xx36xx;
+
                 string hexnum = this.HexNum.ToLower ();
             
                 return hexnum.StartsWith ( "35" ) ||
@@ -543,6 +591,26 @@ namespace Xml
         public bool IsNewVersion
         {
             get { return this.Version == VERSION.NEW; }
+        }
+
+        [XmlIgnore]
+        public bool HasFamilySet
+        {
+            get { return this.family != Family.NOTHING; }
+        }
+
+        public void SetFamily (
+            string family )
+        {
+            Enum.TryParse<Family> ( "_" + family, out this.family );
+        }
+
+        public string GetFamily ()
+        {
+            if ( this.HasFamilySet )
+                return this.family.ToString ().Substring ( 1 ).ToLower ();
+
+            return string.Empty;
         }
 
         #endregion

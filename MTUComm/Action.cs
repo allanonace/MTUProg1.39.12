@@ -48,7 +48,7 @@ namespace MTUComm
         /// </example>
         /// </para>
         /// <para>&#160;</para>
-        /// </para>
+        /// <para>
         /// Operators
         /// <list type="Conditions">
         /// <item>
@@ -208,10 +208,8 @@ namespace MTUComm
             DataRead,
             RemoteDisconnect,
             MtuInstallationConfirmation,
-            Diagnosis,
             BasicRead,
-            ReadFabric,
-            RemoteDisconnect
+            ReadFabric
         }
 
         public enum MTUStatus
@@ -228,7 +226,7 @@ namespace MTUComm
             VerifyingMtuData,
             CheckingEnconderShortTime,
             TurningOnMtu,
-            ReadingMtu,
+            ReadingMtu
         };
 
         public static Dictionary<ActionType, String> logDisplays;
@@ -278,6 +276,8 @@ namespace MTUComm
         private Logger logger;
         private string lastLogCreated;
         private Boolean canceled = false;
+
+        private static bool alreadyInDataMainAction;
         
         #endregion
 
@@ -533,7 +533,6 @@ namespace MTUComm
                 {ActionType.TurnOnMtu,                      "Turn On MTU" },
                 {ActionType.DataRead,                       "Read Data Log" },
                 {ActionType.MtuInstallationConfirmation,    "Install Confirmation" },
-                {ActionType.Diagnosis,                      string.Empty },
                 {ActionType.ReadFabric,                     "Read Fabric" },
                 {ActionType.RemoteDisconnect,               "Valve Operation" }
             };
@@ -552,7 +551,6 @@ namespace MTUComm
                 {ActionType.TurnOnMtu,                      "TurnOnMtu" },
                 {ActionType.DataRead,                       "ReadDataLog" },
                 {ActionType.MtuInstallationConfirmation,    "InstallConfirmation" },
-                {ActionType.Diagnosis,                      string.Empty },
                 {ActionType.ReadFabric,                     "ReadFabric" },
                 {ActionType.RemoteDisconnect,               "Valve Operation" }
             };
@@ -571,7 +569,6 @@ namespace MTUComm
                 {ActionType.TurnOnMtu,                      "TurnOnMtu" },
                 {ActionType.DataRead,                       "DataRead" },
                 {ActionType.MtuInstallationConfirmation,    "InstallConfirmation" },
-                {ActionType.Diagnosis,                      string.Empty },
                 {ActionType.ReadFabric,                     "ReadFabric" },
                 {ActionType.RemoteDisconnect,               "ValveOperation" }
             };
@@ -599,24 +596,34 @@ namespace MTUComm
             this.mtucomm = new MTUComm ( serial, config );
 
             this.additionalScriptParameters = new List<Parameter> ();
-            
+
             // Only save reference for the current action,
             // not for nested or auxiliary actions ( as BasicRead )
-            if ( this.type != ActionType.BasicRead &&
-                 ! Singleton.Has<Action> () )
+            if ( this.type == ActionType.BasicRead ||
+                 this.type == ActionType.ReadMtu )
             {
-                Singleton.Set = this;
-                
+                alreadyInDataMainAction = false;
+
                 // Reset temp data but not all data, because some data is created
                 // only one time and is needed during the life of the application
                 Data.Reset ();
+                Data.Reset ( "MemoryMap" );
+                Data.Reset ( "MtuBasicInfo" );
+                InterfaceAux.ResetInfo ();
+            }
+
+            if ( this.type != ActionType.BasicRead &&
+                 ! alreadyInDataMainAction )
+            {
+                alreadyInDataMainAction = true;
+
+                Singleton.Set = this;
             }
         }
         
-        public void SetCurrentMtu (
-            MTUBasicInfo mtuBasic )
+        public void SetCurrentMtu ()
         {
-            this.currentMtu = this.config.GetMtuTypeById ( ( int )mtuBasic.Type );
+            this.currentMtu = this.config.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
         }
 
         #endregion
@@ -1019,12 +1026,11 @@ namespace MTUComm
         private ActionResult getBasciInfoResult ()
         {
             ActionResult result = new ActionResult ();
-            MTUBasicInfo basic  = mtucomm.GetBasicInfo ();
             
             result.AddParameter(new Parameter("Date", "Date/Time", GetProperty("Date")));
             result.AddParameter(new Parameter("User", "User", GetProperty("User")));
-            result.AddParameter(new Parameter("MtuType", "MTU Type", basic.Type));
-            result.AddParameter(new Parameter("MtuId", "MTU ID", basic.Id));
+            result.AddParameter(new Parameter("MtuType", "MTU Type", Data.Get.MtuBasicInfo.Type));
+            result.AddParameter(new Parameter("MtuId", "MTU ID", Data.Get.MtuBasicInfo.Id));
             
             foreach ( Parameter param in this.AdditionalScriptParameters )
                 result.AddParameter ( param );

@@ -14,7 +14,6 @@ namespace MTUComm.actions
 
         private Dictionary<string,Parameter> dictionary;
         protected List<Parameter> additionalParams;
-        public static MTUBasicInfo mtuBasicInfo { get; private set; }
         public Mtu mtu { get; }
         public dynamic map;
 
@@ -65,11 +64,6 @@ namespace MTUComm.actions
             return true;
 
             //throw new Exception();
-        }
-
-        public static void SetBasicInfo(MTUBasicInfo mtuBasicInfo)
-        {
-            MtuForm.mtuBasicInfo = mtuBasicInfo;
         }
 
         #endregion

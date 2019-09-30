@@ -251,7 +251,7 @@ namespace aclara_meters.view
             dialogsSaved = dialogs;
 
             this.config = Singleton.Get.Configuration;
-            this.mtuBasicInfo = MtuForm.mtuBasicInfo;
+            this.mtuBasicInfo = Data.Get.MtuBasicInfo;
 
             this.detectedMtuType = ( int )this.mtuBasicInfo.Type;
             currentMtu = this.config.GetMtuTypeById ( this.detectedMtuType );
@@ -497,7 +497,7 @@ namespace aclara_meters.view
             #region Conditions
 
             this.currentMtu   = this.addMtuForm.mtu;
-            this.mtuBasicInfo = MtuForm.mtuBasicInfo;
+            this.mtuBasicInfo = Data.Get.MtuBasicInfo;
 
             #endregion
 
@@ -741,7 +741,7 @@ namespace aclara_meters.view
 
             #region Snap Reads / Daily Reads
 
-            bool useDailyReads        = global.AllowDailyReads && this.currentMtu.DailyReads && ! this.currentMtu.IsFamilly33xx;
+            bool useDailyReads        = global.AllowDailyReads && this.currentMtu.DailyReads && ! this.currentMtu.IsFamily33xx;
             bool changeableDailyReads = global.IndividualDailyReads;
             int  dailyReadsDefault    = global.DailyReadsDefault;
             
@@ -4009,7 +4009,7 @@ namespace aclara_meters.view
             if ( ( DEBUG_AUTO_MODE_ON && DEBUG_SNAPSREADS_OK || ! DEBUG_AUTO_MODE_ON ) &&
                  global.AllowDailyReads &&
                  mtu.DailyReads &&
-                 ! mtu.IsFamilly33xx )
+                 ! mtu.IsFamily33xx )
                 this.addMtuForm.AddParameter ( FIELD.SNAP_READS, value_sre );
 
             // Is a two-way MTU

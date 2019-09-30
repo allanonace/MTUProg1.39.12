@@ -1068,10 +1068,10 @@ namespace aclara_meters.view
         { 
             #region Get values from form
 
-            Data.Set("AccountNumber", tbx_AccountNumber.Text,true);
-            Data.Set("MtuId", tbx_MtuId.Text, true);
-            Data.Set("MtuStatus", tbx_Mtu_Status.Text,true);
-            Data.Set("ValvePosition", pck_ValvePosition.SelectedItem.ToString(),true);
+            Data.SetTemp ( "AccountNumber", tbx_AccountNumber.Text );
+            Data.SetTemp ( "MtuId", tbx_MtuId.Text );
+            Data.SetTemp ( "MtuStatus", tbx_Mtu_Status.Text );
+            Data.SetTemp ( "ValvePosition", pck_ValvePosition.SelectedItem.ToString() );
 
             #endregion
 

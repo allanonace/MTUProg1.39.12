@@ -114,7 +114,8 @@ namespace MTUComm
         #endregion
 
         public ( EventLogQueryResult Result, int Index ) TryToAdd (
-            byte[] response )
+            byte[] response,
+            ref bool ok )
         {
             EventLog evnt = null;
         
@@ -126,6 +127,10 @@ namespace MTUComm
 
                 // ACK with log entry
                 case HAS_DATA:
+                    // NOTE: It happened once LExI returned an array of bytes without the required amount of data
+                    if ( ! ( ok = ( response.Length == EventLog.BYTES_REQUIRED_DATA ) ) )
+                        return ( EventLogQueryResult.Empty, -1 );
+
                     evnt = new EventLog ( response );
                     // Repeating entry
                     if ( this.entries.Count >= evnt.Index )

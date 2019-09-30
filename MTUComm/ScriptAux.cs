@@ -590,7 +590,7 @@ namespace MTUComm
                         if ( isNotWrite ||
                              ! global.AllowDailyReads ||
                              ! mtu.DailyReads ||
-                             mtu.IsFamilly33xx )
+                             mtu.IsFamily33xx )
                             continue;
 
                         if ( fail = EmptyNum ( valueStr ) )

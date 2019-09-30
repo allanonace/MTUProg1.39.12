@@ -488,9 +488,8 @@ namespace MTUComm.MemoryMap
         /// <param name="value">New value that will be set to the register and then written to the physical memory of the MTU</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
-        /// <seealso cref="ResetByteAndSetValueToMtu(dynamic)"/>
-        /// <seealso cref="SetBitToMtu"/>
-        /// <seealso cref="SetValue(dynamic)"/>
+        /// <seealso cref="ResetByteAndSetValueToMtu"/>
+        /// <seealso cref="SetValue"/>
         public async Task SetValueToMtu (
             dynamic value = null,
             int numAttempts = MTUComm.LEXI_ATTEMPTS_N )
@@ -527,6 +526,7 @@ namespace MTUComm.MemoryMap
         /// </remarks>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="SetValueToMtu"/>
         /// <seealso cref="ResetByteAndSetValueToMtu"/>
         private async Task SetBitToMtu (
             int numAttempts )
@@ -560,9 +560,9 @@ namespace MTUComm.MemoryMap
         /// <param name="force">Used to allow fill in a memory map while executing unit tests</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
-        /// <seealso cref="ResetByteAndSetValueToMtu(dynamic)"/>
-        /// <seealso cref="SetValue(dynamic)"/>
-        /// <seealso cref="SetValueToMtu(dynamic)"/>
+        /// <seealso cref="SetValueToMtu"/>
+        /// <seealso cref="SetBitToMtu"/>
+        /// <seealso cref="ResetByteAndSetValueToMtu"/>
         public async Task SetValue (
             dynamic value,
             bool force = false )
@@ -614,10 +614,12 @@ namespace MTUComm.MemoryMap
 
         /// <summary>
         /// Set to zero/0 the value of the register, reseting all its bits.
+        /// <para>
         /// If the argument is not null, set the bit referenced by the register to desired value and
         /// finally writes current byte value to the physical memory of the MTU.
+        /// </para>
         /// <para>
-        /// See <see cref="SetValueToMtu(dynamic)"/> to modify the value of the register and write it to the physical memory of the MTU.
+        /// See <see cref="SetValueToMtu"/> to modify the value of the register and write it to the physical memory of the MTU.
         /// </para>
         /// </summary>
         /// <remarks>
@@ -629,9 +631,8 @@ namespace MTUComm.MemoryMap
         /// <param name="value">New value that will be set to the bit pointed by the register and then written to the physical memory of the MTU</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
+        /// <seealso cref="SetValue"/>
         /// <seealso cref="SetBitToMtu"/>
-        /// <seealso cref="SetValue(dynamic)"/>
-        /// <seealso cref="SetValueToMtu(dynamic)"/>
         public async Task ResetByteAndSetValueToMtu (
             dynamic value = null )
         {
