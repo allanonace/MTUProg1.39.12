@@ -20,7 +20,7 @@
                 </Grid.ColumnDefinitions>
                 <StackLayout Opacity="1" BackgroundColor="White" Grid.Row="0" Grid.Column="1" Margin="-6,0,0,0" Orientation="Vertical">
                     <views:TopBar x:Name="TopBar"/>
-                    <ListView Margin="0,0,0,58" x:Name="listaMTUread" IsVisible="false" HasUnevenRows="true" SeparatorVisibility="None" SeparatorColor="#6aa2b8">
+                    <ListView Margin="0,0,0,68" x:Name="listaMTUread" IsVisible="false" HasUnevenRows="true" SeparatorVisibility="None" SeparatorColor="#6aa2b8">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <ViewCell>

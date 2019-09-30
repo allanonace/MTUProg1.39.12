@@ -40,7 +40,7 @@
                         </StackLayout>
                         <Label HeightRequest="20" Margin="12,0,0,0" FontAttributes="Bold" Text="HEX Value:" FontSize="20" IsVisible="false" />
                         <Label x:Name="valorHEX" IsVisible="false" HeightRequest="200" Text="-------------" Margin="12,12,0,0" FontSize="18" />
-                        <ListView Margin="0,0,0,-12" x:Name="listaMTUread" HasUnevenRows="true" SeparatorVisibility="None" SeparatorColor="#6aa2b8">
+                        <ListView Margin="0,0,0,68" x:Name="listaMTUread" HasUnevenRows="true" SeparatorVisibility="None" SeparatorColor="#6aa2b8">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <ViewCell>
