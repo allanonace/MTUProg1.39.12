@@ -410,7 +410,6 @@
 				<Parameter 	name="AcctNumber" 				display="Global.AccountLabel"  			log="true" 	interface="true" 	source="MemoryMap.MeterId"							conditional="MemoryMap.StatusFlag=true"
 							length="Global.AccountLength" fill="left"/>
 				<!-- INIT - RDD -->
-				<!--<Parameter 	name="RDDSerialNumber" 			display="RDD SerialNumber" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true + ( ( Port.Number=1 + MemoryMap.RDDPortNumber=1 ) | ( Port.Number=2 + MemoryMap.RDDPortNumber=2 ) )"/>-->
 				<Parameter 	name="RDDSerialNumber" 			display="RDD SerialNumber" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDCurrentValvePosition" 	display="RDD Current Position" 			log="true" 	interface="true" 	source="MemoryMap.RDDValvePosition"					conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDLastCommandSuccessful" display="RDD LastCommandSuccessful" 	log="true" 	interface="true" 	source="MemoryMap.RDDLastCmdSuccess"				conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>

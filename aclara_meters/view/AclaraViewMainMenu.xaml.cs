@@ -479,9 +479,28 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
             //this.actionType = this.actionTypeNew;
-            DoBasicRead();
 
+            this.GoToPage ();
         }
+
+        private void GoToPage ()
+        {
+            DeviceList.IsRefreshing = false;
+            backdark_bg.IsVisible = false;
+            indicator.IsVisible = false;
+            background_scan_page.IsEnabled = true;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                if (actionType == ActionType.DataRead)
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
+                else if(actionType == ActionType.RemoteDisconnect)
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved,  this.actionType), false);
+                else
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
+            });
+        }
+
         private void refreshBleData(object sender, EventArgs e)
         {
             DeviceList.RefreshCommand.Execute(true);
@@ -1009,14 +1028,6 @@ namespace aclara_meters.view
 
         #endregion
 
-        private void DoBasicRead()
-        {
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                Task.Factory.StartNew(BasicReadThread);
-            });
-        }
-
         private async void LogOffOkTapped(object sender, EventArgs e)
         {
             // Upload log files
@@ -1039,8 +1050,6 @@ namespace aclara_meters.view
 
         }
 
-        
-
         private void TurnOffMTUCloseTapped(object sender, EventArgs e)
         {
             dialog_open_bg.IsVisible = false;
@@ -1062,7 +1071,7 @@ namespace aclara_meters.view
             Task.Factory.StartNew(TurnOffMethod);
         }
 
-        private void TurnOffMethod()
+        private async Task TurnOffMethod()
         {
 
             MTUComm.Action turnOffAction = new MTUComm.Action (
@@ -1076,7 +1085,7 @@ namespace aclara_meters.view
             turnOffAction.OnError  -= TurnOff_OnError;
             turnOffAction.OnError  += TurnOff_OnError;
 
-            turnOffAction.Run();
+            await turnOffAction.Run();
         }
 
         public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
@@ -1105,82 +1114,6 @@ namespace aclara_meters.view
                     dialogView.OpenCloseDialog("dialog_turnoff_two", false);
                     dialogView.OpenCloseDialog("dialog_turnoff_three", true);
                 }));
-        }
-
-       
-     
-        void BasicReadThread()
-        {
-            MTUComm.Action basicRead = new MTUComm.Action (
-               FormsApp.ble_interface,
-               MTUComm.Action.ActionType.BasicRead,
-               FormsApp.credentialsService.UserName );
-
-            basicRead.OnFinish -= BasicRead_OnFinish;
-            basicRead.OnFinish += BasicRead_OnFinish;
-
-            basicRead.OnError -= BasicRead_OnError;
-            basicRead.OnError += BasicRead_OnError;
-
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                #region New Circular Progress bar Animations    
-
-                DeviceList.IsRefreshing = false;
-                backdark_bg.IsVisible = true;
-                indicator.IsVisible = true;
-                background_scan_page.IsEnabled = true;
-
-                #endregion
-            });
-
-            basicRead.Run();
-        }
-
-        public async Task BasicRead_OnFinish ( object sender, Delegates.ActionFinishArgs args )
-        {
-            Task.Delay(100).ContinueWith(t =>
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    if (actionType == ActionType.DataRead)
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
-                    else if(actionType == ActionType.RemoteDisconnect)
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved,  this.actionType), false);
-                    else
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
-
-                    #region New Circular Progress bar Animations    
-
-                    DeviceList.IsRefreshing = false;
-                    backdark_bg.IsVisible = false;
-                    indicator.IsVisible = false;
-                    background_scan_page.IsEnabled = true;
-
-                    #endregion
-
-                })
-            );
-        }
-
-        private void BasicRead_OnError ()
-        {
-            Task.Delay(100).ContinueWith(t =>
-                Device.BeginInvokeOnMainThread(() =>
-                {
-
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        #region New Circular Progress bar Animations    
-
-                        DeviceList.IsRefreshing = false;
-                        backdark_bg.IsVisible = false;
-                        indicator.IsVisible = false;
-                        background_scan_page.IsEnabled = true;
-
-                        #endregion
-                    });
-                })
-            );
         }
 
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
@@ -1330,9 +1263,17 @@ namespace aclara_meters.view
             }
         }
 
-        private void NavigationController(ActionType page)
+        private async Task NavigationController (
+            ActionType actionTarget )
         {
-            switch (page)
+            if ( ! await base.ValidateNavigation ( actionTarget ) )
+            {
+                Console.WriteLine ( "NOOOOO PUEDESSSSS PASARRRRRR!!!" );
+
+                return;
+            }
+
+            switch (actionTarget)
             {
                     case ActionType.DataRead:
                     case ActionType.RemoteDisconnect:
@@ -1363,9 +1304,6 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,page), false);
-                            DoBasicRead();
-
                             background_scan_page.Opacity = 1;
                             background_scan_page_detail.Opacity = 1;
 
@@ -1389,6 +1327,7 @@ namespace aclara_meters.view
 
                             #endregion
 
+                            this.GoToPage ();
                         })
                     );
 
@@ -1424,7 +1363,7 @@ namespace aclara_meters.view
                         Device.BeginInvokeOnMainThread(() =>
                         {
  
-                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved,page), false);
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved,actionTarget), false);
 
                             background_scan_page.Opacity = 1;
                             background_scan_page_detail.Opacity = 1;
@@ -1483,7 +1422,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, page), false);
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, actionTarget), false);
 
                             background_scan_page.Opacity = 1;
                             background_scan_page_detail.Opacity = 1;
@@ -1942,13 +1881,13 @@ namespace aclara_meters.view
 
             }
         }
+
         private void CallLoadPage()
         {
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            DoBasicRead();
-
+            this.GoToPage ();
         }
   
         private void CallLoadViewTurnOff()
@@ -2113,7 +2052,6 @@ namespace aclara_meters.view
             value &= Navigation.NavigationStack.Count >= 3; //  if(Navigation.NavigationStack.Count < 3) Settings.IsLoggedIn = false;
         }
 
-
         public void PrintToConsole(string printConsole)
         {
 
@@ -2122,7 +2060,5 @@ namespace aclara_meters.view
                 Utils.Print("DEBUG_ACL: " + printConsole);
             }
         }
-
-
     }
 }

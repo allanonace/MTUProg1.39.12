@@ -12,6 +12,8 @@ using Xamarin.Forms;
 using MTUComm;
 using Library;
 
+using ActionType = MTUComm.Action.ActionType;
+
 namespace aclara_meters.util
 {
    public class BasePage : ContentPage
@@ -112,6 +114,16 @@ namespace aclara_meters.util
                     else if ( child is Layout )
                         GetChildrensTextbox ( child as Layout, listTbx, listPck );
                 });
+        }
+
+        protected async Task<bool> ValidateNavigation (
+            ActionType typeTarget )
+        {
+            MTUComm.Action basicRead = new MTUComm.Action (
+               FormsApp.ble_interface,
+               ActionType.BasicRead );
+
+            return await basicRead.RunNavValidation ( typeTarget );
         }
     }
 }

@@ -596,37 +596,29 @@ namespace aclara_meters.view
         {
             Task.Run(async () =>
             {
-
                 PrintToConsole("runScript Tarea Asincrona - InvokeMethod");
                 await Task.Delay(150); 
-                Device.BeginInvokeOnMainThread(() =>
+                Device.BeginInvokeOnMainThread ( async () =>
                 {
                     try
                     {
+                        PrintToConsole("Mostrar barra de progreso - InvokeMethod");
 
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            PrintToConsole("Mostrar barra de progreso - InvokeMethod");
+                        backdark_bg.IsVisible = true;
+                        indicator.IsVisible = true;
+                        ContentView_DeviceList.IsEnabled = false;
+                        ContentView_Scripting.IsEnabled = false;
+                        ContentView_Scripting_label_read.Text = "Executing Script ... ";
 
-                            backdark_bg.IsVisible = true;
-                            indicator.IsVisible = true;
-                            ContentView_DeviceList.IsEnabled = false;
-                            ContentView_Scripting.IsEnabled = false;
-                            ContentView_Scripting_label_read.Text = "Executing Script ... ";
-
-                            Task.Factory.StartNew(scriptFunction);
-                        });
-
+                        await Task.Factory.StartNew(scriptFunction);
                     }
                     catch (Exception e2)
                     {
                         Utils.Print(e2.StackTrace);
 
                     }
-
                 });
             });
-
         }
 
         private bool GetAutoConnectStatus()
@@ -634,7 +626,7 @@ namespace aclara_meters.view
             return autoConnect;
         }
 
-        private void scriptFunction()
+        private async Task scriptFunction()
         {
             ScriptRunner runner = new ScriptRunner ();
 
@@ -644,7 +636,7 @@ namespace aclara_meters.view
             runner.onStepFinish += onStepFinish;
             runner.OnError      += OnError;
 
-            runner.ParseScriptAndRun ( FormsApp.ble_interface, scriptToLaunchData, scriptToLaunchData.Length );
+            await runner.ParseScriptAndRun ( FormsApp.ble_interface, scriptToLaunchData, scriptToLaunchData.Length );
         }
 
         //private async Task ChangeListViewData()

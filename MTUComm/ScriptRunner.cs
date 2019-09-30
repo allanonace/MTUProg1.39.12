@@ -66,7 +66,7 @@ namespace MTUComm
         /// <param name="script_stream">Content of the script</param>
         /// <param name="stream_size">Number of characters of the content of the script to be used</param>
         /// <seealso cref="ble_library.BlePort"/>
-        public void ParseScriptAndRun (
+        public async Task ParseScriptAndRun (
             ISerial serial_device,
             String  script_stream,
             int     stream_size )
@@ -106,7 +106,7 @@ namespace MTUComm
                 s.UnknownElement -= this.UnknownElementEvent;
             }
 
-            this.Run ();
+            await this.Run ();
         }
 
         /// <summary>
@@ -224,9 +224,9 @@ namespace MTUComm
         /// <summary>
         /// Initializes the logic of the action after having parsed and validated the content of the script.
         /// </summary>
-        public void Run()
+        public async Task Run ()
         {
-            actions.ToArray()[0].Run();
+            await actions.ToArray()[0].Run ();
         }
 
         private void Action_OnProgress (
@@ -244,14 +244,13 @@ namespace MTUComm
 
             if (act.Order < (actions.Count - 1))
             {
-                onStepFinish(act, args);
-                actions.ToArray()[act.Order + 1].Run();
+                await onStepFinish(act, args);
+                await actions.ToArray()[act.Order + 1].Run();
             }
             else
             {
-                OnFinish(act, args);
+                await OnFinish(act, args);
             }
-
         }
 
         private void Action_OnError ()

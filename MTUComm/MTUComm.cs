@@ -345,7 +345,43 @@ namespace MTUComm
 
         #endregion
 
-        #region Launch Actions
+        #region Launch Validations and Actions
+
+        public async Task<bool> LaunchValidationThread (
+            ActionType type )
+        {
+            bool ok = false;
+
+            try
+            {
+                switch ( type )
+                {
+                    case ActionType.AddMtu                     :
+                    case ActionType.AddMtuAddMeter             :
+                    case ActionType.AddMtuReplaceMeter         :
+                    case ActionType.ReplaceMTU                 :
+                    case ActionType.ReplaceMeter               :
+                    case ActionType.ReplaceMtuReplaceMeter     :
+                    case ActionType.ReadFabric                 :
+                    case ActionType.ReadMtu                    :
+                    case ActionType.BasicRead                  : ok = true; break;
+                    case ActionType.DataRead                   : ok = await Task.Run ( () => Validate_DataRead () ); break;
+                    case ActionType.MtuInstallationConfirmation: ok = await Task.Run ( () => Validate_InstallConfirmation () ); break;
+                    case ActionType.RemoteDisconnect           : ok = await Task.Run ( () => Validate_RemoteDisconnect () ); break;
+                    case ActionType.TurnOffMtu                 : ok = await Task.Run ( () => Validate_TurnOff () ); break;
+                    case ActionType.TurnOnMtu                  : ok = await Task.Run ( () => Validate_TurnOn () ); break;
+                }
+            }
+            // MTUComm.Exceptions.MtuTypeIsNotFoundException
+            catch ( Exception e )
+            {
+                Errors.LogRemainExceptions ( e );
+                
+                this.OnError ();
+            }
+
+            return ok;
+        }
 
         /// <summary>
         /// The entry point of the action logic, loading the basic MTU data required,
@@ -434,6 +470,43 @@ namespace MTUComm
                 
                 this.OnError ();
             }
+        }
+
+        #endregion
+
+        #region Validations
+
+        private bool Validate_InstallConfirmation ()
+        {
+            // MTU not turned off and that supports the IC process
+            return ! Data.Get.MtuBasicInfo.Shipbit &&
+                   this.global.TimeToSync ||
+                   this.mtu.TimeToSync;
+        }
+
+        private bool Validate_RemoteDisconnect ()
+        {
+            // Some port of the MTU is for a RDD device
+            return this.mtu.Port1.IsSetFlow ||
+                   this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow;
+        }
+
+        private bool Validate_DataRead ()
+        {
+            // MTU should supports OnDemand features
+            return this.mtu.MtuDemand;
+        }
+
+        private bool Validate_TurnOff ()
+        {
+            // MTU should not be turned off already
+            return ! Data.Get.MtuBasicInfo.Shipbit;
+        }
+
+        private bool Validate_TurnOn ()
+        {
+            // MTU should be turned off
+            return Data.Get.MtuBasicInfo.Shipbit;
         }
 
         #endregion
@@ -921,7 +994,7 @@ namespace MTUComm
         public async Task InstallConfirmation ()
         {
             #if DEBUG
-            await this.WriteMtuBitAndVerify ( 22, 0, false ); // Turn On MTU
+            //await this.WriteMtuBitAndVerify ( 22, 0, false ); // Turn On MTU
             #endif
 
             if ( await this.InstallConfirmation_Logic () < IC_EXCEPTION )

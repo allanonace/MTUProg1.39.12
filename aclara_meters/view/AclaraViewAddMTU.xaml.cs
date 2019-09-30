@@ -1569,25 +1569,24 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
             this.actionType = this.actionTypeNew;
-            this.ChangeAction();
-
+            
+            this.GoToPage ();
         }
-        private void ChangeAction ()
+
+        private void GoToPage ()
         {
+            backdark_bg.IsVisible = false;
+            indicator.IsVisible = false;
+            background_scan_page.IsEnabled = true;
+
             Device.BeginInvokeOnMainThread(() =>
             {
-                if (actionType==ActionType.DataRead)
-                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved, this.actionType ), false);
-                else 
-                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, this.actionType ), false);
-
-                #region New Circular Progress bar Animations    
-
-                backdark_bg.IsVisible = false;
-                indicator.IsVisible = false;
-                background_scan_page.IsEnabled = true;
-
-                #endregion
+                if (actionType == ActionType.DataRead)
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
+                else if(actionType == ActionType.RemoteDisconnect)
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved,  this.actionType), false);
+                else
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
             });
         }
 
@@ -2430,8 +2429,16 @@ namespace aclara_meters.view
             }
         }
 
-        private void NavigationController(ActionType page)
+        private async Task NavigationController (
+            ActionType actionTarget )
         {
+            if ( ! await base.ValidateNavigation ( actionTarget ) )
+            {
+                Console.WriteLine ( "NOOOOO PUEDESSSSS PASARRRRRR!!!" );
+
+                return;
+            }
+
             if (!isCancellable)
             {
                 //REASON
@@ -2441,7 +2448,7 @@ namespace aclara_meters.view
                 Popup_start.IsEnabled = true;
             }
             else
-                SwitchToControler(page);
+                SwitchToControler(actionTarget);
         }
 
         private void SwitchToControler(ActionType page)
@@ -2478,11 +2485,6 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                           
-
-                            //Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved, page), false);
-                            ChangeAction();
-
                             background_scan_page.Opacity = 1;
 
                             if (Device.Idiom == TargetIdiom.Tablet)
@@ -2504,6 +2506,8 @@ namespace aclara_meters.view
                             indicator.IsVisible = false;
 
                             #endregion
+
+                            this.GoToPage ();
                         })
                     );
 
@@ -2990,15 +2994,14 @@ namespace aclara_meters.view
                     break;
             }
         }
+        
         private void CallLoadPage()
         {
-         
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            this.ChangeAction();
+            this.GoToPage ();
         }
- 
 
         private void CallLoadViewTurnOff()
         {
@@ -3155,7 +3158,7 @@ namespace aclara_meters.view
             Task.Factory.StartNew(TurnOffMethod);
         }
 
-        private void TurnOffMethod ()
+        private async Task TurnOffMethod ()
         {
             MTUComm.Action turnOffAction = new MTUComm.Action (
                 FormsApp.ble_interface,
@@ -3168,7 +3171,7 @@ namespace aclara_meters.view
             turnOffAction.OnError  -= TurnOff_OnError;
             turnOffAction.OnError  += TurnOff_OnError;
 
-            turnOffAction.Run();
+            await turnOffAction.Run ();
         }
 
         public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
@@ -3815,7 +3818,7 @@ namespace aclara_meters.view
             }
         }
 
-        private void AddMtu_Action ()
+        private async Task AddMtu_Action ()
         { 
             #region Get values from form
 
@@ -4146,7 +4149,7 @@ namespace aclara_meters.view
             #endregion
 
             // Launch action!
-            add_mtu.Run ( this.addMtuForm );
+            await add_mtu.Run ( this.addMtuForm );
         }
 
         private void OnProgress ( object sender, MTUComm.Delegates.ProgressArgs e )
@@ -4535,7 +4538,5 @@ namespace aclara_meters.view
         }
 
         #endregion
-
     }
-
 }

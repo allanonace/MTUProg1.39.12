@@ -695,6 +695,13 @@ namespace MTUComm
 
         #region Execution
 
+        public async Task<bool> RunNavValidation (
+            ActionType actionTarget )
+        {
+            await this.Run (); // Basic Read
+            return await this.mtucomm.LaunchValidationThread ( actionTarget ); // Validation
+        }
+
         /// <summary>
         /// Prepares the events ( OnError, OnProgress and OnFinish ) for all possible situations,
         /// registers the required parameters and pass the control to <see cref="MTUComm"/> where
@@ -707,7 +714,8 @@ namespace MTUComm
         /// TODO: Modify all the write logic ( Add/Replace ) to use the log interface.
         /// </remarks>
         /// <param name="mtuForm">Write actions stores the set data in an intermediate form object</param>
-        public void Run ( MtuForm mtuForm = null )
+        public async Task Run (
+            MtuForm mtuForm = null )
         {
             if ( canceled )
             {
@@ -781,9 +789,7 @@ namespace MTUComm
                         break;
                 }
 
-                // Is more easy to control one point of invocation
-                // than N, one for each action/new task to launch
-                this.mtucomm.LaunchActionThread(type, parameters.ToArray());
+                await this.mtucomm.LaunchActionThread ( type, parameters.ToArray () );
             }
         }
 

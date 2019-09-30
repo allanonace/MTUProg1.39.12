@@ -211,13 +211,6 @@ namespace aclara_meters.view
 
         }
 
-        private void DoBasicRead()
-        {
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                Task.Factory.StartNew(BasicReadThread);
-            });
-        }
         void dialog_cancelTapped(object sender, EventArgs e)
         {
             Label obj = (Label)sender;
@@ -237,78 +230,25 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
             this.actionType = this.actionTypeNew;
-            DoBasicRead();
-
+            
+            this.GoToPage ();
         }
 
-        void BasicReadThread()
+        private void GoToPage ()
         {
-            MTUComm.Action basicRead = new MTUComm.Action (
-               FormsApp.ble_interface,
-               MTUComm.Action.ActionType.BasicRead,
-               FormsApp.credentialsService.UserName );
-
-            basicRead.OnFinish -= BasicRead_OnFinish;
-            basicRead.OnFinish += BasicRead_OnFinish;
-
-            basicRead.OnError -= BasicRead_OnError;
-            basicRead.OnError += BasicRead_OnError;
+            backdark_bg.IsVisible = false;
+            indicator.IsVisible = false;
+            background_scan_page.IsEnabled = true;
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                #region New Circular Progress bar Animations    
-
-                backdark_bg.IsVisible = true;
-                indicator.IsVisible = true;
-                background_scan_page.IsEnabled = false;
-
-                #endregion
+                if (actionType == ActionType.DataRead)
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
+                else if(actionType == ActionType.RemoteDisconnect)
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved,  this.actionType), false);
+                else
+                    Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
             });
-
-            basicRead.Run();
-        }
-
-        public async Task BasicRead_OnFinish ( object sender, Delegates.ActionFinishArgs args )
-        {
-            await Task.Delay(100).ContinueWith(t =>
-                Device.BeginInvokeOnMainThread(() =>
-                {
-
-                    if (actionType  == ActionType.DataRead)
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
-                    else
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
-
-                    #region New Circular Progress bar Animations    
-
-                    backdark_bg.IsVisible = false;
-                    indicator.IsVisible = false;
-                    background_scan_page.IsEnabled = true;
-
-                    #endregion
-
-                })
-            );
-        }
-
-        private void BasicRead_OnError ()
-        {
-            Task.Delay(100).ContinueWith(t =>
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        #region New Circular Progress bar Animations    
-
-                        backdark_bg.IsVisible = false;
-                        indicator.IsVisible = false;
-                        background_scan_page.IsEnabled = true;
-                        this.actionType = ActionType.ReadMtu;
-
-                        #endregion
-                    });
-                })
-            );
         }
 
         private void LoadPhoneUI()
@@ -344,7 +284,7 @@ namespace aclara_meters.view
             Task.Factory.StartNew(TurnOffMethod);
         }
 
-        private void TurnOffMethod()
+        private async Task TurnOffMethod()
         {
 
             MTUComm.Action turnOffAction = new MTUComm.Action (
@@ -358,7 +298,7 @@ namespace aclara_meters.view
             turnOffAction.OnError  -= TurnOff_OnError;
             turnOffAction.OnError  += TurnOff_OnError;
 
-            turnOffAction.Run();
+            await turnOffAction.Run();
         }
 
         public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
@@ -445,18 +385,24 @@ namespace aclara_meters.view
             }
         }
 
-        private void NavigationController(ActionType page)
+        private async Task NavigationController (
+            ActionType actionTarget )
         {
-            this.actionTypeNew = page;
-            switch (page)
+            if ( ! await base.ValidateNavigation ( actionTarget ) )
+            {
+                Console.WriteLine ( "NOOOOO PUEDESSSSS PASARRRRRR!!!" );
+
+                return;
+            }
+
+            this.actionTypeNew = actionTarget;
+            switch (actionTarget)
             {
                 case ActionType.DataRead:
 
                     #region Read data Controller
 
                     background_scan_page.Opacity = 1;
-                 
-
                     background_scan_page.IsEnabled = true;
 
                     this.actionType = this.actionTypeNew;
@@ -471,11 +417,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
- 
-                            DoBasicRead();
-
                             background_scan_page.Opacity = 1;
-                          
 
                             if (Device.Idiom == TargetIdiom.Tablet)
                             {
@@ -488,6 +430,15 @@ namespace aclara_meters.view
                                 ContentNav.IsVisible = false;
                             }
                             shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
+                        
+                            #region New Circular Progress bar Animations    
+
+                            backdark_bg.IsVisible = false;
+                            indicator.IsVisible = false;
+
+                            #endregion
+
+                            this.GoToPage ();
                         })
                     );
 
@@ -517,7 +468,7 @@ namespace aclara_meters.view
                         Device.BeginInvokeOnMainThread(() =>
                         {
                             
-                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, page), false);
+                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, actionTarget), false);
 
                             background_scan_page.Opacity = 1;
                           
@@ -570,7 +521,7 @@ namespace aclara_meters.view
                             //dialog_AddMTU.IsVisible = true;
                             else
                             {
-                                this.actionType = page;
+                                this.actionType = actionTarget;
                                 CallLoadPage();
                             }
                             #endregion
@@ -628,7 +579,7 @@ namespace aclara_meters.view
                                
                             else
                             {
-                                this.actionType = page;
+                                this.actionType = actionTarget;
                                 CallLoadViewTurnOff();
                             }
                             #endregion
@@ -669,7 +620,7 @@ namespace aclara_meters.view
                         ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                         shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
                     }
-                    this.actionType = page;
+                    this.actionType = actionTarget;
                     Task.Delay(200).ContinueWith(t =>
 
                         Device.BeginInvokeOnMainThread(() =>
@@ -726,7 +677,7 @@ namespace aclara_meters.view
                             
                             else
                             {
-                                this.actionType = page;
+                                this.actionType = actionTarget;
                                 CallLoadPage();
                             }
                             #endregion
@@ -780,7 +731,7 @@ namespace aclara_meters.view
                            
                             else
                             {
-                                this.actionType = page;
+                                this.actionType = actionTarget;
                                 CallLoadPage();
                             }
                             #endregion
@@ -834,7 +785,7 @@ namespace aclara_meters.view
                            
                             else
                             {
-                                this.actionType = page;
+                                this.actionType = actionTarget;
                                 CallLoadPage();
                             }
                             #endregion
@@ -888,7 +839,7 @@ namespace aclara_meters.view
                                
                             else
                             {
-                                this.actionType = page;
+                                this.actionType = actionTarget;
                                 CallLoadPage();
                             }
                             #endregion
@@ -942,7 +893,7 @@ namespace aclara_meters.view
                            
                             else
                             {
-                                this.actionType = page;
+                                this.actionType = actionTarget;
                                 CallLoadPage();
                             }
                             #endregion
@@ -976,10 +927,8 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            DoBasicRead();
-
+            this.GoToPage ();
         }
-
 
         private void CallLoadViewTurnOff()
         {
@@ -989,7 +938,7 @@ namespace aclara_meters.view
             Task.Factory.StartNew(TurnOffMethod);
         }
 
-        private void ThreadProcedureMTUCOMMAction()
+        private async Task ThreadProcedureMTUCOMMAction()
         {
             //Create Ation when opening Form
             MTUComm.Action add_mtu = new MTUComm.Action (
@@ -1014,7 +963,7 @@ namespace aclara_meters.view
             add_mtu.OnError  -= OnError;
             add_mtu.OnError  += OnError;
 
-            add_mtu.Run();
+            await add_mtu.Run ();
         }
 
         public async Task OnFinish ( object sender, Delegates.ActionFinishArgs args )
@@ -1135,7 +1084,7 @@ namespace aclara_meters.view
         }
 
 
-        private void ThreadProcedureMTUReadFabric()
+        private async Task ThreadProcedureMTUReadFabric ()
         {
             //Create Ation when opening Form
             MTUComm.Action add_mtu = new MTUComm.Action (
@@ -1160,7 +1109,7 @@ namespace aclara_meters.view
             add_mtu.OnError  -= Fabric_OnError;
             add_mtu.OnError  += Fabric_OnError;
 
-            add_mtu.Run();
+            await add_mtu.Run ();
         }
 
         public async Task Fabric_OnFinish ( object sender, Delegates.ActionFinishArgs args )
