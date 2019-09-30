@@ -87,7 +87,7 @@
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
                                                     <!-- Debug -->
-                                                    <ImageButton IsVisible="{Binding DebugMode}"
+                                                    <ImageButton IsVisible="{Binding DebugMode}" BackgroundColor="Transparent"
                                                     HeightRequest="60" Source="auto.png" Clicked="AutoFillTextbox" />
                                                     <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric" HeightRequest="40" x:Name="tbx_AccountNumber" 
                                                                               VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" 
@@ -709,7 +709,7 @@
                         <Label x:Name="valorHEX" IsVisible="false" HeightRequest="200" Text="-------------" Margin="12,12,0,0" FontSize="18" />
                     </StackLayout>
                 </StackLayout>
-                <views:BottomBar x:Name="BottomBar" />
+                <views:BottomBar x:Name="BottomBar" Grid.Column="1" Grid.Row="0" />
             </Grid>
         </ContentView>
         <Image Source="shadoweffect" Margin="298,0,0,0" Opacity="0.75" IsVisible="false" WidthRequest="29" HeightRequest="1024" x:Name="shadoweffect">

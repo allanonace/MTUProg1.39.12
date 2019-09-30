@@ -39,7 +39,7 @@ namespace aclara_meters.view
 
         private List<ReadMTUItem> FinalReadListView { get; set; }
 
-        private ActionType actionType;
+        public ActionType actionType;
         private ActionType actionTypeNew;
        
         private bool isCancellable;
@@ -73,6 +73,8 @@ namespace aclara_meters.view
             menuOptions = this.MenuOptions;
             dialogView = this.DialogView;
             bottomBar = this.BottomBar;
+
+            menuOptions.action = this.actionType;
 
             dialogsSaved = dialogs;
 
@@ -384,18 +386,18 @@ namespace aclara_meters.view
 
         #region Menu options
 
-        private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e )
+        private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
         {
             ((ListView)sender).SelectedItem = null;
         }
 
-        // Event for Menu Item selection, here we are going to handle navigation based
+        //Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
         private void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
         {
             if (Device.Idiom == TargetIdiom.Tablet)
             {
-          
+
                 if (!FormsApp.ble_interface.IsOpen())
                 {
                     // don't do anything if we just de-selected the row.
@@ -419,15 +421,15 @@ namespace aclara_meters.view
                         {
                             this.actionTypeNew = page;
                             if (!isCancellable)
-                            { 
+                            {
                                 //REASON
                                 dialog_open_bg.IsVisible = true;
 
-                               // Popup_start.IsVisible = true;
-                               // Popup_start.IsEnabled = true;
+                                // Popup_start.IsVisible = true;
+                                // Popup_start.IsEnabled = true;
                             }
                             else
-                              NavigationController(page);
+                                NavigationController(page);
 
                         }
                     }
@@ -454,8 +456,8 @@ namespace aclara_meters.view
                 //REASON
                 dialog_open_bg.IsVisible = true;
 
-               // Popup_start.IsVisible = true;
-               // Popup_start.IsEnabled = true;
+                // Popup_start.IsVisible = true;
+                // Popup_start.IsEnabled = true;
             }
             else
                 SwitchToControler(actionTarget);
@@ -463,15 +465,15 @@ namespace aclara_meters.view
 
         private void SwitchToControler(ActionType page)
         {
-            this.actionTypeNew = page; 
+            this.actionTypeNew = page;
 
-            switch ( page )
+            switch (page)
             {
                 case ActionType.DataRead:
 
                     #region New Circular Progress bar Animations    
 
-             
+
                     backdark_bg.IsVisible = true;
                     indicator.IsVisible = true;
 
@@ -479,7 +481,7 @@ namespace aclara_meters.view
 
 
                     #region Read Data Controller
-                    this.actionType = this.actionTypeNew; 
+                    this.actionType = this.actionTypeNew;
 
                     background_scan_page.Opacity = 1;
 
@@ -495,6 +497,9 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
+
+                            ChangeAction();
+
                             background_scan_page.Opacity = 1;
 
                             if (Device.Idiom == TargetIdiom.Tablet)
@@ -507,11 +512,11 @@ namespace aclara_meters.view
                                 ContentNav.Opacity = 0;
                                 ContentNav.IsVisible = false;
                             }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
+                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone;
 
                             #region New Circular Progress bar Animations    
 
-                  
+
                             backdark_bg.IsVisible = false;
                             indicator.IsVisible = false;
 
@@ -528,7 +533,7 @@ namespace aclara_meters.view
 
                     #region New Circular Progress bar Animations    
 
-             
+
                     backdark_bg.IsVisible = true;
                     indicator.IsVisible = true;
 
@@ -536,7 +541,7 @@ namespace aclara_meters.view
 
 
                     #region Read Mtu Controller
-                    this.actionType = this.actionTypeNew; 
+                    this.actionType = this.actionTypeNew;
 
                     background_scan_page.Opacity = 1;
 
@@ -570,7 +575,7 @@ namespace aclara_meters.view
 
                             #region New Circular Progress bar Animations    
 
-                  
+
                             backdark_bg.IsVisible = false;
                             indicator.IsVisible = false;
 
@@ -586,7 +591,7 @@ namespace aclara_meters.view
 
                     #region Add Mtu Controller
                     ControllerAction(page, "dialog_AddMTU");
-  
+
                     #endregion
 
                     break;
@@ -622,7 +627,7 @@ namespace aclara_meters.view
                                 this.actionType = page;
                                 CallLoadViewTurnOff();
                             }
-                                #endregion
+                            #endregion
 
                             background_scan_page.Opacity = 1;
 
@@ -664,7 +669,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                           
+
                             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewInstallConfirmation(dialogsSaved), false);
 
                             background_scan_page.Opacity = 1;
@@ -691,7 +696,7 @@ namespace aclara_meters.view
 
                     #region Replace Mtu Controller
                     ControllerAction(page, "dialog_replacemeter_one");
-                
+
                     #endregion
 
                     break;
@@ -700,7 +705,7 @@ namespace aclara_meters.view
 
                     #region Replace Meter Controller
                     ControllerAction(page, "dialog_meter_replace_one");
-                  
+
                     #endregion
 
                     break;
@@ -709,7 +714,7 @@ namespace aclara_meters.view
 
                     #region Add Mtu | Add Meter Controller
                     ControllerAction(page, "dialog_AddMTUAddMeter");
-                  
+
                     #endregion
 
                     break;
@@ -718,7 +723,7 @@ namespace aclara_meters.view
 
                     #region Add Mtu | Replace Meter Controller
                     ControllerAction(page, "dialog_AddMTUReplaceMeter");
-                   
+
 
                     #endregion
 
@@ -728,7 +733,7 @@ namespace aclara_meters.view
 
                     #region Replace Mtu | Replace Meter Controller
                     ControllerAction(page, "dialog_ReplaceMTUReplaceMeter");
- 
+
                     #endregion
 
                     break;
@@ -777,7 +782,7 @@ namespace aclara_meters.view
                         ContentNav.Opacity = 0;
                         ContentNav.IsVisible = false;
                     }
-                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
+                    shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone;
                 })
             );
         }

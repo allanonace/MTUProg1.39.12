@@ -217,7 +217,7 @@
                         </ScrollView>
                     </StackLayout>
                 </StackLayout>
-                <views:BottomBar x:Name="BottomBar"/>
+                <views:BottomBar x:Name="BottomBar" Grid.Column="1" Grid.Row="0"/>
             </Grid>
         </ContentView>
         <Image Source="shadoweffect" Margin="298,0,0,0" Opacity="0.75" IsVisible="false" WidthRequest="29" HeightRequest="1024" x:Name="shadoweffect">

@@ -1426,6 +1426,7 @@ namespace MTUComm.MemoryMap
             foreach ( KeyValuePair<string,dynamic> entry in this.registersObjs )
             {
                 var reg = entry.Value;
+<<<<<<< Updated upstream
                 if ( reg.readedFromMtu || reg.modified )
                     str.AppendLine (
                         sentence
@@ -1433,7 +1434,19 @@ namespace MTUComm.MemoryMap
                             .Replace ( "#2#", await entry.Value.GetValue () )
                             .Replace ( "#3#", reg.readedFromMtu )
                             .Replace ( "#4#", reg.modified )
+=======
+                if (reg.readedFromMtu || reg.used)
+                {
+                    var value = await entry.Value.GetValue();
+                    str.AppendLine(
+                        sentence
+                            .Replace("#1#", entry.Key)
+                            .Replace("#2#", value.ToString())
+                            .Replace ( "#3#", reg.readedFromMtu.ToString() )
+                            .Replace ( "#4#", reg.used.ToString() )
+>>>>>>> Stashed changes
                     );
+                }
             }
             str.AppendLine ( "</Registers>" );
             Utils.Print ( str.ToString () );

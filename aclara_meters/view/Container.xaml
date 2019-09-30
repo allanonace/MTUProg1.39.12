@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<util:BasePage
+    x:Class="aclara_meters.view.Container"
+    xmlns="http://xamarin.com/schemas/2014/forms" 
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" 
+    xmlns:util="clr-namespace:aclara_meters.util;assembly=aclara_meters" 
+    Title="{Binding PageTitle}" 
+    NavigationPage.HasBackButton="false"
+    xmlns:i18n="clr-namespace:aclara_meters.Helpers" 
+    xmlns:views="clr-namespace:aclara_meters.view;assembly=aclara_meters">
+
+    <AbsoluteLayout
+        HorizontalOptions="FillAndExpand"
+        VerticalOptions="FillAndExpand">
+
+        <!-- APP BODY -->
+        <StackLayout
+            AbsoluteLayout.LayoutBounds="0,0,1,1"
+            AbsoluteLayout.LayoutFlags="All">
+
+            <Grid IsVisible="True" 
+                RowSpacing="0"
+                ColumnSpacing="0"
+                BackgroundColor="Azure"
+                HorizontalOptions="FillAndExpand"
+                VerticalOptions="FillAndExpand">
+              
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <!-- SIDE MENU TABLET -->
+                <views:MenuView
+                    IsVisible="True"
+                        x:Name="SideMenu"
+                        Grid.Row="0"
+                        Grid.Column="0"
+                    WidthRequest="300">
+                </views:MenuView>
+                <StackLayout Grid.Row="0" Grid.Column="1"
+                    HorizontalOptions="FillAndExpand"
+                    VerticalOptions="FillAndExpand"
+                    Orientation="Vertical"
+                             BackgroundColor="DarkCyan"
+                             Margin="0" Padding="0">
+                     <!-- TOP BAR -->                  
+                    <views:TopBar
+                        Margin="0"
+                        x:Name="TopBar"
+                        VerticalOptions="Start"
+                        HorizontalOptions="FillAndExpand"
+                        BackgroundColor="Coral"/>
+                    
+                    <!-- ACTION BODY -->                 
+                    <ContentView
+                        Margin="0"
+                        VerticalOptions="FillAndExpand"
+                        HorizontalOptions="FillAndExpand"
+                        x:Name="ActionBody"
+                        BackgroundColor="DarkCyan"/>
+               
+                <!-- BOTTOM BAR -->                  
+                    <views:BottomBar
+                        Margin="0"
+                        x:Name="Bar"
+                        VerticalOptions="End"
+                        BackgroundColor="Gold"/>
+                    
+                </StackLayout>
+            </Grid>
+        </StackLayout>
+
+        <!-- SIDE MENU MOBILE -->
+        <StackLayout
+            AbsoluteLayout.LayoutBounds="0,0,1,1"
+            AbsoluteLayout.LayoutFlags="All"
+            HorizontalOptions="StartAndExpand"
+            VerticalOptions="FillAndExpand"
+            IsVisible="False">
+            <views:MenuView
+                    IsVisible="True"
+                    x:Name="PhoneMenu"
+                   WidthRequest="300">
+            </views:MenuView>
+        </StackLayout>
+    </AbsoluteLayout>
+
+</util:BasePage>

@@ -443,6 +443,14 @@
     <AndroidResource Include="Resources\xml\file_paths.xml" />
     <AndroidResource Include="Resources\drawable\logo.png" />
     <AndroidResource Include="Resources\drawable-nodpi\logo.png" />
+    <AndroidResource Include="Resources\drawable\nd_excelent.png" />
+    <AndroidResource Include="Resources\drawable\nd_fail.png" />
+    <AndroidResource Include="Resources\drawable\nd_good.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\nd_excelent.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\nd_fail.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\nd_good.png" />
+    <AndroidResource Include="Resources\drawable\auto.png" />
+    <AndroidResource Include="Resources\drawable-nodpi\auto.png" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
 </Project>

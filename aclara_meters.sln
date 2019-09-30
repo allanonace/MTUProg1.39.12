@@ -1,4 +1,5 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28803.352
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -22,7 +23,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTest", "UnitTest\UnitTe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Library", "Library\Library.csproj", "{F6FA20D8-AEDF-4157-9885-6D4975AF2ED6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentation", "Documentation\Documentation.csproj", "{0B712E7C-1274-4449-B504-7D7F4E5A402A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentation", "Documentation\Documentation.csproj", "{0B712E7C-1274-4449-B504-7D7F4E5A402A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,7 +84,6 @@ Global
 		{6647D796-74D3-48BC-8011-1E783F835121}.AppStore|iPhoneSimulator.ActiveCfg = AppStore|iPhoneSimulator
 		{6647D796-74D3-48BC-8011-1E783F835121}.AppStore|iPhoneSimulator.Build.0 = AppStore|iPhoneSimulator
 		{6647D796-74D3-48BC-8011-1E783F835121}.Debug|Any CPU.ActiveCfg = Debug|iPhone
-		{6647D796-74D3-48BC-8011-1E783F835121}.Debug|Any CPU.Build.0 = Debug|iPhone
 		{6647D796-74D3-48BC-8011-1E783F835121}.Debug|iPhone.ActiveCfg = Debug|iPhone
 		{6647D796-74D3-48BC-8011-1E783F835121}.Debug|iPhone.Build.0 = Debug|iPhone
 		{6647D796-74D3-48BC-8011-1E783F835121}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
@@ -155,7 +155,6 @@ Global
 		{884ACC36-012A-4AFC-AAAC-1A85B0D17616}.AppStore|iPhoneSimulator.ActiveCfg = Release|iPhone
 		{884ACC36-012A-4AFC-AAAC-1A85B0D17616}.AppStore|iPhoneSimulator.Build.0 = Release|iPhone
 		{884ACC36-012A-4AFC-AAAC-1A85B0D17616}.Debug|Any CPU.ActiveCfg = Debug|iPhone
-		{884ACC36-012A-4AFC-AAAC-1A85B0D17616}.Debug|Any CPU.Build.0 = Debug|iPhone
 		{884ACC36-012A-4AFC-AAAC-1A85B0D17616}.Debug|iPhone.ActiveCfg = Debug|iPhone
 		{884ACC36-012A-4AFC-AAAC-1A85B0D17616}.Debug|iPhone.Build.0 = Debug|iPhone
 		{884ACC36-012A-4AFC-AAAC-1A85B0D17616}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator

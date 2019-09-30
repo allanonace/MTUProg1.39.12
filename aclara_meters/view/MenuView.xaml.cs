@@ -8,17 +8,23 @@ using System.Threading.Tasks;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using static MTUComm.Action;
-using aclara_meters.view;
+using aclara_meters.util;
+using Library;
+using MTUComm;
 
 namespace aclara_meters.view
 {
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MenuView : RelativeLayout
     {
+        public ActionType action;
+        private ActionType actionTypeNew;
+
         private List<PageItem> MenuList { get; set; }
         public MenuView()
         {
             InitializeComponent();
+
 
             if (FormsApp.credentialsService.UserName != null)
             {
@@ -43,7 +49,7 @@ namespace aclara_meters.view
             }
             if (Device.RuntimePlatform == Device.Android)
             {
-               backmenu.Scale = 1.42;
+                backmenu.Scale = 1.42;
 
             }
         }
@@ -119,9 +125,9 @@ namespace aclara_meters.view
         }
 
         private void LoadPhoneUI()
-        {       
+        {
             close_menu_icon.Opacity = 1;
-            userName.Scale = 1;  
+            userName.Scale = 1;
         }
 
         private void LoadTabletUI()
@@ -129,6 +135,6 @@ namespace aclara_meters.view
             close_menu_icon.Opacity = 0;
             userName.Scale = 1.2;
         }
-        
+
     }
 }

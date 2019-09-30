@@ -814,6 +814,7 @@ namespace MTUComm
         private async Task OnBasicRead ( Delegates.ActionArgs args )
         {
             // Show result in the screen
+
             this.OnFinish ( this );
         }
 
@@ -847,8 +848,11 @@ namespace MTUComm
         {
             try
             {
+
                 // Load parameters using the interface file
                 ActionResult resultAllInterfaces = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
+
+                await args.Map.LogFullMemory();
 
                 // Write result in the activity log
                 this.lastLogCreated = logger.ReadMTU ( this, resultAllInterfaces, args.Mtu );

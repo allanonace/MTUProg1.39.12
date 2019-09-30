@@ -302,7 +302,7 @@ namespace UnitTest.Tests
         }
 
         [Theory]
-        [InlineData("family_31xx32xx_test1")]
+        [InlineData("family_31xx32xx")]
         public void Test_CompareModifiedRegisters ( string xmlName )
         {
             Func<Func<dynamic>,bool> test = this.TestExpression;

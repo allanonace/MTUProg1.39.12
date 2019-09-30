@@ -168,7 +168,7 @@ namespace aclara.ViewModels
                                             Icon = sIcon
                                         };
                                         Item1.ListaDatos = ListaDatos;
-                                        Item1.HeightList = Item1.ListaDatos.Count > 5 ? Item1.ListaDatos.Count * 20: 100;
+                                        Item1.HeightList = Item1.ListaDatos.Count > 5 ? (Item1.ListaDatos.Count * 20): 100;
                                         Item.SubItemsLog = new List<ItemsLog>();
                                         Item.SubItemsLog.Add(Item1);
                                         Item.SubItemsLog.AddRange(SubItemLogs);

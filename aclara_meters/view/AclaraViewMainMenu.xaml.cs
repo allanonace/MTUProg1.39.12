@@ -1116,6 +1116,7 @@ namespace aclara_meters.view
                 }));
         }
 
+
         private void BluetoothPeripheralDisconnect(object sender, EventArgs e)
         {
 

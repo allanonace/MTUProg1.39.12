@@ -275,7 +275,8 @@ namespace aclara_meters.view
                 name_of_window_port2  .Text   = texts[ 1 ] + " - " + LB_PORT2;
                 name_of_window_misc   .Text   = texts[ 2 ] + " - " + LB_MISC;
                 bottomBar.GetImageElement("bg_action_button_img").Source = texts[ 3 ];
-                
+                //bottomBar.GetImageButtonElement("bg_action_button").Source = texts[3];
+
                 bottomBar.GetLabelElement("label_read").Opacity    = 1;
                 //backdark_bg.IsVisible = false;
                 //indicator.IsVisible   = false;
@@ -1495,6 +1496,8 @@ namespace aclara_meters.view
             bottomBar.GetImageButtonElement("btnTakePicture").IsVisible = global.ShowCameraButton;
             TopBar.GetTGRElement("back_button").Tapped += ReturnToMainView;
             bottomBar.GetTGRElement("bg_action_button").Tapped += AddMtu;
+            //bottomBar.GetImageButtonElement("bg_action_button").Clicked += AddMtu;
+
 
             dialogView.GetTGRElement("turnoffmtu_ok").Tapped += TurnOffMTUOkTapped;
             dialogView.GetTGRElement("turnoffmtu_no").Tapped += TurnOffMTUNoTapped;
