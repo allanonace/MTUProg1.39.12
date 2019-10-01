@@ -43,25 +43,53 @@ namespace aclara_meters.view
    
         private void OpenSettingsView(object sender, EventArgs e)
         {
+
+            background_scan_page.Opacity = 1;
+            background_scan_page.IsEnabled = true;
+
+            if (Device.Idiom == TargetIdiom.Phone)
+            {
+                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+            }
+
+            Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
                 try
                 {
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        #region New Circular Progress bar Animations    
+
+
+                        backdark_bg.IsVisible = true;
+                        indicator.IsVisible = true;
+                        background_scan_page.IsEnabled = false;
+
+                        #endregion
+
+                    });
+
                     if (FormsApp.ble_interface.IsOpen())
                     {
                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
+
+
                         return;
                     }
                     else
                     {
                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(true), false);
+
+                        return;
                     }
                 }
                 catch (Exception i2)
                 {
                     Utils.Print(i2.StackTrace);
                 }
-            });
+            }));
         }
 
         private void ChangeLowerButtonImage(bool v)
@@ -172,7 +200,7 @@ namespace aclara_meters.view
             menuOptions.GetTGRElement("logout_button").Tapped += LogoutAsync;
             menuOptions.GetTGRElement("settings_button").Tapped += OpenSettingsView;
 
-           
+            dialogView.GetTGRElement("dialog_NoAction_ok").Tapped += dialog_cancelTapped;
             menuOptions.GetListElement("navigationDrawerList").ItemTapped += OnMenuItemSelected;
 
 
@@ -388,10 +416,26 @@ namespace aclara_meters.view
         private async Task NavigationController (
             ActionType actionTarget )
         {
+            backdark_bg.IsVisible = true;
+            indicator.IsVisible = true;
+            //background_scan_page.IsEnabled = false;
+            background_scan_page.Opacity = 1;
+
+            background_scan_page.IsEnabled = true;
+
+            if (Device.Idiom == TargetIdiom.Phone)
+            {
+                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+            }
+
             if ( ! await base.ValidateNavigation ( actionTarget ) )
             {
-                Console.WriteLine ( "NOOOOO PUEDESSSSS PASARRRRRR!!!" );
-
+                Console.WriteLine("NOOOOO PUEDESSSSS PASARRRRRR!!!");
+                dialog_open_bg.IsVisible = true;
+                turnoff_mtu_background.IsVisible = true;
+                dialogView.CloseDialogs();
+                dialogView.OpenCloseDialog("dialog_NoAction", true);
                 return;
             }
 
@@ -399,46 +443,15 @@ namespace aclara_meters.view
             switch (actionTarget)
             {
                 case ActionType.DataRead:
-
-                    #region Read data Controller
-
-                    background_scan_page.Opacity = 1;
-                    background_scan_page.IsEnabled = true;
-
-                    this.actionType = this.actionTypeNew;
-
-                    if (Device.Idiom == TargetIdiom.Phone)
-                    {
-                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    }
-
-                    Task.Delay(200).ContinueWith(t =>
+                case ActionType.RemoteDisconnect:
+                    #region DataRead  
+                    await Task.Delay(200).ContinueWith(t =>
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            background_scan_page.Opacity = 1;
 
-                            if (Device.Idiom == TargetIdiom.Tablet)
-                            {
-                                ContentNav.Opacity = 1;
-                                ContentNav.IsVisible = true;
-                            }
-                            else
-                            {
-                                ContentNav.Opacity = 0;
-                                ContentNav.IsVisible = false;
-                            }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
-                        
-                            #region New Circular Progress bar Animations    
-
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-
-                            #endregion
-
-                            this.GoToPage ();
+                            this.actionType = this.actionTypeNew;
+                            this.GoToPage();
                         })
                     );
 
@@ -448,42 +461,13 @@ namespace aclara_meters.view
 
                 case ActionType.ReadMtu:
 
-                    #region Read Mtu Controller
-
-                    background_scan_page.Opacity = 1;
-                 
-
-                    background_scan_page.IsEnabled = true;
-
-                    this.actionType = this.actionTypeNew;
-
-                    if (Device.Idiom == TargetIdiom.Phone)
-                    {
-                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    }
-
-                    Task.Delay(200).ContinueWith(t =>
+                    #region ReadMTU  
+                    await Task.Delay(200).ContinueWith(t =>
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            
                             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewReadMTU(dialogsSaved, actionTarget), false);
 
-                            background_scan_page.Opacity = 1;
-                          
-
-                            if (Device.Idiom == TargetIdiom.Tablet)
-                            {
-                                ContentNav.Opacity = 1;
-                                ContentNav.IsVisible = true;
-                            }
-                            else
-                            {
-                                ContentNav.Opacity = 0;
-                                ContentNav.IsVisible = false;
-                            }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
                         })
                     );
 
@@ -491,113 +475,32 @@ namespace aclara_meters.view
 
                     break;
 
-                case ActionType.AddMtu:
-
-                    #region Add Mtu Controller
-
-                    background_scan_page.Opacity = 1;
-
-                    background_scan_page.IsEnabled = true;
-          
-
-                    if (Device.Idiom == TargetIdiom.Phone)
-                    {
-                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    }
-
-                    Task.Delay(200).ContinueWith(t =>
-
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            dialog_open_bg.IsVisible = true;
-                            turnoff_mtu_background.IsVisible = true;
-                            dialogView.CloseDialogs();
-
-                            #region Check ActionVerify
-
-                            if (FormsApp.config.Global.ActionVerify)
-                                dialogView.OpenCloseDialog("dialog_AddMTU", true);
-                            //dialog_AddMTU.IsVisible = true;
-                            else
-                            {
-                                this.actionType = actionTarget;
-                                CallLoadPage();
-                            }
-                            #endregion
-
-                            background_scan_page.Opacity = 1;
-                           
-
-                            if (Device.Idiom == TargetIdiom.Tablet)
-                            {
-                                ContentNav.Opacity = 1;
-                                ContentNav.IsVisible = true;
-                            }
-                            else
-                            {
-                                ContentNav.Opacity = 0;
-                                ContentNav.IsVisible = false;
-                            }
-
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone;
-                        })
-                    );
-
-                    #endregion
-
-                    break;
-
-                case ActionType.TurnOffMtu:
+                 case ActionType.TurnOffMtu:
 
                     #region Turn Off Controller
 
-                    background_scan_page.Opacity = 1;
-           
-
-                    background_scan_page.IsEnabled = true;
-                   
-
-                    if (Device.Idiom == TargetIdiom.Phone)
-                    {
-                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    }
-
-                    Task.Delay(200).ContinueWith(t =>
+                    await Task.Delay(200).ContinueWith(t =>
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            dialog_open_bg.IsVisible = true;
-                            turnoff_mtu_background.IsVisible = true;
+
                             dialogView.CloseDialogs();
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.Global.ActionVerify)
+                            if (this.global.ActionVerify)
+                            {
+                                dialog_open_bg.IsVisible = true;
+                                turnoff_mtu_background.IsVisible = true;
                                 dialogView.OpenCloseDialog("dialog_turnoff_one", true);
-                               
+                            }
                             else
                             {
-                                this.actionType = actionTarget;
+                                this.actionType = this.actionTypeNew;
                                 CallLoadViewTurnOff();
                             }
                             #endregion
 
-                            background_scan_page.Opacity = 1;
-                            
-                            if (Device.Idiom == TargetIdiom.Tablet)
-                            {
-                                ContentNav.Opacity = 1;
-                                ContentNav.IsVisible = true;
-                            }
-                            else
-                            {
-                                ContentNav.Opacity = 0;
-                                ContentNav.IsVisible = false;
-                            }
-
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone;
                         })
                     );
 
@@ -609,38 +512,15 @@ namespace aclara_meters.view
 
                     #region Install Confirm Controller
 
-                    background_scan_page.Opacity = 1;
-                 
+                    this.actionType = this.actionTypeNew;
 
-                    background_scan_page.IsEnabled = true;
-                
-
-                    if (Device.Idiom == TargetIdiom.Phone)
-                    {
-                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    }
-                    this.actionType = actionTarget;
-                    Task.Delay(200).ContinueWith(t =>
+                    await Task.Delay(200).ContinueWith(t =>
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            
+
                             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewInstallConfirmation(dialogsSaved), false);
 
-                            background_scan_page.Opacity = 1;
-                           
-                            if (Device.Idiom == TargetIdiom.Tablet)
-                            {
-                                ContentNav.Opacity = 1;
-                                ContentNav.IsVisible = true;
-                            }
-                            else
-                            {
-                                ContentNav.Opacity = 0;
-                                ContentNav.IsVisible = false;
-                            }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone;
                         })
                     );
 
@@ -648,56 +528,19 @@ namespace aclara_meters.view
 
                     break;
 
+                case ActionType.AddMtu:
+                    #region AddMTU
+                    await ControllerAction(actionTarget, "dialog_AddMTU");
+
+
+                    #endregion
+                    break;
+
                 case ActionType.ReplaceMTU:
 
                     #region Replace Mtu Controller
+                    await ControllerAction(actionTarget, "dialog_replacemeter_one");
 
-                    background_scan_page.Opacity = 1;
-                
-                    background_scan_page.IsEnabled = true;
-                   
-                    if (Device.Idiom == TargetIdiom.Phone)
-                    {
-                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    }
-
-                    Task.Delay(200).ContinueWith(t =>
-
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            dialog_open_bg.IsVisible = true;
-                            turnoff_mtu_background.IsVisible = true;
-                            dialogView.CloseDialogs();
-
-                            #region Check ActionVerify
-
-                            if (FormsApp.config.Global.ActionVerify)
-                                dialogView.OpenCloseDialog("dialog_replacemeter_one", true);
-                            
-                            else
-                            {
-                                this.actionType = actionTarget;
-                                CallLoadPage();
-                            }
-                            #endregion
-
-                            background_scan_page.Opacity = 1;
-
-                            if (Device.Idiom == TargetIdiom.Tablet)
-                            {
-                                ContentNav.Opacity = 1;
-                                ContentNav.IsVisible = true;
-                            }
-                            else
-                            {
-                                ContentNav.Opacity = 0;
-                                ContentNav.IsVisible = false;
-                            }
-
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
-                        })
-                    );
 
                     #endregion
 
@@ -706,51 +549,7 @@ namespace aclara_meters.view
                 case ActionType.ReplaceMeter:
 
                     #region Replace Meter Controller
-
-                    background_scan_page.Opacity = 1;
-                   
-                    background_scan_page.IsEnabled = true;
-                   
-                    if (Device.Idiom == TargetIdiom.Phone)
-                    {
-                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    }
-                    Task.Delay(200).ContinueWith(t =>
-
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            dialog_open_bg.IsVisible = true;
-                            turnoff_mtu_background.IsVisible = true;
-                            dialogView.CloseDialogs();
-
-                            #region Check ActionVerify
-
-                            if (FormsApp.config.Global.ActionVerify)
-                                dialogView.OpenCloseDialog("dialog_meter_replace_one", true);
-                           
-                            else
-                            {
-                                this.actionType = actionTarget;
-                                CallLoadPage();
-                            }
-                            #endregion
-
-                            background_scan_page.Opacity = 1;
-
-                            if (Device.Idiom == TargetIdiom.Tablet)
-                            {
-                                ContentNav.Opacity = 1;
-                                ContentNav.IsVisible = true;
-                            }
-                            else
-                            {
-                                ContentNav.Opacity = 0;
-                                ContentNav.IsVisible = false;
-                            }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
-                        })
-                    );
+                    await ControllerAction(actionTarget, "dialog_meter_replace_one");
 
                     #endregion
 
@@ -759,52 +558,7 @@ namespace aclara_meters.view
                 case ActionType.AddMtuAddMeter:
 
                     #region Add Mtu | Add Meter Controller
-
-                    background_scan_page.Opacity = 1;
-
-                    background_scan_page.IsEnabled = true;
-
-                    if (Device.Idiom == TargetIdiom.Phone)
-                    {
-                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    }
-
-                    Task.Delay(200).ContinueWith(t =>
-
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            dialog_open_bg.IsVisible = true;
-                            turnoff_mtu_background.IsVisible = true;
-                            dialogView.CloseDialogs();
-
-                            #region Check ActionVerify
-
-                            if (FormsApp.config.Global.ActionVerify)
-                                dialogView.OpenCloseDialog("dialog_AddMTUAddMeter", true);
-                           
-                            else
-                            {
-                                this.actionType = actionTarget;
-                                CallLoadPage();
-                            }
-                            #endregion
-
-                            background_scan_page.Opacity = 1;
-
-                            if (Device.Idiom == TargetIdiom.Tablet)
-                            {
-                                ContentNav.Opacity = 1;
-                                ContentNav.IsVisible = true;
-                            }
-                            else
-                            {
-                                ContentNav.Opacity = 0;
-                                ContentNav.IsVisible = false;
-                            }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
-                        })
-                    );
+                    await ControllerAction(actionTarget, "dialog_AddMTUAddMeter");
 
                     #endregion
 
@@ -813,52 +567,7 @@ namespace aclara_meters.view
                 case ActionType.AddMtuReplaceMeter:
 
                     #region Add Mtu | Replace Meter Controller
-
-                    background_scan_page.Opacity = 1;
-
-                    background_scan_page.IsEnabled = true;
-
-                    if (Device.Idiom == TargetIdiom.Phone)
-                    {
-                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    }
-
-                    Task.Delay(200).ContinueWith(t =>
-
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            dialog_open_bg.IsVisible = true;
-                            turnoff_mtu_background.IsVisible = true;
-                            dialogView.CloseDialogs();
-
-                            #region Check ActionVerify
-
-                            if (FormsApp.config.Global.ActionVerify)
-                                dialogView.OpenCloseDialog("dialog_AddMTUReplaceMeter", true);
-                               
-                            else
-                            {
-                                this.actionType = actionTarget;
-                                CallLoadPage();
-                            }
-                            #endregion
-
-                            background_scan_page.Opacity = 1;
-
-                            if (Device.Idiom == TargetIdiom.Tablet)
-                            {
-                                ContentNav.Opacity = 1;
-                                ContentNav.IsVisible = true;
-                            }
-                            else
-                            {
-                                ContentNav.Opacity = 0;
-                                ContentNav.IsVisible = false;
-                            }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
-                        })
-                    );
+                    await ControllerAction(actionTarget, "dialog_AddMTUReplaceMeter");
 
                     #endregion
 
@@ -868,52 +577,8 @@ namespace aclara_meters.view
 
                     #region Replace Mtu | Replace Meter Controller
 
-                    background_scan_page.Opacity = 1;
+                    await ControllerAction(actionTarget, "dialog_ReplaceMTUReplaceMeter");
 
-                    background_scan_page.IsEnabled = true;
-
-                    if (Device.Idiom == TargetIdiom.Phone)
-                    {
-                        ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                        shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
-                    }
-
-                    Task.Delay(200).ContinueWith(t =>
-
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            dialog_open_bg.IsVisible = true;
-                            turnoff_mtu_background.IsVisible = true;
-                            dialogView.CloseDialogs();
-
-                            #region Check ActionVerify
-
-                            if (FormsApp.config.Global.ActionVerify)
-                                dialogView.OpenCloseDialog("dialog_ReplaceMTUReplaceMeter", true);
-                           
-                            else
-                            {
-                                this.actionType = actionTarget;
-                                CallLoadPage();
-                            }
-                            #endregion
-
-
-                            background_scan_page.Opacity = 1;
-
-                            if (Device.Idiom == TargetIdiom.Tablet)
-                            {
-                                ContentNav.Opacity = 1;
-                                ContentNav.IsVisible = true;
-                            }
-                            else
-                            {
-                                ContentNav.Opacity = 0;
-                                ContentNav.IsVisible = false;
-                            }
-                            shadoweffect.IsVisible &= Device.Idiom != TargetIdiom.Phone; 
-                        })
-                    );
 
                     #endregion
 
@@ -922,14 +587,36 @@ namespace aclara_meters.view
             }
         }
 
-        private void CallLoadPage()
+        private async Task ControllerAction(ActionType page, string nameDialog)
         {
-            dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
 
-            this.GoToPage ();
+            await Task.Delay(200).ContinueWith(t =>
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+
+                    dialogView.CloseDialogs();
+
+                    #region Check ActionVerify
+                    if (this.global.ActionVerify)
+                    {
+                        dialog_open_bg.IsVisible = true;
+                        turnoff_mtu_background.IsVisible = true;
+                        dialogView.GetStackLayoutElement(nameDialog).IsVisible = true;
+                    }
+                    else
+                    {
+                        this.actionType = page;
+                        GoToPage();
+                    }
+                    #endregion
+
+
+                })
+            );
         }
 
+        
         private void CallLoadViewTurnOff()
         {
             dialogView.OpenCloseDialog("dialog_turnoff_one", false);

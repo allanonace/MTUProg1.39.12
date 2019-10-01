@@ -119,11 +119,18 @@ namespace aclara_meters.util
         protected async Task<bool> ValidateNavigation (
             ActionType typeTarget )
         {
-            MTUComm.Action basicRead = new MTUComm.Action (
-               FormsApp.ble_interface,
-               ActionType.BasicRead );
+            try
+            {
+                MTUComm.Action basicRead = new MTUComm.Action(
+                   FormsApp.ble_interface,
+                   ActionType.BasicRead);
 
-            return await basicRead.RunNavValidation ( typeTarget );
+                return await basicRead.RunNavValidation(typeTarget);
+            }
+            catch (Exception )
+            {
+                return false;
+            }
         }
     }
 }

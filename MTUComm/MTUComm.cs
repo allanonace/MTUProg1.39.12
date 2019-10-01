@@ -364,12 +364,14 @@ namespace MTUComm
                     case ActionType.ReplaceMtuReplaceMeter     :
                     case ActionType.ReadFabric                 :
                     case ActionType.ReadMtu                    :
+                    case ActionType.TurnOffMtu                 :
+                    case ActionType.TurnOnMtu                  :
                     case ActionType.BasicRead                  : ok = true; break;
                     case ActionType.DataRead                   : ok = await Task.Run ( () => Validate_DataRead () ); break;
                     case ActionType.MtuInstallationConfirmation: ok = await Task.Run ( () => Validate_InstallConfirmation () ); break;
                     case ActionType.RemoteDisconnect           : ok = await Task.Run ( () => Validate_RemoteDisconnect () ); break;
-                    case ActionType.TurnOffMtu                 : ok = await Task.Run ( () => Validate_TurnOff () ); break;
-                    case ActionType.TurnOnMtu                  : ok = await Task.Run ( () => Validate_TurnOn () ); break;
+                   // case ActionType.TurnOffMtu                 : ok = await Task.Run ( () => Validate_TurnOff () ); break;
+                   // case ActionType.TurnOnMtu                  : ok = await Task.Run ( () => Validate_TurnOn () ); break;
                 }
             }
             // MTUComm.Exceptions.MtuTypeIsNotFoundException
