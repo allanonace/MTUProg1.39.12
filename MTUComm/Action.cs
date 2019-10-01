@@ -618,14 +618,11 @@ namespace MTUComm
                 alreadyInDataMainAction = true;
 
                 Singleton.Set = this;
+
+                this.currentMtu = this.config.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
             }
         }
         
-        public void SetCurrentMtu ()
-        {
-            this.currentMtu = this.config.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
-        }
-
         #endregion
 
         #region Parameters
@@ -813,9 +810,8 @@ namespace MTUComm
         /// <seealso cref="MTUComm.BasicRead"/>
         private async Task OnBasicRead ( Delegates.ActionArgs args )
         {
-            // Show result in the screen
+            await this.OnFinish ( this );
 
-            this.OnFinish ( this );
         }
 
         /// <summary>
@@ -831,7 +827,7 @@ namespace MTUComm
         private async Task OnReadFabric ( Delegates.ActionArgs args )
         {
             // Show result in the screen
-            this.OnFinish ( this );
+            await this.OnFinish ( this );
         }
 
         /// <summary>
@@ -920,7 +916,7 @@ namespace MTUComm
                 this.lastLogCreated = logger.TurnOnOff ( this, args.Mtu, resultBasic );
 
                 // Show result in the screen
-                this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultBasic ) );
+                await this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultBasic ) );
             }
             catch ( Exception e )
             {
@@ -969,8 +965,8 @@ namespace MTUComm
                 // Write result in the DataRead file
                 this.lastLogCreated = logger.DataRead ( dataRead_allParamsFromInterface, readMtu_allParamsFromInterface, eventList, args.Mtu );
                 
-                // Show result in the screen
-                this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
+                // Show only the ReadMTU result in the screen
+                await this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
             }
             catch ( Exception e )
             {
@@ -981,7 +977,23 @@ namespace MTUComm
 
         private async Task OnRemoteDisconnect ( Delegates.ActionArgs args )
         {
+            try
+            {
+                // Load parameters using the interface file
+                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.RemoteDisconnect );
+                ActionResult readMtu_allParamsFromInterface  = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
 
+                // Write result in the DataRead file
+                this.lastLogCreated = logger.RemoteDisconnect ( dataRead_allParamsFromInterface, readMtu_allParamsFromInterface, args.Mtu );
+                
+                // Show only the ReadMTU result in the screen
+                await this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
+            }
+            catch ( Exception e )
+            {
+                Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                this.OnError ();
+            }
         }
 
         private async Task OnNodeDiscovery ( Delegates.ActionArgs args )

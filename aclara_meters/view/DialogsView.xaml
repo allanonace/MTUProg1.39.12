@@ -154,5 +154,16 @@
                     </Label>
                 </StackLayout>
             </StackLayout>
+            <StackLayout x:Name="dialog_NoAction" IsVisible="false" HorizontalOptions="CenterAndExpand" VerticalOptions="CenterAndExpand" Margin="0" Opacity="1">
+                <Label Margin="12,12,12,12" HorizontalTextAlignment="Center" FontSize="20" Text="The selected action is not compatible with the current MTU">
+                </Label>
+                <StackLayout Margin="8,8,0,0" IsVisible="true" Orientation="Horizontal">
+                    <Label HorizontalOptions="CenterAndExpand" HorizontalTextAlignment="Center" TextColor="#6aa2b8" FontSize="20" Text="OK">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer x:Name="dialog_NoAction_ok" />
+                        </Label.GestureRecognizers>
+                    </Label>
+                </StackLayout>
+            </StackLayout>
         </StackLayout>
     </Frame>

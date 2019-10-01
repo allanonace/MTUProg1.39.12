@@ -28,6 +28,7 @@ using NodeType                 = Lexi.Lexi.NodeType;
 using NodeDiscoveryQueryResult = MTUComm.NodeDiscoveryList.NodeDiscoveryQueryResult;
 using RDDStatus                = MTUComm.RDDStatusResult.RDDStatus;
 using RDDValveStatus           = MTUComm.RDDStatusResult.RDDValveStatus;
+using RDDCmd                   = MTUComm.RDDStatusResult.RDDCmd;
 
 namespace MTUComm
 {
@@ -364,12 +365,14 @@ namespace MTUComm
                     case ActionType.ReplaceMtuReplaceMeter     :
                     case ActionType.ReadFabric                 :
                     case ActionType.ReadMtu                    :
+                    case ActionType.TurnOffMtu                 :
+                    case ActionType.TurnOnMtu                  :
                     case ActionType.BasicRead                  : ok = true; break;
                     case ActionType.DataRead                   : ok = await Task.Run ( () => Validate_DataRead () ); break;
                     case ActionType.MtuInstallationConfirmation: ok = await Task.Run ( () => Validate_InstallConfirmation () ); break;
                     case ActionType.RemoteDisconnect           : ok = await Task.Run ( () => Validate_RemoteDisconnect () ); break;
-                    case ActionType.TurnOffMtu                 : ok = await Task.Run ( () => Validate_TurnOff () ); break;
-                    case ActionType.TurnOnMtu                  : ok = await Task.Run ( () => Validate_TurnOn () ); break;
+                   // case ActionType.TurnOffMtu                 : ok = await Task.Run ( () => Validate_TurnOff () ); break;
+                   // case ActionType.TurnOnMtu                  : ok = await Task.Run ( () => Validate_TurnOn () ); break;
                 }
             }
             // MTUComm.Exceptions.MtuTypeIsNotFoundException
@@ -423,20 +426,15 @@ namespace MTUComm
                 // that cancel the action but not move to the main menu and could be happen
                 // that perform the basic read with a different MTU
                 if ( ! this.basicInfoLoaded )
-                {
                     await this.LoadMtuBasicInfo ();
-                    
-                    if ( Singleton.Has<Action> () )
-                        Singleton.Get.Action.SetCurrentMtu ();
-                }
 
                 switch ( type )
                 {
-                    case ActionType.AddMtu:
-                    case ActionType.AddMtuAddMeter:
-                    case ActionType.AddMtuReplaceMeter:
-                    case ActionType.ReplaceMTU:
-                    case ActionType.ReplaceMeter:
+                    case ActionType.AddMtu                :
+                    case ActionType.AddMtuAddMeter        :
+                    case ActionType.AddMtuReplaceMeter    :
+                    case ActionType.ReplaceMTU            :
+                    case ActionType.ReplaceMeter          :
                     case ActionType.ReplaceMtuReplaceMeter:
                         // Interactive and Scripting
                         if ( args.Length > 1 )
@@ -450,13 +448,12 @@ namespace MTUComm
                         else await Task.Run ( () => DataRead () );
                         break;
                     case ActionType.MtuInstallationConfirmation: await Task.Run ( () => InstallConfirmation () ); break;
-                    case ActionType.RemoteDisconnect: await Task.Run ( () => RemoteDisconnect () ); break;
-                    case ActionType.ReadFabric : await Task.Run ( () => ReadFabric () ); break;
-                    case ActionType.ReadMtu    : await Task.Run ( () => ReadMtu () ); break;
-                    //case ActionType.ReadMtu    : await Task.Run ( () => RemoteDisconnect () ); break;
-                    case ActionType.TurnOffMtu : await Task.Run ( () => TurnOnOffMtu ( false ) ); break;
-                    case ActionType.TurnOnMtu  : await Task.Run ( () => TurnOnOffMtu ( true  ) ); break;
-                    case ActionType.BasicRead  : await Task.Run ( () => BasicRead () ); break;
+                    case ActionType.RemoteDisconnect           : await Task.Run ( () => RemoteDisconnect () ); break;
+                    case ActionType.ReadFabric                 : await Task.Run ( () => ReadFabric () ); break;
+                    case ActionType.ReadMtu                    : await Task.Run ( () => ReadMtu () ); break;
+                    case ActionType.TurnOffMtu                 : await Task.Run ( () => TurnOnOffMtu ( false ) ); break;
+                    case ActionType.TurnOnMtu                  : await Task.Run ( () => TurnOnOffMtu ( true  ) ); break;
+                    case ActionType.BasicRead                  : await Task.Run ( () => BasicRead () ); break;
                     default: break;
                 }
 
@@ -1330,7 +1327,7 @@ namespace MTUComm
                                 // Finish without perform the action
                                 else if ( ++countAttemptsEr >= maxAttemptsEr )
                                 {
-                                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( maxAttemptsEr + "" ) );
+                                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedNodeDiscoveryException ( maxAttemptsEr + "" ) );
                                     goto BREAK_FAIL;
                                 }
 
@@ -1352,7 +1349,7 @@ namespace MTUComm
                             var queryResult = nodeList.TryToAdd ( fullResponse.Response, ref ok );
 
                             // NOTE: It happened once that LExI returned an array of bytes without the required amount of data
-                            if ( ok ) goto BREAK_FAIL;
+                            if ( ! ok ) goto BREAK_FAIL;
                             
                             switch ( queryResult.Result )
                             {
@@ -1503,29 +1500,35 @@ namespace MTUComm
 
         #region Valve Operation ( prev. Remote Disconnect )
 
-        public static RDDValveStatus TESTRDD = RDDValveStatus.OPEN;
-
         private async Task RemoteDisconnect ()
         {
-            // Aclara:
-            // - STAR Programmer MtuComm.cs Line 833
-            // - Lexi Mtu.cs Line 1268 -> Y61063 Page 52 Request RDD Action
-            // - Lexi Mtu.cs Line 1283 -> Y61063 Page 53 Request RDD Status
-
-            // TODO: ONLY FOR DEBUG
-            Data.SetTemp ( "RDDFirmwareVersion", 1234 );
-            Data.SetTemp ( "RDDActionType", TESTRDD );
-
             Stopwatch nodeCounter = null;
 
             try
             {
                 bool isPort1 = false;
                 if ( ( isPort1 = this.mtu.Port1.IsSetFlow ) ||
-                     this.mtu.Port2.IsSetFlow )
+                     this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow )
                 {
                     dynamic map = this.GetMemoryMap ();
                     MemoryRegister<int> rddStatus = map.RDDStatusInt;
+
+                    // Convert from RDD command to RDD desired status
+                    RDDValveStatus rddValveStatus = RDDValveStatus.UNKNOWN;
+                    switch ( ( RDDCmd )Enum.Parse ( typeof ( RDDCmd ),
+                              Data.Get.RDDActionType.Replace ( " ", "_" ) ) )
+                    {
+                        case RDDCmd.CLOSE       : rddValveStatus = RDDValveStatus.CLOSED;       break;
+                        case RDDCmd.OPEN        : rddValveStatus = RDDValveStatus.OPEN;         break;
+                        case RDDCmd.PARTIAL_OPEN: rddValveStatus = RDDValveStatus.PARTIAL_OPEN; break;
+                    }
+
+                    if ( rddValveStatus == RDDValveStatus.UNKNOWN )
+                        throw new RDDDesiredStatusIsUnknown ();
+
+                    // Values previous to execute the process
+                    Data.SetTemp ( "RDDBattery", await map.RDDBatteryStatus.GetValue () ); // Overload
+                    Data.SetTemp ( "PrevRDDValvePosition", await map.RDDValvePosition.GetValue () ); // Overload
 
                     Func<int,bool,bool,bool,Task<RDDStatus>> CheckStatus = (
                         async (
@@ -1572,29 +1575,17 @@ namespace MTUComm
                     OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 1 Check RDD" ) );
 
                     // Checks if the RDD is not configured/installed
-                    var a = await CheckStatus ( /*step*/1, /*okBusy*/false, /*okError*/true, /*okIdle*/true );
-
-                    Console.WriteLine ( "----> 1: " + a );
-
-                    if ( a == RDDStatus.DISABLED )
-                        throw new Exception ();
+                    if ( await CheckStatus ( /*step*/1, /*okBusy*/false, /*okError*/true, /*okIdle*/true ) == RDDStatus.DISABLED )
+                        throw new RDDStatusIsDisabled ();
 
                     await Task.Delay ( 1000 );
-
-                    // Prepare some data for the final log
-                    // FIXME: Register 492 does not work, always returns zero with the RDD connected
-                    //int rddPortNumber = await map.RDDPortNumber.GetValueFromMtu ();
-                    //int numPort = ( isPort1 && rddPortNumber == 1 ) ? 1 :
-                    //    ( ( ! isPort1 && rddPortNumber == 2 ) ? 2 : -1 );
-
-                    Data.SetTemp ( "PrevRDDValvePosition", await map.RDDValvePosition.GetValue () );
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 2 Request Position" ) );
 
                     // Request an action to the RDD 
                     await this.lexi.Write (
                         CMD_RDD_ACTION,
-                        new byte[] { ( byte )Data.Get.RDDActionType }, // 1 Close, 2 Open, 3 Partial Open
+                        new byte[] { ( byte )rddValveStatus }, // 1 Close, 2 Open, 3 Partial Open
                         CMD_ATTEMPTS_N,
                         WAIT_BTW_CMD_ATTEMPTS,
                         null,
@@ -1606,17 +1597,12 @@ namespace MTUComm
                     OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 3 Check RDD" ) );
 
                     // Checks status after requesting the desired action
-                    switch ( ( a = await CheckStatus ( /*step*/3, /*okBusy*/true, /*okError*/false, /*okIdle*/false ) ) )
+                    switch ( await CheckStatus ( /*step*/3, /*okBusy*/true, /*okError*/false, /*okIdle*/false ) )
                     {
-                        case RDDStatus.BUSY:
-                        Console.WriteLine ( "----> 3: Busy" );
-                        break;
-
                         case RDDStatus.IDLE:
                         case RDDStatus.DISABLED:
                         case RDDStatus.ERROR_ON_LAST_OPERATION:
-                        Console.WriteLine ( "----> 3: " + a );
-                        throw new Exception ();
+                        throw new RDDStatusIsNotBusyAfterLExICommand ();
                     }
 
                     await Task.Delay ( 1000 );
@@ -1653,46 +1639,39 @@ namespace MTUComm
                                 response.PreviousCmdSuccess + " " +
                                 response.ValvePosition );
                         }
-                        catch ( Exception )
-                        {
-
-                        }
+                        catch ( Exception ) {}
                     }
                     while ( ( response == null ||
                               response.ValvePosition == RDDValveStatus.IN_TRANSITION ||
-                              response.ValvePosition != Data.Get.RDDActionType ) &&
+                              response.ValvePosition != rddValveStatus ) &&
                             ! ( timeOut = nodeCounter.ElapsedMilliseconds > WAIT_RDD_MAX ) );
                     
                     // The process has failed
                     if ( ! response.PreviousCmdSuccess ||
-                         response.ValvePosition != Data.Get.RDDActionType )
+                         response.ValvePosition != rddValveStatus )
                     {
+                        string seconds = ( ( int )( WAIT_RDD_MAX / 1000 ) ).ToString ();
+
                         switch ( response.ValvePosition )
                         {
                             // Process continue but the times is out
                             case RDDValveStatus.IN_TRANSITION:
-                                throw new Exception ();
+                                throw new RDDContinueInTransitionAfterMaxTime ( seconds );
 
                             // Unknown current position of the valve
                             case RDDValveStatus.UNKNOWN:
-                                throw new Exception ();
+                                throw new RDDStatusIsUnknownAfterMaxTime ( seconds );
 
                             // the current position of the valve is different from the specified
                             default:
-                                throw new Exception ();
+                                throw new RDDStatusIsDifferentThanExpected ( seconds );
                         }
                     }
-
-                    TESTRDD = ( TESTRDD == RDDValveStatus.OPEN ) ? RDDValveStatus.CLOSED : RDDValveStatus.OPEN;
-
-                    // The status of the RDD has changed correctly
-                    //await this.OnRemoteDisconnect (
-                    //    new Delegates.ActionArgs ( this.mtu, map, response ) );
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Reading from MTU..." ) );
 
                     await this.ReadMtu_Logic ( map );
-                    await this.OnReadMtu ( new Delegates.ActionArgs ( this.mtu, map ) );
+                    await this.OnRemoteDisconnect ( new Delegates.ActionArgs ( this.mtu, map ) );
                 }
             }
             catch ( Exception e )
@@ -3274,16 +3253,18 @@ namespace MTUComm
 
                     Utils.Print ( "----ENCRYPTION_FINISH----" );
 
+                    // The MTU is encrypted!
                     return;
                 }
                 catch ( Exception e )
                 {
                     // Is not own exception
                     if ( ! Errors.IsOwnException ( e ) )
-                        throw new PuckCantCommWithMtuException ();
+                         throw new PuckCantCommWithMtuException ();
                 }
             }
 
+            // Process completed without achieve to encrypt the MTU
             throw new ActionNotAchievedEncryptionException ( CMD_ENCRYP_MAX + "" );
         }
 

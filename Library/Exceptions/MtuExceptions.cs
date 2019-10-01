@@ -313,6 +313,36 @@
         public EncoderAutodetectException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
     
+    public class RDDDesiredStatusIsUnknown : OwnExceptionsBase
+    {
+        public RDDDesiredStatusIsUnknown ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    public class RDDStatusIsDisabled : OwnExceptionsBase
+    {
+        public RDDStatusIsDisabled ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    public class RDDStatusIsNotBusyAfterLExICommand : OwnExceptionsBase
+    {
+        public RDDStatusIsNotBusyAfterLExICommand ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    public class RDDContinueInTransitionAfterMaxTime : OwnExceptionsBase
+    {
+        public RDDContinueInTransitionAfterMaxTime ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    public class RDDStatusIsUnknownAfterMaxTime : OwnExceptionsBase
+    {
+        public RDDStatusIsUnknownAfterMaxTime ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    public class RDDStatusIsDifferentThanExpected : OwnExceptionsBase
+    {
+        public RDDStatusIsDifferentThanExpected ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
     #endregion
 
     #region Scripting Parameters [ 3xx ]
