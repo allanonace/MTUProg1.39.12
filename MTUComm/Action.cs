@@ -599,8 +599,7 @@ namespace MTUComm
 
             // Only save reference for the current action,
             // not for nested or auxiliary actions ( as BasicRead )
-            if ( this.type == ActionType.BasicRead ||
-                 this.type == ActionType.ReadMtu )
+            if ( this.type == ActionType.BasicRead )
             {
                 alreadyInDataMainAction = false;
 
@@ -611,16 +610,15 @@ namespace MTUComm
                 Data.Reset ( "MtuBasicInfo" );
                 InterfaceAux.ResetInfo ();
             }
+            else
+                if (! alreadyInDataMainAction )
+                {
+                    alreadyInDataMainAction = true;
 
-            if ( this.type != ActionType.BasicRead &&
-                 ! alreadyInDataMainAction )
-            {
-                alreadyInDataMainAction = true;
+                    Singleton.Set = this;
 
-                Singleton.Set = this;
-
-                this.currentMtu = this.config.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
-            }
+                    this.currentMtu = this.config.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
+                }
         }
         
         #endregion
@@ -848,7 +846,7 @@ namespace MTUComm
                 // Load parameters using the interface file
                 ActionResult resultAllInterfaces = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
 
-                await args.Map.LogFullMemory();
+                //await args.Map.LogFullMemory();
 
                 // Write result in the activity log
                 this.lastLogCreated = logger.ReadMTU ( this, resultAllInterfaces, args.Mtu );

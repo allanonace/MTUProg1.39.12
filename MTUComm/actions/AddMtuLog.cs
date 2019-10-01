@@ -315,19 +315,15 @@ namespace MTUComm
                     XElement alarmSelection = new XElement ( "AlarmSelection" );
                     logger.AddAtrribute ( alarmSelection, "display", "Alarm Selection" );
 
-<<<<<<< Updated upstream
+
                     // Log the value if the condition is validated
                     dynamic AddParamCond = new Action<string,string,string,bool> (
                         ( tag, display, value, condition ) => {
-=======
-                    dynamic AddParamCondMap = new Action<string,string,string,bool> (
-                        async ( tag, display, id, condition ) => {
->>>>>>> Stashed changes
+
                             if ( condition )
                                 logger.AddParameter ( alarmSelection,
-                                    new Parameter ( tag, display, await map[id].GetValue() ) );
+                                    new Parameter ( tag, display, value ) );
                         });
-<<<<<<< Updated upstream
                     
                     // Log the memory map register value if the condition is validated
                     dynamic AddParamCondMap = new Func<string,string,string,bool,Task> (
@@ -337,20 +333,13 @@ namespace MTUComm
                         });
 
                     // Log always because these entries have no condition
-=======
-                    dynamic AddParamCond = new Action<string, string, string, bool>(
-                        (tag, display, value, condition) => {
-                         if (condition)
-                             logger.AddParameter(alarmSelection,
-                                 new Parameter(tag, display, value));
-                     });
->>>>>>> Stashed changes
+
                     dynamic AddParameter = new Action<string,string,string> (
                         ( tag, display, value ) =>
                             AddParamCond ( tag, display, value, true ) );
 
                     string alarmConfiguration = alarms.Name;
-<<<<<<< Updated upstream
+
                     AddParameter          ( "AlarmConfiguration",        "Alarm Configuration Name",     alarmConfiguration );
                     AddParameter          ( "Overlap",                   "Message Overlap",              alarms.Overlap.ToString () );
                     AddParameter          ( "ImmediateAlarm",            "Immediate Alarm Transmit",     alarms.ImmediateAlarmTransmit.ToString () );
@@ -388,45 +377,6 @@ namespace MTUComm
                     await AddParamCondMap ( "Cut1WireTamperImm",         "Cut Port1 Wire Tamper Imm",    "P1CutWireImmTamperStatus",             mtu.TamperPort1Imm );
                     await AddParamCondMap ( "Cut2WireTamper",            "Cut Port2 Wire Tamper",        "P2CutWireTamperStatus",                form.usePort2 && mtu.TamperPort2 );
                     await AddParamCondMap ( "Cut2WireTamperImm",         "Cut Port2 Wire Tamper Imm",    "P2CutWireImmTamperStatus",             form.usePort2 && mtu.TamperPort2Imm );
-=======
-                    AddParameter ( "AlarmConfiguration",        "Alarm Configuration Name",     alarmConfiguration );
-                    AddParameter ( "Overlap",                   "Message Overlap",              alarms.Overlap.ToString () );
-                    AddParameter ( "ImmediateAlarm",            "Immediate Alarm Transmit",     alarms.ImmediateAlarmTransmit.ToString () );
-                    AddParamCond ( "UrgentAlarm",               "DCU Urgent Alarm Transmit",    alarms.DcuUrgentAlarm.ToString (),                          map.ContainsMember ( "UrgentAlarm" ) );
-                    AddParamCondMap ( "MemoryMapError",            "Memory Map Error",             "MemoryMapTamperStatus",                                    mtu.MemoryMapError );
-                    AddParamCondMap ( "MemoryMapErrorImm",         "Memory Map Error Imm",         await map.MemoryMapImmTamperStatus.GetValue (),             mtu.MemoryMapErrorImm );
-                    AddParamCondMap ( "ProgramMemoryError",        "Program Memory Error",         await map.ProgramMemoryTamperStatus.GetValue (),            mtu.ProgramMemoryError );
-                    AddParamCondMap ( "ProgramMemoryErrorImm",     "Program Memory Error Imm",     await map.ProgramMemoryImmTamperStatus.GetValue (),         mtu.ProgramMemoryErrorImm );
-                    AddParamCondMap ( "MoistureDetect",            "Moisture Detect",              await map.MoistureTamperStatus.GetValue (),                 mtu.MoistureDetect );
-                    AddParamCondMap( "MoistureDetectImm",         "Moisture Detect Imm",          await map.MoistureImmTamperStatus.GetValue (),              mtu.MoistureDetectImm );
-                    AddParamCondMap( "EnergizerLastGasp",         "Energizer Last Gasp",          await map.EnergizerLastGaspTamperStatus.GetValue (),        mtu.EnergizerLastGasp );
-                    AddParamCondMap( "EnergizerLastGaspImm",      "Energizer Last Gasp Imm",      await map.EnergizerLastGaspImmTamperStatus.GetValue (),     mtu.EnergizerLastGaspImm );
-                    AddParamCondMap( "InsufficentMemory",         "Insufficent Memory",           await map.InsufficientMemoryTamperStatus.GetValue (),       mtu.InsufficientMemory );
-                    AddParamCondMap( "InsufficentMemoryImm",      "Insufficent Memory Imm",       await map.InsufficientMemoryImmTamperStatus.GetValue (),    mtu.InsufficientMemoryImm );
-                    AddParamCondMap( "CutAlarmCable",             "Cut Alarm Cable",              await map.GasCutWireTamperStatus.GetValue (),               mtu.GasCutWireAlarm );
-                    AddParamCondMap( "Cut2AlarmCable",            "Cut Port2 Alarm Cable",        await map.P2GasCutWireTamperStatus.GetValue (),             form.usePort2 && mtu.GasCutWireAlarm );
-                    AddParamCondMap( "SerialComProblem",          "Serial Com Problem",           await map.SerialComProblemTamperStatus.GetValue (),         mtu.SerialComProblem );
-                    AddParamCondMap( "SerialComProblemImm",       "Serial Com Problem Imm",       await map.SerialComProblemImmTamperStatus.GetValue (),      mtu.SerialComProblemImm );
-                    AddParamCondMap( "LastGasp",                  "Last Gasp",                    await map.LastGaspTamperStatus.GetValue (),                 mtu.LastGasp );
-                    AddParamCondMap( "LastGaspImm",               "Last Gasp Imm",                await map.LastGaspImmTamperStatus.GetValue (),              mtu.LastGaspImm );
-                    AddParamCondMap( "TiltTamper",                "Tilt Tamper",                  await map.TiltTamperStatus.GetValue (),                     mtu.TiltTamper );
-                    AddParamCondMap( "TiltTamperImm",             "Tilt Tamper Imm",              await map.TiltImmTamperStatus.GetValue (),                  mtu.TiltTamperImm );
-                    AddParamCondMap( "MagneticTamper",            "Magnetic Tamper",              await map.MagneticTamperStatus.GetValue (),                 mtu.MagneticTamper );
-                    AddParamCondMap( "MagneticTamperImm",         "Magnetic Tamper Imm",          await map.MagneticImmTamperStatus.GetValue (),              mtu.MagneticTamperImm );
-                    AddParamCondMap( "InterfaceTamper",           "Interface Tamper",             await map.InterfaceTamperStatus.GetValue (),                mtu.InterfaceTamper );
-                    AddParamCondMap( "InterfaceTamperImm",        "Interface Tamper Imm",         await map.InterfaceImmTamperStatus.GetValue (),             mtu.InterfaceTamperImm );
-                    AddParamCondMap( "RegisterCoverTamper",       "Register Cover Tamper",        await map.RegisterCoverTamperStatus.GetValue (),            mtu.RegisterCoverTamper );
-                    AddParamCondMap( "RegisterCoverTamperImm",    "Register Cover Tamper Imm",    await map.RegisterCoverImmTamperStatus.GetValue (),         mtu.RegisterCoverTamperImm );
-                    AddParamCondMap( "ReverseFlow",               "Reverse Flow Tamper",          await map.ReverseFlowTamperStatus.GetValue (),              mtu.ReverseFlowTamper );
-                    AddParamCond ( "FlowDirection",             "Flow Direction",               meter.Flow.ToString (),                                     mtu.ReverseFlowTamper );
-                    AddParamCondMap( "ReverseFlowTamperImm",      "Reverse Flow Tamper Imm",      await map.ReverseFlowImmTamperStatus.GetValue (),           mtu.ReverseFlowTamperImm );
-                    AddParamCondMap( "SerialCutWire",             "Serial Cut Wire",              await map.SerialCutWireTamperStatus.GetValue (),            mtu.SerialCutWire );
-                    AddParamCondMap( "SerialCutWire",             "Serial Cut Wire",              await map.SerialCutWireImmATamperStatus.GetValue (),        mtu.SerialCutWireImm );
-                    AddParamCondMap( "Cut1WireTamper",            "Cut Port1 Wire Tamper",        await map.P1CutWireTamperStatus.GetValue (),                mtu.TamperPort1 );
-                    AddParamCondMap( "Cut1WireTamperImm",         "Cut Port1 Wire Tamper Imm",    await map.P1CutWireImmTamperStatus.GetValue (),             mtu.TamperPort1Imm );
-                    AddParamCondMap( "Cut2WireTamper",            "Cut Port2 Wire Tamper",        await map.P2CutWireTamperStatus.GetValue (),                form.usePort2 && mtu.TamperPort2 );
-                    AddParamCondMap( "Cut2WireTamperImm",         "Cut Port2 Wire Tamper Imm",    await map.P2CutWireImmTamperStatus.GetValue (),             form.usePort2 && mtu.TamperPort2Imm );
->>>>>>> Stashed changes
 
                     this.addMtuAction.Add ( alarmSelection );
                 }
