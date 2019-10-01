@@ -78,6 +78,18 @@ namespace MTUComm
             { new EncoderAutodetectNotAchievedException (),     213 },
             // Encoder auto-detection process cannot be performed, perhaps due to a problem with the MTU
             { new EncoderAutodetectException (),                214 },
+            // The status of the RDD device is unknown
+            { new RDDDesiredStatusIsUnknown (),                 215 },
+            // The RDD device is disabled
+            { new RDDStatusIsDisabled (),                       216 },
+            // The status of the RDD device is not busy after executing the LExI command
+            { new RDDStatusIsNotBusyAfterLExICommand (),        217 },
+            // The RDD device continues in transition status after ... seconds
+            { new RDDContinueInTransitionAfterMaxTime (),       218 },
+            // The status of the RDD device is unknown after ... seconds
+            { new RDDStatusIsUnknownAfterMaxTime (),            219 },
+            // The status of the RDD device is different than expected after ... seconds
+            { new RDDStatusIsDifferentThanExpected (),          220 },
             
             // Scripting Parameters [ 3xx ]
             //---------------------
