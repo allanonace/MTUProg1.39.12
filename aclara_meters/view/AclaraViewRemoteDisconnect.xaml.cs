@@ -1218,7 +1218,7 @@ namespace aclara_meters.view
                 ChangeLowerButtonImage(false);
                 backdark_bg.IsVisible = false;
                 indicator.IsVisible = false;
-                bottomBar.GetLabelElement("label_read").Text = "Successful Data Read";
+                bottomBar.GetLabelElement("label_read").Text = "Successful Remote Disconnect";
                 ContentNav.IsEnabled = true;
                 background_scan_page.IsEnabled = true;
                 ReadMTUChangeView.IsVisible = false;

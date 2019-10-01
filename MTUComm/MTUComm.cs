@@ -1325,7 +1325,7 @@ namespace MTUComm
                                 // Finish without perform the action
                                 else if ( ++countAttemptsEr >= maxAttemptsEr )
                                 {
-                                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( maxAttemptsEr + "" ) );
+                                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedNodeDiscoveryException ( maxAttemptsEr + "" ) );
                                     goto BREAK_FAIL;
                                 }
 
@@ -1347,7 +1347,7 @@ namespace MTUComm
                             var queryResult = nodeList.TryToAdd ( fullResponse.Response, ref ok );
 
                             // NOTE: It happened once that LExI returned an array of bytes without the required amount of data
-                            if ( ok ) goto BREAK_FAIL;
+                            if ( ! ok ) goto BREAK_FAIL;
                             
                             switch ( queryResult.Result )
                             {
@@ -1522,7 +1522,7 @@ namespace MTUComm
                     }
 
                     if ( rddValveStatus == RDDValveStatus.UNKNOWN )
-                        throw new Exception ();
+                        throw new RDDDesiredStatusIsUnknown ();
 
                     // Values previous to execute the process
                     Data.SetTemp ( "RDDBattery", await map.RDDBatteryStatus.GetValue () ); // Overload
@@ -1574,7 +1574,7 @@ namespace MTUComm
 
                     // Checks if the RDD is not configured/installed
                     if ( await CheckStatus ( /*step*/1, /*okBusy*/false, /*okError*/true, /*okIdle*/true ) == RDDStatus.DISABLED )
-                        throw new Exception ();
+                        throw new RDDStatusIsDisabled ();
 
                     await Task.Delay ( 1000 );
 
@@ -1600,7 +1600,7 @@ namespace MTUComm
                         case RDDStatus.IDLE:
                         case RDDStatus.DISABLED:
                         case RDDStatus.ERROR_ON_LAST_OPERATION:
-                        throw new Exception ();
+                        throw new RDDStatusIsNotBusyAfterLExICommand ();
                     }
 
                     await Task.Delay ( 1000 );
@@ -1637,10 +1637,7 @@ namespace MTUComm
                                 response.PreviousCmdSuccess + " " +
                                 response.ValvePosition );
                         }
-                        catch ( Exception )
-                        {
-
-                        }
+                        catch ( Exception ) {}
                     }
                     while ( ( response == null ||
                               response.ValvePosition == RDDValveStatus.IN_TRANSITION ||
@@ -1651,19 +1648,21 @@ namespace MTUComm
                     if ( ! response.PreviousCmdSuccess ||
                          response.ValvePosition != rddValveStatus )
                     {
+                        string seconds = ( ( int )( WAIT_RDD_MAX / 1000 ) ).ToString ();
+
                         switch ( response.ValvePosition )
                         {
                             // Process continue but the times is out
                             case RDDValveStatus.IN_TRANSITION:
-                                throw new Exception ();
+                                throw new RDDContinueInTransitionAfterMaxTime ( seconds );
 
                             // Unknown current position of the valve
                             case RDDValveStatus.UNKNOWN:
-                                throw new Exception ();
+                                throw new RDDStatusIsUnknownAfterMaxTime ( seconds );
 
                             // the current position of the valve is different from the specified
                             default:
-                                throw new Exception ();
+                                throw new RDDStatusIsDifferentThanExpected ( seconds );
                         }
                     }
 
@@ -3252,16 +3251,18 @@ namespace MTUComm
 
                     Utils.Print ( "----ENCRYPTION_FINISH----" );
 
+                    // The MTU is encrypted!
                     return;
                 }
                 catch ( Exception e )
                 {
                     // Is not own exception
                     if ( ! Errors.IsOwnException ( e ) )
-                        throw new PuckCantCommWithMtuException ();
+                         throw new PuckCantCommWithMtuException ();
                 }
             }
 
+            // Process completed without achieve to encrypt the MTU
             throw new ActionNotAchievedEncryptionException ( CMD_ENCRYP_MAX + "" );
         }
 
