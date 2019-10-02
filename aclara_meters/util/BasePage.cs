@@ -13,6 +13,7 @@ using MTUComm;
 using Library;
 
 using ActionType = MTUComm.Action.ActionType;
+using ValidationResult = MTUComm.MTUComm.ValidationResult;
 
 namespace aclara_meters.util
 {
@@ -116,7 +117,7 @@ namespace aclara_meters.util
                 });
         }
 
-        protected async Task<bool> ValidateNavigation (
+        protected async Task<ValidationResult> ValidateNavigation (
             ActionType typeTarget )
         {
             try
@@ -127,9 +128,9 @@ namespace aclara_meters.util
 
                 return await basicRead.RunNavValidation(typeTarget);
             }
-            catch (Exception )
+            catch ( Exception )
             {
-                return false;
+                return ValidationResult.EXCEPTION;
             }
         }
     }

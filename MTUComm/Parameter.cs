@@ -94,31 +94,33 @@ namespace MTUComm
         /// </summary>
         public enum ParameterType
         {
-            ActivityLogId = 0,
-            MeterType = 1,
-            UnitOfMeasure = 2,
-            //Port2Disabled = 3,
-            AccountNumber = 4,
-            //ProvidingHandFactor = 5,
-            ReadInterval = 6,
-            ForceTimeSync = 7,
-            WorkOrder = 8,
-            //LiveDigits = 9,
-            //TempReadInterval = 10,
-            Alarm = 11,
-            MeterSerialNumber = 12,
-            NumberOfDials = 13,
-            //TempReadDays = 14,
-            MeterReading = 15,
-            DriveDialSize = 16,
-            SnapRead = 17,
-            OldMtuId = 18,
-            OldMeterSerialNumber = 19,
-            NewMeterSerialNumber = 20,
-            OldMeterReading = 21,
-            NewMeterReading = 22,
-            DaysOfRead = 23,
-            Custom = 24
+            ActivityLogId,
+            MeterType,
+            UnitOfMeasure,
+            AccountNumber,
+            ReadInterval,
+            ForceTimeSync,
+            WorkOrder,
+            Alarm,
+            MeterSerialNumber,
+            NumberOfDials,
+            MeterReading,
+            DriveDialSize,
+            SnapRead,
+            OldMtuId,
+            OldMeterSerialNumber,
+            NewMeterSerialNumber,
+            OldMeterReading,
+            NewMeterReading,
+            DaysOfRead,
+            RDDPosition,
+            RDDFirmwareVersion,
+            Custom
+            //Port2Disabled
+            //ProvidingHandFactor
+            //LiveDigits
+            //TempReadDays
+            //TempReadInterval
         };
 
         private class ParameterDefine {

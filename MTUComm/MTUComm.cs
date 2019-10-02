@@ -44,6 +44,13 @@ namespace MTUComm
     {
         #region Constants
 
+        public enum ValidationResult
+        {
+            OK,
+            FAIL,
+            EXCEPTION
+        }
+
         /* Enum: NodeDiscoveryResult
             GOOD         - The Node Discovery process was completed validating at least the minimum nodes/DCUs required
             EXCELLENT    - The Node Discovery process was completed validating the same or more than the desired nodes/DCUs
@@ -224,6 +231,9 @@ namespace MTUComm
         private const int CMD_RDD_STATUS          = 0x22; // 34
         private const int CMD_RDD_STATUS_RES      = 18;
         private const int WAIT_BTW_CMD_RDD        = 1000;
+        private const int RDD_OK                  = 0;
+        private const int RDD_NOT_ACHIEVED        = 1;
+        private const int RDD_EXCEPTION           = 2;
 
         #endregion
 
@@ -348,7 +358,7 @@ namespace MTUComm
 
         #region Launch Validations and Actions
 
-        public async Task<bool> LaunchValidationThread (
+        public async Task<ValidationResult> LaunchValidationThread (
             ActionType type )
         {
             bool ok = false;
@@ -381,9 +391,11 @@ namespace MTUComm
                 Errors.LogRemainExceptions ( e );
                 
                 this.OnError ();
+
+                return ValidationResult.EXCEPTION;
             }
 
-            return ok;
+            return ( ok ) ? ValidationResult.OK : ValidationResult.FAIL;
         }
 
         /// <summary>
@@ -447,8 +459,13 @@ namespace MTUComm
                              await Task.Run ( () => DataRead ( ( Action )args[ 0 ] ) );
                         else await Task.Run ( () => DataRead () );
                         break;
+                    case ActionType.RemoteDisconnect:
+                        // Scripting and Interactive
+                        if ( args.Length == 1 )
+                             await Task.Run ( () => RemoteDisconnect ( ( Action )args[ 0 ] ) );
+                        else await Task.Run ( () => RemoteDisconnect () );
+                        break;
                     case ActionType.MtuInstallationConfirmation: await Task.Run ( () => InstallConfirmation () ); break;
-                    case ActionType.RemoteDisconnect           : await Task.Run ( () => RemoteDisconnect () ); break;
                     case ActionType.ReadFabric                 : await Task.Run ( () => ReadFabric () ); break;
                     case ActionType.ReadMtu                    : await Task.Run ( () => ReadMtu () ); break;
                     case ActionType.TurnOffMtu                 : await Task.Run ( () => TurnOnOffMtu ( false ) ); break;
@@ -509,6 +526,43 @@ namespace MTUComm
         #endregion
 
         #region Actions
+
+        #region Scripting
+
+        private async Task<dynamic> ValidateParams (
+            Action action )
+        {
+            try
+            {
+                // Translate Aclara parameters ID into application's nomenclature
+                // Return ( MTU_has_two_ports, Dictionary<APP_FIELD,( Value, Port_index )> )
+                var translatedParams = ScriptAux.TranslateAclaraParams ( action.GetParameters () );
+
+                dynamic map = this.GetMemoryMap ( true );
+
+                // Check if the second port is enabled
+                bool port2enabled = await map.P2StatusFlag.GetValue ();
+
+                // Validate script parameters ( removing the unnecessary ones )
+                Dictionary<APP_FIELD,string> psSelected = ScriptAux.ValidateParams (
+                    this.mtu, action, translatedParams, port2enabled );
+
+                // Add parameters to Library.Data
+                foreach ( var entry in psSelected )
+                    Data.SetTemp ( entry.Key.ToString (), entry.Value );
+
+                return map;
+            }
+            catch ( Exception e )
+            {
+                // Is not own exception
+                if ( ! Errors.IsOwnException ( e ) )
+                     throw new PuckCantCommWithMtuException ();
+                else throw e;
+            }
+        }
+
+        #endregion
 
         #region AutoDetection Encoders
 
@@ -726,29 +780,17 @@ namespace MTUComm
         {
             try
             {
-                // Translate Aclara parameters ID into application's nomenclature
-                var translatedParams = ScriptAux.TranslateAclaraParams ( action.GetParameters () );
+                // Validates script parameters and set values in Library.Data
+                dynamic map = await this.ValidateParams ( action );
+                
+                // Prepares more data required in the logic of the Data Read process
+                var MtuId     = await map.MtuSerialNumber.GetValue ();
+                var MtuStatus = await map.MtuStatus      .GetValue ();
+                var accName   = await map.P1MeterId      .GetValue ();
 
-                dynamic map = this.GetMemoryMap ( true );
-
-                // Check if the second port is enabled
-                bool port2enabled = await map.P2StatusFlag.GetValue ();
-
-                // Validate script parameters ( removing the unnecessary ones )
-                Dictionary<APP_FIELD,string> psSelected = ScriptAux.ValidateParams (
-                    port2enabled, this.mtu, Data.Get.MtuBasicInfo, action, translatedParams );
-
-                // Add parameters to Library.Data
-                foreach ( var entry in psSelected )
-                    Data.SetTemp ( entry.Key.ToString (), entry.Value );
-
-                var MtuId = await map.MtuSerialNumber.GetValue();
-                var MtuStatus = await map.MtuStatus.GetValue();
-                var accName = await map.P1MeterId.GetValue();
-
-                Data.SetTemp ( "AccountNumber", accName );
-                Data.SetTemp ( "MtuId", MtuId.ToString() );
-                Data.SetTemp ( "MtuStatus", MtuStatus );
+                Data.SetTemp ( "AccountNumber", accName           );
+                Data.SetTemp ( "MtuId",         MtuId.ToString () );
+                Data.SetTemp ( "MtuStatus",     MtuStatus         );
 
                 // Init DataRead logic using translated parameters
                 await this.DataRead ();
@@ -1500,9 +1542,47 @@ namespace MTUComm
 
         #region Valve Operation ( prev. Remote Disconnect )
 
-        private async Task RemoteDisconnect ()
+        private async Task RemoteDisconnect (
+            Action action )
         {
+            try
+            {
+                // Validates script parameters and set values in Library.Data
+                dynamic map = await this.ValidateParams ( action );
+
+                // Init DataRead logic using translated parameters
+                await this.RemoteDisconnect ();
+            }
+            catch ( Exception e )
+            {
+                // Is not own exception
+                if ( ! Errors.IsOwnException ( e ) )
+                     throw new PuckCantCommWithMtuException ();
+                else throw e;
+            }
+        }
+
+        public async Task RemoteDisconnect ()
+        {
+            if ( await this.RemoteDisconnect_Logic () == RDD_OK )
+            {
+                OnProgress ( this, new Delegates.ProgressArgs ( "Reading from MTU..." ) );
+
+                dynamic map = await this.ReadMtu_Logic ();
+                await this.OnRemoteDisconnect ( new Delegates.ActionArgs ( this.mtu, map ) );
+            }
+            else this.OnError ();
+        }
+
+        private async Task<int> RemoteDisconnect_Logic (
+            bool throwExceptions = false )
+        {
+            int result = RDD_OK;
             Stopwatch nodeCounter = null;
+
+            // Uses values from Data..
+            // - RDDPosition ( string ) { Open, Close, Partial Open }
+            // - RDDFirmware ( string ) -> For log only
 
             try
             {
@@ -1516,7 +1596,7 @@ namespace MTUComm
                     // Convert from RDD command to RDD desired status
                     RDDValveStatus rddValveStatus = RDDValveStatus.UNKNOWN;
                     switch ( ( RDDCmd )Enum.Parse ( typeof ( RDDCmd ),
-                              Data.Get.RDDActionType.Replace ( " ", "_" ) ) )
+                              Data.Get.RDDPosition.Replace ( " ", "_" ) ) )
                     {
                         case RDDCmd.CLOSE       : rddValveStatus = RDDValveStatus.CLOSED;       break;
                         case RDDCmd.OPEN        : rddValveStatus = RDDValveStatus.OPEN;         break;
@@ -1543,23 +1623,23 @@ namespace MTUComm
                                 switch ( status = Utils.ParseIntToEnum<RDDStatus> ( await rddStatus.GetValueFromMtu (), RDDStatus.DISABLED ) )
                                 {
                                     case RDDStatus.BUSY:
-                                    if ( okBusy )
-                                        goto END_LOOP;
-                                    break;
+                                        if ( okBusy )
+                                            goto END_LOOP;
+                                        break;
 
                                     case RDDStatus.ERROR_ON_LAST_OPERATION:
-                                    if ( okError )
-                                        goto END_LOOP;
-                                    break;
+                                        if ( okError )
+                                            goto END_LOOP;
+                                        break;
 
                                     case RDDStatus.IDLE:
-                                    if ( ! okIdle )
-                                         goto END_LOOP;
-                                    break;
+                                        if ( ! okIdle )
+                                            goto END_LOOP;
+                                        break;
 
                                     // Error in all cases
                                     case RDDStatus.DISABLED:
-                                    goto END_LOOP;
+                                        goto END_LOOP;
                                 }
 
                                 OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step " + step + " Check RDD attempt " + ( i + 1 ) ) );
@@ -1650,6 +1730,8 @@ namespace MTUComm
                     if ( ! response.PreviousCmdSuccess ||
                          response.ValvePosition != rddValveStatus )
                     {
+                        result = RDD_NOT_ACHIEVED;
+
                         string seconds = ( ( int )( WAIT_RDD_MAX / 1000 ) ).ToString ();
 
                         switch ( response.ValvePosition )
@@ -1668,18 +1750,20 @@ namespace MTUComm
                         }
                     }
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Reading from MTU..." ) );
-
-                    await this.ReadMtu_Logic ( map );
-                    await this.OnRemoteDisconnect ( new Delegates.ActionArgs ( this.mtu, map ) );
+                    // The remote disconnect has worked well!
                 }
             }
             catch ( Exception e )
             {
-                // Is not own exception
-                if ( ! Errors.IsOwnException ( e ) )
-                     throw new PuckCantCommWithMtuException ();
-                else throw e;
+                if ( ! throwExceptions )
+                    result = RDD_EXCEPTION;
+                else
+                {
+                    // Is not own exception
+                    if ( ! Errors.IsOwnException ( e ) )
+                         throw new PuckCantCommWithMtuException ();
+                    else throw e;
+                }
             }
             finally
             {
@@ -1689,6 +1773,8 @@ namespace MTUComm
                     nodeCounter = null;
                 }
             }
+
+            return result;
         }
 
         #endregion
@@ -2453,6 +2539,7 @@ namespace MTUComm
                         }
                     }
     
+                    // Concatenates error messages
                     if ( fail )
                     {
                         fail = false;
@@ -2555,6 +2642,12 @@ namespace MTUComm
                 Logger logger = ( ! Data.Get.IsFromScripting ) ? new Logger () : truquitoAction.Logger;
                 addMtuLog = new AddMtuLog ( logger, form, user );
 
+                bool rddIn1;
+                bool hasRDD = ( ( rddIn1 = mtu.Port1.IsSetFlow ) ||
+                                mtu.TwoPorts && mtu.Port2.IsSetFlow );
+                bool noRddOrNotIn1 = ! hasRDD || ! rddIn1;
+                bool noRddOrNotIn2 = ! hasRDD ||   rddIn1;
+
                 #region Turn Off MTU
 
                 Utils.Print ( "------TURN_OFF_START-----" );
@@ -2604,7 +2697,7 @@ namespace MTUComm
                 dynamic map = this.GetMemoryMap ( true );
                 form.map = map;
 
-                #region Account Number
+                #region Account Number ( also for RDD )
 
                 // Uses default value fill to zeros if parameter is missing in scripting
                 // Only first 12 numeric characters are recorded in MTU memory
@@ -2616,11 +2709,11 @@ namespace MTUComm
 
                 #endregion
 
-                #region Meter Type
+                #region Meter Type ( also for RDD )
 
                 Meter selectedMeter  = null;
                 Meter selectedMeter2 = null;
-                   
+                
                 if ( ! Data.Get.IsFromScripting )
                      selectedMeter = (Meter)form.Meter.Value;
                 else selectedMeter = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
@@ -2642,23 +2735,27 @@ namespace MTUComm
                 string p1readingStr = "0";
                 string p2readingStr = "0";
 
-                if ( form.ContainsParameter ( FIELD.METER_READING ) )
+                if ( noRddOrNotIn1 )
                 {
-                    p1readingStr = form.MeterReading.Value;
-                    ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
-    
-                    map.P1MeterReading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
-                }
-                else if ( this.mtu.Port1.IsForPulse )
-                {
-                    // If meter reading was not present, fill in to zeros up to length equals to selected Meter live digits
-                    p1readingStr = selectedMeter.FillLeftLiveDigits ();
+                    if ( form.ContainsParameter ( FIELD.METER_READING ) )
+                    {
+                        p1readingStr = form.MeterReading.Value;
+                        ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
+        
+                        map.P1MeterReading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
+                    }
+                    else if ( this.mtu.Port1.IsForPulse )
+                    {
+                        // If meter reading was not present, fill in to zeros up to length equals to selected Meter live digits
+                        p1readingStr = selectedMeter.FillLeftLiveDigits ();
 
-                    form.AddParameter ( FIELD.METER_READING, p1readingStr );
-                    map.P1MeterReading = p1readingStr;
+                        form.AddParameter ( FIELD.METER_READING, p1readingStr );
+                        map.P1MeterReading = p1readingStr;
+                    }
                 }
-                
-                if ( form.usePort2 )
+
+                if ( form.usePort2 &&
+                     noRddOrNotIn2 )
                 {
                     if ( form.ContainsParameter ( FIELD.METER_READING_2 ) )
                     {
@@ -2680,11 +2777,13 @@ namespace MTUComm
 
                 #region Reading Interval
 
-                if ( global.IndividualReadInterval )
+                if ( global.IndividualReadInterval &&
+                     noRddOrNotIn1 )
                 {
                     // If not present in scripted mode, set default value to one/1 hour
-                    map.ReadIntervalMinutes = ( form.ContainsParameter ( FIELD.READ_INTERVAL ) ) ?
-                                                form.ReadInterval.Value : "1 Hr";
+                    map.ReadIntervalMinutes =
+                        ( form.ContainsParameter ( FIELD.READ_INTERVAL ) ) ?
+                            form.ReadInterval.Value : "1 Hr";
                 }
 
                 #endregion
@@ -2693,7 +2792,8 @@ namespace MTUComm
 
                 if ( global.AllowDailyReads &&
                      mtu.DailyReads &&
-                     form.ContainsParameter ( FIELD.SNAP_READS ) ) // &&
+                     form.ContainsParameter ( FIELD.SNAP_READS ) &&
+                     noRddOrNotIn1 ) // &&
                      //map.ContainsMember ( "DailyGMTHourRead" ) )
                 {
                     map.DailyGMTHourRead = form.SnapReads.Value;
@@ -2701,7 +2801,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Time of day for TimeSync
+                #region Time of day for TimeSync ( aslo for RDD )
 
                 if ( global.TimeToSync &&
                      mtu.TimeToSync    &&
@@ -2714,7 +2814,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Alarm
+                #region Alarm ( also for RDD )
 
                 if ( mtu.RequiresAlarmProfile )
                 {
@@ -2802,7 +2902,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Frequencies
+                #region Frequencies ( also for RDD )
 
                 if ( global.AFC       &&
                      mtu.TimeToSync   &&
@@ -2819,7 +2919,7 @@ namespace MTUComm
 
                 Utils.Print ( "--------ADD_FINISH-------" );
 
-                #region Encryption
+                #region Encryption ( also for RDD )
 
                 // Only encrypt MTUs with SpecialSet set
                 if ( mtu.SpecialSet )
@@ -2868,7 +2968,7 @@ namespace MTUComm
 
                 await this.CheckIsTheSameMTU ();
 
-                #region Alarm #2
+                #region Alarm #2 ( also for RDD )
 
                 if ( mtu.RequiresAlarmProfile )
                 {
@@ -2882,7 +2982,24 @@ namespace MTUComm
 
                 #endregion
 
-                #region RFCheck
+                #region Valve Operation ( prev. Remote Disconnect )
+
+                Utils.Print ( "--------RDD_START--------" );
+
+                if ( this.mtu.Port1.IsSetFlow ||
+                     this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow )
+                {
+                    // If the Remote Disconnect fails, it cancels the installation
+                    await this.RemoteDisconnect_Logic ( true );
+
+                    await this.CheckIsTheSameMTU ();
+                }
+
+                Utils.Print ( "-------RDD_FINISH--------" );
+
+                #endregion
+
+                #region RFCheck ( prev. Install Confirmation, also for RDD )
 
                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true
@@ -2909,11 +3026,11 @@ namespace MTUComm
                     }
                     
                     Utils.Print ( "--------IC_FINISH--------" );
+
+                    await this.CheckIsTheSameMTU ();
                 }
 
                 #endregion
-
-                await this.CheckIsTheSameMTU ();
 
                 #region Read MTU
 

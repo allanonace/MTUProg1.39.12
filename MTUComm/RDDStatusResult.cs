@@ -74,6 +74,7 @@ namespace MTUComm
             UNKNOWN = 0xFF
         }
 
+        public  const int MAX_LENGTH_FIRMWARE     = 12;
         private const int BYTE_SERIAL_NUMBER      = 2;
         private const int NUM_BYTES_SERIAL_NUMBER = 9;
         private const int BYTE_VALVE_POSITION     = 11;

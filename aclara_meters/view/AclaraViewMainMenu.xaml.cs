@@ -20,6 +20,7 @@ using Plugin.Settings;
 using Xamarin.Forms;
 
 using ActionType = MTUComm.Action.ActionType;
+using ValidationResult = MTUComm.MTUComm.ValidationResult;
 
 
 namespace aclara_meters.view
@@ -1274,13 +1275,17 @@ namespace aclara_meters.view
             }
 
             #endregion
-            if ( ! await base.ValidateNavigation ( actionTarget ) )
+            
+            switch ( await base.ValidateNavigation ( actionTarget ) )
             {
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialogView.CloseDialogs();
-                dialogView.OpenCloseDialog("dialog_NoAction", true);
-                return;
+                case ValidationResult.EXCEPTION:
+                    return;
+                case ValidationResult.FAIL:
+                    dialog_open_bg.IsVisible = true;
+                    turnoff_mtu_background.IsVisible = true;
+                    dialogView.CloseDialogs();
+                    dialogView.OpenCloseDialog("dialog_NoAction", true);
+                    return;
             }
 
             switch (actionTarget)

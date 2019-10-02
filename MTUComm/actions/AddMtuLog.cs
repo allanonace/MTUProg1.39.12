@@ -90,12 +90,15 @@ namespace MTUComm
                                   actionType == ActionType.AddMtuReplaceMeter;
             bool isReplaceMtu   = actionType == ActionType.ReplaceMTU ||
                                   actionType == ActionType.ReplaceMtuReplaceMeter;
+            
+            bool rddIn1;
+            bool hasRDD = ( ( rddIn1 = mtu.Port1.IsSetFlow ) ||
+                            mtu.TwoPorts && mtu.Port2.IsSetFlow );
+            bool noRddOrNotIn1 = ! hasRDD || ! rddIn1;
+            bool noRddOrNotIn2 = ! hasRDD ||   rddIn1;
 
             #region General
 
-            //logger.addAtrribute ( this.addMtuAction, "display", addMtuDisplay );
-            // logger.addAtrribute ( this.addMtuAction, "type",    addMtuType    );
-            // logger.addAtrribute ( this.addMtuAction, "reason",  addMtuReason  );
             logger.AddAtrribute(this.addMtuAction, "display", Action.logDisplays[this.action.Type]);
             logger.AddAtrribute(this.addMtuAction, "type", Action.logTypes[this.action.Type]);
             logger.AddAtrribute(this.addMtuAction, "reason", Action.logReasons[this.action.Type]);
@@ -105,15 +108,22 @@ namespace MTUComm
             if ( ! string.IsNullOrEmpty ( this.user ) )
                 logger.AddParameter(this.addMtuAction, new Parameter("User", "User", this.user ) );
 
+            // Not used with single port MTUs with RDD
             if ( isReplaceMtu &&
-                 form.ContainsParameter ( FIELD.MTU_ID_OLD ) )
+                 form.ContainsParameter ( FIELD.MTU_ID_OLD ) &&
+                 noRddOrNotIn1 )
                 logger.AddParameter ( this.addMtuAction, form.OldMtuId );
 
             logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuId",   "MTU ID",   this.mtuBasicInfo.Id   ) );
             logger.AddParameter ( this.addMtuAction, new Parameter ( "MtuType", "MTU Type", this.mtuBasicInfo.Type ) );
-            logger.AddParameter ( this.addMtuAction, form.ReadInterval );
 
-            if ( form.ContainsParameter ( FIELD.SNAP_READS ) )
+            // Not used with single port MTUs with RDD
+            if ( noRddOrNotIn1 )
+                logger.AddParameter ( this.addMtuAction, form.ReadInterval );
+
+            // Not used with single port MTUs with RDD
+            if ( form.ContainsParameter ( FIELD.SNAP_READS ) &&
+                 noRddOrNotIn1 )
             {
                 bool   useDailyReads    = ( global.AllowDailyReads && 
                                             mtu.DailyReads &&
@@ -205,7 +215,9 @@ namespace MTUComm
             if ( global.WorkOrderRecording )
                 logger.AddParameter ( port, form.WorkOrder );
 
-            if ( isReplaceMeter )
+            // Not used with single port MTUs with RDD
+            if ( isReplaceMeter &&
+                 noRddOrNotIn1 )
             {
                 if ( global.UseMeterSerialNumber )
                     logger.AddParameter ( port, form.MeterNumberOld );
@@ -227,22 +239,35 @@ namespace MTUComm
                 }
             }
 
+            if ( hasRDD &&
+                 rddIn1 )
+            {
+                logger.AddParameter ( port, new Parameter ( "RDDSerialNumber", "RDD SerialNumber", await map.RDDSerialNumber.GetValue () ) );
+                logger.AddParameter ( port, new Parameter ( "RDDBatteryStatus", "RDD Battery Status", Data.Get.RDDBattery ) );
+                logger.AddParameter ( port, new Parameter ( "RDDCurrentValvePosition", "RDD Current Valve Position", Data.Get.PrevRDDValvePosition ) );
+                logger.AddParameter ( port, new Parameter ( "RDDDesiredValvePosition", "RDD Desired Valve Position", Data.Get.RDDActionType ) );
+            }
+
             string meterType = string.Format("({0}) {1}", meter.Id, meter.Display);
             logger.AddParameter ( port, new Parameter("MeterType", "Meter Type", meterType));
             logger.AddParameter ( port, new Parameter("MeterTypeId", "Meter Type ID", meter.Id.ToString()));
             logger.AddParameter ( port, new Parameter("MeterVendor", "Meter Vendor", meter.Vendor));
             logger.AddParameter ( port, new Parameter("MeterModel", "Meter Model", meter.Model));
             
-            if ( global.UseMeterSerialNumber )
+            // Not used with single port MTUs with RDD
+            if ( global.UseMeterSerialNumber &&
+                 noRddOrNotIn1 )
                 logger.AddParameter ( port, form.MeterNumber );
             
-            if ( ! mtu.Port1.IsForEncoderOrEcoder )
+            // Not used with single port MTUs with RDD
+            if ( ! mtu.Port1.IsForEncoderOrEcoder &&
+                 noRddOrNotIn1 )
                 logger.AddParameter ( port, form.MeterReading );
             
-            logger.AddParameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
-            logger.AddParameter ( port, new Parameter("PulseLo","Pulse Low Time", meter.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
+            logger.AddParameter ( port, new Parameter ( "PulseHi","Pulse Hi Time",  meter.PulseHiTime .ToString ().PadLeft ( 2, '0' ) ) );
+            logger.AddParameter ( port, new Parameter ( "PulseLo","Pulse Low Time", meter.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
 
-            this.addMtuAction.Add(port);
+            this.addMtuAction.Add ( port );
 
             #endregion
 
@@ -263,7 +288,9 @@ namespace MTUComm
                 if ( global.WorkOrderRecording )
                     logger.AddParameter ( port, form.WorkOrder_2 );
 
-                if ( isReplaceMeter )
+                // Not used with RDD
+                if ( isReplaceMeter &&
+                     noRddOrNotIn2 )
                 {
                     if ( global.UseMeterSerialNumber )
                         logger.AddParameter ( port, form.MeterNumberOld_2 );
@@ -285,22 +312,35 @@ namespace MTUComm
                     }
                 }
                 
+                if ( hasRDD &&
+                     ! rddIn1 )
+                {
+                    logger.AddParameter ( port, new Parameter ( "RDDSerialNumber", "RDD SerialNumber", await map.RDDSerialNumber.GetValue () ) );
+                    logger.AddParameter ( port, new Parameter ( "RDDBatteryStatus", "RDD Battery Status", Data.Get.RDDBattery ) );
+                    logger.AddParameter ( port, new Parameter ( "RDDCurrentValvePosition", "RDD Current Valve Position", Data.Get.PrevRDDValvePosition ) );
+                    logger.AddParameter ( port, new Parameter ( "RDDDesiredValvePosition", "RDD Desired Valve Position", Data.Get.RDDActionType ) );
+                }
+
                 string meterType2 = string.Format("({0}) {1}", meter2.Id, meter2.Display);
                 logger.AddParameter ( port, new Parameter("MeterType", "Meter Type", meterType2));
                 logger.AddParameter ( port, new Parameter("MeterTypeId", "Meter Type ID", meter2.Id.ToString()));
                 logger.AddParameter ( port, new Parameter("MeterVendor", "Meter Vendor", meter2.Vendor));
                 logger.AddParameter ( port, new Parameter("MeterModel", "Meter Model", meter2.Model));
                 
-                if ( global.UseMeterSerialNumber )
+                // Not used with RDD
+                if ( global.UseMeterSerialNumber &&
+                     noRddOrNotIn2 )
                     logger.AddParameter ( port, form.MeterNumber_2 );
                 
-                if ( ! mtu.Port2.IsForEncoderOrEcoder )
+                // Not used with RDD
+                if ( ! mtu.Port2.IsForEncoderOrEcoder &&
+                     noRddOrNotIn2 )
                     logger.AddParameter ( port, form.MeterReading_2 );
 
-                logger.AddParameter ( port, new Parameter("PulseHi","Pulse Hi Time", meter2.PulseHiTime.ToString ().PadLeft ( 2, '0' ) ) );
-                logger.AddParameter ( port, new Parameter("PulseLo","Pulse Low Time", meter2.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
+                logger.AddParameter ( port, new Parameter ( "PulseHi","Pulse Hi Time",  meter2.PulseHiTime .ToString ().PadLeft ( 2, '0' ) ) );
+                logger.AddParameter ( port, new Parameter ( "PulseLo","Pulse Low Time", meter2.PulseLowTime.ToString ().PadLeft ( 2, '0' ) ) );
 
-                this.addMtuAction.Add(port);
+                this.addMtuAction.Add ( port );
             }
 
             #endregion
