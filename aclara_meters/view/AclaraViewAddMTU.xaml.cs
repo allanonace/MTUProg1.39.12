@@ -613,6 +613,10 @@ namespace aclara_meters.view
             this.div_AccountNumber_Dual_2.IsVisible = hasTwoPorts && useDualAccountNumber;
             this.div_AccountNumber_Dual_2.IsEnabled = hasTwoPorts && useDualAccountNumber;
 
+            // Valve
+            this.div_AccountNumber_Dual_V.IsVisible = hasValve && useDualAccountNumber;
+            this.div_AccountNumber_Dual_V.IsEnabled = hasValve && useDualAccountNumber;
+
             #endregion
 
             #region Work Order / Field Order
@@ -641,6 +645,10 @@ namespace aclara_meters.view
             // Port 2
             this.div_WorkOrder_Dual_2.IsVisible = hasTwoPorts && useDualWorkOrder;
             this.div_WorkOrder_Dual_2.IsEnabled = hasTwoPorts && useDualWorkOrder;
+
+            // Valve
+            this.div_WorkOrder_Dual_V.IsVisible = hasValve && useDualWorkOrder;
+            this.div_WorkOrder_Dual_V.IsEnabled = hasValve && useDualWorkOrder;
 
             #endregion
 
