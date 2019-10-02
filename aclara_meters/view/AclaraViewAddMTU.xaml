@@ -47,11 +47,13 @@
                         <StackLayout Margin="0,0,0,0">
                             <Grid Margin="0,0,0,0" HeightRequest="48">
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto">
+                                    <ColumnDefinition Width="20*">
                                     </ColumnDefinition>
-                                    <ColumnDefinition Width="*">
+                                    <ColumnDefinition Width="20*">
                                     </ColumnDefinition>
-                                    <ColumnDefinition Width="auto">
+                                    <ColumnDefinition Width="20*">
+                                    </ColumnDefinition>
+                                    <ColumnDefinition Width="40*">
                                     </ColumnDefinition>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
@@ -64,7 +66,10 @@
                                 <Label x:Name="port2label" WidthRequest="100" HeightRequest="46" Margin="0,0,0,0" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19"
                                     TextColor="#6aa2b8" Opacity="0.5">
                                 </Label>
-                                <Label x:Name="misclabel" HeightRequest="46" Margin="0,0,10,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="EndAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19" TextColor="#6aa2b8"
+                                <Label x:Name="valvelabel" WidthRequest="100" HeightRequest="46" Margin="0,0,0,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="CenterAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19"
+                                    TextColor="#6aa2b8" Opacity="0.5">
+                                </Label>
+                                <Label x:Name="misclabel" HeightRequest="46" Margin="0,0,10,0" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="EndAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19" TextColor="#6aa2b8"
                                     Opacity="0.5">
                                 </Label>
                             </Grid>
@@ -661,6 +666,135 @@
                                                 <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_DualMeterType_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                             </StackLayout>
                                         </StackLayout>
+                                        <StackLayout Margin="0,4,0,148" />
+                                    </StackLayout>
+                                </StackLayout>
+                                <!--                   -->
+                                <!--      RDD Valve    -->
+                                <!--                   -->
+                                <StackLayout IsVisible="true" Margin="0,0,0,0">
+                                    <StackLayout x:Name="valveview" IsVisible="false" Margin="12,0,12,0">
+                                        <StackLayout Orientation="Horizontal">
+                                            <Label Margin="0,16,0,8" FontSize="22" HorizontalOptions="StartAndExpand" TextColor="#6aa2b8" x:Name="name_of_window_valve" Text="Add MTU" />
+                                        </StackLayout>
+                                        <!-- Account Number / Service Port ID -->
+                                        <StackLayout x:Name="div_AccountNumber_V">
+                                            <Label Text="Service Port ID" Margin="0,4,0,0" x:Name="lb_AccountNumber_V" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <!-- Debug -->
+                                                        <ImageButton IsVisible="{Binding DebugMode}" BackgroundColor="Transparent"
+                                                    HeightRequest="60" Source="auto.png" Clicked="AutoFillTextbox" />
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric" HeightRequest="40" x:Name="tbx_AccountNumber_V" 
+                                                                              VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" 
+                                                                              PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_AccountNumber_V" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+                                        <!-- Work Order / Field Order -->
+                                        <StackLayout x:Name="div_WorkOrder_V">
+                                            <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder_V" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_WorkOrder_V" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_WorkOrder_V" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+                                        <!-- Meter Type -->
+                                        <StackLayout Margin="0,0,0,0">
+                                            <StackLayout HorizontalOptions="FillAndExpand" Margin="0,4,0,0" x:Name="div_MeterType_V" />
+                                        </StackLayout>
+                                        <!-- RDD Position -->
+                                        <StackLayout x:Name="div_RDDPosition">
+                                            <Label Text="RDD Position" Margin="0,4,0,0" x:Name="lb_RDDPosition" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_RDDPosition" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+                                        <!-- RDD Serial Number -->
+                                        <StackLayout x:Name="div_RDDSerialNumber">
+                                            <Label Text="RDD Serial Number" Margin="0,4,0,0" x:Name="lb_RDDSerialNumber" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_RDDSerialNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+                                        <!-- Battery -->
+                                        <StackLayout x:Name="div_Battery">
+                                            <Label Text="Battery" Margin="0,4,0,0" x:Name="lb_Battery" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry IsReadOnly="true" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_Battery" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+                                        <!-- RDD Firmware Version -->
+                                        <StackLayout x:Name="div_RDDFirmwareVersion">
+                                            <Label Text="RDD Firmware Version" Margin="0,4,0,0" x:Name="lb_RDDFirmwareVersion" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry IsReadOnly="False" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_RDDFirmwareVersion" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+                                        <!-- Valve Position -->
+                                        <StackLayout x:Name="div_ValvePosition" IsVisible="true">
+                                            <Label Text="Valve Position" x:Name="lb_ValvePosition" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessPicker x:Name="pck_ValvePosition" Title="" HorizontalOptions="FillAndExpand" FontSize="17" HeightRequest="40" />
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                        </StackLayout>
+
                                         <StackLayout Margin="0,4,0,148" />
                                     </StackLayout>
                                 </StackLayout>

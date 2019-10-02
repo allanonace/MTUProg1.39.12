@@ -109,6 +109,7 @@ namespace aclara_meters.view
         private const string LB_PORT1 = "Port 1";
         private const string LB_PORT2 = "Port 2";
         private const string LB_MISC  = "Miscellaneous";
+        private const string LB_VALVE = "Valve";
 
         #endregion
 
@@ -126,27 +127,40 @@ namespace aclara_meters.view
         private StackLayout      divDyna_MeterType_Vendors_2;
         private StackLayout      divDyna_MeterType_Models_2;
         private StackLayout      divDyna_MeterType_Names_2;
+        private StackLayout      divDyna_MeterType_Vendors_V;
+        private StackLayout      divDyna_MeterType_Models_V;
+        private StackLayout      divDyna_MeterType_Names_V;
         private BorderlessPicker pck_MeterType_Vendors;
         private BorderlessPicker pck_MeterType_Models;
         private BorderlessPicker pck_MeterType_Names;
         private BorderlessPicker pck_MeterType_Vendors_2;
         private BorderlessPicker pck_MeterType_Models_2;
         private BorderlessPicker pck_MeterType_Names_2;
+        private BorderlessPicker pck_MeterType_Vendors_V;
+        private BorderlessPicker pck_MeterType_Models_V;
+        private BorderlessPicker pck_MeterType_Names_V;
         private List<string>     list_MeterType_Vendors;
         private List<string>     list_MeterType_Models;
         private List<string>     list_MeterType_Names;
         private List<string>     list_MeterType_Vendors_2;
         private List<string>     list_MeterType_Models_2;
         private List<string>     list_MeterType_Names_2;
+        private List<string>     list_MeterType_Vendors_V;
+        private List<string>     list_MeterType_Models_V;
+        private List<string>     list_MeterType_Names_V;
         private List<Xml.Meter>  list_MeterTypesForMtu;
         private List<Xml.Meter>  list_MeterTypesForMtu_2;
+        private List<Xml.Meter>  list_MeterTypesForMtu_V;
         private string           selected_MeterType_Vendor;
         private string           selected_MeterType_Vendor_2;
+        private string           selected_MeterType_Vendor_V;
         private string           selected_MeterType_Model;
         private string           selected_MeterType_Model_2;
+        private string           selected_MeterType_Model_V;
         private string           selected_MeterType_Name;
         private string           selected_MeterType_Name_2;
-        
+        private string           selected_MeterType_Name_V;
+
         // Miscelanea
         private List<BorderlessPicker> optionalPickers;
         private List<BorderlessEntry>  optionalEntries;
@@ -209,6 +223,7 @@ namespace aclara_meters.view
         }
         private ActionType actionType;
         private ActionType actionTypeNew;
+        private bool hasValve;
         private bool hasTwoPorts;
         private bool port2IsActivated;
         private bool p1NoNewMeterReadings;
@@ -315,13 +330,14 @@ namespace aclara_meters.view
             
             TappedListeners ();
             InitializeLowerbarLabel();
-            InitializeAddMtuForm ();
             
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
 
             Task.Run ( async () =>
             {
+                await InitializeAddMtuForm();
+
                 await LoadMetersList ();
             })
             .ContinueWith ( t =>
@@ -473,13 +489,19 @@ namespace aclara_meters.view
                 // Pulse
                 else
                     this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu, 1 );
+
+              
             }
-            
+            if (hasValve)
+                this.list_MeterTypesForMtu_V = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu, 1);
+
             Device.BeginInvokeOnMainThread ( () =>
             {
                 this.InitializePicker_MeterType ();
                 if ( hasTwoPorts )
                     this.InitializePicker_MeterType_2 ();
+                if ( hasValve )
+                    this.InitializePicker_MeterType_V();
             });
 
             bool ShowMeterVendor = global.ShowMeterVendor;
@@ -493,7 +515,7 @@ namespace aclara_meters.view
             }
         }
 
-        private void InitializeAddMtuForm ()
+        private async Task InitializeAddMtuForm ()
         {
             #region Conditions
 
@@ -502,11 +524,67 @@ namespace aclara_meters.view
 
             #endregion
 
-            #region Two ports
+            #region Two ports or RDD
+            if (this.currentMtu.Port1.IsSetFlow)
+            {
+                port1label.IsVisible = false;
+                port2label.IsVisible = false;
+                valvelabel.IsVisible = true;
+                hasValve = true;
+                hasTwoPorts = false;
+            }
+            else if (this.currentMtu.TwoPorts && this.currentMtu.Port2.IsSetFlow)
+            {
+                port1label.IsVisible = true;
+                port2label.IsVisible = false;
+                valvelabel.IsVisible = true;
+                hasValve = true;
+                hasTwoPorts = false;
+            }
+            else
+            {
+                this.hasTwoPorts = this.currentMtu.TwoPorts;
+                port2label.IsVisible = this.hasTwoPorts;
+                valvelabel.IsVisible = false;
+                hasValve = false;
+            }
 
-            this.hasTwoPorts = this.currentMtu.TwoPorts;
-            port2label.IsVisible = this.hasTwoPorts;
+            #endregion
+            #region RDD
 
+            if (hasValve)
+            {
+                List<string> list = new List<string>()
+                {
+                    "Close", "Open", "Partial Open"
+                };
+
+                //Now I am given ItemsSorce to the Pickers
+                pck_ValvePosition.ItemsSource = list;
+
+                dynamic map = Data.Get.MemoryMap;
+                Mtu mtuv = Singleton.Get.Action.CurrentMtu;
+
+                int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
+
+                ulong AccountNum = (mtuv.Port1.IsSetFlow) ? await map.P1MeterId.GetValue() : await map.P2MeterId.GetValue();
+                int MtuId = await map.MtuSerialNumber.GetValue();
+                string MtuStatus = await map.MtuStatus.GetValue();
+                string rddPosition = await map.RDDValvePosition.GetValue();
+                ulong rddSerial = await map.RDDSerialNumber.GetValue();
+                string rddBattery = await map.RDDBatteryStatus.GetValue();
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    //this.tbx_MtuId.Text = MtuId.ToString().PadLeft(mtuIdLength, '0');
+                    //this.tbx_Mtu_Status.Text = MtuStatus;
+                    //this.tbx_AccountNumber.Text = AccountNum.ToString();
+                    this.tbx_RDDPosition.Text = rddPosition;
+                    this.tbx_RDDSerialNumber.Text = rddSerial.ToString();
+                    this.tbx_Battery.Text = rddBattery;
+
+                });
+            }
             #endregion
 
             #region Account Number / Service Port ID
@@ -535,7 +613,11 @@ namespace aclara_meters.view
             // Port 2
             this.div_WorkOrder_2.IsVisible = hasTwoPorts && useWorkOrder;
             this.div_WorkOrder_2.IsEnabled = hasTwoPorts && useWorkOrder;
-            
+
+            // RDD
+            this.div_WorkOrder_V.IsVisible = hasValve && useWorkOrder;
+            this.div_WorkOrder_V.IsEnabled = hasValve && useWorkOrder;
+
             // Dual entry
             bool useDualWorkOrder = global.WorkOrderDualEntry && useWorkOrder;
             
@@ -1231,6 +1313,7 @@ namespace aclara_meters.view
             this.port1label.Text = LB_PORT1;
             this.port2label.Text = LB_PORT2;
             this.misclabel .Text = LB_MISC;
+            this.valvelabel.Text = LB_VALVE;
                         
             #endregion
         }
@@ -1544,6 +1627,10 @@ namespace aclara_meters.view
             port2label.GestureRecognizers.Add(new TapGestureRecognizer
             {
                 Command = new Command(() => port2_command()),
+            });
+            valvelabel.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = new Command(() => valve_command()),
             });
 
             gps_icon_button.Tapped += GpsUpdateButton;
@@ -2033,6 +2120,211 @@ namespace aclara_meters.view
             divDyna_MeterType_Models_2.IsVisible = false;
         }
 
+        private void InitializePicker_MeterType_V()
+        {
+            list_MeterType_Vendors_V = this.config.meterTypes.GetVendorsFromMeters(list_MeterTypesForMtu_V);
+
+            Frame meterVendors2ContainerB = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(0, 4, 0, 0),
+                BackgroundColor = Color.FromHex("#7a868c")
+            };
+
+            Frame meterVendors2ContainerC = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(-7, -7, -7, -7),
+                BackgroundColor = Color.White
+            };
+
+            StackLayout meterVendors2ContainerD = new StackLayout()
+            {
+                Orientation = StackOrientation.Horizontal,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Margin = new Thickness(1, 1, 1, 1),
+                BackgroundColor = Color.White
+            };
+
+            pck_MeterType_Vendors_V = new BorderlessPicker()
+            {
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                HeightRequest = 40,
+                FontSize = 17,
+                ItemsSource = list_MeterType_Vendors_V
+            };
+
+            pck_MeterType_Vendors_V.SelectedIndexChanged += MeterVendorsVPicker_SelectedIndexChanged;
+
+            divDyna_MeterType_Vendors_V = new StackLayout()
+            {
+                StyleId = "bloque" + 1
+            };
+
+            Label meterVendors2Label = new Label()
+            {
+                Text = "Vendor",
+                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                Margin = new Thickness(0, 4, 0, 0)
+            };
+
+
+            #region Color Entry
+
+            if (this.global.ColorEntry)
+            {
+                meterVendors2Label.TextColor = COL_MANDATORY;
+
+            }
+
+            #endregion
+
+            meterVendors2ContainerD.Children.Add(pck_MeterType_Vendors_V);
+            meterVendors2ContainerC.Content = meterVendors2ContainerD;
+            meterVendors2ContainerB.Content = meterVendors2ContainerC;
+            divDyna_MeterType_Vendors_V.Children.Add(meterVendors2Label);
+            divDyna_MeterType_Vendors_V.Children.Add(meterVendors2ContainerB);
+
+            list_MeterType_Models_V = new List<string>();
+
+            Frame meterModels2ContainerB = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(0, 4, 0, 0),
+                BackgroundColor = Color.FromHex("#7a868c")
+            };
+
+            Frame meterModels2ContainerC = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(-7, -7, -7, -7),
+                BackgroundColor = Color.White
+            };
+
+            StackLayout meterModels2ContainerD = new StackLayout()
+            {
+                Orientation = StackOrientation.Horizontal,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Margin = new Thickness(1, 1, 1, 1),
+                BackgroundColor = Color.White
+            };
+
+            pck_MeterType_Models_V = new BorderlessPicker()
+            {
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                HeightRequest = 40,
+                FontSize = 17,
+                ItemsSource = list_MeterType_Models_V,
+                StyleId = "pickerModelosV"
+            };
+
+            pck_MeterType_Models_V.SelectedIndexChanged += MeterModelsVPicker_SelectedIndexChanged;
+
+            divDyna_MeterType_Models_V = new StackLayout()
+            {
+                StyleId = "bloque" + 2
+            };
+
+            Label meterModels2Label = new Label()
+            {
+                Text = "Model",
+                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                Margin = new Thickness(0, 4, 0, 0)
+            };
+
+
+            #region Color Entry
+
+            if (this.global.ColorEntry)
+            {
+                meterModels2Label.TextColor = COL_MANDATORY;
+
+            }
+
+            #endregion
+
+
+            meterModels2ContainerD.Children.Add(pck_MeterType_Models_V);
+            meterModels2ContainerC.Content = meterModels2ContainerD;
+            meterModels2ContainerB.Content = meterModels2ContainerC;
+            divDyna_MeterType_Models_V.Children.Add(meterModels2Label);
+            divDyna_MeterType_Models_V.Children.Add(meterModels2ContainerB);
+
+            list_MeterType_Names_V = new List<string>();
+
+            Frame meterNames2ContainerB = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(0, 4, 0, 0),
+                BackgroundColor = Color.FromHex("#7a868c")
+            };
+
+            Frame meterNames2ContainerC = new Frame()
+            {
+                CornerRadius = 6,
+                HeightRequest = 30,
+                Margin = new Thickness(-7, -7, -7, -7),
+                BackgroundColor = Color.White
+            };
+
+            StackLayout meterNames2ContainerD = new StackLayout()
+            {
+                Orientation = StackOrientation.Horizontal,
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                Margin = new Thickness(1, 1, 1, 1),
+                BackgroundColor = Color.White
+            };
+
+            pck_MeterType_Names_V = new BorderlessPicker()
+            {
+                HorizontalOptions = LayoutOptions.FillAndExpand,
+                HeightRequest = 40,
+                FontSize = 17,
+                ItemsSource = list_MeterType_Names_2,
+                StyleId = "pickerNameV"
+            };
+
+            //pck_MeterType_Names_V.SelectedIndexChanged += MeterNamesVPicker_SelectedIndexChanged;
+
+            divDyna_MeterType_Names_V = new StackLayout()
+            {
+                StyleId = "bloque" + 3
+            };
+
+            Label meterNames2Label = new Label()
+            {
+                Text = "Meter Type",
+                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                Margin = new Thickness(0, 4, 0, 0)
+            };
+
+
+            #region Color Entry
+
+            if (this.global.ColorEntry)
+                meterNames2Label.TextColor = COL_MANDATORY;
+
+            #endregion
+
+            meterNames2ContainerD.Children.Add(pck_MeterType_Names_V);
+            meterNames2ContainerC.Content = meterNames2ContainerD;
+            meterNames2ContainerB.Content = meterNames2ContainerC;
+            divDyna_MeterType_Names_V.Children.Add(meterNames2Label);
+            divDyna_MeterType_Names_V.Children.Add(meterNames2ContainerB);
+
+            this.div_MeterType_V.Children.Add(divDyna_MeterType_Vendors_V);
+            this.div_MeterType_V.Children.Add(divDyna_MeterType_Models_V);
+            this.div_MeterType_V.Children.Add(divDyna_MeterType_Names_V);
+
+            divDyna_MeterType_Names_V.IsVisible = false;
+            divDyna_MeterType_Models_V.IsVisible = false;
+        }
+
         private void InitializePicker_ReadInterval (
             MTUBasicInfo mtuBasicInfo,
             Mtu mtu )
@@ -2238,6 +2530,23 @@ namespace aclara_meters.view
             }
         }
 
+        private void MeterVendorsVPicker_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int selectedIndex = ((BorderlessPicker)sender).SelectedIndex;
+
+            if (selectedIndex > -1)
+            {
+                selected_MeterType_Vendor_V = list_MeterType_Vendors_V[selectedIndex];
+
+                list_MeterType_Models_V = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_V, selected_MeterType_Vendor_V);
+                selected_MeterType_Name_V = "";
+
+                pck_MeterType_Models_V.ItemsSource = list_MeterType_Models_V;
+                divDyna_MeterType_Models_V.IsVisible = true;
+                divDyna_MeterType_Names_V.IsVisible = false;
+            }
+        }
+
         private void SetMeterModel ( int selectedIndex )
         {
             if ( selectedIndex > -1 )
@@ -2274,6 +2583,24 @@ namespace aclara_meters.view
                 pck_MeterType_Names_2.ItemsSource = meterlist2;
                 divDyna_MeterType_Models_2.IsVisible = true;
                 divDyna_MeterType_Names_2.IsVisible = true;
+            }
+        }
+
+        private void MeterModelsVPicker_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int selectedIndex = ((BorderlessPicker)sender).SelectedIndex;
+
+            if (selectedIndex > -1)
+            {
+                pck_MeterType_Names_V.ItemDisplayBinding = new Binding("Display");
+
+                selected_MeterType_Model_V = list_MeterType_Models_V[selectedIndex];
+
+                List<Meter> meterlist2 = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_V, selected_MeterType_Vendor_V, selected_MeterType_Model_V);
+
+                pck_MeterType_Names_V.ItemsSource = meterlist2;
+                divDyna_MeterType_Models_V.IsVisible = true;
+                divDyna_MeterType_Names_V.IsVisible = true;
             }
         }
 
@@ -2353,6 +2680,43 @@ namespace aclara_meters.view
             }
         }
 
+   /*     private void MeterNamesVPicker_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (((BorderlessPicker)sender).SelectedIndex > -1)
+            {
+                Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
+
+                selected_MeterType_Name_V = selectedMeter.Display;
+
+                Utils.Print(selected_MeterType_Name_V + " Selected");
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    // Update MeterReading field length to use and validate
+                    this.tbx_MeterReading_V.MaxLength = selectedMeter.LiveDigits;
+                    this.tbx_MeterReading_Dual_V.MaxLength = selectedMeter.LiveDigits;
+                    //this.tbx_OldMeterReading_2     .MaxLength = selectedMeter.LiveDigits;
+                    //this.tbx_OldMeterReading_Dual_2.MaxLength = selectedMeter.LiveDigits;
+
+                    this.divSub_MeterReading_2.Opacity = OPACITY_ENABLE;
+                    this.divSub_MeterReading_Dual_2.Opacity = OPACITY_ENABLE;
+                    //this.divSub_OldMeterReading_2     .Opacity = OPACITY_ENABLE;
+                    //this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_ENABLE;
+
+                    this.tbx_MeterReading_2.IsEnabled = true;
+                    this.tbx_MeterReading_Dual_2.IsEnabled = true;
+                    this.btnScannerMeterReading_2.IsEnabled = true;
+                    this.btnScannerMeterReadingDual_2.IsEnabled = true;
+                    //this.tbx_OldMeterReading_2     .IsEnabled = true;
+                    //this.tbx_OldMeterReading_Dual_2.IsEnabled = true;
+
+                    this.lb_MeterReading_MeterType_2.IsVisible = false;
+                    this.lb_MeterReading_DualMeterType_2.IsVisible = false;
+                    //this.lb_OldMeterReading_MeterType_2    .IsVisible = false;
+                    //this.lb_OldMeterReading_DualMeterType_2.IsVisible = false;
+                });
+            }
+        }*/
         #endregion
 
         #region Sliders
@@ -2917,17 +3281,42 @@ namespace aclara_meters.view
             port1label.Opacity = 0.5;
             misclabel.Opacity = 1;
             port2label.Opacity = 0.5;
+            valvelabel.Opacity = 0.5;
 
             port1label.FontSize = 19;
             misclabel.FontSize = 22;
             port2label.FontSize = 19;
+            valvelabel.FontSize = 19;
 
             port1view.IsVisible = false;
             port2view.IsVisible = false;
             miscview.IsVisible = true;
+            valveview.IsVisible = false;
 
             miscview.FadeTo(1, 200);
 
+        }
+
+        private void valve_command()
+        {
+            valveview.Opacity = 0;
+
+            port1label.Opacity = 0.5;
+            misclabel.Opacity = 0.5;
+            port2label.Opacity = 0.5;
+            valvelabel.Opacity = 1;
+
+            port1label.FontSize = 19;
+            misclabel.FontSize = 19;
+            port2label.FontSize = 19;
+            valvelabel.FontSize = 22;
+
+            port1view.IsVisible = false;
+            port2view.IsVisible = false;
+            miscview.IsVisible = false;
+            valveview.IsVisible = true;
+
+            valveview.FadeTo(1, 200);
         }
 
         private void port2_command()
@@ -2936,14 +3325,17 @@ namespace aclara_meters.view
 
             port1label.Opacity = 0.5;
             misclabel.Opacity = 0.5;
+            valveview.Opacity = 0.5;
             port2label.Opacity = 1;
 
             port1label.FontSize = 19;
             misclabel.FontSize = 19;
+            valvelabel.FontSize = 19;
             port2label.FontSize = 22;
 
             port1view.IsVisible = false;
             port2view.IsVisible = true;
+            valveview.IsVisible = false;
             miscview.IsVisible = false;
 
             port2view.FadeTo(1, 200);
@@ -2956,16 +3348,17 @@ namespace aclara_meters.view
             port1label.Opacity = 1;
             misclabel.Opacity = 0.5;
             port2label.Opacity = 0.5;
+            valvelabel.Opacity = 0.5;
 
             port1label.FontSize = 22;
             misclabel.FontSize = 19;
             port2label.FontSize = 19;
-
-           
+            valvelabel.FontSize = 19;
 
             port1view.IsVisible = true;
             port2view.IsVisible = false;
             miscview.IsVisible = false;
+            valveview.IsVisible = false;
 
             port1view.FadeTo(1, 200);
 

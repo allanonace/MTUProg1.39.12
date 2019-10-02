@@ -126,13 +126,16 @@
                                                                     </DataTemplate>
                                                                 </ListView.ItemTemplate>
                                                             </ListView>
-                                                            <accordion:AccordionRepeaterView IsVisible="{Binding HayAcciones}" x:Name="Acordeon" Spacing="0" Padding="0,0,10,0"  Margin="0,10,10,10" KeepOnlyOneItemOpen="True" ItemsSource="{Binding .SubItemsLog}">
+                                                            <accordion:AccordionRepeaterView IsVisible="{Binding HayAcciones}" x:Name="Acordeon" Spacing="0" Padding="0,0,10,0" 
+                                                                       Margin="0,10,10,10" KeepOnlyOneItemOpen="True" ItemsSource="{Binding .SubItemsLog}">
                                                                 <accordion:AccordionRepeaterView.AccordionItemTemplate>
                                                                     <DataTemplate>
-                                                                        <accordion:AccordionItemView ActiveLeftImage="{Binding Icon}" ActiveBorderColor="Transparent" Margin="10,0,0,0" Text="{Binding Accion}" FontSize="18" ActiveTextColor="#7a868c" TextColor="#7a868c" ButtonBackgroundColor="White" BorderColor="Transparent" ButtonActiveBackgroundColor="White"
+                                                                        <accordion:AccordionItemView ActiveLeftImage="{Binding Icon}" ActiveBorderColor="Transparent" Margin="10,0,0,0" 
+                                                                             Text="{Binding Accion}" FontSize="18" ActiveTextColor="#7a868c" TextColor="#7a868c" 
+                                                                            ButtonBackgroundColor="White" BorderColor="Transparent" ButtonActiveBackgroundColor="White"
                                                                             TextPosition="Left" LeftImage="{Binding Icon}">
                                                                             <accordion:AccordionItemView.ItemContent>
-                                                                                <StackLayout BackgroundColor="#6aa2b8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+                                                                                <StackLayout Margin="0,0,0,10"  BackgroundColor="#6aa2b8" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
                                                                                     <ListView x:Name="Lista1" 
                                                                                               SeparatorVisibility="None"
                                                                                               Margin="0,10,0,10" 
