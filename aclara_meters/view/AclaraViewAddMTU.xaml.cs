@@ -550,42 +550,17 @@ namespace aclara_meters.view
             }
 
             #endregion
-            #region RDD
 
-            if (hasValve)
-            {
-                List<string> list = new List<string>()
-                {
-                    "Close", "Open", "Partial Open"
-                };
+            #region Labels
 
-                //Now I am given ItemsSorce to the Pickers
-                pck_ValvePosition.ItemsSource = list;
+            this.port1label.Text = LB_PORT1;
+            this.port2label.Text = LB_PORT2;
+            this.misclabel.Text = LB_MISC;
+            this.valvelabel.Text = LB_VALVE;
 
-                dynamic map = Data.Get.MemoryMap;
-                Mtu mtuv = Singleton.Get.Action.CurrentMtu;
-
-                int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
-
-                ulong AccountNum = (mtuv.Port1.IsSetFlow) ? await map.P1MeterId.GetValue() : await map.P2MeterId.GetValue();
-                int MtuId = await map.MtuSerialNumber.GetValue();
-                string MtuStatus = await map.MtuStatus.GetValue();
-                string rddPosition = await map.RDDValvePosition.GetValue();
-                ulong rddSerial = await map.RDDSerialNumber.GetValue();
-                string rddBattery = await map.RDDBatteryStatus.GetValue();
-
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    //this.tbx_MtuId.Text = MtuId.ToString().PadLeft(mtuIdLength, '0');
-                    //this.tbx_Mtu_Status.Text = MtuStatus;
-                    //this.tbx_AccountNumber.Text = AccountNum.ToString();
-                    this.tbx_RDDPosition.Text = rddPosition;
-                    this.tbx_RDDSerialNumber.Text = rddSerial.ToString();
-                    this.tbx_Battery.Text = rddBattery;
-
-                });
-            }
             #endregion
+
+
 
             #region Account Number / Service Port ID
 
@@ -1307,15 +1282,44 @@ namespace aclara_meters.view
             this.lb_OldMeterReading_DualError_2     .Text = DUAL_ERROR;
 
             #endregion
-            
-            #region Labels
-            
-            this.port1label.Text = LB_PORT1;
-            this.port2label.Text = LB_PORT2;
-            this.misclabel .Text = LB_MISC;
-            this.valvelabel.Text = LB_VALVE;
-                        
+
+            #region RDD
+
+            if (hasValve)
+            {
+                List<string> list = new List<string>()
+                {
+                    "Close", "Open", "Partial Open"
+                };
+
+                //Now I am given ItemsSorce to the Pickers
+                pck_ValvePosition.ItemsSource = list;
+
+                dynamic map = Data.Get.MemoryMap;
+                //Mtu mtuv = Singleton.Get.Action.CurrentMtu;
+
+                //int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
+
+                //ulong AccountNum = (mtuv.Port1.IsSetFlow) ? await map.P1MeterId.GetValue() : await map.P2MeterId.GetValue();
+                //int MtuId = await map.MtuSerialNumber.GetValue();
+                //string MtuStatus = await map.MtuStatus.GetValue();
+                string rddPosition = await map.RDDValvePosition.GetValue();
+                ulong rddSerial = await map.RDDSerialNumber.GetValue();
+                string rddBattery = await map.RDDBatteryStatus.GetValue();
+
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    //this.tbx_MtuId.Text = MtuId.ToString().PadLeft(mtuIdLength, '0');
+                    //this.tbx_Mtu_Status.Text = MtuStatus;
+                    //this.tbx_AccountNumber.Text = AccountNum.ToString();
+                    this.tbx_RDDPosition.Text = rddPosition;
+                    this.tbx_RDDSerialNumber.Text = rddSerial.ToString();
+                    this.tbx_Battery.Text = rddBattery;
+
+                });
+            }
             #endregion
+
         }
 
         #endregion
