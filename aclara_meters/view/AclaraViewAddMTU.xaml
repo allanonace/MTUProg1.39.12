@@ -698,6 +698,24 @@
                                                 </Frame>
                                             </Frame>
                                         </StackLayout>
+                                        <!-- Account Number / Service Port ID - Dual Entry -->
+                                        <StackLayout x:Name="div_AccountNumber_Dual_V">
+                                            <Label Text="Repeat Service Port ID" x:Name="lb_AccountNumber_Dual_V" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" Keyboard="Numeric" HeightRequest="40" x:Name="tbx_AccountNumber_Dual_V" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_AccountNumber_Dual_V" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                            <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_AccountNumber_DualError_V" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
+                                        </StackLayout>
                                         <!-- Work Order / Field Order -->
                                         <StackLayout x:Name="div_WorkOrder_V">
                                             <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder_V" VerticalOptions="Center" Font="Bold,17" />
@@ -714,6 +732,24 @@
                                                     </StackLayout>
                                                 </Frame>
                                             </Frame>
+                                        </StackLayout>
+                                        <!-- Work Order / Field Order - Dual -->
+                                        <StackLayout x:Name="div_WorkOrder_Dual_V">
+                                            <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder_Dual_V" VerticalOptions="Center" Font="Bold,17" />
+                                            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                                                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                                                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_WorkOrder_Dual_V" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Text" FontSize="17"
+                                                            HorizontalTextAlignment="Start">
+                                                            <Controls:BorderlessEntry.Behaviors>
+                                                                <behaviors:EntryValidatorBehavior />
+                                                            </Controls:BorderlessEntry.Behaviors>
+                                                        </Controls:BorderlessEntry>
+                                                        <ImageButton CommandParameter="tbx_WorkOrder_Dual_V" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
+                                                    </StackLayout>
+                                                </Frame>
+                                            </Frame>
+                                            <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_WorkOrder_DualError_V" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                         </StackLayout>
                                         <!-- Meter Type -->
                                         <StackLayout Margin="0,0,0,0">

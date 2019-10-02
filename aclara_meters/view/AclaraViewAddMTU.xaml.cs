@@ -1022,6 +1022,10 @@ namespace aclara_meters.view
                     // Port 2
                     this.lb_AccountNumber_2     .TextColor = COL_MANDATORY;
                     this.lb_AccountNumber_Dual_2.TextColor = COL_MANDATORY;
+
+                    // Valve
+                    this.lb_AccountNumber_V.TextColor = COL_MANDATORY;
+                    this.lb_AccountNumber_Dual_V.TextColor = COL_MANDATORY;
                 }
                 
                 // Work Order
@@ -1034,6 +1038,10 @@ namespace aclara_meters.view
                     // Port 2
                     this.lb_WorkOrder_2     .TextColor = COL_MANDATORY;
                     this.lb_WorkOrder_Dual_2.TextColor = COL_MANDATORY;
+
+                    // Valve
+                    this.lb_WorkOrder_V.TextColor = COL_MANDATORY;
+                    this.lb_WorkOrder_Dual_V.TextColor = COL_MANDATORY;
                 }
                 
                 // Old MTU ID
