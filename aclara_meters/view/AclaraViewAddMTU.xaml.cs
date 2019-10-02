@@ -115,8 +115,6 @@ namespace aclara_meters.view
 
         #region GUI Elements
 
-        private List<PageItem> MenuList;
-
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
 
@@ -334,11 +332,14 @@ namespace aclara_meters.view
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
 
+            InitializeAddMtuForm();
+
             Task.Run ( async () =>
             {
-                await InitializeAddMtuForm();
+                if (hasValve)
+                    await InitializeRDDForm();
 
-                await LoadMetersList ();
+                 await LoadMetersList ();
             })
             .ContinueWith ( t =>
                 Device.BeginInvokeOnMainThread ( () =>
@@ -515,7 +516,45 @@ namespace aclara_meters.view
             }
         }
 
-        private async Task InitializeAddMtuForm ()
+        private async Task InitializeRDDForm ()
+        {
+            #region RDD
+                     
+            List<string> list = new List<string>()
+            {
+                "Close", "Open", "Partial Open"
+            };
+
+            //Now I am given ItemsSorce to the Pickers
+            pck_ValvePosition.ItemsSource = list;
+
+            dynamic map = Data.Get.MemoryMap;
+            //Mtu mtuv = Singleton.Get.Action.CurrentMtu;
+
+            //int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
+
+            //ulong AccountNum = (mtuv.Port1.IsSetFlow) ? await map.P1MeterId.GetValue() : await map.P2MeterId.GetValue();
+            //int MtuId = await map.MtuSerialNumber.GetValue();
+            //string MtuStatus = await map.MtuStatus.GetValue();
+            string rddPosition = await map.RDDValvePosition.GetValue();
+            ulong rddSerial = await map.RDDSerialNumber.GetValue();
+            string rddBattery = await map.RDDBatteryStatus.GetValue();
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                //this.tbx_MtuId.Text = MtuId.ToString().PadLeft(mtuIdLength, '0');
+                //this.tbx_Mtu_Status.Text = MtuStatus;
+                //this.tbx_AccountNumber.Text = AccountNum.ToString();
+                this.tbx_RDDPosition.Text = rddPosition;
+                this.tbx_RDDSerialNumber.Text = rddSerial.ToString();
+                this.tbx_Battery.Text = rddBattery;
+
+            });
+       
+            #endregion
+        }
+
+        private void InitializeAddMtuForm ()
         {
             #region Conditions
 
@@ -530,6 +569,7 @@ namespace aclara_meters.view
                 port1label.IsVisible = false;
                 port2label.IsVisible = false;
                 valvelabel.IsVisible = true;
+                div_RDDGeneral.IsVisible = true;
                 hasValve = true;
                 hasTwoPorts = false;
             }
@@ -559,8 +599,6 @@ namespace aclara_meters.view
             this.valvelabel.Text = LB_VALVE;
 
             #endregion
-
-
 
             #region Account Number / Service Port ID
 
@@ -799,22 +837,24 @@ namespace aclara_meters.view
 
             #region Snap Reads / Daily Reads
 
-            bool useDailyReads        = global.AllowDailyReads && this.currentMtu.DailyReads && ! this.currentMtu.IsFamily33xx;
+            bool useDailyReads = global.AllowDailyReads && this.currentMtu.DailyReads && !this.currentMtu.IsFamily33xx;
             bool changeableDailyReads = global.IndividualDailyReads;
-            int  dailyReadsDefault    = global.DailyReadsDefault;
-            
-            this.div_SnapReads   .IsEnabled = useDailyReads;
-            this.div_SnapReads   .IsVisible = useDailyReads;
+
+            int dailyReadsDefault = global.DailyReadsDefault;
+
+            this.div_SnapReads.IsEnabled = useDailyReads;
+            this.div_SnapReads.IsVisible = useDailyReads;
             this.divSub_SnapReads.IsEnabled = changeableDailyReads && useDailyReads;
-            this.divSub_SnapReads.Opacity   = ( changeableDailyReads && useDailyReads ) ? 1 : 0.8d;
+            this.divSub_SnapReads.Opacity = (changeableDailyReads && useDailyReads) ? 1 : 0.8d;
 
-            this.snapReadsStep  = 1.0;
+            this.snapReadsStep = 1.0;
 
-            if ( useDailyReads )
+            if (useDailyReads)
                 this.sld_SnapReads.ValueChanged += OnSnapReadsSlider_ValueChanged;
 
-            this.sld_SnapReads.Value = ( dailyReadsDefault > -1 ) ? dailyReadsDefault : 13;
-
+            this.sld_SnapReads.Value = (dailyReadsDefault > -1) ? dailyReadsDefault : 13;
+         
+ 
             #endregion
 
             #region 2-Way
@@ -823,12 +863,19 @@ namespace aclara_meters.view
             bool useTwoWay = global.TimeToSync          &&
                              this.currentMtu.TimeToSync &&
                              this.currentMtu.FastMessageConfig;
-            
-            this.Initialize_TwoWay ();
 
-            div_TwoWay.IsVisible = useTwoWay;
-            div_TwoWay.IsEnabled = useTwoWay;
-
+            if (!div_RDDGeneral.IsVisible)
+            {
+                this.Initialize_TwoWay(pck_TwoWay);
+                div_TwoWay.IsVisible = useTwoWay;
+                div_TwoWay.IsEnabled = useTwoWay;
+            }
+            else
+            {
+                this.Initialize_TwoWay(pck_TwoWay_V);
+                div_TwoWay_V.IsVisible = useTwoWay;
+                div_TwoWay_V.IsEnabled = useTwoWay;
+            }
             #endregion
 
             #region Alarms
@@ -843,15 +890,28 @@ namespace aclara_meters.view
             bool RequiresAlarmProfile = this.currentMtu.RequiresAlarmProfile;
             bool portHasSomeAlarm     = ( RequiresAlarmProfile && alarmsList.Count > 0 );
 
-            pck_Alarms.ItemDisplayBinding = new Binding ( "Name" );
+            if (!div_RDDGeneral.IsVisible)
+            {
+                pck_Alarms.ItemDisplayBinding = new Binding("Name");
 
-            div_Alarms.IsEnabled   = portHasSomeAlarm;
-            div_Alarms.IsVisible   = portHasSomeAlarm;
-            pck_Alarms   .ItemsSource = alarmsList;
+                div_Alarms.IsEnabled = portHasSomeAlarm;
+                div_Alarms.IsVisible = portHasSomeAlarm;
+                pck_Alarms.ItemsSource = alarmsList;
 
-            // Hide alarms dropdownlist if contains only one option
-            div_Alarms.IsVisible = ( alarmsList .Count > 1 );
+                // Hide alarms dropdownlist if contains only one option
+                div_Alarms.IsVisible = (alarmsList.Count > 1);
+            }
+            else
+            {
+                pck_Alarms_V.ItemDisplayBinding = new Binding("Name");
 
+                div_Alarms_V.IsEnabled = portHasSomeAlarm;
+                div_Alarms_V.IsVisible = portHasSomeAlarm;
+                pck_Alarms_V.ItemsSource = alarmsList;
+
+                // Hide alarms dropdownlist if contains only one option
+                div_Alarms_V.IsVisible = (alarmsList.Count > 1);
+            }
             #endregion
 
             #region Demands
@@ -863,12 +923,22 @@ namespace aclara_meters.view
             bool portHasSomeDemand  = ( MtuDemand && demandsList.Count > 0 );
             bool port2HasSomeDemand = ( hasTwoPorts && MtuDemand && demands2List.Count > 0 );
 
-            pck_Demands.ItemDisplayBinding = new Binding ( "Name" );
+            if (!div_RDDGeneral.IsVisible)
+            {
+                pck_Demands.ItemDisplayBinding = new Binding("Name");
 
-            div_Demands.IsEnabled   = portHasSomeDemand;
-            div_Demands.IsVisible   = portHasSomeDemand;
-            pck_Demands   .ItemsSource = demandsList;
+                div_Demands.IsEnabled = portHasSomeDemand;
+                div_Demands.IsVisible = portHasSomeDemand;
+                pck_Demands.ItemsSource = demandsList;
+            }
+            else 
+            {
+                pck_Demands_V.ItemDisplayBinding = new Binding("Name");
 
+                div_Demands_V.IsEnabled = portHasSomeDemand;
+                div_Demands_V.IsVisible = portHasSomeDemand;
+                pck_Demands_V.ItemsSource = demandsList;
+            }
             #endregion
 
             #region Misc
@@ -1289,43 +1359,6 @@ namespace aclara_meters.view
             this.lb_OldMeterReading_DualError       .Text = DUAL_ERROR;
             this.lb_OldMeterReading_DualError_2     .Text = DUAL_ERROR;
 
-            #endregion
-
-            #region RDD
-
-            if (hasValve)
-            {
-                List<string> list = new List<string>()
-                {
-                    "Close", "Open", "Partial Open"
-                };
-
-                //Now I am given ItemsSorce to the Pickers
-                pck_ValvePosition.ItemsSource = list;
-
-                dynamic map = Data.Get.MemoryMap;
-                //Mtu mtuv = Singleton.Get.Action.CurrentMtu;
-
-                //int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
-
-                //ulong AccountNum = (mtuv.Port1.IsSetFlow) ? await map.P1MeterId.GetValue() : await map.P2MeterId.GetValue();
-                //int MtuId = await map.MtuSerialNumber.GetValue();
-                //string MtuStatus = await map.MtuStatus.GetValue();
-                string rddPosition = await map.RDDValvePosition.GetValue();
-                ulong rddSerial = await map.RDDSerialNumber.GetValue();
-                string rddBattery = await map.RDDBatteryStatus.GetValue();
-
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    //this.tbx_MtuId.Text = MtuId.ToString().PadLeft(mtuIdLength, '0');
-                    //this.tbx_Mtu_Status.Text = MtuStatus;
-                    //this.tbx_AccountNumber.Text = AccountNum.ToString();
-                    this.tbx_RDDPosition.Text = rddPosition;
-                    this.tbx_RDDSerialNumber.Text = rddSerial.ToString();
-                    this.tbx_Battery.Text = rddBattery;
-
-                });
-            }
             #endregion
 
         }
@@ -2400,7 +2433,7 @@ namespace aclara_meters.view
                 pck_ReadInterval.SelectedIndex = readIntervalList.IndexOf ( "1 Hour" );
         }
 
-        private void Initialize_TwoWay ()
+        private void Initialize_TwoWay (BorderlessPicker picker)
         {
             List<string> twoWayList = new List<string> ()
             {
@@ -2408,7 +2441,7 @@ namespace aclara_meters.view
                 TWOWAY_SLOW,
             };
             
-            pck_TwoWay.ItemsSource = twoWayList;
+            picker.ItemsSource = twoWayList;
         }
 
         private void Initialize_OldMeterPickers ()
@@ -2740,7 +2773,7 @@ namespace aclara_meters.view
             sld_SnapReads.Value   = newStep * snapReadsStep;
             lb_SnapReads_Num.Text = sld_SnapReads.Value.ToString ();
         }
-
+       
         #endregion
 
         #region Menu options
