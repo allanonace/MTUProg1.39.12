@@ -3805,11 +3805,18 @@ namespace aclara_meters.view
                 bool noDAc = EmptyNoReq ( this.tbx_AccountNumber_Dual_V.Text, MANDATORY_ACCOUNTNUMBER );
                 bool noDWr = EmptyNoReq ( this.tbx_WorkOrder_Dual_V    .Text, MANDATORY_WORKORDER );
                 // Drop-down-lists
-                bool noTwo = NoSelNoReq ( this.pck_TwoWay_V         .SelectedIndex, MANDATORY_TWOWAY );
-                bool noAlr = NoSelNoReq ( this.pck_Alarms_V         .SelectedIndex, MANDATORY_ALARMS );
-                bool noDmd = NoSelNoReq ( this.pck_Demands_V        .SelectedIndex, MANDATORY_DEMANDS );
                 bool noRDD = NoSelNoReq ( this.pck_MeterType_Names_V.SelectedIndex, MANDATORY_METERTYPE );
                 bool noPos = NoSelNoReq ( this.pck_ValvePosition    .SelectedIndex, MANDATORY_RDDPOSITION );
+                bool noTwo = true;
+                bool noAlr = true;
+                bool noDmd = true;
+                // Validate only when the RDD is in port 1
+                if ( mtu.Port1.IsSetFlow )
+                {
+                    noTwo = NoSelNoReq ( this.pck_TwoWay_V .SelectedIndex, MANDATORY_TWOWAY );
+                    noAlr = NoSelNoReq ( this.pck_Alarms_V .SelectedIndex, MANDATORY_ALARMS );
+                    noDmd = NoSelNoReq ( this.pck_Demands_V.SelectedIndex, MANDATORY_DEMANDS );
+                }
 
                 // Correct length
                 // TRUE when the field has not correct length or is not selected yet
@@ -3820,11 +3827,18 @@ namespace aclara_meters.view
                 bool badDAc = global.AccountDualEntry   && this.div_AccountNumber_Dual_V.IsVisible && NoEqNum ( this.tbx_AccountNumber_Dual_V.Text, global.AccountLength );
                 bool badDWr = global.WorkOrderDualEntry && this.div_WorkOrder_Dual_V    .IsVisible && NoELTxt ( this.tbx_WorkOrder_Dual_V    .Text, global.WorkOrderLength );
                 // Drop-down-lists
-                bool badTwo = this.div_TwoWay_V .IsVisible && this.pck_TwoWay_V .SelectedIndex <= -1;
-                bool badAlr = this.div_Alarms_V .IsVisible && this.pck_Alarms_V .SelectedIndex <= -1;
-                bool badDmd = this.div_Demands_V.IsVisible && this.pck_Demands_V.SelectedIndex <= -1;
                 bool badRDD =                                 this.pck_MeterType_Names_V.SelectedIndex <= -1;
                 bool badPos =                                 this.pck_ValvePosition    .SelectedIndex <= -1;
+                bool badTwo = false;
+                bool badAlr = false;
+                bool badDmd = false;
+                // Validate only when the RDD is in port 1
+                if ( mtu.Port1.IsSetFlow )
+                {
+                    badTwo = this.div_TwoWay_V .IsVisible && this.pck_TwoWay_V .SelectedIndex <= -1;
+                    badAlr = this.div_Alarms_V .IsVisible && this.pck_Alarms_V .SelectedIndex <= -1;
+                    badDmd = this.div_Demands_V.IsVisible && this.pck_Demands_V.SelectedIndex <= -1;
+                }
 
                 FILL_ERROR = "Field 'RDD _' is incorrectly filled";
                 DUAL_ERROR = " ( Second entry )";
