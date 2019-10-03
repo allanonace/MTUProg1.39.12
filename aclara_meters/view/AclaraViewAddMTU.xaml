@@ -71,7 +71,7 @@
                                 <!--                   -->
                                 <!--      Port 1       -->
                                 <!--                   -->
-                                <StackLayout IsVisible="true" Margin="0,0,0,0">
+                                <StackLayout IsVisible="false" Margin="0,0,0,0">
                                     <StackLayout x:Name="port1view" IsVisible="true" Margin="12,0,12,0">
                                         <StackLayout Orientation="Horizontal">
                                            <Label Margin="0,16,0,8" FontSize="22" HorizontalOptions="StartAndExpand" TextColor="#6aa2b8" x:Name="name_of_window_port1" Text="Add MTU" />
@@ -861,7 +861,7 @@
                                 <!--                   -->
                                 <!--       Misc        -->
                                 <!--                   -->
-                                <StackLayout x:Name="miscview" IsVisible="false" Margin="12,0,12,0">
+                                <StackLayout x:Name="miscview" IsVisible="true" Margin="12,0,12,0">
                                     <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" x:Name="name_of_window_misc" Text="Add MTU" />
                                     <!-- MTU Geolocation -->
                                     <Label Text="MTU Geolocation" x:Name="lb_GPS" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />

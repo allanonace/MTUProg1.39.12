@@ -118,9 +118,9 @@
                                                                 <ListView.ItemTemplate>
                                                                     <DataTemplate>
                                                                         <ViewCell>
-                                                                            <StackLayout Margin="15,0,4,0" Orientation="Horizontal">
+                                                                            <StackLayout Margin="10,0,4,0" Orientation="Horizontal">
                                                                                 <Label Text="{Binding Descripcion}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
-                                                                                <Label Text="{Binding Valor}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
+                                                                                <Label Text="{Binding Valor}" LineBreakMode="TailTruncation" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                             </StackLayout>
                                                                         </ViewCell>
                                                                     </DataTemplate>
@@ -148,7 +148,7 @@
                                                                                                 <ViewCell>
                                                                                                     <StackLayout Margin="15,0,4,0" Orientation="Horizontal">
                                                                                                         <Label Text="{Binding Descripcion}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
-                                                                                                        <Label Text="{Binding Valor}" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
+                                                                                                        <Label Text="{Binding Valor}" LineBreakMode="TailTruncation" TextColor="White" HorizontalOptions="Start" VerticalOptions="Start" Font="16" />
                                                                                                     </StackLayout>
                                                                                                 </ViewCell>
                                                                                             </DataTemplate>

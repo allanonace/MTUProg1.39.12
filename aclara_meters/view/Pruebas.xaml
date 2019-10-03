@@ -3,31 +3,38 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:d="http://xamarin.com/schemas/2014/forms/design"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:Controls="clr-namespace:aclara_meters"
              mc:Ignorable="d"
              x:Class="aclara_meters.view.Pruebas">
     <StackLayout>
-        <StackLayout Margin="0,0,0,0" HeightRequest="50">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="48"/>
-                </Grid.RowDefinitions>
-                <StackLayout Orientation="Horizontal" VerticalOptions="FillAndExpand" >
-                    <Label Text="Prot1" WidthRequest="100"  HeightRequest="46" x:Name="port1label" Margin="0,0,0,0" Grid.Column="0" VerticalOptions="Center" HorizontalOptions="StartAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="22"
-                                    TextColor="#6aa2b8" Opacity="1">
-                    </Label>
-                    <Label Text="Port2" IsVisible="False" x:Name="port2label" WidthRequest="100" HeightRequest="46" Margin="0,0,0,0" Grid.Column="1" VerticalOptions="Center" HorizontalOptions="StartAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19"
-                                    TextColor="#6aa2b8" Opacity="0.5">
-                    </Label>
-                    <Label Text="Valve" x:Name="valvelabel"  WidthRequest="100" HeightRequest="46" Margin="0,0,0,0" Grid.Column="2" VerticalOptions="Center" HorizontalOptions="StartAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19"
-                                    TextColor="#6aa2b8" Opacity="0.5">
-                    </Label>
-                    <Label Text="Miscelaneous" x:Name="misclabel" HeightRequest="46" Margin="0,0,10,0" Grid.Column="3" VerticalOptions="Center" HorizontalOptions="EndAndExpand" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" FontSize="19" TextColor="#6aa2b8"
-                                    Opacity="0.5">
-                    </Label>
-                </StackLayout>
-            </Grid>
-            <Image Margin="-16,-4,-16,0" WidthRequest="380" HeightRequest="2" BackgroundColor="#6aa2b8" />
+        <Label Text="MTU Geolocation" x:Name="lb_GPS" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+        <StackLayout BackgroundColor="Beige" Orientation="Horizontal" HorizontalOptions="FillAndExpand" Margin="4">
+            <Label Text="Lat." Margin="0,4,0,0" VerticalOptions="Center" FontSize="16">
+            </Label>
+            <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" HorizontalOptions="FillAndExpand" BackgroundColor="#7a868c">
+                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                        <Controls:BorderlessEntry Margin="0,0,0,0"  Text="" HeightRequest="40" x:Name="tbx_MtuGeolocationLat" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
+                    </StackLayout>
+                </Frame>
+            </Frame>
+            <Label Text="Lon." Margin="0,4,0,0" VerticalOptions="Center" FontSize="16">
+            </Label>
+            <Frame CornerRadius="6" HorizontalOptions="FillAndExpand" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
+                <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
+                    <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
+                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_MtuGeolocationLong" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start" />
+                    </StackLayout>
+                </Frame>
+            </Frame>
+            <StackLayout Margin="0,0,0,0" VerticalOptions="Center" HeightRequest="40" HorizontalOptions="End">
+                <Image IsVisible="true" IsEnabled="true" InputTransparent="false" x:Name="gps_icon" HeightRequest="48" WidthRequest="48" Margin="12,-3,0,0" Scale="0.85" Source="gps_icon.png" HorizontalOptions="End">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer x:Name="gps_icon_button" NumberOfTapsRequired="1" />
+                    </Image.GestureRecognizers>
+                </Image>
+            </StackLayout>
         </StackLayout>
-  
+
     </StackLayout>
 </ContentView>

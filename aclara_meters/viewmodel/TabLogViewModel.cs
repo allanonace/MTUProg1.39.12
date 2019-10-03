@@ -15,7 +15,7 @@ namespace aclara.ViewModels
 {
     public class TabLogViewModel:BaseViewModel
     {
-        private const int HEIGH_TEXT_LIST = 25;
+        private const int HEIGH_TEXT_LIST = 22;
         public ObservableRangeCollection<ItemsLog> ItemsLog { get; } = new ObservableRangeCollection<ItemsLog>();
         private List<FileInfo> FileList = new List<FileInfo>();
         public string FileName { get; set; }
@@ -133,12 +133,13 @@ namespace aclara.ViewModels
                             else if (String.IsNullOrEmpty(sPort))
                                 datosAccion.Descripcion = $"{sDescripcion}:";
                             else
-                                datosAccion.Descripcion = $" {sPort} {sDescripcion}:";
+                                datosAccion.Descripcion = $" {sPort}-{sDescripcion}:";
 
-                            if (!String.IsNullOrEmpty(datosAccion.Descripcion))
-                                datosAccion.Valor = sValor.Length > sNumChar ? $"{sValor.Substring(0, sNumChar)}..." : sValor;
-                            else
-                                datosAccion.Valor = sValor;
+                            //if (!String.IsNullOrEmpty(datosAccion.Descripcion))
+                            //    datosAccion.Valor = sValor.Length > sNumChar ? $"{sValor.Substring(0, sNumChar)}..." : sValor;
+                            //else
+
+                            datosAccion.Valor = sValor;
 
                             if (!string.IsNullOrEmpty(sSubAccion))
                                 SubListaDatos.Add(datosAccion);
