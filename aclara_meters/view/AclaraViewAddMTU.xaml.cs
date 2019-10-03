@@ -1013,14 +1013,18 @@ namespace aclara_meters.view
             int acnLength = ( global.AccountLength <= MAX_ACCOUNTNUMBER ) ? global.AccountLength : MAX_ACCOUNTNUMBER;
             tbx_AccountNumber              .MaxLength = acnLength;
             tbx_AccountNumber_2            .MaxLength = acnLength;
+            tbx_AccountNumber_V            .MaxLength = acnLength;
             tbx_AccountNumber_Dual         .MaxLength = acnLength;
             tbx_AccountNumber_Dual_2       .MaxLength = acnLength;
-            
+            tbx_AccountNumber_Dual_V       .MaxLength = acnLength;
+
             tbx_WorkOrder                  .MaxLength = global.WorkOrderLength;
             tbx_WorkOrder_2                .MaxLength = global.WorkOrderLength;
+            tbx_WorkOrder_V                .MaxLength = global.WorkOrderLength;
             tbx_WorkOrder_Dual             .MaxLength = global.WorkOrderLength;
             tbx_WorkOrder_Dual_2           .MaxLength = global.WorkOrderLength;
-            
+            tbx_WorkOrder_Dual_V           .MaxLength = global.WorkOrderLength;
+
             tbx_OldMtuId                   .MaxLength = global.MtuIdLength;
             
             tbx_OldMeterSerialNumber       .MaxLength = global.MeterNumberLength;
@@ -1283,12 +1287,19 @@ namespace aclara_meters.view
                     this.tbx_AccountNumber_2,
                     this.tbx_AccountNumber_Dual_2,
                     this.lb_AccountNumber_DualError_2 );
-            
+            System.Action valEqAccountNumber_V = () =>
+                ValidateEqualityOnFocus(
+                    this.tbx_AccountNumber_V,
+                    this.tbx_AccountNumber_Dual_V,
+                    this.lb_AccountNumber_DualError_V);
+
             this.tbx_AccountNumber_Dual  .Unfocused += ( s, e ) => { valEqAccountNumber   (); };
             this.tbx_AccountNumber       .Unfocused += ( s, e ) => { valEqAccountNumber   (); };
             this.tbx_AccountNumber_2     .Unfocused += ( s, e ) => { valEqAccountNumber_2 (); };
             this.tbx_AccountNumber_Dual_2.Unfocused += ( s, e ) => { valEqAccountNumber_2 (); };
-            
+            this.tbx_AccountNumber_V     .Unfocused += (s, e) => { valEqAccountNumber_V(); };
+            this.tbx_AccountNumber_Dual_V.Unfocused += (s, e) => { valEqAccountNumber_V(); };
+
             // Work Order
             System.Action valEqWorkOrder = () =>
                 ValidateEqualityOnFocus (
@@ -1300,12 +1311,19 @@ namespace aclara_meters.view
                     this.tbx_WorkOrder_2,
                     this.tbx_WorkOrder_Dual_2,
                     this.lb_WorkOrder_DualError_2 );
-            
+            System.Action valEqWorkOrder_V = () =>
+              ValidateEqualityOnFocus(
+                  this.tbx_WorkOrder_V,
+                  this.tbx_WorkOrder_Dual_V,
+                  this.lb_WorkOrder_DualError_V);
+
             this.tbx_WorkOrder       .Unfocused += ( s, e ) => { valEqWorkOrder   (); };
             this.tbx_WorkOrder_Dual  .Unfocused += ( s, e ) => { valEqWorkOrder   (); };
             this.tbx_WorkOrder_2     .Unfocused += ( s, e ) => { valEqWorkOrder_2 (); };
             this.tbx_WorkOrder_Dual_2.Unfocused += ( s, e ) => { valEqWorkOrder_2 (); };
-            
+            this.tbx_WorkOrder_V     .Unfocused += (s, e) => { valEqWorkOrder_V (); };
+            this.tbx_WorkOrder_Dual_V.Unfocused += (s, e) => { valEqWorkOrder_V (); };
+
             // ( New ) Meter Serial Number
             System.Action valEqMeterSerialNumber = () =>
                 ValidateEqualityOnFocus (
@@ -2905,13 +2923,12 @@ namespace aclara_meters.view
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
-            backdark_bg.IsVisible = true;
-            indicator.IsVisible = true;
-            background_scan_page.IsEnabled = false;
-
             switch ( await base.ValidateNavigation ( page ) )
             {
                 case ValidationResult.EXCEPTION:
+                    backdark_bg.IsVisible = false;
+                    indicator.IsVisible = false;
+                    background_scan_page.IsEnabled = true;
                     return;
                 case ValidationResult.FAIL:
                     dialog_open_bg.IsVisible = true;

@@ -282,6 +282,9 @@ namespace aclara_meters.view
             switch ( await base.ValidateNavigation ( actionTarget ) )
             {
                 case ValidationResult.EXCEPTION:
+                    backdark_bg.IsVisible = false;
+                    indicator.IsVisible = false;
+                    background_scan_page.IsEnabled = true;
                     return;
                 case ValidationResult.FAIL:
                     dialog_open_bg.IsVisible = true;
