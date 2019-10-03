@@ -342,10 +342,9 @@ namespace aclara_meters.view
             {
                 if (hasValve)
                     await InitializeRDDForm();
+                await InitilizeValuesAsync();
+                await LoadMetersList ();
 
-                 await LoadMetersList ();
-
-                 await InitilizeValuesAsync ();
             })
             .ContinueWith ( t =>
                 Device.BeginInvokeOnMainThread ( () =>
@@ -568,11 +567,17 @@ namespace aclara_meters.view
 
         private async Task InitilizeValuesAsync ()
         {
-            int twoway = ( await Data.Get.MemoryMap.FastMessagingFrequency.GetValue () ) ? 1 : 0;
+            dynamic map = Data.Get.MemoryMap;
 
-            if ( ! div_RDDGeneral.IsVisible )
-                 pck_TwoWay  .SelectedIndex = twoway;
-            else pck_TwoWay_V.SelectedIndex = twoway;
+            bool two = await map.FastMessagingConfigFreq.GetValue();
+            int twoway = two? 1 : 0;
+
+            Device.BeginInvokeOnMainThread(() =>
+            {
+                if (!div_RDDGeneral.IsVisible)
+                    pck_TwoWay.SelectedIndex = twoway;
+                else pck_TwoWay_V.SelectedIndex = twoway;
+            });
         }
 
         private void InitializeAddMtuForm ()
@@ -4155,7 +4160,7 @@ namespace aclara_meters.view
                 
                 // General fields, for the MTU itself
                 // No RDD or RDD in port two
-                if ( ! hasRDD &&
+                if (! hasRDD ||
                      ! rddIn1 )
                 {
                     value_omt = this.tbx_OldMtuId.Text;
