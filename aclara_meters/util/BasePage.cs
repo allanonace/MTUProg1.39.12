@@ -17,8 +17,17 @@ using ValidationResult = MTUComm.MTUComm.ValidationResult;
 
 namespace aclara_meters.util
 {
-   public class BasePage : ContentPage
-   {
+    public class BasePage : ContentPage
+    {
+        protected const string COLOR_FONT             = "#000";
+        protected const string COLOR_BACKGROUND       = "#FFF";
+        protected const string COLOR_BG_ND_EXCELENT   = "#0F0";
+        protected const string COLOR_BG_ND_GOOD       = "#FF0";
+        protected const string COLOR_BG_ND_FAIL       = "#F00";
+        protected const string COLOR_FONT_ND_EXCELENT = COLOR_FONT;
+        protected const string COLOR_FONT_ND_GOOD     = COLOR_FONT;
+        protected const string COLOR_FONT_ND_FAIL     = "#FFF";
+
         protected bool DebugMode { private set; get; }
 
         public BasePage ()

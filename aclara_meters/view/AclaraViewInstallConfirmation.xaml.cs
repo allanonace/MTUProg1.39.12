@@ -240,8 +240,6 @@ namespace aclara_meters.view
 
             Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
 
-            string bgcolor  = "#FFF";
-            string fcolor   = "#000";
             string ndresult = string.Empty;
             InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
 
@@ -271,14 +269,12 @@ namespace aclara_meters.view
 
                                 FinalReadListView.Add(new ReadMTUItem()
                                 {
-                                    Title           = "Here lies the Port title...",
-                                    isDisplayed     = "true",
-                                    Height          = "40",
-                                    isMTU           = "false",
-                                    isMeter         = "true",
-                                    Description     = "Port " + (i+1) + ": " + description,
-                                    BackgroundColor = bgcolor,
-                                    FontColor       = fcolor
+                                    Title       = "Here lies the Port title...",
+                                    isDisplayed = "true",
+                                    Height      = "40",
+                                    isMTU       = "false",
+                                    isMeter     = "true",
+                                    Description = "Port " + (i+1) + ": " + description
                                 });
                             }
                             else
@@ -287,15 +283,13 @@ namespace aclara_meters.view
                                 {
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
-                                        Title           = param.getLogDisplay() + ":",
-                                        isDisplayed     = "true",
-                                        Height          = "70",
-                                        isMTU           = "false",
-                                        isDetailMeter   = "true",
-                                        isMeter         = "false",
-                                        Description     = param.Value,
-                                        BackgroundColor = bgcolor,
-                                        FontColor       = fcolor
+                                        Title         = param.getLogDisplay() + ":",
+                                        isDisplayed   = "true",
+                                        Height        = "70",
+                                        isMTU         = "false",
+                                        isDetailMeter = "true",
+                                        isMeter       = "false",
+                                        Description   = param.Value
                                     });
                                 }
                             }
@@ -308,31 +302,45 @@ namespace aclara_meters.view
 
                     if ( param != null )
                     {
-                        string bgcolorEntry = bgcolor;
-                        string fcolorEntry  = fcolor;
+                        string bgcolorEntry = string.Empty;
+                        string fcolorEntry  = string.Empty;
 
+                        // Custom colors for Node Discovery result
                         if ( param.CustomParameter.Equals ( "NodeDiscoveryResult" ) )
                         {
                             ndresult = param.Value.ToString ().Split ( ' ' )[ 0 ].ToLower ();
                             switch ( ndresult )
                             {
-                                case "fail"    : bgcolorEntry = "#F00"; fcolorEntry = "#FFF"; break;
-                                case "good"    : bgcolorEntry = "#FF0"; break;
-                                case "excelent": bgcolorEntry = "#0F0"; break;
+                                case "fail"    : bgcolorEntry = COLOR_BG_ND_FAIL;     fcolorEntry = COLOR_FONT_ND_FAIL;     break;
+                                case "good"    : bgcolorEntry = COLOR_BG_ND_GOOD;     fcolorEntry = COLOR_FONT_ND_GOOD;     break;
+                                case "excelent": bgcolorEntry = COLOR_BG_ND_EXCELENT; fcolorEntry = COLOR_FONT_ND_EXCELENT; break;
                             }
-                        }
 
-                        FinalReadListView.Add(new ReadMTUItem()
+                            FinalReadListView.Add(new ReadMTUItem()
+                            {
+                                Title           = param.getLogDisplay() + ":",
+                                isDisplayed     = "true",
+                                Height          = "64",
+                                isMTU           = "true",
+                                isMeter         = "false",
+                                Description     = param.Value,
+                                BackgroundColor = bgcolorEntry,
+                                FontColor       = fcolorEntry,
+                            });
+                        }
+                        else
                         {
-                            Title           = param.getLogDisplay() + ":",
-                            isDisplayed     = "true",
-                            Height          = "64",
-                            isMTU           = "true",
-                            isMeter         = "false",
-                            Description     = param.Value,
-                            BackgroundColor = bgcolorEntry,
-                            FontColor       = fcolorEntry
-                        });
+                            // Uses default colors for text and background
+                            FinalReadListView.Add(new ReadMTUItem()
+                            {
+                                Title           = param.getLogDisplay() + ":",
+                                isDisplayed     = "true",
+                                Height          = "64",
+                                isMTU           = "true",
+                                isMeter         = "false",
+                                Description     = param.Value,
+                            });
+                        }
                     }
                 }
             }

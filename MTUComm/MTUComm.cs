@@ -439,6 +439,10 @@ namespace MTUComm
                 // that perform the basic read with a different MTU
                 if ( ! this.basicInfoLoaded )
                     await this.LoadMtuBasicInfo ();
+                
+                // Checks if the MTU remains the same as in the initial reading
+                if ( type != ActionType.BasicRead )
+                    await this.CheckIsTheSameMTU ();
 
                 switch ( type )
                 {
@@ -857,7 +861,7 @@ namespace MTUComm
                 if ( ! this.mtu.MtuDemand )
                     throw new MtuIsNotOnDemandCompatibleDevice ();
 
-                OnProgress ( this, new Delegates.ProgressArgs ( "DataRead: Requesting logs..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "HR: Requesting logs..." ) );
 
                 DateTime end   = DateTime.UtcNow;
                 DateTime start = end.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
@@ -974,7 +978,7 @@ namespace MTUComm
 
                         // Wait a bit and try to read/recover the next log
                         case EventLogQueryResult.NextRead:
-                            OnProgress ( this, new Delegates.ProgressArgs ( "DataRead: Requesting logs... " + queryResult.Index + "/" + eventLogList.TotalEntries ) );
+                            OnProgress ( this, new Delegates.ProgressArgs ( "HR: Requesting logs... " + queryResult.Index + "/" + eventLogList.TotalEntries ) );
                             
                             await Task.Delay ( WAIT_BTW_LOGS );
                             countAttempts = 0; // Reset accumulated fails after reading ok
@@ -983,7 +987,7 @@ namespace MTUComm
 
                         // Was last event log
                         case EventLogQueryResult.LastRead:
-                            OnProgress ( this, new Delegates.ProgressArgs ( "DataRead: All logs requested" ) );
+                            OnProgress ( this, new Delegates.ProgressArgs ( "HR: All logs requested" ) );
                             goto BREAK; // Exit from infinite while
                     }
                 }
@@ -1001,7 +1005,7 @@ namespace MTUComm
                 
                 await this.CheckIsTheSameMTU ();
 
-                OnProgress ( this, new Delegates.ProgressArgs ( "Reading from MTU..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
 
                 // Generates log using the interface
                 await this.OnDataRead ( new Delegates.ActionArgs ( this.mtu, map, eventLogList ) );
@@ -1112,7 +1116,7 @@ namespace MTUComm
                 {
                     // Update interface text to look the progress
                     int progress = ( int )Math.Round ( ( decimal )( ( count * 100.0 ) / max ) );
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Checking IC... " + progress.ToString () + "%" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "RF-Check... " + progress.ToString () + "%" ) );
                     
                     await Task.Delay ( wait * 1000 );
                     
@@ -1241,7 +1245,7 @@ namespace MTUComm
                 {
                     #region Step 1 - Init
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery: Step 1 Init" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 1 Init" ) );
                 
                     // Node discovery initiation command
                     byte[] data = new byte[ 8 ]; // 1+4+1+1+1
@@ -1280,7 +1284,7 @@ namespace MTUComm
                     {
                         #region Step 2 - Start/Reset
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery: Step 2 Start/Reset" ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 2 Start/Reset" ) );
 
                         // Start/Reset node discovery response query
                         bool lexiTimeOut;
@@ -1332,7 +1336,7 @@ namespace MTUComm
 
                         #region Step 3 - Get Next
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery: Step 3 Get Next" ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 3 Get Next" ) );
 
                         await Task.Delay ( WAIT_BEFORE_NODE_NEXT );
 
@@ -1398,7 +1402,7 @@ namespace MTUComm
                                 // Wait a bit and try to read/recover the next node
                                 case NodeDiscoveryQueryResult.NextRead:
                                     OnProgress ( this, new Delegates.ProgressArgs ( 
-                                        "Node Discovery: Requesting nodes... " + queryResult.Index + "/" + nodeList.CurrentAttemptTotalEntries ) );
+                                        "ND: Requesting nodes... " + queryResult.Index + "/" + nodeList.CurrentAttemptTotalEntries ) );
                                     
                                     await Task.Delay ( WAIT_BTW_NODE_NEXT );
                                     break;
@@ -1406,7 +1410,7 @@ namespace MTUComm
                                 // Was the last node or no node was recovered
                                 case NodeDiscoveryQueryResult.LastRead:
                                 case NodeDiscoveryQueryResult.Empty:
-                                    OnProgress ( this, new Delegates.ProgressArgs ( "Node Discovery: All nodes requested" ) );
+                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Nodes requested" ) );
                                     goto BREAK_OK; // Exit from switch + infinite while
                             }
                         }
@@ -1566,7 +1570,7 @@ namespace MTUComm
         {
             if ( await this.RemoteDisconnect_Logic () == RDD_OK )
             {
-                OnProgress ( this, new Delegates.ProgressArgs ( "Reading from MTU..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
 
                 dynamic map = await this.ReadMtu_Logic ();
                 await this.OnRemoteDisconnect ( new Delegates.ActionArgs ( this.mtu, map ) );
@@ -1642,7 +1646,7 @@ namespace MTUComm
                                         goto END_LOOP;
                                 }
 
-                                OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step " + step + " Check RDD attempt " + ( i + 1 ) ) );
+                                OnProgress ( this, new Delegates.ProgressArgs ( "RDD: Step " + step + " Check RDD attempt " + ( i + 1 ) ) );
 
                                 await Task.Delay ( WAIT_BTW_RDD );
                             }
@@ -1652,7 +1656,7 @@ namespace MTUComm
                             return status;
                         });
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 1 Check RDD" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "RDD: Step 1 Check RDD" ) );
 
                     // Checks if the RDD is not configured/installed
                     if ( await CheckStatus ( /*step*/1, /*okBusy*/false, /*okError*/true, /*okIdle*/true ) == RDDStatus.DISABLED )
@@ -1660,7 +1664,7 @@ namespace MTUComm
 
                     await Task.Delay ( 1000 );
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 2 Request Position" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "RDD: Step 2 Request Position" ) );
 
                     // Request an action to the RDD 
                     await this.lexi.Write (
@@ -1674,7 +1678,7 @@ namespace MTUComm
 
                     await Task.Delay ( 2000 );
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 3 Check RDD" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "RDD: Step 3 Check RDD" ) );
 
                     // Checks status after requesting the desired action
                     switch ( await CheckStatus ( /*step*/3, /*okBusy*/true, /*okError*/false, /*okIdle*/false ) )
@@ -1687,7 +1691,7 @@ namespace MTUComm
 
                     await Task.Delay ( 1000 );
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Remote Disconnect: Step 4 In Transition" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "RDD: Step 4 In Transition" ) );
 
                     // Waits until the status of the RDD changes
                     bool timeOut = false;
@@ -1893,7 +1897,7 @@ namespace MTUComm
         {
             try
             {
-                OnProgress ( this, new Delegates.ProgressArgs ( "Testing puck..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "Testing Puck..." ) );
 
                 // Only read all required registers once
                 var map = this.GetMemoryMap ( true );
@@ -1901,7 +1905,7 @@ namespace MTUComm
                 // Activates flag to read Meter
                 int MtuType = await  map.MtuType.GetValueFromMtu ();
 
-                OnProgress ( this, new Delegates.ProgressArgs ( "Successful MTU read (" + MtuType.ToString() + ")" ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "Successful MTU Read (" + MtuType.ToString() + ")" ) );
 
                 await OnReadFabric ();
             }
@@ -1933,7 +1937,7 @@ namespace MTUComm
         {
             try
             {
-                OnProgress ( this, new Delegates.ProgressArgs ( "Reading from MTU..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
             
                 // Load memory map and prepare to read from Meters
                 var map = await ReadMtu_Logic ();
@@ -2952,7 +2956,7 @@ namespace MTUComm
 
                 Utils.Print ( "---WRITE_TO_MTU_START----" );
 
-                OnProgress ( this, new Delegates.ProgressArgs ( "Writing MemoryMap to MTU..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "Writing to MTU..." ) );
 
                 // Write changes into MTU
                 await this.WriteMtuModifiedRegisters ( map );
@@ -3049,7 +3053,7 @@ namespace MTUComm
 
                 Utils.Print ( "----FINAL_READ_START-----" );
                 
-                OnProgress ( this, new Delegates.ProgressArgs ( "Reading from MTU..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
                 
                 // Checks if all data was write ok, and then to generate the
                 // final log without read again from the MTU the registers already read
@@ -3274,7 +3278,7 @@ namespace MTUComm
                 {
                     if ( this.mtu.BroadCast )
                     {
-                        OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Broadcast Key" ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Broadcast Key" ) );
 
                         // Loads Encryption Item - Type 4: Broadcast Key 
                         fullResponse = await this.lexi.Write (
@@ -3287,7 +3291,7 @@ namespace MTUComm
                             LexiAction.OperationRequest );
                     }
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Head-End Random Number" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Head-End Random Number" ) );
 
                     // Generates the random number and prepares LExI array
                     randomKey = mtusha.RandomBytes ( randomKey.Length );
@@ -3305,7 +3309,7 @@ namespace MTUComm
                     
                     string serverRND = Convert.ToBase64String ( randomKey );
                     
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Head-End Public Key" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Head-End Public Key" ) );
 
                     // Loads Encryption Item - Type 0: Head End Public Key
                     fullResponse = await this.lexi.Write (
@@ -3317,7 +3321,7 @@ namespace MTUComm
                         null,
                         LexiAction.OperationRequest );
                     
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: Generate Keys" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Generate Keys" ) );
 
                     // Generates Encryptions Keys
                     fullResponse = await this.lexi.Write (
@@ -3342,7 +3346,7 @@ namespace MTUComm
                          encrypIndex <= curEncrypIndex )
                         continue; // Error
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: MTU Random Number" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: MTU Random Number" ) );
 
                     // Reads Encryption Item - Type 3: MTU Random Number
                     fullResponse = await this.lexi.Write (
@@ -3356,7 +3360,7 @@ namespace MTUComm
 
                     string clientRnd = Convert.ToBase64String ( fullResponse.Response );
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting: MTU Public Key" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: MTU Public Key" ) );
 
                     // Reads Encryption Item - Type 2: MTU Public Key
                     fullResponse = await this.lexi.Write (
