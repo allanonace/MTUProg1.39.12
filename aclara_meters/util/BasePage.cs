@@ -28,7 +28,7 @@ namespace aclara_meters.util
         protected const string COLOR_FONT_ND_GOOD     = COLOR_FONT;
         protected const string COLOR_FONT_ND_FAIL     = "#FFF";
 
-        protected bool DebugMode { private set; get; }
+        public bool DebugMode { private set; get; }
 
         public BasePage ()
         {

@@ -251,6 +251,7 @@ namespace aclara_meters.view
         {
             InitializeComponent ();
             BindingContext = this;
+
             Device.BeginInvokeOnMainThread ( () =>
             {
                   backdark_bg.IsVisible = true;
