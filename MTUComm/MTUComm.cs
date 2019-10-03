@@ -1600,7 +1600,7 @@ namespace MTUComm
                     // Convert from RDD command to RDD desired status
                     RDDValveStatus rddValveStatus = RDDValveStatus.UNKNOWN;
                     switch ( ( RDDCmd )Enum.Parse ( typeof ( RDDCmd ),
-                              Data.Get.RDDPosition.Replace ( " ", "_" ) ) )
+                              Data.Get.RDDPosition.ToUpper().Replace ( " ", "_" ) ) )
                     {
                         case RDDCmd.CLOSE       : rddValveStatus = RDDValveStatus.CLOSED;       break;
                         case RDDCmd.OPEN        : rddValveStatus = RDDValveStatus.OPEN;         break;
