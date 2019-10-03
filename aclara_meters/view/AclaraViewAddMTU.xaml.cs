@@ -481,7 +481,7 @@ namespace aclara_meters.view
             // RDD
             else this.list_MeterTypesForMtu_V = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu );
 
-            if ( hasTwoPorts )
+            if (this.currentMtu.TwoPorts)
             {
                 // No RDD
                 if ( ! this.currentMtu.Port2.IsSetFlow )
