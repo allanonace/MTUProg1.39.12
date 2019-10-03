@@ -15,17 +15,15 @@ using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
 using MTUStatus = MTUComm.Action.MTUStatus;
+using ValidationResult = MTUComm.MTUComm.ValidationResult;
 
 namespace aclara_meters.view
 {
     public partial class AclaraViewRemoteDisconnect
     {
-
         private const string LB_PORT1 = "Valve";
-
         private IUserDialogs dialogsSaved;
         private bool _userTapped;
-
 
         #region Attributes
 
@@ -133,7 +131,6 @@ namespace aclara_meters.view
 
         }
         
-
         private async Task InitializeValveOperationForm ()
         {
             #region Initialize data
@@ -183,6 +180,8 @@ namespace aclara_meters.view
                 this.tbx_RDDSerialNumber.Text = rddSerial.ToString ();
                 this.tbx_Battery        .Text = rddBattery;
                 
+                this.tbx_FieldOrder        .MaxLength = global.WorkOrderLength;
+                this.tbx_RDDFirmwareVersion.MaxLength = 12;
             });
         }
 
@@ -470,14 +469,16 @@ namespace aclara_meters.view
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
-            if ( ! await base.ValidateNavigation ( actionTarget ) )
+            switch ( await base.ValidateNavigation ( actionTarget ) )
             {
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialogView.CloseDialogs();
-                dialogView.OpenCloseDialog("dialog_NoAction", true);
-                return;
-
+                case ValidationResult.EXCEPTION:
+                    return;
+                case ValidationResult.FAIL:
+                    dialog_open_bg.IsVisible = true;
+                    turnoff_mtu_background.IsVisible = true;
+                    dialogView.CloseDialogs();
+                    dialogView.OpenCloseDialog("dialog_NoAction", true);
+                    return;
             }
 
             if (!isCancellable)
@@ -910,9 +911,9 @@ namespace aclara_meters.view
         { 
             #region Get values from form
 
-            Data.SetTemp ( "WorkOrder",          tbx_FieldOrder.Text );
-            Data.SetTemp ( "RDDActionType",      pck_ValvePosition.SelectedItem.ToString ().ToUpper () );
-            Data.SetTemp ( "RDDFirmwareVersion", tbx_RDDFirmwareVersion.Text );
+            Data.SetTemp ( "WorkOrder",   tbx_FieldOrder.Text );
+            Data.SetTemp ( "RDDPosition", pck_ValvePosition.SelectedItem.ToString ().ToUpper () );
+            Data.SetTemp ( "RDDFirmware", tbx_RDDFirmwareVersion.Text );
 
             #endregion
 

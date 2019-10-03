@@ -549,6 +549,24 @@
     <CustomGet>method</CustomGet>
   </Overload>
   <Overload>
+    <Id>P1DaysBtwMtuQueryRDD</Id>
+    <Description>The number of hours between MTU periodic RDD query/transmits</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P1MinsBtwMtuQueryRDD</Register>
+    </Registers>
+    <CustomGet>method:MinutesToHours_Get</CustomGet>
+  </Overload>
+  <Overload>
+    <Id>P2DaysBtwMtuQueryRDD</Id>
+    <Description>The number of hours between MTU periodic RDD query/transmits</Description>
+    <Type>string</Type>
+    <Registers>
+      <Register>P2MinsBtwMtuQueryRDD</Register>
+    </Registers>
+    <CustomGet>method:MinutesToHours_Get</CustomGet>
+  </Overload>
+  <Overload>
     <Id>RDDStatus</Id>
     <Description>The status reported by the RDD</Description>
     <Type>string</Type>
@@ -1213,6 +1231,26 @@
   
   <!-- INIT - Remote Disonnect -->
 
+  <Register> <!-- OK -->
+    <Id>P1MinsBtwMtuQueryRDD</Id>
+    <Description>The number of minutes between MTU periodic RDD query/transmits</Description>
+    <Type>int</Type>
+    <Address>32</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>P2MinsBtwMtuQueryRDD</Id>
+    <Description>The number of minutes between MTU periodic RDD query/transmits</Description>
+    <Type>int</Type>
+    <Address>52</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
   <Register>
     <Id>RDDPortNumber</Id>
     <Description>RDD Port Number, used in conjunction with the ports enabled</Description>
@@ -1654,6 +1692,16 @@
     <Type>int</Type>
     <Address>124</Address>
     <Size>4</Size>
+    <Write>true</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>ResponseFrequency</Id>
+    <Description>Fast Messaging Configuration</Description>
+    <Type>bool</Type>
+    <Address>163</Address>
+    <Size>1</Size>
     <Write>true</Write>
     <CustomGet/>
     <CustomSet/>

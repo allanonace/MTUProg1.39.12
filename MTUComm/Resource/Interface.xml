@@ -402,22 +402,22 @@
 				<Parameter 	name="DriveDialSize" 			display="Drive Dial Size" 				log="true" 	interface="true" 	source="Meter.DriveDialSize"						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true + Meter.NumberOfDials gt -1"/>
 				<Parameter 	name="UnitOfMeasure" 			display="Unit Of Measure" 				log="true" 	interface="true" 	source="Meter.UnitOfMeasure"						conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=true"/>
 				<!-- INIT - Ecoder -->
-				<Parameter 	name="BackFlowState" 			display="Backflow State" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true"/>
-				<Parameter 	name="DaysOfNoFlow" 			display="Days of No Flow" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true"/>
-				<Parameter 	name="LeakDetection" 			display="Leak Detection" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true"/>
-				<Parameter 	name="DaysOfLeak" 				display="Days of Leak" 					log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true"/>
+				<Parameter 	name="BackFlowState" 			display="Backflow State" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true + Port.IsSetFlow=false"/>
+				<Parameter 	name="DaysOfNoFlow" 			display="Days of No Flow" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true + Port.IsSetFlow=false"/>
+				<Parameter 	name="LeakDetection" 			display="Leak Detection" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true + Port.IsSetFlow=false"/>
+				<Parameter 	name="DaysOfLeak" 				display="Days of Leak" 					log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Mtu.Ecoder=true + Port.IsSetFlow=false"/>
 				<!-- END - Ecoder -->
 				<Parameter 	name="AcctNumber" 				display="Global.AccountLabel"  			log="true" 	interface="true" 	source="MemoryMap.MeterId"							conditional="MemoryMap.StatusFlag=true"
 							length="Global.AccountLength" fill="left"/>
 				<!-- INIT - RDD -->
 				<Parameter 	name="RDDSerialNumber" 			display="RDD SerialNumber" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
-				<Parameter 	name="RDDCurrentValvePosition" 	display="RDD Current Position" 			log="true" 	interface="true" 	source="MemoryMap.RDDValvePosition"					conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
+				<Parameter 	name="RDDCurrentValvePosition" 	display="RDD Current Position" 			log="true" 	interface="true" 	source="MemoryMap.RDDPosition"						conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDLastCommandSuccessful" display="RDD LastCommandSuccessful" 	log="true" 	interface="true" 	source="MemoryMap.RDDLastCmdSuccess"				conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDBatteryStatus" 		display="RDD Battery Status" 			log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
-				<!--<Parameter 	name="RDDStatusDays" 			display="RDD Status Days" 				log="true" 	interface="true" 	source="Data."										conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>-->
-				<Parameter 	name="RDDFirmwareVersion" 		display="RDD Firm. Version" 			log="true" 	interface="true" 	source="Data.RDDFirmwareVersion"					conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
+				<Parameter 	name="RDDStatusDays" 			display="RDD Status Days" 				log="true" 	interface="true" 	source="MemoryMap.DaysBtwMtuQueryRDD"				conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
+				<Parameter 	name="RDDFirmwareVersion" 		display="RDD Firm. Version" 			log="true" 	interface="true" 	source="Data.RDDFirmware"							conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<!-- END - RDD -->
-				<Parameter 	name="MeterReading" 			display="Meter Reading" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true"/>
+				<Parameter 	name="MeterReading" 			display="Meter Reading" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=false"/>
 				<Parameter 	name="NumberOfDigits" 			display="Digits #"  					log="true" 	interface="true" 	source="MemoryMap.EncoderLiveDigits"				conditional="MemoryMap.StatusFlag=true + Port.IsForPulse=false"/>
 			</Parameter>
 			<Parameter 	name="XmitInterval" 				display="Xmit Interval" 				log="true" 	interface="true"/>
@@ -457,11 +457,6 @@
 							length="Global.AccountLength" fill="left"/>
 				<Parameter 	name="DaysOfRead" 				display="Days of Read"  				log="true" 	interface="true" 	source="Data.TotalDifDays"							conditional="MemoryMap.StatusFlag=true"/>
 			</Parameter>
-			<!-- QUESTION!!! -->
-			<Parameter 	name="GPS_Y" 						display="Lat" 							log="true" 	interface="true" 	source="Data.GpsLat"/>
-			<Parameter 	name="GPS_X" 						display="Long" 							log="true" 	interface="true" 	source="Data.GpsLon"/>
-			<Parameter 	name="Altitude" 					display="Elevation" 					log="true" 	interface="true" 	source="Data.GpsAlt"/>
-			<!-- QUESTION!!! -->
 			<Parameter 	name="ReadRequest" 					display="Number Read Request Days"  	log="true" 	interface="true" 	source="Data.NumOfDays"/>
 			<Parameter 	name="ReadResult" 					display="Read Result"  					log="true" 	interface="true" 	source="Data.ProcessResult"/>
 			<Parameter 	name="ReadResultFile" 				display="Read Result File"  			log="true" 	interface="true" 	source="Data.ProcessResultFile"/>
@@ -482,11 +477,6 @@
 				<Parameter 	name="RDDDesiredValvePosition" 	display="RDD Desired Valve Position" 	log="true" 	interface="true" 	source="Data.RDDActionType"							conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDBatteryStatus" 		display="RDD Battery Status" 			log="true" 	interface="true" 	source="Data.RDDBattery" 							conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 			</Parameter>
-			<!-- QUESTION!!! -->
-			<Parameter 	name="GPS_Y" 						display="Lat" 							log="true" 	interface="true" 	source="Data.GpsLat"/>
-			<Parameter 	name="GPS_X" 						display="Long" 							log="true" 	interface="true" 	source="Data.GpsLon"/>
-			<Parameter 	name="Altitude" 					display="Elevation" 					log="true" 	interface="true" 	source="Data.GpsAlt"/>
-			<!-- QUESTION!!! -->
 		</Action>
 	</Interface>
 </InterfaceConfig>

@@ -11,6 +11,7 @@ using Library.Exceptions;
 using System.IO;
 
 using NodeDiscoveryResult = MTUComm.MTUComm.NodeDiscoveryResult;
+using ValidationResult = MTUComm.MTUComm.ValidationResult;
 
 namespace MTUComm
 {
@@ -690,11 +691,11 @@ namespace MTUComm
 
         #region Execution
 
-        public async Task<bool> RunNavValidation (
+        public async Task<ValidationResult> RunNavValidation (
             ActionType actionTarget )
         {
             await this.Run (); // Basic Read
-            return await this.mtucomm.LaunchValidationThread ( actionTarget ); // Validation
+            return await this.mtucomm.LaunchValidationThread ( actionTarget );
         }
 
         /// <summary>
@@ -767,7 +768,7 @@ namespace MTUComm
                     case ActionType.DataRead:
                         this.mtucomm.OnDataRead -= OnDataRead;
                         this.mtucomm.OnDataRead += OnDataRead;
-                        // In interactive mode value are already set in Data
+                        // In interactive mode values are already set in Library.Data
                         // but in scripted mode they are stored in Action.parameters
                         if ( Data.Get.IsFromScripting )
                             parameters.Add ( this );
@@ -776,6 +777,10 @@ namespace MTUComm
                     case ActionType.RemoteDisconnect:
                         this.mtucomm.OnRemoteDisconnect -= OnRemoteDisconnect;
                         this.mtucomm.OnRemoteDisconnect += OnRemoteDisconnect;
+                        // In interactive mode values are already set in Library.Data
+                        // but in scripted mode they are stored in Action.parameters
+                        if ( Data.Get.IsFromScripting )
+                            parameters.Add ( this );
                         break;
 
                     case ActionType.BasicRead:

@@ -15,6 +15,7 @@ using Library.Exceptions;
 using Xml;
 
 using ActionType = MTUComm.Action.ActionType;
+using ValidationResult = MTUComm.MTUComm.ValidationResult;
 using System.IO;
 
 using System.Xml.Linq;
@@ -278,14 +279,16 @@ namespace aclara_meters.view
             indicator.IsVisible = true;
             background_scan_page.IsEnabled = false;
 
-            if ( ! await base.ValidateNavigation ( actionTarget ) )
+            switch ( await base.ValidateNavigation ( actionTarget ) )
             {
-                Console.WriteLine("NOOOOO PUEDESSSSS PASARRRRRR!!!");
-                dialog_open_bg.IsVisible = true;
-                turnoff_mtu_background.IsVisible = true;
-                dialogView.CloseDialogs();
-                dialogView.OpenCloseDialog("dialog_NoAction", true);
-                return;
+                case ValidationResult.EXCEPTION:
+                    return;
+                case ValidationResult.FAIL:
+                    dialog_open_bg.IsVisible = true;
+                    turnoff_mtu_background.IsVisible = true;
+                    dialogView.CloseDialogs();
+                    dialogView.OpenCloseDialog("dialog_NoAction", true);
+                    return;
             }
 
             switch (actionTarget)

@@ -7,6 +7,7 @@ using Xml;
 
 using ActionType    = MTUComm.Action.ActionType;
 using ParameterType = MTUComm.Parameter.ParameterType;
+using RDDCmd        = MTUComm.RDDStatusResult.RDDCmd;
 
 namespace MTUComm
 {
@@ -14,6 +15,7 @@ namespace MTUComm
     {
         #region Constants
 
+        private const int    MAX_RDD_FW = 12;
         private const string PT2_SUFIX  = "_2";
         private const string HOUR       = " Hour";
         private const string HOURS      = " Hours";
@@ -26,6 +28,7 @@ namespace MTUComm
         private const string MSG_HSMINS = "should be one of the possible values and using Hr/s or Min";
         private const string MSG_BOOL   = "should be 'true' or 'false'";
         private const string MSG_DAYS   = "should be one of the possible values ( 1, 8, 32, 64 or 96 )";
+        private const string MSG_RDD    = "Should be one of the possible values ( 'CLOSE', 'OPEN', 'PARTIAL OPEN' )";
 
         public enum APP_FIELD
         {
@@ -74,7 +77,10 @@ namespace MTUComm
             
             ForceTimeSync,
 
-            NumOfDays
+            NumOfDays,
+
+            RDDPosition,
+            RDDFirmware,
         }
 
         public static Dictionary<ParameterType,APP_FIELD> IdsAclara =
@@ -98,7 +104,9 @@ namespace MTUComm
                 { ParameterType.MeterReading,         APP_FIELD.MeterReading    },
                 { ParameterType.NewMeterReading,      APP_FIELD.MeterReading    },
                 { ParameterType.OldMeterReading,      APP_FIELD.MeterReadingOld },
-                { ParameterType.DaysOfRead,           APP_FIELD.NumOfDays       }
+                { ParameterType.DaysOfRead,           APP_FIELD.NumOfDays       },
+                { ParameterType.RDDPosition,          APP_FIELD.RDDPosition     },
+                { ParameterType.RDDFirmwareVersion,   APP_FIELD.RDDFirmware     },
             };
 
         #endregion
@@ -108,7 +116,8 @@ namespace MTUComm
         public static ( bool UsePort2, Dictionary<APP_FIELD,( dynamic Value, int Port )> Data ) TranslateAclaraParams (
             Parameter[] scriptParams )
         {
-            Dictionary<APP_FIELD,( dynamic Value, int Port )> translatedParams = new Dictionary<APP_FIELD,( dynamic Value, int Port )> ();
+            Dictionary<APP_FIELD,( dynamic Value, int Port )> translatedParams =
+                new Dictionary<APP_FIELD,( dynamic Value, int Port )> ();
 
             bool usePort2 = false;
             foreach ( Parameter param in scriptParams )
@@ -157,11 +166,10 @@ namespace MTUComm
         }
 
         public static Dictionary<APP_FIELD,string> ValidateParams (
-            bool port2Activated,
             Mtu mtu,
-            MTUBasicInfo mtuBasicInfo,
             Action action,
-            ( bool UsePort2, Dictionary<APP_FIELD,( dynamic Value, int Port )> Data ) translatedParams )
+            ( bool UsePort2, Dictionary<APP_FIELD,( dynamic Value, int Port )> Data ) translatedParams,
+            bool port2Activated )
         {
             Configuration config         = Singleton.Get.Configuration;
             Global        global         = config.Global;
@@ -169,18 +177,18 @@ namespace MTUComm
             var           data           = translatedParams.Data;
             bool          scriptUsePort2 = translatedParams.UsePort2;
 
-            List<Meter>  meters;
-            List<string> portTypes;
+            List<Meter> meters;
             Meter meterPort1 = null;
             Meter meterPort2 = null;
             bool isAutodetectMeter = false;
 
             // These actions do not need to get the meter types
-            bool isNotWrite = actionType == ActionType.ReadMtu ||
+            bool isNotWrite = actionType == ActionType.ReadMtu    ||
                               actionType == ActionType.TurnOffMtu ||
-                              actionType == ActionType.TurnOnMtu ||
+                              actionType == ActionType.TurnOnMtu  ||
                               actionType == ActionType.MtuInstallationConfirmation ||
-                              actionType == ActionType.DataRead;
+                              actionType == ActionType.DataRead   ||
+                              actionType == ActionType.RemoteDisconnect;
             
             // Action is about Replace Meter
             bool isReplaceMeter = (
@@ -538,7 +546,7 @@ namespace MTUComm
                             continue;
 
                         List<string> readIntervalList;
-                        if ( mtuBasicInfo.version >= global.LatestVersion )
+                        if ( Data.Get.MtuBasicInfo.version >= global.LatestVersion )
                         {
                             readIntervalList = new List<string>()
                             {
@@ -648,6 +656,32 @@ namespace MTUComm
                             msgDescription = MSG_DAYS;
                             break;
                         }
+                        break;
+                        #endregion
+                        #region Valve Position [ Only RemoteDisconnect ]
+                        case APP_FIELD.RDDPosition:
+                        // Param totally useless in other action types
+                        if ( actionType != ActionType.RemoteDisconnect )
+                            continue;
+
+                        // Allowed values: CLOSE, OPEN, PARTIAL_OPEN
+                        RDDCmd cmd;
+                        if ( fail = ! ( Enum.TryParse<RDDCmd> (
+                                            Data.Get.RDDPosition.ToUpper ().Replace ( " ", "_" ), out cmd ) &&
+                                        cmd != RDDCmd.SEDIMENT_TURN &&
+                                        cmd != RDDCmd.UNKNOWN ) )
+                            msgDescription = String.Format ( MSG_RDD );
+                        break;
+                        #endregion
+                        #region RDD Firmware [ Only RemoteDisconnect ]
+                        case APP_FIELD.RDDFirmware:
+                        // Param totally useless in other action types
+                        if ( actionType != ActionType.RemoteDisconnect )
+                            continue;
+                        
+                        else if ( fail = NoELTxt ( valueStr, MAX_RDD_FW ) )
+                            msgDescription =
+                                String.Format ( MSG_ELONLY, MAX_RDD_FW );
                         break;
                         #endregion
                     }

@@ -318,6 +318,12 @@ namespace MTUComm.MemoryMap
             return ( await MemoryRegisters.FastMessagingConfigFreq.GetValue () ) ? MESAG_FAST : MESAG_SLOW;
         }
 
+        public async Task<int> MinutesToHours_Get ( MemoryOverload<int> memoryOverload, dynamic[] memoryRegisters )
+        {
+            // NOTE: 1440 minutes / 60 minutes one hour = 24 hours
+            return ( int ) ( memoryRegisters[ 0 ].GetValue () / 1440 ); // Days
+        }
+
         public async Task<string> RDDStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
             int val = await MemoryRegisters.RDDStatusInt.GetValue ();
