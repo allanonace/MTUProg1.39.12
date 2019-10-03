@@ -1697,16 +1697,6 @@
     <CustomSet/>
   </Register>
   <Register> <!-- OK -->
-    <Id>ResponseFrequency</Id>
-    <Description>Fast Messaging Configuration</Description>
-    <Type>bool</Type>
-    <Address>163</Address>
-    <Size>1</Size>
-    <Write>true</Write>
-    <CustomGet/>
-    <CustomSet/>
-  </Register>
-  <Register> <!-- OK -->
     <Id>DailyGMTHourRead</Id>
     <Description>Indicates the hour of the daily read (network time). Range [0,23]</Description>
     <Type>int</Type>

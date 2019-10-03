@@ -355,7 +355,6 @@
 		- Remove F12WAYRegister14		-> Not supported
 		-->
 		<Action type="ReadMTU">
-			<Parameter 	name="Test" 						display="Test" 							log="false" interface="true"	source="Puck.SerialNumber"							conditional="MemoryMap.Shipbit=false + ( Global.ShowFreq=true + ( ( Action.User=test + Puck.SerialNumber=123 ) | Mtu.SpecialSet=true ) )"/>
 			<Parameter 	name="Date" 						display="Date/Time" 					log="true" 	interface="false"	source="Action.Date"/>
 			<Parameter 	name="User" 						display="User" 							log="true" 	interface="false"	source="Action.User"/>
 			<Parameter 	name="MtuStatus" 					display="MTU Status" 					log="true" 	interface="true"/>

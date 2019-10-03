@@ -2796,7 +2796,7 @@ namespace MTUComm
                      //! this.mtu.IsFamily31xx32xx &&
                      //! this.mtu.IsFamily33xx )
                 {
-                    map.ResponseFrequency = ( form.TwoWay.Value.ToUpper ().Equals ( "SLOW" ) ) ? false : true; // F1/Slow and F2/Fast
+                    map.FastMessagingConfigFreq = ( form.TwoWay.Value.ToUpper ().Equals ( "SLOW" ) ) ? false : true; // F1/Slow and F2/Fast
                 }
 
                 #endregion
