@@ -101,6 +101,10 @@ namespace Xml
         public bool IsThisMeterSupported (
             Meter meter )
         {
+            // RDD
+            if ( this.IsSetFlow )
+                return meter.Type.ToUpper ().Equals ( "SETFLOW" );
+            // No RDD
             return ( ( ! this.IsSpecialCaseNumType && // Type as string, comparing characters
                        this.TypeString.ToList ().Intersect ( meter.Type.ToList () ).Count () > 0 ||
                        this.IsSpecialCaseNumType && // Type as number

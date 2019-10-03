@@ -2788,6 +2788,19 @@ namespace MTUComm
 
                 #endregion
 
+                #region Two-Way ( Fast Messaging , also for RDD )
+
+                if ( global.TimeToSync &&
+                     this.mtu.TimeToSync &&
+                     this.mtu.FastMessageConfig )
+                     //! this.mtu.IsFamily31xx32xx &&
+                     //! this.mtu.IsFamily33xx )
+                {
+                    map.ResponseFrequency = ( form.TwoWay.Value.ToUpper ().Equals ( "SLOW" ) ) ? false : true; // F1/Slow and F2/Fast
+                }
+
+                #endregion
+
                 #region Snap Reads
 
                 if ( global.AllowDailyReads &&
@@ -2801,7 +2814,7 @@ namespace MTUComm
 
                 #endregion
 
-                #region Time of day for TimeSync ( aslo for RDD )
+                #region Time of day for TimeSync ( also for RDD )
 
                 if ( global.TimeToSync &&
                      mtu.TimeToSync    &&

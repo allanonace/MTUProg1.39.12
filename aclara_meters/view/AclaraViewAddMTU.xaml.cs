@@ -343,6 +343,8 @@ namespace aclara_meters.view
                     await InitializeRDDForm();
 
                  await LoadMetersList ();
+
+                 await InitilizeValuesAsync ();
             })
             .ContinueWith ( t =>
                 Device.BeginInvokeOnMainThread ( () =>
@@ -456,48 +458,54 @@ namespace aclara_meters.view
                     bottomBar.GetLabelElement("label_read").Text = AUTO_DETECTING;
                 });
 
-            // Ecoder/Encoder
-            if ( currentMtu.Port1.IsForEncoderOrEcoder )
-            {
-                bool autoDetect = await this.add_mtu.MTUComm.AutodetectMeterEncoders ( currentMtu );
-                if ( autoDetect )
-                    this.list_MeterTypesForMtu = this.config.meterTypes.FindByEncoderTypeAndLiveDigits (
-                        currentMtu.Port1.MeterProtocol,
-                        currentMtu.Port1.MeterLiveDigits );
-
-                // If auto-detect fails, show all Encoder/Ecoder Meters    
-                if ( ! autoDetect ||
-                     this.list_MeterTypesForMtu.Count <= 0 )
-                    this.list_MeterTypesForMtu = this.config.meterTypes.FindAllForEncodersAndEcoders ();
-            }
-            // Pulse
-            else
-                this.list_MeterTypesForMtu = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu );
-
-            if ( hasTwoPorts )
+            // No RDD
+            if ( ! this.currentMtu.Port1.IsSetFlow )
             {
                 // Ecoder/Encoder
-                if ( currentMtu.Port2.IsForEncoderOrEcoder )
+                if ( currentMtu.Port1.IsForEncoderOrEcoder )
                 {
-                    bool autoDetect = await this.add_mtu.MTUComm.AutodetectMeterEncoders ( currentMtu, 2 );
+                    bool autoDetect = await this.add_mtu.MTUComm.AutodetectMeterEncoders ( currentMtu );
                     if ( autoDetect )
-                        this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByEncoderTypeAndLiveDigits (
-                            currentMtu.Port2.MeterProtocol,
-                            currentMtu.Port2.MeterLiveDigits );
+                        this.list_MeterTypesForMtu = this.config.meterTypes.FindByEncoderTypeAndLiveDigits (
+                            currentMtu.Port1.MeterProtocol,
+                            currentMtu.Port1.MeterLiveDigits );
 
                     // If auto-detect fails, show all Encoder/Ecoder Meters    
                     if ( ! autoDetect ||
-                         this.list_MeterTypesForMtu_2.Count <= 0 )
-                        this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindAllForEncodersAndEcoders ();
+                         this.list_MeterTypesForMtu.Count <= 0 )
+                        this.list_MeterTypesForMtu = this.config.meterTypes.FindAllForEncodersAndEcoders ();
                 }
                 // Pulse
-                else
-                    this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu, 1 );
-
-              
+                else this.list_MeterTypesForMtu = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu );
             }
-            if (hasValve)
-                this.list_MeterTypesForMtu_V = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu, 1);
+            // RDD
+            else this.list_MeterTypesForMtu_V = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu );
+
+            if ( hasTwoPorts )
+            {
+                // No RDD
+                if ( ! this.currentMtu.Port2.IsSetFlow )
+                {
+                    // Ecoder/Encoder
+                    if ( currentMtu.Port2.IsForEncoderOrEcoder )
+                    {
+                        bool autoDetect = await this.add_mtu.MTUComm.AutodetectMeterEncoders ( currentMtu, 2 );
+                        if ( autoDetect )
+                            this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByEncoderTypeAndLiveDigits (
+                                currentMtu.Port2.MeterProtocol,
+                                currentMtu.Port2.MeterLiveDigits );
+
+                        // If auto-detect fails, show all Encoder/Ecoder Meters    
+                        if ( ! autoDetect ||
+                             this.list_MeterTypesForMtu_2.Count <= 0 )
+                            this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindAllForEncodersAndEcoders ();
+                    }
+                    // Pulse
+                    else this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu, 1 );
+                }
+                // RDD
+                else this.list_MeterTypesForMtu_V = this.config.meterTypes.FindByPortTypeAndFlow ( currentMtu, 1 );
+            }
 
             Device.BeginInvokeOnMainThread ( () =>
             {
@@ -555,6 +563,15 @@ namespace aclara_meters.view
             });
        
             #endregion
+        }
+
+        private async Task InitilizeValuesAsync ()
+        {
+            int twoway = ( await Data.Get.MemoryMap.ResponseFrequency.GetValue () ) ? 0 : 1;
+
+            if ( ! div_RDDGeneral.IsVisible )
+                 pck_TwoWay  .SelectedIndex = twoway;
+            else pck_TwoWay_V.SelectedIndex = twoway;
         }
 
         private void InitializeAddMtuForm ()
@@ -2440,8 +2457,8 @@ namespace aclara_meters.view
         {
             List<string> twoWayList = new List<string> ()
             {
-                TWOWAY_FAST,
                 TWOWAY_SLOW,
+                TWOWAY_FAST
             };
             
             picker.ItemsSource = twoWayList;
@@ -3760,9 +3777,9 @@ namespace aclara_meters.view
                 bool noDAc = EmptyNoReq ( this.tbx_AccountNumber_Dual_V.Text, MANDATORY_ACCOUNTNUMBER );
                 bool noDWr = EmptyNoReq ( this.tbx_WorkOrder_Dual_V    .Text, MANDATORY_WORKORDER );
                 // Drop-down-lists
-                bool noTwo = NoSelNoReq ( this.pck_TwoWay_V         .SelectedIndex, MANDATORY_TWOWAY          );
-                bool noAlr = NoSelNoReq ( this.pck_Alarms_V         .SelectedIndex, MANDATORY_ALARMS          );
-                bool noDmd = NoSelNoReq ( this.pck_Demands_V        .SelectedIndex, MANDATORY_DEMANDS         );
+                bool noTwo = NoSelNoReq ( this.pck_TwoWay_V         .SelectedIndex, MANDATORY_TWOWAY );
+                bool noAlr = NoSelNoReq ( this.pck_Alarms_V         .SelectedIndex, MANDATORY_ALARMS );
+                bool noDmd = NoSelNoReq ( this.pck_Demands_V        .SelectedIndex, MANDATORY_DEMANDS );
                 bool noRDD = NoSelNoReq ( this.pck_MeterType_Names_V.SelectedIndex, MANDATORY_METERTYPE );
                 bool noPos = NoSelNoReq ( this.pck_ValvePosition    .SelectedIndex, MANDATORY_RDDPOSITION );
 
