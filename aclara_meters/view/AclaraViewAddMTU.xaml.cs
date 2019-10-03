@@ -99,6 +99,7 @@ namespace aclara_meters.view
         private       Color  COL_MANDATORY   = Color.FromHex ( "#FF0000" );
         private const int    MAX_ACCOUNTNUMBER = 12;
         private const int    MAX_METERREADING  = 12;
+        private const int    MAX_RDDFIRMWARE   = 12;
 
         private const string DUAL_PREFIX    = "Repeat ";
         private const string OLD_PREFIX     = "Old ";
@@ -1049,6 +1050,8 @@ namespace aclara_meters.view
 
             tbx_MtuGeolocationLat          .MaxLength = 20;
             tbx_MtuGeolocationLong         .MaxLength = 20;
+
+            tbx_RDDFirmwareVersion         .MaxLength = MAX_RDDFIRMWARE;
 
             #endregion
 
@@ -3823,7 +3826,7 @@ namespace aclara_meters.view
                 bool badRDD =                                 this.pck_MeterType_Names_V.SelectedIndex <= -1;
                 bool badPos =                                 this.pck_ValvePosition    .SelectedIndex <= -1;
 
-                FILL_ERROR = "Field '_' is incorrectly filled";
+                FILL_ERROR = "Field 'RDD _' is incorrectly filled";
                 DUAL_ERROR = " ( Second entry )";
                 
                 if      ( ( badAcn &= ! noAcn ) ) msgError = this.lb_AccountNumber_V.Text;
