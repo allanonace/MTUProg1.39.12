@@ -3031,7 +3031,7 @@ namespace MTUComm
                 {
                     Utils.Print ( "--------IC_START---------" );
                 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "Install Confirmation..." ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "RF-Check..." ) );
                 
                     // Force to execute Install Confirmation avoiding problems
                     // with MTU shipbit, because MTU is just turned on
