@@ -567,7 +567,7 @@ namespace aclara_meters.view
 
         private async Task InitilizeValuesAsync ()
         {
-            int twoway = ( await Data.Get.MemoryMap.ResponseFrequency.GetValue () ) ? 0 : 1;
+            int twoway = ( await Data.Get.MemoryMap.ResponseFrequency.GetValue () ) ? 1 : 0;
 
             if ( ! div_RDDGeneral.IsVisible )
                  pck_TwoWay  .SelectedIndex = twoway;

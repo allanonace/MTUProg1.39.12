@@ -551,7 +551,7 @@
   <Overload>
     <Id>P1DaysBtwMtuQueryRDD</Id>
     <Description>The number of hours between MTU periodic RDD query/transmits</Description>
-    <Type>string</Type>
+    <Type>int</Type>
     <Registers>
       <Register>P1MinsBtwMtuQueryRDD</Register>
     </Registers>
@@ -560,7 +560,7 @@
   <Overload>
     <Id>P2DaysBtwMtuQueryRDD</Id>
     <Description>The number of hours between MTU periodic RDD query/transmits</Description>
-    <Type>string</Type>
+    <Type>int</Type>
     <Registers>
       <Register>P2MinsBtwMtuQueryRDD</Register>
     </Registers>
