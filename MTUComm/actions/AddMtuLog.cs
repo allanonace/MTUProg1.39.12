@@ -245,7 +245,7 @@ namespace MTUComm
                 logger.AddParameter ( port, new Parameter ( "RDDSerialNumber", "RDD SerialNumber", await map.RDDSerialNumber.GetValue () ) );
                 logger.AddParameter ( port, new Parameter ( "RDDBatteryStatus", "RDD Battery Status", Data.Get.RDDBattery ) );
                 logger.AddParameter ( port, new Parameter ( "RDDCurrentValvePosition", "RDD Current Valve Position", Data.Get.PrevRDDValvePosition ) );
-                logger.AddParameter ( port, new Parameter ( "RDDDesiredValvePosition", "RDD Desired Valve Position", Data.Get.RDDActionType ) );
+                logger.AddParameter ( port, new Parameter ( "RDDDesiredValvePosition", "RDD Desired Valve Position", Data.Get.RDDPosition ) );
             }
 
             string meterType = string.Format("({0}) {1}", meter.Id, meter.Display);
@@ -318,7 +318,7 @@ namespace MTUComm
                     logger.AddParameter ( port, new Parameter ( "RDDSerialNumber", "RDD SerialNumber", await map.RDDSerialNumber.GetValue () ) );
                     logger.AddParameter ( port, new Parameter ( "RDDBatteryStatus", "RDD Battery Status", Data.Get.RDDBattery ) );
                     logger.AddParameter ( port, new Parameter ( "RDDCurrentValvePosition", "RDD Current Valve Position", Data.Get.PrevRDDValvePosition ) );
-                    logger.AddParameter ( port, new Parameter ( "RDDDesiredValvePosition", "RDD Desired Valve Position", Data.Get.RDDActionType ) );
+                    logger.AddParameter ( port, new Parameter ( "RDDDesiredValvePosition", "RDD Desired Valve Position", Data.Get.RDDPosition ) );
                 }
 
                 string meterType2 = string.Format("({0}) {1}", meter2.Id, meter2.Display);

@@ -567,7 +567,7 @@ namespace aclara_meters.view
 
         private async Task InitilizeValuesAsync ()
         {
-            int twoway = ( await Data.Get.MemoryMap.ResponseFrequency.GetValue () ) ? 1 : 0;
+            int twoway = ( await Data.Get.MemoryMap.FastMessagingFrequency.GetValue () ) ? 1 : 0;
 
             if ( ! div_RDDGeneral.IsVisible )
                  pck_TwoWay  .SelectedIndex = twoway;
@@ -4446,6 +4446,10 @@ namespace aclara_meters.view
             }
 
             Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
+
+            string bgcolor  = "#FFF";
+            string fcolor   = "#000";
+            string ndresult = string.Empty;
             InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
             
             Mtu currentMtu = Singleton.Get.Action.CurrentMtu;
@@ -4475,28 +4479,34 @@ namespace aclara_meters.view
                                 
                                 FinalReadListView.Add(new ReadMTUItem()
                                 {
-                                    Title = "Here lies the Port title...",
-                                    isDisplayed = "true",
-                                    Height = "40",
-                                    isMTU = "false",
-                                    isMeter = "true",
-                                    Description = "Port " + ( i + 1 ) + ": " + description
+                                    Title           = "Here lies the Port title...",
+                                    isDisplayed     = "true",
+                                    Height          = "40",
+                                    isMTU           = "false",
+                                    isMeter         = "true",
+                                    Description     = "Port " + ( i + 1 ) + ": " + description,
+                                    BackgroundColor = bgcolor,
+                                    FontColor       = fcolor
                                 });
                             }
                             // Port fields
                             else
                             {
                                 if ( param != null )
+                                {
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
-                                        Title = param.getLogDisplay() + ":",
-                                        isDisplayed = "true",
-                                        Height = "70",
-                                        isMTU = "false",
-                                        isDetailMeter = "true",
-                                        isMeter = "false",
-                                        Description = param.Value
+                                        Title           = param.getLogDisplay() + ":",
+                                        isDisplayed     = "true",
+                                        Height          = "70",
+                                        isMTU           = "false",
+                                        isDetailMeter   = "true",
+                                        isMeter         = "false",
+                                        Description     = param.Value,
+                                        BackgroundColor = bgcolor,
+                                        FontColor       = fcolor
                                     });
+                                }
                             }
                         }
                     }
@@ -4509,21 +4519,35 @@ namespace aclara_meters.view
 
                     if (param != null)
                     {
+                        string bgcolorEntry = bgcolor;
+                        string fcolorEntry  = fcolor;
+
+                        if ( param.CustomParameter.Equals ( "NodeDiscoveryResult" ) )
+                        {
+                            ndresult = param.Value.ToString ().Split ( ' ' )[ 0 ].ToLower ();
+                            switch ( ndresult )
+                            {
+                                case "fail"    : bgcolorEntry = "#F00"; fcolorEntry = "#FFF"; break;
+                                case "good"    : bgcolorEntry = "#FF0"; break;
+                                case "excelent": bgcolorEntry = "#0F0"; break;
+                            }
+                        }
+
                         FinalReadListView.Add(new ReadMTUItem()
                         {
-                            Title = param.getLogDisplay() + ":",
-                            isDisplayed = "true",
-                            Height = "64",
-                            isMTU = "true",
-                            isMeter = "false",
-                            Description = param.Value
+                            Title           = param.getLogDisplay() + ":",
+                            isDisplayed     = "true",
+                            Height          = "64",
+                            isMTU           = "true",
+                            isMeter         = "false",
+                            Description     = param.Value,
+                            BackgroundColor = bgcolorEntry,
+                            FontColor       = fcolorEntry
                         });
                     }
                 }
             }
-            // copy the pictures from MTU to user images folder
 
-            
             await Task.Delay(100).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -4531,6 +4555,13 @@ namespace aclara_meters.view
                 {
                     bottomBar.GetLabelElement("label_read").Text = "Saving pictures...";
                     CopyPicturesToUserImagesFolder();
+                }
+
+                if ( ! string.IsNullOrEmpty ( ndresult ) )
+                {
+                    Image imgNdResult     = bottomBar.GetImageElement ( "img_ndresult" );
+                    imgNdResult.Source    = "nd_" + ndresult;
+                    imgNdResult.IsVisible = true;
                 }
 
                 _userTapped = false;

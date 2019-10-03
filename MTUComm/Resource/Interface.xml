@@ -355,7 +355,6 @@
 		- Remove F12WAYRegister14		-> Not supported
 		-->
 		<Action type="ReadMTU">
-			<Parameter 	name="Test" 						display="Test" 							log="false" interface="true"	source="Puck.SerialNumber"							conditional="MemoryMap.Shipbit=false + ( Global.ShowFreq=true + ( ( Action.User=test + Puck.SerialNumber=123 ) | Mtu.SpecialSet=true ) )"/>
 			<Parameter 	name="Date" 						display="Date/Time" 					log="true" 	interface="false"	source="Action.Date"/>
 			<Parameter 	name="User" 						display="User" 							log="true" 	interface="false"	source="Action.User"/>
 			<Parameter 	name="MtuStatus" 					display="MTU Status" 					log="true" 	interface="true"/>
@@ -411,7 +410,7 @@
 							length="Global.AccountLength" fill="left"/>
 				<!-- INIT - RDD -->
 				<Parameter 	name="RDDSerialNumber" 			display="RDD SerialNumber" 				log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
-				<Parameter 	name="RDDCurrentValvePosition" 	display="RDD Current Position" 			log="true" 	interface="true" 	source="MemoryMap.RDDPosition"						conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
+				<Parameter 	name="RDDCurrentValvePosition" 	display="RDD Current Position" 			log="true" 	interface="true" 	source="MemoryMap.RDDValvePosition"					conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDLastCommandSuccessful" display="RDD LastCommandSuccessful" 	log="true" 	interface="true" 	source="MemoryMap.RDDLastCmdSuccess"				conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDBatteryStatus" 		display="RDD Battery Status" 			log="true" 	interface="true"														conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDStatusDays" 			display="RDD Status Days" 				log="true" 	interface="true" 	source="MemoryMap.DaysBtwMtuQueryRDD"				conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
@@ -474,7 +473,7 @@
 				<Parameter  name="WorkOrder"				display="Global.WorkOrderLabel"			log="true"	interface="true"	source="Data.WorkOrder"								conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDSerialNumber" 			display="RDD SerialNumber" 				log="true" 	interface="true" 														conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDCurrentValvePosition" 	display="RDD Current Valve Position" 	log="true" 	interface="true" 	source="Data.PrevRDDValvePosition" 					conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
-				<Parameter 	name="RDDDesiredValvePosition" 	display="RDD Desired Valve Position" 	log="true" 	interface="true" 	source="Data.RDDActionType"							conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
+				<Parameter 	name="RDDDesiredValvePosition" 	display="RDD Desired Valve Position" 	log="true" 	interface="true" 	source="Data.RDDPosition"							conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 				<Parameter 	name="RDDBatteryStatus" 		display="RDD Battery Status" 			log="true" 	interface="true" 	source="Data.RDDBattery" 							conditional="MemoryMap.StatusFlag=true + Port.IsSetFlow=true"/>
 			</Parameter>
 		</Action>

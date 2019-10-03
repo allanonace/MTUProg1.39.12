@@ -265,8 +265,8 @@ namespace aclara_meters.view
                                 string description;
 
                                 // For Read action when no Meter is installed on readed MTU
-                                if (param != null)
-                                    description = param.Value;
+                                if ( param != null )
+                                     description = param.Value;
                                 else description = mtu.Ports[i].GetProperty(port_parameter.Name);
 
                                 FinalReadListView.Add(new ReadMTUItem()
@@ -320,14 +320,6 @@ namespace aclara_meters.view
                                 case "good"    : bgcolorEntry = "#FF0"; break;
                                 case "excelent": bgcolorEntry = "#0F0"; break;
                             }
-
-                            /*
-                            if ( ! ndresult.Equals ( "fail" ) )
-                            {
-                                byte[] rgb = Utils.ConvertHexToRGB ( bgcolorEntry );
-                                barcolor = new Color ( rgb[ 0 ], rgb[ 1 ], rgb[ 2 ] );
-                            }
-                            */
                         }
 
                         FinalReadListView.Add(new ReadMTUItem()
@@ -351,18 +343,13 @@ namespace aclara_meters.view
 
             }
 
+            // Get result of the Install Confirmation process
             bool ok = false;
             foreach ( Parameter parameter in paramResult )
             {
-                if ( parameter.getLogTag ().Equals ( "InstallationConfirmationStatus" ) )
-                {
-                    string name = parameter.getLogTag ();
-                    dynamic value = parameter.Value;
-                }
-
                 if ( parameter.getLogTag ().Equals ( "InstallationConfirmationStatus" ) &&
-                        ! string.IsNullOrEmpty ( parameter.Value ) &&
-                        ! string.Equals ( parameter.Value.ToUpper (), "NOT CONFIRMED" ) )
+                     ! string.IsNullOrEmpty ( parameter.Value ) &&
+                     ! string.Equals ( parameter.Value.ToUpper (), "NOT CONFIRMED" ) )
                 {
                     ok = true;
                     break;
@@ -376,7 +363,6 @@ namespace aclara_meters.view
             {
                 if ( ! string.IsNullOrEmpty ( ndresult ) )
                 {
-                    //bottomBar.GetLabelStack ( "div_label" ).BackgroundColor = barcolor;
                     Image imgNdResult     = bottomBar.GetImageElement ( "img_ndresult" );
                     imgNdResult.Source    = "nd_" + ndresult;
                     imgNdResult.IsVisible = true;
