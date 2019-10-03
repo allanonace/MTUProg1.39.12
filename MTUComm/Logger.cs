@@ -795,8 +795,10 @@ namespace MTUComm
         {
             Parameter param = allParamsFromInterface.getParameterByTag ( parameter.Name, parameter.Source, portNumber );
             
-            Utils.Print ( "Log Param: " + parameter.Name + " " + parameter.Source + " " + portNumber +
-                " = " + ( ( param == null ) ? "..." : param.Value ) );
+            string source = string.IsNullOrEmpty ( parameter.Source ) ? string.Empty : " , Source: " + parameter.Source;
+
+            Utils.Print ( "Add Param to Log: " + parameter.Name + source + " , Port: " + portNumber +
+                " = " + ( ( param == null ) ? "NOT USED" : param.Value ) );
             
             if (param != null)
                 AddParameter ( parent, param );
