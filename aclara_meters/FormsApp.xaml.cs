@@ -121,26 +121,12 @@ namespace aclara_meters
                 // Config path
                 ConfigPaths();
 
-                if ( Data.Get.IsAndroid )
-                {
-                    //Task.Run(async () =>
-                    //{
-                    //    await PermisosLocationAsync();
-                    //});
-                    CallToInitApp(adapter, dialogs, appVersion);
-                }
-                else
-                    Task.Factory.StartNew(ThreadProcedure);
+                CallToInitApp(adapter, dialogs, appVersion);
             }
             catch (Exception e)
             {
                 
             }
-        }
-
-        private void ThreadProcedure ()
-        {
-            CallToInitApp ( adapter, dialogs, appVersion );
         }
 
         private void CallToInitApp(
