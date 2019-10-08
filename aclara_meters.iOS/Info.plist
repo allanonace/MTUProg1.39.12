@@ -96,5 +96,7 @@
 	<string>Assets.xcassets/AppIcon.appiconset</string>
 	<key>XSLaunchImageAssets</key>
 	<string>Assets.xcassets/LaunchImage-4.launchimage</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>This app need saccess to Bluetooth</string>
 </dict>
 </plist>

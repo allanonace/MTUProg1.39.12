@@ -105,6 +105,9 @@ namespace aclara_meters
             try
             {
                 InitializeComponent();
+
+                MainPage = new ContentPage();
+
                 VersionTracking.Track();
                 dataUrl=url;
 
