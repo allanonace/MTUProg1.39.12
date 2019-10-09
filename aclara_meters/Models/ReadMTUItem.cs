@@ -26,6 +26,7 @@ namespace aclara_meters.Models
 
             isDisplayed = "true";
             Height = "60";
+            FontColor = "#7a868c";
         }
 
         public string Height

@@ -4535,7 +4535,7 @@ namespace aclara_meters.view
                 else
                 {
                     Parameter param = args.Result.getParameterByTag ( iParameter.Name, iParameter.Source, 0 );
-
+                    
                     if (param != null)
                     {
                         string bgcolorEntry = string.Empty;
@@ -4569,13 +4569,13 @@ namespace aclara_meters.view
                             // Uses default colors for text and background
                             FinalReadListView.Add(new ReadMTUItem()
                             {
-                                Title           = param.getLogDisplay() + ":",
-                                isDisplayed     = "true",
-                                Height          = "64",
-                                isMTU           = "true",
-                                isMeter         = "false",
-                                Description     = param.Value,
-                            });
+                                Title = param.getLogDisplay() + ":",
+                                isDisplayed = "true",
+                                Height = "64",
+                                isMTU = "true",
+                                isMeter = "false",
+                                Description = param.Value
+                            }); 
                         }
                     }
                 }
