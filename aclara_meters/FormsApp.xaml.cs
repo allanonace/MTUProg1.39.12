@@ -16,14 +16,10 @@ using Library.Exceptions;
 using nexus.protocols.ble;
 using Plugin.DeviceInfo;
 using Plugin.Multilingual;
-using Plugin.Permissions;
-using Plugin.Permissions.Abstractions;
-using Renci.SshNet;
-using Renci.SshNet.Sftp;
 using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using Xml;
-using System.Xml.Linq;
+
 using aclara_meters.Helpers;
 using aclara_meters.util;
 using System.Threading;
@@ -114,8 +110,7 @@ namespace aclara_meters
                 VersionTracking.Track();
 
                 dataUrl=url;
-
-               // Data.Set ( "IsFromScripting",   false );
+                           
                 Data.Set ( "ActionInitialized", false );
                 Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
                 Data.Set ( "IsAndroid", Device.RuntimePlatform == Device.Android );
@@ -130,9 +125,9 @@ namespace aclara_meters
 
                 CallToInitApp(adapter, dialogs, appVersion);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                
+                //Debug.WriteLine(e.Message);
             }
         }
 
@@ -274,6 +269,7 @@ namespace aclara_meters
                 // Check if all configuration files are available in public folder
                 if ( GenericUtilsClass.HasDeviceAllXmls ( Mobile.ConfigPublicPath ) )
                 {
+                    NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
 
                     bool CPD = false;
                     if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
@@ -285,8 +281,7 @@ namespace aclara_meters
                     if (!string.IsNullOrEmpty(sFileCert))
                         Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
 
-                    NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
-
+                    
                     return true;
                 }
                 else

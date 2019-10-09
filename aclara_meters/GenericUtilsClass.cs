@@ -40,7 +40,7 @@ namespace aclara_meters
 
         public async static Task<bool> UploadFiles (Boolean UploadPrompt = true, Boolean AllLogs = true )
         {
-            Global global = Singleton.Get.Configuration.Global; //FormsApp.config.Global;
+            Global global = Singleton.Get.Configuration.Global; 
         
             // Path where the file should be saved once downloaded (locally)
             string path = ( AllLogs ) ? Mobile.LogPath : Mobile.LogUserPath;
@@ -57,8 +57,7 @@ namespace aclara_meters
                         "Pending log files",
                         "Do you want to Upload them?",
                         "Ok", "Cancel");
-  //          else upload = false;
-            
+  
             
             if ( ! upload )
                 return false;
@@ -156,7 +155,7 @@ namespace aclara_meters
                                         // Only create backup file ( "moving" log to backup folder ) in interactive mode
                                         if ( ! Data.Get.IsFromScripting )
                                         {
-                                            string url_to_copy = Mobile.LogUserBackupPath;// Path.Combine ( file.Directory.FullName, Mobile.PATH_BACKUP );
+                                            string url_to_copy = Mobile.LogUserBackupPath;
                                             if ( ! Directory.Exists ( url_to_copy ) )
                                                 Directory.CreateDirectory ( url_to_copy );
                     
@@ -440,7 +439,6 @@ namespace aclara_meters
                     List<SftpFile> ftp_array_files = new List<SftpFile>();
 
                     // Remote FTP File directory
-                    //bool isCertificate;
                     string configPath = Mobile.ConfigPath;
 
                     foreach (SftpFile file in sftp.ListDirectory(data.ftpDownload_Path))
@@ -477,8 +475,7 @@ namespace aclara_meters
         public static  bool GenerateBase64Certificate (string configPath)
         {
             bool   ok         = true;
-            //string configPath = Mobile.ConfigPath;
-  
+           
             string txtPath    = Path.Combine ( configPath, CER_TXT );
         
             try
@@ -519,15 +516,9 @@ namespace aclara_meters
         {
             bool ok = true;
 
-            //string path = Mobile.ConfigPath;
-        
-
-                // Directory could exist but is empty
+           // Directory could exist but is empty
             if ( string.IsNullOrEmpty ( path ) )
                 ok = false;
-
-            // Directory exists and is not empty
-            //string[] filesLocal = Directory.GetFiles ( path );
 
             DirectoryInfo info = new DirectoryInfo(path);
             FileInfo[] filesLocal = info.GetFiles();
@@ -537,17 +528,11 @@ namespace aclara_meters
                 foreach (FileInfo file in filesLocal)
                 {
                     string compareStr = fileNeeded + XML_EXT;
-                    //compareStr = compareStr.Replace ( path, string.Empty ).Replace("/", string.Empty);
-
+              
                     string fileStr = file.Name.ToLower();
-                    //fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty).ToLower ();
+                 
                     if ( fileStr.Equals ( compareStr ) )
                     {
-                        //if (!file.Name.Equals(compareStr)) // upper case
-                        //{
-                        //    file.CopyTo(Path.Combine(path, file.Name.ToLower()), true);
-                        //    file.Delete();
-                        //}
                         count++;
                         break;
                     }
@@ -579,8 +564,9 @@ namespace aclara_meters
                           (file.Name.Contains(XML_EXT) && CheckConfigFile(file.Name.ToLower())))
                     {
                         fileCopy = Path.Combine(sPathTo, file.Name.ToLower());
+                        file.CopyTo(fileCopy, true);
                     }
-                    file.CopyTo(fileCopy, true);
+                   
                     if (bRemove) file.Delete();
                 }
             }
@@ -593,7 +579,7 @@ namespace aclara_meters
 
         public static bool TagGlobal(bool bPublic, string sTag, out dynamic value)
         {
-            string sVal = String.Empty;
+          
             string uri;
             if (bPublic)
                 uri = Path.Combine(Mobile.ConfigPublicPath, Configuration.XML_GLOBAL);
@@ -625,15 +611,10 @@ namespace aclara_meters
                 "mtu",
                 "user",
             };
-            //string path = Mobile.ConfigPath;
-
-
+    
             // Directory could exist but is empty
             if (string.IsNullOrEmpty(path))
                 ok = false;
-
-            // Directory exists and is not empty
-            //string[] filesLocal = Directory.GetFiles ( path );
 
             DirectoryInfo info = new DirectoryInfo(path);
             FileInfo[] filesLocal = info.GetFiles();
@@ -643,10 +624,9 @@ namespace aclara_meters
                 foreach (FileInfo file in filesLocal)
                 {
                     string compareStr = fileNeeded + XML_EXT;
-                    //compareStr = compareStr.Replace ( path, string.Empty ).Replace("/", string.Empty);
-
+                  
                     string fileStr = file.Name.ToLower();
-                    //fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty).ToLower ();
+               
                     if (fileStr.Equals(compareStr))
                     {
                         file.Delete();
