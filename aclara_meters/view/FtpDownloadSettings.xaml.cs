@@ -14,44 +14,44 @@ namespace aclara_meters.view
 {
     public partial class FtpDownloadSettings: INotifyPropertyChanged//: Rg.Plugins.Popup.Pages.PopupPage
     {
-        MTUComm.Mobile.ConfigData config = MTUComm.Mobile.configData;
-        TaskCompletionSource<bool> tcs1;
-        public FtpDownloadSettings(TaskCompletionSource<bool> tcs)
+        private MTUComm.Mobile.ConfigData config = MTUComm.Mobile.configData;
+        private TaskCompletionSource<bool> taskSemaphoreDownload;
+        
+        public FtpDownloadSettings (
+            TaskCompletionSource<bool> taskSemaphore )
         {
-            InitializeComponent();
+            InitializeComponent ();
 
-            tcs1 = tcs;  //new TaskCompletionSource<bool>();
-            //tcs1 = tcs;
+            this.taskSemaphoreDownload = taskSemaphore;
 
             BindingContext = this;
 
-            if (Device.Idiom == TargetIdiom.Tablet)
-                ScaleFrame = 1;
-            else
-                ScaleFrame = 1;
+            this.ScaleFrame = 1;
 
-            Executing(false);
+            this.Executing ( false );
 
-            FocusEntryFields();
+            this.FocusEntryFields ();
 
-            if (config.HasFTP)
+            if ( config.HasFTP )
             {
                 tbx_remote_host.Text = config.ftpDownload_Host;
                 //tbx_user_pass.Text = MTUComm.Mobile.configData.ftpDownload_Pass;
-                tbx_user_name.Text = config.ftpDownload_User;
+                tbx_user_name  .Text = config.ftpDownload_User;
                 tbx_remote_path.Text = config.ftpDownload_Path;
-                tbx_remote_port.Text = config.ftpDownload_Port.ToString();
+                tbx_remote_port.Text = config.ftpDownload_Port.ToString ();
             }
-#if DEBUG
+
+            #if DEBUG
             tbx_remote_host.Text = "159.89.29.176";
-            tbx_user_pass.Text = "aclara1234";
-            tbx_user_name.Text = "aclara";
+            tbx_user_pass  .Text = "aclara1234";
+            tbx_user_name  .Text = "aclara";
             tbx_remote_path.Text = "/home/aclara/prod";
             tbx_remote_port.Text = "22";
-#endif
-            return;
+            #endif
 
+            return;
         }
+
         private void Executing (bool bExec)
         {
             
@@ -70,26 +70,28 @@ namespace aclara_meters.view
             bool res=false;
             await Task.Run(async () => { res = ProcessFtp(); });
 
-            if (!res)
+            if ( ! res )
             {
                 lb_Error.Text = "Error dowloading configuration files," + Environment.NewLine + "please check connection data or try it later";
                 Executing(false);
 
                 return;
             }
+
             try
             {
-                await Navigation.PopAsync();
-                tcs1.SetResult(true);
+                await Navigation.PopAsync ();
 
+                // Configuration files downloaded correctly
+                taskSemaphoreDownload.SetResult ( true );
             }
-            catch (Exception exc)
+            catch ( Exception exc )
             {
-                tcs1.SetResult(false);//await Application.Current.MainPage.Navigation.PopAsync();
+                // Error downloading configuration files
+                taskSemaphoreDownload.SetResult ( false );
             }
           
             return;
-
         }
 
         private bool ProcessFtp()
@@ -135,9 +137,10 @@ namespace aclara_meters.view
         }
         private async void Cancel_Clicked(object sender, EventArgs e)
         {
-            await Navigation.PopAsync();
-            //await PopupNavigation.Instance.PopAsync();
-            tcs1.SetResult(false);
+            await Navigation.PopAsync ();
+
+            // Canceled downloading action
+            taskSemaphoreDownload.SetResult ( false );
         }
 
         private bool isLoading;

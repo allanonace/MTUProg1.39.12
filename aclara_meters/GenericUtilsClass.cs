@@ -327,11 +327,11 @@ namespace aclara_meters
 
         public static string ChekInstallMode()
         {
-            var Mode = SecureStorage.GetAsync(INSTALL_MODE);
-            if (String.IsNullOrEmpty(Mode.Result))
-            {
+            var Mode = SecureStorage.GetAsync ( INSTALL_MODE );
+
+            if ( String.IsNullOrEmpty ( Mode.Result ) )
                 return "None";
-            }
+
             return Mode.Result;
         }
         public static bool CheckFTPDownload()

@@ -43,7 +43,7 @@ namespace MTUComm
         }
 
         // Maximum lengths
-        public  const int BYTES_REQUIRED_DATA    = 18;
+        public  const int BYTES_REQUIRED_DATA    = 25;
 
         // ACK with Remote Disconnect Response
         private const int BYTE_RESULT            = 2;

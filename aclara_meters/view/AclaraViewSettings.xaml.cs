@@ -1123,14 +1123,14 @@ namespace aclara_meters.view
                 if (Mobile.IsNetAvailable())
                 {
                     bool result = false;
-                    TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+                    TaskCompletionSource<bool> taskSemaphoreDownload = new TaskCompletionSource<bool>();
                
                     Device.BeginInvokeOnMainThread(async () =>
                     {
 
-                        await Application.Current.MainPage.Navigation.PushAsync(new FtpDownloadSettings(tcs));
+                        await Application.Current.MainPage.Navigation.PushAsync(new FtpDownloadSettings(taskSemaphoreDownload));
 
-                        result = await tcs.Task;
+                        result = await taskSemaphoreDownload.Task;
 
                         if (result)
                         {
