@@ -77,7 +77,7 @@ namespace aclara_meters.viewmodel
 
         public async void Load ()
         {
-            if ( await FormsApp.credentialsService.CredentialsExist () )
+            if ( await FormsApp.credentialsService.CredentialsExist () && !Data.Get.IsFromScripting )
             {
                 string user = FormsApp.credentialsService.UserName;
                 //Mobile.LogUserPath = user;
