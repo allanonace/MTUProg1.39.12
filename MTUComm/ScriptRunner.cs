@@ -89,6 +89,8 @@ namespace MTUComm
                 {
                     script = ( Script )s.Deserialize ( reader );
                 }
+                await new Action(serial_device, ActionType.BasicRead).Run();
+
                 BuildScriptActions ( serial_device, script );
             }
             catch ( Exception e )
@@ -226,6 +228,7 @@ namespace MTUComm
         /// </summary>
         public async Task Run ()
         {
+          
             await actions.ToArray()[0].Run ();
         }
 

@@ -543,11 +543,11 @@ namespace aclara_meters
                     //fileStr = fileStr.Replace ( path, string.Empty ).Replace("/",string.Empty).ToLower ();
                     if ( fileStr.Equals ( compareStr ) )
                     {
-                        if (!file.Name.Equals(compareStr)) // upper case
-                        {
-                            file.CopyTo(Path.Combine(path, file.Name.ToLower()), true);
-                            file.Delete();
-                        }
+                        //if (!file.Name.Equals(compareStr)) // upper case
+                        //{
+                        //    file.CopyTo(Path.Combine(path, file.Name.ToLower()), true);
+                        //    file.Delete();
+                        //}
                         count++;
                         break;
                     }

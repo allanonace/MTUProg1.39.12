@@ -120,7 +120,7 @@ namespace aclara_meters.view
             #endregion
         }
 
-        public async void UpdateFiles()
+        public async Task UpdateFiles()
         {
             String sMessage;
             // Upload log files
@@ -189,7 +189,11 @@ namespace aclara_meters.view
 
                         if (listPucks.Count != 0)
                         {
-                            DeviceList.ItemsSource = listPucks;
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                DeviceList.ItemsSource = listPucks;
+                                txtBuscando.IsVisible = false;
+                            });
                         }
                         if (conectarDevice)
                         {
@@ -198,12 +202,10 @@ namespace aclara_meters.view
                         else
                         {
                             ContentView_DeviceList.IsVisible = true;
+                            Terminado();
 
-                        }
-                        
-                    }
-                    
-                    Terminado();
+                        }                        
+                    }                    
                 }
             });
 
@@ -498,7 +500,7 @@ namespace aclara_meters.view
                                 {
                                     Utils.Print(e5.StackTrace);
                                 }
-
+                                Terminado();
                                 //Connection Method
                                 runScript();
 
@@ -817,6 +819,7 @@ namespace aclara_meters.view
 
                             // call your method to check for notifications here
                             FormsApp.ble_interface.Open(Singleton.Get.Puck.Device, true);
+                            
                        }
                        else
                        {
