@@ -1584,10 +1584,6 @@ namespace MTUComm
             int result = RDD_OK;
             Stopwatch nodeCounter = null;
 
-            // Uses values from Data..
-            // - RDDPosition ( string ) { Open, Close, Partial Open }
-            // - RDDFirmware ( string ) -> For log only
-
             try
             {
                 bool isPort1 = false;

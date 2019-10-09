@@ -667,7 +667,7 @@ namespace MTUComm
                         // Allowed values: CLOSE, OPEN, PARTIAL_OPEN
                         RDDCmd cmd;
                         if ( fail = ! ( Enum.TryParse<RDDCmd> (
-                                            Data.Get.RDDPosition.ToUpper ().Replace ( " ", "_" ), out cmd ) &&
+                                            valueStr.ToUpper ().Replace ( " ", "_" ), out cmd ) &&
                                         cmd != RDDCmd.SEDIMENT_TURN &&
                                         cmd != RDDCmd.UNKNOWN ) )
                             msgDescription = String.Format ( MSG_RDD );
