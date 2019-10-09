@@ -117,6 +117,16 @@ namespace Xml
         //[XmlElement("TempReadDays")]
         //public ActionParameter TempReadDays { get; set; }
 
+        // Remote Disconnect
+
+        [XmlElement("RDDPosition")]
+        public ActionParameter RDDPosition { get; set; }
+
+        [XmlElement("RDDFirmwareVersion")]
+        public ActionParameter RDDFirmware { get; set; }
+
+        // Custom field
+
         [XmlElement("Custom")]
         public ActionParameter Custom { get; set; }
 

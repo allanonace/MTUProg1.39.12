@@ -4163,7 +4163,7 @@ namespace aclara_meters.view
                 
                 // General fields, for the MTU itself
                 // No RDD or RDD in port two
-                if (! hasRDD ||
+                if ( ! hasRDD ||
                      ! rddIn1 )
                 {
                     value_omt = this.tbx_OldMtuId.Text;
