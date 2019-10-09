@@ -82,12 +82,11 @@
     <MtouchLink>None</MtouchLink>
     <OnDemandResourcesInitialInstallTags />
     <MtouchArch>ARM64</MtouchArch>
-    <OptimizePNGs>false</OptimizePNGs>
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
-    <MtouchFastDev>true</MtouchFastDev>
-    <DeviceSpecificBuild>true</DeviceSpecificBuild>
     <CodesignProvision>bizintekdist</CodesignProvision>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
+    <OptimizePNGs>false</OptimizePNGs>
+    <DeviceSpecificBuild>true</DeviceSpecificBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>

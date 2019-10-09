@@ -96,11 +96,10 @@
     <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
     <MtouchVerbosity>
     </MtouchVerbosity>
-    <MtouchFastDev>true</MtouchFastDev>
-    <DeviceSpecificBuild>true</DeviceSpecificBuild>
-    <OptimizePNGs>false</OptimizePNGs>
     <CodesignProvision>bizintekdist</CodesignProvision>
+    <DeviceSpecificBuild>true</DeviceSpecificBuild>
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
+    <OptimizePNGs>false</OptimizePNGs>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <AppExtensionDebugBundleId />

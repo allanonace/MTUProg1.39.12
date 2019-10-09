@@ -20,7 +20,8 @@ namespace aclara_meters.iOS
             }
             catch ( Exception e )
             {
-
+                Console.WriteLine($"-------- {e.Message}");
+                Console.WriteLine($"-------- {e.StackTrace}");
             }
         }
 

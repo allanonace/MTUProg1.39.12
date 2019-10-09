@@ -106,9 +106,11 @@ namespace aclara_meters
             {
                 InitializeComponent();
 
-                MainPage = new ContentPage();
+                if (!Data.Get.IsFromScripting)
+                    MainPage = new ContentPage();
 
                 VersionTracking.Track();
+
                 dataUrl=url;
 
                // Data.Set ( "IsFromScripting",   false );
@@ -552,38 +554,45 @@ namespace aclara_meters
 
                 if ( callback != null ) { /* ... */ }
 
-                
-                if ( Data.Get.IsIOS)  
+                try
                 {
-                    if (MainPage == null) // no interactive 
+                    if (Data.Get.IsIOS)
                     {
-                        tcs1 = new TaskCompletionSource<bool>(); 
-                        bool result = await tcs1.Task;
-                    }
-                    await Task.Run(async () =>
-                    {
-                        await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread ( async () =>
+                        if (MainPage == null) // no interactive 
                         {
+                            tcs1 = new TaskCompletionSource<bool>();
+                            bool result = await tcs1.Task;
+                        }
+                        await Task.Run(async () =>
+                        {
+                            await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
+                      {
                             //Settings.IsLoggedIn = false;
                             //credentialsService.DeleteCredentials ();
 
-                            Application.Current.MainPage = new NavigationPage(new AclaraViewScripting ( path, callback, script_name ) );
+                            Application.Current.MainPage = new NavigationPage(new AclaraViewScripting(path, callback, script_name));
 
-                            await MainPage.Navigation.PopToRootAsync ( true );
+                                await MainPage.Navigation.PopToRootAsync(true);
+                            });
                         });
-                    });
-                }
-                else
-                {
-                    Device.BeginInvokeOnMainThread ( async () =>
-                        {
+                    }
+                    else
+                    {
+                        Device.BeginInvokeOnMainThread(async () =>
+                          {
                             //Settings.IsLoggedIn = false;
                             //credentialsService.DeleteCredentials ();
 
-                            Application.Current.MainPage = new NavigationPage(new AclaraViewScripting ( path, callback, script_name ) );
+                            Application.Current.MainPage = new NavigationPage(new AclaraViewScripting(path, callback, script_name));
 
                             //await MainPage.Navigation.PopToRootAsync ( true );
                         });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"-----  {ex.Message}");
+
                 }
             }
         }
