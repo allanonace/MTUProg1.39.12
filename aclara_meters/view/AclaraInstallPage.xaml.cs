@@ -40,9 +40,9 @@ namespace aclara_meters.view
                 return;
             }
             GenericUtilsClass.SetInstallMode("FTP");
-            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
-            await Navigation.PushAsync(new FtpDownloadSettings(tcs));
-            result = await tcs.Task;
+            TaskCompletionSource<bool> taskSemaphoreDownload = new TaskCompletionSource<bool>();
+            await Navigation.PushAsync(new FtpDownloadSettings(taskSemaphoreDownload));
+            result = await taskSemaphoreDownload.Task;
             if (!result) GenericUtilsClass.SetInstallMode("None");
             await DisplayAlert("Attention", "The app will close to apply the configuration", "OK");
             System.Diagnostics.Process.GetCurrentProcess().Kill();
