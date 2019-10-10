@@ -173,12 +173,13 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread ( () =>
             {
-                this.tbx_MtuId          .Text = MtuId.ToString ().PadLeft ( mtuIdLength, '0' );
-                this.tbx_Mtu_Status     .Text = MtuStatus;
-                this.tbx_AccountNumber  .Text = AccountNum.ToString ();
-                this.tbx_RDDPosition    .Text = rddPosition;
-                this.tbx_RDDSerialNumber.Text = rddSerial.ToString ();
-                this.tbx_Battery        .Text = rddBattery;
+                this.tbx_MtuId             .Text = MtuId.ToString ().PadLeft ( mtuIdLength, '0' );
+                this.tbx_Mtu_Status        .Text = MtuStatus;
+                this.tbx_AccountNumber     .Text = AccountNum.ToString ();
+                this.tbx_RDDPosition       .Text = rddPosition;
+                this.tbx_RDDSerialNumber   .Text = rddSerial.ToString ();
+                this.tbx_Battery           .Text = rddBattery;
+                this.tbx_RDDFirmwareVersion.Text = this.global.RDDFirmwareVersion;
                 
                 this.tbx_FieldOrder        .MaxLength = global.WorkOrderLength;
                 this.tbx_RDDFirmwareVersion.MaxLength = 12;

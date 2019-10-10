@@ -160,7 +160,7 @@ namespace MTUComm
             // The MTU encryption process can't be performed because broadcast key does not have the correct format
             { new ODEncryptionBroadcastKeyFormatException (),   704 },
             
-            // Configuration Files and System [ 7xx ]
+            // Configuration Files and System [ 8xx ]
             //-------------------------------
             // Some of the configuration files are not present in the root folder. Contact your IT administrator
             { new ConfigurationFilesNotFoundException (),       800 },
@@ -194,6 +194,8 @@ namespace MTUComm
             { new IntuneCredentialsException (),                814 },
             // Exception with camera
             { new CameraException (),                           815 },
+            // Modification of the content of Global.xml file has failed
+            { new GlobalChangedException (),                    816 },
 
             // DEBUG - Configuration Files and System [ 85x ]
             //-------------------------------

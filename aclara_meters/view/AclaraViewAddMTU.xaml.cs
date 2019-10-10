@@ -557,12 +557,12 @@ namespace aclara_meters.view
                 //this.tbx_MtuId.Text = MtuId.ToString().PadLeft(mtuIdLength, '0');
                 //this.tbx_Mtu_Status.Text = MtuStatus;
                 //this.tbx_AccountNumber.Text = AccountNum.ToString();
-                this.tbx_RDDPosition.Text = rddPosition;
-                this.tbx_RDDSerialNumber.Text = rddSerial.ToString();
-                this.tbx_Battery.Text = rddBattery;
-
+                this.tbx_RDDPosition       .Text = rddPosition;
+                this.tbx_RDDSerialNumber   .Text = rddSerial.ToString();
+                this.tbx_Battery           .Text = rddBattery;
+                this.tbx_RDDFirmwareVersion.Text = this.global.RDDFirmwareVersion;
             });
-       
+
             #endregion
         }
 

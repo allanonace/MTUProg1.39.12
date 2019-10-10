@@ -88,6 +88,7 @@
     <Error id="813" message="The new version configuration files are corrupted, the app will continues with the actual ones when restart it. Contact your IT administrator"/>
     <Error id="814" message="Credentials from Intune missing" />
     <Error id="815" message="There is a problem with the camera to scan or take photos (_var_)" />
+    <Error id="816" message="Modification of the content of Global.xml file has failed" />
     
     <!-- Configuration Files -->
     <Error id="850" message="The interface for the specified MTU ID was not found" /> <!-- message_release="" /> -->
