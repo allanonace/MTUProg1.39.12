@@ -777,6 +777,7 @@ namespace aclara_meters.view
 
         private void TurnOffMTUNoTapped(object sender, EventArgs e)
         {
+            indicator.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
             Navigation.PopToRootAsync(false);

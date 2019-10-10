@@ -3001,7 +3001,6 @@ namespace aclara_meters.view
 
                             if (this.global.ActionVerify)
                             {
-                                indicator.IsVisible = false;
                                 dialog_open_bg.IsVisible = true;
                                 turnoff_mtu_background.IsVisible = true;
                                 dialogView.OpenCloseDialog("dialog_turnoff_one", true);
@@ -3111,7 +3110,6 @@ namespace aclara_meters.view
                     #region Check ActionVerify
                     if (this.global.ActionVerify)
                     {
-                        indicator.IsVisible = false;
                         dialog_open_bg.IsVisible = true;
                         turnoff_mtu_background.IsVisible = true;
                         dialogView.GetStackLayoutElement(nameDialog).IsVisible = true;
@@ -3219,7 +3217,8 @@ namespace aclara_meters.view
         }
 
         private void TurnOffMTUNoTapped(object sender, EventArgs e)
-        { 
+        {
+            indicator.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
             Navigation.PopToRootAsync(false);

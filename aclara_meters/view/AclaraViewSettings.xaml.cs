@@ -1124,31 +1124,35 @@ namespace aclara_meters.view
                 {
                     bool result = false;
                     TaskCompletionSource<bool> taskSemaphoreDownload = new TaskCompletionSource<bool>();
-               
-                    Device.BeginInvokeOnMainThread(async () =>
-                    {
 
-                        await Application.Current.MainPage.Navigation.PushAsync(new FtpDownloadSettings(taskSemaphoreDownload));
+                    await Task.Run(async () => {
 
+                        Device.BeginInvokeOnMainThread(async () =>
+                        {
+                            await Application.Current.MainPage.Navigation.PushAsync(new FtpDownloadSettings(taskSemaphoreDownload));
+                        });
                         result = await taskSemaphoreDownload.Task;
 
-                        if (result)
+                        Device.BeginInvokeOnMainThread(async () =>
                         {
-                            if (Configuration.CheckLoadXML())
+                            if (result)
                             {
-                                await SecureStorage.SetAsync("ConfigVersion", GenericUtilsClass.CheckFTPConfigVersion());
-                                await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "ok");
-                                
-                                System.Diagnostics.Process.GetCurrentProcess().Kill();
-                            }
-                            else
-                            {
-                                GenericUtilsClass.RestoreConfigFiles();
-                                await Application.Current.MainPage.DisplayAlert("Attention", 
-                                     "The new version configuration files are corrupted, the app will continues with the actual files. Contact your IT administratorn", "OK"); 
-                            }
-                        }
+                                if (Configuration.CheckLoadXML())
+                                {
+                                    await SecureStorage.SetAsync("ConfigVersion", GenericUtilsClass.CheckFTPConfigVersion());
+                                    await Application.Current.MainPage.DisplayAlert("Attention", "The application will end, restart it to make changes in the configuration", "ok");
 
+                                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                                }
+                                else
+                                {
+                                    GenericUtilsClass.RestoreConfigFiles();
+                                    await Application.Current.MainPage.DisplayAlert("Attention",
+                                         "The new version configuration files are corrupted, the app will continues with the actual files. Contact your IT administratorn", "OK");
+                                }
+                            }
+                        });
+ 
                     });
 
                     return false; 
