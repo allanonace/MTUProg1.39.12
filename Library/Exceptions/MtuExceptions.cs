@@ -727,5 +727,9 @@
     {
         public CameraException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
+    public class PortTypeMissingMTUException : OwnExceptionsBase
+    {
+        public PortTypeMissingMTUException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+    }
     #endregion
 }

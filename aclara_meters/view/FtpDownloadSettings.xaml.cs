@@ -9,6 +9,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using MTUComm;
+using System.Diagnostics;
 
 namespace aclara_meters.view
 {
@@ -16,7 +17,8 @@ namespace aclara_meters.view
     {
         private MTUComm.Mobile.ConfigData config = MTUComm.Mobile.configData;
         private TaskCompletionSource<bool> taskSemaphoreDownload;
-        
+        const int smallWidthResolution = 768;
+        const int smallHeightResolution = 1280;
         public FtpDownloadSettings (
             TaskCompletionSource<bool> taskSemaphore )
         {
@@ -26,7 +28,9 @@ namespace aclara_meters.view
 
             BindingContext = this;
 
-            this.ScaleFrame = 1;
+            if (DeviceDisplay.MainDisplayInfo.Width < smallWidthResolution)
+                this.ScaleFrame = 0.9;
+            else this.ScaleFrame = 1;
 
             this.Executing ( false );
 
@@ -127,10 +131,14 @@ namespace aclara_meters.view
                     return true;
                 }
                 else
-                    return  false;
+                {
+                    Debug.WriteLine("-----------  Fallo bajando los ficheros---------------------");
+                    return false;
+                }
             }
             else
             {
+                Debug.WriteLine("-----------  Fallo en la conexion con el FTP------------------");
                 return false;
             }
 

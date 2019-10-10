@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 
 using ActionType = MTUComm.Action.ActionType;
+using System.Diagnostics;
 
 namespace MTUComm
 {
@@ -52,6 +53,7 @@ namespace MTUComm
                 alarms     = Utils.DeserializeXml<AlarmList>       ( Path.Combine ( configPath, XML_ALARMS    ) );
                 demands    = Utils.DeserializeXml<DemandConf>      ( Path.Combine ( configPath, XML_DEMANDS   ) );
                 users      = Utils.DeserializeXml<UserList>        ( Path.Combine ( configPath, XML_USERS     ) ).List;
+                
                 interfaces = Utils.DeserializeXml<InterfaceConfig> ( XML_INTERFACE, true ); // From resources
                 
                 // Preload port types, because some ports use a letter but other a list of Meter IDs
@@ -62,6 +64,10 @@ namespace MTUComm
                 {
                     foreach ( Port port in mtu.Ports )
                     {
+                       
+                        if (string.IsNullOrEmpty(port.Type))
+                            throw new PortTypeMissingMTUException(mtu.Id.ToString());
+
                         bool isNumeric = MtuAux.GetPortTypes ( port.Type, out portTypes );
 
                         // Some Meters have numeric type ( e.g. 122 ) and some of them appears

@@ -1677,8 +1677,8 @@ namespace aclara_meters.view
 
         private void TappedListeners()
         {
-            bottomBar.GetImageButtonElement("btnTakePicture").Clicked += TakePicture;
-            bottomBar.GetImageButtonElement("btnTakePicture").IsVisible = global.ShowCameraButton;
+            bottomBar.GetTGRElement("btnTakePicture").Tapped += TakePicture;
+            bottomBar.GetImageElement("imgTakePicture").IsVisible = global.ShowCameraButton;
             TopBar.GetTGRElement("back_button").Tapped += ReturnToMainView;
             bottomBar.GetTGRElement("bg_action_button").Tapped += AddMtu;
             //bottomBar.GetImageButtonElement("bg_action_button").Clicked += AddMtu;

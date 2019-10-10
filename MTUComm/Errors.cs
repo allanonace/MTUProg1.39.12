@@ -194,6 +194,8 @@ namespace MTUComm
             { new IntuneCredentialsException (),                814 },
             // Exception with camera
             { new CameraException (),                           815 },
+             // Exception MTU without portType
+            { new PortTypeMissingMTUException (),               817 },
 
             // DEBUG - Configuration Files and System [ 85x ]
             //-------------------------------

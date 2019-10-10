@@ -309,7 +309,7 @@ namespace aclara_meters
                     sftp.Disconnect();
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 ok = false;
             }
@@ -434,10 +434,6 @@ namespace aclara_meters
                 {
                     sftp.Connect();
 
-                    // List all posible files in the documents directory 
-                    // Check if file's lastwritetime is the lastest 
-                    List<SftpFile> ftp_array_files = new List<SftpFile>();
-
                     // Remote FTP File directory
                     string configPath = Mobile.ConfigPath;
 
@@ -460,16 +456,17 @@ namespace aclara_meters
                     }
 
                     sftp.Disconnect();
+                    Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
+
+                    return ok;
                 }
             }
             catch (Exception e)
             {
-                ok = false;
+                //throw new FtpDownloadException(e.Message);
+                return false;
             }
-
-            Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
-
-            return ok;
+                    
         }
 
         public static  bool GenerateBase64Certificate (string configPath)
@@ -545,7 +542,7 @@ namespace aclara_meters
             return ok;
         }
                
-        public static void CopyConfigFiles(bool bRemove, string sPathFrom, string sPathTo, out string sFileCert)
+        public static bool CopyConfigFiles(bool bRemove, string sPathFrom, string sPathTo, out string sFileCert)
         {
             sFileCert = string.Empty;
             string fileCopy = string.Empty;
@@ -569,11 +566,11 @@ namespace aclara_meters
                    
                     if (bRemove) file.Delete();
                 }
+                return true;
             }
             catch (Exception e)
-            {
-                Errors.ShowAlert(e);
-                return;
+            {         
+                return false;
             }
         }
 
