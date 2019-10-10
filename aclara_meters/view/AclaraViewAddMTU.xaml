@@ -749,7 +749,7 @@
                                     </StackLayout>
                                     <!-- RDD Position -->
                                     <StackLayout x:Name="div_RDDPosition">
-                                        <Label Text="RDD Position" Margin="0,4,0,0" x:Name="lb_RDDPosition" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Valve Position" Margin="0,4,0,0" x:Name="lb_RDDPosition" VerticalOptions="Center" Font="Bold,17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -765,7 +765,7 @@
                                     </StackLayout>
                                     <!-- RDD Serial Number -->
                                     <StackLayout x:Name="div_RDDSerialNumber">
-                                        <Label Text="RDD Serial Number" Margin="0,4,0,0" x:Name="lb_RDDSerialNumber" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Valve Serial Number" Margin="0,4,0,0" x:Name="lb_RDDSerialNumber" VerticalOptions="Center" Font="Bold,17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -781,7 +781,7 @@
                                     </StackLayout>
                                     <!-- Battery -->
                                     <StackLayout x:Name="div_Battery">
-                                        <Label Text="Battery" Margin="0,4,0,0" x:Name="lb_Battery" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Valve Battery" Margin="0,4,0,0" x:Name="lb_Battery" VerticalOptions="Center" Font="Bold,17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -797,7 +797,7 @@
                                     </StackLayout>
                                     <!-- RDD Firmware Version -->
                                     <StackLayout x:Name="div_RDDFirmwareVersion">
-                                        <Label Text="RDD Firmware Version" Margin="0,4,0,0" x:Name="lb_RDDFirmwareVersion" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Valve Firmware Version" Margin="0,4,0,0" x:Name="lb_RDDFirmwareVersion" VerticalOptions="Center" Font="Bold,17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -813,7 +813,7 @@
                                     </StackLayout>
                                     <!-- Valve Position -->
                                     <StackLayout x:Name="div_ValvePosition" IsVisible="true">
-                                        <Label Text="Valve Position" x:Name="lb_ValvePosition" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Valve Position Desired" x:Name="lb_ValvePosition" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">

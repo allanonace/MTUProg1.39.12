@@ -1325,8 +1325,8 @@ namespace MTUComm
                                 ! ( timeOut = nodeCounter.ElapsedMilliseconds >= maxTimeND ) );
                         
                         // Node discovery mode not started/ready for query
-                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY &&
-                             timeOut )
+                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY ) // &&
+                             //timeOut )
                         {
                             Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotStartedException () );
                             goto BREAK_FAIL;
@@ -1399,6 +1399,13 @@ namespace MTUComm
                             
                             switch ( queryResult.Result )
                             {
+                                // First message always contains general information
+                                case NodeDiscoveryQueryResult.GeneralInfo:
+                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: General information" ) );
+
+                                    await Task.Delay ( WAIT_BTW_NODE_NEXT );
+                                    break;
+
                                 // Wait a bit and try to read/recover the next node
                                 case NodeDiscoveryQueryResult.NextRead:
                                     OnProgress ( this, new Delegates.ProgressArgs ( 
@@ -1409,8 +1416,14 @@ namespace MTUComm
 
                                 // Was the last node or no node was recovered
                                 case NodeDiscoveryQueryResult.LastRead:
+                                    OnProgress(this, new Delegates.ProgressArgs(
+                                        "ND: Nodes requested... " + queryResult.Index + "/" + nodeList.CurrentAttemptTotalEntries));
+
+                                    goto BREAK_OK; // Exit from switch + infinite while
+
                                 case NodeDiscoveryQueryResult.Empty:
-                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Nodes requested" ) );
+                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Empty" ) );
+
                                     goto BREAK_OK; // Exit from switch + infinite while
                             }
                         }
@@ -1751,6 +1764,10 @@ namespace MTUComm
                     }
 
                     // The remote disconnect has worked well!
+
+                    // Updates firmware version of the RDD in global
+                    if ( ! ( ( string )Data.Get.RDDFirmware ).Equals ( this.global.RDDFirmwareVersion ) )
+                        Utils.WriteToGlobal ( "RDDFirmwareVersion", Data.Get.RDDFirmware );
                 }
             }
             catch ( Exception e )

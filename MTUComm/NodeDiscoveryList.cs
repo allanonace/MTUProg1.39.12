@@ -121,6 +121,7 @@ namespace MTUComm
         /// </summary>
         public enum NodeDiscoveryQueryResult
         {
+            GeneralInfo,
             NextRead,
             LastRead,
             Empty
@@ -289,8 +290,16 @@ namespace MTUComm
                     break;
             }
 
-            return ( ( this.CurrentAttemptLastEntry.IsLast ) ?
-                NodeDiscoveryQueryResult.LastRead : NodeDiscoveryQueryResult.NextRead, node.Index );
+            bool last = this.CurrentAttemptLastEntry.IsLast;
+
+            if ( this.entries.Count == 1 )
+                return ( last ?
+                    NodeDiscoveryQueryResult.LastRead : NodeDiscoveryQueryResult.GeneralInfo,
+                    node.Index );
+
+            return ( last ?
+                NodeDiscoveryQueryResult.LastRead : NodeDiscoveryQueryResult.NextRead,
+                node.Index );
         }
     
         /// <summary>

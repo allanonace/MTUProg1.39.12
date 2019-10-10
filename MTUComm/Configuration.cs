@@ -141,7 +141,14 @@ namespace MTUComm
         public static Configuration GetInstanceWithParams ( string path = "", bool avoidXmlError = false )
         {
             if ( ! Singleton.Has<Configuration> () )
+            {
                 Singleton.Set = new Configuration ( path, avoidXmlError );
+
+                // NOTE: It is not possible to use Mobile static property through an instance
+                //Singleton.Set = new Mobile ();
+                Data.Set ( "ConfigPath", Mobile.ConfigPath );
+                Data.Set ( "XmlGlobal", Configuration.XML_GLOBAL );
+            }
 
             return Singleton.Get.Configuration;
         }

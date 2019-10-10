@@ -592,6 +592,9 @@ namespace Xml
             this.GoodF2Rely                   = 75m;                  // Good F2 frequency threshold
             this.MaxTimeRFCheck               = 60;                   // Max time in seconds to perform the NodeDiscovery process ( Value set to NodeDiscoveryTime in STAR Programmer )
 
+            // Remote Disconnect
+            this.RDDFirmwareVersion           = string.Empty;         // RDD device firmware version
+
             // New Encryption ( OD 1.2 )
             this.BroadcastSet                 = string.Empty;         // Broadcast key used during the OnDemand 1.2 MTUs new encryption process
             this.PublicKey                    = string.Empty;         // Public key used during the OnDemand 1.2 MTUs new encryption process
@@ -831,6 +834,9 @@ namespace Xml
 
         [XmlElement("PublicKey")]
         public string PublicKey { get; set; }
+
+        [XmlElement("RDDFirmwareVersion")]
+        public string RDDFirmwareVersion { get; set; }
 
         [XmlElement("ReadingDualEntry")]
         public bool ReadingDualEntry { get; set; }

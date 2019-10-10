@@ -9,6 +9,8 @@ using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Xml.Linq;
+using Library.Exceptions;
 
 namespace Library
 {
@@ -133,6 +135,30 @@ namespace Library
                     streamReader.BaseStream.CopyTo ( memStream );
                     return new X509Certificate2 ( memStream.ToArray () );
                 }
+            }
+        }
+
+        public static void WriteToGlobal (
+            string  tagName,
+            dynamic value = null )
+        {
+            try
+            {
+                if ( string.IsNullOrEmpty ( tagName ) )
+                    return;
+
+                String    uri = Path.Combine ( Data.Get.ConfigPath, Data.Get.XmlGlobal );
+                XDocument doc = XDocument.Load ( uri );
+
+                doc.Root.SetElementValue ( tagName, value );
+                doc.Save ( uri );
+
+                // Update instance
+                Utils.SetPropertyValue ( Singleton.Get.Configuration.Global, tagName, value );
+            }
+            catch ( Exception e )
+            {
+                throw new GlobalChangedException ();
             }
         }
 
@@ -435,5 +461,17 @@ namespace Library
         }
 
         #endregion        
+
+        #region Properties
+
+        public static void SetPropertyValue (
+            dynamic instance,
+            string propName,
+            dynamic value )
+        {
+            instance.GetType ().GetProperty ( propName ).SetValue ( instance, value );
+        }
+
+        #endregion
     }
 }
