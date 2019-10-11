@@ -294,7 +294,7 @@ namespace MTUComm
 
             if ( this.entries.Count == 1 )
                 return ( last ?
-                    NodeDiscoveryQueryResult.LastRead : NodeDiscoveryQueryResult.GeneralInfo,
+                    NodeDiscoveryQueryResult.Empty : NodeDiscoveryQueryResult.GeneralInfo,
                     node.Index );
 
             return ( last ?
@@ -357,6 +357,10 @@ namespace MTUComm
                 acumProb *= ( 1 - this.GetProbability ( averageRssi ) );
             }
 
+            if ( isF1 )
+                Library.Utils.Print ( "ND: F1 MtuTxSuccess " + ( 1 - acumProb ) +
+                    " | AcumProb " + acumProb );
+
             // P( MTU TX Success )
             return 1 - acumProb;
         }
@@ -369,6 +373,13 @@ namespace MTUComm
 
             // P( TWO WAY ) = 100% - ( 100% - P( DCU TX Success ) * P( MTU TX Success ) ) ^ 3
             decimal precalc = 1 - this.GetProbability ( bestRssiResponse ) * mtuTxSuccess;
+
+            Library.Utils.Print ( "ND: F2 MtuTxSuccess " + mtuTxSuccess +
+                " | BestRSSI " + bestRssiResponse +
+                " | Prob BestRSSI " + this.GetProbability(bestRssiResponse) +
+                " | Precalc " + precalc +
+                " | Result " + ( 1 - precalc * precalc * precalc ) );
+
             return 1 - precalc * precalc * precalc;
         }
 

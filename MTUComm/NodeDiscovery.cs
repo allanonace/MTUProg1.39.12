@@ -295,6 +295,10 @@ namespace MTUComm
                 this.responderId         = ( int )response[ BYTE_RESID   ];                                                              // 20
                 this.freqChannelRequest  = Utils.GetNumericValueFromBytes<int> ( response, BYTE_FREQCHREQ, NUM_BYTES_FREQCHREQ );        // 21 and 22
                 this.noiseFloorResponse  = ( int )response[ BYTE_NOISERES ];                                                             // 23
+
+                // Converts the RSSI values ​​to the desired range
+                this.rssiRequest  = Math.Abs ( this.rssiRequest  / 2 - 130 );
+                this.rssiResponse = Math.Abs ( this.rssiResponse / 2 - 130 );
             }
         }
 

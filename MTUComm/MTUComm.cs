@@ -168,6 +168,12 @@ namespace MTUComm
         private const int CMD_VSWR                 = 0x23;  // 35 VSWR Test
         private const int CMD_VSWR_RES             = 6;
         private const int WAIT_BEFORE_NODE_INIT    = 1000;
+        private const int CMD_NODE_INIT_TYPE       = ( int )NodeType.DCUsOnly;
+        private const int CMD_NODE_INIT_TARGET     = 0x00;
+        private const int CMD_NODE_INIT_MAXDITHER  = 0x0A;
+        private const int CMD_NODE_INIT_MINREQTIME = 0x00;
+        private const int CMD_NODE_INIT_RFCHANNELS = 0x03;
+        private const int CMD_NODE_OVERHEAD_TIME   = 2;     // STAR Programmer comment: "Slack time. Necessary because the top of the second (TOS) on the MTU may not happen at the same time as the TOS on the Star Programmer, and the TOS on the DCUs"
         private const int CMD_NODE_INIT            = 0x18;  // 24 Node discovery initiation command
         private const int CMD_NODE_INIT_RES        = 5;     // Response ACK with result [0-4] = 5 bytes
         private const int CMD_NODE_INIT_NOT        = 0x00;  // Node discovery not initiated
@@ -1252,14 +1258,14 @@ namespace MTUComm
                 
                     // Node discovery initiation command
                     byte[] data = new byte[ 8 ]; // 1+4+1+1+1
-                    data[ 0 ] = ( byte )NodeType.DCUsOnly;
-                    data[ 1 ] = 0x00; // Target node ID LSB
-                    data[ 2 ] = 0x00; // ...
-                    data[ 3 ] = 0x00; // ...
-                    data[ 4 ] = 0x00; // Target node ID MSB
-                    data[ 5 ] = 0x0A; // Max dither time in seconds
-                    data[ 6 ] = 0x00; // Min request send time in seconds
-                    data[ 7 ] = 0x03; // RF Channels bitmap up to 8 channels
+                    data[ 0 ] = CMD_NODE_INIT_TYPE;
+                    data[ 1 ] = CMD_NODE_INIT_TARGET;     // Target node ID LSB
+                    data[ 2 ] = CMD_NODE_INIT_TARGET;     // ...
+                    data[ 3 ] = CMD_NODE_INIT_TARGET;     // ...
+                    data[ 4 ] = CMD_NODE_INIT_TARGET;     // Target node ID MSB
+                    data[ 5 ] = CMD_NODE_INIT_MAXDITHER;  // Max dither time in seconds
+                    data[ 6 ] = CMD_NODE_INIT_MINREQTIME; // Min request send time in seconds
+                    data[ 7 ] = CMD_NODE_INIT_RFCHANNELS; // RF Channels bitmap up to 8 channels
 
                     // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
                     fullResponse = await this.lexi.Write (
@@ -1270,7 +1276,7 @@ namespace MTUComm
                         new uint[] { CMD_NODE_INIT_RES },
                         new LexiFiltersResponse ( new ( int,int,byte )[] {
                             ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_NOT ), // Node discovery not initiated
-                            ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_OK )  // Node discovery initiated
+                            ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_OK )   // Node discovery initiated
                         } ),
                         LexiAction.OperationRequest );
                     
@@ -1285,6 +1291,22 @@ namespace MTUComm
                     // Node discovery mode successfully initiated in the MTU
                     else
                     {
+                        #region Delay before start
+
+                        int dcuDelayF1 = await map.DcuDelayF1.GetValueFromMtu ();
+                        int dcuDelayF2 = await map.DcuDelayF2.GetValueFromMtu ();
+
+                        int slackTime = ( ( dcuDelayF1 > dcuDelayF2 ) ? dcuDelayF1 : dcuDelayF2 ) +
+                                        CMD_NODE_INIT_MINREQTIME +
+                                        CMD_NODE_INIT_MAXDITHER  +
+                                        CMD_NODE_OVERHEAD_TIME;
+
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s before Step 2" ) );
+
+                        await Task.Delay ( slackTime * 1000 );
+
+                        #endregion
+
                         #region Step 2 - Start/Reset
 
                         OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 2 Start/Reset" ) );
@@ -1294,7 +1316,7 @@ namespace MTUComm
                         bool timeOut = false;
                         do
                         {
-                            await Task.Delay ( WAIT_BEFORE_NODE_START );
+                            //await Task.Delay ( WAIT_BEFORE_NODE_START );
                             
                             lexiTimeOut = true;
                             
@@ -1328,8 +1350,7 @@ namespace MTUComm
                                 ! ( timeOut = nodeCounter.ElapsedMilliseconds >= maxTimeND ) );
                         
                         // Node discovery mode not started/ready for query
-                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY ) // &&
-                             //timeOut )
+                        if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY )
                         {
                             Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotStartedException () );
                             goto BREAK_FAIL;
@@ -1404,7 +1425,7 @@ namespace MTUComm
                             {
                                 // First message always contains general information
                                 case NodeDiscoveryQueryResult.GeneralInfo:
-                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: General information" ) );
+                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: General Information" ) );
 
                                     await Task.Delay ( WAIT_BTW_NODE_NEXT );
                                     break;
@@ -1412,20 +1433,20 @@ namespace MTUComm
                                 // Wait a bit and try to read/recover the next node
                                 case NodeDiscoveryQueryResult.NextRead:
                                     OnProgress ( this, new Delegates.ProgressArgs ( 
-                                        "ND: Requesting nodes... " + queryResult.Index + "/" + nodeList.CurrentAttemptTotalEntries ) );
+                                        "ND: Requesting Nodes... " + ( queryResult.Index - 1 ) + "/" + ( nodeList.CurrentAttemptTotalEntries - 1 ) ) );
                                     
                                     await Task.Delay ( WAIT_BTW_NODE_NEXT );
                                     break;
 
                                 // Was the last node or no node was recovered
                                 case NodeDiscoveryQueryResult.LastRead:
-                                    OnProgress(this, new Delegates.ProgressArgs(
-                                        "ND: Nodes requested... " + queryResult.Index + "/" + nodeList.CurrentAttemptTotalEntries));
+                                    OnProgress ( this, new Delegates.ProgressArgs (
+                                        "ND: All Nodes Requested " + ( queryResult.Index - 1 ) + "/" + ( nodeList.CurrentAttemptTotalEntries - 1 ) ) );
 
                                     goto BREAK_OK; // Exit from switch + infinite while
 
                                 case NodeDiscoveryQueryResult.Empty:
-                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Empty" ) );
+                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: The Are No Nodes" ) );
 
                                     goto BREAK_OK; // Exit from switch + infinite while
                             }
@@ -1437,13 +1458,17 @@ namespace MTUComm
 
                         #region Validation
 
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Validating Nodes.." ) );
+
+                        Utils.Print ( "ND: Nodes to validate " + nodeList.CurrentAttemptEntries.Length );
+
                         bool    isF1;
                         int     bestRssiResponse = -150;
                         string  freq1wayStr      = await map.Frequency1Way  .GetValue ();
                         string  freq2wayTxStr    = await map.Frequency2WayTx.GetValue ();
                         // NOTE: Parsing to double is important to take into account the separator symbol ( . or , ),
                         // NOTE: because parse "123,456" returns "123456" and use CultureInfo.InvariantCulture is not an universal solution
-                        CultureInfo usCulture    = new CultureInfo("en-US");
+                        CultureInfo usCulture    = new CultureInfo ( "en-US" );
                         double  freq1            = double.Parse ( freq1wayStr  .Replace ( ',', '.' ), usCulture.NumberFormat );
                         double  freq2            = double.Parse ( freq2wayTxStr.Replace ( ',', '.' ), usCulture.NumberFormat );
                         foreach ( NodeDiscovery node in nodeList.CurrentAttemptEntries )
@@ -1455,9 +1480,13 @@ namespace MTUComm
                         
                             // Channel / Frequency
                             // NOTE: In the custom methods Frequency1Way_Get and Frequency2WayTx_Get the value returned is trimmed to three decimal digits
-                            double freq = double.Parse ( ( ( node.FreqChannelRequest * 6250 + 450000000 ) / 1000000.0 ).ToString ( "F3" ) );
-                            if ( ! ( isF1 = freq.Equals ( freq1 ) ) &&
-                                 ! freq.Equals ( freq2 ) )
+                            double freq = double.Parse ( ( ( node.FreqChannelRequest * 6250 + 450000000 ) / 1000000.0 ).ToString ( "F4" ) );
+                            bool   noOk = ! ( isF1 = freq.Equals ( freq1 ) ) &&
+                                          ! freq.Equals ( freq2 );
+
+                            Utils.Print ( "ND: Validating nodes.. " + ( ( isF1 ) ? "F1" : "F2" ) + " " + ( ( noOk ) ? "NO" : "YES" ) );
+
+                            if ( noOk )
                                 continue;
 
                             node.SetAsValidated ( isF1 );
@@ -1497,6 +1526,10 @@ namespace MTUComm
 
                         // Number of nodes validated so far, those discovered in any iteration
                         int numNodesValidated = nodeList.CountUniqueNodesValidated;
+
+                        Utils.Print ( "ND: Nodes validated " + numNodesValidated + " | Excelent " + global.GoodNumDCU + " | Good " + global.MinNumDCU );
+                        Utils.Print ( "ND: Success F1 " + successF1 + " >= " + ( global.GoodF1Rely/100 ) );
+                        Utils.Print ( "ND: Success F2 " + successF2 + " >= " + ( global.GoodF2Rely/100 ) );
 
                         // Excellent
                         if ( numNodesValidated >= global.GoodNumDCU &&
@@ -1913,7 +1946,7 @@ namespace MTUComm
         {
             try
             {
-                OnProgress ( this, new Delegates.ProgressArgs ( "Testing Puck..." ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "Internal: Testing Puck..." ) );
 
                 // Only read all required registers once
                 var map = this.GetMemoryMap ( true );
@@ -1921,7 +1954,7 @@ namespace MTUComm
                 // Activates flag to read Meter
                 int MtuType = await  map.MtuType.GetValueFromMtu ();
 
-                OnProgress ( this, new Delegates.ProgressArgs ( "Successful MTU Read (" + MtuType.ToString() + ")" ) );
+                OnProgress ( this, new Delegates.ProgressArgs ( "Internal: Successful MTU Read ( " + MtuType.ToString() + " )" ) );
 
                 await OnReadFabric ();
             }
