@@ -33,21 +33,33 @@ namespace aclara_meters.view
         }
         public async void Btn_FTP_Clicked(object sender, EventArgs e)
         {
-            bool result;
+            string result;
             if (!Mobile.IsNetAvailable())
             {
                 await DisplayAlert("Attention", "No internet connection, try later", "OK");
                 return;
             }
             GenericUtilsClass.SetInstallMode("FTP");
-            TaskCompletionSource<bool> taskSemaphoreDownload = new TaskCompletionSource<bool>();
+            TaskCompletionSource<string> taskSemaphoreDownload = new TaskCompletionSource<string>();
             await Navigation.PushAsync(new FtpDownloadSettings(taskSemaphoreDownload));
             result = await taskSemaphoreDownload.Task;
-            if (!result) 
-                GenericUtilsClass.SetInstallMode("None");
+            switch(result)
+            {
+                case "OK":
+                    await DisplayAlert("Attention", "The app will close to apply the configuration", "OK");
+                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    return;
+                case "ERROR":
+                    GenericUtilsClass.SetInstallMode("None");
 
-            await DisplayAlert("Attention", "The app will close to apply the configuration", "OK");
-            System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    await DisplayAlert("Attention", "The app will close, try configuration again later", "OK");
+                    System.Diagnostics.Process.GetCurrentProcess().Kill();
+                    return;
+                case "CANCEL":
+                    GenericUtilsClass.SetInstallMode("None");
+                    return;
+            }
+       
         }
         public async void Btn_Intune_Clicked(object sender, EventArgs e)
         {
@@ -68,8 +80,6 @@ namespace aclara_meters.view
             GenericUtilsClass.SetInstallMode("Manual");
             await DisplayAlert("Attention", "The app will close, you must copy the config files in the public folder of the app, and then restart", "OK");
             System.Diagnostics.Process.GetCurrentProcess().Kill();
-        }
-
-      
+        }     
     }
 }

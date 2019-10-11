@@ -437,11 +437,14 @@ namespace MTUComm
                 // because an action can be launched multiple times because of exceptions
                 // that cancel the action but not move to the main menu and could be happen
                 // that perform the basic read with a different MTU
-                if ( ! this.basicInfoLoaded )
+                //if ( ! this.basicInfoLoaded )
+                if (!Data.Contains("MtuBasicInfo") || type == ActionType.ReadMtu)
                     await this.LoadMtuBasicInfo ();
-                
+                else 
+                    this.mtu = configuration.GetMtuTypeById((int)Data.Get.MtuBasicInfo.Type);
+
                 // Checks if the MTU remains the same as in the initial reading
-                if ( type != ActionType.BasicRead )
+                if ( type != ActionType.BasicRead && type != ActionType.ReadMtu)
                     await this.CheckIsTheSameMTU ();
 
                 switch ( type )
@@ -3550,17 +3553,12 @@ namespace MTUComm
 
             bool mtuHasChanged = await this.LoadMtuBasicInfo_Logic ();
 
-            if ( this.mtu == null )
-            {
-                // Get Mtu entry using numeric ID ( e.g. 138 )
-                this.mtu = configuration.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
-            }
-
+            this.mtu = configuration.GetMtuTypeById ( ( int )Data.Get.MtuBasicInfo.Type );
+ 
             if ( mtuHasChanged )
-            {
-                this.basicInfoLoaded = true;
-                
+            {              
                 Data.Set ( "MemoryMap", GetMemoryMap ( true ) );
+                InterfaceAux.ResetInfo();
             }
         }
 

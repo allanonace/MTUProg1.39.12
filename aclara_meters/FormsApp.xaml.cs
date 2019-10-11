@@ -62,7 +62,7 @@ namespace aclara_meters
         public static BleSerial ble_interface;
         public static Logger logger;
         public static Configuration config;
-        private static Uri dataUrl;
+        private Uri dataUrl;
 
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
@@ -96,7 +96,6 @@ namespace aclara_meters
         }
 
         public FormsApp (
-            IBluetoothLowEnergyAdapter badapter,
             IUserDialogs dialogs,
             string appVersion, Uri url=null )
         {
@@ -109,13 +108,16 @@ namespace aclara_meters
 
                 VersionTracking.Track();
 
-                dataUrl=url;
+                var platform = DependencyService.Get<IAdapterBluetooth>();
+                adapter = platform.GetNativeBleAdapter();
+
+                dataUrl =url;
                            
                 Data.Set ( "ActionInitialized", false );
                 Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
                 Data.Set ( "IsAndroid", Device.RuntimePlatform == Device.Android );
 
-                this.adapter    = badapter;
+                //this.adapter    = badapter;
                 this.dialogs    = dialogs;
                 this.appVersion = appVersion;
                 appName        += ( Data.Get.IsAndroid ) ? "Android" : "iOS";

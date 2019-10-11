@@ -62,16 +62,9 @@ namespace aclara.ViewModels
             String sDescripcion =String.Empty;
             String sValor = String.Empty;
             Boolean bTratar = false;
-            String sResultado = String.Empty;
             String sSubAccion = String.Empty;
             String sSubIcon = String.Empty;
-            int sNumChar = 0;
-
-            if (Xamarin.Forms.Device.Idiom == Xamarin.Forms.TargetIdiom.Tablet)
-                sNumChar = 58;
-            else
-                sNumChar = 23;
-
+           
             XmlReader xReader = XmlReader.Create(stream);
             List<DatosAccion> ListaDatos = new List<DatosAccion>();
             List<DatosAccion> SubListaDatos = new List<DatosAccion>();
@@ -129,24 +122,19 @@ namespace aclara.ViewModels
                             sValor = xReader.Value;
                             DatosAccion datosAccion = new DatosAccion();
                             if (!String.IsNullOrEmpty(sError) && sDescripcion == "Message")
-                                datosAccion.Descripcion = String.Empty; //$"{sError} :";
+                                datosAccion.Descripcion = String.Empty;
                             else if (String.IsNullOrEmpty(sPort))
                                 datosAccion.Descripcion = $"{sDescripcion}:";
                             else
                                 datosAccion.Descripcion = $" {sPort}-{sDescripcion}:";
-
-                            //if (!String.IsNullOrEmpty(datosAccion.Descripcion))
-                            //    datosAccion.Valor = sValor.Length > sNumChar ? $"{sValor.Substring(0, sNumChar)}..." : sValor;
-                            //else
-
+                            
                             datosAccion.Valor = sValor;
 
                             if (!string.IsNullOrEmpty(sSubAccion))
                                 SubListaDatos.Add(datosAccion);
                             else
                                 ListaDatos.Add(datosAccion);
-                           // sResultado = String.Concat(sResultado, $" : {xReader.Value}");
-                            //listBox1.Items.Add(xReader.Value);
+ 
                             break;
                         case XmlNodeType.EndElement:
 

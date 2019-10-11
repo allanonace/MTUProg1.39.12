@@ -63,7 +63,7 @@ namespace aclara_meters.Droid
             // Obtain the bluetooth adapter so we can pass it into our (shared-code) Xamarin Forms app. There are
             // additional Obtain() methods on BluetoothLowEnergyAdapter if you have more specific needs (e.g. if you
             // need to support devices with multiple Bluetooth adapters)
-            var bluetooth = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
+            //var bluetooth = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
 
             if ( Xamarin.Forms.Device.Idiom == TargetIdiom.Phone )
                  RequestedOrientation = ScreenOrientation.Portrait;
@@ -90,7 +90,7 @@ namespace aclara_meters.Droid
             string      appversion = info.VersionName + " ( " + info.VersionCode + " )";
 
             Data.Set ( "IsFromScripting",   true);
-            FormsApp app = new FormsApp ( bluetooth, UserDialogs.Instance, appversion,new System.Uri(data.ToString()));
+            FormsApp app = new FormsApp (UserDialogs.Instance, appversion,new System.Uri(data.ToString()));
                      
             LoadApplication(app);
             //app.HandleUrl(new System.Uri(data.ToString()), bluetooth); 
@@ -99,7 +99,6 @@ namespace aclara_meters.Droid
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
         {
-            ZXing.Net.Mobile.Forms.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -164,7 +163,7 @@ namespace aclara_meters.Droid
             // Obtain the bluetooth adapter so we can pass it into our (shared-code) Xamarin Forms app. There are
             // additional Obtain() methods on BluetoothLowEnergyAdapter if you have more specific needs (e.g. if you
             // need to support devices with multiple Bluetooth adapters)
-            var bluetooth = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
+            //var bluetooth = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
 
 
             if (Xamarin.Forms.Device.Idiom == TargetIdiom.Phone)
@@ -186,13 +185,12 @@ namespace aclara_meters.Droid
             // GenericUtilsClass.CheckFTPDownload();
 
             Data.Set ( "IsFromScripting",   false );
-            LoadApplication(new FormsApp ( bluetooth, UserDialogs.Instance, value));
+            LoadApplication(new FormsApp (UserDialogs.Instance, value));
 
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Android.Content.PM.Permission[] grantResults)
         {
-            //ZXing.Net.Mobile.Forms.Android.PermissionsHandler.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             Plugin.Permissions.PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }

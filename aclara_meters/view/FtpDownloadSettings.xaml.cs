@@ -16,11 +16,11 @@ namespace aclara_meters.view
     public partial class FtpDownloadSettings: INotifyPropertyChanged//: Rg.Plugins.Popup.Pages.PopupPage
     {
         private MTUComm.Mobile.ConfigData config = MTUComm.Mobile.configData;
-        private TaskCompletionSource<bool> taskSemaphoreDownload;
+        private TaskCompletionSource<string> taskSemaphoreDownload;
         const int smallWidthResolution = 768;
         const int smallHeightResolution = 1280;
         public FtpDownloadSettings (
-            TaskCompletionSource<bool> taskSemaphore )
+            TaskCompletionSource<string> taskSemaphore )
         {
             InitializeComponent ();
 
@@ -87,12 +87,12 @@ namespace aclara_meters.view
                 await Navigation.PopAsync ();
 
                 // Configuration files downloaded correctly
-                taskSemaphoreDownload.SetResult ( true );
+                taskSemaphoreDownload.SetResult ( "OK" );
             }
             catch ( Exception exc )
             {
                 // Error downloading configuration files
-                taskSemaphoreDownload.SetResult ( false );
+                taskSemaphoreDownload.SetResult ( "ERROR" );
             }
           
             return;
@@ -148,7 +148,7 @@ namespace aclara_meters.view
             await Navigation.PopAsync ();
 
             // Canceled downloading action
-            taskSemaphoreDownload.SetResult ( false );
+            taskSemaphoreDownload.SetResult ( "CANCEL" );
         }
 
         private bool isLoading;
@@ -249,6 +249,11 @@ namespace aclara_meters.view
                     this.frm_FTP.TranslateTo(0, 0, 50);
                 }
             }
+        }
+
+        protected override bool OnBackButtonPressed()
+        {
+            return true;
         }
     }
 }

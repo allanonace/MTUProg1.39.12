@@ -1122,8 +1122,8 @@ namespace aclara_meters.view
             {
                 if (Mobile.IsNetAvailable())
                 {
-                    bool result = false;
-                    TaskCompletionSource<bool> taskSemaphoreDownload = new TaskCompletionSource<bool>();
+                    string result;
+                    TaskCompletionSource<string> taskSemaphoreDownload = new TaskCompletionSource<string>();
 
                     await Task.Run(async () => {
 
@@ -1135,7 +1135,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(async () =>
                         {
-                            if (result)
+                            if (result=="OK")
                             {
                                 if (Configuration.CheckLoadXML())
                                 {
@@ -1151,6 +1151,10 @@ namespace aclara_meters.view
                                          "The new version configuration files are corrupted, the app will continues with the actual files. Contact your IT administratorn", "OK");
                                 }
                             }
+                            else
+                                await Application.Current.MainPage.DisplayAlert("Attention",
+                                          "The app will continues with the actual files", "OK");
+
                         });
  
                     });
