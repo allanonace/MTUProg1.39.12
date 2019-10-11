@@ -185,8 +185,8 @@ namespace aclara_meters.view
 
         private void TappedListeners()
         {
-            bottomBar.GetImageButtonElement("btnTakePicture").Clicked += TakePicture;
-            bottomBar.GetImageButtonElement("btnTakePicture").IsVisible = global.ShowCameraButton;
+            bottomBar.GetTGRElement("btnTakePicture").Tapped += TakePicture;
+            bottomBar.GetImageElement("imgTakePicture").IsVisible = global.ShowCameraButton;
             TopBar.GetTGRElement("back_button")        .Tapped += ReturnToMainView;
             bottomBar.GetTGRElement("bg_action_button").Tapped += ReadMTU;
 
@@ -300,6 +300,7 @@ namespace aclara_meters.view
 
         private void TurnOffMTUNoTapped(object sender, EventArgs e)
         {
+            indicator.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
             Navigation.PopToRootAsync(false);

@@ -1047,6 +1047,8 @@ namespace aclara_meters.view
 
         private void TurnOffMTUNoTapped(object sender, EventArgs e)
         {
+            backdark_bg.IsVisible = false;
+            indicator.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
@@ -1079,9 +1081,7 @@ namespace aclara_meters.view
 
         public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
         {
-            ActionResult actionResult = args.Result;
-
-            await Task.Delay(2000).ContinueWith(t =>
+             await Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     Label textResult = (Label)dialogView.FindByName("dialog_turnoff_text");

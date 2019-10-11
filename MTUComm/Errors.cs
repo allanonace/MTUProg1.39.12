@@ -196,7 +196,10 @@ namespace MTUComm
             { new CameraException (),                           815 },
             // Modification of the content of Global.xml file has failed
             { new GlobalChangedException (),                    816 },
-
+            // Exception MTU without portType
+            { new PortTypeMissingMTUException (),               817 },
+            
+            
             // DEBUG - Configuration Files and System [ 85x ]
             //-------------------------------
             // The interface for the specified MTU ID was not found

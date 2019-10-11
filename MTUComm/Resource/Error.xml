@@ -81,14 +81,15 @@
     <Error id="806" message="There is a problem with the FTP and configuration files could not be downloaded. Contact your IT administrator" />
     <Error id="807" message="The device has not internet connection" />
     <Error id="808" message="The current date of the device is lower than allowed" />
-    <Error id="809" message="Missing credentials for SFTP in global.xml" />
+    <Error id="809" message="Missing credentials for SFTP" />
     <Error id="810" message="App cannot communicate with the FTP" />
     <Error id="811" message="Sending activity logs to the FTP has failed, only _var_ files have been uploaded" />
-	<Error id="812" message="Changed configuration files"/>
+	  <Error id="812" message="Changed configuration files"/>
     <Error id="813" message="The new version configuration files are corrupted, the app will continues with the actual ones when restart it. Contact your IT administrator"/>
     <Error id="814" message="Credentials from Intune missing" />
     <Error id="815" message="There is a problem with the camera to scan or take photos (_var_)" />
     <Error id="816" message="Modification of the content of Global.xml file has failed" />
+    <Error id="817" message="Port type missing in MTU ID: (_var_)" />
     
     <!-- Configuration Files -->
     <Error id="850" message="The interface for the specified MTU ID was not found" /> <!-- message_release="" /> -->

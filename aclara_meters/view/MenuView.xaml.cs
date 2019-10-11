@@ -105,7 +105,7 @@ namespace aclara_meters.view
             if (FormsApp.config.Global.ShowInstallConfirmation)
                 MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
 
-            if (FormsApp.config.Global.ShowDataRead)
+            if (FormsApp.config.Global.ShowValvePosition)
                 MenuList.Add(new PageItem() { Title = "Valve Operation", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.RemoteDisconnect });
 
             if (FormsApp.config.Global.ShowDataRead)
