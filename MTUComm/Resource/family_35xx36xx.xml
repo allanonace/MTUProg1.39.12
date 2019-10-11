@@ -1656,6 +1656,26 @@
     <CustomGet/>
 	  <CustomSet/>
   </Register>
+  <Register> <!-- OK -->
+    <Id>DcuDelayF1</Id>
+    <Description>DCU F1 Delay in seconds</Description>
+    <Type>int</Type>
+    <Address>102</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>DcuDelayF2</Id>
+    <Description>DCU F2 Delay in seconds</Description>
+    <Type>int</Type>
+    <Address>103</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
   <Register> <!-- ¿Operation? -->
     <Id>MtuMiliVoltageBattery</Id>
     <Description>battery voltage (AD value) | battery volt = ADvalue * 9.766mV*2 + 250</Description>

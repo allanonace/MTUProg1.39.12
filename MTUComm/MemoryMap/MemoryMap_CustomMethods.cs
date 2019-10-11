@@ -245,19 +245,19 @@ namespace MTUComm.MemoryMap
 
         public async Task<string> Frequency1Way_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
-            return String.Format ( new CultureInfo("en-us"), "{0:0.000}",
+            return String.Format ( new CultureInfo("en-us"), "{0:0.0000}",
                 ( await MemoryRegisters.Frequency1WayHz.GetValue () / 1000000.0 ) );
         }
 
         public async Task<string> Frequency2WayTx_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
-            return String.Format ( new CultureInfo("en-us"), "{0:0.000}",
+            return String.Format ( new CultureInfo("en-us"), "{0:0.0000}",
                 ( await MemoryRegisters.Frequency2WayTxHz.GetValue () / 1000000.0 ) );
         }
 
         public async Task<string> Frequency2WayRx_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
-            return String.Format ( new CultureInfo("en-us"), "{0:0.000}",
+            return String.Format ( new CultureInfo("en-us"), "{0:0.0000}",
                 ( await MemoryRegisters.Frequency2WayRxHz.GetValue () / 1000000.0 ) );
         }
 
