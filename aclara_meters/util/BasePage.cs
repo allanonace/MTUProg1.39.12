@@ -84,9 +84,9 @@ namespace aclara_meters.util
                 {
                     pck.SelectedIndex = 0;
                 }
-                catch ( Exception ex )
+                catch ( Exception )
                 {
-                    
+                    // only in debug
                 }
             }
 
@@ -100,7 +100,7 @@ namespace aclara_meters.util
                 {
                     tbx.Text = new string ( '1', tbx.MaxLength );
                 }
-                catch ( Exception ex )
+                catch ( Exception )
                 {
                     // NOTE: Can fail if the control does not have set a max length value
                 }

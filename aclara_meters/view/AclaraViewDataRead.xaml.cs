@@ -50,11 +50,7 @@ namespace aclara_meters.view
         private ActionType actionTypeNew;
        
         private bool isCancellable;
-        private bool isLogout;
-        private bool isReturn;
-        private bool isSettings;
-
-
+   
         #endregion
 
         #region Initialization
@@ -163,8 +159,7 @@ namespace aclara_meters.view
 
             // Account Number
             this.lb_AccountNumber.Text = global.AccountLabel;      
-
-            
+       
             this.port1label.Text = LB_PORT1;
 
                         
@@ -191,54 +186,6 @@ namespace aclara_meters.view
             {
                 bottomBar.GetLabelElement("label_read").Text = statusMsg;
             });
-        }
-
-        public string GetStringFromMTUStatus(MTUStatus mtuStatus, int time)
-        {
-            switch (mtuStatus)
-            {
-                case MTUStatus.ReadingMtuShortTime:
-                    return "Reading MTU in " + time + " seconds...";
-
-                case MTUStatus.ReadingMtuData:
-                    return "Reading MTU data...";
-
-                case MTUStatus.Autodetect:
-                    return "Autodetect...";
-
-                case MTUStatus.CheckingEnconderLongTime:
-                    return "Checking Encoder... " + time;
-
-                case MTUStatus.ProgramingMtuShortTime:
-                    return "Programming MTU in " + time + " seconds...";
-
-                case MTUStatus.PreparingToProgram:
-                    return "Preparing to program...";
-
-                case MTUStatus.TurningOffMtu:
-                    return "Turning off MTU...";
-
-                case MTUStatus.ReadingMtuAgain:
-                    return "Reading MTU again...";
-
-                case MTUStatus.ProgramingMtu:
-                    return "Programming MTU...";
-
-                case MTUStatus.VerifyingMtuData:
-                    return "Verifying Mtu Data...";
-
-                case MTUStatus.CheckingEnconderShortTime:
-                    return "Checking Encoder... " + time;
-
-                case MTUStatus.TurningOnMtu:
-                    return "Autodetect...";
-
-                case MTUStatus.ReadingMtu:
-                    return "Reading MTU...";
-
-            }
-
-            return "Error Detected";
         }
 
         private void TappedListeners ()
@@ -341,7 +288,7 @@ namespace aclara_meters.view
                 //REASON
                 if (!isCancellable)
                 {
-                    isLogout = true;
+                    
                     dialog_open_bg.IsVisible = true;
                    // Popup_start.IsVisible = true;
                    // Popup_start.IsEnabled = true;
@@ -394,10 +341,10 @@ namespace aclara_meters.view
 
         #region Menu options
 
-        private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e )
-        {
-            ((ListView)sender).SelectedItem = null;
-        }
+        //private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e )
+        //{
+        //    ((ListView)sender).SelectedItem = null;
+        //}
 
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
@@ -456,15 +403,15 @@ namespace aclara_meters.view
         {
             backdark_bg.IsVisible = true;
             indicator.IsVisible = true;
-            //background_scan_page.IsEnabled = false;
+            
             background_scan_page.Opacity = 1;
 
             background_scan_page.IsEnabled = false;
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                await ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
             switch ( await base.ValidateNavigation ( actionTarget ) )
@@ -508,7 +455,6 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-
                             this.actionType = this.actionTypeNew;
                             this.GoToPage();
                         })
@@ -532,8 +478,6 @@ namespace aclara_meters.view
 
                     #endregion
                     break;
-
-                
 
                 case ActionType.TurnOffMtu:
 
@@ -578,9 +522,7 @@ namespace aclara_meters.view
 
                         Device.BeginInvokeOnMainThread(() =>
                         {
-
                             Application.Current.MainPage.Navigation.PushAsync(new AclaraViewInstallConfirmation(dialogsSaved), false);
-
                         })
                     );
 
@@ -592,7 +534,6 @@ namespace aclara_meters.view
 
                     #region Add Mtu Controller
                     ControllerAction(page, "dialog_AddMTU");
-
                     #endregion
 
                     break;
@@ -600,8 +541,7 @@ namespace aclara_meters.view
                 case ActionType.ReplaceMTU:
 
                     #region Replace Mtu Controller
-                    ControllerAction(page, "dialog_replacemeter_one");
-                
+                    ControllerAction(page, "dialog_replacemeter_one");             
                     #endregion
 
                     break;
@@ -609,8 +549,7 @@ namespace aclara_meters.view
                 case ActionType.ReplaceMeter:
 
                     #region Replace Meter Controller
-                    ControllerAction(page, "dialog_meter_replace_one");
-                  
+                    ControllerAction(page, "dialog_meter_replace_one");                 
                     #endregion
 
                     break;
@@ -618,8 +557,7 @@ namespace aclara_meters.view
                 case ActionType.AddMtuAddMeter:
 
                     #region Add Mtu | Add Meter Controller
-                    ControllerAction(page, "dialog_AddMTUAddMeter");
-                  
+                    ControllerAction(page, "dialog_AddMTUAddMeter");                  
                     #endregion
 
                     break;
@@ -627,9 +565,7 @@ namespace aclara_meters.view
                 case ActionType.AddMtuReplaceMeter:
 
                     #region Add Mtu | Replace Meter Controller
-                    ControllerAction(page, "dialog_AddMTUReplaceMeter");
-                   
-
+                    ControllerAction(page, "dialog_AddMTUReplaceMeter");                 
                     #endregion
 
                     break;
@@ -637,8 +573,7 @@ namespace aclara_meters.view
                 case ActionType.ReplaceMtuReplaceMeter:
 
                     #region Replace Mtu | Replace Meter Controller
-                    ControllerAction(page, "dialog_ReplaceMTUReplaceMeter");
- 
+                    ControllerAction(page, "dialog_ReplaceMTUReplaceMeter"); 
                     #endregion
 
                     break;
@@ -667,8 +602,6 @@ namespace aclara_meters.view
                         CallLoadPage();
                     }
                     #endregion
-
- 
                 })
             );
         }
@@ -695,8 +628,7 @@ namespace aclara_meters.view
             if (!isCancellable)
             {
                 //REASON
-                isSettings = true;
-                dialog_open_bg.IsVisible = true;
+               dialog_open_bg.IsVisible = true;
 
               //  Popup_start.IsVisible = true;
               //  Popup_start.IsEnabled = true;
@@ -719,13 +651,10 @@ namespace aclara_meters.view
                 {
                     Device.BeginInvokeOnMainThread(() =>
                     {
-                        #region New Circular Progress bar Animations    
-
-                    
+                        #region New Circular Progress bar Animations                      
                         backdark_bg.IsVisible = true;
                         indicator.IsVisible = true;
                         background_scan_page.IsEnabled = false;
-
                         #endregion
 
                     });
@@ -753,8 +682,7 @@ namespace aclara_meters.view
         private async void LogoutTapped(object sender, EventArgs e)
         {
             #region Check if no action done
-
-     
+   
             Device.BeginInvokeOnMainThread(() =>
             {
                 dialogView.CloseDialogs();
@@ -837,7 +765,7 @@ namespace aclara_meters.view
             base.OnAppearing();
 
             background_scan_page.Opacity = 0.5;
-            background_scan_page.FadeTo(1, 500);
+           // background_scan_page.FadeTo(1, 500);
         }
 
  
@@ -862,20 +790,10 @@ namespace aclara_meters.view
         private void port1_command()
         {
             port1view.Opacity = 0;
-
-            port1label.Opacity = 1;
-           // misclabel.Opacity = 0.5;
-            
+            port1label.Opacity = 1;           
             port1label.FontSize = 22;
-          //  misclabel.FontSize = 19;
-                 
-
             port1view.IsVisible = true;
-           // miscview.IsVisible = false;
-
             port1view.FadeTo(1, 200);
-
-
         }
 
         private void ReturnToMainView(object sender, EventArgs e)
@@ -886,8 +804,7 @@ namespace aclara_meters.view
             }
             else
             {
-                isReturn = true;
-
+             
                 //REASON
                 dialog_open_bg.IsVisible = true;
 
@@ -905,19 +822,10 @@ namespace aclara_meters.view
 
         private void DataReadMtu ( object sender, EventArgs e )
         {
-            //string msgError = string.Empty;
-            //if ( ! DEBUG_AUTO_MODE_ON )
-            //{
-            //    DisplayAlert ( "Error", msgError, "OK" );
-            //    return;
-            //}
-
             isCancellable = true;
 
             if (!_userTapped)
             {
-                //Task.Delay(100).ContinueWith(t =>
-
                 Device.BeginInvokeOnMainThread(() =>
                 {
                     backdark_bg.IsVisible = true;

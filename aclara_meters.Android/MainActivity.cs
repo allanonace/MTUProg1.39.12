@@ -164,7 +164,7 @@ namespace aclara_meters.Droid
             // additional Obtain() methods on BluetoothLowEnergyAdapter if you have more specific needs (e.g. if you
             // need to support devices with multiple Bluetooth adapters)
             //var bluetooth = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
-
+            
 
             if (Xamarin.Forms.Device.Idiom == TargetIdiom.Phone)
             {

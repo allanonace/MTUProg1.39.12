@@ -72,7 +72,7 @@ namespace aclara_meters.view
             var MamServ = DependencyService.Get<IMAMService>();
             MamServ.LoginUserMAM();
             await DisplayAlert("Attention", "The app will close to apply the configuration", "OK");
-            //MamServ.UtilMAMService();
+           
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }
         public async void Btn_Manual_Clicked(object sender, EventArgs e)

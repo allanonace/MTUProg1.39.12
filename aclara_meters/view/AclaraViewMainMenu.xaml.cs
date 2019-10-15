@@ -54,10 +54,6 @@ namespace aclara_meters.view
             return true;
         }
 
-        private bool GetDebugVar()
-        {
-            return false;
-        }
         public AclaraViewMainMenu()
         {
             InitializeComponent();
@@ -80,9 +76,10 @@ namespace aclara_meters.view
         {
             InitializeComponent();
             
-            PrintToConsole($"-------------------------------   AclaraViewMainMenu     , thread: { Thread.CurrentThread.ManagedThreadId}");
+            Utils.PrintDeep($"-------------------------------   AclaraViewMainMenu     , thread: { Thread.CurrentThread.ManagedThreadId}");
             Settings.IsConnectedBLE = false;
             NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
+
             menuOptions = this.MenuOptions;
             dialogView = this.DialogView;
 
@@ -107,14 +104,11 @@ namespace aclara_meters.view
                 CrossSettings.Current.AddOrUpdateValue("session_username", FormsApp.credentialsService.UserName);
             }
 
-        
             if (Device.Idiom == TargetIdiom.Phone)
             {
                 background_scan_page.Opacity = 0;
                 background_scan_page.FadeTo(1, 250);
-            }
-
-        
+            }    
 
             // Upload log files and then start pucks detection
             UploadFilesAndCheckCertificate ();
@@ -139,28 +133,13 @@ namespace aclara_meters.view
            
         }
 
-        public string GZipCompress ( string input )
-        {
-            using ( var outStream = new System.IO.MemoryStream () )
-            {
-                using ( var gzipStream = new System.IO.Compression.GZipStream ( outStream, System.IO.Compression.CompressionMode.Compress ) )
-                {
-                    using (var ms = new System.IO.MemoryStream ( System.Text.Encoding.UTF8.GetBytes ( input ) ) )
-                    {
-                        ms.CopyTo ( gzipStream );
-                    }
-                }
-    
-                return System.Text.Encoding.UTF8.GetString ( outStream.ToArray() );
-            }
-        }
-
         private void InitRefreshCommand()
         {
+            //Asign the action to command refresh_command
             refresh_command = new Command(async () =>
             {
-            PrintToConsole($"----------------------REFRESH command dispositivos encontrados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
-            PrintToConsole($"-------------------------------        REFRESH command, thread: { Thread.CurrentThread.ManagedThreadId}");
+                Utils.PrintDeep($"----------------------REFRESH command dispositivos encontrados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
+                Utils.PrintDeep($"-------------------------------        REFRESH command, thread: { Thread.CurrentThread.ManagedThreadId}");
 
                 if (!GetAutoConnectStatus())
                 {
@@ -173,7 +152,7 @@ namespace aclara_meters.view
                     {
                         try
                         {
-                            Utils.Print("---------------  printer resume");
+                            Utils.PrintDeep("---------------  printer resume");
                             //printer.Interrupt();
                             printer.Resume();
                         }
@@ -185,17 +164,16 @@ namespace aclara_meters.view
                     
                     listPucks = new ObservableCollection<DeviceItem>();
 
+                    //start scan
                     FormsApp.ble_interface.SetTimeOutSeconds(TimeOutSeconds);
                     await FormsApp.ble_interface.Scan();
-                    TimeOutSeconds = 3; // los siguientes escaneos son de 5 sec
+
+                    TimeOutSeconds = 3; //next scan timeout 3 sec
 
                     if (FormsApp.ble_interface.GetBlePeripheralList().Count > 0)
                     {
-
-                        //await ChangeListViewData();
                         ChangeListViewData();
 
-                        //DeviceList.IsRefreshing = false;
                         if (listPucks.Count != 0)
                         {
                             Device.BeginInvokeOnMainThread(() =>
@@ -273,19 +251,19 @@ namespace aclara_meters.view
        
         private void Interface_background_scan_page()
         {
-            PrintToConsole($"-------------------------------    Interface_background_scan_page, thread: { Thread.CurrentThread.ManagedThreadId}");
+            Utils.PrintDeep($"-------------------------------    Interface_background_scan_page, thread: { Thread.CurrentThread.ManagedThreadId}");
 
+            // this task controls the connect and disconnect for the devices
             printer = new Thread(new ThreadStart(InvokeMethod));
-
             printer.Start();
 
+            // asign the command to the list
             DeviceList.RefreshCommand = refresh_command;
 
+            //start first scan
             FirstRefreshSearchPucs();
                
         }
-
-
 
         public void FirstRefreshSearchPucs()
         {
@@ -370,22 +348,19 @@ namespace aclara_meters.view
             ContentNav.IsVisible = true;
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
-            //close_menu_icon.Opacity = 0;
+          
             hamburger_icon.IsVisible = false;
             hamburger_icon_detail.IsVisible = false;
             background_scan_page.Margin = new Thickness(310, 0, 0, 0);
             background_scan_page_detail.Margin = new Thickness(310, 0, 0, 0);
             aclara_logo.IsVisible = true;
-            //logo_tablet_aclara.Opacity = 0;
+           
             aclara_detail_logo.IsVisible = true;
-            //tablet_user_view.TranslationY = -22;
-            //tablet_user_view.Scale = 1.2;
+ 
             shadoweffect.IsVisible = true;
             aclara_logo.Scale = 1.2;
             aclara_detail_logo.Scale = 1.2;
-            //aclara_detail_logo.TranslationX = 42;
-            //aclara_logo.TranslationX = 42;
-
+       
             shadoweffect.Source = "shadow_effect_tablet";
 
         }
@@ -455,7 +430,7 @@ namespace aclara_meters.view
             backdark_bg.IsVisible = false;
             indicator.IsVisible = false;
             background_scan_page.IsEnabled = true;
-            //Navigation.PopToRootAsync(false);
+  
         }
         private void dialog_OKBasicTapped(object sender, EventArgs e)
         {
@@ -465,18 +440,12 @@ namespace aclara_meters.view
             dialog.IsVisible = false;
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
-            //this.actionType = this.actionTypeNew;
-
+ 
             this.GoToPage ();
         }
 
         private void GoToPage ()
         {
-            //DeviceList.IsRefreshing = false;
-            //backdark_bg.IsVisible = false;
-            //indicator.IsVisible = false;
-            //background_scan_page.IsEnabled = true;
-
             Device.BeginInvokeOnMainThread(() =>
             {
                 if (actionType == ActionType.DataRead)
@@ -485,9 +454,7 @@ namespace aclara_meters.view
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved,  this.actionType), false);
                 else
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
-            });
-
-            
+            });         
         }
 
         private void refreshBleData(object sender, EventArgs e)
@@ -555,7 +522,7 @@ namespace aclara_meters.view
             int cont = 0;
             int refresh = 0;
 
-            //bAlertBatt = false;
+          
             //PrintToConsole("se va a ejecutar un bucle (WHILE TRUE) - InvokeMethod");
 
             while (true)
@@ -614,11 +581,10 @@ namespace aclara_meters.view
                                 switch (FormsApp.ble_interface.GetConnectionError())
                                 {
                                     case ble_library.BlePort.NO_ERROR:
-                                        //Utils.Print("Estado conexion: NO_ERROR - InvokeMethod");
+                                        
                                         break;
                                     case ble_library.BlePort.CONECTION_ERRROR:
-                                        //Utils.Print("Estado conexion: CONECTION_ERRROR - InvokeMethod");
-
+                                      
                                         Device.BeginInvokeOnMainThread(() =>
                                         {
                                             #region New Circular Progress bar Animations    
@@ -630,32 +596,12 @@ namespace aclara_meters.view
 
                                             #endregion
                                         });
-
-                                        //Utils.Print("Desactivar barra de progreso - InvokeMethod");
 
                                         Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
                                         break;
                                     case ble_library.BlePort.DYNAMIC_KEY_ERROR:
-                                        //Utils.Print("Estado conexion: DYNAMIC_KEY_ERROR - InvokeMethod");
-
-                                        Device.BeginInvokeOnMainThread(() =>
-                                        {
-                                            #region New Circular Progress bar Animations    
-
-                                            DeviceList.IsRefreshing = false;
-                                            backdark_bg.IsVisible = false;
-                                            indicator.IsVisible = false;
-                                            background_scan_page.IsEnabled = true;
-
-                                            #endregion
-                                        });
-
-                                        //Utils.Print("Desactivar barra de progreso - InvokeMethod");
-                                        Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
-                                        break;
                                     case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
-                                        //Utils.Print("Estado conexion: NO_DYNAMIC_KEY_ERROR - InvokeMethod");
-
+                                        
                                         Device.BeginInvokeOnMainThread(() =>
                                         {
                                             #region New Circular Progress bar Animations    
@@ -668,7 +614,7 @@ namespace aclara_meters.view
                                             #endregion
 
                                         });
-                                        //Utils.Print("Desactivar barra de progreso - InvokeMethod");
+                                       
                                         Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
                                         break;
                                 }
@@ -789,7 +735,7 @@ namespace aclara_meters.view
 
         private void IsConnectedUIChange(bool puckConnected)
         {
-            //Utils.Print($"---------------------------------IsConnectedUIChange param: {v} ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
+
             if (puckConnected)
             {
                 try
@@ -831,13 +777,13 @@ namespace aclara_meters.view
             }
         }
 
-        //private async Task ChangeListViewData()
+       
         private  void ChangeListViewData()
         {
  
             try
             {
-                // Utils.Print($"------------------------------- ChangeListViewData while IsScanning, thread: {Thread.CurrentThread.ManagedThreadId}");
+ 
                 List<IBlePeripheral> blePeripherals;
                 blePeripherals = FormsApp.ble_interface.GetBlePeripheralList();
 
@@ -939,7 +885,7 @@ namespace aclara_meters.view
                     }
                     catch (Exception er)
                     {
-                        Utils.Print(er.StackTrace); //2018-09-21 13:08:25.918 aclara_meters.iOS[505:190980] System.NullReferenceException: Object reference not set to an instance of an object
+                        Utils.Print(er.StackTrace); 
                     }
                 }
                 if (!autoConnect)
@@ -1027,7 +973,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            printer.Abort(); //.Suspend();
+            printer.Abort();
 
             FormsApp.DoLogOff();
 
@@ -1035,8 +981,7 @@ namespace aclara_meters.view
             background_scan_page_detail.IsEnabled = true;
             
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
-            //Navigation.PopAsync();
-
+         
         }
 
         private void TurnOffMTUCloseTapped(object sender, EventArgs e)
@@ -1110,9 +1055,6 @@ namespace aclara_meters.view
         {
 
             FormsApp.ble_interface.Close();
-            //peripheralConnected = ble_library.BlePort.NO_CONNECTED;
-            //Singleton.Remove<Puck>();
-
             peripheralManualDisconnection = true;
 
             CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
@@ -1150,8 +1092,6 @@ namespace aclara_meters.view
         private void OnMenuItemSelectedListDevices(object sender, ItemTappedEventArgs e)
         {
             var item = (DeviceItem)e.Item;
-            //fondo.Opacity = 0;
-            //background_scan_page.Opacity = 0.5;
             background_scan_page.IsEnabled = false;
 
             #region New Circular Progress bar Animations    
@@ -1234,7 +1174,6 @@ namespace aclara_meters.view
                 menuOptions.GetListElement("navigationDrawerList").SelectedItem = null;
                 try
                 {
-                    //var item = (PageItem)e.Item;
                     ActionType page = item.TargetType;
                     ((ListView)sender).SelectedItem = null;
 
@@ -1512,7 +1451,7 @@ namespace aclara_meters.view
 
         private void OpenSettingsTapped(object sender, EventArgs e)
         {
-            //printer.Suspend();
+            
             background_scan_page.Opacity = 1;
             background_scan_page_detail.Opacity = 1;
             background_scan_page.IsEnabled = true;
@@ -1523,7 +1462,6 @@ namespace aclara_meters.view
                 ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
                 shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
-
            
             Task.Delay(200).ContinueWith(t =>
             Device.BeginInvokeOnMainThread(() =>
@@ -1599,21 +1537,8 @@ namespace aclara_meters.view
         protected override void OnDisappearing()
         {
             base.OnDisappearing();
-            // todo: this is a hack - hopefully Xamarin adds the ability to name a Pushed Page.
-            //MainMenu.IsSegmentShowing = false;
-            bool value = FormsApp.ble_interface.IsOpen();
-            value &= Navigation.NavigationStack.Count >= 3; //  if(Navigation.NavigationStack.Count < 3) Settings.IsLoggedIn = false;
+        
         }
-
-       
-
-        public void PrintToConsole(string printConsole)
-        {
-
-            if (GetDebugVar())
-            {
-                Utils.Print("DEBUG_ACL: " + printConsole);
-            }
-        }
+            
     }
 }

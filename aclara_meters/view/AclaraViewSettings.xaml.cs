@@ -207,7 +207,6 @@ namespace aclara_meters.view
 
         private async void LogoutTapped(object sender, EventArgs e)
         {
-
             Device.BeginInvokeOnMainThread(() =>
             {
                 dialogView.CloseDialogs();
@@ -215,17 +214,11 @@ namespace aclara_meters.view
                 dialog_open_bg.IsVisible = true;
                 turnoff_mtu_background.IsVisible = true;
             });
-
         }
 
         private void ReturnToMainView(object sender, EventArgs e)
         {
             Navigation.PopToRootAsync(false);
-        }
-
-        private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
-        {
-            ((ListView)sender).SelectedItem = null;
         }
 
         // Event for Menu Item selection, here we are going to handle navigation based
@@ -271,8 +264,8 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                await ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
             backdark_bg.IsVisible = true;
@@ -448,9 +441,7 @@ namespace aclara_meters.view
 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-
                     dialogView.CloseDialogs();
-
                     #region Check ActionVerify
                     if (this.global.ActionVerify)
                     {
@@ -464,8 +455,6 @@ namespace aclara_meters.view
                         GoToPage();
                     }
                     #endregion
-
-
                 })
             );
         }
@@ -478,76 +467,7 @@ namespace aclara_meters.view
 
             Task.Factory.StartNew(TurnOffMethod);
         }
-
-        async Task BasicReadThread()
-        {
-            MTUComm.Action basicRead = new MTUComm.Action (
-               FormsApp.ble_interface,
-               MTUComm.Action.ActionType.BasicRead,
-               FormsApp.credentialsService.UserName );
-
-            basicRead.OnFinish -= BasicRead_OnFinish;
-            basicRead.OnFinish += BasicRead_OnFinish;
-
-            basicRead.OnError  -= BasicRead_OnError;
-            basicRead.OnError  += BasicRead_OnError;
-
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                #region New Circular Progress bar Animations    
-
-                backdark_bg.IsVisible = true;
-                indicator.IsVisible = true;
-                background_scan_page.IsEnabled = false;
-
-                #endregion
-
-            });
-
-            await basicRead.Run();
-        }
-
-        public async Task BasicRead_OnFinish ( object sender, Delegates.ActionFinishArgs args )
-        {
-            await Task.Delay(100).ContinueWith(t =>
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    if (actionType == ActionType.DataRead)
-                            Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
-                    else
-                        Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
-
-                    #region New Circular Progress bar Animations    
-
-                    backdark_bg.IsVisible = false;
-                    indicator.IsVisible = false;
-                    background_scan_page.IsEnabled = true;
-
-                    #endregion
-
-                })
-            );
-        }
-
-        public void BasicRead_OnError ()
-        {
-            Task.Delay(100).ContinueWith(t =>
-                Device.BeginInvokeOnMainThread(() =>
-                {
-                    Device.BeginInvokeOnMainThread(() =>
-                    {
-                        #region New Circular Progress bar Animations    
-
-                        backdark_bg.IsVisible = false;
-                        indicator.IsVisible = false;
-                        background_scan_page.IsEnabled = true;
-
-                        #endregion
-                    });
-                })
-            );
-        }
-
+        
         private async Task TurnOffMethod()
         {
             MTUComm.Action turnOffAction = new MTUComm.Action (
@@ -566,7 +486,6 @@ namespace aclara_meters.view
 
         public async Task TurnOff_OnFinish ( object sender, Delegates.ActionFinishArgs args )
         {
- 
             await Task.Delay(2000).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -601,20 +520,19 @@ namespace aclara_meters.view
             
             viewModelTabLog.RefreshList();
             ChangeLogFile(viewModelTabLog.TotalFiles,false);
+      
+            String myDate = DateTime.Now.ToString();
+            date_sync.Text = myDate;
+            updated_files.Text = GenericUtilsClass.NumFilesUploaded.ToString();
+            pending_files.Text = GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath).ToString();
+            backup_files.Text = GenericUtilsClass.NumBackupFiles().ToString();
+            Color colorText = pending_files.TextColor;
+            if (int.Parse(backup_files.Text) >= 100)
+                colorText = Color.Red;
 
-          
-                String myDate = DateTime.Now.ToString();
-                date_sync.Text = myDate;
-                updated_files.Text = GenericUtilsClass.NumFilesUploaded.ToString();
-                pending_files.Text = GenericUtilsClass.NumLogFilesToUpload(Mobile.LogPath).ToString();
-                backup_files.Text = GenericUtilsClass.NumBackupFiles().ToString();
-                Color colorText = pending_files.TextColor;
-                if (int.Parse(backup_files.Text) >= 100)
-                    colorText = Color.Red;
-
-                lbl_backup.TextColor = colorText;
-                force_sync.IsEnabled = true;
-                Wait(false);
+            lbl_backup.TextColor = colorText;
+            force_sync.IsEnabled = true;
+            Wait(false);
            
         }
 
@@ -706,7 +624,6 @@ namespace aclara_meters.view
 
         public async void Btn_DownloadConf_Clicked(object sender, EventArgs e)
         {
-
             if (await ConfirmDownloadFilesAsync())
             {
                 Wait(true);
@@ -730,7 +647,6 @@ namespace aclara_meters.view
                    
                 }
                 Wait(false);
-
             }
         }
     
@@ -778,7 +694,6 @@ namespace aclara_meters.view
                 global.ftpRemoteHost = tbx_remote_host.Text;
                 global.ftpRemotePath = tbx_remote_path.Text;
 
-
                 String uri = Path.Combine(Mobile.ConfigPath, Configuration.XML_GLOBAL);
 
                 XDocument doc = XDocument.Load(uri);
@@ -788,14 +703,12 @@ namespace aclara_meters.view
                 doc.Root.SetElementValue("ftpUserName", tbx_user_name.Text);
                 doc.Root.SetElementValue("ftpPassword", tbx_user_pass.Text);
 
-
                 doc.Save(uri);
                 DisplayAlert("Infomation", "SFTP/FTP settings saved in global.xml", "OK");
             }
             catch (Exception e)
             {
-                Errors.ShowAlert(new FtpConnectionException());
-                
+                Errors.ShowAlert(new FtpConnectionException());               
             }
             Wait(false);
         }
@@ -838,8 +751,6 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
         }
-
-
 
         private void AboutButtonTapped(object sender, EventArgs e)
         {
@@ -1099,7 +1010,6 @@ namespace aclara_meters.view
             }
         }
 
-
         public async Task<bool> DownloadConfigProcess()
         {
             if (Mobile.configData.HasIntune)
@@ -1122,7 +1032,7 @@ namespace aclara_meters.view
             {
                 if (Mobile.IsNetAvailable())
                 {
-                    string result;
+                    string result = string.Empty;
                     TaskCompletionSource<string> taskSemaphoreDownload = new TaskCompletionSource<string>();
 
                     await Task.Run(async () => {
@@ -1133,9 +1043,10 @@ namespace aclara_meters.view
                         });
                         result = await taskSemaphoreDownload.Task;
 
+
                         Device.BeginInvokeOnMainThread(async () =>
-                        {
-                            if (result=="OK")
+                        {                        
+                            if (result == "OK")
                             {
                                 if (Configuration.CheckLoadXML())
                                 {
@@ -1148,7 +1059,7 @@ namespace aclara_meters.view
                                 {
                                     GenericUtilsClass.RestoreConfigFiles();
                                     await Application.Current.MainPage.DisplayAlert("Attention",
-                                         "The new version configuration files are corrupted, the app will continues with the actual files. Contact your IT administratorn", "OK");
+                                         "The new version configuration files are corrupted, the app will continues with the actual files. Contact your IT administrator", "OK");
                                 }
                             }
                             else
@@ -1156,9 +1067,8 @@ namespace aclara_meters.view
                                           "The app will continues with the actual files", "OK");
 
                         });
- 
-                    });
 
+                    });
                     return false; 
                 }
                 else
@@ -1193,8 +1103,8 @@ namespace aclara_meters.view
                 }
                 else
                     await Application.Current.MainPage.DisplayAlert("Attention", "There is not configuration files in public folder,copy files and try again", "OK");
-                return false;
 
+                return false;
             }
         }
 

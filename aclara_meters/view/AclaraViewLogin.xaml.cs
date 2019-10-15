@@ -50,21 +50,6 @@ namespace aclara_meters.view
                 Device.BeginInvokeOnMainThread ( () =>
                 {
                     loginpage.IsVisible = true;
-
-                    //if ( Mobile.IsNetAvailable () )
-                    //{
-                    //    //if ( this.UploadingLogFiles () )
-                    //    //{
-                    //    //    //base.DisplayAlert ( "Information", "All Log files uploaded!", "Ok" );
-
-                    //    //    //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
-                    //    //}
-                    //    //else base.DisplayAlert ( "Error", "Error Uploading files", "Ok" );
-                    //}
-                    //else base.DisplayAlert ( "Warning", "No connection available. Log files will not be uploaded till you get internet connection", "Ok" );
-
-                    // Force to
-                    //(( AclaraViewMainMenu )Application.Current.MainPage.Navigation.NavigationStack[ 1 ] ).FirstRefreshSearchPucs ();
                 });
             });
 
@@ -102,17 +87,9 @@ namespace aclara_meters.view
 
             EmailEntry.MaxLength = FormsApp.config.Global.UserIdMaxLength;
 
-            //EmailEntry.MaxLength = FormsApp.config.global.UserIdMinLength;
-
             PasswordEntry.MaxLength = FormsApp.config.Global.PasswordMaxLength;
 
         }
-
-        #endregion
-
-        #region Log files
-
-
 
         #endregion
 
@@ -148,52 +125,5 @@ namespace aclara_meters.view
             }
         }
 
-        public bool IsLocationAvailable()
-        {
-            if (!CrossGeolocator.IsSupported)
-                return false;
-            //CrossGeolocator.Current.DesiredAccuracy = 1;
-            CrossGeolocator.Current.DesiredAccuracy = 5;
-
-            return CrossGeolocator.Current.IsGeolocationAvailable;
-        }
-
-        async Task StartListening()
-        {
-            if (CrossGeolocator.Current.IsListening)
-                return;
-            await CrossGeolocator.Current.StartListeningAsync(TimeSpan.FromSeconds(1), 1, true);
-            CrossGeolocator.Current.PositionChanged += PositionChanged;
-            CrossGeolocator.Current.PositionError += PositionError;
-        }
-
-        private void PositionChanged(object sender, PositionEventArgs e)
-        {
-            //If updating the UI, ensure you invoke on main thread
-            var position = e.Position;
-            var output = "Full: Lat: " + position.Latitude + " Long: " + position.Longitude;
-            output += "\n" + $"Time: {position.Timestamp}";
-            output += "\n" + $"Heading: {position.Heading}";
-            output += "\n" + $"Speed: {position.Speed}";
-            output += "\n" + $"Accuracy: {position.Accuracy}";
-            output += "\n" + $"Altitude: {position.Altitude}";
-            output += "\n" + $"Altitude Accuracy: {position.AltitudeAccuracy}";
-            Debug.WriteLine(output);
-            accuracy.Text = output.ToString();
-        }
-
-        private void PositionError(object sender, PositionErrorEventArgs e)
-        {
-            Debug.WriteLine(e.Error);
-        }
-
-        private async Task StopListening()
-        {
-            if (!CrossGeolocator.Current.IsListening)
-                return;
-            await CrossGeolocator.Current.StopListeningAsync();
-            CrossGeolocator.Current.PositionChanged -= PositionChanged;
-            CrossGeolocator.Current.PositionError -= PositionError;
-        }
-    }
+      }
 }

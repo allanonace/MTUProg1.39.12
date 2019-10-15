@@ -75,14 +75,11 @@ namespace aclara_meters.view
                     if (FormsApp.ble_interface.IsOpen())
                     {
                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(dialogsSaved), false);
-
-
                         return;
                     }
                     else
                     {
                         Application.Current.MainPage.Navigation.PushAsync(new AclaraViewSettings(true), false);
-
                         return;
                     }
                 }
@@ -93,9 +90,9 @@ namespace aclara_meters.view
             }));
         }
 
-        private void ChangeLowerButtonImage(bool v)
+        private void ChangeLowerButtonImage(bool vBlack)
         {
-            if (v)
+            if (vBlack)
             {
                 bottomBar.GetImageElement("bg_action_button_img").Source = "read_mtu_btn_black.png";
             }
@@ -136,7 +133,6 @@ namespace aclara_meters.view
             menuOptions = this.MenuOptions;
             dialogView = this.DialogView;
             bottomBar = this.BottomBar;
-
 
             Task.Run(() =>
             {
@@ -240,7 +236,7 @@ namespace aclara_meters.view
 
         }
 
-        void dialog_cancelTapped(object sender, EventArgs e)
+        private void dialog_cancelTapped(object sender, EventArgs e)
         {
             Label obj = (Label)sender;
             StackLayout parent = (StackLayout)obj.Parent;
@@ -420,15 +416,14 @@ namespace aclara_meters.view
         {
             backdark_bg.IsVisible = true;
             indicator.IsVisible = true;
-            //background_scan_page.IsEnabled = false;
             background_scan_page.Opacity = 1;
 
             background_scan_page.IsEnabled = false;
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                await ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
             switch ( await base.ValidateNavigation ( actionTarget ) )

@@ -41,9 +41,7 @@ namespace aclara_meters.view
         private ActionType actionTypeNew;
        
         private bool isCancellable;
-        private bool isLogout;
-        private bool isReturn;
-        private bool isSettings;
+       //private bool isLogout;
 
         #endregion
 
@@ -100,8 +98,7 @@ namespace aclara_meters.view
                 else LoadPhoneUI ();
                 
                 NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-                
-  
+ 
             });
 
             _userTapped = false;
@@ -138,7 +135,6 @@ namespace aclara_meters.view
             this.div_MtuId.IsVisible=true;
             this.div_Mtu_Status.IsVisible=true;
 
-
             List<string> list = new List<string> ()
             {
                 "Close", "Open", "Partial Open"
@@ -149,12 +145,9 @@ namespace aclara_meters.view
              
             #endregion
             
-
             #region Labels
-
             // Account Number
-            this.lb_AccountNumber.Text = global.AccountLabel;      
-            
+            this.lb_AccountNumber.Text = global.AccountLabel;                
             this.port1label.Text = LB_PORT1;
                  
             #endregion
@@ -184,66 +177,6 @@ namespace aclara_meters.view
                 this.tbx_FieldOrder        .MaxLength = global.WorkOrderLength;
                 this.tbx_RDDFirmwareVersion.MaxLength = 12;
             });
-        }
-
-        #endregion
-
-        #region Status message
-
-        public void SetUserInterfaceMTUStatus(string statusMsg)
-        {
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                bottomBar.GetLabelElement("label_read").Text = statusMsg;
-            });
-        }
-
-        public string GetStringFromMTUStatus(MTUStatus mtuStatus, int time)
-        {
-            switch (mtuStatus)
-            {
-                case MTUStatus.ReadingMtuShortTime:
-                    return "Reading MTU in " + time + " seconds...";
-
-                case MTUStatus.ReadingMtuData:
-                    return "Reading MTU data...";
-
-                case MTUStatus.Autodetect:
-                    return "Autodetect...";
-
-                case MTUStatus.CheckingEnconderLongTime:
-                    return "Checking Encoder... " + time;
-
-                case MTUStatus.ProgramingMtuShortTime:
-                    return "Programming MTU in " + time + " seconds...";
-
-                case MTUStatus.PreparingToProgram:
-                    return "Preparing to program...";
-
-                case MTUStatus.TurningOffMtu:
-                    return "Turning off MTU...";
-
-                case MTUStatus.ReadingMtuAgain:
-                    return "Reading MTU again...";
-
-                case MTUStatus.ProgramingMtu:
-                    return "Programming MTU...";
-
-                case MTUStatus.VerifyingMtuData:
-                    return "Verifying Mtu Data...";
-
-                case MTUStatus.CheckingEnconderShortTime:
-                    return "Checking Encoder... " + time;
-
-                case MTUStatus.TurningOnMtu:
-                    return "Autodetect...";
-
-                case MTUStatus.ReadingMtu:
-                    return "Reading MTU...";
-
-            }
-
-            return "Error Detected";
         }
 
         #endregion
@@ -347,7 +280,7 @@ namespace aclara_meters.view
                 //REASON
                 if (!isCancellable)
                 {
-                    isLogout = true;
+                    //isLogout = true;
                     dialog_open_bg.IsVisible = true;
                
                 }
@@ -398,11 +331,6 @@ namespace aclara_meters.view
         #region GUI Handlers
 
         #region Menu options
-
-        private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
-        {
-            ((ListView)sender).SelectedItem = null;
-        }
 
         //Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
@@ -466,8 +394,8 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                await ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
             switch ( await base.ValidateNavigation ( actionTarget ) )
@@ -703,7 +631,7 @@ namespace aclara_meters.view
             if (!isCancellable)
             {
                 //REASON
-                isSettings = true;
+                //isSettings = true;
                 dialog_open_bg.IsVisible = true;
 
               //  Popup_start.IsVisible = true;
@@ -735,7 +663,6 @@ namespace aclara_meters.view
                              background_scan_page.IsEnabled = false;
 
                             #endregion
-
                         });
 
                         if (FormsApp.ble_interface.IsOpen())
@@ -773,8 +700,7 @@ namespace aclara_meters.view
             #endregion
         }
 
-   
-
+  
         private void TurnOffMTUNoTapped(object sender, EventArgs e)
         {
             indicator.IsVisible = false;
@@ -852,8 +778,7 @@ namespace aclara_meters.view
 
             try
             {
-                FormsApp.DoLogOff();
-              
+                FormsApp.DoLogOff();         
             }
             catch (Exception e25)
             {
@@ -874,7 +799,7 @@ namespace aclara_meters.view
             }
             else
             {
-                isReturn = true;
+                //isReturn = true;
 
                 //REASON
                 dialog_open_bg.IsVisible = true;
@@ -1090,13 +1015,10 @@ namespace aclara_meters.view
         #endregion
  
         #region Other methods
-
-  
-
-        private void ChangeLowerButtonImage(bool v)
+        private void ChangeLowerButtonImage(bool vBlack)
         {
             Image buttonImg = bottomBar.GetImageElement("bg_action_button_img");
-            if(v)
+            if(vBlack)
                 buttonImg.Source = "read_mtu_btn_black.png";
             else
                 buttonImg.Source = "read_mtu_btn.png";
