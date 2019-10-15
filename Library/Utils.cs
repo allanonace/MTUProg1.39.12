@@ -346,7 +346,7 @@ namespace Library
             return hex.ToString ().Substring ( 0, hex.Length - 1 );
         }
 
-        public static T GetNumericValueFromBytes<T> (
+        public static T CalculateNumericFromBytes<T> (
             byte[] data,
             int startAt,
             int size )
@@ -359,7 +359,65 @@ namespace Library
                 value += data[ i + startAt ] << ( i * 8 );
 
             // NOTE: Can be used ( T )( object )value nor ( T )value
-            return ( T )Convert.ChangeType ( value, typeof( T ) );
+            try
+            {
+                return ( T )Convert.ChangeType ( value, typeof( T ) );
+            }
+            catch ( Exception e )
+            {
+                return default ( T );
+            }
+        }
+
+        public static T ConvertToNumericFromBytes<T> (
+            byte[] data,
+            int startAt = 0,
+            int size    = 0 )
+        where T : struct
+        {
+            if ( size == 0 ) size = data.Length;
+
+            byte[] sub = data.Skip ( startAt ).Take ( size ).ToArray ();
+
+            // Add zeros up to the required length
+            TypeCode code;
+            byte[] subZeros = null;
+            switch ( code = Type.GetTypeCode ( typeof ( T ) ) )
+            {
+                case TypeCode.Byte  :
+                    subZeros = new byte[ 1 ]; break; // 1 byte
+
+                case TypeCode.Int16 :
+                case TypeCode.UInt16:
+                    subZeros = new byte[ 2 ]; break; // 2 bytes
+
+                case TypeCode.Int32 :
+                case TypeCode.UInt32:
+                    subZeros = new byte[ 4 ]; break; // 4 bytes
+
+                case TypeCode.Int64 :
+                case TypeCode.UInt64:
+                case TypeCode.Double:
+                    subZeros = new byte[ 8 ]; break; // 8 bytes
+            }
+            sub.CopyTo ( subZeros, 0 );
+            
+            dynamic result = default ( T );
+            switch ( code )
+            {
+                // short, int, ushort, uint and double
+                // NOTE: The array must contain the exact number of indexes required for each case
+                case TypeCode.Byte  : result = subZeros [ 0 ];                        break; // 1 byte
+                case TypeCode.Int16 : result = BitConverter.ToInt16  ( subZeros, 0 ); break; // 2 bytes
+                case TypeCode.Int32 : result = BitConverter.ToInt32  ( subZeros, 0 ); break; // 4 bytes
+                case TypeCode.Int64 : result = BitConverter.ToInt64  ( subZeros, 0 ); break; // 8 bytes
+                case TypeCode.UInt16: result = BitConverter.ToUInt16 ( subZeros, 0 ); break; // 2 bytes
+                case TypeCode.UInt32: result = BitConverter.ToUInt32 ( subZeros, 0 ); break; // 4 bytes
+                case TypeCode.UInt64: result = BitConverter.ToUInt64 ( subZeros, 0 ); break; // 8 bytes
+                case TypeCode.Double: result = BitConverter.ToDouble ( subZeros, 0 ); break; // 8 bytes
+            }
+
+            return ( T )( object )result;
         }
 
         #endregion

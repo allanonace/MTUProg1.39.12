@@ -168,7 +168,7 @@ namespace MTUComm
         private const int CMD_VSWR                 = 0x23;  // 35 VSWR Test
         private const int CMD_VSWR_RES             = 6;
         private const int WAIT_BEFORE_NODE_INIT    = 1000;
-        private const int CMD_NODE_INIT_TYPE       = ( int )NodeType.DCUsOnly;
+        private const int CMD_NODE_INIT_TYPE       = ( int )NodeType.DCU;
         private const int CMD_NODE_INIT_TARGET     = 0x00;
         private const int CMD_NODE_INIT_MAXDITHER  = 0x0A;
         private const int CMD_NODE_INIT_MINREQTIME = 0x00;
@@ -518,7 +518,8 @@ namespace MTUComm
         private bool Validate_DataRead ()
         {
             // MTU should supports OnDemand features
-            return this.mtu.MtuDemand;
+            return this.mtu.MtuDemand &&
+                   this.mtu.DataRead;
         }
 
         private bool Validate_TurnOff ()
@@ -864,7 +865,8 @@ namespace MTUComm
             try
             {
                 // Check if the MTU is an OnDemand MTU
-                if ( ! this.mtu.MtuDemand )
+                if ( ! this.mtu.MtuDemand ||
+                     ! this.mtu.DataRead )
                     throw new MtuIsNotOnDemandCompatibleDevice ();
 
                 OnProgress ( this, new Delegates.ProgressArgs ( "HR: Requesting logs..." ) );
@@ -1103,7 +1105,7 @@ namespace MTUComm
                 }
                 
                 // MTU does not support two-way or client does not want to perform it
-                if ( ! global.TimeToSync ||
+                if ( ! this.global.TimeToSync ||
                      ! this.mtu.TimeToSync )
                 {
                     wasNotAboutPuck = true;
@@ -1217,7 +1219,7 @@ namespace MTUComm
             dynamic map )
         {
             // List of all nodes detected for each attempt performed
-            NodeDiscoveryList nodeList = new NodeDiscoveryList ( NodeType.DCUsOnly );
+            NodeDiscoveryList nodeList = new NodeDiscoveryList ( NodeType.DCU );
             NodeDiscoveryResult result = NodeDiscoveryResult.NOT_ACHIEVED;
             double  vswr          = -1;
             decimal successF1     = 0m;
@@ -1226,7 +1228,7 @@ namespace MTUComm
 
             try
             {
-                // VSWR Test
+                // Gets the radio impedance match VSWR of the MTU
                 // NOTE: It can take up to one second to return an answer with data
                 // NOTE: If the size of the data to be answered is not specified, the accepted answer will be ACK 6 and ACK Info Size 0
                 LexiWriteResult fullResponse = await this.lexi.Write (
@@ -1238,7 +1240,7 @@ namespace MTUComm
                         null,
                         LexiAction.OperationRequest );
 
-                vswr = Utils.GetNumericValueFromBytes<double> ( fullResponse.Response, 2, 2 );
+                vswr = ( double )Utils.ConvertToNumericFromBytes<short> ( fullResponse.Response, 2, 2 ) / 1000;
 
                 await Task.Delay ( WAIT_BEFORE_NODE_INIT );
 
@@ -1460,7 +1462,7 @@ namespace MTUComm
                         Utils.Print ( "ND: Nodes to validate " + nodeList.CurrentAttemptEntries.Length );
 
                         bool    isF1;
-                        int     bestRssiResponse = -150;
+                        short   bestRssiResponse = -150;
                         string  freq1wayStr      = await map.Frequency1Way  .GetValue ();
                         string  freq2wayTxStr    = await map.Frequency2WayTx.GetValue ();
                         // NOTE: Parsing to double is important to take into account the separator symbol ( . or , ),
@@ -2961,6 +2963,54 @@ namespace MTUComm
                     }
                     // No alarm profile was selected before launch the action
                     else throw new SelectedAlarmForCurrentMtuException ();
+                }
+
+                #endregion
+
+                #region Demands ( also for RDD )
+
+                if ( this.mtu.MtuDemand &&
+                     this.mtu.FastMessageConfig )
+                {
+                    // MTU 170+ = Families 342x and 35xx36xx
+                    Demand demand = ( Demand )Data.Get.DemandConf;
+                    if ( demand != null )
+                    {
+                        map.MtuPrimaryWindowInterval  = demand.MtuPrimaryWindowInterval;
+                        map.MtuPrimaryWindowIntervalB = demand.MtuPrimaryWindowIntervalB;
+                        map.MtuWindowAStart           = demand.MtuWindowAStart;
+                        map.MtuWindowBStart           = demand.MtuWindowBStart;
+                        map.MtuPrimaryWindowOffset    = demand.MtuPrimaryWindowOffset;
+                        map.MtuNumLowPriorityMsg      = demand.MtuNumLowPriorityMsg;
+
+                        // NOTE: Konstantin: "It is out of this project. This is will be part of Windows project"
+                        /*
+                        map.ConfigReportItems.SetValue ( demand.ConfigReportItems ); // [320,389] = 70 / 2 bytes each element = 35 values max
+                        map.ConfigReportInterval      = demand.ConfigReportInterval;
+                        map.TrendMode                 = demand.TrendMode;
+                        map.TrendModeReadInterval     = demand.TrendModeReadInterval;
+                        map.TrendModeTrig1            = demand.TrendModeTrig1;
+                        map.TrendModeTrig2            = demand.TrendModeTrig2;
+
+                        if ( this.mtu.IsFamily35xx36xx )
+                        {
+                            map.ReadRqst01Item = demand.ReadRqst01Item;
+                            map.ReadRqst02Item = demand.ReadRqst02Item;
+                            map.ReadRqst03Item = demand.ReadRqst03Item;
+                            map.ReadRqst04Item = demand.ReadRqst04Item;
+                            map.ReadRqst05Item = demand.ReadRqst05Item;
+                            map.ReadRqst06Item = demand.ReadRqst06Item;
+                            map.ReadRqst07Item = demand.ReadRqst07Item;
+                            map.ReadRqst08Item = demand.ReadRqst08Item;
+                        }
+                        */
+
+                        //map.xxx = demand.BlockTime;
+                        //map.xxx = demand.IntervalTime;
+                        //map.xxx = demand.AutoClear;
+                    }
+                    // No demand profile was selected before launch the action
+                    else throw new SelectedDemandForCurrentMtuException ();
                 }
 
                 #endregion

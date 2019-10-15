@@ -918,11 +918,9 @@ namespace aclara_meters.view
             #region Alarms
 
             alarmsList = config.alarms.FindByMtuType(this.detectedMtuType);
-            alarms2List = (hasTwoPorts) ? config.alarms.FindByMtuType(this.detectedMtuType) : new List<Alarm>();
 
             // Remove "Scripting" option in interactive mode
-            alarmsList = alarmsList.FindAll(alarm => !string.Equals(alarm.Name.ToLower(), "scripting"));
-            alarms2List = alarms2List.FindAll(alarm => !string.Equals(alarm.Name.ToLower(), "scripting"));
+            alarmsList = alarmsList.FindAll ( alarm => !string.Equals ( alarm.Name.ToLower (), "scripting" ) );
 
             bool RequiresAlarmProfile = this.currentMtu.RequiresAlarmProfile;
             bool portHasSomeAlarm = (RequiresAlarmProfile && alarmsList.Count > 0);
@@ -953,12 +951,13 @@ namespace aclara_meters.view
 
             #region Demands
 
-            demandsList = config.demands.FindByMtuType(this.detectedMtuType);
-            demands2List = (hasTwoPorts) ? config.demands.FindByMtuType(this.detectedMtuType) : new List<Demand>();
+            demandsList = config.demands.FindByMtuType ( this.detectedMtuType );
 
-            bool MtuDemand = this.currentMtu.MtuDemand;
-            bool portHasSomeDemand = (MtuDemand && demandsList.Count > 0);
-            bool port2HasSomeDemand = (hasTwoPorts && MtuDemand && demands2List.Count > 0);
+            // Remove "Scripting" option in interactive mode
+            demandsList = demandsList.FindAll ( demand => !string.Equals ( demand.Name.ToLower (), "scripting" ) );
+
+            bool MtuDemand = this.currentMtu.MtuDemand && this.currentMtu.FastMessageConfig;
+            bool portHasSomeDemand = ( MtuDemand && demandsList.Count > 0 );
 
             if (!div_RDDGeneral.IsVisible)
             {
@@ -967,6 +966,9 @@ namespace aclara_meters.view
                 div_Demands.IsEnabled = portHasSomeDemand;
                 div_Demands.IsVisible = portHasSomeDemand;
                 pck_Demands.ItemsSource = demandsList;
+
+                // Hide alarms dropdownlist if contains only one option
+                div_Demands.IsVisible = ( demandsList.Count > 1 );
             }
             else
             {
@@ -975,6 +977,9 @@ namespace aclara_meters.view
                 div_Demands_V.IsEnabled = portHasSomeDemand;
                 div_Demands_V.IsVisible = portHasSomeDemand;
                 pck_Demands_V.ItemsSource = demandsList;
+
+                // Hide alarms dropdownlist if contains only one option
+                div_Demands_V.IsVisible = ( demandsList.Count > 1 );
             }
             #endregion
 
@@ -4109,7 +4114,7 @@ namespace aclara_meters.view
                 value_sre = DEBUG_SNAPSREADS;
                 value_two = (string)pck_TwoWay.ItemsSource[ 0 ];
                 value_alr = (Alarm)this.pck_Alarms.ItemsSource[ DEBUG_ALARM_INDEX   ];
-                //value_dmd = (Demand)pck_Demands.ItemsSource[ DEBUG_DEMAND_INDEX  ];
+                value_dmd = (Demand)this.pck_Demands.ItemsSource[ DEBUG_DEMAND_INDEX  ];
                 
                 // GPS
                 value_lat = DEBUG_GPS_LAT;
@@ -4182,6 +4187,12 @@ namespace aclara_meters.view
                         value_alr = ( Alarm )this.pck_Alarms.ItemsSource[ 0 ];
                     else if ( this.pck_Alarms.ItemsSource.Count > 1 )
                         value_alr = ( Alarm )this.pck_Alarms.SelectedItem;
+                    
+                    // Demands dropdownlist is hidden when only has one option
+                    if ( this.pck_Demands.ItemsSource.Count == 1 )
+                        value_dmd = ( Demand )this.pck_Demands.ItemsSource[ 0 ];
+                    else if ( this.pck_Demands.ItemsSource.Count > 1 )
+                        value_dmd = ( Demand )this.pck_Demands.SelectedItem;
                 }
                 // RDD in port 1
                 else
@@ -4197,6 +4208,12 @@ namespace aclara_meters.view
                         value_alr = ( Alarm )this.pck_Alarms_V.ItemsSource[ 0 ];
                     else if ( this.pck_Alarms_V.ItemsSource.Count > 1 )
                         value_alr = ( Alarm )this.pck_Alarms_V.SelectedItem;
+                    
+                    // Demands dropdownlist is hidden when only has one option
+                    if ( this.pck_Demands_V.ItemsSource.Count == 1 )
+                        value_dmd = ( Demand )this.pck_Demands_V.ItemsSource[ 0 ];
+                    else if ( this.pck_Demands_V.ItemsSource.Count > 1 )
+                        value_dmd = ( Demand )this.pck_Demands_V.SelectedItem;
                 }
 
                 // RDD
@@ -4311,9 +4328,11 @@ namespace aclara_meters.view
                  mtu.RequiresAlarmProfile )
                 this.addMtuForm.AddParameter ( FIELD.ALARM, value_alr );
 
-            // Demands [ SOLO SE LOGEA ¿? ]
-            //if ( MtuConditions.MtuDemand )
-            //    this.addMtuForm.AddParameter ( FIELD.DEMAND, value_dmd );
+            // Demands
+            if ( value_dmd != null &&
+                 mtu.MtuDemand &&
+                 mtu.FastMessageConfig )
+                Data.Set ( "DemandConf", value_dmd );
 
             #endregion
 

@@ -251,8 +251,8 @@ namespace Lexi
         public enum NodeType : byte
         {
             All      = 0x00,
-            DCUsOnly = 0x01,
-            MTUsOnly = 0x02,
+            DCU      = 0x01,
+            MTU      = 0x02,
             Zonescan = 0x03
         }
 

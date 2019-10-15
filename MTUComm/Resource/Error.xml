@@ -50,6 +50,10 @@
     <Error id="400" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" /> <!-- footer not necessary -->
     <Error id="401" message="No alarm was selected but the MTU entry in Mtu.xml requires using an alarm" footer="No alarm selected" />
     
+    <!-- Demand -->
+    <Error id="450" message="The demand profile Scripting for current MTU is not defined in the DemandConf.xml file" /> <!-- footer not necessary -->
+    <Error id="451" message="No demand was selected but the MTU entry in Mtu.xml requires using one" footer="No demand selected" />
+
     <!-- Turn Off -->
     <Error id="500" message="Turn off MTU process has failed trying to activated the Ship Bit" footer="MTU already turned off" />
     <Error id="501" message="MTU cannot be turned on or off after having tried it _var_ times" footer="Turn on or off not achieved" />

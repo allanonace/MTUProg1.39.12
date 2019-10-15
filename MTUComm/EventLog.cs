@@ -68,14 +68,14 @@ namespace MTUComm
         #region Attributes
 
         private LogEntryType logType;
-        private int          index;
-        private int          totalLogs;
-        private int          formatVersion;
+        private ushort       index;
+        private ushort       totalLogs;
+        private byte         formatVersion;
         private DateTime     timeStamp;
-        private int          readInterval;
+        private ushort       readInterval;
         private long         meterRead;
-        private int          flags;
-        private int          errorStatus;
+        private ushort       flags;
+        private byte         errorStatus;
 
         #endregion
 
@@ -86,12 +86,12 @@ namespace MTUComm
             get { return this.logType; }
         }
 
-        public int Index
+        public ushort Index
         {
             get { return this.index; }
         }
         
-        public int TotalEntries
+        public ushort TotalEntries
         {
             get { return this.totalLogs; }
         }
@@ -101,7 +101,7 @@ namespace MTUComm
             get { return this.index >= this.totalLogs; }
         }
 
-        public int FormatVersion
+        public byte FormatVersion
         {
             get { return formatVersion; }
         }
@@ -111,7 +111,7 @@ namespace MTUComm
             get { return timeStamp; }
         }
 
-        public int ReadInterval
+        public ushort ReadInterval
         {
             get { return readInterval; }
         }
@@ -121,7 +121,7 @@ namespace MTUComm
             get { return meterRead; }
         }
 
-        public int ErrorStatus
+        public byte ErrorStatus
         {
             get { return errorStatus; }
         }
@@ -163,14 +163,14 @@ namespace MTUComm
             byte[] response )
         {
             this.logType       = ( LogEntryType )response[ BYTE_TYPE ]; // 7
-            this.formatVersion = ( int )response[ BYTE_FORMAT ];        // 8
-            this.errorStatus   = ( int )response[ BYTE_ERROR  ];        // 22
-            this.totalLogs     = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_NUMLOGS,      NUM_BYTES_NUMLOGS      ); // 3 and 4
-            this.index         = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_CURRENT,      NUM_BYTES_CURRENT      ); // 5 and 6
-            long secsTimeStamp = Utils.GetNumericValueFromBytes<long> ( response, BYTE_SECSTIME,     NUM_BYTES_SECSTIME     ); // 9, 10, 11 and 12
-            this.flags         = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_FLAGS,        NUM_BYTES_FLAGS        ); // 13 and 14
-            this.readInterval  = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_READINTERVAL, NUM_BYTES_READINTERVAL ); // 15 and 16
-            this.meterRead     = Utils.GetNumericValueFromBytes<long> ( response, BYTE_METERREAD,    NUM_BYTES_METERREAD    ); // 17, 18, 19, 20 and 21
+            this.formatVersion = ( byte )response[ BYTE_FORMAT ];       // 8
+            this.errorStatus   = ( byte )response[ BYTE_ERROR  ];       // 22
+            this.totalLogs     = Utils.ConvertToNumericFromBytes<ushort> ( response, BYTE_NUMLOGS,      NUM_BYTES_NUMLOGS      ); // 3 and 4
+            this.index         = Utils.ConvertToNumericFromBytes<ushort> ( response, BYTE_CURRENT,      NUM_BYTES_CURRENT      ); // 5 and 6
+            uint secsTimeStamp = Utils.ConvertToNumericFromBytes<uint>   ( response, BYTE_SECSTIME,     NUM_BYTES_SECSTIME     ); // 9, 10, 11 and 12
+            this.flags         = Utils.ConvertToNumericFromBytes<ushort> ( response, BYTE_FLAGS,        NUM_BYTES_FLAGS        ); // 13 and 14
+            this.readInterval  = Utils.ConvertToNumericFromBytes<ushort> ( response, BYTE_READINTERVAL, NUM_BYTES_READINTERVAL ); // 15 and 16
+            this.meterRead     = Utils.ConvertToNumericFromBytes<long>   ( response, BYTE_METERREAD,    NUM_BYTES_METERREAD    ); // 17, 18, 19, 20 and 21
             this.timeStamp     = new DateTime ( 1970, 1, 1, 0, 0, 0 ).AddSeconds ( secsTimeStamp );
         }
 

@@ -950,8 +950,8 @@ namespace MTUComm
 
                 Data.SetTemp ( "ProcessResult",
                     $"Number of Reads {eventList.Count} for Selected Period " +
-                    $"From {eventList.DateStart.ToString ( "dd/MM/yyyy HH:mm:ss" )} " +
-                    $"Till {eventList.DateEnd  .ToString ( "dd/MM/yyyy HH:mm:ss" )}" );
+                    $"From {eventList.DateStart.ToString ( "MM/dd/yyyy HH:mm:ss" )} " +
+                    $"Till {eventList.DateEnd  .ToString ( "MM/dd/yyyy HH:mm:ss" )}" );
 
                 // NOTE: STARProgrammer MtuComm.cs Line 5341
                 string path = Path.Combine ( Mobile.EventPath,

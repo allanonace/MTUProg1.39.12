@@ -1388,7 +1388,7 @@
   	<CustomSet/>
   </Register>
   
-  <!-- INIT - On Demand -->
+  <!-- INIT - Demand -->
 
   <Register> <!-- OK -->
     <Id>OnDemandCount</Id>
@@ -1511,7 +1511,68 @@
 	  <CustomSet/>
   </Register>
   
-  <!-- END - On Demand -->
+  <Register> <!-- OK -->
+    <Id>ConfigReportItems</Id>
+    <Description>Config Parameter Set III Items</Description>
+    <Type>string</Type>
+    <Address>320</Address>
+    <Size>70</Size> <!-- 35 items x 2 bytes each -->
+    <Write>true</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>ConfigReportInterval</Id>
+    <Description>Number of days between Configuration Reports. (30 (default), 60, or 90 days)</Description>
+    <Type>int</Type>
+    <Address>390</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TrendMode</Id>
+    <Description>Trend Mode, Feature Enable/Disabled</Description>
+    <Type>bool</Type>
+    <Address>404</Address>
+    <Size>0</Size>
+    <Write>true</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TrendModeReadInterval</Id>
+    <Description>Trend Mode, Read Interval. Number of minutes (1 or 5)</Description>
+    <Type>int</Type>
+    <Address>405</Address>
+    <Size>1</Size>
+    <Write>true</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TrendModeTrig1</Id>
+    <Description>Trend Mode, Alarm Trigger 1 LSB, Configure</Description>
+    <Type>int</Type>
+    <Address>406</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+  <Register> <!-- OK -->
+    <Id>TrendModeTrig2</Id>
+    <Description>Trend Mode, Alarm Trigger 2 LSB, Configure</Description>
+    <Type>int</Type>
+    <Address>408</Address>
+    <Size>2</Size>
+    <Write>true</Write>
+    <CustomGet/>
+	  <CustomSet/>
+  </Register>
+
+  <!-- END - Demand -->
 
   <!-- END - Registers -->
   

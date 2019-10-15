@@ -424,21 +424,21 @@ namespace MTUComm
 
             #endregion
 
-            // TODO (encoders)
             #region Demands
 
-            if ( mtu.MtuDemand )
+            if ( mtu.MtuDemand &&
+                 mtu.FastMessageConfig )
             {
-                XElement demandConf = new XElement("DemandConfiguration");
-                logger.AddAtrribute(demandConf, "display", "Demand Configuration");
-                logger.AddParameter(demandConf, new Parameter("ConfigurationName", "Configuration Name", "Default")); // TODO: replace real value
-                logger.AddParameter(demandConf, new Parameter("MtuNumLowPriorityMsg", "Mtu Num Low Priority Msg", "2")); // TODO: replace real value
-                logger.AddParameter(demandConf, new Parameter("MtuPrimaryWindowInterval", "Mtu Primary WindowInterval", "180")); // TODO: replace real value
-                logger.AddParameter(demandConf, new Parameter("MtuWindowAStart", "Mtu Window A Start", "0")); // TODO: replace real value
-                logger.AddParameter(demandConf, new Parameter("MtuWindowBStart", "Mtu Window B Start", "0")); // TODO: replace real value
-                logger.AddParameter(demandConf, new Parameter("MtuPrimaryWindowIntervalB", "Mtu Primary WindowInterval B", "3600")); // TODO: replace real value
-                logger.AddParameter(demandConf, new Parameter("MtuPrimaryWindowOffset", "Mtu Primary Window Offset", "51")); // TODO: replace real value
-                this.addMtuAction.Add(demandConf);
+                XElement demandConf = new XElement ( "DemandConfiguration" );
+                logger.AddAtrribute ( demandConf, "display", "Demand Configuration" );
+                logger.AddParameter ( demandConf, new Parameter ( "ConfigurationName",         "Configuration Name",           Data.Get.DemandConf.Name ) );
+                logger.AddParameter ( demandConf, new Parameter ( "MtuNumLowPriorityMsg",      "Mtu Num Low Priority Msg",     await map.MtuNumLowPriorityMsg     .GetValue () ) );
+                logger.AddParameter ( demandConf, new Parameter ( "MtuPrimaryWindowInterval",  "Mtu Primary WindowInterval",   await map.MtuPrimaryWindowInterval .GetValue () ) );
+                logger.AddParameter ( demandConf, new Parameter ( "MtuWindowAStart",           "Mtu Window A Start",           await map.MtuWindowAStart          .GetValue () ) );
+                logger.AddParameter ( demandConf, new Parameter ( "MtuWindowBStart",           "Mtu Window B Start",           await map.MtuWindowBStart          .GetValue () ) );
+                logger.AddParameter ( demandConf, new Parameter ( "MtuPrimaryWindowIntervalB", "Mtu Primary WindowInterval B", await map.MtuPrimaryWindowIntervalB.GetValue () ) );
+                logger.AddParameter ( demandConf, new Parameter ( "MtuPrimaryWindowOffset",    "Mtu Primary Window Offset",    await map.MtuPrimaryWindowOffset   .GetValue () ) );
+                this.addMtuAction.Add ( demandConf );
             }
 
             #endregion
