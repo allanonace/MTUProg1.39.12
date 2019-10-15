@@ -161,10 +161,10 @@ namespace MTUComm
             #region Encryption
 
             // Avoid try to log encryption info when not it has not been performed
-            if ( await map.Encrypted.GetValue () )
+            if ( await map.Encrypted.GetValueFromMtu () )
             {
                 //logger.Parameter ( this.addMtuAction, new Parameter ( "Encryption", "Encrypted", map.Encryption.GetValue () ) );
-                logger.AddParameter ( this.addMtuAction, new Parameter ( "EncryptionIndex", "Encryption Index", await map.EncryptionIndex.GetValue () ) );
+                logger.AddParameter ( this.addMtuAction, new Parameter ( "EncryptionIndex", "Encryption Index", await map.EncryptionIndex.GetValueFromMtu () ) );
             
                 if ( ! mtu.IsFamily35xx36xx )
                 {

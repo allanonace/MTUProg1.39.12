@@ -1243,9 +1243,30 @@ namespace MTUComm
                         null,
                         LexiAction.OperationRequest );
 
-                vswr = ( double )Utils.ConvertToNumericFromBytes<short> ( fullResponse.Response, 2, 2 ) / 1000;
+                vswr = Utils.ConvertToNumericFromBytes<double> ( fullResponse.Response, 2, 2 );
 
                 await Task.Delay ( WAIT_BEFORE_NODE_INIT );
+
+                // NOTE: Prepare some info out of the while block for reuse inside
+
+                // Node discovery initiation command
+                byte[] data = new byte[8]; // 1+4+1+1+1
+                data[0] = CMD_NODE_INIT_TYPE;
+                data[1] = CMD_NODE_INIT_TARGET;     // Target node ID LSB
+                data[2] = CMD_NODE_INIT_TARGET;     // ...
+                data[3] = CMD_NODE_INIT_TARGET;     // ...
+                data[4] = CMD_NODE_INIT_TARGET;     // Target node ID MSB
+                data[5] = CMD_NODE_INIT_MAXDITHER;  // Max dither time in seconds
+                data[6] = CMD_NODE_INIT_MINREQTIME; // Min request send time in seconds
+                data[7] = CMD_NODE_INIT_RFCHANNELS; // RF Channels bitmap up to 8 channels
+
+                // Calculates delay between step 1 and 2
+                int dcuDelayF1 = await map.DcuDelayF1.GetValueFromMtu ();
+                int dcuDelayF2 = await map.DcuDelayF2.GetValueFromMtu ();
+                int slackTime = ( ( dcuDelayF1 > dcuDelayF2 ) ? dcuDelayF1 : dcuDelayF2 ) +
+                                  CMD_NODE_INIT_MINREQTIME +
+                                  CMD_NODE_INIT_MAXDITHER  +
+                                  CMD_NODE_OVERHEAD_TIME;
 
                 // Node Discovery ( Initiation + Start/Reset + Get Nodes )
                 float maxTimeND = this.global.MaxTimeRFCheck * 1000;
@@ -1257,17 +1278,6 @@ namespace MTUComm
                     #region Step 1 - Init
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 1 Init" ) );
-                
-                    // Node discovery initiation command
-                    byte[] data = new byte[ 8 ]; // 1+4+1+1+1
-                    data[ 0 ] = CMD_NODE_INIT_TYPE;
-                    data[ 1 ] = CMD_NODE_INIT_TARGET;     // Target node ID LSB
-                    data[ 2 ] = CMD_NODE_INIT_TARGET;     // ...
-                    data[ 3 ] = CMD_NODE_INIT_TARGET;     // ...
-                    data[ 4 ] = CMD_NODE_INIT_TARGET;     // Target node ID MSB
-                    data[ 5 ] = CMD_NODE_INIT_MAXDITHER;  // Max dither time in seconds
-                    data[ 6 ] = CMD_NODE_INIT_MINREQTIME; // Min request send time in seconds
-                    data[ 7 ] = CMD_NODE_INIT_RFCHANNELS; // RF Channels bitmap up to 8 channels
 
                     // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
                     fullResponse = await this.lexi.Write (
@@ -1294,14 +1304,6 @@ namespace MTUComm
                     else
                     {
                         #region Delay before start
-
-                        int dcuDelayF1 = await map.DcuDelayF1.GetValueFromMtu ();
-                        int dcuDelayF2 = await map.DcuDelayF2.GetValueFromMtu ();
-
-                        int slackTime = ( ( dcuDelayF1 > dcuDelayF2 ) ? dcuDelayF1 : dcuDelayF2 ) +
-                                        CMD_NODE_INIT_MINREQTIME +
-                                        CMD_NODE_INIT_MAXDITHER  +
-                                        CMD_NODE_OVERHEAD_TIME;
 
                         OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s before Step 2" ) );
 
@@ -3058,6 +3060,8 @@ namespace MTUComm
                 OnProgress ( this, new Delegates.ProgressArgs ( "Writing to MTU..." ) );
 
                 // Write changes into MTU
+                // NOTE: The memory map instance used inside AddMtuLog is configured for read only once
+                // NOTE: each register and for that reason for example Encryption the first time is not logged
                 await this.WriteMtuModifiedRegisters ( map );
                 await addMtuLog.LogAddMtu ();
                 
