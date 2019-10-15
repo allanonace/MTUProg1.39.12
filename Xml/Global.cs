@@ -724,6 +724,9 @@ namespace Xml
             }
         }
 
+        [XmlElement("EnableFEC")]
+        public string EnableFEC { get; set; }
+
         [XmlElement("ErrorId")]
         public bool ErrorId { get; set; }
 

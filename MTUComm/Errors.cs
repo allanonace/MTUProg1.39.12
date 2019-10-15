@@ -120,6 +120,13 @@ namespace MTUComm
             { new ScriptingAlarmForCurrentMtuException (),      400 },
             // No alarm was selected but the MTU entry in Mtu.xml requires using an alarm
             { new SelectedAlarmForCurrentMtuException (),       401 },
+
+            // Alarm [ 45x ]
+            //------
+            // The demand profile Scripting for current MTU is not defined in the DemandConf.xml file
+            { new ScriptingDemandForCurrentMtuException (),     450 },
+            // No demand was selected but the MTU entry in Mtu.xml requires using one
+            { new SelectedDemandForCurrentMtuException (),      451 },
             
             // Turn Off [ 5xx ]
             //---------

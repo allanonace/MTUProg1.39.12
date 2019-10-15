@@ -454,6 +454,30 @@
     
     #endregion
     
+    #region Demand [ 45x ]
+
+    /// <summary>
+    /// Exception thrown in scripted mode when in DemandConf.xml
+    /// file there is no an "Scripting" entry for the MTU ID.
+    /// <para>
+    /// See <see cref="MTUComm.MTUComm.AddMtu ( Action action )"/>.
+    /// </para>
+    /// </summary>
+    public class ScriptingDemandForCurrentMtuException : OwnExceptionsBase
+    {
+        public ScriptingDemandForCurrentMtuException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+    
+    /// <summary>
+    /// Exception thrown when an demand profile has not been selected before to start with the new installation.
+    /// </summary>
+    public class SelectedDemandForCurrentMtuException : OwnExceptionsBase
+    {
+        public SelectedDemandForCurrentMtuException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
+    }
+
+    #endregion
+
     #region Turn Off [ 5xx ]
     
     /// <summary>

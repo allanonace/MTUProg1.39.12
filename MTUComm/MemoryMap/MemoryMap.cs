@@ -1136,7 +1136,11 @@ namespace MTUComm.MemoryMap
             Utils.Print ( "Memory: size " + this.memory.Length + " | from: " + address + " to " + ( address + size ) + " [ " + size + " bytes ]" );
         
             for ( int i = 0; i < size; i++ )
-                this.memory[ address + i ] = value[ i ];
+                if ( value.Length > i )
+                    this.memory[ address + i ] = value[ i ];
+                
+                // Allows to pass less data than the maximum bytes of the register
+                else break;
         }
 
         private void SetNumToMem_Logic (

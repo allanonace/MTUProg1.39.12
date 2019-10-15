@@ -91,22 +91,22 @@ namespace MTUComm
 
         #region Attributes
         
-        private int         index;
         private bool        isF1;
-        private int         totalEntries;
+        private byte        index;
+        private byte        totalEntries;
         private NodeType    nodeType;
-        private int         nodeId;
-        private int         rssiRequest;            // MTU -> DCU
-        private int         rssiResponse;           // DCU -> MTU
-        private int         freqErrorRequest;
-        private int         freqErrorResponse;
-        private int         timeDeltaRequest;
-        private int         timeDeltaResponse;
-        private int         responderId;
-        private int         freqChannelRequest;
-        private int         freqChannelResponse;
-        private int         noiseFloorRequest;
-        private int         noiseFloorResponse;
+        private uint        nodeId;
+        private short       rssiRequest;            // MTU -> DCU
+        private short       rssiResponse;           // DCU -> MTU
+        private short       freqErrorRequest;
+        private short       freqErrorResponse;
+        private sbyte       timeDeltaRequest;
+        private sbyte       timeDeltaResponse;
+        private byte        responderId;
+        private ushort      freqChannelRequest;
+        private ushort      freqChannelResponse;
+        private byte        noiseFloorRequest;
+        private byte        noiseFloorResponse;
         private bool        validated;
 
         #endregion
@@ -119,7 +119,7 @@ namespace MTUComm
         /// <remarks>
         /// LExI command "GET NEXT NODE DISCOVERY RESPONSE": Second Response ( ACK with Node Discovery Response )
         /// </remarks>
-        public int Index
+        public uint Index
         {
             get { return this.index; }
         }
@@ -140,7 +140,7 @@ namespace MTUComm
         /// <remarks>
         /// LExI command "GET NEXT NODE DISCOVERY RESPONSE": First response ( ACK with Node Discovery General Information )
         /// </remarks>
-        public int TotalEntries
+        public uint TotalEntries
         {
             get { return this.totalEntries; }
         }
@@ -161,7 +161,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int NodeId
+        public uint NodeId
         {
             get { return this.nodeId; }
         }
@@ -169,7 +169,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int RSSIRequest
+        public short RSSIRequest
         {
             get { return this.rssiRequest; }
         }
@@ -177,7 +177,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int RSSIResponse
+        public short RSSIResponse
         {
             get { return this.rssiResponse; }
         }
@@ -185,7 +185,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int FreqErrorRequest
+        public short FreqErrorRequest
         {
             get { return this.freqErrorRequest; }
         }
@@ -193,7 +193,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int FreqErrorResponse
+        public short FreqErrorResponse
         {
             get { return this.freqErrorResponse; }
         }
@@ -201,7 +201,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int TimeDeltaRequest
+        public sbyte TimeDeltaRequest
         {
             get { return this.timeDeltaRequest; }
         }
@@ -209,7 +209,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int TimeDeltaResponse
+        public sbyte TimeDeltaResponse
         {
             get { return this.timeDeltaResponse; }
         }
@@ -217,7 +217,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int ResponderId
+        public byte ResponderId
         {
             get { return this.responderId; }
         }
@@ -225,7 +225,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int FreqChannelRequest
+        public ushort FreqChannelRequest
         {
             get { return this.freqChannelRequest; }
         }
@@ -233,7 +233,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int FreqChannelResponse
+        public ushort FreqChannelResponse
         {
             get { return this.freqChannelResponse; }
         }
@@ -241,7 +241,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int NoiseFloorRequest
+        public byte NoiseFloorRequest
         {
             get { return this.noiseFloorRequest; }
         }
@@ -249,7 +249,7 @@ namespace MTUComm
         /// <summary>
         /// 
         /// </summary>
-        public int NoiseFloorResponse
+        public byte NoiseFloorResponse
         {
             get { return this.noiseFloorResponse; }
         }
@@ -272,33 +272,33 @@ namespace MTUComm
         public NodeDiscovery (
             byte[] response )
         {
-            this.totalEntries  = ( int )response[ BYTE_NUMRESULTS ]; // 3
-            this.index         = ( int )response[ BYTE_CURRENT    ]; // 4
+            this.totalEntries  = ( byte )response[ BYTE_NUMRESULTS ]; // 3
+            this.index         = ( byte )response[ BYTE_CURRENT    ]; // 4
 
             // ACK with Node Discovery General Information
             if ( this.index == 1 )
             {
-                this.freqChannelResponse = Utils.GetNumericValueFromBytes<int> ( response, BYTE_FREQCHRES, NUM_BYTES_FREQCHRES ); // 5 and 6
-                this.noiseFloorRequest   = ( int )response[ BYTE_NOISEREQ ];                                                      // 7
+                this.freqChannelResponse = Utils.ConvertToNumericFromBytes<ushort> ( response, BYTE_FREQCHRES, NUM_BYTES_FREQCHRES ); // 5 and 6
+                this.noiseFloorRequest   = ( byte )response[ BYTE_NOISEREQ ];                                                         // 7
             }
             // ACK with Node Discovery Response
             else
             {
-                this.nodeType            = ( NodeType )response[ BYTE_TYPE ];                                                            // 5
-                this.nodeId              = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_NODEID, NUM_BYTES_NODEID );             // 6, 7, 8 and 9
-                this.rssiRequest         = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_RSSIREQ, NUM_BYTES_RSSIREQ );           // 10 and 11
-                this.freqErrorRequest    = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_FREQERRORREQ, NUM_BYTES_FREQERRORREQ ); // 12 and 13
-                this.rssiResponse        = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_RSSIRES, NUM_BYTES_RSSIRES );           // 14 and 15
-                this.freqErrorResponse   = Utils.GetNumericValueFromBytes<int>  ( response, BYTE_FREQERRORRES, NUM_BYTES_FREQERRORRES ); // 16 and 17
-                this.timeDeltaRequest    = ( int )response[ BYTE_TIMEREQ ];                                                              // 18
-                this.timeDeltaResponse   = ( int )response[ BYTE_TIMERES ];                                                              // 19
-                this.responderId         = ( int )response[ BYTE_RESID   ];                                                              // 20
-                this.freqChannelRequest  = Utils.GetNumericValueFromBytes<int> ( response, BYTE_FREQCHREQ, NUM_BYTES_FREQCHREQ );        // 21 and 22
-                this.noiseFloorResponse  = ( int )response[ BYTE_NOISERES ];                                                             // 23
+                this.nodeType           = ( NodeType )response[ BYTE_TYPE ];                                                              // 5
+                this.nodeId             = Utils.ConvertToNumericFromBytes<uint>  ( response, BYTE_NODEID, NUM_BYTES_NODEID );             // 6, 7, 8 and 9
+                this.rssiRequest        = Utils.ConvertToNumericFromBytes<short> ( response, BYTE_RSSIREQ, NUM_BYTES_RSSIREQ );           // 10 and 11
+                this.freqErrorRequest   = Utils.ConvertToNumericFromBytes<short> ( response, BYTE_FREQERRORREQ, NUM_BYTES_FREQERRORREQ ); // 12 and 13
+                this.rssiResponse       = Utils.ConvertToNumericFromBytes<short> ( response, BYTE_RSSIRES, NUM_BYTES_RSSIRES );           // 14 and 15
+                this.freqErrorResponse  = Utils.ConvertToNumericFromBytes<short> ( response, BYTE_FREQERRORRES, NUM_BYTES_FREQERRORRES ); // 16 and 17
+                this.timeDeltaRequest   = ( sbyte )response[ BYTE_TIMEREQ ];                                                              // 18
+                this.timeDeltaResponse  = ( sbyte )response[ BYTE_TIMERES ];                                                              // 19
+                this.responderId        = ( byte  )response[ BYTE_RESID   ];                                                              // 20
+                this.freqChannelRequest = Utils.ConvertToNumericFromBytes<ushort> ( response, BYTE_FREQCHREQ, NUM_BYTES_FREQCHREQ );      // 21 and 22
+                this.noiseFloorResponse = ( byte  )response[ BYTE_NOISERES ];                                                             // 23
 
                 // Converts the RSSI values ​​to the desired range
-                this.rssiRequest  = Math.Abs ( this.rssiRequest  / 2 - 130 );
-                this.rssiResponse = Math.Abs ( this.rssiResponse / 2 - 130 );
+                //this.rssiRequest  = Math.Abs ( this.rssiRequest  / 2 - 130 );
+                //this.rssiResponse = Math.Abs ( this.rssiResponse / 2 - 130 );
             }
         }
 

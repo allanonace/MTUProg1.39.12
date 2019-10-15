@@ -887,11 +887,9 @@ namespace aclara_meters.view
             #region Alarms
 
             alarmsList = config.alarms.FindByMtuType(this.detectedMtuType);
-            alarms2List = (hasTwoPorts) ? config.alarms.FindByMtuType(this.detectedMtuType) : new List<Alarm>();
 
             // Remove "Scripting" option in interactive mode
-            alarmsList = alarmsList.FindAll(alarm => !string.Equals(alarm.Name.ToLower(), "scripting"));
-            alarms2List = alarms2List.FindAll(alarm => !string.Equals(alarm.Name.ToLower(), "scripting"));
+            alarmsList = alarmsList.FindAll ( alarm => !string.Equals ( alarm.Name.ToLower (), "scripting" ) );
 
             bool RequiresAlarmProfile = this.currentMtu.RequiresAlarmProfile;
             bool portHasSomeAlarm = (RequiresAlarmProfile && alarmsList.Count > 0);
@@ -922,12 +920,13 @@ namespace aclara_meters.view
 
             #region Demands
 
-            demandsList = config.demands.FindByMtuType(this.detectedMtuType);
-            demands2List = (hasTwoPorts) ? config.demands.FindByMtuType(this.detectedMtuType) : new List<Demand>();
+            demandsList = config.demands.FindByMtuType ( this.detectedMtuType );
 
-            bool MtuDemand = this.currentMtu.MtuDemand;
-            bool portHasSomeDemand = (MtuDemand && demandsList.Count > 0);
-            bool port2HasSomeDemand = (hasTwoPorts && MtuDemand && demands2List.Count > 0);
+            // Remove "Scripting" option in interactive mode
+            demandsList = demandsList.FindAll ( demand => !string.Equals ( demand.Name.ToLower (), "scripting" ) );
+
+            bool MtuDemand = this.currentMtu.MtuDemand && this.currentMtu.FastMessageConfig;
+            bool portHasSomeDemand = ( MtuDemand && demandsList.Count > 0 );
 
             if (!div_RDDGeneral.IsVisible)
             {
@@ -936,6 +935,9 @@ namespace aclara_meters.view
                 div_Demands.IsEnabled = portHasSomeDemand;
                 div_Demands.IsVisible = portHasSomeDemand;
                 pck_Demands.ItemsSource = demandsList;
+
+                // Hide alarms dropdownlist if contains only one option
+                div_Demands.IsVisible = ( demandsList.Count > 1 );
             }
             else
             {
@@ -944,6 +946,9 @@ namespace aclara_meters.view
                 div_Demands_V.IsEnabled = portHasSomeDemand;
                 div_Demands_V.IsVisible = portHasSomeDemand;
                 pck_Demands_V.ItemsSource = demandsList;
+
+                // Hide alarms dropdownlist if contains only one option
+                div_Demands_V.IsVisible = ( demandsList.Count > 1 );
             }
             #endregion
 
@@ -4061,26 +4066,18 @@ namespace aclara_meters.view
                 }
             }
                 
-            // General fields, for the MTU itself
-            // No RDD or RDD in port two
-            if ( ! hasRDD ||
-                    ! rddIn1 )
-            {
-                value_omt = this.tbx_OldMtuId.Text;
-                value_rin = this.pck_ReadInterval.SelectedItem.ToString ();
-                value_sre = this.sld_SnapReads   .Value.ToString ();
-
-                // Is a two-way MTU
-                if ( global.TimeToSync &&
-                        mtu.TimeToSync    &&
-                        mtu.FastMessageConfig )
-                    value_two = this.pck_TwoWay.SelectedItem.ToString ();
-                    
-                // Alarms dropdownlist is hidden when only has one option
-                if ( this.pck_Alarms.ItemsSource.Count == 1 )
-                    value_alr = ( Alarm )this.pck_Alarms.ItemsSource[ 0 ];
-                else if ( this.pck_Alarms.ItemsSource.Count > 1 )
-                    value_alr = ( Alarm )this.pck_Alarms.SelectedItem;
+                // Only for port 1 ( for MTU itself )
+                value_omt = "";
+                value_rin = DEBUG_READSINTERVAL;
+                value_sre = DEBUG_SNAPSREADS;
+                value_two = (string)pck_TwoWay.ItemsSource[ 0 ];
+                value_alr = (Alarm)this.pck_Alarms.ItemsSource[ DEBUG_ALARM_INDEX   ];
+                value_dmd = (Demand)this.pck_Demands.ItemsSource[ DEBUG_DEMAND_INDEX  ];
+                
+                // GPS
+                value_lat = DEBUG_GPS_LAT;
+                value_lon = DEBUG_GPS_LON;
+                value_alt = DEBUG_GPS_ALT;
             }
             // RDD in port 1
             else
@@ -4103,13 +4100,47 @@ namespace aclara_meters.view
             {
                 if ( rddIn1 )
                 {
-                    value_acn = this.tbx_AccountNumber_V.Text;
-                    value_wor = this.tbx_WorkOrder_V    .Text;
+                    value_omt = this.tbx_OldMtuId.Text;
+                    value_rin = this.pck_ReadInterval.SelectedItem.ToString ();
+                    value_sre = this.sld_SnapReads   .Value.ToString ();
+
+                    // Is a two-way MTU
+                    if ( global.TimeToSync &&
+                            mtu.TimeToSync    &&
+                            mtu.FastMessageConfig )
+                        value_two = this.pck_TwoWay.SelectedItem.ToString ();
+                    
+                    // Alarms dropdownlist is hidden when only has one option
+                    if ( this.pck_Alarms.ItemsSource.Count == 1 )
+                        value_alr = ( Alarm )this.pck_Alarms.ItemsSource[ 0 ];
+                    else if ( this.pck_Alarms.ItemsSource.Count > 1 )
+                        value_alr = ( Alarm )this.pck_Alarms.SelectedItem;
+                    
+                    // Demands dropdownlist is hidden when only has one option
+                    if ( this.pck_Demands.ItemsSource.Count == 1 )
+                        value_dmd = ( Demand )this.pck_Demands.ItemsSource[ 0 ];
+                    else if ( this.pck_Demands.ItemsSource.Count > 1 )
+                        value_dmd = ( Demand )this.pck_Demands.SelectedItem;
                 }
                 else
                 {
-                    value_acn_2 = this.tbx_AccountNumber_V.Text;
-                    value_wor_2 = this.tbx_WorkOrder_V    .Text;
+                    // Is a two-way MTU
+                    if ( global.TimeToSync &&
+                            mtu.TimeToSync &&
+                            mtu.FastMessageConfig )
+                        value_two = this.pck_TwoWay_V.SelectedItem.ToString ();
+                    
+                    // Alarms dropdownlist is hidden when only has one option
+                    if ( this.pck_Alarms_V.ItemsSource.Count == 1 )
+                        value_alr = ( Alarm )this.pck_Alarms_V.ItemsSource[ 0 ];
+                    else if ( this.pck_Alarms_V.ItemsSource.Count > 1 )
+                        value_alr = ( Alarm )this.pck_Alarms_V.SelectedItem;
+                    
+                    // Demands dropdownlist is hidden when only has one option
+                    if ( this.pck_Demands_V.ItemsSource.Count == 1 )
+                        value_dmd = ( Demand )this.pck_Demands_V.ItemsSource[ 0 ];
+                    else if ( this.pck_Demands_V.ItemsSource.Count > 1 )
+                        value_dmd = ( Demand )this.pck_Demands_V.SelectedItem;
                 }
                 value_rdd = ( Meter )this.pck_MeterType_Names_V.SelectedItem;
                 value_fir = this.tbx_RDDFirmwareVersion.Text;
@@ -4208,9 +4239,11 @@ namespace aclara_meters.view
                  mtu.RequiresAlarmProfile )
                 this.addMtuForm.AddParameter ( FIELD.ALARM, value_alr );
 
-            // Demands [ SOLO SE LOGEA ¿? ]
-            //if ( MtuConditions.MtuDemand )
-            //    this.addMtuForm.AddParameter ( FIELD.DEMAND, value_dmd );
+            // Demands
+            if ( value_dmd != null &&
+                 mtu.MtuDemand &&
+                 mtu.FastMessageConfig )
+                Data.Set ( "DemandConf", value_dmd );
 
             #endregion
 

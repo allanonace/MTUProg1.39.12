@@ -172,13 +172,13 @@ namespace MTUComm
         /// <summary>
         /// The total number of nodes/DCUs that should be recovered.
         /// </summary>
-        public int CurrentAttemptTotalEntries
+        public uint CurrentAttemptTotalEntries
         {
             get
             {
                 if ( this.entries.Count > 0 )
                     return this.entries[ 0 ].TotalEntries;
-                return -1;
+                return 0;
             }
         }
 
@@ -204,7 +204,7 @@ namespace MTUComm
             get { return this.entries; }
         }
 
-        private IEnumerable<IGrouping<int,NodeDiscovery>> UniqueNodesValidated
+        private IEnumerable<IGrouping<uint,NodeDiscovery>> UniqueNodesValidated
         {
             get
             {
@@ -262,7 +262,7 @@ namespace MTUComm
             this.entries.Clear ();
         }
 
-        public ( NodeDiscoveryQueryResult Result, int Index ) TryToAdd (
+        public ( NodeDiscoveryQueryResult Result, uint Index ) TryToAdd (
             byte[] response,
             ref bool ok )
         {
@@ -272,19 +272,19 @@ namespace MTUComm
             {
                 // ACK without node entry
                 case byte val when val != 0x00:
-                    return ( NodeDiscoveryQueryResult.Empty, -1 );
+                    return ( NodeDiscoveryQueryResult.Empty, 0 );
 
                 // ACK with node entry
                 case HAS_DATA:
                     // NOTE: It happened once LExI returned an array of bytes without the required amount of data
                     if ( this.entries.Count == 0 && ! ( ok = ( response.Length == NodeDiscovery.BYTES_REQUIRED_DATA_1 ) ) ||
                          this.entries.Count >= 1 && ! ( ok = ( response.Length == NodeDiscovery.BYTES_REQUIRED_DATA_2 ) ) )
-                        return ( NodeDiscoveryQueryResult.Empty, -1 );
+                        return ( NodeDiscoveryQueryResult.Empty, 0 );
 
                     node = new NodeDiscovery ( response );
                     // Repeating entry
                     if ( this.entries.Count >= node.Index )
-                         this.entries[ node.Index - 1 ] = node;
+                         this.entries[ ( int )node.Index - 1 ] = node;
                     // New entry
                     else this.entries.Add ( node );
                     break;
@@ -339,9 +339,9 @@ namespace MTUComm
             bool isF1 )
         {
             decimal acumRssi;
-            int     averageRssi;
+            short   averageRssi;
             decimal acumProb = 1m;
-            foreach ( IGrouping<int,NodeDiscovery> group in this.NodesValidatedForFreq ( isF1 ) )
+            foreach ( IGrouping<uint,NodeDiscovery> group in this.NodesValidatedForFreq ( isF1 ) )
             {
                 acumRssi = 0;
                 
@@ -351,7 +351,7 @@ namespace MTUComm
 
                 // NOTE: RSSI values in RSSI_and_Probability table are integers,
                 // NOTE: and the more logic approach is to round the average RSSI
-                averageRssi = ( int )Math.Round ( acumRssi / group.Count (), 0 );
+                averageRssi = ( short )Math.Round ( acumRssi / group.Count (), 0 );
 
                 // Calculate half of P( MTU TX Success ) operation
                 acumProb *= ( 1 - this.GetProbability ( averageRssi ) );
@@ -366,24 +366,24 @@ namespace MTUComm
         }
 
         public decimal CalculateTwoWaySuccess (
-            int bestRssiResponse )
+            short bestRssiResponse )
         {
             // P( MTU TX Success )
             decimal mtuTxSuccess = this.CalculateMtuSuccess ( false ); // false indicates F2
 
             // P( TWO WAY ) = 100% - ( 100% - P( DCU TX Success ) * P( MTU TX Success ) ) ^ 3
-            decimal precalc = 1 - this.GetProbability ( bestRssiResponse ) * mtuTxSuccess;
+            decimal precalc = 1 - this.GetProbability ( ( int )bestRssiResponse ) * mtuTxSuccess;
 
             Library.Utils.Print ( "ND: F2 MtuTxSuccess " + mtuTxSuccess +
                 " | BestRSSI " + bestRssiResponse +
-                " | Prob BestRSSI " + this.GetProbability(bestRssiResponse) +
+                " | Prob BestRSSI " + this.GetProbability ( ( int )bestRssiResponse ) +
                 " | Precalc " + precalc +
                 " | Result " + ( 1 - precalc * precalc * precalc ) );
 
             return 1 - precalc * precalc * precalc;
         }
 
-        private IEnumerable<IGrouping<int,NodeDiscovery>> NodesValidatedForFreq (
+        private IEnumerable<IGrouping<uint,NodeDiscovery>> NodesValidatedForFreq (
             bool isF1 )
         {
             return this.AllAttempts

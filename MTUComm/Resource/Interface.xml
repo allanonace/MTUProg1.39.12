@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <InterfaceConfig>
+	<!-- Encryption -->
 	<MtuInterface family="31xx32xx">
 		<Mtu id="122" />
 		<Mtu id="123" />
@@ -50,6 +51,8 @@
 		<Mtu id="147" />
 		<Mtu id="148" />
 	</MtuInterface>
+	<!-- OnDemand 1.0 -->
+	<!-- Encryption and DataRead -->
 	<MtuInterface family="342x">
 		<Mtu id="170" />
 		<Mtu id="171" />
@@ -61,11 +64,24 @@
 		<Mtu id="177" />
 		<Mtu id="178" />
 	</MtuInterface>
+	<!-- OnDemand 1.2 -->
+	<!-- New Encryption, DataRead, RemoteDisconnect and NodeDiscovery -->
 	<MtuInterface family="35xx36xx">
+		<Mtu id="180" />
 		<Mtu id="181" />
+		<Mtu id="182" />
+		<Mtu id="183" />
+		<Mtu id="184" />
+		<Mtu id="185" />
+		<Mtu id="186" />
+		<Mtu id="187" />
+		<Mtu id="188" />
 		<Mtu id="189" />
 		<Mtu id="190" />
+		<Mtu id="191" />
+		<Mtu id="192" />
 		<Mtu id="193" />
+		<Mtu id="194" />
 		<Mtu id="195" />
 		<Mtu id="196" />
 		<Mtu id="197" />
