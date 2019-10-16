@@ -115,7 +115,8 @@
                                                                       HasUnevenRows="true"
                                                                       ItemsSource="{Binding .ListaDatos}" 
                                                                       HeightRequest="{Binding HeightList}" 
-                                                                      BackgroundColor="#6aa2b8">
+                                                                      BackgroundColor="#6aa2b8"
+                                                                      IsEnabled="False">
                                                                 <ListView.ItemTemplate>
                                                                     <DataTemplate>
                                                                         <ViewCell>

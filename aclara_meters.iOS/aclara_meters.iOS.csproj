@@ -373,6 +373,12 @@
   <ItemGroup>
     <BundleResource Include="Resources\logo.png" />
   </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Resources\valve_operation.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BundleResource Include="Resources\data_read.png" />
+  </ItemGroup>
   <Target Name="_CompileITunesMetadata" DependsOnTargets="_DetectSdkLocations;_DetectAppManifest;_GenerateBundleName;_CompileAppManifest">
     <Message Text="Skipping CompileITunesMetadata task to prevent inclusion of iTunesMetadata.plist in the IPA" />
   </Target>
