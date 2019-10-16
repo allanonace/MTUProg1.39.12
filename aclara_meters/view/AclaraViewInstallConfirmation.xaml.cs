@@ -175,6 +175,9 @@ namespace aclara_meters.view
                     _userTapped = true;
                     bottomBar.GetLabelElement("label_read").Text = "Reading from MTU ... ";
 
+                    listaMTUread.ItemsSource = null;
+                    bottomBar.GetImageElement ( "img_ndresult" ).IsVisible = false;
+
                     Task.Factory.StartNew(ThreadProcedureMTUCOMMAction);
                 });
             }

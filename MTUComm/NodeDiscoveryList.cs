@@ -23,7 +23,7 @@ namespace MTUComm
         /// Table with pre-calculated values to easiest know the probability
         /// of establish a good transmission channel, based on signal strength ( RSSI ).
         /// </summary>
-        public static (int RSSI,decimal Probability)[] RSSI_and_Probability =
+        public static (short RSSI,decimal Probability)[] RSSI_and_Probability =
         {
             ( -115, 0.002m  ), // ~0% probability
             ( -114, 0.0154m ),
@@ -319,9 +319,9 @@ namespace MTUComm
         /// <param name="rssi">Signal strength</param>
         /// <returns>Normalized probability [0-1]</returns>
         public decimal GetProbability (
-            int rssi )
+            short rssi )
         {
-            ( int RSSI, decimal Probability )[] entries = RSSI_and_Probability
+            ( short RSSI, decimal Probability )[] entries = RSSI_and_Probability
                 .Where ( entry => entry.RSSI == rssi )
                 .ToArray ();
 
@@ -349,8 +349,7 @@ namespace MTUComm
                 foreach ( NodeDiscovery entry in group )
                     acumRssi += entry.RSSIRequest;
 
-                // NOTE: RSSI values in RSSI_and_Probability table are integers,
-                // NOTE: and the more logic approach is to round the average RSSI
+                // Rounds the average RSSI because RSSI values in the table are shorts
                 averageRssi = ( short )Math.Round ( acumRssi / group.Count (), 0 );
 
                 // Calculate half of P( MTU TX Success ) operation
@@ -372,11 +371,11 @@ namespace MTUComm
             decimal mtuTxSuccess = this.CalculateMtuSuccess ( false ); // false indicates F2
 
             // P( TWO WAY ) = 100% - ( 100% - P( DCU TX Success ) * P( MTU TX Success ) ) ^ 3
-            decimal precalc = 1 - this.GetProbability ( ( int )bestRssiResponse ) * mtuTxSuccess;
+            decimal precalc = 1 - this.GetProbability ( bestRssiResponse ) * mtuTxSuccess;
 
             Library.Utils.Print ( "ND: F2 MtuTxSuccess " + mtuTxSuccess +
                 " | BestRSSI " + bestRssiResponse +
-                " | Prob BestRSSI " + this.GetProbability ( ( int )bestRssiResponse ) +
+                " | Prob BestRSSI " + this.GetProbability ( bestRssiResponse ) +
                 " | Precalc " + precalc +
                 " | Result " + ( 1 - precalc * precalc * precalc ) );
 
