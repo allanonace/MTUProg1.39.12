@@ -765,7 +765,7 @@ namespace aclara_meters.view
             base.OnAppearing();
 
             background_scan_page.Opacity = 0.5;
-           // background_scan_page.FadeTo(1, 500);
+            background_scan_page.FadeTo(1, 500);
         }
 
  

@@ -15,7 +15,7 @@ namespace aclara.ViewModels
 {
     public class TabLogViewModel:BaseViewModel
     {
-        private const int HEIGH_TEXT_LIST = 24;
+        private const int HEIGH_TEXT_LIST = 22;
         public ObservableRangeCollection<ItemsLog> ItemsLog { get; } = new ObservableRangeCollection<ItemsLog>();
         private List<FileInfo> FileList = new List<FileInfo>();
         public string FileName { get; set; }
@@ -55,7 +55,6 @@ namespace aclara.ViewModels
         private void ReadLogXML(Stream stream)
         {
             String sPort = String.Empty;
-            String sName = String.Empty;
             String sAccion = String.Empty;
             String sError = String.Empty;
             String sIcon = String.Empty;
@@ -170,7 +169,6 @@ namespace aclara.ViewModels
                                     {
                                         Item.ListaDatos = ListaDatos;
                                         Item.HeightList= Item.ListaDatos.Count>5?(Item.ListaDatos.Count * HEIGH_TEXT_LIST) : 100;
-
                                     }
                                     ItemsLog.Add(Item);
                                     sAccion = String.Empty;
