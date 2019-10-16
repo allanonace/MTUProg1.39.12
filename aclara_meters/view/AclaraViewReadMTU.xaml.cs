@@ -838,7 +838,7 @@ namespace aclara_meters.view
                     port = "1";
 
                 accName1 = port == "1" ? accName1 : accName2;
-                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0') + "_" + accName1 + sTick + "_Port" + port;
+                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0') + "_" + accName1 + "_" + sTick + "_Port" + port;
 
                 Device.BeginInvokeOnMainThread(async () =>
                 {

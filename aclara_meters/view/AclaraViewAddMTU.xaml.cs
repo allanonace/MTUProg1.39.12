@@ -4836,7 +4836,7 @@ namespace aclara_meters.view
                 string AccFieldName = port == "1" ? "tbx_AccountNumber" : $"tbx_AccountNumber_{port}";
                 BorderlessEntry field = (BorderlessEntry)this.FindByName(AccFieldName);
 
-                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0')+"_"+ field.Text+ sTick + "_Port"+ port;
+                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0')+"_"+ field.Text + "_" + sTick + "_Port"+ port;
                 
                 Device.BeginInvokeOnMainThread(async () =>
                 {
