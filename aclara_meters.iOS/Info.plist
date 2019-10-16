@@ -5,7 +5,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>aclara-mtu-programmer</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.aclara.mtu.programmer</string>
+	<string>com.aclara.programmer</string>
 	<key>CFBundleName</key>
 	<string>Aclara MTU Programmer</string>
 	<key>CFBundleShortVersionString</key>
@@ -27,7 +27,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0.0.2</string>
+	<string>0.0.6</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>MainStoryboardFile</key>
@@ -48,7 +48,7 @@
 	<key>MinimumOSVersion</key>
 	<string>10.0</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>This app need saccess to Bluetooth</string>
+	<string>It is necessary to use the bluetooth to establish communication with the puck, wich performs the programming of the MTU.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>aclara-mtu-programmer bluetooth use.</string>
 	<key>NSCalendarsUsageDescription</key>
@@ -63,6 +63,8 @@
 	<string>This app needs access to location when in the background.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs access to location when open.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app needs access to photos</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>OpenSans-Bold.ttf</string>

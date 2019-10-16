@@ -1772,20 +1772,24 @@ namespace MTUComm
                                 response.PreviousCmdSuccess + " " +
                                 response.ValvePosition );
                         }
-                        catch ( Exception ) {}
+                        catch ( Exception e )
+                        {}
                     }
                     while ( ( response == null ||
                               response.ValvePosition == RDDValveStatus.IN_TRANSITION ||
                               response.ValvePosition != rddValveStatus ) &&
                             ! ( timeOut = nodeCounter.ElapsedMilliseconds > WAIT_RDD_MAX ) );
-                    
-                    // The process has failed
+
+                    string seconds = ((int)(WAIT_RDD_MAX / 1000)).ToString();
+                    if (response == null)
+                    {
+                        throw new RDDStatusIsUnknownAfterMaxTime(seconds);
+                    }
+                    else  // The process has failed
                     if ( ! response.PreviousCmdSuccess ||
                          response.ValvePosition != rddValveStatus )
                     {
                         result = RDD_NOT_ACHIEVED;
-
-                        string seconds = ( ( int )( WAIT_RDD_MAX / 1000 ) ).ToString ();
 
                         switch ( response.ValvePosition )
                         {
