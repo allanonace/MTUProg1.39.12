@@ -358,7 +358,7 @@
     </PackageReference>
     <Compile Include="TEST.cs" />
     <PackageReference Include="Microsoft.Intune.MAM.Xamarin.iOS">
-      <Version>8.1.1.2</Version>
+      <Version>11.0.13</Version>
     </PackageReference>
     <PackageReference Include="ZXing.Net.Mobile.Forms">
       <Version>2.4.1</Version>

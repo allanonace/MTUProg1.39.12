@@ -508,7 +508,7 @@ namespace Lexi
             LexiAction lexiAction )
         {
             int TEST = new Random ().Next ( 0, 999 );
-            Utils.PrintDeep ( Environment.NewLine + "-------LEXI_WRITE--------| " + TEST + " |--" );
+            Utils.Print ( Environment.NewLine + "-------LEXI_WRITE--------| " + TEST + " |--" );
             Utils.PrintDeep ( "Lexi.Write = Write + UpdateBuffer + ReadBuffer" );
     
             try
@@ -522,7 +522,7 @@ namespace Lexi
                 byte[] stream;
                 var info = GeneratePackage ( lexiAction, out stream, addressOrLexiCmd, data );
 
-                Utils.PrintDeep ( "Lexi.Write.. " +
+                Utils.Print ( "Lexi.Write.. " +
                 "Stream = " +
                 "0x" + info.Header + " ( " + Convert.ToInt32 ( info.Header, 16 ) + " ) + " +
                 "WriteCmd 0x" + info.Cmd + " ( " + Convert.ToInt32 ( info.Cmd, 16 ) + " ) + " +
@@ -532,7 +532,7 @@ namespace Lexi
                 "Data [ " + Utils.ByteArrayToString ( data ) + " ] + " +
                 "CRC [ " + Utils.ByteArrayToString ( info.CRC.Take ( 2 ).ToArray () ) + " ]" );
     
-                Utils.PrintDeep ( "Lexi.Write.. " + Utils.ByteArrayToString ( stream ).Trim () + " [ Length " + stream.Length + " ]" );
+                Utils.Print ( "Lexi.Write.. " + Utils.ByteArrayToString ( stream ).Trim () + " [ Length " + stream.Length + " ]" );
     
                 // Send Lexi Write command
                 await serial.Write ( stream, 0, stream.Length );
@@ -634,7 +634,7 @@ namespace Lexi
                 
                 Utils.PrintDeep ( "Lexi.Read.. BytesRead: " + bytesRead + " / " + rawBuffer.Length );
                 
-                Utils.PrintDeep ( "------BUFFER_FINISH------" );
+                Utils.Print ( "------BUFFER_FINISH------" );
 
                 serial.Read ( rawBuffer, 0, rawBuffer.Length );
     
@@ -642,7 +642,7 @@ namespace Lexi
                 byte[] response = new byte[ 2 ];
                 Array.Copy ( rawBuffer, responseOffset, response, 0, response.Length );
                 
-                Utils.PrintDeep ( "Lexi.Write.." +
+                Utils.Print ( "Lexi.Write.." +
                     " RawBuffer " + Utils.ByteArrayToString ( rawBuffer ) +
                     " | ACK " + Utils.ByteArrayToString ( response ) );
     
@@ -651,7 +651,7 @@ namespace Lexi
                     throw new LexiWriteException ( response );
                 else
                 {
-                    Utils.PrintDeep ( "----LEXI_WRITE_FINISH----| " + TEST + " |--" + Environment.NewLine );
+                    Utils.Print ( "----LEXI_WRITE_FINISH----| " + TEST + " |--" + Environment.NewLine );
 
                     // Return MTU response
                     //return ( bytes: rawBuffer, responseOffset: responseOffset );

@@ -20,7 +20,7 @@ namespace Library
 
         #region Log
 
-        private static bool DEEP_MODE = true;
+        private static bool DEEP_MODE = false;
     
         public static void PrintDeep (
             object element,

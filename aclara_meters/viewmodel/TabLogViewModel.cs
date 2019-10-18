@@ -15,7 +15,7 @@ namespace aclara.ViewModels
 {
     public class TabLogViewModel:BaseViewModel
     {
-        private const int HEIGH_TEXT_LIST = 21;
+        private const int HEIGH_TEXT_LIST = 22;
         public ObservableRangeCollection<ItemsLog> ItemsLog { get; } = new ObservableRangeCollection<ItemsLog>();
         private List<FileInfo> FileList = new List<FileInfo>();
         public string FileName { get; set; }

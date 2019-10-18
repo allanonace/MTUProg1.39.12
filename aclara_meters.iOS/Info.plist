@@ -27,7 +27,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0.0.6</string>
+	<string>0.0.8</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>MainStoryboardFile</key>
@@ -36,7 +36,6 @@
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>companyportal</string>
-		<string>companyportal-intunemam</string>
 		<string>https-intunemam</string>
 		<string>http-intunemam</string>
 		<string>microsoft-edge-https-intunemam</string>

@@ -904,7 +904,13 @@ namespace aclara_meters.view
                             indicator.IsVisible = false;
                             ContentView_Scripting.IsEnabled = true;
                             ContentView_Scripting_label_read.Text = "Successful Script Execution";
-    
+
+                            Uri repuesta = new Uri(resultCallback + "?" +
+                                                       "status=success" +
+                                                       Compression.GetUriParameter() +
+                                                       "&output_filename=" + resultScriptName +
+                                                       "&output_data=" + Compression.CompressToUrlUsingGlobal(xmlResultTocallback));
+
                             Device.OpenUri ( new Uri ( resultCallback + "?" +
                                                        "status=success" +
                                                        Compression.GetUriParameter () +

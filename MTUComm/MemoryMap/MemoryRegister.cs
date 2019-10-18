@@ -416,7 +416,7 @@ namespace MTUComm.MemoryMap
             bool returnByteArray = false )
         {
             Utils.PrintDeep ( Environment.NewLine + "------LOAD_FROM_MTU------" );
-            Utils.Print ( "Register -> GetValueFromMtu -> " + this.id + " [ Return byte array: " + returnByteArray + " ]" );
+            Utils.PrintDeep ( "Register -> GetValueFromMtu -> " + this.id + " [ Return byte array: " + returnByteArray + " ]" );
         
             // Reset flag that will be used in funcGet to invoke funcGetFromMtu
             this.readedFromMtu = false;
@@ -495,7 +495,7 @@ namespace MTUComm.MemoryMap
             int numAttempts = MTUComm.LEXI_ATTEMPTS_N )
         {
             Utils.PrintDeep ( Environment.NewLine + "------WRITE_TO_MTU-------" );
-            Utils.Print ( "Register -> SetValueToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
+            Utils.PrintDeep( "Register -> SetValueToMtu -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
         
             // Set value in temporary memory map before write it to the MTU
             if ( value != null )
@@ -534,8 +534,8 @@ namespace MTUComm.MemoryMap
             // Read current value
             byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1 ) )[ 0 ];
 
-            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
-            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ]" );
+            Utils.PrintDeep( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
+            Utils.PrintDeep( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ]" );
 
             bool valueInMap = ( bool )( object )this.ValueRaw;
 
@@ -544,7 +544,7 @@ namespace MTUComm.MemoryMap
                  systemFlags = ( byte ) ( systemFlags |    1 << ( int )bit   );
             else systemFlags = ( byte ) ( systemFlags & ~( 1 << ( int )bit ) );
             
-            Utils.Print ( "Register -> ValueWriteToMtu_Bit -> Write full byte to MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ] to bit: " + bit );
+            Utils.PrintDeep( "Register -> ValueWriteToMtu_Bit -> Write full byte to MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ] to bit: " + bit );
             
             await this.lexi.Write (
                 ( uint )this.address,
@@ -570,7 +570,7 @@ namespace MTUComm.MemoryMap
             // Register with read and write
             if ( this.write || force )
             {
-                Utils.Print ( "Register -> SetValue: " + this.id + " = " + value );
+                Utils.PrintDeep( "Register -> SetValue: " + this.id + " = " + value );
             
                 try
                 {
@@ -605,7 +605,7 @@ namespace MTUComm.MemoryMap
             // Register is readonly
             else
             {
-                Utils.Print ( "Set " + id + ": Error - Can't write to this register because is readonly" );
+                Utils.PrintDeep( "Set " + id + ": Error - Can't write to this register because is readonly" );
 
                 if ( ! MemoryMap.isUnityTest )
                     throw new MemoryRegisterNotAllowWrite ( MemoryMap.EXCEP_SET_READONLY + ": " + id );
@@ -638,7 +638,7 @@ namespace MTUComm.MemoryMap
         {
             if ( this.valueType == RegType.BOOL )
             {
-                Utils.Print ( "Register -> ResetByte -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
+                Utils.PrintDeep( "Register -> ResetByte -> " + this.id + ( ( value != null ) ? " = " + value : "" ) );
             
                 // Reset full byte ( all flags to zero/disable )
                 await this.lexi.Write (
@@ -688,7 +688,7 @@ namespace MTUComm.MemoryMap
                     
                     ok_value = valLocal.SequenceEqual ( valOther );
                     
-                    Utils.Print ( "Equals: " + this.id + " -> " +
+                    Utils.PrintDeep( "Equals: " + this.id + " -> " +
                     Utils.ByteArrayToString ( valLocal ) + " == " +
                     Utils.ByteArrayToString ( valOther ) + " = " +
                     ok_value );
@@ -700,7 +700,7 @@ namespace MTUComm.MemoryMap
                 
                     ok_value = ( bool.Equals ( bitLocal, bitOther ) );
                     
-                    Utils.Print ( "Equals: " + this.id + " -> " +
+                    Utils.PrintDeep( "Equals: " + this.id + " -> " +
                         bitLocal + " == " +
                         bitOther + " = " +
                         ok_value );
