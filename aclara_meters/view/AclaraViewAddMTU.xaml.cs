@@ -4001,7 +4001,7 @@ namespace aclara_meters.view
                 return;
             }
 
-            isCancellable = true;
+           
 
             if (!_userTapped)
             {
@@ -4481,6 +4481,7 @@ namespace aclara_meters.view
             Parameter[] paramResult = args.Result.getParameters();
 
             int mtu_type = 0;
+            isCancellable = true;
 
             // Get MtuType = MtuID
             foreach ( Parameter p in paramResult)
@@ -4641,7 +4642,7 @@ namespace aclara_meters.view
         private void OnError ()
         {
             Error error = Errors.LastError;
-
+            isCancellable = false;
             Task.Delay(100).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
