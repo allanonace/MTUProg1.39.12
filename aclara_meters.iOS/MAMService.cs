@@ -20,10 +20,14 @@ namespace aclara_meters.iOS
             {
 
                 string user = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
+                Console.WriteLine($"=========== User: {user}");
                 //IntuneMAMPolicyManager value = IntuneMAMPolicyManager.Instance;
                 if (string.IsNullOrEmpty(user))
                 {
-                     IntuneMAMEnrollmentManager.Instance.LoginAndEnrollAccount(null);
+                    IntuneMAMEnrollmentManager.Instance.Delegate = new MainControllerEnrollmentDelegate(); 
+                    IntuneMAMEnrollmentManager.Instance.LoginAndEnrollAccount(null);
+                    user = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
+                    Console.WriteLine($"=========== Login User: {user}");
                 }
               
             }
@@ -39,6 +43,7 @@ namespace aclara_meters.iOS
             {
                
                 string user = IntuneMAMEnrollmentManager.Instance.EnrolledAccount;
+                Console.WriteLine($"=========== Enrrolled User: {user}");
                 //user= null;              
                 var stringValues = new Dictionary<string,string> ();
                 var numberValues = new Dictionary<string, int>();
@@ -88,6 +93,35 @@ namespace aclara_meters.iOS
             catch (Exception e )
             {
                 return;
+            }
+        }
+    }
+    public class MainControllerEnrollmentDelegate : IntuneMAMEnrollmentDelegate
+    {
+
+        public override void EnrollmentRequestWithStatus(IntuneMAMEnrollmentStatus status)
+        {
+            if (status.DidSucceed)
+            {
+                Console.WriteLine($"Enrollment Ok: {status.Identity}");
+                //this.ViewController.HideLogInButton();
+            }
+            else if (IntuneMAMEnrollmentStatusCode.MAMEnrollmentStatusLoginCanceled != status.StatusCode)
+            {
+                //this.ViewController.ShowAlert("Enrollment Failed", status.ErrorString);
+                Console.WriteLine($"Enrollment Failed: {status.ErrorString}");
+            }
+        }
+
+        public override void UnenrollRequestWithStatus(IntuneMAMEnrollmentStatus status)
+        {
+            if (status.DidSucceed)
+            {
+               // this.ViewController.HideLogOutButton();
+            }
+            else
+            {
+                //this.ViewController.ShowAlert("Unenroll Failed", status.ErrorString);
             }
         }
     }

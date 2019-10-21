@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>aclara-mtu-programmer</string>
+	<string>Aclara MTU Programmer (BIZ)</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.aclara.programmer</string>
+	<string>com.aclara.mtu.programmer</string>
 	<key>CFBundleName</key>
-	<string>Aclara MTU Programmer</string>
+	<string>Aclara MTU Programmer (BIZ)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.39.00</string>
+	<string>1.39.01</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -27,7 +27,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>0.0.8</string>
+	<string>0.0.3</string>
 	<key>IntuneMAMSettings</key>
 	<dict>
 		<key>MainStoryboardFile</key>

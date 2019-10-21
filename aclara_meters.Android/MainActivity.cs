@@ -178,7 +178,7 @@ namespace aclara_meters.Droid
             var context = Android.App.Application.Context;
             var info = context.PackageManager.GetPackageInfo(context.PackageName, 0);
 
-            string value = info.VersionName.ToString() + " ( " + info.VersionCode + " )"; ;
+            string value = info.VersionName + " ( " + info.VersionCode + " )";
 
 
             // Check if FTP settings is in securestorage
