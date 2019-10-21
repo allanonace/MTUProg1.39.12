@@ -49,85 +49,7 @@ namespace aclara_meters.view
             });
 
         }
-        private bool InitialConfigProcess()
-        {
-
-            string Mode = GenericUtilsClass.ChekInstallMode();
-            if (Mode.Equals("Intune"))
-            {
-                if (Mobile.IsNetAvailable())
-                {
-                    var MamServ = DependencyService.Get<IMAMService>();
-                    MamServ.UtilMAMService();
-                    if (Mobile.configData.HasIntune)
-                    {
-                        NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
-                        if (!string.IsNullOrEmpty(NewConfigVersion))
-                        {
-                            if (!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
-                            {
-                                this.ShowErrorAndKill(new FtpDownloadException());
-                                return false;
-                            }
-                            else
-                            {
-                                if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
-                                    Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-
-                            }
-                            return true;
-                        }
-
-
-                    }
-                    else
-                    {
-                        GenericUtilsClass.SetInstallMode("None");
-                        this.ShowErrorAndKill(new IntuneCredentialsException());
-                        return false;
-                    }
-                }
-                else
-                    this.ShowErrorAndKill(new NoInternetException());
-
-                return false;
-            }
-            else if (Mode.Equals("Manual"))
-            {
-                Mobile.configData.HasFTP = false;
-
-                // Check if all configuration files are available in public folder
-                if (GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath))
-                {
-                    NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
-
-                    bool CPD = false;
-                    if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
-                    {
-                        if (value != null)
-                            bool.TryParse((string)value, out CPD);
-                    }
-                    if (!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
-                    {
-                        return false;
-                    }
-                    if (!string.IsNullOrEmpty(sFileCert))
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-
-
-                    return true;
-                }
-                else
-                {
-                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
-                    GenericUtilsClass.SetInstallMode("None");
-
-                    return false;
-                }
-            }
-            return true;
-        }
-
+ 
         private void LoadConfigurationAndOpenScene(IUserDialogs dialogs)
         {
             bool Result = true;
@@ -235,6 +157,84 @@ namespace aclara_meters.view
                 }
             }
         }
+        private bool InitialConfigProcess()
+        {
+
+            string Mode = GenericUtilsClass.ChekInstallMode();
+            if (Mode.Equals("Intune"))
+            {
+                if (Mobile.IsNetAvailable())
+                {
+                    var MamServ = DependencyService.Get<IMAMService>();
+                    MamServ.UtilMAMService();
+                    if (Mobile.configData.HasIntune)
+                    {
+                        NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
+                        if (!string.IsNullOrEmpty(NewConfigVersion))
+                        {
+                            if (!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
+                            {
+                                this.ShowErrorAndKill(new FtpDownloadException());
+                                return false;
+                            }
+                            else
+                            {
+                                if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
+                                    Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+
+                            }
+                            return true;
+                        }
+
+
+                    }
+                    else
+                    {
+                        GenericUtilsClass.SetInstallMode("None");
+                        this.ShowErrorAndKill(new IntuneCredentialsException());
+                        return false;
+                    }
+                }
+                else
+                    this.ShowErrorAndKill(new NoInternetException());
+
+                return false;
+            }
+            else if (Mode.Equals("Manual"))
+            {
+                Mobile.configData.HasFTP = false;
+
+                // Check if all configuration files are available in public folder
+                if (GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath))
+                {
+                    NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
+
+                    bool CPD = false;
+                    if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
+                    {
+                        if (value != null)
+                            bool.TryParse((string)value, out CPD);
+                    }
+                    if (!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
+                    {
+                        return false;
+                    }
+                    if (!string.IsNullOrEmpty(sFileCert))
+                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+
+
+                    return true;
+                }
+                else
+                {
+                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
+                    GenericUtilsClass.SetInstallMode("None");
+
+                    return false;
+                }
+            }
+            return true;
+        }
 
         public bool InitializeConfiguration()
         {
@@ -273,6 +273,7 @@ namespace aclara_meters.view
 
             return true;
         }
+
         #region Base64
 
         public static string Base64Decode(string base64EncodedData)
