@@ -660,7 +660,7 @@ namespace aclara_meters.view
             FinalReadListView = new List<ReadMTUItem>();
  
             Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( args.Mtu.Id );
-            InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface( mtu, ActionType.ReadMtu );
+            InterfaceParameters[] interfacesParams =Singleton.Get.Configuration.getUserParamsFromInterface( mtu, ActionType.ReadMtu );
             
             Mtu currentMtu = Singleton.Get.Action.CurrentMtu;
 

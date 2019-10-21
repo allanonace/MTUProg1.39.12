@@ -124,17 +124,17 @@ namespace aclara_meters.viewmodel
 
                         #region Credentials length Validation
 
-                        if (userName.Length < FormsApp.config.Global.UserIdMinLength || userName.Length > FormsApp.config.Global.UserIdMaxLength)
+                        if (userName.Length < Singleton.Get.Configuration.Global.UserIdMinLength || userName.Length > Singleton.Get.Configuration.Global.UserIdMaxLength)
                         {
                             IsBusy = false;
-                            Message = "The field UserName must be with a minimum length of " + FormsApp.config.Global.UserIdMinLength+ " and a maximum length of " + FormsApp.config.Global.UserIdMaxLength;
+                            Message = "The field UserName must be with a minimum length of " + Singleton.Get.Configuration.Global.UserIdMinLength+ " and a maximum length of " + Singleton.Get.Configuration.Global.UserIdMaxLength;
                             return;
                         }
 
-                        if(password.Length < FormsApp.config.Global.PasswordMinLength || password.Length > FormsApp.config.Global.PasswordMaxLength)
+                        if(password.Length < Singleton.Get.Configuration.Global.PasswordMinLength || password.Length > Singleton.Get.Configuration.Global.PasswordMaxLength)
                         {
                             IsBusy = false;
-                            Message = "The field Password must be with a minimum length of " + FormsApp.config.Global.PasswordMinLength + " and a maximum length of " + FormsApp.config.Global.PasswordMaxLength;
+                            Message = "The field Password must be with a minimum length of " + Singleton.Get.Configuration.Global.PasswordMinLength + " and a maximum length of " + Singleton.Get.Configuration.Global.PasswordMaxLength;
                             return;
                         }
 

@@ -66,7 +66,7 @@ namespace aclara_meters.view
             menuOptions = this.MenuOptions;
             dialogView = this.DialogView;
 
-            global = FormsApp.config.Global;
+            global = Singleton.Get.Configuration.Global;
             
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -125,7 +125,7 @@ namespace aclara_meters.view
             menuOptions = this.MenuOptions;
             dialogView = this.DialogView;
 
-            global = FormsApp.config.Global;
+            global = Singleton.Get.Configuration.Global;
 
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -792,7 +792,7 @@ namespace aclara_meters.view
                 certificate_exp .Text = string.Empty;
             }
 
-            customers_name.Text = TEXT_LICENSE + FormsApp.config.Global.CustomerName;
+            customers_name.Text = TEXT_LICENSE + Singleton.Get.Configuration.Global.CustomerName;
 
             #endregion
             about_block.Opacity = 0;

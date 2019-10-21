@@ -89,6 +89,9 @@
     <Compile Condition=" '$(EnableDefaultCompileItems)' == 'true' " Update="view\AclaraViewAddMTU.xaml.cs">
       <DependentUpon>AclaraViewAddMTU.xaml</DependentUpon>
     </Compile>
+    <Compile Update="view\AclaraViewConfig.xaml.cs">
+      <DependentUpon>AclaraViewConfig.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

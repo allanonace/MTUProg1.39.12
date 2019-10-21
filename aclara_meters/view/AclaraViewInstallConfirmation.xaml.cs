@@ -237,7 +237,7 @@ namespace aclara_meters.view
             Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
 
             string ndresult = string.Empty;
-            InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
+            InterfaceParameters[] interfacesParams =Singleton.Get.Configuration.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
 
             try
             {

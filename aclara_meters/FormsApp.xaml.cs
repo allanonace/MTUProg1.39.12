@@ -51,8 +51,8 @@ namespace aclara_meters
 
         #region Attributes
 
-        public string appVersion_str;
-        public string deviceId;
+        public static string appVersion_str;
+        public static string deviceId;
         public string ConfigVersion;
         public string NewConfigVersion;
         private bool checkConfigFiles = false;
@@ -60,9 +60,9 @@ namespace aclara_meters
 
         public static CredentialsService credentialsService { get; private set; }
         public static BleSerial ble_interface;
-        public static Logger logger;
-        public static Configuration config;
-        private Uri dataUrl;
+        //public static  Logger logger;
+        //public static Configuration config;
+        public static Uri dataUrl;
 
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
@@ -70,7 +70,7 @@ namespace aclara_meters
 
         private bool formsInitFailed;
 
-        public static TaskCompletionSource<bool> taskSemaphoreIOS;
+        //public static TaskCompletionSource<bool> taskSemaphoreIOS;
 
         #endregion
 
@@ -103,8 +103,7 @@ namespace aclara_meters
             {
                 InitializeComponent();
 
-                if (!Data.Get.IsFromScripting)
-                    MainPage = new ContentPage();
+                MainPage = new ContentPage();
 
                 VersionTracking.Track();
 
@@ -188,7 +187,8 @@ namespace aclara_meters
                     if (Mobile.configData.HasIntune)
                     {
                         GenericUtilsClass.SetInstallMode("Intune");
-                        this.LoadConfigurationAndOpenScene(dialogs);
+                        Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
+                        //this.LoadConfigurationAndOpenScene(dialogs);
 
                         return;
                     }
@@ -197,12 +197,13 @@ namespace aclara_meters
                 SecureStorage.RemoveAll ();
                 Device.BeginInvokeOnMainThread ( () =>
                 {
-                    MainPage = new NavigationPage ( new AclaraInstallPage () );
+                    Application.Current.MainPage = new NavigationPage ( new AclaraInstallPage () );
                 });
             }
             // Is not the first launch
             else
             {
+                
                 // Load the ftp settings in configData
                 if ( Mode.Equals ( "Intune" ) )
                 {
@@ -214,11 +215,14 @@ namespace aclara_meters
                 else if ( Mode.Equals ( "FTP" ) && !GenericUtilsClass.CheckFTPDownload())
                 {
                     GenericUtilsClass.SetInstallMode("None");
-                    this.ShowErrorAndKill(new FtpCredentialsMissingException());
+                    ShowErrorAndKill(new FtpCredentialsMissingException());
                     return;
                 }
-                   
-                this.LoadConfigurationAndOpenScene ( dialogs );
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
+                });
+              //  this.LoadConfigurationAndOpenScene ( dialogs );
             }
         }
 
@@ -250,227 +254,230 @@ namespace aclara_meters
             #endif
         }
 
-        private bool InitialConfigProcess()
-        {
+        //private bool InitialConfigProcess()
+        //{
 
-            string Mode = GenericUtilsClass.ChekInstallMode();
-            if (Mode.Equals("Intune"))
-            {
-                if (Mobile.IsNetAvailable())
-                {
-                    var MamServ = DependencyService.Get<IMAMService>();
-                    MamServ.UtilMAMService();
-                    if (Mobile.configData.HasIntune)
-                    {
-                        NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
-                        if (!string.IsNullOrEmpty(NewConfigVersion))
-                        {
-                            if (!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
-                            {
-                                this.ShowErrorAndKill(new FtpDownloadException());
-                                return false;
-                            }
-                            else
-                            {
-                                if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
-                                    Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+        //    string Mode = GenericUtilsClass.ChekInstallMode();
+        //    if (Mode.Equals("Intune"))
+        //    {
+        //        if (Mobile.IsNetAvailable())
+        //        {
+        //            var MamServ = DependencyService.Get<IMAMService>();
+        //            MamServ.UtilMAMService();
+        //            if (Mobile.configData.HasIntune)
+        //            {
+        //                NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
+        //                if (!string.IsNullOrEmpty(NewConfigVersion))
+        //                {
+        //                    if (!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
+        //                    {
+        //                        this.ShowErrorAndKill(new FtpDownloadException());
+        //                        return false;
+        //                    }
+        //                    else
+        //                    {
+        //                        if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
+        //                            Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
                                 
-                            }
-                            return true;
-                        }
+        //                    }
+        //                    return true;
+        //                }
 
                        
-                    }
-                    else
-                    {
-                        GenericUtilsClass.SetInstallMode("None");
-                        this.ShowErrorAndKill(new IntuneCredentialsException());
-                        return false;
-                    }
-                }
-                else
-                    this.ShowErrorAndKill(new NoInternetException());
+        //            }
+        //            else
+        //            {
+        //                GenericUtilsClass.SetInstallMode("None");
+        //                this.ShowErrorAndKill(new IntuneCredentialsException());
+        //                return false;
+        //            }
+        //        }
+        //        else
+        //            this.ShowErrorAndKill(new NoInternetException());
                 
-                return false;
-            }
-            else if (Mode.Equals("Manual"))
-            {
-                Mobile.configData.HasFTP = false;
+        //        return false;
+        //    }
+        //    else if (Mode.Equals("Manual"))
+        //    {
+        //        Mobile.configData.HasFTP = false;
 
-                // Check if all configuration files are available in public folder
-                if ( GenericUtilsClass.HasDeviceAllXmls ( Mobile.ConfigPublicPath ) )
-                {
-                    NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
+        //        // Check if all configuration files are available in public folder
+        //        if ( GenericUtilsClass.HasDeviceAllXmls ( Mobile.ConfigPublicPath ) )
+        //        {
+        //            NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
 
-                    bool CPD = false;
-                    if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
-                    {
-                        if (value != null)
-                            bool.TryParse((string)value, out CPD);
-                    }
-                    if(!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
-                    {
-                        return false;
-                    }
-                    if (!string.IsNullOrEmpty(sFileCert))
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+        //            bool CPD = false;
+        //            if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
+        //            {
+        //                if (value != null)
+        //                    bool.TryParse((string)value, out CPD);
+        //            }
+        //            if(!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
+        //            {
+        //                return false;
+        //            }
+        //            if (!string.IsNullOrEmpty(sFileCert))
+        //                Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
 
                     
-                    return true;
-                }
-                else
-                {
-                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
-                    GenericUtilsClass.SetInstallMode("None");
+        //            return true;
+        //        }
+        //        else
+        //        {
+        //            this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
+        //            GenericUtilsClass.SetInstallMode("None");
 
-                    return false;
-                }
-            }
-            return true;
-        }
+        //            return false;
+        //        }
+        //    }
+        //    return true;
+        //}
 
-        private void LoadConfigurationAndOpenScene(IUserDialogs dialogs)
-        {
-            bool Result = true;
+        //private void LoadConfigurationAndOpenScene(IUserDialogs dialogs)
+        //{
+        //    bool Result = true;
 
-            if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
-            {
-                Result = InitialConfigProcess();
-                if ( ! Result )
-                    return; // The apps will be forced to close / kill
+       
+        //    Thread.Sleep(18000);
 
-                SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
-                SecureStorage.SetAsync("DateCheck", DateTime.Today.ToShortDateString());
-            }
-            else
-            {
-                DateCheck = SecureStorage.GetAsync("DateCheck").Result;
-                if (DateCheck != DateTime.Today.ToShortDateString())  // once per day
-                {
-                    SecureStorage.SetAsync("DateCheck", DateTime.Today.ToShortDateString());
-                    ConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
-                    NewConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
+        //    if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
+        //    {
+        //        Result = InitialConfigProcess();
+        //        if ( ! Result )
+        //            return; // The apps will be forced to close / kill
 
-                    if ( GenericUtilsClass.TagGlobal ( false, "CheckConfigFiles", out dynamic value ) &&
-                         value != null )
-                    {
-                        bool.TryParse ( ( string )value, out checkConfigFiles );
+        //        SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
+        //        SecureStorage.SetAsync("DateCheck", DateTime.Today.ToShortDateString());
+        //    }
+        //    else
+        //    {
+        //        DateCheck = SecureStorage.GetAsync("DateCheck").Result;
+        //        if (DateCheck != DateTime.Today.ToShortDateString())  // once per day
+        //        {
+        //            SecureStorage.SetAsync("DateCheck", DateTime.Today.ToShortDateString());
+        //            ConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
+        //            NewConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
+
+        //            if ( GenericUtilsClass.TagGlobal ( false, "CheckConfigFiles", out dynamic value ) &&
+        //                 value != null )
+        //            {
+        //                bool.TryParse ( ( string )value, out checkConfigFiles );
                     
-                        if ( checkConfigFiles )
-                        {
-                            if ( Mobile.configData.HasFTP ||
-                                 Mobile.configData.HasIntune )
-                                 NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion ();
-                            else NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion ();
-                            checkConfigFiles = false;
+        //                if ( checkConfigFiles )
+        //                {
+        //                    if ( Mobile.configData.HasFTP ||
+        //                         Mobile.configData.HasIntune )
+        //                         NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion ();
+        //                    else NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion ();
+        //                    checkConfigFiles = false;
 
-                            if (!string.IsNullOrEmpty(NewConfigVersion) && ! NewConfigVersion.Equals ( ConfigVersion ) )
-                            {
-                                checkConfigFiles = true;
-                                // Backup current and update config files
-                                GenericUtilsClass.BackUpConfigFiles ();
-                                if ( ! ( Result = UpdateConfigFiles () ) )
-                                {
-                                    GenericUtilsClass.RestoreConfigFiles();
-                                    this.ShowErrorAndKill ( new ConfigurationFilesNewVersionException () );
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+        //                    if (!string.IsNullOrEmpty(NewConfigVersion) && ! NewConfigVersion.Equals ( ConfigVersion ) )
+        //                    {
+        //                        checkConfigFiles = true;
+        //                        // Backup current and update config files
+        //                        GenericUtilsClass.BackUpConfigFiles ();
+        //                        if ( ! ( Result = UpdateConfigFiles () ) )
+        //                        {
+        //                            GenericUtilsClass.RestoreConfigFiles();
+        //                            this.ShowErrorAndKill ( new ConfigurationFilesNewVersionException () );
+        //                            return;
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
 
-            if ( Result )
-            {
-                ConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
+        //    if ( Result )
+        //    {
+        //        ConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
 
-                // Loads configuration files
-                if ( ! this.InitializeConfiguration () )
-                {
-                    if ( checkConfigFiles )
-                        GenericUtilsClass.RestoreConfigFiles ();
-                    else
-                    {
-                        GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
-                        GenericUtilsClass.SetInstallMode("None");
-                    }
+        //        // Loads configuration files
+        //        if ( ! this.InitializeConfiguration () )
+        //        {
+        //            if ( checkConfigFiles )
+        //                GenericUtilsClass.RestoreConfigFiles ();
+        //            else
+        //            {
+        //                GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
+        //                GenericUtilsClass.SetInstallMode("None");
+        //            }
                     
-                    // Finishes because the app will be killed
-                    return;
-                }
+        //            // Finishes because the app will be killed
+        //            return;
+        //        }
 
-                if (!String.IsNullOrEmpty(NewConfigVersion))
-                {
-                    ConfigVersion = NewConfigVersion;
-                    SecureStorage.SetAsync("ConfigVersion", ConfigVersion);
-                }
+        //        if (!String.IsNullOrEmpty(NewConfigVersion))
+        //        {
+        //            ConfigVersion = NewConfigVersion;
+        //            SecureStorage.SetAsync("ConfigVersion", ConfigVersion);
+        //        }
 
-                Utils.Print($"Config version: { ConfigVersion} ");
-                if (!Mobile.configData.HasIntune) Utils.Print("Local parameters loaded..");
-                else Utils.Print("Intune parameters loaded..");
-                if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
-                {
-                    Utils.Print("FTP: " + Mobile.configData.ftpDownload_Host + ":" + Mobile.configData.ftpDownload_Port + " - "
-                        + Mobile.configData.ftpDownload_User + " [ " + Mobile.configData.ftpDownload_Pass + " ]");
-                    if (Mobile.configData.IsCertLoaded)
-                    {
-                        Utils.Print("Certificate: " + Mobile.configData.certificate.Subject + " [ " + Mobile.configData.certificate.NotAfter + " ]");
-                    }
-                }
+        //        Utils.Print($"Config version: { ConfigVersion} ");
+        //        if (!Mobile.configData.HasIntune) Utils.Print("Local parameters loaded..");
+        //        else Utils.Print("Intune parameters loaded..");
+        //        if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
+        //        {
+        //            Utils.Print("FTP: " + Mobile.configData.ftpDownload_Host + ":" + Mobile.configData.ftpDownload_Port + " - "
+        //                + Mobile.configData.ftpDownload_User + " [ " + Mobile.configData.ftpDownload_Pass + " ]");
+        //            if (Mobile.configData.IsCertLoaded)
+        //            {
+        //                Utils.Print("Certificate: " + Mobile.configData.certificate.Subject + " [ " + Mobile.configData.certificate.NotAfter + " ]");
+        //            }
+        //        }
                 
-                if ( ! Data.Get.IsFromScripting )
-                    Device.BeginInvokeOnMainThread ( () =>
-                    {
-                       Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
-                    });
-                else
-                {
-                    if ( Data.Get.IsIOS )
-                        taskSemaphoreIOS.SetResult ( true );
-                    else
-                        HandleUrl ( dataUrl,adapter );
-                }
-            }
-        }
+        //        if ( ! Data.Get.IsFromScripting )
+        //            Device.BeginInvokeOnMainThread ( () =>
+        //            {
+        //               Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
+        //            });
+        //        else
+        //        {
+        //            if ( Data.Get.IsIOS )
+        //                taskSemaphoreIOS.SetResult ( true );
+        //            else
+        //                HandleUrl ( dataUrl,adapter );
+        //        }
+        //    }
+        //}
 
-        public bool InitializeConfiguration ()
-        {
-            try
-            {
-                config = Configuration.GetInstanceWithParams ( string.Empty );
-                logger = new Logger ();
+        //public bool InitializeConfiguration ()
+        //{
+        //    try
+        //    {
+        //        config = Configuration.GetInstanceWithParams ( string.Empty );
+        //        logger = new Logger ();
     
-                switch ( Device.RuntimePlatform )
-                {
-                    case Device.Android:
-                        config.setPlatform   ( SO_ANDROID );
-                        config.setAppName    ( AppName    );
-                        config.setVersion    ( appVersion_str);
-                        config.setDeviceUUID ( deviceId   );
-                        break;
-                    case Device.iOS:
-                        config.setPlatform   ( SO_IOS     );
-                        config.setAppName    ( AppName    );
-                        config.setVersion    ( appVersion_str);
-                        config.setDeviceUUID ( deviceId   );
-                        break;
-                    default:
-                        config.setPlatform   ( SO_UNKNOWN );
-                        break;
-                }
-            }
-            catch ( Exception e )
-            {
-                if ( Errors.IsOwnException ( e ) )
-                     this.ShowErrorAndKill ( e );
-                else this.ShowErrorAndKill ( new ConfigurationFilesCorruptedException () );
+        //        switch ( Device.RuntimePlatform )
+        //        {
+        //            case Device.Android:
+        //                config.setPlatform   ( SO_ANDROID );
+        //                config.setAppName    ( AppName    );
+        //                config.setVersion    ( appVersion_str);
+        //                config.setDeviceUUID ( deviceId   );
+        //                break;
+        //            case Device.iOS:
+        //                config.setPlatform   ( SO_IOS     );
+        //                config.setAppName    ( AppName    );
+        //                config.setVersion    ( appVersion_str);
+        //                config.setDeviceUUID ( deviceId   );
+        //                break;
+        //            default:
+        //                config.setPlatform   ( SO_UNKNOWN );
+        //                break;
+        //        }
+        //    }
+        //    catch ( Exception e )
+        //    {
+        //        if ( Errors.IsOwnException ( e ) )
+        //             this.ShowErrorAndKill ( e );
+        //        else this.ShowErrorAndKill ( new ConfigurationFilesCorruptedException () );
                
-                return false;
-            }
+        //        return false;
+        //    }
             
-            return true;
-        }
+        //    return true;
+        //}
 
         #endregion
 
@@ -545,13 +552,13 @@ namespace aclara_meters
                     if ( Data.Get.IsIOS )
                     {
                         // Scripting
-                        if ( MainPage == null )
-                        {
-                            taskSemaphoreIOS = new TaskCompletionSource<bool>();
+                        //if ( MainPage == null )
+                        //{
+                        //    taskSemaphoreIOS = new TaskCompletionSource<bool>();
 
-                            // Wait until HandleUrl finishes
-                            bool result = await taskSemaphoreIOS.Task;
-                        }
+                        //    // Wait until HandleUrl finishes
+                        //    bool result = await taskSemaphoreIOS.Task;
+                        //}
 
                         await Task.Run ( async () =>
                         {
@@ -720,56 +727,56 @@ namespace aclara_meters
             FormsApp.ble_interface.Close();
         }
 
-        private bool UpdateConfigFiles()
-        {
-            if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
-            {
-                if (Mobile.IsNetAvailable())
-                {
-                    if(!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
-                    {
-                        return false;
-                    }
-                    if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
-                    {
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-                    }
+        //private bool UpdateConfigFiles()
+        //{
+        //    if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
+        //    {
+        //        if (Mobile.IsNetAvailable())
+        //        {
+        //            if(!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
+        //            {
+        //                return false;
+        //            }
+        //            if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
+        //            {
+        //                Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+        //            }
 
-                    return true;
-                }
-                //this.ShowErrorAndKill(new NoInternetException());
-                //MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
-                return false;
-            }
-            else
-            {
-                Mobile.configData.HasFTP = false;
+        //            return true;
+        //        }
+        //        //this.ShowErrorAndKill(new NoInternetException());
+        //        //MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
+        //        return false;
+        //    }
+        //    else
+        //    {
+        //        Mobile.configData.HasFTP = false;
 
-                // Check if all configuration files are available in public folder
-                if ( GenericUtilsClass.HasDeviceAllXmls ( Mobile.ConfigPublicPath ) )
-                {
+        //        // Check if all configuration files are available in public folder
+        //        if ( GenericUtilsClass.HasDeviceAllXmls ( Mobile.ConfigPublicPath ) )
+        //        {
 
-                    bool CPD = false;
-                    if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
-                    {
-                        if (value != null)
-                            bool.TryParse((string)value, out CPD);
-                    }
-                    if (!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
-                    {
-                        return false;
-                    }
-                    if (!string.IsNullOrEmpty(sFileCert))
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+        //            bool CPD = false;
+        //            if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
+        //            {
+        //                if (value != null)
+        //                    bool.TryParse((string)value, out CPD);
+        //            }
+        //            if (!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
+        //            {
+        //                return false;
+        //            }
+        //            if (!string.IsNullOrEmpty(sFileCert))
+        //                Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
 
-                    if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
-                        return false;
-                    else
-                        return true;
-                }
+        //            if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
+        //                return false;
+        //            else
+        //                return true;
+        //        }
 
-                return true;
-            }
-        }
+        //        return true;
+        //    }
+        //}
     }
 }
