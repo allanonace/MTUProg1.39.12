@@ -9,6 +9,7 @@ using Xamarin.Forms;
 using Xamarin.Forms.Xaml;
 using static MTUComm.Action;
 using aclara_meters.view;
+using Library;
 
 namespace aclara_meters.view
 {
@@ -75,31 +76,31 @@ namespace aclara_meters.view
 
             MenuList.Add(new PageItem() { Title = "Read MTU", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadMtu });
 
-            if (FormsApp.config.Global.ShowTurnOff)
+            if (Singleton.Get.Configuration.Global.ShowTurnOff)
                 MenuList.Add(new PageItem() { Title = "Turn Off MTU", Icon = "turnoff_icon.png", Color = "White", TargetType = ActionType.TurnOffMtu });
 
-            if (FormsApp.config.Global.ShowAddMTU)
+            if (Singleton.Get.Configuration.Global.ShowAddMTU)
                 MenuList.Add(new PageItem() { Title = "Add MTU", Icon = "addMTU.png", Color = "White", TargetType = ActionType.AddMtu });
 
-            if (FormsApp.config.Global.ShowReplaceMTU)
+            if (Singleton.Get.Configuration.Global.ShowReplaceMTU)
                 MenuList.Add(new PageItem() { Title = "Replace MTU", Icon = "replaceMTU2.png", Color = "White", TargetType = ActionType.ReplaceMTU });
 
-            if (FormsApp.config.Global.ShowReplaceMeter)
+            if (Singleton.Get.Configuration.Global.ShowReplaceMeter)
                 MenuList.Add(new PageItem() { Title = "Replace Meter", Icon = "replaceMeter.png", Color = "White", TargetType = ActionType.ReplaceMeter });
 
-            if (FormsApp.config.Global.ShowAddMTUMeter)
+            if (Singleton.Get.Configuration.Global.ShowAddMTUMeter)
                 MenuList.Add(new PageItem() { Title = "Add MTU / Add Meter", Icon = "addMTUaddmeter.png", Color = "White", TargetType = ActionType.AddMtuAddMeter });
 
-            if (FormsApp.config.Global.ShowAddMTUReplaceMeter)
+            if (Singleton.Get.Configuration.Global.ShowAddMTUReplaceMeter)
                 MenuList.Add(new PageItem() { Title = "Add MTU / Rep. Meter", Icon = "addMTUrepmeter.png", Color = "White", TargetType = ActionType.AddMtuReplaceMeter });
 
-            if (FormsApp.config.Global.ShowReplaceMTUMeter)
+            if (Singleton.Get.Configuration.Global.ShowReplaceMTUMeter)
                 MenuList.Add(new PageItem() { Title = "Rep.MTU / Rep. Meter", Icon = "repMTUrepmeter.png", Color = "White", TargetType = ActionType.ReplaceMtuReplaceMeter });
 
-            if (FormsApp.config.Global.ShowInstallConfirmation)
+            if (Singleton.Get.Configuration.Global.ShowInstallConfirmation)
                 MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
 
-            if (FormsApp.config.Global.ShowDataRead)
+            if (Singleton.Get.Configuration.Global.ShowDataRead)
                 MenuList.Add(new PageItem() { Title = "Data Read", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.DataRead });
 #if DEBUG
             // MenuList.Add(new PageItem() { Title = "Read Fabric", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadFabric });

@@ -55,7 +55,7 @@ namespace aclara_meters.view
             bool Result = true;
 
 
-            Thread.Sleep(18000);
+            //Thread.Sleep(18000);
 
             if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
             {
@@ -153,6 +153,7 @@ namespace aclara_meters.view
                     //if (Data.Get.IsIOS)
                     //   // taskSemaphoreIOS.SetResult(true);
                     //else
+                    //if (Data.Get.IsAndroid)
                         HandleUrl(FormsApp.dataUrl);
                 }
             }
@@ -295,7 +296,8 @@ namespace aclara_meters.view
         {
             Data.Set("IsFromScripting", true);
 
-            Utils.Print("FormsApp: Scripting [ " + Data.Get.IsFromScripting + " ]");
+            Utils.Print("Config: Scripting Config [ " + Data.Get.IsFromScripting + " ]");
+            Utils.Print("Config: Uri.Query [ " + url.Query.ToString() + " ]");
 
             // Stops logic because initialization has been canceled due to an error / exception
             if (this.formsInitFailed)

@@ -823,6 +823,12 @@ namespace aclara_meters.view
         private void DataReadMtu ( object sender, EventArgs e )
         {
             isCancellable = true;
+            string msgError = string.Empty;
+            if (!this.ValidateFields(ref msgError))
+            {
+                DisplayAlert("Error", msgError, "OK");
+                return;
+            }
 
             if (!_userTapped)
             {
@@ -838,6 +844,24 @@ namespace aclara_meters.view
                     Task.Factory.StartNew(DataRead_Action);
                 });
             }
+        }
+
+        private bool ValidateFields(ref string msgError)
+        {
+            // validate fields
+            string FILL_ERROR = "Days of read is incorrectly filled";
+
+            dynamic NoSelNoReq = new Func<int, bool, bool>((index, isMandatory) =>
+                                    index <= -1 && !isMandatory);
+
+            bool bDays = NoSelNoReq(this.pck_DaysOfRead.SelectedIndex,true);
+            if (bDays)
+            {
+                msgError = FILL_ERROR;
+                return false;
+            }
+            return true;
+
         }
 
         private async Task DataRead_Action ()

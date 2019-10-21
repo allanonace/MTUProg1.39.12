@@ -63,7 +63,7 @@ namespace aclara_meters.viewmodel
         {
             Mobile.LogPath = Mobile.ConfigPublicPath;//public folder
             Mobile.LogUserBackupPath = user;  //public folder
-            if (FormsApp.config.Global.LogsPublicDir)
+            if (Singleton.Get.Configuration.Global.LogsPublicDir)
                 Mobile.LogUserPath = user;
             else
             {
@@ -84,7 +84,7 @@ namespace aclara_meters.viewmodel
 
                 PathsLogs(user);
 
-                FormsApp.logger.Login(user);
+                Singleton.Get.Logger.Login(user);
                 Settings.IsLoggedIn = true;
                 Application.Current.MainPage=new NavigationPage(new AclaraViewMainMenu(dialogs_save));
             }   
@@ -152,7 +152,7 @@ namespace aclara_meters.viewmodel
 
                             PathsLogs(userName);
 
-                            FormsApp.logger.Login(userName);
+                            Singleton.Get.Logger.Login(userName);
                             //await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewMainMenu(dialogs_save), false);
                             Application.Current.MainPage = new NavigationPage(new AclaraViewMainMenu(dialogs_save));
                             //await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewGlobalUIController(), false);

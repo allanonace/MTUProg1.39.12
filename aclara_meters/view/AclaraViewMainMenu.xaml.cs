@@ -124,7 +124,7 @@ namespace aclara_meters.view
                 }
             }
             // Upload log files
-            if (FormsApp.config.Global.UploadPrompt)
+            if (Singleton.Get.Configuration.Global.UploadPrompt)
                 await GenericUtilsClass.UploadFiles ();
             
             // Init pucks detection
@@ -966,7 +966,7 @@ namespace aclara_meters.view
         private async void LogOffOkTapped(object sender, EventArgs e)
         {
             // Upload log files
-            if (FormsApp.config.Global.UploadPrompt)
+            if (Singleton.Get.Configuration.Global.UploadPrompt)
                 await GenericUtilsClass.UploadFiles ();
 
             dialogView.OpenCloseDialog("dialog_logoff", false);
@@ -1292,7 +1292,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.Global.ActionVerify)
+                            if (Singleton.Get.Configuration.Global.ActionVerify)
                             {
                                 dialog_open_bg.IsVisible = true;
                                 turnoff_mtu_background.IsVisible = true;
@@ -1323,7 +1323,7 @@ namespace aclara_meters.view
 
                             #region Check ActionVerify
 
-                            if (FormsApp.config.Global.ActionVerify)
+                            if (Singleton.Get.Configuration.Global.ActionVerify)
                             {
                                 dialog_open_bg.IsVisible = true;
                                 turnoff_mtu_background.IsVisible = true;
@@ -1423,7 +1423,7 @@ namespace aclara_meters.view
                     dialogView.CloseDialogs();
 
                     #region Check ActionVerify
-                    if (FormsApp.config.Global.ActionVerify)
+                    if (Singleton.Get.Configuration.Global.ActionVerify)
                     {
                         dialog_open_bg.IsVisible = true;
                         turnoff_mtu_background.IsVisible = true;

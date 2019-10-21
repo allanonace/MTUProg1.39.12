@@ -123,7 +123,7 @@ namespace aclara_meters
 
                 // Config path
                 ConfigPaths();
-
+                
                 CallToInitApp(adapter, dialogs, appVersion);
             }
             catch (Exception)
@@ -263,87 +263,89 @@ namespace aclara_meters
             Data.Set ( "IsFromScripting", true );
 
             Utils.Print ( "FormsApp: Scripting [ " + Data.Get.IsFromScripting + " ]" );
-        
+            Utils.Print ("FormsApp: Uri.Query [ " + url.Query.ToString() + " ]");
+
+            dataUrl = url;
             // Stops logic because initialization has been canceled due to an error / exception
             if ( this.formsInitFailed )
                 return;
         
-            try
-            {
-                if ( ble_interface != null &&
-                     ble_interface.IsOpen() )
-                    ble_interface.Close();
+            //try
+            //{
+            //    if ( ble_interface != null &&
+            //         ble_interface.IsOpen() )
+            //        ble_interface.Close();
 
-                #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
+            //    #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
 
-               // await adapter.DisableAdapter();
-               // await adapter.EnableAdapter(); //Android shows a window to allow bluetooth
+            //   // await adapter.DisableAdapter();
+            //   // await adapter.EnableAdapter(); //Android shows a window to allow bluetooth
 
-                #endregion
+            //    #endregion
 
-            }
-            catch (Exception e)
-            {
-                Utils.Print(e.StackTrace);
-            }
+            //}
+            //catch (Exception e)
+            //{
+            //    Utils.Print(e.StackTrace);
+            //}
 
-            if ( url != null )
-            {
-                //string path = Mobile.ConfigPath;
-                //ConfigPaths();
-                string path = Mobile.ConfigPath;
-                NameValueCollection query = HttpUtility.ParseQueryString ( url.Query );
+            //if ( url != null )
+            //{
+            //    //string path = Mobile.ConfigPath;
+            //    //ConfigPaths();
+            //    string path = Mobile.ConfigPath;
+            //    NameValueCollection query = HttpUtility.ParseQueryString ( url.Query );
 
-                var script_name = query.Get ( "script_name" );
-                var script_data = query.Get ( "script_data" );
-                var callback    = query.Get ( "callback"    );
+            //    var script_name = query.Get ( "script_name" );
+            //    var script_data = query.Get ( "script_data" );
+            //    var callback    = query.Get ( "callback"    );
 
-                if ( script_name != null )
-                    path = Path.Combine ( path, "___" + script_name.ToString () );
+            //    if ( script_name != null )
+            //        path = Path.Combine ( path, "___" + script_name.ToString () );
 
-                if ( script_data != null )
-                    File.WriteAllText ( path, Base64Decode ( script_data ) );
+            //    if ( script_data != null )
+            //        File.WriteAllText ( path, Base64Decode ( script_data ) );
 
-                if ( callback != null ) { /* ... */ }
+            //    if ( callback != null ) { /* ... */ }
 
-                try
-                {
-                    if ( Data.Get.IsIOS )
-                    {
-                        // Scripting
-                        //if ( MainPage == null )
-                        //{
-                        //    taskSemaphoreIOS = new TaskCompletionSource<bool>();
+            //    try
+            //    {
+            //        if ( Data.Get.IsIOS )
+            //        {
+            //            // Scripting
+            //            //if ( MainPage == null )
+            //            //{
+            //            //    taskSemaphoreIOS = new TaskCompletionSource<bool>();
 
-                        //    // Wait until HandleUrl finishes
-                        //    bool result = await taskSemaphoreIOS.Task;
-                        //}
+            //            //    // Wait until HandleUrl finishes
+            //            //    bool result = await taskSemaphoreIOS.Task;
+            //            //}
 
-                        await Task.Run ( async () =>
-                        {
-                            await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread ( async () =>
-                            {
-                                Application.Current.MainPage = new NavigationPage (
-                                    new AclaraViewScripting ( path, callback, script_name ) );
+            //            await Task.Run ( async () =>
+            //            {
+            //                await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread ( async () =>
+            //                {
+            //                    Application.Current.MainPage = new NavigationPage (
+            //                        new AclaraViewScripting ( path, callback, script_name ) );
 
-                                await MainPage.Navigation.PopToRootAsync(true);
-                            });
-                        });
-                    }
-                    else
-                    {
-                        Device.BeginInvokeOnMainThread ( () =>
-                        {
-                            Application.Current.MainPage = new NavigationPage (
-                                new AclaraViewScripting ( path, callback, script_name ) );
-                        });
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"-----  {ex.Message}");
-                }
-            }
+            //                    await MainPage.Navigation.PopToRootAsync(true);
+            //                });
+            //            });
+            //        }
+            //        else
+            //        {
+            //            Device.BeginInvokeOnMainThread ( () =>
+            //            {
+            //                Application.Current.MainPage = new NavigationPage (
+            //                    new AclaraViewScripting ( path, callback, script_name ) );
+            //            });
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        Console.WriteLine($"-----  {ex.Message}");
+            //    }
+            //}
         }
         
         #endregion
