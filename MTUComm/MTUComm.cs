@@ -444,13 +444,13 @@ namespace MTUComm
                 // that cancel the action but not move to the main menu and could be happen
                 // that perform the basic read with a different MTU
                 //if ( ! this.basicInfoLoaded )
-                if (!Data.Contains("MtuBasicInfo") || type == ActionType.ReadMtu)
+                if ( ! Data.Contains ( "MtuBasicInfo" ) || type == ActionType.ReadMtu )
                     await this.LoadMtuBasicInfo ();
                 else 
                     this.mtu = configuration.GetMtuTypeById((int)Data.Get.MtuBasicInfo.Type);
 
                 // Checks if the MTU remains the same as in the initial reading
-                if ( type != ActionType.BasicRead && type != ActionType.ReadMtu)
+                if ( type != ActionType.BasicRead && type != ActionType.ReadMtu )
                     await this.CheckIsTheSameMTU ();
 
                 switch ( type )
@@ -874,8 +874,11 @@ namespace MTUComm
 
                 OnProgress ( this, new Delegates.ProgressArgs ( "HR: Requesting logs..." ) );
 
-                DateTime end   = DateTime.UtcNow;
+                // NOTE: When performing unit tests, the date must be a fixed value
+                DateTime end   = ( ! Data.Get.UNIT_TEST ) ? DateTime.UtcNow : new DateTime ( 2019, 10, 15 );
+                end = new DateTime ( end.Year, end.Month, end.Day, 23, 59, 59 );
                 DateTime start = end.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
+                start = new DateTime ( start.Year, start.Month, start.Day, 0, 0, 0 );
 
                 byte[] data = new byte[ 10 ]; // 1+1+4x2
                 data[ 0 ] = ( byte )LogFilterMode.Match;    // Only return logs that matches the Log Entry Filter Field specified
@@ -1115,7 +1118,7 @@ namespace MTUComm
                     throw new MtuIsNotTwowayICException ();
                 }
 
-                // Set to true/one this flag to request a time sync
+                // Set to true this flag to request a time sync
                 await regICRequest.SetValueToMtu ( true );
 
                 bool fail;
@@ -1183,6 +1186,9 @@ namespace MTUComm
                 {
                     case NodeDiscoveryResult.EXCELLENT:
                     case NodeDiscoveryResult.GOOD:
+
+                    //await map.LogFullMemory ();
+
                     return IC_OK;
 
                     case NodeDiscoveryResult.NOT_ACHIEVED:
@@ -3189,7 +3195,7 @@ namespace MTUComm
 
                 // Show all registers read from the MTU and modified/write to the MTU
                 #if DEBUG
-                map.LogFullMemory ();
+                //map.LogFullMemory ();
                 #endif
             }
             catch ( Exception e )
@@ -3673,7 +3679,7 @@ namespace MTUComm
                 finalRead.AddRange ( secondRead );
             }
             // System.IO.IOException = Puck is not well placed or is off
-            catch ( Exception )
+            catch ( Exception e )
             {
                 //if ( ! isAfterWriting )
                      Errors.LogErrorNow ( new PuckCantCommWithMtuException () );
@@ -3710,6 +3716,9 @@ namespace MTUComm
         /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
         private async Task CheckIsTheSameMTU ()
         {
+            if ( Data.Get.UNIT_TEST )
+                return;
+
             byte[] read;
             try
             {
