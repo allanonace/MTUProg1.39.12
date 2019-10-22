@@ -51,7 +51,7 @@ namespace aclara_meters.iOS
             NSUrl         url,
             NSDictionary  options )
         {
-            appSave.HandleUrl ( ( Uri )url, null );
+            appSave.HandleUrl ( ( Uri )url );
             return true;
         }
     }

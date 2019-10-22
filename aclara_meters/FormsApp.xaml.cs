@@ -258,7 +258,7 @@ namespace aclara_meters
 
         #region Scripting iOS
 
-        public async void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
+        public async void HandleUrl ( Uri url )
         {
             Data.Set ( "IsFromScripting", true );
 
