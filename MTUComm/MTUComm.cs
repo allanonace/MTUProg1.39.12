@@ -874,8 +874,10 @@ namespace MTUComm
 
                 OnProgress ( this, new Delegates.ProgressArgs ( "HR: Requesting logs..." ) );
 
-                DateTime end   = DateTime.UtcNow;
+                DateTime end   = DateTime.UtcNow.Date;
                 DateTime start = end.Subtract ( new TimeSpan ( int.Parse ( Data.Get.NumOfDays ), 0, 0, 0 ) );
+                end = new DateTime(end.Year, end.Month, end.Day, 23, 59, 59);
+                start = new DateTime(start.Year, start.Month, start.Day, 0, 0, 0);
 
                 byte[] data = new byte[ 10 ]; // 1+1+4x2
                 data[ 0 ] = ( byte )LogFilterMode.Match;    // Only return logs that matches the Log Entry Filter Field specified

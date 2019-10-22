@@ -819,6 +819,12 @@ namespace aclara_meters.view
         {
             
             isCancellable =true;
+            string msgError = string.Empty;
+            if (!this.ValidateFields(ref msgError))
+            {
+                DisplayAlert("Error", msgError, "OK");
+                return;
+            }
 
             if (!_userTapped)
             {
@@ -836,6 +842,19 @@ namespace aclara_meters.view
                     Task.Factory.StartNew(ValveOperation_Action);
                 });
             }
+        }
+        private bool ValidateFields(ref string msgError)
+        {
+            // validate fields
+            string FILL_ERROR = "Fields incorrectly filled";
+
+            if (this.pck_ValvePosition.SelectedIndex <= -1 || string.IsNullOrEmpty(tbx_FieldOrder.Text) || string.IsNullOrEmpty(tbx_RDDFirmwareVersion.Text))
+            {
+                msgError = FILL_ERROR;
+                return false;
+            }
+            return true;
+
         }
 
         private async Task ValveOperation_Action ()

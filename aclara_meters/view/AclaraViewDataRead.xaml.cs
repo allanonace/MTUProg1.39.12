@@ -850,12 +850,8 @@ namespace aclara_meters.view
         {
             // validate fields
             string FILL_ERROR = "Days of read is incorrectly filled";
-
-            dynamic NoSelNoReq = new Func<int, bool, bool>((index, isMandatory) =>
-                                    index <= -1 && !isMandatory);
-
-            bool bDays = NoSelNoReq(this.pck_DaysOfRead.SelectedIndex,true);
-            if (bDays)
+ 
+            if (this.pck_DaysOfRead.SelectedIndex <= -1)
             {
                 msgError = FILL_ERROR;
                 return false;
