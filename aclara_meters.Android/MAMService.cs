@@ -3,7 +3,6 @@ using Xamarin.Forms;
 using aclara_meters.util;
 using Library;
 using MTUComm;
-using System.Linq;
 //using Microsoft.Intune.Mam.Policy;
 //using Microsoft.Intune.Mam.Client.App;
 //using Microsoft.Intune.Mam.Policy.AppConfig;
@@ -24,21 +23,19 @@ namespace aclara_meters.Droid
         public void UtilMAMService()
         {
             //IMAMAppConfigManager _configManager;
-            //// private IMAMEnrollmentManager _enrolledMgr;
             //IMAMUserInfo _userInfo;
             //try
             //{
-            //    //_enrolledMgr = MAMComponents.Get<IMAMEnrollmentManager>();
+                
             //    _userInfo = MAMComponents.Get<IMAMUserInfo>();
-            //    // if (_enrolledMgr.GetRegisteredAccountStatus(_userInfo.PrimaryUser) == MAMEnrollmentManagerResult.EnrollmentSucceeded)
-            //    // {
+              
             //    _configManager = MAMComponents.Get<IMAMAppConfigManager>();
 
             //    _userInfo = MAMComponents.Get<IMAMUserInfo>();
 
             //    string identity = _userInfo.PrimaryUser;
-            //    Utils.PrintDeep($"----------------------------------------------------------  va a buscar la configuracion de: {identity}  ");
-            //    //identity = "h.foronda@bizintekinnova.com";
+            //    Utils.Print($"----------------------------------------------------------  va a buscar la configuracion de: {identity}  ");
+               
             //    var stringValues = new List<Dictionary<string, string>>();
             //    var dict = new Dictionary<string, string>();
             //    try
@@ -87,8 +84,6 @@ namespace aclara_meters.Droid
             //    if (dict.TryGetValue(Mobile.ID_CERTIFICATE, out certificate))
             //    {
             //        data.StoreCertificate(data.CreateCertificate(certificate));  //save the certificate in keychain
-            //        //data.GenerateCertFromStore();
-            //        //data.GenerateCert(certificate);
             //    }
 
             //}

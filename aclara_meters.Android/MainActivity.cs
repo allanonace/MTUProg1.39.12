@@ -6,8 +6,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using aclara_meters.view;
 using Acr.UserDialogs;
 using Android;
 using Android.App;
@@ -19,8 +17,6 @@ using Library;
 using nexus.protocols.ble;
 using Plugin.CurrentActivity;
 using Xamarin.Forms;
-using Xamarin.Forms.Platform.Android;
-//using Application = Android.App.Application;
 
 namespace aclara_meters.Droid
 {
@@ -40,9 +36,6 @@ namespace aclara_meters.Droid
 
         protected override void OnCreate(Bundle bundle)
         {
-            //TabLayoutResource = Resource.Layout.Tabbar;
-            // ToolbarResource = Resource.Layout.Toolbar;
-
             base.OnCreate(bundle);
 
             UserDialogs.Init(this);
@@ -60,30 +53,11 @@ namespace aclara_meters.Droid
                 Utils.Print(e.StackTrace);
             }
 
-            // Obtain the bluetooth adapter so we can pass it into our (shared-code) Xamarin Forms app. There are
-            // additional Obtain() methods on BluetoothLowEnergyAdapter if you have more specific needs (e.g. if you
-            // need to support devices with multiple Bluetooth adapters)
-            //var bluetooth = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
-
             if ( Xamarin.Forms.Device.Idiom == TargetIdiom.Phone )
                  RequestedOrientation = ScreenOrientation.Portrait;
             else RequestedOrientation = ScreenOrientation.Landscape;
 
-           // CrossCurrentActivity.Current.Init ( this, bundle );
-
             var data = Intent.Data;
-
-            // check if this intent is started via custom scheme link
-            if (data != null)
-            {
-                if ( data.Scheme == "aclara-mtu-programmer" )
-                {
-                    //accessCodeTextbox.Text = data.Host;
-                }
-            }
-
-            // Set our view from the "main" layout resource
-            //SetContentView(Resource.Layout.SplashScreen);
 
             Context     context    = Android.App.Application.Context;
             PackageInfo info       = context.PackageManager.GetPackageInfo ( context.PackageName, 0 );
@@ -93,8 +67,7 @@ namespace aclara_meters.Droid
             FormsApp app = new FormsApp (UserDialogs.Instance, appversion,new System.Uri(data.ToString()));
                      
             LoadApplication(app);
-            //app.HandleUrl(new System.Uri(data.ToString()), bluetooth); 
-            
+         
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
@@ -103,20 +76,6 @@ namespace aclara_meters.Droid
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
-
-    //[Application(AllowBackup = true, AllowClearUserData = true)]
-    //public class MyApplication : Android.App.Application
-    //{
-    //    protected MyApplication(IntPtr javaReference, JniHandleOwnership transfer)
-    //    : base(javaReference, transfer)
-    //    {
-    //    }
-
-    //    public override void OnCreate()
-    //    {
-            
-    //    }
-    //}
 
     [Activity(
         Label = "aclara_meters", 
@@ -142,9 +101,7 @@ namespace aclara_meters.Droid
 
         protected override void OnCreate(Bundle bundle)
         {
-            //TabLayoutResource = Resource.Layout.Tabbar;
-           // ToolbarResource = Resource.Layout.Toolbar;
-
+ 
             base.OnCreate(bundle);
 
             UserDialogs.Init(this);
@@ -160,12 +117,6 @@ namespace aclara_meters.Droid
                 Utils.Print(e.StackTrace);
             }
 
-            // Obtain the bluetooth adapter so we can pass it into our (shared-code) Xamarin Forms app. There are
-            // additional Obtain() methods on BluetoothLowEnergyAdapter if you have more specific needs (e.g. if you
-            // need to support devices with multiple Bluetooth adapters)
-            //var bluetooth = BluetoothLowEnergyAdapter.ObtainDefaultAdapter(ApplicationContext);
-            
-
             if (Xamarin.Forms.Device.Idiom == TargetIdiom.Phone)
             {
                 RequestedOrientation = ScreenOrientation.Portrait;
@@ -179,10 +130,6 @@ namespace aclara_meters.Droid
             var info = context.PackageManager.GetPackageInfo(context.PackageName, 0);
 
             string value = info.VersionName + " ( " + info.VersionCode + " )";
-
-
-            // Check if FTP settings is in securestorage
-            // GenericUtilsClass.CheckFTPDownload();
 
             Data.Set ( "IsFromScripting",   false );
             LoadApplication(new FormsApp (UserDialogs.Instance, value));

@@ -15,7 +15,7 @@ namespace aclara_meters.Droid
     [Application(AllowBackup = false, AllowClearUserData = true)]
 #endif
 
-    public class MyApplication : Application//MAMApplication
+    public class MyApplication : Application //MAMApplication
     {
         protected MyApplication(IntPtr javaReference, JniHandleOwnership transfer)
         : base(javaReference, transfer)

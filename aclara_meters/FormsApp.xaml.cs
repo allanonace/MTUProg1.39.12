@@ -53,8 +53,8 @@ namespace aclara_meters
 
         public static string appVersion_str;
         public static string deviceId;
-        public string ConfigVersion;
-        public string NewConfigVersion;
+        public static string ConfigVersion;
+        public static string NewConfigVersion;
         private bool checkConfigFiles = false;
         private string DateCheck;
 
@@ -116,7 +116,6 @@ namespace aclara_meters
                 Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
                 Data.Set ( "IsAndroid", Device.RuntimePlatform == Device.Android );
 
-                //this.adapter    = badapter;
                 this.dialogs    = dialogs;
                 this.appVersion = appVersion;
                 appName        += ( Data.Get.IsAndroid ) ? "Android" : "iOS";
@@ -126,9 +125,9 @@ namespace aclara_meters
                 
                 CallToInitApp(adapter, dialogs, appVersion);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                //Debug.WriteLine(e.Message);
+                Console.WriteLine(e.Message);
             }
         }
 
@@ -171,8 +170,6 @@ namespace aclara_meters
                     {
                         GenericUtilsClass.SetInstallMode("Intune");
                         Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
-                        //this.LoadConfigurationAndOpenScene(dialogs);
-
                         return;
                     }
                 }
@@ -205,7 +202,7 @@ namespace aclara_meters
                 {
                     Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
                 });
-              //  this.LoadConfigurationAndOpenScene ( dialogs );
+              
             }
         }
 
@@ -482,62 +479,12 @@ namespace aclara_meters
         public static void DoLogOff()
         {
             Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
+            credentialsService.DeleteCredentials();
             Singleton.Remove<Puck>();
             Mobile.LogPath = Mobile.ConfigPublicPath;
-            FormsApp.ble_interface.Close();
+            ble_interface.Close();
         }
 
-        //private bool UpdateConfigFiles()
-        //{
-        //    if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
-        //    {
-        //        if (Mobile.IsNetAvailable())
-        //        {
-        //            if(!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
-        //            {
-        //                return false;
-        //            }
-        //            if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
-        //            {
-        //                Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-        //            }
-
-        //            return true;
-        //        }
-        //        //this.ShowErrorAndKill(new NoInternetException());
-        //        //MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
-        //        return false;
-        //    }
-        //    else
-        //    {
-        //        Mobile.configData.HasFTP = false;
-
-        //        // Check if all configuration files are available in public folder
-        //        if ( GenericUtilsClass.HasDeviceAllXmls ( Mobile.ConfigPublicPath ) )
-        //        {
-
-        //            bool CPD = false;
-        //            if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
-        //            {
-        //                if (value != null)
-        //                    bool.TryParse((string)value, out CPD);
-        //            }
-        //            if (!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
-        //            {
-        //                return false;
-        //            }
-        //            if (!string.IsNullOrEmpty(sFileCert))
-        //                Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-
-        //            if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
-        //                return false;
-        //            else
-        //                return true;
-        //        }
-
-        //        return true;
-        //    }
-        //}
+  
     }
 }

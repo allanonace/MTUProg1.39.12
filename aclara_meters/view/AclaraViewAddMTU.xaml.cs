@@ -2529,8 +2529,11 @@ namespace aclara_meters.view
 
                 int i = 0;
                 foreach (char c in chars)
+                {
                     if (c.Equals('1'))
-                        list.Add(values[i++]);
+                        list.Add(values[i]);
+                    i++;
+                }
             }
             else list.AddRange(values);
 

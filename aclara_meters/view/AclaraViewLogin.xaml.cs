@@ -1,19 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using aclara_meters.Helpers;
 using Acr.UserDialogs;
-using MTUComm;
-using Plugin.DeviceInfo;
-using Plugin.Geolocator;
-using Plugin.Geolocator.Abstractions;
-using Renci.SshNet;
 using Xamarin.Forms;
-using Library.Exceptions;
 using Library;
 
 namespace aclara_meters.view

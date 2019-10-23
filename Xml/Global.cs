@@ -549,7 +549,7 @@ namespace Xml
 
             // Register recording
             this.RegisterRecordingDefault     = "Meter";              // [Meter,Register] What is the default value for recording
-            this.RegisterRecordingItems       = "101";                // [0,1] Controls contents of the Register Recording Selection dropdown list. Which one first and so on
+            this.RegisterRecordingItems       = "111";                // [0,1] Controls contents of the Register Recording Selection dropdown list. Which one first and so on
             this.RegisterRecordingReq         = false;                // Required to choose if RegisterRecording is “true” on the screen
 
             // FTP

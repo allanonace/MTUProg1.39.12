@@ -23,12 +23,10 @@
   <ItemGroup>
     <PackageReference Include="Xamarin.Forms" Version="4.2.0.709249" />
     <PackageReference Include="Xamarin.CustomControls.AccordionView" Version="1.1.6" />
-    <PackageReference Include="Xamarin.CustomControls.StateButton" Version="1.1.0" />
     <PackageReference Include="Refractored.MvvmHelpers" Version="1.3.2.47-beta" />
     <PackageReference Include="nexus.core" Version="0.35.0" />
-    <PackageReference Include="Acr.UserDialogs" Version="7.0.4" />
+    <PackageReference Include="Acr.UserDialogs" Version="7.0.35" />
     <PackageReference Include="ble.net" Version="1.2.1" />
-    <PackageReference Include="Xam.Plugin.Geolocator" Version="4.5.0.6" />
     <PackageReference Include="Plugin.Permissions" Version="3.0.0.12" />
     <PackageReference Include="Xamarin.Auth" Version="1.6.0.4" />
     <PackageReference Include="SSH.NET" Version="2016.1.0" />
@@ -118,9 +116,7 @@
     <None Remove=".DS_Store" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ble_library\ble_library.csproj" />
     <ProjectReference Include="..\MTUComm\MTUComm.csproj" />
-    <ProjectReference Include="..\Library\Library.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="view\AclaraViewGlobalUIController.xaml" />

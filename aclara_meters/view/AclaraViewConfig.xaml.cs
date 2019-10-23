@@ -54,9 +54,6 @@ namespace aclara_meters.view
         {
             bool Result = true;
 
-
-            //Thread.Sleep(18000);
-
             if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
             {
                 Result = InitialConfigProcess();
