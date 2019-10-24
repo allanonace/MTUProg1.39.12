@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.aclara.intune.programmer" android:installLocation="auto" android:versionName="1.39.1" android:versionCode="1">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.aclara.mtu.programmer" android:installLocation="auto" android:versionName="1.39.1" android:versionCode="1">
 	<uses-sdk android:minSdkVersion="23" android:targetSdkVersion="28" />
 	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 	<uses-permission android:name="android.permission.BLUETOOTH" />
@@ -17,9 +17,7 @@
 	<uses-feature android:name="android.hardware.location.gps" android:required="false" />
 	<uses-feature android:name="android.hardware.location.network" android:required="false" />
 	<application android:label="Aclara MTU Programmer" android:icon="@drawable/aclara_icon_app">
-	<!--	<meta-data android:name="com.microsoft.intune.mam.DefaultMAMServiceEnrollment" android:value="true" />
-		<meta-data android:name="com.microsoft.intune.mam.MAMPolicyRequired" android:value="true" /> -->
-		<provider android:name="android.support.v4.content.FileProvider" android:authorities="com.aclara.intune.programmer.fileprovider" android:exported="false" android:grantUriPermissions="true">
+		<provider android:name="android.support.v4.content.FileProvider" android:authorities="${applicationId}.fileprovider"  android:exported="false" android:grantUriPermissions="true">
 			<meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"></meta-data>
 		</provider>
 		<activity android:icon="@drawable/aclara_icon_app" android:theme="@style/MainTheme" android:label="aclara-mtu-programmer" android:name="com.aclara.mtu.programmer.urlentryclass">
