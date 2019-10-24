@@ -21,7 +21,6 @@ namespace aclara_meters
 {
     public static class GenericUtilsClass
     {
-        public static int NumFilesUploaded;
         private const string XML_EXT = ".xml";
         private const string CER_TXT = "certificate.txt";
         private const string XML_CER = ".cer";
@@ -37,6 +36,8 @@ namespace aclara_meters
                 "mtu",
                 "user",
             };
+
+        public static int NumFilesUploaded { get; set; }
 
         public async static Task<bool> UploadFiles (Boolean UploadPrompt = true, Boolean AllLogs = true )
         {
@@ -175,7 +176,7 @@ namespace aclara_meters
                             sftp.Disconnect ();
                         }
                     }
-                    catch ( Exception e )
+                    catch ( Exception )
                     {
                         // Catch all exceptions and then always show the number of
                         // files uploaded using the exception FtpUpdateLogsException
@@ -184,9 +185,7 @@ namespace aclara_meters
                     {
                         if ( sftp != null )
                             sftp.Dispose ();
-                        
-                        sftp = null;
-                        
+                                                                        
                         // Is necessary for appear the progress full ( 100% )
                         await Task.Delay ( 10 );
                         
@@ -309,12 +308,10 @@ namespace aclara_meters
                     sftp.Disconnect();
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 ok = false;
             }
-
-            //Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
 
             return ok;
         }
@@ -389,7 +386,7 @@ namespace aclara_meters
                     return sVersion;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }
@@ -417,7 +414,7 @@ namespace aclara_meters
                 return sVersion;
              
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }
@@ -461,9 +458,8 @@ namespace aclara_meters
                     return ok;
                 }
             }
-            catch (Exception e)
+            catch (Exception )
             {
-                //throw new FtpDownloadException(e.Message);
                 return false;
             }
                     
@@ -495,7 +491,7 @@ namespace aclara_meters
                     }
                 }
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 ok = false;
             }
@@ -511,12 +507,8 @@ namespace aclara_meters
 
         public static bool HasDeviceAllXmls (string path)
         {
-            bool ok = true;
-
-           // Directory could exist but is empty
-            if ( string.IsNullOrEmpty ( path ) )
-                ok = false;
-
+            bool ok;
+              
             DirectoryInfo info = new DirectoryInfo(path);
             FileInfo[] filesLocal = info.GetFiles();
 
@@ -545,7 +537,7 @@ namespace aclara_meters
         public static bool CopyConfigFiles(bool bRemove, string sPathFrom, string sPathTo, out string sFileCert)
         {
             sFileCert = string.Empty;
-            string fileCopy = string.Empty;
+            string fileCopy;
             try
             {
                 Mobile.CreateDirectoryIfNotExist(sPathTo);
@@ -568,7 +560,7 @@ namespace aclara_meters
                 }
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {         
                 return false;
             }
@@ -598,20 +590,7 @@ namespace aclara_meters
 
         public static bool DeleteConfigFiles(string path)
         {
-            bool ok = true;
-            string[] filesToCheck =
-            {
-                "alarm",
-                "demandconf",
-                "global",
-                "meter",
-                "mtu",
-                "user",
-            };
-    
-            // Directory could exist but is empty
-            if (string.IsNullOrEmpty(path))
-                ok = false;
+            bool ok;
 
             DirectoryInfo info = new DirectoryInfo(path);
             FileInfo[] filesLocal = info.GetFiles();

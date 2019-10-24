@@ -37,11 +37,11 @@ namespace aclara_meters.view
 
         private List<ReadMTUItem> FinalReadListView { get; set; }
 
-        public ActionType actionType;
+        private ActionType actionType;
         private ActionType actionTypeNew;
        
         private bool isCancellable;
-       //private bool isLogout;
+   
 
         #endregion
 
@@ -69,8 +69,6 @@ namespace aclara_meters.view
             menuOptions = this.MenuOptions;
             dialogView = this.DialogView;
             bottomBar = this.BottomBar;
-
-            menuOptions.action = this.actionType;
 
             dialogsSaved = dialogs;
 
@@ -280,9 +278,7 @@ namespace aclara_meters.view
                 //REASON
                 if (!isCancellable)
                 {
-                    //isLogout = true;
                     dialog_open_bg.IsVisible = true;
-               
                 }
                 else DoLogoff();
             });
@@ -365,9 +361,6 @@ namespace aclara_meters.view
                             {
                                 //REASON
                                 dialog_open_bg.IsVisible = true;
-
-                                // Popup_start.IsVisible = true;
-                                // Popup_start.IsEnabled = true;
                             }
                             else
                                 NavigationController(page);
@@ -418,9 +411,6 @@ namespace aclara_meters.view
             {
                 //REASON
                 dialog_open_bg.IsVisible = true;
-
-                // Popup_start.IsVisible = true;
-                // Popup_start.IsEnabled = true;
             }
             else
                 SwitchToControler(actionTarget);
@@ -631,11 +621,7 @@ namespace aclara_meters.view
             if (!isCancellable)
             {
                 //REASON
-                //isSettings = true;
                 dialog_open_bg.IsVisible = true;
-
-              //  Popup_start.IsVisible = true;
-              //  Popup_start.IsEnabled = true;
                 return;
             }
             
@@ -711,10 +697,7 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
-            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
-            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
-
-            Task.Factory.StartNew(TurnOffMethod);
+            CallLoadViewTurnOff();
         }
 
         private async Task TurnOffMethod ()
@@ -799,13 +782,9 @@ namespace aclara_meters.view
             }
             else
             {
-                //isReturn = true;
-
                 //REASON
                 dialog_open_bg.IsVisible = true;
 
-              //  Popup_start.IsVisible = true;
-              //  Popup_start.IsEnabled = true;
             }
         }
 

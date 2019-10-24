@@ -9,7 +9,6 @@ namespace Xml
         private const int EMPTY_VAL = -1;
     
         private string message;
-        private string messageDebug;
         private string messageFooter;
         private string messagePopup;
 

@@ -35,9 +35,7 @@ namespace aclara_meters.view
         private List<ReadMTUItem> MTUDataListView { get; set; }
 
         private List<ReadMTUItem> FinalReadListView { get; set; }
-
-
-        private List<PageItem> MenuList { get; set; }
+                
         private bool _userTapped;
         private IUserDialogs dialogsSaved;
 
@@ -531,10 +529,7 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
-            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
-            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
-
-            Task.Factory.StartNew(TurnOffMethod);
+            CallLoadViewTurnOff();
         }
 
         private async Task TurnOffMethod()
@@ -598,11 +593,7 @@ namespace aclara_meters.view
             Application.Current.MainPage.Navigation.PopToRootAsync(false);
         }
 
-        //private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
-        //{
-        //    ((ListView)sender).SelectedItem = null;
-        //}
-
+        
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
         private void OnMenuItemSelected(object sender, ItemTappedEventArgs e)

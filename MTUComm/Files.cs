@@ -65,7 +65,7 @@ namespace MTUComm
                     }
                 }
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 throw new FtpConnectionException ();
             }

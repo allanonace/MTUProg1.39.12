@@ -17,9 +17,7 @@ namespace aclara_meters.view
     [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class MenuView : RelativeLayout
     {
-        public ActionType action;
-        private ActionType actionTypeNew;
-
+     
         private List<PageItem> MenuList { get; set; }
         public MenuView()
         {

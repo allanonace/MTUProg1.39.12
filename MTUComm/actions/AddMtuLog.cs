@@ -30,8 +30,6 @@ namespace MTUComm
         private XElement  turnOnAction;
         private XElement  readMtuAction;
         
-        private string uniLog;
-
         public AddMtuLog(Logger logger, dynamic form, string user )
         {
             this.logger = logger;
@@ -485,7 +483,7 @@ namespace MTUComm
                     else
                         logger.ComplexParameter(this.readMtuAction, result, parameter);
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
                     
                 }

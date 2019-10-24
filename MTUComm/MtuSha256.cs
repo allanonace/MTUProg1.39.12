@@ -197,16 +197,16 @@ namespace MTUComm
             SHA_H[7] += h;  
         }
 
-        private static string kCertificatePassword = "pass4y0u";//"@CL@r@";
-        
-        // test ->
+         // test ->
         public string GetKeyFromContainer(string ContainerName)
         {
             // Create the CspParameters object and set the key container 
             // name used to store the RSA key pair.
-            CspParameters cp = new CspParameters();
-            cp.KeyContainerName = ContainerName;
-            
+            CspParameters cp = new CspParameters
+            {
+                KeyContainerName = ContainerName
+            };
+
             // Create a new instance of RSACryptoServiceProvider that accesses
             // the key container MyKeyContainerName.
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider(cp);
@@ -224,7 +224,7 @@ namespace MTUComm
 
             // Fill the array with a random value
             Gen.GetBytes ( randomNumber );
-
+            Gen.Dispose();
             return randomNumber;
         }
 

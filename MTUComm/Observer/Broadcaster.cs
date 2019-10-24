@@ -103,7 +103,7 @@ namespace MTUComm.Observer
                 {
                     evnt = events[ eventId ].Single ( e => e.observer == observer );
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
                     // Observer is not registered for selected event
                     return;

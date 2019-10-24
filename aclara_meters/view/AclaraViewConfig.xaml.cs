@@ -24,16 +24,14 @@ namespace aclara_meters.view
     {
         #region Constants
 
-        private const bool DEBUG_MODE_ON = false;
-
         private const string SO_ANDROID = "Android";
         private const string SO_IOS = "iOS";
         private const string SO_UNKNOWN = "Unknown";
 
         #endregion
         private Configuration config;
-        public string ConfigVersion;
-        public string NewConfigVersion;
+        private string ConfigVersion;
+        private string NewConfigVersion;
         private bool checkConfigFiles = false;
         private string DateCheck;
 
@@ -90,7 +88,8 @@ namespace aclara_meters.view
                                 checkConfigFiles = true;
                                 // Backup current and update config files
                                 GenericUtilsClass.BackUpConfigFiles();
-                                if (!(Result = UpdateConfigFiles()))
+                                Result = UpdateConfigFiles();
+                                if (!Result)
                                 {
                                     GenericUtilsClass.RestoreConfigFiles();
                                     this.ShowErrorAndKill(new ConfigurationFilesNewVersionException());
@@ -147,11 +146,7 @@ namespace aclara_meters.view
                     });
                 else
                 {
-                    //if (Data.Get.IsIOS)
-                    //   // taskSemaphoreIOS.SetResult(true);
-                    //else
-                    //if (Data.Get.IsAndroid)
-                        HandleUrl(FormsApp.dataUrl);
+                    HandleUrl(FormsApp.DataUrl);
                 }
             }
         }
@@ -246,14 +241,14 @@ namespace aclara_meters.view
                     case Device.Android:
                         config.setPlatform(SO_ANDROID);
                         config.setAppName(FormsApp.AppName);
-                        config.setVersion(FormsApp.appVersion_str);
-                        config.setDeviceUUID(FormsApp.deviceId);
+                        config.setVersion(FormsApp.AppVersion_str);
+                        config.setDeviceUUID(FormsApp.DeviceId);
                         break;
                     case Device.iOS:
                         config.setPlatform(SO_IOS);
                         config.setAppName(FormsApp.AppName);
-                        config.setVersion(FormsApp.appVersion_str);
-                        config.setDeviceUUID(FormsApp.deviceId);
+                        config.setVersion(FormsApp.AppVersion_str);
+                        config.setDeviceUUID(FormsApp.DeviceId);
                         break;
                     default:
                         config.setPlatform(SO_UNKNOWN);
@@ -289,7 +284,7 @@ namespace aclara_meters.view
         #endregion
         #region Scripting
 
-        public async void HandleUrl(Uri url)
+        public async Task HandleUrl(Uri url)
         {
             Data.Set("IsFromScripting", true);
 
@@ -305,76 +300,60 @@ namespace aclara_meters.view
                 if (FormsApp.ble_interface != null &&
                     FormsApp.ble_interface.IsOpen())
                     FormsApp.ble_interface.Close();
-
-                #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
-
-                // await adapter.DisableAdapter();
-                // await adapter.EnableAdapter(); //Android shows a window to allow bluetooth
-
-                #endregion
-
             }
             catch (Exception e)
             {
                 Utils.Print(e.StackTrace);
             }
 
-            if (url != null)
+            if (url == null)
             {
-                //string path = Mobile.ConfigPath;
-                //ConfigPaths();
-                string path = Mobile.ConfigPath;
-                NameValueCollection query = HttpUtility.ParseQueryString(url.Query);
+                return;
+            }
 
-                var script_name = query.Get("script_name");
-                var script_data = query.Get("script_data");
-                var callback = query.Get("callback");
+            string path = Mobile.ConfigPath;
+            NameValueCollection query = HttpUtility.ParseQueryString(url.Query);
 
-                if (script_name != null)
-                    path = Path.Combine(path, "___" + script_name.ToString());
+            var script_name = query.Get("script_name");
+            var script_data = query.Get("script_data");
+            var callback = query.Get("callback");
 
-                if (script_data != null)
-                    File.WriteAllText(path, Base64Decode(script_data));
+            if (script_name != null)
+                path = Path.Combine(path, "___" + script_name.ToString());
 
-                if (callback != null) { /* ... */ }
+            if (script_data != null)
+                File.WriteAllText(path, Base64Decode(script_data));
 
-                try
+            if (callback != null) { /* ... */ }
+
+            try
+            {
+                if (Data.Get.IsIOS)
                 {
-                    if (Data.Get.IsIOS)
+ 
+                    await Task.Run(async () =>
                     {
-                        // Scripting
-                        //if (Application.Current.MainPage == null)
-                        //{
-                        //    taskSemaphoreIOS = new TaskCompletionSource<bool>();
-
-                        //    // Wait until HandleUrl finishes
-                        //    bool result = await taskSemaphoreIOS.Task;
-                        //}
-
-                        await Task.Run(async () =>
-                        {
-                            await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
-                            {
-                                Application.Current.MainPage = new NavigationPage(
-                                    new AclaraViewScripting(path, callback, script_name));
-
-                                await Application.Current.MainPage.Navigation.PopToRootAsync(true);
-                            });
-                        });
-                    }
-                    else
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
+                        await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
                         {
                             Application.Current.MainPage = new NavigationPage(
                                 new AclaraViewScripting(path, callback, script_name));
+
+                            await Application.Current.MainPage.Navigation.PopToRootAsync(true);
                         });
-                    }
+                    });
                 }
-                catch (Exception ex)
+                else
                 {
-                    Console.WriteLine($"-----  {ex.Message}");
+                    Device.BeginInvokeOnMainThread(() =>
+                    {
+                        Application.Current.MainPage = new NavigationPage(
+                            new AclaraViewScripting(path, callback, script_name));
+                    });
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"-----  {ex.Message}");
             }
         }
 
@@ -411,8 +390,7 @@ namespace aclara_meters.view
 
                     return true;
                 }
-                //this.ShowErrorAndKill(new NoInternetException());
-                //MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
+  
                 return false;
             }
             else

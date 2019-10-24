@@ -30,58 +30,27 @@ namespace aclara_meters
 {
     public partial class FormsApp : Application
     {
-        #region Initial FTP - Default Config data
-
-        //string host = "159.89.29.176";
-        //string username = "aclara";
-        //string password = "aclara1234";
-        //string pathRemoteFile = "/home/aclara";
-
-        #endregion
-
-        #region Constants
-
-        private const bool   DEBUG_MODE_ON = false;
-
-        private const string SO_ANDROID = "Android";
-        private const string SO_IOS     = "iOS";
-        private const string SO_UNKNOWN = "Unknown";
-       
-        #endregion
 
         #region Attributes
 
-        public static string appVersion_str;
-        public static string deviceId;
-        public static string ConfigVersion;
-        public static string NewConfigVersion;
-        private bool checkConfigFiles = false;
         private string DateCheck;
 
         public static CredentialsService credentialsService { get; private set; }
-        public static BleSerial ble_interface;
-        //public static  Logger logger;
-        //public static Configuration config;
-        public static Uri dataUrl;
+        public static BleSerial ble_interface { get; private set; }
 
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
         private string appVersion;
 
-        private bool formsInitFailed;
-
-        //public static TaskCompletionSource<bool> taskSemaphoreIOS;
-
         #endregion
 
         #region Properties
+               
+        public static string AppName { get; private set; } = "Aclara MTU Programmer ";
 
-        private static string appName = "Aclara MTU Programmer ";
-
-        public static string AppName
-        {
-            get { return appName; }
-        }
+        public static string DeviceId { get; set; }
+        public static string AppVersion_str { get; set; }
+        public static Uri DataUrl { get; set; }
 
         #endregion
 
@@ -110,7 +79,7 @@ namespace aclara_meters
                 var platform = DependencyService.Get<IAdapterBluetooth>();
                 adapter = platform.GetNativeBleAdapter();
 
-                dataUrl =url;
+                DataUrl =url;
                            
                 Data.Set ( "ActionInitialized", false );
                 Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
@@ -118,7 +87,7 @@ namespace aclara_meters
 
                 this.dialogs    = dialogs;
                 this.appVersion = appVersion;
-                appName        += ( Data.Get.IsAndroid ) ? "Android" : "iOS";
+                AppName        += ( Data.Get.IsAndroid ) ? "Android" : "iOS";
 
                 // Config path
                 ConfigPaths();
@@ -142,9 +111,9 @@ namespace aclara_meters
 
             Utils.Print("FormsApp: Interactive [ " + Data.Get.IsFromScripting + " ]");
 
-            appVersion_str = appVersion;
+            AppVersion_str = appVersion;
 
-            deviceId = CrossDeviceInfo.Current.Id;
+            DeviceId = CrossDeviceInfo.Current.Id;
 
             // Profiles manager
             credentialsService = new CredentialsService();
@@ -255,106 +224,27 @@ namespace aclara_meters
 
         #region Scripting iOS
 
-        public async void HandleUrl ( Uri url )
+        public  void HandleUrl ( Uri url )
         {
             Data.Set ( "IsFromScripting", true );
 
             Utils.Print ( "FormsApp: Scripting [ " + Data.Get.IsFromScripting + " ]" );
             Utils.Print ("FormsApp: Uri.Query [ " + url.Query.ToString() + " ]");
 
-            dataUrl = url;
-            // Stops logic because initialization has been canceled due to an error / exception
-            if ( this.formsInitFailed )
-                return;
-        
-            //try
-            //{
-            //    if ( ble_interface != null &&
-            //         ble_interface.IsOpen() )
-            //        ble_interface.Close();
-
-            //    #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
-
-            //   // await adapter.DisableAdapter();
-            //   // await adapter.EnableAdapter(); //Android shows a window to allow bluetooth
-
-            //    #endregion
-
-            //}
-            //catch (Exception e)
-            //{
-            //    Utils.Print(e.StackTrace);
-            //}
-
-            //if ( url != null )
-            //{
-            //    //string path = Mobile.ConfigPath;
-            //    //ConfigPaths();
-            //    string path = Mobile.ConfigPath;
-            //    NameValueCollection query = HttpUtility.ParseQueryString ( url.Query );
-
-            //    var script_name = query.Get ( "script_name" );
-            //    var script_data = query.Get ( "script_data" );
-            //    var callback    = query.Get ( "callback"    );
-
-            //    if ( script_name != null )
-            //        path = Path.Combine ( path, "___" + script_name.ToString () );
-
-            //    if ( script_data != null )
-            //        File.WriteAllText ( path, Base64Decode ( script_data ) );
-
-            //    if ( callback != null ) { /* ... */ }
-
-            //    try
-            //    {
-            //        if ( Data.Get.IsIOS )
-            //        {
-            //            // Scripting
-            //            //if ( MainPage == null )
-            //            //{
-            //            //    taskSemaphoreIOS = new TaskCompletionSource<bool>();
-
-            //            //    // Wait until HandleUrl finishes
-            //            //    bool result = await taskSemaphoreIOS.Task;
-            //            //}
-
-            //            await Task.Run ( async () =>
-            //            {
-            //                await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread ( async () =>
-            //                {
-            //                    Application.Current.MainPage = new NavigationPage (
-            //                        new AclaraViewScripting ( path, callback, script_name ) );
-
-            //                    await MainPage.Navigation.PopToRootAsync(true);
-            //                });
-            //            });
-            //        }
-            //        else
-            //        {
-            //            Device.BeginInvokeOnMainThread ( () =>
-            //            {
-            //                Application.Current.MainPage = new NavigationPage (
-            //                    new AclaraViewScripting ( path, callback, script_name ) );
-            //            });
-            //        }
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        Console.WriteLine($"-----  {ex.Message}");
-            //    }
-            //}
+            DataUrl = url;
+ 
         }
-        
+
         #endregion
 
         #region Events
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S1186:Methods should not be empty", Justification = "<pendiente>")]
         protected override void OnStart()
         {
-            // https://appcenter.ms/users/ma.jimenez/apps/Aclara-MTU-Testing-App
-            //AppCenter.Start("ios=cb622ad5-e2ad-469d-b1cd-7461f140b2dc;" + "android=53abfbd5-4a3f-4eb2-9dea-c9f7810394be", typeof(Analytics), typeof(Crashes), typeof(Distribute) );
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S1186:Methods should not be empty", Justification = "<pendiente>")]
         protected override void OnSleep()
         {
         }
@@ -438,7 +328,6 @@ namespace aclara_meters
                 var capturedTraces = typeof ( StackTrace ).GetField ( "captured_traces", BindingFlags.Instance | BindingFlags.NonPublic)
                   .GetValue ( traces ) as StackTrace[];
                 
-                //string traces2 = exception.InnerException.StackTrace;
                 foreach ( StackTrace trace in capturedTraces )
                     foreach ( StackFrame frame in trace.GetFrames () )
                         str.AppendLine ( frame.GetFileName () + ".." + Environment.NewLine +
@@ -467,9 +356,7 @@ namespace aclara_meters
         private void ShowErrorAndKill (
             Exception e )
         {
-            // Avoids executing the HandleUrl method
-            this.formsInitFailed = true;
-        
+       
             Device.BeginInvokeOnMainThread(() =>
             {
                 this.MainPage = new NavigationPage ( new ErrorInitView ( e ) );

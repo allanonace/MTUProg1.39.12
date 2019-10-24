@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Xml;
 using MvvmHelpers;
 using System.Threading.Tasks;
@@ -13,7 +10,7 @@ using aclara_meters;
 
 namespace aclara.ViewModels
 {
-    public class TabLogViewModel:BaseViewModel
+    public class TabLogViewModel: BaseViewModel
     {
         private const int HEIGH_TEXT_LIST = 22;
         public ObservableRangeCollection<ItemsLog> ItemsLog { get; } = new ObservableRangeCollection<ItemsLog>();
@@ -48,7 +45,8 @@ namespace aclara.ViewModels
             fileStream.Close();
             IndexFile = ind;
             FileName = file.Name;
-            FileDateTime = file.CreationTime.ToString("MM/dd/yyyy HH:00");
+            //FileDateTime = file.CreationTime.ToString("MM/dd/yyyy HH:00");
+            FileDateTime = $"{FileName.Substring(0,2)}/{FileName.Substring(2, 2)}/{FileName.Substring(4, 4)} {FileName.Substring(8, 2)}:00";
 
         }
 
@@ -161,9 +159,7 @@ namespace aclara.ViewModels
                                         Item.SubItemsLog = new List<ItemsLog>();
                                         Item.SubItemsLog.Add(Item1);
                                         Item.SubItemsLog.AddRange(SubItemLogs);
-                                        Item.HayLista = false;
-                                       
-                                        // Item.ListaDatos = null;
+                                        Item.HayLista = false;                                    
                                     }
                                     else
                                     {
@@ -210,8 +206,7 @@ namespace aclara.ViewModels
                             }
                             if (xReader.Name == "Mtus" || xReader.Name == "Error")
                                 bTratar = false;
-                            //sResultado = String.Concat(sResultado, Environment.NewLine);
-                            //listBox1.Items.Add("");
+                           
                             break;
                     }
                 }
@@ -223,7 +218,7 @@ namespace aclara.ViewModels
             };
             ItemsLog.Add(ItemNull);
             ItemsLog.Add(ItemNull);
-            //  Application.Current.MainPage.DisplayAlert("XML", sResultado,"OK");
+          
         }
 
     }

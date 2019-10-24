@@ -23,8 +23,7 @@ namespace aclara_meters.view
 
             if (Device.Idiom == TargetIdiom.Tablet)
             {
-                aclara_logo.Scale = 1.2;
-             //   aclara_logo.TranslationX = 42;
+                aclara_logo.Scale = 1.2;          
             }
         }
         public TapGestureRecognizer GetTGRElement(string buttonName)

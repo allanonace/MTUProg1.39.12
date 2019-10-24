@@ -11,8 +11,7 @@ using System.Xml.Serialization;
 using Library;
 using Library.Exceptions;
 using Xml;
-using Lexi;
-using Library;
+
 
 /// <summary>
 /// LOGIC:
@@ -345,8 +344,9 @@ namespace MTUComm.MemoryMap
                         }
                         catch ( Exception e )
                         {
+                            Utils.PrintDeep("ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException);
                             throw new MemoryMapParseXmlException ( xmlRegister.Id );
-                            Utils.Print ( "ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException );
+                            
                         }
                     }
 
@@ -400,8 +400,9 @@ namespace MTUComm.MemoryMap
                         }
                         catch ( Exception e )
                         {
+                            Utils.PrintDeep("ERROR! " + xmlOverload.Id + " -> " + e.Message + " " + e.InnerException);
                             throw new MemoryMapParseXmlException ( xmlOverload.Id );
-                            Utils.Print ( "ERROR! " + xmlOverload.Id + " -> " + e.Message + " " + e.InnerException );
+                           
                         }
                         
                     }
@@ -1408,7 +1409,7 @@ namespace MTUComm.MemoryMap
                     else
                         Utils.PrintDeep ( "ERROR! FillMemory: Register '" + reg.Id + "' is not present" ); 
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
                     Utils.PrintDeep ( "ERROR! FillMemory: Set register '" + reg.Id + "'" );
                 }
@@ -1447,8 +1448,7 @@ namespace MTUComm.MemoryMap
             str.AppendLine ( "</Registers>" );
             Utils.Print ( str.ToString () );
 
-            str.Clear ();
-            str = null;
+            str.Clear ();            
         }
 
         #endregion

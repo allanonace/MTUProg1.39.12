@@ -424,7 +424,7 @@ namespace Lexi
                 // Validates CRC and if everything is ok, returns recovered data
                 return validateReadResponse ( response, bytesToRead );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 throw new LexiReadingException ();
             }
@@ -658,7 +658,7 @@ namespace Lexi
                     return new LexiWriteResult ( rawBuffer, responseOffset );
                 }
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 throw new LexiWritingException ();
             }

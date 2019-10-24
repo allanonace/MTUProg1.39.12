@@ -21,32 +21,8 @@ namespace aclara_meters.view
         {
             InitializeComponent();
 
-            if (FormsApp.credentialsService.UserName != null)
-            {
-                //userName.Text = FormsApp.credentialsService.UserName;
-
-            }
             LoadMTUData();
-
-            if (Device.Idiom == TargetIdiom.Tablet)
-            {
-                Task.Run(() =>
-                {
-                    Device.BeginInvokeOnMainThread(LoadTabletUI);
-                });
-            }
-            else
-            {
-                Task.Run(() =>
-                {
-                    Device.BeginInvokeOnMainThread(LoadPhoneUI);
-                });
-            }
-            if (Device.RuntimePlatform == Device.Android)
-            {
-               //backmenu.Scale = 1.42;
-
-            }
+           
         }
 
         public TapGestureRecognizer GetTGRElement(string buttonName)
@@ -103,38 +79,16 @@ namespace aclara_meters.view
             if (Singleton.Get.Configuration.Global.ShowDataRead)
                 MenuList.Add(new PageItem() { Title = "Data Read", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.DataRead });
 #if DEBUG
-            // MenuList.Add(new PageItem() { Title = "Read Fabric", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadFabric });
+             MenuList.Add(new PageItem() { Title = "Read Fabric", Icon = "readmtu_icon.png", Color = "White", TargetType = ActionType.ReadFabric });
 #endif
-
 
             // ListView needs to be at least  elements for UI Purposes, even empty ones
             while (MenuList.Count < 9)
                 MenuList.Add(new PageItem() { Title = "", Color = "#6aa2b8", Icon = "" });
 
-            // Setting our list to be ItemSource for ListView in MainPage.xaml
-            //navigationDrawerList.ItemsSource = MenuList;
-
-        }
-
-        private void LoadPhoneUI()
-        {
-        
-            //close_menu_icon.Opacity = 1;
-           
-            //tablet_user_view.TranslationY = -22;
-            //userName.Scale = 1;
-           
-        }
-
-        private void LoadTabletUI()
-        {
-          
-            //close_menu_icon.Opacity = 0;
       
-           //tablet_user_view.TranslationY = -22;
-           //userName.Scale = 1.2;
-         
         }
+
         
     }
 }

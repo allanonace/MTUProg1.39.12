@@ -80,8 +80,7 @@ namespace aclara_meters.viewmodel
             if ( await FormsApp.credentialsService.CredentialsExist () && !Data.Get.IsFromScripting )
             {
                 string user = FormsApp.credentialsService.UserName;
-                //Mobile.LogUserPath = user;
-
+ 
                 PathsLogs(user);
 
                 Singleton.Get.Logger.Login(user);
@@ -153,9 +152,9 @@ namespace aclara_meters.viewmodel
                             PathsLogs(userName);
 
                             Singleton.Get.Logger.Login(userName);
-                            //await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewMainMenu(dialogs_save), false);
+                            
                             Application.Current.MainPage = new NavigationPage(new AclaraViewMainMenu(dialogs_save));
-                            //await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewGlobalUIController(), false);
+                          
                         }
                         else
                         {

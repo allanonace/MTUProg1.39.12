@@ -57,11 +57,7 @@ namespace ble_library
             {
                 Task.Factory.StartNew(blePort.DisconnectDevice).Wait();
             }
-            else
-            {
-                // test
-                value = value;
-            }
+          
         }
     }
 
@@ -108,11 +104,7 @@ namespace ble_library
                 Task.Factory.StartNew(blePort.DisconnectDevice).Wait();
 
             }
-            else
-            {
-                // test
-                value = value;
-            }
+          
         }
     }
 
@@ -696,11 +688,6 @@ namespace ble_library
             }
         }
 
-        private void CosasError(Exception e)
-        {
-            Console.Write(e);
-        }
-
         /// <summary>
         /// Performs an AES Verification to connect bluetooth peripherals.
         /// </summary>
@@ -708,68 +695,7 @@ namespace ble_library
         {
             try
             {
-                // Will also stop listening when gattServer
-                // is disconnected, so if that is acceptable,
-                // you don't need to store this disposable.
-
-
-                //try
-                //{
-                //    // Will also stop listening when gattServer
-                //    // is disconnected, so if that is acceptable,
-                //    // you don't need to store this disposable.
-                //    Listen_ack_response_Handler = gattServer_connection.NotifyCharacteristicValue(
-                //       new Guid("2cf42000-7992-4d24-b05d-1effd0381208"),
-                //       new Guid("00000002-0000-1000-8000-00805f9b34fb"),
-                //        UpdateACKBuffer
-                //    );
-
-                //}
-                //catch (GattException ex)
-                //{
-                //    Utils.Print(ex.ToString());
-                //}
-
-                //gattServer_connection.NotifyCharacteristicValue(
-                //   new Guid("ba792500-13d9-409b-8abb-48893a06dc7d"),
-                //   new Guid("00000004-0000-1000-8000-00805f9b34fb"),
-                //   UpdateAESBuffer,
-                //   CosasError
-                //);
-                //await Task.Delay(1000);
-
-                //IEnumerable<Guid> ListAllServices = gattServer_connection.ListAllServices();
-                //gattServer_connection.ListServiceCharacteristics();
-                // TO-DO: comprobar que tiene servicios y caracteristicas de un PUK? consultar Maria.            
-
-
-                /*
-                ArrayList ListAllServices = new ArrayList();
-                ArrayList ListAllCharacteristics = new ArrayList();
-                try
-                {                    
-                    foreach (var guid in await gattServer_connection.ListAllServices())
-                    {
-                        ListAllServices.Add(guid);
-                        ListAllCharacteristics.Add("_______________________________");
-                        Utils.Print("_______________________________");
-                        ListAllCharacteristics.Add("Service: " + "\n\r" + guid + "\n\r");
-                        Utils.Print("Service: " + "\n\r" + guid + "\n\r");
-                        ListAllCharacteristics.Add("________Caracteristics_________");
-                        Utils.Print("________Caracteristics_________");
-                        foreach (var DescriptionOrGuid in await gattServer_connection.ListServiceCharacteristics(guid))
-                        {
-                            ListAllCharacteristics.Add(DescriptionOrGuid);
-                            Utils.Print(DescriptionOrGuid);
-                        }
-                    }
-                }
-                catch (Exception j)
-                {
-
-                }
-                */
-
+ 
                 bool hayServicio = false;
                 int reintentos = 5;
 
@@ -1040,7 +966,7 @@ namespace ble_library
                 await gattServer_connection.Disconnect();
 
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 
             }
@@ -1095,7 +1021,7 @@ namespace ble_library
 									}
 								}
 							}
-                            catch (Exception e)
+                            catch (Exception )
 							{
 							}
 						},
@@ -1109,7 +1035,7 @@ namespace ble_library
                 //  Utils.Print($"-----------------------------------------------------Escaneado terminado, encontrados: {BlePeripheralList.Count}, thread: {Thread.CurrentThread.ManagedThreadId}");
 						// scanning has been stopped when code reached this point
 			}
-			catch (Exception e)
+			catch (Exception )
             {
 			}
 		}

@@ -287,11 +287,8 @@ namespace aclara_meters.view
             {
                 //REASON
                 if (!isCancellable)
-                {
-                    
+                {                    
                     dialog_open_bg.IsVisible = true;
-                   // Popup_start.IsVisible = true;
-                   // Popup_start.IsEnabled = true;
                 }
                 else DoLogoff();
             });
@@ -341,11 +338,6 @@ namespace aclara_meters.view
 
         #region Menu options
 
-        //private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e )
-        //{
-        //    ((ListView)sender).SelectedItem = null;
-        //}
-
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
         private void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
@@ -380,8 +372,6 @@ namespace aclara_meters.view
                                 //REASON
                                 dialog_open_bg.IsVisible = true;
 
-                               // Popup_start.IsVisible = true;
-                               // Popup_start.IsEnabled = true;
                             }
                             else
                             {
@@ -433,9 +423,6 @@ namespace aclara_meters.view
             {
                 //REASON
                 dialog_open_bg.IsVisible = true;
-
-               // Popup_start.IsVisible = true;
-               // Popup_start.IsEnabled = true;
             }
             else
                 SwitchToControler ( actionTarget );
@@ -628,10 +615,7 @@ namespace aclara_meters.view
             if (!isCancellable)
             {
                 //REASON
-               dialog_open_bg.IsVisible = true;
-
-              //  Popup_start.IsVisible = true;
-              //  Popup_start.IsEnabled = true;
+                dialog_open_bg.IsVisible = true;
                 return;
             }
          
@@ -707,10 +691,7 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
-            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
-            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
-
-            Task.Factory.StartNew(TurnOffMethod);
+            CallLoadViewTurnOff();
         }
 
         private async Task TurnOffMethod ()
@@ -803,13 +784,9 @@ namespace aclara_meters.view
                 Navigation.PopToRootAsync(false);
             }
             else
-            {
-             
+            {             
                 //REASON
                 dialog_open_bg.IsVisible = true;
-
-              //  Popup_start.IsVisible = true;
-              //  Popup_start.IsEnabled = true;
             }
         }
 

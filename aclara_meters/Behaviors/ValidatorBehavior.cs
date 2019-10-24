@@ -18,8 +18,7 @@ namespace aclara_meters.Behaviors
 
         void HandleTextChanged(object sender, TextChangedEventArgs e)
         {
-            bool IsValid = false;
-            IsValid = (Regex.IsMatch(e.NewTextValue, fieldRegex, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250)));
+            bool IsValid = Regex.IsMatch(e.NewTextValue, fieldRegex, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
             ((BorderlessEntry)sender).TextColor = IsValid ? Color.Default : Color.Red;
         }
 
@@ -42,8 +41,7 @@ namespace aclara_meters.Behaviors
 
         void HandleTextChanged(object sender, TextChangedEventArgs e)
         {
-            bool IsValid = false;
-            IsValid = (Regex.IsMatch(e.NewTextValue, fieldRegex, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250)));
+            bool IsValid = Regex.IsMatch(e.NewTextValue, fieldRegex, RegexOptions.IgnoreCase, TimeSpan.FromMilliseconds(250));
             ((BorderlessEntry)sender).TextColor = IsValid ? Color.Default : Color.Red;
         }
 
@@ -74,17 +72,12 @@ namespace aclara_meters.Behaviors
             var entry = (BorderlessEntry)sender;
 
 
-            if (!string.IsNullOrWhiteSpace(e.NewTextValue))
+            if (!string.IsNullOrWhiteSpace(e.NewTextValue) && entry.Text != null && entry.Text.Length > this.MaxLength)
             {
 
-                if (entry.Text != null && entry.Text.Length > this.MaxLength)
-                {
-                    string entryText = entry.Text;
-                    entry.TextChanged -= OnEntryTextChanged;
-                    entry.Text = e.OldTextValue;
-                    entry.TextChanged += OnEntryTextChanged;
-                }
-
+                entry.TextChanged -= OnEntryTextChanged;
+                entry.Text = e.OldTextValue;
+                entry.TextChanged += OnEntryTextChanged;
             }
 
         }
@@ -119,8 +112,7 @@ namespace aclara_meters.Behaviors
                 if (isValid)
                 {
                     if (entry.Text != null && entry.Text.Length > this.MaxLength)
-                    {
-                        string entryText = entry.Text;
+                    {                        
                         entry.TextChanged -= OnEntryTextChanged;
                         entry.Text = e.OldTextValue;
                         entry.TextChanged += OnEntryTextChanged;

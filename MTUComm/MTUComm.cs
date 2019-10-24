@@ -344,7 +344,7 @@ namespace MTUComm
         private Configuration configuration;
         private Global global;
         private Mtu mtu;
-        private bool basicInfoLoaded = false;
+       
         private AddMtuLog addMtuLog;
 
         #endregion
@@ -1774,7 +1774,7 @@ namespace MTUComm
                                 response.PreviousCmdSuccess + " " +
                                 response.ValvePosition );
                         }
-                        catch ( Exception e )
+                        catch ( Exception )
                         {}
                     }
                     while ( ( response == null ||
@@ -3287,7 +3287,7 @@ namespace MTUComm
                     }
                 }
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 //...
             }
@@ -3646,8 +3646,7 @@ namespace MTUComm
             // Actions without form have no problem, but actions that require the user to
             // complete a form before launch the action logic, should avoid to invoking this
             // event the first time, when the basic loading is done to prepare the form
-            if ( OnProgress != null )
-                OnProgress ( this, new Delegates.ProgressArgs ( "Initial Reading..." ) );
+            OnProgress?.Invoke(this, new Delegates.ProgressArgs("Initial Reading..."));
 
             bool mtuHasChanged = await this.LoadMtuBasicInfo_Logic ();
 

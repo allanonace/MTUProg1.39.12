@@ -10,7 +10,7 @@ namespace aclara_meters.view
     {
         #region Attributes
 
-        public viewmodel.LoginMenuViewModel viewModel;
+        private viewmodel.LoginMenuViewModel viewModel;
 
         #endregion
 

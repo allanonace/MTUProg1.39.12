@@ -304,11 +304,8 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
-            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
-            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
-
-            Task.Factory.StartNew(TurnOffMethod);
-        }
+            CallLoadViewTurnOff();
+         }
 
         private async Task TurnOffMethod()
         {

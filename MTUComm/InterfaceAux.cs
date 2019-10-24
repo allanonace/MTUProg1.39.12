@@ -69,7 +69,7 @@ namespace MTUComm
                             })
                             .First ( intf => intf.MtuIDs.Count > 0 );
                     }
-                    catch ( Exception e )
+                    catch ( Exception )
                     {
                         throw new InterfaceNotFoundException_Internal ();
                     }

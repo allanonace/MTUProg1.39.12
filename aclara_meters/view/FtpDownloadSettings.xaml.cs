@@ -18,7 +18,7 @@ namespace aclara_meters.view
         private MTUComm.Mobile.ConfigData config = MTUComm.Mobile.configData;
         private TaskCompletionSource<string> taskSemaphoreDownload;
         const int smallWidthResolution = 768;
-        const int smallHeightResolution = 1280;
+       
         public FtpDownloadSettings (
             TaskCompletionSource<string> taskSemaphore )
         {
@@ -39,7 +39,6 @@ namespace aclara_meters.view
             if ( config.HasFTP )
             {
                 tbx_remote_host.Text = config.ftpDownload_Host;
-                //tbx_user_pass.Text = MTUComm.Mobile.configData.ftpDownload_Pass;
                 tbx_user_name  .Text = config.ftpDownload_User;
                 tbx_remote_path.Text = config.ftpDownload_Path;
                 tbx_remote_port.Text = config.ftpDownload_Port.ToString ();
@@ -89,7 +88,7 @@ namespace aclara_meters.view
                 // Configuration files downloaded correctly
                 taskSemaphoreDownload.SetResult ( "OK" );
             }
-            catch ( Exception exc )
+            catch ( Exception )
             {
                 // Error downloading configuration files
                 taskSemaphoreDownload.SetResult ( "ERROR" );

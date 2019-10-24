@@ -36,8 +36,6 @@ namespace aclara_meters.view
 
         private ActionType actionType;
 
-        public DeviceItem last_item;
-
         private IUserDialogs dialogsSaved;
         private ObservableCollection<DeviceItem> listPucks;
 
@@ -114,7 +112,7 @@ namespace aclara_meters.view
             UploadFilesAndCheckCertificate ();
         }
 
-        public async void UploadFilesAndCheckCertificate()
+        public async Task UploadFilesAndCheckCertificate()
         {
             if (Mobile.configData.IsCertLoaded)
             {
@@ -153,7 +151,7 @@ namespace aclara_meters.view
                         try
                         {
                             Utils.PrintDeep("---------------  printer resume");
-                            //printer.Interrupt();
+                           
                             printer.Resume();
                         }
                         catch (Exception e11)
@@ -232,10 +230,6 @@ namespace aclara_meters.view
                 indicator.IsVisible = false;
                 background_scan_page.IsEnabled = true;
 
-                //DeviceList.IsEnabled = true;
-                //fondo.Opacity = 1;
-                //background_scan_page.Opacity = 1;
-                //background_scan_page.IsEnabled = true;
                 #endregion
             });
         }
@@ -484,7 +478,6 @@ namespace aclara_meters.view
                 batteryIcon = puck.BatteryLevelIcon;
             }
 
-            int rssi = puck.RSSI;
             string rssiIcon = puck.RSSIIcon;
 
             Device.BeginInvokeOnMainThread(async() =>
@@ -516,26 +509,18 @@ namespace aclara_meters.view
 
         private void InvokeMethod()
         {
-            //PrintToConsole("dentro del metodo - InvokeMethod");
-
+ 
             int timeout_connecting = 0;
             int cont = 0;
             int refresh = 0;
 
-          
-            //PrintToConsole("se va a ejecutar un bucle (WHILE TRUE) - InvokeMethod");
-
             while (true)
             {
-                //Utils.Print($"---------------------------------Invoke method while ----dispositivos encontados : {FormsApp.ble_interface.GetBlePeripheralList().Count}");
-                //Utils.Print($"---------------------------------Invoke method while ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
-
+ 
                 if (Settings.IsLoggedIn == false) 
                     break;
 
                 int status = FormsApp.ble_interface.GetConnectionStatus();
-
-                //Utils.Print("se obtiene el estado de la conexion - InvokeMethod");
 
                 if (cont == 2000)
                 {
@@ -555,29 +540,18 @@ namespace aclara_meters.view
                 if (status != peripheralConnected)
                 {
 
-                   // Utils.Print($"---------------------------------Invoke method ----estado : {status} , Perifericoconnected: {peripheralConnected}");
-                   // Utils.Print($"---------------------------------Invoke method ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
-                    
-                    //PrintToConsole("¿ES NO_CONNECTED? - InvokeMethod");
-
                     if (peripheralConnected == ble_library.BlePort.NO_CONNECTED)
                     {
-                        //Utils.Print("    NO_CONNECTED - InvokeMethod");
                         peripheralConnected = status;
                         timeout_connecting = 0;
                     }
                     else if (peripheralConnected == ble_library.BlePort.CONNECTING)
                     {
-                        //Utils.Print("Nop, es CONNECTING - InvokeMethod");
 
                         if (status == ble_library.BlePort.NO_CONNECTED)
                         {
-                            //Utils.Print("Se va a ejecutar algo en la UI - InvokeMethod");
-
                             Device.BeginInvokeOnMainThread(() =>
                             {
-                                //Utils.Print("Se va a detectar el estado de la conexion - InvokeMethod");
-
                                 switch (FormsApp.ble_interface.GetConnectionError())
                                 {
                                     case ble_library.BlePort.NO_ERROR:
@@ -633,8 +607,6 @@ namespace aclara_meters.view
                         }
                         else // status == ble_library.BlePort.CONNECTED
                         {
-                            //Utils.Print("Estas Conectado - InvokeMethod");
-
                             DeviceList.IsEnabled = true;
                            
                             peripheralConnected = status;
@@ -650,8 +622,6 @@ namespace aclara_meters.view
                     }
                     else if (peripheralConnected == ble_library.BlePort.CONNECTED)
                     {
-                        //Utils.Print("Nop, es CONNECTED - InvokeMethod");
-
                         DeviceList.IsEnabled = true;
                        
                         peripheralConnected = status;
@@ -670,16 +640,13 @@ namespace aclara_meters.view
                     }
                 }
 
-                //Utils.Print("¿Está en CONNECTING? - InvokeMethod");
                 if (peripheralConnected == ble_library.BlePort.CONNECTING)
                 {
-                    //Utils.Print("Si, es CONNECTING - InvokeMethod");
                     timeout_connecting++;
                     if (timeout_connecting >= 2 * 12) // 10 seconds
                     {
                         Device.BeginInvokeOnMainThread(() =>
                         {
-                            //Utils.Print("Un Timeout que te llevas - InvokeMethod");
                             Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
 
                             listPucks = new ObservableCollection<DeviceItem>();
@@ -720,15 +687,11 @@ namespace aclara_meters.view
                 }
                 else
                 {
-                    //Utils.Print("Nop, no es CONNECTING - InvokeMethod");
+                    //No es connecting
                 }
 
-                
-                //Utils.Print("Esperamos 300 ms - InvokeMethod");
-                Thread.Sleep(300); // 0.5 Second
-                
-                //Utils.Print("¿Se va a realizar reconexion? - InvokeMethod");
-
+                 Thread.Sleep(300); // 0.5 Second
+              
             }
 
         }
@@ -914,16 +877,10 @@ namespace aclara_meters.view
 
         private void NewOpenConnectionWithDevice()
         {
-
-            //Utils.Print("Se va a entrar en un bucle mientras esté Escaneando bluetooth - NewOpenConnectionWithDevice");
-
             while (FormsApp.ble_interface.IsScanning())
             {
-               // Utils.Print("A esperar 100 ms mientras escanea... - NewOpenConnectionWithDevice");
-                Thread.Sleep(100);
+                 Thread.Sleep(100);
             }
-
-            //Utils.Print("Se va a ejecutar algo en el UI - NewOpenConnectionWithDevice");
 
             Device.BeginInvokeOnMainThread(() =>
             {
@@ -931,29 +888,21 @@ namespace aclara_meters.view
 
                 Device.StartTimer(seconds, () =>
                 {
-                    //Utils.Print("Cada 1 segundo, se ejectua lo siguinete en el UI - NewOpenConnectionWithDevice");
+ 
                     Device.BeginInvokeOnMainThread(() =>
                     {
 
-                        //Utils.Print("¿Esta la conexion abierta ? - NewOpenConnectionWithDevice");
-
-
                         if (!FormsApp.ble_interface.IsOpen())
                         {
-                            //Utils.Print("¿Esta escaneando perifericos ? - NewOpenConnectionWithDevice");
                             while (FormsApp.ble_interface.IsScanning())
                             {
-                                //Utils.Print("A esperar 100 ms en bucle - NewOpenConnectionWithDevice");
                                 Thread.Sleep(100);
                             }
 
                             // call your method to check for notifications here
                             FormsApp.ble_interface.Open ( Singleton.Get.Puck.Device, true );
                         }
-                        else
-                        {
-                            //Utils.Print("NOPE, no lo esta - NewOpenConnectionWithDevice");
-                        }
+
                     });
 
                     return false;
@@ -1000,11 +949,7 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
-
-            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
-            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
-
-            Task.Factory.StartNew(TurnOffMethod);
+            CallLoadViewTurnOff();
         }
 
         private async Task TurnOffMethod()
@@ -1112,8 +1057,6 @@ namespace aclara_meters.view
             {
                 reassociate = true;
             }
-
-            last_item = item;
 
             try
             {

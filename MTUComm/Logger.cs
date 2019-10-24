@@ -77,7 +77,7 @@ namespace MTUComm
                 base_stream += "        <AppName>"   + config.getApplicationName() + "</AppName>";
                 base_stream += "        <Version>"   + config.GetApplicationVersion() + "</Version>";
                 base_stream += "        <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
-                base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+                base_stream += "        <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "        <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "        <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
                 base_stream += "    </AppInfo>";
@@ -94,7 +94,7 @@ namespace MTUComm
                 base_stream += "    <Version>"   + config.GetApplicationVersion() + "</Version>";
                 base_stream += "    <MtuId />";
                 base_stream += "    <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
-                base_stream += "    <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+                base_stream += "    <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "    <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "    <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
                 base_stream += "</NodeDiscoveryReports>";
@@ -107,17 +107,15 @@ namespace MTUComm
                 base_stream += "        <Version>"   + config.GetApplicationVersion() + "</Version>";
                 base_stream += "        <MtuId />";
                 base_stream += "        <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
-                base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+                base_stream += "        <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "        <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "        <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
                 base_stream += "        <Events />";
                 base_stream += "    </Transfer>";
                 base_stream += "</Log>";
                 break;
-            }
-            
-            config = null;
-            
+            }            
+                     
             return base_stream;
         }
         
@@ -131,7 +129,7 @@ namespace MTUComm
             base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
             base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
             base_stream += "        <Date>" + DateTime.Now.ToString("MM/dd/yyyy HH:mm") + "</Date>";
-            base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+            base_stream += "        <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
             base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
             base_stream += "        <AppType>Scripted</AppType>";
             base_stream += "    </AppInfo>";
@@ -146,9 +144,7 @@ namespace MTUComm
             }
             
             base_stream += "</StarSystem>";
-            
-            config = null;
-            
+                        
             string uri = Path.Combine ( Mobile.ConfigPath, "___tmp.xml" );
             Mobile.CreateDirectoryIfNotExist(Mobile.ConfigPath);
 
@@ -209,7 +205,7 @@ namespace MTUComm
                 {
                     XDocument.Load(uri);
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
                     using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, false ))
                     {
@@ -427,7 +423,7 @@ namespace MTUComm
                     else
                         this.ComplexParameter(element, allParamsFromInterface, parameter);
                 }
-                catch ( Exception ex )
+                catch ( Exception )
                 {
                 
                 }

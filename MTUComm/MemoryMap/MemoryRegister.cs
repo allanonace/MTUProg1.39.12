@@ -706,7 +706,7 @@ namespace MTUComm.MemoryMap
                         ok_value );
                 }
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 return false;
             }

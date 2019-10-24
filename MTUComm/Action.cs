@@ -857,9 +857,9 @@ namespace MTUComm
                 this.lastLogCreated = logger.ReadMTU ( this, resultAllInterfaces, args.Mtu );
                 
                 // Show result in the screen
-                this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultAllInterfaces, args.Mtu ) );
+                await this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultAllInterfaces, args.Mtu ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -892,9 +892,9 @@ namespace MTUComm
                 this.lastLogCreated = addMtuLog.Save ();
 
                 // Show result in the screen
-                this.OnFinish ( this, new Delegates.ActionFinishArgs ( result ) );
+                await this.OnFinish ( this, new Delegates.ActionFinishArgs ( result ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -921,7 +921,7 @@ namespace MTUComm
                 // Show result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultBasic ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -971,7 +971,7 @@ namespace MTUComm
                 // Show only the ReadMTU result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -992,7 +992,7 @@ namespace MTUComm
                 // Show only the ReadMTU result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -1039,7 +1039,7 @@ namespace MTUComm
                 if ( result != NodeDiscoveryResult.EXCEPTION )
                     logger.NodeDiscovery ( nodeList, args.Mtu );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -1139,7 +1139,7 @@ namespace MTUComm
                                     default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                                 }
                             }
-                            catch ( Exception e )
+                            catch ( Exception )
                             {
                                 Utils.Print ( "Interface: Map Error: " + sourceProperty );
                                 throw new Exception ();
@@ -1173,7 +1173,7 @@ namespace MTUComm
                         }
                     }
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
                     Utils.PrintDeep ( "Error: Interface parameter '" + parameter.Name + "'" );
                 }
@@ -1327,7 +1327,7 @@ namespace MTUComm
                                 else
                                     result.AddParameter ( new Parameter ( parameter.Name, parameter.Display, meter_reading_error, parameter.Source, indexPort - 1 ) );
                             }
-                            catch ( Exception e )
+                            catch ( Exception )
                             {
                                 //...
                             }
@@ -1369,7 +1369,7 @@ namespace MTUComm
                                                        break;
                                 }
                             }
-                            catch ( Exception e )
+                            catch ( Exception )
                             {
                                 Utils.Print ( "Interface: Map Error: " + sourceProperty );
                                 throw new Exception ();
@@ -1696,7 +1696,7 @@ namespace MTUComm
 
                 return ( finalResult > 0 );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 //...
             }

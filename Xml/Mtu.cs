@@ -221,8 +221,6 @@ namespace Xml
 
         private Family    family;
 
-        private Interface iInfo;
-
         #endregion
     
         public Mtu ()

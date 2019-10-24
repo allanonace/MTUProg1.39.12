@@ -35,8 +35,7 @@ namespace MTUComm
         private string deviceUUID;
         private string version;
         private string appName;
-        private static Configuration instance;
-
+    
         private Configuration ( string path = "", bool avoidXmlError = false )
         {
             string configPath = Mobile.ConfigPath;
@@ -215,7 +214,7 @@ namespace MTUComm
                 allTypes = null;
                 return true;
             }
-            catch (Exception e)
+            catch (Exception )
             {
                 return false;
             }
@@ -306,7 +305,7 @@ namespace MTUComm
             {
                 return getFamilyRegister ( InterfaceAux.GetmemoryMapTypeByMtuId ( mtu ), regsiter_name);
             }
-            catch (Exception e)
+            catch (Exception )
             {
                 return null;
             }
@@ -332,7 +331,7 @@ namespace MTUComm
                         }
                     }
                 }
-            }catch (Exception e) { }
+            }catch (Exception ) { }
 
             return null;
         }
@@ -354,21 +353,9 @@ namespace MTUComm
 
         public String GetDeviceUUID()
         {
-            string return_str = "";
+            string return_str;
 
             return_str = deviceUUID;
-
-            /*
-            if (device.Equals("PC"))
-            {
-                return_str = "ACLARATECH-CLE5478L-KGUILER";
-            }else
-                
-            if (device.Equals("Android") || device.Equals("iOS") )
-            {
-                return_str = deviceUUID;
-            }
-            */
 
             return return_str; //get UUID from Xamarin
         }

@@ -26,7 +26,7 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewScripting
     {
-        private const bool DEBUG_MODE_ON = false;
+        
         private Thread printer;
         private ObservableCollection<DeviceItem> listPucks;
        
@@ -244,11 +244,6 @@ namespace aclara_meters.view
                 indicator.IsVisible = false;
                 txtBuscando.IsVisible = false;
 
-
-                //DeviceList.IsEnabled = true;
-                //fondo.Opacity = 1;
-                //background_scan_page.Opacity = 1;
-                //background_scan_page.IsEnabled = true;
                 #endregion
             });
         }
@@ -904,13 +899,7 @@ namespace aclara_meters.view
                             indicator.IsVisible = false;
                             ContentView_Scripting.IsEnabled = true;
                             ContentView_Scripting_label_read.Text = "Successful Script Execution";
-
-                            Uri repuesta = new Uri(resultCallback + "?" +
-                                                       "status=success" +
-                                                       Compression.GetUriParameter() +
-                                                       "&output_filename=" + resultScriptName +
-                                                       "&output_data=" + Compression.CompressToUrlUsingGlobal(xmlResultTocallback));
-
+                                                       
                             Device.OpenUri ( new Uri ( resultCallback + "?" +
                                                        "status=success" +
                                                        Compression.GetUriParameter () +
@@ -966,7 +955,7 @@ namespace aclara_meters.view
             }
 
             var item = (DeviceItem)e.Item;
-            //fondo.Opacity = 0;
+            
             ContentView_DeviceList.Opacity = 0.5;
             ContentView_DeviceList.IsEnabled = false;
 

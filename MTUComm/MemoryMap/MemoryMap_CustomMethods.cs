@@ -125,7 +125,7 @@ namespace MTUComm.MemoryMap
                  ! mtu.DailyReads )
                 return DISABLED;
         
-            int timeDiff = TimeZone.CurrentTimeZone.GetUtcOffset ( DateTime.Now ).Hours;
+            int timeDiff = TimeZoneInfo.Local.GetUtcOffset ( DateTime.Now ).Hours;
             int curTime = await MemoryRegisters.DailyGMTHourRead.GetValue () + timeDiff;
 
             if ( curTime < 0 )
@@ -165,7 +165,7 @@ namespace MTUComm.MemoryMap
                 tempString = tempString + Convert.ToChar ( await MemoryRegisters.PCBSupplierCode.GetValue () ) + "-";
 
             if ( await MemoryRegisters.PCBCoreNumber.GetValue () >= 0 )
-                tempString = tempString + string.Format ( PCBFORMAT, await MemoryRegisters.PCBCoreNumber.GetValue () );
+                tempString += string.Format ( PCBFORMAT, await MemoryRegisters.PCBCoreNumber.GetValue () );
 
             if ( await MemoryRegisters.PCBProductRevision.GetValue () >= 65 &&
                  await MemoryRegisters.PCBProductRevision.GetValue () <= 90 )
@@ -366,7 +366,7 @@ namespace MTUComm.MemoryMap
 
             if ( timeUnit.StartsWith ( "hour" ) ||
                  timeUnit.StartsWith ( "hr"   ) )
-                timeIntervalMins = timeIntervalMins * 60;
+                timeIntervalMins *= 60;
 
             return timeIntervalMins;
         }

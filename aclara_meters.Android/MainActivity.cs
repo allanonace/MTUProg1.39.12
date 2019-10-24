@@ -21,7 +21,7 @@ using Xamarin.Forms;
 namespace aclara_meters.Droid
 {
     [Activity(Theme = "@style/MainTheme",  MainLauncher = true, NoHistory = true, Name = "com.aclara.mtu.programmer.urlentryclass")]
-    public class urlentryclass : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
+    public class Urlentryclass : global::Xamarin.Forms.Platform.Android.FormsAppCompatActivity
     {
         /// <remarks>
         /// This must be implemented if you want to Subscribe() to IBluetoothLowEnergyAdapter.State to be notified when the
@@ -34,13 +34,13 @@ namespace aclara_meters.Droid
             BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
         }
 
-        protected override void OnCreate(Bundle bundle)
+        protected override void OnCreate(Bundle savedInstanceState)
         {
-            base.OnCreate(bundle);
+            base.OnCreate(savedInstanceState);
 
             UserDialogs.Init(this);
-            global::Xamarin.Forms.Forms.Init(this, bundle);
-            Xamarin.Essentials.Platform.Init(this, bundle);
+            global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             ZXing.Net.Mobile.Forms.Android.Platform.Init();
 
             try
@@ -99,14 +99,14 @@ namespace aclara_meters.Droid
             BluetoothLowEnergyAdapter.OnActivityResult(requestCode, resultCode, data);
         }
 
-        protected override void OnCreate(Bundle bundle)
+        protected override void OnCreate(Bundle savedInstanceState)
         {
  
-            base.OnCreate(bundle);
+            base.OnCreate(savedInstanceState);
 
             UserDialogs.Init(this);
-            global::Xamarin.Forms.Forms.Init(this, bundle);
-            CrossCurrentActivity.Current.Init(this, bundle);
+            global::Xamarin.Forms.Forms.Init(this, savedInstanceState);
+            CrossCurrentActivity.Current.Init(this, savedInstanceState);
             ZXing.Net.Mobile.Forms.Android.Platform.Init();
             CrossCurrentActivity.Current.Activity = this;
             try
@@ -184,9 +184,9 @@ namespace aclara_meters.Droid
     [Activity(Theme = "@style/AppTheme.Splash", MainLauncher = true, NoHistory = true)]
     public class SplashActivity : Activity
     {
-        protected override void OnCreate(Bundle bundle)
+        protected override void OnCreate(Bundle savedInstanceState)
         {
-            base.OnCreate(bundle);
+            base.OnCreate(savedInstanceState);
             StartActivity(typeof(MainActivity));
             Finish();
         }

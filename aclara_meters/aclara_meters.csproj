@@ -93,13 +93,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
-    <Folder Include="XML\" />
     <Folder Include="Behaviors\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="aclara_meters-1.ruleset" />
     <None Remove="aclara_meters.ruleset" />
-    <None Remove="XML\XmlElementList.xml" />
     <None Remove="view\.AclaraViewMainMenu.xaml.cs.swp" />
     <None Remove="Resources\Alarm.xml" />
     <None Remove="Resources\DemandConf.xml" />
