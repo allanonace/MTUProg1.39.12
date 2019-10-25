@@ -53,7 +53,9 @@ namespace aclara_meters.iOS
                 var fullData = appConfig.FullData;
                 foreach (var i in fullData)
                 {
+#pragma warning disable S3217 // "Explicit" conversions of "foreach" loops should not be used
                     foreach (NSString key in i.Keys)
+#pragma warning restore S3217 // "Explicit" conversions of "foreach" loops should not be used
                     {
                         var val = i.ValueForKey(key);
                         if (val is NSString)
@@ -64,19 +66,40 @@ namespace aclara_meters.iOS
                 }
 
                 var data = Mobile.configData;
-
+                
                 // Convert parameters to string and regenerate the certificate
                 if (stringValues.ContainsKey(Mobile.ID_FTP_HOST))
-                    stringValues.TryGetValue(Mobile.ID_FTP_HOST, out data.FtpDownload_Host);
+                {
+                    stringValues.TryGetValue(Mobile.ID_FTP_HOST, out string dataValue);
+                    data.FtpDownload_Host = dataValue;
+                }
                 else return;
                 if (stringValues.ContainsKey(Mobile.ID_FTP_PATH))
-                    stringValues.TryGetValue(Mobile.ID_FTP_PATH, out data.FtpDownload_Path);
+                {
+                    stringValues.TryGetValue(Mobile.ID_FTP_PATH, out string dataValue);
+                    data.FtpDownload_Path = dataValue;
+                }
                 if (stringValues.ContainsKey(Mobile.ID_FTP_PASS))
-                    stringValues.TryGetValue(Mobile.ID_FTP_PASS, out data.FtpDownload_Pass);
+                {
+                    stringValues.TryGetValue(Mobile.ID_FTP_PASS, out string dataValue);
+                    data.FtpDownload_Pass = dataValue;
+                }
                 if (stringValues.ContainsKey(Mobile.ID_FTP_USER))
-                    stringValues.TryGetValue(Mobile.ID_FTP_USER, out data.FtpDownload_User);
+                {
+                    stringValues.TryGetValue(Mobile.ID_FTP_USER, out string dataValue);
+                    data.FtpDownload_User = dataValue;
+                }
                 if (numberValues.ContainsKey(Mobile.ID_FTP_PORT))
-                    numberValues.TryGetValue(Mobile.ID_FTP_PORT, out data.FtpDownload_Port);
+                {
+                    numberValues.TryGetValue(Mobile.ID_FTP_PORT, out int dataValue);
+                    data.FtpDownload_Port = dataValue;
+                }
+                else if (stringValues.ContainsKey(Mobile.ID_FTP_PORT))
+                {
+                    stringValues.TryGetValue(Mobile.ID_FTP_PORT, out string dataValue);
+                    if (int.TryParse(dataValue, out int value))
+                        data.FtpDownload_Port = value;
+                }
 
                 data.HasIntune = true;
 

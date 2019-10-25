@@ -7,7 +7,6 @@ using aclara_meters.util;
                             //using Microsoft.Intune.Mam.Policy;
                             //using Microsoft.Intune.Mam.Client.App;
                             //using Microsoft.Intune.Mam.Policy.AppConfig;
-
                             //using System.Collections.Generic;
 #pragma warning restore S125 // Sections of code should not be "commented out"
 
@@ -59,39 +58,50 @@ namespace aclara_meters.Droid
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception )
                 {
                     return;
                 }
                 var data = Mobile.configData;
 
                 if (dict.ContainsKey(Mobile.ID_FTP_HOST))
-                    dict.TryGetValue(Mobile.ID_FTP_HOST, out data.ftpDownload_Host);
+                {
+                    dict.TryGetValue(Mobile.ID_FTP_HOST, out string dataValue);
+                    data.FtpDownload_Host = dataValue;
+                }
                 else
                     return;
                 // Convert parameters to string and regenerate the certificate
                 if (dict.ContainsKey(Mobile.ID_FTP_USER))
-                    dict.TryGetValue(Mobile.ID_FTP_USER, out data.ftpDownload_User);
-                if (dict.ContainsKey(Mobile.ID_FTP_PORT))
                 {
-                    dict.TryGetValue(Mobile.ID_FTP_PORT, out string Port);
-                    data.ftpDownload_Port = int.Parse(Port);
+                    dict.TryGetValue(Mobile.ID_FTP_USER, out string dataValue);
+                    data.FtpDownload_User = dataValue;
                 }
                 if (dict.ContainsKey(Mobile.ID_FTP_PATH))
-                    dict.TryGetValue(Mobile.ID_FTP_PATH, out data.ftpDownload_Path);
+                {
+                    dict.TryGetValue(Mobile.ID_FTP_PATH, out string dataValue);
+                    data.FtpDownload_Path = dataValue;
+                }
                 if (dict.ContainsKey(Mobile.ID_FTP_PASS))
-                    dict.TryGetValue(Mobile.ID_FTP_PASS, out data.ftpDownload_Pass);
-
+                {
+                    dict.TryGetValue(Mobile.ID_FTP_PASS, out string dataValue);
+                    data.FtpDownload_Pass = dataValue;
+                }
+                if (dict.ContainsKey(Mobile.ID_FTP_PORT))
+                {
+                    dict.TryGetValue(Mobile.ID_FTP_PORT, out string dataValue);
+                    if (int.TryParse(dataValue,out int value))
+                        data.FtpDownload_Port = value;
+                }
 
                 data.HasIntune = true;
-                string certificate = string.Empty;
-                if (dict.TryGetValue(Mobile.ID_CERTIFICATE, out certificate))
+                if (dict.TryGetValue(Mobile.ID_CERTIFICATE, out string certificate))
                 {
                     data.StoreCertificate(data.CreateCertificate(certificate));  //save the certificate in keychain
                 }
 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return;
             } 
