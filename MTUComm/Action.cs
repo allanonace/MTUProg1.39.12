@@ -230,11 +230,6 @@ namespace MTUComm
             ReadingMtu
         };
 
-        public static Dictionary<ActionType, String> logDisplays;
-        public static Dictionary<ActionType, String> logTypes;
-        public static Dictionary<ActionType, String> logReasons;
-        public static Dictionary<ActionType, string[]> actionsTexts;
-
         #endregion
 
         #region Events
@@ -354,7 +349,7 @@ namespace MTUComm
         /// </summary>
         public String LogDisplay
         {
-            get { return logDisplays[type]; }
+            get { return LogDisplays[type]; }
         }
 
         /// <summary>
@@ -369,7 +364,7 @@ namespace MTUComm
         /// </summary>
         public String LogType
         {
-            get { return logTypes[this.type]; }
+            get { return LogTypes[this.type]; }
         }
 
         /// <summary>
@@ -384,7 +379,7 @@ namespace MTUComm
         /// </summary>
         public String LogReason
         {
-            get { return logReasons[this.type]; }
+            get { return LogReasons[this.type]; }
         }
 
         public bool IsWrite
@@ -436,13 +431,18 @@ namespace MTUComm
             }
         }
 
+        public static Dictionary<ActionType, string> LogDisplays { get; set; }
+        public static Dictionary<ActionType, string> LogTypes { get; set; }
+        public static Dictionary<ActionType, string> LogReasons { get; set; }
+        public static Dictionary<ActionType, string[]> ActionsTexts { get; set; }
+
         #endregion
 
         #region Initialization
 
         static Action ()
         {
-            actionsTexts =
+            ActionsTexts =
             new Dictionary<ActionType, string[]>()
             {   
             { ActionType.RemoteDisconnect,
@@ -520,7 +520,7 @@ namespace MTUComm
         };
 
 
-        logDisplays = new Dictionary<ActionType,String> ()
+        LogDisplays = new Dictionary<ActionType,String> ()
             {
                 {ActionType.BasicRead,                      "Basic Read" },
                 {ActionType.ReadMtu,                        "Read MTU" },
@@ -538,7 +538,7 @@ namespace MTUComm
                 {ActionType.RemoteDisconnect,               "Valve Operation" }
             };
 
-            logTypes = new Dictionary<ActionType,String> ()
+            LogTypes = new Dictionary<ActionType,String> ()
             {
                 {ActionType.BasicRead,                      "BasicRead" },
                 {ActionType.ReadMtu,                        "ReadMTU" },
@@ -556,7 +556,7 @@ namespace MTUComm
                 {ActionType.RemoteDisconnect,               "Valve Operation" }
             };
 
-            logReasons = new Dictionary<ActionType,String> ()
+            LogReasons = new Dictionary<ActionType,String> ()
             {
                 {ActionType.BasicRead,                      "BasicRead" },
                 {ActionType.ReadMtu,                        "ReadMtu" },
@@ -1159,7 +1159,7 @@ namespace MTUComm
                                 else
                                 {
                                     paramToAdd.CustomParameter = parameter.Name;
-                                    paramToAdd.source = parameter.Source;
+                                    paramToAdd.Source = parameter.Source;
                                 }
                             }
                         

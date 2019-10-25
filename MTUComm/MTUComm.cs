@@ -1349,7 +1349,7 @@ namespace MTUComm
                                 
                                 lexiTimeOut = false;
                             }
-                            catch ( Exception ) { }
+                            catch (Exception e) { Console.WriteLine($"mtucomm.cs_nodeDiscovery {e.Message}"); }
                         }
                         while ( ( lexiTimeOut ||
                                   fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY ) &&
@@ -1774,8 +1774,7 @@ namespace MTUComm
                                 response.PreviousCmdSuccess + " " +
                                 response.ValvePosition );
                         }
-                        catch ( Exception )
-                        {}
+                        catch (Exception e) { Console.WriteLine($"mtucomm.cs_Remotedisconnectlogic {e.Message}"); }
                     }
                     while ( ( response == null ||
                               response.ValvePosition == RDDValveStatus.IN_TRANSITION ||
@@ -2188,7 +2187,7 @@ namespace MTUComm
                     {
                         isAutodetectMeter = true;
                     
-                        meters = configuration.meterTypes.FindByDialDescription (
+                        meters = configuration.MeterTypes.FindByDialDescription (
                             int.Parse ( form.NumberOfDials.Value ),
                             int.Parse ( form.DriveDialSize.Value ),
                             form.UnitOfMeasure.Value,
@@ -2243,7 +2242,7 @@ namespace MTUComm
                              form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE_2 ) &&
                              form.ContainsParameter ( FIELD.UNIT_MEASURE_2    ) )
                         {
-                            meters = configuration.meterTypes.FindByDialDescription (
+                            meters = configuration.MeterTypes.FindByDialDescription (
                                 int.Parse ( form.NumberOfDials_2.Value ),
                                 int.Parse ( form.DriveDialSize_2.Value ),
                                 form.UnitOfMeasure_2.Value,
@@ -2652,7 +2651,7 @@ namespace MTUComm
                 #region Auto-detect Alarm
     
                 // Auto-detect scripting Alarm profile
-                List<Alarm> alarms = configuration.alarms.FindByMtuType ( (int)Data.Get.MtuBasicInfo.Type );
+                List<Alarm> alarms = configuration.Alarms.FindByMtuType ( (int)Data.Get.MtuBasicInfo.Type );
                 if ( alarms.Count > 0 )
                 {
                     Alarm alarm = alarms.Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
@@ -2970,10 +2969,7 @@ namespace MTUComm
                             if ( map.ContainsMember ( "AlarmMask1" ) ) map.AlarmMask1 = false; // Set '0'
                             if ( map.ContainsMember ( "AlarmMask2" ) ) map.AlarmMask2 = false;
                         }
-                        catch ( Exception )
-                        {
-
-                        }
+                        catch (Exception e) { Console.WriteLine($"mtucomm.cs_addmtu {e.Message}"); }
                     }
                     // No alarm profile was selected before launch the action
                     else throw new SelectedAlarmForCurrentMtuException ();
@@ -3297,12 +3293,12 @@ namespace MTUComm
                 {
                     Mobile.ConfigData data = Mobile.configData;
                     
-                    data.lastRandomKey    = new byte[ aesKey.Length ];
-                    data.lastRandomKeySha = new byte[ sha   .Length ];
+                    data.LastRandomKey    = new byte[ aesKey.Length ];
+                    data.LastRandomKeySha = new byte[ sha   .Length ];
                 
                     // Save data to log
-                    Array.Copy ( aesKey, data.lastRandomKey,    aesKey.Length );
-                    Array.Copy ( sha,    data.lastRandomKeySha, sha.Length    );
+                    Array.Copy ( aesKey, data.LastRandomKey,    aesKey.Length );
+                    Array.Copy ( sha,    data.LastRandomKeySha, sha.Length    );
                 }
                 
                 // Always clear temporary random key from memory, and then after generate the
@@ -3312,7 +3308,7 @@ namespace MTUComm
             }
             
             // MTU encryption has failed
-            if ( ! ( Mobile.configData.isMtuEncrypted = ok ) )
+            if ( ! ( Mobile.configData.IsMtuEncrypted = ok ) )
                 throw new ActionNotAchievedEncryptionException ( CMD_ENCRYP_OLD_MAX + "" );
             
             await this.CheckIsTheSameMTU ();

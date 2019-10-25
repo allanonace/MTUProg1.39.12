@@ -239,7 +239,7 @@ namespace MTUComm
                 {
                     isAutodetectMeter = true;
                 
-                    meters = config.meterTypes.FindByDialDescription (
+                    meters = config.MeterTypes.FindByDialDescription (
                         int.Parse ( data[ APP_FIELD.NumberOfDials ].Value ),
                         int.Parse ( data[ APP_FIELD.DriveDialSize ].Value ),
                         data[ APP_FIELD.UnitOfMeasure ].Value,
@@ -300,7 +300,7 @@ namespace MTUComm
                     {
                         isAutodetectMeter = true;
 
-                        meters = config.meterTypes.FindByDialDescription (
+                        meters = config.MeterTypes.FindByDialDescription (
                             int.Parse ( data[ APP_FIELD.NumberOfDials_2 ].Value ),
                             int.Parse ( data[ APP_FIELD.DriveDialSize_2 ].Value ),
                             data[ APP_FIELD.UnitOfMeasure_2 ].Value,

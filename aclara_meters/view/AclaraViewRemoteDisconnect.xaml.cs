@@ -83,7 +83,7 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                string[] texts = MTUComm.Action.actionsTexts[ this.actionType ];
+                string[] texts = MTUComm.Action.ActionsTexts[ this.actionType ];
             
                 name_of_window_port1  .Text   = texts[ 0 ] + " - " + LB_PORT1;
                 

@@ -225,7 +225,7 @@ namespace aclara_meters.view
             {
                 #region New Circular Progress bar Animations    
                 DeviceList.IsRefreshing = false;
-                backdark_bg.IsVisible = false;
+                backdark_bg.IsVisible = true;
                 indicator.IsVisible = true;
                 txtBuscando.IsVisible = true;
                 ContentView_DeviceList.IsEnabled = false;

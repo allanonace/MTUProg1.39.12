@@ -380,7 +380,7 @@ namespace Library
 
             // Add zeros up to the required length
             TypeCode code;
-            byte[] subZeros = null;
+            byte[] subZeros = new byte[1];
             switch ( code = Type.GetTypeCode ( typeof ( T ) ) )
             {
                 case TypeCode.Byte  :

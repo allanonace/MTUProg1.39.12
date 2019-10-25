@@ -252,7 +252,7 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                string[] texts = MTUComm.Action.actionsTexts[this.actionType];
+                string[] texts = MTUComm.Action.ActionsTexts[this.actionType];
 
                 name_of_window_port1.Text = texts[0] + " - " + LB_PORT1;
                 name_of_window_port2.Text = texts[1] + " - " + LB_PORT2;
@@ -429,20 +429,20 @@ namespace aclara_meters.view
                 {
                     bool autoDetect = await this.add_mtu.MTUComm.AutodetectMeterEncoders(currentMtu);
                     if (autoDetect)
-                        this.list_MeterTypesForMtu = this.config.meterTypes.FindByEncoderTypeAndLiveDigits(
+                        this.list_MeterTypesForMtu = this.config.MeterTypes.FindByEncoderTypeAndLiveDigits(
                             currentMtu.Port1.MeterProtocol,
                             currentMtu.Port1.MeterLiveDigits);
 
                     // If auto-detect fails, show all Encoder/Ecoder Meters    
                     if (!autoDetect ||
                          this.list_MeterTypesForMtu.Count <= 0)
-                        this.list_MeterTypesForMtu = this.config.meterTypes.FindAllForEncodersAndEcoders();
+                        this.list_MeterTypesForMtu = this.config.MeterTypes.FindAllForEncodersAndEcoders();
                 }
                 // Pulse
-                else this.list_MeterTypesForMtu = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu);
+                else this.list_MeterTypesForMtu = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu);
             }
             // RDD
-            else this.list_MeterTypesForMtu_V = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu);
+            else this.list_MeterTypesForMtu_V = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu);
 
             if (this.currentMtu.TwoPorts)
             {
@@ -454,40 +454,31 @@ namespace aclara_meters.view
                     {
                         bool autoDetect = await this.add_mtu.MTUComm.AutodetectMeterEncoders(currentMtu, 2);
                         if (autoDetect)
-                            this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByEncoderTypeAndLiveDigits(
+                            this.list_MeterTypesForMtu_2 = this.config.MeterTypes.FindByEncoderTypeAndLiveDigits(
                                 currentMtu.Port2.MeterProtocol,
                                 currentMtu.Port2.MeterLiveDigits);
 
                         // If auto-detect fails, show all Encoder/Ecoder Meters    
                         if (!autoDetect ||
                              this.list_MeterTypesForMtu_2.Count <= 0)
-                            this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindAllForEncodersAndEcoders();
+                            this.list_MeterTypesForMtu_2 = this.config.MeterTypes.FindAllForEncodersAndEcoders();
                     }
                     // Pulse
-                    else this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu, 1);
+                    else this.list_MeterTypesForMtu_2 = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu, 1);
                 }
                 // RDD
-                else this.list_MeterTypesForMtu_V = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu, 1);
+                else this.list_MeterTypesForMtu_V = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu, 1);
             }
 
             Device.BeginInvokeOnMainThread(() =>
-          {
-              this.InitializePicker_MeterType();
-              if (hasTwoPorts)
-                  this.InitializePicker_MeterType_2();
-              if (hasValve)
-                  this.InitializePicker_MeterType_V();
-          });
+            {
+                this.InitializePicker_MeterType();
+                if (hasTwoPorts)
+                    this.InitializePicker_MeterType_2();
+                if (hasValve)
+                    this.InitializePicker_MeterType_V();
+            });
 
-            bool ShowMeterVendor = global.ShowMeterVendor;
-            if (ShowMeterVendor)
-            {
-                // TODO: group meters by vendor / model / name
-            }
-            else
-            {
-                // TODO: display meter list directly, by  name
-            }
         }
 
         private async Task InitializeRDDForm()
@@ -871,7 +862,7 @@ namespace aclara_meters.view
 
             #region Alarms
 
-            alarmsList = config.alarms.FindByMtuType(this.detectedMtuType);
+            alarmsList = config.Alarms.FindByMtuType(this.detectedMtuType);
 
             // Remove "Scripting" option in interactive mode
             alarmsList = alarmsList.FindAll ( alarm => !string.Equals ( alarm.Name.ToLower (), "scripting" ) );
@@ -905,7 +896,7 @@ namespace aclara_meters.view
 
             #region Demands
 
-            demandsList = config.demands.FindByMtuType ( this.detectedMtuType );
+            demandsList = config.Demands.FindByMtuType ( this.detectedMtuType );
 
             // Remove "Scripting" option in interactive mode
             demandsList = demandsList.FindAll ( demand => !string.Equals ( demand.Name.ToLower (), "scripting" ) );
@@ -1779,7 +1770,7 @@ namespace aclara_meters.view
 
         private void InitializePicker_MeterType()
         {
-            list_MeterType_Vendors = this.config.meterTypes.GetVendorsFromMeters(list_MeterTypesForMtu);
+            list_MeterType_Vendors = this.config.MeterTypes.GetVendorsFromMeters(list_MeterTypesForMtu);
 
             Frame meterVendorsContainerB = new Frame()
             {
@@ -1965,7 +1956,7 @@ namespace aclara_meters.view
 
         private void InitializePicker_MeterType_2()
         {
-            list_MeterType_Vendors_2 = this.config.meterTypes.GetVendorsFromMeters(list_MeterTypesForMtu_2);
+            list_MeterType_Vendors_2 = this.config.MeterTypes.GetVendorsFromMeters(list_MeterTypesForMtu_2);
 
             Frame meterVendors2ContainerB = new Frame()
             {
@@ -2173,7 +2164,7 @@ namespace aclara_meters.view
 
         private void InitializePicker_MeterType_V()
         {
-            list_MeterType_Vendors_V = this.config.meterTypes.GetVendorsFromMeters(list_MeterTypesForMtu_V);
+            list_MeterType_Vendors_V = this.config.MeterTypes.GetVendorsFromMeters(list_MeterTypesForMtu_V);
 
             Frame meterVendors2ContainerB = new Frame()
             {
@@ -2554,7 +2545,7 @@ namespace aclara_meters.view
             {
                 selected_MeterType_Vendor = list_MeterType_Vendors[selectedIndex];
 
-                list_MeterType_Models = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor);
+                list_MeterType_Models = this.config.MeterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor);
                 selected_MeterType_Name = "";
 
                 pck_MeterType_Models.ItemsSource = list_MeterType_Models;
@@ -2576,7 +2567,7 @@ namespace aclara_meters.view
             {
                 selected_MeterType_Vendor_2 = list_MeterType_Vendors_2[selectedIndex];
 
-                list_MeterType_Models_2 = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2);
+                list_MeterType_Models_2 = this.config.MeterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2);
                 selected_MeterType_Name_2 = "";
 
                 pck_MeterType_Models_2.ItemsSource = list_MeterType_Models_2;
@@ -2593,7 +2584,7 @@ namespace aclara_meters.view
             {
                 selected_MeterType_Vendor_V = list_MeterType_Vendors_V[selectedIndex];
 
-                list_MeterType_Models_V = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_V, selected_MeterType_Vendor_V);
+                list_MeterType_Models_V = this.config.MeterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_V, selected_MeterType_Vendor_V);
               
                 pck_MeterType_Models_V.ItemsSource = list_MeterType_Models_V;
                 divDyna_MeterType_Models_V.IsVisible = true;
@@ -2609,7 +2600,7 @@ namespace aclara_meters.view
 
                 selected_MeterType_Model = list_MeterType_Models[selectedIndex];
 
-                List<Meter> meterlist = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor, selected_MeterType_Model);
+                List<Meter> meterlist = this.config.MeterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor, selected_MeterType_Model);
 
                 pck_MeterType_Names.ItemsSource = meterlist;
                 divDyna_MeterType_Models.IsVisible = true;
@@ -2632,7 +2623,7 @@ namespace aclara_meters.view
 
                 selected_MeterType_Model_2 = list_MeterType_Models_2[selectedIndex];
 
-                List<Meter> meterlist2 = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2, selected_MeterType_Model_2);
+                List<Meter> meterlist2 = this.config.MeterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2, selected_MeterType_Model_2);
 
                 pck_MeterType_Names_2.ItemsSource = meterlist2;
                 divDyna_MeterType_Models_2.IsVisible = true;
@@ -2650,7 +2641,7 @@ namespace aclara_meters.view
 
                 selected_MeterType_Model_V = list_MeterType_Models_V[selectedIndex];
 
-                List<Meter> meterlist2 = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_V, selected_MeterType_Vendor_V, selected_MeterType_Model_V);
+                List<Meter> meterlist2 = this.config.MeterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_V, selected_MeterType_Vendor_V, selected_MeterType_Model_V);
 
                 pck_MeterType_Names_V.ItemsSource = meterlist2;
                 divDyna_MeterType_Models_V.IsVisible = true;

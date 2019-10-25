@@ -131,8 +131,8 @@ namespace aclara_meters.view
                 else Utils.Print("Intune parameters loaded..");
                 if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
                 {
-                    Utils.Print("FTP: " + Mobile.configData.ftpDownload_Host + ":" + Mobile.configData.ftpDownload_Port + " - "
-                        + Mobile.configData.ftpDownload_User + " [ " + Mobile.configData.ftpDownload_Pass + " ]");
+                    Utils.Print("FTP: " + Mobile.configData.FtpDownload_Host + ":" + Mobile.configData.FtpDownload_Port + " - "
+                        + Mobile.configData.FtpDownload_User + " [ " + Mobile.configData.FtpDownload_Pass + " ]");
                     if (Mobile.configData.IsCertLoaded)
                     {
                         Utils.Print("Certificate: " + Mobile.configData.certificate.Subject + " [ " + Mobile.configData.certificate.NotAfter + " ]");
@@ -286,6 +286,9 @@ namespace aclara_meters.view
 
         public async Task HandleUrl(Uri url)
         {
+            if (url == null)
+                return;
+            
             Data.Set("IsFromScripting", true);
 
             Utils.Print("Config: Scripting Config [ " + Data.Get.IsFromScripting + " ]");
@@ -304,12 +307,7 @@ namespace aclara_meters.view
             catch (Exception e)
             {
                 Utils.Print(e.StackTrace);
-            }
-
-            if (url == null)
-            {
-                return;
-            }
+            }                    
 
             string path = Mobile.ConfigPath;
             NameValueCollection query = HttpUtility.ParseQueryString(url.Query);

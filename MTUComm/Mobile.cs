@@ -18,18 +18,7 @@ namespace MTUComm
             private const string CER_INIT   = "MII";
             private const string XML_CER = ".cer";
 
-            public string ftpDownload_User;
-            public string ftpDownload_Pass;
-            public string ftpDownload_Host;
-            public int    ftpDownload_Port;
-            public string ftpDownload_Path;
-            public bool HasIntune;
-            public bool HasFTP;
             public X509Certificate2 certificate { private set; get; }
-            public byte[] lastRandomKey;
-            public byte[] lastRandomKeySha;
-            public bool   isMtuEncrypted;
-
 
             public string RandomKeyAndShaEncryptedInBase64
             {
@@ -46,16 +35,27 @@ namespace MTUComm
                 get { return this.certificate != null; }
             }
 
+            public string FtpDownload_User { get; set; }
+            public string FtpDownload_Pass { get; set; }
+            public string FtpDownload_Host { get; set; }
+            public int FtpDownload_Port { get; set; }
+            public string FtpDownload_Path { get; set; }
+            public bool HasIntune { get; set; }
+            public bool HasFTP { get; set; }
+            public byte[] LastRandomKey { get; set; }
+            public byte[] LastRandomKeySha { get; set; }
+            public bool IsMtuEncrypted { get; set; }
+
             public ConfigData ()
             {
-                this.lastRandomKey    = new byte[ 0 ];
-                this.lastRandomKeySha = new byte[ 0 ];
+                this.LastRandomKey    = new byte[ 0 ];
+                this.LastRandomKeySha = new byte[ 0 ];
                 
-                this.ftpDownload_User = string.Empty;
-                this.ftpDownload_Pass = string.Empty;
-                this.ftpDownload_Host = string.Empty;
-                this.ftpDownload_Port = 22;
-                this.ftpDownload_Path = string.Empty;
+                this.FtpDownload_User = string.Empty;
+                this.FtpDownload_Pass = string.Empty;
+                this.FtpDownload_Host = string.Empty;
+                this.FtpDownload_Port = 22;
+                this.FtpDownload_Path = string.Empty;
                 this.HasIntune = false;
                 this.HasFTP = false;
                
@@ -252,9 +252,9 @@ namespace MTUComm
                 bool encrypted = true )
             {
                 // Concatenate random key and random key sha
-                byte[] keyAndSha = new byte[ this.lastRandomKey.Length + this.lastRandomKeySha.Length ];
-                Array.Copy ( this.lastRandomKey, keyAndSha, this.lastRandomKey.Length );
-                Array.Copy ( this.lastRandomKeySha, 0, keyAndSha, this.lastRandomKey.Length, this.lastRandomKeySha.Length );
+                byte[] keyAndSha = new byte[ this.LastRandomKey.Length + this.LastRandomKeySha.Length ];
+                Array.Copy ( this.LastRandomKey, keyAndSha, this.LastRandomKey.Length );
+                Array.Copy ( this.LastRandomKeySha, 0, keyAndSha, this.LastRandomKey.Length, this.LastRandomKeySha.Length );
                 
                 // Encrypt new byte array with public key
                 if ( encrypted )
@@ -266,11 +266,11 @@ namespace MTUComm
                 }
                 
                 // Clear random key and its sha from memory
-                Array.Clear ( this.lastRandomKey,    0, this.lastRandomKey.Length    );
-                Array.Clear ( this.lastRandomKeySha, 0, this.lastRandomKeySha.Length );
+                Array.Clear ( this.LastRandomKey,    0, this.LastRandomKey.Length    );
+                Array.Clear ( this.LastRandomKeySha, 0, this.LastRandomKeySha.Length );
                 
                 // Reset encrypted status
-                this.isMtuEncrypted = false;
+                this.IsMtuEncrypted = false;
                 
                 return Convert.ToBase64String ( keyAndSha );
             }

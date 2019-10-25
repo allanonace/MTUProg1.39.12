@@ -519,7 +519,7 @@ namespace aclara_meters.view
             await GenericUtilsClass.UploadFiles (false);
             
             viewModelTabLog.RefreshList();
-            ChangeLogFile(viewModelTabLog.TotalFiles);
+            await ChangeLogFile(viewModelTabLog.TotalFiles);
       
             String myDate = DateTime.Now.ToString();
             date_sync.Text = myDate;
@@ -905,7 +905,7 @@ namespace aclara_meters.view
             }
         }
 
-        private async void ChangeLogFile(int index)
+        private async Task ChangeLogFile(int index)
         {
             if (index < 0)
             {
@@ -940,7 +940,7 @@ namespace aclara_meters.view
             Waiting(true);
             await Task.Run(async () =>
             {
-                ChangeLogFile(viewModelTabLog.IndexFile - 1);
+                await ChangeLogFile(viewModelTabLog.IndexFile - 1);
             });
             Waiting(false);
         }
@@ -950,7 +950,7 @@ namespace aclara_meters.view
             Waiting(true);
             await Task.Run(async () =>
             {
-                ChangeLogFile(viewModelTabLog.IndexFile + 1);
+                await ChangeLogFile(viewModelTabLog.IndexFile + 1);
             });
             Waiting(false);
         }

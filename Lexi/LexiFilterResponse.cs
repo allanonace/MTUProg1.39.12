@@ -4,9 +4,10 @@ namespace Lexi
 {
     public class LexiFilterResponse
     {
-        public int ResponseBytes;
         public readonly int IndexByte;
         public readonly byte Value;
+
+        public int ResponseBytes { get; set; }
 
         public LexiFilterResponse (
             int responseBytes,

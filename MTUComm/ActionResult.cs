@@ -41,7 +41,7 @@ namespace MTUComm
             // The first element that matches the conditions defined by the specified predicate,
             // if found, returns the default value for type T
             return parameters.Find ( param => param.CustomParameter.Equals ( tag ) &&
-                                              ( param.source.Equals ( source ) || string.IsNullOrEmpty ( source ) ) &&
+                                              ( param.Source.Equals ( source ) || string.IsNullOrEmpty ( source ) ) &&
                                               param.Port == port );
         }
     }

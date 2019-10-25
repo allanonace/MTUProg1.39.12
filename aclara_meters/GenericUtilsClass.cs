@@ -336,11 +336,11 @@ namespace aclara_meters
             if (!String.IsNullOrEmpty(Host.Result))
             {
                 var data = Mobile.configData;
-                data.ftpDownload_Host = Host.Result;
-                data.ftpDownload_Path = SecureStorage.GetAsync("ftpDownload_Path").Result;
-                data.ftpDownload_User = SecureStorage.GetAsync("ftpDownload_User").Result;
-                data.ftpDownload_Pass = SecureStorage.GetAsync("ftpDownload_Pass").Result;
-                data.ftpDownload_Port = int.Parse(SecureStorage.GetAsync("ftpDownload_Port").Result);
+                data.FtpDownload_Host = Host.Result;
+                data.FtpDownload_Path = SecureStorage.GetAsync("ftpDownload_Path").Result;
+                data.FtpDownload_User = SecureStorage.GetAsync("ftpDownload_User").Result;
+                data.FtpDownload_Pass = SecureStorage.GetAsync("ftpDownload_Pass").Result;
+                data.FtpDownload_Port = int.Parse(SecureStorage.GetAsync("ftpDownload_Port").Result);
                 data.HasFTP = true;
                 data.HasIntune = false;
                 return true;
@@ -368,11 +368,11 @@ namespace aclara_meters
             try
             {
                 Mobile.ConfigData data = Mobile.configData;
-                using (SftpClient sftp = new SftpClient(data.ftpDownload_Host, data.ftpDownload_Port, data.ftpDownload_User, data.ftpDownload_Pass))
+                using (SftpClient sftp = new SftpClient(data.FtpDownload_Host, data.FtpDownload_Port, data.FtpDownload_User, data.FtpDownload_Pass))
                 {
                     sftp.Connect();
 
-                    foreach (SftpFile file in sftp.ListDirectory(data.ftpDownload_Path))
+                    foreach (SftpFile file in sftp.ListDirectory(data.FtpDownload_Path))
                     {
                         if (file.Name.Contains(FIL_VER))
                         {
@@ -427,14 +427,14 @@ namespace aclara_meters
             try
             {
                 Mobile.ConfigData data = Mobile.configData;
-                using (SftpClient sftp = new SftpClient(data.ftpDownload_Host, data.ftpDownload_Port, data.ftpDownload_User, data.ftpDownload_Pass))
+                using (SftpClient sftp = new SftpClient(data.FtpDownload_Host, data.FtpDownload_Port, data.FtpDownload_User, data.FtpDownload_Pass))
                 {
                     sftp.Connect();
 
                     // Remote FTP File directory
                     string configPath = Mobile.ConfigPath;
 
-                    foreach (SftpFile file in sftp.ListDirectory(data.ftpDownload_Path))
+                    foreach (SftpFile file in sftp.ListDirectory(data.FtpDownload_Path))
                     {
                         string name = file.Name;
                         if (name.ToLower().Contains(XML_CER)) sfileCert = name.ToLower();
@@ -447,13 +447,14 @@ namespace aclara_meters
                                 File.Delete(sfile);
                             using (Stream stream = File.OpenWrite(sfile))  // keep in low case
                             {
-                                sftp.DownloadFile(Path.Combine(data.ftpDownload_Path, name), stream);
+                                sftp.DownloadFile(Path.Combine(data.FtpDownload_Path, name), stream);
                             }
                         }
                     }
 
                     sftp.Disconnect();
-                    Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
+                
+                    Console.WriteLine("Download config.files from FTP: OK");
 
                     return ok;
                 }

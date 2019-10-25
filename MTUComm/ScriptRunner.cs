@@ -70,20 +70,20 @@ namespace MTUComm
             String  script_stream,
             int     stream_size )
         {
-            XmlSerializer s = null;
+            XmlSerializer s = null ;
         
             try
-            {
-                // Script file is empty
-                if ( string.IsNullOrEmpty ( script_stream.Trim () ) )
-                    throw new ScriptEmptyException ();
-            
+            {                     
                 Script script = new Script ();
                 s = new XmlSerializer ( typeof ( Script ) );
-    
+                               
                 // Register unknown elements ( not present in Script class ) as additional parameters
                 s.UnknownElement += this.UnknownElementEvent;
-            
+
+                // Script file is empty
+                if (string.IsNullOrEmpty(script_stream.Trim()))
+                    throw new ScriptEmptyException();
+
                 using ( StringReader reader = new StringReader ( script_stream.Substring ( 0, stream_size ) ) )
                 {
                     script = ( Script )s.Deserialize ( reader );

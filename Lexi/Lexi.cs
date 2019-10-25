@@ -825,7 +825,8 @@ namespace Lexi
             }
 
             // Concatenate..
-            array = null;
+            array = new byte[0];
+
             switch ( lexiAction )
             {
                 case LexiAction.Read:

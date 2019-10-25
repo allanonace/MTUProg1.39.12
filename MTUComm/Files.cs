@@ -26,7 +26,7 @@ namespace MTUComm
             try
             {
                 Mobile.ConfigData data = Mobile.configData;
-                using ( sftp = new SftpClient ( data.ftpDownload_Host, data.ftpDownload_Port, data.ftpDownload_User, data.ftpDownload_Pass ) )
+                using ( sftp = new SftpClient ( data.FtpDownload_Host, data.FtpDownload_Port, data.FtpDownload_User, data.FtpDownload_Pass ) )
                 {
                     sftp.Connect ();
             
@@ -43,7 +43,7 @@ namespace MTUComm
                                 int    lastIndex = ( filePath.LastIndexOf ( '\\' ) > -1 ) ? filePath.LastIndexOf ( '\\' ) : filePath.LastIndexOf ( '/' );
                                 string fileName = filePath.Substring ( lastIndex + 1 );
                                 
-                                string remoteFullPath = Path.Combine ( data.ftpDownload_Path, remoteBasePath, fileName );
+                                string remoteFullPath = Path.Combine ( data.FtpDownload_Path, remoteBasePath, fileName );
                                 
                                 // File is present in the FTP
                                 if ( sftp.Exists ( remoteFullPath ) )

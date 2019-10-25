@@ -137,7 +137,7 @@ namespace MTUComm
             Action currentAction;
             if ( ( currentAction = Singleton.Get.Action ) != null )
             {
-                base_stream += "    <Action display=\"" + Action.logDisplays[ currentAction.Type ] + "\" type=\"" + Action.logTypes[ currentAction.Type ] + "\" reason=\"" + Action.logReasons[ currentAction.Type ] + "\">";
+                base_stream += "    <Action display=\"" + Action.LogDisplays[ currentAction.Type ] + "\" type=\"" + Action.LogTypes[ currentAction.Type ] + "\" reason=\"" + Action.LogReasons[ currentAction.Type ] + "\">";
                 base_stream += "        <Date display=\"Date/Time\">" + DateTime.Now.ToString("MM/dd/yyyy HH:mm") + "</Date>";
                 base_stream += "        <User display=\"User\">" + currentAction.User + "</User>";
                 base_stream += "    </Action>";
@@ -402,11 +402,11 @@ namespace MTUComm
         {
             XElement element = new XElement("Action");
 
-            AddAtrribute(element, "display", Action.logDisplays[ actionType ] );
-            AddAtrribute(element, "type", Action.logTypes[ actionType ] );
+            AddAtrribute(element, "display", Action.LogDisplays[ actionType ] );
+            AddAtrribute(element, "type", Action.LogTypes[ actionType ] );
 
             if ( ! isSubAction )
-                AddAtrribute(element, "reason", Action.logReasons[ actionType ] );
+                AddAtrribute(element, "reason", Action.LogReasons[ actionType ] );
 
             InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogParamsFromInterface ( mtu, ActionType.ReadMtu );
             foreach ( InterfaceParameters parameter in parameters )
@@ -423,10 +423,7 @@ namespace MTUComm
                     else
                         this.ComplexParameter(element, allParamsFromInterface, parameter);
                 }
-                catch ( Exception )
-                {
-                
-                }
+                catch (Exception e) { Console.WriteLine($"logger.cs_ {e.Message}"); }
             }
             
             // Add additional parameters
@@ -735,9 +732,9 @@ namespace MTUComm
 
             // DataRead log
             //ActionType actionType = ActionType.DataRead;
-            AddAtrribute(element, "display", Action.logDisplays[ actionType ] );
-            AddAtrribute(element, "type",    Action.logTypes   [ actionType ] );
-            AddAtrribute(element, "reason",  Action.logReasons [ actionType ] );
+            AddAtrribute(element, "display", Action.LogDisplays[ actionType ] );
+            AddAtrribute(element, "type",    Action.LogTypes   [ actionType ] );
+            AddAtrribute(element, "reason",  Action.LogReasons [ actionType ] );
 
             InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogParamsFromInterface ( mtu, actionType );
             foreach (InterfaceParameters parameter in parameters)

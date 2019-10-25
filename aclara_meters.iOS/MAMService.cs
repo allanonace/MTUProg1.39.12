@@ -67,16 +67,16 @@ namespace aclara_meters.iOS
 
                 // Convert parameters to string and regenerate the certificate
                 if (stringValues.ContainsKey(Mobile.ID_FTP_HOST))
-                    stringValues.TryGetValue(Mobile.ID_FTP_HOST, out data.ftpDownload_Host);
+                    stringValues.TryGetValue(Mobile.ID_FTP_HOST, out data.FtpDownload_Host);
                 else return;
                 if (stringValues.ContainsKey(Mobile.ID_FTP_PATH))
-                    stringValues.TryGetValue(Mobile.ID_FTP_PATH, out data.ftpDownload_Path);
+                    stringValues.TryGetValue(Mobile.ID_FTP_PATH, out data.FtpDownload_Path);
                 if (stringValues.ContainsKey(Mobile.ID_FTP_PASS))
-                    stringValues.TryGetValue(Mobile.ID_FTP_PASS, out data.ftpDownload_Pass);
+                    stringValues.TryGetValue(Mobile.ID_FTP_PASS, out data.FtpDownload_Pass);
                 if (stringValues.ContainsKey(Mobile.ID_FTP_USER))
-                    stringValues.TryGetValue(Mobile.ID_FTP_USER, out data.ftpDownload_User);
+                    stringValues.TryGetValue(Mobile.ID_FTP_USER, out data.FtpDownload_User);
                 if (numberValues.ContainsKey(Mobile.ID_FTP_PORT))
-                    numberValues.TryGetValue(Mobile.ID_FTP_PORT, out data.ftpDownload_Port);
+                    numberValues.TryGetValue(Mobile.ID_FTP_PORT, out data.FtpDownload_Port);
 
                 data.HasIntune = true;
 

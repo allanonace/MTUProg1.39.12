@@ -60,7 +60,7 @@ namespace MTUComm.Observer
             events = new Dictionary<string,List<Event>> ();
         }
 
-        private Broadcaster ()
+        public Broadcaster ()
         {
 
         }

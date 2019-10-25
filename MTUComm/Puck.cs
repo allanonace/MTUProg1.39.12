@@ -29,8 +29,7 @@ namespace MTUComm
         #endregion
 
         #region Attributes
-    
-        public  dynamic Device;
+
         private ISerial bleSerial;
         public int    RSSI             { get; private set; }
         public string Name             { get; private set; }
@@ -38,6 +37,7 @@ namespace MTUComm
         public string SerialNumber     { get; private set; }
         public int    BatteryLevelFix  { get; private set; }
 
+        public dynamic Device { get; set; }
         #endregion
 
         #region Initialization
@@ -64,11 +64,11 @@ namespace MTUComm
                                             manufacturer.ElementAt ( manufacturer.Count () - 1 )
                                                 .Data.Skip ( 4 ).Take ( 1 ).ToArray ()[ 0 ] );
             }
-            // Using library 'Bluetooth LE plugin for Xamarin' for Windows
-            else if ( 1 == 1 )
-            {
+            /// Todo: Using library 'Bluetooth LE plugin for Xamarin' for Windows
+            ///else if ( 1 == 1 )
+            ///{
                 
-            }
+            ///}
         }
 
         #endregion
@@ -154,6 +154,8 @@ namespace MTUComm
                 else                 return this.iconsRSSI[ 0 ]; // High
             }
         }
+
+
 
         #endregion
 

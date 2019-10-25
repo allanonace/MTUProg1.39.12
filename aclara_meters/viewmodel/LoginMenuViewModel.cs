@@ -49,7 +49,7 @@ namespace aclara_meters.viewmodel
         {
             dialogs_save = dialogs;
             LoginCommand = new Command(Login);
-            LoadCommand = new Command(Load);
+            LoadCommand = new Command(()=> { Load(); });
             Task.Run(async () =>
             {
                 await Task.Delay(550); Device.BeginInvokeOnMainThread(() =>
@@ -75,7 +75,7 @@ namespace aclara_meters.viewmodel
             Mobile.ImagesPath = user;
         }
 
-        public async void Load ()
+        public async Task Load ()
         {
             if ( await FormsApp.credentialsService.CredentialsExist () && !Data.Get.IsFromScripting )
             {
@@ -93,7 +93,7 @@ namespace aclara_meters.viewmodel
             string username,
             string password )
         {
-            Xml.User[] dbUsers = Singleton.Get.Configuration.users;
+            Xml.User[] dbUsers = Singleton.Get.Configuration.Users;
             
             IEnumerable<Xml.User> coincidences = dbUsers.Where ( user => user.Name.Equals ( username ) );
             if ( coincidences.Count () == 1 )
