@@ -58,17 +58,22 @@ namespace aclara_meters.util
         {
             StackLayout main = ( StackLayout )this.FindByName ( "ReadMTUChangeView" );
 
-            AutoFillTextbox_Logic ( main );
+            var random = new Random();
+            var list = new List<char> { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
+            int index = random.Next(list.Count);
+            char cTextWr = list[index];
+
+            AutoFillTextbox_Logic ( main, cTextWr );
 
             await Task.Delay ( 1000 );
 
             // NOTE: First fill pickrs because some textbox ( e.g. MeterReading ) need it
-            AutoFillTextbox_Logic ( main );
+            AutoFillTextbox_Logic ( main, cTextWr );
         }
 
         protected void AutoFillTextbox_Logic (
-            StackLayout mainElement )
-        {
+            StackLayout mainElement, char cTextWr )
+        {            
             List<BorderlessEntry>  listTbx = new List<BorderlessEntry> ();
             List<BorderlessPicker> listPck = new List<BorderlessPicker> ();
 
@@ -98,7 +103,7 @@ namespace aclara_meters.util
             {
                 try
                 {
-                    tbx.Text = new string ( '1', tbx.MaxLength );
+                    tbx.Text = new string(cTextWr, tbx.MaxLength);
                 }
                 catch ( Exception )
                 {
