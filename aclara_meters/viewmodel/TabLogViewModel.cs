@@ -217,6 +217,11 @@ namespace aclara.ViewModels
                 Icon = String.Empty
             };
             ItemsLog.Add(ItemNull);
+            ItemNull = new ItemsLog
+            {
+                Accion = String.Empty,
+                Icon = String.Empty
+            };
             ItemsLog.Add(ItemNull);
           
         }

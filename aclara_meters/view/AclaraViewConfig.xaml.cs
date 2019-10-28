@@ -373,53 +373,41 @@ namespace aclara_meters.view
 
         private bool UpdateConfigFiles()
         {
-            if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
+            string Mode = GenericUtilsClass.ChekInstallMode();
+            if (Mobile.IsNetAvailable() && (Mode == "Intune" || Mode == "FTP"))
             {
-                if (Mobile.IsNetAvailable())
+                if (!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
                 {
-                    if (!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
-                    {
-                        return false;
-                    }
-                    if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
-                    {
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-                    }
-
-                    return true;
+                    return false;
                 }
-  
-                return false;
-            }
-            else
-            {
-                Mobile.configData.HasFTP = false;
-
-                // Check if all configuration files are available in public folder
-                if (GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath))
+                if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
                 {
-
-                    bool CPD = false;
-                    if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
-                    {
-                        if (value != null)
-                            bool.TryParse((string)value, out CPD);
-                    }
-                    if (!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
-                    {
-                        return false;
-                    }
-                    if (!string.IsNullOrEmpty(sFileCert))
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-
-                    if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
-                        return false;
-                    else
-                        return true;
+                    Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
                 }
-
                 return true;
             }
+            else if (Mode=="Manual" && GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPublicPath))
+            {
+                bool CPD = false;
+                if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
+                {
+                    if (value != null)
+                        bool.TryParse((string)value, out CPD);
+                }
+                if (!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
+                {
+                    return false;
+                }
+                if (!string.IsNullOrEmpty(sFileCert))
+                    Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
+
+                if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
+                    return false;
+                else
+                    return true;
+            }
+            else return false;
+                                   
         }
     }
 }

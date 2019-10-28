@@ -485,7 +485,7 @@ namespace MTUComm
                 }
                 catch ( Exception )
                 {
-                    
+                    // catch outside
                 }
             }
         }

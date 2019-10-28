@@ -27,7 +27,7 @@ namespace aclara_meters.view
     public partial class AclaraViewScripting
     {
         
-        private Thread printer;
+        private Thread connectionThread;
         private ObservableCollection<DeviceItem> listPucks;
        
 
@@ -155,12 +155,12 @@ namespace aclara_meters.view
 
                     Esperando();
 
-                    if (printer.ThreadState == System.Threading.ThreadState.Suspended)
+                    if (connectionThread.ThreadState == System.Threading.ThreadState.WaitSleepJoin)
                     {
                         try
                         {
-
-                            printer.Resume();
+                            connectionThread.Interrupt();
+                            //printer.Resume();
                         }
                         catch (Exception e11)
                         {
@@ -252,9 +252,11 @@ namespace aclara_meters.view
         {
             Utils.PrintDeep($"-------------------------------    Interface_ContentView_DeviceList, thread: { Thread.CurrentThread.ManagedThreadId}");
 
-            printer = new Thread(new ThreadStart(InvokeMethod));
-
-            printer.Start();
+            connectionThread = new Thread(new ThreadStart(ConnectionMethod))
+            {
+                Name = "ConnectionThreadScript"
+            };
+            connectionThread.Start();
 
             DeviceList.RefreshCommand.Execute(true);
               
@@ -292,7 +294,7 @@ namespace aclara_meters.view
         }
 
 
-        private void InvokeMethod()
+        private void ConnectionMethod()
         {
             Utils.PrintDeep("dentro del metodo - InvokeMethod");
 
@@ -304,274 +306,277 @@ namespace aclara_meters.view
          
             while (true)
             {
-                Utils.PrintDeep("dentro del bucle (WHILE TRUE) - InvokeMethod");
-
-                Utils.PrintDeep("buscamos el estado de la conexion - InvokeMethod");
-
-                int status = FormsApp.ble_interface.GetConnectionStatus();
-
-                Utils.PrintDeep("se obtiene el estado de la conexion - InvokeMethod");
-
-                if (cont == 2000)
+                try
                 {
-                    if (refresh == 4)
-                    {
-                        refresh = 0;
-                        bAlertBatt = true;
-                        bAlertBatt10 = true;
-                    }
-                    else refresh += 1;
+                    Utils.PrintDeep("dentro del bucle (WHILE TRUE) - InvokeMethod");
 
-                    RefreshPuckData();
-                    cont = 0;
-                }
-                else cont += 1;
-
-
-                if (status != peripheralConnected)
-                {
-                    Utils.PrintDeep($"---------------------------------Invoke method ----estado : {status} , Perifericoconnected: {peripheralConnected}");
-                    Utils.PrintDeep($"---------------------------------Invoke method ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
                     Utils.PrintDeep("buscamos el estado de la conexion - InvokeMethod");
 
-                    Utils.PrintDeep("¿ES NO_CONNECTED? - InvokeMethod");
+                    int status = FormsApp.ble_interface.GetConnectionStatus();
 
-                    if (peripheralConnected == ble_library.BlePort.NO_CONNECTED)
-                    {
-                        peripheralConnected = status;
-                        timeout_connecting = 0;
-                    }
-                    else if (peripheralConnected == ble_library.BlePort.CONNECTING)
-                    {
-                        Utils.PrintDeep("Nop, es CONNECTING - InvokeMethod");
+                    Utils.PrintDeep("se obtiene el estado de la conexion - InvokeMethod");
 
-                        if (status == ble_library.BlePort.NO_CONNECTED)
+                    if (cont == 2000)
+                    {
+                        if (refresh == 4)
                         {
-
-                            Utils.PrintDeep("Se va a ejecutar algo en la UI - InvokeMethod");
-
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                Utils.PrintDeep("Se va a detectar el estado de la conexion - InvokeMethod");
-
-                                switch (FormsApp.ble_interface.GetConnectionError())
-                                {
-                                    case ble_library.BlePort.NO_ERROR:
-                                        Utils.PrintDeep("Estado conexion: NO_ERROR - InvokeMethod");
-                                        break;
-                                    case ble_library.BlePort.CONECTION_ERRROR:
-                                        Utils.PrintDeep("Estado conexion: CONECTION_ERRROR - InvokeMethod");
-
-
-                                        Device.BeginInvokeOnMainThread(() =>
-                                        {
-                                            #region New Circular Progress bar Animations    
-
-                                            DeviceList.IsRefreshing = false;
-                                            backdark_bg.IsVisible = false;
-                                            indicator.IsVisible = false;
-                                            ContentView_DeviceList.IsEnabled = true;
-
-                                            #endregion
-                                        });
-
-                                        Utils.PrintDeep("Desactivar barra de progreso - InvokeMethod");
-
-                                        Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
-                                        break;
-                                    case ble_library.BlePort.DYNAMIC_KEY_ERROR:
-                                        Utils.PrintDeep("Estado conexion: DYNAMIC_KEY_ERROR - InvokeMethod");
-
-                                        Device.BeginInvokeOnMainThread(() =>
-                                        {
-                                            #region New Circular Progress bar Animations    
-
-                                            DeviceList.IsRefreshing = false;
-                                            backdark_bg.IsVisible = false;
-                                            indicator.IsVisible = false;
-                                            ContentView_DeviceList.IsEnabled = true;
-
-                                            #endregion
-                                        });
-
-                                        Utils.PrintDeep("Desactivar barra de progreso - InvokeMethod");
-                                        Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
-                                        break;
-                                    case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
-                                        Utils.PrintDeep("Estado conexion: NO_DYNAMIC_KEY_ERROR - InvokeMethod");
-
-                                        Device.BeginInvokeOnMainThread(() =>
-                                        {
-                                            #region New Circular Progress bar Animations    
-
-                                            DeviceList.IsRefreshing = false;
-                                            backdark_bg.IsVisible = false;
-                                            indicator.IsVisible = false;
-                                            ContentView_DeviceList.IsEnabled = true;
-
-                                            #endregion
-
-                                        });
-                                        Utils.PrintDeep("Desactivar barra de progreso - InvokeMethod");
-                                        Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
-                                        break;
-                                }
-                                DeviceList.IsEnabled = true;
-                                fondo.Opacity = 1;
-                                ContentView_DeviceList.Opacity = 1;
-                                ContentView_DeviceList.IsEnabled = true;
-
-                            });
-
-                            peripheralConnected = status;
-                            Singleton.Remove<Puck>();
-
+                            refresh = 0;
                             bAlertBatt = true;
                             bAlertBatt10 = true;
                         }
-                        else
-                        {
-                            Utils.PrintDeep($"---------------------------------Invoke method ----estado : {status} , Conectado");
+                        else refresh += 1;
 
-                            Utils.PrintDeep("Estas Conectado - InvokeMethod");
+                        RefreshPuckData();
+                        cont = 0;
+                    }
+                    else cont += 1;
+
+
+                    if (status != peripheralConnected)
+                    {
+                        Utils.PrintDeep($"---------------------------------Invoke method ----estado : {status} , Perifericoconnected: {peripheralConnected}");
+                        Utils.PrintDeep($"---------------------------------Invoke method ---- Thread: {Thread.CurrentThread.ManagedThreadId}");
+                        Utils.PrintDeep("buscamos el estado de la conexion - InvokeMethod");
+
+                        Utils.PrintDeep("¿ES NO_CONNECTED? - InvokeMethod");
+
+                        if (peripheralConnected == ble_library.BlePort.NO_CONNECTED)
+                        {
+                            peripheralConnected = status;
+                            timeout_connecting = 0;
+                        }
+                        else if (peripheralConnected == ble_library.BlePort.CONNECTING)
+                        {
+                            Utils.PrintDeep("Nop, es CONNECTING - InvokeMethod");
+
+                            if (status == ble_library.BlePort.NO_CONNECTED)
+                            {
+
+                                Utils.PrintDeep("Se va a ejecutar algo en la UI - InvokeMethod");
+
+                                Device.BeginInvokeOnMainThread(() =>
+                                {
+                                    Utils.PrintDeep("Se va a detectar el estado de la conexion - InvokeMethod");
+
+                                    switch (FormsApp.ble_interface.GetConnectionError())
+                                    {
+                                        case ble_library.BlePort.NO_ERROR:
+                                            Utils.PrintDeep("Estado conexion: NO_ERROR - InvokeMethod");
+                                            break;
+                                        case ble_library.BlePort.CONECTION_ERRROR:
+                                            Utils.PrintDeep("Estado conexion: CONECTION_ERRROR - InvokeMethod");
+
+
+                                            Device.BeginInvokeOnMainThread(() =>
+                                            {
+                                            #region New Circular Progress bar Animations    
+
+                                            DeviceList.IsRefreshing = false;
+                                                backdark_bg.IsVisible = false;
+                                                indicator.IsVisible = false;
+                                                ContentView_DeviceList.IsEnabled = true;
+
+                                            #endregion
+                                        });
+
+                                            Utils.PrintDeep("Desactivar barra de progreso - InvokeMethod");
+
+                                            Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
+                                            break;
+                                        case ble_library.BlePort.DYNAMIC_KEY_ERROR:
+                                            Utils.PrintDeep("Estado conexion: DYNAMIC_KEY_ERROR - InvokeMethod");
+
+                                            Device.BeginInvokeOnMainThread(() =>
+                                            {
+                                            #region New Circular Progress bar Animations    
+
+                                            DeviceList.IsRefreshing = false;
+                                                backdark_bg.IsVisible = false;
+                                                indicator.IsVisible = false;
+                                                ContentView_DeviceList.IsEnabled = true;
+
+                                            #endregion
+                                        });
+
+                                            Utils.PrintDeep("Desactivar barra de progreso - InvokeMethod");
+                                            Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+                                            break;
+                                        case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
+                                            Utils.PrintDeep("Estado conexion: NO_DYNAMIC_KEY_ERROR - InvokeMethod");
+
+                                            Device.BeginInvokeOnMainThread(() =>
+                                            {
+                                            #region New Circular Progress bar Animations    
+
+                                            DeviceList.IsRefreshing = false;
+                                                backdark_bg.IsVisible = false;
+                                                indicator.IsVisible = false;
+                                                ContentView_DeviceList.IsEnabled = true;
+
+                                            #endregion
+
+                                        });
+                                            Utils.PrintDeep("Desactivar barra de progreso - InvokeMethod");
+                                            Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+                                            break;
+                                    }
+                                    DeviceList.IsEnabled = true;
+                                    fondo.Opacity = 1;
+                                    ContentView_DeviceList.Opacity = 1;
+                                    ContentView_DeviceList.IsEnabled = true;
+
+                                });
+
+                                peripheralConnected = status;
+                                Singleton.Remove<Puck>();
+
+                                bAlertBatt = true;
+                                bAlertBatt10 = true;
+                            }
+                            else
+                            {
+                                Utils.PrintDeep($"---------------------------------Invoke method ----estado : {status} , Conectado");
+
+                                Utils.PrintDeep("Estas Conectado - InvokeMethod");
+
+                                DeviceList.IsEnabled = true;
+
+                                peripheralConnected = status;
+                                Device.BeginInvokeOnMainThread(() =>
+                                {
+                                    fondo.Opacity = 1;
+                                    ContentView_DeviceList.Opacity = 1;
+                                    ContentView_DeviceList.IsEnabled = true;
+
+                                    ContentView_Scripting.IsVisible = true;
+                                    ContentView_DeviceList.IsVisible = false;
+
+                                    try
+                                    {
+                                        Device.BeginInvokeOnMainThread(() =>
+                                        {
+                                        // Minor bug fix in case of missing battery data
+                                        try
+                                            {
+                                                String icono_bateria;
+                                                string rssiIcono;
+                                                Puck puck = Singleton.Get.Puck;
+                                                icono_bateria = puck.BatteryLevelIconFix;
+                                                rssiIcono = puck.RSSIIcon;
+
+                                                ContentView_Scripting_battery_level.Source = icono_bateria + "_white";
+                                                ContentView_Scripting_rssi_level.Source = rssiIcono + "_white";
+                                            }
+                                            catch (Exception e)
+                                            {
+                                                Utils.Print(e.StackTrace);
+                                            }
+                                        });
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Utils.Print(e.StackTrace);
+                                    }
+
+                                    Utils.PrintDeep("Se va a ejecutar el Script - InvokeMethod");
+
+                                    try
+                                    {
+                                        connectionThread.Abort();
+                                    }
+                                    catch (Exception e5)
+                                    {
+                                        Utils.Print(e5.StackTrace);
+                                    }
+                                    Terminado();
+                                //Connection Method
+                                runScript();
+
+                                });
+                            }
+                        }
+                        else if (peripheralConnected == ble_library.BlePort.CONNECTED)
+                        {
+                            Utils.PrintDeep("Nop, es CONNECTED - InvokeMethod");
 
                             DeviceList.IsEnabled = true;
 
                             peripheralConnected = status;
+                            Singleton.Remove<Puck>();
+                            bAlertBatt = true;
+                            bAlertBatt10 = true;
+
                             Device.BeginInvokeOnMainThread(() =>
                             {
                                 fondo.Opacity = 1;
                                 ContentView_DeviceList.Opacity = 1;
                                 ContentView_DeviceList.IsEnabled = true;
 
-                                ContentView_Scripting.IsVisible = true;
-                                ContentView_DeviceList.IsVisible = false;
-
-                                try
-                                {
-                                    Device.BeginInvokeOnMainThread(() =>
-                                    {
-                                        // Minor bug fix in case of missing battery data
-                                        try
-                                        {
-                                            String icono_bateria;
-                                            string rssiIcono;
-                                            Puck puck = Singleton.Get.Puck;
-                                            icono_bateria = puck.BatteryLevelIconFix;
-                                            rssiIcono = puck.RSSIIcon;
-                                                                                   
-                                            ContentView_Scripting_battery_level.Source = icono_bateria + "_white";
-                                            ContentView_Scripting_rssi_level.Source = rssiIcono + "_white";
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            Utils.Print(e.StackTrace);
-                                        }
-                                    });
-                                }
-                                catch (Exception e)
-                                {
-                                    Utils.Print(e.StackTrace);
-                                }
-
-                                Utils.PrintDeep("Se va a ejecutar el Script - InvokeMethod");
-
-                                try
-                                {
-                                    printer.Abort();
-                                }
-                                catch (Exception e5)
-                                {
-                                    Utils.Print(e5.StackTrace);
-                                }
-                                Terminado();
-                                //Connection Method
-                                runScript();
+                                Utils.Print("========================================================================================= NOT CONNECTED");
+                                ContentView_Scripting.IsVisible = false;
+                                ContentView_DeviceList.IsVisible = true;
+                                backdark_bg.IsVisible = false;
+                                indicator.IsVisible = false;
 
                             });
+
                         }
-                    }
-                    else if (peripheralConnected == ble_library.BlePort.CONNECTED)
-                    {
-                        Utils.PrintDeep("Nop, es CONNECTED - InvokeMethod");
-
-                        DeviceList.IsEnabled = true;
-
-                        peripheralConnected = status;
-                        Singleton.Remove<Puck>();
-                        bAlertBatt = true;
-                        bAlertBatt10 = true;
-
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            fondo.Opacity = 1;
-                            ContentView_DeviceList.Opacity = 1;
-                            ContentView_DeviceList.IsEnabled = true;
-
-                            Utils.PrintDeep("NOT CONNECTED");
-                            ContentView_Scripting.IsVisible = false;
-                            ContentView_DeviceList.IsVisible = true;
-                            backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-
-                        });
 
                     }
 
-                }
+                    Utils.PrintDeep("¿Está en CONNECTING? - InvokeMethod");
 
-                Utils.PrintDeep("¿Está en CONNECTING? - InvokeMethod");
-
-                if (peripheralConnected == ble_library.BlePort.CONNECTING)
-                {
-                    Utils.PrintDeep("Si, es CONNECTING - InvokeMethod");
-                    timeout_connecting++;
-                    if (timeout_connecting >= 2 * 10) // 10 seconds
+                    if (peripheralConnected == ble_library.BlePort.CONNECTING)
                     {
-                        Device.BeginInvokeOnMainThread(() =>
+                        Utils.PrintDeep("Si, es CONNECTING - InvokeMethod");
+                        timeout_connecting++;
+                        if (timeout_connecting >= 2 * 10) // 10 seconds
                         {
-                            Utils.PrintDeep("Un Timeout que te llevas - InvokeMethod");
-                            Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
-                            DeviceList.IsEnabled = true;
-                            fondo.Opacity = 1;
-                            ContentView_DeviceList.Opacity = 1;
-                         
-                            autoConnect = false;
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                Utils.PrintDeep("Un Timeout que te llevas - InvokeMethod");
+                                Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
+                                DeviceList.IsEnabled = true;
+                                fondo.Opacity = 1;
+                                ContentView_DeviceList.Opacity = 1;
 
-                            #region Disable Circular Progress bar Animations when done
+                                autoConnect = false;
+
+                                #region Disable Circular Progress bar Animations when done
 
                             backdark_bg.IsVisible = false;
-                            indicator.IsVisible = false;
-                            ContentView_DeviceList.IsEnabled = true;
+                                indicator.IsVisible = false;
+                                ContentView_DeviceList.IsEnabled = true;
 
                             #endregion
 
-                            try
-                            {
-                                printer.Suspend();
-                            }
-                            catch (Exception e5)
-                            {
-                                Utils.Print(e5.StackTrace);
-                            }
+                                peripheralConnected = ble_library.BlePort.NO_CONNECTED;
+                                timeout_connecting = 0;
 
-                        });
-                        peripheralConnected = ble_library.BlePort.NO_CONNECTED;
-                        timeout_connecting = 0;
+                            });
 
-                        Utils.PrintDeep("Cerrar Conexion - InvokeMethod");
-    
+                            Utils.PrintDeep("Cerrar Conexion - InvokeMethod");
+
+                            Thread.Sleep(Timeout.Infinite);
+                            //printer.Suspend();
+
+                        }
                     }
+                    else
+                    {
+                        Utils.PrintDeep("Nop, no es CONNECTING - InvokeMethod");
+                    }
+
+                    Utils.PrintDeep("Esperamos 300 ms - InvokeMethod");
+                    Thread.Sleep(300); // 0.5 Second
+
+                    Utils.PrintDeep("¿Se va a realizar reconexion? - InvokeMethod");
                 }
-                else
+                catch (ThreadInterruptedException)
                 {
-                    Utils.PrintDeep("Nop, no es CONNECTING - InvokeMethod");
+                    Console.WriteLine("Thread '{0}' awoken.",
+                                  Thread.CurrentThread.Name);
                 }
-
-                Utils.PrintDeep("Esperamos 300 ms - InvokeMethod");
-                Thread.Sleep(300); // 0.5 Second
-
-                Utils.PrintDeep("¿Se va a realizar reconexion? - InvokeMethod");
 
             }
 
@@ -947,7 +952,8 @@ namespace aclara_meters.view
             Utils.PrintDeep($"-------------------------------       OnMenuItemSelectedListDevices, thread: { Thread.CurrentThread.ManagedThreadId}");
             try
             {
-                printer.Resume();
+                connectionThread.Interrupt();
+                //printer.Resume();
             }
             catch (Exception e5)
             {

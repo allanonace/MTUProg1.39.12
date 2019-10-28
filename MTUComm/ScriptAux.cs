@@ -83,7 +83,7 @@ namespace MTUComm
             RDDFirmware,
         }
 
-        public static Dictionary<ParameterType,APP_FIELD> IdsAclara =
+        public readonly static Dictionary<ParameterType,APP_FIELD> IdsAclara =
             new Dictionary<ParameterType,APP_FIELD> ()
             {
                 { ParameterType.OldMtuId,             APP_FIELD.OldMtuId        },

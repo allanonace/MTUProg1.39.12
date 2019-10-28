@@ -790,7 +790,7 @@ namespace MTUComm
             
             string source = string.IsNullOrEmpty ( parameter.Source ) ? string.Empty : " , Source: " + parameter.Source;
 
-            Utils.Print ( "Add Param to Log: " + parameter.Name + source + " , Port: " + portNumber +
+            Utils.PrintDeep ( "Add Param to Log: " + parameter.Name + source + " , Port: " + portNumber +
                 " = " + ( ( param == null ) ? "NOT USED" : param.Value ) );
             
             if (param != null)

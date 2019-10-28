@@ -271,7 +271,7 @@ namespace Library
             using ( Aes aesAlg = Aes.Create () )
             {
                 aesAlg.Key = key;
-                aesAlg.IV  = ( iv != null ) ? iv : new byte[ aesAlg.BlockSize / 8 ];
+                aesAlg.IV  = iv ?? (new byte[aesAlg.BlockSize / 8]);
     
                 ICryptoTransform decryptor = aesAlg.CreateDecryptor ( aesAlg.Key, aesAlg.IV );
                 using (MemoryStream msDecrypt = new MemoryStream ( encryptedText ) )

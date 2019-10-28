@@ -48,8 +48,8 @@ namespace aclara_meters.viewmodel
         public LoginMenuViewModel(IUserDialogs dialogs)
         {
             dialogs_save = dialogs;
-            LoginCommand = new Command(Login);
-            LoadCommand = new Command(()=> { Load(); });
+            LoginCommand = new Command(async () => { await Login(); });
+            LoadCommand = new Command(async ()=> { await Load(); });
             Task.Run(async () =>
             {
                 await Task.Delay(550); Device.BeginInvokeOnMainThread(() =>
@@ -108,7 +108,7 @@ namespace aclara_meters.viewmodel
             return false;
         }
 
-        public async void Login()
+        public async Task Login()
         {
             IsBusy = true;
             Title = string.Empty;

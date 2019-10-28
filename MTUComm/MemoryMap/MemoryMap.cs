@@ -844,7 +844,7 @@ namespace MTUComm.MemoryMap
                 case TypeCode.UInt64 : result = Convert.ToInt64  ( result ); break;
             }
 
-            Utils.Print ( "GetOperation: " + operation + " | " + value + " = " + result );
+            Utils.PrintDeep ( "GetOperation: " + operation + " | " + value + " = " + result );
 
             return ( T )result;
         }
@@ -864,7 +864,7 @@ namespace MTUComm.MemoryMap
                 case TypeCode.UInt64 : result = Convert.ToInt64  ( result ); break;
             }
 
-            Utils.Print ( "GetOperation: " + operation + " = " + result );
+            Utils.PrintDeep ( "GetOperation: " + operation + " = " + result );
 
             return ( T )result;
         }

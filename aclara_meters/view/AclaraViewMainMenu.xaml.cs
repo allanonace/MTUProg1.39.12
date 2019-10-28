@@ -41,7 +41,7 @@ namespace aclara_meters.view
 
         private int peripheralConnected = ble_library.BlePort.NO_CONNECTED;
         private Boolean peripheralManualDisconnection = false;
-        private Thread printer;
+        private Thread connectionThread;
         private int TimeOutSeconds = 5;
 
 
@@ -146,18 +146,10 @@ namespace aclara_meters.view
                     if (FormsApp.ble_interface.IsOpen()) FormsApp.ble_interface.Close();
 
                     Utils.PrintDeep("----------------------------------------------  init Ble_iterface");
-                    if (printer.ThreadState == ThreadState.Suspended)
+                    if (connectionThread.ThreadState == ThreadState.WaitSleepJoin)
                     {
-                        try
-                        {
-                            Utils.PrintDeep("---------------  printer resume");
-                           
-                            printer.Resume();
-                        }
-                        catch (Exception e11)
-                        {
-                            Utils.Print(e11.StackTrace);
-                        }
+                       Utils.PrintDeep($"____________________________________________________________________Thread '{Thread.CurrentThread.Name}' waiting.");
+                       connectionThread.Interrupt(); 
                     }
                     
                     listPucks = new ObservableCollection<DeviceItem>();
@@ -248,8 +240,11 @@ namespace aclara_meters.view
             Utils.PrintDeep($"-------------------------------    Interface_background_scan_page, thread: { Thread.CurrentThread.ManagedThreadId}");
 
             // this task controls the connect and disconnect for the devices
-            printer = new Thread(new ThreadStart(InvokeMethod));
-            printer.Start();
+            connectionThread = new Thread(new ThreadStart(ConnectionMethod))
+            {
+                Name = "ConnectionThread"
+            };
+            connectionThread.Start();
 
             // asign the command to the list
             DeviceList.RefreshCommand = refresh_command;
@@ -507,193 +502,180 @@ namespace aclara_meters.view
             CrossSettings.Current.AddOrUpdateValue("rssi_icon_topbar", rssiIcon + "_white");
         }
 
-        private void InvokeMethod()
+        private void ConnectionMethod()
         {
  
             int timeout_connecting = 0;
             int cont = 0;
             int refresh = 0;
 
+     
             while (true)
             {
- 
-                if (Settings.IsLoggedIn == false) 
-                    break;
+                try
+                { 
 
-                int status = FormsApp.ble_interface.GetConnectionStatus();
+                    if (Settings.IsLoggedIn == false)
+                        break;
 
-                if (cont == 2000)
-                {
-                    if (refresh == 4)
+                    int status = FormsApp.ble_interface.GetConnectionStatus();
+
+                    if (cont == 2000)
                     {
-                        refresh = 0;
-                        bAlertBatt = true;
-                        bAlertBatt10 = true;
-                    }
-                    else refresh += 1;
-
-                    RefreshPuckData();
-                    cont = 0;
-                }
-                else cont += 1;
-
-                if (status != peripheralConnected)
-                {
-
-                    if (peripheralConnected == ble_library.BlePort.NO_CONNECTED)
-                    {
-                        peripheralConnected = status;
-                        timeout_connecting = 0;
-                    }
-                    else if (peripheralConnected == ble_library.BlePort.CONNECTING)
-                    {
-
-                        if (status == ble_library.BlePort.NO_CONNECTED)
+                        if (refresh == 4)
                         {
-                            Device.BeginInvokeOnMainThread(() =>
-                            {
-                                switch (FormsApp.ble_interface.GetConnectionError())
-                                {
-                                    case ble_library.BlePort.NO_ERROR:
-                                        
-                                        break;
-                                    case ble_library.BlePort.CONECTION_ERRROR:
-                                      
-                                        Device.BeginInvokeOnMainThread(() =>
-                                        {
-                                            #region New Circular Progress bar Animations    
-
-                                            DeviceList.IsRefreshing = false;
-                                            backdark_bg.IsVisible = false;
-                                            indicator.IsVisible = false;
-                                            background_scan_page.IsEnabled = true;
-
-                                            #endregion
-                                        });
-
-                                        Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
-                                        break;
-                                    case ble_library.BlePort.DYNAMIC_KEY_ERROR:
-                                    case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
-                                        
-                                        Device.BeginInvokeOnMainThread(() =>
-                                        {
-                                            #region New Circular Progress bar Animations    
-
-                                            DeviceList.IsRefreshing = false;
-                                            backdark_bg.IsVisible = false;
-                                            indicator.IsVisible = false;
-                                            background_scan_page.IsEnabled = true;
-
-                                            #endregion
-
-                                        });
-                                       
-                                        Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
-                                        break;
-                                }
-                                DeviceList.IsEnabled = true;
-                                
-                                fondo.Opacity = 1;
-                                background_scan_page.Opacity = 1;
-                                background_scan_page.IsEnabled = true;
-
-                            });
-                            peripheralConnected = status;
-                            Singleton.Remove<Puck> ();
-                           
+                            refresh = 0;
                             bAlertBatt = true;
                             bAlertBatt10 = true;
                         }
-                        else // status == ble_library.BlePort.CONNECTED
+                        else refresh += 1;
+
+                        RefreshPuckData();
+                        cont = 0;
+                    }
+                    else cont += 1;
+
+                    if (status != peripheralConnected)
+                    {
+                        if (peripheralConnected == ble_library.BlePort.NO_CONNECTED)
+                        {
+                            peripheralConnected = status;
+                            timeout_connecting = 0;
+                        }
+                        else if (peripheralConnected == ble_library.BlePort.CONNECTING)
+                        {
+
+                            if (status == ble_library.BlePort.NO_CONNECTED)
+                            {
+                                Device.BeginInvokeOnMainThread(() =>
+                                {
+                                    Device.BeginInvokeOnMainThread(() =>
+                                    {
+                                        #region New Circular Progress bar Animations    
+
+                                        DeviceList.IsRefreshing = false;
+                                        backdark_bg.IsVisible = false;
+                                        indicator.IsVisible = false;
+                                        background_scan_page.IsEnabled = true;
+
+                                        #endregion
+                                    });
+                                    switch (FormsApp.ble_interface.GetConnectionError())
+                                    {
+                                        case ble_library.BlePort.NO_ERROR:
+
+                                            Application.Current.MainPage.DisplayAlert("Alert", "Please, press again the button to change PAIRING mode", "Ok");
+                                            break;
+                                        case ble_library.BlePort.CONECTION_ERRROR:
+
+                                            Application.Current.MainPage.DisplayAlert("Alert", "Connection error. Please, retry", "Ok");
+                                            break;
+                                        case ble_library.BlePort.DYNAMIC_KEY_ERROR:
+                                        case ble_library.BlePort.NO_DYNAMIC_KEY_ERROR:
+
+                                            Application.Current.MainPage.DisplayAlert("Alert", "Please, press the button to change PAIRING mode", "Ok");
+                                            break;
+                                    }
+                                    DeviceList.IsEnabled = true;
+
+                                    fondo.Opacity = 1;
+                                    background_scan_page.Opacity = 1;
+                                    background_scan_page.IsEnabled = true;
+
+                                });
+                                peripheralConnected = status;
+                                Singleton.Remove<Puck>();
+
+                                bAlertBatt = true;
+                                bAlertBatt10 = true;
+                            }
+                            else // status == ble_library.BlePort.CONNECTED
+                            {
+                                DeviceList.IsEnabled = true;
+
+                                peripheralConnected = status;
+                                Device.BeginInvokeOnMainThread(() =>
+                                {
+                                    fondo.Opacity = 1;
+                                    background_scan_page.Opacity = 1;
+                                    background_scan_page.IsEnabled = true;
+
+                                    IsConnectedUIChange(true);
+                                });
+                            }
+                        }
+                        else if (peripheralConnected == ble_library.BlePort.CONNECTED)
                         {
                             DeviceList.IsEnabled = true;
-                           
+
                             peripheralConnected = status;
+                            Singleton.Remove<Puck>();
+                            bAlertBatt = true;
+                            bAlertBatt10 = true;
+
                             Device.BeginInvokeOnMainThread(() =>
                             {
                                 fondo.Opacity = 1;
                                 background_scan_page.Opacity = 1;
                                 background_scan_page.IsEnabled = true;
-
-                                IsConnectedUIChange(true);
+                                //desconectar disp
+                                IsConnectedUIChange(false);
                             });
                         }
                     }
-                    else if (peripheralConnected == ble_library.BlePort.CONNECTED)
+                    
+                    if (peripheralConnected == ble_library.BlePort.CONNECTING)
                     {
-                        DeviceList.IsEnabled = true;
-                       
-                        peripheralConnected = status;
-                        Singleton.Remove<Puck> ();
-                        bAlertBatt = true;
-                        bAlertBatt10 = true;
+                        timeout_connecting++;
+                        
+                        if (timeout_connecting >= 2 * 12) // 10 seconds
+                        {                           
+                            Device.BeginInvokeOnMainThread(() =>
+                            {
+                                Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
 
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            fondo.Opacity = 1;
-                            background_scan_page.Opacity = 1;
-                            background_scan_page.IsEnabled = true;
-                            //desconectar disp
-                            IsConnectedUIChange(false);
-                        });
-                    }
-                }
+                                listPucks = new ObservableCollection<DeviceItem>();
+                                DeviceList.ItemsSource = listPucks;
 
-                if (peripheralConnected == ble_library.BlePort.CONNECTING)
-                {
-                    timeout_connecting++;
-                    if (timeout_connecting >= 2 * 12) // 10 seconds
-                    {
-                        Device.BeginInvokeOnMainThread(() =>
-                        {
-                            Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
+                                DeviceList.IsEnabled = true;
+                                fondo.Opacity = 1;
+                                background_scan_page.Opacity = 1;
+                                background_scan_page.IsEnabled = true;
 
-                            listPucks = new ObservableCollection<DeviceItem>();
-                            DeviceList.ItemsSource = listPucks;
+                                autoConnect = false;
 
-                            DeviceList.IsEnabled = true;
-                            fondo.Opacity = 1;
-                            background_scan_page.Opacity = 1;
-                            background_scan_page.IsEnabled = true;
-
-                            autoConnect = false;
-
-                            #region Disable Circular Progress bar Animations when done
+                                #region Disable Circular Progress bar Animations when done
 
                                 backdark_bg.IsVisible = false;
                                 indicator.IsVisible = false;
                                 background_scan_page.IsEnabled = true;
 
-                            #endregion
+                                #endregion
 
-                            try
-                            {
-                                Utils.Print("---------------  printer suspend");
-                                printer.Suspend();
-                            }
-                            catch (Exception e5)
-                            {
-                                Utils.Print($"------ {e5.StackTrace}, {e5.Message}");
-                            }
+                                peripheralConnected = ble_library.BlePort.NO_CONNECTED;
+                                timeout_connecting = 0;
 
-
-                        });
-                        peripheralConnected = ble_library.BlePort.NO_CONNECTED;
-                        timeout_connecting = 0;
-
-                        FormsApp.ble_interface.Close();
+                                FormsApp.ble_interface.Close();
+                      
+                            });
+                           
+                            Thread.Sleep(Timeout.Infinite);
+                        }
                     }
+                    else
+                    {
+                        //No es connecting
+                    }
+
+                    Thread.Sleep(300); // 0.5 Second
                 }
-                else
+                catch (ThreadInterruptedException)
                 {
-                    //No es connecting
+                    Console.WriteLine($"____________________________________________________________________Thread '{Thread.CurrentThread.Name}' awoken.");
                 }
 
-                 Thread.Sleep(300); // 0.5 Second
-              
             }
-
+           
         }
 
         private void IsConnectedUIChange(bool puckConnected)
@@ -922,7 +904,7 @@ namespace aclara_meters.view
             dialog_open_bg.IsVisible = false;
             turnoff_mtu_background.IsVisible = false;
 
-            printer.Abort();
+            connectionThread.Abort();
 
             FormsApp.DoLogOff();
 

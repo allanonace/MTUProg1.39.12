@@ -127,7 +127,7 @@ namespace ble_library
                 if ( ble_port_serial.semaphore.CurrentCount <= 0 )
                     ble_port_serial.semaphore.Release ();
                     
-                ble_port_serial.timeInit = 0L;
+                ble_port_serial.TimeInit = 0L;
             
                 int totalBytesToWrite = count;
                 int bytesWritten = 0;

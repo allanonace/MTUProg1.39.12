@@ -70,13 +70,11 @@ namespace MTUComm
             String  script_stream,
             int     stream_size )
         {
-            XmlSerializer s = null ;
-        
+            XmlSerializer s;
+            Script script = new Script();
+            s = new XmlSerializer(typeof(Script));
             try
-            {                     
-                Script script = new Script ();
-                s = new XmlSerializer ( typeof ( Script ) );
-                               
+            {             
                 // Register unknown elements ( not present in Script class ) as additional parameters
                 s.UnknownElement += this.UnknownElementEvent;
 

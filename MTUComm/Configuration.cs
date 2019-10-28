@@ -366,12 +366,6 @@ namespace MTUComm
 
             string return_str = "";
 
-            if (device.Equals("PC"))
-            {
-                return_str = "2.2.5.0";
-            }
-            else
-
             if (device.Equals("Android") || device.Equals("iOS"))
             {
                 return_str = version;
@@ -386,12 +380,6 @@ namespace MTUComm
         {
 
             string return_str = "";
-
-            if (device.Equals("PC"))
-            {
-                return_str = "AclaraStarSystemMobileR";
-            }
-            else
 
             if (device.Equals("Android") || device.Equals("iOS"))
             {
