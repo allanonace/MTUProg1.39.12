@@ -128,8 +128,8 @@ namespace Xml
             get { return ! string.IsNullOrEmpty ( this.messagePopup ); }
         }
 
-        public int Port;
-        public Exception Exception;
+        public int Port { get; set; }
+        public Exception Exception { get; set; }
 
         public object Clone ()
         {

@@ -232,6 +232,7 @@ namespace aclara_meters
             Utils.Print ("FormsApp: Uri.Query [ " + url.Query.ToString() + " ]");
 
             DataUrl = url;
+
  
         }
 
