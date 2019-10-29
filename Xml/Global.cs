@@ -960,7 +960,7 @@ namespace Xml
         public bool WorkOrderRecording { get; set; }
 
         [XmlIgnore]
-        public bool FastMessageConfig;
+        public bool FastMessageConfig { get; set; }
 
         [XmlElement("FastMessageConfig")]
         public bool FastMessageConfigXml
@@ -979,11 +979,11 @@ namespace Xml
         #region Collections
 
         [XmlIgnore]
-        public List<Option> Options_Default;
+        private List<Option> Options_Default;
 
         [XmlArray("Options")]
         [XmlArrayItem("option")]
-        public List<Option> Options_Deserialized;
+        private List<Option> Options_Deserialized;
         
         [XmlIgnore]
         public List<Option> Options
@@ -997,11 +997,11 @@ namespace Xml
         }
         
         [XmlIgnore]
-        public List<string> Cancel_Default;
+        private List<string> Cancel_Default;
         
         [XmlArray("Cancel")]
         [XmlArrayItem("option")]
-        public List<string> Cancel_Deserialized;
+        private List<string> Cancel_Deserialized;
 
         [XmlIgnore]
         public List<string> Cancel
