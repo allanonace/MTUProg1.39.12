@@ -80,7 +80,7 @@ namespace aclara_meters.view
 
             menuOptions = this.MenuOptions;
             dialogView = this.DialogView;
-
+           
             TappedListeners();
             LoadPreUIGFX();
 

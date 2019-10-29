@@ -142,6 +142,7 @@ namespace aclara_meters.view
                 if (!Data.Get.IsFromScripting)
                     Device.BeginInvokeOnMainThread(() =>
                     {
+                        FormsApp.StartInteractive = true;
                         Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
                     });
                 else

@@ -121,8 +121,15 @@ namespace MTUComm
             object sender,
             XmlElementEventArgs e )
         {
-            ScriptAction script = ( ScriptAction )e.ObjectBeingDeserialized;
-            script.AddAdditionParameter ( e.Element.Name, e.Element.InnerText );
+            try
+            {
+                ScriptAction script = (ScriptAction)e.ObjectBeingDeserialized;
+                script.AddAdditionParameter(e.Element.Name, e.Element.InnerText);
+            }
+            catch(Exception)
+            {
+                // the tags out of the action are ignored
+            }
         }
 
         /// <summary>

@@ -41,6 +41,7 @@ namespace aclara_meters
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
         private string appVersion;
+        public static bool StartInteractive;
 
         #endregion
 
@@ -224,7 +225,7 @@ namespace aclara_meters
 
         #region Scripting iOS
 
-        public  void HandleUrl ( Uri url )
+        public async  void HandleUrl ( Uri url )
         {
             Data.Set ( "IsFromScripting", true );
 
@@ -232,6 +233,55 @@ namespace aclara_meters
             Utils.Print ("FormsApp: Uri.Query [ " + url.Query.ToString() + " ]");
 
             DataUrl = url;
+
+            if (StartInteractive) ///   is in interactive mode
+            {
+                try
+                {
+                    if (FormsApp.ble_interface != null &&
+                        FormsApp.ble_interface.IsOpen())
+                        FormsApp.ble_interface.Close();
+                }
+                catch (Exception e)
+                {
+                    Utils.Print(e.StackTrace);
+                }
+
+                string path = Mobile.ConfigPath;
+                NameValueCollection query = HttpUtility.ParseQueryString(url.Query);
+
+                var script_name = query.Get("script_name");
+                var script_data = query.Get("script_data");
+                var callback = query.Get("callback");
+
+                if (script_name != null)
+                    path = Path.Combine(path, "___" + script_name.ToString());
+
+                if (script_data != null)
+                    File.WriteAllText(path, Base64Decode(script_data));
+
+                if (callback != null) { /* ... */ }
+
+                try
+                {
+                    await Task.Run(async () =>
+                    {
+                        await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
+                        {
+                            Application.Current.MainPage = new NavigationPage(
+                                   new AclaraViewScripting(path, callback, script_name));
+
+                            await Application.Current.MainPage.Navigation.PopToRootAsync(true);
+                        });
+                    });
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"-----  {ex.Message}");
+                }
+            
+            }
+            
  
         }
 
