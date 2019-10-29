@@ -131,18 +131,18 @@ namespace aclara_meters
             if ( VersionTracking.IsFirstLaunchEver ||
                  Mode.Equals ( "None" ) )
             {
-                if (Data.Get.IsAndroid)
-                {
-                    var MamServ = DependencyService.Get<IMAMService>();
-                    MamServ.UtilMAMService();
+                //if (Data.Get.IsAndroid)
+                //{
+                //    var MamServ = DependencyService.Get<IMAMService>();
+                //    MamServ.UtilMAMService();
 
-                    if (Mobile.configData.HasIntune)
-                    {
-                        GenericUtilsClass.SetInstallMode("Intune");
-                        Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
-                        return;
-                    }
-                }
+                //    if (Mobile.configData.HasIntune)
+                //    {
+                //        GenericUtilsClass.SetInstallMode("Intune");
+                //        Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
+                //        return;
+                //    }
+                //}
 
                 SecureStorage.RemoveAll ();
                 Device.BeginInvokeOnMainThread ( () =>

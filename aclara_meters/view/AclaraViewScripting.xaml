@@ -76,7 +76,7 @@
                                             <!-- {Binding Name} -->
                                             <Label FontSize="32" Text="{Binding deviceName}">
                                             </Label>
-                                            <Label Margin="4,-4,0,0" FontSize="14" Text="{Binding deviceMacAddress}">
+                                            <Label Margin="4,-4,0,0" FontSize="22" Text="{Binding deviceMacAddress}">
                                             </Label>
                                             <StackLayout Margin="0,-4,0,0" Orientation="Horizontal" VerticalOptions="Center">
                                                 <Image Source="{Binding deviceBatteryIcon} " HeightRequest="34" VerticalOptions="Center" />
