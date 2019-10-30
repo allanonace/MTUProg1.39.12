@@ -386,7 +386,7 @@ namespace MTUComm
                     case ActionType.BasicRead                  : ok = true; break;
                     case ActionType.DataRead                   : ok = await Task.Run ( () => Validate_DataRead () ); break;
                     case ActionType.MtuInstallationConfirmation: ok = await Task.Run ( () => Validate_InstallConfirmation () ); break;
-                    case ActionType.RemoteDisconnect           : ok = await Task.Run ( () => Validate_RemoteDisconnect () ); break;
+                    case ActionType.ValveOperation             : ok = await Task.Run ( () => Validate_RemoteDisconnect () ); break;
                    // case ActionType.TurnOffMtu                 : ok = await Task.Run ( () => Validate_TurnOff () ); break;
                    // case ActionType.TurnOnMtu                  : ok = await Task.Run ( () => Validate_TurnOn () ); break;
                 }
@@ -472,7 +472,7 @@ namespace MTUComm
                              await Task.Run ( () => DataRead ( ( Action )args[ 0 ] ) );
                         else await Task.Run ( () => DataRead () );
                         break;
-                    case ActionType.RemoteDisconnect:
+                    case ActionType.ValveOperation:
                         // Scripting and Interactive
                         if ( args.Length == 1 )
                              await Task.Run ( () => RemoteDisconnect ( ( Action )args[ 0 ] ) );

@@ -104,7 +104,7 @@ namespace aclara_meters.view
                 MenuList.Add(new PageItem() { Title = "Install Confirmation", Icon = "installConfirm.png", Color = "White", TargetType = ActionType.MtuInstallationConfirmation });
 
             if (Singleton.Get.Configuration.Global.ShowValvePosition)
-                MenuList.Add(new PageItem() { Title = "Valve Operation", Icon = "valve_operation.png", Color = "White", TargetType = ActionType.RemoteDisconnect });
+                MenuList.Add(new PageItem() { Title = "Valve Operation", Icon = "valve_operation.png", Color = "White", TargetType = ActionType.ValveOperation });
 
             if (Singleton.Get.Configuration.Global.ShowDataRead)
                 MenuList.Add(new PageItem() { Title = "Historical Read", Icon = "data_read.png", Color = "White", TargetType = ActionType.DataRead });

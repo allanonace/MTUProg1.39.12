@@ -439,7 +439,7 @@ namespace aclara_meters.view
             {
                 if (actionType == ActionType.DataRead)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
-                else if(actionType == ActionType.RemoteDisconnect)
+                else if(actionType == ActionType.ValveOperation)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved,  this.actionType), false);
                 else
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
@@ -1157,7 +1157,7 @@ namespace aclara_meters.view
             switch (actionTarget)
             {
                     case ActionType.DataRead:
-                    case ActionType.RemoteDisconnect:
+                    case ActionType.ValveOperation:
                     #region DataRead  
                     await Task.Delay(200).ContinueWith(t =>
 

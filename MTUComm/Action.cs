@@ -207,7 +207,7 @@ namespace MTUComm
             TurnOffMtu,
             TurnOnMtu,
             DataRead,
-            RemoteDisconnect,
+            ValveOperation,
             MtuInstallationConfirmation,
             BasicRead,
             ReadFabric,
@@ -445,7 +445,7 @@ namespace MTUComm
             ActionsTexts =
             new Dictionary<ActionType, string[]>()
             {   
-            { ActionType.RemoteDisconnect,
+            { ActionType.ValveOperation,
                 new string[]
                 {
                    "Valve Operation",
@@ -535,7 +535,7 @@ namespace MTUComm
                 {ActionType.DataRead,                       "Read Data Log" },
                 {ActionType.MtuInstallationConfirmation,    "Install Confirmation" },
                 {ActionType.ReadFabric,                     "Read Fabric" },
-                {ActionType.RemoteDisconnect,               "Valve Operation" }
+                {ActionType.ValveOperation,               "Valve Operation" }
             };
 
             LogTypes = new Dictionary<ActionType,String> ()
@@ -553,7 +553,7 @@ namespace MTUComm
                 {ActionType.DataRead,                       "ReadDataLog" },
                 {ActionType.MtuInstallationConfirmation,    "InstallConfirmation" },
                 {ActionType.ReadFabric,                     "ReadFabric" },
-                {ActionType.RemoteDisconnect,               "Valve Operation" }
+                {ActionType.ValveOperation,               "Valve Operation" }
             };
 
             LogReasons = new Dictionary<ActionType,String> ()
@@ -571,7 +571,7 @@ namespace MTUComm
                 {ActionType.DataRead,                       "DataRead" },
                 {ActionType.MtuInstallationConfirmation,    "InstallConfirmation" },
                 {ActionType.ReadFabric,                     "ReadFabric" },
-                {ActionType.RemoteDisconnect,               "ValveOperation" }
+                {ActionType.ValveOperation,               "ValveOperation" }
             };
         }
 
@@ -774,7 +774,7 @@ namespace MTUComm
                             parameters.Add ( this );
                         break;
                     
-                    case ActionType.RemoteDisconnect:
+                    case ActionType.ValveOperation:
                         this.mtucomm.OnRemoteDisconnect -= OnRemoteDisconnect;
                         this.mtucomm.OnRemoteDisconnect += OnRemoteDisconnect;
                         // In interactive mode values are already set in Library.Data
@@ -983,7 +983,7 @@ namespace MTUComm
             try
             {
                 // Load parameters using the interface file
-                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.RemoteDisconnect );
+                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.ValveOperation );
                 ActionResult readMtu_allParamsFromInterface  = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
 
                 // Write result in the DataRead file

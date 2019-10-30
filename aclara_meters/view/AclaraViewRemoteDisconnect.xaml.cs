@@ -256,7 +256,7 @@ namespace aclara_meters.view
             {
                 if (actionType == ActionType.DataRead)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
-                else if(actionType == ActionType.RemoteDisconnect)
+                else if(actionType == ActionType.ValveOperation)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved,  this.actionType), false);
                 else
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);

@@ -188,7 +188,7 @@ namespace MTUComm
                               actionType == ActionType.TurnOnMtu  ||
                               actionType == ActionType.MtuInstallationConfirmation ||
                               actionType == ActionType.DataRead   ||
-                              actionType == ActionType.RemoteDisconnect;
+                              actionType == ActionType.ValveOperation;
             
             // Action is about Replace Meter
             bool isReplaceMeter = (
@@ -661,7 +661,7 @@ namespace MTUComm
                         #region Valve Position [ Only RemoteDisconnect ]
                         case APP_FIELD.RDDPosition:
                         // Param totally useless in other action types
-                        if ( actionType != ActionType.RemoteDisconnect )
+                        if ( actionType != ActionType.ValveOperation)
                             continue;
 
                         // Allowed values: CLOSE, OPEN, PARTIAL_OPEN
@@ -676,7 +676,7 @@ namespace MTUComm
                         #region RDD Firmware [ Only RemoteDisconnect ]
                         case APP_FIELD.RDDFirmware:
                         // Param totally useless in other action types
-                        if ( actionType != ActionType.RemoteDisconnect )
+                        if ( actionType != ActionType.ValveOperation)
                             continue;
                         
                         else if ( fail = NoELTxt ( valueStr, MAX_RDD_FW ) )

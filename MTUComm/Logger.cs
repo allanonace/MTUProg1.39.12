@@ -577,7 +577,7 @@ namespace MTUComm
             Mtu mtu )
         {
             return this.CompoundActivityLog (
-                ActionType.RemoteDisconnect,
+                ActionType.ValveOperation,
                 rdd_allParamsFromInterface,
                 readMtu_allParamsFromInterface,
                 mtu );
