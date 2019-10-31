@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using Library.Exceptions;
@@ -50,7 +51,8 @@ namespace Xml
         [XmlElement("Alarm")]
         public List<Alarm> Alarms { get; set; }
 
-        public List<Alarm> FindByMtuType(int mtuType)
+        public List<Alarm> FindByMtuType (
+            int mtuType )
         {
             List<Alarm> alarms = Alarms.FindAll ( x => x.MTUType == mtuType );
 
@@ -58,6 +60,32 @@ namespace Xml
                 throw new AlarmNotFoundException_Internal ();
 
             return alarms;
+        }
+
+        public Alarm FindByMtuTypeAndName (
+            int mtuType,
+            string name )
+        {
+            return this.FindByMtuType ( mtuType )
+                .Find ( a => a.Name.ToLower ().Equals ( name.ToLower () ) );
+        }
+
+        public Alarm[] FindByMtuType_Interactive (
+            int mtuType )
+        {
+            List<Alarm> alarms = this.FindByMtuType ( mtuType );
+
+            if ( alarms.Count > 0 )
+                return alarms.Where ( a => ! string.Equals ( a.Name.ToLower (), "scripting" ) ).ToArray ();
+            
+            return null;
+        }
+
+        public Alarm FindByMtuType_Scripting (
+            int mtuType )
+        {
+            return this.FindByMtuType ( mtuType )
+                .Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
         }
     }
 }

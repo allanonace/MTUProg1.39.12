@@ -43,8 +43,8 @@ namespace aclara_meters
 
         private const bool   DEBUG_MODE_ON = false;
 
-        private const string SO_ANDROID = "Android";
-        private const string SO_IOS     = "iOS";
+        public const string SO_ANDROID = "Android";
+        public const string SO_IOS     = "iOS";
         private const string SO_UNKNOWN = "Unknown";
        
         #endregion
@@ -76,7 +76,7 @@ namespace aclara_meters
 
         #region Properties
 
-        private static string appName = "Aclara MTU Programmer ";
+        public static string appName = "Aclara MTU Programmer ";
 
         public static string AppName
         {
@@ -101,10 +101,12 @@ namespace aclara_meters
         {
             try
             {
-                InitializeComponent();
+                InitializeComponent ();
 
-                if (!Data.Get.IsFromScripting)
-                    MainPage = new ContentPage();
+                Data.Set ( "UNIT_TEST", false );
+
+                if ( ! Data.Get.IsFromScripting )
+                    MainPage = new ContentPage ();
 
                 VersionTracking.Track();
 

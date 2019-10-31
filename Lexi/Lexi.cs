@@ -8,6 +8,7 @@ using Lexi.Exceptions;
 using Lexi.Interfaces;
 using Library;
 using Library.Exceptions;
+using Xml.UnitTest;
 
 namespace Lexi
 {
@@ -290,8 +291,11 @@ namespace Lexi
 
         #region Attributes
 
-        private ISerial m_serial; // Serial port interface used to communicate through Lexi
+        public static dynamic map;
+        //private string lastStream;
+        //private int    indexLastStream;
 
+        private ISerial m_serial; // Serial port interface used to communicate through Lexi
         private int m_timeout; // Timout limit to wait for MTU response.
 
         #endregion
@@ -304,7 +308,7 @@ namespace Lexi
             m_timeout = 400;
         }
 
-        public Lexi(ISerial serial, int timeout)
+        public Lexi ( ISerial serial, int timeout )
         {
             m_serial = serial;
             m_timeout = timeout;
@@ -322,13 +326,56 @@ namespace Lexi
         /// <returns>Response from the MTU.</returns>
         /// <seealso cref="Write(uint, byte[], uint[], LexiFiltersResponse, LexiAction)"/>
         public async Task<byte[]> Read (
-            UInt32 addres,
-            uint data )
+            UInt32 address,
+            uint data,
+            bool isPartOfWrite = false )
         {
+            #region Unit Test
+
+            // Performing unit tests the data is always read from the preloaded memory map
+            if ( Data.Get.UNIT_TEST )
+            {
+                try
+                {
+                    byte[] inputStream;
+                    LexiPackage info = GeneratePackage ( LexiAction.Read, out inputStream, address, new byte[]{ ( byte )data } );
+
+                    byte[] response = new byte[]{};
+
+                    // Returns bytes from the XML or from the virtual memory map of the MTU
+                    if ( this.LoadResponseFromXML ( inputStream, ref response, true, isPartOfWrite ) )
+                    {
+                        // Updates the memory map with the desired response
+                        Array.Copy ( response, 0, map.memory, ( int )address, ( int )data );
+
+                        return response;
+                    }
+                    // Response input not present in the xml
+                    else
+                    {
+                        byte[] output = ( ( byte[] ) map.memory ).Skip ( ( int )address ).Take ( ( int )data ).ToArray ();
+
+                        Console.WriteLine ( "MTU response output: " + BitConverter.ToString ( output ).Replace ( "-", " " ) );
+
+                        return output;
+                    }
+                }
+                catch ( Exception e )
+                {
+
+                }
+            }
+            
+            #endregion
+
+            #region NO Unit Test
+
             if ( m_serial == null )
                 throw new ArgumentNullException ( "No Serial interface defined" );
 
-            return await Read ( m_serial, addres, data, m_timeout );
+            return await Read ( m_serial, address, data, m_timeout );
+
+            #endregion
         }
 
         private async Task<byte[]> Read (
@@ -343,8 +390,8 @@ namespace Lexi
         
             try
             {
-                byte[] stream;
-                var info = GeneratePackage ( LexiAction.Read, out stream, address, null, bytesToRead );
+                byte[] inputStream;
+                LexiPackage info = GeneratePackage ( LexiAction.Read, out inputStream, address, new byte[]{ ( byte )bytesToRead } );
                 
                 Utils.PrintDeep ( "Lexi.Read.. " +
                 "Stream = " +
@@ -353,16 +400,16 @@ namespace Lexi
                 "Address 0x" + info.StartAddress + " ( " + Convert.ToInt32 ( info.StartAddress, 16 ) + " ) + " +
                 "Checksum 0x" + info.Checksum + " ( " + Convert.ToInt32 ( info.Checksum, 16 ) + " )" );
     
-                Utils.PrintDeep ( "Lexi.Read.. " + Utils.ByteArrayToString ( stream ).Trim () + " [ Length " + stream.Length + " ]" );
+                Utils.PrintDeep ( "Lexi.Read.. " + Utils.ByteArrayToString ( inputStream ).Trim () + " [ Length " + inputStream.Length + " ]" );
     
                 // Send Lexi Read command
-                await serial.Write ( stream, 0, stream.Length );
+                await serial.Write ( inputStream, 0, inputStream.Length );
                 
                 Utils.PrintDeep ( "------BUFFER_START-------" );
                 
                 //define response buffer size
                 byte[] rawBuffer = new byte[0];
-                int headerOffset = ( serial.isEcho () ) ? stream.Length : 0;
+                int headerOffset = ( serial.isEcho () ) ? inputStream.Length : 0;
                 Array.Resize ( ref rawBuffer, headerOffset + ( int )bytesToRead + 2 ); // Package + Data + ACK
                 
                 Utils.PrintDeep ( "Lexi.Read -> Array.Resize.." +
@@ -453,15 +500,55 @@ namespace Lexi
             LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
             LexiAction lexiAction  = LexiAction.Write )
         {
+            // Some Operation Request commands do not have more data than the header
+            if ( data is null )
+                data = new byte[ 0 ]; // Empty data array
+
+            #region Unit Test
+
+            // Performing unit tests the response generated by the writing actions is simulated
+            if ( Data.Get.UNIT_TEST )
+            {
+                try
+                {
+                    byte[] inputStream;
+                    LexiPackage info = GeneratePackage ( lexiAction, out inputStream, addressOrLexiCmd, data );
+
+                    byte[] response = new byte[]{};
+
+                    // Normal write, modifying the value of a register into the MTU
+                    if ( lexiAction == LexiAction.Write )
+                    {
+                        Array.Copy ( data, 0, map.memory, addressOrLexiCmd, data.Length );
+
+                        response = new byte[ inputStream.Length + 2 ]; // ACK + ACK Info
+                        Array.Copy ( inputStream, response, inputStream.Length );
+                        response[ inputStream.Length     ] = 0x06;
+                        response[ inputStream.Length + 1 ] = 0x00;
+                    }
+                    // Operation Request commands
+                    else
+                    {
+                        this.LoadResponseFromXML ( inputStream, ref response );
+                    }
+
+                    return new LexiWriteResult ( response, inputStream.Length );
+                }
+                catch ( Exception e )
+                {
+
+                }
+            }
+
+            #endregion
+
+            #region NO Unit Test
+
             if ( m_serial == null )
                 throw new ArgumentNullException ( "No Serial interface defined" );
 
             if ( bytesResponse == null )
                 bytesResponse = new uint[] { 2 }; // ACK + ACK Info Size
-
-            // Some Operation Request commands do not have more data than the header
-            if ( data is null )
-                data = new byte[ 0 ]; // Empty data array
 
             // Try the specified time of attempts
             LexiWriteResult result = null;
@@ -496,8 +583,10 @@ namespace Lexi
             while ( attempts > 0 );
 
             return result;
+
+            #endregion
         }
-        
+
         private async Task<LexiWriteResult> Write (
             ISerial serial,
             UInt32 addressOrLexiCmd,
@@ -664,6 +753,55 @@ namespace Lexi
             }
         }
 
+        private bool LoadResponseFromXML (
+            byte[] inputStream,
+            ref byte[] response,
+            bool isRead        = false,
+            bool isPartOfWrite = false )
+        {
+            UnitTest_Data testData = Data.Get.UnitTestData;
+
+            string inputXml = BitConverter.ToString ( inputStream ).Replace ( "-", " " );
+
+            Console.WriteLine ( "LExI searching response for: " + inputXml );
+
+            // Searches for the desired response based on the generated package
+            List<UnitTest_WriteResponse> list = testData.WriteResponses.ListRegisters;
+            int index = list.FindIndex ( r =>
+                ( ( isRead ) ? r.IsRead && ! isPartOfWrite : r.IsWrite ) &&
+                r.Input.Equals ( inputXml ) );
+            
+            if ( index < 0 )
+                return false;
+
+            Console.WriteLine ( "LExI response output: " + list.ElementAt ( index ).Output );
+
+            // Some commands can be used multiple times, having multiple outputs ( e.g. Get Next Log in NodeDescovery )
+            string responseDesired = list.ElementAt ( index ).Output;
+            list.RemoveAt ( index );
+
+            // Convert output string to byte array
+            string[] outputXml = responseDesired.Split ( new char[]{ ' ' } );
+            byte[] outputStream = new byte[ outputXml.Length ];
+            for ( int i = 0; i < outputStream.Length; i++ )
+                outputStream[ i ] = Convert.ToByte ( outputXml[ i ], 16 );
+
+            // Concatenates generated package ( simulating the echo ) and the desired result
+            if ( ! isRead )
+            {
+                response = new byte[ inputStream.Length + outputStream.Length ];
+                Array.Copy ( inputStream, response, inputStream.Length );
+                Array.Copy ( outputStream, 0, response, inputStream.Length, outputStream.Length );
+            }
+            else
+            {
+                response = new byte[ outputStream.Length ];
+                Array.Copy ( outputStream, response, outputStream.Length );
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Depending on the process to be executed ( write or read ) and the LExI command,
         /// this method prepares the package to be sent to the MTU, avoiding to have dupled
@@ -686,8 +824,7 @@ namespace Lexi
             LexiAction lexiAction,
             out byte[] array,
             uint address,
-            byte[] data = null,
-            params object[] arguments )
+            byte[] data )
         {
             byte[] header = new byte[ 4 ];
             byte[] crc    = new byte[ 0 ];
@@ -720,7 +857,7 @@ namespace Lexi
                 header[ 0 ] = 0x25;
                 header[ 1 ] = ( byte )( uint )(     128 + ( ( address / 256 ) *   2 ) );
                 header[ 2 ] = ( byte )( uint )( address - ( ( address / 256 ) * 256 ) );
-                header[ 3 ] = ( byte )( uint )arguments[ 0 ];
+                header[ 3 ] = ( byte )( uint )data[ 0 ];
                 header      = checkSum ( header );
                 break;
 

@@ -1,4 +1,5 @@
 ﻿using System.Xml.Serialization;
+using Library;
 
 namespace Xml
 {
@@ -12,8 +13,6 @@ namespace Xml
     */
     public class MemRegister
     {
-        public  const int    ERROR_VAL   = -1;
-        public  const string ERROR_STR   = "-1";
         public  const bool   DEF_WRITE   = false;
         private const int    BOOL_TRUE   = 1;
         private const int    BOOL_FALSE  = 0;
@@ -49,9 +48,9 @@ namespace Xml
                     int v;
                     if (int.TryParse(value, out v))
                          this.Address = v;
-                    else this.Address = ERROR_VAL; //DEF_ADDRESS;
+                    else this.Address = Validations.ERROR_VAL; //DEF_ADDRESS;
                 }
-                else this.Address = ERROR_VAL; //DEF_ADDRESS;
+                else this.Address = Validations.ERROR_VAL; //DEF_ADDRESS;
             }
         }
 
@@ -69,9 +68,9 @@ namespace Xml
                     int v;
                     if (int.TryParse(value, out v))
                          this.Size = v;
-                    else this.Size = ERROR_VAL; //( string.Equals ( this.Type, STR_BOOL ) ) ? DEF_BIT : DEF_SIZE;
+                    else this.Size = Validations.ERROR_VAL; //( string.Equals ( this.Type, STR_BOOL ) ) ? DEF_BIT : DEF_SIZE;
                 }
-                else this.Size = ERROR_VAL; //( string.Equals ( this.Type, STR_BOOL ) ) ? DEF_BIT : DEF_SIZE;
+                else this.Size = Validations.ERROR_VAL; //( string.Equals ( this.Type, STR_BOOL ) ) ? DEF_BIT : DEF_SIZE;
             }
         }
         
@@ -118,9 +117,9 @@ namespace Xml
                     bool v;
                     if (bool.TryParse ( value, out v ) )
                          this.Write = ( v ) ? BOOL_TRUE : BOOL_FALSE;
-                    else this.Write = ERROR_VAL;
+                    else this.Write = Validations.ERROR_VAL;
                 }
-                else this.Write = ERROR_VAL;
+                else this.Write = Validations.ERROR_VAL;
             }
         }
 

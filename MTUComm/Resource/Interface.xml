@@ -113,7 +113,7 @@
 			<Parameter name="RegisterCoverTamperStatus" display="Reg. Cover" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.RegisterCoverTamper=true"/>
 			<Parameter name="ReverseFlowTamperStatus" display="Rev. Fl Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.ReverseFlowTamper=true"/>
 			<Parameter name="Cut1WireTamperStatus" display="Cut 1 Wire Tamp" log="true" interface="true" source="MemoryMap.GasCutWireTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.GasCutWireAlarm=true"/>
-			<Parameter name="Cut2WireTamperStatus" display="Cut 2 Wire Tamp" log="true" interface="true" source="MemoryMap.P2GasCutWireTamperStatus" conditional="Memory.P2StatusFlag=true + MemoryMap.Shipbit=false + Mtu.GasCutWireAlarm=true"/>
+			<Parameter name="Cut2WireTamperStatus" display="Cut 2 Wire Tamp" log="true" interface="true" source="MemoryMap.P2GasCutWireTamperStatus" conditional="MemoryMap.P2StatusFlag=true + MemoryMap.Shipbit=false + Mtu.GasCutWireAlarm=true"/>
 			<!-- END - Alarms -->
 			<Parameter name="DailySnap" display="Daily Snap" log="true" interface="true" conditional="MemoryMap.Shipbit=false"/>
 			<Parameter name="DailyGMTHourRead" display="Daily GMT Hour Read" log="true" interface="false" conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
@@ -121,7 +121,7 @@
 			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="Deviation" display="Deviation" log="true" interface="false" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
-			<Parameter name="MTU_DateTime" display="MtuGmtDateTime" log="true" interface="false" source="Memory.MtuDatetime" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter name="MTU_DateTime" display="MtuGmtDateTime" log="true" interface="false" source="MemoryMap.MtuDatetime" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="Encryption" display="Encrypted" log="true" interface="true" conditional="Mtu.SpecialSet=true"/>
 			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
@@ -184,7 +184,7 @@
 			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="Deviation" display="Deviation" log="true" interface="false" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
-			<Parameter name="MTU_DateTime" display="MtuGmtDateTime" log="true" interface="false" source="Memory.MtuDatetime" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter name="MTU_DateTime" display="MtuGmtDateTime" log="true" interface="false" source="MemoryMap.MtuDatetime" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
 				<Parameter name="Description" display="Description" log="true" interface="true" source="Port.Description"/>
 				<Parameter name="Status" display="Status" log="true" interface="true" conditional="MemoryMap.StatusFlag=false"/>
@@ -264,7 +264,7 @@
 			<Parameter name="RegisterCoverTamperStatus" display="Reg. Cover" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.RegisterCoverTamper=true"/>
 			<Parameter name="ReverseFlowTamperStatus" display="Rev. Fl Tamp" log="true" interface="true" conditional="MemoryMap.Shipbit=false + Mtu.ReverseFlowTamper=true"/>
 			<Parameter name="Cut1WireTamperStatus" display="Cut 1 Wire Tamp" log="true" interface="true" source="MemoryMap.P1CutWireTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.TamperPort1=true"/>
-			<Parameter name="Cut2WireTamperStatus" display="Cut 2 Wire Tamp" log="true" interface="true" source="MemoryMap.P2CutWireTamperStatus" conditional="Memory.P2StatusFlag=true + MemoryMap.Shipbit=false + Mtu.TamperPort2=true"/>
+			<Parameter name="Cut2WireTamperStatus" display="Cut 2 Wire Tamp" log="true" interface="true" source="MemoryMap.P2CutWireTamperStatus" conditional="MemoryMap.P2StatusFlag=true + MemoryMap.Shipbit=false + Mtu.TamperPort2=true"/>
 			<Parameter name="CutWireTamperStatus" display="Cut Wire Tamp" log="true" interface="true" source="MemoryMap.GasCutWireTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.GasCutWireAlarm=true"/>
 			<Parameter name="InsufficentMemory" display="Insf. Mem" log="true" interface="true" source="MemoryMap.InsufficientMemoryTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.InsufficientMemory=true"/>
 			<Parameter name="LastGasp" display="Last Gasp" log="true" interface="true" source="MemoryMap.LastGaspTamperStatus" conditional="MemoryMap.Shipbit=false + Mtu.LastGasp=true"/>
@@ -277,7 +277,7 @@
 			<Parameter name="DcuId" display="DCU ID" log="true" interface="true" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="RSSI" display="RSSI" log="true" interface="true" source="MemoryMap.RSSIStatus" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="Deviation" display="Deviation" log="true" interface="false" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
-			<Parameter name="MTU_DateTime" display="MtuGmtDateTime" log="true" interface="false" source="Memory.MtuDatetime" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter name="MTU_DateTime" display="MtuGmtDateTime" log="true" interface="false" source="MemoryMap.MtuDatetime" conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter name="Encryption" display="Encrypted" log="true" interface="true" conditional="Mtu.SpecialSet=true"/>
 			<Parameter name="EncryptionIndex" display="Encryption Index" log="true" interface="false" conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
 			<Parameter name="Port" display="Port {0}" log="true" interface="true">
@@ -337,8 +337,8 @@
 			<Parameter name="GPS_X" display="Long" log="true" interface="true" source="Data.GpsLon"/>
 			<Parameter name="Altitude" display="Elevation" log="true" interface="true" source="Data.GpsAlt"/>
 			<Parameter name="ReadRequest" display="Number Read Request Days" source="Data.NumOfDays" log="true" interface="true"/>
-			<Parameter name="ReadResult" display="Read Result" source="Data.ProcessResult" log="true" interface="true"/>
-			<Parameter name="ReadResultFile" display="Read Result File" source="Data.ProcessResultFile" log="true" interface="true"/>
+			<Parameter name="ReadResult" display="Read Result" source="Data.ProcessResultDR" log="true" interface="true"/>
+			<Parameter name="ReadResultFile" display="Read Result File" source="Data.ProcessResultFileDR" log="true" interface="true"/>
 		</Action>
 	</Interface>
 	<Interface family="35xx36xx" memorysize="1024">
@@ -387,7 +387,7 @@
 			<Parameter 	name="RegisterCoverTamperStatus" 	display="Reg. Cover" 					log="true" 	interface="true"														conditional="MemoryMap.Shipbit=false + Mtu.RegisterCoverTamper=true"/>
 			<Parameter 	name="ReverseFlowTamperStatus" 		display="Rev. Fl Tamp" 					log="true" 	interface="true"														conditional="MemoryMap.Shipbit=false + Mtu.ReverseFlowTamper=true"/>
 			<Parameter 	name="Cut1WireTamperStatus" 		display="Cut 1 Wire Tamp" 				log="true" 	interface="true" 	source="MemoryMap.P1CutWireTamperStatus"			conditional="MemoryMap.Shipbit=false + Mtu.TamperPort1=true"/>
-			<Parameter 	name="Cut2WireTamperStatus" 		display="Cut 2 Wire Tamp" 				log="true" 	interface="true" 	source="MemoryMap.P2CutWireTamperStatus"			conditional="MemoryMap.Shipbit=false + Mtu.TamperPort2=true + Memory.P2StatusFlag=true"/>
+			<Parameter 	name="Cut2WireTamperStatus" 		display="Cut 2 Wire Tamp" 				log="true" 	interface="true" 	source="MemoryMap.P2CutWireTamperStatus"			conditional="MemoryMap.Shipbit=false + Mtu.TamperPort2=true + MemoryMap.P2StatusFlag=true"/>
 			<Parameter 	name="InsufficentMemory" 			display="Insf. Mem" 					log="true" 	interface="true" 	source="MemoryMap.InsufficientMemoryTamperStatus"	conditional="MemoryMap.Shipbit=false + Mtu.InsufficientMemory=true"/>
 			<Parameter 	name="MemoryMapError" 				display="Memory Map Error" 				log="true" 	interface="true" 	source="MemoryMap.MemoryMapTamperStatus"			conditional="MemoryMap.Shipbit=false + Mtu.MemoryMapError=true"/>
 			<Parameter 	name="ProgMemoryError" 				display="Prog Memory Error" 			log="true" 	interface="true" 	source="MemoryMap.ProgramMemoryTamperStatus"		conditional="MemoryMap.Shipbit=false + Mtu.ProgramMemoryError=true"/>
@@ -398,14 +398,14 @@
 			<!-- END - Alarms -->
 			<Parameter 	name="DailySnap" 					display="Daily Snap" 					log="true" 	interface="true"														conditional="MemoryMap.Shipbit=false"/>
 			<Parameter 	name="DailyGMTHourRead" 			display="Daily GMT Hour Read" 			log="true" 	interface="false"														conditional="MemoryMap.Shipbit=false + MemoryMap.DailyGMTHourRead gt -1 + MemoryMap.DailyGMTHourRead lt 24"/>
-			<Parameter 	name="VSWR" 						display="VSWR" 							log="true" 	interface="true" 	source="Data.VSWR"									conditional="Data.VSWR gt -1"/>
-			<Parameter 	name="NodeDiscoveryResult" 			display="NodeDiscoveryResult" 			log="true" 	interface="true" 	source="Data.ProcessResult"							conditional="MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
-			<Parameter 	name="NodeDiscoveryFile" 			display="NodeDiscoveryFile" 			log="true" 	interface="true" 	source="Data.ProcessResultFile"						conditional="MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
+			<Parameter 	name="VSWR" 						display="VSWR" 							log="true" 	interface="true" 	source="Data.VSWR"			format="F3"				conditional="Data.VSWR gt -1"/>
+			<Parameter 	name="NodeDiscoveryResult" 			display="NodeDiscoveryResult" 			log="true" 	interface="true" 	source="Data.ProcessResultND"						conditional="MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
+			<Parameter 	name="NodeDiscoveryFile" 			display="NodeDiscoveryFile" 			log="true" 	interface="true" 	source="Data.ProcessResultFileND"					conditional="MemoryMap.InstallConfirmationNotSynced=false + Mtu.MtuDemand=true + Mtu.NodeDiscovery=true"/>
 			<Parameter 	name="InstallationConfirmationStatus" display="Installation" 				log="true" 	interface="true" 	source="MemoryMap.InstallConfirmationStatus"/>
 			<Parameter 	name="DcuId" 						display="DCU ID" 						log="true" 	interface="true"														conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="RSSI" 						display="RSSI" 							log="true" 	interface="true" 	source="MemoryMap.RSSIStatus"						conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="Deviation" 					display="Deviation" 					log="true" 	interface="false"														conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
-			<Parameter 	name="MTU_DateTime" 				display="MtuGmtDateTime" 				log="true" 	interface="false" 	source="Memory.MtuDatetime"							conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
+			<Parameter 	name="MTU_DateTime" 				display="MtuGmtDateTime" 				log="true" 	interface="false" 	source="MemoryMap.MtuDatetime"							conditional="MemoryMap.InstallConfirmationNotSynced=false"/>
 			<Parameter 	name="Encryption" 					display="Encrypted" 					log="true" 	interface="true"														conditional="Mtu.SpecialSet=true"/>
 			<Parameter 	name="EncryptionIndex" 				display="Encryption Index" 				log="true" 	interface="false"														conditional="Mtu.SpecialSet=true + MemoryMap.Encrypted=true"/>
 			<Parameter 	name="Port" 						display="Port {0}" 						log="true" 	interface="true">
@@ -473,8 +473,8 @@
 				<Parameter 	name="DaysOfRead" 				display="Days of Read"  				log="true" 	interface="true" 	source="Data.TotalDifDays"							conditional="MemoryMap.StatusFlag=true"/>
 			</Parameter>
 			<Parameter 	name="ReadRequest" 					display="Number Read Request Days"  	log="true" 	interface="true" 	source="Data.NumOfDays"/>
-			<Parameter 	name="ReadResult" 					display="Read Result"  					log="true" 	interface="true" 	source="Data.ProcessResult"/>
-			<Parameter 	name="ReadResultFile" 				display="Read Result File"  			log="true" 	interface="true" 	source="Data.ProcessResultFile"/>
+			<Parameter 	name="ReadResult" 					display="Read Result"  					log="true" 	interface="true" 	source="Data.ProcessResultDR"/>
+			<Parameter 	name="ReadResultFile" 				display="Read Result File"  			log="true" 	interface="true" 	source="Data.ProcessResultFileDR"/>
 		</Action>
 		<Action type="RemoteDisconnect">
 			<Parameter 	name="Date" 						display="Date/Time" 					log="true" 	interface="false" 	source="Action.Date"/>

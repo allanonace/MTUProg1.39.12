@@ -27,8 +27,8 @@ namespace MTUComm
         public MeterTypes meterTypes;
         public Global Global { private set; get; }
         public InterfaceConfig interfaces;
-        public AlarmList alarms;
-        public DemandConf demands;
+        private AlarmList alarms;
+        private DemandConf demands;
         public User[] users;
         
         private string device;
@@ -37,9 +37,10 @@ namespace MTUComm
         private string appName;
         private static Configuration instance;
 
-        private Configuration ( string path = "", bool avoidXmlError = false )
+        private Configuration ( string customPath = "", bool avoidXmlError = false )
         {
-            string configPath = Mobile.ConfigPath;
+            Data.Set ( "UNIT_TEST", ! string.IsNullOrEmpty ( customPath ) );
+            string configPath = ( ! Data.Get.UNIT_TEST ) ? Mobile.ConfigPath : customPath;
 
             device = "PC";
 
@@ -398,6 +399,14 @@ namespace MTUComm
             get
             {
                 return this.alarms;
+            }
+        }
+
+        public DemandConf Demands
+        {
+            get
+            {
+                return this.demands;
             }
         }
 

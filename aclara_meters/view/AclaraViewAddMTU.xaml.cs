@@ -917,10 +917,8 @@ namespace aclara_meters.view
 
             #region Alarms
 
-            alarmsList = config.alarms.FindByMtuType(this.detectedMtuType);
-
             // Remove "Scripting" option in interactive mode
-            alarmsList = alarmsList.FindAll ( alarm => !string.Equals ( alarm.Name.ToLower (), "scripting" ) );
+            alarmsList = new List<Alarm> ( config.Alarms.FindByMtuType_Interactive ( this.detectedMtuType ) );
 
             bool RequiresAlarmProfile = this.currentMtu.RequiresAlarmProfile;
             bool portHasSomeAlarm = (RequiresAlarmProfile && alarmsList.Count > 0);
@@ -951,10 +949,8 @@ namespace aclara_meters.view
 
             #region Demands
 
-            demandsList = config.demands.FindByMtuType ( this.detectedMtuType );
-
             // Remove "Scripting" option in interactive mode
-            demandsList = demandsList.FindAll ( demand => !string.Equals ( demand.Name.ToLower (), "scripting" ) );
+            demandsList = new List<Demand> ( config.Demands.FindByMtuType_Interactive ( this.detectedMtuType ) );
 
             bool MtuDemand = this.currentMtu.MtuDemand && this.currentMtu.FastMessageConfig;
             bool portHasSomeDemand = ( MtuDemand && demandsList.Count > 0 );
@@ -981,6 +977,7 @@ namespace aclara_meters.view
                 // Hide alarms dropdownlist if contains only one option
                 div_Demands_V.IsVisible = ( demandsList.Count > 1 );
             }
+            
             #endregion
 
             #region Misc
@@ -1061,8 +1058,8 @@ namespace aclara_meters.view
             tbx_MeterReading_Dual.MaxLength = MAX_METERREADING;
             tbx_MeterReading_Dual_2.MaxLength = MAX_METERREADING;
 
-            tbx_MtuGeolocationLat.MaxLength = 20;
-            tbx_MtuGeolocationLong.MaxLength = 20;
+            tbx_MtuGeolocationLat.MaxLength  = 10;
+            tbx_MtuGeolocationLong.MaxLength = 10;
 
             tbx_RDDFirmwareVersion.MaxLength = MAX_RDDFIRMWARE;
 
@@ -1422,7 +1419,6 @@ namespace aclara_meters.view
             this.lb_OldMeterReading_DualError_2.Text = DUAL_ERROR;
 
             #endregion
-
         }
 
         #endregion
@@ -4332,7 +4328,7 @@ namespace aclara_meters.view
             if ( value_dmd != null &&
                  mtu.MtuDemand &&
                  mtu.FastMessageConfig )
-                Data.Set ( "DemandConf", value_dmd );
+                this.addMtuForm.AddParameter ( FIELD.DEMAND, value_dmd );
 
             #endregion
 
@@ -4401,8 +4397,8 @@ namespace aclara_meters.view
 
             if ( hasRDD )
             {
-                Data.Set ( "RDDFirmware", value_fir );
-                Data.Set ( "RDDPosition", value_pos );
+                Data.SetTemp ( "RDDFirmware", value_fir );
+                Data.SetTemp ( "RDDPosition", value_pos );
             }
 
             #endregion
@@ -4415,12 +4411,13 @@ namespace aclara_meters.view
             {
                 double lat = Convert.ToDouble ( value_lat );
                 double lon = Convert.ToDouble ( value_lon );
+                double alt = Convert.ToDouble ( ( ! string.IsNullOrEmpty ( value_alt ) ) ? value_alt : new string ( '1', 10 ) );
                 //string latDir = ( lat < 0d ) ? "S" : "N";
                 //string lonDir = ( lon < 0d ) ? "W" : "E";
 
                 this.addMtuForm.AddParameter ( FIELD.GPS_LATITUDE,  lat );
                 this.addMtuForm.AddParameter ( FIELD.GPS_LONGITUDE, lon );
-                this.addMtuForm.AddParameter ( FIELD.GPS_ALTITUDE,  value_alt );
+                this.addMtuForm.AddParameter ( FIELD.GPS_ALTITUDE,  alt );
             }
 
             List<Parameter> optionalParams = new List<Parameter>();
@@ -4458,6 +4455,10 @@ namespace aclara_meters.view
             this.add_mtu.OnError += OnError;
 
             #endregion
+
+            // TODO: Use Library.Data as first step to remove AddMtuForm from the system
+            foreach ( KeyValuePair<string,Parameter> entry in addMtuForm.Dictionary )
+                Data.SetTemp ( entry.Key, entry.Value.Value );
 
             // Launch action!
             await add_mtu.Run ( this.addMtuForm );

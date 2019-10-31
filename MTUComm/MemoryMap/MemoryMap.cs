@@ -11,6 +11,7 @@ using System.Xml.Serialization;
 using Library;
 using Library.Exceptions;
 using Xml;
+using Xml.UnitTest;
 using Lexi;
 using Library;
 
@@ -153,7 +154,7 @@ namespace MTUComm.MemoryMap
 
         public static bool isUnityTest { get; private set; }
 
-        private byte[] memory;
+        public  byte[] memory { private set; get; }
         private Dictionary<string,dynamic> registersObjs;
         private Lexi.Lexi lexi;
         private bool readFromMtuOnlyOnce;
@@ -188,7 +189,7 @@ namespace MTUComm.MemoryMap
         /// memory of the MTU is read, but sometimes it is preferable
         /// to only read once and cache the data</param>
         /// <param name="pathUnityTest">Only for debug purposes</param>
-        public MemoryMap ( byte[] memory, string family, bool readFromMtuOnlyOnce = false, string pathUnityTest = "" )
+        public MemoryMap ( byte[] memory, string family, bool readFromMtuOnlyOnce = false )
         {
             this.lexi   = Singleton.Get.Lexi;
             this.family = family;
@@ -196,22 +197,19 @@ namespace MTUComm.MemoryMap
             // The third argument is used because is impossible to know if a byte
             // in the memory argument was read from the MTU or is only an empty byte
             this.readFromMtuOnlyOnce = readFromMtuOnlyOnce;
-        
-            this.memory = memory;
-            this.registersObjs = new Dictionary<string,dynamic>();
-
-            isUnityTest = ! string.IsNullOrEmpty ( pathUnityTest );
 
             // Read MTU family XML and prepare setters and getters
-            Configuration config     = Configuration.GetInstanceWithParams ( pathUnityTest );
+            Configuration config     = Singleton.Get.Configuration;
             XmlSerializer serializer = new XmlSerializer ( typeof ( MemRegisterList ) );
 
-            // Parameter "family" when testing is full path to use
-            TextReader reader = ( ! isUnityTest ) ?
-                Utils.GetResourceStreamReader ( XML_PREFIX + family + XML_EXTENSION ) :
-                Utils.GetStreamReader ( Path.Combine ( pathUnityTest, family + XML_EXTENSION ) );
+            // Prepares the memory buffer with the length indicates in the interface
+            if ( memory == null )
+                memory = new byte[ config.interfaces.GetMemoryLengthByFamily ( family ) ];
+            this.memory = memory;
 
-            using ( reader )
+            this.registersObjs = new Dictionary<string, dynamic>();
+
+            using ( TextReader reader = Utils.GetResourceStreamReader ( XML_PREFIX + family + XML_EXTENSION ) )
             {
                 MemRegisterList list = Validations.DeserializeXml<MemRegisterList> ( reader );
 
@@ -222,7 +220,6 @@ namespace MTUComm.MemoryMap
                     {
                         try
                         {
-
                             // TEST: PARA PODER CAPTURAR LA EJECUCION EN UN REGISTRO CONCRETO
                             //if ( string.Equals ( xmlRegister.Id, "P1MeterId" ) )
                             //{
@@ -243,8 +240,8 @@ namespace MTUComm.MemoryMap
                             }
     
                             // Creates an instance of the generic class
-                            dynamic memoryRegister = Activator.CreateInstance(typeof(MemoryRegister<>)
-                                .MakeGenericType(SysType),
+                            dynamic memoryRegister = Activator.CreateInstance ( typeof ( MemoryRegister<> )
+                                .MakeGenericType ( SysType ),
                                     xmlRegister.Id,
                                     type,
                                     xmlRegister.Description,
@@ -1388,67 +1385,72 @@ namespace MTUComm.MemoryMap
     
         #region Unit Test
 
-        public void FillMemory (
-            UnitTestRegisters registers )
+        public async Task FillMemory (
+            UnitTest_DumpMemoryMap dump )
         {
-            // The generic dictionary does not allow duplicate keys
-            if ( registers.ListRegisters.Length > this.registersObjs.Count )
+            foreach ( UnitTest_Register xmlReg in dump.ListRegisters )
             {
-                Utils.PrintDeep ( "ERROR! FillMemory: Has passed more entries than registers has the memory map" );
+                //Console.WriteLine ( xmlReg.Id );
 
-                throw new Exception ();
-            }
+                var mapReg = base[ xmlReg.Id ]; //.SetValue ( xmlReg.Value, true ); // Force to write
 
-            foreach ( UnitTestRegister reg in registers.ListRegisters )
-            {
+                byte[] ar = xmlReg.GetBytes ();
+
                 try
                 {
-                    if ( base.ContainsMember ( reg.Id ) )
-                        base[ reg.Id ].SetValue ( reg.Value, true );
-                    else
-                        Utils.PrintDeep ( "ERROR! FillMemory: Register '" + reg.Id + "' is not present" ); 
+                    Array.Copy ( ar, 0, this.memory, mapReg.address,
+                        ( mapReg.valueType != RegType.BOOL ) ? mapReg.size : 1 );
+
+                    Console.WriteLine ( "UnitTest - FillMap: " + xmlReg.Id +
+                        " <- " + BitConverter.ToString ( ar ).Replace ( "-", " " ) );
                 }
                 catch ( Exception e )
                 {
-                    Utils.PrintDeep ( "ERROR! FillMemory: Set register '" + reg.Id + "'" );
+                    Console.WriteLine ( e.Message );
                 }
             }
-
-            // TODO: No solo se leen valores del MTU, tambien se recuperan valores de Data o de AddMtuForm, seteados en el formulario
-            // TODO: Esto tiene que hacerse con un fichero dividido en dos, una parte para rellenar la memoria del MTU y otra con los
-            // TODO: valores a usar para simular el rellenado del formulario
-            // TODO: Para rellenar el formulario de las instalaciones (Add/Replace) se pueden usar los metodos ContainsParameter y FindById
-            // TODO: Despues para otras acciones habra que usar data, siendo facil añadir un atributo en el xml ( isdata ) para usar AddMtuForm o Data
         }
 
         public async Task LogFullMemory ()
         {
-            StringBuilder str = new StringBuilder ();
-            const string sentence = "\t<Register id=\"#1#\" value=\"#2#\" readmtu=\"#3#\" modified=\"#4#\"/>";
-
-            str.AppendLine ( "<Registers>" );
-            foreach ( KeyValuePair<string,dynamic> entry in this.registersObjs )
+            try
             {
-                var reg = entry.Value;
+                StringBuilder str = new StringBuilder ();
+                //const string sentence = "\t<Register id=\"#1#\" value=\"#2#\" bytes=\"#3#\" size=\"#4#\" readmtu=\"#5#\" modified=\"#6#\"/>";
+                const string sentence = "\t<Register id=\"#1#\" value=\"#2#\" bytes=\"#3#\" size=\"#4#\"/>";
 
-                if (reg.readedFromMtu || reg.used)
+                str.AppendLine ( "<MemoryDump>" );
+                foreach ( KeyValuePair<string,dynamic> entry in this.registersObjs )
                 {
-                    var value = await entry.Value.GetValue();
-                    str.AppendLine(
-                        sentence
-                            .Replace("#1#", entry.Key)
-                            .Replace("#2#", value.ToString())
-                            .Replace ( "#3#", reg.readedFromMtu.ToString() )
-                            .Replace ( "#4#", reg.used.ToString() )
+                    var reg = entry.Value;
 
-                    );
+                    if ( reg.readedFromMtu ||
+                         reg.modified )
+                    {
+                        var    value   = await reg.GetValue ();
+                        byte[] valueAr = await reg.GetValueByteArray ();
+
+                        str.AppendLine (
+                            sentence
+                                .Replace ( "#1#", entry.Key )
+                                .Replace ( "#2#", value.ToString () )
+                                .Replace ( "#3#", BitConverter.ToString ( valueAr ).Replace ( "-", " " ) )
+                                .Replace ( "#4#", reg.sizeGet.ToString () )
+                                //.Replace ( "#5#", reg.readedFromMtu.ToString () )
+                                //.Replace ( "#6#", reg.modified.ToString () )
+                        );
+                    }
                 }
-            }
-            str.AppendLine ( "</Registers>" );
-            Utils.Print ( str.ToString () );
+                str.AppendLine ( "</MemoryDump>" );
+                Utils.Print ( str.ToString () );
 
-            str.Clear ();
-            str = null;
+                str.Clear ();
+                str = null;
+            }
+            catch ( Exception e )
+            {
+
+            }
         }
 
         #endregion

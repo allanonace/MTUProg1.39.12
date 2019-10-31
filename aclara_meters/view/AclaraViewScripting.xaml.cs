@@ -895,8 +895,8 @@ namespace aclara_meters.view
                                 ContentView_Scripting_textScript.Text = val + res + "\r\n";
                             }
                         }
-    
-                        string xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML(args.Result);
+
+                        string xmlResultTocallback = ((MTUComm.Action)sender).GetResultXML (); // args.Result);
     
                         Device.BeginInvokeOnMainThread(() =>
                         {

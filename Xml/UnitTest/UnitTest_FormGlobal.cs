@@ -1,8 +1,8 @@
 ﻿using System.Xml.Serialization;
 
-namespace Xml
+namespace Xml.UnitTest
 {
-    public class UnitTestValue
+    public class UnitTest_FormGlobal
     {
         [XmlAttribute("id")]
         public string Id { get; set; }

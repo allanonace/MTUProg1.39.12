@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -144,14 +145,17 @@ namespace Library
         {
             try
             {
-                if ( string.IsNullOrEmpty ( tagName ) )
-                    return;
+                if ( ! Data.Get.UNIT_TEST )
+                {
+                    if ( string.IsNullOrEmpty ( tagName ) )
+                        return;
 
-                String    uri = Path.Combine ( Data.Get.ConfigPath, Data.Get.XmlGlobal );
-                XDocument doc = XDocument.Load ( uri );
+                    String    uri = Path.Combine ( Data.Get.ConfigPath, Data.Get.XmlGlobal );
+                    XDocument doc = XDocument.Load ( uri );
 
-                doc.Root.SetElementValue ( tagName, value );
-                doc.Save ( uri );
+                    doc.Root.SetElementValue ( tagName, value );
+                    doc.Save ( uri );
+                }
 
                 // Update instance
                 Utils.SetPropertyValue ( Singleton.Get.Configuration.Global, tagName, value );
@@ -401,6 +405,24 @@ namespace Library
                     subZeros = new byte[ 8 ]; break; // 8 bytes
             }
             sub.CopyTo ( subZeros, 0 );
+
+            // NOTE: It is not useful ( it is wrong ) try to fill the indices left with zeros
+            /* Example..
+            double d = 4.139;
+		    byte[] arD = BitConverter.GetBytes ( d );
+		    string str = string.Join ( "-", arD );
+            >> 117-147-24-4-86-142-16-64
+		    
+            byte[] ar = new byte[] { 6, 2, 43, 16, 25, 42 }; // Uses 43 and 16
+
+            double v = CalculateNumericFromBytes<double> ( ar, 2, 2 ) / 1000;
+            >> 4.139
+
+		    double v = ConvertToNumericFromBytes<double> ( ar, 2, 2 );
+            Both options are diferent that the array resulted at the beginning
+            >> 43-16-0-0-0-0-0-0
+            >> 0-0-0-0-0-0-43-16
+            */
             
             dynamic result = default ( T );
             switch ( code )
@@ -492,6 +514,39 @@ namespace Library
             return Utils.StringFromBase64 ( text, out bool wasInBase64 );
         }
 
+        /// <summary>
+        /// Returns current value of the parameter, filling in up to number of characters specified,
+        /// or a string filled with zeros or spaces with the specific length if the parameter does not have value.
+        /// <para>
+        /// If T is an string the character used to fill in the
+        /// string will be space ( ' ' ), in other case will be zero/0.
+        /// </para>
+        /// </summary>
+        /// <remarks>
+        /// TODO: Divide this method in two, one for numeric values and other for strings.
+        /// </remarks>
+        /// <param name="numCharacters">Number of characters desired for the output string</param>
+        /// <typeparam name="T">Type of the default</typeparam>
+        /// <returns>Current value or default string</returns>
+        public static string GetValueOrDefault<T> (
+            dynamic value,
+            int numCharacters )
+        {
+            char   val   = ( typeof ( T ) == typeof ( string ) ) ? ' ' : '0';
+            string strValue = value.ToString ();
+        
+            if ( string.IsNullOrEmpty ( strValue ) )
+                strValue = "".PadRight ( numCharacters, val );
+            else
+            {
+                if ( strValue.Length > numCharacters )
+                     strValue = strValue.Substring ( 0, numCharacters );                      // Get only n first characters
+                else strValue = "".PadRight ( numCharacters - value.Length, val ) + strValue; // Fill in left side to default character value
+            }
+
+            return strValue;
+        }
+
         #endregion
 
         #region Type
@@ -518,6 +573,57 @@ namespace Library
             return defaultValue;
         }
 
+        public static T IsNumeric<T> (
+		    object value,
+            out bool ok )
+        {
+            float   resultFloat;
+            double  resultDouble;
+            decimal resultDecimal;
+
+            switch ( Type.GetTypeCode ( typeof( T ) ) )
+            {
+                case TypeCode.Single:
+                    if ( ok = float.TryParse ( value.ToString (), out resultFloat ) )
+                         return ( T )( object )resultFloat;
+                    else return default ( T );
+                case TypeCode.Double:
+                    if ( ok = double.TryParse ( value.ToString (), out resultDouble ) )
+                         return ( T )( object )resultDouble;
+                    else return default ( T );
+            }
+            if ( ok = decimal.TryParse ( value.ToString (), out resultDecimal ) )
+                 return ( T )( object )resultDecimal;
+            else return default ( T );
+        }
+
+        public static T IsNumeric<T> (
+            object value )
+        {
+            return IsNumeric<T> ( value, out bool ok );
+        }
+        
+        public static bool IsFloat (
+            object value )
+        {
+            IsNumeric<float> ( value, out bool ok );
+            return ok;
+        }
+
+        public static bool IsDouble (
+            object value )
+        {
+            IsNumeric<double> ( value, out bool ok );
+            return ok;
+        }
+
+        public static bool IsDecimal (
+            object value )
+        {
+            IsNumeric<decimal> ( value, out bool ok );
+            return ok;
+        }
+
         #endregion        
 
         #region Properties
@@ -527,7 +633,80 @@ namespace Library
             string propName,
             dynamic value )
         {
-            instance.GetType ().GetProperty ( propName ).SetValue ( instance, value );
+            PropertyInfo pinfo = instance.GetType ().GetProperty ( propName );
+            if ( pinfo != null )
+            {
+                dynamic valueConverted = null;
+
+                if ( value is string )
+                {
+                    string valueString = value;
+                    switch ( Type.GetTypeCode ( pinfo.PropertyType ) )
+                    {
+                        case TypeCode.Int32  : valueConverted = int    .Parse ( valueString ); break;
+                        case TypeCode.UInt32 : valueConverted = uint   .Parse ( valueString ); break;
+                        case TypeCode.Decimal: valueConverted = decimal.Parse ( valueString ); break;
+                        case TypeCode.Double : valueConverted = double .Parse ( valueString ); break;
+                        case TypeCode.Boolean: valueConverted = ( valueString.Equals ( "1" ) ||
+                                                                  valueString.ToLower ().Equals ( "true" ) ); break;
+                        default: valueConverted = value; break;
+                    }
+                }
+                else
+                    valueConverted = value;
+
+                pinfo.SetValue ( instance, valueConverted );
+            }
+        }
+
+        #endregion
+
+        #region Format
+
+        public static string FormatString (
+            string value,
+            string format )
+        {
+            return string.Format ( new StringFormatter (), "{0:" + format + "}", value );
+        }
+
+        public class StringFormatter : IFormatProvider, ICustomFormatter
+        {
+            public object GetFormat (
+                Type formatType )
+            {
+                if ( formatType == typeof ( ICustomFormatter ) )
+                    return this;
+                return null;
+            }
+
+            public string Format (
+                string format,
+                object value,
+                IFormatProvider formatProvider )
+            {
+                if ( value == null )
+                    return string.Empty;
+
+                else if ( Validations.IsNumeric ( value ) )
+                {
+                    if ( IsFloat ( value ) )
+                        value = IsNumeric<float> ( value );
+                    
+                    else if ( IsDouble ( value ) )
+                        value = IsNumeric<double> ( value );
+
+                    else // Is decimal or an interger value
+                        value = IsNumeric<decimal> ( value );
+                    
+                    return ( ( IFormattable )value ).ToString ( format, CultureInfo.CurrentCulture );
+                }
+
+                else if ( value is string )
+                    return ( string )value;
+
+                return string.Empty;
+            }
         }
 
         #endregion

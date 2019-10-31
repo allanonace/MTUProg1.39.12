@@ -100,6 +100,7 @@ namespace UnitTest.Tests
             return Path.Combine ( Environment.GetFolderPath ( Environment.SpecialFolder.Desktop ), FOLDER );
         }
 
+        /*
         [Fact]
         public void Test_Validations ()
         {
@@ -344,6 +345,7 @@ namespace UnitTest.Tests
             Assert.True ( list.Contains ( "P1MeterId"     ), ERROR_COMPARE_REG );
             Assert.True ( list.Contains ( "EncryptionKey" ), ERROR_COMPARE_REG );
         }
+        */
 
         #endregion
     }

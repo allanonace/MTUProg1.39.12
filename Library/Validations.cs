@@ -3,11 +3,9 @@ using System.Linq;
 using System.IO;
 using System.Reflection;
 using System.Xml.Serialization;
-using MTUComm.MemoryMap;
-using Xml;
 using Library.Exceptions;
 
-namespace MTUComm
+namespace Library
 {
     public sealed class Validations
     {
@@ -16,6 +14,8 @@ namespace MTUComm
         private const string PREFIX_AUX     = "_AllowEmptyField";
         private const string EXCEP_NAME_INI = "#";
         private const string EXCEP_NAME_SGN = "_";
+        public  const string ERROR_STR   = "-1";
+        public  const int    ERROR_VAL   = -1;
 
         #endregion
 
@@ -26,12 +26,20 @@ namespace MTUComm
             if ( string.IsNullOrEmpty ( value.ToString () ) )
                 return false;
             
-            else if ( value is Int32  ||
-                      value is UInt32 ||
-                      value is UInt64 )
+            else if ( value is sbyte  ||
+                      value is byte   ||
+                      value is short  ||
+                      value is ushort ||
+                      value is int    ||
+                      value is uint   ||
+                      value is long   ||
+                      value is ulong  ||
+                      value is float  ||
+                      value is double ||
+                      value is decimal )
                 return true;
 
-            // Validation for other numeric types
+            // If the first validation has failed...
             string chars = value.ToString ().Trim ();
             chars = chars.Replace ( ",", string.Empty )
                          .Replace ( ".", string.Empty )
@@ -365,14 +373,14 @@ namespace MTUComm
                                 throw new Exception ( name + " " + index + " | String" );
 
                             // Int elements with string auxiliary method to allow correct deserialization
-                            if ( string.Equals ( value, MemRegister.ERROR_STR ) )
+                            if ( string.Equals ( value, ERROR_STR ) )
                                 throw new Exception ( name + " " + index + " | Int" );
 
                             // Bool elements with string auxiliary method to allow correct deserialization
                             if ( name.Contains ( PREFIX_AUX ) &&
                                  typeInstance.GetProperty (
                                     ( name = name.Substring ( 0, name.IndexOf ( PREFIX_AUX ) ) ) )
-                                 .GetValue ( instance ) == MemRegister.ERROR_VAL )
+                                 .GetValue ( instance ) == ERROR_VAL )
                                 throw new Exception ( name + " " + index + " | Bool" );
                         }
 

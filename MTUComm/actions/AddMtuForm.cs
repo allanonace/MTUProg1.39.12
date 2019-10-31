@@ -61,9 +61,7 @@ namespace MTUComm.actions
             GPS_LONGITUDE,
             GPS_ALTITUDE,
             OPTIONAL_PARAMS,
-            FORCE_TIME_SYNC,
-            
-            TEST
+            FORCE_TIME_SYNC
         }
 
         private const string PORT_2_SUFIX = "_2";
@@ -98,7 +96,7 @@ namespace MTUComm.actions
         // 0. Parameter ID     = dynamicMap.id
         // 1. Custom parameter = <name>
         // 2. Custom display   = <display>
-        public Dictionary<FIELD, string[]> Texts;
+        public Dictionary<FIELD, string[]> Texts { get; private set; }
 
         public bool usePort2;
         private Dictionary<FIELD,Parameter> dictionary;
@@ -130,7 +128,6 @@ namespace MTUComm.actions
                         "AccountNumber",
                         "AccountNumber",
                         global.AccountLabel
-
                     }
                 },
                 {
@@ -487,18 +484,6 @@ namespace MTUComm.actions
                         "ForceTimeSync",
                         "ForceTimeSync",
                         "Force TimeSync"
-                    }
-                },
-                #endregion
-
-                #region TEST
-                {
-                    FIELD.TEST,
-                    new string[]
-                    {
-                        "Test",
-                        "Test",
-                        "Test"
                     }
                 },
                 #endregion

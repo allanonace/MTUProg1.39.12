@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using Library.Exceptions;
+using System.Linq;
 
 namespace Xml
 {
@@ -50,6 +51,31 @@ namespace Xml
                 throw new ActionInterfaceNotFoundException_Internal ();
 
             return action_interface;
+        }
+
+        public string GetFamilyByMtuId (
+            int mtuId )
+        {
+            return GetFamilyByMtuId ( mtuId.ToString () );
+        }
+
+        public string GetFamilyByMtuId (
+            string mtuId )
+        {
+            return this.MtuInterfaces.Select ( intf => new MtuInterface
+                {
+                    Family = intf.Family,
+                    MtuIDs = intf.MtuIDs
+                    .Where ( m => m.ID.Equals ( mtuId ) ).ToList ()
+                })
+                .First ( intf => intf.MtuIDs.Count > 0 )
+                .Family;
+        }
+
+        public int GetMemoryLengthByFamily (
+            string family )
+        {
+            return this.Interfaces.First ( i => i.Family.Equals ( family ) ).MemorymapSize;
         }
     }
 }
