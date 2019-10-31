@@ -1,7 +1,9 @@
 ﻿using System;
 using Android.App;
 using Android.Runtime;
+#pragma warning disable S125 // Sections of code should not be "commented out"
 //using Microsoft.Intune.Mam.Client.App;
+#pragma warning restore S125 // Sections of code should not be "commented out"
 
 namespace aclara_meters.Droid
 {
@@ -15,18 +17,19 @@ namespace aclara_meters.Droid
     [Application(AllowBackup = false, AllowClearUserData = true)]
 #endif
 
-    public class MyApplication : Application//MAMApplication
+    public class MyApplication : Application //MAMApplication
     {
         protected MyApplication(IntPtr javaReference, JniHandleOwnership transfer)
         : base(javaReference, transfer)
         {
         }
-
-
+                
+#pragma warning disable S125 // Sections of code should not be "commented out"
         //public override byte[] GetADALSecretKey()
         //{
         //    return null;
         //}
     }
+#pragma warning restore S125 // Sections of code should not be "commented out"
 
 }

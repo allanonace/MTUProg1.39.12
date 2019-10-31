@@ -224,7 +224,7 @@ namespace MTUComm
         
             using ( var inStream = new MemoryStream ( Convert.FromBase64String ( input ) ) )
             {
-                dynamic stream = null;
+                dynamic stream;
                 switch ( algorithm )
                 {
                     case ALGORITHM.DEFLATE:
@@ -233,14 +233,21 @@ namespace MTUComm
                     case ALGORITHM.GZIP:
                         stream = new GZipStream ( inStream, CompressionMode.Decompress );
                         break;
+                    default:
+                        stream = null;
+                        break;
+
                 }
-                
-                using ( stream )
+                if (stream is null) return string.Empty;
+                else
                 {
-                    using ( var ms = new MemoryStream () )
+                    using (stream)
                     {
-                        stream.CopyTo ( ms );
-                        return Encoding.UTF8.GetString ( ms.ToArray () );
+                        using (var ms = new MemoryStream())
+                        {
+                            stream.CopyTo(ms);
+                            return Encoding.UTF8.GetString(ms.ToArray());
+                        }
                     }
                 }
             }

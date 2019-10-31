@@ -6,7 +6,7 @@ namespace Lexi.Exceptions
 {
     public class LexiWriteException : Exception
     {
-        private int error_code;
+        private readonly int error_code;
 
         public LexiWriteException(byte[] response) : base(getMessge(response[1]))
         {

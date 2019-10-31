@@ -1,21 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.aclara.mtu.programmer" android:installLocation="auto" android:versionName="1.37.05" android:versionCode="3">
-	<uses-sdk android:minSdkVersion="19" android:targetSdkVersion="27" />
-	<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-	<uses-permission android:name="android.permission.BLUETOOTH" />
-	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-	<uses-permission android:name="android.permission.ACCOUNT_MANAGER" />
-	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-	<application android:label="Aclara MTU Programmer" android:icon="@drawable/aclara_icon_app">
-		<activity android:icon="@drawable/aclara_icon_app" android:theme="@style/MainTheme" android:label="aclara-mtu-programmer" android:name="com.aclara.mtu.programmer.urlentryclass">
-			<intent-filter>
-				<action android:name="android.intent.action.VIEW" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<category android:name="android.intent.category.BROWSABLE" />
-				<data android:scheme="aclara-mtu-programmer" />
-			</intent-filter>
-		</activity>
-	</application>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.aclara.mtu.programmer" android:installLocation="auto" android:versionName="1.39.0" android:versionCode="1">
+  <uses-sdk android:minSdkVersion="23" android:targetSdkVersion="27" />
+  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+  <uses-permission android:name="android.permission.BLUETOOTH" />
+  <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+  <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+  <uses-permission android:name="android.permission.ACCOUNT_MANAGER" />
+  <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+  <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+  <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+  <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+  <uses-permission android:name="android.permission.CAMERA" />
+  <uses-permission android:name="android.permission.FLASHLIGHT" />
+  <uses-feature android:name="android.hardware.location" android:required="false" />
+  <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+  <uses-feature android:name="android.hardware.location.network" android:required="false" />
+  <application android:label="Aclara MTU Programmer" android:icon="@drawable/aclara_icon_app">
+    <!--	<meta-data android:name="com.microsoft.intune.mam.DefaultMAMServiceEnrollment" android:value="true" />
+		<meta-data android:name="com.microsoft.intune.mam.MAMPolicyRequired" android:value="true" />-->
+    <provider android:name="android.support.v4.content.FileProvider" android:authorities="com.aclara.mtu.programmer.fileprovider" android:exported="false" android:grantUriPermissions="true">
+      <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/file_paths"></meta-data>
+    </provider>
+    <activity android:icon="@drawable/aclara_icon_app" android:theme="@style/MainTheme" android:label="aclara-mtu-programmer" android:name="com.aclara.mtu.programmer.urlentryclass">
+      <intent-filter>
+        <action android:name="android.intent.action.VIEW" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <category android:name="android.intent.category.BROWSABLE" />
+        <data android:scheme="aclara-mtu-programmer" />
+      </intent-filter>
+    </activity>
+  </application>
 </manifest>

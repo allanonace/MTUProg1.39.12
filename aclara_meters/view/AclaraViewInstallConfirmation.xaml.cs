@@ -35,9 +35,7 @@ namespace aclara_meters.view
         private List<ReadMTUItem> MTUDataListView { get; set; }
 
         private List<ReadMTUItem> FinalReadListView { get; set; }
-
-
-        private List<PageItem> MenuList { get; set; }
+                
         private bool _userTapped;
         private IUserDialogs dialogsSaved;
 
@@ -237,7 +235,7 @@ namespace aclara_meters.view
             Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
 
             string ndresult = string.Empty;
-            InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
+            InterfaceParameters[] interfacesParams =Singleton.Get.Configuration.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
 
             try
             {
@@ -480,7 +478,7 @@ namespace aclara_meters.view
             {
                 if (actionType == ActionType.DataRead)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
-                else if(actionType == ActionType.RemoteDisconnect)
+                else if(actionType == ActionType.ValveOperation)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved,  this.actionType), false);
                 else
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
@@ -490,7 +488,7 @@ namespace aclara_meters.view
         private async void LogOffOkTapped(object sender, EventArgs e)
         {
             // Upload log files
-            if (FormsApp.config.Global.UploadPrompt)
+            if (Singleton.Get.Configuration.Global.UploadPrompt)
                 await GenericUtilsClass.UploadFiles ();
 
             dialogView.GetStackLayoutElement("dialog_logoff").IsVisible = false;
@@ -531,10 +529,7 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
-            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
-            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
-
-            Task.Factory.StartNew(TurnOffMethod);
+            CallLoadViewTurnOff();
         }
 
         private async Task TurnOffMethod()
@@ -598,11 +593,7 @@ namespace aclara_meters.view
             Application.Current.MainPage.Navigation.PopToRootAsync(false);
         }
 
-        //private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e)
-        //{
-        //    ((ListView)sender).SelectedItem = null;
-        //}
-
+        
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
         private void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
@@ -678,7 +669,7 @@ namespace aclara_meters.view
             switch (actionTarget)
             {
                 case ActionType.DataRead:
-                case ActionType.RemoteDisconnect:
+                case ActionType.ValveOperation:
                     #region DataRead  
                     await Task.Delay(200).ContinueWith(t =>
 
@@ -853,7 +844,7 @@ namespace aclara_meters.view
                     port = "1";
 
                 accName1 = port == "1" ? accName1 : accName2;
-                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0') + "_" + accName1 + sTick + "_Port" + port;
+                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0') + "_" + accName1 + "_" + sTick + "_Port" + port;
 
                 Device.BeginInvokeOnMainThread(async () =>
                 {

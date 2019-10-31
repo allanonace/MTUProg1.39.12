@@ -83,7 +83,7 @@ namespace MTUComm
             RDDFirmware,
         }
 
-        public static Dictionary<ParameterType,APP_FIELD> IdsAclara =
+        public readonly static Dictionary<ParameterType,APP_FIELD> IdsAclara =
             new Dictionary<ParameterType,APP_FIELD> ()
             {
                 { ParameterType.OldMtuId,             APP_FIELD.OldMtuId        },
@@ -188,7 +188,7 @@ namespace MTUComm
                               actionType == ActionType.TurnOnMtu  ||
                               actionType == ActionType.MtuInstallationConfirmation ||
                               actionType == ActionType.DataRead   ||
-                              actionType == ActionType.RemoteDisconnect;
+                              actionType == ActionType.ValveOperation;
             
             // Action is about Replace Meter
             bool isReplaceMeter = (
@@ -239,7 +239,7 @@ namespace MTUComm
                 {
                     isAutodetectMeter = true;
                 
-                    meters = config.meterTypes.FindByDialDescription (
+                    meters = config.MeterTypes.FindByDialDescription (
                         int.Parse ( data[ APP_FIELD.NumberOfDials ].Value ),
                         int.Parse ( data[ APP_FIELD.DriveDialSize ].Value ),
                         data[ APP_FIELD.UnitOfMeasure ].Value,
@@ -300,7 +300,7 @@ namespace MTUComm
                     {
                         isAutodetectMeter = true;
 
-                        meters = config.meterTypes.FindByDialDescription (
+                        meters = config.MeterTypes.FindByDialDescription (
                             int.Parse ( data[ APP_FIELD.NumberOfDials_2 ].Value ),
                             int.Parse ( data[ APP_FIELD.DriveDialSize_2 ].Value ),
                             data[ APP_FIELD.UnitOfMeasure_2 ].Value,
@@ -661,7 +661,7 @@ namespace MTUComm
                         #region Valve Position [ Only RemoteDisconnect ]
                         case APP_FIELD.RDDPosition:
                         // Param totally useless in other action types
-                        if ( actionType != ActionType.RemoteDisconnect )
+                        if ( actionType != ActionType.ValveOperation)
                             continue;
 
                         // Allowed values: CLOSE, OPEN, PARTIAL_OPEN
@@ -676,7 +676,7 @@ namespace MTUComm
                         #region RDD Firmware [ Only RemoteDisconnect ]
                         case APP_FIELD.RDDFirmware:
                         // Param totally useless in other action types
-                        if ( actionType != ActionType.RemoteDisconnect )
+                        if ( actionType != ActionType.ValveOperation)
                             continue;
                         
                         else if ( fail = NoELTxt ( valueStr, MAX_RDD_FW ) )

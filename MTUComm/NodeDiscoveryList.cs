@@ -23,7 +23,7 @@ namespace MTUComm
         /// Table with pre-calculated values to easiest know the probability
         /// of establish a good transmission channel, based on signal strength ( RSSI ).
         /// </summary>
-        public static (short RSSI,decimal Probability)[] RSSI_and_Probability =
+        public readonly static (short RSSI,decimal Probability)[] RSSI_and_Probability =
         {
             ( -115, 0.002m  ), // ~0% probability
             ( -114, 0.0154m ),

@@ -20,7 +20,7 @@ namespace Library
 
         #region Log
 
-        private static bool DEEP_MODE = true;
+        private static bool DEEP_MODE = false;
     
         public static void PrintDeep (
             object element,
@@ -156,7 +156,7 @@ namespace Library
                 // Update instance
                 Utils.SetPropertyValue ( Singleton.Get.Configuration.Global, tagName, value );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 throw new GlobalChangedException ();
             }
@@ -170,8 +170,7 @@ namespace Library
             string hex )
         {
             string r, g, b;
-            byte[] rgb = new byte[ 3 ];
-
+            
             hex = hex.Replace ( "#", string.Empty );
 
             switch ( hex.Length )
@@ -272,7 +271,7 @@ namespace Library
             using ( Aes aesAlg = Aes.Create () )
             {
                 aesAlg.Key = key;
-                aesAlg.IV  = ( iv != null ) ? iv : new byte[ aesAlg.BlockSize / 8 ];
+                aesAlg.IV  = iv ?? (new byte[aesAlg.BlockSize / 8]);
     
                 ICryptoTransform decryptor = aesAlg.CreateDecryptor ( aesAlg.Key, aesAlg.IV );
                 using (MemoryStream msDecrypt = new MemoryStream ( encryptedText ) )
@@ -363,7 +362,7 @@ namespace Library
             {
                 return ( T )Convert.ChangeType ( value, typeof( T ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 return default ( T );
             }
@@ -381,7 +380,7 @@ namespace Library
 
             // Add zeros up to the required length
             TypeCode code;
-            byte[] subZeros = null;
+            byte[] subZeros = new byte[1];
             switch ( code = Type.GetTypeCode ( typeof ( T ) ) )
             {
                 case TypeCode.Byte  :
@@ -505,8 +504,7 @@ namespace Library
             if ( ! ( value is string ) )
                 return false;
 
-            bool ok;
-            return bool.TryParse ( value.ToString (), out ok );
+            return bool.TryParse(value.ToString(), out bool ok);
         }
 
         public static T ParseIntToEnum<T> ( int index, T defaultValue )

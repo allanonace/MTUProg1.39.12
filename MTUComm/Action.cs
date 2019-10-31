@@ -207,7 +207,7 @@ namespace MTUComm
             TurnOffMtu,
             TurnOnMtu,
             DataRead,
-            RemoteDisconnect,
+            ValveOperation,
             MtuInstallationConfirmation,
             BasicRead,
             ReadFabric,
@@ -229,11 +229,6 @@ namespace MTUComm
             TurningOnMtu,
             ReadingMtu
         };
-
-        public static Dictionary<ActionType, String> logDisplays;
-        public static Dictionary<ActionType, String> logTypes;
-        public static Dictionary<ActionType, String> logReasons;
-        public static Dictionary<ActionType, string[]> actionsTexts;
 
         #endregion
 
@@ -354,7 +349,7 @@ namespace MTUComm
         /// </summary>
         public String LogDisplay
         {
-            get { return logDisplays[type]; }
+            get { return LogDisplays[type]; }
         }
 
         /// <summary>
@@ -369,7 +364,7 @@ namespace MTUComm
         /// </summary>
         public String LogType
         {
-            get { return logTypes[this.type]; }
+            get { return LogTypes[this.type]; }
         }
 
         /// <summary>
@@ -384,7 +379,7 @@ namespace MTUComm
         /// </summary>
         public String LogReason
         {
-            get { return logReasons[this.type]; }
+            get { return LogReasons[this.type]; }
         }
 
         public bool IsWrite
@@ -436,16 +431,21 @@ namespace MTUComm
             }
         }
 
+        public static Dictionary<ActionType, string> LogDisplays { get; set; }
+        public static Dictionary<ActionType, string> LogTypes { get; set; }
+        public static Dictionary<ActionType, string> LogReasons { get; set; }
+        public static Dictionary<ActionType, string[]> ActionsTexts { get; set; }
+
         #endregion
 
         #region Initialization
 
         static Action ()
         {
-            actionsTexts =
+            ActionsTexts =
             new Dictionary<ActionType, string[]>()
             {   
-            { ActionType.RemoteDisconnect,
+            { ActionType.ValveOperation,
                 new string[]
                 {
                    "Valve Operation",
@@ -520,7 +520,7 @@ namespace MTUComm
         };
 
 
-        logDisplays = new Dictionary<ActionType,String> ()
+        LogDisplays = new Dictionary<ActionType,String> ()
             {
                 {ActionType.BasicRead,                      "Basic Read" },
                 {ActionType.ReadMtu,                        "Read MTU" },
@@ -535,10 +535,10 @@ namespace MTUComm
                 {ActionType.DataRead,                       "Read Data Log" },
                 {ActionType.MtuInstallationConfirmation,    "Install Confirmation" },
                 {ActionType.ReadFabric,                     "Read Fabric" },
-                {ActionType.RemoteDisconnect,               "Valve Operation" }
+                {ActionType.ValveOperation,               "Valve Operation" }
             };
 
-            logTypes = new Dictionary<ActionType,String> ()
+            LogTypes = new Dictionary<ActionType,String> ()
             {
                 {ActionType.BasicRead,                      "BasicRead" },
                 {ActionType.ReadMtu,                        "ReadMTU" },
@@ -553,10 +553,10 @@ namespace MTUComm
                 {ActionType.DataRead,                       "ReadDataLog" },
                 {ActionType.MtuInstallationConfirmation,    "InstallConfirmation" },
                 {ActionType.ReadFabric,                     "ReadFabric" },
-                {ActionType.RemoteDisconnect,               "Valve Operation" }
+                {ActionType.ValveOperation,               "Valve Operation" }
             };
 
-            logReasons = new Dictionary<ActionType,String> ()
+            LogReasons = new Dictionary<ActionType,String> ()
             {
                 {ActionType.BasicRead,                      "BasicRead" },
                 {ActionType.ReadMtu,                        "ReadMtu" },
@@ -571,7 +571,7 @@ namespace MTUComm
                 {ActionType.DataRead,                       "DataRead" },
                 {ActionType.MtuInstallationConfirmation,    "InstallConfirmation" },
                 {ActionType.ReadFabric,                     "ReadFabric" },
-                {ActionType.RemoteDisconnect,               "ValveOperation" }
+                {ActionType.ValveOperation,               "ValveOperation" }
             };
         }
 
@@ -774,7 +774,7 @@ namespace MTUComm
                             parameters.Add ( this );
                         break;
                     
-                    case ActionType.RemoteDisconnect:
+                    case ActionType.ValveOperation:
                         this.mtucomm.OnRemoteDisconnect -= OnRemoteDisconnect;
                         this.mtucomm.OnRemoteDisconnect += OnRemoteDisconnect;
                         // In interactive mode values are already set in Library.Data
@@ -857,9 +857,9 @@ namespace MTUComm
                 this.lastLogCreated = logger.ReadMTU ( this, resultAllInterfaces, args.Mtu );
                 
                 // Show result in the screen
-                this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultAllInterfaces, args.Mtu ) );
+                await this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultAllInterfaces, args.Mtu ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -892,9 +892,9 @@ namespace MTUComm
                 this.lastLogCreated = addMtuLog.Save ();
 
                 // Show result in the screen
-                this.OnFinish ( this, new Delegates.ActionFinishArgs ( result ) );
+                await this.OnFinish ( this, new Delegates.ActionFinishArgs ( result ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -921,7 +921,7 @@ namespace MTUComm
                 // Show result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( resultBasic ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -971,7 +971,7 @@ namespace MTUComm
                 // Show only the ReadMTU result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -983,7 +983,7 @@ namespace MTUComm
             try
             {
                 // Load parameters using the interface file
-                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.RemoteDisconnect );
+                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.ValveOperation );
                 ActionResult readMtu_allParamsFromInterface  = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
 
                 // Write result in the DataRead file
@@ -992,7 +992,7 @@ namespace MTUComm
                 // Show only the ReadMTU result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -1039,7 +1039,7 @@ namespace MTUComm
                 if ( result != NodeDiscoveryResult.EXCEPTION )
                     logger.NodeDiscovery ( nodeList, args.Mtu );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -1139,7 +1139,7 @@ namespace MTUComm
                                     default          : value      = ( await map[ sourceProperty ].GetValue () ).ToString (); break; // MemoryMap.ParameterName
                                 }
                             }
-                            catch ( Exception e )
+                            catch ( Exception )
                             {
                                 Utils.Print ( "Interface: Map Error: " + sourceProperty );
                                 throw new Exception ();
@@ -1159,7 +1159,7 @@ namespace MTUComm
                                 else
                                 {
                                     paramToAdd.CustomParameter = parameter.Name;
-                                    paramToAdd.source = parameter.Source;
+                                    paramToAdd.Source = parameter.Source;
                                 }
                             }
                         
@@ -1173,7 +1173,7 @@ namespace MTUComm
                         }
                     }
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
                     Utils.PrintDeep ( "Error: Interface parameter '" + parameter.Name + "'" );
                 }
@@ -1327,7 +1327,7 @@ namespace MTUComm
                                 else
                                     result.AddParameter ( new Parameter ( parameter.Name, parameter.Display, meter_reading_error, parameter.Source, indexPort - 1 ) );
                             }
-                            catch ( Exception e )
+                            catch ( Exception )
                             {
                                 //...
                             }
@@ -1369,7 +1369,7 @@ namespace MTUComm
                                                        break;
                                 }
                             }
-                            catch ( Exception e )
+                            catch ( Exception )
                             {
                                 Utils.Print ( "Interface: Map Error: " + sourceProperty );
                                 throw new Exception ();
@@ -1511,7 +1511,7 @@ namespace MTUComm
                         prevFinalResult    = currentFinalResult;
                         currentFinalResult = finalResults.Count - 1;
                         
-                        Console.WriteLine (
+                        Utils.PrintDeep (
                             "INIT block [ New Parent: " + currentNestedLevel + " , New FinalResultIndex: " + currentFinalResult + " ] " +
                             "-> And: " + condition.IsAnd + " Or: " + condition.IsOr );
                         
@@ -1523,7 +1523,7 @@ namespace MTUComm
                         currentNestedLevel--;
                         currentFinalResult = prevFinalResult--;
                         
-                        Console.WriteLine ( "FINISH [ Return to Parent: " + currentNestedLevel + " , Return to FinalResultIndex: " + currentFinalResult + " ]" );
+                        Utils.PrintDeep ( "FINISH [ Return to Parent: " + currentNestedLevel + " , Return to FinalResultIndex: " + currentFinalResult + " ]" );
                         
                         continue;
                     }
@@ -1575,7 +1575,7 @@ namespace MTUComm
 
                     #endregion
 
-                    Console.WriteLine ( "   " + condition.Key + " == " + condition.Value + " -> " + result +
+                    Utils.PrintDeep ( "   " + condition.Key + " == " + condition.Value + " -> " + result +
                         " [ Parent: " + ( currentNestedLevel - 1 ) + " , FinalResultIndex: " + currentFinalResult + " ]" );
 
                     // Concatenate results
@@ -1586,29 +1586,28 @@ namespace MTUComm
                     }
                     else finalResults[ currentFinalResult ]  = result;
 
-                    Console.WriteLine ( "   Final = " + result + " -> FinalResult[" + currentFinalResult + "] = " + finalResults[ currentFinalResult ] );
+                    Utils.PrintDeep ( "   Final = " + result + " -> FinalResult[" + currentFinalResult + "] = " + finalResults[ currentFinalResult ] );
                 }
                 
                 #endregion
 
                 #region Calculate inside out
 
-                Console.WriteLine ( "----" );
+                Utils.PrintDeep ( "----" );
 
-                Console.WriteLine ( conditionStr );
-		
-		        Console.WriteLine ();
-		
-		        for ( int i = 0; i < finalResults.Count; i++ )
+                Utils.PrintDeep ( conditionStr );
+                Utils.PrintDeep("-");
+
+                for ( int i = 0; i < finalResults.Count; i++ )
 		        {
-		            Console.WriteLine (
+		            Utils.PrintDeep (
 		                "Group: " + i +
 		                " Parent: " + blockParent[ i ] +
 		                " -> FinalResult: " + finalResults[ i ] +
 		                " PreCondition: " + ( ( blockCondition[ i ] ) ? "AND" : "OR" ) );
 		        }
 		
-		        Console.WriteLine ();
+		        Utils.PrintDeep ("-");
 
                 /*
                 e.g. "Level0.P1=true | ( Level1.P1=3 + ( Level2.P1=1 + Level2.P2=1 ) | ( Level2.P3=2 + Level2.P3=2 ) | Level1.P2=4 )"
@@ -1636,19 +1635,19 @@ namespace MTUComm
                     used        = 0;
                     finalResult = 0;
                     
-                    Console.WriteLine ( "Parent: " + parent + " [ For " + parent + " >= 0 ]" );
+                    Utils.PrintDeep ( "Parent: " + parent + " [ For " + parent + " >= 0 ]" );
                     
                     // Iterates all groups, first finding current parent ( travels the sentence from left to right )
                     int groupLimit = finalResults.Count;
                     for ( int group = 0; group < groupLimit; group++ )
                     {
-                        Console.WriteLine ( "    Group: " + group + " [ For 0 < " + groupLimit + " ]" );
+                        Utils.PrintDeep ( "    Group: " + group + " [ For 0 < " + groupLimit + " ]" );
                         
                         if ( group == parent )
                         {
                             finalResult = finalResults[ group ];
                             
-                            Console.WriteLine ( "        Parent: FinalResult = " + finalResult );
+                            Utils.PrintDeep ( "        Parent: FinalResult = " + finalResult );
                         }
                         else if ( blockParent[ group ] == parent )
                         {
@@ -1662,7 +1661,7 @@ namespace MTUComm
                             if ( ! andCondition ) finalResult += entryFinalResult; // If one condition validate, pass
                             else                  finalResult *= entryFinalResult; // All conditions have to validate
                             
-                            Console.WriteLine (
+                            Utils.PrintDeep (
                                 "        Child: FinalResult = " + preFinalResult +
                                 ( ( andCondition ) ? " x" : " +" ) +
                                 " " + entryFinalResult + " = " +
@@ -1673,30 +1672,30 @@ namespace MTUComm
                     if ( parent > 0 &&
                         used   > 0 )
                     {
-                        Console.WriteLine ( "    Remove elements: " + ( finalResults.Count - 1 - used ) + " / " + finalResults.Count );
+                        Utils.PrintDeep ( "    Remove elements: " + ( finalResults.Count - 1 - used ) + " / " + finalResults.Count );
                         
                         finalResults.RemoveRange ( finalResults.Count - 1 - used, used );
                         finalResults[ parent ] = finalResult;
                         
-                        Console.WriteLine (
+                        Utils.PrintDeep (
                             "    FinalResult = " + finalResult +
                             " | FinalResults.Count = " + finalResults.Count );
                 
                         int i = 0;
                         foreach ( int result in finalResults )
-                            Console.WriteLine ( "        · Group " + i++ + " = " + result );
+                            Utils.PrintDeep ( "        · Group " + i++ + " = " + result );
                     }
                 }
                 
                 #endregion
 
-                Console.WriteLine ( "----" );
+                Utils.PrintDeep ( "----" );
                 
-                Console.WriteLine ( finalResult );
+                Utils.PrintDeep ( finalResult );
 
                 return ( finalResult > 0 );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 //...
             }

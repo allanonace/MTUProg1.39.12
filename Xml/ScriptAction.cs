@@ -123,7 +123,7 @@ namespace Xml
         public ActionParameter RDDPosition { get; set; }
 
         [XmlElement("RDDFirmwareVersion")]
-        public ActionParameter RDDFirmware { get; set; }
+        public ActionParameter RDDFirmwareVersion { get; set; }
 
         // Custom field
 

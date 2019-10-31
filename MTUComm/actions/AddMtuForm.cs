@@ -68,7 +68,7 @@ namespace MTUComm.actions
 
         private const string PORT_2_SUFIX = "_2";
 
-        public Dictionary<ParameterType,FIELD> IdsAclara =
+        private Dictionary<ParameterType,FIELD> IdsAclara =
             new Dictionary<ParameterType,FIELD> ()
             {
                 { ParameterType.OldMtuId,             FIELD.MTU_ID_OLD        },
@@ -98,7 +98,7 @@ namespace MTUComm.actions
         // 0. Parameter ID     = dynamicMap.id
         // 1. Custom parameter = <name>
         // 2. Custom display   = <display>
-        public Dictionary<FIELD, string[]> Texts;
+        private Dictionary<FIELD, string[]> Texts;
 
         public bool usePort2;
         private Dictionary<FIELD,Parameter> dictionary;

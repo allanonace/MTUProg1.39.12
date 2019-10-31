@@ -136,7 +136,7 @@ namespace MTUComm
         public RDDStatusResult (
             byte[] response )
         {
-            this.serialNumber  = Utils.ConvertToNumericFromBytes<int>  ( response, BYTE_SERIAL_NUMBER, NUM_BYTES_SERIAL_NUMBER );               // 2 to 10
+            this.serialNumber  = Utils.CalculateNumericFromBytes<long>  ( response, BYTE_SERIAL_NUMBER, NUM_BYTES_SERIAL_NUMBER );               // 2 to 10
             this.valvePosition = Utils.ParseIntToEnum<RDDValveStatus>   ( ( int )response[ BYTE_VALVE_POSITION  ], RDDValveStatus  .UNKNOWN ); // 11
             this.battery       = Utils.ParseIntToEnum<RDDBatteryStatus> ( ( int )response[ BYTE_BATTERY         ], RDDBatteryStatus.UNKNOWN ); // 12
             this.prevCmdSource = Utils.ParseIntToEnum<RDDCmdSource>     ( ( int )response[ BYTE_PREV_CMD_SOURCE ], RDDCmdSource    .UNKNOWN ); // 13

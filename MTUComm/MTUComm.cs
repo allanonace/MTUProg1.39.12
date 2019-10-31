@@ -344,7 +344,7 @@ namespace MTUComm
         private Configuration configuration;
         private Global global;
         private Mtu mtu;
-        private bool basicInfoLoaded = false;
+       
         private AddMtuLog addMtuLog;
 
         #endregion
@@ -386,7 +386,7 @@ namespace MTUComm
                     case ActionType.BasicRead                  : ok = true; break;
                     case ActionType.DataRead                   : ok = await Task.Run ( () => Validate_DataRead () ); break;
                     case ActionType.MtuInstallationConfirmation: ok = await Task.Run ( () => Validate_InstallConfirmation () ); break;
-                    case ActionType.RemoteDisconnect           : ok = await Task.Run ( () => Validate_RemoteDisconnect () ); break;
+                    case ActionType.ValveOperation             : ok = await Task.Run ( () => Validate_RemoteDisconnect () ); break;
                    // case ActionType.TurnOffMtu                 : ok = await Task.Run ( () => Validate_TurnOff () ); break;
                    // case ActionType.TurnOnMtu                  : ok = await Task.Run ( () => Validate_TurnOn () ); break;
                 }
@@ -472,7 +472,7 @@ namespace MTUComm
                              await Task.Run ( () => DataRead ( ( Action )args[ 0 ] ) );
                         else await Task.Run ( () => DataRead () );
                         break;
-                    case ActionType.RemoteDisconnect:
+                    case ActionType.ValveOperation:
                         // Scripting and Interactive
                         if ( args.Length == 1 )
                              await Task.Run ( () => RemoteDisconnect ( ( Action )args[ 0 ] ) );
@@ -1353,7 +1353,7 @@ namespace MTUComm
                                 
                                 lexiTimeOut = false;
                             }
-                            catch ( Exception ) { }
+                            catch (Exception e) { Console.WriteLine($"mtucomm.cs_nodeDiscovery {e.Message}"); }
                         }
                         while ( ( lexiTimeOut ||
                                   fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY ) &&
@@ -1614,7 +1614,7 @@ namespace MTUComm
                 dynamic map = await this.ValidateParams ( action );
 
                 // Init DataRead logic using translated parameters
-                await this.RemoteDisconnect ();
+                await this.RemoteDisconnect (true);
             }
             catch ( Exception e )
             {
@@ -1625,9 +1625,9 @@ namespace MTUComm
             }
         }
 
-        public async Task RemoteDisconnect ()
+        public async Task RemoteDisconnect (bool throwExceptions = false)
         {
-            if ( await this.RemoteDisconnect_Logic () == RDD_OK )
+            if ( await this.RemoteDisconnect_Logic (throwExceptions) == RDD_OK )
             {
                 OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
 
@@ -1778,20 +1778,23 @@ namespace MTUComm
                                 response.PreviousCmdSuccess + " " +
                                 response.ValvePosition );
                         }
-                        catch ( Exception ) {}
+                        catch (Exception e) { Console.WriteLine($"mtucomm.cs_Remotedisconnectlogic {e.Message}"); }
                     }
                     while ( ( response == null ||
                               response.ValvePosition == RDDValveStatus.IN_TRANSITION ||
                               response.ValvePosition != rddValveStatus ) &&
                             ! ( timeOut = nodeCounter.ElapsedMilliseconds > WAIT_RDD_MAX ) );
-                    
-                    // The process has failed
+
+                    string seconds = ((int)(WAIT_RDD_MAX / 1000)).ToString();
+                    if (response == null)
+                    {
+                        throw new RDDStatusIsUnknownAfterMaxTime(seconds);
+                    }
+                    else  // The process has failed
                     if ( ! response.PreviousCmdSuccess ||
                          response.ValvePosition != rddValveStatus )
                     {
                         result = RDD_NOT_ACHIEVED;
-
-                        string seconds = ( ( int )( WAIT_RDD_MAX / 1000 ) ).ToString ();
 
                         switch ( response.ValvePosition )
                         {
@@ -1818,13 +1821,16 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                if ( ! throwExceptions )
+                if (!throwExceptions)
+                {
                     result = RDD_EXCEPTION;
+                    Errors.LogErrorNowAndContinue(e);
+                }
                 else
                 {
                     // Is not own exception
-                    if ( ! Errors.IsOwnException ( e ) )
-                         throw new PuckCantCommWithMtuException ();
+                    if (!Errors.IsOwnException(e))
+                        throw new PuckCantCommWithMtuException();
                     else throw e;
                 }
             }
@@ -2185,7 +2191,7 @@ namespace MTUComm
                     {
                         isAutodetectMeter = true;
                     
-                        meters = configuration.meterTypes.FindByDialDescription (
+                        meters = configuration.MeterTypes.FindByDialDescription (
                             int.Parse ( form.NumberOfDials.Value ),
                             int.Parse ( form.DriveDialSize.Value ),
                             form.UnitOfMeasure.Value,
@@ -2240,7 +2246,7 @@ namespace MTUComm
                              form.ContainsParameter ( FIELD.DRIVE_DIAL_SIZE_2 ) &&
                              form.ContainsParameter ( FIELD.UNIT_MEASURE_2    ) )
                         {
-                            meters = configuration.meterTypes.FindByDialDescription (
+                            meters = configuration.MeterTypes.FindByDialDescription (
                                 int.Parse ( form.NumberOfDials_2.Value ),
                                 int.Parse ( form.DriveDialSize_2.Value ),
                                 form.UnitOfMeasure_2.Value,
@@ -2649,7 +2655,7 @@ namespace MTUComm
                 #region Auto-detect Alarm
     
                 // Auto-detect scripting Alarm profile
-                List<Alarm> alarms = configuration.alarms.FindByMtuType ( (int)Data.Get.MtuBasicInfo.Type );
+                List<Alarm> alarms = configuration.Alarms.FindByMtuType ( (int)Data.Get.MtuBasicInfo.Type );
                 if ( alarms.Count > 0 )
                 {
                     Alarm alarm = alarms.Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
@@ -2967,10 +2973,7 @@ namespace MTUComm
                             if ( map.ContainsMember ( "AlarmMask1" ) ) map.AlarmMask1 = false; // Set '0'
                             if ( map.ContainsMember ( "AlarmMask2" ) ) map.AlarmMask2 = false;
                         }
-                        catch ( Exception )
-                        {
-
-                        }
+                        catch (Exception e) { Console.WriteLine($"mtucomm.cs_addmtu {e.Message}"); }
                     }
                     // No alarm profile was selected before launch the action
                     else throw new SelectedAlarmForCurrentMtuException ();
@@ -3284,7 +3287,7 @@ namespace MTUComm
                     }
                 }
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 //...
             }
@@ -3294,12 +3297,12 @@ namespace MTUComm
                 {
                     Mobile.ConfigData data = Mobile.configData;
                     
-                    data.lastRandomKey    = new byte[ aesKey.Length ];
-                    data.lastRandomKeySha = new byte[ sha   .Length ];
+                    data.LastRandomKey    = new byte[ aesKey.Length ];
+                    data.LastRandomKeySha = new byte[ sha   .Length ];
                 
                     // Save data to log
-                    Array.Copy ( aesKey, data.lastRandomKey,    aesKey.Length );
-                    Array.Copy ( sha,    data.lastRandomKeySha, sha.Length    );
+                    Array.Copy ( aesKey, data.LastRandomKey,    aesKey.Length );
+                    Array.Copy ( sha,    data.LastRandomKeySha, sha.Length    );
                 }
                 
                 // Always clear temporary random key from memory, and then after generate the
@@ -3309,7 +3312,7 @@ namespace MTUComm
             }
             
             // MTU encryption has failed
-            if ( ! ( Mobile.configData.isMtuEncrypted = ok ) )
+            if ( ! ( Mobile.configData.IsMtuEncrypted = ok ) )
                 throw new ActionNotAchievedEncryptionException ( CMD_ENCRYP_OLD_MAX + "" );
             
             await this.CheckIsTheSameMTU ();
@@ -3388,7 +3391,7 @@ namespace MTUComm
                     if ( this.mtu.BroadCast )
                     {
                         OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Broadcast Key" ) );
-
+                        Utils.Print($"======================================================  Encrypt: Broadcast Key ");
                         // Loads Encryption Item - Type 4: Broadcast Key 
                         fullResponse = await this.lexi.Write (
                             CMD_ENCRYP_LOAD,
@@ -3406,6 +3409,7 @@ namespace MTUComm
                     randomKey = mtusha.RandomBytes ( randomKey.Length );
                     Array.Copy ( randomKey, 0, data1, 1, randomKey.Length );
 
+                    Utils.Print($"======================================================  Encrypt: Head-End Random Number ");
                     // Loads Encryption Item - Type 1: Head End Random Number
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_LOAD,
@@ -3420,6 +3424,7 @@ namespace MTUComm
                     
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Head-End Public Key" ) );
 
+                    Utils.Print($"======================================================  Encrypt: Head-End Public Key ");
                     // Loads Encryption Item - Type 0: Head End Public Key
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_LOAD,
@@ -3431,7 +3436,7 @@ namespace MTUComm
                         LexiAction.OperationRequest );
                     
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Generate Keys" ) );
-
+                    Utils.Print($"======================================================  Encrypt: Generate Keys ");
                     // Generates Encryptions Keys
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_KEYS,
@@ -3456,7 +3461,7 @@ namespace MTUComm
                         continue; // Error
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: MTU Random Number" ) );
-
+                    Utils.Print($"======================================================  Encrypt: MTU Random Number ");
                     // Reads Encryption Item - Type 3: MTU Random Number
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_READ,
@@ -3470,7 +3475,7 @@ namespace MTUComm
                     string clientRnd = Convert.ToBase64String ( fullResponse.Response );
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: MTU Public Key" ) );
-
+                    Utils.Print($"======================================================  Encrypt: MTU Public Key ");
                     // Reads Encryption Item - Type 2: MTU Public Key
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_READ,
@@ -3641,8 +3646,7 @@ namespace MTUComm
             // Actions without form have no problem, but actions that require the user to
             // complete a form before launch the action logic, should avoid to invoking this
             // event the first time, when the basic loading is done to prepare the form
-            if ( OnProgress != null )
-                OnProgress ( this, new Delegates.ProgressArgs ( "Initial Reading..." ) );
+            OnProgress?.Invoke(this, new Delegates.ProgressArgs("Initial Reading..."));
 
             bool mtuHasChanged = await this.LoadMtuBasicInfo_Logic ();
 

@@ -66,7 +66,7 @@ namespace aclara_meters.view
             menuOptions = this.MenuOptions;
             dialogView = this.DialogView;
 
-            global = FormsApp.config.Global;
+            global = Singleton.Get.Configuration.Global;
             
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -95,7 +95,7 @@ namespace aclara_meters.view
                 await Task.Delay(100); 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                     ChangeLogFile(viewModelTabLog.TotalFiles, false);
+                     ChangeLogFile(viewModelTabLog.TotalFiles);
                 });
             });
 
@@ -125,7 +125,7 @@ namespace aclara_meters.view
             menuOptions = this.MenuOptions;
             dialogView = this.DialogView;
 
-            global = FormsApp.config.Global;
+            global = Singleton.Get.Configuration.Global;
 
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -157,7 +157,7 @@ namespace aclara_meters.view
                 await Task.Delay(100); 
                 Device.BeginInvokeOnMainThread(() =>
                 {
-                    ChangeLogFile(viewModelTabLog.TotalFiles, false);
+                    ChangeLogFile(viewModelTabLog.TotalFiles);
                 });
             });
 
@@ -223,7 +223,7 @@ namespace aclara_meters.view
 
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
-        private void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
+        private async void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
         {
             if (!FormsApp.ble_interface.IsOpen())
             {
@@ -241,7 +241,7 @@ namespace aclara_meters.view
                     ActionType page = item.TargetType;
                     ((ListView)sender).SelectedItem = null;
                     this.actionType = page;
-                    NavigationController(page);
+                    await NavigationController(page);
  
                 }
                 catch (Exception w2)
@@ -251,7 +251,7 @@ namespace aclara_meters.view
             }
             else
             {
-                Application.Current.MainPage.DisplayAlert("Alert", "Connect to a device and retry", "Ok");
+                await Application.Current.MainPage.DisplayAlert("Alert", "Connect to a device and retry", "Ok");
             }
         }
 
@@ -290,7 +290,7 @@ namespace aclara_meters.view
             switch (actionTarget)
             {
                 case ActionType.DataRead:
-                case ActionType.RemoteDisconnect:
+                case ActionType.ValveOperation:
                     #region DataRead  
                     await Task.Delay(200).ContinueWith(t =>
 
@@ -513,13 +513,13 @@ namespace aclara_meters.view
         private async void ForceSyncButtonTapped(object sender, EventArgs e)
         {
             force_sync.IsEnabled = false;
-            Wait(true);
+            Waiting(true);
 
             // Upload log files
             await GenericUtilsClass.UploadFiles (false);
             
             viewModelTabLog.RefreshList();
-            ChangeLogFile(viewModelTabLog.TotalFiles,false);
+            await ChangeLogFile(viewModelTabLog.TotalFiles);
       
             String myDate = DateTime.Now.ToString();
             date_sync.Text = myDate;
@@ -532,7 +532,7 @@ namespace aclara_meters.view
 
             lbl_backup.TextColor = colorText;
             force_sync.IsEnabled = true;
-            Wait(false);
+            Waiting(false);
            
         }
 
@@ -615,7 +615,7 @@ namespace aclara_meters.view
             {
                 if (actionType == ActionType.DataRead)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
-                else if(actionType == ActionType.RemoteDisconnect)
+                else if(actionType == ActionType.ValveOperation)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved,  this.actionType), false);
                 else
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
@@ -626,7 +626,7 @@ namespace aclara_meters.view
         {
             if (await ConfirmDownloadFilesAsync())
             {
-                Wait(true);
+                Waiting(true);
 
                 GenericUtilsClass.BackUpConfigFiles();
                 if (await DownloadConfigProcess())
@@ -646,7 +646,7 @@ namespace aclara_meters.view
                     }
                    
                 }
-                Wait(false);
+                Waiting(false);
             }
         }
     
@@ -670,22 +670,33 @@ namespace aclara_meters.view
         }
 
 
-        void Btn_Save_Clicked(object sender, EventArgs e)
+        private async void Btn_Save_Clicked(object sender, EventArgs e)
         {
-
-            Wait(true);
-            if (!GenericUtilsClass.TestFtpCredentials(tbx_remote_host.Text, tbx_user_name.Text, tbx_user_pass.Text, tbx_remote_path.Text))
+            bool result = false;
+            Waiting(true);
+            await Task.Run(async () =>
             {
-                DisplayAlert("Infomation", "Can't connect with the FTP, please check the entered data", "OK");
+                result = GenericUtilsClass.TestFtpCredentials(tbx_remote_host.Text, tbx_user_name.Text, tbx_user_pass.Text, tbx_remote_path.Text);
+
+            });
+            if (!result)
+            {
+                await DisplayAlert("Infomation", "Can't connect with the FTP, please check the entered data", "OK");
+                return;
             }
+           
+            result = await SaveFTPCredentials();
+
+            if(result)
+                await DisplayAlert("Infomation", "SFTP/FTP settings saved in global.xml", "OK");
             else
-                SaveFTPCredentials();
-            Wait(false);
+                await Errors.ShowAlert(new FtpConnectionException());
+
+            Waiting(false);
         }
 
-        private void SaveFTPCredentials()
+        private async Task<bool> SaveFTPCredentials()
         {
-            Wait(true);
             //Save FTP in global.xml and in global data
             try
             {
@@ -704,33 +715,38 @@ namespace aclara_meters.view
                 doc.Root.SetElementValue("ftpPassword", tbx_user_pass.Text);
 
                 doc.Save(uri);
-                DisplayAlert("Infomation", "SFTP/FTP settings saved in global.xml", "OK");
+                return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Errors.ShowAlert(new FtpConnectionException());               
+                return false;        
             }
-            Wait(false);
         }
 
-        private void Btn_Test_Clicked(object sender, EventArgs e)
+        private async void Btn_Test_Clicked(object sender, EventArgs e)
         {
-            Wait(true);
-            if (GenericUtilsClass.TestFtpCredentials(tbx_remote_host.Text, tbx_user_name.Text, tbx_user_pass.Text, tbx_remote_path.Text))
+            bool result=false;
+            Waiting(true);
+            await Task.Run(async () =>
             {
-               DisplayAlert("Information", "Connect to FTP succesfully", "OK");
+                result = GenericUtilsClass.TestFtpCredentials(tbx_remote_host.Text, tbx_user_name.Text, tbx_user_pass.Text, tbx_remote_path.Text);
+            
+            });
+            if (result)
+            {
+                await DisplayAlert("Information", "Connect to FTP succesfully", "OK");
             }
             else
             {
-                Errors.ShowAlert(new FtpConnectionException());
+                await Errors.ShowAlert(new FtpConnectionException());
             }
-            Wait(false);
+            Waiting(false);
         }
 
         private async void LogOffOkTapped(object sender, EventArgs e)
         {
             // Upload log files
-            if (FormsApp.config.Global.UploadPrompt)
+            if (Singleton.Get.Configuration.Global.UploadPrompt)
                 await GenericUtilsClass.UploadFiles ();
 
             dialogView.GetStackLayoutElement("dialog_logoff").IsVisible = false;
@@ -792,7 +808,7 @@ namespace aclara_meters.view
                 certificate_exp .Text = string.Empty;
             }
 
-            customers_name.Text = TEXT_LICENSE + FormsApp.config.Global.CustomerName;
+            customers_name.Text = TEXT_LICENSE + Singleton.Get.Configuration.Global.CustomerName;
 
             #endregion
             about_block.Opacity = 0;
@@ -889,7 +905,7 @@ namespace aclara_meters.view
             }
         }
 
-        private void ChangeLogFile(int index, bool bUI)
+        private async Task ChangeLogFile(int index)
         {
             if (index < 0)
             {
@@ -897,36 +913,49 @@ namespace aclara_meters.view
                 btnNext.IsVisible = false;
                 return;
             }
-              
+            
+            await Task.Run(async () =>
+            {
+                Device.BeginInvokeOnMainThread(async() =>
+                {
+                    await viewModelTabLog.LoadData(index);
+                    
+                    if (viewModelTabLog.IndexFile == 0) btnPrevious.IsVisible = false;
+                    else btnPrevious.IsVisible = true;
 
-            if (bUI) Wait(true);
-            Task.WaitAll(viewModelTabLog.LoadData(index));
+                    if (viewModelTabLog.IndexFile == viewModelTabLog.TotalFiles) btnNext.IsVisible = false;
+                    else btnNext.IsVisible = true;
 
-            if (viewModelTabLog.IndexFile == 0) btnPrevious.IsVisible = false;
-            else btnPrevious.IsVisible = true;
+                    if (Device.Idiom == TargetIdiom.Tablet)
+                        file_name.Text = $"Activity Log: {viewModelTabLog.FileDateTime}";
+                    else
+                        file_name.Text = viewModelTabLog.FileDateTime;
+                });
+            });
 
-            if (viewModelTabLog.IndexFile == viewModelTabLog.TotalFiles) btnNext.IsVisible = false;
-            else btnNext.IsVisible = true;
-
-            if (Device.Idiom == TargetIdiom.Tablet)
-                file_name.Text = $"Activity Log: {viewModelTabLog.FileDateTime}";
-            else
-                file_name.Text = viewModelTabLog.FileDateTime;
-
-            if (bUI)  Wait(false);
         }
 
-        void Previous_Clicked(object sender, System.EventArgs e)
+        private async void Previous_Clicked(object sender, System.EventArgs e)
         {
-            ChangeLogFile(viewModelTabLog.IndexFile - 1,true);
+            Waiting(true);
+            await Task.Run(async () =>
+            {
+                await ChangeLogFile(viewModelTabLog.IndexFile - 1);
+            });
+            Waiting(false);
         }
 
-        void Next_Clicked(object sender, System.EventArgs e)
+        private async void Next_Clicked(object sender, System.EventArgs e)
         {
-            ChangeLogFile(viewModelTabLog.IndexFile + 1,true);
+            Waiting(true);
+            await Task.Run(async () =>
+            {
+                await ChangeLogFile(viewModelTabLog.IndexFile + 1);
+            });
+            Waiting(false);
         }
 
-        private void Wait(bool state)
+        private void Waiting(bool state)
         {
             backdark_bg.IsVisible = state;
             indicator.IsVisible = state;

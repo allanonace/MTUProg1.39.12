@@ -23,19 +23,19 @@ namespace MTUComm
         private const string XML_DEMANDS   = "demandconf.xml";
         private const string XML_USERS     = "user.xml";
 
-        public MtuTypes mtuTypes;
-        public MeterTypes meterTypes;
         public Global Global { private set; get; }
-        public InterfaceConfig interfaces;
-        public AlarmList alarms;
-        public DemandConf demands;
-        public User[] users;
-        
+
         private string device;
         private string deviceUUID;
         private string version;
         private string appName;
-        private static Configuration instance;
+        public AlarmList Alarms { get; }
+
+        public MtuTypes MtuTypes { get; set; }
+        public MeterTypes MeterTypes { get; set; }
+        public InterfaceConfig Interfaces { get; set; }
+        public User[] Users { get; set; }
+        public DemandConf Demands { get; set; }
 
         private Configuration ( string path = "", bool avoidXmlError = false )
         {
@@ -47,20 +47,20 @@ namespace MTUComm
             {
                 // Load configuration files ( xml's )
 
-                mtuTypes   = Utils.DeserializeXml<MtuTypes>        ( Path.Combine ( configPath, XML_MTUS      ) );
-                meterTypes = Utils.DeserializeXml<MeterTypes>      ( Path.Combine ( configPath, XML_METERS    ) );
+                MtuTypes   = Utils.DeserializeXml<MtuTypes>        ( Path.Combine ( configPath, XML_MTUS      ) );
+                MeterTypes = Utils.DeserializeXml<MeterTypes>      ( Path.Combine ( configPath, XML_METERS    ) );
                 Global     = Utils.DeserializeXml<Global>          ( Path.Combine ( configPath, XML_GLOBAL    ) );
-                alarms     = Utils.DeserializeXml<AlarmList>       ( Path.Combine ( configPath, XML_ALARMS    ) );
-                demands    = Utils.DeserializeXml<DemandConf>      ( Path.Combine ( configPath, XML_DEMANDS   ) );
-                users      = Utils.DeserializeXml<UserList>        ( Path.Combine ( configPath, XML_USERS     ) ).List;
+                Alarms     = Utils.DeserializeXml<AlarmList>       ( Path.Combine ( configPath, XML_ALARMS    ) );
+                Demands    = Utils.DeserializeXml<DemandConf>      ( Path.Combine ( configPath, XML_DEMANDS   ) );
+                Users      = Utils.DeserializeXml<UserList>        ( Path.Combine ( configPath, XML_USERS     ) ).List;
                 
-                interfaces = Utils.DeserializeXml<InterfaceConfig> ( XML_INTERFACE, true ); // From resources
+                Interfaces = Utils.DeserializeXml<InterfaceConfig> ( XML_INTERFACE, true ); // From resources
                 
                 // Preload port types, because some ports use a letter but other a list of Meter IDs
                 // Done here because Xml project has no reference to MTUComm ( cross references )
                 List<string> portTypes;
                 StringBuilder allTypes = new StringBuilder ();
-                foreach ( Mtu mtu in mtuTypes.Mtus )
+                foreach ( Mtu mtu in MtuTypes.Mtus )
                 {
                     foreach ( Port port in mtu.Ports )
                     {
@@ -72,7 +72,7 @@ namespace MTUComm
 
                         // Some Meters have numeric type ( e.g. 122 ) and some of them appears
                         // twice in meter.xml, one for a Meter ID and other for a Meter type
-                        port.IsSpecialCaseNumType = meterTypes.ContainsNumericType ( portTypes[ 0 ] );
+                        port.IsSpecialCaseNumType = MeterTypes.ContainsNumericType ( portTypes[ 0 ] );
 
                         // Set if this Mtu only supports certain Meter IDs
                         if ( isNumeric &&
@@ -90,7 +90,7 @@ namespace MTUComm
                         {
                             foreach ( string id in portTypes )
                             {
-                                string types = meterTypes.FindByMterId ( int.Parse ( id ) ).Type;
+                                string types = MeterTypes.FindByMterId ( int.Parse ( id ) ).Type;
 
                                 // Get all different types from all supported Meters
                                 // Type 1: ABC
@@ -215,7 +215,7 @@ namespace MTUComm
                 allTypes = null;
                 return true;
             }
-            catch (Exception e)
+            catch (Exception )
             {
                 return false;
             }
@@ -246,12 +246,12 @@ namespace MTUComm
 
         public Mtu[] GetMtuTypes()
         {
-            return mtuTypes.Mtus.ToArray();
+            return MtuTypes.Mtus.ToArray();
         }
 
         public Mtu GetMtuTypeById ( int mtuId )
         {
-            Mtu mtu = mtuTypes.FindByMtuId ( mtuId );
+            Mtu mtu = MtuTypes.FindByMtuId ( mtuId );
             
             // Is not valid MTU ID ( not present in Mtu.xml )
             if ( mtu == null )
@@ -262,32 +262,32 @@ namespace MTUComm
 
         public Meter[] GetMeterType()
         {
-            return meterTypes.Meters.ToArray();
+            return MeterTypes.Meters.ToArray();
         }
 
         public MeterTypes GetMeterTypes()
         {
-            return meterTypes;
+            return MeterTypes;
         }
 
         public Meter getMeterTypeById(int meterId)
         {
-            return meterTypes.FindByMterId(meterId);
+            return MeterTypes.FindByMterId(meterId);
         }
 
         public InterfaceParameters[] getAllParamsFromInterface ( Mtu mtu, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getAllParams ();
+            return Interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getAllParams ();
         }
 
         public InterfaceParameters[] getLogParamsFromInterface ( Mtu mtu, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getLogParams ();
+            return Interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getLogParams ();
         }
 
         public InterfaceParameters[] getUserParamsFromInterface ( Mtu mtu, ActionType actionType )
         {
-            return interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getUserParams ();
+            return Interfaces.GetInterfaceByMtuIdAndAction ( mtu, actionType.ToString () ).getUserParams ();
         }
 
         public string GetMemoryMapTypeByMtuId ( Mtu mtu )
@@ -306,7 +306,7 @@ namespace MTUComm
             {
                 return getFamilyRegister ( InterfaceAux.GetmemoryMapTypeByMtuId ( mtu ), regsiter_name);
             }
-            catch (Exception e)
+            catch (Exception )
             {
                 return null;
             }
@@ -332,19 +332,19 @@ namespace MTUComm
                         }
                     }
                 }
-            }catch (Exception e) { }
+            }catch (Exception e ) { Console.WriteLine($"configuracion.cs_ {e.Message}"); }
 
             return null;
         }
 
         public List<string>  GetVendorsFromMeters()
         {
-            return meterTypes.GetVendorsFromMeters(meterTypes.Meters);
+            return MeterTypes.GetVendorsFromMeters(MeterTypes.Meters);
         }
 
         public List<string> GetModelsByVendorFromMeters(String vendor)
         {
-            return meterTypes.GetModelsByVendorFromMeters(meterTypes.Meters, vendor);
+            return MeterTypes.GetModelsByVendorFromMeters(MeterTypes.Meters, vendor);
         }
 
         public Boolean useDummyDigits()
@@ -354,21 +354,9 @@ namespace MTUComm
 
         public String GetDeviceUUID()
         {
-            string return_str = "";
+            string return_str;
 
             return_str = deviceUUID;
-
-            /*
-            if (device.Equals("PC"))
-            {
-                return_str = "ACLARATECH-CLE5478L-KGUILER";
-            }else
-                
-            if (device.Equals("Android") || device.Equals("iOS") )
-            {
-                return_str = deviceUUID;
-            }
-            */
 
             return return_str; //get UUID from Xamarin
         }
@@ -377,12 +365,6 @@ namespace MTUComm
         {
 
             string return_str = "";
-
-            if (device.Equals("PC"))
-            {
-                return_str = "2.2.5.0";
-            }
-            else
 
             if (device.Equals("Android") || device.Equals("iOS"))
             {
@@ -393,24 +375,11 @@ namespace MTUComm
 
         }
 
-        public AlarmList Alarms
-        {
-            get
-            {
-                return this.alarms;
-            }
-        }
 
         public String getApplicationName()
         {
 
             string return_str = "";
-
-            if (device.Equals("PC"))
-            {
-                return_str = "AclaraStarSystemMobileR";
-            }
-            else
 
             if (device.Equals("Android") || device.Equals("iOS"))
             {

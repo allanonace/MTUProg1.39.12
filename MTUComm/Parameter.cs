@@ -179,8 +179,6 @@ namespace MTUComm
         private dynamic mValue;
 
         private bool optional = false;
-        
-        public string source;
 
         public Parameter ()
         {
@@ -210,7 +208,7 @@ namespace MTUComm
             mParameterType   = ParameterType.Custom;
             mCustomParameter = custom_parameter;
             mCustomDisplay   = custom_display;
-            this.source      = source;
+            this.Source      = source;
             mValue           = value;
             this.optional    = optional;
             
@@ -357,6 +355,8 @@ namespace MTUComm
                 mValue = value;
             }
         }
+
+        public string Source { get; set; }
 
         /// <summary>
         /// Returns current value of the parameter, filling in up to number of characters specified,

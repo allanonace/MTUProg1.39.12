@@ -21,7 +21,6 @@ namespace aclara_meters
 {
     public static class GenericUtilsClass
     {
-        public static int NumFilesUploaded;
         private const string XML_EXT = ".xml";
         private const string CER_TXT = "certificate.txt";
         private const string XML_CER = ".cer";
@@ -37,6 +36,8 @@ namespace aclara_meters
                 "mtu",
                 "user",
             };
+
+        public static int NumFilesUploaded { get; set; }
 
         public async static Task<bool> UploadFiles (Boolean UploadPrompt = true, Boolean AllLogs = true )
         {
@@ -175,7 +176,7 @@ namespace aclara_meters
                             sftp.Disconnect ();
                         }
                     }
-                    catch ( Exception e )
+                    catch ( Exception )
                     {
                         // Catch all exceptions and then always show the number of
                         // files uploaded using the exception FtpUpdateLogsException
@@ -184,9 +185,7 @@ namespace aclara_meters
                     {
                         if ( sftp != null )
                             sftp.Dispose ();
-                        
-                        sftp = null;
-                        
+                                                                        
                         // Is necessary for appear the progress full ( 100% )
                         await Task.Delay ( 10 );
                         
@@ -309,12 +308,10 @@ namespace aclara_meters
                     sftp.Disconnect();
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 ok = false;
             }
-
-            //Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
 
             return ok;
         }
@@ -339,11 +336,11 @@ namespace aclara_meters
             if (!String.IsNullOrEmpty(Host.Result))
             {
                 var data = Mobile.configData;
-                data.ftpDownload_Host = Host.Result;
-                data.ftpDownload_Path = SecureStorage.GetAsync("ftpDownload_Path").Result;
-                data.ftpDownload_User = SecureStorage.GetAsync("ftpDownload_User").Result;
-                data.ftpDownload_Pass = SecureStorage.GetAsync("ftpDownload_Pass").Result;
-                data.ftpDownload_Port = int.Parse(SecureStorage.GetAsync("ftpDownload_Port").Result);
+                data.FtpDownload_Host = Host.Result;
+                data.FtpDownload_Path = SecureStorage.GetAsync("ftpDownload_Path").Result;
+                data.FtpDownload_User = SecureStorage.GetAsync("ftpDownload_User").Result;
+                data.FtpDownload_Pass = SecureStorage.GetAsync("ftpDownload_Pass").Result;
+                data.FtpDownload_Port = int.Parse(SecureStorage.GetAsync("ftpDownload_Port").Result);
                 data.HasFTP = true;
                 data.HasIntune = false;
                 return true;
@@ -371,11 +368,11 @@ namespace aclara_meters
             try
             {
                 Mobile.ConfigData data = Mobile.configData;
-                using (SftpClient sftp = new SftpClient(data.ftpDownload_Host, data.ftpDownload_Port, data.ftpDownload_User, data.ftpDownload_Pass))
+                using (SftpClient sftp = new SftpClient(data.FtpDownload_Host, data.FtpDownload_Port, data.FtpDownload_User, data.FtpDownload_Pass))
                 {
                     sftp.Connect();
 
-                    foreach (SftpFile file in sftp.ListDirectory(data.ftpDownload_Path))
+                    foreach (SftpFile file in sftp.ListDirectory(data.FtpDownload_Path))
                     {
                         if (file.Name.Contains(FIL_VER))
                         {
@@ -389,7 +386,7 @@ namespace aclara_meters
                     return sVersion;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }
@@ -417,7 +414,7 @@ namespace aclara_meters
                 return sVersion;
              
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return null;
             }
@@ -430,14 +427,14 @@ namespace aclara_meters
             try
             {
                 Mobile.ConfigData data = Mobile.configData;
-                using (SftpClient sftp = new SftpClient(data.ftpDownload_Host, data.ftpDownload_Port, data.ftpDownload_User, data.ftpDownload_Pass))
+                using (SftpClient sftp = new SftpClient(data.FtpDownload_Host, data.FtpDownload_Port, data.FtpDownload_User, data.FtpDownload_Pass))
                 {
                     sftp.Connect();
 
                     // Remote FTP File directory
                     string configPath = Mobile.ConfigPath;
 
-                    foreach (SftpFile file in sftp.ListDirectory(data.ftpDownload_Path))
+                    foreach (SftpFile file in sftp.ListDirectory(data.FtpDownload_Path))
                     {
                         string name = file.Name;
                         if (name.ToLower().Contains(XML_CER)) sfileCert = name.ToLower();
@@ -450,20 +447,20 @@ namespace aclara_meters
                                 File.Delete(sfile);
                             using (Stream stream = File.OpenWrite(sfile))  // keep in low case
                             {
-                                sftp.DownloadFile(Path.Combine(data.ftpDownload_Path, name), stream);
+                                sftp.DownloadFile(Path.Combine(data.FtpDownload_Path, name), stream);
                             }
                         }
                     }
 
                     sftp.Disconnect();
-                    Console.WriteLine("Download config.files from FTP: " + ((ok) ? "OK" : "NO"));
+                
+                    Console.WriteLine("Download config.files from FTP: OK");
 
                     return ok;
                 }
             }
-            catch (Exception e)
+            catch (Exception )
             {
-                //throw new FtpDownloadException(e.Message);
                 return false;
             }
                     
@@ -495,7 +492,7 @@ namespace aclara_meters
                     }
                 }
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 ok = false;
             }
@@ -511,12 +508,8 @@ namespace aclara_meters
 
         public static bool HasDeviceAllXmls (string path)
         {
-            bool ok = true;
-
-           // Directory could exist but is empty
-            if ( string.IsNullOrEmpty ( path ) )
-                ok = false;
-
+            bool ok;
+              
             DirectoryInfo info = new DirectoryInfo(path);
             FileInfo[] filesLocal = info.GetFiles();
 
@@ -545,7 +538,7 @@ namespace aclara_meters
         public static bool CopyConfigFiles(bool bRemove, string sPathFrom, string sPathTo, out string sFileCert)
         {
             sFileCert = string.Empty;
-            string fileCopy = string.Empty;
+            string fileCopy;
             try
             {
                 Mobile.CreateDirectoryIfNotExist(sPathTo);
@@ -568,7 +561,7 @@ namespace aclara_meters
                 }
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {         
                 return false;
             }
@@ -598,20 +591,7 @@ namespace aclara_meters
 
         public static bool DeleteConfigFiles(string path)
         {
-            bool ok = true;
-            string[] filesToCheck =
-            {
-                "alarm",
-                "demandconf",
-                "global",
-                "meter",
-                "mtu",
-                "user",
-            };
-    
-            // Directory could exist but is empty
-            if (string.IsNullOrEmpty(path))
-                ok = false;
+            bool ok;
 
             DirectoryInfo info = new DirectoryInfo(path);
             FileInfo[] filesLocal = info.GetFiles();

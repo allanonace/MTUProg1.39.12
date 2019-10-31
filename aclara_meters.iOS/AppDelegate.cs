@@ -21,8 +21,8 @@ namespace aclara_meters.iOS
         // method you should instantiate the window, load the UI into it and make window visible
         // NOTE: You have 17 seconds to return from this method or iOS will terminate application
         public override bool FinishedLaunching (
-            UIApplication app,
-            NSDictionary  options )
+            UIApplication uiApplication,
+            NSDictionary  launchOptions )
         {
             global::Xamarin.Forms.Forms.Init();
 
@@ -33,17 +33,17 @@ namespace aclara_meters.iOS
             var appVersion = NSBundle.MainBundle.InfoDictionary[ "CFBundleShortVersionString" ];
             var appBuild   = NSBundle.MainBundle.InfoDictionary[ "CFBundleVersion" ];
 
-            //IBluetoothLowEnergyAdapter bluetoothLowEnergyAdapter = BluetoothLowEnergyAdapter.ObtainDefaultAdapter();
+          
             IUserDialogs userDialogs = UserDialogs.Instance;
             string appversion = appVersion.Description + " ( " + appBuild.Description + " )";
 
             Data.Set("IsFromScripting", false);
-            //appSave = new FormsApp ( bluetoothLowEnergyAdapter, userDialogs, appversion);
+           
             appSave = new FormsApp(userDialogs, appversion);
 
             base.LoadApplication ( appSave );
 
-            return base.FinishedLaunching ( app, options );
+            return base.FinishedLaunching (uiApplication, launchOptions );
         }
 
         public override bool OpenUrl (
@@ -51,7 +51,7 @@ namespace aclara_meters.iOS
             NSUrl         url,
             NSDictionary  options )
         {
-            appSave.HandleUrl ( ( Uri )url, null );
+            appSave.HandleUrl ( ( Uri )url );
             return true;
         }
     }

@@ -6,10 +6,9 @@ using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using Lexi.Interfaces;
 using System.Threading.Tasks;
-using Library;
 using Library.Exceptions;
 using Xml;
-using Library;
+
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -71,20 +70,18 @@ namespace MTUComm
             String  script_stream,
             int     stream_size )
         {
-            XmlSerializer s = null;
-        
+            XmlSerializer s;
+            Script script = new Script();
+            s = new XmlSerializer(typeof(Script));
             try
-            {
-                // Script file is empty
-                if ( string.IsNullOrEmpty ( script_stream.Trim () ) )
-                    throw new ScriptEmptyException ();
-            
-                Script script = new Script ();
-                s = new XmlSerializer ( typeof ( Script ) );
-    
+            {             
                 // Register unknown elements ( not present in Script class ) as additional parameters
                 s.UnknownElement += this.UnknownElementEvent;
-            
+
+                // Script file is empty
+                if (string.IsNullOrEmpty(script_stream.Trim()))
+                    throw new ScriptEmptyException();
+
                 using ( StringReader reader = new StringReader ( script_stream.Substring ( 0, stream_size ) ) )
                 {
                     script = ( Script )s.Deserialize ( reader );
@@ -124,8 +121,15 @@ namespace MTUComm
             object sender,
             XmlElementEventArgs e )
         {
-            ScriptAction script = ( ScriptAction )e.ObjectBeingDeserialized;
-            script.AddAdditionParameter ( e.Element.Name, e.Element.InnerText );
+            try
+            {
+                ScriptAction script = (ScriptAction)e.ObjectBeingDeserialized;
+                script.AddAdditionParameter(e.Element.Name, e.Element.InnerText);
+            }
+            catch(Exception)
+            {
+                // the tags out of the action are ignored
+            }
         }
 
         /// <summary>
@@ -200,6 +204,25 @@ namespace MTUComm
                                         paramTypeToAdd,
                                         aParam.Value,
                                         aParam.Port ) );
+
+                            // Parameters for ReadMTU or InstallConfirmation, treat like adittional parameters
+                            if (new_action.IsRead || new_action.IsInstallConfirmation )
+                            {
+                                Parameter paramAdd;
+                                string sPort;
+                                string sDisplay, sName;
+                                string[] sWords;
+                                foreach (ActionParameter aParam in list)
+                                {                                   
+                                    sPort    = aParam.Port.ToString();                                   
+                                    sWords   = Regex.Split(paramTypeToAdd.ToString(), @"(?<!^)(?=[A-Z])");
+                                    sDisplay = sPort == "0" ? string.Join(" ", sWords):$"Port {sPort} " + string.Join(" ",sWords);
+                                    sName    = sPort == "0" ? paramTypeToAdd.ToString(): $"Port{sPort}" + paramTypeToAdd.ToString();
+                                    paramAdd = new Parameter( sName, sDisplay, aParam.Value);
+                                    paramAdd.Optional = true;
+                                    new_action.AddAdditionalParameter(paramAdd);
+                                }
+                            }
                         }
                     }
 

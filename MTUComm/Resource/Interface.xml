@@ -99,8 +99,10 @@
 		<Action type="ReadMTU">
 			<Parameter name="Date" display="Date/Time" log="true" source="Action.Date" interface="false"/>
 			<Parameter name="User" display="User" log="true" source="Action.User" interface="false"/>
+			<Parameter name="MtuType" display="Actual MTU Type" log="true" interface="false" conditional="Data.IsFromScripting=true"/>
+            <Parameter name="ActualMtuId" display="Actual MTU Id" source="MemoryMap.MtuSerialNumber" log="true" interface="false" conditional="Data.IsFromScripting=true"/>
 			<Parameter name="MtuStatus" display="MTU Status" log="true" interface="true"/>
-			<Parameter name="MtuSerialNumber" display="MTU Ser No" log="true" interface="true"/>
+            <Parameter name="MtuSerialNumber" display="MTU Ser No" log="true" interface="true"/>
             <Parameter name="PuckSerialNumber" display="Puck Ser No" log="true" interface="false" source="Puck.SerialNumber" />
             <Parameter name="PuckBattery" display="Puck Battery" log="true" interface="false" source="Puck.BatteryLevel" />
 			<Parameter name="Frequency" display="1 Way Tx Freq" log="true" source="MemoryMap.Frequency1Way" interface="true" conditional="Global.ShowFreq=true"/>
@@ -476,7 +478,7 @@
 			<Parameter 	name="ReadResult" 					display="Read Result"  					log="true" 	interface="true" 	source="Data.ProcessResult"/>
 			<Parameter 	name="ReadResultFile" 				display="Read Result File"  			log="true" 	interface="true" 	source="Data.ProcessResultFile"/>
 		</Action>
-		<Action type="RemoteDisconnect">
+		<Action type="ValveOperation">
 			<Parameter 	name="Date" 						display="Date/Time" 					log="true" 	interface="false" 	source="Action.Date"/>
 			<Parameter 	name="User" 						display="User" 							log="true" 	interface="false" 	source="Action.User"/>
 			<Parameter 	name="MtuId" 						display="MTU ID"  						log="true" 	interface="true" 	source="MemoryMap.MtuSerialNumber"

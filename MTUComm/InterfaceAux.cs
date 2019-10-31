@@ -37,7 +37,7 @@ namespace MTUComm
             Mtu mtu )
         {
             Configuration   config        = Singleton.Get.Configuration;
-            InterfaceConfig xmlInterfaces = config.interfaces;
+            InterfaceConfig xmlInterfaces = config.Interfaces;
             Port            port1         = mtu.Ports[ 0 ];
             string family;
 
@@ -69,7 +69,7 @@ namespace MTUComm
                             })
                             .First ( intf => intf.MtuIDs.Count > 0 );
                     }
-                    catch ( Exception e )
+                    catch ( Exception )
                     {
                         throw new InterfaceNotFoundException_Internal ();
                     }

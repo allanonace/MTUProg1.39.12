@@ -91,7 +91,7 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                string[] texts = MTUComm.Action.actionsTexts[ this.actionType ];
+                string[] texts = MTUComm.Action.ActionsTexts[ this.actionType ];
             
                 name_of_window_port1  .Text   = texts[ 0 ] + " - " + LB_PORT1;
                
@@ -266,7 +266,7 @@ namespace aclara_meters.view
             {
                 if (actionType == ActionType.DataRead)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved,  this.actionType), false);
-                else if(actionType == ActionType.RemoteDisconnect)
+                else if(actionType == ActionType.ValveOperation)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved,  this.actionType), false);
                 else
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved,  this.actionType), false);
@@ -287,11 +287,8 @@ namespace aclara_meters.view
             {
                 //REASON
                 if (!isCancellable)
-                {
-                    
+                {                    
                     dialog_open_bg.IsVisible = true;
-                   // Popup_start.IsVisible = true;
-                   // Popup_start.IsEnabled = true;
                 }
                 else DoLogoff();
             });
@@ -341,11 +338,6 @@ namespace aclara_meters.view
 
         #region Menu options
 
-        //private void OnItemSelected(Object sender, SelectedItemChangedEventArgs e )
-        //{
-        //    ((ListView)sender).SelectedItem = null;
-        //}
-
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
         private void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
@@ -380,8 +372,6 @@ namespace aclara_meters.view
                                 //REASON
                                 dialog_open_bg.IsVisible = true;
 
-                               // Popup_start.IsVisible = true;
-                               // Popup_start.IsEnabled = true;
                             }
                             else
                             {
@@ -433,9 +423,6 @@ namespace aclara_meters.view
             {
                 //REASON
                 dialog_open_bg.IsVisible = true;
-
-               // Popup_start.IsVisible = true;
-               // Popup_start.IsEnabled = true;
             }
             else
                 SwitchToControler ( actionTarget );
@@ -449,7 +436,7 @@ namespace aclara_meters.view
             switch ( page )
             {
                 case ActionType.DataRead:
-                case ActionType.RemoteDisconnect:
+                case ActionType.ValveOperation:
                     #region DataRead  
                     await Task.Delay(200).ContinueWith(t =>
 
@@ -628,10 +615,7 @@ namespace aclara_meters.view
             if (!isCancellable)
             {
                 //REASON
-               dialog_open_bg.IsVisible = true;
-
-              //  Popup_start.IsVisible = true;
-              //  Popup_start.IsEnabled = true;
+                dialog_open_bg.IsVisible = true;
                 return;
             }
          
@@ -707,10 +691,7 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
-            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
-            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
-
-            Task.Factory.StartNew(TurnOffMethod);
+            CallLoadViewTurnOff();
         }
 
         private async Task TurnOffMethod ()
@@ -765,7 +746,7 @@ namespace aclara_meters.view
             base.OnAppearing();
 
             background_scan_page.Opacity = 0.5;
-           // background_scan_page.FadeTo(1, 500);
+            background_scan_page.FadeTo(1, 500);
         }
 
  
@@ -803,13 +784,9 @@ namespace aclara_meters.view
                 Navigation.PopToRootAsync(false);
             }
             else
-            {
-             
+            {             
                 //REASON
                 dialog_open_bg.IsVisible = true;
-
-              //  Popup_start.IsVisible = true;
-              //  Popup_start.IsEnabled = true;
             }
         }
 
@@ -823,6 +800,12 @@ namespace aclara_meters.view
         private void DataReadMtu ( object sender, EventArgs e )
         {
             isCancellable = true;
+            string msgError = string.Empty;
+            if (!this.ValidateFields(ref msgError))
+            {
+                DisplayAlert("Error", msgError, "OK");
+                return;
+            }
 
             if (!_userTapped)
             {
@@ -838,6 +821,20 @@ namespace aclara_meters.view
                     Task.Factory.StartNew(DataRead_Action);
                 });
             }
+        }
+
+        private bool ValidateFields(ref string msgError)
+        {
+            // validate fields
+            string FILL_ERROR = "Days of read is incorrectly filled";
+ 
+            if (this.pck_DaysOfRead.SelectedIndex <= -1)
+            {
+                msgError = FILL_ERROR;
+                return false;
+            }
+            return true;
+
         }
 
         private async Task DataRead_Action ()
@@ -896,7 +893,7 @@ namespace aclara_meters.view
             }
 
             Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
-            InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface( mtu, ActionType.ReadMtu );
+            InterfaceParameters[] interfacesParams = Singleton.Get.Configuration.getUserParamsFromInterface( mtu, ActionType.ReadMtu );
             
             Mtu currentMtu = Singleton.Get.Action.CurrentMtu;
 
@@ -1053,7 +1050,7 @@ namespace aclara_meters.view
                     port = "1";
 
                 accName1 = port == "1" ? accName1 : accName2;
-                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0') + "_" + accName1 + sTick + "_Port" + port;
+                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0') + "_" + accName1 + "_" + sTick + "_Port" + port;
 
                 Device.BeginInvokeOnMainThread(async () =>
                 {

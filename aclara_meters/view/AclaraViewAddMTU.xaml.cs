@@ -11,9 +11,7 @@ using Library;
 using Library.Exceptions;
 using MTUComm;
 using MTUComm.actions;
-using Plugin.Media;
 using Plugin.Media.Abstractions;
-using Plugin.Settings;
 using Xamarin.Essentials;
 using Xamarin.Forms;
 using Xml;
@@ -27,38 +25,7 @@ namespace aclara_meters.view
 {
     public partial class AclaraViewAddMTU
     {
-        #region Debug
-
-        //#if ADHOC || RELEASE
-        private const bool DEBUG_AUTO_MODE_ON = false;
-        //#elif DEBUG
-        //private const bool   DEBUG_AUTO_MODE_ON  = true;
-        //#endif
-        private const string DEBUG_ACCOUNTNUMBER = "123456789"; // 9
-        private const string DEBUG_WORKORDER = "12345678901234567890"; // 20
-        private const string DEBUG_OLDMETERNUM = "09876543210987654321"; // 20
-        private const int DEBUG_OLDMETERWORK = 0;
-        private const string DEBUG_OLDMETERREAD = "444444444444"; //"210987654321"; // 12
-        private const int DEBUG_REPLACEREGIS = 0;
-        private const string DEBUG_METERNUM = "12345678901234567890"; // 20
-        private const int DEBUG_VENDOR_INDEX = 0; // GENERIC
-        private const int DEBUG_MODEL_INDEX = 0; // 4D PF2
-        private const int DEBUG_MTRNAME_INDEX = 0; // Pos 4D PF2 CCF
-        private const string DEBUG_INITREADING = "222222222222"; //"123456789012"; // 12
-        private const int DEBUG_ALARM_INDEX = 0; // All
-        private const int DEBUG_DEMAND_INDEX = 0;
-        private const string DEBUG_READSINTERVAL = "1 Hour";
-        private const string DEBUG_SNAPSREADS = "10";
-        private const bool DEBUG_SNAPSREADS_OK = false;
-        private const string DEBUG_GPS_LAT = "43,316";
-        private const string DEBUG_GPS_LON = "-2.981";
-        private const string DEBUG_GPS_ALT = "1";
-        private const int DEBUG_MTULOCATION = 0; // Outside
-        private const int DEBUG_METERLOC = 0; // Outside
-        private const int DEBUG_CONSTRUC = 0; // Vinyl
-
-        #endregion
-
+ 
         #region Mandatory
 
         public const bool MANDATORY_ACCOUNTNUMBER = true;
@@ -161,7 +128,7 @@ namespace aclara_meters.view
         private string selected_MeterType_Model_V;
         private string selected_MeterType_Name;
         private string selected_MeterType_Name_2;
-        private string selected_MeterType_Name_V;
+ 
 
         // Miscelanea
         private List<BorderlessPicker> optionalPickers;
@@ -178,12 +145,10 @@ namespace aclara_meters.view
 
         // Alarms
         private List<Alarm> alarmsList = new List<Alarm>();
-        private List<Alarm> alarms2List = new List<Alarm>();
-
+      
         // Demands
         private List<Demand> demandsList = new List<Demand>();
-        private List<Demand> demands2List = new List<Demand>();
-
+  
         #endregion
 
         #region Attributes
@@ -287,17 +252,16 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                string[] texts = MTUComm.Action.actionsTexts[this.actionType];
+                string[] texts = MTUComm.Action.ActionsTexts[this.actionType];
 
                 name_of_window_port1.Text = texts[0] + " - " + LB_PORT1;
                 name_of_window_port2.Text = texts[1] + " - " + LB_PORT2;
                 name_of_window_misc.Text = texts[2] + " - " + LB_MISC;
                 bottomBar.GetImageElement("bg_action_button_img").Source = texts[3];
-                //bottomBar.GetImageButtonElement("bg_action_button").Source = texts[3];
+               
 
                 bottomBar.GetLabelElement("label_read").Opacity = 1;
-                //backdark_bg.IsVisible = false;
-                //indicator.IsVisible   = false;
+               
                 BarCodeEnabled = global.ShowBarCodeButton;
                 ImagesEnabled = global.ShowCameraButton;
 
@@ -306,10 +270,6 @@ namespace aclara_meters.view
                 else LoadPhoneUI();
 
                 NavigationPage.SetHasNavigationBar(this, false); //Turn off the Navigation bar
-
-                //TopBar.GetImageElement("battery_level").Source = CrossSettings.Current.GetValueOrDefault("battery_icon_topbar", "battery_toolbar_high_white");
-                //TopBar.GetImageElement("rssi_level").Source = CrossSettings.Current.GetValueOrDefault("rssi_icon_topbar", "rssi_toolbar_high_white");
-
 
                 this.cancelReasonOtherInput.Focused += (s, e) =>
                 {
@@ -401,7 +361,9 @@ namespace aclara_meters.view
                   divSub_SnapReads.Opacity = (ok) ? 1 : OPACITY_DISABLE;
                   snapReadsStatus = ok;
 
+#pragma warning disable S2589 // Boolean expressions should not be gratuitous
                   if (MANDATORY_SNAPREADS &&
+#pragma warning restore S2589 // Boolean expressions should not be gratuitous
                        global.IndividualDailyReads &&
                        snapReadsStatus)
                       this.lb_SnapReads.TextColor = COL_MANDATORY;
@@ -410,7 +372,7 @@ namespace aclara_meters.view
             });
         }
 
-        private async void SetPort2Buttons()
+        private async Task SetPort2Buttons()
         {
             // Port2 form starts visible or hidden depends on bit 1 of byte 28
             this.port2IsActivated = await Data.Get.MemoryMap.P2StatusFlag.GetValue();
@@ -467,20 +429,20 @@ namespace aclara_meters.view
                 {
                     bool autoDetect = await this.add_mtu.MTUComm.AutodetectMeterEncoders(currentMtu);
                     if (autoDetect)
-                        this.list_MeterTypesForMtu = this.config.meterTypes.FindByEncoderTypeAndLiveDigits(
+                        this.list_MeterTypesForMtu = this.config.MeterTypes.FindByEncoderTypeAndLiveDigits(
                             currentMtu.Port1.MeterProtocol,
                             currentMtu.Port1.MeterLiveDigits);
 
                     // If auto-detect fails, show all Encoder/Ecoder Meters    
                     if (!autoDetect ||
                          this.list_MeterTypesForMtu.Count <= 0)
-                        this.list_MeterTypesForMtu = this.config.meterTypes.FindAllForEncodersAndEcoders();
+                        this.list_MeterTypesForMtu = this.config.MeterTypes.FindAllForEncodersAndEcoders();
                 }
                 // Pulse
-                else this.list_MeterTypesForMtu = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu);
+                else this.list_MeterTypesForMtu = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu);
             }
             // RDD
-            else this.list_MeterTypesForMtu_V = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu);
+            else this.list_MeterTypesForMtu_V = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu);
 
             if (this.currentMtu.TwoPorts)
             {
@@ -492,40 +454,31 @@ namespace aclara_meters.view
                     {
                         bool autoDetect = await this.add_mtu.MTUComm.AutodetectMeterEncoders(currentMtu, 2);
                         if (autoDetect)
-                            this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByEncoderTypeAndLiveDigits(
+                            this.list_MeterTypesForMtu_2 = this.config.MeterTypes.FindByEncoderTypeAndLiveDigits(
                                 currentMtu.Port2.MeterProtocol,
                                 currentMtu.Port2.MeterLiveDigits);
 
                         // If auto-detect fails, show all Encoder/Ecoder Meters    
                         if (!autoDetect ||
                              this.list_MeterTypesForMtu_2.Count <= 0)
-                            this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindAllForEncodersAndEcoders();
+                            this.list_MeterTypesForMtu_2 = this.config.MeterTypes.FindAllForEncodersAndEcoders();
                     }
                     // Pulse
-                    else this.list_MeterTypesForMtu_2 = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu, 1);
+                    else this.list_MeterTypesForMtu_2 = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu, 1);
                 }
                 // RDD
-                else this.list_MeterTypesForMtu_V = this.config.meterTypes.FindByPortTypeAndFlow(currentMtu, 1);
+                else this.list_MeterTypesForMtu_V = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu, 1);
             }
 
             Device.BeginInvokeOnMainThread(() =>
-          {
-              this.InitializePicker_MeterType();
-              if (hasTwoPorts)
-                  this.InitializePicker_MeterType_2();
-              if (hasValve)
-                  this.InitializePicker_MeterType_V();
-          });
+            {
+                this.InitializePicker_MeterType();
+                if (hasTwoPorts)
+                    this.InitializePicker_MeterType_2();
+                if (hasValve)
+                    this.InitializePicker_MeterType_V();
+            });
 
-            bool ShowMeterVendor = global.ShowMeterVendor;
-            if (ShowMeterVendor)
-            {
-                // TODO: group meters by vendor / model / name
-            }
-            else
-            {
-                // TODO: display meter list directly, by  name
-            }
         }
 
         private async Task InitializeRDDForm()
@@ -541,22 +494,13 @@ namespace aclara_meters.view
             pck_ValvePosition.ItemsSource = list;
 
             dynamic map = Data.Get.MemoryMap;
-            //Mtu mtuv = Singleton.Get.Action.CurrentMtu;
 
-            //int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
-
-            //ulong AccountNum = (mtuv.Port1.IsSetFlow) ? await map.P1MeterId.GetValue() : await map.P2MeterId.GetValue();
-            //int MtuId = await map.MtuSerialNumber.GetValue();
-            //string MtuStatus = await map.MtuStatus.GetValue();
             string rddPosition = await map.RDDValvePosition.GetValue();
             ulong rddSerial = await map.RDDSerialNumber.GetValue();
             string rddBattery = await map.RDDBatteryStatus.GetValue();
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                //this.tbx_MtuId.Text = MtuId.ToString().PadLeft(mtuIdLength, '0');
-                //this.tbx_Mtu_Status.Text = MtuStatus;
-                //this.tbx_AccountNumber.Text = AccountNum.ToString();
                 this.tbx_RDDPosition       .Text = rddPosition;
                 this.tbx_RDDSerialNumber   .Text = rddSerial.ToString();
                 this.tbx_Battery           .Text = rddBattery;
@@ -863,7 +807,8 @@ namespace aclara_meters.view
             this.InitializePicker_ReadInterval(this.mtuBasicInfo, this.currentMtu);
 
             // Use IndividualReadInterval tag to enable o disable read interval picker
-            if (!(this.pck_ReadInterval.IsEnabled = global.IndividualReadInterval))
+            this.pck_ReadInterval.IsEnabled = global.IndividualReadInterval;
+            if ( !this.pck_ReadInterval.IsEnabled )
             {
                 this.div_ReadInterval.BackgroundColor = Color.LightGray;
                 this.pck_ReadInterval.BackgroundColor = Color.LightGray;
@@ -917,7 +862,7 @@ namespace aclara_meters.view
 
             #region Alarms
 
-            alarmsList = config.alarms.FindByMtuType(this.detectedMtuType);
+            alarmsList = config.Alarms.FindByMtuType(this.detectedMtuType);
 
             // Remove "Scripting" option in interactive mode
             alarmsList = alarmsList.FindAll ( alarm => !string.Equals ( alarm.Name.ToLower (), "scripting" ) );
@@ -951,7 +896,7 @@ namespace aclara_meters.view
 
             #region Demands
 
-            demandsList = config.demands.FindByMtuType ( this.detectedMtuType );
+            demandsList = config.Demands.FindByMtuType ( this.detectedMtuType );
 
             // Remove "Scripting" option in interactive mode
             demandsList = demandsList.FindAll ( demand => !string.Equals ( demand.Name.ToLower (), "scripting" ) );
@@ -1267,11 +1212,11 @@ namespace aclara_meters.view
             #region Port 2 Buttons
 
             // Button for enable|disable the second port
-            if (!(this.div_EnablePort2.IsEnabled = global.Port2DisableNo))
+            this.div_EnablePort2.IsEnabled = global.Port2DisableNo;
+            if (!this.div_EnablePort2.IsEnabled)
             {
                 this.block_view_port2.IsVisible = this.port2IsActivated;
-                this.btn_EnablePort2.Text = (this.port2IsActivated) ? SWITCH_P2_OFF : SWITCH_P2_ON;
-                //this.btn_EnablePort2.TextColor  = ( this.port2IsActivated ) ? Color.Gold : Color.White;
+                this.btn_EnablePort2.Text = (this.port2IsActivated) ? SWITCH_P2_OFF : SWITCH_P2_ON;               
             }
             // Auto-enable second port because Port2DisableNo is true
             else
@@ -1534,7 +1479,8 @@ namespace aclara_meters.view
                 Label optionalLabel = new Label()
                 {
                     Text = optionalField.Display,
-                    Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                    FontSize=17,
+                    FontAttributes=FontAttributes.Bold,
                     Margin = new Thickness(0, 4, 0, 0)
                 };
 
@@ -1569,7 +1515,7 @@ namespace aclara_meters.view
                 }
                 else if (optionalField.Format == "date")
                 {
-                    bool required = optionalField.Required;
+                   
                     optionalDate = new BorderlessDatePicker()
                     {
                         HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -1578,11 +1524,6 @@ namespace aclara_meters.view
                     };
                     optionalDate.Name = optionalField.Name.Replace(" ", "_");
                     optionalDate.Display = optionalField.Display;
-
-                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    //behavior.MaxLength = optionalField.Len;
-
-                    //optionalEntry.Behaviors.Add(behavior);
 
                     optionalDates.Add(optionalDate);
 
@@ -1596,7 +1537,7 @@ namespace aclara_meters.view
                 }
                 else if (optionalField.Format == "time")
                 {
-                    bool required = optionalField.Required;
+                    
                     optionalTime = new BorderlessTimePicker()
                     {
                         HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -1605,11 +1546,6 @@ namespace aclara_meters.view
                     };
                     optionalTime.Name = optionalField.Name.Replace(" ", "_");
                     optionalTime.Display = optionalField.Display;
-
-                    //CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    //behavior.MaxLength = optionalField.Len;
-
-                    //optionalEntry.Behaviors.Add(behavior);
 
                     optionalTimes.Add(optionalTime);
 
@@ -1624,13 +1560,8 @@ namespace aclara_meters.view
                 else // Text
                 {
                     string format = optionalField.Format;
-                    int maxLen = optionalField.Len;
-                    int minLen = optionalField.MinLen;
-                    bool required = optionalField.Required;
-
+ 
                     Keyboard keyboard = Keyboard.Default;
-                    //if      ( format.Equals ( "alpha"        ) ) keyboard = Keyboard.Default;
-                    //else if ( format.Equals ( "date"         ) ) keyboard = Keyboard.Default;
                     if (format.Equals("alphanumeric")) keyboard = Keyboard.Numeric;
                     else if (format.Equals("time")) keyboard = Keyboard.Numeric;
 
@@ -1644,8 +1575,10 @@ namespace aclara_meters.view
                     optionalEntry.Name = optionalField.Name.Replace(" ", "_");
                     optionalEntry.Display = optionalField.Display;
 
-                    CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior();
-                    behavior.MaxLength = optionalField.Len;
+                    CommentsLengthValidatorBehavior behavior = new CommentsLengthValidatorBehavior
+                    {
+                        MaxLength = optionalField.Len
+                    };
 
                     optionalEntry.Behaviors.Add(behavior);
 
@@ -1686,9 +1619,7 @@ namespace aclara_meters.view
             bottomBar.GetImageElement("imgTakePicture").IsVisible = global.ShowCameraButton;
             TopBar.GetTGRElement("back_button").Tapped += ReturnToMainView;
             bottomBar.GetTGRElement("bg_action_button").Tapped += AddMtu;
-            //bottomBar.GetImageButtonElement("bg_action_button").Clicked += AddMtu;
-
-
+           
             dialogView.GetTGRElement("turnoffmtu_ok").Tapped += TurnOffMTUOkTapped;
             dialogView.GetTGRElement("turnoffmtu_no").Tapped += TurnOffMTUNoTapped;
             dialogView.GetTGRElement("turnoffmtu_ok_close").Tapped += dialog_cancelTapped;
@@ -1778,7 +1709,7 @@ namespace aclara_meters.view
             {
                 if (actionType == ActionType.DataRead)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewDataRead(dialogsSaved, this.actionType), false);
-                else if (actionType == ActionType.RemoteDisconnect)
+                else if (actionType == ActionType.ValveOperation)
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewRemoteDisconnect(dialogsSaved, this.actionType), false);
                 else
                     Application.Current.MainPage.Navigation.PushAsync(new AclaraViewAddMTU(dialogsSaved, this.actionType), false);
@@ -1795,8 +1726,7 @@ namespace aclara_meters.view
             Popup_start.IsVisible = false;
             Popup_start.IsEnabled = false;
             this.cancelReasonOtherInput.Text = String.Empty;
-            this.cancelReasonPicker.SelectedIndex = 0;
-            //Navigation.PopToRootAsync(false);
+            this.cancelReasonPicker.SelectedIndex = 0;            
         }
 
         private async void Confirm_Yes_LogOut(object sender, EventArgs e)
@@ -1828,8 +1758,7 @@ namespace aclara_meters.view
         {
             dialogView.OpenCloseDialog("dialog_logoff", false);
             dialog_open_bg.IsVisible = false;
-            turnoff_mtu_background.IsVisible = false;
-            //Navigation.PopToRootAsync(false);
+            turnoff_mtu_background.IsVisible = false;           
         }
 
         #endregion
@@ -1841,7 +1770,7 @@ namespace aclara_meters.view
 
         private void InitializePicker_MeterType()
         {
-            list_MeterType_Vendors = this.config.meterTypes.GetVendorsFromMeters(list_MeterTypesForMtu);
+            list_MeterType_Vendors = this.config.MeterTypes.GetVendorsFromMeters(list_MeterTypesForMtu);
 
             Frame meterVendorsContainerB = new Frame()
             {
@@ -1885,7 +1814,8 @@ namespace aclara_meters.view
             Label meterVendorsLabel = new Label()
             {
                 Text = "Vendor",
-                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
@@ -1943,7 +1873,8 @@ namespace aclara_meters.view
             Label meterModelsLabel = new Label()
             {
                 Text = "Model",
-                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
@@ -2001,7 +1932,8 @@ namespace aclara_meters.view
             Label meterNamesLabel = new Label()
             {
                 Text = "Meter Type",
-                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
@@ -2024,7 +1956,7 @@ namespace aclara_meters.view
 
         private void InitializePicker_MeterType_2()
         {
-            list_MeterType_Vendors_2 = this.config.meterTypes.GetVendorsFromMeters(list_MeterTypesForMtu_2);
+            list_MeterType_Vendors_2 = this.config.MeterTypes.GetVendorsFromMeters(list_MeterTypesForMtu_2);
 
             Frame meterVendors2ContainerB = new Frame()
             {
@@ -2068,7 +2000,8 @@ namespace aclara_meters.view
             Label meterVendors2Label = new Label()
             {
                 Text = "Vendor",
-                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
@@ -2134,7 +2067,8 @@ namespace aclara_meters.view
             Label meterModels2Label = new Label()
             {
                 Text = "Model",
-                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
@@ -2201,7 +2135,8 @@ namespace aclara_meters.view
             Label meterNames2Label = new Label()
             {
                 Text = "Meter Type",
-                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
@@ -2229,7 +2164,7 @@ namespace aclara_meters.view
 
         private void InitializePicker_MeterType_V()
         {
-            list_MeterType_Vendors_V = this.config.meterTypes.GetVendorsFromMeters(list_MeterTypesForMtu_V);
+            list_MeterType_Vendors_V = this.config.MeterTypes.GetVendorsFromMeters(list_MeterTypesForMtu_V);
 
             Frame meterVendors2ContainerB = new Frame()
             {
@@ -2273,7 +2208,8 @@ namespace aclara_meters.view
             Label meterVendors2Label = new Label()
             {
                 Text = "Vendor",
-                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
@@ -2339,7 +2275,8 @@ namespace aclara_meters.view
             Label meterModels2Label = new Label()
             {
                 Text = "Model",
-                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
@@ -2396,8 +2333,6 @@ namespace aclara_meters.view
                 StyleId = "pickerNameV"
             };
 
-            //pck_MeterType_Names_V.SelectedIndexChanged += MeterNamesVPicker_SelectedIndexChanged;
-
             divDyna_MeterType_Names_V = new StackLayout()
             {
                 StyleId = "bloque" + 3
@@ -2406,7 +2341,8 @@ namespace aclara_meters.view
             Label meterNames2Label = new Label()
             {
                 Text = "Meter Type",
-                Font = Font.SystemFontOfSize(17).WithAttributes(FontAttributes.Bold),
+                FontSize = 17,
+                FontAttributes = FontAttributes.Bold,
                 Margin = new Thickness(0, 4, 0, 0)
             };
 
@@ -2529,8 +2465,11 @@ namespace aclara_meters.view
 
                 int i = 0;
                 foreach (char c in chars)
+                {
                     if (c.Equals('1'))
-                        list.Add(values[i++]);
+                        list.Add(values[i]);
+                    i++;
+                }
             }
             else list.AddRange(values);
 
@@ -2606,7 +2545,7 @@ namespace aclara_meters.view
             {
                 selected_MeterType_Vendor = list_MeterType_Vendors[selectedIndex];
 
-                list_MeterType_Models = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor);
+                list_MeterType_Models = this.config.MeterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor);
                 selected_MeterType_Name = "";
 
                 pck_MeterType_Models.ItemsSource = list_MeterType_Models;
@@ -2628,7 +2567,7 @@ namespace aclara_meters.view
             {
                 selected_MeterType_Vendor_2 = list_MeterType_Vendors_2[selectedIndex];
 
-                list_MeterType_Models_2 = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2);
+                list_MeterType_Models_2 = this.config.MeterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2);
                 selected_MeterType_Name_2 = "";
 
                 pck_MeterType_Models_2.ItemsSource = list_MeterType_Models_2;
@@ -2645,9 +2584,8 @@ namespace aclara_meters.view
             {
                 selected_MeterType_Vendor_V = list_MeterType_Vendors_V[selectedIndex];
 
-                list_MeterType_Models_V = this.config.meterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_V, selected_MeterType_Vendor_V);
-                selected_MeterType_Name_V = "";
-
+                list_MeterType_Models_V = this.config.MeterTypes.GetModelsByVendorFromMeters(list_MeterTypesForMtu_V, selected_MeterType_Vendor_V);
+              
                 pck_MeterType_Models_V.ItemsSource = list_MeterType_Models_V;
                 divDyna_MeterType_Models_V.IsVisible = true;
                 divDyna_MeterType_Names_V.IsVisible = false;
@@ -2662,7 +2600,7 @@ namespace aclara_meters.view
 
                 selected_MeterType_Model = list_MeterType_Models[selectedIndex];
 
-                List<Meter> meterlist = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor, selected_MeterType_Model);
+                List<Meter> meterlist = this.config.MeterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu, selected_MeterType_Vendor, selected_MeterType_Model);
 
                 pck_MeterType_Names.ItemsSource = meterlist;
                 divDyna_MeterType_Models.IsVisible = true;
@@ -2685,7 +2623,7 @@ namespace aclara_meters.view
 
                 selected_MeterType_Model_2 = list_MeterType_Models_2[selectedIndex];
 
-                List<Meter> meterlist2 = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2, selected_MeterType_Model_2);
+                List<Meter> meterlist2 = this.config.MeterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_2, selected_MeterType_Vendor_2, selected_MeterType_Model_2);
 
                 pck_MeterType_Names_2.ItemsSource = meterlist2;
                 divDyna_MeterType_Models_2.IsVisible = true;
@@ -2703,7 +2641,7 @@ namespace aclara_meters.view
 
                 selected_MeterType_Model_V = list_MeterType_Models_V[selectedIndex];
 
-                List<Meter> meterlist2 = this.config.meterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_V, selected_MeterType_Vendor_V, selected_MeterType_Model_V);
+                List<Meter> meterlist2 = this.config.MeterTypes.GetMetersByModelAndVendorFromMeters(list_MeterTypesForMtu_V, selected_MeterType_Vendor_V, selected_MeterType_Model_V);
 
                 pck_MeterType_Names_V.ItemsSource = meterlist2;
                 divDyna_MeterType_Models_V.IsVisible = true;
@@ -2726,25 +2664,17 @@ namespace aclara_meters.view
                     // Update MeterReading field length to use and validate
                     this.tbx_MeterReading.MaxLength = selectedMeter.LiveDigits;
                     this.tbx_MeterReading_Dual.MaxLength = selectedMeter.LiveDigits;
-                    //this.tbx_OldMeterReading     .MaxLength = selectedMeter.LiveDigits;
-                    //this.tbx_OldMeterReading_Dual.MaxLength = selectedMeter.LiveDigits;
-
+                 
                     this.div_MeterReading.Opacity = OPACITY_ENABLE;
                     this.divSub_MeterReading_Dual.Opacity = OPACITY_ENABLE;
-                    //this.divSub_OldMeterReading     .Opacity = OPACITY_ENABLE;
-                    //this.divSub_OldMeterReading_Dual.Opacity = OPACITY_ENABLE;
-
+                   
                     this.tbx_MeterReading.IsEnabled = true;
                     this.tbx_MeterReading_Dual.IsEnabled = true;
                     this.btnScanMeterReading.IsEnabled = true;
                     this.btnScanMeterReadingDual.IsEnabled = true;
-                    //this.tbx_OldMeterReading     .IsEnabled = true;
-                    //this.tbx_OldMeterReading_Dual.IsEnabled = true;
-
+                  
                     this.lb_MeterReading_MeterType.IsVisible = false;
                     this.lb_MeterReading_DualMeterType.IsVisible = false;
-                    //this.lb_OldMeterReading_MeterType    .IsVisible = false;
-                    //this.lb_OldMeterReading_DualMeterType.IsVisible = false;
                 });
             }
         }
@@ -2764,66 +2694,23 @@ namespace aclara_meters.view
                     // Update MeterReading field length to use and validate
                     this.tbx_MeterReading_2.MaxLength = selectedMeter.LiveDigits;
                     this.tbx_MeterReading_Dual_2.MaxLength = selectedMeter.LiveDigits;
-                    //this.tbx_OldMeterReading_2     .MaxLength = selectedMeter.LiveDigits;
-                    //this.tbx_OldMeterReading_Dual_2.MaxLength = selectedMeter.LiveDigits;
-
+                   
                     this.divSub_MeterReading_2.Opacity = OPACITY_ENABLE;
                     this.divSub_MeterReading_Dual_2.Opacity = OPACITY_ENABLE;
-                    //this.divSub_OldMeterReading_2     .Opacity = OPACITY_ENABLE;
-                    //this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_ENABLE;
-
+                  
                     this.tbx_MeterReading_2.IsEnabled = true;
                     this.tbx_MeterReading_Dual_2.IsEnabled = true;
                     this.btnScannerMeterReading_2.IsEnabled = true;
                     this.btnScannerMeterReadingDual_2.IsEnabled = true;
-                    //this.tbx_OldMeterReading_2     .IsEnabled = true;
-                    //this.tbx_OldMeterReading_Dual_2.IsEnabled = true;
-
+                   
                     this.lb_MeterReading_MeterType_2.IsVisible = false;
                     this.lb_MeterReading_DualMeterType_2.IsVisible = false;
-                    //this.lb_OldMeterReading_MeterType_2    .IsVisible = false;
-                    //this.lb_OldMeterReading_DualMeterType_2.IsVisible = false;
+                
                 });
             }
         }
 
-        /*     private void MeterNamesVPicker_SelectedIndexChanged(object sender, EventArgs e)
-             {
-                 if (((BorderlessPicker)sender).SelectedIndex > -1)
-                 {
-                     Meter selectedMeter = (Meter)((BorderlessPicker)sender).SelectedItem;
-
-                     selected_MeterType_Name_V = selectedMeter.Display;
-
-                     Utils.Print(selected_MeterType_Name_V + " Selected");
-
-                     Device.BeginInvokeOnMainThread(() =>
-                     {
-                         // Update MeterReading field length to use and validate
-                         this.tbx_MeterReading_V.MaxLength = selectedMeter.LiveDigits;
-                         this.tbx_MeterReading_Dual_V.MaxLength = selectedMeter.LiveDigits;
-                         //this.tbx_OldMeterReading_2     .MaxLength = selectedMeter.LiveDigits;
-                         //this.tbx_OldMeterReading_Dual_2.MaxLength = selectedMeter.LiveDigits;
-
-                         this.divSub_MeterReading_2.Opacity = OPACITY_ENABLE;
-                         this.divSub_MeterReading_Dual_2.Opacity = OPACITY_ENABLE;
-                         //this.divSub_OldMeterReading_2     .Opacity = OPACITY_ENABLE;
-                         //this.divSub_OldMeterReading_Dual_2.Opacity = OPACITY_ENABLE;
-
-                         this.tbx_MeterReading_2.IsEnabled = true;
-                         this.tbx_MeterReading_Dual_2.IsEnabled = true;
-                         this.btnScannerMeterReading_2.IsEnabled = true;
-                         this.btnScannerMeterReadingDual_2.IsEnabled = true;
-                         //this.tbx_OldMeterReading_2     .IsEnabled = true;
-                         //this.tbx_OldMeterReading_Dual_2.IsEnabled = true;
-
-                         this.lb_MeterReading_MeterType_2.IsVisible = false;
-                         this.lb_MeterReading_DualMeterType_2.IsVisible = false;
-                         //this.lb_OldMeterReading_MeterType_2    .IsVisible = false;
-                         //this.lb_OldMeterReading_DualMeterType_2.IsVisible = false;
-                     });
-                 }
-             }*/
+ 
         #endregion
 
         #region Sliders
@@ -2850,7 +2737,7 @@ namespace aclara_meters.view
 
         // Event for Menu Item selection, here we are going to handle navigation based
         // on user selection in menu ListView
-        private void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
+        private async void OnMenuItemSelected(object sender, ItemTappedEventArgs e)
         {
             if (Device.Idiom == TargetIdiom.Tablet)
             {
@@ -2892,8 +2779,8 @@ namespace aclara_meters.view
                             }
                             else
                             {
-                                //this.actionType = page;
-                                NavigationController(page);
+                                
+                                await NavigationController(page);
                             }
                         }
                     }
@@ -2928,15 +2815,14 @@ namespace aclara_meters.view
         {
             backdark_bg.IsVisible = true;
             indicator.IsVisible = true;
-            //background_scan_page.IsEnabled = false;
             background_scan_page.Opacity = 1;
 
             background_scan_page.IsEnabled = true;
 
             if (Device.Idiom == TargetIdiom.Phone)
             {
-                ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
-                shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
+                await ContentNav.TranslateTo(-310, 0, 175, Easing.SinOut);
+                await shadoweffect.TranslateTo(-310, 0, 175, Easing.SinOut);
             }
 
             switch (await base.ValidateNavigation(page))
@@ -2959,7 +2845,7 @@ namespace aclara_meters.view
             switch (page)
             {
                 case ActionType.DataRead:
-                case ActionType.RemoteDisconnect:
+                case ActionType.ValveOperation:
                     #region DataRead  
                     await Task.Delay(200).ContinueWith(t =>
 
@@ -3155,7 +3041,7 @@ namespace aclara_meters.view
                 Popup_start.IsEnabled = true;
                 return;
             }
-            //printer.Suspend();
+  
             background_scan_page.Opacity = 1;
             background_scan_page.IsEnabled = true;
 
@@ -3231,11 +3117,7 @@ namespace aclara_meters.view
 
         private void TurnOffMTUOkTapped(object sender, EventArgs e)
         {
-            dialogView.OpenCloseDialog("dialog_turnoff_one", false);
-            dialogView.OpenCloseDialog("dialog_turnoff_two", true);
-
-
-            Task.Factory.StartNew(TurnOffMethod);
+            CallLoadViewTurnOff();
         }
 
         private async Task TurnOffMethod ()
@@ -3293,7 +3175,7 @@ namespace aclara_meters.view
             background_scan_page.FadeTo(1, 500);
         }
 
-        private void submit_send(object sender, EventArgs e3)
+        private async void submit_send(object sender, EventArgs e3)
         {
             int selectedCancelReasonIndex = cancelReasonPicker.SelectedIndex;
             string selectedCancelReason = String.Empty;
@@ -3320,13 +3202,13 @@ namespace aclara_meters.view
             {
                 this.actionType = this.actionTypeNew;
 
-                SwitchToControler ( this.actionType );
+                await SwitchToControler ( this.actionType );
             }
             else
             {
                 #region I guess it's logout time ...
 
-                Task.Run(async () =>
+                await Task.Run(async () =>
                 {
                     await Task.Delay(500); Device.BeginInvokeOnMainThread(() =>
                     {
@@ -3350,8 +3232,6 @@ namespace aclara_meters.view
                                 Navigation.PopToRootAsync(false);
                                 isReturn = false;
                                 isSettings = false;
-
-                                //Navigation.PopAsync();
                             }
 
                         }
@@ -3369,9 +3249,6 @@ namespace aclara_meters.view
             try
             {
                 FormsApp.DoLogOff();
-                //FormsApp.credentialsService.DeleteCredentials();
-                //FormsApp.ble_interface.Close();
-                //Singleton.Remove<Puck>();
             }
             catch (Exception e25)
             {
@@ -3380,7 +3257,6 @@ namespace aclara_meters.view
 
             background_scan_page.IsEnabled = true;
             Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogsSaved));
-            //Navigation.PopToRootAsync(false);
         }
 
         private void misc_command()
@@ -3506,15 +3382,14 @@ namespace aclara_meters.view
             lb.IsVisible = ! tbx1.Text.Equals ( tbx2.Text );
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Major Code Smell", "S1121:Assignments should not be made from within sub-expressions", Justification = "<pendiente>")]
         private bool ValidateFields ( ref string msgError )
         {
-            if ( DEBUG_AUTO_MODE_ON )
-                return true;
 
             Mtu mtu = this.add_mtu.CurrentMtu;
 
             string FILL_ERROR = string.Empty;
-            string DUAL_ERROR = string.Empty;
+            string DUAL_ERROR_V = string.Empty;
 
             #region Methods
 
@@ -3602,24 +3477,24 @@ namespace aclara_meters.view
                 bool badDMr = global.ReadingDualEntry      && this.div_MeterReading_Dual        .IsVisible && NoEqNum ( this.tbx_MeterReading_Dual        .Text, this.tbx_MeterReading_Dual   .MaxLength );
                 
                 FILL_ERROR = "Field '_' is incorrectly filled";
-                DUAL_ERROR = " ( Second entry )";
+                DUAL_ERROR_V = " ( Second entry )";
                 
                 if      ( ( badAcn &= ! noAcn ) ) msgError = this.lb_AccountNumber.Text;
-                else if ( ( badDAc &= ! noDAc ) ) msgError = this.lb_AccountNumber.Text + DUAL_ERROR;
+                else if ( ( badDAc &= ! noDAc ) ) msgError = this.lb_AccountNumber.Text + DUAL_ERROR_V;
                 else if ( ( badWor &= ! noWor ) ) msgError = this.lb_WorkOrder.Text;
-                else if ( ( badDWr &= ! noDWr ) ) msgError = this.lb_WorkOrder.Text + DUAL_ERROR;
+                else if ( ( badDWr &= ! noDWr ) ) msgError = this.lb_WorkOrder.Text + DUAL_ERROR_V;
                 else if ( ( badOMt &= ! noOMt ) ) msgError = this.lb_OldMtuId.Text;
                 else if ( ( badOMs &= ! noOMs ) ) msgError = this.lb_OldMeterSerialNumber.Text;
-                else if ( ( badDOs &= ! noDOs ) ) msgError = this.lb_OldMeterSerialNumber.Text + DUAL_ERROR;
+                else if ( ( badDOs &= ! noDOs ) ) msgError = this.lb_OldMeterSerialNumber.Text + DUAL_ERROR_V;
                 else if ( ( badOMw &= ! noOMw ) ) msgError = this.lb_OldMeterWorking.Text;
                 else if ( ( badOMr &= ! noOMr ) ) msgError = this.lb_OldMeterReading.Text;
-                else if ( ( badDOr &= ! noDOr ) ) msgError = this.lb_OldMeterReading.Text + DUAL_ERROR;
+                else if ( ( badDOr &= ! noDOr ) ) msgError = this.lb_OldMeterReading.Text + DUAL_ERROR_V;
                 else if ( ( badRpc &= ! noRpc ) ) msgError = this.lb_ReplaceMeterRegister.Text;
                 else if ( ( badMsn &= ! noMsn ) ) msgError = this.lb_MeterSerialNumber.Text;
-                else if ( ( badDMs &= ! noDMs ) ) msgError = this.lb_MeterSerialNumber.Text + DUAL_ERROR;
+                else if ( ( badDMs &= ! noDMs ) ) msgError = this.lb_MeterSerialNumber.Text + DUAL_ERROR_V;
                 else if ( ( badMty &= ! noMty ) ) msgError = "Meter Type";
                 else if ( ( badMre &= ! noMre ) ) msgError = this.lb_MeterReading.Text;
-                else if ( ( badDMr &= ! noDMr ) ) msgError = this.lb_MeterReading.Text + DUAL_ERROR;
+                else if ( ( badDMr &= ! noDMr ) ) msgError = this.lb_MeterReading.Text + DUAL_ERROR_V;
                 else if ( ( badRin &= ! noRin ) ) msgError = this.lb_ReadInterval.Text;
                 else if ( ( badSnr &= ! noSnr ) ) msgError = this.lb_SnapReads.Text;
                 else if ( ( badTwo &= ! noTwo ) ) msgError = this.lb_TwoWay.Text;
@@ -3636,47 +3511,47 @@ namespace aclara_meters.view
                 }
 
                 // Dual entries
-                DUAL_ERROR = "Field '_' dual entries are not the same";
+                DUAL_ERROR_V = "Field '_' dual entries are not the same";
 
                 if ( global.AccountDualEntry &&
                     ! string.Equals ( tbx_AccountNumber.Text, tbx_AccountNumber_Dual.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_AccountNumber.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_AccountNumber.Text );
                     return false;
                 }
                 
                 if ( global.WorkOrderDualEntry &&
                     ! string.Equals ( tbx_WorkOrder.Text, tbx_WorkOrder_Dual.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_WorkOrder.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_WorkOrder.Text );
                     return false;
                 }
                 
                 if ( global.OldSerialNumDualEntry &&
                     ! string.Equals ( tbx_OldMeterSerialNumber.Text, tbx_OldMeterSerialNumber_Dual.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterSerialNumber.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_OldMeterSerialNumber.Text );
                     return false;
                 }
                 
                 if ( global.OldReadingDualEntry &&
                     ! string.Equals ( tbx_OldMeterReading.Text, tbx_OldMeterReading_Dual.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterReading.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_OldMeterReading.Text );
                     return false;
                 }
                 
                 if ( global.NewSerialNumDualEntry &&
                     ! string.Equals ( tbx_MeterSerialNumber.Text, tbx_MeterSerialNumber_Dual.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterSerialNumber.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_MeterSerialNumber.Text );
                     return false;
                 }
 
                 if ( global.ReadingDualEntry &&
                     ! string.Equals ( tbx_MeterReading.Text, tbx_MeterReading_Dual.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterReading.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_MeterReading.Text );
                     return false;
                 }
             }
@@ -3731,23 +3606,23 @@ namespace aclara_meters.view
                 bool badDMr = global.ReadingDualEntry      && this.div_MeterReading_Dual_2        .IsVisible && NoEqNum ( this.tbx_MeterReading_Dual_2        .Text, this.tbx_MeterReading_Dual_2   .MaxLength );
                 
                 FILL_ERROR = "Field 'Port2 _' is incorrectly filled";
-                DUAL_ERROR = " ( Second entry )";
+                DUAL_ERROR_V = " ( Second entry )";
                 
                 if      ( ( badAcn &= ! noAcn ) ) msgError = this.lb_AccountNumber_2.Text;
-                else if ( ( badDAc &= ! noDAc ) ) msgError = this.lb_AccountNumber_2.Text + DUAL_ERROR;
+                else if ( ( badDAc &= ! noDAc ) ) msgError = this.lb_AccountNumber_2.Text + DUAL_ERROR_V;
                 else if ( ( badWor &= ! noWor ) ) msgError = this.lb_WorkOrder_2.Text;
-                else if ( ( badDWr &= ! noDWr ) ) msgError = this.lb_WorkOrder_2.Text + DUAL_ERROR;
+                else if ( ( badDWr &= ! noDWr ) ) msgError = this.lb_WorkOrder_2.Text + DUAL_ERROR_V;
                 else if ( ( badOMs &= ! noOMs ) ) msgError = this.lb_OldMeterSerialNumber_2.Text;
-                else if ( ( badDOs &= ! noDOs ) ) msgError = this.lb_OldMeterSerialNumber_2.Text + DUAL_ERROR;
+                else if ( ( badDOs &= ! noDOs ) ) msgError = this.lb_OldMeterSerialNumber_2.Text + DUAL_ERROR_V;
                 else if ( ( badOMw &= ! noOMw ) ) msgError = this.lb_OldMeterWorking_2.Text;
                 else if ( ( badOMr &= ! noOMr ) ) msgError = this.lb_OldMeterReading_2.Text;
-                else if ( ( badDOr &= ! noDOr ) ) msgError = this.lb_OldMeterReading_2.Text + DUAL_ERROR;
+                else if ( ( badDOr &= ! noDOr ) ) msgError = this.lb_OldMeterReading_2.Text + DUAL_ERROR_V;
                 else if ( ( badRpc &= ! noRpc ) ) msgError = this.lb_ReplaceMeterRegister_2.Text;
                 else if ( ( badMsn &= ! noMsn ) ) msgError = this.lb_MeterSerialNumber_2.Text;
-                else if ( ( badDMs &= ! noDMs ) ) msgError = this.lb_MeterSerialNumber_2.Text + DUAL_ERROR;
+                else if ( ( badDMs &= ! noDMs ) ) msgError = this.lb_MeterSerialNumber_2.Text + DUAL_ERROR_V;
                 else if ( ( badMty &= ! noMty ) ) msgError = "Meter Type";
                 else if ( ( badMre &= ! noMre ) ) msgError = this.lb_MeterReading_2.Text;
-                else if ( ( badDMr &= ! noDMr ) ) msgError = this.lb_MeterReading_2.Text + DUAL_ERROR;
+                else if ( ( badDMr &= ! noDMr ) ) msgError = this.lb_MeterReading_2.Text + DUAL_ERROR_V;
                 
                 if ( badAcn || badWor || badOMs || badOMw || badOMr ||
                         badRpc || badMsn || badMre || badMty || badDAc ||
@@ -3758,47 +3633,47 @@ namespace aclara_meters.view
                 }
                 
                 // Dual entries
-                DUAL_ERROR = "Field 'Port2 _' dual entries are not the same";
+                DUAL_ERROR_V = "Field 'Port2 _' dual entries are not the same";
 
                 if (global.AccountDualEntry &&
                     ! string.Equals ( tbx_AccountNumber_2.Text, tbx_AccountNumber_Dual_2.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_AccountNumber_2.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_AccountNumber_2.Text );
                     return false;
                 }
                 
                 if (global.WorkOrderDualEntry &&
                     ! string.Equals ( tbx_WorkOrder_2.Text, tbx_WorkOrder_Dual_2.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_WorkOrder_2.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_WorkOrder_2.Text );
                     return false;
                 }
                 
                 if (global.OldSerialNumDualEntry &&
                     ! string.Equals ( tbx_OldMeterSerialNumber_2.Text, tbx_OldMeterSerialNumber_Dual_2.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterSerialNumber_2.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_OldMeterSerialNumber_2.Text );
                     return false;
                 }
                 
                 if (global.OldReadingDualEntry &&
                     ! string.Equals ( tbx_OldMeterReading_2.Text, tbx_OldMeterReading_Dual_2.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_OldMeterReading_2.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_OldMeterReading_2.Text );
                     return false;
                 }
                 
                 if (global.NewSerialNumDualEntry &&
                     ! string.Equals ( tbx_MeterSerialNumber_2.Text, tbx_MeterSerialNumber_Dual_2.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterSerialNumber_2.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_MeterSerialNumber_2.Text );
                     return false;
                 }
     
                 if (global.ReadingDualEntry &&
                     ! string.Equals ( tbx_MeterReading_2.Text, tbx_MeterReading_Dual_2.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_MeterReading_2.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_MeterReading_2.Text );
                     return false;
                 }
             }
@@ -3855,12 +3730,12 @@ namespace aclara_meters.view
                 }
 
                 FILL_ERROR = "Field 'RDD _' is incorrectly filled";
-                DUAL_ERROR = " ( Second entry )";
+                DUAL_ERROR_V = " ( Second entry )";
                 
                 if      ( ( badAcn &= ! noAcn ) ) msgError = this.lb_AccountNumber_V.Text;
-                else if ( ( badDAc &= ! noDAc ) ) msgError = this.lb_AccountNumber_V.Text + DUAL_ERROR;
+                else if ( ( badDAc &= ! noDAc ) ) msgError = this.lb_AccountNumber_V.Text + DUAL_ERROR_V;
                 else if ( ( badWor &= ! noWor ) ) msgError = this.lb_WorkOrder_V.Text;
-                else if ( ( badDWr &= ! noDWr ) ) msgError = this.lb_WorkOrder_V.Text + DUAL_ERROR;
+                else if ( ( badDWr &= ! noDWr ) ) msgError = this.lb_WorkOrder_V.Text + DUAL_ERROR_V;
                 else if ( ( badRDD &= ! noRDD ) ) msgError = "RDD Type";
                 else if ( ( badPos &= ! noPos ) ) msgError = this.lb_ValvePosition.Text;
                 else if ( ( badFir &= ! noFir ) ) msgError = this.lb_RDDFirmwareVersion.Text;
@@ -3877,19 +3752,19 @@ namespace aclara_meters.view
                 }
 
                 // Dual entries
-                DUAL_ERROR = "Field '_' dual entries are not the same";
+                DUAL_ERROR_V = "Field '_' dual entries are not the same";
 
                 if ( global.AccountDualEntry &&
                     ! string.Equals ( tbx_AccountNumber_V.Text, tbx_AccountNumber_Dual_V.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_AccountNumber_V.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_AccountNumber_V.Text );
                     return false;
                 }
                 
                 if ( global.WorkOrderDualEntry &&
                     ! string.Equals ( tbx_WorkOrder_V.Text, tbx_WorkOrder_Dual_V.Text ) )
                 {
-                    msgError = DUAL_ERROR.Replace ( "_", this.lb_WorkOrder_V.Text );
+                    msgError = DUAL_ERROR_V.Replace ( "_", this.lb_WorkOrder_V.Text );
                     return false;
                 }
             }
@@ -3973,8 +3848,7 @@ namespace aclara_meters.view
                     Device.BeginInvokeOnMainThread(() =>
                     {
                         block_view_port2.IsVisible = this.port2IsActivated;
-                        btn_EnablePort2.Text = (this.port2IsActivated) ? "Disable Port 2" : "Enable Port 2";
-                        //btn_EnablePort2.TextColor = (this.port2IsActivated) ? Color.Gold : Color.White;
+                        btn_EnablePort2.Text = (this.port2IsActivated) ? "Disable Port 2" : "Enable Port 2";                       
                     });
                 }
             
@@ -3994,14 +3868,13 @@ namespace aclara_meters.view
         private void AddMtu ( object sender, EventArgs e )
         {
             string msgError = string.Empty;
-            if ( ! DEBUG_AUTO_MODE_ON &&
-                 ! this.ValidateFields ( ref msgError ) )
+            if ( !this.ValidateFields ( ref msgError ) )
             {
                 DisplayAlert ( "Error", msgError, "OK" );
                 return;
             }
 
-            isCancellable = true;
+           
 
             if (!_userTapped)
             {
@@ -4032,8 +3905,8 @@ namespace aclara_meters.view
                                     this.actionType == ActionType.ReplaceMtuReplaceMeter ||
                                     this.actionType == ActionType.AddMtuReplaceMeter );
 
-            bool rddIn1;
-            bool hasRDD = ( ( rddIn1 = mtu.Port1.IsSetFlow ) || mtu.TwoPorts && mtu.Port2.IsSetFlow );
+            bool rddIn1 = mtu.Port1.IsSetFlow;
+            bool hasRDD = (  rddIn1  || mtu.TwoPorts && mtu.Port2.IsSetFlow );
 
             // For port 1 and 2
             string value_acn   = string.Empty; // Account Number / Service Port ID
@@ -4073,172 +3946,124 @@ namespace aclara_meters.view
             string value_lon;              // Longitude
             string value_alt;              // Altitude
 
-            // Debug values
-            if ( DEBUG_AUTO_MODE_ON )
+
+            // Real values
+
+            // Port 1
+            if ( ! mtu.Port1.IsSetFlow )
             {
-                // Port 1
-                value_acn = DEBUG_ACCOUNTNUMBER;
-                value_wor = DEBUG_WORKORDER;
-                value_oms = DEBUG_OLDMETERNUM;
-                value_omr = DEBUG_OLDMETERREAD;
-                value_msn = DEBUG_METERNUM;
-                value_mre = DEBUG_INITREADING;
-                value_mty = (Meter)this.pck_MeterType_Names.ItemsSource[ DEBUG_MTRNAME_INDEX ];
-                
+                value_acn = this.tbx_AccountNumber           .Text;
+                value_wor = this.tbx_WorkOrder               .Text;
+                value_oms = this.tbx_OldMeterSerialNumber    .Text;
+                value_omr = this.tbx_OldMeterReading         .Text;
+                value_msn = this.tbx_MeterSerialNumber       .Text;
+                value_mre = this.tbx_MeterReading            .Text;
+                value_mty = ( Meter )this.pck_MeterType_Names.SelectedItem;
+
                 if ( isReplaceMeter )
                 {
                     if ( global.MeterWorkRecording )
-                        value_rpl = this.pck_ReplaceMeterRegister.ItemsSource[ DEBUG_REPLACEREGIS ].ToString ();
-                    
+                        value_omw = this.pck_OldMeterWorking.SelectedItem.ToString ();
+                            
                     if ( global.RegisterRecording )
-                        value_omw = this.pck_OldMeterWorking.ItemsSource[ DEBUG_OLDMETERWORK ].ToString ();
+                        value_rpl = this.pck_ReplaceMeterRegister.SelectedItem.ToString ();
                 }
-                
-                if ( mtu.TwoPorts )
-                {
-                    // Port 2
-                    value_acn_2 = value_acn;
-                    value_wor_2 = value_wor;
-                    value_oms_2 = value_oms;
-                    value_omw_2 = value_omw;
-                    value_omr_2 = value_omr;
-                    value_rpl_2 = value_rpl;
-                    value_msn_2 = value_msn;
-                    value_mre_2 = value_mre;
-                    value_mty_2 = value_mty;
-                }
-                
-                // Only for port 1 ( for MTU itself )
-                value_omt = "";
-                value_rin = DEBUG_READSINTERVAL;
-                value_sre = DEBUG_SNAPSREADS;
-                value_two = (string)pck_TwoWay.ItemsSource[ 0 ];
-                value_alr = (Alarm)this.pck_Alarms.ItemsSource[ DEBUG_ALARM_INDEX   ];
-                value_dmd = (Demand)this.pck_Demands.ItemsSource[ DEBUG_DEMAND_INDEX  ];
-                
-                // GPS
-                value_lat = DEBUG_GPS_LAT;
-                value_lon = DEBUG_GPS_LON;
-                value_alt = DEBUG_GPS_ALT;
             }
-            // Real values
+                
+            // Port 2
+            if ( ( addMtuForm.usePort2 = mtu.TwoPorts && this.port2IsActivated ) &&
+                    ! mtu.Port2.IsSetFlow )
+            {
+                value_acn_2 = this.tbx_AccountNumber_2           .Text;
+                value_wor_2 = this.tbx_WorkOrder_2               .Text;
+                value_oms_2 = this.tbx_OldMeterSerialNumber_2    .Text;
+                value_omr_2 = this.tbx_OldMeterReading_2         .Text;
+                value_msn_2 = this.tbx_MeterSerialNumber_2       .Text;
+                value_mre_2 = this.tbx_MeterReading_2            .Text;
+                value_mty_2 = ( Meter )this.pck_MeterType_Names_2.SelectedItem;
+                    
+                if ( isReplaceMeter )
+                {
+                    if ( global.MeterWorkRecording )
+                        value_omw = this.pck_OldMeterWorking_2.SelectedItem.ToString ();
+                        
+                    if ( global.RegisterRecording )
+                        value_rpl = this.pck_ReplaceMeterRegister_2.SelectedItem.ToString ();
+                }
+            }
+                
+            // General fields, for the MTU itself
+            // No RDD or RDD in port two
+            if ( ! hasRDD ||
+                    ! rddIn1 )
+            {
+                value_omt = this.tbx_OldMtuId.Text;
+                value_rin = this.pck_ReadInterval.SelectedItem.ToString ();
+                value_sre = this.sld_SnapReads   .Value.ToString ();
+
+                // Is a two-way MTU
+                if ( global.TimeToSync &&
+                        mtu.TimeToSync    &&
+                        mtu.FastMessageConfig )
+                    value_two = this.pck_TwoWay.SelectedItem.ToString ();
+                    
+                // Alarms dropdownlist is hidden when only has one option
+                if ( this.pck_Alarms.ItemsSource.Count == 1 )
+                    value_alr = ( Alarm )this.pck_Alarms.ItemsSource[ 0 ];
+                else if ( this.pck_Alarms.ItemsSource.Count > 1 )
+                    value_alr = ( Alarm )this.pck_Alarms.SelectedItem;
+                    
+                // Demands dropdownlist is hidden when only has one option
+                if ( this.pck_Demands.ItemsSource.Count == 1 )
+                    value_dmd = ( Demand )this.pck_Demands.ItemsSource[ 0 ];
+                else if ( this.pck_Demands.ItemsSource.Count > 1 )
+                    value_dmd = ( Demand )this.pck_Demands.SelectedItem;
+            }
+            // RDD in port 1
             else
             {
-                // Port 1
-                if ( ! mtu.Port1.IsSetFlow )
-                {
-                    value_acn = this.tbx_AccountNumber           .Text;
-                    value_wor = this.tbx_WorkOrder               .Text;
-                    value_oms = this.tbx_OldMeterSerialNumber    .Text;
-                    value_omr = this.tbx_OldMeterReading         .Text;
-                    value_msn = this.tbx_MeterSerialNumber       .Text;
-                    value_mre = this.tbx_MeterReading            .Text;
-                    value_mty = ( Meter )this.pck_MeterType_Names.SelectedItem;
+                // Is a two-way MTU
+                if ( global.TimeToSync &&
+                        mtu.TimeToSync &&
+                        mtu.FastMessageConfig )
+                    value_two = this.pck_TwoWay_V.SelectedItem.ToString ();
+                    
+                // Alarms dropdownlist is hidden when only has one option
+                if ( this.pck_Alarms_V.ItemsSource.Count == 1 )
+                    value_alr = ( Alarm )this.pck_Alarms_V.ItemsSource[ 0 ];
+                else if ( this.pck_Alarms_V.ItemsSource.Count > 1 )
+                    value_alr = ( Alarm )this.pck_Alarms_V.SelectedItem;
+                    
+                // Demands dropdownlist is hidden when only has one option
+                if ( this.pck_Demands_V.ItemsSource.Count == 1 )
+                    value_dmd = ( Demand )this.pck_Demands_V.ItemsSource[ 0 ];
+                else if ( this.pck_Demands_V.ItemsSource.Count > 1 )
+                    value_dmd = ( Demand )this.pck_Demands_V.SelectedItem;
+            }
 
-                    if ( isReplaceMeter )
-                    {
-                        if ( global.MeterWorkRecording )
-                            value_omw = this.pck_OldMeterWorking.SelectedItem.ToString ();
-                            
-                        if ( global.RegisterRecording )
-                            value_rpl = this.pck_ReplaceMeterRegister.SelectedItem.ToString ();
-                    }
-                }
-                
-                // Port 2
-                if ( ( addMtuForm.usePort2 = mtu.TwoPorts && this.port2IsActivated ) &&
-                     ! mtu.Port2.IsSetFlow )
+            // RDD
+            if ( hasRDD )
+            {
+                if ( rddIn1 )
                 {
-                    value_acn_2 = this.tbx_AccountNumber_2           .Text;
-                    value_wor_2 = this.tbx_WorkOrder_2               .Text;
-                    value_oms_2 = this.tbx_OldMeterSerialNumber_2    .Text;
-                    value_omr_2 = this.tbx_OldMeterReading_2         .Text;
-                    value_msn_2 = this.tbx_MeterSerialNumber_2       .Text;
-                    value_mre_2 = this.tbx_MeterReading_2            .Text;
-                    value_mty_2 = ( Meter )this.pck_MeterType_Names_2.SelectedItem;
-                    
-                    if ( isReplaceMeter )
-                    {
-                        if ( global.MeterWorkRecording )
-                            value_omw = this.pck_OldMeterWorking_2.SelectedItem.ToString ();
-                        
-                        if ( global.RegisterRecording )
-                            value_rpl = this.pck_ReplaceMeterRegister_2.SelectedItem.ToString ();
-                    }
+                    value_acn = this.tbx_AccountNumber_V.Text;
+                    value_wor = this.tbx_WorkOrder_V    .Text;
                 }
-                
-                // General fields, for the MTU itself
-                // No RDD or RDD in port two
-                if ( ! hasRDD ||
-                     ! rddIn1 )
-                {
-                    value_omt = this.tbx_OldMtuId.Text;
-                    value_rin = this.pck_ReadInterval.SelectedItem.ToString ();
-                    value_sre = this.sld_SnapReads   .Value.ToString ();
-
-                    // Is a two-way MTU
-                    if ( global.TimeToSync &&
-                            mtu.TimeToSync    &&
-                            mtu.FastMessageConfig )
-                        value_two = this.pck_TwoWay.SelectedItem.ToString ();
-                    
-                    // Alarms dropdownlist is hidden when only has one option
-                    if ( this.pck_Alarms.ItemsSource.Count == 1 )
-                        value_alr = ( Alarm )this.pck_Alarms.ItemsSource[ 0 ];
-                    else if ( this.pck_Alarms.ItemsSource.Count > 1 )
-                        value_alr = ( Alarm )this.pck_Alarms.SelectedItem;
-                    
-                    // Demands dropdownlist is hidden when only has one option
-                    if ( this.pck_Demands.ItemsSource.Count == 1 )
-                        value_dmd = ( Demand )this.pck_Demands.ItemsSource[ 0 ];
-                    else if ( this.pck_Demands.ItemsSource.Count > 1 )
-                        value_dmd = ( Demand )this.pck_Demands.SelectedItem;
-                }
-                // RDD in port 1
                 else
                 {
-                    // Is a two-way MTU
-                    if ( global.TimeToSync &&
-                            mtu.TimeToSync &&
-                            mtu.FastMessageConfig )
-                        value_two = this.pck_TwoWay_V.SelectedItem.ToString ();
-                    
-                    // Alarms dropdownlist is hidden when only has one option
-                    if ( this.pck_Alarms_V.ItemsSource.Count == 1 )
-                        value_alr = ( Alarm )this.pck_Alarms_V.ItemsSource[ 0 ];
-                    else if ( this.pck_Alarms_V.ItemsSource.Count > 1 )
-                        value_alr = ( Alarm )this.pck_Alarms_V.SelectedItem;
-                    
-                    // Demands dropdownlist is hidden when only has one option
-                    if ( this.pck_Demands_V.ItemsSource.Count == 1 )
-                        value_dmd = ( Demand )this.pck_Demands_V.ItemsSource[ 0 ];
-                    else if ( this.pck_Demands_V.ItemsSource.Count > 1 )
-                        value_dmd = ( Demand )this.pck_Demands_V.SelectedItem;
+                    value_acn_2 = this.tbx_AccountNumber_V.Text;
+                    value_wor_2 = this.tbx_WorkOrder_V    .Text;
                 }
-
-                // RDD
-                if ( hasRDD )
-                {
-                    if ( rddIn1 )
-                    {
-                        value_acn = this.tbx_AccountNumber_V.Text;
-                        value_wor = this.tbx_WorkOrder_V    .Text;
-                    }
-                    else
-                    {
-                        value_acn_2 = this.tbx_AccountNumber_V.Text;
-                        value_wor_2 = this.tbx_WorkOrder_V    .Text;
-                    }
-                    value_rdd = ( Meter )this.pck_MeterType_Names_V.SelectedItem;
-                    value_fir = this.tbx_RDDFirmwareVersion.Text;
-                    value_pos = ( string )this.pck_ValvePosition.SelectedItem;
-                }
-                
-                // GPS
-                value_lat = this.tbx_MtuGeolocationLat .Text;
-                value_lon = this.tbx_MtuGeolocationLong.Text;
-                value_alt = this.mtuGeolocationAlt;
+                value_rdd = ( Meter )this.pck_MeterType_Names_V.SelectedItem;
+                value_fir = this.tbx_RDDFirmwareVersion.Text;
+                value_pos = ( string )this.pck_ValvePosition.SelectedItem;
             }
+                
+            // GPS
+            value_lat = this.tbx_MtuGeolocationLat .Text;
+            value_lon = this.tbx_MtuGeolocationLong.Text;
+            value_alt = this.mtuGeolocationAlt;
+
 
             // Reset needed when same actions is launched more than one time ( Exception/error )
             this.addMtuForm.RemoveParameters ();
@@ -4276,8 +4101,7 @@ namespace aclara_meters.view
                 this.addMtuForm.AddParameter ( FIELD.READ_INTERVAL, value_rin );
 
                 // Snap Reads
-                if ( ( DEBUG_AUTO_MODE_ON && DEBUG_SNAPSREADS_OK || ! DEBUG_AUTO_MODE_ON ) &&
-                     global.AllowDailyReads &&
+                if ( global.AllowDailyReads &&
                      mtu.DailyReads &&
                      ! mtu.IsFamily33xx )
                     this.addMtuForm.AddParameter ( FIELD.SNAP_READS, value_sre );
@@ -4415,9 +4239,7 @@ namespace aclara_meters.view
             {
                 double lat = Convert.ToDouble ( value_lat );
                 double lon = Convert.ToDouble ( value_lon );
-                //string latDir = ( lat < 0d ) ? "S" : "N";
-                //string lonDir = ( lon < 0d ) ? "W" : "E";
-
+  
                 this.addMtuForm.AddParameter ( FIELD.GPS_LATITUDE,  lat );
                 this.addMtuForm.AddParameter ( FIELD.GPS_LONGITUDE, lon );
                 this.addMtuForm.AddParameter ( FIELD.GPS_ALTITUDE,  value_alt );
@@ -4481,6 +4303,7 @@ namespace aclara_meters.view
             Parameter[] paramResult = args.Result.getParameters();
 
             int mtu_type = 0;
+            isCancellable = true;
 
             // Get MtuType = MtuID
             foreach ( Parameter p in paramResult)
@@ -4493,9 +4316,9 @@ namespace aclara_meters.view
             Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
 
             string ndresult = string.Empty;
-            InterfaceParameters[] interfacesParams = FormsApp.config.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
+            InterfaceParameters[] interfacesParams = Singleton.Get.Configuration.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
             
-            Mtu currentMtu = Singleton.Get.Action.CurrentMtu;
+            Mtu curMtu = Singleton.Get.Action.CurrentMtu;
 
             foreach (InterfaceParameters iParameter in interfacesParams)
             {
@@ -4518,7 +4341,7 @@ namespace aclara_meters.view
                                 // For Read action when no Meter is installed on readed MTU
                                 if ( param != null )
                                      description = param.Value;
-                                else description = currentMtu.Ports[i].GetProperty ( pParameter.Name );
+                                else description = curMtu.Ports[i].GetProperty ( pParameter.Name );
                                 
                                 FinalReadListView.Add(new ReadMTUItem()
                                 {
@@ -4641,7 +4464,7 @@ namespace aclara_meters.view
         private void OnError ()
         {
             Error error = Errors.LastError;
-
+            isCancellable = false;
             Task.Delay(100).ContinueWith(t =>
                 Device.BeginInvokeOnMainThread(() =>
                 {
@@ -4683,19 +4506,19 @@ namespace aclara_meters.view
                 var request = new GeolocationRequest(GeolocationAccuracy.Medium);
                 location = await Geolocation.GetLocationAsync(request);
             }
-            catch (FeatureNotSupportedException fnsEx)
+            catch (FeatureNotSupportedException )
             {
                 // Handle not supported on device exception
             }
-            catch (FeatureNotEnabledException fneEx)
+            catch (FeatureNotEnabledException )
             {
                return null; // Handle not enabled on device exception
             }
-            catch (PermissionException pEx)
+            catch (PermissionException )
             {
                 // Handle permission exception
             }
-            catch (Exception ex)
+            catch (Exception )
             {
                 // Unable to get location
             }
@@ -4816,13 +4639,12 @@ namespace aclara_meters.view
         { 
             try
             {
-                //ImageButton ctlButton = (ImageButton)sender;
-                string port; //= (string)ctlButton.CommandParameter;
+
+                string port; 
 
                 int mtuIdLength = Singleton.Get.Configuration.Global.MtuIdLength;
                 var MtuId = await Data.Get.MemoryMap.MtuSerialNumber.GetValue();
-                // var accName1 = await Data.Get.MemoryMap.P1MeterId.GetValue();
-               
+                
                 string sTick = DateTime.Now.Ticks.ToString();
 
                 if (hasTwoPorts)
@@ -4836,7 +4658,7 @@ namespace aclara_meters.view
                 string AccFieldName = port == "1" ? "tbx_AccountNumber" : $"tbx_AccountNumber_{port}";
                 BorderlessEntry field = (BorderlessEntry)this.FindByName(AccFieldName);
 
-                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0')+"_"+ field.Text+ sTick + "_Port"+ port;
+                string nameFile = MtuId.ToString().PadLeft(mtuIdLength, '0')+"_"+ field.Text + "_" + sTick + "_Port"+ port;
                 
                 Device.BeginInvokeOnMainThread(async () =>
                 {
@@ -4851,14 +4673,10 @@ namespace aclara_meters.view
                     DirectoryInfo dir = new DirectoryInfo(file.Path.Substring(0,file.Path.Length-(nameFile.Length+1)));
                     
                     FileInfo[]  imagefiles = dir.GetFiles(nameFile);
-                                                       
-                    //PicturesMTU.Add(imagefiles[0]);
-                   
+                 
                     imagefiles[0].CopyTo(Path.Combine(Mobile.ImagesPath, nameFile));
                     imagefiles[0].Delete();
-                    
-                    //await DisplayAlert("File Location", file.Path, "OK");
-
+ 
                     file.Dispose();
                 });
 

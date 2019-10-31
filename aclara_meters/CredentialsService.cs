@@ -31,10 +31,12 @@ namespace aclara_meters
         {
             try
             {
-                await SecureStorage.SetAsync ( USER, ( UserName = user ) );
-                await SecureStorage.SetAsync ( PASS, ( Password = pass ) );
+                UserName = user;
+                Password = pass;
+                await SecureStorage.SetAsync ( USER, UserName );
+                await SecureStorage.SetAsync ( PASS,  Password );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 //...
             }
@@ -48,7 +50,7 @@ namespace aclara_meters
             {
                 name = await SecureStorage.GetAsync ( USER );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 //...
             }
@@ -64,7 +66,7 @@ namespace aclara_meters
             {
                 pass = await SecureStorage.GetAsync ( PASS );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 //...
             }

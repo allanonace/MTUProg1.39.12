@@ -101,7 +101,7 @@ namespace MTUComm
                         {
                             valueInt = Convert.ToInt32 ( value );
                         }
-                        catch ( Exception e )
+                        catch ( Exception )
                         {
                             return false;
                         }
@@ -113,7 +113,7 @@ namespace MTUComm
                         iLimit = Convert.ToInt32 ( Math.Pow ( 2, numBytes * 8 ) );
                     }
                     // Launchs error when result is bigger than ulong upper limit
-                    catch ( Exception e )
+                    catch ( Exception )
                     {
                         iLimit = int.MaxValue;
                     }
@@ -136,7 +136,7 @@ namespace MTUComm
                         {
                             valueUInt = Convert.ToUInt32 ( value );
                         }
-                        catch ( Exception e )
+                        catch ( Exception )
                         {
                             return false;
                         }
@@ -148,7 +148,7 @@ namespace MTUComm
                         uLimit = Convert.ToUInt32 ( Math.Pow ( 2, numBytes * 8 ) );
                     }
                     // Launchs error when result is bigger than ulong upper limit
-                    catch ( Exception e )
+                    catch ( Exception )
                     {
                         uLimit = uint.MaxValue;
                     }
@@ -171,7 +171,7 @@ namespace MTUComm
                         {
                             valueULong = Convert.ToUInt64 ( value );
                         }
-                        catch ( Exception e )
+                        catch ( Exception )
                         {
                             return false;
                         }
@@ -183,7 +183,7 @@ namespace MTUComm
                         ulLimit = Convert.ToUInt64 ( Math.Pow ( 2, numBytes * 8 ) );
                     }
                     // Launchs error when result is bigger than ulong upper limit
-                    catch ( Exception e )
+                    catch ( Exception )
                     {
                         ulLimit = ulong.MaxValue;
                     }
@@ -219,7 +219,7 @@ namespace MTUComm
                         {
                             valueInt = Convert.ToInt32 ( value );
                         }
-                        catch ( Exception e )
+                        catch ( Exception )
                         {
                             return false;
                         }
@@ -243,7 +243,7 @@ namespace MTUComm
                         {
                             valueUInt = Convert.ToUInt32 ( value );
                         }
-                        catch ( Exception e )
+                        catch ( Exception )
                         {
                             return false;
                         }
@@ -267,7 +267,7 @@ namespace MTUComm
                         {
                             valueULong = Convert.ToUInt64 ( value );
                         }
-                        catch ( Exception e )
+                        catch ( Exception )
                         {
                             return false;
                         }

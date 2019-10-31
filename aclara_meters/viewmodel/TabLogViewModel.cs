@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Xml;
 using MvvmHelpers;
 using System.Threading.Tasks;
@@ -13,9 +10,9 @@ using aclara_meters;
 
 namespace aclara.ViewModels
 {
-    public class TabLogViewModel:BaseViewModel
+    public class TabLogViewModel: BaseViewModel
     {
-        private const int HEIGH_TEXT_LIST = 24;
+        private const int HEIGH_TEXT_LIST = 22;
         public ObservableRangeCollection<ItemsLog> ItemsLog { get; } = new ObservableRangeCollection<ItemsLog>();
         private List<FileInfo> FileList = new List<FileInfo>();
         public string FileName { get; set; }
@@ -48,14 +45,14 @@ namespace aclara.ViewModels
             fileStream.Close();
             IndexFile = ind;
             FileName = file.Name;
-            FileDateTime = file.CreationTime.ToString("MM/dd/yyyy HH:00");
+            //FileDateTime = file.CreationTime.ToString("MM/dd/yyyy HH:00");
+            FileDateTime = $"{FileName.Substring(0,2)}/{FileName.Substring(2, 2)}/{FileName.Substring(4, 4)} {FileName.Substring(8, 2)}:00";
 
         }
 
         private void ReadLogXML(Stream stream)
         {
             String sPort = String.Empty;
-            String sName = String.Empty;
             String sAccion = String.Empty;
             String sError = String.Empty;
             String sIcon = String.Empty;
@@ -162,15 +159,12 @@ namespace aclara.ViewModels
                                         Item.SubItemsLog = new List<ItemsLog>();
                                         Item.SubItemsLog.Add(Item1);
                                         Item.SubItemsLog.AddRange(SubItemLogs);
-                                        Item.HayLista = false;
-                                       
-                                        // Item.ListaDatos = null;
+                                        Item.HayLista = false;                                    
                                     }
                                     else
                                     {
                                         Item.ListaDatos = ListaDatos;
                                         Item.HeightList= Item.ListaDatos.Count>5?(Item.ListaDatos.Count * HEIGH_TEXT_LIST) : 100;
-
                                     }
                                     ItemsLog.Add(Item);
                                     sAccion = String.Empty;
@@ -212,8 +206,7 @@ namespace aclara.ViewModels
                             }
                             if (xReader.Name == "Mtus" || xReader.Name == "Error")
                                 bTratar = false;
-                            //sResultado = String.Concat(sResultado, Environment.NewLine);
-                            //listBox1.Items.Add("");
+                           
                             break;
                     }
                 }
@@ -224,8 +217,13 @@ namespace aclara.ViewModels
                 Icon = String.Empty
             };
             ItemsLog.Add(ItemNull);
+            ItemNull = new ItemsLog
+            {
+                Accion = String.Empty,
+                Icon = String.Empty
+            };
             ItemsLog.Add(ItemNull);
-            //  Application.Current.MainPage.DisplayAlert("XML", sResultado,"OK");
+          
         }
 
     }

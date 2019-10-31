@@ -549,7 +549,7 @@ namespace Xml
 
             // Register recording
             this.RegisterRecordingDefault     = "Meter";              // [Meter,Register] What is the default value for recording
-            this.RegisterRecordingItems       = "101";                // [0,1] Controls contents of the Register Recording Selection dropdown list. Which one first and so on
+            this.RegisterRecordingItems       = "111";                // [0,1] Controls contents of the Register Recording Selection dropdown list. Which one first and so on
             this.RegisterRecordingReq         = false;                // Required to choose if RegisterRecording is “true” on the screen
 
             // FTP
@@ -960,7 +960,7 @@ namespace Xml
         public bool WorkOrderRecording { get; set; }
 
         [XmlIgnore]
-        public bool FastMessageConfig;
+        public bool FastMessageConfig { get; set; }
 
         [XmlElement("FastMessageConfig")]
         public bool FastMessageConfigXml
@@ -979,11 +979,11 @@ namespace Xml
         #region Collections
 
         [XmlIgnore]
-        public List<Option> Options_Default;
+        private List<Option> Options_Default;
 
         [XmlArray("Options")]
         [XmlArrayItem("option")]
-        public List<Option> Options_Deserialized;
+        private List<Option> Options_Deserialized;
         
         [XmlIgnore]
         public List<Option> Options
@@ -997,11 +997,11 @@ namespace Xml
         }
         
         [XmlIgnore]
-        public List<string> Cancel_Default;
+        private List<string> Cancel_Default;
         
         [XmlArray("Cancel")]
         [XmlArrayItem("option")]
-        public List<string> Cancel_Deserialized;
+        private List<string> Cancel_Deserialized;
 
         [XmlIgnore]
         public List<string> Cancel

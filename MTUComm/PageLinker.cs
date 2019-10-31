@@ -12,16 +12,11 @@ namespace MTUComm
         private const string BTN_CANCEL = "Cancel";
     
         private static PageLinker instance;
-        private static Page currentPage;
-        public static Page mainPage;
+
         //private IDisposable popup;
-    
-        public static Page CurrentPage
-        {
-            get { return currentPage;  }
-            set { currentPage = value; }
-        }
-    
+
+        public static Page CurrentPage { get; set; }
+
         private PageLinker () {}
         
         private static PageLinker GetInstance ()

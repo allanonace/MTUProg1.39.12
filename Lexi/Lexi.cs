@@ -290,9 +290,9 @@ namespace Lexi
 
         #region Attributes
 
-        private ISerial m_serial; // Serial port interface used to communicate through Lexi
+        private readonly ISerial m_serial; // Serial port interface used to communicate through Lexi
 
-        private int m_timeout; // Timout limit to wait for MTU response.
+        private readonly int m_timeout; // Timout limit to wait for MTU response.
 
         #endregion
 
@@ -306,7 +306,7 @@ namespace Lexi
 
         public Lexi(ISerial serial, int timeout)
         {
-            m_serial = serial;
+            m_serial = serial ?? throw new ArgumentNullException("serial","No Serial interface defined");
             m_timeout = timeout;
         }
 
@@ -325,9 +325,7 @@ namespace Lexi
             UInt32 addres,
             uint data )
         {
-            if ( m_serial == null )
-                throw new ArgumentNullException ( "No Serial interface defined" );
-
+          
             return await Read ( m_serial, addres, data, m_timeout );
         }
 
@@ -424,7 +422,7 @@ namespace Lexi
                 // Validates CRC and if everything is ok, returns recovered data
                 return validateReadResponse ( response, bytesToRead );
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 throw new LexiReadingException ();
             }
@@ -453,8 +451,7 @@ namespace Lexi
             LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
             LexiAction lexiAction  = LexiAction.Write )
         {
-            if ( m_serial == null )
-                throw new ArgumentNullException ( "No Serial interface defined" );
+            
 
             if ( bytesResponse == null )
                 bytesResponse = new uint[] { 2 }; // ACK + ACK Info Size
@@ -485,12 +482,12 @@ namespace Lexi
 
                     break;
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
                     if ( --attempts > 0 )
                         await Task.Delay ( secsBtwAttempts * 1000 );
                     else
-                        throw e;
+                        throw;                  
                 }
             }
             while ( attempts > 0 );
@@ -508,7 +505,7 @@ namespace Lexi
             LexiAction lexiAction )
         {
             int TEST = new Random ().Next ( 0, 999 );
-            Utils.PrintDeep ( Environment.NewLine + "-------LEXI_WRITE--------| " + TEST + " |--" );
+            Utils.Print ( Environment.NewLine + "-------LEXI_WRITE--------| " + TEST + " |--" );
             Utils.PrintDeep ( "Lexi.Write = Write + UpdateBuffer + ReadBuffer" );
     
             try
@@ -522,7 +519,7 @@ namespace Lexi
                 byte[] stream;
                 var info = GeneratePackage ( lexiAction, out stream, addressOrLexiCmd, data );
 
-                Utils.PrintDeep ( "Lexi.Write.. " +
+                Utils.Print ( "Lexi.Write.. " +
                 "Stream = " +
                 "0x" + info.Header + " ( " + Convert.ToInt32 ( info.Header, 16 ) + " ) + " +
                 "WriteCmd 0x" + info.Cmd + " ( " + Convert.ToInt32 ( info.Cmd, 16 ) + " ) + " +
@@ -532,7 +529,7 @@ namespace Lexi
                 "Data [ " + Utils.ByteArrayToString ( data ) + " ] + " +
                 "CRC [ " + Utils.ByteArrayToString ( info.CRC.Take ( 2 ).ToArray () ) + " ]" );
     
-                Utils.PrintDeep ( "Lexi.Write.. " + Utils.ByteArrayToString ( stream ).Trim () + " [ Length " + stream.Length + " ]" );
+                Utils.Print ( "Lexi.Write.. " + Utils.ByteArrayToString ( stream ).Trim () + " [ Length " + stream.Length + " ]" );
     
                 // Send Lexi Write command
                 await serial.Write ( stream, 0, stream.Length );
@@ -634,7 +631,7 @@ namespace Lexi
                 
                 Utils.PrintDeep ( "Lexi.Read.. BytesRead: " + bytesRead + " / " + rawBuffer.Length );
                 
-                Utils.PrintDeep ( "------BUFFER_FINISH------" );
+                Utils.Print ( "------BUFFER_FINISH------" );
 
                 serial.Read ( rawBuffer, 0, rawBuffer.Length );
     
@@ -642,7 +639,7 @@ namespace Lexi
                 byte[] response = new byte[ 2 ];
                 Array.Copy ( rawBuffer, responseOffset, response, 0, response.Length );
                 
-                Utils.PrintDeep ( "Lexi.Write.." +
+                Utils.Print ( "Lexi.Write.." +
                     " RawBuffer " + Utils.ByteArrayToString ( rawBuffer ) +
                     " | ACK " + Utils.ByteArrayToString ( response ) );
     
@@ -651,14 +648,13 @@ namespace Lexi
                     throw new LexiWriteException ( response );
                 else
                 {
-                    Utils.PrintDeep ( "----LEXI_WRITE_FINISH----| " + TEST + " |--" + Environment.NewLine );
+                    Utils.Print ( "----LEXI_WRITE_FINISH----| " + TEST + " |--" + Environment.NewLine );
 
                     // Return MTU response
-                    //return ( bytes: rawBuffer, responseOffset: responseOffset );
                     return new LexiWriteResult ( rawBuffer, responseOffset );
                 }
             }
-            catch ( Exception e )
+            catch ( Exception )
             {
                 throw new LexiWritingException ();
             }
@@ -718,8 +714,8 @@ namespace Lexi
                 * Example: Addres 600 --> block 2 --> offset 600 - 512 = 88
                 */
                 header[ 0 ] = 0x25;
-                header[ 1 ] = ( byte )( uint )(     128 + ( ( address / 256 ) *   2 ) );
-                header[ 2 ] = ( byte )( uint )( address - ( ( address / 256 ) * 256 ) );
+                header[ 1 ] = ( byte )(     128 + ( ( address / 256 ) *   2 ) );
+                header[ 2 ] = ( byte )( address - ( ( address / 256 ) * 256 ) );
                 header[ 3 ] = ( byte )( uint )arguments[ 0 ];
                 header      = checkSum ( header );
                 break;
@@ -745,8 +741,8 @@ namespace Lexi
                 * block 3: addres >=         768 = 0x87 => 135
                 */
                 header[ 0 ] = 0x25;
-                header[ 1 ] = ( byte )( uint )(     129 + ( ( address / 256 ) *   2 ) );
-                header[ 2 ] = ( byte )( uint )( address - ( ( address / 256 ) * 256 ) );
+                header[ 1 ] = ( byte )(     129 + ( ( address / 256 ) *   2 ) );
+                header[ 2 ] = ( byte )( address - ( ( address / 256 ) * 256 ) );
                 header[ 3 ] = ( byte )data.Length;
                 header      = checkSum ( header );
                 break;
@@ -825,7 +821,8 @@ namespace Lexi
             }
 
             // Concatenate..
-            array = null;
+            array = new byte[0];
+
             switch ( lexiAction )
             {
                 case LexiAction.Read:
@@ -900,11 +897,6 @@ namespace Lexi
             return accum;
         }
 
-        private byte GetChecksum(IEnumerable<byte> values)
-        {
-            return (byte)(255 - (byte)values.Sum((byte x) => x) + 1);
-        }
-
         static byte[] checkSum(byte[] data)
         {
             int chksum = 0;
@@ -916,7 +908,7 @@ namespace Lexi
                 chksum += 256;
 
             Array.Resize(ref data, data.Length + 1);
-            data[data.Length - 1] = Convert.ToByte(chksum & 0x00ff); ;
+            data[data.Length - 1] = Convert.ToByte(chksum & 0x00ff);
 
             return data;
         }
@@ -929,7 +921,7 @@ namespace Lexi
         private byte[] validateReadResponse(byte[] response, uint response_length)
         {
             // Recover data has not last two CRC bytes
-            if ( ! ( response.Length - 2 == response_length ) )
+            if ( response.Length - 2 != response_length )
                 throw new InvalidDataException ("");
 
             byte[] crc = new byte[2];

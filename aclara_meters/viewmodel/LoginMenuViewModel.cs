@@ -48,8 +48,8 @@ namespace aclara_meters.viewmodel
         public LoginMenuViewModel(IUserDialogs dialogs)
         {
             dialogs_save = dialogs;
-            LoginCommand = new Command(Login);
-            LoadCommand = new Command(Load);
+            LoginCommand = new Command(async () => { await Login(); });
+            LoadCommand = new Command(async ()=> { await Load(); });
             Task.Run(async () =>
             {
                 await Task.Delay(550); Device.BeginInvokeOnMainThread(() =>
@@ -63,7 +63,7 @@ namespace aclara_meters.viewmodel
         {
             Mobile.LogPath = Mobile.ConfigPublicPath;//public folder
             Mobile.LogUserBackupPath = user;  //public folder
-            if (FormsApp.config.Global.LogsPublicDir)
+            if (Singleton.Get.Configuration.Global.LogsPublicDir)
                 Mobile.LogUserPath = user;
             else
             {
@@ -75,16 +75,15 @@ namespace aclara_meters.viewmodel
             Mobile.ImagesPath = user;
         }
 
-        public async void Load ()
+        public async Task Load ()
         {
             if ( await FormsApp.credentialsService.CredentialsExist () && !Data.Get.IsFromScripting )
             {
                 string user = FormsApp.credentialsService.UserName;
-                //Mobile.LogUserPath = user;
-
+ 
                 PathsLogs(user);
 
-                FormsApp.logger.Login(user);
+                Singleton.Get.Logger.Login(user);
                 Settings.IsLoggedIn = true;
                 Application.Current.MainPage=new NavigationPage(new AclaraViewMainMenu(dialogs_save));
             }   
@@ -94,7 +93,7 @@ namespace aclara_meters.viewmodel
             string username,
             string password )
         {
-            Xml.User[] dbUsers = Singleton.Get.Configuration.users;
+            Xml.User[] dbUsers = Singleton.Get.Configuration.Users;
             
             IEnumerable<Xml.User> coincidences = dbUsers.Where ( user => user.Name.Equals ( username ) );
             if ( coincidences.Count () == 1 )
@@ -109,7 +108,7 @@ namespace aclara_meters.viewmodel
             return false;
         }
 
-        public async void Login()
+        public async Task Login()
         {
             IsBusy = true;
             Title = string.Empty;
@@ -124,17 +123,17 @@ namespace aclara_meters.viewmodel
 
                         #region Credentials length Validation
 
-                        if (userName.Length < FormsApp.config.Global.UserIdMinLength || userName.Length > FormsApp.config.Global.UserIdMaxLength)
+                        if (userName.Length < Singleton.Get.Configuration.Global.UserIdMinLength || userName.Length > Singleton.Get.Configuration.Global.UserIdMaxLength)
                         {
                             IsBusy = false;
-                            Message = "The field UserName must be with a minimum length of " + FormsApp.config.Global.UserIdMinLength+ " and a maximum length of " + FormsApp.config.Global.UserIdMaxLength;
+                            Message = "The field UserName must be with a minimum length of " + Singleton.Get.Configuration.Global.UserIdMinLength+ " and a maximum length of " + Singleton.Get.Configuration.Global.UserIdMaxLength;
                             return;
                         }
 
-                        if(password.Length < FormsApp.config.Global.PasswordMinLength || password.Length > FormsApp.config.Global.PasswordMaxLength)
+                        if(password.Length < Singleton.Get.Configuration.Global.PasswordMinLength || password.Length > Singleton.Get.Configuration.Global.PasswordMaxLength)
                         {
                             IsBusy = false;
-                            Message = "The field Password must be with a minimum length of " + FormsApp.config.Global.PasswordMinLength + " and a maximum length of " + FormsApp.config.Global.PasswordMaxLength;
+                            Message = "The field Password must be with a minimum length of " + Singleton.Get.Configuration.Global.PasswordMinLength + " and a maximum length of " + Singleton.Get.Configuration.Global.PasswordMaxLength;
                             return;
                         }
 
@@ -152,10 +151,10 @@ namespace aclara_meters.viewmodel
 
                             PathsLogs(userName);
 
-                            FormsApp.logger.Login(userName);
-                            //await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewMainMenu(dialogs_save), false);
+                            Singleton.Get.Logger.Login(userName);
+                            
                             Application.Current.MainPage = new NavigationPage(new AclaraViewMainMenu(dialogs_save));
-                            //await Application.Current.MainPage.Navigation.PushAsync(new AclaraViewGlobalUIController(), false);
+                          
                         }
                         else
                         {

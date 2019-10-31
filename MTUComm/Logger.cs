@@ -77,7 +77,7 @@ namespace MTUComm
                 base_stream += "        <AppName>"   + config.getApplicationName() + "</AppName>";
                 base_stream += "        <Version>"   + config.GetApplicationVersion() + "</Version>";
                 base_stream += "        <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
-                base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+                base_stream += "        <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "        <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "        <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
                 base_stream += "    </AppInfo>";
@@ -94,7 +94,7 @@ namespace MTUComm
                 base_stream += "    <Version>"   + config.GetApplicationVersion() + "</Version>";
                 base_stream += "    <MtuId />";
                 base_stream += "    <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
-                base_stream += "    <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+                base_stream += "    <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "    <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "    <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
                 base_stream += "</NodeDiscoveryReports>";
@@ -107,17 +107,15 @@ namespace MTUComm
                 base_stream += "        <Version>"   + config.GetApplicationVersion() + "</Version>";
                 base_stream += "        <MtuId />";
                 base_stream += "        <Date>"      + DateTime.UtcNow.ToString("MM/dd/yyyy HH:mm:ss") + "</Date>";
-                base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+                base_stream += "        <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
                 base_stream += "        <UnitId>"    + config.GetDeviceUUID() + "</UnitId>";
                 base_stream += "        <AppType>"   + ( Data.Get.IsFromScripting ? "Scripted" : "Interactive" ) + "</AppType>";
                 base_stream += "        <Events />";
                 base_stream += "    </Transfer>";
                 base_stream += "</Log>";
                 break;
-            }
-            
-            config = null;
-            
+            }            
+                     
             return base_stream;
         }
         
@@ -131,7 +129,7 @@ namespace MTUComm
             base_stream += "        <AppName>" + config.getApplicationName() + "</AppName>";
             base_stream += "        <Version>" + config.GetApplicationVersion() + "</Version>";
             base_stream += "        <Date>" + DateTime.Now.ToString("MM/dd/yyyy HH:mm") + "</Date>";
-            base_stream += "        <UTCOffset>" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
+            base_stream += "        <UTCOffset>" + TimeZoneInfo.Local.GetUtcOffset(DateTime.Now).ToString() + "</UTCOffset>";
             base_stream += "        <UnitId>" + config.GetDeviceUUID() + "</UnitId>";
             base_stream += "        <AppType>Scripted</AppType>";
             base_stream += "    </AppInfo>";
@@ -139,16 +137,14 @@ namespace MTUComm
             Action currentAction;
             if ( ( currentAction = Singleton.Get.Action ) != null )
             {
-                base_stream += "    <Action display=\"" + Action.logDisplays[ currentAction.Type ] + "\" type=\"" + Action.logTypes[ currentAction.Type ] + "\" reason=\"" + Action.logReasons[ currentAction.Type ] + "\">";
+                base_stream += "    <Action display=\"" + Action.LogDisplays[ currentAction.Type ] + "\" type=\"" + Action.LogTypes[ currentAction.Type ] + "\" reason=\"" + Action.LogReasons[ currentAction.Type ] + "\">";
                 base_stream += "        <Date display=\"Date/Time\">" + DateTime.Now.ToString("MM/dd/yyyy HH:mm") + "</Date>";
                 base_stream += "        <User display=\"User\">" + currentAction.User + "</User>";
                 base_stream += "    </Action>";
             }
             
             base_stream += "</StarSystem>";
-            
-            config = null;
-            
+                        
             string uri = Path.Combine ( Mobile.ConfigPath, "___tmp.xml" );
             Mobile.CreateDirectoryIfNotExist(Mobile.ConfigPath);
 
@@ -209,7 +205,7 @@ namespace MTUComm
                 {
                     XDocument.Load(uri);
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
                     using (System.IO.StreamWriter file = new System.IO.StreamWriter(uri, false ))
                     {
@@ -406,11 +402,11 @@ namespace MTUComm
         {
             XElement element = new XElement("Action");
 
-            AddAtrribute(element, "display", Action.logDisplays[ actionType ] );
-            AddAtrribute(element, "type", Action.logTypes[ actionType ] );
+            AddAtrribute(element, "display", Action.LogDisplays[ actionType ] );
+            AddAtrribute(element, "type", Action.LogTypes[ actionType ] );
 
             if ( ! isSubAction )
-                AddAtrribute(element, "reason", Action.logReasons[ actionType ] );
+                AddAtrribute(element, "reason", Action.LogReasons[ actionType ] );
 
             InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogParamsFromInterface ( mtu, ActionType.ReadMtu );
             foreach ( InterfaceParameters parameter in parameters )
@@ -427,10 +423,7 @@ namespace MTUComm
                     else
                         this.ComplexParameter(element, allParamsFromInterface, parameter);
                 }
-                catch ( Exception ex )
-                {
-                
-                }
+                catch (Exception e) { Console.WriteLine($"logger.cs_ {e.Message}"); }
             }
             
             // Add additional parameters
@@ -584,7 +577,7 @@ namespace MTUComm
             Mtu mtu )
         {
             return this.CompoundActivityLog (
-                ActionType.RemoteDisconnect,
+                ActionType.ValveOperation,
                 rdd_allParamsFromInterface,
                 readMtu_allParamsFromInterface,
                 mtu );
@@ -739,9 +732,9 @@ namespace MTUComm
 
             // DataRead log
             //ActionType actionType = ActionType.DataRead;
-            AddAtrribute(element, "display", Action.logDisplays[ actionType ] );
-            AddAtrribute(element, "type",    Action.logTypes   [ actionType ] );
-            AddAtrribute(element, "reason",  Action.logReasons [ actionType ] );
+            AddAtrribute(element, "display", Action.LogDisplays[ actionType ] );
+            AddAtrribute(element, "type",    Action.LogTypes   [ actionType ] );
+            AddAtrribute(element, "reason",  Action.LogReasons [ actionType ] );
 
             InterfaceParameters[] parameters = Singleton.Get.Configuration.getLogParamsFromInterface ( mtu, actionType );
             foreach (InterfaceParameters parameter in parameters)
@@ -797,7 +790,7 @@ namespace MTUComm
             
             string source = string.IsNullOrEmpty ( parameter.Source ) ? string.Empty : " , Source: " + parameter.Source;
 
-            Utils.Print ( "Add Param to Log: " + parameter.Name + source + " , Port: " + portNumber +
+            Utils.PrintDeep ( "Add Param to Log: " + parameter.Name + source + " , Port: " + portNumber +
                 " = " + ( ( param == null ) ? "NOT USED" : param.Value ) );
             
             if (param != null)

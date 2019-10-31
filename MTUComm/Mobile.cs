@@ -18,18 +18,7 @@ namespace MTUComm
             private const string CER_INIT   = "MII";
             private const string XML_CER = ".cer";
 
-            public string ftpDownload_User;
-            public string ftpDownload_Pass;
-            public string ftpDownload_Host;
-            public int    ftpDownload_Port;
-            public string ftpDownload_Path;
-            public bool HasIntune;
-            public bool HasFTP;
             public X509Certificate2 certificate { private set; get; }
-            public byte[] lastRandomKey;
-            public byte[] lastRandomKeySha;
-            public bool   isMtuEncrypted;
-
 
             public string RandomKeyAndShaEncryptedInBase64
             {
@@ -46,43 +35,30 @@ namespace MTUComm
                 get { return this.certificate != null; }
             }
 
+            public string FtpDownload_User { get; set; }
+            public string FtpDownload_Pass { get; set; }
+            public string FtpDownload_Host { get; set; }
+            public int FtpDownload_Port { get; set; }
+            public string FtpDownload_Path { get; set; }
+            public bool HasIntune { get; set; }
+            public bool HasFTP { get; set; }
+            public byte[] LastRandomKey { get; set; }
+            public byte[] LastRandomKeySha { get; set; }
+            public bool IsMtuEncrypted { get; set; }
+
             public ConfigData ()
             {
-                this.lastRandomKey    = new byte[ 0 ];
-                this.lastRandomKeySha = new byte[ 0 ];
+                this.LastRandomKey    = new byte[ 0 ];
+                this.LastRandomKeySha = new byte[ 0 ];
                 
-                this.ftpDownload_User = string.Empty;
-                this.ftpDownload_Pass = string.Empty;
-                this.ftpDownload_Host = string.Empty;
-                this.ftpDownload_Port = 22;
-                this.ftpDownload_Path = string.Empty;
+                this.FtpDownload_User = string.Empty;
+                this.FtpDownload_Pass = string.Empty;
+                this.FtpDownload_Host = string.Empty;
+                this.FtpDownload_Port = 22;
+                this.FtpDownload_Path = string.Empty;
                 this.HasIntune = false;
                 this.HasFTP = false;
                
-            }
-
-            public void TestCertificateIOS ()
-            {
-                /*
-                // Load certificate from resources
-                //X509Certificate2 cer = Utils.GetCertificateFromResources ( "certificate.cer" );
-
-                // Install certificate in the keystore for the app
-                X509Store store = new X509Store ( StoreName.Root, StoreLocation.CurrentUser );
-                store.Open ( OpenFlags.ReadWrite );
-                //store.Add ( cer );
-
-                // Load certificate from keystore
-                foreach ( var c in store.Certificates )
-                    Utils.Print ( "- " + c.Subject + " | " + c.Issuer + " | " + c.NotAfter );
-
-                store.Close ();
-                */
-
-                // NOTE: Certificates deployed using Intune are not present in the keychain
-                foreach ( var storeLocation in Enum.GetValues ( typeof ( StoreLocation ) ) )
-                    foreach ( var storeName in Enum.GetValues ( typeof ( StoreName ) ) )
-                        RecoverCerts ( ( StoreName )storeName, ( StoreLocation )storeLocation );
             }
 
             private void RecoverCerts ( StoreName storeName, StoreLocation storeLocation )
@@ -99,96 +75,6 @@ namespace MTUComm
 
                 store.Close ();
             }
-
-            public void RecoverAppFilesTree ()
-            {
-                /*
-                Using ios-deploy: ios-deploy --nolldb --list --bundle_id com.aclara.programmer
-                //
-                /Documents/
-                /Documents/LogsUni/
-                /Documents/.config/
-                /Documents/.config/.mono/
-                /Documents/.config/.mono/certs/
-                /Documents/.config/.mono/certs/Trust/
-                /Documents/Logs/
-                /Library/
-                /Library/global.xml
-                /Library/Caches/
-                /Library/Caches/com.aclara.programmer/
-                /Library/Caches/com.aclara.programmer/MAMURLCache/
-                /Library/Caches/com.aclara.programmer/MAMURLCache/Cache.db
-                /Library/Caches/com.aclara.programmer/MAMURLCache/Cache.db-wal
-                /Library/Caches/com.aclara.programmer/MAMURLCache/Cache.db-shm
-                /Library/Caches/.IntuneMAM/
-                /Library/Caches/.IntuneMAM/com.microsoft.intune.ApplicationInsights/
-                /Library/Caches/.IntuneMAM/com.microsoft.intune.ApplicationInsights/regularPrio/
-                /Library/Caches/.IntuneMAM/com.microsoft.intune.ApplicationInsights/metaData/
-                /Library/Caches/.IntuneMAM/com.microsoft.intune.ApplicationInsights/metaData/metaData
-                /Library/Caches/Snapshots/
-                /Library/Caches/Snapshots/com.aclara.programmer/
-                /Library/Caches/Snapshots/com.aclara.programmer/77B9721D-8B75-4CCB-AEB3-356A40AD0472@2x.ktx
-                /Library/Caches/Snapshots/com.aclara.programmer/8897336D-4446-46AC-B916-A3FC2FDEB36F@2x.ktx
-                /Library/Caches/Snapshots/com.aclara.programmer/downscaled/
-                /Library/Caches/Snapshots/com.aclara.programmer/downscaled/B5D8074E-7B0B-40C1-BC86-B8F2A15BE80B@2x.ktx
-                /Library/user.xml
-                /Library/mtu.xml
-                /Library/meter.xml
-                /Library/certificate.txt
-                /Library/alarm.xml
-                /Library/.IntuneMAM/
-                /Library/.IntuneMAM/NBUConfig.plist
-                /Library/.IntuneMAM/Config.plist
-                /Library/.IntuneMAM/com.aclara.programmer066B69C4-B148-49CC-8C5A-6D0B3C45A307-0.txt
-                /Library/Preferences/
-                /Library/Preferences/com.aclara.programmer.plist
-                /Library/demandconf.xml
-                /SystemData/
-                /tmp/
-                */
-
-                //string publicDir  = Environment.GetFolderPath ( Environment.SpecialFolder.MyDocuments );
-                //string privateDir = Environment.GetFolderPath ( Environment.SpecialFolder.Personal );
-
-                var    baseDirs  = Directory.EnumerateDirectories ( "./" );
-                foreach ( var directory in baseDirs )
-                {
-                    Utils.Print ( "------------------> " + directory );
-                }
-            }
-
-            /*
-            public void LoadCertFromKeychain ()
-            {
-                // https://docs.microsoft.com/es-es/dotnet/api/system.security.cryptography.x509certificates.storename?view=netframework-4.8
-
-                GetCol ( StoreName.AddressBook );
-                GetCol ( StoreName.AuthRoot );
-                GetCol ( StoreName.CertificateAuthority );
-                GetCol ( StoreName.Disallowed );
-                GetCol ( StoreName.My );
-                GetCol ( StoreName.Root );
-                GetCol ( StoreName.TrustedPeople );
-                GetCol ( StoreName.TrustedPublisher );
-            }
-            
-            private void GetCol ( StoreName name )
-            {
-                X509Store store = new X509Store ( name );
-                store.Open ( OpenFlags.ReadWrite );
-                //X509Certificate2 certificate = new X509Certificate2 ();
-
-                X509Certificate2Collection storecollection = (X509Certificate2Collection)store.Certificates;
-                
-                Console.WriteLine("Store name: {0}", store.Name);
-                Console.WriteLine("Store location: {0} , count: {1}", store.Location, storecollection.Count );
-                foreach (X509Certificate2 x509 in storecollection)
-                    Console.WriteLine("certificate name: {0}", x509.Subject);
-
-                store.Close ();
-                store.Dispose ();
-            }
-            */
 
             public X509Certificate2 CreateCertificate(string sCert = null, string sFileCer = null)
             {
@@ -366,9 +252,9 @@ namespace MTUComm
                 bool encrypted = true )
             {
                 // Concatenate random key and random key sha
-                byte[] keyAndSha = new byte[ this.lastRandomKey.Length + this.lastRandomKeySha.Length ];
-                Array.Copy ( this.lastRandomKey, keyAndSha, this.lastRandomKey.Length );
-                Array.Copy ( this.lastRandomKeySha, 0, keyAndSha, this.lastRandomKey.Length, this.lastRandomKeySha.Length );
+                byte[] keyAndSha = new byte[ this.LastRandomKey.Length + this.LastRandomKeySha.Length ];
+                Array.Copy ( this.LastRandomKey, keyAndSha, this.LastRandomKey.Length );
+                Array.Copy ( this.LastRandomKeySha, 0, keyAndSha, this.LastRandomKey.Length, this.LastRandomKeySha.Length );
                 
                 // Encrypt new byte array with public key
                 if ( encrypted )
@@ -380,11 +266,11 @@ namespace MTUComm
                 }
                 
                 // Clear random key and its sha from memory
-                Array.Clear ( this.lastRandomKey,    0, this.lastRandomKey.Length    );
-                Array.Clear ( this.lastRandomKeySha, 0, this.lastRandomKeySha.Length );
+                Array.Clear ( this.LastRandomKey,    0, this.LastRandomKey.Length    );
+                Array.Clear ( this.LastRandomKeySha, 0, this.LastRandomKeySha.Length );
                 
                 // Reset encrypted status
-                this.isMtuEncrypted = false;
+                this.IsMtuEncrypted = false;
                 
                 return Convert.ToBase64String ( keyAndSha );
             }
@@ -407,36 +293,7 @@ namespace MTUComm
         public  const string PATH_IMAGES    = "Images";
 
         private const string APP_SUBF       = "com.aclara.mtu.programmer/files/";
-        private const string PREFAB_PATH    = "/data/data/" + APP_SUBF;
-        private const string SEARCH_PATH    = "Android/data/" + APP_SUBF;
-        private const string XML_MTUS       = "Mtu.xml";
-
-        private enum PATHS
-        {
-            STORAGE_EMULATED_ZERO,
-            STORAGE_EMULATED_LEGACY,
-            STORAGE_SDCARD_ZERO,
-            SDCARD_MNT,
-            SDCARD,
-            //DATA_MEDIA_ZERO,
-            //DATA_MEDIA,
-            //DATA_ZERO,
-            //DATA
-        }
-
-        private static string[] paths =
-        {
-            "/storage/emulated/0/",      // Espacio de trabajo del usuario cero/0
-            "/storage/emulated/legacy/", // Enlace simbolico a "/storage/emulated/0/"
-            "/storage/sdcard0/",         // Android >= 4.0
-            "/mnt/sdcard/",              // Android < 4.0
-            "/sdcard/",                  // Enlace simbolico a "/storage/sdcard0/" y "/mnt/sdcard/"
-            //"/data/media/0/",            // 
-            //"/data/media/",
-            //"/data/0/",
-            //"/data/"
-        };
-
+ 
         public static void CreateDirectoryIfNotExist ( string path )
         {
             if ( ! Directory.Exists ( path ) )
@@ -586,69 +443,6 @@ namespace MTUComm
         static Mobile ()
         {
             configData = new ConfigData ();
-        }
-
-        private static string GetEnumPath ( PATHS ePath )
-        {
-            return paths[ (int)ePath ];
-        }
-
-        private static string GetPathForAndroid ()
-        {
-            // Works with dev unit ZTE but not with Alcatel
-            if ( Directory.Exists ( PREFAB_PATH ) &&
-                 File.Exists(PREFAB_PATH + XML_MTUS ) )
-                return PREFAB_PATH;
-
-            // Search the first valid path to recover XML files
-            // Works with dev unit Alcatel but no with ZTE
-            PATHS ePath;
-            string path;
-            string[] names = Enum.GetNames(typeof(PATHS));
-            for (int i = 0; i < names.Length; i++)
-            {
-                Enum.TryParse<PATHS>(names[i], out ePath);
-                path = GetEnumPath(ePath);
-
-                if ( Directory.Exists ( path )) //&& File.Exists(path + SEARCH_PATH + XML_MTUS ) )
-                    return path + SEARCH_PATH;
-            }
-
-            return null;
-        }
-        
-        public static void RecurReadFolders ( string PATH, int numLevel = 0 )
-        {
-            string space = string.Empty.PadLeft ( numLevel * 4, ' ' );
-            
-            Utils.Print ( space + "FOLDER: " + PATH );
-            
-            if ( Directory.GetFiles ( PATH ).Length > 0 )
-            {
-                Utils.Print ( space + "· FILES.." );
-                foreach ( string file in Directory.EnumerateFiles ( PATH ) )
-                {
-                    Utils.Print ( space + "  · " + file );
-                    
-                    string backPath = Mobile.ConfigPublicPath + "/BACKUP";
-                    if ( ! Directory.Exists ( backPath ) )
-                        Directory.CreateDirectory ( backPath );
-                    
-                    string newPath  = file.Replace ( PATH, backPath );
-                    
-                    Utils.Print ( "--------> new path: " + newPath );
-                    
-                    File.Copy ( file, newPath, true );
-                }
-            }
-        
-            foreach ( string folder in Directory.EnumerateDirectories ( PATH ) )
-            {
-                if ( folder.Contains ( "BACKUP" ) )
-                    continue;
-            
-                RecurReadFolders ( folder, numLevel + 1 );
-            }
         }
 
         public static bool IsNetAvailable ()

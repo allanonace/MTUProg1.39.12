@@ -30,58 +30,28 @@ namespace aclara_meters
 {
     public partial class FormsApp : Application
     {
-        #region Initial FTP - Default Config data
-
-        //string host = "159.89.29.176";
-        //string username = "aclara";
-        //string password = "aclara1234";
-        //string pathRemoteFile = "/home/aclara";
-
-        #endregion
-
-        #region Constants
-
-        private const bool   DEBUG_MODE_ON = false;
-
-        private const string SO_ANDROID = "Android";
-        private const string SO_IOS     = "iOS";
-        private const string SO_UNKNOWN = "Unknown";
-       
-        #endregion
 
         #region Attributes
 
-        public string appVersion_str;
-        public string deviceId;
-        public string ConfigVersion;
-        public string NewConfigVersion;
-        private bool checkConfigFiles = false;
         private string DateCheck;
 
         public static CredentialsService credentialsService { get; private set; }
-        public static BleSerial ble_interface;
-        public static Logger logger;
-        public static Configuration config;
-        private Uri dataUrl;
+        public static BleSerial ble_interface { get; private set; }
 
         private IBluetoothLowEnergyAdapter adapter;
         private IUserDialogs dialogs;
         private string appVersion;
-
-        private bool formsInitFailed;
-
-        public static TaskCompletionSource<bool> taskSemaphoreIOS;
+        public static bool StartInteractive;
 
         #endregion
 
         #region Properties
+               
+        public static string AppName { get; private set; } = "Aclara MTU Programmer ";
 
-        private static string appName = "Aclara MTU Programmer ";
-
-        public static string AppName
-        {
-            get { return appName; }
-        }
+        public static string DeviceId { get; set; }
+        public static string AppVersion_str { get; set; }
+        public static Uri DataUrl { get; set; }
 
         #endregion
 
@@ -103,33 +73,31 @@ namespace aclara_meters
             {
                 InitializeComponent();
 
-                if (!Data.Get.IsFromScripting)
-                    MainPage = new ContentPage();
+                MainPage = new ContentPage();
 
                 VersionTracking.Track();
 
                 var platform = DependencyService.Get<IAdapterBluetooth>();
                 adapter = platform.GetNativeBleAdapter();
 
-                dataUrl =url;
+                DataUrl =url;
                            
                 Data.Set ( "ActionInitialized", false );
                 Data.Set ( "IsIOS",     Device.RuntimePlatform == Device.iOS     );
                 Data.Set ( "IsAndroid", Device.RuntimePlatform == Device.Android );
 
-                //this.adapter    = badapter;
                 this.dialogs    = dialogs;
                 this.appVersion = appVersion;
-                appName        += ( Data.Get.IsAndroid ) ? "Android" : "iOS";
+                AppName        += ( Data.Get.IsAndroid ) ? "Android" : "iOS";
 
                 // Config path
                 ConfigPaths();
-
+                
                 CallToInitApp(adapter, dialogs, appVersion);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                //Debug.WriteLine(e.Message);
+                Console.WriteLine(e.Message);
             }
         }
 
@@ -144,9 +112,9 @@ namespace aclara_meters
 
             Utils.Print("FormsApp: Interactive [ " + Data.Get.IsFromScripting + " ]");
 
-            appVersion_str = appVersion;
+            AppVersion_str = appVersion;
 
-            deviceId = CrossDeviceInfo.Current.Id;
+            DeviceId = CrossDeviceInfo.Current.Id;
 
             // Profiles manager
             credentialsService = new CredentialsService();
@@ -157,52 +125,35 @@ namespace aclara_meters
             AppResources.Culture = CrossMultilingual.Current.DeviceCultureInfo;
 
             string Mode = GenericUtilsClass.ChekInstallMode ();
-
-            //// FIXME: ES NECESARIO ESTE BLOQUE TENIENDO EL DE ABAJO
-
-            //// New installation on Android
-            //if ( Data.Get.IsAndroid &&
-            //     Mode.Equals ( "None" ) )
-            //{
-            //    var MamServ = DependencyService.Get<IMAMService> ();
-            //    MamServ.UtilMAMService ();
-
-            //    if ( Mobile.configData.HasIntune )
-            //    {
-            //        GenericUtilsClass.SetInstallMode ( "Intune" );
-            //        this.LoadConfigurationAndOpenScene ( dialogs );
-
-            //        return;
-            //    }
-            //}
+               
 
             // The first time the app is launched after installation
             if ( VersionTracking.IsFirstLaunchEver ||
                  Mode.Equals ( "None" ) )
             {
-                if (Data.Get.IsAndroid)
-                {
-                    var MamServ = DependencyService.Get<IMAMService>();
-                    MamServ.UtilMAMService();
+                //if (Data.Get.IsAndroid)
+                //{
+                //    var MamServ = DependencyService.Get<IMAMService>();
+                //    MamServ.UtilMAMService();
 
-                    if (Mobile.configData.HasIntune)
-                    {
-                        GenericUtilsClass.SetInstallMode("Intune");
-                        this.LoadConfigurationAndOpenScene(dialogs);
-
-                        return;
-                    }
-                }
+                //    if (Mobile.configData.HasIntune)
+                //    {
+                //        GenericUtilsClass.SetInstallMode("Intune");
+                //        Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
+                //        return;
+                //    }
+                //}
 
                 SecureStorage.RemoveAll ();
                 Device.BeginInvokeOnMainThread ( () =>
                 {
-                    MainPage = new NavigationPage ( new AclaraInstallPage () );
+                    Application.Current.MainPage = new NavigationPage ( new AclaraInstallPage () );
                 });
             }
             // Is not the first launch
             else
             {
+                
                 // Load the ftp settings in configData
                 if ( Mode.Equals ( "Intune" ) )
                 {
@@ -214,11 +165,14 @@ namespace aclara_meters
                 else if ( Mode.Equals ( "FTP" ) && !GenericUtilsClass.CheckFTPDownload())
                 {
                     GenericUtilsClass.SetInstallMode("None");
-                    this.ShowErrorAndKill(new FtpCredentialsMissingException());
+                    ShowErrorAndKill(new FtpCredentialsMissingException());
                     return;
                 }
-                   
-                this.LoadConfigurationAndOpenScene ( dialogs );
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
+                });
+              
             }
         }
 
@@ -250,228 +204,7 @@ namespace aclara_meters
             #endif
         }
 
-        private bool InitialConfigProcess()
-        {
-
-            string Mode = GenericUtilsClass.ChekInstallMode();
-            if (Mode.Equals("Intune"))
-            {
-                if (Mobile.IsNetAvailable())
-                {
-                    var MamServ = DependencyService.Get<IMAMService>();
-                    MamServ.UtilMAMService();
-                    if (Mobile.configData.HasIntune)
-                    {
-                        NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion();
-                        if (!string.IsNullOrEmpty(NewConfigVersion))
-                        {
-                            if (!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
-                            {
-                                this.ShowErrorAndKill(new FtpDownloadException());
-                                return false;
-                            }
-                            else
-                            {
-                                if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
-                                    Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-                                
-                            }
-                            return true;
-                        }
-
-                       
-                    }
-                    else
-                    {
-                        GenericUtilsClass.SetInstallMode("None");
-                        this.ShowErrorAndKill(new IntuneCredentialsException());
-                        return false;
-                    }
-                }
-                else
-                    this.ShowErrorAndKill(new NoInternetException());
-                
-                return false;
-            }
-            else if (Mode.Equals("Manual"))
-            {
-                Mobile.configData.HasFTP = false;
-
-                // Check if all configuration files are available in public folder
-                if ( GenericUtilsClass.HasDeviceAllXmls ( Mobile.ConfigPublicPath ) )
-                {
-                    NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion();
-
-                    bool CPD = false;
-                    if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
-                    {
-                        if (value != null)
-                            bool.TryParse((string)value, out CPD);
-                    }
-                    if(!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
-                    {
-                        return false;
-                    }
-                    if (!string.IsNullOrEmpty(sFileCert))
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-
-                    
-                    return true;
-                }
-                else
-                {
-                    this.ShowErrorAndKill(new ConfigurationFilesNotFoundException());
-                    GenericUtilsClass.SetInstallMode("None");
-
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        private void LoadConfigurationAndOpenScene(IUserDialogs dialogs)
-        {
-            bool Result = true;
-
-            if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
-            {
-                Result = InitialConfigProcess();
-                if ( ! Result )
-                    return; // The apps will be forced to close / kill
-
-                SecureStorage.SetAsync("ConfigVersion", NewConfigVersion);
-                SecureStorage.SetAsync("DateCheck", DateTime.Today.ToShortDateString());
-            }
-            else
-            {
-                DateCheck = SecureStorage.GetAsync("DateCheck").Result;
-                if (DateCheck != DateTime.Today.ToShortDateString())  // once per day
-                {
-                    SecureStorage.SetAsync("DateCheck", DateTime.Today.ToShortDateString());
-                    ConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
-                    NewConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
-
-                    if ( GenericUtilsClass.TagGlobal ( false, "CheckConfigFiles", out dynamic value ) &&
-                         value != null )
-                    {
-                        bool.TryParse ( ( string )value, out checkConfigFiles );
-                    
-                        if ( checkConfigFiles )
-                        {
-                            if ( Mobile.configData.HasFTP ||
-                                 Mobile.configData.HasIntune )
-                                 NewConfigVersion = GenericUtilsClass.CheckFTPConfigVersion ();
-                            else NewConfigVersion = GenericUtilsClass.CheckPubConfigVersion ();
-                            checkConfigFiles = false;
-
-                            if (!string.IsNullOrEmpty(NewConfigVersion) && ! NewConfigVersion.Equals ( ConfigVersion ) )
-                            {
-                                checkConfigFiles = true;
-                                // Backup current and update config files
-                                GenericUtilsClass.BackUpConfigFiles ();
-                                if ( ! ( Result = UpdateConfigFiles () ) )
-                                {
-                                    GenericUtilsClass.RestoreConfigFiles();
-                                    this.ShowErrorAndKill ( new ConfigurationFilesNewVersionException () );
-                                    return;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if ( Result )
-            {
-                ConfigVersion = SecureStorage.GetAsync("ConfigVersion").Result;
-
-                // Loads configuration files
-                if ( ! this.InitializeConfiguration () )
-                {
-                    if ( checkConfigFiles )
-                        GenericUtilsClass.RestoreConfigFiles ();
-                    else
-                    {
-                        GenericUtilsClass.DeleteConfigFiles(Mobile.ConfigPath);
-                        GenericUtilsClass.SetInstallMode("None");
-                    }
-                    
-                    // Finishes because the app will be killed
-                    return;
-                }
-
-                if (!String.IsNullOrEmpty(NewConfigVersion))
-                {
-                    ConfigVersion = NewConfigVersion;
-                    SecureStorage.SetAsync("ConfigVersion", ConfigVersion);
-                }
-
-                Utils.Print($"Config version: { ConfigVersion} ");
-                if (!Mobile.configData.HasIntune) Utils.Print("Local parameters loaded..");
-                else Utils.Print("Intune parameters loaded..");
-                if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
-                {
-                    Utils.Print("FTP: " + Mobile.configData.ftpDownload_Host + ":" + Mobile.configData.ftpDownload_Port + " - "
-                        + Mobile.configData.ftpDownload_User + " [ " + Mobile.configData.ftpDownload_Pass + " ]");
-                    if (Mobile.configData.IsCertLoaded)
-                    {
-                        Utils.Print("Certificate: " + Mobile.configData.certificate.Subject + " [ " + Mobile.configData.certificate.NotAfter + " ]");
-                    }
-                }
-                
-                if ( ! Data.Get.IsFromScripting )
-                    Device.BeginInvokeOnMainThread ( () =>
-                    {
-                       Application.Current.MainPage = new NavigationPage(new AclaraViewLogin(dialogs));
-                    });
-                else
-                {
-                    if ( Data.Get.IsIOS )
-                        taskSemaphoreIOS.SetResult ( true );
-                    else
-                        HandleUrl ( dataUrl,adapter );
-                }
-            }
-        }
-
-        public bool InitializeConfiguration ()
-        {
-            try
-            {
-                config = Configuration.GetInstanceWithParams ( string.Empty );
-                logger = new Logger ();
-    
-                switch ( Device.RuntimePlatform )
-                {
-                    case Device.Android:
-                        config.setPlatform   ( SO_ANDROID );
-                        config.setAppName    ( AppName    );
-                        config.setVersion    ( appVersion_str);
-                        config.setDeviceUUID ( deviceId   );
-                        break;
-                    case Device.iOS:
-                        config.setPlatform   ( SO_IOS     );
-                        config.setAppName    ( AppName    );
-                        config.setVersion    ( appVersion_str);
-                        config.setDeviceUUID ( deviceId   );
-                        break;
-                    default:
-                        config.setPlatform   ( SO_UNKNOWN );
-                        break;
-                }
-            }
-            catch ( Exception e )
-            {
-                if ( Errors.IsOwnException ( e ) )
-                     this.ShowErrorAndKill ( e );
-                else this.ShowErrorAndKill ( new ConfigurationFilesCorruptedException () );
-               
-                return false;
-            }
-            
-            return true;
-        }
-
+ 
         #endregion
 
         #region Base64
@@ -490,106 +223,78 @@ namespace aclara_meters
 
         #endregion
 
-        #region Scripting
+        #region Scripting iOS
 
-        public async void HandleUrl ( Uri url , IBluetoothLowEnergyAdapter adapter)
+        public async  void HandleUrl ( Uri url )
         {
             Data.Set ( "IsFromScripting", true );
 
             Utils.Print ( "FormsApp: Scripting [ " + Data.Get.IsFromScripting + " ]" );
-        
-            // Stops logic because initialization has been canceled due to an error / exception
-            if ( this.formsInitFailed )
-                return;
-        
-            try
+            Utils.Print ("FormsApp: Uri.Query [ " + url.Query.ToString() + " ]");
+
+            DataUrl = url;
+
+            if (StartInteractive) ///   is in interactive mode
             {
-                if ( ble_interface != null &&
-                     ble_interface.IsOpen() )
-                    ble_interface.Close();
+                try
+                {
+                    if (FormsApp.ble_interface != null &&
+                        FormsApp.ble_interface.IsOpen())
+                        FormsApp.ble_interface.Close();
+                }
+                catch (Exception e)
+                {
+                    Utils.Print(e.StackTrace);
+                }
 
-                #region WE HAVE TO DISABLE THE BLUETOOTH ANTENNA, IN ORDER TO DISCONNECT FROM PREVIOUS CONNECTION, IF WE WENT FROM INTERACTIVE TO SCRIPTING MODE
-
-               // await adapter.DisableAdapter();
-               // await adapter.EnableAdapter(); //Android shows a window to allow bluetooth
-
-                #endregion
-
-            }
-            catch (Exception e)
-            {
-                Utils.Print(e.StackTrace);
-            }
-
-            if ( url != null )
-            {
-                //string path = Mobile.ConfigPath;
-                //ConfigPaths();
                 string path = Mobile.ConfigPath;
-                NameValueCollection query = HttpUtility.ParseQueryString ( url.Query );
+                NameValueCollection query = HttpUtility.ParseQueryString(url.Query);
 
-                var script_name = query.Get ( "script_name" );
-                var script_data = query.Get ( "script_data" );
-                var callback    = query.Get ( "callback"    );
+                var script_name = query.Get("script_name");
+                var script_data = query.Get("script_data");
+                var callback = query.Get("callback");
 
-                if ( script_name != null )
-                    path = Path.Combine ( path, "___" + script_name.ToString () );
+                if (script_name != null)
+                    path = Path.Combine(path, "___" + script_name.ToString());
 
-                if ( script_data != null )
-                    File.WriteAllText ( path, Base64Decode ( script_data ) );
+                if (script_data != null)
+                    File.WriteAllText(path, Base64Decode(script_data));
 
-                if ( callback != null ) { /* ... */ }
+                if (callback != null) { /* ... */ }
 
                 try
                 {
-                    if ( Data.Get.IsIOS )
+                    await Task.Run(async () =>
                     {
-                        // Scripting
-                        if ( MainPage == null )
+                        await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread(async () =>
                         {
-                            taskSemaphoreIOS = new TaskCompletionSource<bool>();
+                            Application.Current.MainPage = new NavigationPage(
+                                   new AclaraViewScripting(path, callback, script_name));
 
-                            // Wait until HandleUrl finishes
-                            bool result = await taskSemaphoreIOS.Task;
-                        }
-
-                        await Task.Run ( async () =>
-                        {
-                            await Task.Delay(1000); Xamarin.Forms.Device.BeginInvokeOnMainThread ( async () =>
-                            {
-                                Application.Current.MainPage = new NavigationPage (
-                                    new AclaraViewScripting ( path, callback, script_name ) );
-
-                                await MainPage.Navigation.PopToRootAsync(true);
-                            });
+                            await Application.Current.MainPage.Navigation.PopToRootAsync(true);
                         });
-                    }
-                    else
-                    {
-                        Device.BeginInvokeOnMainThread ( () =>
-                        {
-                            Application.Current.MainPage = new NavigationPage (
-                                new AclaraViewScripting ( path, callback, script_name ) );
-                        });
-                    }
+                    });
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"-----  {ex.Message}");
                 }
+            
             }
+            
+ 
         }
-        
+
         #endregion
 
         #region Events
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S1186:Methods should not be empty", Justification = "<pendiente>")]
         protected override void OnStart()
         {
-            // https://appcenter.ms/users/ma.jimenez/apps/Aclara-MTU-Testing-App
-            //AppCenter.Start("ios=cb622ad5-e2ad-469d-b1cd-7461f140b2dc;" + "android=53abfbd5-4a3f-4eb2-9dea-c9f7810394be", typeof(Analytics), typeof(Crashes), typeof(Distribute) );
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Critical Code Smell", "S1186:Methods should not be empty", Justification = "<pendiente>")]
         protected override void OnSleep()
         {
         }
@@ -673,7 +378,6 @@ namespace aclara_meters
                 var capturedTraces = typeof ( StackTrace ).GetField ( "captured_traces", BindingFlags.Instance | BindingFlags.NonPublic)
                   .GetValue ( traces ) as StackTrace[];
                 
-                //string traces2 = exception.InnerException.StackTrace;
                 foreach ( StackTrace trace in capturedTraces )
                     foreach ( StackFrame frame in trace.GetFrames () )
                         str.AppendLine ( frame.GetFileName () + ".." + Environment.NewLine +
@@ -702,9 +406,7 @@ namespace aclara_meters
         private void ShowErrorAndKill (
             Exception e )
         {
-            // Avoids executing the HandleUrl method
-            this.formsInitFailed = true;
-        
+       
             Device.BeginInvokeOnMainThread(() =>
             {
                 this.MainPage = new NavigationPage ( new ErrorInitView ( e ) );
@@ -714,62 +416,12 @@ namespace aclara_meters
         public static void DoLogOff()
         {
             Settings.IsLoggedIn = false;
-            FormsApp.credentialsService.DeleteCredentials();
+            credentialsService.DeleteCredentials();
             Singleton.Remove<Puck>();
             Mobile.LogPath = Mobile.ConfigPublicPath;
-            FormsApp.ble_interface.Close();
+            ble_interface.Close();
         }
 
-        private bool UpdateConfigFiles()
-        {
-            if (Mobile.configData.HasIntune || Mobile.configData.HasFTP)
-            {
-                if (Mobile.IsNetAvailable())
-                {
-                    if(!GenericUtilsClass.DownloadConfigFiles(out string sFileCert))
-                    {
-                        return false;
-                    }
-                    if (!Mobile.configData.IsCertLoaded && !string.IsNullOrEmpty(sFileCert))
-                    {
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-                    }
-
-                    return true;
-                }
-                //this.ShowErrorAndKill(new NoInternetException());
-                //MainPage.DisplayAlert("Attention", "There is not connection at this moment, try again later","OK");
-                return false;
-            }
-            else
-            {
-                Mobile.configData.HasFTP = false;
-
-                // Check if all configuration files are available in public folder
-                if ( GenericUtilsClass.HasDeviceAllXmls ( Mobile.ConfigPublicPath ) )
-                {
-
-                    bool CPD = false;
-                    if (GenericUtilsClass.TagGlobal(true, "ConfigPublicDir", out dynamic value))
-                    {
-                        if (value != null)
-                            bool.TryParse((string)value, out CPD);
-                    }
-                    if (!GenericUtilsClass.CopyConfigFiles(!CPD, Mobile.ConfigPublicPath, Mobile.ConfigPath, out string sFileCert))
-                    {
-                        return false;
-                    }
-                    if (!string.IsNullOrEmpty(sFileCert))
-                        Mobile.configData.StoreCertificate(Mobile.configData.CreateCertificate(null, sFileCert));
-
-                    if (!GenericUtilsClass.HasDeviceAllXmls(Mobile.ConfigPath))
-                        return false;
-                    else
-                        return true;
-                }
-
-                return true;
-            }
-        }
+  
     }
 }

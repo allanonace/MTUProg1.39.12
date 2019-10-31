@@ -11,8 +11,7 @@ using System.Xml.Serialization;
 using Library;
 using Library.Exceptions;
 using Xml;
-using Lexi;
-using Library;
+
 
 /// <summary>
 /// LOGIC:
@@ -345,8 +344,9 @@ namespace MTUComm.MemoryMap
                         }
                         catch ( Exception e )
                         {
+                            Utils.PrintDeep("ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException);
                             throw new MemoryMapParseXmlException ( xmlRegister.Id );
-                            Utils.Print ( "ERROR! " + xmlRegister.Id + " -> " + e.Message + " " + e.InnerException );
+                            
                         }
                     }
 
@@ -400,8 +400,9 @@ namespace MTUComm.MemoryMap
                         }
                         catch ( Exception e )
                         {
+                            Utils.PrintDeep("ERROR! " + xmlOverload.Id + " -> " + e.Message + " " + e.InnerException);
                             throw new MemoryMapParseXmlException ( xmlOverload.Id );
-                            Utils.Print ( "ERROR! " + xmlOverload.Id + " -> " + e.Message + " " + e.InnerException );
+                           
                         }
                         
                     }
@@ -447,7 +448,7 @@ namespace MTUComm.MemoryMap
                     // Get value from local memory map ( not using/reading the MTU )
                     T result = this.PropertyGet_Logic ( memoryRegister );
 
-                    Utils.Print ( "Map -> Value cache: " + memoryRegister.id + " = " + result );
+                    Utils.PrintDeep ( "Map -> Value cache: " + memoryRegister.id + " = " + result );
 
                     return result;
                 }));
@@ -460,7 +461,7 @@ namespace MTUComm.MemoryMap
             base.AddMethod ( METHODS_SET_MTU_PREFIX + memoryRegister.id,
                 new Func<Task<T>> ( async () =>
                 {
-                    Utils.Print ( "Map -> Read from MTU: " + memoryRegister.id +
+                    Utils.PrintDeep ( "Map -> Read from MTU: " + memoryRegister.id +
                                         " | dir: " + memoryRegister.address +
                                         " | Size Get: " + memoryRegister.sizeGet +
                                         " | Size Set: " + memoryRegister.size +
@@ -472,7 +473,7 @@ namespace MTUComm.MemoryMap
                     
                     memoryRegister.lastRead = read;
                     
-                    Utils.Print ( "Map -> From MTU value: " + memoryRegister.id + " = " + Utils.ByteArrayToString ( read ) + " [ " + read + " ]" );
+                    Utils.PrintDeep ( "Map -> From MTU value: " + memoryRegister.id + " = " + Utils.ByteArrayToString ( read ) + " [ " + read + " ]" );
                     
                     // Convert byte array to desired format
                     object value = default ( T );
@@ -486,7 +487,7 @@ namespace MTUComm.MemoryMap
                         case TypeCode.String : value = ( object )this.GetStringFromMem_Logic ( read ); break;
                     }
                     
-                    Utils.Print ( "Map -> Converted value: " + memoryRegister.id + " = " + value );
+                    Utils.PrintDeep ( "Map -> Converted value: " + memoryRegister.id + " = " + value );
                     
                     // When sizeGet is different to size, no setting is performed, only recover
                     if ( memoryRegister.size == memoryRegister.sizeGet ||
@@ -784,7 +785,7 @@ namespace MTUComm.MemoryMap
                 dynamic register = modifiedRegisters[ i ];
                 string  name     = register.id;
                 
-                Utils.Print ( "Check MTU write: " + name +
+                Utils.PrintDeep( "Check MTU write: " + name +
                     " [ Size: " + register.size +
                     ", SizeGet: " + register.sizeGet +
                     ", Other contains: " + otherMap.ContainsMember ( name ) + " ]" );
@@ -794,12 +795,12 @@ namespace MTUComm.MemoryMap
                      ( ! otherMap.ContainsMember ( name ) ||                // Register not present in other memory map
                        ! await base[ name ].Equals ( otherMap[ name ] ) ) ) // Both registers are not equal
                 {
-                    Utils.Print ( "Equals: " + name + " -> NO" );
+                    Utils.PrintDeep ( "Equals: " + name + " -> NO" );
                 
                     difs.Add ( name );
                     continue;
                 }
-                else Utils.Print ( "Equals: " + name + " -> OK" );
+                else Utils.PrintDeep( "Equals: " + name + " -> OK" );
             }
 
             return difs.ToArray ();
@@ -843,7 +844,7 @@ namespace MTUComm.MemoryMap
                 case TypeCode.UInt64 : result = Convert.ToInt64  ( result ); break;
             }
 
-            Utils.Print ( "GetOperation: " + operation + " | " + value + " = " + result );
+            Utils.PrintDeep ( "GetOperation: " + operation + " | " + value + " = " + result );
 
             return ( T )result;
         }
@@ -863,7 +864,7 @@ namespace MTUComm.MemoryMap
                 case TypeCode.UInt64 : result = Convert.ToInt64  ( result ); break;
             }
 
-            Utils.Print ( "GetOperation: " + operation + " = " + result );
+            Utils.PrintDeep ( "GetOperation: " + operation + " = " + result );
 
             return ( T )result;
         }
@@ -1408,7 +1409,7 @@ namespace MTUComm.MemoryMap
                     else
                         Utils.PrintDeep ( "ERROR! FillMemory: Register '" + reg.Id + "' is not present" ); 
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
                     Utils.PrintDeep ( "ERROR! FillMemory: Set register '" + reg.Id + "'" );
                 }
@@ -1447,8 +1448,7 @@ namespace MTUComm.MemoryMap
             str.AppendLine ( "</Registers>" );
             Utils.Print ( str.ToString () );
 
-            str.Clear ();
-            str = null;
+            str.Clear ();            
         }
 
         #endregion

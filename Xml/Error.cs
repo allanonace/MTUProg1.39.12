@@ -9,7 +9,6 @@ namespace Xml
         private const int EMPTY_VAL = -1;
     
         private string message;
-        private string messageDebug;
         private string messageFooter;
         private string messagePopup;
 
@@ -129,8 +128,8 @@ namespace Xml
             get { return ! string.IsNullOrEmpty ( this.messagePopup ); }
         }
 
-        public int Port;
-        public Exception Exception;
+        public int Port { get; set; }
+        public Exception Exception { get; set; }
 
         public object Clone ()
         {
