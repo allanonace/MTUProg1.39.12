@@ -235,22 +235,25 @@ namespace aclara_meters
                 if (!Events && file.Name.ToLower().Contains("mtuid"))
                     continue;
 
-                if ( file.Name.ToLower ().Contains ("result") || file.Name.ToLower().Contains("mtuid"))
-                    local_array_files.Add ( file );
-                else
-                {
+                string dayfix = file.Name.ToLower().Substring(0, 10);
+                bool LogDateOk = DateTime.TryParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date);
 
-	                if (!AllFiles)
+                if (LogDateOk)  // activity log
+                {
+                    if (!AllFiles)  // check the latest file
                     {
-                        string dayfix = file.Name.ToLower().Substring(0, 10);
-                        DateTime date = DateTime.ParseExact(dayfix, "MMddyyyyHH", CultureInfo.InvariantCulture).ToUniversalTime();
+                        date = date.ToUniversalTime();
                         TimeSpan diff = date - DateTime.UtcNow;
-                    
-                        int hours = ( int )diff.TotalHours;
-                        if ( hours < 0 )
-                           local_array_files.Add(file);
+
+                        int hours = (int)diff.TotalHours;
+                        if (hours < 0)
+                            local_array_files.Add(file);
                     }
                     else local_array_files.Add(file);
+                }
+                else // other logs
+                {
+                    local_array_files.Add(file);
                 }
             }
 
