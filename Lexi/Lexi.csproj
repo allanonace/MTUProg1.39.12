@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj" />
+    <ProjectReference Include="..\Xml\Xml.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="LogInfo.cs" />

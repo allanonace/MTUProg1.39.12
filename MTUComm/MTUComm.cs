@@ -16,8 +16,8 @@ using MTUComm.MemoryMap;
 using Xml;
 
 using ActionType               = MTUComm.Action.ActionType;
-using FIELD                    = MTUComm.actions.AddMtuForm.FIELD;
 using APP_FIELD                = MTUComm.ScriptAux.APP_FIELD;
+using FIELD                    = MTUComm.actions.AddMtuForm.FIELD;
 using EventLogQueryResult      = MTUComm.EventLogList.EventLogQueryResult;
 using ParameterType            = MTUComm.Parameter.ParameterType;
 using ENCRYPTION               = Xml.Mtu.ENCRYPTION;
@@ -478,7 +478,8 @@ namespace MTUComm
                              await Task.Run ( () => RemoteDisconnect ( ( Action )args[ 0 ] ) );
                         else await Task.Run ( () => RemoteDisconnect () );
                         break;
-                    case ActionType.MtuInstallationConfirmation: await Task.Run ( () => InstallConfirmation () ); break;
+                    case ActionType.MtuInstallationConfirmation:
+                    case ActionType.RFCheck                    : await Task.Run ( () => InstallConfirmation () ); break;
                     case ActionType.ReadFabric                 : await Task.Run ( () => ReadFabric () ); break;
                     case ActionType.ReadMtu                    : await Task.Run ( () => ReadMtu () ); break;
                     case ActionType.TurnOffMtu                 : await Task.Run ( () => TurnOnOffMtu ( false ) ); break;
@@ -1186,9 +1187,6 @@ namespace MTUComm
                 {
                     case NodeDiscoveryResult.EXCELLENT:
                     case NodeDiscoveryResult.GOOD:
-
-                    //await map.LogFullMemory ();
-
                     return IC_OK;
 
                     case NodeDiscoveryResult.NOT_ACHIEVED:
@@ -1249,11 +1247,11 @@ namespace MTUComm
                         null,
                         LexiAction.OperationRequest );
 
-                vswr = Utils.ConvertToNumericFromBytes<double> ( fullResponse.Response, 2, 2 );
+                vswr = Utils.CalculateNumericFromBytes<double> ( fullResponse.Response, 2, 2 ) / 1000;
 
                 await Task.Delay ( WAIT_BEFORE_NODE_INIT );
 
-                // NOTE: Prepare some info out of the while block for reuse inside
+                // Prepare some info out of the while block for reuse inside
 
                 // Node discovery initiation command
                 byte[] data = new byte[8]; // 1+4+1+1+1
@@ -1554,8 +1552,19 @@ namespace MTUComm
                             result = NodeDiscoveryResult.GOOD;
 
                         // Finish process only if the result is excellent or time is over
-                        if ( result == NodeDiscoveryResult.EXCELLENT )
+                        if ( result == NodeDiscoveryResult.EXCELLENT ||
+                             // Avoids performing multiple attempts during the unit test
+                             Data.Get.UNIT_TEST &&
+                             result == NodeDiscoveryResult.GOOD )
                             break; // Exit from infinite while
+
+                        #if DEBUG
+
+                        // NOTE: Avoid to perform all the attempts debugging
+                        if ( result == NodeDiscoveryResult.GOOD )
+                            break;
+
+                        #endif
 
                         #endregion
                     }
@@ -1692,7 +1701,7 @@ namespace MTUComm
                                         break;
 
                                     case RDDStatus.IDLE:
-                                        if ( ! okIdle )
+                                        if ( okIdle )
                                             goto END_LOOP;
                                         break;
 
@@ -1772,11 +1781,6 @@ namespace MTUComm
                                 LexiAction.OperationRequest );
                             
                             response = new RDDStatusResult ( fullResponse.Response );
-
-                            Console.WriteLine ( "----> 3: " +
-                                response.PreviousCmd + " " +
-                                response.PreviousCmdSuccess + " " +
-                                response.ValvePosition );
                         }
                         catch (Exception e) { Console.WriteLine($"mtucomm.cs_Remotedisconnectlogic {e.Message}"); }
                     }
@@ -1821,16 +1825,16 @@ namespace MTUComm
             }
             catch ( Exception e )
             {
-                if (!throwExceptions)
-                {
+                if ( ! throwExceptions )
+		{
                     result = RDD_EXCEPTION;
                     Errors.LogErrorNowAndContinue(e);
                 }
                 else
                 {
                     // Is not own exception
-                    if (!Errors.IsOwnException(e))
-                        throw new PuckCantCommWithMtuException();
+                    if ( ! Errors.IsOwnException ( e ) )
+                         throw new PuckCantCommWithMtuException ();
                     else throw e;
                 }
             }
@@ -2052,9 +2056,12 @@ namespace MTUComm
             await Task.Delay ( WAIT_BEFORE_PREPARE_MTU );
             
             // Activates flag to read Meter
-            await map.ReadMeter.SetValueToMtu ( true, LEXI_ATTEMPTS_N * 2 );
+            if ( this.mtu.Port1.IsForEncoderOrEcoder )
+            {
+                await map.ReadMeter.SetValueToMtu ( true, LEXI_ATTEMPTS_N * 2 );
             
-            await Task.Delay ( WAIT_BEFORE_READ_MTU );
+                await Task.Delay ( WAIT_BEFORE_READ_MTU );
+            }
 
             return map;
         }
@@ -2655,20 +2662,40 @@ namespace MTUComm
                 #region Auto-detect Alarm
     
                 // Auto-detect scripting Alarm profile
-                List<Alarm> alarms = configuration.Alarms.FindByMtuType ( (int)Data.Get.MtuBasicInfo.Type );
-                if ( alarms.Count > 0 )
+                if ( this.mtu.RequiresAlarmProfile )
                 {
-                    Alarm alarm = alarms.Find ( a => string.Equals ( a.Name.ToLower (), "scripting" ) );
-                    if ( alarm != null &&
-                         form.mtu.RequiresAlarmProfile )
+                    Alarm alarm = configuration.Alarms.FindByMtuType_Scripting ( ( int )Data.Get.MtuBasicInfo.Type );
+
+                    if ( alarm != null )
                         form.AddParameter ( FIELD.ALARM, alarm );
-                        
+                            
                     // For current MTU does not exist "Scripting" profile inside Alarm.xml
                     else throw new ScriptingAlarmForCurrentMtuException ();
                 }
 
                 #endregion
+
+                #region Auto-detect Demands
+
+                // Auto-detect scripting Alarm profile
+                if ( this.mtu.MtuDemand &&
+                     this.mtu.FastMessageConfig )
+                {
+                    Demand demand = configuration.Demands.FindByMtuType_Scripting ( ( int )Data.Get.MtuBasicInfo.Type );
+
+                    if ( demand != null )
+                        form.AddParameter ( FIELD.DEMAND, demand );
+                            
+                    // For current MTU does not exist "Scripting" profile inside DemandConf.xml
+                    else throw new ScriptingDemandForCurrentMtuException ();
+                }
+
+                #endregion
             
+                // TODO: Use Library.Data as first step to remove AddMtuForm from the system
+                foreach ( KeyValuePair<string,Parameter> entry in form.Dictionary )
+                    Data.SetTemp ( entry.Key, entry.Value.Value );
+
                 await this.AddMtu ( form, action.User, action );
             }
             catch ( Exception e )
@@ -2703,8 +2730,7 @@ namespace MTUComm
             string user,
             Action action )
         {
-            Mtu mtu  = form.mtu;
-            this.mtu = mtu;
+            this.mtu = form.mtu;
 
             try
             {
@@ -2771,10 +2797,10 @@ namespace MTUComm
                 // Uses default value fill to zeros if parameter is missing in scripting
                 // Only first 12 numeric characters are recorded in MTU memory
                 // F1 electric can have 20 alphanumeric characters but in the activity log should be written all characters
-                map.P1MeterId = form.AccountNumber.GetValueOrDefault<ulong> ( 12 );
+                map.P1MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get.AccountNumber, 12 );
                 if ( form.usePort2 &&
                      form.ContainsParameter ( FIELD.ACCOUNT_NUMBER_2 ) )
-                    map.P2MeterId = form.AccountNumber_2.GetValueOrDefault<ulong> ( 12 );
+                    map.P2MeterId = Utils.GetValueOrDefault<ulong> ( Data.Get.AccountNumber_2, 12 );
 
                 #endregion
 
@@ -2784,16 +2810,16 @@ namespace MTUComm
                 Meter selectedMeter2 = null;
                 
                 if ( ! Data.Get.IsFromScripting )
-                     selectedMeter = (Meter)form.Meter.Value;
-                else selectedMeter = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter.Value ) );
+                     selectedMeter = (Meter)Data.Get.Meter;
+                else selectedMeter = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )Data.Get.Meter ) );
                 map.P1MeterType = selectedMeter.Id;
 
                 if ( form.usePort2 &&
                      form.ContainsParameter ( FIELD.METER_TYPE_2 ) )
                 {
                     if ( ! Data.Get.IsFromScripting )
-                         selectedMeter2 = (Meter)form.Meter_2.Value;
-                    else selectedMeter2 = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )form.Meter_2.Value ) );
+                         selectedMeter2 = (Meter)Data.Get.Meter_2;
+                    else selectedMeter2 = this.configuration.getMeterTypeById ( Convert.ToInt32 ( ( string )Data.Get.Meter_2 ) );
                     map.P2MeterType = selectedMeter2.Id;
                 }
 
@@ -2808,7 +2834,7 @@ namespace MTUComm
                 {
                     if ( form.ContainsParameter ( FIELD.METER_READING ) )
                     {
-                        p1readingStr = form.MeterReading.Value;
+                        p1readingStr = Data.Get.MeterReading;
                         ulong p1reading = ( ! string.IsNullOrEmpty ( p1readingStr ) ) ? Convert.ToUInt64 ( ( p1readingStr ) ) : 0;
         
                         map.P1MeterReading = p1reading / ( ( selectedMeter.HiResScaling <= 0 ) ? 1 : selectedMeter.HiResScaling );
@@ -2828,7 +2854,7 @@ namespace MTUComm
                 {
                     if ( form.ContainsParameter ( FIELD.METER_READING_2 ) )
                     {
-                        p2readingStr = form.MeterReading_2.Value;
+                        p2readingStr = Data.Get.MeterReading_2;
                         ulong p2reading = ( ! string.IsNullOrEmpty ( p2readingStr ) ) ? Convert.ToUInt64 ( ( p2readingStr ) ) : 0;
         
                         map.P2MeterReading = p2reading / ( ( selectedMeter2.HiResScaling <= 0 ) ? 1 : selectedMeter2.HiResScaling );
@@ -2852,7 +2878,7 @@ namespace MTUComm
                     // If not present in scripted mode, set default value to one/1 hour
                     map.ReadIntervalMinutes =
                         ( form.ContainsParameter ( FIELD.READ_INTERVAL ) ) ?
-                            form.ReadInterval.Value : "1 Hr";
+                            Data.Get.ReadInterval : "1 Hr";
                 }
 
                 #endregion
@@ -2865,7 +2891,7 @@ namespace MTUComm
                      //! this.mtu.IsFamily31xx32xx &&
                      //! this.mtu.IsFamily33xx )
                 {
-                    map.FastMessagingConfigFreq = ( form.TwoWay.Value.ToUpper ().Equals ( "SLOW" ) ) ? false : true; // F1/Slow and F2/Fast
+                    map.FastMessagingConfigFreq = ( Data.Get.TwoWay.ToUpper ().Equals ( "SLOW" ) ) ? false : true; // F1/Slow and F2/Fast
                 }
 
                 #endregion
@@ -2878,7 +2904,7 @@ namespace MTUComm
                      noRddOrNotIn1 ) // &&
                      //map.ContainsMember ( "DailyGMTHourRead" ) )
                 {
-                    map.DailyGMTHourRead = form.SnapReads.Value;
+                    map.DailyGMTHourRead = Data.Get.SnapReads;
                 }
 
                 #endregion
@@ -2900,7 +2926,7 @@ namespace MTUComm
 
                 if ( mtu.RequiresAlarmProfile )
                 {
-                    Alarm alarms = (Alarm)form.Alarm.Value;
+                    Alarm alarms = (Alarm)Data.Get.Alarm;
                     if ( alarms != null )
                     {
                         try
@@ -2987,7 +3013,7 @@ namespace MTUComm
                      this.mtu.FastMessageConfig )
                 {
                     // MTU 170+ = Families 342x and 35xx36xx
-                    Demand demand = ( Demand )Data.Get.DemandConf;
+                    Demand demand = ( Demand )Data.Get.Demand;
                     if ( demand != null )
                     {
                         map.MtuPrimaryWindowInterval  = demand.MtuPrimaryWindowInterval;
@@ -3101,7 +3127,7 @@ namespace MTUComm
 
                 if ( mtu.RequiresAlarmProfile )
                 {
-                    Alarm alarms = ( Alarm )form.Alarm.Value;
+                    Alarm alarms = ( Alarm )Data.Get.Alarm;
                     
                     // PCI Alarm needs to be set after MTU is turned on, just before the read MTU
                     // The Status will show enabled during install and actual status (triggered) during the read
@@ -3115,8 +3141,9 @@ namespace MTUComm
 
                 Utils.Print ( "--------RDD_START--------" );
 
-                if ( this.mtu.Port1.IsSetFlow ||
-                     this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow )
+                if ( ! Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RemoteDisconnect has its own test
+                     ( this.mtu.Port1.IsSetFlow ||
+                       this.mtu.TwoPorts && this.mtu.Port2.IsSetFlow ) )
                 {
                     // If the Remote Disconnect fails, it cancels the installation
                     await this.RemoteDisconnect_Logic ( true );
@@ -3132,14 +3159,15 @@ namespace MTUComm
 
                 // After TurnOn has to be performed an InstallConfirmation
                 // if certain tags/registers are validated/true
-                if ( global.TimeToSync && // Indicates that is a two-way MTU and enables TimeSync request
+                if ( ! Data.Get.UNIT_TEST && // Avoid this subprocess during the unit test because the RFCheck has its own test
+                     global.TimeToSync && // Indicates that is a two-way MTU and enables TimeSync request
                      mtu.TimeToSync    && // Indicates that is a two-way MTU and enables TimeSync request
                      mtu.OnTimeSync    && // MTU can be force during installation to perform a TimeSync/IC
                      // If script contains ForceTimeSync, use it but if not use value from Global
                      ( ! form.ContainsParameter ( FIELD.FORCE_TIME_SYNC ) &&
                        global.ForceTimeSync ||
                        form.ContainsParameter ( FIELD.FORCE_TIME_SYNC ) &&
-                       form.ForceTimeSync ) )
+                       Data.Get.ForceTimeSync ) )
                 {
                     Utils.Print ( "--------IC_START---------" );
                 
@@ -3182,7 +3210,7 @@ namespace MTUComm
                     map.P2MeterReading.readedFromMtu = false;
                 
                     // Activates flag to read Meter
-                    await map.ReadMeter.SetValueToMtu ( true );
+                    await map.ReadMeter.SetValueToMtu ( true, LEXI_ATTEMPTS_N * 2 );
                     
                     await Task.Delay ( WAIT_BEFORE_READ_MTU );
                 }
@@ -3195,11 +3223,6 @@ namespace MTUComm
 
                 // Generate log to show on device screen
                 await this.OnAddMtu ( new Delegates.ActionArgs ( this.mtu, map, form, addMtuLog ) );
-
-                // Show all registers read from the MTU and modified/write to the MTU
-                #if DEBUG
-                //map.LogFullMemory ();
-                #endif
             }
             catch ( Exception e )
             {
@@ -3324,7 +3347,7 @@ namespace MTUComm
             dynamic map )
         {
             Utils.Print ( "----ENCRYPTION_START-----" );
-                
+            
             OnProgress ( this, new Delegates.ProgressArgs ( "Encrypting..." ) );
 
             MemoryRegister<string> regAesKey     = map[ "EncryptionKey"   ];
@@ -3699,9 +3722,9 @@ namespace MTUComm
             {
                 MTUBasicInfo currentBasicInfo = Data.Get.MtuBasicInfo;
                 mtuHasChanged = ( currentBasicInfo.Id   == 0 ||
-                                       currentBasicInfo.Type == 0 ||
-                                       basicInfo.Id   != currentBasicInfo.Id ||
-                                       basicInfo.Type != currentBasicInfo.Type );
+                                  currentBasicInfo.Type == 0 ||
+                                  basicInfo.Id   != currentBasicInfo.Id ||
+                                  basicInfo.Type != currentBasicInfo.Type );
             }
 
             if ( mtuHasChanged )
@@ -3720,9 +3743,6 @@ namespace MTUComm
         /// <exception cref="PuckCantCommWithMtuException">( Generic error )</exception>
         private async Task CheckIsTheSameMTU ()
         {
-            if ( Data.Get.UNIT_TEST )
-                return;
-
             byte[] read;
             try
             {

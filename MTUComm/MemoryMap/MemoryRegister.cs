@@ -517,7 +517,7 @@ namespace MTUComm.MemoryMap
             
             Utils.PrintDeep ( "---WRITE_TO_MTU_FINISH---" + Environment.NewLine );
         }
-        
+
         /// <summary>
         /// Writes current value of the register in the physical memory of the MTU, only by modifying the specified bit.
         /// </summary>
@@ -532,7 +532,7 @@ namespace MTUComm.MemoryMap
             int numAttempts )
         {
             // Read current value
-            byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1 ) )[ 0 ];
+            byte systemFlags = ( await this.lexi.Read ( ( uint )this.address, 1, true ) )[ 0 ];
 
             Utils.PrintDeep( "Register -> ValueWriteToMtu_Bit -> Current value map: " + this.id + " -> " + this.ValueRaw );
             Utils.PrintDeep( "Register -> ValueWriteToMtu_Bit -> Current value MTU: " + this.id + " -> " + Utils.ByteToBits ( systemFlags ) + " [ Hex: " + systemFlags.ToString ( "D3" ) + " ]" );

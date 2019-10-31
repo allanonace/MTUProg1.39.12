@@ -1,18 +1,27 @@
 ﻿using System.Collections.Generic;
 
+using ActionType = MTUComm.Action.ActionType;
+
 namespace MTUComm
 {
     public class ActionResult
     {
-        private List<Parameter> parameters;
-
+        private ActionType         actionType;
+        private List<Parameter>    parameters;
         private List<ActionResult> ports;
 
-
-        public ActionResult()
+        public ActionType ActionType
         {
-            parameters  = new List<Parameter>();
-            ports = new List<ActionResult>();
+            get { return this.actionType; }
+            set { this.actionType = value; }
+        }
+
+        public ActionResult (
+            ActionType actionType = ActionType.ReadMtu )
+        {
+            this.actionType = actionType;
+            this.parameters = new List<Parameter> ();
+            this.ports      = new List<ActionResult> ();
         }
 
         public void AddParameter(Parameter parameter)
@@ -25,6 +34,10 @@ namespace MTUComm
             return parameters.ToArray();
         }
 
+        public int NumParameters
+        {
+            get { return this.parameters.Count; }
+        }
 
         public void addPort(ActionResult port)
         {
@@ -34,6 +47,11 @@ namespace MTUComm
         public ActionResult[] getPorts()
         {
             return ports.ToArray();
+        }
+
+        public int NumPorts
+        {
+            get { return this.ports.Count; }
         }
 
         public Parameter getParameterByTag ( string tag, string source, int port = 0 )

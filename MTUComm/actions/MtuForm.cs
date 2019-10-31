@@ -101,6 +101,11 @@ namespace MTUComm.actions
             return new List<Parameter>(this.dictionary.Values).ToArray();
         }
 
+        public Dictionary<string,Parameter> Dictionary
+        {
+            get { return this.dictionary; }
+        }
+
         public Parameter GetParameter ( string paramId )
         {
             if ( this.dictionary.ContainsKey ( paramId ) )

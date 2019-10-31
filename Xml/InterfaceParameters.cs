@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Xml.Serialization;
 
 namespace Xml
@@ -11,6 +12,7 @@ namespace Xml
             this.Source = string.Empty;
             this.Length = string.Empty;
             this.Fill   = string.Empty;
+            this.Format = string.Empty;
         }
 
         [XmlAttribute("name")]
@@ -37,11 +39,19 @@ namespace Xml
         [XmlAttribute("fill")]
         public string Fill { get; set; }
 
+        [XmlAttribute("format")]
+        public string Format { get; set; }
+
         [XmlText]
         public string Value { get; set; }
 
         [XmlElement("Parameter")]
         public List<InterfaceParameters> Parameters { get; set; }
+
+        public bool HasFormat
+        {
+            get { return ! string.IsNullOrEmpty ( this.Format ); }
+        }
 
         public object Clone ()
         {

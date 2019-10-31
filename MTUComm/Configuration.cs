@@ -37,9 +37,10 @@ namespace MTUComm
         public User[] Users { get; set; }
         public DemandConf Demands { get; set; }
 
-        private Configuration ( string path = "", bool avoidXmlError = false )
+        private Configuration ( string customPath = "", bool avoidXmlError = false )
         {
-            string configPath = Mobile.ConfigPath;
+            Data.Set ( "UNIT_TEST", ! string.IsNullOrEmpty ( customPath ) );
+            string configPath = ( ! Data.Get.UNIT_TEST ) ? Mobile.ConfigPath : customPath;
 
             device = "PC";
 
@@ -375,6 +376,14 @@ namespace MTUComm
 
         }
 
+
+        public DemandConf Demands
+        {
+            get
+            {
+                return this.demands;
+            }
+        }
 
         public String getApplicationName()
         {

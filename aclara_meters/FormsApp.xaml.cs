@@ -71,9 +71,11 @@ namespace aclara_meters
         {
             try
             {
-                InitializeComponent();
+                InitializeComponent ();
 
-                MainPage = new ContentPage();
+                Data.Set ( "UNIT_TEST", false );
+
+                MainPage = new ContentPage ();
 
                 VersionTracking.Track();
 

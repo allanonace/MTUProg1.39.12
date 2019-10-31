@@ -172,7 +172,7 @@ namespace aclara_meters.view
                 this.tbx_Battery           .Text = rddBattery;
                 this.tbx_RDDFirmwareVersion.Text = this.global.RDDFirmwareVersion;
                 
-                this.tbx_FieldOrder        .MaxLength = global.WorkOrderLength;
+                this.tbx_FieldOrder        .MaxLength = this.global.WorkOrderLength;
                 this.tbx_RDDFirmwareVersion.MaxLength = 12;
             });
         }

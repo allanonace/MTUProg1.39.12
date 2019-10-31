@@ -446,7 +446,7 @@ namespace MTUComm
         {
             #region Events Log
 
-            string eventsUri = Data.Get.ProcessResultFileFull;
+            string eventsUri = Data.Get.ProcessResultFileFullDR;
             using ( Stream BasicStruct = new MemoryStream (
                 Encoding.UTF8.GetBytes ( CreateBasicStructure ( BasicFileType.DATA_READ ) ) ) )
             {
@@ -508,7 +508,7 @@ namespace MTUComm
             NodeDiscoveryList nodeList,
             Mtu mtu )
         {
-            string eventsUri = Data.Get.ProcessResultFileFull;
+            string eventsUri = Data.Get.ProcessResultFileFullND;
             using ( Stream BasicStruct = new MemoryStream (
                 Encoding.UTF8.GetBytes(CreateBasicStructure ( BasicFileType.NODE_DISCOVERY ) ) ) )
             {

@@ -87,6 +87,7 @@
     <MtouchNoSymbolStrip>true</MtouchNoSymbolStrip>
     <OptimizePNGs>false</OptimizePNGs>
     <DeviceSpecificBuild>true</DeviceSpecificBuild>
+    <MtouchFloat32>true</MtouchFloat32>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|iPhone' ">
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>

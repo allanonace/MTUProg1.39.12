@@ -31,21 +31,43 @@ namespace MTUComm
 
         public Logger Logger { get; set; }
 
+        public XElement XmlAddMtu
+        {
+            get { return this.addMtuAction; }
+        }
+
+        public XElement XmlTurnOff
+        {
+            get { return this.turnOffAction; }
+        }
+
+        public XElement XmlTurnOn
+        {
+            get { return this.turnOnAction; }
+        }
+
+        public XElement XmlReadMtu
+        {
+            get { return this.readMtuAction; }
+        }
+
         public AddMtuLog(Logger logger, dynamic form, string user )
         {
             this.Logger = logger;
             this.form = form;
             this.user = user;
             this.mtuBasicInfo = Data.Get.MtuBasicInfo;
-            this.logUri = this.Logger.CreateFileIfNotExist ();
+
+            if ( ! Data.Get.UNIT_TEST )
+                this.logUri = this.logger.CreateFileIfNotExist ();
             
             this.config = Singleton.Get.Configuration;
             this.action = Singleton.Get.Action;
 
-            this.addMtuAction  = new XElement("Action");
-            this.turnOffAction = new XElement("Action");
-            this.turnOnAction  = new XElement("Action");
-            this.readMtuAction = new XElement("Action");
+            this.addMtuAction  = new XElement ( "Action" );
+            this.turnOffAction = new XElement ( "Action" );
+            this.turnOnAction  = new XElement ( "Action" );
+            this.readMtuAction = new XElement ( "Action" );
         }
 
         public void LogTurnOff ()
@@ -232,7 +254,7 @@ namespace MTUComm
                 
                 if ( global.AutoRegisterRecording )
                 {
-                    temp = ( string.Equals ( form.MeterNumber, form.MeterNumberOld ) ) ?
+                    temp = ( string.Equals ( form.MeterNumber.Value, form.MeterNumberOld.Value ) ) ?
                              "Register head change" : "Meter change";
                     Logger.AddParameter ( port, new Parameter ( "MeterRegisterAutoStatus", temp, "Meter Register Auto Status" ) );
                 }
@@ -448,9 +470,13 @@ namespace MTUComm
                  form.ContainsParameter ( FIELD.GPS_LONGITUDE ) &&
                  form.ContainsParameter ( FIELD.GPS_ALTITUDE  ) )
             {
-                Logger.AddParameter(this.addMtuAction, new Parameter("GPS_Y", "Lat", form.GPSLat.Value ));
-                Logger.AddParameter(this.addMtuAction, new Parameter("GPS_X", "Long", form.GPSLon.Value ));
-                Logger.AddParameter(this.addMtuAction, new Parameter("Altitude", "Elevation", form.GPSAlt.Value ));
+                string lat = Utils.FormatString ( Data.Get.GPSLat, "F6" );
+                string lon = Utils.FormatString ( Data.Get.GPSLon, "F6" );
+                string alt = Utils.FormatString ( Data.Get.GPSAlt, "F2" );
+
+                Logger.AddParameter ( this.addMtuAction, new Parameter ( "GPS_Y",    "Lat",       lat ) );
+                Logger.AddParameter ( this.addMtuAction, new Parameter ( "GPS_X",    "Long",      lon ) );
+                Logger.AddParameter ( this.addMtuAction, new Parameter ( "Altitude", "Elevation", alt ) );
             }
 
             if ( ! ( form.OptionalParams.Value is string ) )
@@ -509,13 +535,14 @@ namespace MTUComm
             XDocument uniDoc = XDocument.Load(BasicStruct);
             XElement uniMtus = uniDoc.Root.Element("Mtus");
             uniMtus.Add(this.addMtuAction);
-#if DEBUG
+
+            #if DEBUG
             string uniUri = Path.Combine ( Mobile.LogUniPath,
                 this.mtuBasicInfo.Type + "-" + this.action.Type + ( ( form.mtu.SpecialSet ) ? "-Encrypted" : "" ) + "-" + DateTime.Today.ToString ( "MM_dd_yyyy" ) + ".xml" );
             this.Logger.CreateFileIfNotExist ( Logger.BasicFileType.READ, false, uniUri );
 
-            uniDoc.Save ( uniUri );           
-#endif
+            uniDoc.Save ( uniUri );
+            #endif
             
             // Write in ActivityLog
             if ( Data.Get.IsFromScripting &&
