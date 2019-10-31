@@ -291,9 +291,20 @@ namespace Lexi
 
         #region Attributes
 
+        private static dynamic map;
+
         private readonly ISerial m_serial; // Serial port interface used to communicate through Lexi
 
         private readonly int m_timeout; // Timout limit to wait for MTU response.
+
+        #endregion
+
+        #region Properties
+
+        public static dynamic Map
+        {
+            set { map = value; }
+        }
 
         #endregion
 
@@ -357,7 +368,7 @@ namespace Lexi
                         return output;
                     }
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
 
                 }
@@ -531,7 +542,7 @@ namespace Lexi
 
                     return new LexiWriteResult ( response, inputStream.Length );
                 }
-                catch ( Exception e )
+                catch ( Exception )
                 {
 
                 }

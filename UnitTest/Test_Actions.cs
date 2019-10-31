@@ -84,7 +84,7 @@ namespace UnitTest.Tests
         [InlineData(198,ActionType.ReadMtu,true)]
         [InlineData(198,ActionType.DataRead,true)]
         [InlineData(198,ActionType.RFCheck,true)]
-        [InlineData(198,ActionType.RemoteDisconnect,true)]
+        [InlineData(198,ActionType.ValveOperation,true)]
         [InlineData(198,ActionType.TurnOffMtu,true)]
         [InlineData(198,ActionType.TurnOnMtu,true)]
         [InlineData(198,ActionType.AddMtu,true)]
@@ -146,7 +146,7 @@ namespace UnitTest.Tests
                 // Replaces alarm, demand and meter ids by the instances
                 if ( Data.Contains ( "Meter" ) )
                     Data.SetTemp ( "Meter",
-                        config.meterTypes.FindByMterId ( int.Parse ( Data.Get.Meter ) ) );
+                        config.MeterTypes.FindByMterId ( int.Parse ( Data.Get.Meter ) ) );
 
                 if ( Data.Contains ( "Alarm" ) )
                     Data.SetTemp ( "Alarm",
@@ -157,13 +157,13 @@ namespace UnitTest.Tests
                         config.Demands.FindByMtuTypeAndName ( mtuId, Data.Get.Demand ) );
 
                 // Generates the memory map for the family of the MTU indicated
-                string family = this.config.interfaces.GetFamilyByMtuId ( mtuId );
+                string family = this.config.Interfaces.GetFamilyByMtuId ( mtuId );
                 this.map = new MemoryMap ( null, family, false );
 
                 this.map.FillMemory ( testData.MemoryMap );
 
                 // All LExI functions will use preloaded data
-                Lexi.Lexi.map = this.map;
+                Lexi.Lexi.Map = this.map;
 
                 // Performs the basic reading that all actions need before executing
                 await new Action ( null, ActionType.BasicRead ).Run ();

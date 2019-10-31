@@ -59,7 +59,7 @@ namespace MTUComm
             this.mtuBasicInfo = Data.Get.MtuBasicInfo;
 
             if ( ! Data.Get.UNIT_TEST )
-                this.logUri = this.logger.CreateFileIfNotExist ();
+                this.logUri = this.Logger.CreateFileIfNotExist ();
             
             this.config = Singleton.Get.Configuration;
             this.action = Singleton.Get.Action;

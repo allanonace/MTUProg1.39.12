@@ -376,15 +376,6 @@ namespace MTUComm
 
         }
 
-
-        public DemandConf Demands
-        {
-            get
-            {
-                return this.demands;
-            }
-        }
-
         public String getApplicationName()
         {
 

@@ -11,10 +11,7 @@ using System.Xml.Serialization;
 using Library;
 using Library.Exceptions;
 using Xml;
-==== BASE ====
-using Lexi;
-using Library;
-==== BASE ====
+using Xml.UnitTest;
 
 /// <summary>
 /// LOGIC:
@@ -205,7 +202,7 @@ namespace MTUComm.MemoryMap
 
             // Prepares the memory buffer with the length indicates in the interface
             if ( memory == null )
-                memory = new byte[ config.interfaces.GetMemoryLengthByFamily ( family ) ];
+                memory = new byte[ config.Interfaces.GetMemoryLengthByFamily ( family ) ];
             this.memory = memory;
 
             this.registersObjs = new Dictionary<string, dynamic>();
@@ -1407,7 +1404,7 @@ namespace MTUComm.MemoryMap
                 }
                 catch ( Exception )
                 {
-                    Console.WriteLine ( e.Message );
+                    //Console.WriteLine ( e.Message );
                 }
             }
         }

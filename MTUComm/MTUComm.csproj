@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Xml\Xml.csproj" />
     <ProjectReference Include="..\ble_library\ble_library.csproj" />
+    <ProjectReference Include="..\Library\Library.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.CSharp">
