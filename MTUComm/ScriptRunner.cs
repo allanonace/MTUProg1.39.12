@@ -198,30 +198,34 @@ namespace MTUComm
                                  list.Add      ( ( ActionParameter   )paramValue );
                             else list.AddRange ( ( ActionParameter[] )paramValue );
 
-                            foreach ( ActionParameter aParam in list )
-                                new_action.AddParameter (
-                                    new Parameter (
-                                        paramTypeToAdd,
-                                        aParam.Value,
-                                        aParam.Port ) );
-
                             // Parameters for ReadMTU or InstallConfirmation, treat like adittional parameters
-                            if (new_action.IsRead || new_action.IsInstallConfirmation )
+                            if ( new_action.IsRead ||
+                                 new_action.IsInstallConfirmation ||
+                                 new_action.IsTurnOnOff )
                             {
                                 Parameter paramAdd;
                                 string sPort;
                                 string sDisplay, sName;
                                 string[] sWords;
-                                foreach (ActionParameter aParam in list)
+                                foreach ( ActionParameter aParam in list )
                                 {                                   
-                                    sPort    = aParam.Port.ToString();                                   
-                                    sWords   = Regex.Split(paramTypeToAdd.ToString(), @"(?<!^)(?=[A-Z])");
-                                    sDisplay = sPort == "0" ? string.Join(" ", sWords):$"Port {sPort} " + string.Join(" ",sWords);
-                                    sName    = sPort == "0" ? paramTypeToAdd.ToString(): $"Port{sPort}" + paramTypeToAdd.ToString();
-                                    paramAdd = new Parameter( sName, sDisplay, aParam.Value);
+                                    sPort    = aParam.Port.ToString ();
+                                    sWords   = Regex.Split ( paramTypeToAdd.ToString (), @"(?<!^)(?=[A-Z])" );
+                                    sDisplay = sPort == "0" ? string.Join ( " ", sWords ):$"Port {sPort} " + string.Join ( " ", sWords );
+                                    sName    = sPort == "0" ? paramTypeToAdd.ToString (): $"Port{sPort}" + paramTypeToAdd.ToString ();
+                                    paramAdd = new Parameter ( sName, sDisplay, aParam.Value );
                                     paramAdd.Optional = true;
-                                    new_action.AddAdditionalParameter(paramAdd);
+                                    new_action.AddAdditionalParameter ( paramAdd );
                                 }
+                            }
+                            else
+                            {
+                                foreach ( ActionParameter aParam in list )
+                                    new_action.AddParameter (
+                                        new Parameter (
+                                            paramTypeToAdd,
+                                            aParam.Value,
+                                            aParam.Port ) );
                             }
                         }
                     }
