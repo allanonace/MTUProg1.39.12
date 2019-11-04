@@ -1324,7 +1324,7 @@ namespace MTUComm
                                     paramToAdd.Value = this.FormatLength ( paramToAdd.Value, parameter.Length, parameter.Fill );
 
                                     if ( parameter.HasFormat )
-                                        paramToAdd.Value = Utils.FormatString ( paramToAdd.Value, parameter.Format );
+                                        paramToAdd.Value = Utils.FormatNumber ( paramToAdd.Value, parameter.Format );
                                 }
                                 result.AddParameter ( paramToAdd );
                             }
@@ -1552,7 +1552,7 @@ namespace MTUComm
                                     value = this.FormatLength ( value, parameter.Length, parameter.Fill );
 
                                     if ( parameter.HasFormat )
-                                        value = Utils.FormatString ( value, parameter.Format );
+                                        value = Utils.FormatNumber ( value, parameter.Format );
                                 }
 
                                 string display = ( parameter.Display.ToLower ().StartsWith ( "global." ) ) ?

@@ -452,7 +452,7 @@ namespace MTUComm
             {
                 XElement demandConf = new XElement ( "DemandConfiguration" );
                 Logger.AddAtrribute ( demandConf, "display", "Demand Configuration" );
-                Logger.AddParameter ( demandConf, new Parameter ( "ConfigurationName",         "Configuration Name",           Data.Get.DemandConf.Name ) );
+                Logger.AddParameter ( demandConf, new Parameter ( "ConfigurationName",         "Configuration Name",           Data.Get.Demand.Name ) );
                 Logger.AddParameter ( demandConf, new Parameter ( "MtuNumLowPriorityMsg",      "Mtu Num Low Priority Msg",     await map.MtuNumLowPriorityMsg     .GetValue () ) );
                 Logger.AddParameter ( demandConf, new Parameter ( "MtuPrimaryWindowInterval",  "Mtu Primary WindowInterval",   await map.MtuPrimaryWindowInterval .GetValue () ) );
                 Logger.AddParameter ( demandConf, new Parameter ( "MtuWindowAStart",           "Mtu Window A Start",           await map.MtuWindowAStart          .GetValue () ) );
@@ -470,9 +470,9 @@ namespace MTUComm
                  form.ContainsParameter ( FIELD.GPS_LONGITUDE ) &&
                  form.ContainsParameter ( FIELD.GPS_ALTITUDE  ) )
             {
-                string lat = Utils.FormatString ( Data.Get.GPSLat, "F6" );
-                string lon = Utils.FormatString ( Data.Get.GPSLon, "F6" );
-                string alt = Utils.FormatString ( Data.Get.GPSAlt, "F2" );
+                string lat = Utils.FormatNumber ( Data.Get.GPSLat, "F6" );
+                string lon = Utils.FormatNumber ( Data.Get.GPSLon, "F6" );
+                string alt = Utils.FormatNumber ( Data.Get.GPSAlt, "F2" );
 
                 Logger.AddParameter ( this.addMtuAction, new Parameter ( "GPS_Y",    "Lat",       lat ) );
                 Logger.AddParameter ( this.addMtuAction, new Parameter ( "GPS_X",    "Long",      lon ) );

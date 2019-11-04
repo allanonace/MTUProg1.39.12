@@ -571,7 +571,7 @@ namespace Library
             return defaultValue;
         }
 
-        public static T IsNumeric<T> (
+        private static T IsNumberOfType<T> (
 		    object value,
             out bool ok )
         {
@@ -579,46 +579,62 @@ namespace Library
             double  resultDouble;
             decimal resultDecimal;
 
+            string sValue = value.ToString ();
+            
             switch ( Type.GetTypeCode ( typeof( T ) ) )
             {
+                // ~6-9 digits -> Testing in MacOSX is 7
                 case TypeCode.Single:
-                    if ( ok = float.TryParse ( value.ToString (), out resultFloat ) )
+                    if ( ok =
+                         float.TryParse ( sValue, out resultFloat ) &&
+                         // NOTE: Avoids false positive conversion with loss
+                         string.Equals ( resultFloat.ToString (), sValue ) )
                          return ( T )( object )resultFloat;
                     else return default ( T );
+                // ~15-17 digits -> Testing seems to be 16
                 case TypeCode.Double:
-                    if ( ok = double.TryParse ( value.ToString (), out resultDouble ) )
+                    if ( ok =
+                         double.TryParse ( sValue, out resultDouble ) &&
+                         string.Equals ( resultDouble.ToString (), sValue ) )
                          return ( T )( object )resultDouble;
                     else return default ( T );
+                // 28-29 digits -> Testing seems to be 29
+                case TypeCode.Decimal:
+                    if ( ok =
+                         decimal.TryParse ( sValue, out resultDecimal ) &&
+                         string.Equals ( resultDecimal.ToString (), sValue ) )
+                         return ( T )( object )resultDecimal;
+                    else return default ( T );
             }
-            if ( ok = decimal.TryParse ( value.ToString (), out resultDecimal ) )
-                 return ( T )( object )resultDecimal;
-            else return default ( T );
+            
+            ok = false;
+            return default ( T );
         }
 
-        public static T IsNumeric<T> (
+        private static T IsNumberOfType<T> (
             object value )
         {
-            return IsNumeric<T> ( value, out bool ok );
+            return IsNumberOfType<T> ( value, out bool ok );
         }
         
         public static bool IsFloat (
             object value )
         {
-            IsNumeric<float> ( value, out bool ok );
+            IsNumberOfType<float> ( value, out bool ok );
             return ok;
         }
 
         public static bool IsDouble (
             object value )
         {
-            IsNumeric<double> ( value, out bool ok );
+            IsNumberOfType<double> ( value, out bool ok );
             return ok;
         }
 
         public static bool IsDecimal (
             object value )
         {
-            IsNumeric<decimal> ( value, out bool ok );
+            IsNumberOfType<decimal> ( value, out bool ok );
             return ok;
         }
 
@@ -661,50 +677,34 @@ namespace Library
 
         #region Format
 
-        public static string FormatString (
-            string value,
+        public static string FormatNumber (
+            dynamic value,
             string format )
         {
-            return string.Format ( new StringFormatter (), "{0:" + format + "}", value );
-        }
+            if ( value == null ||
+			     value is string &&
+		         string.IsNullOrEmpty ( ( string )value ) )
+			    return string.Empty;
 
-        public class StringFormatter : IFormatProvider, ICustomFormatter
-        {
-            public object GetFormat (
-                Type formatType )
+            else if ( Validations.IsNumeric ( value ) )
             {
-                if ( formatType == typeof ( ICustomFormatter ) )
-                    return this;
-                return null;
+                dynamic number;
+
+                value = value.ToString ();
+
+                if ( IsFloat ( value ) )
+                    number = IsNumberOfType<float> ( value );
+
+                else if ( IsDouble ( value ) )
+                    number = IsNumberOfType<double> ( value );
+
+                else // Is a number with more digits than float and double
+                    number = IsNumberOfType<decimal> ( value );
+
+                return string.Format ( "{0:" + format + "}", number );
             }
 
-            public string Format (
-                string format,
-                object value,
-                IFormatProvider formatProvider )
-            {
-                if ( value == null )
-                    return string.Empty;
-
-                else if ( Validations.IsNumeric ( value ) )
-                {
-                    if ( IsFloat ( value ) )
-                        value = IsNumeric<float> ( value );
-                    
-                    else if ( IsDouble ( value ) )
-                        value = IsNumeric<double> ( value );
-
-                    else // Is decimal or an interger value
-                        value = IsNumeric<decimal> ( value );
-                    
-                    return ( ( IFormattable )value ).ToString ( format, CultureInfo.CurrentCulture );
-                }
-
-                else if ( value is string )
-                    return ( string )value;
-
-                return string.Empty;
-            }
+            return ( value is string ) ? value : string.Empty;
         }
 
         #endregion
