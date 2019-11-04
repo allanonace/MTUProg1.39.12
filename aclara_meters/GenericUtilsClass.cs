@@ -526,6 +526,12 @@ namespace aclara_meters
                  
                     if ( fileStr.Equals ( compareStr ) )
                     {
+                        
+                        if (!file.Name.Equals(compareStr) && Data.Get.IsIOS) // lower case only in iOS
+                        {
+                            file.CopyTo(Path.Combine(path, file.Name.ToLower()), true);
+                            file.Delete();
+                        }
                         count++;
                         break;
                     }
