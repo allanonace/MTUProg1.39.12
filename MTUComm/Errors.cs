@@ -166,6 +166,8 @@ namespace MTUComm
             { new ODEncryptionBroadcastKeyNotSetException (),   703 },
             // The MTU encryption process can't be performed because broadcast key does not have the correct format
             { new ODEncryptionBroadcastKeyFormatException (),   704 },
+            // The MTU encryption index has reached its limit
+            { new EncryptionIndexLimitReachedException (),      705 },
             
             // Configuration Files and System [ 8xx ]
             //-------------------------------
