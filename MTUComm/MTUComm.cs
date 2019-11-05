@@ -1669,10 +1669,12 @@ namespace MTUComm
                     dynamic map = this.GetMemoryMap ();
                     MemoryRegister<int> rddStatus = map.RDDStatusInt;
 
+                    Data.Get.RDDPosition = Data.Get.RDDPosition.ToUpper ();
+
                     // Convert from RDD command to RDD desired status
                     RDDValveStatus rddValveStatus = RDDValveStatus.UNKNOWN;
                     switch ( ( RDDCmd )Enum.Parse ( typeof ( RDDCmd ),
-                              Data.Get.RDDPosition.ToUpper().Replace ( " ", "_" ) ) )
+                             Data.Get.RDDPosition.Replace ( " ", "_" ) ) )
                     {
                         case RDDCmd.CLOSE       : rddValveStatus = RDDValveStatus.CLOSED;       break;
                         case RDDCmd.OPEN        : rddValveStatus = RDDValveStatus.OPEN;         break;
@@ -1834,7 +1836,7 @@ namespace MTUComm
             catch ( Exception e )
             {
                 if ( ! throwExceptions )
-		{
+		        {
                     result = RDD_EXCEPTION;
                     Errors.LogErrorNowAndContinue(e);
                 }

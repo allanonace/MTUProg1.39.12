@@ -333,7 +333,7 @@ namespace MTUComm.MemoryMap
         public async Task<string> RDDValvePosition_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
             int val = await MemoryRegisters.RDDValvePositionInt.GetValue ();
-            return Utils.ParseIntToEnum<RDDValveStatus> ( val, RDDValveStatus.UNKNOWN ).ToString ();
+            return Utils.ParseIntToEnum<RDDValveStatus> ( val, RDDValveStatus.UNKNOWN ).ToString ().Replace ( "_", " " );
         }
 
         public async Task<string> RDDBatteryStatus_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
