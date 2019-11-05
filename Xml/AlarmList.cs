@@ -56,7 +56,8 @@ namespace Xml
         {
             List<Alarm> alarms = Alarms.FindAll ( x => x.MTUType == mtuType );
 
-            if ( alarms == null )
+            if ( alarms == null ||
+                 alarms.Count <= 0 )
                 throw new AlarmNotFoundException_Internal ();
 
             return alarms;
@@ -78,7 +79,7 @@ namespace Xml
             if ( alarms.Count > 0 )
                 return alarms.Where ( a => ! string.Equals ( a.Name.ToLower (), "scripting" ) ).ToArray ();
             
-            return null;
+            return default ( Alarm[] );
         }
 
         public Alarm FindByMtuType_Scripting (

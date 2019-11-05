@@ -299,14 +299,14 @@ namespace aclara_meters.view
 
             InitializeAddMtuForm();
 
-            Task.Run(async () =>
-          {
-              if (hasValve)
-                  await InitializeRDDForm();
-              await InitilizeValuesAsync();
-              await LoadMetersList();
+            Task.Run ( async () =>
+            {
+                if ( hasValve )
+                    await InitializeRDDForm();
 
-          })
+                await InitilizeValuesAsync();
+                await LoadMetersList();
+            })
             .ContinueWith(t =>
               Device.BeginInvokeOnMainThread(() =>
             {
@@ -472,11 +472,16 @@ namespace aclara_meters.view
 
             Device.BeginInvokeOnMainThread(() =>
             {
-                this.InitializePicker_MeterType();
-                if (hasTwoPorts)
-                    this.InitializePicker_MeterType_2();
-                if (hasValve)
-                    this.InitializePicker_MeterType_V();
+                // RDD devices is always in port two
+                if ( hasTwoPorts ||
+                     ! hasValve )
+                    this.InitializePicker_MeterType ();
+
+                if ( hasTwoPorts )
+                    this.InitializePicker_MeterType_2 ();
+                
+                if ( hasValve )
+                    this.InitializePicker_MeterType_V ();
             });
 
         }
@@ -529,841 +534,866 @@ namespace aclara_meters.view
 
         private void InitializeAddMtuForm()
         {
-            #region Conditions
-
-            this.currentMtu = this.addMtuForm.mtu;
-            this.mtuBasicInfo = Data.Get.MtuBasicInfo;
-
-            #endregion
-
-            #region Two ports or RDD
-            if (this.currentMtu.Port1.IsSetFlow)
+            try
             {
-                port1label.IsVisible = false;
-                port2label.IsVisible = false;
-                valvelabel.IsVisible = true;
-                div_RDDGeneral.IsVisible = true;
-                hasValve = true;
-                hasTwoPorts = false;
-            }
-            else if (this.currentMtu.TwoPorts && this.currentMtu.Port2.IsSetFlow)
-            {
-                port1label.IsVisible = true;
-                port2label.IsVisible = false;
-                valvelabel.IsVisible = true;
-                hasValve = true;
-                hasTwoPorts = false;
-            }
-            else
-            {
-                this.hasTwoPorts = this.currentMtu.TwoPorts;
-                port2label.IsVisible = this.hasTwoPorts;
-                valvelabel.IsVisible = false;
-                hasValve = false;
-            }
+                #region Conditions
 
-            #endregion
+                this.currentMtu = this.addMtuForm.mtu;
+                this.mtuBasicInfo = Data.Get.MtuBasicInfo;
 
-            #region Labels
+                #endregion
 
-            this.port1label.Text = LB_PORT1;
-            this.port2label.Text = LB_PORT2;
-            this.misclabel.Text = LB_MISC;
-            this.valvelabel.Text = LB_VALVE;
+                #region Two ports or RDD
 
-            #endregion
-
-            #region Account Number / Service Port ID
-
-            // Dual entry
-            bool useDualAccountNumber = global.AccountDualEntry;
-
-            // Port 1
-            this.div_AccountNumber_Dual.IsVisible = useDualAccountNumber;
-            this.div_AccountNumber_Dual.IsEnabled = useDualAccountNumber;
-
-            // Port 2
-            this.div_AccountNumber_Dual_2.IsVisible = hasTwoPorts && useDualAccountNumber;
-            this.div_AccountNumber_Dual_2.IsEnabled = hasTwoPorts && useDualAccountNumber;
-
-            // Valve
-            this.div_AccountNumber_Dual_V.IsVisible = hasValve && useDualAccountNumber;
-            this.div_AccountNumber_Dual_V.IsEnabled = hasValve && useDualAccountNumber;
-
-            #endregion
-
-            #region Work Order / Field Order
-
-            bool useWorkOrder = global.WorkOrderRecording;
-
-            // Port 1            
-            this.div_WorkOrder.IsVisible = useWorkOrder;
-            this.div_WorkOrder.IsEnabled = useWorkOrder;
-
-            // Port 2
-            this.div_WorkOrder_2.IsVisible = hasTwoPorts && useWorkOrder;
-            this.div_WorkOrder_2.IsEnabled = hasTwoPorts && useWorkOrder;
-
-            // RDD
-            this.div_WorkOrder_V.IsVisible = hasValve && useWorkOrder;
-            this.div_WorkOrder_V.IsEnabled = hasValve && useWorkOrder;
-
-            // Dual entry
-            bool useDualWorkOrder = global.WorkOrderDualEntry && useWorkOrder;
-
-            // Port 1
-            this.div_WorkOrder_Dual.IsVisible = useDualWorkOrder;
-            this.div_WorkOrder_Dual.IsEnabled = useDualWorkOrder;
-
-            // Port 2
-            this.div_WorkOrder_Dual_2.IsVisible = hasTwoPorts && useDualWorkOrder;
-            this.div_WorkOrder_Dual_2.IsEnabled = hasTwoPorts && useDualWorkOrder;
-
-            // Valve
-            this.div_WorkOrder_Dual_V.IsVisible = hasValve && useDualWorkOrder;
-            this.div_WorkOrder_Dual_V.IsEnabled = hasValve && useDualWorkOrder;
-
-            #endregion
-
-            #region Old MTU ID
-
-            bool isReplaceMtu = (
-                this.actionType == ActionType.ReplaceMTU ||
-                this.actionType == ActionType.ReplaceMtuReplaceMeter);
-
-            this.div_OldMtuId.IsVisible = isReplaceMtu;
-            this.div_OldMtuId.IsEnabled = isReplaceMtu;
-
-            #endregion
-
-            #region Meter Serial Number and Reading ( and OLD fields )
-
-            this.Initialize_OldMeterPickers();
-
-            // Action is about Replace Meter
-            bool isReplaceMeter = (
-                this.actionType == ActionType.ReplaceMeter ||
-                this.actionType == ActionType.ReplaceMtuReplaceMeter ||
-                this.actionType == ActionType.AddMtuReplaceMeter);
-
-            // ( New ) Meter Serial Number
-            bool useMeterSerialNumber = global.UseMeterSerialNumber;
-
-            // Port 1
-            this.div_MeterSerialNumber.IsVisible = useMeterSerialNumber;
-            this.div_MeterSerialNumber.IsEnabled = useMeterSerialNumber;
-
-            // Port 2
-            this.div_MeterSerialNumber_2.IsVisible = hasTwoPorts && useMeterSerialNumber;
-            this.div_MeterSerialNumber_2.IsEnabled = hasTwoPorts && useMeterSerialNumber;
-
-            ///////////////////////////////////
-            // Dual entry - ( New ) Meter Serial Number
-            bool useDualSeriaNumber = global.NewSerialNumDualEntry && useMeterSerialNumber;
-
-            // Port 1
-            this.div_MeterSerialNumber_Dual.IsVisible = useDualSeriaNumber;
-            this.div_MeterSerialNumber_Dual.IsEnabled = useDualSeriaNumber;
-
-            // Port 2
-            this.div_MeterSerialNumber_Dual_2.IsVisible = hasTwoPorts && useDualSeriaNumber;
-            this.div_MeterSerialNumber_Dual_2.IsEnabled = hasTwoPorts && useDualSeriaNumber;
-
-            ///////////////////////////////////
-            // ( New ) Meter Reading
-            this.p1NoNewMeterReadings = !this.currentMtu.Port1.IsForEncoderOrEcoder;
-            this.p2NoNewMeterReadings = this.hasTwoPorts && !this.currentMtu.Port2.IsForEncoderOrEcoder;
-
-            // Port 1
-            this.div_MeterReadings.IsVisible = this.p1NoNewMeterReadings;
-            this.div_MeterReadings.IsEnabled = this.p1NoNewMeterReadings;
-
-            // Port 2
-            this.div_MeterReadings_2.IsVisible = this.p2NoNewMeterReadings;
-            this.div_MeterReadings_2.IsEnabled = this.p2NoNewMeterReadings;
-
-            ///////////////////////////////////
-            // Dual Entry - ( New ) Meter Reading
-            bool useDualMeterReading = global.ReadingDualEntry;
-
-            // Port 1
-            this.div_MeterReading_Dual.IsVisible = this.p1NoNewMeterReadings && useDualMeterReading;
-            this.div_MeterReading_Dual.IsEnabled = this.p1NoNewMeterReadings && useDualMeterReading;
-
-            // Port 2
-            this.div_MeterReading_Dual_2.IsVisible = this.p2NoNewMeterReadings && useDualMeterReading;
-            this.div_MeterReading_Dual_2.IsEnabled = this.p2NoNewMeterReadings && useDualMeterReading;
-
-            ///////////////////////////////////
-            // Old Meter Serial Number
-            // Port 1
-            this.div_OldMeterSerialNumber.IsVisible = isReplaceMeter && useMeterSerialNumber;
-            this.div_OldMeterSerialNumber.IsEnabled = isReplaceMeter && useMeterSerialNumber;
-
-            // Port 2
-            this.div_OldMeterSerialNumber_2.IsVisible = hasTwoPorts && isReplaceMeter && useMeterSerialNumber;
-            this.div_OldMeterSerialNumber_2.IsEnabled = hasTwoPorts && isReplaceMeter && useMeterSerialNumber;
-
-            ///////////////////////////////////
-            // Dual entry - Old Meter Serial Number
-            bool useDualOldSeriaNumber = global.OldSerialNumDualEntry && this.div_OldMeterSerialNumber.IsVisible;
-
-            // Port 1
-            this.div_OldMeterSerialNumber_Dual.IsVisible = useDualOldSeriaNumber;
-            this.div_OldMeterSerialNumber_Dual.IsEnabled = useDualOldSeriaNumber;
-
-            // Port 2
-            this.div_OldMeterSerialNumber_Dual_2.IsVisible = hasTwoPorts && useDualOldSeriaNumber;
-            this.div_OldMeterSerialNumber_Dual_2.IsEnabled = hasTwoPorts && useDualOldSeriaNumber;
-
-            ///////////////////////////////////
-            // Old Meter Working ( Change reason )
-            bool useMeterWorking = isReplaceMeter && global.MeterWorkRecording;
-
-            // Port 1
-            this.div_OldMeterWorking.IsVisible = useMeterWorking;
-            this.div_OldMeterWorking.IsEnabled = useMeterWorking;
-
-            // Port 2
-            this.div_OldMeterWorking_2.IsVisible = hasTwoPorts && useMeterWorking;
-            this.div_OldMeterWorking_2.IsEnabled = hasTwoPorts && useMeterWorking;
-
-            ///////////////////////////////////
-            // Old Meter Reading
-            bool useOldReading = isReplaceMeter && global.OldReadingRecording;
-
-            // Port 1
-            this.div_OldMeterReading.IsVisible = useOldReading;
-            this.div_OldMeterReading.IsEnabled = useOldReading;
-
-            // Port 2
-            this.div_OldMeterReading_2.IsVisible = hasTwoPorts && useOldReading;
-            this.div_OldMeterReading_2.IsEnabled = hasTwoPorts && useOldReading;
-
-            ///////////////////////////////////
-            // Dual entry - Old Meter Reading
-            bool useDualOldReading = global.OldReadingDualEntry && useOldReading;
-
-            // Port 1
-            this.div_OldMeterReading_Dual.IsVisible = useDualOldReading;
-            this.div_OldMeterReading_Dual.IsEnabled = useDualOldReading;
-
-            // Port 2
-            this.div_OldMeterReading_Dual_2.IsVisible = hasTwoPorts && useDualOldReading;
-            this.div_OldMeterReading_Dual_2.IsEnabled = hasTwoPorts && useDualOldReading;
-
-            ///////////////////////////////////
-            // Replace Meter/Register
-            bool useReplaceMeterRegister = isReplaceMeter && global.RegisterRecording;
-
-            // Port 1
-            this.div_ReplaceMeterRegister.IsVisible = useReplaceMeterRegister;
-            this.div_ReplaceMeterRegister.IsEnabled = useReplaceMeterRegister;
-
-            // Port 2
-            this.div_ReplaceMeterRegister_2.IsVisible = hasTwoPorts && useReplaceMeterRegister;
-            this.div_ReplaceMeterRegister_2.IsEnabled = hasTwoPorts && useReplaceMeterRegister;
-
-            ///////////////////////////////////
-            // Introduce values from right to left, but finish with the same number
-            // e.g. 1 _ _ -> 1 2 _ -> 1 2 3
-            //      _ _ 3 -> _ 2 3 -> 1 2 3
-            FlowDirection flow = (global.ReverseReading) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
-            this.tbx_MeterReading.FlowDirection = flow;
-            this.tbx_MeterReading_2.FlowDirection = flow;
-            this.tbx_MeterReading_Dual.FlowDirection = flow;
-            this.tbx_MeterReading_Dual_2.FlowDirection = flow;
-            this.tbx_OldMeterReading.FlowDirection = flow;
-            this.tbx_OldMeterReading_2.FlowDirection = flow;
-            this.tbx_OldMeterReading_Dual.FlowDirection = flow;
-            this.tbx_OldMeterReading_Dual_2.FlowDirection = flow;
-
-            ///////////////////////////////////
-            // New Meter readings will be disabled before meter type was selected
-            this.tbx_MeterReading.IsEnabled = false;
-            this.tbx_MeterReading_2.IsEnabled = false;
-            this.tbx_MeterReading_Dual.IsEnabled = false;
-            this.tbx_MeterReading_Dual_2.IsEnabled = false;
-
-            this.div_MeterReading.Opacity = OPACITY_DISABLE;
-            this.divSub_MeterReading_Dual.Opacity = OPACITY_DISABLE;
-            this.divSub_MeterReading_2.Opacity = OPACITY_DISABLE;
-            this.divSub_MeterReading_Dual_2.Opacity = OPACITY_DISABLE;
-
-            this.lb_MeterReading_MeterType.Text = FIRST_METERTYPE;
-            this.lb_MeterReading_DualMeterType.Text = FIRST_METERTYPE;
-            this.lb_MeterReading_MeterType_2.Text = FIRST_METERTYPE;
-            this.lb_MeterReading_DualMeterType_2.Text = FIRST_METERTYPE;
-
-            this.lb_MeterReading_MeterType.IsVisible = true;
-            this.lb_MeterReading_DualMeterType.IsVisible = true;
-            this.lb_MeterReading_MeterType_2.IsVisible = true;
-            this.lb_MeterReading_DualMeterType_2.IsVisible = true;
-
-            #endregion
-
-            #region Read Interval
-
-            this.InitializePicker_ReadInterval(this.mtuBasicInfo, this.currentMtu);
-
-            // Use IndividualReadInterval tag to enable o disable read interval picker
-            this.pck_ReadInterval.IsEnabled = global.IndividualReadInterval;
-            if ( !this.pck_ReadInterval.IsEnabled )
-            {
-                this.div_ReadInterval.BackgroundColor = Color.LightGray;
-                this.pck_ReadInterval.BackgroundColor = Color.LightGray;
-                this.pck_ReadInterval.TextColor = Color.Gray;
-            }
-
-            #endregion
-
-            #region Snap Reads / Daily Reads
-
-            bool useDailyReads = global.AllowDailyReads && this.currentMtu.DailyReads && !this.currentMtu.IsFamily33xx;
-            bool changeableDailyReads = global.IndividualDailyReads;
-
-            int dailyReadsDefault = global.DailyReadsDefault;
-
-            this.div_SnapReads.IsEnabled = useDailyReads;
-            this.div_SnapReads.IsVisible = useDailyReads;
-            this.divSub_SnapReads.IsEnabled = changeableDailyReads && useDailyReads;
-            this.divSub_SnapReads.Opacity = (changeableDailyReads && useDailyReads) ? 1 : 0.8d;
-
-            this.snapReadsStep = 1.0;
-
-            if (useDailyReads)
-                this.sld_SnapReads.ValueChanged += OnSnapReadsSlider_ValueChanged;
-
-            this.sld_SnapReads.Value = (dailyReadsDefault > -1) ? dailyReadsDefault : 13;
-
-
-            #endregion
-
-            #region 2-Way
-
-            // Only for 34xx MTUs and above
-            bool useTwoWay = global.TimeToSync &&
-                             this.currentMtu.TimeToSync &&
-                             this.currentMtu.FastMessageConfig;
-
-            if (!div_RDDGeneral.IsVisible)
-            {
-                this.Initialize_TwoWay(pck_TwoWay);
-                div_TwoWay.IsVisible = useTwoWay;
-                div_TwoWay.IsEnabled = useTwoWay;
-            }
-            else
-            {
-                this.Initialize_TwoWay(pck_TwoWay_V);
-                div_TwoWay_V.IsVisible = useTwoWay;
-                div_TwoWay_V.IsEnabled = useTwoWay;
-            }
-            #endregion
-
-            #region Alarms
-
-            // Remove "Scripting" option in interactive mode
-            alarmsList = new List<Alarm> ( config.Alarms.FindByMtuType_Interactive ( this.detectedMtuType ) );
-
-            bool RequiresAlarmProfile = this.currentMtu.RequiresAlarmProfile;
-            bool portHasSomeAlarm = (RequiresAlarmProfile && alarmsList.Count > 0);
-
-            if (!div_RDDGeneral.IsVisible)
-            {
-                pck_Alarms.ItemDisplayBinding = new Binding("Name");
-
-                div_Alarms.IsEnabled = portHasSomeAlarm;
-                div_Alarms.IsVisible = portHasSomeAlarm;
-                pck_Alarms.ItemsSource = alarmsList;
-
-                // Hide alarms dropdownlist if contains only one option
-                div_Alarms.IsVisible = (alarmsList.Count > 1);
-            }
-            else
-            {
-                pck_Alarms_V.ItemDisplayBinding = new Binding("Name");
-
-                div_Alarms_V.IsEnabled = portHasSomeAlarm;
-                div_Alarms_V.IsVisible = portHasSomeAlarm;
-                pck_Alarms_V.ItemsSource = alarmsList;
-
-                // Hide alarms dropdownlist if contains only one option
-                div_Alarms_V.IsVisible = (alarmsList.Count > 1);
-            }
-            #endregion
-
-            #region Demands
-
-            // Remove "Scripting" option in interactive mode
-            demandsList = new List<Demand> ( config.Demands.FindByMtuType_Interactive ( this.detectedMtuType ) );
-
-            bool MtuDemand = this.currentMtu.MtuDemand && this.currentMtu.FastMessageConfig;
-            bool portHasSomeDemand = ( MtuDemand && demandsList.Count > 0 );
-
-            if (!div_RDDGeneral.IsVisible)
-            {
-                pck_Demands.ItemDisplayBinding = new Binding("Name");
-
-                div_Demands.IsEnabled = portHasSomeDemand;
-                div_Demands.IsVisible = portHasSomeDemand;
-                pck_Demands.ItemsSource = demandsList;
-
-                // Hide alarms dropdownlist if contains only one option
-                div_Demands.IsVisible = ( demandsList.Count > 1 );
-            }
-            else
-            {
-                pck_Demands_V.ItemDisplayBinding = new Binding("Name");
-
-                div_Demands_V.IsEnabled = portHasSomeDemand;
-                div_Demands_V.IsVisible = portHasSomeDemand;
-                pck_Demands_V.ItemsSource = demandsList;
-
-                // Hide alarms dropdownlist if contains only one option
-                div_Demands_V.IsVisible = ( demandsList.Count > 1 );
-            }
-            
-            #endregion
-
-            #region Misc
-
-            if (this.global.Options.Count > 0)
-                InitializeOptionalFields();
-
-            #endregion
-
-            #region Cancel reason
-
-            // Load cancel reasons from Global.xml
-            List<string> cancelReasons = this.global.Cancel;
-
-            if (!cancelReasons.Contains("Other"))
-                cancelReasons.Add("Other"); // Add "Other" option
-
-            cancelReasonPicker.ItemsSource = cancelReasons;
-
-            // Select default reason
-            cancelReasonPicker.SelectedIndex = 0;
-
-            // Enable "Other" reason box if default is "Other"
-            string defaultCancelReason = cancelReasonPicker.Items[cancelReasonPicker.SelectedIndex];
-            if ("Other".Equals(defaultCancelReason))
-            {
-                cancelReasonOtherInput.IsEnabled = true;
-                cancelReasonOtherInputContainer.Opacity = 1;
-            }
-            else
-            {
-                cancelReasonOtherInput.IsEnabled = false;
-                cancelReasonOtherInputContainer.Opacity = 0.8;
-            }
-
-            // Add handler
-            cancelReasonPicker.SelectedIndexChanged += CancelReasonPicker_SelectedIndexChanged;
-
-            #endregion
-
-            #region Set Max
-
-            // Set maximum values from global.xml
-            int acnLength = (global.AccountLength <= MAX_ACCOUNTNUMBER) ? global.AccountLength : MAX_ACCOUNTNUMBER;
-            tbx_AccountNumber.MaxLength = acnLength;
-            tbx_AccountNumber_2.MaxLength = acnLength;
-            tbx_AccountNumber_V.MaxLength = acnLength;
-            tbx_AccountNumber_Dual.MaxLength = acnLength;
-            tbx_AccountNumber_Dual_2.MaxLength = acnLength;
-            tbx_AccountNumber_Dual_V.MaxLength = acnLength;
-
-            tbx_WorkOrder.MaxLength = global.WorkOrderLength;
-            tbx_WorkOrder_2.MaxLength = global.WorkOrderLength;
-            tbx_WorkOrder_V.MaxLength = global.WorkOrderLength;
-            tbx_WorkOrder_Dual.MaxLength = global.WorkOrderLength;
-            tbx_WorkOrder_Dual_2.MaxLength = global.WorkOrderLength;
-            tbx_WorkOrder_Dual_V.MaxLength = global.WorkOrderLength;
-
-            tbx_OldMtuId.MaxLength = global.MtuIdLength;
-
-            tbx_OldMeterSerialNumber.MaxLength = global.MeterNumberLength;
-            tbx_OldMeterSerialNumber_2.MaxLength = global.MeterNumberLength;
-            tbx_OldMeterSerialNumber_Dual.MaxLength = global.MeterNumberLength;
-            tbx_OldMeterSerialNumber_Dual_2.MaxLength = global.MeterNumberLength;
-
-            tbx_MeterSerialNumber.MaxLength = global.MeterNumberLength;
-            tbx_MeterSerialNumber_2.MaxLength = global.MeterNumberLength;
-            tbx_MeterSerialNumber_Dual.MaxLength = global.MeterNumberLength;
-            tbx_MeterSerialNumber_Dual_2.MaxLength = global.MeterNumberLength;
-
-            tbx_OldMeterReading.MaxLength = MAX_METERREADING;
-            tbx_OldMeterReading_2.MaxLength = MAX_METERREADING;
-            tbx_OldMeterReading_Dual.MaxLength = MAX_METERREADING;
-            tbx_OldMeterReading_Dual_2.MaxLength = MAX_METERREADING;
-
-            tbx_MeterReading.MaxLength = MAX_METERREADING;
-            tbx_MeterReading_2.MaxLength = MAX_METERREADING;
-            tbx_MeterReading_Dual.MaxLength = MAX_METERREADING;
-            tbx_MeterReading_Dual_2.MaxLength = MAX_METERREADING;
-
-            tbx_MtuGeolocationLat.MaxLength  = 10;
-            tbx_MtuGeolocationLong.MaxLength = 10;
-
-            tbx_RDDFirmwareVersion.MaxLength = MAX_RDDFIRMWARE;
-
-            #endregion
-
-            #region Labels
-
-            // Account Number
-            this.lb_AccountNumber.Text = global.AccountLabel;
-            this.lb_AccountNumber_Dual.Text = DUAL_PREFIX + global.AccountLabel;
-            this.lb_AccountNumber_2.Text = global.AccountLabel;
-            this.lb_AccountNumber_Dual_2.Text = DUAL_PREFIX + global.AccountLabel;
-
-            // Work Order
-            this.lb_WorkOrder.Text = global.WorkOrderLabel;
-            this.lb_WorkOrder_Dual.Text = DUAL_PREFIX + global.WorkOrderLabel;
-            this.lb_WorkOrder_2.Text = global.WorkOrderLabel;
-            this.lb_WorkOrder_Dual_2.Text = DUAL_PREFIX + global.WorkOrderLabel;
-
-            string NEW_LABEL = (isReplaceMeter) ? "New " : string.Empty;
-
-            // Meter Reading
-            this.lb_MeterReading.Text = NEW_LABEL + TEXT_READING;
-            this.lb_MeterReading_Dual.Text = DUAL_PREFIX + NEW_LABEL + TEXT_READING;
-            this.lb_MeterReading_2.Text = NEW_LABEL + TEXT_READING;
-            this.lb_MeterReading_Dual_2.Text = DUAL_PREFIX + NEW_LABEL + TEXT_READING;
-
-            this.lb_OldMeterReading.Text = OLD_PREFIX + TEXT_READING;
-            this.lb_OldMeterReading_Dual.Text = DUAL_PREFIX + OLD_PREFIX + TEXT_READING;
-            this.lb_OldMeterReading_2.Text = OLD_PREFIX + TEXT_READING;
-            this.lb_OldMeterReading_Dual_2.Text = DUAL_PREFIX + OLD_PREFIX + TEXT_READING;
-
-            // Meter Serial Number
-            if (useMeterSerialNumber)
-            {
-                if (isReplaceMeter)
+                if (this.currentMtu.Port1.IsSetFlow)
                 {
-                    this.lb_MeterSerialNumber.Text = global.NewMeterLabel;
-                    this.lb_MeterSerialNumber_Dual.Text = DUAL_PREFIX + global.NewMeterLabel;
-                    this.lb_MeterSerialNumber_2.Text = global.NewMeterLabel;
-                    this.lb_MeterSerialNumber_Dual_2.Text = DUAL_PREFIX + global.NewMeterLabel;
-
-                    this.lb_OldMeterSerialNumber.Text = OLD_PREFIX + global.SerialNumLabel;
-                    this.lb_OldMeterSerialNumber_Dual.Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
-                    this.lb_OldMeterSerialNumber_2.Text = OLD_PREFIX + global.SerialNumLabel;
-                    this.lb_OldMeterSerialNumber_Dual_2.Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
+                    port1label.IsVisible = false;
+                    port2label.IsVisible = false;
+                    valvelabel.IsVisible = true;
+                    div_RDDGeneral.IsVisible = true;
+                    hasValve = true;
+                    hasTwoPorts = false;
+                }
+                else if (this.currentMtu.TwoPorts && this.currentMtu.Port2.IsSetFlow)
+                {
+                    port1label.IsVisible = true;
+                    port2label.IsVisible = false;
+                    valvelabel.IsVisible = true;
+                    hasValve = true;
+                    hasTwoPorts = false;
                 }
                 else
                 {
-                    this.lb_MeterSerialNumber.Text = global.SerialNumLabel;
-                    this.lb_MeterSerialNumber_Dual.Text = DUAL_PREFIX + global.SerialNumLabel;
-                    this.lb_MeterSerialNumber_2.Text = global.SerialNumLabel;
-                    this.lb_MeterSerialNumber_Dual_2.Text = DUAL_PREFIX + global.SerialNumLabel;
-
-                    this.lb_OldMeterSerialNumber.Text = OLD_PREFIX + global.SerialNumLabel;
-                    this.lb_OldMeterSerialNumber_Dual.Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
-                    this.lb_OldMeterSerialNumber_2.Text = OLD_PREFIX + global.SerialNumLabel;
-                    this.lb_OldMeterSerialNumber_Dual_2.Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
-                }
-            }
-
-            #endregion
-
-            #region Mandatory Fields
-
-            if (global.ColorEntry)
-            {
-                // Account Number
-                if (MANDATORY_ACCOUNTNUMBER)
-                {
-                    // Port 1
-                    this.lb_AccountNumber.TextColor = COL_MANDATORY;
-                    this.lb_AccountNumber_Dual.TextColor = COL_MANDATORY;
-
-                    // Port 2
-                    this.lb_AccountNumber_2.TextColor = COL_MANDATORY;
-                    this.lb_AccountNumber_Dual_2.TextColor = COL_MANDATORY;
-
-                    // Valve
-                    this.lb_AccountNumber_V.TextColor = COL_MANDATORY;
-                    this.lb_AccountNumber_Dual_V.TextColor = COL_MANDATORY;
+                    this.hasTwoPorts = this.currentMtu.TwoPorts;
+                    port2label.IsVisible = this.hasTwoPorts;
+                    valvelabel.IsVisible = false;
+                    hasValve = false;
                 }
 
-                // Work Order
-                if (MANDATORY_WORKORDER)
-                {
-                    // Port 1
-                    this.lb_WorkOrder.TextColor = COL_MANDATORY;
-                    this.lb_WorkOrder_Dual.TextColor = COL_MANDATORY;
+                #endregion
 
-                    // Port 2
-                    this.lb_WorkOrder_2.TextColor = COL_MANDATORY;
-                    this.lb_WorkOrder_Dual_2.TextColor = COL_MANDATORY;
+                #region Labels
 
-                    // Valve
-                    this.lb_WorkOrder_V.TextColor = COL_MANDATORY;
-                    this.lb_WorkOrder_Dual_V.TextColor = COL_MANDATORY;
-                }
+                this.port1label.Text = LB_PORT1;
+                this.port2label.Text = LB_PORT2;
+                this.misclabel.Text = LB_MISC;
+                this.valvelabel.Text = LB_VALVE;
 
-                // Old MTU ID
-                if (MANDATORY_OLDMTUID)
-                    this.lb_OldMtuId.TextColor = COL_MANDATORY;
+                #endregion
 
-                // Old Meter Serial Number
-                if (MANDATORY_OLDMETERSERIAL)
-                {
-                    // Port 1
-                    this.lb_OldMeterSerialNumber.TextColor = COL_MANDATORY;
-                    this.lb_OldMeterSerialNumber_Dual.TextColor = COL_MANDATORY;
+                #region Account Number / Service Port ID
 
-                    // Port 2
-                    this.lb_OldMeterSerialNumber_2.TextColor = COL_MANDATORY;
-                    this.lb_OldMeterSerialNumber_Dual_2.TextColor = COL_MANDATORY;
-                }
+                // Dual entry
+                bool useDualAccountNumber = global.AccountDualEntry;
 
-                // Old Meter Working
-                if (global.MeterWorkRecording)
-                {
-                    // Port 1
-                    this.lb_OldMeterWorking.TextColor = COL_MANDATORY;
+                // Port 1
+                this.div_AccountNumber_Dual.IsVisible = useDualAccountNumber;
+                this.div_AccountNumber_Dual.IsEnabled = useDualAccountNumber;
 
-                    // Port 2
-                    this.lb_OldMeterWorking_2.TextColor = COL_MANDATORY;
-                }
+                // Port 2
+                this.div_AccountNumber_Dual_2.IsVisible = hasTwoPorts && useDualAccountNumber;
+                this.div_AccountNumber_Dual_2.IsEnabled = hasTwoPorts && useDualAccountNumber;
 
-                // Old Meter Reading
-                if (MANDATORY_OLDMETERREADING)
-                {
-                    // Port 1
-                    this.lb_OldMeterReading.TextColor = COL_MANDATORY;
-                    this.lb_OldMeterReading_Dual.TextColor = COL_MANDATORY;
+                // Valve
+                this.div_AccountNumber_Dual_V.IsVisible = hasValve && useDualAccountNumber;
+                this.div_AccountNumber_Dual_V.IsEnabled = hasValve && useDualAccountNumber;
 
-                    // Port 2
-                    this.lb_OldMeterReading_2.TextColor = COL_MANDATORY;
-                    this.lb_OldMeterReading_Dual_2.TextColor = COL_MANDATORY;
-                }
+                #endregion
 
-                // Replace Meter|Register
-                if (global.RegisterRecordingReq)
-                {
-                    // Port 1
-                    this.lb_ReplaceMeterRegister.TextColor = COL_MANDATORY;
+                #region Work Order / Field Order
 
-                    // Port 2
-                    this.lb_ReplaceMeterRegister_2.TextColor = COL_MANDATORY;
-                }
+                bool useWorkOrder = global.WorkOrderRecording;
+
+                // Port 1            
+                this.div_WorkOrder.IsVisible = useWorkOrder;
+                this.div_WorkOrder.IsEnabled = useWorkOrder;
+
+                // Port 2
+                this.div_WorkOrder_2.IsVisible = hasTwoPorts && useWorkOrder;
+                this.div_WorkOrder_2.IsEnabled = hasTwoPorts && useWorkOrder;
+
+                // RDD
+                this.div_WorkOrder_V.IsVisible = hasValve && useWorkOrder;
+                this.div_WorkOrder_V.IsEnabled = hasValve && useWorkOrder;
+
+                // Dual entry
+                bool useDualWorkOrder = global.WorkOrderDualEntry && useWorkOrder;
+
+                // Port 1
+                this.div_WorkOrder_Dual.IsVisible = useDualWorkOrder;
+                this.div_WorkOrder_Dual.IsEnabled = useDualWorkOrder;
+
+                // Port 2
+                this.div_WorkOrder_Dual_2.IsVisible = hasTwoPorts && useDualWorkOrder;
+                this.div_WorkOrder_Dual_2.IsEnabled = hasTwoPorts && useDualWorkOrder;
+
+                // Valve
+                this.div_WorkOrder_Dual_V.IsVisible = hasValve && useDualWorkOrder;
+                this.div_WorkOrder_Dual_V.IsEnabled = hasValve && useDualWorkOrder;
+
+                #endregion
+
+                #region Old MTU ID
+
+                bool isReplaceMtu = (
+                    this.actionType == ActionType.ReplaceMTU ||
+                    this.actionType == ActionType.ReplaceMtuReplaceMeter);
+
+                this.div_OldMtuId.IsVisible = isReplaceMtu;
+                this.div_OldMtuId.IsEnabled = isReplaceMtu;
+
+                #endregion
+
+                #region Meter Serial Number and Reading ( and OLD fields )
+
+                this.Initialize_OldMeterPickers();
+
+                // Action is about Replace Meter
+                bool isReplaceMeter = (
+                    this.actionType == ActionType.ReplaceMeter ||
+                    this.actionType == ActionType.ReplaceMtuReplaceMeter ||
+                    this.actionType == ActionType.AddMtuReplaceMeter);
 
                 // ( New ) Meter Serial Number
-                if (MANDATORY_METERSERIAL)
-                {
-                    // Port 1
-                    this.lb_MeterSerialNumber.TextColor = COL_MANDATORY;
-                    this.lb_MeterSerialNumber_Dual.TextColor = COL_MANDATORY;
+                bool useMeterSerialNumber = global.UseMeterSerialNumber;
 
-                    // Port 2
-                    this.lb_MeterSerialNumber_2.TextColor = COL_MANDATORY;
-                    this.lb_MeterSerialNumber_Dual_2.TextColor = COL_MANDATORY;
+                // Port 1
+                this.div_MeterSerialNumber.IsVisible = useMeterSerialNumber;
+                this.div_MeterSerialNumber.IsEnabled = useMeterSerialNumber;
+
+                // Port 2
+                this.div_MeterSerialNumber_2.IsVisible = hasTwoPorts && useMeterSerialNumber;
+                this.div_MeterSerialNumber_2.IsEnabled = hasTwoPorts && useMeterSerialNumber;
+
+                ///////////////////////////////////
+                // Dual entry - ( New ) Meter Serial Number
+                bool useDualSeriaNumber = global.NewSerialNumDualEntry && useMeterSerialNumber;
+
+                // Port 1
+                this.div_MeterSerialNumber_Dual.IsVisible = useDualSeriaNumber;
+                this.div_MeterSerialNumber_Dual.IsEnabled = useDualSeriaNumber;
+
+                // Port 2
+                this.div_MeterSerialNumber_Dual_2.IsVisible = hasTwoPorts && useDualSeriaNumber;
+                this.div_MeterSerialNumber_Dual_2.IsEnabled = hasTwoPorts && useDualSeriaNumber;
+
+                ///////////////////////////////////
+                // ( New ) Meter Reading
+                this.p1NoNewMeterReadings = !this.currentMtu.Port1.IsForEncoderOrEcoder;
+                this.p2NoNewMeterReadings = this.hasTwoPorts && !this.currentMtu.Port2.IsForEncoderOrEcoder;
+
+                // Port 1
+                this.div_MeterReadings.IsVisible = this.p1NoNewMeterReadings;
+                this.div_MeterReadings.IsEnabled = this.p1NoNewMeterReadings;
+
+                // Port 2
+                this.div_MeterReadings_2.IsVisible = this.p2NoNewMeterReadings;
+                this.div_MeterReadings_2.IsEnabled = this.p2NoNewMeterReadings;
+
+                ///////////////////////////////////
+                // Dual Entry - ( New ) Meter Reading
+                bool useDualMeterReading = global.ReadingDualEntry;
+
+                // Port 1
+                this.div_MeterReading_Dual.IsVisible = this.p1NoNewMeterReadings && useDualMeterReading;
+                this.div_MeterReading_Dual.IsEnabled = this.p1NoNewMeterReadings && useDualMeterReading;
+
+                // Port 2
+                this.div_MeterReading_Dual_2.IsVisible = this.p2NoNewMeterReadings && useDualMeterReading;
+                this.div_MeterReading_Dual_2.IsEnabled = this.p2NoNewMeterReadings && useDualMeterReading;
+
+                ///////////////////////////////////
+                // Old Meter Serial Number
+                // Port 1
+                this.div_OldMeterSerialNumber.IsVisible = isReplaceMeter && useMeterSerialNumber;
+                this.div_OldMeterSerialNumber.IsEnabled = isReplaceMeter && useMeterSerialNumber;
+
+                // Port 2
+                this.div_OldMeterSerialNumber_2.IsVisible = hasTwoPorts && isReplaceMeter && useMeterSerialNumber;
+                this.div_OldMeterSerialNumber_2.IsEnabled = hasTwoPorts && isReplaceMeter && useMeterSerialNumber;
+
+                ///////////////////////////////////
+                // Dual entry - Old Meter Serial Number
+                bool useDualOldSeriaNumber = global.OldSerialNumDualEntry && this.div_OldMeterSerialNumber.IsVisible;
+
+                // Port 1
+                this.div_OldMeterSerialNumber_Dual.IsVisible = useDualOldSeriaNumber;
+                this.div_OldMeterSerialNumber_Dual.IsEnabled = useDualOldSeriaNumber;
+
+                // Port 2
+                this.div_OldMeterSerialNumber_Dual_2.IsVisible = hasTwoPorts && useDualOldSeriaNumber;
+                this.div_OldMeterSerialNumber_Dual_2.IsEnabled = hasTwoPorts && useDualOldSeriaNumber;
+
+                ///////////////////////////////////
+                // Old Meter Working ( Change reason )
+                bool useMeterWorking = isReplaceMeter && global.MeterWorkRecording;
+
+                // Port 1
+                this.div_OldMeterWorking.IsVisible = useMeterWorking;
+                this.div_OldMeterWorking.IsEnabled = useMeterWorking;
+
+                // Port 2
+                this.div_OldMeterWorking_2.IsVisible = hasTwoPorts && useMeterWorking;
+                this.div_OldMeterWorking_2.IsEnabled = hasTwoPorts && useMeterWorking;
+
+                ///////////////////////////////////
+                // Old Meter Reading
+                bool useOldReading = isReplaceMeter && global.OldReadingRecording;
+
+                // Port 1
+                this.div_OldMeterReading.IsVisible = useOldReading;
+                this.div_OldMeterReading.IsEnabled = useOldReading;
+
+                // Port 2
+                this.div_OldMeterReading_2.IsVisible = hasTwoPorts && useOldReading;
+                this.div_OldMeterReading_2.IsEnabled = hasTwoPorts && useOldReading;
+
+                ///////////////////////////////////
+                // Dual entry - Old Meter Reading
+                bool useDualOldReading = global.OldReadingDualEntry && useOldReading;
+
+                // Port 1
+                this.div_OldMeterReading_Dual.IsVisible = useDualOldReading;
+                this.div_OldMeterReading_Dual.IsEnabled = useDualOldReading;
+
+                // Port 2
+                this.div_OldMeterReading_Dual_2.IsVisible = hasTwoPorts && useDualOldReading;
+                this.div_OldMeterReading_Dual_2.IsEnabled = hasTwoPorts && useDualOldReading;
+
+                ///////////////////////////////////
+                // Replace Meter/Register
+                bool useReplaceMeterRegister = isReplaceMeter && global.RegisterRecording;
+
+                // Port 1
+                this.div_ReplaceMeterRegister.IsVisible = useReplaceMeterRegister;
+                this.div_ReplaceMeterRegister.IsEnabled = useReplaceMeterRegister;
+
+                // Port 2
+                this.div_ReplaceMeterRegister_2.IsVisible = hasTwoPorts && useReplaceMeterRegister;
+                this.div_ReplaceMeterRegister_2.IsEnabled = hasTwoPorts && useReplaceMeterRegister;
+
+                ///////////////////////////////////
+                // Introduce values from right to left, but finish with the same number
+                // e.g. 1 _ _ -> 1 2 _ -> 1 2 3
+                //      _ _ 3 -> _ 2 3 -> 1 2 3
+                FlowDirection flow = (global.ReverseReading) ? FlowDirection.RightToLeft : FlowDirection.LeftToRight;
+                this.tbx_MeterReading.FlowDirection = flow;
+                this.tbx_MeterReading_2.FlowDirection = flow;
+                this.tbx_MeterReading_Dual.FlowDirection = flow;
+                this.tbx_MeterReading_Dual_2.FlowDirection = flow;
+                this.tbx_OldMeterReading.FlowDirection = flow;
+                this.tbx_OldMeterReading_2.FlowDirection = flow;
+                this.tbx_OldMeterReading_Dual.FlowDirection = flow;
+                this.tbx_OldMeterReading_Dual_2.FlowDirection = flow;
+
+                ///////////////////////////////////
+                // New Meter readings will be disabled before meter type was selected
+                this.tbx_MeterReading.IsEnabled = false;
+                this.tbx_MeterReading_2.IsEnabled = false;
+                this.tbx_MeterReading_Dual.IsEnabled = false;
+                this.tbx_MeterReading_Dual_2.IsEnabled = false;
+
+                this.div_MeterReading.Opacity = OPACITY_DISABLE;
+                this.divSub_MeterReading_Dual.Opacity = OPACITY_DISABLE;
+                this.divSub_MeterReading_2.Opacity = OPACITY_DISABLE;
+                this.divSub_MeterReading_Dual_2.Opacity = OPACITY_DISABLE;
+
+                this.lb_MeterReading_MeterType.Text = FIRST_METERTYPE;
+                this.lb_MeterReading_DualMeterType.Text = FIRST_METERTYPE;
+                this.lb_MeterReading_MeterType_2.Text = FIRST_METERTYPE;
+                this.lb_MeterReading_DualMeterType_2.Text = FIRST_METERTYPE;
+
+                this.lb_MeterReading_MeterType.IsVisible = true;
+                this.lb_MeterReading_DualMeterType.IsVisible = true;
+                this.lb_MeterReading_MeterType_2.IsVisible = true;
+                this.lb_MeterReading_DualMeterType_2.IsVisible = true;
+
+                #endregion
+
+                #region Read Interval
+
+                this.InitializePicker_ReadInterval(this.mtuBasicInfo, this.currentMtu);
+
+                // Use IndividualReadInterval tag to enable o disable read interval picker
+                this.pck_ReadInterval.IsEnabled = global.IndividualReadInterval;
+                if ( !this.pck_ReadInterval.IsEnabled )
+                {
+                    this.div_ReadInterval.BackgroundColor = Color.LightGray;
+                    this.pck_ReadInterval.BackgroundColor = Color.LightGray;
+                    this.pck_ReadInterval.TextColor = Color.Gray;
                 }
+
+                #endregion
+
+                #region Snap Reads / Daily Reads
+
+                bool useDailyReads = global.AllowDailyReads && this.currentMtu.DailyReads && !this.currentMtu.IsFamily33xx;
+                bool changeableDailyReads = global.IndividualDailyReads;
+
+                int dailyReadsDefault = global.DailyReadsDefault;
+
+                this.div_SnapReads.IsEnabled = useDailyReads;
+                this.div_SnapReads.IsVisible = useDailyReads;
+                this.divSub_SnapReads.IsEnabled = changeableDailyReads && useDailyReads;
+                this.divSub_SnapReads.Opacity = (changeableDailyReads && useDailyReads) ? 1 : 0.8d;
+
+                this.snapReadsStep = 1.0;
+
+                if (useDailyReads)
+                    this.sld_SnapReads.ValueChanged += OnSnapReadsSlider_ValueChanged;
+
+                this.sld_SnapReads.Value = (dailyReadsDefault > -1) ? dailyReadsDefault : 13;
+
+
+                #endregion
+
+                #region 2-Way
+
+                // Only for 34xx MTUs and above
+                bool useTwoWay = global.TimeToSync &&
+                                this.currentMtu.TimeToSync &&
+                                this.currentMtu.FastMessageConfig;
+
+                if (!div_RDDGeneral.IsVisible)
+                {
+                    this.Initialize_TwoWay(pck_TwoWay);
+                    div_TwoWay.IsVisible = useTwoWay;
+                    div_TwoWay.IsEnabled = useTwoWay;
+                }
+                else
+                {
+                    this.Initialize_TwoWay(pck_TwoWay_V);
+                    div_TwoWay_V.IsVisible = useTwoWay;
+                    div_TwoWay_V.IsEnabled = useTwoWay;
+                }
+                #endregion
+
+                #region Alarms
+
+                div_Alarms.IsEnabled   = false;
+                div_Alarms.IsVisible   = false;
+                div_Alarms_V.IsEnabled = false;
+                div_Alarms_V.IsVisible = false;
+
+                if ( this.currentMtu.RequiresAlarmProfile )
+                {
+                    // Remove "Scripting" option in interactive mode
+                    alarmsList = new List<Alarm> ( config.Alarms.FindByMtuType_Interactive ( this.detectedMtuType ) );
+                    
+                    if (!div_RDDGeneral.IsVisible)
+                    {
+                        pck_Alarms.ItemDisplayBinding = new Binding("Name");
+
+                        div_Alarms.IsEnabled   = true;
+                        div_Alarms.IsVisible   = true;
+                        pck_Alarms.ItemsSource = alarmsList;
+
+                        // Hide alarms dropdownlist if contains only one option
+                        div_Alarms.IsVisible = (alarmsList.Count > 1);
+                    }
+                    else
+                    {
+                        pck_Alarms_V.ItemDisplayBinding = new Binding("Name");
+
+                        div_Alarms_V.IsEnabled   = true;
+                        div_Alarms_V.IsVisible   = true;
+                        pck_Alarms_V.ItemsSource = alarmsList;
+
+                        // Hide alarms dropdownlist if contains only one option
+                        div_Alarms_V.IsVisible = (alarmsList.Count > 1);
+                    }
+                }
+
+                #endregion
+
+                #region Demands
+
+                div_Demands.IsEnabled   = false;
+                div_Demands.IsVisible   = false;
+                div_Demands_V.IsEnabled = false;
+                div_Demands_V.IsVisible = false;
+
+                if ( this.currentMtu.MtuDemand &&
+                     this.currentMtu.FastMessageConfig )
+                {
+                    // Remove "Scripting" option in interactive mode
+                    demandsList = new List<Demand> ( config.Demands.FindByMtuType_Interactive ( this.detectedMtuType ) );
+
+                    if (!div_RDDGeneral.IsVisible)
+                    {
+                        pck_Demands.ItemDisplayBinding = new Binding("Name");
+
+                        div_Demands.IsEnabled   = true;
+                        div_Demands.IsVisible   = true;
+                        pck_Demands.ItemsSource = demandsList;
+
+                        // Hide alarms dropdownlist if contains only one option
+                        div_Demands.IsVisible = ( demandsList.Count > 1 );
+                    }
+                    else
+                    {
+                        pck_Demands_V.ItemDisplayBinding = new Binding("Name");
+
+                        div_Demands_V.IsEnabled   = true;
+                        div_Demands_V.IsVisible   = true;
+                        pck_Demands_V.ItemsSource = demandsList;
+
+                        // Hide alarms dropdownlist if contains only one option
+                        div_Demands_V.IsVisible = ( demandsList.Count > 1 );
+                    }
+                }
+                
+                #endregion
+
+                #region Misc
+
+                if (this.global.Options.Count > 0)
+                    InitializeOptionalFields();
+
+                #endregion
+
+                #region Cancel reason
+
+                // Load cancel reasons from Global.xml
+                List<string> cancelReasons = this.global.Cancel;
+
+                if (!cancelReasons.Contains("Other"))
+                    cancelReasons.Add("Other"); // Add "Other" option
+
+                cancelReasonPicker.ItemsSource = cancelReasons;
+
+                // Select default reason
+                cancelReasonPicker.SelectedIndex = 0;
+
+                // Enable "Other" reason box if default is "Other"
+                string defaultCancelReason = cancelReasonPicker.Items[cancelReasonPicker.SelectedIndex];
+                if ("Other".Equals(defaultCancelReason))
+                {
+                    cancelReasonOtherInput.IsEnabled = true;
+                    cancelReasonOtherInputContainer.Opacity = 1;
+                }
+                else
+                {
+                    cancelReasonOtherInput.IsEnabled = false;
+                    cancelReasonOtherInputContainer.Opacity = 0.8;
+                }
+
+                // Add handler
+                cancelReasonPicker.SelectedIndexChanged += CancelReasonPicker_SelectedIndexChanged;
+
+                #endregion
+
+                #region Set Max
+
+                // Set maximum values from global.xml
+                int acnLength = (global.AccountLength <= MAX_ACCOUNTNUMBER) ? global.AccountLength : MAX_ACCOUNTNUMBER;
+                tbx_AccountNumber.MaxLength = acnLength;
+                tbx_AccountNumber_2.MaxLength = acnLength;
+                tbx_AccountNumber_V.MaxLength = acnLength;
+                tbx_AccountNumber_Dual.MaxLength = acnLength;
+                tbx_AccountNumber_Dual_2.MaxLength = acnLength;
+                tbx_AccountNumber_Dual_V.MaxLength = acnLength;
+
+                tbx_WorkOrder.MaxLength = global.WorkOrderLength;
+                tbx_WorkOrder_2.MaxLength = global.WorkOrderLength;
+                tbx_WorkOrder_V.MaxLength = global.WorkOrderLength;
+                tbx_WorkOrder_Dual.MaxLength = global.WorkOrderLength;
+                tbx_WorkOrder_Dual_2.MaxLength = global.WorkOrderLength;
+                tbx_WorkOrder_Dual_V.MaxLength = global.WorkOrderLength;
+
+                tbx_OldMtuId.MaxLength = global.MtuIdLength;
+
+                tbx_OldMeterSerialNumber.MaxLength = global.MeterNumberLength;
+                tbx_OldMeterSerialNumber_2.MaxLength = global.MeterNumberLength;
+                tbx_OldMeterSerialNumber_Dual.MaxLength = global.MeterNumberLength;
+                tbx_OldMeterSerialNumber_Dual_2.MaxLength = global.MeterNumberLength;
+
+                tbx_MeterSerialNumber.MaxLength = global.MeterNumberLength;
+                tbx_MeterSerialNumber_2.MaxLength = global.MeterNumberLength;
+                tbx_MeterSerialNumber_Dual.MaxLength = global.MeterNumberLength;
+                tbx_MeterSerialNumber_Dual_2.MaxLength = global.MeterNumberLength;
+
+                tbx_OldMeterReading.MaxLength = MAX_METERREADING;
+                tbx_OldMeterReading_2.MaxLength = MAX_METERREADING;
+                tbx_OldMeterReading_Dual.MaxLength = MAX_METERREADING;
+                tbx_OldMeterReading_Dual_2.MaxLength = MAX_METERREADING;
+
+                tbx_MeterReading.MaxLength = MAX_METERREADING;
+                tbx_MeterReading_2.MaxLength = MAX_METERREADING;
+                tbx_MeterReading_Dual.MaxLength = MAX_METERREADING;
+                tbx_MeterReading_Dual_2.MaxLength = MAX_METERREADING;
+
+                tbx_MtuGeolocationLat.MaxLength  = 10;
+                tbx_MtuGeolocationLong.MaxLength = 10;
+
+                tbx_RDDFirmwareVersion.MaxLength = MAX_RDDFIRMWARE;
+
+                #endregion
+
+                #region Labels
+
+                // Account Number
+                this.lb_AccountNumber.Text = global.AccountLabel;
+                this.lb_AccountNumber_Dual.Text = DUAL_PREFIX + global.AccountLabel;
+                this.lb_AccountNumber_2.Text = global.AccountLabel;
+                this.lb_AccountNumber_Dual_2.Text = DUAL_PREFIX + global.AccountLabel;
+
+                // Work Order
+                this.lb_WorkOrder.Text = global.WorkOrderLabel;
+                this.lb_WorkOrder_Dual.Text = DUAL_PREFIX + global.WorkOrderLabel;
+                this.lb_WorkOrder_2.Text = global.WorkOrderLabel;
+                this.lb_WorkOrder_Dual_2.Text = DUAL_PREFIX + global.WorkOrderLabel;
+
+                string NEW_LABEL = (isReplaceMeter) ? "New " : string.Empty;
+
+                // Meter Reading
+                this.lb_MeterReading.Text = NEW_LABEL + TEXT_READING;
+                this.lb_MeterReading_Dual.Text = DUAL_PREFIX + NEW_LABEL + TEXT_READING;
+                this.lb_MeterReading_2.Text = NEW_LABEL + TEXT_READING;
+                this.lb_MeterReading_Dual_2.Text = DUAL_PREFIX + NEW_LABEL + TEXT_READING;
+
+                this.lb_OldMeterReading.Text = OLD_PREFIX + TEXT_READING;
+                this.lb_OldMeterReading_Dual.Text = DUAL_PREFIX + OLD_PREFIX + TEXT_READING;
+                this.lb_OldMeterReading_2.Text = OLD_PREFIX + TEXT_READING;
+                this.lb_OldMeterReading_Dual_2.Text = DUAL_PREFIX + OLD_PREFIX + TEXT_READING;
+
+                // Meter Serial Number
+                if (useMeterSerialNumber)
+                {
+                    if (isReplaceMeter)
+                    {
+                        this.lb_MeterSerialNumber.Text = global.NewMeterLabel;
+                        this.lb_MeterSerialNumber_Dual.Text = DUAL_PREFIX + global.NewMeterLabel;
+                        this.lb_MeterSerialNumber_2.Text = global.NewMeterLabel;
+                        this.lb_MeterSerialNumber_Dual_2.Text = DUAL_PREFIX + global.NewMeterLabel;
+
+                        this.lb_OldMeterSerialNumber.Text = OLD_PREFIX + global.SerialNumLabel;
+                        this.lb_OldMeterSerialNumber_Dual.Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
+                        this.lb_OldMeterSerialNumber_2.Text = OLD_PREFIX + global.SerialNumLabel;
+                        this.lb_OldMeterSerialNumber_Dual_2.Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
+                    }
+                    else
+                    {
+                        this.lb_MeterSerialNumber.Text = global.SerialNumLabel;
+                        this.lb_MeterSerialNumber_Dual.Text = DUAL_PREFIX + global.SerialNumLabel;
+                        this.lb_MeterSerialNumber_2.Text = global.SerialNumLabel;
+                        this.lb_MeterSerialNumber_Dual_2.Text = DUAL_PREFIX + global.SerialNumLabel;
+
+                        this.lb_OldMeterSerialNumber.Text = OLD_PREFIX + global.SerialNumLabel;
+                        this.lb_OldMeterSerialNumber_Dual.Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
+                        this.lb_OldMeterSerialNumber_2.Text = OLD_PREFIX + global.SerialNumLabel;
+                        this.lb_OldMeterSerialNumber_Dual_2.Text = DUAL_PREFIX + OLD_PREFIX + global.SerialNumLabel;
+                    }
+                }
+
+                #endregion
+
+                #region Mandatory Fields
+
+                if (global.ColorEntry)
+                {
+                    // Account Number
+                    if (MANDATORY_ACCOUNTNUMBER)
+                    {
+                        // Port 1
+                        this.lb_AccountNumber.TextColor = COL_MANDATORY;
+                        this.lb_AccountNumber_Dual.TextColor = COL_MANDATORY;
+
+                        // Port 2
+                        this.lb_AccountNumber_2.TextColor = COL_MANDATORY;
+                        this.lb_AccountNumber_Dual_2.TextColor = COL_MANDATORY;
+
+                        // Valve
+                        this.lb_AccountNumber_V.TextColor = COL_MANDATORY;
+                        this.lb_AccountNumber_Dual_V.TextColor = COL_MANDATORY;
+                    }
+
+                    // Work Order
+                    if (MANDATORY_WORKORDER)
+                    {
+                        // Port 1
+                        this.lb_WorkOrder.TextColor = COL_MANDATORY;
+                        this.lb_WorkOrder_Dual.TextColor = COL_MANDATORY;
+
+                        // Port 2
+                        this.lb_WorkOrder_2.TextColor = COL_MANDATORY;
+                        this.lb_WorkOrder_Dual_2.TextColor = COL_MANDATORY;
+
+                        // Valve
+                        this.lb_WorkOrder_V.TextColor = COL_MANDATORY;
+                        this.lb_WorkOrder_Dual_V.TextColor = COL_MANDATORY;
+                    }
+
+                    // Old MTU ID
+                    if (MANDATORY_OLDMTUID)
+                        this.lb_OldMtuId.TextColor = COL_MANDATORY;
+
+                    // Old Meter Serial Number
+                    if (MANDATORY_OLDMETERSERIAL)
+                    {
+                        // Port 1
+                        this.lb_OldMeterSerialNumber.TextColor = COL_MANDATORY;
+                        this.lb_OldMeterSerialNumber_Dual.TextColor = COL_MANDATORY;
+
+                        // Port 2
+                        this.lb_OldMeterSerialNumber_2.TextColor = COL_MANDATORY;
+                        this.lb_OldMeterSerialNumber_Dual_2.TextColor = COL_MANDATORY;
+                    }
+
+                    // Old Meter Working
+                    if (global.MeterWorkRecording)
+                    {
+                        // Port 1
+                        this.lb_OldMeterWorking.TextColor = COL_MANDATORY;
+
+                        // Port 2
+                        this.lb_OldMeterWorking_2.TextColor = COL_MANDATORY;
+                    }
+
+                    // Old Meter Reading
+                    if (MANDATORY_OLDMETERREADING)
+                    {
+                        // Port 1
+                        this.lb_OldMeterReading.TextColor = COL_MANDATORY;
+                        this.lb_OldMeterReading_Dual.TextColor = COL_MANDATORY;
+
+                        // Port 2
+                        this.lb_OldMeterReading_2.TextColor = COL_MANDATORY;
+                        this.lb_OldMeterReading_Dual_2.TextColor = COL_MANDATORY;
+                    }
+
+                    // Replace Meter|Register
+                    if (global.RegisterRecordingReq)
+                    {
+                        // Port 1
+                        this.lb_ReplaceMeterRegister.TextColor = COL_MANDATORY;
+
+                        // Port 2
+                        this.lb_ReplaceMeterRegister_2.TextColor = COL_MANDATORY;
+                    }
+
+                    // ( New ) Meter Serial Number
+                    if (MANDATORY_METERSERIAL)
+                    {
+                        // Port 1
+                        this.lb_MeterSerialNumber.TextColor = COL_MANDATORY;
+                        this.lb_MeterSerialNumber_Dual.TextColor = COL_MANDATORY;
+
+                        // Port 2
+                        this.lb_MeterSerialNumber_2.TextColor = COL_MANDATORY;
+                        this.lb_MeterSerialNumber_Dual_2.TextColor = COL_MANDATORY;
+                    }
+
+                    // ( New ) Meter Reading
+                    if (MANDATORY_METERREADING)
+                    {
+                        // Port 1
+                        this.lb_MeterReading.TextColor = COL_MANDATORY;
+                        this.lb_MeterReading_Dual.TextColor = COL_MANDATORY;
+
+                        // Port 2
+                        this.lb_MeterReading_2.TextColor = COL_MANDATORY;
+                        this.lb_MeterReading_Dual_2.TextColor = COL_MANDATORY;
+                    }
+
+                    // Read Interval
+                    if (MANDATORY_READINTERVAL &&
+                        global.IndividualReadInterval)
+                        this.lb_ReadInterval.TextColor = COL_MANDATORY;
+
+                    // Snap Reads
+                    if (MANDATORY_SNAPREADS &&
+                        global.IndividualDailyReads &&
+                        snapReadsStatus)
+                        this.lb_SnapReads.TextColor = COL_MANDATORY;
+
+                    // Two-Way
+                    if (MANDATORY_TWOWAY)
+                        this.lb_TwoWay.TextColor = COL_MANDATORY;
+
+                    // Alarms
+                    if (MANDATORY_ALARMS)
+                        this.lb_Alarms.TextColor = COL_MANDATORY;
+
+                    // Demands
+                    if (MANDATORY_DEMANDS)
+                        this.lb_Demands.TextColor = COL_MANDATORY;
+
+                    // GPS
+                    if (MANDATORY_GPS)
+                        this.lb_GPS.TextColor = COL_MANDATORY;
+                }
+
+                #endregion
+
+                #region Port 2 Buttons
+
+                // Button for enable|disable the second port
+                this.div_EnablePort2.IsEnabled = global.Port2DisableNo;
+                if (!this.div_EnablePort2.IsEnabled)
+                {
+                    this.block_view_port2.IsVisible = this.port2IsActivated;
+                    this.btn_EnablePort2.Text = (this.port2IsActivated) ? SWITCH_P2_OFF : SWITCH_P2_ON;               
+                }
+                // Auto-enable second port because Port2DisableNo is true
+                else
+                {
+                    this.port2IsActivated = true;
+                    this.block_view_port2.IsVisible = true;
+                    this.div_EnablePort2.IsVisible = false;
+                    this.div_EnablePort2.IsEnabled = false;
+                }
+
+                // Button for copy port 1 common fields values to port 2
+                this.div_CopyPort1To2.IsVisible = this.port2IsActivated;
+                this.div_CopyPort1To2.IsEnabled = this.port2IsActivated;
+
+                btn_CopyPort1To2.Text = COPY_1_TO_2;
+
+                #endregion
+
+                #region UnFocus events
+
+                // Account Number
+                System.Action valEqAccountNumber = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_AccountNumber,
+                        this.tbx_AccountNumber_Dual,
+                        this.lb_AccountNumber_DualError);
+                System.Action valEqAccountNumber_2 = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_AccountNumber_2,
+                        this.tbx_AccountNumber_Dual_2,
+                        this.lb_AccountNumber_DualError_2);
+                System.Action valEqAccountNumber_V = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_AccountNumber_V,
+                        this.tbx_AccountNumber_Dual_V,
+                        this.lb_AccountNumber_DualError_V);
+
+                this.tbx_AccountNumber_Dual.Unfocused += (s, e) => { valEqAccountNumber(); };
+                this.tbx_AccountNumber.Unfocused += (s, e) => { valEqAccountNumber(); };
+                this.tbx_AccountNumber_2.Unfocused += (s, e) => { valEqAccountNumber_2(); };
+                this.tbx_AccountNumber_Dual_2.Unfocused += (s, e) => { valEqAccountNumber_2(); };
+                this.tbx_AccountNumber_V.Unfocused += (s, e) => { valEqAccountNumber_V(); };
+                this.tbx_AccountNumber_Dual_V.Unfocused += (s, e) => { valEqAccountNumber_V(); };
+
+                // Work Order
+                System.Action valEqWorkOrder = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_WorkOrder,
+                        this.tbx_WorkOrder_Dual,
+                        this.lb_WorkOrder_DualError);
+                System.Action valEqWorkOrder_2 = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_WorkOrder_2,
+                        this.tbx_WorkOrder_Dual_2,
+                        this.lb_WorkOrder_DualError_2);
+                System.Action valEqWorkOrder_V = () =>
+                ValidateEqualityOnFocus(
+                    this.tbx_WorkOrder_V,
+                    this.tbx_WorkOrder_Dual_V,
+                    this.lb_WorkOrder_DualError_V);
+
+                this.tbx_WorkOrder.Unfocused += (s, e) => { valEqWorkOrder(); };
+                this.tbx_WorkOrder_Dual.Unfocused += (s, e) => { valEqWorkOrder(); };
+                this.tbx_WorkOrder_2.Unfocused += (s, e) => { valEqWorkOrder_2(); };
+                this.tbx_WorkOrder_Dual_2.Unfocused += (s, e) => { valEqWorkOrder_2(); };
+                this.tbx_WorkOrder_V.Unfocused += (s, e) => { valEqWorkOrder_V(); };
+                this.tbx_WorkOrder_Dual_V.Unfocused += (s, e) => { valEqWorkOrder_V(); };
+
+                // ( New ) Meter Serial Number
+                System.Action valEqMeterSerialNumber = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_MeterSerialNumber,
+                        this.tbx_MeterSerialNumber_Dual,
+                        this.lb_MeterSerialNumber_DualError);
+                System.Action valEqMeterSerialNumber_2 = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_MeterSerialNumber_2,
+                        this.tbx_MeterSerialNumber_Dual_2,
+                        this.lb_MeterSerialNumber_DualError_2);
+
+                this.tbx_MeterSerialNumber.Unfocused += (s, e) => { valEqMeterSerialNumber(); };
+                this.tbx_MeterSerialNumber_Dual.Unfocused += (s, e) => { valEqMeterSerialNumber(); };
+                this.tbx_MeterSerialNumber_2.Unfocused += (s, e) => { valEqMeterSerialNumber_2(); };
+                this.tbx_MeterSerialNumber_Dual_2.Unfocused += (s, e) => { valEqMeterSerialNumber_2(); };
+
+                // Old Meter Serial Number
+                System.Action valEqOldMeterSerialNumber = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_OldMeterSerialNumber,
+                        this.tbx_OldMeterSerialNumber_Dual,
+                        this.lb_OldMeterSerialNumber_DualError);
+                System.Action valEqOldMeterSerialNumber_2 = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_OldMeterSerialNumber_2,
+                        this.tbx_OldMeterSerialNumber_Dual_2,
+                        this.lb_OldMeterSerialNumber_DualError_2);
+
+                this.tbx_OldMeterSerialNumber.Unfocused += (s, e) => { valEqOldMeterSerialNumber(); };
+                this.tbx_OldMeterSerialNumber_Dual.Unfocused += (s, e) => { valEqOldMeterSerialNumber(); };
+                this.tbx_OldMeterSerialNumber_2.Unfocused += (s, e) => { valEqOldMeterSerialNumber_2(); };
+                this.tbx_OldMeterSerialNumber_Dual_2.Unfocused += (s, e) => { valEqOldMeterSerialNumber_2(); };
 
                 // ( New ) Meter Reading
-                if (MANDATORY_METERREADING)
-                {
-                    // Port 1
-                    this.lb_MeterReading.TextColor = COL_MANDATORY;
-                    this.lb_MeterReading_Dual.TextColor = COL_MANDATORY;
+                System.Action valEqMeterReading = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_MeterReading,
+                        this.tbx_MeterReading_Dual,
+                        this.lb_MeterReading_DualError);
+                System.Action valEqMeterReading_2 = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_MeterReading_2,
+                        this.tbx_MeterReading_Dual_2,
+                        this.lb_MeterReading_DualError_2);
 
-                    // Port 2
-                    this.lb_MeterReading_2.TextColor = COL_MANDATORY;
-                    this.lb_MeterReading_Dual_2.TextColor = COL_MANDATORY;
-                }
+                this.tbx_MeterReading.Unfocused += (s, e) => { valEqMeterReading(); };
+                this.tbx_MeterReading_Dual.Unfocused += (s, e) => { valEqMeterReading(); };
+                this.tbx_MeterReading.Unfocused += (s, e) => { valEqMeterReading_2(); };
+                this.tbx_MeterReading_Dual_2.Unfocused += (s, e) => { valEqMeterReading_2(); };
 
-                // Read Interval
-                if (MANDATORY_READINTERVAL &&
-                     global.IndividualReadInterval)
-                    this.lb_ReadInterval.TextColor = COL_MANDATORY;
+                // Old Meter Reading
+                System.Action valOldEqMeterReading = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_OldMeterReading,
+                        this.tbx_OldMeterReading_Dual,
+                        this.lb_OldMeterReading_DualError);
+                System.Action valOldEqMeterReading_2 = () =>
+                    ValidateEqualityOnFocus(
+                        this.tbx_OldMeterReading_2,
+                        this.tbx_OldMeterReading_Dual_2,
+                        this.lb_OldMeterReading_DualError_2);
 
-                // Snap Reads
-                if (MANDATORY_SNAPREADS &&
-                     global.IndividualDailyReads &&
-                     snapReadsStatus)
-                    this.lb_SnapReads.TextColor = COL_MANDATORY;
+                this.tbx_OldMeterReading.Unfocused += (s, e) => { valOldEqMeterReading(); };
+                this.tbx_OldMeterReading_Dual.Unfocused += (s, e) => { valOldEqMeterReading(); };
+                this.tbx_OldMeterReading.Unfocused += (s, e) => { valOldEqMeterReading_2(); };
+                this.tbx_OldMeterReading_Dual_2.Unfocused += (s, e) => { valOldEqMeterReading_2(); };
 
-                // Two-Way
-                if (MANDATORY_TWOWAY)
-                    this.lb_TwoWay.TextColor = COL_MANDATORY;
+                this.lb_AccountNumber_DualError.Text = DUAL_ERROR;
+                this.lb_AccountNumber_DualError_2.Text = DUAL_ERROR;
+                this.lb_WorkOrder_DualError.Text = DUAL_ERROR;
+                this.lb_WorkOrder_DualError_2.Text = DUAL_ERROR;
+                this.lb_MeterSerialNumber_DualError.Text = DUAL_ERROR;
+                this.lb_MeterSerialNumber_DualError_2.Text = DUAL_ERROR;
+                this.lb_OldMeterSerialNumber_DualError.Text = DUAL_ERROR;
+                this.lb_OldMeterSerialNumber_DualError_2.Text = DUAL_ERROR;
+                this.lb_MeterReading_DualError.Text = DUAL_ERROR;
+                this.lb_MeterReading_DualError_2.Text = DUAL_ERROR;
+                this.lb_OldMeterReading_DualError.Text = DUAL_ERROR;
+                this.lb_OldMeterReading_DualError_2.Text = DUAL_ERROR;
 
-                // Alarms
-                if (MANDATORY_ALARMS)
-                    this.lb_Alarms.TextColor = COL_MANDATORY;
-
-                // Demands
-                if (MANDATORY_DEMANDS)
-                    this.lb_Demands.TextColor = COL_MANDATORY;
-
-                // GPS
-                if (MANDATORY_GPS)
-                    this.lb_GPS.TextColor = COL_MANDATORY;
+                #endregion
             }
-
-            #endregion
-
-            #region Port 2 Buttons
-
-            // Button for enable|disable the second port
-            this.div_EnablePort2.IsEnabled = global.Port2DisableNo;
-            if (!this.div_EnablePort2.IsEnabled)
+            catch ( Exception e )
             {
-                this.block_view_port2.IsVisible = this.port2IsActivated;
-                this.btn_EnablePort2.Text = (this.port2IsActivated) ? SWITCH_P2_OFF : SWITCH_P2_ON;               
+                if ( ! Errors.IsOwnException ( e ) )
+                     Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
+                else Errors.LogErrorNowAndContinue ( e );
+
+                // Return to main menu
+                //TODO: VOLVER AL MENU PRINCIPAL CUANDO FALLE LA CARGA DEL FORMULARIO
             }
-            // Auto-enable second port because Port2DisableNo is true
-            else
-            {
-                this.port2IsActivated = true;
-                this.block_view_port2.IsVisible = true;
-                this.div_EnablePort2.IsVisible = false;
-                this.div_EnablePort2.IsEnabled = false;
-            }
-
-            // Button for copy port 1 common fields values to port 2
-            this.div_CopyPort1To2.IsVisible = this.port2IsActivated;
-            this.div_CopyPort1To2.IsEnabled = this.port2IsActivated;
-
-            btn_CopyPort1To2.Text = COPY_1_TO_2;
-
-            #endregion
-
-            #region UnFocus events
-
-            // Account Number
-            System.Action valEqAccountNumber = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_AccountNumber,
-                    this.tbx_AccountNumber_Dual,
-                    this.lb_AccountNumber_DualError);
-            System.Action valEqAccountNumber_2 = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_AccountNumber_2,
-                    this.tbx_AccountNumber_Dual_2,
-                    this.lb_AccountNumber_DualError_2);
-            System.Action valEqAccountNumber_V = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_AccountNumber_V,
-                    this.tbx_AccountNumber_Dual_V,
-                    this.lb_AccountNumber_DualError_V);
-
-            this.tbx_AccountNumber_Dual.Unfocused += (s, e) => { valEqAccountNumber(); };
-            this.tbx_AccountNumber.Unfocused += (s, e) => { valEqAccountNumber(); };
-            this.tbx_AccountNumber_2.Unfocused += (s, e) => { valEqAccountNumber_2(); };
-            this.tbx_AccountNumber_Dual_2.Unfocused += (s, e) => { valEqAccountNumber_2(); };
-            this.tbx_AccountNumber_V.Unfocused += (s, e) => { valEqAccountNumber_V(); };
-            this.tbx_AccountNumber_Dual_V.Unfocused += (s, e) => { valEqAccountNumber_V(); };
-
-            // Work Order
-            System.Action valEqWorkOrder = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_WorkOrder,
-                    this.tbx_WorkOrder_Dual,
-                    this.lb_WorkOrder_DualError);
-            System.Action valEqWorkOrder_2 = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_WorkOrder_2,
-                    this.tbx_WorkOrder_Dual_2,
-                    this.lb_WorkOrder_DualError_2);
-            System.Action valEqWorkOrder_V = () =>
-              ValidateEqualityOnFocus(
-                  this.tbx_WorkOrder_V,
-                  this.tbx_WorkOrder_Dual_V,
-                  this.lb_WorkOrder_DualError_V);
-
-            this.tbx_WorkOrder.Unfocused += (s, e) => { valEqWorkOrder(); };
-            this.tbx_WorkOrder_Dual.Unfocused += (s, e) => { valEqWorkOrder(); };
-            this.tbx_WorkOrder_2.Unfocused += (s, e) => { valEqWorkOrder_2(); };
-            this.tbx_WorkOrder_Dual_2.Unfocused += (s, e) => { valEqWorkOrder_2(); };
-            this.tbx_WorkOrder_V.Unfocused += (s, e) => { valEqWorkOrder_V(); };
-            this.tbx_WorkOrder_Dual_V.Unfocused += (s, e) => { valEqWorkOrder_V(); };
-
-            // ( New ) Meter Serial Number
-            System.Action valEqMeterSerialNumber = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_MeterSerialNumber,
-                    this.tbx_MeterSerialNumber_Dual,
-                    this.lb_MeterSerialNumber_DualError);
-            System.Action valEqMeterSerialNumber_2 = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_MeterSerialNumber_2,
-                    this.tbx_MeterSerialNumber_Dual_2,
-                    this.lb_MeterSerialNumber_DualError_2);
-
-            this.tbx_MeterSerialNumber.Unfocused += (s, e) => { valEqMeterSerialNumber(); };
-            this.tbx_MeterSerialNumber_Dual.Unfocused += (s, e) => { valEqMeterSerialNumber(); };
-            this.tbx_MeterSerialNumber_2.Unfocused += (s, e) => { valEqMeterSerialNumber_2(); };
-            this.tbx_MeterSerialNumber_Dual_2.Unfocused += (s, e) => { valEqMeterSerialNumber_2(); };
-
-            // Old Meter Serial Number
-            System.Action valEqOldMeterSerialNumber = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_OldMeterSerialNumber,
-                    this.tbx_OldMeterSerialNumber_Dual,
-                    this.lb_OldMeterSerialNumber_DualError);
-            System.Action valEqOldMeterSerialNumber_2 = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_OldMeterSerialNumber_2,
-                    this.tbx_OldMeterSerialNumber_Dual_2,
-                    this.lb_OldMeterSerialNumber_DualError_2);
-
-            this.tbx_OldMeterSerialNumber.Unfocused += (s, e) => { valEqOldMeterSerialNumber(); };
-            this.tbx_OldMeterSerialNumber_Dual.Unfocused += (s, e) => { valEqOldMeterSerialNumber(); };
-            this.tbx_OldMeterSerialNumber_2.Unfocused += (s, e) => { valEqOldMeterSerialNumber_2(); };
-            this.tbx_OldMeterSerialNumber_Dual_2.Unfocused += (s, e) => { valEqOldMeterSerialNumber_2(); };
-
-            // ( New ) Meter Reading
-            System.Action valEqMeterReading = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_MeterReading,
-                    this.tbx_MeterReading_Dual,
-                    this.lb_MeterReading_DualError);
-            System.Action valEqMeterReading_2 = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_MeterReading_2,
-                    this.tbx_MeterReading_Dual_2,
-                    this.lb_MeterReading_DualError_2);
-
-            this.tbx_MeterReading.Unfocused += (s, e) => { valEqMeterReading(); };
-            this.tbx_MeterReading_Dual.Unfocused += (s, e) => { valEqMeterReading(); };
-            this.tbx_MeterReading.Unfocused += (s, e) => { valEqMeterReading_2(); };
-            this.tbx_MeterReading_Dual_2.Unfocused += (s, e) => { valEqMeterReading_2(); };
-
-            // Old Meter Reading
-            System.Action valOldEqMeterReading = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_OldMeterReading,
-                    this.tbx_OldMeterReading_Dual,
-                    this.lb_OldMeterReading_DualError);
-            System.Action valOldEqMeterReading_2 = () =>
-                ValidateEqualityOnFocus(
-                    this.tbx_OldMeterReading_2,
-                    this.tbx_OldMeterReading_Dual_2,
-                    this.lb_OldMeterReading_DualError_2);
-
-            this.tbx_OldMeterReading.Unfocused += (s, e) => { valOldEqMeterReading(); };
-            this.tbx_OldMeterReading_Dual.Unfocused += (s, e) => { valOldEqMeterReading(); };
-            this.tbx_OldMeterReading.Unfocused += (s, e) => { valOldEqMeterReading_2(); };
-            this.tbx_OldMeterReading_Dual_2.Unfocused += (s, e) => { valOldEqMeterReading_2(); };
-
-            this.lb_AccountNumber_DualError.Text = DUAL_ERROR;
-            this.lb_AccountNumber_DualError_2.Text = DUAL_ERROR;
-            this.lb_WorkOrder_DualError.Text = DUAL_ERROR;
-            this.lb_WorkOrder_DualError_2.Text = DUAL_ERROR;
-            this.lb_MeterSerialNumber_DualError.Text = DUAL_ERROR;
-            this.lb_MeterSerialNumber_DualError_2.Text = DUAL_ERROR;
-            this.lb_OldMeterSerialNumber_DualError.Text = DUAL_ERROR;
-            this.lb_OldMeterSerialNumber_DualError_2.Text = DUAL_ERROR;
-            this.lb_MeterReading_DualError.Text = DUAL_ERROR;
-            this.lb_MeterReading_DualError_2.Text = DUAL_ERROR;
-            this.lb_OldMeterReading_DualError.Text = DUAL_ERROR;
-            this.lb_OldMeterReading_DualError_2.Text = DUAL_ERROR;
-
-            #endregion
         }
 
         #endregion
