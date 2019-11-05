@@ -191,7 +191,8 @@ namespace aclara_meters.view
         private ActionType actionType;
         private ActionType actionTypeNew;
         private bool hasValve;
-        private bool hasTwoPorts;
+        private bool hasMeterPortTwo;
+        private bool hasValvePortOne;
         private bool port2IsActivated;
         private bool p1NoNewMeterReadings;
         private bool p2NoNewMeterReadings;
@@ -414,7 +415,7 @@ namespace aclara_meters.view
         private async Task LoadMetersList()
         {
             if (currentMtu.Port1.IsForEncoderOrEcoder ||
-                 hasTwoPorts &&
+                 hasMeterPortTwo &&
                  currentMtu.Port2.IsForEncoderOrEcoder)
                 Device.BeginInvokeOnMainThread(() =>
               {
@@ -473,11 +474,10 @@ namespace aclara_meters.view
             Device.BeginInvokeOnMainThread(() =>
             {
                 // RDD devices is always in port two
-                if ( hasTwoPorts ||
-                     ! hasValve )
+                if (! hasValvePortOne )
                     this.InitializePicker_MeterType ();
 
-                if ( hasTwoPorts )
+                if ( hasMeterPortTwo )
                     this.InitializePicker_MeterType_2 ();
                 
                 if ( hasValve )
@@ -552,7 +552,8 @@ namespace aclara_meters.view
                     valvelabel.IsVisible = true;
                     div_RDDGeneral.IsVisible = true;
                     hasValve = true;
-                    hasTwoPorts = false;
+                    hasMeterPortTwo = false;
+                    hasValvePortOne = true;
                 }
                 else if (this.currentMtu.TwoPorts && this.currentMtu.Port2.IsSetFlow)
                 {
@@ -560,12 +561,13 @@ namespace aclara_meters.view
                     port2label.IsVisible = false;
                     valvelabel.IsVisible = true;
                     hasValve = true;
-                    hasTwoPorts = false;
+                    hasMeterPortTwo = false;
+                    hasValvePortOne = false;
                 }
                 else
                 {
-                    this.hasTwoPorts = this.currentMtu.TwoPorts;
-                    port2label.IsVisible = this.hasTwoPorts;
+                    this.hasMeterPortTwo = this.currentMtu.TwoPorts;
+                    port2label.IsVisible = this.hasMeterPortTwo;
                     valvelabel.IsVisible = false;
                     hasValve = false;
                 }
@@ -591,8 +593,8 @@ namespace aclara_meters.view
                 this.div_AccountNumber_Dual.IsEnabled = useDualAccountNumber;
 
                 // Port 2
-                this.div_AccountNumber_Dual_2.IsVisible = hasTwoPorts && useDualAccountNumber;
-                this.div_AccountNumber_Dual_2.IsEnabled = hasTwoPorts && useDualAccountNumber;
+                this.div_AccountNumber_Dual_2.IsVisible = hasMeterPortTwo && useDualAccountNumber;
+                this.div_AccountNumber_Dual_2.IsEnabled = hasMeterPortTwo && useDualAccountNumber;
 
                 // Valve
                 this.div_AccountNumber_Dual_V.IsVisible = hasValve && useDualAccountNumber;
@@ -609,8 +611,8 @@ namespace aclara_meters.view
                 this.div_WorkOrder.IsEnabled = useWorkOrder;
 
                 // Port 2
-                this.div_WorkOrder_2.IsVisible = hasTwoPorts && useWorkOrder;
-                this.div_WorkOrder_2.IsEnabled = hasTwoPorts && useWorkOrder;
+                this.div_WorkOrder_2.IsVisible = hasMeterPortTwo && useWorkOrder;
+                this.div_WorkOrder_2.IsEnabled = hasMeterPortTwo && useWorkOrder;
 
                 // RDD
                 this.div_WorkOrder_V.IsVisible = hasValve && useWorkOrder;
@@ -624,8 +626,8 @@ namespace aclara_meters.view
                 this.div_WorkOrder_Dual.IsEnabled = useDualWorkOrder;
 
                 // Port 2
-                this.div_WorkOrder_Dual_2.IsVisible = hasTwoPorts && useDualWorkOrder;
-                this.div_WorkOrder_Dual_2.IsEnabled = hasTwoPorts && useDualWorkOrder;
+                this.div_WorkOrder_Dual_2.IsVisible = hasMeterPortTwo && useDualWorkOrder;
+                this.div_WorkOrder_Dual_2.IsEnabled = hasMeterPortTwo && useDualWorkOrder;
 
                 // Valve
                 this.div_WorkOrder_Dual_V.IsVisible = hasValve && useDualWorkOrder;
@@ -662,8 +664,8 @@ namespace aclara_meters.view
                 this.div_MeterSerialNumber.IsEnabled = useMeterSerialNumber;
 
                 // Port 2
-                this.div_MeterSerialNumber_2.IsVisible = hasTwoPorts && useMeterSerialNumber;
-                this.div_MeterSerialNumber_2.IsEnabled = hasTwoPorts && useMeterSerialNumber;
+                this.div_MeterSerialNumber_2.IsVisible = hasMeterPortTwo && useMeterSerialNumber;
+                this.div_MeterSerialNumber_2.IsEnabled = hasMeterPortTwo && useMeterSerialNumber;
 
                 ///////////////////////////////////
                 // Dual entry - ( New ) Meter Serial Number
@@ -674,13 +676,13 @@ namespace aclara_meters.view
                 this.div_MeterSerialNumber_Dual.IsEnabled = useDualSeriaNumber;
 
                 // Port 2
-                this.div_MeterSerialNumber_Dual_2.IsVisible = hasTwoPorts && useDualSeriaNumber;
-                this.div_MeterSerialNumber_Dual_2.IsEnabled = hasTwoPorts && useDualSeriaNumber;
+                this.div_MeterSerialNumber_Dual_2.IsVisible = hasMeterPortTwo && useDualSeriaNumber;
+                this.div_MeterSerialNumber_Dual_2.IsEnabled = hasMeterPortTwo && useDualSeriaNumber;
 
                 ///////////////////////////////////
                 // ( New ) Meter Reading
                 this.p1NoNewMeterReadings = !this.currentMtu.Port1.IsForEncoderOrEcoder;
-                this.p2NoNewMeterReadings = this.hasTwoPorts && !this.currentMtu.Port2.IsForEncoderOrEcoder;
+                this.p2NoNewMeterReadings = this.hasMeterPortTwo && !this.currentMtu.Port2.IsForEncoderOrEcoder;
 
                 // Port 1
                 this.div_MeterReadings.IsVisible = this.p1NoNewMeterReadings;
@@ -709,8 +711,8 @@ namespace aclara_meters.view
                 this.div_OldMeterSerialNumber.IsEnabled = isReplaceMeter && useMeterSerialNumber;
 
                 // Port 2
-                this.div_OldMeterSerialNumber_2.IsVisible = hasTwoPorts && isReplaceMeter && useMeterSerialNumber;
-                this.div_OldMeterSerialNumber_2.IsEnabled = hasTwoPorts && isReplaceMeter && useMeterSerialNumber;
+                this.div_OldMeterSerialNumber_2.IsVisible = hasMeterPortTwo && isReplaceMeter && useMeterSerialNumber;
+                this.div_OldMeterSerialNumber_2.IsEnabled = hasMeterPortTwo && isReplaceMeter && useMeterSerialNumber;
 
                 ///////////////////////////////////
                 // Dual entry - Old Meter Serial Number
@@ -721,8 +723,8 @@ namespace aclara_meters.view
                 this.div_OldMeterSerialNumber_Dual.IsEnabled = useDualOldSeriaNumber;
 
                 // Port 2
-                this.div_OldMeterSerialNumber_Dual_2.IsVisible = hasTwoPorts && useDualOldSeriaNumber;
-                this.div_OldMeterSerialNumber_Dual_2.IsEnabled = hasTwoPorts && useDualOldSeriaNumber;
+                this.div_OldMeterSerialNumber_Dual_2.IsVisible = hasMeterPortTwo && useDualOldSeriaNumber;
+                this.div_OldMeterSerialNumber_Dual_2.IsEnabled = hasMeterPortTwo && useDualOldSeriaNumber;
 
                 ///////////////////////////////////
                 // Old Meter Working ( Change reason )
@@ -733,8 +735,8 @@ namespace aclara_meters.view
                 this.div_OldMeterWorking.IsEnabled = useMeterWorking;
 
                 // Port 2
-                this.div_OldMeterWorking_2.IsVisible = hasTwoPorts && useMeterWorking;
-                this.div_OldMeterWorking_2.IsEnabled = hasTwoPorts && useMeterWorking;
+                this.div_OldMeterWorking_2.IsVisible = hasMeterPortTwo && useMeterWorking;
+                this.div_OldMeterWorking_2.IsEnabled = hasMeterPortTwo && useMeterWorking;
 
                 ///////////////////////////////////
                 // Old Meter Reading
@@ -745,8 +747,8 @@ namespace aclara_meters.view
                 this.div_OldMeterReading.IsEnabled = useOldReading;
 
                 // Port 2
-                this.div_OldMeterReading_2.IsVisible = hasTwoPorts && useOldReading;
-                this.div_OldMeterReading_2.IsEnabled = hasTwoPorts && useOldReading;
+                this.div_OldMeterReading_2.IsVisible = hasMeterPortTwo && useOldReading;
+                this.div_OldMeterReading_2.IsEnabled = hasMeterPortTwo && useOldReading;
 
                 ///////////////////////////////////
                 // Dual entry - Old Meter Reading
@@ -757,8 +759,8 @@ namespace aclara_meters.view
                 this.div_OldMeterReading_Dual.IsEnabled = useDualOldReading;
 
                 // Port 2
-                this.div_OldMeterReading_Dual_2.IsVisible = hasTwoPorts && useDualOldReading;
-                this.div_OldMeterReading_Dual_2.IsEnabled = hasTwoPorts && useDualOldReading;
+                this.div_OldMeterReading_Dual_2.IsVisible = hasMeterPortTwo && useDualOldReading;
+                this.div_OldMeterReading_Dual_2.IsEnabled = hasMeterPortTwo && useDualOldReading;
 
                 ///////////////////////////////////
                 // Replace Meter/Register
@@ -769,8 +771,8 @@ namespace aclara_meters.view
                 this.div_ReplaceMeterRegister.IsEnabled = useReplaceMeterRegister;
 
                 // Port 2
-                this.div_ReplaceMeterRegister_2.IsVisible = hasTwoPorts && useReplaceMeterRegister;
-                this.div_ReplaceMeterRegister_2.IsEnabled = hasTwoPorts && useReplaceMeterRegister;
+                this.div_ReplaceMeterRegister_2.IsVisible = hasMeterPortTwo && useReplaceMeterRegister;
+                this.div_ReplaceMeterRegister_2.IsEnabled = hasMeterPortTwo && useReplaceMeterRegister;
 
                 ///////////////////////////////////
                 // Introduce values from right to left, but finish with the same number
@@ -1392,7 +1394,8 @@ namespace aclara_meters.view
                 else Errors.LogErrorNowAndContinue ( e );
 
                 // Return to main menu
-                //TODO: VOLVER AL MENU PRINCIPAL CUANDO FALLE LA CARGA DEL FORMULARIO
+                Navigation.PopToRootAsync(false);
+                
             }
         }
 
@@ -3587,7 +3590,7 @@ namespace aclara_meters.view
             #region Port 2
 
             // Check if it is not for a RDD device
-            if ( this.hasTwoPorts &&
+            if ( this.hasMeterPortTwo &&
                  this.port2IsActivated &&
                  ! mtu.Port2.IsSetFlow )
             {
@@ -4678,7 +4681,7 @@ namespace aclara_meters.view
                 
                 string sTick = DateTime.Now.Ticks.ToString();
 
-                if (hasTwoPorts)
+                if (hasMeterPortTwo)
                 {
                     bool bResp = await DisplayAlert("Select port", "Select the port for the picture", "Port 1", "Port 2");
                     port = bResp == true ? "1" : "2";
