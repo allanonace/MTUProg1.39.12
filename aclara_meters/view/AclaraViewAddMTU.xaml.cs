@@ -4035,18 +4035,24 @@ namespace aclara_meters.view
                         mtu.TimeToSync    &&
                         mtu.FastMessageConfig )
                     value_two = this.pck_TwoWay.SelectedItem.ToString ();
-                    
+
                 // Alarms dropdownlist is hidden when only has one option
-                if ( this.pck_Alarms.ItemsSource.Count == 1 )
-                    value_alr = ( Alarm )this.pck_Alarms.ItemsSource[ 0 ];
-                else if ( this.pck_Alarms.ItemsSource.Count > 1 )
-                    value_alr = ( Alarm )this.pck_Alarms.SelectedItem;
-                    
+                if (this.pck_Alarms.ItemsSource != null)
+                {
+                    if (this.pck_Alarms.ItemsSource.Count == 1)
+                        value_alr = (Alarm)this.pck_Alarms.ItemsSource[0];
+                    else if (this.pck_Alarms.ItemsSource.Count > 1)
+                        value_alr = (Alarm)this.pck_Alarms.SelectedItem;
+                }
+
                 // Demands dropdownlist is hidden when only has one option
-                if ( this.pck_Demands.ItemsSource.Count == 1 )
-                    value_dmd = ( Demand )this.pck_Demands.ItemsSource[ 0 ];
-                else if ( this.pck_Demands.ItemsSource.Count > 1 )
-                    value_dmd = ( Demand )this.pck_Demands.SelectedItem;
+                if (this.pck_Demands.ItemsSource != null)
+                {
+                    if (this.pck_Demands.ItemsSource.Count == 1)
+                        value_dmd = (Demand)this.pck_Demands.ItemsSource[0];
+                    else if (this.pck_Demands.ItemsSource.Count > 1)
+                        value_dmd = (Demand)this.pck_Demands.SelectedItem;
+                }
             }
             // RDD in port 1
             else
