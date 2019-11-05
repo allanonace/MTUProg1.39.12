@@ -17,7 +17,8 @@ namespace Xml
         {
             List<Demand> demands = Demands.FindAll ( x => x.MTUType == mtuType );
             
-            if ( demands == null )
+            if ( demands == null ||
+                 demands.Count <= 0 )
                 throw new DemandNotFoundException_Internal ();
                 
             return demands;
@@ -39,7 +40,7 @@ namespace Xml
             if ( demands.Count > 0 )
                 return demands.Where ( a => ! string.Equals ( a.Name.ToLower (), "scripting" ) ).ToArray ();
             
-            return null;
+            return default ( Demand[] );
         }
 
         public Demand FindByMtuType_Scripting (
