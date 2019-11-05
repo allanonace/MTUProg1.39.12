@@ -70,7 +70,7 @@ namespace Xml
     /// </remarks>
     /// <seealso cref="MtuTypes"/>
     /// <seealso cref="Mtu"/>
-    public class Port
+    public class Port : ICloneable
     {
         public Port ()
         {
@@ -171,6 +171,11 @@ namespace Xml
             String Name )
         {
             return this.GetType().GetProperty(Name).GetValue(this, null).ToString();
+        }
+
+        public object Clone ()
+        {
+            return this.MemberwiseClone ();
         }
     }
 }

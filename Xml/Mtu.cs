@@ -611,6 +611,22 @@ namespace Xml
             return string.Empty;
         }
 
+        public object SimulateRddInPortTwoIfNeeded ()
+        {
+            if ( ! this.TwoPorts &&
+                 this.Port1.IsSetFlow )
+            {
+                Mtu copy = this.MemberwiseClone () as Mtu;
+                copy.Ports = new List<Port> ();
+                copy.Ports.Add ( this.Port1.Clone () as Port );
+                copy.Ports.Add ( this.Port1.Clone () as Port );
+                copy.Port2.Number++;
+
+                return copy;
+            }
+            return this;
+        }
+
         #endregion
     }
 }

@@ -1054,17 +1054,17 @@ namespace MTUComm
             try
             {
                 // Load parameters using the interface file
-                ActionResult dataRead_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.ValveOperation );
-                ActionResult readMtu_allParamsFromInterface  = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
+                ActionResult rdd_allParamsFromInterface     = await CreateActionResultUsingInterface ( args.Map, args.Mtu, null, ActionType.ValveOperation );
+                ActionResult readMtu_allParamsFromInterface = await CreateActionResultUsingInterface ( args.Map, args.Mtu );
 
                 // Write result in the DataRead file
                 if ( ! Data.Get.UNIT_TEST )
-                    this.lastLogCreated = logger.RemoteDisconnect ( dataRead_allParamsFromInterface, readMtu_allParamsFromInterface, args.Mtu );
+                    this.lastLogCreated = logger.RemoteDisconnect ( rdd_allParamsFromInterface, readMtu_allParamsFromInterface, args.Mtu );
                 
                 // Show only the ReadMTU result in the screen
                 await this.OnFinish ( this, new Delegates.ActionFinishArgs ( readMtu_allParamsFromInterface, args.Mtu ) );
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
                 Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
                 this.OnError ();
@@ -1257,7 +1257,7 @@ namespace MTUComm
                 {
                     if ( parameter.Name.Equals ( IFACE_PORT ) )
                         for ( int i = 0; i < mtu.Ports.Count; i++ )
-                            result.addPort ( await ReadPort ( i + 1, parameter.Parameters.ToArray (), map, mtu, actionType ) );
+                            result.addPort ( await ReadPortUsingInterface ( i + 1, parameter.Parameters.ToArray (), map, mtu, actionType ) );
                     else
                     {
                         if ( await ValidateCondition ( parameter.Conditional, map, mtu ) )
@@ -1343,9 +1343,13 @@ namespace MTUComm
                     result.AddParameter ( param );
 
             // Add additional parameters ( from Global.xml ) for DataRead action
-            if ( actionType == ActionType.DataRead && Data.Contains("Options"))
+            if ( actionType == ActionType.DataRead && Data.Contains ( "Options" ) )
                 foreach ( Parameter param in Data.Get.Options )
                     result.AddParameter ( param );
+            
+            // NOTE: Special case when is one port MTU for valve/RDD
+            // NOTE: Pass port 1 data to port 2 and set port 1 as disabled
+            result.SimulateRddInPortTwoIfNeeded ( mtu );
 
             #if DEBUG
 
@@ -1373,7 +1377,7 @@ namespace MTUComm
         /// All the parameters required for the action type and log target, interface or log file, for the specified port.
         /// </para>
         /// </returns>
-        private async Task<ActionResult> ReadPort (
+        private async Task<ActionResult> ReadPortUsingInterface (
             int indexPort,
             InterfaceParameters[] parameters,
             dynamic map,
