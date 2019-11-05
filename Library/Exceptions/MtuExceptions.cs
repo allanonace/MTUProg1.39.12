@@ -574,15 +574,15 @@
     {
         public ActionNotAchievedNodeDiscoveryException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
-    
+
     #endregion
-    
+
     #region Encryption [ 7xx ]
 
     /// <summary>
     /// Exception thrown when the Encryption of the MTU fails during an installation.
     /// <para>
-    /// See <see cref="MTUComm.MTUComm.AddMtu ( dynamic, string, Action )"/>.
+    /// See <see cref="MTUComm.MTUComm.Encrypt_Old ( dynamic )"/>.
     /// </para>
     /// </summary>
     public class ActionNotAchievedEncryptionException : OwnExceptionsBase
@@ -637,9 +637,23 @@
     {
         public ODEncryptionBroadcastKeyFormatException ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
-    
+
+    /// <summary>
+    /// Exception thrown when the encryption index has reached the register/byte limit ( 255 ).
+    /// <para>
+    /// See <see cref="MTUComm.MTUComm.Encrypt_Old ( dynamic )"/>.
+    /// </para>
+    /// <para>
+    /// See <see cref="MTUComm.MTUComm.Encrypt_OD12 ( dynamic )"/>.
+    /// </para>
+    /// </summary>
+    public class EncryptionIndexLimitReachedException : OwnExceptionsBase
+    {
+        public EncryptionIndexLimitReachedException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+    }
+
     #endregion
-    
+
     #region Configuration Files and System [ 8xx ]
 
     public class ConfigurationFilesNotFoundException : OwnExceptionsBase

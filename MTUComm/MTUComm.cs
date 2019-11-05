@@ -3258,6 +3258,10 @@ namespace MTUComm
             byte[] aesKey = new byte[ regAesKey.size    ]; // 16 bytes
             byte[] sha    = new byte[ regAesKey.sizeGet ]; // 32 bytes
             
+            // Checks if the encryption index has reached the byte maximum value ( 255 )
+            if ( await regEncryIndex.GetValue () >= byte.MaxValue )
+                throw new EncryptionIndexLimitReachedException ();
+
             try
             {
                 // Generate random key
