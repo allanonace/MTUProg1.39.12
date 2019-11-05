@@ -1641,9 +1641,10 @@ namespace MTUComm
             }
         }
 
-        public async Task RemoteDisconnect (bool throwExceptions = false)
+        public async Task RemoteDisconnect (
+            bool throwExceptions = false )
         {
-            if ( await this.RemoteDisconnect_Logic (throwExceptions) == RDD_OK )
+            if ( await this.RemoteDisconnect_Logic ( throwExceptions ) == RDD_OK )
             {
                 OnProgress ( this, new Delegates.ProgressArgs ( "Reading MTU..." ) );
 

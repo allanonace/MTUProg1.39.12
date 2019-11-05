@@ -873,8 +873,8 @@ namespace aclara_meters.view
                     bottomBar.GetLabelElement("label_read").Text = mensaje;
             });
         }
-        
-        private async Task OnFinish ( object sender, MTUComm.Delegates.ActionFinishArgs args )
+
+        private async Task OnFinish(object sender, MTUComm.Delegates.ActionFinishArgs args)
         {
             FinalReadListView = new List<ReadMTUItem>();
 
@@ -883,41 +883,46 @@ namespace aclara_meters.view
             int mtu_type = 0;
 
             // Get MtuType = MtuID
-            foreach ( Parameter p in paramResult)
+            foreach (Parameter p in paramResult)
             {
-                if ( ! string.IsNullOrEmpty ( p.CustomParameter ) &&
-                     p.CustomParameter.Equals ( "MtuType" ) )
+                if (!string.IsNullOrEmpty(p.CustomParameter) &&
+                     p.CustomParameter.Equals("MtuType"))
                     mtu_type = Int32.Parse(p.Value.ToString());
             }
 
-            Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById ( mtu_type );
-            InterfaceParameters[] interfacesParams = Singleton.Get.Configuration.getUserParamsFromInterface( mtu, ActionType.ReadMtu );
-            
+            Mtu mtu = Singleton.Get.Configuration.GetMtuTypeById(mtu_type);
+            InterfaceParameters[] interfacesParams = Singleton.Get.Configuration.getUserParamsFromInterface(mtu, ActionType.ReadMtu);
+
             currentMtu = Singleton.Get.Action.CurrentMtu;
 
-            foreach (InterfaceParameters iParameter in interfacesParams)
+            // NOTE: Special case when is one port MTU for valve/RDD
+            // NOTE: Create temporal MTU instace because if the final log fails,
+            // NOTE: the MTU info should continue with the correct/real number of ports
+            Mtu copyCurrentMtu = currentMtu.SimulateRddInPortTwoIfNeeded () as Mtu;
+
+            foreach ( InterfaceParameters iParameter in interfacesParams )
             {
                 // Port 1 or 2 log section
                 if (iParameter.Name.Equals("Port"))
                 {
-                    ActionResult[] ports = args.Result.getPorts ();
+                    ActionResult[] ports = args.Result.getPorts();
 
-                    for ( int i = 0; i < ports.Length; i++ )
+                    for (int i = 0; i < ports.Length; i++)
                     {
-                        foreach ( InterfaceParameters pParameter in iParameter.Parameters )
+                        foreach (InterfaceParameters pParameter in iParameter.Parameters)
                         {
-                            Parameter param = ports[i].getParameterByTag ( pParameter.Name, pParameter.Source, i );
+                            Parameter param = ports[i].getParameterByTag(pParameter.Name, pParameter.Source, i);
 
                             // Port header
                             if (pParameter.Name.Equals("Description"))
                             {
                                 string description;
-                                
+
                                 // For Read action when no Meter is installed on readed MTU
                                 if ( param != null )
                                      description = param.Value;
-                                else description = currentMtu.Ports[i].GetProperty ( pParameter.Name );
-                                
+                                else description = copyCurrentMtu.Ports[i].GetProperty(pParameter.Name);
+
                                 FinalReadListView.Add(new ReadMTUItem()
                                 {
                                     Title = "Here lies the Port title...",
@@ -925,13 +930,13 @@ namespace aclara_meters.view
                                     Height = "40",
                                     isMTU = "false",
                                     isMeter = "true",
-                                    Description = "Port " + ( i + 1 ) + ": " + description
+                                    Description = "Port " + (i + 1) + ": " + description
                                 });
                             }
                             // Port fields
                             else
                             {
-                                if ( param != null )
+                                if (param != null)
                                     FinalReadListView.Add(new ReadMTUItem()
                                     {
                                         Title = param.getLogDisplay() + ":",
@@ -950,7 +955,7 @@ namespace aclara_meters.view
                 // Root log fields
                 else
                 {
-                    Parameter param = args.Result.getParameterByTag ( iParameter.Name, iParameter.Source, 0 );
+                    Parameter param = args.Result.getParameterByTag(iParameter.Name, iParameter.Source, 0);
 
                     if (param != null)
                     {
@@ -975,7 +980,7 @@ namespace aclara_meters.view
                 ChangeLowerButtonImage(false);
                 backdark_bg.IsVisible = false;
                 indicator.IsVisible = false;
-                bottomBar.GetLabelElement("label_read").Text = "Successful Remote Disconnect";
+                bottomBar.GetLabelElement("label_read").Text = "Successful Valve Operation";
                 ContentNav.IsEnabled = true;
                 background_scan_page.IsEnabled = true;
                 ReadMTUChangeView.IsVisible = false;
