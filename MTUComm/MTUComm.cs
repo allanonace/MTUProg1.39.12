@@ -1283,19 +1283,26 @@ namespace MTUComm
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 1 Init" ) );
 
-                    // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
-                    fullResponse = await this.lexi.Write (
-                        CMD_NODE_INIT,
-                        data,
-                        CMD_ATTEMPTS_N,
-                        WAIT_BTW_CMD_ATTEMPTS,
-                        new uint[] { CMD_NODE_INIT_RES },
-                        new LexiFiltersResponse ( new ( int,int,byte )[] {
+                    try
+                    {
+                        // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
+                        fullResponse = await this.lexi.Write(
+                            CMD_NODE_INIT,
+                            data,
+                            CMD_ATTEMPTS_N,
+                            WAIT_BTW_CMD_ATTEMPTS,
+                            new uint[] { CMD_NODE_INIT_RES },
+                            new LexiFiltersResponse(new (int, int, byte)[] {
                             ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_NOT ), // Node discovery not initiated
                             ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_OK )   // Node discovery initiated
-                        } ),
-                        LexiAction.OperationRequest );
-                    
+                            }),
+                            LexiAction.OperationRequest);
+                    }
+                    catch (Exception)
+                    {
+                        Errors.LogErrorNowAndContinue(new NodeDiscoveryNotInitializedException());
+                        goto BREAK_FAIL;
+                    }
                     #endregion
 
                     // Node discovery mode NOT initiated in the MTU
