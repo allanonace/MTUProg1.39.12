@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using Xamarin.Forms;
+using System.Globalization;
 
 namespace aclara_meters.Behaviors
 {
@@ -122,4 +123,5 @@ namespace aclara_meters.Behaviors
 
         }
     }
+    
 }
