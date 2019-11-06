@@ -77,7 +77,7 @@
                                     <StackLayout x:Name="port1view" IsVisible="true" Margin="12,0,12,0">
                                         <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" x:Name="name_of_window_port1" Text="Add MTU" />
                                         <!-- Account Number / Service Port ID -->
-                                        <Label Text="Service Port ID" Margin="0,4,0,0" x:Name="lb_AccountNumber" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Service Port ID" Margin="0,4,0,0" x:Name="lb_AccountNumber" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -92,7 +92,7 @@
                                         </Frame>
                                         <!-- MTU ID -->
                                         <StackLayout x:Name="div_MtuId">
-                                            <Label Text="MTU ID" Margin="0,4,0,0" x:Name="lb_MtuId" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="MTU ID" Margin="0,4,0,0" x:Name="lb_MtuId" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -108,7 +108,7 @@
                                         </StackLayout>
                                         <!-- MTU status -->
                                         <StackLayout x:Name="div_Mtu_Status">
-                                            <Label Text="MTU Status" Margin="0,4,0,0" x:Name="lb_Mtu_Status" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="MTU Status" Margin="0,4,0,0" x:Name="lb_Mtu_Status" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -125,7 +125,7 @@
                                         </StackLayout>
                                         <!-- Days -->
                                         <StackLayout x:Name="div_DayOfRead" IsVisible="true">
-                                            <Label Text="Day(s) of read" x:Name="lb_daysofread" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Day(s) of read" x:Name="lb_daysofread" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -143,7 +143,7 @@
                                 <!--<StackLayout x:Name="miscview" IsVisible="false" Margin="12,0,12,0">
                                     <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" x:Name="name_of_window_misc" Text="Add MTU" />
                                     --><!-- MTU Geolocation --><!--
-                                    <Label Text="MTU Geolocation" x:Name="lb_GPS" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                    <Label Text="MTU Geolocation" x:Name="lb_GPS" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                     <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Margin="4">
                                         <Label Text="Lat." Margin="0,4,0,0" VerticalOptions="Center" FontSize="16">
                                         </Label>

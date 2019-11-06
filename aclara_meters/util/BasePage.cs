@@ -19,14 +19,14 @@ namespace aclara_meters.util
 {
     public class BasePage : ContentPage
     {
-        protected const string COLOR_FONT             = "#000";
+        protected const string COLOR_FONT             = "#000000";
         protected const string COLOR_BACKGROUND       = "#FFF";
         protected const string COLOR_BG_ND_EXCELENT   = "#0F0";
         protected const string COLOR_BG_ND_GOOD       = "#FF0";
         protected const string COLOR_BG_ND_FAIL       = "#F00";
         protected const string COLOR_FONT_ND_EXCELENT = COLOR_FONT;
         protected const string COLOR_FONT_ND_GOOD     = COLOR_FONT;
-        protected const string COLOR_FONT_ND_FAIL     = "#FFF";
+        protected const string COLOR_FONT_ND_FAIL     = "#FFFFFF";
 
         public bool DebugMode { private set; get; }
 
@@ -62,17 +62,19 @@ namespace aclara_meters.util
             var list = new List<char> { '1', '2', '3', '4', '5', '6', '7', '8', '9' };
             int index = random.Next(list.Count);
             char cTextWr = list[index];
+            index = random.Next(list.Count);
+            char cTextOld = list[index];
 
-            AutoFillTextbox_Logic ( main, cTextWr );
+            AutoFillTextbox_Logic ( main, cTextWr, cTextOld );
 
             await Task.Delay ( 1000 );
 
             // NOTE: First fill pickrs because some textbox ( e.g. MeterReading ) need it
-            AutoFillTextbox_Logic ( main, cTextWr );
+            AutoFillTextbox_Logic ( main, cTextWr, cTextOld );
         }
 
         protected void AutoFillTextbox_Logic (
-            StackLayout mainElement, char cTextWr )
+            StackLayout mainElement, char cTextWr, char cTextOld )
         {            
             List<BorderlessEntry>  listTbx = new List<BorderlessEntry> ();
             List<BorderlessPicker> listPck = new List<BorderlessPicker> ();
@@ -104,6 +106,9 @@ namespace aclara_meters.util
                 try
                 {
                     tbx.Text = new string(cTextWr, tbx.MaxLength);
+                    if (tbx.Display.ToLower().Contains("old"))
+                        tbx.Text = new string(cTextOld, tbx.MaxLength);
+                    
                 }
                 catch ( Exception )
                 {
