@@ -178,7 +178,7 @@ namespace aclara_meters.view
                         await FormsApp.ble_interface.Scan();
                     }
                     
-                    DeviceList.ItemsSource = null;
+                    
                     if (FormsApp.ble_interface.GetBlePeripheralList().Count > 0)
                     {
 
@@ -490,8 +490,8 @@ namespace aclara_meters.view
                                     }
 
                                 Terminado();
-                                    //Connection Method
-                                Thread.Sleep(20000);
+                                //Connection Method
+                               
                                 runScript();
 
                                 });
@@ -599,12 +599,13 @@ namespace aclara_meters.view
                     {
                         Utils.PrintDeep("Mostrar barra de progreso - InvokeMethod");
 
+                        ContentView_Scripting_label_read.Text = "Preparing the script ... ";
                         backdark_bg.IsVisible = true;
                         indicator.IsVisible = true;
                         ContentView_DeviceList.IsEnabled = false;
                         ContentView_Scripting.IsEnabled = false;
+                        Thread.Sleep(2000);
                         ContentView_Scripting_label_read.Text = "Executing Script ... ";
-
                         await Task.Factory.StartNew(scriptFunction);
                     }
                     catch (Exception e2)
