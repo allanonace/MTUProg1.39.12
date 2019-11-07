@@ -2424,17 +2424,7 @@ namespace MTUComm
     
                 bool isAutodetectMeter = false;
 
-                if (global.TimeToSync &&
-                     this.mtu.TimeToSync &&
-                     this.mtu.FastMessageConfig)
-                //! this.mtu.IsFamily31xx32xx &&
-                //! this.mtu.IsFamily33xx )
-                {
-                    if (!form.ContainsParameter(FIELD.TWO_WAY))
-                        throw new ScriptingTagMissing("TwoWay");  
-                }
-
-                    // Port 1
+                // Port 1
                 if ( ! form.ContainsParameter ( FIELD.METER_TYPE ) )
                 {
                     // Missing tags
