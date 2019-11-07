@@ -820,7 +820,9 @@ namespace MTUComm
                     break;
             }
 
-            paramsFail = strb.ToString ().Substring ( 2 ); // Remove first ", "
+            paramsFail = strb.ToString();
+            if (!string.IsNullOrEmpty(paramsFail))
+                paramsFail = paramsFail.Substring ( 2 ); // Remove first ", "
 
             strb.Clear ();
             strb = null;
