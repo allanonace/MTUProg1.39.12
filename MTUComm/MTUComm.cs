@@ -562,6 +562,10 @@ namespace MTUComm
                 Dictionary<APP_FIELD,string> psSelected = ScriptAux.ValidateParams (
                     this.mtu, action, translatedParams, port2enabled );
 
+                // Check if some required parameter is not present
+                if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
+                    throw new ScriptingTagMissingException ( errorRequired );
+
                 // Add parameters to Library.Data
                 foreach ( var entry in psSelected )
                     Data.SetTemp ( entry.Key.ToString (), entry.Value );
@@ -804,7 +808,7 @@ namespace MTUComm
                     break;
             }
 
-            paramsFail = strb.ToString ();
+            paramsFail = strb.ToString ().Substring ( 2 ); // Remove first ", "
 
             strb.Clear ();
             strb = null;
@@ -2424,7 +2428,6 @@ namespace MTUComm
     
                 bool isAutodetectMeter = false;
 
-                // Port 1
                 if ( ! form.ContainsParameter ( FIELD.METER_TYPE ) )
                 {
                     // Missing tags
@@ -2959,6 +2962,10 @@ namespace MTUComm
                     throw new ProcessingParamsScriptException ( msgErrorStr, 1, msgErrorPopupStr );
                 }
     
+                // Check if some required parameter is not present
+                if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
+                    throw new ScriptingTagMissingException ( errorRequired );
+
                 #endregion
     
                 #region Auto-detect Alarm
