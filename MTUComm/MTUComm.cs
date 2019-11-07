@@ -818,8 +818,8 @@ namespace MTUComm
                     break;
             }
 
-            paramsFail = strb.ToString();
-            if (!string.IsNullOrEmpty(paramsFail))
+            paramsFail = strb.ToString ();
+            if ( ! string.IsNullOrEmpty ( paramsFail ) )
                 paramsFail = paramsFail.Substring ( 2 ); // Remove first ", "
 
             strb.Clear ();

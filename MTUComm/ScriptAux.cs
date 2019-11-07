@@ -31,7 +31,7 @@ namespace MTUComm
         private const string MSG_RDD    = "Should be one of the possible values ( 'CLOSE', 'OPEN', 'PARTIAL OPEN' )";
         private const string MSG_OMW    = "Should be one of the possible values ( 'Yes', 'No', 'Broken' )";
         private const string MSG_MRR    = "Should be one of the possible values ( 'Meter', 'Register', 'Both' )";
-        private const string MSG_TWO    = "Should be one of the possible values ( 'Fast', 'Slow' )";
+        private const string MSG_TWO    = "Should be one of the possible values ( 'True' for Fast, 'False' for Slow )";
 
         public enum OldMeterWorking
         {
