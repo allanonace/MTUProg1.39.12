@@ -178,7 +178,7 @@ namespace aclara_meters.view
                         await FormsApp.ble_interface.Scan();
                     }
                     
-                    DeviceList.ItemsSource = null;
+                    
                     if (FormsApp.ble_interface.GetBlePeripheralList().Count > 0)
                     {
 
