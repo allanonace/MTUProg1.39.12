@@ -44,12 +44,12 @@ namespace MTUComm
             if ( ! mtu.HasFamilySet )
             {
                 // Gas MTUs of family 33xx should use family 31xx32xx memorymap
-                if ( mtu.IsFamily33xx &&
-                    mtu.Port1.IsForPulse &&
+                if ( mtu.IsFamily33xx     &&
+                     mtu.Port1.IsForPulse &&
                     ( port1.TypeString.Contains ( "M" ) ||
-                    port1.TypeString.Contains ( "R" ) ||
+                      port1.TypeString.Contains ( "R" ) ||
                     ( ! port1.IsSpecialCaseNumType &&
-                        port1.HasCertainMeterIds     &&
+                        port1.HasCertainMeterIds   &&
                         config.getMeterTypeById ( int.Parse ( port1.CertainMeterIds[ 0 ] ) ).IsForGas ) ) )
                 {
                     family = "31xx32xx";

@@ -3975,9 +3975,6 @@ namespace aclara_meters.view
             string value_lon;              // Longitude
             string value_alt;              // Altitude
 
-
-            // Real values
-
             // Port 1
             if ( ! mtu.Port1.IsSetFlow )
             {
@@ -4010,21 +4007,21 @@ namespace aclara_meters.view
                 value_msn_2 = this.tbx_MeterSerialNumber_2       .Text;
                 value_mre_2 = this.tbx_MeterReading_2            .Text;
                 value_mty_2 = ( Meter )this.pck_MeterType_Names_2.SelectedItem;
-                    
+                
                 if ( isReplaceMeter )
                 {
                     if ( global.MeterWorkRecording )
-                        value_omw = this.pck_OldMeterWorking_2.SelectedItem.ToString ();
+                        value_omw_2 = this.pck_OldMeterWorking_2.SelectedItem.ToString ();
                         
                     if ( global.RegisterRecording )
-                        value_rpl = this.pck_ReplaceMeterRegister_2.SelectedItem.ToString ();
+                        value_rpl_2 = this.pck_ReplaceMeterRegister_2.SelectedItem.ToString ();
                 }
             }
                 
             // General fields, for the MTU itself
             // No RDD or RDD in port two
             if ( ! hasRDD ||
-                    ! rddIn1 )
+                 ! rddIn1 )
             {
                 value_omt = this.tbx_OldMtuId.Text;
                 value_rin = this.pck_ReadInterval.SelectedItem.ToString ();
@@ -4358,7 +4355,12 @@ namespace aclara_meters.view
             string ndresult = string.Empty;
             InterfaceParameters[] interfacesParams = Singleton.Get.Configuration.getUserParamsFromInterface ( mtu, ActionType.ReadMtu );
             
-            Mtu curMtu = Singleton.Get.Action.CurrentMtu;
+            Mtu currentMtu = Singleton.Get.Action.CurrentMtu;
+
+            // NOTE: Special case when is one port MTU for valve/RDD
+            // NOTE: Create temporal MTU instace because if the final log fails,
+            // NOTE: the MTU info should continue with the correct/real number of ports
+            Mtu copyCurrentMtu = currentMtu.SimulateRddInPortTwoIfNeeded () as Mtu;
 
             foreach (InterfaceParameters iParameter in interfacesParams)
             {
@@ -4381,7 +4383,7 @@ namespace aclara_meters.view
                                 // For Read action when no Meter is installed on readed MTU
                                 if ( param != null )
                                      description = param.Value;
-                                else description = curMtu.Ports[i].GetProperty ( pParameter.Name );
+                                else description = copyCurrentMtu.Ports[i].GetProperty ( pParameter.Name );
                                 
                                 FinalReadListView.Add(new ReadMTUItem()
                                 {

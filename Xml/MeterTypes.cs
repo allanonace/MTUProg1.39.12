@@ -69,11 +69,14 @@ namespace Xml
             return meter;
         }
 
-        public List<Meter> FindByEncoderTypeAndLiveDigits(int encoderType, int liveDigits)
+        public List<Meter> FindByEncoderTypeAndLiveDigits (
+            int encoderType,
+            int liveDigits )
         {
             // Filter by protocol and livedigits
             List<Meter> meters = Meters.FindAll ( x => (
-                x.EncoderType == encoderType && x.LiveDigits == liveDigits
+                x.EncoderType == encoderType &&
+                x.LiveDigits  == liveDigits
             ));
             
             // Filter only by protocol

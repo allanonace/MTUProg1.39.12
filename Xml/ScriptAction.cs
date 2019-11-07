@@ -104,6 +104,9 @@ namespace Xml
         [XmlElement("SnapRead")]
         public ActionParameter SnapRead { get; set; }
 
+        [XmlElement("Fast-2-Way")]
+        public ActionParameter Fast2Way { get; set; }
+
         [XmlElement("ForceTimeSync")]
         public ActionParameter ForceTimeSync { get; set; }
 

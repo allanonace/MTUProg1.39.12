@@ -14,6 +14,7 @@ using System.IO;
 using NodeDiscoveryResult = MTUComm.MTUComm.NodeDiscoveryResult;
 using ValidationResult = MTUComm.MTUComm.ValidationResult;
 using FIELD = MTUComm.actions.AddMtuForm.FIELD;
+using ParameterType = MTUComm.Parameter.ParameterType;
 
 namespace MTUComm
 {
@@ -661,6 +662,15 @@ namespace MTUComm
         public Parameter[] GetParameters()
         {
             return scriptParameters.ToArray();
+        }
+
+        public bool ContainsParameter (
+            ParameterType paramType,
+            int portIndex = 0 )
+        {
+            return this.scriptParameters.Find ( p =>
+                p.Type == paramType &&
+                p.Port == portIndex ) != null;
         }
 
         public Parameter GetParameterByTag(string tag, int port = -1)
