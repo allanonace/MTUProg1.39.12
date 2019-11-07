@@ -598,23 +598,31 @@ namespace MTUComm
 
             #region Methods
 
-            dynamic LogParamNotPresent = new Action<string> (
+            dynamic LogParamNotPresent = new Action<ParameterType> (
                 ( name ) => strb.Append ( ", " + name.ToString () ) );
 
             dynamic CheckIfParamIsPresent = new Func<ParameterType,int,bool,bool> (
                 ( paramType, portIndex, modifyResult ) => {
-                    bool contains = true;
-                    contains = action.ContainsParameter ( paramType, portIndex );
-
-                    if ( modifyResult )
+                    try
                     {
-                        ok &= contains;
+                        bool contains = true;
+                        contains = action.ContainsParameter(paramType, portIndex);
 
-                        if ( ! contains )
-                            LogParamNotPresent ( paramType );
+                        if (modifyResult)
+                        {
+                            ok &= contains;
+
+                            if (!contains)
+                                LogParamNotPresent(paramType);
+                        }
+                        return contains;
                     }
-
-                    return contains;
+                    catch(Exception e)
+                    {
+                        return false;
+                    }
+                    
+                    
                 });
 
             dynamic CheckIfNotPresent = new Func<ParameterType,bool> (
@@ -707,11 +715,13 @@ namespace MTUComm
 
                         // ( New ) Meter Serial Number
                         if ( this.global.UseMeterSerialNumber )
-                            CheckIfNotPresentInPort ( ParameterType.NewMeterSerialNumber, 0 );
+                            CheckIfAnyPresentInPort (
+                              new ParameterType[] { ParameterType.MeterSerialNumber,
+                                    ParameterType.NewMeterSerialNumber }, 0 );
 
                         // ( New ) Meter Reading / Initial Reading
                         CheckIfAnyPresentInPort (
-                            new { ParameterType.MeterReading,
+                            new ParameterType[] { ParameterType.MeterReading,
                                   ParameterType.NewMeterReading }, 0 );
 
                         // Read Interval
@@ -766,11 +776,13 @@ namespace MTUComm
                         {
                             // ( New ) Meter Serial Number
                             if ( this.global.UseMeterSerialNumber )
-                                CheckIfNotPresentInPort ( ParameterType.NewMeterSerialNumber, 1 );
+                                CheckIfAnyPresentInPort (
+                                    new ParameterType[] { ParameterType.MeterSerialNumber,
+                                        ParameterType.NewMeterSerialNumber }, 1 );
 
                             // ( New ) Meter Reading / Initial Reading
                             CheckIfAnyPresentInPort (
-                                new { ParameterType.MeterReading,
+                                new ParameterType[] { ParameterType.MeterReading,
                                     ParameterType.NewMeterReading }, 1 );
 
                             // Action is about Replace Meter
@@ -2880,9 +2892,9 @@ namespace MTUComm
                             #region Two-Way
                             case FIELD.TWO_WAY:
                             // Do not use
-                            if ( this.global.TimeToSync &&
-                                 this.mtu.TimeToSync    &&
-                                 this.mtu.FastMessageConfig )
+                            if ( !this.global.TimeToSync ||
+                                 !this.mtu.TimeToSync    ||
+                                 !this.mtu.FastMessageConfig )
                             {
                                 form.RemoveParameter ( FIELD.TWO_WAY );
 
@@ -2891,7 +2903,7 @@ namespace MTUComm
                             
                             // In STAR Programmer this value is used as boolean ( true=Fast, false=Slow )
                             if ( fail = ! bool.TryParse ( value, out bool result ) )
-                                msgDescription = "Should be one of the possible values ( 'Fast', 'Slow' )";
+                                msgDescription = "Should be one of the possible values ( 'True' for Fast, 'False' for slow )";
                             else
                                 value = ( ( result ) ? ScriptAux.TwoWay.FAST : ScriptAux.TwoWay.SLOW ).ToString ();
                             break;
