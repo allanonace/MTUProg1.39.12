@@ -7,6 +7,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <util:InvertBooleanConverter x:Key="InvertBoolean" />
+            <util:StringToColorConverter x:Key="StringToColor" />
             <OnPlatform x:TypeArguments="Thickness"
                      x:Key="GridPadding"
                      Android="8,8,8,8"

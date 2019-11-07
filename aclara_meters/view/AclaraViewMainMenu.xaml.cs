@@ -656,7 +656,8 @@ namespace aclara_meters.view
                                 timeout_connecting = 0;
 
                                 FormsApp.ble_interface.Close();
-                      
+                                CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
+
                             });
                            
                             Thread.Sleep(Timeout.Infinite);

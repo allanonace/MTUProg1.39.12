@@ -2423,8 +2423,18 @@ namespace MTUComm
                     throw new ScriptForTwoPortsButMtuOnlyOneException ();
     
                 bool isAutodetectMeter = false;
-    
-                // Port 1
+
+                if (global.TimeToSync &&
+                     this.mtu.TimeToSync &&
+                     this.mtu.FastMessageConfig)
+                //! this.mtu.IsFamily31xx32xx &&
+                //! this.mtu.IsFamily33xx )
+                {
+                    if (!form.ContainsParameter(FIELD.TWO_WAY))
+                        throw new ScriptingTagMissing("TwoWay");  
+                }
+
+                    // Port 1
                 if ( ! form.ContainsParameter ( FIELD.METER_TYPE ) )
                 {
                     // Missing tags
@@ -3193,7 +3203,9 @@ namespace MTUComm
                      //! this.mtu.IsFamily31xx32xx &&
                      //! this.mtu.IsFamily33xx )
                 {
+                    
                     map.FastMessagingConfigFreq = ( Data.Get.TwoWay.ToUpper ().Equals ( "SLOW" ) ) ? false : true; // F1/Slow and F2/Fast
+
                 }
 
                 #endregion
@@ -3552,6 +3564,10 @@ namespace MTUComm
             byte[] aesKey = new byte[ regAesKey.size    ]; // 16 bytes
             byte[] sha    = new byte[ regAesKey.sizeGet ]; // 32 bytes
             
+            // Checks if the encryption index has reached the byte maximum value ( 255 )
+            if ( await regEncryIndex.GetValue () >= byte.MaxValue )
+                throw new EncryptionIndexLimitReachedException ();
+
             try
             {
                 // Generate random key

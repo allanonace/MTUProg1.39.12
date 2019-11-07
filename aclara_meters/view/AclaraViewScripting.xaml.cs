@@ -488,8 +488,10 @@ namespace aclara_meters.view
                                     {
                                         Utils.Print(e5.StackTrace);
                                     }
-                                    Terminado();
-                                //Connection Method
+
+                                Terminado();
+                                    //Connection Method
+                                Thread.Sleep(20000);
                                 runScript();
 
                                 });
@@ -536,6 +538,8 @@ namespace aclara_meters.view
                             {
                                 Utils.PrintDeep("Un Timeout que te llevas - InvokeMethod");
                                 Application.Current.MainPage.DisplayAlert("Timeout", "Connection Timeout", "Ok");
+                                listPucks = new ObservableCollection<DeviceItem>();
+                                DeviceList.ItemsSource = listPucks;
                                 DeviceList.IsEnabled = true;
                                 fondo.Opacity = 1;
                                 ContentView_DeviceList.Opacity = 1;
@@ -552,7 +556,8 @@ namespace aclara_meters.view
 
                                 peripheralConnected = ble_library.BlePort.NO_CONNECTED;
                                 timeout_connecting = 0;
-
+                                FormsApp.ble_interface.Close();
+                                CrossSettings.Current.AddOrUpdateValue("session_dynamicpass", string.Empty);
                             });
 
                             Utils.PrintDeep("Cerrar Conexion - InvokeMethod");

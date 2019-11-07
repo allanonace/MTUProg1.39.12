@@ -56,7 +56,9 @@ namespace MTUComm.actions
             TWO_WAY,
             ALARM,
             DEMAND,
-            
+            RDD_POSITION,
+            RDD_FIRMWARE,
+
             GPS_LATITUDE,
             GPS_LONGITUDE,
             GPS_ALTITUDE,
@@ -90,10 +92,13 @@ namespace MTUComm.actions
                 
                 { ParameterType.MeterReading,         FIELD.METER_READING     },
                 { ParameterType.NewMeterReading,      FIELD.METER_READING     },
-                { ParameterType.OldMeterReading,      FIELD.METER_READING_OLD },
+		{ ParameterType.OldMeterReading,      FIELD.METER_READING_OLD },
 
                 { ParameterType.OldMeterWorking,      FIELD.METER_WORKING_OLD },
-                { ParameterType.ReplaceMeterRegister, FIELD.REPLACE_METER_REG }
+                { ParameterType.ReplaceMeterRegister, FIELD.REPLACE_METER_REG },
+
+		{ ParameterType.RDDFirmwareVersion,   FIELD.RDD_FIRMWARE      },
+                { ParameterType.RDDPosition,          FIELD.RDD_POSITION      }
             };
 
         // Elements array
@@ -418,6 +423,28 @@ namespace MTUComm.actions
                     }
                 },
                 #endregion
+                #region RDDPosition
+                {
+                    FIELD.RDD_POSITION,
+                    new string[]
+                    {
+                        "RDDPosition",
+                        "RDDPostion",
+                        "RDD Position"
+                    }
+                },
+                #endregion
+                #region RDDFirmware
+                {
+                    FIELD.RDD_FIRMWARE,
+                    new string[]
+                    {
+                        "RDDFirmware",
+                        "RDDFirmware",
+                        "RDD Firmware Version"
+                    }
+                },
+                #endregion
                 #region Alarm
                 {
                     FIELD.ALARM,
@@ -524,7 +551,7 @@ namespace MTUComm.actions
                 // Allow non-reserved tags
                 //AddAdditionalParameter ( nameTypeAclara, parameter.Value, parameter.Port );
                 
-                Errors.LogErrorNow ( new ProcessingParamsScriptException () );
+                Errors.LogErrorNow ( new ProcessingParamsScriptException ( parameter.CustomDisplay ) );
             }
             else
             {

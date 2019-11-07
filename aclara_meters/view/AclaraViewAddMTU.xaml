@@ -33,12 +33,12 @@
                                         <StackLayout IsVisible="{Binding isMTU}">
                                             <Label Text="{Binding Title}" Margin="14,0,0,0" VerticalOptions="Center" Font="Bold,20" />
                                             <Label Text="{Binding Description}" Margin="14,-4,0,0" FontSize="18" VerticalOptions="Center"
-                                            BackgroundColor="{Binding BackgroundColor}" TextColor="{Binding FontColor}" />
+                                            BackgroundColor="{Binding BackgroundColor}" TextColor="{Binding FontColor, Converter={StaticResource StringToColor}}" />
                                         </StackLayout>
                                         <StackLayout IsVisible="{Binding isDetailMeter}">
                                             <Label Text="{Binding Title}" Margin="36,0,0,0" VerticalOptions="Center" Font="Bold,19" />
                                             <Label Text="{Binding Description}" Margin="36,-4,0,0" FontSize="17" VerticalOptions="Center"
-                                            BackgroundColor="{Binding BackgroundColor}" TextColor="{Binding FontColor}" />
+                                            BackgroundColor="{Binding BackgroundColor}" TextColor="{Binding FontColor, Converter={StaticResource StringToColor}}" />
                                         </StackLayout>
                                     </StackLayout>
                                 </ViewCell>
@@ -80,7 +80,7 @@
                                         </StackLayout>
                                         <!-- Account Number / Service Port ID -->
                                         <StackLayout x:Name="div_AccountNumber">
-                                        <Label Text="Service Port ID" Margin="0,4,0,0" x:Name="lb_AccountNumber" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Service Port ID" Margin="0,4,0,0" x:Name="lb_AccountNumber" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -101,7 +101,7 @@
                                         </StackLayout>
                                         <!-- Account Number / Service Port ID - Dual Entry -->
                                         <StackLayout x:Name="div_AccountNumber_Dual">
-                                            <Label Text="Repeat Service Port ID" x:Name="lb_AccountNumber_Dual" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Repeat Service Port ID" x:Name="lb_AccountNumber_Dual" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -119,7 +119,7 @@
                                         </StackLayout>
                                         <!-- Work Order / Field Order -->
                                         <StackLayout x:Name="div_WorkOrder">
-                                            <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -136,7 +136,7 @@
                                         </StackLayout>
                                         <!-- Work Order / Field Order - Dual -->
                                         <StackLayout x:Name="div_WorkOrder_Dual">
-                                            <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder_Dual" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder_Dual" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -154,11 +154,11 @@
                                         </StackLayout>
                                         <!-- Old MTU ID -->
                                         <StackLayout x:Name="div_OldMtuId" IsVisible="false">
-                                            <Label Text="Old MTU ID" Margin="0,12,0,0" x:Name="lb_OldMtuId" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old MTU ID" Margin="0,12,0,0" x:Name="lb_OldMtuId" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMtuId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry Display="old" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMtuId" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
@@ -170,11 +170,11 @@
                                         </StackLayout>
                                         <!-- Old Meter Serial Number -->
                                         <StackLayout x:Name="div_OldMeterSerialNumber" IsVisible="false">
-                                            <Label Text="Old Meter #" x:Name="lb_OldMeterSerialNumber" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old Meter #" x:Name="lb_OldMeterSerialNumber" Margin="0,12,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterSerialNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry Display="old" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterSerialNumber" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
@@ -186,11 +186,11 @@
                                         </StackLayout>
                                         <!-- Old Meter Serial Number - Dual -->
                                         <StackLayout x:Name="div_OldMeterSerialNumber_Dual" IsVisible="false">
-                                            <Label Text="Old Meter #" x:Name="lb_OldMeterSerialNumber_Dual" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old Meter #" x:Name="lb_OldMeterSerialNumber_Dual" Margin="0,12,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterSerialNumber_Dual" VerticalOptions="CenterAndExpand"
+                                                        <Controls:BorderlessEntry Display="old" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterSerialNumber_Dual" VerticalOptions="CenterAndExpand"
                                                         HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
@@ -204,7 +204,7 @@
                                         </StackLayout>
                                         <!-- Old Meter Working -->
                                         <StackLayout x:Name="div_OldMeterWorking" IsVisible="false">
-                                            <Label Text="Old Meter Working" x:Name="lb_OldMeterWorking" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old Meter Working" x:Name="lb_OldMeterWorking" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -215,11 +215,11 @@
                                         </StackLayout>
                                         <!-- Old Meter Reading / Initial Reading -->
                                         <StackLayout x:Name="div_OldMeterReading" IsVisible="false">
-                                            <Label Text="Old Reading" x:Name="lb_OldMeterReading" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old Reading" x:Name="lb_OldMeterReading" Margin="0,12,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_OldMeterReading">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand" >
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterReading"
+                                                        <Controls:BorderlessEntry Display="old" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterReading"
                                                         VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17" />
                                                         <ImageButton CommandParameter="tbx_OldMeterReading" IsVisible="{Binding BarCodeEnabled}" HeightRequest="56" Source="scanner1.png" Clicked="BarCodeScanner" />
                                                     </StackLayout>
@@ -229,11 +229,11 @@
                                         </StackLayout>
                                         <!-- Old Meter Reading / Initial Reading - Dual -->
                                         <StackLayout x:Name="div_OldMeterReading_Dual" IsVisible="false">
-                                            <Label Text="Old Reading" x:Name="lb_OldMeterReading_Dual" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old Reading" x:Name="lb_OldMeterReading_Dual" Margin="0,12,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_OldMeterReading_Dual">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterReading_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
+                                                        <Controls:BorderlessEntry Display="old" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterReading_Dual" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
                                                             HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
@@ -248,7 +248,7 @@
                                         </StackLayout>
                                         <!-- Replace Meter|Register -->
                                         <StackLayout x:Name="div_ReplaceMeterRegister" IsVisible="false">
-                                            <Label Text="Replace Meter / Register" x:Name="lb_ReplaceMeterRegister" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Replace Meter / Register" x:Name="lb_ReplaceMeterRegister" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -259,7 +259,7 @@
                                         </StackLayout>
                                         <!-- ( New ) Meter Serial Number -->
                                         <StackLayout x:Name="div_MeterSerialNumber">
-                                            <Label Text="Meter Number" x:Name="lb_MeterSerialNumber" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Meter Number" x:Name="lb_MeterSerialNumber" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -276,7 +276,7 @@
                                         </StackLayout>
                                         <!-- ( New ) Meter Serial Number - Dual -->
                                         <StackLayout x:Name="div_MeterSerialNumber_Dual">
-                                            <Label Text="Meter Number" x:Name="lb_MeterSerialNumber_Dual" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Meter Number" x:Name="lb_MeterSerialNumber_Dual" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -298,7 +298,7 @@
                                         </StackLayout>
                                         <!-- ( New ) Meter Reading / Initial Reading -->
                                         <StackLayout x:Name="div_MeterReadings">
-                                            <Label Text="Meter Reading" x:Name="lb_MeterReading" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Meter Reading" x:Name="lb_MeterReading" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="div_MeterReading">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -315,7 +315,7 @@
                                             <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_MeterType" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                             <!-- ( New ) Meter Reading / Initial Reading - Dual -->
                                             <StackLayout x:Name="div_MeterReading_Dual" IsVisible="false">
-                                                <Label Text="Meter Reading" x:Name="lb_MeterReading_Dual" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                                <Label Text="Meter Reading" x:Name="lb_MeterReading_Dual" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                     <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_Dual">
                                                         <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -335,7 +335,7 @@
                                         </StackLayout>
                                         <!--  Read Inverval -->
                                         <StackLayout>
-                                            <Label Text="Read Interval" x:Name="lb_ReadInterval" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Read Interval" x:Name="lb_ReadInterval" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" x:Name="div_ReadInterval" Opacity="1" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -346,7 +346,7 @@
                                         </StackLayout>
                                         <!-- Snap Reads / Daily Reads -->
                                         <StackLayout x:Name="div_SnapReads" Orientation="Vertical" HorizontalOptions="FillAndExpand">
-                                            <Label Text="Snap Reads" x:Name="lb_SnapReads" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Snap Reads" x:Name="lb_SnapReads" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" x:Name="divSub_SnapReads" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -363,7 +363,7 @@
                                         </StackLayout>
                                         <!-- 2-Way -->
                                         <StackLayout Margin="0,4,0,0" x:Name="div_TwoWay">
-                                            <Label Text="2-Way" x:Name="lb_TwoWay" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="2-Way" x:Name="lb_TwoWay" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -374,7 +374,7 @@
                                         </StackLayout>
                                         <!-- Alarms -->
                                         <StackLayout Margin="0,4,0,0" x:Name="div_Alarms">
-                                            <Label Text="Alarm Settings" x:Name="lb_Alarms" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Alarm Settings" x:Name="lb_Alarms" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -385,7 +385,7 @@
                                         </StackLayout>
                                         <!-- Demands -->
                                         <StackLayout Margin="0,4,0,0" x:Name="div_Demands">
-                                            <Label Text="Demand Settings" x:Name="lb_Demands" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Demand Settings" x:Name="lb_Demands" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -423,7 +423,7 @@
                                         </StackLayout>
                                         <StackLayout x:Name="div_AccountNumber_2">
                                         <!-- Account Number / Service Port ID -->
-                                        <Label Text="Service Port ID" x:Name="lb_AccountNumber_2" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Service Port ID" x:Name="lb_AccountNumber_2" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -440,7 +440,7 @@
                                         </StackLayout>
                                         <!-- Account Number / Service Port ID - Dual Entry -->
                                         <StackLayout x:Name="div_AccountNumber_Dual_2">
-                                            <Label Text="Repeat Service Port ID" x:Name="lb_AccountNumber_Dual_2" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Repeat Service Port ID" x:Name="lb_AccountNumber_Dual_2" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -458,7 +458,7 @@
                                         </StackLayout>
                                         <!-- Work Order / Field Order -->
                                         <StackLayout x:Name="div_WorkOrder_2">
-                                            <Label Text="Field Order" x:Name="lb_WorkOrder_2" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Field Order" x:Name="lb_WorkOrder_2" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -475,7 +475,7 @@
                                         </StackLayout>
                                         <!-- Work Order / Field Order - Dual -->
                                         <StackLayout x:Name="div_WorkOrder_Dual_2">
-                                            <Label Text="Repeat Service Port ID" x:Name="lb_WorkOrder_Dual_2" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Repeat Service Port ID" x:Name="lb_WorkOrder_Dual_2" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -493,11 +493,11 @@
                                         </StackLayout>
                                         <!-- Old Meter Serial Number -->
                                         <StackLayout x:Name="div_OldMeterSerialNumber_2" IsVisible="false">
-                                            <Label Text="Old Meter #" x:Name="lb_OldMeterSerialNumber_2" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old Meter #" x:Name="lb_OldMeterSerialNumber_2" Margin="0,12,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterSerialNumber_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry Display="old" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterSerialNumber_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
@@ -509,11 +509,11 @@
                                         </StackLayout>
                                         <!-- Old Meter Serial Number - Dual -->
                                         <StackLayout x:Name="div_OldMeterSerialNumber_Dual_2" IsVisible="false">
-                                            <Label Text="Old Meter #" x:Name="lb_OldMeterSerialNumber_Dual_2" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old Meter #" x:Name="lb_OldMeterSerialNumber_Dual_2" Margin="0,12,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterSerialNumber_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
+                                                        <Controls:BorderlessEntry Display="old" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterSerialNumber_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" FontSize="17" HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
                                                             </Controls:BorderlessEntry.Behaviors>
@@ -526,7 +526,7 @@
                                         </StackLayout>
                                         <!-- Old Meter Working -->
                                         <StackLayout x:Name="div_OldMeterWorking_2" IsVisible="false">
-                                            <Label Text="Old Meter Working" x:Name="lb_OldMeterWorking_2" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old Meter Working" x:Name="lb_OldMeterWorking_2" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -537,11 +537,11 @@
                                         </StackLayout>
                                         <!-- Old Meter Reading / Initial Reading -->
                                         <StackLayout x:Name="div_OldMeterReading_2" IsVisible="false">
-                                            <Label Text="Old Meter #" x:Name="lb_OldMeterReading_2" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old Meter #" x:Name="lb_OldMeterReading_2" Margin="0,12,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_OldMeterReading_2">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterReading_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
+                                                        <Controls:BorderlessEntry Display="old" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterReading_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
                                                             HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
@@ -555,11 +555,11 @@
                                         </StackLayout>
                                         <!-- Old Meter Reading / Initial Reading - Dual -->
                                         <StackLayout x:Name="div_OldMeterReading_Dual_2" IsVisible="false">
-                                            <Label Text="Old Meter #" x:Name="lb_OldMeterReading_Dual_2" Margin="0,12,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Old Meter #" x:Name="lb_OldMeterReading_Dual_2" Margin="0,12,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_OldMeterReading_Dual_2">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
-                                                        <Controls:BorderlessEntry Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterReading_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
+                                                        <Controls:BorderlessEntry Display="old" Margin="0,0,0,0" Text="" HeightRequest="40" x:Name="tbx_OldMeterReading_Dual_2" VerticalOptions="CenterAndExpand" HorizontalOptions="FillAndExpand" Placeholder="" PlaceholderColor="#7a868c" Keyboard="Numeric" FontSize="17"
                                                             HorizontalTextAlignment="Start">
                                                             <Controls:BorderlessEntry.Behaviors>
                                                                 <behaviors:EntryValidatorBehavior />
@@ -574,7 +574,7 @@
                                         </StackLayout>
                                         <!-- Replace Meter|Register -->
                                         <StackLayout x:Name="div_ReplaceMeterRegister_2" IsVisible="false">
-                                            <Label Text="Replace Meter / Register" x:Name="lb_ReplaceMeterRegister_2" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Replace Meter / Register" x:Name="lb_ReplaceMeterRegister_2" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -585,7 +585,7 @@
                                         </StackLayout>
                                         <!-- ( New ) Meter Serial Number -->
                                         <StackLayout x:Name="div_MeterSerialNumber_2">
-                                            <Label Text="Meter Number" Margin="0,4,0,0" x:Name="lb_MeterSerialNumber_2" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Meter Number" Margin="0,4,0,0" x:Name="lb_MeterSerialNumber_2" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -602,7 +602,7 @@
                                         </StackLayout>
                                         <!-- ( New ) Meter Serial Number - Dual -->
                                         <StackLayout x:Name="div_MeterSerialNumber_Dual_2">
-                                            <Label Text="Meter Number" Margin="0,4,0,0" x:Name="lb_MeterSerialNumber_Dual_2" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Meter Number" Margin="0,4,0,0" x:Name="lb_MeterSerialNumber_Dual_2" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -624,7 +624,7 @@
                                         </StackLayout>
                                         <!-- ( New ) Meter Reading / Initial Reading -->
                                         <StackLayout x:Name="div_MeterReadings_2">
-                                            <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_2" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_2" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_2">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -641,7 +641,7 @@
                                             <Label HorizontalTextAlignment="Start" TextColor="Red" x:Name="lb_MeterReading_MeterType_2" IsVisible="false" FontSize="12" Margin="12,0,0,0" />
                                             <!-- ( New ) Meter Reading / Initial Reading - Dual -->
                                             <StackLayout x:Name="div_MeterReading_Dual_2">
-                                                <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_Dual_2" VerticalOptions="Center" Font="Bold,17" />
+                                                <Label Text="Meter Reading" Margin="0,4,0,0" x:Name="lb_MeterReading_Dual_2" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                                     <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White" x:Name="divSub_MeterReading_Dual_2">
                                                         <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -671,7 +671,7 @@
                                     </StackLayout>
                                     <!-- Account Number / Service Port ID -->
                                     <StackLayout x:Name="div_AccountNumber_V">
-                                        <Label Text="Service Port ID" Margin="0,4,0,0" x:Name="lb_AccountNumber_V" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Service Port ID" Margin="0,4,0,0" x:Name="lb_AccountNumber_V" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -692,7 +692,7 @@
                                     </StackLayout>
                                     <!-- Account Number / Service Port ID - Dual Entry -->
                                     <StackLayout x:Name="div_AccountNumber_Dual_V">
-                                        <Label Text="Repeat Service Port ID" x:Name="lb_AccountNumber_Dual_V" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Repeat Service Port ID" x:Name="lb_AccountNumber_Dual_V" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -710,7 +710,7 @@
                                     </StackLayout>
                                     <!-- Work Order / Field Order -->
                                     <StackLayout x:Name="div_WorkOrder_V">
-                                        <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder_V" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder_V" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -727,7 +727,7 @@
                                     </StackLayout>
                                     <!-- Work Order / Field Order - Dual -->
                                     <StackLayout x:Name="div_WorkOrder_Dual_V">
-                                        <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder_Dual_V" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Field Order" Margin="0,4,0,0" x:Name="lb_WorkOrder_Dual_V" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -749,7 +749,7 @@
                                     </StackLayout>
                                     <!-- RDD Position -->
                                     <StackLayout x:Name="div_RDDPosition">
-                                        <Label Text="Valve Position" Margin="0,4,0,0" x:Name="lb_RDDPosition" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Valve Position" Margin="0,4,0,0" x:Name="lb_RDDPosition" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -765,7 +765,7 @@
                                     </StackLayout>
                                     <!-- RDD Serial Number -->
                                     <StackLayout x:Name="div_RDDSerialNumber">
-                                        <Label Text="Valve Serial Number" Margin="0,4,0,0" x:Name="lb_RDDSerialNumber" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Valve Serial Number" Margin="0,4,0,0" x:Name="lb_RDDSerialNumber" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -781,7 +781,7 @@
                                     </StackLayout>
                                     <!-- Battery -->
                                     <StackLayout x:Name="div_Battery">
-                                        <Label Text="Valve Battery" Margin="0,4,0,0" x:Name="lb_Battery" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Valve Battery" Margin="0,4,0,0" x:Name="lb_Battery" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame Opacity="0.8" CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -797,7 +797,7 @@
                                     </StackLayout>
                                     <!-- RDD Firmware Version -->
                                     <StackLayout x:Name="div_RDDFirmwareVersion">
-                                        <Label Text="Valve Firmware Version" Margin="0,4,0,0" x:Name="lb_RDDFirmwareVersion" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Valve Firmware Version" Margin="0,4,0,0" x:Name="lb_RDDFirmwareVersion" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,0" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -813,7 +813,7 @@
                                     </StackLayout>
                                     <!-- Valve Position -->
                                     <StackLayout x:Name="div_ValvePosition" IsVisible="true">
-                                        <Label Text="Valve Position Desired" x:Name="lb_ValvePosition" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                        <Label Text="Valve Position Desired" x:Name="lb_ValvePosition" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                         <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                 <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -826,7 +826,7 @@
                                     <StackLayout x:Name="div_RDDGeneral" IsVisible="False">
                                          <!-- 2-Way -->
                                         <StackLayout Margin="0,4,0,0" x:Name="div_TwoWay_V">
-                                            <Label Text="2-Way" x:Name="lb_TwoWay_V" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="2-Way" x:Name="lb_TwoWay_V" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -837,7 +837,7 @@
                                         </StackLayout>
                                         <!-- Alarms -->
                                         <StackLayout Margin="0,4,0,0" x:Name="div_Alarms_V">
-                                            <Label Text="Alarm Settings" x:Name="lb_Alarms_V" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Alarm Settings" x:Name="lb_Alarms_V" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -848,7 +848,7 @@
                                         </StackLayout>
                                         <!-- Demands -->
                                         <StackLayout Margin="0,4,0,0" x:Name="div_Demands_V">
-                                            <Label Text="Demand Settings" x:Name="lb_Demands_V" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                            <Label Text="Demand Settings" x:Name="lb_Demands_V" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                             <Frame CornerRadius="6" HeightRequest="30" Margin="0,4,0,4" BackgroundColor="#7a868c">
                                                 <Frame CornerRadius="6" HeightRequest="30" Margin="-7" BackgroundColor="White">
                                                     <StackLayout Margin="1" BackgroundColor="White" Orientation="Horizontal" HorizontalOptions="FillAndExpand">
@@ -866,7 +866,7 @@
                                 <StackLayout x:Name="miscview" IsVisible="false" Margin="12,0,12,0">
                                     <Label Margin="0,16,0,8" FontSize="22" TextColor="#6aa2b8" x:Name="name_of_window_misc" Text="Add MTU" />
                                     <!-- MTU Geolocation -->
-                                    <Label Text="MTU Geolocation" x:Name="lb_GPS" Margin="0,4,0,0" VerticalOptions="Center" Font="Bold,17" />
+                                    <Label Text="MTU Geolocation" x:Name="lb_GPS" Margin="0,4,0,0" VerticalOptions="Center" FontAttributes="Bold" FontSize="17" />
                                     <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Margin="4">
                                         <Label Text="Lat." Margin="0,4,0,0" VerticalOptions="Center" FontSize="16">
                                         </Label>

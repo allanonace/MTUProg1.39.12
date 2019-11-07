@@ -546,10 +546,10 @@ namespace aclara_meters.view
                 #region Two ports or RDD
 
                 if (this.currentMtu.Port1.IsSetFlow)
-                {
+                {                    
+                    valve_command();
                     port1label.IsVisible = false;
                     port2label.IsVisible = false;
-                    valvelabel.IsVisible = true;
                     div_RDDGeneral.IsVisible = true;
                     hasValve = true;
                     hasMeterPortTwo = false;
