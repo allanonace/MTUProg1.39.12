@@ -29,6 +29,29 @@ namespace MTUComm
         private const string MSG_BOOL   = "should be 'true' or 'false'";
         private const string MSG_DAYS   = "should be one of the possible values ( 1, 8, 32, 64 or 96 )";
         private const string MSG_RDD    = "Should be one of the possible values ( 'CLOSE', 'OPEN', 'PARTIAL OPEN' )";
+        private const string MSG_OMW    = "Should be one of the possible values ( 'Yes', 'No', 'Broken' )";
+        private const string MSG_MRR    = "Should be one of the possible values ( 'Meter', 'Register', 'Both' )";
+        private const string MSG_TWO    = "Should be one of the possible values ( 'Fast', 'Slow' )";
+
+        public enum OldMeterWorking
+        {
+            YES,
+            NO,
+            BROKEN
+        }
+
+        public enum MeterRegisterRecording
+        {
+            METER,
+            REGISTER,
+            BOTH
+        }
+
+        public enum TwoWay
+        {
+            FAST,
+            SLOW
+        }
 
         public enum APP_FIELD
         {
@@ -96,6 +119,7 @@ namespace MTUComm
                 { ParameterType.UnitOfMeasure,        APP_FIELD.UnitOfMeasure   },
                 { ParameterType.SnapRead,             APP_FIELD.SnapReads       },
                 { ParameterType.ReadInterval,         APP_FIELD.ReadInterval    },
+                { ParameterType.Fast2Way,             APP_FIELD.TwoWay          },
                 { ParameterType.Alarm,                APP_FIELD.Alarm           },
                 { ParameterType.ForceTimeSync,        APP_FIELD.ForceTimeSync   },
                 { ParameterType.MeterSerialNumber,    APP_FIELD.MeterNumber     },
@@ -104,6 +128,8 @@ namespace MTUComm
                 { ParameterType.MeterReading,         APP_FIELD.MeterReading    },
                 { ParameterType.NewMeterReading,      APP_FIELD.MeterReading    },
                 { ParameterType.OldMeterReading,      APP_FIELD.MeterReadingOld },
+                { ParameterType.OldMeterWorking,      APP_FIELD.OldMeterWorking },
+                { ParameterType.ReplaceMeterRegister, APP_FIELD.ReplaceMeterRegister },
                 { ParameterType.DaysOfRead,           APP_FIELD.NumOfDays       },
                 { ParameterType.RDDPosition,          APP_FIELD.RDDPosition     },
                 { ParameterType.RDDFirmwareVersion,   APP_FIELD.RDDFirmware     },
@@ -529,6 +555,34 @@ namespace MTUComm
                             msgDescription = String.Format ( MSG_ELONLY, "12" );
                         break;
                         #endregion
+                        #region Old Meter Working [ Only Writing ]
+                        case APP_FIELD.OldMeterWorking:
+                        case APP_FIELD.OldMeterWorking_2:
+                        // Param totally useless in this action type
+                        if ( isNotWrite ||
+                             ! global.MeterWorkRecording )
+                            continue;
+                        
+                        // Allowed values: Yes, No, Broken
+                        if ( fail = ! ( Enum.TryParse<OldMeterWorking> (
+                                            valueStr.ToUpper (), out var cmd_omw ) ) )
+                            msgDescription = MSG_OMW;
+                        break;
+                        #endregion
+                        #region Replace Meter|Register [ Only Writing ]
+                        case APP_FIELD.ReplaceMeterRegister:
+                        case APP_FIELD.ReplaceMeterRegister_2:
+                        // Param totally useless in this action type
+                        if ( isNotWrite ||
+                             ! global.RegisterRecording )
+                            continue;
+
+                        // Allowed values: Meter, Register, Both
+                        if ( fail = ! ( Enum.TryParse<MeterRegisterRecording> (
+                                            valueStr.ToUpper (), out var cmd_mrr ) ) )
+                            msgDescription = MSG_MRR;
+                        break;
+                        #endregion
                         #region Meter Type [ Only Writing ]
                         case APP_FIELD.Meter:
                         case APP_FIELD.Meter_2:
@@ -605,6 +659,23 @@ namespace MTUComm
                             msgDescription = MSG_NUMBER;
                         break;
                         #endregion
+                        #region Two-Way [ Only Writing ]
+                        case APP_FIELD.TwoWay:
+                        // Param totally useless in this action type
+                        // Do not use
+                        if ( isNotWrite ||
+                             global.TimeToSync &&
+                             mtu.TimeToSync    &&
+                             mtu.FastMessageConfig )
+                            continue;
+                        
+                        // In STAR Programmer this value is used as boolean ( true=Fast, false=Slow )
+                        if ( fail = ! bool.TryParse ( valueStr, out bool result ) )
+                            msgDescription = MSG_TWO;
+                        else
+                            valueStr = ( ( result ) ? ScriptAux.TwoWay.FAST : ScriptAux.TwoWay.SLOW ).ToString ();
+                        break;
+                        #endregion
                         #region Auto-detect Meter [ Only Writing ]
                         case APP_FIELD.NumberOfDials:
                         case APP_FIELD.NumberOfDials_2:
@@ -665,12 +736,11 @@ namespace MTUComm
                             continue;
 
                         // Allowed values: CLOSE, OPEN, PARTIAL_OPEN
-                        RDDCmd cmd;
                         if ( fail = ! ( Enum.TryParse<RDDCmd> (
-                                            valueStr.ToUpper ().Replace ( " ", "_" ), out cmd ) &&
-                                        cmd != RDDCmd.SEDIMENT_TURN &&
-                                        cmd != RDDCmd.UNKNOWN ) )
-                            msgDescription = String.Format ( MSG_RDD );
+                                            valueStr.ToUpper ().Replace ( " ", "_" ), out var cmd_rdd ) &&
+                                        cmd_rdd != RDDCmd.SEDIMENT_TURN &&
+                                        cmd_rdd != RDDCmd.UNKNOWN ) )
+                            msgDescription = MSG_RDD;
                         break;
                         #endregion
                         #region RDD Firmware [ Only RemoteDisconnect ]

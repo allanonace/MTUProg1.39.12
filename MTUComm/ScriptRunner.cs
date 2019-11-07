@@ -177,8 +177,10 @@ namespace MTUComm
                     Parameter.ParameterType paramTypeToAdd;
                     foreach ( PropertyInfo propertyInfo in scriptAction.GetType().GetProperties () )
                     {
-                        var property   = actionType.GetProperty ( propertyInfo.Name );
-                        var paramValue = property.GetValue ( scriptAction, null );
+                        string       propertyName = propertyInfo.Name;
+                        PropertyInfo property     = actionType.GetProperty ( propertyName );
+                        object       paramValue   = property.GetValue ( scriptAction, null );
+
                         if ( paramValue is null )
                             continue;
                         
@@ -187,7 +189,7 @@ namespace MTUComm
                         if ( valueType.Name.ToLower ().Contains ( "actionparameter" ) )
                         {
                             // The parameter name is not listed in the ParameterType enumeration
-                            if ( ! Enum.TryParse<Parameter.ParameterType> ( propertyInfo.Name, out paramTypeToAdd ) )
+                            if ( ! Enum.TryParse<Parameter.ParameterType> ( propertyName, out paramTypeToAdd ) )
                                 continue;
                         
                             List<ActionParameter> list = new List<ActionParameter> ();

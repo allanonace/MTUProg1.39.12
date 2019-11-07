@@ -99,6 +99,7 @@ namespace MTUComm
             UnitOfMeasure,
             AccountNumber,
             ReadInterval,
+            Fast2Way, // Fast-2-Way
             ForceTimeSync,
             WorkOrder,
             Alarm,
@@ -112,6 +113,8 @@ namespace MTUComm
             NewMeterSerialNumber,
             OldMeterReading,
             NewMeterReading,
+            OldMeterWorking,
+            ReplaceMeterRegister,
             DaysOfRead,
             RDDPosition,
             RDDFirmwareVersion,

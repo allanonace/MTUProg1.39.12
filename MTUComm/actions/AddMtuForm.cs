@@ -78,6 +78,7 @@ namespace MTUComm.actions
                 { ParameterType.DriveDialSize,        FIELD.DRIVE_DIAL_SIZE   },
                 { ParameterType.UnitOfMeasure,        FIELD.UNIT_MEASURE      },
                 { ParameterType.SnapRead,             FIELD.SNAP_READS        },
+                { ParameterType.Fast2Way,             FIELD.TWO_WAY           },
                 { ParameterType.Custom,               FIELD.OPTIONAL_PARAMS   },
                 { ParameterType.ReadInterval,         FIELD.READ_INTERVAL     },
                 { ParameterType.Alarm,                FIELD.ALARM             },
@@ -89,7 +90,10 @@ namespace MTUComm.actions
                 
                 { ParameterType.MeterReading,         FIELD.METER_READING     },
                 { ParameterType.NewMeterReading,      FIELD.METER_READING     },
-                { ParameterType.OldMeterReading,      FIELD.METER_READING_OLD }
+                { ParameterType.OldMeterReading,      FIELD.METER_READING_OLD },
+
+                { ParameterType.OldMeterWorking,      FIELD.METER_WORKING_OLD },
+                { ParameterType.ReplaceMeterRegister, FIELD.REPLACE_METER_REG }
             };
 
         // Elements array
@@ -551,7 +555,7 @@ namespace MTUComm.actions
             this.dictionary.Remove ( fieldType );
         }
         
-        public void RemoveParameters ()
+        new public void RemoveParameters ()
         {
             base.RemoveParameters ();
             this.dictionary.Clear ();

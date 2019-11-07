@@ -3975,9 +3975,6 @@ namespace aclara_meters.view
             string value_lon;              // Longitude
             string value_alt;              // Altitude
 
-
-            // Real values
-
             // Port 1
             if ( ! mtu.Port1.IsSetFlow )
             {
@@ -4010,21 +4007,21 @@ namespace aclara_meters.view
                 value_msn_2 = this.tbx_MeterSerialNumber_2       .Text;
                 value_mre_2 = this.tbx_MeterReading_2            .Text;
                 value_mty_2 = ( Meter )this.pck_MeterType_Names_2.SelectedItem;
-                    
+                
                 if ( isReplaceMeter )
                 {
                     if ( global.MeterWorkRecording )
-                        value_omw = this.pck_OldMeterWorking_2.SelectedItem.ToString ();
+                        value_omw_2 = this.pck_OldMeterWorking_2.SelectedItem.ToString ();
                         
                     if ( global.RegisterRecording )
-                        value_rpl = this.pck_ReplaceMeterRegister_2.SelectedItem.ToString ();
+                        value_rpl_2 = this.pck_ReplaceMeterRegister_2.SelectedItem.ToString ();
                 }
             }
                 
             // General fields, for the MTU itself
             // No RDD or RDD in port two
             if ( ! hasRDD ||
-                    ! rddIn1 )
+                 ! rddIn1 )
             {
                 value_omt = this.tbx_OldMtuId.Text;
                 value_rin = this.pck_ReadInterval.SelectedItem.ToString ();
