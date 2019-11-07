@@ -89,6 +89,8 @@ namespace Xml
 
         //[XmlElement("ProvidingHandFactor")]
         //public ActionParameter ProvidingHandFactor { get; set; }
+        [XmlElement("TwoWay")]
+        public ActionParameter TwoWay { get; set; }
 
         [XmlElement("DaysOfRead")]
         public ActionParameter DaysOfRead { get; set; }

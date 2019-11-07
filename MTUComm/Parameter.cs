@@ -115,7 +115,8 @@ namespace MTUComm
             DaysOfRead,
             RDDPosition,
             RDDFirmwareVersion,
-            Custom
+            Custom,
+            TwoWay
             //Port2Disabled
             //ProvidingHandFactor
             //LiveDigits
@@ -165,7 +166,8 @@ namespace MTUComm
             {ParameterType.OldMeterReading, new ParameterDefine(true, true, "Port{0}OldMeterReading", "Old Meter Reading")},
             {ParameterType.NewMeterReading, new ParameterDefine(true, true, "Port{0}NewMeterReading", "")},
             //{ParameterType.DaysOfRead, new ParameterDefine(true, true, "DaysOfRead", "DaysOfRead")},
-            {ParameterType.Custom, new ParameterDefine(true, true, "{1}", "{1}")}
+            {ParameterType.Custom, new ParameterDefine(true, true, "{1}", "{1}")},
+            {ParameterType.TwoWay, new ParameterDefine(true, true, "TwoWay", "Two Way")}
         };
 
         private Boolean has_port = false;

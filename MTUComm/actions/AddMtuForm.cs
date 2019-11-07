@@ -89,6 +89,7 @@ namespace MTUComm.actions
                 
                 { ParameterType.MeterReading,         FIELD.METER_READING     },
                 { ParameterType.NewMeterReading,      FIELD.METER_READING     },
+                { ParameterType.TwoWay,               FIELD.TWO_WAY           },
                 { ParameterType.OldMeterReading,      FIELD.METER_READING_OLD }
             };
 

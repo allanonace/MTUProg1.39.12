@@ -45,6 +45,7 @@
     <Error id="307" message="The script file does not contain the ( Old|New ) Meter serial number parameter that is mandatory in writing actions" footer="Missing Meter serial number" />
     <Error id="308" message="The script file contains the same parameter more than once" footer="Repeated params" />
     <Error id="309" message="The script file does not contain userName parameter or it has some invalid character" footer="Missing username" />
+    <Error id="310" message="The script file does not contain the _var_ parameter" footer="Missing tag" />
     
     <!-- Alarm -->
     <Error id="400" message="The alarm profile Scripting for current MTU is not defined in the Alarm.xml file" /> <!-- footer not necessary -->

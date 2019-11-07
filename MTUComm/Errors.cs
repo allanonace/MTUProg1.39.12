@@ -90,7 +90,7 @@ namespace MTUComm
             { new RDDStatusIsUnknownAfterMaxTime (),            219 },
             // The status of the RDD device is different than expected after ... seconds
             { new RDDStatusIsDifferentThanExpected (),          220 },
-            
+                       
             // Scripting Parameters [ 3xx ]
             //---------------------
             // Error translating or validating parameters from script/trigger file
@@ -113,6 +113,8 @@ namespace MTUComm
             { new SameParameterRepeatScriptException (),        308 },
             // User name missing in the script file
             { new ScriptUserNameMissingException (),            309 },
+            // The TwoWay parameter is missing 
+            { new ScriptingTagMissing (),                       310 },
             
             // Alarm [ 4xx ]
             //------

@@ -342,11 +342,11 @@
     {
         public RDDStatusIsDifferentThanExpected ( string message = "", int port = 1, string messagePopup = "" ) : base ( message, port, messagePopup ) { }
     }
-
+  
     #endregion
 
     #region Scripting Parameters [ 3xx ]
-    
+
     /// <summary>
     /// Exception thrown when some of the tags included in the
     /// script file has not passed the validation process.
@@ -425,6 +425,11 @@
     public class ScriptUserNameMissingException : OwnExceptionsBase
     {
         public ScriptUserNameMissingException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+    }
+
+    public class ScriptingTagMissing : OwnExceptionsBase
+    {
+        public ScriptingTagMissing(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
 
     #endregion
