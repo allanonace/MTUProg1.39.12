@@ -562,6 +562,10 @@ namespace MTUComm
                 Dictionary<APP_FIELD,string> psSelected = ScriptAux.ValidateParams (
                     this.mtu, action, translatedParams, port2enabled );
 
+                // Check if some required parameter is not present
+                if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
+                    throw new ScriptingTagMissingException ( errorRequired );
+
                 // Add parameters to Library.Data
                 foreach ( var entry in psSelected )
                     Data.SetTemp ( entry.Key.ToString (), entry.Value );
@@ -804,7 +808,7 @@ namespace MTUComm
                     break;
             }
 
-            paramsFail = strb.ToString ();
+            paramsFail = strb.ToString ().Substring ( 2 ); // Remove first ", "
 
             strb.Clear ();
             strb = null;
@@ -2431,7 +2435,7 @@ namespace MTUComm
                 //! this.mtu.IsFamily33xx )
                 {
                     if (!form.ContainsParameter(FIELD.TWO_WAY))
-                        throw new ScriptingTagMissing("TwoWay");  
+                        throw new ScriptingTagMissingException("TwoWay");  
                 }
 
                     // Port 1
@@ -2969,6 +2973,10 @@ namespace MTUComm
                     throw new ProcessingParamsScriptException ( msgErrorStr, 1, msgErrorPopupStr );
                 }
     
+                // Check if some required parameter is not present
+                if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
+                    throw new ScriptingTagMissingException ( errorRequired );
+
                 #endregion
     
                 #region Auto-detect Alarm

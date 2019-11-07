@@ -427,9 +427,9 @@
         public ScriptUserNameMissingException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
 
-    public class ScriptingTagMissing : OwnExceptionsBase
+    public class ScriptingTagMissingException : OwnExceptionsBase
     {
-        public ScriptingTagMissing(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
+        public ScriptingTagMissingException(string message = "", int port = 1, string messagePopup = "") : base(message, port, messagePopup) { }
     }
 
     #endregion

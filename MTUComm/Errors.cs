@@ -113,8 +113,8 @@ namespace MTUComm
             { new SameParameterRepeatScriptException (),        308 },
             // User name missing in the script file
             { new ScriptUserNameMissingException (),            309 },
-            // The TwoWay parameter is missing 
-            { new ScriptingTagMissing (),                       310 },
+            // The script does not contain the required parameters 
+            { new ScriptingTagMissingException (),              310 },
             
             // Alarm [ 4xx ]
             //------
