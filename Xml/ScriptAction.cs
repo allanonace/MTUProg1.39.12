@@ -110,6 +110,12 @@ namespace Xml
         [XmlElement("ForceTimeSync")]
         public ActionParameter ForceTimeSync { get; set; }
 
+        [XmlElement("ReplaceMeterRegister")]
+        public ActionParameter ReplaceMeterRegister { get; set; }
+
+        [XmlElement("OldMeterWorking")]
+        public ActionParameter OldMeterWorking { get; set; }
+
         //[XmlElement("LiveDigits")]
         //public ActionParameter LiveDigits { get; set; }
 

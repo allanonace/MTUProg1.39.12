@@ -436,7 +436,18 @@ namespace MTUComm
             }
         }
 
-	public ActionResult[] LastResults
+        public bool HasParametersForPort2
+        {
+            get
+            {
+                foreach ( Parameter parameter in this.scriptParameters )
+                    if ( parameter.Port == 1 ) // For second port
+                        return true;
+                return false;
+            }
+        }
+
+	    public ActionResult[] LastResults
         {
             get { return this.lastResults.ToArray (); }
         }

@@ -562,7 +562,8 @@ namespace MTUComm
                 Dictionary<APP_FIELD,string> psSelected = ScriptAux.ValidateParams (
                     this.mtu, action, translatedParams, port2enabled );
 
-                // Check if some required parameter is not present
+                // Check if some required parameter is not present, after having eliminate the
+                // unnecessary parameters to avoid false positives about using the second port
                 if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
                     throw new ScriptingTagMissingException ( errorRequired );
 
@@ -595,37 +596,35 @@ namespace MTUComm
             bool isReplaceMeter = ( actionType == ActionType.ReplaceMeter           ||
                                     actionType == ActionType.ReplaceMtuReplaceMeter ||
                                     actionType == ActionType.AddMtuReplaceMeter );
+            bool paramsForPort2 = action.HasParametersForPort2;
 
             #region Methods
 
-            dynamic LogParamNotPresent = new Action<ParameterType> (
-                ( name ) => strb.Append ( ", " + name.ToString () ) );
+            dynamic LogParamNotPresent = new Action<ParameterType,int> (
+                ( name, portIndex ) => strb.Append ( ", " +
+                    ( ( portIndex <= 0 ) ? string.Empty : ( ( portIndex == 0 ) ? "P1." : "P2." ) ) +
+                    name.ToString () ) );
 
             dynamic CheckIfParamIsPresent = new Func<ParameterType,int,bool,bool> (
                 ( paramType, portIndex, modifyResult ) => {
-                    try
-                    {
-                        bool contains = true;
-                        contains = action.ContainsParameter(paramType, portIndex);
+                    bool contains = true;
 
-                        if (modifyResult)
-                        {
-                            ok &= contains;
+                    // PortIndex -1 is used to know when a parameter is general, not for a port
+                    contains = action.ContainsParameter ( paramType, ( portIndex < 0 ) ? 0 : portIndex );
 
-                            if (!contains)
-                                LogParamNotPresent(paramType);
-                        }
-                        return contains;
-                    }
-                    catch(Exception e)
+                    if ( modifyResult )
                     {
-                        return false;
+                        ok &= contains;
+
+                        if ( ! contains )
+                            LogParamNotPresent ( paramType, portIndex );
                     }
+                    return contains;
                 });
 
             dynamic CheckIfNotPresent = new Func<ParameterType,bool> (
                 ( paramType ) =>
-                    CheckIfParamIsPresent ( paramType, 0, true ) );
+                    CheckIfParamIsPresent ( paramType, -1, true ) );
 
             dynamic CheckIfNotPresentInPort = new Func<ParameterType,int,bool> (
                 ( paramType, portIndex ) =>
@@ -642,15 +641,32 @@ namespace MTUComm
                     {
                         ok &= contains;
 
-                        LogParamNotPresent ( paramTypes[ 0 ] );
+                        LogParamNotPresent ( paramTypes[ 0 ], portIndex );
                     }
 
                     return contains;
                 });
+
+            dynamic CheckIfNotPresentWithDef = new Func<ParameterType,string,bool> (
+                ( paramType, defValue ) =>
+                {
+                    if ( ! CheckIfParamIsPresent ( paramType, -1, false ) )
+                        action.AddParameter ( new Parameter ( paramType, defValue ) );
+
+                    return true;
+                });
+
+            dynamic CheckIfNotPresentInPortWithDef = new Func<ParameterType,int,string,bool> (
+                ( paramType, portIndex, defValue ) =>
+                {
+                    if ( ! CheckIfParamIsPresent ( paramType, portIndex, false ) )
+                        action.AddParameter ( new Parameter ( paramType, defValue ) );
+                    
+                    return true;
+                });
             
             #endregion
 
-            // this.IndividualDailyReads
             // this.IndividualReadInterval
 
             switch ( actionType )
@@ -697,11 +713,13 @@ namespace MTUComm
                     // would be checked during the Meter auto-detection process
 
                     // Account Number / Service Port ID
-                    CheckIfNotPresentInPort ( ParameterType.AccountNumber, 0 );
+                    CheckIfNotPresentInPort (
+                        ParameterType.AccountNumber, 0 );
 
                     // Work Order / Field Order
                     if ( this.global.WorkOrderRecording )
-                        CheckIfNotPresentInPort ( ParameterType.WorkOrder, 0 );
+                        CheckIfNotPresentInPort (
+                            ParameterType.WorkOrder, 0 );
 
                     // No RDD in Port 1
                     if ( ! rddIn1 )
@@ -714,60 +732,78 @@ namespace MTUComm
                         // ( New ) Meter Serial Number
                         if ( this.global.UseMeterSerialNumber )
                             CheckIfAnyPresentInPort (
-                              new ParameterType[] { ParameterType.MeterSerialNumber,
-                                    ParameterType.NewMeterSerialNumber }, 0 );
+                              new ParameterType[] {
+                                ParameterType.MeterSerialNumber,
+                                ParameterType.NewMeterSerialNumber }, 0 );
 
                         // ( New ) Meter Reading / Initial Reading
                         CheckIfAnyPresentInPort (
-                            new ParameterType[] { ParameterType.MeterReading,
-                                  ParameterType.NewMeterReading }, 0 );
+                            new ParameterType[] {
+                                ParameterType.MeterReading,
+                                ParameterType.NewMeterReading }, 0 );
 
                         // Read Interval
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
-                        CheckIfNotPresent ( ParameterType.ReadInterval );
+                        // Calculates the default value to use in case the parameter is not present in the script
+                        string valueReadInterval = string.Empty;
+                        ScriptAux.PrepareReadIntervalList ( mtu, ref valueReadInterval );
+                        CheckIfNotPresentWithDef (
+                            ParameterType.ReadInterval,
+                            valueReadInterval );
 
                         // Span Reads / Daily Reads
                         // NOTE: Is general data/not for the first port, but not present if the RDD is on port 1
                         if ( this.global.AllowDailyReads &&
                              this.mtu.DailyReads &&
                              ! this.mtu.IsFamily33xx )
-                            CheckIfNotPresent ( ParameterType.SnapRead );
+                            CheckIfNotPresentWithDef (
+                                ParameterType.SnapRead,
+                                global.DailyReadsDefault.ToString () );
 
                         // Action is about Replace Meter
                         if ( isReplaceMeter )
                         {
                             // Old Meter Serial Number
                             if ( this.global.UseMeterSerialNumber )
-                                CheckIfNotPresentInPort ( ParameterType.OldMeterSerialNumber, 0 );
+                                CheckIfNotPresentInPort (
+                                    ParameterType.OldMeterSerialNumber, 0 );
 
                             // Old Meter Working
                             if ( this.global.MeterWorkRecording )
-                                CheckIfNotPresentInPort ( ParameterType.OldMeterWorking, 0 );
+                                CheckIfNotPresentInPortWithDef (
+                                    ParameterType.OldMeterWorking, 0,
+                                    ScriptAux.OldMeterWorking.YES.ToString () );
 
                             // Old Meter Reading / Initial Reading
                             if ( this.global.OldReadingRecording )
-                                CheckIfNotPresentInPort ( ParameterType.OldMeterReading, 0 );
+                                CheckIfNotPresentInPort (
+                                    ParameterType.OldMeterReading, 0 );
 
                             // Replace Meter|Register
                             if ( this.global.RegisterRecording )
-                                CheckIfNotPresentInPort ( ParameterType.ReplaceMeterRegister, 0 );
+                                CheckIfNotPresentInPortWithDef (
+                                    ParameterType.ReplaceMeterRegister, 0,
+                                    global.RegisterRecordingDefault );
                         }
                     }
 
                     #endregion
                     #region Port 2
 
-                    if ( this.mtu.TwoPorts )
+                    if ( this.mtu.TwoPorts &&
+                         paramsForPort2 )
                     {
                         // The Meter Type or NumberOfDials, UnitOfMeasure and DriveDialSize
                         // would be checked during the Meter auto-detection process
 
                         // Account Number / Service Port ID
-                        CheckIfNotPresentInPort ( ParameterType.AccountNumber, 1 );
+                        CheckIfNotPresentInPort (
+                            ParameterType.AccountNumber, 1 );
 
                         // Work Order / Field Order
                         if ( this.global.WorkOrderRecording )
-                            CheckIfNotPresentInPort ( ParameterType.WorkOrder, 1 );
+                            CheckIfNotPresentInPort (
+                                ParameterType.WorkOrder, 1 );
 
                         // No RDD in Port 1
                         if ( ! rddIn1 )
@@ -775,12 +811,14 @@ namespace MTUComm
                             // ( New ) Meter Serial Number
                             if ( this.global.UseMeterSerialNumber )
                                 CheckIfAnyPresentInPort (
-                                    new ParameterType[] { ParameterType.MeterSerialNumber,
+                                    new ParameterType[] {
+                                        ParameterType.MeterSerialNumber,
                                         ParameterType.NewMeterSerialNumber }, 1 );
 
                             // ( New ) Meter Reading / Initial Reading
                             CheckIfAnyPresentInPort (
-                                new ParameterType[] { ParameterType.MeterReading,
+                                new ParameterType[] {
+                                    ParameterType.MeterReading,
                                     ParameterType.NewMeterReading }, 1 );
 
                             // Action is about Replace Meter
@@ -788,19 +826,25 @@ namespace MTUComm
                             {
                                 // Old Meter Serial Number
                                 if ( this.global.UseMeterSerialNumber )
-                                    CheckIfNotPresentInPort ( ParameterType.OldMeterSerialNumber, 1 );
+                                    CheckIfNotPresentInPort (
+                                        ParameterType.OldMeterSerialNumber, 1 );
 
                                 // Old Meter Working
                                 if ( this.global.MeterWorkRecording )
-                                    CheckIfNotPresentInPort ( ParameterType.OldMeterWorking, 1 );
+                                    CheckIfNotPresentInPortWithDef (
+                                        ParameterType.OldMeterWorking, 1,
+                                        ScriptAux.OldMeterWorking.YES.ToString () );
 
                                 // Old Meter Reading / Initial Reading
                                 if ( this.global.OldReadingRecording )
-                                    CheckIfNotPresentInPort ( ParameterType.OldMeterReading, 1 );
+                                    CheckIfNotPresentInPort (
+                                        ParameterType.OldMeterReading, 1 );
 
                                 // Replace Meter|Register
                                 if ( this.global.RegisterRecording )
-                                    CheckIfNotPresentInPort ( ParameterType.ReplaceMeterRegister, 1 );
+                                    CheckIfNotPresentInPortWithDef (
+                                        ParameterType.ReplaceMeterRegister, 1,
+                                        global.RegisterRecordingDefault );
                             }
                         }
                     }
@@ -860,8 +904,8 @@ namespace MTUComm
             bool isPort1 = ( portIndex == 1 );
 
             // Check if the port is enabled
-            if (!await map[$"P{portIndex}StatusFlag"].GetValue())
-                return false;
+            //if (!await map[$"P{portIndex}StatusFlag"].GetValue())
+            //    return false;
 
             try
             {
@@ -2821,56 +2865,7 @@ namespace MTUComm
                             #endregion
                             #region Read Interval
                             case FIELD.READ_INTERVAL:
-                            // Do not use
-                            if ( ! global.IndividualReadInterval )
-                            {
-                                form.RemoveParameter ( FIELD.WORK_ORDER );
-
-                                continue;
-                            }
-
-                            List<string> readIntervalList;
-                            if ( Data.Get.MtuBasicInfo.version >= global.LatestVersion )
-                            {
-                                readIntervalList = new List<string>()
-                                {
-                                    "24 Hours",
-                                    "12 Hours",
-                                    "8 Hours",
-                                    "6 Hours",
-                                    "4 Hours",
-                                    "3 Hours",
-                                    "2 Hours",
-                                    "1 Hour",
-                                    "30 Min",
-                                    "20 Min",
-                                    "15 Min"
-                                };
-                            }
-                            else
-                            {
-                                readIntervalList = new List<string>()
-                                {
-                                    "1 Hour",
-                                    "30 Min",
-                                    "20 Min",
-                                    "15 Min"
-                                };
-                            }
-                            
-                            // TwoWay MTU reading interval cannot be less than 15 minutes
-                            if ( ! this.mtu.TimeToSync )
-                                readIntervalList.AddRange ( new string[]{
-                                    "10 Min",
-                                    "5 Min"
-                                });
-                            
-                            value = value.ToLower ()
-                                         .Replace ( "hr", "hour" )
-                                         .Replace ( "h", "H" )
-                                         .Replace ( "m", "M" );
-                            if ( fail = Empty ( value ) ||
-                                 ! readIntervalList.Contains ( value ) )
+                            if ( fail = ! ScriptAux.PrepareReadIntervalList ( mtu, ref value ) )
                                 msgDescription = "should be one of the possible values and using Hr/s or Min";
                             break;
                             #endregion
@@ -2886,8 +2881,26 @@ namespace MTUComm
                                 continue;
                             }
 
-                            else if ( fail = EmptyNum ( value ) )
-                                msgDescription = "should be a valid numeric value";
+                            // Use default value
+                            if ( ! global.IndividualDailyReads )
+                            {
+                                int defDailyReads = global.DailyReadsDefault;
+                                value = ( ( defDailyReads >= 0 &&
+                                            defDailyReads <= 23 ) ?
+                                    defDailyReads : 13 ).ToString ();
+                            }
+                            else
+                            {
+                                if ( ! ( fail = EmptyNum ( value ) ) )
+                                {
+                                    if ( int.TryParse ( value, out int dailyReads ) )
+                                         fail &= dailyReads < 0 || dailyReads > 23;
+                                    else fail = true;
+                                }
+
+                                if ( fail )
+                                    msgDescription = "should be a valid numeric value";
+                            }
                             break;
                             #endregion
                             #region Two-Way
@@ -2975,7 +2988,8 @@ namespace MTUComm
                     throw new ProcessingParamsScriptException ( msgErrorStr, 1, msgErrorPopupStr );
                 }
     
-                // Check if some required parameter is not present
+                // Check if some required parameter is not present, after having eliminate the
+                // unnecessary parameters to avoid false positives about using the second port
                 if ( ! this.ValidateRequiredParams ( action, out string errorRequired ) )
                     throw new ScriptingTagMissingException ( errorRequired );
 

@@ -594,54 +594,10 @@ namespace MTUComm
                         #region Read Interval [ Only Writing ]
                         case APP_FIELD.ReadInterval:
                         // Param totally useless in this action type
-                        // Do not use
-                        if ( isNotWrite ||
-                             ! global.IndividualReadInterval )
+                        if ( isNotWrite )
                             continue;
 
-                        List<string> readIntervalList;
-                        if ( Data.Get.MtuBasicInfo.version >= global.LatestVersion )
-                        {
-                            readIntervalList = new List<string>()
-                            {
-                                "24" + HOURS,
-                                "12" + HOURS,
-                                 "8" + HOURS,
-                                 "6" + HOURS,
-                                 "4" + HOURS,
-                                 "3" + HOURS,
-                                 "2" + HOURS,
-                                 "1" + HOURS,
-                                "30" + MIN,
-                                "20" + MIN,
-                                "15" + MIN
-                            };
-                        }
-                        else
-                        {
-                            readIntervalList = new List<string>()
-                            {
-                                 "1" + HOUR,
-                                "30" + MIN,
-                                "20" + MIN,
-                                "15" + MIN
-                            };
-                        }
-                        
-                        // TwoWay MTU reading interval cannot be less than 15 minutes
-                        if ( ! mtu.TimeToSync )
-                            readIntervalList.AddRange ( new string[]{
-                                "10" + MIN,
-                                 "5" + MIN
-                            });
-                        
-                        valueStr = valueStr.ToLower ()
-                                        .Replace ( "hr", "hour" )
-                                        .Replace ( "h", "H" )
-                                        .Replace ( "m", "M" );
-                        
-                        if ( fail = Empty ( valueStr ) ||
-                             ! readIntervalList.Contains ( valueStr ) )
+                        if ( fail = ! PrepareReadIntervalList ( mtu, ref valueStr ) )
                             msgDescription = MSG_HSMINS;
                         break;
                         #endregion
@@ -655,8 +611,26 @@ namespace MTUComm
                              mtu.IsFamily33xx )
                             continue;
 
-                        if ( fail = EmptyNum ( valueStr ) )
-                            msgDescription = MSG_NUMBER;
+                        // Use default value
+                        if ( ! global.IndividualDailyReads )
+                        {
+                            int defDailyReads = global.DailyReadsDefault;
+                            valueStr = ( ( defDailyReads >= 0 &&
+                                           defDailyReads <= 23 ) ?
+                                defDailyReads : 13 ).ToString ();
+                        }
+                        else
+                        {
+                            if ( ! ( fail = EmptyNum ( valueStr ) ) )
+                            {
+                                if ( int.TryParse ( valueStr, out int dailyReads ) )
+                                     fail &= dailyReads < 0 || dailyReads > 23;
+                                else fail = true;
+                            }
+
+                            if ( fail )
+                                msgDescription = MSG_NUMBER;
+                        }
                         break;
                         #endregion
                         #region Two-Way [ Only Writing ]
@@ -800,6 +774,82 @@ namespace MTUComm
             #endregion
 
             return entriesSelected;
+        }
+
+        public static bool PrepareReadIntervalList (
+            Mtu mtu,
+            ref string value )
+        {
+            Global global = Singleton.Get.Configuration.Global;
+
+            List<string> list;
+            if ( Data.Get.MtuBasicInfo.version >= global.LatestVersion )
+            {
+                list = new List<string>()
+                {
+                    "24" + HOURS,
+                    "12" + HOURS,
+                    "8"  + HOURS,
+                    "6"  + HOURS,
+                    "4"  + HOURS,
+                    "3"  + HOURS,
+                    "2"  + HOURS,
+                    "1"  + HOURS,
+                    "30" + MIN,
+                    "20" + MIN,
+                    "15" + MIN
+                };
+            }
+            else
+            {
+                list = new List<string>()
+                {
+                    "1"  + HOUR,
+                    "30" + MIN,
+                    "20" + MIN,
+                    "15" + MIN
+                };
+            }
+            
+            // TwoWay MTU reading interval cannot be less than 15 minutes
+            if ( ! mtu.TimeToSync )
+                list.AddRange ( new string[]{
+                    "10" + MIN,
+                    "5"  + MIN
+                });
+            
+            // Use ( calculated ) default value
+            if ( ! global.IndividualReadInterval )
+            {
+                // If tag NormXmitInterval is present inside Global,
+                // its value is used as default selection
+                string normXmitInterval = global.NormXmitInterval;
+                if ( ! string.IsNullOrEmpty ( normXmitInterval ) )
+                {
+                    // Convert "Hr/s" to "Hour/s"
+                    normXmitInterval = normXmitInterval.ToLower ()
+                        .Replace ( "hr", "hour")
+                        .Replace ( "h" , "H"   );
+
+                    int index = list.IndexOf ( normXmitInterval );
+                    value     = ( index > -1 ) ? normXmitInterval : "1 Hour";
+                }
+                // If tag NormXmitInterval is NOT present, use "1 Hour" as default value
+                else value = "1 Hour";
+            }
+            else
+            {
+                value = value.ToLower ()
+                    .Replace ( "hr", "hour" )
+                    .Replace ( "h" , "H" )
+                    .Replace ( "m" , "M" );
+                
+                if ( string.IsNullOrEmpty ( value ) ||
+                     ! list.Contains ( value ) )
+                    return false;
+            }
+
+            return true;
         }
     
         #endregion

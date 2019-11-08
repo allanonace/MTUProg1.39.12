@@ -92,12 +92,12 @@ namespace MTUComm.actions
                 
                 { ParameterType.MeterReading,         FIELD.METER_READING     },
                 { ParameterType.NewMeterReading,      FIELD.METER_READING     },
-		{ ParameterType.OldMeterReading,      FIELD.METER_READING_OLD },
+		        { ParameterType.OldMeterReading,      FIELD.METER_READING_OLD },
 
                 { ParameterType.OldMeterWorking,      FIELD.METER_WORKING_OLD },
                 { ParameterType.ReplaceMeterRegister, FIELD.REPLACE_METER_REG },
 
-		{ ParameterType.RDDFirmwareVersion,   FIELD.RDD_FIRMWARE      },
+		        { ParameterType.RDDFirmwareVersion,   FIELD.RDD_FIRMWARE      },
                 { ParameterType.RDDPosition,          FIELD.RDD_POSITION      }
             };
 
