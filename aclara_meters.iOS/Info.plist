@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>Aclara MTU Programmer</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.39.02</string>
+	<string>1.39.03</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
