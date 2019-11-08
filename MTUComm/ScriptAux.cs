@@ -559,7 +559,7 @@ namespace MTUComm
                         case APP_FIELD.OldMeterWorking:
                         case APP_FIELD.OldMeterWorking_2:
                         // Param totally useless in this action type
-                        if ( isNotWrite ||
+                        if ( ! isReplaceMeter ||
                              ! global.MeterWorkRecording )
                             continue;
                         
@@ -573,7 +573,7 @@ namespace MTUComm
                         case APP_FIELD.ReplaceMeterRegister:
                         case APP_FIELD.ReplaceMeterRegister_2:
                         // Param totally useless in this action type
-                        if ( isNotWrite ||
+                        if ( ! isReplaceMeter ||
                              ! global.RegisterRecording )
                             continue;
 

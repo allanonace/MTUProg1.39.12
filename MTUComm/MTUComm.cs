@@ -362,7 +362,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Launch Validations and Actions
+        #region Launch Actions
 
         public async Task<ValidationResult> LaunchValidationThread (
             ActionType type )
@@ -502,7 +502,7 @@ namespace MTUComm
 
         #endregion
 
-        #region Validations
+        #region Launch Validations
 
         private bool Validate_InstallConfirmation ()
         {
@@ -542,7 +542,7 @@ namespace MTUComm
 
         #region Actions
 
-        #region Scripting
+        #region Scripting Validations
 
         private async Task<dynamic> ValidateParams (
             Action action )
@@ -666,8 +666,6 @@ namespace MTUComm
                 });
             
             #endregion
-
-            // this.IndividualReadInterval
 
             switch ( actionType )
             {
@@ -2823,7 +2821,8 @@ namespace MTUComm
                             case FIELD.METER_WORKING_OLD:
                             case FIELD.METER_WORKING_OLD_2:
                             // Do not use
-                            if ( ! this.global.MeterWorkRecording )
+                            if ( ! isReplaceMeter ||
+                                 ! this.global.MeterWorkRecording )
                             {
                                 if ( parameter.Port == 0 )
                                      form.RemoveParameter ( FIELD.METER_WORKING_OLD   );
@@ -2842,7 +2841,8 @@ namespace MTUComm
                             case FIELD.REPLACE_METER_REG:
                             case FIELD.REPLACE_METER_REG_2:
                             // Do not use
-                            if ( ! this.global.RegisterRecording )
+                            if ( ! isReplaceMeter ||
+                                 ! this.global.RegisterRecording )
                             {
                                 if ( parameter.Port == 0 )
                                      form.RemoveParameter ( FIELD.REPLACE_METER_REG   );
