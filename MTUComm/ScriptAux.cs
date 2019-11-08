@@ -794,7 +794,7 @@ namespace MTUComm
                     "4"  + HOURS,
                     "3"  + HOURS,
                     "2"  + HOURS,
-                    "1"  + HOURS,
+                    "1"  + HOUR,
                     "30" + MIN,
                     "20" + MIN,
                     "15" + MIN

@@ -2384,6 +2384,11 @@ namespace MTUComm
         /// See <see cref="AddMtu(dynamic, string, Action)"/> for the writing logic.
         /// </para>
         /// </summary>
+        /// <remarks>
+        /// TODO: The parameters validation logic in this method is only used during
+        /// installations and should be replaced by the generic methods inside
+        /// <see cref="MTUComm.ScriptAux"/> class, using all actions the same unique validation logic.
+        /// </remarks>
         /// <param name="action">Current action type ( AddMtu, ReplaceMeter,.. )</param>
         /// <returns>Task object required to execute the method asynchronously and
         /// for a correct exceptions bubbling.</returns>
