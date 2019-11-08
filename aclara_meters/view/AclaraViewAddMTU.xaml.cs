@@ -465,10 +465,10 @@ namespace aclara_meters.view
                             this.list_MeterTypesForMtu_2 = this.config.MeterTypes.FindAllForEncodersAndEcoders();
                     }
                     // Pulse
-                    else this.list_MeterTypesForMtu_2 = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu, 2);
+                    else this.list_MeterTypesForMtu_2 = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu, 1);
                 }
                 // RDD
-                else this.list_MeterTypesForMtu_V = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu, 2);
+                else this.list_MeterTypesForMtu_V = this.config.MeterTypes.FindByPortTypeAndFlow(currentMtu, 1);
             }
 
             Device.BeginInvokeOnMainThread(() =>
