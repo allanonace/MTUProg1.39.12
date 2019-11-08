@@ -151,6 +151,10 @@ namespace aclara_meters.view
            
             //Now I am given ItemsSorce to the Pickers
             pck_DaysOfRead.ItemsSource   = list;
+            
+            int index = list.IndexOf ( global.NumOfDays.ToString () );
+            if ( index > -1 )
+                pck_DaysOfRead.SelectedIndex = index;
              
             #endregion
 

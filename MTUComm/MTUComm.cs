@@ -679,7 +679,9 @@ namespace MTUComm
                     break;
                 
                 case ActionType.DataRead:
-                    CheckIfNotPresent ( ParameterType.DaysOfRead );
+                    CheckIfNotPresentWithDef (
+                        ParameterType.DaysOfRead,
+                        global.NumOfDays );
                     break;
                 
                 case ActionType.ValveOperation:
