@@ -5,7 +5,7 @@
 	<key>CFBundleDisplayName</key>
 	<string>Aclara MTU Programmer (BIZ)</string>
 	<key>CFBundleName</key>
-	<string>Aclara MTU Programmer (BIZ)</string>
+	<string>Aclara MTU Programmer</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.aclara.mtu.programmer.AclaraMeterShareExtension</string>
 	<key>CFBundleDevelopmentRegion</key>
@@ -36,8 +36,8 @@
 		<string>com.apple.share-services</string>
 	</dict>
 	<key>CFBundleShortVersionString</key>
-	<string>1.39.01</string>
+	<string>1.39.02</string>
 	<key>CFBundleVersion</key>
-	<string>0.0.3</string>
+	<string>0.0.1</string>
 </dict>
 </plist>

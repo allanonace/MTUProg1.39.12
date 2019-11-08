@@ -116,6 +116,25 @@
     <MtouchDebug />
     <MtouchEnableSGenConc />
     <OnDemandResourcesInitialInstallTags />
+    <IpaPackageName></IpaPackageName>
+    <CrashReportingApiKey></CrashReportingApiKey>
+    <CrashReportingEnabled>false</CrashReportingEnabled>
+    <CodesignResourceRules></CodesignResourceRules>
+    <MtouchI18n></MtouchI18n>
+    <CrashReportingDelay>-1</CrashReportingDelay>
+    <OnDemandResourcesPrefetchOrder></OnDemandResourcesPrefetchOrder>
+    <AssemblyName></AssemblyName>
+    <SignAssembly>false</SignAssembly>
+    <DelaySign>false</DelaySign>
+    <PublicSign>false</PublicSign>
+    <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
+    <NoWarn></NoWarn>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <LangVersion>Default</LangVersion>
+    <PlatformTarget>anycpu</PlatformTarget>
+    <WarningsNotAsErrors></WarningsNotAsErrors>
+    <Nullable></Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Ad-Hoc|iPhone' ">
     <DebugType>none</DebugType>
@@ -149,8 +168,42 @@
     <CodesignKey>iPhone Distribution: Bizintek Innova S.L. (2GFJU3448Z)</CodesignKey>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <BuildIpa>true</BuildIpa>
-    <MtouchHttpClientHandler>NSUrlSessionHandler</MtouchHttpClientHandler>
+    <BuildIpa>true</BuildIpa>
     <MtouchFloat32>true</MtouchFloat32>
+    <MtouchNoSymbolStrip></MtouchNoSymbolStrip>
+    <MtouchFastDev></MtouchFastDev>
+    <MtouchProfiling></MtouchProfiling>
+    <MtouchSdkVersion></MtouchSdkVersion>
+    <MtouchExtraArgs></MtouchExtraArgs>
+    <MtouchVerbosity></MtouchVerbosity>
+    <MtouchUseLlvm></MtouchUseLlvm>
+    <MtouchUseThumb></MtouchUseThumb>
+    <MtouchEnableBitcode></MtouchEnableBitcode>
+    <IpaMetadata></IpaMetadata>
+    <IpaPackageName></IpaPackageName>
+    <CrashReportingApiKey></CrashReportingApiKey>
+    <CrashReportingEnabled>false</CrashReportingEnabled>
+    <CodesignResourceRules></CodesignResourceRules>
+    <IOSDebuggerPort></IOSDebuggerPort>
+    <MtouchLink></MtouchLink>
+    <MtouchI18n></MtouchI18n>
+    <CrashReportingDelay>-1</CrashReportingDelay>
+    <OptimizePNGs></OptimizePNGs>
+    <OnDemandResourcesInitialInstallTags></OnDemandResourcesInitialInstallTags>
+    <OnDemandResourcesPrefetchOrder></OnDemandResourcesPrefetchOrder>
+    <AssemblyName></AssemblyName>
+    <SignAssembly>false</SignAssembly>
+    <DelaySign>false</DelaySign>
+    <PublicSign>false</PublicSign>
+    <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
+    <NoWarn></NoWarn>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <LangVersion>Default</LangVersion>
+    <NoStdLib>false</NoStdLib>
+    <PlatformTarget>anycpu</PlatformTarget>
+    <WarningsNotAsErrors></WarningsNotAsErrors>
+    <Nullable></Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
     <AppExtensionDebugBundleId />
