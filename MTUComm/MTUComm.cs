@@ -1595,7 +1595,7 @@ namespace MTUComm
                     }
                     catch (Exception)
                     {
-                        Errors.LogErrorNowAndContinue(new NodeDiscoveryNotInitializedException());
+                        //Errors.LogErrorNowAndContinue(new NodeDiscoveryNotInitializedException());
                         goto BREAK_FAIL;
                     }
                     #endregion
@@ -1603,7 +1603,7 @@ namespace MTUComm
                     // Node discovery mode NOT initiated in the MTU
                     if ( fullResponse.Response[ CMD_BYTE_RES ] != CMD_NODE_INIT_OK )
                     {
-                        Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotInitializedException () );
+                        //Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotInitializedException () );
                         goto BREAK_FAIL;
                     }
                     // Node discovery mode successfully initiated in the MTU
@@ -1662,7 +1662,7 @@ namespace MTUComm
                         // Node discovery mode not started/ready for query
                         if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY )
                         {
-                            Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotStartedException () );
+                            //Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotStartedException () );
                             goto BREAK_FAIL;
                         }
 
