@@ -1116,8 +1116,8 @@ namespace MTUComm
                 Data.SetTemp ( "ProcessResultND",
                     $"{ word } " +
                     $"Number of DCUs { nodeList.CountUniqueNodesValidated } " +
-                    $"F1 Reliability {( probF1 * 100 ).ToString ( "F2" )} Percent " +
-                    $"F2 Reliability {( probF2 * 100 ).ToString ( "F2" )} Percent" );
+                    $"F1 Reliability {Utils.FormatNumber ( probF1 * 100, "F2" )} Percent " +
+                    $"F2 Reliability {Utils.FormatNumber ( probF2 * 100, "F2" )} Percent" );
 
                 Data.SetTemp ( "VSWR", vswr );
 

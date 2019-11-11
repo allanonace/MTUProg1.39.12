@@ -631,6 +631,16 @@
     <CustomGet/>
     <CustomSet/>
   </Register>
+  <Register> <!-- OK - CutWireDelaySetting -->
+    <Id>CutWireDelaySetting</Id>
+    <Description>Cut wire alarm hysteresis setting</Description>
+    <Type>int</Type>
+    <Address>199</Address>
+    <Size>1</Size>
+    <Write>false</Write>
+    <CustomGet/>
+    <CustomSet/>
+  </Register>
 
   <!-- Read Alarms -->
   <Register> <!-- OK -->

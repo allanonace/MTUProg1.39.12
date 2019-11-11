@@ -3291,6 +3291,7 @@ namespace MTUComm
                             if ( mtu.TamperPort1            ) map.P1CutWireAlarm             = alarms.TamperPort1;
                             if ( form.usePort2 &&
                                  mtu.TamperPort2            ) map.P2CutWireAlarm             = alarms.TamperPort2;
+                            if ( mtu.CutWireDelaySetting    ) map.CutWireDelaySetting        = alarms.CutWireDelaySetting;
 
                             // Set immediate alarms [ Alarm Message Immediate ]
                             if ( mtu.InsufficientMemoryImm  ) map.InsufficientMemoryImmAlarm = alarms.InsufficientMemoryImm;

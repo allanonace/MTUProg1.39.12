@@ -688,6 +688,12 @@ namespace Library
 
             else if ( Validations.IsNumeric ( value ) )
             {
+                // Forces top use the American standard period ( . ) as decimal separator
+                NumberFormatInfo numFormat = new CultureInfo ( "en-US", false ).NumberFormat;
+                //numFormat.CurrencyDecimalSeparator = ".";
+                //numFormat.CurrencyGroupSeparator   = ",";
+                //numFormat.CurrencySymbol           = string.Empty;
+
                 dynamic number;
 
                 value = value.ToString ();
@@ -701,7 +707,7 @@ namespace Library
                 else // Is a number with more digits than float and double
                     number = IsNumberOfType<decimal> ( value );
 
-                return string.Format ( "{0:" + format + "}", number );
+                return number.ToString ( format, numFormat ); // string.Format ( "{0:" + format + "}", number );
             }
 
             return ( value is string ) ? value : string.Empty;

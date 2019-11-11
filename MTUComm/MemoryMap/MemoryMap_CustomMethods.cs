@@ -157,19 +157,24 @@ namespace MTUComm.MemoryMap
 
         public async Task<string> PCBNumber_Get ( MemoryOverload<string> MemoryOverload, dynamic MemoryRegisters )
         {
+            int val;
             string tempString = string.Empty;
 
             //ASCII RANGE FOR PCBSupplierCode
-            if ( await MemoryRegisters.PCBSupplierCode.GetValue () >= 65 &&
-                 await MemoryRegisters.PCBSupplierCode.GetValue () <= 90 )
-                tempString = tempString + Convert.ToChar ( await MemoryRegisters.PCBSupplierCode.GetValue () ) + "-";
+            if ( ( val = await MemoryRegisters.PCBSupplierCode.GetValue () ) >= 65 && val <= 90 )
+                tempString = tempString + Convert.ToChar ( val ) + "-";
 
-            if ( await MemoryRegisters.PCBCoreNumber.GetValue () >= 0 )
-                tempString += string.Format ( PCBFORMAT, await MemoryRegisters.PCBCoreNumber.GetValue () );
+            Utils.Print ( "PCB Supplier Code: " + val );
+            
+            if ( ( val = await MemoryRegisters.PCBCoreNumber.GetValue () ) >= 0 )
+                tempString += string.Format ( PCBFORMAT, val );
+            
+            Utils.Print ( "PCB Core Number: " + val );
 
-            if ( await MemoryRegisters.PCBProductRevision.GetValue () >= 65 &&
-                 await MemoryRegisters.PCBProductRevision.GetValue () <= 90 )
-                tempString = tempString + "-" + Convert.ToChar ( await MemoryRegisters.PCBProductRevision.GetValue () );
+            if ( ( val = await MemoryRegisters.PCBProductRevision.GetValue () ) >= 65 && val <= 90 )
+                tempString = tempString + "-" + Convert.ToChar ( val );
+            
+            Utils.Print ( "PCB Product Revision: " + val );
 
             string result = ( string.IsNullOrEmpty ( tempString ) ) ? NTAVAILABLE : tempString;
 

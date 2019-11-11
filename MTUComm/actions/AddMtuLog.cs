@@ -378,12 +378,12 @@ namespace MTUComm
 
 
                     // Log the value if the condition is validated
-                    dynamic AddParamCond = new Action<string,string,string,bool> (
+                    dynamic AddParamCond = new Action<string,string,dynamic,bool> (
                         ( tag, display, value, condition ) => {
 
                             if ( condition )
                                 Logger.AddParameter ( alarmSelection,
-                                    new Parameter ( tag, display, value ) );
+                                    new Parameter ( tag, display, value.ToString () ) );
                         });
                     
                     // Log the memory map register value if the condition is validated
@@ -438,6 +438,7 @@ namespace MTUComm
                     await AddParamCondMap ( "Cut1WireTamperImm",         "Cut Port1 Wire Tamper Imm",    "P1CutWireImmTamperStatus",             mtu.TamperPort1Imm );
                     await AddParamCondMap ( "Cut2WireTamper",            "Cut Port2 Wire Tamper",        "P2CutWireTamperStatus",                form.usePort2 && mtu.TamperPort2 );
                     await AddParamCondMap ( "Cut2WireTamperImm",         "Cut Port2 Wire Tamper Imm",    "P2CutWireImmTamperStatus",             form.usePort2 && mtu.TamperPort2Imm );
+                    await AddParamCondMap ( "CutWireDelaySetting",       "Cut Wire Delay Setting",       "CutWireDelaySetting",                  mtu.CutWireDelaySetting );
 
                     this.addMtuAction.Add ( alarmSelection );
                 }
