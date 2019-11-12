@@ -7,8 +7,8 @@ using System.Xml.Serialization;
 using Lexi.Interfaces;
 using System.Threading.Tasks;
 using Library.Exceptions;
+using Library;
 using Xml;
-
 
 using ActionType = MTUComm.Action.ActionType;
 
@@ -168,7 +168,7 @@ namespace MTUComm
                 foreach ( Xml.ScriptAction scriptAction in script.Actions )
                 {
                     // Action string is not present in ActionType enum
-                    if ( ! Enum.TryParse<ActionType> ( scriptAction.Type, out type ) )
+                    if ( ! Utils.IsFromEnum<ActionType> ( scriptAction.Type, out type ) )
                         throw new ScriptActionTypeInvalidException ( scriptAction.Type );
                 
                     Action new_action = new Action ( serial_device, type, script.UserName, script.LogFile );

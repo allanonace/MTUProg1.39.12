@@ -428,28 +428,21 @@ namespace Lexi
                 long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (timeout);
                 await Task.Run(() =>
                 {
-                    while (checkResponseOk(serial, rawBuffer))
+                    while ( checkResponseOk ( serial, rawBuffer ) )
                     {
-                        if (DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit)
+                        if ( DateTimeOffset.Now.ToUnixTimeMilliseconds () > timeout_limit )
                         {
                             int num = serial.BytesReadCount();
 
-                            Utils.PrintDeep("Lexi.Read -> BytesToRead: " + num);
+                            Utils.PrintDeep ( "Lexi.Read -> BytesToRead: " + num );
 
-                            if (num <= headerOffset)
-                            {
-                                Utils.PrintDeep("Lexi.Read -> CheckResponseOk IOException");
+                            if ( num <= headerOffset )
+                                 Utils.PrintDeep ( "Lexi.Write -> Only or partially the Echo" );
+                            else Utils.PrintDeep ( "Lexi.Write -> The number of bytes of data is less than expected" );
 
-                                throw new IOException();
-                            }
-                            else
-                            {
-                                Utils.PrintDeep("Lexi.Read -> CheckResponseOk TimeoutException");
-
-                                throw new TimeoutException();
-                            }
+                            throw new TimeoutException ();
                         }
-                        Thread.Sleep(10);
+                        Thread.Sleep ( 10 );
                     }
                 });
     
@@ -710,20 +703,13 @@ namespace Lexi
                         
                         CONTINUE:
 
-                        if ( DateTimeOffset.Now.ToUnixTimeMilliseconds() > timeout_limit )
+                        if ( DateTimeOffset.Now.ToUnixTimeMilliseconds () > timeout_limit )
                         {
                             if ( bytesRead <= responseOffset )
-                            {
-                                Utils.PrintDeep("Lexi.Write -> CheckResponseOk IOException");
+                                 Utils.PrintDeep ( "Lexi.Write -> Only or partially the Echo" );
+                            else Utils.PrintDeep ( "Lexi.Write -> The number of bytes of data is less than expected" );
 
-                                throw new IOException();
-                            }
-                            else
-                            {
-                                Utils.PrintDeep("Lexi.Write -> CheckResponseOk TimeoutException");
-
-                                throw new TimeoutException();
-                            }
+                            throw new TimeoutException ();
                         }
                         Thread.Sleep ( 10 );
                     }

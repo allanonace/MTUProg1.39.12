@@ -21,7 +21,7 @@ namespace Library
 
         #region Log
 
-        private static bool DEEP_MODE = false;
+        private const bool DEEP_MODE = false;
     
         public static void PrintDeep (
             object element,
@@ -636,6 +636,32 @@ namespace Library
         {
             IsNumberOfType<decimal> ( value, out bool ok );
             return ok;
+        }
+
+        public static bool IsFromEnum<T> (
+            string value,
+            out T entry )
+        where T : struct, IConvertible
+        {
+            entry = default ( T );
+            
+            if ( typeof ( T ).IsEnum )
+            {
+                value = value.ToUpper ();
+                List<string> values = new List<string> ();
+                foreach ( var val in Enum.GetValues ( typeof( T ) ) )
+                    values.Add ( val.ToString ().ToUpper () );
+                
+                int index;
+                if ( ( index = values.IndexOf ( value ) ) >= 0 )
+                {
+                    Array realValues = Enum.GetValues( typeof ( T ) );
+                    entry = ( T ) realValues.GetValue ( index );
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         #endregion        

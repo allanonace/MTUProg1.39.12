@@ -779,7 +779,7 @@ namespace MTUComm.MemoryMap
                 dynamic register = modifiedRegisters[ i ];
                 string  name     = register.id;
                 
-                Utils.PrintDeep( "Check MTU write: " + name +
+                Utils.Print ( "Check MTU write: " + name +
                     " [ Size: " + register.size +
                     ", SizeGet: " + register.sizeGet +
                     ", Other contains: " + otherMap.ContainsMember ( name ) + " ]" );
@@ -789,7 +789,7 @@ namespace MTUComm.MemoryMap
                      ( ! otherMap.ContainsMember ( name ) ||                // Register not present in other memory map
                        ! await base[ name ].Equals ( otherMap[ name ] ) ) ) // Both registers are not equal
                 {
-                    Utils.PrintDeep ( "Equals: " + name + " -> NO" );
+                    Utils.Print ( "Equals: " + name + " -> NO" );
                 
                     difs.Add ( name );
                     continue;
