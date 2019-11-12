@@ -407,6 +407,12 @@ namespace ble_library
                 
                 await this.semaphore.WaitAsync ();
                 
+                // Note from STAR Programmer:
+                // found that some commands were failing when blasted out one after the other
+                // Determined that app could process data and send next command while ringing existed from previous
+                // response. Simplest method to fix is to delay (10ms from MTU code) before next command is sent
+                await Task.Delay ( 10 );
+                
                 long nextTimeInit = DateTimeOffset.Now.ToUnixTimeMilliseconds ();
                 
                 Utils.PrintDeep ( "BlePort.WriteCharacteristic.. My turn | Start at " + TimeInit +
@@ -466,12 +472,26 @@ namespace ble_library
                     for ( int i = 0; i < tempArray.Length; i++ )
                         buffer_ble_data.Enqueue ( tempArray[ i ] );
 
+                    // Sometimes the first bytes of the response is zero and must be deleted, not saved
+                    int zerosRemoved = 0;
+                    if ( buffer_array != null &&
+                         buffer_array.Length <= 0 )
+                        for ( int i = 0; i < bytesOfData; i++ )
+                            if ( buffer_ble_data.ElementAt( 0 ) == 0x00 )
+                            {
+                                buffer_ble_data.Dequeue ();
+                                bytesOfData--;
+                                zerosRemoved++;
+                            }
+                            else break;
+
                     buffer_array = buffer_ble_data.ToArray ();
                     
                     Utils.PrintDeep ( "BlePort.UpdateBuffer.. " +
-                    "Stream = " + Utils.ByteArrayToString ( bytes ) +
-                    " | Stream.Decrypted = " + Utils.ByteArrayToString ( tempArray ) +
-                    " [ +" + bytesOfData + " = " + buffer_ble_data.Count + " received ]" );
+                        "Stream = " + Utils.ByteArrayToString ( bytes ) +
+                        " | Stream.Decrypted = " + Utils.ByteArrayToString ( tempArray ) +
+                        " [ +" + bytesOfData + ( ( zerosRemoved <= 0 ) ? string.Empty : " +" + zerosRemoved + " ZerosRemoved" ) +
+                        " = " + buffer_ble_data.Count + " received ]" );
                 }
                 else
                     Utils.PrintDeep ( "BlePort.UpdateBuffer.. Waiting data" );

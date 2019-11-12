@@ -3764,7 +3764,7 @@ namespace MTUComm
                     if ( this.mtu.BroadCast )
                     {
                         OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Broadcast Key" ) );
-                        Utils.Print($"======================================================  Encrypt: Broadcast Key ");
+
                         // Loads Encryption Item - Type 4: Broadcast Key 
                         fullResponse = await this.lexi.Write (
                             CMD_ENCRYP_LOAD,
@@ -3782,7 +3782,6 @@ namespace MTUComm
                     randomKey = mtusha.RandomBytes ( randomKey.Length );
                     Array.Copy ( randomKey, 0, data1, 1, randomKey.Length );
 
-                    Utils.Print($"======================================================  Encrypt: Head-End Random Number ");
                     // Loads Encryption Item - Type 1: Head End Random Number
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_LOAD,
@@ -3792,12 +3791,11 @@ namespace MTUComm
                         null,
                         null,
                         LexiAction.OperationRequest );
-                    
+
                     string serverRND = Convert.ToBase64String ( randomKey );
                     
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Head-End Public Key" ) );
 
-                    Utils.Print($"======================================================  Encrypt: Head-End Public Key ");
                     // Loads Encryption Item - Type 0: Head End Public Key
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_LOAD,
@@ -3809,7 +3807,7 @@ namespace MTUComm
                         LexiAction.OperationRequest );
                     
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Generate Keys" ) );
-                    Utils.Print($"======================================================  Encrypt: Generate Keys ");
+                    
                     // Generates Encryptions Keys
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_KEYS,
@@ -3834,7 +3832,7 @@ namespace MTUComm
                         continue; // Error
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: MTU Random Number" ) );
-                    Utils.Print($"======================================================  Encrypt: MTU Random Number ");
+                    
                     // Reads Encryption Item - Type 3: MTU Random Number
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_READ,
@@ -3848,7 +3846,7 @@ namespace MTUComm
                     string clientRnd = Convert.ToBase64String ( fullResponse.Response );
 
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: MTU Public Key" ) );
-                    Utils.Print($"======================================================  Encrypt: MTU Public Key ");
+                    
                     // Reads Encryption Item - Type 2: MTU Public Key
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_READ,
