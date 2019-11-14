@@ -21,5 +21,20 @@ namespace Library.Exceptions
             this.varMessagaPopup = varMessagaPopup;
             this.Port            = port;
         }
+
+        public OwnExceptionsBase () { }
+    }
+
+    public class OwnSpecialExceptionsBase<T> : OwnExceptionsBase
+    {
+        private object response;
+
+        public T Response { get { return ( T )this.response; } }
+
+        public OwnSpecialExceptionsBase (
+            T response )
+        {
+            this.response = response;
+        }
     }
 }

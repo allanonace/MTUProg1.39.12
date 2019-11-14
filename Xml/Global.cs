@@ -600,7 +600,13 @@ namespace Xml
             this.PublicKey                    = string.Empty;         // Public key used during the OnDemand 1.2 MTUs new encryption process
             #if DEBUG
             this.BroadcastSet                 = "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI="; // 12345678901234567890123456789012 = 32 bytes
-            this.PublicKey                    = "RUNLMSAAAACyuwIi50PTmsr1fy5RpVqEpM1jXUyXVN61xPKbj9ivQItW+Hei0TPa1fur/X7k7fy36seQ7jNdz5/iLnxrqlZT"; // = 72 - 8 = 64 bytes
+            //this.PublicKey                    = "RUNLMSAAAACyuwIi50PTmsr1fy5RpVqEpM1jXUyXVN61xPKbj9ivQItW+Hei0TPa1fur/X7k7fy36seQ7jNdz5/iLnxrqlZT"; // = 72 - 8 = 64 bytes
+            this.PublicKey                    = "RUNLMSAAAAAgvzPX7EdjwIi4i7sTiPAPw58V6hAh9tA3g+QaRAYlKUlclfu3FMXCO+0R20HQc6Mm/ids1BdBLakhE2yYP0bm";
+            /*
+            this.PublicKey                    = "25-FE-1B-41-81-00-01-02-03-04-05-06-07-08-09-0A-0B-0C-0D-0E-0F-10-11-12-13-" + // Konstantin's new key = 72 bytes in hex format
+			                                    "14-15-16-17-18-19-1A-1B-1C-1D-1E-1F-20-01-02-03-04-05-06-07-08-09-0A-0B-0C-" +
+			                                    "0D-0E-0F-10-11-12-13-14-15-16-17-18-19-1A-1B-1C-1D-1E-1F-20-BC-C2";
+            */
             #endif
 
             // New parameters/tags ( Own )

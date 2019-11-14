@@ -491,11 +491,35 @@ namespace Library
 
         public static byte[] ByteArrayFromBase64 (
             string text,
-            out bool wasInBase64 )
+            out bool wasInBase64OrSpecialCase )
         {
-            if ( ( wasInBase64 = Utils.StringIsInBase64 ( text ) ) )
+            if ( ( wasInBase64OrSpecialCase = Utils.StringIsInBase64 ( text ) ) )
                 return Convert.FromBase64String ( text );
-            return null;
+            // Maybe it's a byte string in hex format with "-" as separator
+            // This part is due to the beloved Konstantin and the key screenshot
+            else
+            {
+                wasInBase64OrSpecialCase = true;
+
+                int i = 0;
+                string[] bytesAsChar = text.Split ( '-' );
+                byte[] bytes = new byte[ bytesAsChar.Length ];
+                foreach ( string b in bytesAsChar )
+                {
+                    try
+                    {
+                        bytes[ i++ ] = Convert.ToByte ( b, 16 );
+                    }
+                    catch ( Exception )
+                    {
+                        wasInBase64OrSpecialCase = false;
+
+                        return null;	
+                    }
+                }
+
+                return bytes;
+            }
         }
 
         public static string StringFromBase64 (
@@ -664,7 +688,14 @@ namespace Library
             return false;
         }
 
-        #endregion        
+        public static bool IsSubclassOfGeneric (
+            Type generic,
+            Type toCheck )
+        {
+            return ( generic == toCheck.BaseType.GetGenericTypeDefinition () );
+        }
+
+        #endregion
 
         #region Properties
 

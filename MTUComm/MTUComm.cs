@@ -1394,8 +1394,6 @@ namespace MTUComm
             bool wasNotAboutPuck = false;
             try
             {
-                Utils.Print ( "InstallConfirmation trigger start" );
-                
                 await regICNotSynced.SetValueToMtu ( true );
 
                 // MTU is turned off
@@ -1838,8 +1836,10 @@ namespace MTUComm
                         int numNodesValidated = nodeList.CountUniqueNodesValidated;
 
                         Utils.Print ( "ND: Nodes validated " + numNodesValidated + " | Excelent " + global.GoodNumDCU + " | Good " + global.MinNumDCU );
-                        Utils.Print ( "ND: Success F1 " + successF1 + " >= " + ( global.GoodF1Rely/100 ) );
-                        Utils.Print ( "ND: Success F2 " + successF2 + " >= " + ( global.GoodF2Rely/100 ) );
+                        Utils.Print ( "ND: Is Excellent F1: " + successF1 + " >= " + ( global.GoodF1Rely/100 ) );
+                        Utils.Print ( "ND: Is Excellent F2: " + successF2 + " >= " + ( global.GoodF2Rely/100 ) );
+                        Utils.Print ( "ND: Is Good      F1: " + successF1 + " >= " + ( global.MinF1Rely /100 ) );
+                        Utils.Print ( "ND: Is Good      F2: " + successF2 + " >= " + ( global.MinF2Rely /100 ) );
 
                         // Excellent
                         if ( numNodesValidated >= global.GoodNumDCU &&
@@ -3766,7 +3766,7 @@ namespace MTUComm
                         OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Broadcast Key" ) );
 
                         // Loads Encryption Item - Type 4: Broadcast Key 
-                        fullResponse = await this.lexi.Write (
+                        fullResponse = await this.lexi.WriteAvoidingACK (
                             CMD_ENCRYP_LOAD,
                             data4,
                             CMD_ATTEMPTS_N,
@@ -3783,7 +3783,7 @@ namespace MTUComm
                     Array.Copy ( randomKey, 0, data1, 1, randomKey.Length );
 
                     // Loads Encryption Item - Type 1: Head End Random Number
-                    fullResponse = await this.lexi.Write (
+                    fullResponse = await this.lexi.WriteAvoidingACK (
                         CMD_ENCRYP_LOAD,
                         data1,
                         CMD_ATTEMPTS_N,
@@ -3797,7 +3797,7 @@ namespace MTUComm
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Head-End Public Key" ) );
 
                     // Loads Encryption Item - Type 0: Head End Public Key
-                    fullResponse = await this.lexi.Write (
+                    fullResponse = await this.lexi.WriteAvoidingACK (
                         CMD_ENCRYP_LOAD,
                         data0,
                         CMD_ATTEMPTS_N,
@@ -3808,7 +3808,7 @@ namespace MTUComm
                     
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Generate Keys" ) );
                     
-                    // Generates Encryptions Keys
+                    // Generates Encryption Keys
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_KEYS,
                         null,
