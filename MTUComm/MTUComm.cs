@@ -1442,7 +1442,7 @@ namespace MTUComm
                     throw new AttemptNotAchievedICException ();
 
                 int DcuId = await map.DcuId.GetValueFromMtu();
-                Data.Set("DcuId", DcuId);
+                Data.SetTemp("DcuId", DcuId);
 
             }
             catch ( Exception e )
