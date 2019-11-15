@@ -293,7 +293,7 @@
     /// Exception thrown working with Encoders or Ecoders when the
     /// Meter type auto-detection process fails.
     /// <para>
-    /// See <see cref="MTUComm.MTUComm.AutodetectMetersEcoders ()"/>.
+    /// See <see cref="MTUComm.MTUComm.AutodetectMeterEcoders ()"/>.
     /// </para>
     /// </summary>
     public class EncoderAutodetectNotAchievedException : OwnExceptionsBase
@@ -305,7 +305,7 @@
     /// Exception thrown working with Encoders or Ecoders when the Meter type
     /// auto-detection process fails, but due to an exception that is not own ( .Net ).
     /// <para>
-    /// See <see cref="MTUComm.MTUComm.AutodetectMetersEcoders ()"/>.
+    /// See <see cref="MTUComm.MTUComm.AutodetectMeterEcoders ()"/>.
     /// </para>
     /// </summary>
     public class EncoderAutodetectException : OwnExceptionsBase

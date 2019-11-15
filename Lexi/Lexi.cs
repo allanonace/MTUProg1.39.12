@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Lexi.Exceptions;
 using Lexi.Interfaces;
 using Library;
 using Library.Exceptions;
@@ -482,6 +481,26 @@ namespace Lexi
             }
         }
 
+        public async Task<LexiWriteResult> WriteAvoidingACK (
+            uint   addressOrLexiCmd,
+            byte[] data            = null,
+            int    attempts        = 1,
+            int    secsBtwAttempts = 1,
+            uint[] bytesResponse   = null, // By default is +2 ACK
+            LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
+            LexiAction lexiAction  = LexiAction.Write )
+        {
+            return await this.Write (
+                addressOrLexiCmd,
+                data,
+                attempts,
+                secsBtwAttempts,
+                bytesResponse,
+                filtersResponse,
+                lexiAction,
+                true );
+        }
+
         /// <summary>
         /// Prepares and executes a write action in the physical memory of the MTU.
         /// </summary>
@@ -499,7 +518,8 @@ namespace Lexi
             int    secsBtwAttempts = 1,
             uint[] bytesResponse   = null, // By default is +2 ACK
             LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
-            LexiAction lexiAction  = LexiAction.Write )
+            LexiAction lexiAction  = LexiAction.Write,
+            bool avoidACK = false )
         {
             // Some Operation Request commands do not have more data than the header
             if ( data is null )
@@ -569,13 +589,20 @@ namespace Lexi
                         bytesResponse,
                         filtersResponse,
                         m_timeout,
-                        lexiAction );
+                        lexiAction,
+                        avoidACK );
 
                     break;
                 }
-                catch ( Exception )
+                catch ( Exception e )
                 {
-                    if ( --attempts > 0 )
+                    // NOTE: Avoiding ACK is due to the special case related to the new encryption process, where
+                    // NOTE: STAR Programmer does not take into account whether LExI commands work or not ( correct ACK = 0x06 )
+                    if ( avoidACK &&
+                         Utils.IsSubclassOfGeneric ( typeof ( OwnSpecialExceptionsBase<> ), e.GetType () ) )
+                        return ( ( OwnSpecialExceptionsBase<LexiWriteResult> ) e ).Response;
+
+                    else if ( --attempts > 0 )
                         await Task.Delay ( secsBtwAttempts * 1000 );
                     else
                         throw;                  
@@ -595,7 +622,8 @@ namespace Lexi
             uint[] bytesResponse,
             LexiFiltersResponse filtersResponse,
             int timeout,
-            LexiAction lexiAction )
+            LexiAction lexiAction,
+            bool avoidACK )
         {
             int TEST = new Random ().Next ( 0, 999 );
             Utils.PrintDeep ( Environment.NewLine + "-------LEXI_WRITE--------| " + TEST + " |--" );
@@ -603,12 +631,6 @@ namespace Lexi
     
             try
             {
-                // Write normal: 25, WriteCmd, Address, Data.Length, Checksum, Data, CRC
-                //   Response: PACKAGE + ACK
-                // Operation 19: 25, 0xFE, OpCmd ( 0x13 ), Data.Length ( 10 ), Checksum, Data, CRC
-                //   Response: PACKAGE + ACK
-                // Operation 20: 25, 0xFE, OpCmd ( 0x14 ), Data.Length ( 0 ), Checksum
-                //   Response: PACKAGE + ACK [ + Data ( 21 bytes ) ]
                 byte[] stream;
                 var info = GeneratePackage ( lexiAction, out stream, addressOrLexiCmd, data );
 
@@ -652,68 +674,91 @@ namespace Lexi
                 // Wait until the response buffer data is available or timeout limit is reached
                 int  bytesRead = 0;
                 long timeout_limit = DateTimeOffset.Now.ToUnixTimeMilliseconds () + timeout;
-                await Task.Run ( () =>
+                try
                 {
-                    while ( ( bytesRead = serial.BytesReadCount () ) < rawBuffer.Length - 1 )
+                    await Task.Run ( () =>
                     {
-                        Utils.PrintDeep ( "Lexi.Write.. BytesRead: " + bytesRead + "/" + rawBuffer.Length +
-                            " | " + Utils.ByteArrayToString ( serial.BytesRead () ) +
-                            " [ " + DateTimeOffset.Now.ToUnixTimeMilliseconds() + " > " + timeout_limit + " ]" );
-
-                        Utils.PrintDeep ( "Lexi.Write.. Check " + bytesRead + " in Responses [ " + Utils.ArrayToString ( bytesResponse ) + " ]" );
-
-                        // Maybe already recovered data is a valid response
-                        if ( bytesResponse.Contains ( ( uint )( bytesRead ) ) )
+                        while ( ( bytesRead = serial.BytesReadCount () ) < rawBuffer.Length - 1 )
                         {
-                            Utils.PrintDeep ( "Lexi.Write.. Number of bytes are equal to some response [ " + bytesRead + " ]" );
-                            
-                            // This response could have some conditions to validate
-                            if ( hasFilters )
+                            Utils.PrintDeep ( "Lexi.Write.. BytesRead: " + bytesRead + "/" + rawBuffer.Length +
+                                " | " + Utils.ByteArrayToString ( serial.BytesRead () ) +
+                                " [ " + DateTimeOffset.Now.ToUnixTimeMilliseconds() + " > " + timeout_limit + " ]" );
+
+                            Utils.PrintDeep ( "Lexi.Write.. Check " + bytesRead + " in Responses [ " + Utils.ArrayToString ( bytesResponse ) + " ]" );
+
+                            // Maybe already recovered data is a valid response
+                            if ( bytesResponse.Contains ( ( uint )( bytesRead ) ) )
                             {
-                                bool ok = false;
-                                byte[] arBytesRead = serial.BytesRead ();
-                                var filters = filtersResponse.Entries.Where ( entry => entry.ResponseBytes == bytesRead ).ToArray ();
-                                for ( int i = 0; i < filters.Length; i++ )
-                                {
-                                    var filter = filters[ i ];
-                                    bool conditionOk = arBytesRead[ responseOffset + filter.IndexByte ] == filter.Value;
-
-                                    Utils.PrintDeep ( "Lexi.Write.. Condition ( " + arBytesRead[ responseOffset + filter.IndexByte ] +
-                                        " == " + filter.Value + " ) = " + conditionOk.ToString ().ToUpper () );
-
-                                    if ( conditionOk )
-                                    {
-                                        ok = true;
-                                        break;
-                                    }
-                                }
+                                Utils.PrintDeep ( "Lexi.Write.. Number of bytes are equal to some response [ " + bytesRead + " ]" );
                                 
-                                // No condition was validated
-                                if ( ! ok )
-                                    goto CONTINUE;
+                                // This response could have some conditions to validate
+                                if ( hasFilters )
+                                {
+                                    bool ok = false;
+                                    byte[] arBytesRead = serial.BytesRead ();
 
-                                Utils.PrintDeep ( "Lexi.Write.. Conditions validated and response accepted" );
+                                    var filters = filtersResponse.Entries.Where ( entry => entry.ResponseBytes == bytesRead ).ToArray ();
+                                    for ( int i = 0; i < filters.Length; i++ )
+                                    {
+                                        var filter = filters[ i ];
+                                        bool conditionOk = arBytesRead[ responseOffset + filter.IndexByte ] == filter.Value;
+
+                                        Utils.PrintDeep ( "Lexi.Write.. Condition ( " + arBytesRead[ responseOffset + filter.IndexByte ] +
+                                            " == " + filter.Value + " ) = " + conditionOk.ToString ().ToUpper () );
+
+                                        if ( conditionOk )
+                                        {
+                                            ok = true;
+                                            break;
+                                        }
+                                    }
+                                    
+                                    // No condition was validated
+                                    if ( ! ok )
+                                        goto CONTINUE;
+
+                                    Utils.PrintDeep ( "Lexi.Write.. Conditions validated and response accepted" );
+                                }
+
+                                // Remove tail of zeros
+                                Array.Resize ( ref rawBuffer, bytesRead );
+
+                                break;
+                            }
+                            
+                            CONTINUE:
+
+                            if ( DateTimeOffset.Now.ToUnixTimeMilliseconds () > timeout_limit )
+                            {
+                                if ( bytesRead <= responseOffset )
+                                     Utils.PrintDeep ( "Lexi.Write -> Only or partially the Echo" );
+                                else Utils.PrintDeep ( "Lexi.Write -> The number of bytes of data is less than expected" );
+
+                                throw new TimeoutException ();
                             }
 
-                            // Remove tail of zeros
-                            Array.Resize ( ref rawBuffer, bytesRead );
-
-                            break;
+                            Thread.Sleep ( 10 );
                         }
-                        
-                        CONTINUE:
+                    });
+                }
+                catch ( Exception e )
+                {
+                    // NOTE: Avoiding ACK is due to the special case related to the new encryption process, where
+                    // NOTE: STAR Programmer does not take into account whether LExI commands work or not (correct ACK = 0x06)
+                    if ( avoidACK &&
+                         e is TimeoutException &&
+                         bytesResponse.Contains ( ( uint )( bytesRead + 2 ) ) ) // + ACK and ACK Info Size
+                    {
+                        Utils.PrintDeep ( "Lexi.Write.. Special case without ACK validated" );
 
-                        if ( DateTimeOffset.Now.ToUnixTimeMilliseconds () > timeout_limit )
-                        {
-                            if ( bytesRead <= responseOffset )
-                                 Utils.PrintDeep ( "Lexi.Write -> Only or partially the Echo" );
-                            else Utils.PrintDeep ( "Lexi.Write -> The number of bytes of data is less than expected" );
+                        bytesRead += 2;
 
-                            throw new TimeoutException ();
-                        }
-                        Thread.Sleep ( 10 );
+                        // Remove tail of zeros
+                        Array.Resize ( ref rawBuffer, bytesRead );
                     }
-                });
+                    // Time out and is not a special case avoiding the ACK
+                    else throw e;
+                }
                 
                 Utils.PrintDeep ( "Lexi.Read.. BytesRead: " + bytesRead + " / " + rawBuffer.Length );
                 
@@ -726,12 +771,18 @@ namespace Lexi
                 Array.Copy ( rawBuffer, responseOffset, response, 0, response.Length );
                 
                 Utils.PrintDeep ( "Lexi.Write.." +
-                    " RawBuffer " + Utils.ByteArrayToString ( rawBuffer ) +
-                    " | ACK " + Utils.ByteArrayToString ( response ) );
-    
+                    " RawBuffer " + Utils.ByteArrayToString ( rawBuffer ) + " | " +
+                    ( ( ! avoidACK ) ? "ACK " + Utils.ByteArrayToString ( response ) : "Avoid ACK" ) );
+
                 // If first byte of the recovered ACK is 6, everything has gone OK
                 if ( response[0] != 0x06 )
-                    throw new LexiWriteException ( response );
+                {
+                    // NOTE: The LexiWritingEncryptionException exception inherits from OwnSpecialExceptionsBase, a special
+                    // NOTE: exception created only for use in a cases similar to this, allowing only one object as a parameter
+                    if ( avoidACK )
+                         throw new LexiWritingEncryptionException<LexiWriteResult> ( new LexiWriteResult ( rawBuffer, responseOffset ) );
+                    else throw new LexiWritingException ();
+                }
                 else
                 {
                     Utils.PrintDeep ( "----LEXI_WRITE_FINISH----| " + TEST + " |--" + Environment.NewLine );
@@ -740,9 +791,11 @@ namespace Lexi
                     return new LexiWriteResult ( rawBuffer, responseOffset );
                 }
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
-                throw new LexiWritingException ();
+                if ( e is LexiWritingEncryptionException<LexiWriteResult> )
+                     throw e;
+                else throw new LexiWritingException ();
             }
         }
 
@@ -1054,7 +1107,7 @@ namespace Lexi
 
         private byte[] validateReadResponse(byte[] response, uint response_length)
         {
-            // Recover data has not last two CRC bytes
+            // The recovered data has not last two CRC bytes
             if ( response.Length - 2 != response_length )
                 throw new InvalidDataException ("");
 

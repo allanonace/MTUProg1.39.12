@@ -949,11 +949,11 @@ namespace MTUComm
                     }
                     catch ( Exception e )
                     {
-                        Utils.Print ( "AutodetectMetersEcoders: " + e.GetType ().Name );
+                        Utils.Print ( "AutodetectMeterEcoders: " + e.GetType ().Name );
                     }
                     finally
                     {
-                        Utils.Print ( "AutodetectMetersEcoders: Protocol " + protocol + " LiveDigits " + liveDigits );
+                        Utils.Print ( "AutodetectMeterEcoders: Protocol " + protocol + " LiveDigits " + liveDigits );
                     }
                     
                     // It is usual for LiveDigits to take value 8 but only for a moment
@@ -986,7 +986,7 @@ namespace MTUComm
         }
         
         /// <summary>
-        /// Logic of Meters auto-detection process extracted from AutodetectMetersEcoders
+        /// Logic of Meters auto-detection process extracted from AutodetectMeterEcoders
         /// method, for an easy and readable reuse of the code for the two MTUs ports.
         /// <para>
         /// See <see cref="AutodetectMeterEncoders(Mtu,int)"/> to detect automatically
@@ -1844,8 +1844,10 @@ namespace MTUComm
                         int numNodesValidated = nodeList.CountUniqueNodesValidated;
 
                         Utils.Print ( "ND: Nodes validated " + numNodesValidated + " | Excelent " + global.GoodNumDCU + " | Good " + global.MinNumDCU );
-                        Utils.Print ( "ND: Success F1 " + successF1 + " >= " + ( global.GoodF1Rely/100 ) );
-                        Utils.Print ( "ND: Success F2 " + successF2 + " >= " + ( global.GoodF2Rely/100 ) );
+                        Utils.Print ( "ND: Is Excellent F1: " + successF1 + " >= " + ( global.GoodF1Rely/100 ) );
+                        Utils.Print ( "ND: Is Excellent F2: " + successF2 + " >= " + ( global.GoodF2Rely/100 ) );
+                        Utils.Print ( "ND: Is Good      F1: " + successF1 + " >= " + ( global.MinF1Rely /100 ) );
+                        Utils.Print ( "ND: Is Good      F2: " + successF2 + " >= " + ( global.MinF2Rely /100 ) );
 
                         // Excellent
                         if ( numNodesValidated >= global.GoodNumDCU &&
@@ -3237,12 +3239,8 @@ namespace MTUComm
                 if ( global.TimeToSync &&
                      this.mtu.TimeToSync &&
                      this.mtu.FastMessageConfig )
-                     //! this.mtu.IsFamily31xx32xx &&
-                     //! this.mtu.IsFamily33xx )
                 {
-                    
                     map.FastMessagingConfigFreq = ( Data.Get.TwoWay.ToUpper ().Equals ( "SLOW" ) ) ? false : true; // F1/Slow and F2/Fast
-
                 }
 
                 #endregion
@@ -3772,7 +3770,7 @@ namespace MTUComm
                         OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Broadcast Key" ) );
 
                         // Loads Encryption Item - Type 4: Broadcast Key 
-                        fullResponse = await this.lexi.Write (
+                        fullResponse = await this.lexi.WriteAvoidingACK (
                             CMD_ENCRYP_LOAD,
                             data4,
                             CMD_ATTEMPTS_N,
@@ -3789,7 +3787,7 @@ namespace MTUComm
                     Array.Copy ( randomKey, 0, data1, 1, randomKey.Length );
 
                     // Loads Encryption Item - Type 1: Head End Random Number
-                    fullResponse = await this.lexi.Write (
+                    fullResponse = await this.lexi.WriteAvoidingACK (
                         CMD_ENCRYP_LOAD,
                         data1,
                         CMD_ATTEMPTS_N,
@@ -3803,7 +3801,7 @@ namespace MTUComm
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Head-End Public Key" ) );
 
                     // Loads Encryption Item - Type 0: Head End Public Key
-                    fullResponse = await this.lexi.Write (
+                    fullResponse = await this.lexi.WriteAvoidingACK (
                         CMD_ENCRYP_LOAD,
                         data0,
                         CMD_ATTEMPTS_N,
@@ -3814,7 +3812,7 @@ namespace MTUComm
                     
                     OnProgress ( this, new Delegates.ProgressArgs ( "Encrypt: Generate Keys" ) );
                     
-                    // Generates Encryptions Keys
+                    // Generates Encryption Keys
                     fullResponse = await this.lexi.Write (
                         CMD_ENCRYP_KEYS,
                         null,
