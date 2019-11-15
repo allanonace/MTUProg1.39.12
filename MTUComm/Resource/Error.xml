@@ -25,8 +25,8 @@
     <Error id="210" message="The selected Meter is not compatible with the Encoder because of 'Deltas purged / New install / Reset'" footer="Incompatible Meter selected" />
     <Error id="211" message="The selected Meter is not compatible with the Encoder because of 'Encoder clock shorted'" footer="Incompatible Meter selected" />
     <Error id="212" message="The selected Meter is not compatible with the Encoder because of an unknown error code" footer="Incompatible Meter selected" />
-    <Error id="213" message="Encoder auto-detection process cannot be performed after having tried it for _var_ seconds" footer="Encoder auto-detect not achieved" />
-    <Error id="214" message="Encoder auto-detection process cannot be performed, perhaps due to a problem with the MTU" footer="Encoder auto-detect not achieved" />
+    <Error id="213" message="Encoder auto-detection process for port _var_ cannot be performed" footer="Encoder auto-detect not achieved" />
+    <Error id="214" message="Encoder auto-detection process for port _var_ cannot be performed, perhaps due to a problem with the puck or MTU" footer="Encoder auto-detect not achieved" />
     <Error id="215" message="The status of the RDD device is unknown" footer="RDD status unknown" />
     <Error id="216" message="The RDD device is disabled" footer="RDD is disabled" />
     <Error id="217" message="The status of the RDD device is not busy after executing the LExI command" footer="RDD is not busy" />

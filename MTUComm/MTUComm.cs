@@ -972,13 +972,13 @@ namespace MTUComm
                 
                     return true;
                 }
-                else throw new EncoderAutodetectNotAchievedException ( time.ToString () );
+                else throw new EncoderAutodetectNotAchievedException ( portIndex.ToString () );
             }
             catch ( Exception e )
             {
                 // Is not own exception
                 if ( ! Errors.IsOwnException ( e ) )
-                     Errors.LogErrorNowAndContinue ( new EncoderAutodetectException (), portIndex );
+                     Errors.LogErrorNowAndContinue ( new EncoderAutodetectException ( portIndex.ToString () ), portIndex );
                 else Errors.LogErrorNowAndContinue ( e, portIndex );
             }
             
