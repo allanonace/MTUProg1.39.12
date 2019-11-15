@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using aclara_meters.util;
+using Acr.UserDialogs;
 using Library;
 using Library.Exceptions;
 using MTUComm;
@@ -12,11 +13,13 @@ namespace aclara_meters.view
 {
     public partial class AclaraInstallPage : BasePage 
     {
+        IUserDialogs dialogs;
 
-        public AclaraInstallPage()
+        public AclaraInstallPage(IUserDialogs dialogs)
         {
             InitializeComponent();
 
+            this.dialogs = dialogs;
             btn_Cancel.Clicked += Btn_Cancel_Clicked;
             btn_FTP.Clicked += Btn_FTP_Clicked;
             btn_Intune.Clicked += Btn_Intune_Clicked;
@@ -46,9 +49,14 @@ namespace aclara_meters.view
             switch(result)
             {
                 case "OK":
+                    //Device.BeginInvokeOnMainThread(() =>
+                    //{
+                    //    Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
+                    //});
                     await DisplayAlert("Attention", "The app will close to apply the configuration", "OK");
                     System.Diagnostics.Process.GetCurrentProcess().Kill();
                     return;
+
                 case "ERROR":
                     GenericUtilsClass.SetInstallMode("None");
 
@@ -78,7 +86,11 @@ namespace aclara_meters.view
         public async void Btn_Manual_Clicked(object sender, EventArgs e)
         {
             GenericUtilsClass.SetInstallMode("Manual");
-            await DisplayAlert("Attention", "The app will close, you must copy the config files in the public folder of the app, and then restart", "OK");
+            await DisplayAlert("Attention", "Now you must copy the config files in the public folder of the app, then press Continue", "Continue");
+            //Device.BeginInvokeOnMainThread(() =>
+            //{
+            //    Application.Current.MainPage = new NavigationPage(new AclaraViewConfig(dialogs));
+            //});
             System.Diagnostics.Process.GetCurrentProcess().Kill();
         }     
     }

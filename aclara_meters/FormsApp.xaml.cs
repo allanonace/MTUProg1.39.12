@@ -149,7 +149,7 @@ namespace aclara_meters
                 SecureStorage.RemoveAll ();
                 Device.BeginInvokeOnMainThread ( () =>
                 {
-                    Application.Current.MainPage = new NavigationPage ( new AclaraInstallPage () );
+                    Application.Current.MainPage = new NavigationPage ( new AclaraInstallPage (dialogs) );
                 });
             }
             // Is not the first launch

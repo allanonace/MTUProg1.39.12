@@ -1395,8 +1395,10 @@ namespace MTUComm
             try
             {
                 Utils.Print ( "InstallConfirmation trigger start" );
-                
+                await map.DcuId.SetValueToMtu(0);
+
                 await regICNotSynced.SetValueToMtu ( true );
+               
 
                 // MTU is turned off
                 if ( ! force &&
@@ -1438,6 +1440,10 @@ namespace MTUComm
                 
                 if ( fail )
                     throw new AttemptNotAchievedICException ();
+
+                int DcuId = await map.DcuId.GetValueFromMtu();
+                Data.Set("DcuId", DcuId);
+
             }
             catch ( Exception e )
             {
