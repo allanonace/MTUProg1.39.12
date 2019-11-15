@@ -192,6 +192,7 @@ namespace MTUComm
         private const byte CMD_NODE_NEXT_EMPTY     = 0x01;  // ACK without node entry ( query complete )
         private const int WAIT_BTW_NODE_NEXT_ERROR = 1000;
         private const int WAIT_BTW_NODE_NEXT       = 100;
+        private const int WAIT_BTW_NODE_NEXT_STEP  = 1500;
         private const int WAIT_BTW_NODE_ERROR      = 1000;
 
         /* Constants: Encryption
@@ -1532,7 +1533,6 @@ namespace MTUComm
             double  vswr          = -1;
             decimal successF1     = 0m;
             decimal successF2     = 0m;
-            Stopwatch nodeCounter = null;
 
             try
             {
@@ -1573,51 +1573,51 @@ namespace MTUComm
                                   CMD_NODE_INIT_MAXDITHER  +
                                   CMD_NODE_OVERHEAD_TIME;
 
-                // Node Discovery ( Initiation + Start/Reset + Get Nodes )
-                float maxTimeND = this.global.MaxTimeRFCheck * 1000;
-                nodeCounter     = new Stopwatch ();
-                nodeCounter.Start ();
+                int attemptsLeft = ( this.global.MaxTimeRFCheck >= 10 ) ?
+                    ( int )Math.Ceiling ( this.global.MaxTimeRFCheck / 10d ) :
+                    this.global.MaxTimeRFCheck;
+
+                if ( attemptsLeft < 1 )
+                    attemptsLeft = 6;
+
+                int attempIndex = 0;
 
                 while ( true )
                 {
                     #region Step 1 - Init
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 1 Init" ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 1 Init #" + ( attempIndex + 1 ) ) );
 
                     try
                     {
                         // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
-                        fullResponse = await this.lexi.Write(
+                        fullResponse = await this.lexi.WriteAvoidingACK (
                             CMD_NODE_INIT,
                             data,
-                            CMD_ATTEMPTS_N,
-                            WAIT_BTW_CMD_ATTEMPTS,
                             new uint[] { CMD_NODE_INIT_RES },
                             new LexiFiltersResponse(new (int, int, byte)[] {
                             ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_NOT ), // Node discovery not initiated
                             ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_OK )   // Node discovery initiated
                             }),
-                            LexiAction.OperationRequest);
+                            LexiAction.OperationRequest );
                     }
-                    catch (Exception)
+                    catch ( Exception )
                     {
-                        //Errors.LogErrorNowAndContinue(new NodeDiscoveryNotInitializedException());
                         goto BREAK_FAIL;
                     }
+
                     #endregion
 
                     // Node discovery mode NOT initiated in the MTU
                     if ( fullResponse.Response[ CMD_BYTE_RES ] != CMD_NODE_INIT_OK )
-                    {
-                        //Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotInitializedException () );
                         goto BREAK_FAIL;
-                    }
+                    
                     // Node discovery mode successfully initiated in the MTU
                     else
                     {
                         #region Delay before start
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s before Step 2" ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s before Step 2 #" + ( attempIndex + 1 ) ) );
 
                         await Task.Delay ( slackTime * 1000 );
 
@@ -1625,58 +1625,44 @@ namespace MTUComm
 
                         #region Step 2 - Start/Reset
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 2 Start/Reset" ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 2 Start/Reset #" + ( attempIndex + 1 ) ) );
 
                         // Start/Reset node discovery response query
-                        bool lexiTimeOut;
-                        bool timeOut = false;
-                        do
+                        fullResponse = null;
+                        
+                        // NOTE: After testing several times, the MTU generally does not respond
+                        // NOTE: if is busy, not returning all requested bytes ( LExI timeout )
+                        // ACLARA: It looks like bytes are lost.  That can happen if the MTU is busy doing something.
+                        // It is a limitation of the coil and will happen with any command.  The coil isn’t a UART and
+                        // doesn’t have any buffering so if the MTU is too busy to respond in time then the communication
+                        // is going to get garbled and he just has to handle that by trying again.
+                        try
                         {
-                            //await Task.Delay ( WAIT_BEFORE_NODE_START );
-                            
-                            lexiTimeOut = true;
-                            
-                            // NOTE: After testing several times, the MTU generally does not respond
-                            // NOTE: if is busy, not returning all requested bytes ( LExI timeout )
-                            // ACLARA: It looks like bytes are lost.  That can happen if the MTU is busy doing something.
-                            // It is a limitation of the coil and will happen with any command.  The coil isn’t a UART and
-                            // doesn’t have any buffering so if the MTU is too busy to respond in time then the communication
-                            // is going to get garbled and he just has to handle that by trying again.
-                            try
-                            {
-                                // Response: Byte 2 { 0 = The MTU is busy, 1 = The MTU is ready for query }
-                                fullResponse = await this.lexi.Write (
-                                    CMD_NODE_QUERY,
-                                    null,
-                                    CMD_ATTEMPTS_N,
-                                    WAIT_BTW_CMD_ATTEMPTS,
-                                    new uint[] { CMD_NODE_QUERY_RES }, // ACK with response
-                                    new LexiFiltersResponse ( new ( int,int,byte )[] {
-                                        ( CMD_NODE_QUERY_RES, CMD_BYTE_RES, CMD_NODE_QUERY_BUSY ), // The MTU is busy
-                                        ( CMD_NODE_QUERY_RES, CMD_BYTE_RES, CMD_NODE_QUERY_OK )  // The MTU is ready for query
-                                    } ),
-                                    LexiAction.OperationRequest );
-                                
-                                lexiTimeOut = false;
-                            }
-                            catch (Exception e) { Console.WriteLine($"mtucomm.cs_nodeDiscovery {e.Message}"); }
+                            // Response: Byte 2 { 0 = The MTU is busy, 1 = The MTU is ready for query }
+                            fullResponse = await this.lexi.WriteAvoidingACK (
+                                CMD_NODE_QUERY,
+                                null,
+                                new uint[] { CMD_NODE_QUERY_RES }, // ACK with response
+                                new LexiFiltersResponse ( new ( int,int,byte )[] {
+                                    ( CMD_NODE_QUERY_RES, CMD_BYTE_RES, CMD_NODE_QUERY_BUSY ), // The MTU is busy
+                                    ( CMD_NODE_QUERY_RES, CMD_BYTE_RES, CMD_NODE_QUERY_OK )  // The MTU is ready for query
+                                } ),
+                                LexiAction.OperationRequest );
                         }
-                        while ( ( lexiTimeOut ||
-                                  fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY ) &&
-                                ! ( timeOut = nodeCounter.ElapsedMilliseconds >= maxTimeND ) );
+                        catch ( Exception )
+                        {
+                            goto BREAK_FAIL;
+                        }
                         
                         // Node discovery mode not started/ready for query
                         if ( fullResponse.Response[ CMD_BYTE_RES ] == CMD_NODE_QUERY_BUSY )
-                        {
-                            //Errors.LogErrorNowAndContinue ( new NodeDiscoveryNotStartedException () );
                             goto BREAK_FAIL;
-                        }
 
                         #endregion
 
                         #region Step 3 - Get Next
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 3 Get Next" ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 3 Get Next #" + ( attempIndex + 1 ) ) );
 
                         await Task.Delay ( WAIT_BEFORE_NODE_NEXT );
 
@@ -1741,7 +1727,7 @@ namespace MTUComm
                             {
                                 // First message always contains general information
                                 case NodeDiscoveryQueryResult.GeneralInfo:
-                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: General Information" ) );
+                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: General Information #" + ( attempIndex + 1 ) ) );
 
                                     await Task.Delay ( WAIT_BTW_NODE_NEXT );
                                     break;
@@ -1759,11 +1745,13 @@ namespace MTUComm
                                     OnProgress ( this, new Delegates.ProgressArgs (
                                         "ND: All Nodes Requested " + ( queryResult.Index - 1 ) + "/" + ( nodeList.CurrentAttemptTotalEntries - 1 ) ) );
 
+                                    await Task.Delay ( WAIT_BTW_NODE_NEXT_STEP );
                                     goto BREAK_OK; // Exit from switch + infinite while
 
                                 case NodeDiscoveryQueryResult.Empty:
                                     OnProgress ( this, new Delegates.ProgressArgs ( "ND: The Are No Nodes" ) );
 
+                                    await Task.Delay ( WAIT_BTW_NODE_NEXT_STEP );
                                     goto BREAK_OK; // Exit from switch + infinite while
                             }
                         }
@@ -1774,7 +1762,7 @@ namespace MTUComm
 
                         #region Validation
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Validating Nodes.." ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Validating Nodes.. #" + ( attempIndex + 1 ) ) );
 
                         Utils.Print ( "ND: Nodes to validate " + nodeList.CurrentAttemptEntries.Length );
 
@@ -1882,7 +1870,7 @@ namespace MTUComm
                     BREAK_FAIL:
 
                     // The max time to perform Node Discovery process has expired
-                    if ( nodeCounter.ElapsedMilliseconds >= maxTimeND )
+                    if ( ++attempIndex >= attemptsLeft )
                     {
                         // Finish process only if the result is excellent or time is over,
                         // and it can end after consuming all time but with "good" as result
@@ -1902,14 +1890,6 @@ namespace MTUComm
                 else Errors.LogErrorNowAndContinue ( e );
                 
                 result = NodeDiscoveryResult.EXCEPTION;
-            }
-            finally
-            {
-                if ( nodeCounter != null )
-                {
-                    nodeCounter.Stop ();
-                    nodeCounter = null;
-                }
             }
 
             // Generates entries for activity log and nodes log file
@@ -3773,8 +3753,6 @@ namespace MTUComm
                         fullResponse = await this.lexi.WriteAvoidingACK (
                             CMD_ENCRYP_LOAD,
                             data4,
-                            CMD_ATTEMPTS_N,
-                            WAIT_BTW_CMD_ATTEMPTS,
                             null,
                             null,
                             LexiAction.OperationRequest );
@@ -3790,8 +3768,6 @@ namespace MTUComm
                     fullResponse = await this.lexi.WriteAvoidingACK (
                         CMD_ENCRYP_LOAD,
                         data1,
-                        CMD_ATTEMPTS_N,
-                        WAIT_BTW_CMD_ATTEMPTS,
                         null,
                         null,
                         LexiAction.OperationRequest );
@@ -3804,8 +3780,6 @@ namespace MTUComm
                     fullResponse = await this.lexi.WriteAvoidingACK (
                         CMD_ENCRYP_LOAD,
                         data0,
-                        CMD_ATTEMPTS_N,
-                        WAIT_BTW_CMD_ATTEMPTS,
                         null,
                         null,
                         LexiAction.OperationRequest );

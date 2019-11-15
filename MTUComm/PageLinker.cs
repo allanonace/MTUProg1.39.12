@@ -81,7 +81,7 @@ namespace MTUComm
         {
             if ( error.Id > -1 )
                 await GetInstance ()._ShowAlert (
-                    title, "Error " + error.Id + ": " + error.Message, btnText, kill );
+                    title, error.Message + "\nError ID: " + error.Id, btnText, kill );
             else
                 await GetInstance ()._ShowAlert (
                     title, error.Message, btnText, kill );

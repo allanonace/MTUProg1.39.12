@@ -484,8 +484,6 @@ namespace Lexi
         public async Task<LexiWriteResult> WriteAvoidingACK (
             uint   addressOrLexiCmd,
             byte[] data            = null,
-            int    attempts        = 1,
-            int    secsBtwAttempts = 1,
             uint[] bytesResponse   = null, // By default is +2 ACK
             LexiFiltersResponse filtersResponse = null, // It is used when multiple responses are possible ( base 0 )
             LexiAction lexiAction  = LexiAction.Write )
@@ -493,8 +491,8 @@ namespace Lexi
             return await this.Write (
                 addressOrLexiCmd,
                 data,
-                attempts,
-                secsBtwAttempts,
+                1,
+                1,
                 bytesResponse,
                 filtersResponse,
                 lexiAction,

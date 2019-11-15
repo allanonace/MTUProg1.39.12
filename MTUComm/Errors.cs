@@ -13,7 +13,6 @@ namespace MTUComm
     {    
         #region Constants
 
-        private const string ERROR_TITLE = "Controlled Exception";
         private const string ERROR_INFO  = "Information";
 
         private Dictionary<Exception,int> ex2id = 
@@ -485,7 +484,7 @@ namespace MTUComm
             bool kill = false )
         {
             Error error = this.AddErrorByException ( e, portIndex );
-            PageLinker.ShowAlert ( ERROR_TITLE, error, kill );
+            PageLinker.ShowAlert ( ERROR_INFO, error, kill );
             
             // Method can be invoked when Configuration is not instantiated yet
             if ( Singleton.Has<Configuration> () )
@@ -505,7 +504,7 @@ namespace MTUComm
             if ( this.errorsToLog.Count > 0 )
             {
                 Error error = this.errorsToLog[ this.errorsToLog.Count - 1 ];
-                PageLinker.ShowAlert ( ERROR_TITLE, this.lastError );
+                PageLinker.ShowAlert ( ERROR_INFO, this.lastError );
                 
                 lastErrorLogGenerated = this.logger.Error ();
 
