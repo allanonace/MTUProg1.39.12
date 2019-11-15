@@ -805,8 +805,8 @@ namespace MTUComm
                             CheckIfNotPresentInPort (
                                 ParameterType.WorkOrder, 1 );
 
-                        // No RDD in Port 1
-                        if ( ! rddIn1 )
+                        // No RDD in Port 2
+                        if ( ! rddIn2 )
                         {
                             // ( New ) Meter Serial Number
                             if ( this.global.UseMeterSerialNumber )
