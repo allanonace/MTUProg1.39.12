@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Library;
 
 using NodeType = Lexi.Lexi.NodeType;
 
@@ -277,14 +278,21 @@ namespace MTUComm
                 // ACK with node entry
                 case HAS_DATA:
                     // NOTE: It happened once LExI returned an array of bytes without the required amount of data
-                    if ( this.entries.Count == 0 && ! ( ok = ( response.Length == NodeDiscovery.BYTES_REQUIRED_DATA_1 ) ) ||
-                         this.entries.Count >= 1 && ! ( ok = ( response.Length == NodeDiscovery.BYTES_REQUIRED_DATA_2 ) ) )
+                    if ( ! ( ok = ( response.Length == NodeDiscovery.BYTES_REQUIRED_DATA_1 ) ||
+                                    response.Length == NodeDiscovery.BYTES_REQUIRED_DATA_2 ) )
                         return ( NodeDiscoveryQueryResult.Empty, 0 );
 
                     node = new NodeDiscovery ( response );
+
                     // Repeating entry
                     if ( this.entries.Count >= node.Index )
-                         this.entries[ ( int )node.Index - 1 ] = node;
+                    {
+                        Utils.Print ( "Node Discovery: Processing already retrieved response/node" );
+
+                        // Clear previous responses
+                        this.entries.RemoveRange ( ( int )node.Index - 1, this.entries.Count - ( ( int )node.Index - 1 ) );
+                        this.entries[ ( int )node.Index - 1 ] = node;
+                    }
                     // New entry
                     else this.entries.Add ( node );
                     break;

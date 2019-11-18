@@ -446,7 +446,9 @@ namespace Lexi
                 });
     
                 Utils.PrintDeep ( "------BUFFER_FINISH------" );
-    
+
+                Utils.Print ( "Read Buffer" );
+
                 //read the response buffer
                 serial.Read ( rawBuffer, 0, rawBuffer.Length );
                 
@@ -458,7 +460,9 @@ namespace Lexi
                  * | N..N+1     | CRC   | Calculated    | CRC over all data bytes.  See section 7.2              |
                  * +------------+-------+---------------+--------------------------------------------------------+
                  */
-    
+
+                Utils.Print ( "Get only ACK" );
+
                 // Removes header and get only the ACK
                 byte[] response = new byte[ 2 ];
                 Array.Resize ( ref response, response.Length + ( int )bytesToRead );
@@ -467,11 +471,13 @@ namespace Lexi
                 Utils.PrintDeep ( "Lexi.Read ->" +
                     " CheckCRC " + Utils.ByteArrayToString ( response ) +
                     " [ " + response.Length + " = BytesToRead " + bytesToRead + " + ACK 2 ]" );
-    
+
+                Utils.Print ( "Validate CRC" );
+
                 // Validates CRC and if everything is ok, returns recovered data
                 return validateReadResponse ( response, bytesToRead );
             }
-            catch ( Exception )
+            catch ( Exception e )
             {
                 throw new LexiReadingException ();
             }
@@ -685,9 +691,12 @@ namespace Lexi
                             Utils.PrintDeep ( "Lexi.Write.. Check " + bytesRead + " in Responses [ " + Utils.ArrayToString ( bytesResponse ) + " ]" );
 
                             // Maybe already recovered data is a valid response
-                            if ( bytesResponse.Contains ( ( uint )( bytesRead ) ) )
+                            if ( bytesResponse.Contains ( ( uint )( bytesRead ) ) &&
+                                 serial.BytesRead ()[ responseOffset + 1 ] == bytesRead - responseOffset - // ACK Info Size = FullResponse - Echo
+                                 ( ( ! avoidACK ) ? 4 : 2 ) ) // If the ACK should be avoided, only subtract the CRC bytes = [ - ACK - ACK Info Size ] - CRCx2
                             {
-                                Utils.PrintDeep ( "Lexi.Write.. Number of bytes are equal to some response [ " + bytesRead + " ]" );
+                                Utils.Print ( "Lexi.Write.. Number of bytes are equal to some response [ " + bytesRead + " -> Data " +
+                                    ( bytesRead - responseOffset - 4 ) + " ]" );
                                 
                                 // This response could have some conditions to validate
                                 if ( hasFilters )
@@ -715,7 +724,7 @@ namespace Lexi
                                     if ( ! ok )
                                         goto CONTINUE;
 
-                                    Utils.PrintDeep ( "Lexi.Write.. Conditions validated and response accepted" );
+                                    Utils.Print ( "Lexi.Write.. Conditions validated and response accepted" );
                                 }
 
                                 // Remove tail of zeros
@@ -729,8 +738,8 @@ namespace Lexi
                             if ( DateTimeOffset.Now.ToUnixTimeMilliseconds () > timeout_limit )
                             {
                                 if ( bytesRead <= responseOffset )
-                                     Utils.PrintDeep ( "Lexi.Write -> Only or partially the Echo" );
-                                else Utils.PrintDeep ( "Lexi.Write -> The number of bytes of data is less than expected" );
+                                     Utils.Print ( "Lexi.Write -> Only or partially the Echo ( " + bytesRead + " <= " + responseOffset + " )" );
+                                else Utils.Print ( "Lexi.Write -> The number of bytes of data is less than expected ( " + bytesRead + " > " + responseOffset + " )" );
 
                                 throw new TimeoutException ();
                             }
@@ -747,7 +756,7 @@ namespace Lexi
                          e is TimeoutException &&
                          bytesResponse.Contains ( ( uint )( bytesRead + 2 ) ) ) // + ACK and ACK Info Size
                     {
-                        Utils.PrintDeep ( "Lexi.Write.. Special case without ACK validated" );
+                        Utils.Print ( "Lexi.Write.. Special case without ACK validated" );
 
                         bytesRead += 2;
 
@@ -758,7 +767,7 @@ namespace Lexi
                     else throw e;
                 }
                 
-                Utils.PrintDeep ( "Lexi.Read.. BytesRead: " + bytesRead + " / " + rawBuffer.Length );
+                Utils.Print ( "Lexi.Read.. BytesRead: " + bytesRead + " / " + rawBuffer.Length );
                 
                 Utils.PrintDeep ( "------BUFFER_FINISH------" );
 
@@ -768,7 +777,7 @@ namespace Lexi
                 byte[] response = new byte[ 2 ];
                 Array.Copy ( rawBuffer, responseOffset, response, 0, response.Length );
                 
-                Utils.PrintDeep ( "Lexi.Write.." +
+                Utils.Print ( "Lexi.Write.." +
                     " RawBuffer " + Utils.ByteArrayToString ( rawBuffer ) + " | " +
                     ( ( ! avoidACK ) ? "ACK " + Utils.ByteArrayToString ( response ) : "Avoid ACK" ) );
 

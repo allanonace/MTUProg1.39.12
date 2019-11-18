@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Library;
 
 using LogFilterMode = Lexi.Lexi.LogFilterMode;
 using LogEntryType  = Lexi.Lexi.LogEntryType;
@@ -132,9 +133,16 @@ namespace MTUComm
                         return ( EventLogQueryResult.Empty, 0 );
 
                     evnt = new EventLog ( response );
+
                     // Repeating entry
                     if ( this.entries.Count >= evnt.Index )
-                         this.entries[ ( int )evnt.Index - 1 ] = evnt;
+                    {
+                        Utils.Print ( "Node Discovery: Processing already retrieved response/node" );
+
+                        // Clear previous responses
+                        this.entries.RemoveRange ( ( int )evnt.Index - 1, this.entries.Count - ( ( int )evnt.Index - 1 ) );
+                        this.entries[ ( int )evnt.Index - 1 ] = evnt;
+                    }
                     // New entry
                     else this.entries.Add ( evnt );
                     break;

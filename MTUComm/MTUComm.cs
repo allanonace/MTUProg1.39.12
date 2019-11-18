@@ -1237,14 +1237,14 @@ namespace MTUComm
 
                         await Task.Delay ( WAIT_BTW_LOG_ERROR );
 
-                        Utils.Print ( "DataRead: Error trying to recover an event [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
+                        Utils.Print ( "DataRead: Error trying to recover the next event [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
 
                         // Try one more time
                         Errors.AddError ( new AttemptNotAchievedGetEventsLogException () );
 
                         // Try again, using this time Get Repeat Last Event Log Response command
-                        // NOTE: Is very strange how works the MTU is a LExI command fails and you use the
-                        // process RepeatLast because some times it recovers events previous to the current one
+                        // NOTE: It is very strange how works the MTU if a LExI command fails and you use the
+                        // NOTE: process RepeatLast, because some times it recovers events previous to the current one
                         retrying = true;
 
                         continue;
@@ -1533,6 +1533,7 @@ namespace MTUComm
             double  vswr          = -1;
             decimal successF1     = 0m;
             decimal successF2     = 0m;
+            int attemptsLeft      = 6;
 
             try
             {
@@ -1573,7 +1574,7 @@ namespace MTUComm
                                   CMD_NODE_INIT_MAXDITHER  +
                                   CMD_NODE_OVERHEAD_TIME;
 
-                int attemptsLeft = ( this.global.MaxTimeRFCheck >= 10 ) ?
+                attemptsLeft = ( this.global.MaxTimeRFCheck >= 10 ) ?
                     ( int )Math.Ceiling ( this.global.MaxTimeRFCheck / 10d ) :
                     this.global.MaxTimeRFCheck;
 
@@ -1591,13 +1592,15 @@ namespace MTUComm
                     try
                     {
                         // Response: Byte 2 { 0 = Node discovery not initiated, 1 = Node discovery initiated }
-                        fullResponse = await this.lexi.WriteAvoidingACK (
+                        fullResponse = await this.lexi.Write (
                             CMD_NODE_INIT,
                             data,
+                            CMD_ATTEMPTS_ONE,
+                            WAIT_BTW_CMD_ATTEMPTS,
                             new uint[] { CMD_NODE_INIT_RES },
-                            new LexiFiltersResponse(new (int, int, byte)[] {
-                            ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_NOT ), // Node discovery not initiated
-                            ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_OK )   // Node discovery initiated
+                            new LexiFiltersResponse ( new ( int,int,byte )[] {
+                                ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_NOT ), // Node discovery not initiated
+                                ( CMD_NODE_INIT_RES, CMD_BYTE_RES, CMD_NODE_INIT_OK )   // Node discovery initiated
                             }),
                             LexiAction.OperationRequest );
                     }
@@ -1617,7 +1620,7 @@ namespace MTUComm
                     {
                         #region Delay before start
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s before Step 2 #" + ( attempIndex + 1 ) ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s" ) );
 
                         await Task.Delay ( slackTime * 1000 );
 
@@ -1639,14 +1642,16 @@ namespace MTUComm
                         try
                         {
                             // Response: Byte 2 { 0 = The MTU is busy, 1 = The MTU is ready for query }
-                            fullResponse = await this.lexi.WriteAvoidingACK (
+                            fullResponse = await this.lexi.Write (
                                 CMD_NODE_QUERY,
                                 null,
+                                CMD_ATTEMPTS_ONE,
+                                WAIT_BTW_CMD_ATTEMPTS,
                                 new uint[] { CMD_NODE_QUERY_RES }, // ACK with response
                                 new LexiFiltersResponse ( new ( int,int,byte )[] {
                                     ( CMD_NODE_QUERY_RES, CMD_BYTE_RES, CMD_NODE_QUERY_BUSY ), // The MTU is busy
-                                    ( CMD_NODE_QUERY_RES, CMD_BYTE_RES, CMD_NODE_QUERY_OK )  // The MTU is ready for query
-                                } ),
+                                    ( CMD_NODE_QUERY_RES, CMD_BYTE_RES, CMD_NODE_QUERY_OK   )  // The MTU is ready for query
+                                }),
                                 LexiAction.OperationRequest );
                         }
                         catch ( Exception )
@@ -1667,9 +1672,12 @@ namespace MTUComm
                         await Task.Delay ( WAIT_BEFORE_NODE_NEXT );
 
                         // Get next node discovery response
-                        int maxAttemptsEr   = 2;
+                        int maxAttemptsEr   = 2; // 3 attempts to recover all the nodes
                         int countAttemptsEr = 0;
                         nodeList.StartNewAttempt (); // Saves nodes from the previous attempt for the log
+
+                        // NOTE: Some times the MTU returns previously returned nodes, but this behaviour
+                        // NOTE: is already supported in TryToAdd method within NodeDiscoveryList class
                         while ( true )
                         {
                             try
@@ -1692,23 +1700,13 @@ namespace MTUComm
                             }
                             catch ( Exception e )
                             {
-                                // Finish because it is not own exception
-                                if ( ! Errors.IsOwnException ( e ) )
-                                    throw new PuckCantCommWithMtuException ();
+                                Utils.Print ( "Node Discovery: Error trying to recover the next node [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
 
-                                // Finish without perform the action
-                                else if ( ++countAttemptsEr >= maxAttemptsEr )
-                                {
-                                    Errors.LogErrorNowAndContinue ( new ActionNotAchievedNodeDiscoveryException ( maxAttemptsEr + "" ) );
+                                // Finish all the attempts to recover nodes in current Node Discovery iteration
+                                if ( ++countAttemptsEr >= maxAttemptsEr )
                                     goto BREAK_FAIL;
-                                }
 
                                 await Task.Delay ( WAIT_BTW_NODE_NEXT_ERROR );
-
-                                Utils.Print ( "Node Discovery: Error trying to recover a node [ Attempts " + countAttemptsEr + " / " + maxAttemptsEr + " ]" );
-
-                                // Try one more time
-                                Errors.AddError ( new AttemptNotAchievedNodeDiscoveryException () );
 
                                 continue;
                             }
@@ -1721,7 +1719,15 @@ namespace MTUComm
                             var queryResult = nodeList.TryToAdd ( fullResponse.Response, ref ok );
 
                             // NOTE: It happened once that LExI returned an array of bytes without the required amount of data
-                            if ( ! ok ) goto BREAK_FAIL;
+                            if ( ! ok )
+                            {
+                                if ( ++countAttemptsEr >= maxAttemptsEr )
+                                    goto BREAK_FAIL;
+
+                                await Task.Delay ( WAIT_BTW_NODE_NEXT_ERROR );
+
+                                continue;
+                            }
                             
                             switch ( queryResult.Result )
                             {
@@ -1743,7 +1749,7 @@ namespace MTUComm
                                 // Was the last node or no node was recovered
                                 case NodeDiscoveryQueryResult.LastRead:
                                     OnProgress ( this, new Delegates.ProgressArgs (
-                                        "ND: All Nodes Requested " + ( queryResult.Index - 1 ) + "/" + ( nodeList.CurrentAttemptTotalEntries - 1 ) ) );
+                                        "ND: All Nodes Requested" ) );
 
                                     await Task.Delay ( WAIT_BTW_NODE_NEXT_STEP );
                                     goto BREAK_OK; // Exit from switch + infinite while
@@ -1874,8 +1880,8 @@ namespace MTUComm
                     {
                         // Finish process only if the result is excellent or time is over,
                         // and it can end after consuming all time but with "good" as result
-                        if ( result > NodeDiscoveryResult.EXCELLENT )
-                            result = NodeDiscoveryResult.NOT_ACHIEVED;
+                        if ( result == NodeDiscoveryResult.NOT_ACHIEVED )
+                            Errors.LogErrorNowAndContinue ( new ActionNotAchievedNodeDiscoveryException ( attemptsLeft + "" ) );
 
                         break; // Exit from infinite while
                     }
@@ -1887,7 +1893,7 @@ namespace MTUComm
             {
                 if ( ! Errors.IsOwnException ( e ) )
                      Errors.LogErrorNowAndContinue ( new PuckCantCommWithMtuException () );
-                else Errors.LogErrorNowAndContinue ( e );
+                else Errors.LogErrorNowAndContinue ( new ActionNotAchievedNodeDiscoveryException ( attemptsLeft + "" ) );
                 
                 result = NodeDiscoveryResult.EXCEPTION;
             }
