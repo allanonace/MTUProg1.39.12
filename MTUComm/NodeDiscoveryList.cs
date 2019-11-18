@@ -170,6 +170,11 @@ namespace MTUComm
             get { return this.entries.ToArray (); }
         }
 
+        public bool HasCurrentAttemptEntries ()
+        {
+            return this.entries.Count > 1;
+        }
+
         /// <summary>
         /// The total number of nodes/DCUs that should be recovered.
         /// </summary>

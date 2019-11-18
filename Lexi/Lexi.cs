@@ -447,8 +447,6 @@ namespace Lexi
     
                 Utils.PrintDeep ( "------BUFFER_FINISH------" );
 
-                Utils.Print ( "Read Buffer" );
-
                 //read the response buffer
                 serial.Read ( rawBuffer, 0, rawBuffer.Length );
                 
@@ -461,8 +459,6 @@ namespace Lexi
                  * +------------+-------+---------------+--------------------------------------------------------+
                  */
 
-                Utils.Print ( "Get only ACK" );
-
                 // Removes header and get only the ACK
                 byte[] response = new byte[ 2 ];
                 Array.Resize ( ref response, response.Length + ( int )bytesToRead );
@@ -471,8 +467,6 @@ namespace Lexi
                 Utils.PrintDeep ( "Lexi.Read ->" +
                     " CheckCRC " + Utils.ByteArrayToString ( response ) +
                     " [ " + response.Length + " = BytesToRead " + bytesToRead + " + ACK 2 ]" );
-
-                Utils.Print ( "Validate CRC" );
 
                 // Validates CRC and if everything is ok, returns recovered data
                 return validateReadResponse ( response, bytesToRead );

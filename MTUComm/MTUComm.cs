@@ -1587,7 +1587,7 @@ namespace MTUComm
                 {
                     #region Step 1 - Init
 
-                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 1 Init #" + ( attempIndex + 1 ) ) );
+                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step1 Init #" + ( attempIndex + 1 ) ) );
 
                     try
                     {
@@ -1620,7 +1620,7 @@ namespace MTUComm
                     {
                         #region Delay before start
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s" ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Wait " + slackTime + "s #" + ( attempIndex + 1 ) ) );
 
                         await Task.Delay ( slackTime * 1000 );
 
@@ -1628,7 +1628,7 @@ namespace MTUComm
 
                         #region Step 2 - Start/Reset
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 2 Start/Reset #" + ( attempIndex + 1 ) ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step2 Start/Reset #" + ( attempIndex + 1 ) ) );
 
                         // Start/Reset node discovery response query
                         fullResponse = null;
@@ -1667,7 +1667,7 @@ namespace MTUComm
 
                         #region Step 3 - Get Next
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step 3 Get Next #" + ( attempIndex + 1 ) ) );
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Step3 Get Nodes #" + ( attempIndex + 1 ) ) );
 
                         await Task.Delay ( WAIT_BEFORE_NODE_NEXT );
 
@@ -1733,7 +1733,8 @@ namespace MTUComm
                             {
                                 // First message always contains general information
                                 case NodeDiscoveryQueryResult.GeneralInfo:
-                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: General Information #" + ( attempIndex + 1 ) ) );
+                                    OnProgress ( this, new Delegates.ProgressArgs (
+                                        "ND: General Info." ) );
 
                                     await Task.Delay ( WAIT_BTW_NODE_NEXT );
                                     break;
@@ -1741,7 +1742,8 @@ namespace MTUComm
                                 // Wait a bit and try to read/recover the next node
                                 case NodeDiscoveryQueryResult.NextRead:
                                     OnProgress ( this, new Delegates.ProgressArgs ( 
-                                        "ND: Requesting Nodes... " + ( queryResult.Index - 1 ) + "/" + ( nodeList.CurrentAttemptTotalEntries - 1 ) ) );
+                                        "ND: Requesting Nodes... " +
+                                        ( queryResult.Index - 1 ) + "/" + ( nodeList.CurrentAttemptTotalEntries - 1 ) ) );
                                     
                                     await Task.Delay ( WAIT_BTW_NODE_NEXT );
                                     break;
@@ -1755,7 +1757,8 @@ namespace MTUComm
                                     goto BREAK_OK; // Exit from switch + infinite while
 
                                 case NodeDiscoveryQueryResult.Empty:
-                                    OnProgress ( this, new Delegates.ProgressArgs ( "ND: The Are No Nodes" ) );
+                                    OnProgress ( this, new Delegates.ProgressArgs (
+                                        "ND: The Are No Nodes" ) );
 
                                     await Task.Delay ( WAIT_BTW_NODE_NEXT_STEP );
                                     goto BREAK_OK; // Exit from switch + infinite while
@@ -1768,7 +1771,10 @@ namespace MTUComm
 
                         #region Validation
 
-                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Validating Nodes.. #" + ( attempIndex + 1 ) ) );
+                        if ( ! nodeList.HasCurrentAttemptEntries () )
+                            goto BREAK_FAIL;
+
+                        OnProgress ( this, new Delegates.ProgressArgs ( "ND: Validating nodes.. #" + ( attempIndex + 1 ) ) );
 
                         Utils.Print ( "ND: Nodes to validate " + nodeList.CurrentAttemptEntries.Length );
 
