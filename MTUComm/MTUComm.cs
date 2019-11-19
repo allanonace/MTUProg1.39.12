@@ -445,13 +445,13 @@ namespace MTUComm
                 // that cancel the action but not move to the main menu and could be happen
                 // that perform the basic read with a different MTU
                 //if ( ! this.basicInfoLoaded )
-                if ( ! Data.Contains ( "MtuBasicInfo" ) || type == ActionType.ReadMtu )
+                if ( ! Data.Contains ( "MtuBasicInfo" ) || type == ActionType.ReadMtu || type==ActionType.MtuInstallationConfirmation )
                     await this.LoadMtuBasicInfo ();
                 else 
                     this.mtu = configuration.GetMtuTypeById((int)Data.Get.MtuBasicInfo.Type);
 
                 // Checks if the MTU remains the same as in the initial reading
-                if ( type != ActionType.BasicRead && type != ActionType.ReadMtu )
+                if ( type != ActionType.BasicRead && type != ActionType.ReadMtu && type != ActionType.MtuInstallationConfirmation)
                     await this.CheckIsTheSameMTU ();
 
                 switch ( type )
@@ -1444,7 +1444,7 @@ namespace MTUComm
 
                 int DcuId = await map.DcuId.GetValueFromMtu();
                 Data.SetTemp("DcuId", DcuId);
-
+                            
             }
             catch ( Exception e )
             {
@@ -1460,42 +1460,45 @@ namespace MTUComm
 
                     return IC_EXCEPTION;
                 }
-            
+
                 // Retry action
-                if ( ++time < global.TimeSyncCountRepeat )
+                if (++time < global.TimeSyncCountRepeat)
                 {
-                    await Task.Delay ( WAIT_BTW_IC_ERROR );
-                    
-                    result = await this.InstallConfirmation_Logic ( force, time );
+                    Utils.Print($"___________________InstallConf: {time.ToString()}");
+                    await Task.Delay(WAIT_BTW_IC_ERROR);
+
+                    result = await this.InstallConfirmation_Logic(force, time);
 
                     // If this is not the first iteration, we need it to
                     // returns the result up to the initial invocation
-                    if ( result > 0 )
+                    //if (result > 0)
                         return result;
                 }
-                
-                // Finish with error
-                Errors.LogErrorNowAndContinue ( new ActionNotAchievedICException ( ( global.TimeSyncCountRepeat ) + "" ) );
-                result = IC_NOT_ACHIEVED;
+                else
+                {
+                    // Finish with error
+                    Errors.LogErrorNowAndContinue(new ActionNotAchievedICException((global.TimeSyncCountRepeat) + ""));
+                    result = IC_NOT_ACHIEVED;
+                }
             }
-            
+
             // Node Discovery with OnDemand 1.2 MTUs
-            if ( result == IC_OK         &&
+            if (result == IC_OK &&
                  this.global.AutoRFCheck &&
-                 this.mtu.MtuDemand      &&
-                 this.mtu.NodeDiscovery )
+                 this.mtu.MtuDemand &&
+                 this.mtu.NodeDiscovery)
             {
-                switch ( await this.NodeDiscovery ( map ) )
+                switch (await this.NodeDiscovery(map))
                 {
                     case NodeDiscoveryResult.EXCELLENT:
                     case NodeDiscoveryResult.GOOD:
-                    return IC_OK;
+                        return IC_OK;
 
                     case NodeDiscoveryResult.NOT_ACHIEVED:
-                    return IC_NOT_ACHIEVED;
+                        return IC_NOT_ACHIEVED;
 
                     case NodeDiscoveryResult.EXCEPTION:
-                    return IC_EXCEPTION;
+                        return IC_EXCEPTION;
                 }
             }
             // Result of the IC only
@@ -1868,13 +1871,13 @@ namespace MTUComm
                              result == NodeDiscoveryResult.GOOD )
                             break; // Exit from infinite while
 
-                        #if DEBUG
+                        //#if DEBUG
 
-                        // NOTE: Avoid to perform all the attempts debugging
-                        if ( result == NodeDiscoveryResult.GOOD )
-                            break;
+                        //// NOTE: Avoid to perform all the attempts debugging
+                        //if ( result == NodeDiscoveryResult.GOOD )
+                        //    break;
 
-                        #endif
+                        //#endif
 
                         #endregion
                     }

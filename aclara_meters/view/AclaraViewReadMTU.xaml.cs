@@ -660,6 +660,7 @@ namespace aclara_meters.view
             InterfaceParameters[] interfacesParams =Singleton.Get.Configuration.getUserParamsFromInterface( mtu, ActionType.ReadMtu );
             
             Mtu currentMtu = Singleton.Get.Action.CurrentMtu;
+            Mtu copyCurrentMtu = currentMtu.SimulateRddInPortTwoIfNeeded() as Mtu;
 
             foreach (InterfaceParameters iParameter in interfacesParams)
             {
@@ -682,7 +683,7 @@ namespace aclara_meters.view
                                 // For Read action when no Meter is installed on readed MTU
                                 if ( param != null )
                                         description = param.Value;
-                                else description = currentMtu.Ports[i].GetProperty ( pParameter.Name );
+                                else description = copyCurrentMtu.Ports[i].GetProperty ( pParameter.Name );
                                 
                                 FinalReadListView.Add(new ReadMTUItem()
                                 {
